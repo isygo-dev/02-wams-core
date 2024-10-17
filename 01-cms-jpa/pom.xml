@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <organization>
+        <name>isygo-it-services</name>
+        <url>http://www.isygo-it.eu</url>
+    </organization>
+
+    <groupId>eu.isygo-it.services</groupId>
+    <artifactId>calendar-management-jpa</artifactId>
+    <version>1.0.241017-S0215</version>
+    <packaging>jar</packaging>
+    <name>calendar-management-jpa</name>
+    <description>calendar-management-jpa</description>
+
+    <parent>
+        <groupId>eu.isygo-it.services</groupId>
+        <artifactId>service-core</artifactId>
+        <version>1.0.241017-S0215</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <properties>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>eu.isygo-it.services</groupId>
+            <artifactId>service-stack-jpa</artifactId>
+            <version>1.0.241017-S0215</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.26</version>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.4.2</version>
+        </dependency>
+    </dependencies>
+
+        <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub isygo-it Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/isygo-it/01-service-core</url>
+        </repository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>github</id>
+            <name>GitHub isygo-it Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/isygo-it/00-service-stack</url>
+        </repository>
+    </repositories>
+</project>
