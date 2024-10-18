@@ -38,7 +38,7 @@
         <repository>
             <id>github</id>
             <name>GitHub isygo-it Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/isygo-it/01-service-core</url>
+            <url>https://maven.pkg.github.com/isygo-dev/02-service-core</url>
         </repository>
     </distributionManagement>
 
@@ -46,7 +46,10 @@
         <repository>
             <id>github</id>
             <name>GitHub isygo-it Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/isygo-it/00-service-stack</url>
+            <url>https://maven.pkg.github.com/isygo-dev/01-wams-stack</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 </project>
