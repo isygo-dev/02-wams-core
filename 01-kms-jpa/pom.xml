@@ -54,7 +54,7 @@
         <repository>
             <id>github</id>
             <name>GitHub isygo-it Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/isygo-dev/02-service-core</url>
+            <url>https://maven.pkg.github.com/isygo-dev/02-wams-core</url>
         </repository>
     </distributionManagement>
 
