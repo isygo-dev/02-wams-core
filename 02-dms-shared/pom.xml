@@ -60,9 +60,6 @@
             <id>github</id>
             <name>GitHub isygo-it Apache Maven Packages</name>
             <url>https://maven.pkg.github.com/isygo-dev/01-wams-stack</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
         </repository>
     </repositories>
 </project>
