@@ -7,7 +7,6 @@ import eu.isygoit.dto.response.AccessResponseDto;
 import eu.isygoit.dto.response.AuthResponseDto;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.exception.*;
-import eu.isygoit.exception.ApplicationNotAllowedException;
 import eu.isygoit.model.ConnectionTracking;
 import eu.isygoit.model.RegistredUser;
 import eu.isygoit.remote.kms.KmsPasswordService;
