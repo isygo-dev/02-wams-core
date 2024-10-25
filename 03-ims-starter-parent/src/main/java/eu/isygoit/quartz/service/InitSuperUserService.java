@@ -71,10 +71,11 @@ public class InitSuperUserService extends AbstractJobService {
         Application application = applicationService.findByName("webapp-sysadmin");
         if (application == null) {
             application = applicationService.create(Application.builder()
+                    .domain(DomainConstants.SUPER_DOMAIN_NAME)
                     .title("System administration")
                     .name("webapp-sysadmin")
                     .description("System administration tool")
-                    .url("https://fe-sysadmin.dev.prm.easygoit.eu")
+                    .url("https://fe-sysadmin.dev.prm.isygoit.eu")
                     .order(1)
                     .build());
         }
@@ -83,6 +84,7 @@ public class InitSuperUserService extends AbstractJobService {
         RoleInfo superAdmin = roleInfoService.findByName(AccountTypeConstants.SUPER_ADMIN);
         if (superAdmin == null) {
             superAdmin = roleInfoService.create(RoleInfo.builder()
+                    .domain(DomainConstants.SUPER_DOMAIN_NAME)
                     .name(AccountTypeConstants.SUPER_ADMIN)
                     .description(AccountTypeConstants.SUPER_ADMIN)
                     .permissions(apiPermissionRepository.findAll())
@@ -94,6 +96,7 @@ public class InitSuperUserService extends AbstractJobService {
         RoleInfo domainAdmin = roleInfoService.findByName(AccountTypeConstants.DOMAIN_ADMIN);
         if (superAdmin == null) {
             superAdmin = roleInfoService.create(RoleInfo.builder()
+                    .domain(DomainConstants.SUPER_DOMAIN_NAME)
                     .name(AccountTypeConstants.DOMAIN_ADMIN)
                     .description(AccountTypeConstants.DOMAIN_ADMIN)
                     .permissions(apiPermissionRepository.findAll())

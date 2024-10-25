@@ -19,6 +19,33 @@
     </parent>
 
     <profiles>
+        <!-- hibernate ddl-auto mode-->
+        <profile>
+            <id>ddl-update</id>
+            <properties>
+                <env.db.ddl.auto>update</env.db.ddl.auto>
+                <env.db.show.sql>true</env.db.show.sql>
+            </properties>
+        </profile>
+        <profile>
+            <id>ddl-validate</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <env.db.ddl.auto>validate</env.db.ddl.auto>
+                <env.db.show.sql>true</env.db.show.sql>
+            </properties>
+        </profile>
+        <profile>
+            <id>ddl-create</id>
+            <properties>
+                <env.db.ddl.auto>create</env.db.ddl.auto>
+                <env.db.show.sql>true</env.db.show.sql>
+            </properties>
+        </profile>
+
+        <!-- properties loading profiles-->
         <profile>
             <id>build-dev-localhost</id>
             <activation>
