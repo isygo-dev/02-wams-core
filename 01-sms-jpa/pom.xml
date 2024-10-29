@@ -58,5 +58,10 @@
             <name>GitHub isygo-it Apache Maven Packages</name>
             <url>https://maven.pkg.github.com/isygo-dev/01-wams-stack</url>
         </repository>
+        <repository>
+            <id>isygo-it-github-02</id>
+            <name>GitHub isygo-it Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/isygo-dev/02-wams-core</url>
+        </repository>
     </repositories>
 </project>
