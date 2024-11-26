@@ -1,0 +1,14 @@
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 30MB
+      max-request-size: 30MB
+
+  application:
+    name: storage-service
+    version: @project.version@ #pom: project.version
+  banner:
+    location: classpath:banner.txt
+  config:
+    import: "optional:configserver:@cloud.config.service@"

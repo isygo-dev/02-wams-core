@@ -1,0 +1,152 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <organization>
+        <name>isygo-it-services</name>
+        <url>https://isygo-it.eu</url>
+    </organization>
+
+    <groupId>eu.isygo-it.services</groupId>
+    <artifactId>messaging-management-starter-parent</artifactId>
+    <version>WC-1.0.261112-S1046</version>
+    <packaging>jar</packaging>
+
+    <parent>
+        <groupId>eu.isygo-it.services</groupId>
+        <artifactId>service-stack-parent</artifactId>
+        <version>WS-1.0.261112-S1046</version>
+    </parent>
+
+    <profiles>
+        <profile>
+            <id>build-dev-localhost</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <cloud.config.service>http://localhost:8088</cloud.config.service>
+                <hazelcast.public.address>localhost</hazelcast.public.address>
+                <hazelcast.public.port>5555</hazelcast.public.port>
+                <hazelcast.port>5701</hazelcast.port>
+            </properties>
+        </profile>
+        <profile>
+            <id>build-docker</id>
+            <properties>
+                <cloud.config.service>http://config-service:8088</cloud.config.service>
+                <hazelcast.public.address>key-service</hazelcast.public.address>
+                <hazelcast.public.port>5555</hazelcast.public.port>
+                <hazelcast.port>5701</hazelcast.port>
+            </properties>
+        </profile>
+        <profile>
+            <id>build-dev</id>
+            <properties>
+                <cloud.config.service>http://config-service:8088</cloud.config.service>
+                <hazelcast.public.address>key-service</hazelcast.public.address>
+                <hazelcast.public.port>5555</hazelcast.public.port>
+                <hazelcast.port>5701</hazelcast.port>
+            </properties>
+        </profile>
+        <profile>
+            <id>build-prod</id>
+            <properties>
+                <cloud.config.service>http://config-service:8088</cloud.config.service>
+                <hazelcast.public.address>key-service</hazelcast.public.address>
+                <hazelcast.public.port>5555</hazelcast.public.port>
+                <hazelcast.port>5701</hazelcast.port>
+            </properties>
+        </profile>
+    </profiles>
+
+    <dependencies>
+        <dependency>
+            <groupId>eu.isygo-it.services</groupId>
+            <artifactId>messaging-management-jpa</artifactId>
+            <version>WC-1.0.261112-S1046</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.isygo-it.services</groupId>
+            <artifactId>messaging-management-shared</artifactId>
+            <version>WC-1.0.261112-S1046</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.isygo-it.services</groupId>
+            <artifactId>service-stack-web</artifactId>
+            <version>WS-1.0.261112-S1046</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-cassandra</artifactId>
+            <version>3.3.3</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.isygo-it.services</groupId>
+            <artifactId>key-management-shared</artifactId>
+            <version>WC-1.0.261112-S1046</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.isygo-it.services</groupId>
+            <artifactId>identity-management-shared</artifactId>
+            <version>WC-1.0.261112-S1046</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-freemarker</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <excludes>
+                    <exclude>config/**/*.*</exclude>
+                </excludes>
+            </resource>
+        </resources>
+
+        <plugins>
+        </plugins>
+    </build>
+
+    <distributionManagement>
+        <repository>
+            <id>isygo-it-github-02</id>
+            <name>GitHub isygo-it Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/isygo-it/02-wams-core</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>isygo-it-github-01</id>
+            <name>GitHub isygo-it Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/isygo-it/01-wams-stack</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>isygo-it-github-02</id>
+            <name>GitHub isygo-it Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/isygo-it/02-wams-core</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+</project>

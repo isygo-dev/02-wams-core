@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: document-service
+    version: @project.version@ #pom: project.version
+  banner:
+    location: classpath:banner.txt
+  config:
+    import: "optional:configserver:@cloud.config.service@"
+  servlet:
+    multipart:
+      max-file-size: -1
+      max-request-size: -1

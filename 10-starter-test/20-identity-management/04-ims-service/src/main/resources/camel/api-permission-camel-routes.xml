@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes xmlns="http://camel.apache.org/schema/spring">
+    <!-- Define additional camel routes here file:config/camel/*.xml is automatically
+        scanned -->
+    <route id="register-api-permission-route" autoStartup="true">
+        <from uri="kafka:{{spring.kafka.topics.register-api-permission}}?brokers={{spring.kafka.producer.bootstrap-servers}}"/>
+        <log message="Register api permission..."/>
+        <process ref="registerApiPermissionProcessor"/>
+        <choice>
+            <when>
+                <simple>${header.return} == "true"</simple>
+                <log
+                        message="Api ${header.code} was registered successfully"
+                        loggingLevel="INFO" logName="eu.isygoit"/>
+            </when>
+            <otherwise>
+                <log
+                        message="Error: Api ${header.code} was not registered"
+                        loggingLevel="INFO" logName="eu.isygoit"/>
+            </otherwise>
+        </choice>
+    </route>
+</routes>

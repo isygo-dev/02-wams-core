@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hazelcast-client xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns="http://www.hazelcast.com/schema/client-config"
+                  xsi:schemaLocation="http://www.hazelcast.com/schema/client-config
+                  http://www.hazelcast.com/schema/client-config/hazelcast-client-config-5.2.xsd">
+
+    <cluster-name>prm-cluster</cluster-name>
+    <instance-name>prm-cluster</instance-name>
+
+    <network>
+        <cluster-members>
+            <address>@hazelcast.public.address@</address>
+        </cluster-members>
+        <outbound-ports>
+            <ports>34700-34799</ports>
+        </outbound-ports>
+        <smart-routing>true</smart-routing>
+        <redo-operation>true</redo-operation>
+        <connection-timeout>60000</connection-timeout>
+    </network>
+</hazelcast-client>

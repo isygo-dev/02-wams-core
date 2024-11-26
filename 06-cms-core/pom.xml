@@ -9,11 +9,17 @@
     </organization>
 
     <groupId>eu.isygo-it.services</groupId>
-    <artifactId>service-core</artifactId>
+    <artifactId>cms-core</artifactId>
     <version>WC-1.0.261112-S1046</version>
 
-    <name>service-core</name>
-    <description>service-core</description>
+    <name>cms-core</name>
+    <description>cms-core</description>
+
+    <parent>
+        <groupId>eu.isygo-it.services</groupId>
+        <artifactId>service-core</artifactId>
+        <version>WC-1.0.261112-S1046</version>
+    </parent>
 
     <packaging>pom</packaging>
 
@@ -23,14 +29,9 @@
     </properties>
 
     <modules>
-        <module>01-kms-core</module>
-        <module>02-ims-core</module>
-        <module>03-mms-core</module>
-        <module>04-dms-core</module>
-        <module>05-sms-core</module>
-        <module>06-cms-core</module>
-        <module>07-bpm-core</module>
-        <module>10-starter-test</module>
+        <module>01-cms-jpa</module>
+        <module>02-cms-shared</module>
+        <module>03-cms-starter-parent</module>
     </modules>
 
     <build>

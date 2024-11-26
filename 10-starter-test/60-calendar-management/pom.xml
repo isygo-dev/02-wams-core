@@ -1,0 +1,29 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <organization>
+        <name>isygo-it-services</name>
+        <url>https://isygo-it.eu/</url>
+    </organization>
+
+    <groupId>eu.isygo-it.services</groupId>
+    <artifactId>calendar-management</artifactId>
+    <version>WC-1.0.261112-S1046</version>
+    <packaging>pom</packaging>
+
+    <parent>
+        <groupId>eu.isygo-it.services</groupId>
+        <artifactId>starter-test-core</artifactId>
+        <version>WC-1.0.261112-S1046</version>
+    </parent>
+
+    <modules>
+        <module>04-cms-service</module>
+    </modules>
+
+    <build>
+        <plugins>
+        </plugins>
+    </build>
+</project>
