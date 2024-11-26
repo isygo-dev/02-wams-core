@@ -22,12 +22,13 @@
 - Install Java 17 from https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html
 - install Docker desktop last version from https://www.docker.com/products/docker-desktop
 
-### isygo-it core services
+### Core Starter services
 
 - clone the isygo-it project from https://github.com/isygo-it/02-wams-core.git
 - Open the project with Intellij IDEA (open as maven project)
 - Copy the settings.xml file from the root directory to the Maven .m2 directory
 - Run: `mvn clean install` in the terminal or use the Intellij Maven GUI
-
-
+- Create run configuration for all the services Starter and set the working directory to the related Target directory
+  (Ultimate version will detect automatically the Springboot configurations)
+- Run configurations in the order: Kms, Ims, Mms, Dms, Sms, Cms
 
