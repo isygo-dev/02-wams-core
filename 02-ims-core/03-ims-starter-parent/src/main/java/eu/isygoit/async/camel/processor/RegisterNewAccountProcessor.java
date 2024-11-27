@@ -4,7 +4,6 @@ import eu.isygoit.com.camel.processor.AbstractCamelProcessor;
 import eu.isygoit.com.camel.processor.AbstractStringProcessor;
 import eu.isygoit.dto.data.AssoAccountDto;
 import eu.isygoit.dto.request.NewAccountDto;
-import eu.isygoit.dto.request.RegisteredUserDto;
 import eu.isygoit.helper.JsonHelper;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.AccountDetails;

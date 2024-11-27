@@ -2,7 +2,10 @@ package eu.isygoit.model;
 
 import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.model.jakarta.AuditableCancelableEntity;
-import eu.isygoit.model.schema.*;
+import eu.isygoit.model.schema.SchemaColumnConstantName;
+import eu.isygoit.model.schema.SchemaConstantSize;
+import eu.isygoit.model.schema.SchemaTableConstantName;
+import eu.isygoit.model.schema.SchemaUcConstantName;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,7 +30,7 @@ import java.util.Date;
                 columnNames = {SchemaColumnConstantName.C_CODE}),
         @UniqueConstraint(name = SchemaUcConstantName.UC_CALENDAR_EVENT_DOMAIN_NAME,
                 columnNames = {SchemaColumnConstantName.C_DOMAIN, SchemaColumnConstantName.C_NAME})})
-@SQLDelete(sql = "update " + SchemaTableConstantName.T_EVENT + " set " + SchemaColumnConstantName.C_CHECK_CANCEL + "= true , " + ComSchemaColumnConstantName.C_CANCEL_DATE + " = current_timestamp WHERE id = ?")
+@SQLDelete(sql = "update " + SchemaTableConstantName.T_EVENT + " set " + SchemaColumnConstantName.C_CHECK_CANCEL + "= true , " + SchemaColumnConstantName.C_CANCEL_DATE + " = current_timestamp WHERE id = ?")
 @Where(clause = SchemaColumnConstantName.C_CHECK_CANCEL + "=false")
 public class VCalendarEvent extends AuditableCancelableEntity<Long> implements ISAASEntity, ICodifiable {
 
@@ -46,7 +49,7 @@ public class VCalendarEvent extends AuditableCancelableEntity<Long> implements I
     private String calendar;
 
     //@Convert(converter = LowerCaseConverter.class)
-    @Column(name = ComSchemaColumnConstantName.C_CODE, length = ComSchemaConstantSize.CODE, updatable = false, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;
 
     @Column(name = SchemaColumnConstantName.C_TITLE, updatable = false, nullable = false)
@@ -55,7 +58,7 @@ public class VCalendarEvent extends AuditableCancelableEntity<Long> implements I
     @Column(name = SchemaColumnConstantName.C_NAME, length = SchemaConstantSize.S_NAME, updatable = false, nullable = false)
     private String name;
 
-    @Column(name = ComSchemaColumnConstantName.C_DESCRIPTION, length = ComSchemaConstantSize.DESCRIPTION)
+    @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = SchemaConstantSize.DESCRIPTION)
     private String description;
 
     @Column(name = SchemaColumnConstantName.C_TYPE, nullable = false)
@@ -69,6 +72,6 @@ public class VCalendarEvent extends AuditableCancelableEntity<Long> implements I
     @Column(name = SchemaColumnConstantName.C_END_DATE, nullable = false)
     private Date endDate;
 
-    @Column(name = SchemaColumnConstantName.C_COMMENT, length = ComSchemaConstantSize.COMMENT)
+    @Column(name = SchemaColumnConstantName.C_COMMENT, length = SchemaConstantSize.COMMENT)
     private String comment;
 }

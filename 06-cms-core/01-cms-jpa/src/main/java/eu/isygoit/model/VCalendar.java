@@ -2,7 +2,10 @@ package eu.isygoit.model;
 
 import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.model.jakarta.AuditableCancelableEntity;
-import eu.isygoit.model.schema.*;
+import eu.isygoit.model.schema.SchemaColumnConstantName;
+import eu.isygoit.model.schema.SchemaConstantSize;
+import eu.isygoit.model.schema.SchemaTableConstantName;
+import eu.isygoit.model.schema.SchemaUcConstantName;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,7 +30,7 @@ import org.hibernate.annotations.Where;
         @UniqueConstraint(name = SchemaUcConstantName.UC_CALENDAR_DOMAIN_NAME,
                 columnNames = {SchemaColumnConstantName.C_DOMAIN, SchemaColumnConstantName.C_NAME})
 })
-@SQLDelete(sql = "update " + SchemaTableConstantName.T_CALENDAR + " set " + SchemaColumnConstantName.C_CHECK_CANCEL + "= true , " + ComSchemaColumnConstantName.C_CANCEL_DATE + " = current_timestamp WHERE id = ?")
+@SQLDelete(sql = "update " + SchemaTableConstantName.T_CALENDAR + " set " + SchemaColumnConstantName.C_CHECK_CANCEL + "= true , " + SchemaColumnConstantName.C_CANCEL_DATE + " = current_timestamp WHERE id = ?")
 @Where(clause = SchemaColumnConstantName.C_CHECK_CANCEL + "=false")
 public class VCalendar extends AuditableCancelableEntity<Long> implements ICodifiable, ISAASEntity {
 
@@ -42,13 +45,13 @@ public class VCalendar extends AuditableCancelableEntity<Long> implements ICodif
     @Column(name = SchemaColumnConstantName.C_DOMAIN, length = SchemaConstantSize.DOMAIN, updatable = false, nullable = false)
     private String domain;
 
-    @Column(name = ComSchemaColumnConstantName.C_CODE, length = ComSchemaConstantSize.CODE, updatable = false, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;
 
     @Column(name = SchemaColumnConstantName.C_NAME, length = SchemaConstantSize.S_NAME, updatable = false, nullable = false)
     private String name;
 
-    @Column(name = ComSchemaColumnConstantName.C_DESCRIPTION, length = ComSchemaConstantSize.DESCRIPTION)
+    @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = SchemaConstantSize.DESCRIPTION)
     private String description;
 
     @ColumnDefault("'NA'")

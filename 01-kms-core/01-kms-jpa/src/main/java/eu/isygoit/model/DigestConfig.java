@@ -5,7 +5,10 @@ import eu.isygoit.enums.IEnumAlgoDigestConfig;
 import eu.isygoit.enums.IEnumSaltGenerator;
 import eu.isygoit.enums.IEnumStringOutputType;
 import eu.isygoit.model.jakarta.AuditableEntity;
-import eu.isygoit.model.schema.*;
+import eu.isygoit.model.schema.SchemaColumnConstantName;
+import eu.isygoit.model.schema.SchemaConstantSize;
+import eu.isygoit.model.schema.SchemaTableConstantName;
+import eu.isygoit.model.schema.SchemaUcConstantName;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,7 +43,7 @@ public class DigestConfig extends AuditableEntity<Long> implements ISAASEntity, 
 
     @Length(max = SchemaConstantSize.CODE)
     //@Convert(converter = LowerCaseConverter.class)
-    @Column(name = ComSchemaColumnConstantName.C_CODE, length = ComSchemaConstantSize.CODE, updatable = false, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;
 
     //@Convert(converter = LowerCaseConverter.class)

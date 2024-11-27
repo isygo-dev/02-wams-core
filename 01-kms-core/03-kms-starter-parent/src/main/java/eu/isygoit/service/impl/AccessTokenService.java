@@ -5,12 +5,9 @@ import eu.isygoit.com.rest.service.impl.CrudService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.enums.IEnumAppToken;
 import eu.isygoit.model.AccessToken;
-import eu.isygoit.model.schema.SchemaTableConstantName;
 import eu.isygoit.repository.AccessTokenRepository;
 import eu.isygoit.service.IAccessTokenService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

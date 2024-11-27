@@ -4,7 +4,10 @@ import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.enums.IEnumAppToken;
 import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.model.jakarta.AuditableEntity;
-import eu.isygoit.model.schema.*;
+import eu.isygoit.model.schema.SchemaColumnConstantName;
+import eu.isygoit.model.schema.SchemaConstantSize;
+import eu.isygoit.model.schema.SchemaTableConstantName;
+import eu.isygoit.model.schema.SchemaUcConstantName;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,7 +40,7 @@ public class TokenConfig extends AuditableEntity<Long> implements ISAASEntity, I
     private Long id;
 
     //@Convert(converter = LowerCaseConverter.class)
-    @Column(name = ComSchemaColumnConstantName.C_CODE, length = ComSchemaConstantSize.CODE, updatable = false, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;
 
     //@Convert(converter = LowerCaseConverter.class)
@@ -58,7 +61,7 @@ public class TokenConfig extends AuditableEntity<Long> implements ISAASEntity, I
     private String audience;
 
     @Builder.Default
-    @Column(name = ComSchemaColumnConstantName.C_SIGNATURE_ALGORITHM, length = IEnumCharSet.STR_ENUM_SIZE, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_SIGNATURE_ALGORITHM, length = IEnumCharSet.STR_ENUM_SIZE, nullable = false)
     private String signatureAlgorithm = "RS256";
 
     @Column(name = SchemaColumnConstantName.C_SECRET_KEY, nullable = false)

@@ -10,7 +10,7 @@
 
     <groupId>eu.isygo-it.services</groupId>
     <artifactId>starter-test-core</artifactId>
-    <version>WC-1.0.261112-S1046</version>
+    <version>WC-1.0.271124-S0916</version>
 
     <name>starter-test-core</name>
     <description>starter-test-core</description>
@@ -20,7 +20,7 @@
     <parent>
         <groupId>eu.isygo-it.services</groupId>
         <artifactId>service-core</artifactId>
-        <version>WC-1.0.261112-S1046</version>
+        <version>WC-1.0.271124-S0916</version>
     </parent>
 
     <properties>
@@ -69,7 +69,7 @@
         <repository>
             <id>isygo-it-github-02</id>
             <name>GitHub isygo-it Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/isygo-it/02-wams-core</url>
+            <url>https://maven.pkg.github.com/your-org/02-wams-core</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -80,7 +80,7 @@
         <repository>
             <id>isygo-it-github-01</id>
             <name>GitHub isygo-it Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/isygo-it/01-wams-stack</url>
+            <url>https://maven.pkg.github.com/your-org/01-wams-stack</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -88,7 +88,7 @@
         <repository>
             <id>isygo-it-github-02</id>
             <name>GitHub isygo-it Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/isygo-it/02-wams-core</url>
+            <url>https://maven.pkg.github.com/your-org/02-wams-core</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>

@@ -4,7 +4,10 @@ import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.model.jakarta.AuditableEntity;
-import eu.isygoit.model.schema.*;
+import eu.isygoit.model.schema.SchemaColumnConstantName;
+import eu.isygoit.model.schema.SchemaConstantSize;
+import eu.isygoit.model.schema.SchemaTableConstantName;
+import eu.isygoit.model.schema.SchemaUcConstantName;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,7 +40,7 @@ public class PasswordConfig extends AuditableEntity<Long> implements ISAASEntity
     private Long id;
 
     //@Convert(converter = LowerCaseConverter.class)
-    @Column(name = ComSchemaColumnConstantName.C_CODE, length = ComSchemaConstantSize.CODE, updatable = false, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;
     //@Convert(converter = LowerCaseConverter.class)
     @ColumnDefault("'" + DomainConstants.DEFAULT_DOMAIN_NAME + "'")
@@ -53,7 +56,7 @@ public class PasswordConfig extends AuditableEntity<Long> implements ISAASEntity
     @Builder.Default
     @ColumnDefault("'ALL'")
     @Enumerated(EnumType.STRING)
-    @Column(name = ComSchemaColumnConstantName.C_CHAR_SET_TYPE, length = IEnumCharSet.STR_ENUM_SIZE, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_CHAR_SET_TYPE, length = IEnumCharSet.STR_ENUM_SIZE, nullable = false)
     private IEnumCharSet.Types charSetType = IEnumCharSet.Types.ALL;
     @Column(name = SchemaColumnConstantName.C_INITIAL, length = SchemaConstantSize.PASS_WORD)
     private String initial;

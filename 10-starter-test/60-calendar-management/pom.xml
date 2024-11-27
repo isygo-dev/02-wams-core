@@ -9,13 +9,13 @@
 
     <groupId>eu.isygo-it.services</groupId>
     <artifactId>calendar-management</artifactId>
-    <version>WC-1.0.261112-S1046</version>
+    <version>WC-1.0.271124-S0916</version>
     <packaging>pom</packaging>
 
     <parent>
         <groupId>eu.isygo-it.services</groupId>
         <artifactId>starter-test-core</artifactId>
-        <version>WC-1.0.261112-S1046</version>
+        <version>WC-1.0.271124-S0916</version>
     </parent>
 
     <modules>

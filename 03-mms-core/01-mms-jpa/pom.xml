@@ -11,7 +11,7 @@
 
     <groupId>eu.isygo-it.services</groupId>
     <artifactId>messaging-management-jpa</artifactId>
-    <version>WC-1.0.261112-S1046</version>
+    <version>WC-1.0.271124-S0916</version>
     <packaging>jar</packaging>
     <name>messaging-management-jpa</name>
     <description>messaging-management-jpa</description>
@@ -19,7 +19,7 @@
     <parent>
         <groupId>eu.isygo-it.services</groupId>
         <artifactId>mms-core</artifactId>
-        <version>WC-1.0.261112-S1046</version>
+        <version>WC-1.0.271124-S0916</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -30,12 +30,12 @@
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>service-stack-jpa</artifactId>
-            <version>WS-1.0.261112-S1046</version>
+            <version>WS-1.0.271124-S0916</version>
         </dependency>
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>service-stack-cassandra</artifactId>
-            <version>WS-1.0.261112-S1046</version>
+            <version>WS-1.0.271124-S0916</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -53,7 +53,7 @@
         <repository>
             <id>isygo-it-github-02</id>
             <name>GitHub isygo-it Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/isygo-it/02-wams-core</url>
+            <url>https://maven.pkg.github.com/your-org/02-wams-core</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -64,7 +64,7 @@
         <repository>
             <id>isygo-it-github-01</id>
             <name>GitHub isygo-it Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/isygo-it/01-wams-stack</url>
+            <url>https://maven.pkg.github.com/your-org/01-wams-stack</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -72,7 +72,7 @@
         <repository>
             <id>isygo-it-github-02</id>
             <name>GitHub isygo-it Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/isygo-it/02-wams-core</url>
+            <url>https://maven.pkg.github.com/your-org/02-wams-core</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>

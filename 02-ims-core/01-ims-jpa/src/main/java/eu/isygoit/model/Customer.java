@@ -23,7 +23,7 @@ public class Customer extends CustomerModel<Long> {
     @Id
     @SequenceGenerator(name = "customer_sequence_generator", sequenceName = "customer_sequence", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "customer_sequence_generator")
-    @Column(name = ComSchemaColumnConstantName.C_ID, updatable = false, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_ID, updatable = false, nullable = false)
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL /* CASCADE only for OneToOne*/)
@@ -31,6 +31,6 @@ public class Customer extends CustomerModel<Long> {
             , foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_CUSTOMER_REF_ADDRESS))
     private CustomerAddress address;
 
-    @Column(name = SchemaColumnConstantName.C_ACCOUNT_CODE, length = ComSchemaConstantSize.CODE)
+    @Column(name = SchemaColumnConstantName.C_ACCOUNT_CODE, length = SchemaConstantSize.CODE)
     private String accountCode;
 }

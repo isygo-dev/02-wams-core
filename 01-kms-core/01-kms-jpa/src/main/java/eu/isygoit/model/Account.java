@@ -30,10 +30,10 @@ public class Account extends AccountModel<Long> {
     @Column(name = SchemaColumnConstantName.C_ID, updatable = false, nullable = false)
     private Long id;
 
-    @Column(name = SchemaColumnConstantName.C_FULL_NAME, length = ComSchemaConstantSize.S_NAME, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_FULL_NAME, length = SchemaConstantSize.S_NAME, nullable = false)
     private String fullName;
 
-    @OrderBy(ComSchemaColumnConstantName.C_CREATE_DATE + " DESC")
+    @OrderBy(SchemaColumnConstantName.C_CREATE_DATE + " DESC")
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL /* Cascade only for OneToMany*/)
     @JoinColumn(name = SchemaColumnConstantName.C_USER_ID
             , foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_PASSWORD_INFO_REF_ACCOUNT))
