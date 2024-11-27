@@ -53,7 +53,7 @@ public class LinkedFile extends LinkedFileModel<Long> implements ISAASEntity {
             , joinColumns = @JoinColumn(name = SchemaColumnConstantName.C_LINKED_FILE,
             referencedColumnName = SchemaColumnConstantName.C_CODE,
             foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_TAGS_REF_LINKED_FILE)))
-    @Column(name = ComSchemaColumnConstantName.C_TAG_OWNER)
+    @Column(name = SchemaColumnConstantName.C_TAG_OWNER)
     private List<String> tags;
 
     @ManyToMany(fetch = FetchType.LAZY /* NO CASCADE */)

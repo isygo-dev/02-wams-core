@@ -40,11 +40,11 @@ public class WorkflowBoard extends AuditableEntity<Long> implements ISAASEntity,
     private String domain;
 
     //@Convert(converter = LowerCaseConverter.class)
-    @Column(name = ComSchemaColumnConstantName.C_CODE, length = ComSchemaConstantSize.CODE, updatable = false, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;
     @Column(name = SchemaColumnConstantName.C_NAME, length = SchemaConstantSize.S_NAME, updatable = false, nullable = false)
     private String name;
-    @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = ComSchemaConstantSize.DESCRIPTION)
+    @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = SchemaConstantSize.DESCRIPTION)
     private String description;
     @Column(name = SchemaColumnConstantName.C_ITEM, nullable = false)
     private String item;

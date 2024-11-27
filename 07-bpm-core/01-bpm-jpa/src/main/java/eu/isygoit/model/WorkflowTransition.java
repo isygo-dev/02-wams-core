@@ -35,7 +35,7 @@ public class WorkflowTransition extends AuditableEntity<Long> implements ICodifi
     private Long id;
 
     //@Convert(converter = LowerCaseConverter.class)
-    @Column(name = ComSchemaColumnConstantName.C_CODE, length = ComSchemaConstantSize.CODE, updatable = false, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;
     @Column(name = SchemaColumnConstantName.C_FROM_CODE, length = SchemaConstantSize.S_NAME, updatable = false, nullable = false)
     private String fromCode;

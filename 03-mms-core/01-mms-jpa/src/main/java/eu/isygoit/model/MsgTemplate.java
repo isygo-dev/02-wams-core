@@ -45,7 +45,7 @@ public class MsgTemplate extends AuditableEntity<Long>
     private Long id;
 
     //@Convert(converter = LowerCaseConverter.class)
-    @Column(name = ComSchemaColumnConstantName.C_CODE, length = ComSchemaConstantSize.CODE, updatable = false, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;
     //@Convert(converter = LowerCaseConverter.class)
     @ColumnDefault("'" + DomainConstants.DEFAULT_DOMAIN_NAME + "'")
@@ -54,7 +54,7 @@ public class MsgTemplate extends AuditableEntity<Long>
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_NAME, length = IEnumMsgTemplateName.STR_ENUM_SIZE, nullable = false)
     private IEnumMsgTemplateName.Types name;
-    @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = ComSchemaConstantSize.DESCRIPTION)
+    @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = SchemaConstantSize.DESCRIPTION)
     private String description;
     @Builder.Default
     @Enumerated(EnumType.STRING)

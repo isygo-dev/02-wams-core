@@ -2,7 +2,6 @@ package eu.isygoit.model;
 
 import eu.isygoit.enums.IEnumAppToken;
 import eu.isygoit.model.jakarta.AuditableEntity;
-import eu.isygoit.model.schema.ComSchemaConstantSize;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaConstantSize;
 import eu.isygoit.model.schema.SchemaTableConstantName;
@@ -37,7 +36,7 @@ public class AccessToken extends AuditableEntity<Long> {
     @Column(name = SchemaColumnConstantName.C_TOKEN_TYPE, length = IEnumAppToken.STR_ENUM_SIZE, nullable = false)
     private IEnumAppToken.Types tokenType;
 
-    @Column(name = SchemaColumnConstantName.C_ACCOUNT_CODE, length = ComSchemaConstantSize.CODE, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_ACCOUNT_CODE, length = SchemaConstantSize.CODE, nullable = false)
     private String accountCode;
 
     @Column(name = SchemaColumnConstantName.C_APPLICATION, nullable = false)

@@ -1,7 +1,6 @@
 package eu.isygoit.model;
 
 import eu.isygoit.model.extendable.DomainModel;
-import eu.isygoit.model.schema.ComSchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaTableConstantName;
 import eu.isygoit.model.schema.SchemaUcConstantName;
@@ -28,7 +27,7 @@ public class KmsDomain extends DomainModel<Long> {
     @Id
     @SequenceGenerator(name = "domain_sequence_generator", sequenceName = "domain_sequence", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "domain_sequence_generator")
-    @Column(name = ComSchemaColumnConstantName.C_ID, updatable = false, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_ID, updatable = false, nullable = false)
     private Long id;
 
     /*    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL *//* CASCADE only for OneToOne*//*)

@@ -31,7 +31,7 @@ import java.util.List;
         @UniqueConstraint(name = SchemaUcConstantName.UC_WORKFLOW_DOMAIN_NAME,
                 columnNames = {SchemaColumnConstantName.C_DOMAIN, SchemaColumnConstantName.C_NAME})
 })
-@SQLDelete(sql = "update " + SchemaTableConstantName.T_WORKFLOW + " set " + SchemaColumnConstantName.C_CHECK_CANCEL + "= true , " + ComSchemaColumnConstantName.C_CANCEL_DATE + " = current_timestamp WHERE id = ?")
+@SQLDelete(sql = "update " + SchemaTableConstantName.T_WORKFLOW + " set " + SchemaColumnConstantName.C_CHECK_CANCEL + "= true , " + SchemaColumnConstantName.C_CANCEL_DATE + " = current_timestamp WHERE id = ?")
 @Where(clause = SchemaColumnConstantName.C_CHECK_CANCEL + "=false")
 public class Workflow extends AuditableCancelableEntity<Long> implements ISAASEntity, ICodifiable {
 
@@ -46,11 +46,11 @@ public class Workflow extends AuditableCancelableEntity<Long> implements ISAASEn
     @Column(name = SchemaColumnConstantName.C_DOMAIN, length = SchemaConstantSize.DOMAIN, updatable = false, nullable = false)
     private String domain;
     //@Convert(converter = LowerCaseConverter.class)
-    @Column(name = ComSchemaColumnConstantName.C_CODE, length = ComSchemaConstantSize.CODE, updatable = false, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;
     @Column(name = SchemaColumnConstantName.C_NAME, length = SchemaConstantSize.S_NAME, updatable = false, nullable = false)
     private String name;
-    @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = ComSchemaConstantSize.DESCRIPTION)
+    @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = SchemaConstantSize.DESCRIPTION)
     private String description;
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_TYPE, length = IEnumWorkflow.STR_ENUM_SIZE, nullable = false)

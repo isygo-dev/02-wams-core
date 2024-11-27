@@ -4,7 +4,6 @@ import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.enums.IEnumBinaryStatus;
 import eu.isygoit.enums.IEnumPasswordStatus;
 import eu.isygoit.model.jakarta.AuditableEntity;
-import eu.isygoit.model.schema.ComSchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaConstantSize;
 import eu.isygoit.model.schema.SchemaTableConstantName;
@@ -54,9 +53,9 @@ public class PasswordInfo extends AuditableEntity<Long> {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = SchemaColumnConstantName.C_EXPIRY_DATE, nullable = false, updatable = false)
     private Date expiryDate;
-    @Column(name = ComSchemaColumnConstantName.C_CRC16, nullable = false, updatable = false)
+    @Column(name = SchemaColumnConstantName.C_CRC16, nullable = false, updatable = false)
     private Integer crc16;
-    @Column(name = ComSchemaColumnConstantName.C_CRC32, nullable = false, updatable = false)
+    @Column(name = SchemaColumnConstantName.C_CRC32, nullable = false, updatable = false)
     private Integer crc32;
 
     /**

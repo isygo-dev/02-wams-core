@@ -1,7 +1,6 @@
 package eu.isygoit.model;
 
 import eu.isygoit.model.extendable.ApiPermissionModel;
-import eu.isygoit.model.schema.ComSchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaTableConstantName;
 import eu.isygoit.model.schema.SchemaUcConstantName;
@@ -32,6 +31,6 @@ public class ApiPermission extends ApiPermissionModel<Long> {
     @Id
     @SequenceGenerator(name = "api_permission_sequence_generator", sequenceName = "api_permission_sequence", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "api_permission_sequence_generator")
-    @Column(name = ComSchemaColumnConstantName.C_ID, updatable = false, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_ID, updatable = false, nullable = false)
     private Long id;
 }

@@ -41,7 +41,7 @@ public class Application extends AuditableEntity<Long> implements ISAASEntity, I
     @Column(name = SchemaColumnConstantName.C_DOMAIN, length = SchemaConstantSize.DOMAIN, updatable = false, nullable = false)
     private String domain;
     //@Convert(converter = LowerCaseConverter.class)
-    @Column(name = ComSchemaColumnConstantName.C_CODE, length = ComSchemaConstantSize.CODE, updatable = false, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;
     @Column(name = SchemaColumnConstantName.C_NAME, length = SchemaConstantSize.S_NAME, updatable = false, nullable = false)
     private String name;
@@ -51,7 +51,7 @@ public class Application extends AuditableEntity<Long> implements ISAASEntity, I
     @ColumnDefault("'PRM Store'")
     @Column(name = SchemaColumnConstantName.C_CATEGORY, length = SchemaConstantSize.S_NAME, nullable = false)
     private String category = "PRM Store";
-    @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = ComSchemaConstantSize.DESCRIPTION)
+    @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = SchemaConstantSize.DESCRIPTION)
     private String description;
     @Column(name = SchemaColumnConstantName.C_PHOTO)
     private String imagePath;
@@ -62,7 +62,7 @@ public class Application extends AuditableEntity<Long> implements ISAASEntity, I
     @Builder.Default
     @ColumnDefault("'ENABLED'")
     @Enumerated(EnumType.STRING)
-    @Column(name = ComSchemaColumnConstantName.C_ADMIN_STATUS, length = IEnumBinaryStatus.STR_ENUM_SIZE, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_ADMIN_STATUS, length = IEnumBinaryStatus.STR_ENUM_SIZE, nullable = false)
     private IEnumBinaryStatus.Types adminStatus = IEnumBinaryStatus.Types.ENABLED;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL /* Cascade only for OneToMany*/)

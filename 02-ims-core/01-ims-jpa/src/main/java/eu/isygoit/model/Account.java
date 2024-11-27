@@ -44,7 +44,7 @@ import java.util.List;
         , uniqueConstraints = {
         @UniqueConstraint(name = SchemaUcConstantName.UC_ACCOUNT_CODE, columnNames = {SchemaColumnConstantName.C_CODE})
 })
-@SQLDelete(sql = "update " + SchemaTableConstantName.T_ACCOUNT + " set " + SchemaColumnConstantName.C_CHECK_CANCEL + "= true , " + ComSchemaColumnConstantName.C_CANCEL_DATE + " = current_timestamp WHERE id = ?")
+@SQLDelete(sql = "update " + SchemaTableConstantName.T_ACCOUNT + " set " + SchemaColumnConstantName.C_CHECK_CANCEL + "= true , " + SchemaColumnConstantName.C_CANCEL_DATE + " = current_timestamp WHERE id = ?")
 @Where(clause = SchemaColumnConstantName.C_CHECK_CANCEL + "=false")
 public class Account extends AccountModel<Long> implements IImageEntity {
 
@@ -95,7 +95,7 @@ public class Account extends AccountModel<Long> implements IImageEntity {
     private String accountType = AccountTypeConstants.DOMAIN_USER;
     @Builder.Default
     @ColumnDefault("'SYS_ADMIN'")
-    @Column(name = ComSchemaColumnConstantName.C_ORIGIN, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_ORIGIN, nullable = false)
     private String origin = IEnumAccountOrigin.Types.SYS_ADMIN.name();
 
     @Transient

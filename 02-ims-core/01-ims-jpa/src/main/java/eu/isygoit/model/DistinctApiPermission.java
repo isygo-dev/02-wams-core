@@ -1,7 +1,7 @@
 package eu.isygoit.model;
 
-import eu.isygoit.model.schema.ComSchemaColumnConstantName;
-import eu.isygoit.model.schema.ComSchemaConstantSize;
+import eu.isygoit.model.schema.SchemaColumnConstantName;
+import eu.isygoit.model.schema.SchemaConstantSize;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,9 +19,9 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class DistinctApiPermission implements Serializable {
 
-    @Column(name = ComSchemaColumnConstantName.C_SERVICE, length = ComSchemaConstantSize.S_NAME, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_SERVICE, length = SchemaConstantSize.S_NAME, nullable = false)
     private String serviceName;
 
-    @Column(name = ComSchemaColumnConstantName.C_OBJECT, length = ComSchemaConstantSize.S_NAME, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_OBJECT, length = SchemaConstantSize.S_NAME, nullable = false)
     private String object;
 }
