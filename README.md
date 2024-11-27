@@ -31,3 +31,12 @@
 - Create run configuration for all the services Starter and set the working directory to the related Target directory
   (Ultimate version will detect automatically the Springboot configurations)
 - Run configurations in the order: Kms, Ims, Mms, Dms, Sms, Cms
+
+### Docker image
+- Run Docker desktop
+- Run: docker build -f .\09-docker\core-kms.Dockerfile -t core/kms-serv .
+- Run: docker build -f .\09-docker\core-ims.Dockerfile -t core/ims-serv .
+- Run: docker build -f .\09-docker\core-mms.Dockerfile -t core/mms-serv .
+- Run: docker build -f .\09-docker\core-dms.Dockerfile -t core/dms-serv .
+- Run: docker build -f .\09-docker\core-sms.Dockerfile -t core/sms-serv .
+- Run: docker build -f .\09-docker\core-cms.Dockerfile -t core/cms-serv .

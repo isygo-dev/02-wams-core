@@ -1,8 +1,8 @@
 FROM openjdk:17-alpine
-ADD target/*.jar service.jar
-ADD target/uploads /uploads
+ADD 10-starter-test/30-messaging-management/04-mms-service/target/*.jar service.jar
+ADD 10-starter-test/30-messaging-management/04-mms-service/target/uploads /uploads
 RUN ls -al /uploads/*
-ADD target/camel /camel
+ADD 10-starter-test/30-messaging-management/04-mms-service/target/camel /camel
 RUN ls -al /camel/*
 ADD target/templates /templates
 RUN ls -al /msgtemplate/*
