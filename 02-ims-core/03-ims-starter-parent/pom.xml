@@ -75,7 +75,6 @@
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>messaging-management-shared</artifactId>
             <version>WC-1.0.271124-S0916</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
