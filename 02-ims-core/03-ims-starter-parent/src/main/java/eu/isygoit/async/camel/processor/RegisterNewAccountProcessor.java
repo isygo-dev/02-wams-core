@@ -4,6 +4,7 @@ import eu.isygoit.com.camel.processor.AbstractCamelProcessor;
 import eu.isygoit.com.camel.processor.AbstractStringProcessor;
 import eu.isygoit.dto.data.AssoAccountDto;
 import eu.isygoit.dto.request.NewAccountDto;
+import eu.isygoit.exception.RoleNotDefinedException;
 import eu.isygoit.helper.JsonHelper;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.AccountDetails;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * The type Register new account processor.
@@ -47,7 +49,8 @@ public class RegisterNewAccountProcessor extends AbstractStringProcessor {
         String[] splitOrigin = newAccount.getOrigin().split("-");
         String roleName = parameterService.getValueByDomainAndName(newAccount.getDomain(), splitOrigin[0] + "_ROLE", true, "");
         if (StringUtils.hasText(roleName)) {
-            roleInfo = roleInfoService.findByName(roleName);
+            roleInfo = roleInfoService.findByName(roleName)
+                    .orElseThrow(() -> new RoleNotDefinedException("with name " + roleName));
         } else {
             log.error("<Error>: No role parametrized for account origin : {} ", newAccount.getOrigin());
         }
@@ -57,7 +60,7 @@ public class RegisterNewAccountProcessor extends AbstractStringProcessor {
                 .domain(newAccount.getDomain())
                 .email(newAccount.getEmail())
                 .phoneNumber(newAccount.getPhoneNumber())
-                .roleInfo(roleInfo != null ? Arrays.asList(roleInfo) : null)
+                .roleInfo(Objects.nonNull(roleInfo) ? Arrays.asList(roleInfo) : null)
                 .functionRole(newAccount.getFunctionRole())
                 .accountDetails(AccountDetails.builder()
                         .firstName(newAccount.getFirstName())

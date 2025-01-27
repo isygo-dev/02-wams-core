@@ -6,11 +6,14 @@ import eu.isygoit.com.rest.service.impl.CodifiableService;
 import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.model.PEBConfig;
+import eu.isygoit.model.extendable.NextCodeModel;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.repository.PEBConfigRepository;
 import eu.isygoit.service.IPEBConfigService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 /**
  * The type Peb config service.
@@ -22,8 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class PEBConfigService extends CodifiableService<Long, PEBConfig, PEBConfigRepository> implements IPEBConfigService {
 
     @Override
-    public AppNextCode initCodeGenerator() {
-        return AppNextCode.builder()
+    public Optional<NextCodeModel> initCodeGenerator() {
+        return Optional.ofNullable(AppNextCode.builder()
                 .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
                 .entity(PEBConfig.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
@@ -31,6 +34,6 @@ public class PEBConfigService extends CodifiableService<Long, PEBConfig, PEBConf
                 .valueLength(6L)
                 .value(1L)
                 .increment(1)
-                .build();
+                .build());
     }
 }

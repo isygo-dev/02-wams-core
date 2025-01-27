@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The type Linked file controller.
@@ -118,7 +119,7 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
     public ResponseEntity<LinkedFileResponseDto> upload(//RequestContextDto requestContext,
                                                         LinkedFileRequestDto linkedFile) throws IOException {
         log.info("Uploading file from domain {} : {}", linkedFile.getDomain(), linkedFile.getFile().getOriginalFilename());
-        if (linkedFile.getFile() == null) {
+        if (Objects.isNull(linkedFile.getFile())) {
             return ResponseFactory.ResponseBadRequest();
         }
         try {

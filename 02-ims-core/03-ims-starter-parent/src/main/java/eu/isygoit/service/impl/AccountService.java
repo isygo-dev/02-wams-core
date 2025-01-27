@@ -22,6 +22,7 @@ import eu.isygoit.exception.*;
 import eu.isygoit.mapper.ApplicationMapper;
 import eu.isygoit.mapper.MinAccountMapper;
 import eu.isygoit.model.*;
+import eu.isygoit.model.extendable.NextCodeModel;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.remote.kms.KmsIncrementalKeyService;
 import eu.isygoit.remote.kms.KmsPasswordService;
@@ -88,8 +89,8 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     }
 
     @Override
-    public AppNextCode initCodeGenerator() {
-        return AppNextCode.builder()
+    public Optional<NextCodeModel> initCodeGenerator() {
+        return Optional.ofNullable(AppNextCode.builder()
                 .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
                 .entity(Account.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
@@ -97,16 +98,12 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
                 .valueLength(6L)
                 .value(1L)
                 .increment(1)
-                .build();
+                .build());
     }
 
     @Override
-    public Account findByDomainAndUserName(String domain, String userName) {
-        Optional<Account> optional = repository().findByDomainIgnoreCaseAndCodeIgnoreCase(domain, userName);
-        if (optional.isPresent()) {
-            return optional.get();
-        }
-        return null;
+    public Optional<Account> findByDomainAndUserName(String domain, String userName) {
+        return repository().findByDomainIgnoreCaseAndCodeIgnoreCase(domain, userName);
     }
 
     @Override
@@ -120,13 +117,10 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
 
     @Override
     public List<Application> findDistinctAllowedToolsByDomainAndUserName(String domain, String userName) {
-        Account account = findByDomainAndUserName(domain, userName);
-        if (account != null) {
-            List<Application> applications = new ArrayList<>();
-            for (RoleInfo role : account.getRoleInfo()) {
-                applications.addAll(role.getAllowedTools());
-            }
-            return applications.stream().distinct().toList();
+        Optional<Account> optional = findByDomainAndUserName(domain, userName);
+        if (optional.isPresent() && !CollectionUtils.isEmpty(optional.get().getRoleInfo())) {
+            return optional.get().getRoleInfo().stream().flatMap(roleInfo -> roleInfo.getAllowedTools().stream())
+                    .distinct().toList();
         }
         return Collections.EMPTY_LIST;
     }
@@ -151,13 +145,16 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     }
 
     public List<ApplicationDto> buildAllowedTools(Account account, String token) {
-        List<Application> applications = new ArrayList<>();
-        for (RoleInfo role : account.getRoleInfo()) {
-            applications.addAll(role.getAllowedTools());
-        }
+        List<Application> applications = account.getRoleInfo().stream()
+                .flatMap(roleInfo -> roleInfo.getAllowedTools().stream())
+                .distinct().toList();
 
         //Add param to load disabled applications
-        String hideDisabledApp = parameterService.getValueByDomainAndName(account.getDomain(), AppParameterConstants.HIDE_DISABLED_APP, true, AppParameterConstants.NO);
+        String hideDisabledApp = parameterService.getValueByDomainAndName(account.getDomain(),
+                AppParameterConstants.HIDE_DISABLED_APP,
+                true,
+                AppParameterConstants.NO);
+
         if (AppParameterConstants.YES.equals(hideDisabledApp)) {
             return applications.stream()
                     .filter(application -> IEnumBinaryStatus.Types.ENABLED == application.getAdminStatus())
@@ -226,8 +223,9 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
             throw new AccountAuthenticationException("domain disabled: " + accountAuthTypeRequest.getDomain());
         }
 
-        Account account = findByDomainAndUserName(accountAuthTypeRequest.getDomain(), accountAuthTypeRequest.getUserName());
-        if (account != null) {
+        Optional<Account> optional = findByDomainAndUserName(accountAuthTypeRequest.getDomain(), accountAuthTypeRequest.getUserName());
+        if (optional.isPresent()) {
+            Account account = optional.get();
             if (IEnumAuth.Types.OTP == account.getAuthType()) {
                 try {
                     ResponseEntity<Integer> result = kmsPasswordService.generate(//RequestContextDto.builder().build(),
@@ -303,7 +301,8 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
                     return UserAccountDto.builder()
                             .code(account.getCode())
                             .domain(account.getDomain())
-                            .domainId(domainService.findByName(account.getDomain()).getId())
+                            .domainId(domainService.findByName(account.getDomain())
+                                    .orElseThrow(() -> new DomainNotFoundException("with name " + account.getDomain())).getId())
                             .fullName(account.getFullName())
                             .functionRole(account.getFunctionRole())
                             .build();
@@ -313,22 +312,22 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
 
     @Override
     public boolean switchAuthType(AccountAuthTypeRequest accountAuthTypeRequest) throws AccountNotFoundException {
-        Account account = findByDomainAndUserName(accountAuthTypeRequest.getDomain(), accountAuthTypeRequest.getUserName());
-        if (account != null) {
-            if (accountAuthTypeRequest.getAuthType() == null) {
-                if (account.getAuthType().equals(IEnumAuth.Types.OTP)) {
-                    account.setAuthType(IEnumAuth.Types.PWD);
-                } else {
-                    account.setAuthType(IEnumAuth.Types.OTP);
-                }
-            } else {
-                account.setAuthType(accountAuthTypeRequest.getAuthType());
-            }
-            this.update(account);
-            return true;
-        } else {
-            throw new AccountNotFoundException("with domain: " + accountAuthTypeRequest.getDomain() + " and username with " + accountAuthTypeRequest.getUserName());
-        }
+        Optional<Account> optional = findByDomainAndUserName(accountAuthTypeRequest.getDomain(), accountAuthTypeRequest.getUserName());
+        optional.ifPresentOrElse(account -> {
+                    if (Objects.isNull(accountAuthTypeRequest.getAuthType())) {
+                        if (account.getAuthType().equals(IEnumAuth.Types.OTP)) {
+                            account.setAuthType(IEnumAuth.Types.PWD);
+                        } else {
+                            account.setAuthType(IEnumAuth.Types.OTP);
+                        }
+                    } else {
+                        account.setAuthType(accountAuthTypeRequest.getAuthType());
+                    }
+                    this.update(account);
+                },
+                () -> new AccountNotFoundException("with domain: " + accountAuthTypeRequest.getDomain() + " and username with " + accountAuthTypeRequest.getUserName()));
+
+        return true;
     }
 
     @Override
@@ -345,10 +344,10 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
 
         Optional<Account> optional = repository().findByDomainIgnoreCaseAndCodeIgnoreCase(domain, userName);
         if (optional.isPresent()) {
-            for (RoleInfo roleInfo : optional.get().getRoleInfo()) {
-                if (roleInfo.getAllowedTools().stream().parallel().anyMatch(app -> (app.getName().equals(application) && IEnumBinaryStatus.Types.ENABLED == app.getAdminStatus()))) {
-                    return true;
-                }
+            if (optional.get().getRoleInfo().stream().flatMap(roleInfo -> roleInfo.getAllowedTools().stream())
+                    .distinct().parallel()
+                    .anyMatch(app -> (app.getName().equals(application) && IEnumBinaryStatus.Types.ENABLED == app.getAdminStatus()))) {
+                return true;
             }
         } else {
             throw new AccountNotFoundException(domain + "/" + userName);
@@ -359,15 +358,16 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
 
     @Override
     public void trackUserConnections(String domain, String userName, ConnectionTracking connectionTracking) {
-        Account account = this.findByDomainAndUserName(domain, userName);
-        if (account != null) {
-            if (CollectionUtils.isEmpty(account.getConnectionTracking())) {
-                account.setConnectionTracking(new ArrayList<>());
-            }
+        Optional<Account> optional = this.findByDomainAndUserName(domain, userName);
+        optional.ifPresentOrElse(account -> {
+                    if (CollectionUtils.isEmpty(account.getConnectionTracking())) {
+                        account.setConnectionTracking(new ArrayList<>());
+                    }
 
-            account.getConnectionTracking().add(connectionTracking);
-            this.saveOrUpdate(account);
-        }
+                    account.getConnectionTracking().add(connectionTracking);
+                    this.saveOrUpdate(account);
+                },
+                () -> new AccountNotFoundException(domain + "/" + userName));
     }
 
     @Override
@@ -378,7 +378,8 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
         }
         try {
             ResponseEntity<List<WsConnectDto>> result = mmsChatMessageService.getChatStatus(RequestContextDto.builder().build(),
-                    domainService.findByName(domain).getId());
+                    domainService.findByName(domain)
+                            .orElseThrow(() -> new DomainNotFoundException("with name " + domain)).getId());
             if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
                 List<WsConnectDto> connections = result.getBody();
                 if (!CollectionUtils.isEmpty(connections)) {
@@ -402,13 +403,19 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
 
     @Override
     public boolean resendCreationEmail(Long id) {
-        Account account = this.findById(id);
+        Optional<Account> optional = this.findById(id);
+        if (!optional.isPresent()) {
+            throw new AccountNotFoundException("with id " + id);
+        }
+
         try {
+            Account account = optional.get();
             ResponseEntity<Integer> result = kmsPasswordService.generate(//RequestContextDto.builder().build(),
                     IEnumAuth.Types.PWD,
                     GeneratePwdRequestDto.builder()
                             .domain(account.getDomain())
-                            .domainUrl(domainService.findByName(account.getDomain()).getUrl())
+                            .domainUrl(domainService.findByName(account.getDomain())
+                                    .orElseThrow(() -> new DomainNotFoundException("with name " + account.getDomain())).getUrl())
                             .email(account.getEmail())
                             .userName(account.getCode())
                             .fullName(account.getFullName())
@@ -499,8 +506,6 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
 
     @Override
     public Account createDomainAdmin(String domain, DomainAdminDto admin) {
-        RoleInfo domainAdmin = roleInfoService.findByName(AccountTypeConstants.DOMAIN_ADMIN);
-
         return this.create(Account.builder()
                 .domain(domain)
                 .isAdmin(Boolean.TRUE)
@@ -511,7 +516,8 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
                         .lastName(admin.getLastName())
                         .build())
                 .functionRole("Domain administrator")
-                .roleInfo(Arrays.asList(domainAdmin))
+                .roleInfo(Arrays.asList(roleInfoService.findByName(AccountTypeConstants.DOMAIN_ADMIN)
+                        .orElseThrow(() -> new AdminRoleNotFoundException("for domain " + domain))))
                 .build());
     }
 

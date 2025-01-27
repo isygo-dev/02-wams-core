@@ -6,6 +6,7 @@ import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.enums.IEnumCharSet;
+import eu.isygoit.exception.RandomKeyNotFoundException;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.service.IKeyService;
 import eu.isygoit.service.KeyServiceApi;
@@ -61,7 +62,8 @@ public class KeyController extends ControllerExceptionHandler implements KeyServ
                                                String domain, String keyName) {
         log.info("Call getRandomKeyName");
         try {
-            return ResponseFactory.ResponseOk(keyService.getKeyByName(domain, keyName).getValue());
+            return ResponseFactory.ResponseOk(keyService.getKeyByName(domain, keyName)
+                    .orElseThrow(() -> new RandomKeyNotFoundException("for domain " + domain + " and name " + keyName)).getValue());
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

@@ -5,6 +5,8 @@ import eu.isygoit.enums.IEnumBinaryStatus;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.KmsDomain;
 
+import java.util.Optional;
+
 /**
  * The interface Domain service.
  */
@@ -18,7 +20,7 @@ public interface IDomainService extends ICrudServiceMethod<Long, KmsDomain> {
      * @param createIfNotExists the create if not exists
      * @return the kms domain
      */
-    KmsDomain checkDomainIfExists(String domainName, String domainUrl, boolean createIfNotExists);
+    Optional<KmsDomain> checkDomainIfExists(String domainName, String domainUrl, boolean createIfNotExists);
 
     /**
      * Find by name ignore case kms domain.
@@ -26,7 +28,7 @@ public interface IDomainService extends ICrudServiceMethod<Long, KmsDomain> {
      * @param domainName the domain name
      * @return the kms domain
      */
-    KmsDomain findByNameIgnoreCase(String domainName);
+    Optional<KmsDomain> findByNameIgnoreCase(String domainName);
 
     /**
      * Check account if exists account.
@@ -39,7 +41,7 @@ public interface IDomainService extends ICrudServiceMethod<Long, KmsDomain> {
      * @param createIfNotExists the create if not exists
      * @return the account
      */
-    Account checkAccountIfExists(String domainName, String domainUrl, String email, String userName, String fullName, boolean createIfNotExists);
+    Optional<Account> checkAccountIfExists(String domainName, String domainUrl, String email, String userName, String fullName, boolean createIfNotExists);
 
     /**
      * Check if exists boolean.

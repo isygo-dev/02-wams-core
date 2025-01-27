@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * The type Min account dto.
@@ -52,6 +53,6 @@ public class MinAccountDto extends AccountModelDto<Long> {
      * @return the full name
      */
     public String getFullName() {
-        return this.getAccountDetails() != null ? this.accountDetails.getFullName() : null;
+        return Objects.nonNull(this.getAccountDetails()) ? this.accountDetails.getFullName() : null;
     }
 }

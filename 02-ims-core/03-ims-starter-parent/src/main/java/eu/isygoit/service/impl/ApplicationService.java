@@ -9,12 +9,15 @@ import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.enums.IEnumBinaryStatus;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.model.Application;
+import eu.isygoit.model.extendable.NextCodeModel;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.remote.kms.KmsIncrementalKeyService;
 import eu.isygoit.repository.ApplicationRepository;
 import eu.isygoit.service.IApplicationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 /**
  * The type Application service.
@@ -39,8 +42,8 @@ public class ApplicationService extends ImageService<Long, Application, Applicat
     }
 
     @Override
-    public AppNextCode initCodeGenerator() {
-        return AppNextCode.builder()
+    public Optional<NextCodeModel> initCodeGenerator() {
+        return Optional.ofNullable(AppNextCode.builder()
                 .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
                 .entity(Application.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
@@ -48,7 +51,7 @@ public class ApplicationService extends ImageService<Long, Application, Applicat
                 .valueLength(6L)
                 .value(1L)
                 .increment(1)
-                .build();
+                .build());
     }
 
     @Override
@@ -63,7 +66,7 @@ public class ApplicationService extends ImageService<Long, Application, Applicat
     }
 
     @Override
-    public Application findByName(String name) {
+    public Optional<Application> findByName(String name) {
         return repository().findByNameIgnoreCase(name);
     }
 }

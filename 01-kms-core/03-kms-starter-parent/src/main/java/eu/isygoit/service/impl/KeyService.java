@@ -91,11 +91,7 @@ public class KeyService implements IKeyService {
     }
 
     @Override
-    public RandomKey getKeyByName(String domain, String name) {
-        Optional<RandomKey> optional = randomKeyRepository.findByDomainIgnoreCaseAndName(domain, name);
-        if (optional.isPresent()) {
-            return optional.get();
-        }
-        return null;
+    public Optional<RandomKey> getKeyByName(String domain, String name) {
+        return randomKeyRepository.findByDomainIgnoreCaseAndName(domain, name);
     }
 }

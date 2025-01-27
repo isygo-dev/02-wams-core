@@ -8,6 +8,7 @@ import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.enums.IEnumAppToken;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.model.TokenConfig;
+import eu.isygoit.model.extendable.NextCodeModel;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.repository.TokenConfigRepository;
 import eu.isygoit.service.ITokenConfigService;
@@ -65,8 +66,8 @@ public class TokenConfigService extends CodifiableService<Long, TokenConfig, Tok
     }
 
     @Override
-    public AppNextCode initCodeGenerator() {
-        return AppNextCode.builder()
+    public Optional<NextCodeModel> initCodeGenerator() {
+        return Optional.ofNullable(AppNextCode.builder()
                 .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
                 .entity(TokenConfig.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
@@ -74,6 +75,6 @@ public class TokenConfigService extends CodifiableService<Long, TokenConfig, Tok
                 .valueLength(6L)
                 .value(1L)
                 .increment(1)
-                .build();
+                .build());
     }
 }

@@ -1,44 +1,54 @@
 package eu.isygoit.model;
 
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+
 import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
  * The type File storage.
  */
+
+@Data
+@SuperBuilder
+@AllArgsConstructor
+@NoArgsConstructor
 public class FileStorage {
 
     /**
      * The Object name.
      */
-    public String objectName;
+    private String objectName;
     /**
      * The Size.
      */
-    public long size;
+    private long size;
     /**
      * The Etag.
      */
-    public String etag;
+    private String etag;
     /**
      * The Last modified.
      */
-    public ZonedDateTime lastModified;
+    private ZonedDateTime lastModified;
     /**
      * The Tags.
      */
-    public List<String> tags;
+    private List<String> tags;
 
     /**
      * The Version id.
      */
-    public String versionID;
+    private String versionID;
 
     /**
      * The Current version.
      */
-    public boolean currentVersion;
+    private boolean currentVersion;
 }
 
 

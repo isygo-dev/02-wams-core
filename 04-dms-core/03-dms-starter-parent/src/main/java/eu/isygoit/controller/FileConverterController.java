@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.util.Objects;
 
 /**
  * The type File converter controller.
@@ -53,7 +54,7 @@ public class FileConverterController extends ControllerExceptionHandler implemen
                 default -> throw new UnsupportedFileTypeException(targetFormat.meaning());
             }
 
-            if (responseFile != null) {
+            if (Objects.nonNull(responseFile)) {
                 Resource resource = new UrlResource(responseFile.toURI());
                 if (resource.exists()) {
                     return ResponseEntity.ok()
@@ -85,7 +86,7 @@ public class FileConverterController extends ControllerExceptionHandler implemen
                 default -> throw new UnsupportedFileTypeException(targetFormat.meaning());
             }
 
-            if (responseFile != null) {
+            if (Objects.nonNull(responseFile)) {
                 Resource resource = new UrlResource(responseFile.toURI());
                 if (resource.exists()) {
                     return ResponseEntity.ok()

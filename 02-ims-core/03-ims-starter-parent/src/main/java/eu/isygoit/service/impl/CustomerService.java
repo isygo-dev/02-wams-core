@@ -11,6 +11,7 @@ import eu.isygoit.exception.AccountNotFoundException;
 import eu.isygoit.exception.CustomerNotFoundException;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.model.Customer;
+import eu.isygoit.model.extendable.NextCodeModel;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.remote.kms.KmsIncrementalKeyService;
 import eu.isygoit.repository.AccountRepository;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The type Customer service.
@@ -49,15 +51,15 @@ public class CustomerService extends ImageService<Long, Customer, CustomerReposi
     }
 
     @Override
-    public AppNextCode initCodeGenerator() {
-        return AppNextCode.builder()
+    public Optional<NextCodeModel> initCodeGenerator() {
+        return Optional.ofNullable(AppNextCode.builder()
                 .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
                 .entity(Customer.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("CUS")
                 .valueLength(6L)
                 .value(1L)
-                .build();
+                .build());
     }
 
     @Override
@@ -73,17 +75,18 @@ public class CustomerService extends ImageService<Long, Customer, CustomerReposi
 
     @Override
     public Customer linkToAccount(Long id, String accountCode) {
-        Customer customer = this.findById(id);
-        if (customer == null) {
-            throw new CustomerNotFoundException("with id:" + id);
-        }
-
+        //Check if account code exists
         if (!accountRepository.existsByCodeIgnoreCase(accountCode)) {
             throw new AccountNotFoundException("with code:" + accountCode);
         }
 
-        customer.setAccountCode(accountCode);
-        return this.update(customer);
+        //link csustomer to account
+        Optional<Customer> optional = this.findById(id);
+        optional.ifPresentOrElse(customer -> customer.setAccountCode(accountCode),
+                () -> new CustomerNotFoundException("with id:" + id));
+
+
+        return this.update(optional.get());
     }
 
     @Override

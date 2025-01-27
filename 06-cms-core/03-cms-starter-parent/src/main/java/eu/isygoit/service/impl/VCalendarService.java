@@ -13,6 +13,7 @@ import eu.isygoit.exception.ResourceNotFoundException;
 import eu.isygoit.jasycal.ICalendarBuilder;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.model.VCalendar;
+import eu.isygoit.model.extendable.NextCodeModel;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.remote.kms.KmsIncrementalKeyService;
 import eu.isygoit.repository.VCalendarRepository;
@@ -61,12 +62,8 @@ public class VCalendarService extends CodifiableService<Long, VCalendar, VCalend
     }
 
     @Override
-    public VCalendar findByDomainAndName(String domain, String name) {
-        Optional<VCalendar> optional = vCalendarRepository.findByDomainIgnoreCaseAndName(domain, name);
-        if (optional.isPresent()) {
-            return optional.get();
-        }
-        return null;
+    public Optional<VCalendar> findByDomainAndName(String domain, String name) {
+        return vCalendarRepository.findByDomainIgnoreCaseAndName(domain, name);
     }
 
 
@@ -96,22 +93,24 @@ public class VCalendarService extends CodifiableService<Long, VCalendar, VCalend
 
     @Override
     public VCalendar beforeCreate(VCalendar vCalendar) {
-        VCalendar find = this.findByDomainAndName(vCalendar.getDomain(), vCalendar.getName());
-        if (find != null) {
-            throw new CalendarAlreadyExistsException("with domain/name : " + vCalendar.getDomain() + "/" + vCalendar.getName());
-        }
+        this.findByDomainAndName(vCalendar.getDomain(), vCalendar.getName())
+                .ifPresentOrElse(vCalendar1 -> {
+                            //preparing ics file path
+                            Path filePath = Path.of(appProperties.getCalanedarRepo()
+                                    + File.separator + vCalendar.getDomain());
+                            if (!Files.exists(filePath)) {
+                                try {
+                                    Files.createDirectories(filePath);
+                                } catch (IOException e) {
+                                    log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
+                                }
+                            }
+                            vCalendar.setIcsPath(filePath.resolve(vCalendar.getName() + ".ics").toString());
+                        },
+                        () -> {
+                            new CalendarAlreadyExistsException("with domain/name : " + vCalendar.getDomain() + "/" + vCalendar.getName());
+                        });
 
-        //preparing ics file path
-        Path filePath = Path.of(appProperties.getCalanedarRepo()
-                + File.separator + vCalendar.getDomain());
-        if (!Files.exists(filePath)) {
-            try {
-                Files.createDirectories(filePath);
-            } catch (IOException e) {
-                log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
-            }
-        }
-        vCalendar.setIcsPath(filePath.resolve(vCalendar.getName() + ".ics").toString());
         return super.beforeCreate(vCalendar);
     }
 
@@ -138,8 +137,8 @@ public class VCalendarService extends CodifiableService<Long, VCalendar, VCalend
     }
 
     @Override
-    public AppNextCode initCodeGenerator() {
-        return AppNextCode.builder()
+    public Optional<NextCodeModel> initCodeGenerator() {
+        return Optional.ofNullable(AppNextCode.builder()
                 .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
                 .entity(VCalendar.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
@@ -147,7 +146,7 @@ public class VCalendarService extends CodifiableService<Long, VCalendar, VCalend
                 .valueLength(6L)
                 .value(1L)
                 .increment(1)
-                .build();
+                .build());
     }
 
 

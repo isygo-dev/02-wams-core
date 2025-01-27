@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The type Annex service.
@@ -41,7 +42,7 @@ public class AnnexService extends CrudService<Long, Annex, AnnexRepository> impl
 
     //@Cacheable(cacheNames = SchemaTableConstantName.T_ANNEX, key = "{#annex.id}")
     @Override
-    public Annex findById(Long id) throws ObjectNotFoundException {
+    public Optional<Annex> findById(Long id) throws ObjectNotFoundException {
         return super.findById(id);
     }
 

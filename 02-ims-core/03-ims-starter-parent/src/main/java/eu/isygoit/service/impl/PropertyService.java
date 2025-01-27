@@ -93,7 +93,7 @@ public class PropertyService extends CrudServiceUtils<Property, PropertyReposito
         Optional<Account> optionalAccount = accountRepository.findByCodeIgnoreCase(accountCode);
         if (optionalAccount.isPresent()) {
             List<Property> listProperty = repository().findByAccountAndGuiName(accountCode, guiName);
-            if (listProperty != null) {
+            if (!CollectionUtils.isEmpty(listProperty)) {
                 return listProperty;
             }
             throw new PropertyNotFoundException("with name: " + accountCode + "/" + guiName);

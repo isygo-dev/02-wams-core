@@ -11,6 +11,7 @@ import eu.isygoit.exception.AccountNotFoundException;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.model.RoleInfo;
+import eu.isygoit.model.extendable.NextCodeModel;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.remote.kms.KmsIncrementalKeyService;
 import eu.isygoit.repository.AccountRepository;
@@ -42,8 +43,8 @@ public class RoleInfoService extends CodifiableService<Long, RoleInfo, RoleInfoR
     private AccountRepository accountRepository;
 
     @Override
-    public AppNextCode initCodeGenerator() {
-        return AppNextCode.builder()
+    public Optional<NextCodeModel> initCodeGenerator() {
+        return Optional.ofNullable(AppNextCode.builder()
                 .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
                 .entity(RoleInfo.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
@@ -51,17 +52,17 @@ public class RoleInfoService extends CodifiableService<Long, RoleInfo, RoleInfoR
                 .valueLength(6L)
                 .value(1L)
                 .increment(1)
-                .build();
+                .build());
     }
 
     @Override
-    public RoleInfo findByName(String name) {
-        return repository().findByName(name).orElse(null);
+    public Optional<RoleInfo> findByName(String name) {
+        return repository().findByName(name);
     }
 
     @Override
-    public RoleInfo findByCodeIgnoreCase(String code) {
-        return repository().findByCodeIgnoreCase(code).orElse(null);
+    public Optional<RoleInfo> findByCodeIgnoreCase(String code) {
+        return repository().findByCodeIgnoreCase(code);
     }
 
     @Override

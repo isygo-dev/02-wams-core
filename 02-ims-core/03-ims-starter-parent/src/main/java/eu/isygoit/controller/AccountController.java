@@ -17,6 +17,8 @@ import eu.isygoit.dto.response.UserDataResponseDto;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.enums.IEnumBinaryStatus;
 import eu.isygoit.enums.IEnumLanguage;
+import eu.isygoit.exception.AccountNotFoundException;
+import eu.isygoit.exception.DomainNotFoundException;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.jwt.JwtService;
 import eu.isygoit.mapper.AccountMapper;
@@ -92,7 +94,8 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
                     IEnumAuth.Types.PWD,
                     GeneratePwdRequestDto.builder()
                             .domain(account.getDomain())
-                            .domainUrl(domainService.findByName(account.getDomain()).getUrl())
+                            .domainUrl(domainService.findByName(account.getDomain())
+                                    .orElseThrow(() -> new DomainNotFoundException("with name " + account.getDomain())).getUrl())
                             .email(account.getEmail())
                             .userName(account.getCode())
                             .fullName(account.getFullName())
@@ -184,8 +187,11 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     @Override
     public ResponseEntity<UserDataResponseDto> connectedUser(RequestContextDto requestContext) {
         try {
-            Account account = accountService.findByDomainAndUserName(requestContext.getSenderDomain(), requestContext.getSenderUser());
-            Domain domain = domainService.findByName(requestContext.getSenderDomain());
+            Account account = accountService.findByDomainAndUserName(requestContext.getSenderDomain(), requestContext.getSenderUser())
+                    .orElseThrow(() -> new AccountNotFoundException("with domain " + requestContext.getSenderDomain()
+                            + " and username " + requestContext.getSenderUser()));
+            Domain domain = domainService.findByName(requestContext.getSenderDomain())
+                    .orElseThrow(() -> new DomainNotFoundException("with domain " + requestContext.getSenderDomain()));
             //ThemeDto theme = themeMapper.entityToDto(themeService.findThemeByAccountCodeAndDomainCode(account.getCode(), domain.getCode()));
             UserDataResponseDto userDataResponseDto = UserDataResponseDto.builder()
                     .id(account.getId())
@@ -226,7 +232,9 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     public ResponseEntity<AccountDto> connectedUserFullData(RequestContextDto requestContext) {
         try {
             return ResponseFactory.ResponseOk(mapper().entityToDto(accountService.findByDomainAndUserName(requestContext.getSenderDomain(),
-                    requestContext.getSenderUser())));
+                            requestContext.getSenderUser())
+                    .orElseThrow(() -> new AccountNotFoundException("with domain " + requestContext.getSenderDomain()
+                            + " and username " + requestContext.getSenderUser()))));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -237,8 +245,9 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     public ResponseEntity<AccountDto> updateConnectedUserAccountData(RequestContextDto requestContext,
                                                                      AccountDto accountDto) {
         try {
-            Account account = accountService.findByDomainAndUserName(requestContext.getSenderDomain(), requestContext.getSenderUser());
-            accountDto.setId(account.getId());
+            accountDto.setId(accountService.findByDomainAndUserName(requestContext.getSenderDomain(), requestContext.getSenderUser())
+                    .orElseThrow(() -> new AccountNotFoundException("with domain " + requestContext.getSenderDomain()
+                            + " and username " + requestContext.getSenderUser())).getId());
             this.beforeUpdate(accountDto.getId(), accountDto);
             return ResponseFactory.ResponseOk(mapper().entityToDto(accountService.update(mapper().dtoToEntity(accountDto))));
         } catch (Throwable e) {

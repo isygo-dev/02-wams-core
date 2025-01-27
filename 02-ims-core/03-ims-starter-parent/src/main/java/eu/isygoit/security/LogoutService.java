@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 /**
  * The type Logout service.
@@ -26,7 +27,7 @@ public class LogoutService implements LogoutHandler {
     ) {
         final String authHeader = UrlHelper.getJwtFromRequest(request);
         final String jwt;
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (!StringUtils.hasText(authHeader) || !authHeader.startsWith("Bearer ")) {
             return;
         }
         jwt = authHeader.substring(7);

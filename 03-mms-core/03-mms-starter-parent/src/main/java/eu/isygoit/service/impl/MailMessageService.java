@@ -32,9 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -99,25 +97,27 @@ public class MailMessageService extends CassandraCrudService<UUID, MailMessage, 
             // SUBJECT
             mail.setSubject(mailMessageData.getSubject(), "UTF-8");
 
-            if (resources != null && resources.size() > 0) {
+            if (Objects.nonNull(resources) && resources.size() > 0) {
                 MimeMultipart multipart = new MimeMultipart("related");
                 BodyPart messageBodyPart = new MimeBodyPart();
                 messageBodyPart.setContent(mailMessageData.getBody(), "text/html");
                 multipart.addBodyPart(messageBodyPart);
 
-                for (String key : resources.keySet()) {
+                resources.keySet().stream().forEach(key -> {
                     DataSource fds = new FileDataSource(resources.get(key));
 
-                    messageBodyPart = new MimeBodyPart();
-                    messageBodyPart.setDataHandler(new DataHandler(fds));
-                    messageBodyPart.setHeader("Content-ID", "<" + key + ">");
-
-                    // Set the file name as the attachment's name
-                    messageBodyPart.setFileName(key);  // Add this line
-
-                    // add image to the multipart
-                    multipart.addBodyPart(messageBodyPart);
-                }
+                    BodyPart resourcePart = new MimeBodyPart();
+                    try {
+                        resourcePart.setDataHandler(new DataHandler(fds));
+                        resourcePart.setHeader("Content-ID", "<" + key + ">");
+                        // Set the file name as the attachment's name
+                        resourcePart.setFileName(key);  // Add this line
+                        // add image to the multipart
+                        multipart.addBodyPart(messageBodyPart);
+                    } catch (MessagingException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
 
                 mail.setContent(multipart);
             } else {
@@ -153,7 +153,7 @@ public class MailMessageService extends CassandraCrudService<UUID, MailMessage, 
     @Override
     public Map<String, File> multiPartFileToResource(String senderDomainName, List<MultipartFile> resources) {
         if (CollectionUtils.isEmpty(resources)) {
-            return null;
+            return Collections.EMPTY_MAP;
         }
 
         return resources.stream().map(multipartFile -> {
@@ -173,5 +173,4 @@ public class MailMessageService extends CassandraCrudService<UUID, MailMessage, 
                 + File.separator + "resources"
                 + File.separator + multipartFile.getOriginalFilename())));
     }
-
 }

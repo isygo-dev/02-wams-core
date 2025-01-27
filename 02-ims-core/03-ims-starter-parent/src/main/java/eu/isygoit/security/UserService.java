@@ -35,8 +35,10 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         String[] userNameArray = username.split("@");
         if (userNameArray.length >= 2) {
-            Domain domain = domainRepository.findByNameIgnoreCase(userNameArray[1]).orElseThrow(() -> new UsernameNotFoundException("User Not Found!"));
-            Account account = accountRepository.findByDomainIgnoreCaseAndCodeIgnoreCase(userNameArray[1], userNameArray[0]).orElseThrow(() -> new UsernameNotFoundException("User Not Found!"));
+            Domain domain = domainRepository.findByNameIgnoreCase(userNameArray[1])
+                    .orElseThrow(() -> new UsernameNotFoundException("User Not Found!"));
+            Account account = accountRepository.findByDomainIgnoreCaseAndCodeIgnoreCase(userNameArray[1], userNameArray[0])
+                    .orElseThrow(() -> new UsernameNotFoundException("User Not Found!"));
             return CustomUserDetails.builder()
                     .username(account.getCode())
                     .isAdmin(account.getIsAdmin())

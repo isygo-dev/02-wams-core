@@ -5,6 +5,8 @@ import eu.isygoit.com.rest.service.IImageServiceMethods;
 import eu.isygoit.enums.IEnumBinaryStatus;
 import eu.isygoit.model.Application;
 
+import java.util.Optional;
+
 /**
  * The interface Application service.
  */
@@ -25,5 +27,5 @@ public interface IApplicationService extends ICrudServiceMethod<Long, Applicatio
      * @param name the name
      * @return the application
      */
-    Application findByName(String name);
+    Optional<Application> findByName(String name);
 }

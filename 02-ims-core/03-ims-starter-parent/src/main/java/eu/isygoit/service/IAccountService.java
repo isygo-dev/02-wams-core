@@ -17,6 +17,7 @@ import eu.isygoit.model.ConnectionTracking;
 import jakarta.transaction.NotSupportedException;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The interface Account service.
@@ -30,7 +31,7 @@ public interface IAccountService extends ICrudServiceMethod<Long, Account>, IIma
      * @param userName the user name
      * @return the account
      */
-    Account findByDomainAndUserName(String domain, String userName);
+    Optional<Account> findByDomainAndUserName(String domain, String userName);
 
     /**
      * Find distinct allowed tools by domain and username list.

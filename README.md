@@ -1,6 +1,6 @@
 # 02-wams-core
 
->  WAMS Core microservices.
+> WAMS Core microservices.
 
 # Technology Stack
 

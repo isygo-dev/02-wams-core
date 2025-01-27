@@ -8,7 +8,8 @@ import lombok.experimental.SuperBuilder;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
 
-import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * The type Event.
@@ -95,16 +96,16 @@ public class IEvent {
      * @return the event
      */
     public IEvent event() {
-        if (this.event == null) {
+        if (Objects.isNull(this.event)) {
             this.event = new VEvent();
-            for (Field field : this.getClass().getDeclaredFields()) {
+            Arrays.stream(this.getClass().getDeclaredFields()).forEach(field -> {
                 if (Property.class.isAssignableFrom(field.getType())) {
                     Property fieldValue = BeanHelper.callGetter(this, field.getName());
-                    if (fieldValue != null) {
+                    if (Objects.nonNull(fieldValue)) {
                         this.event.add(fieldValue);
                     }
                 }
-            }
+            });
         }
         return this;
     }

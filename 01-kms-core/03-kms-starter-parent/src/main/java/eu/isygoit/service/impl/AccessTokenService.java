@@ -34,21 +34,14 @@ public class AccessTokenService extends CrudService<Long, AccessToken, AccessTok
     }
 
     //@Cacheable(cacheNames = SchemaTableConstantName.T_ACCESS_TOKEN, key = "{#application, #accountCode, #token, #tokenType}")
-    public AccessToken findByApplicationAndAccountCodeAndTokenAndTokenType(String application, String accountCode, String token, IEnumAppToken.Types tokenType) {
-        Optional<AccessToken> optional = repository().findFirstByApplicationAndAccountCodeIgnoreCaseAndTokenAndTokenTypeAndDeprecatedFalseOrderByCreateDateDesc(application, accountCode, token, tokenType);
-        if (optional.isPresent()) {
-            return optional.get();
-        }
-        return null;
+    public Optional<AccessToken> findByApplicationAndAccountCodeAndTokenAndTokenType(String application, String accountCode, String token, IEnumAppToken.Types tokenType) {
+        return repository().findFirstByApplicationAndAccountCodeIgnoreCaseAndTokenAndTokenTypeAndDeprecatedFalseOrderByCreateDateDesc(application,
+                accountCode, token, tokenType);
     }
 
     @Override
-    public AccessToken findByAccountCodeAndTokenAndTokenType(String accountCode, String token, IEnumAppToken.Types tokenType) {
-        Optional<AccessToken> optional = repository().findFirstByAccountCodeIgnoreCaseAndTokenAndTokenTypeAndDeprecatedFalseOrderByCreateDateDesc(accountCode, token, tokenType);
-        if (optional.isPresent()) {
-            return optional.get();
-        }
-        return null;
+    public Optional<AccessToken> findByAccountCodeAndTokenAndTokenType(String accountCode, String token, IEnumAppToken.Types tokenType) {
+        return repository().findFirstByAccountCodeIgnoreCaseAndTokenAndTokenTypeAndDeprecatedFalseOrderByCreateDateDesc(accountCode, token, tokenType);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
 import eu.isygoit.constants.JwtConstants;
@@ -8,6 +9,7 @@ import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.ThemeDto;
 import eu.isygoit.dto.extendable.IdentifiableDto;
+import eu.isygoit.exception.ThemeNotFoundException;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.mapper.ThemeMapper;
 import eu.isygoit.model.Theme;
@@ -21,7 +23,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -62,14 +63,8 @@ public class ThemeController extends MappedCrudController<Long, Theme, ThemeDto,
                                                                         @PathVariable(name = RestApiConstants.DOMAIN_CODE) String domainCode,
                                                                         @PathVariable(name = RestApiConstants.ACCOUNT_CODE) String accountCode) {
         try {
-            Theme theme = themeService.findThemeByAccountCodeAndDomainCode(accountCode, domainCode);
-
-            if (theme != null) {
-                ThemeDto themeDto = themeMapper.entityToDto(theme);
-                return new ResponseEntity<>(themeDto, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            }
+            return ResponseFactory.ResponseOk(themeMapper.entityToDto(themeService.findThemeByAccountCodeAndDomainCode(accountCode, domainCode)
+                    .orElseThrow(() -> new ThemeNotFoundException("for domain " + domainCode + " and account " + accountCode))));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -95,8 +90,8 @@ public class ThemeController extends MappedCrudController<Long, Theme, ThemeDto,
     public ResponseEntity<ThemeDto> updateTheme(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) RequestContextDto requestContext,
                                                 @Valid @RequestBody ThemeDto theme) {
         try {
-            Theme themeResult = themeService.updateTheme(themeMapper.dtoToEntity(theme));
-            return new ResponseEntity<>(themeMapper.entityToDto(themeResult), HttpStatus.OK);
+            return ResponseFactory.ResponseOk(themeMapper.entityToDto(themeService.updateTheme(themeMapper.dtoToEntity(theme))
+                    .orElseThrow(() -> new ThemeNotFoundException("for domain " + theme.getDomainCode() + " and account " + theme.getAccountCode()))));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

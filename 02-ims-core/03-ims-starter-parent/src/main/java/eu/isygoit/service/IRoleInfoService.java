@@ -3,6 +3,8 @@ package eu.isygoit.service;
 import eu.isygoit.com.rest.service.ICrudServiceMethod;
 import eu.isygoit.model.RoleInfo;
 
+import java.util.Optional;
+
 /**
  * The interface Role info service.
  */
@@ -14,7 +16,7 @@ public interface IRoleInfoService extends ICrudServiceMethod<Long, RoleInfo> {
      * @param name the name
      * @return the role info
      */
-    RoleInfo findByName(String name);
+    Optional<RoleInfo> findByName(String name);
 
     /**
      * Find by code ignore case role info.
@@ -22,5 +24,5 @@ public interface IRoleInfoService extends ICrudServiceMethod<Long, RoleInfo> {
      * @param code the code
      * @return the role info
      */
-    RoleInfo findByCodeIgnoreCase(String code);
+    Optional<RoleInfo> findByCodeIgnoreCase(String code);
 }

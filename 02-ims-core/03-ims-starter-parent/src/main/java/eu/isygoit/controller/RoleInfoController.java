@@ -22,10 +22,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -81,9 +78,9 @@ public class RoleInfoController extends MappedCrudController<Long, RoleInfo, Rol
     @Override
     public RoleInfoDto beforeCreate(RoleInfoDto roleInfoDto) {
         if (StringUtils.hasText(roleInfoDto.getTemplateCode())) {
-            RoleInfo template = this.crudService().findByCodeIgnoreCase(roleInfoDto.getTemplateCode());
-            if (template != null) {
-                RoleInfoDto copiedRole = mapper().entityToDto(template);
+            Optional<RoleInfo> optional = this.crudService().findByCodeIgnoreCase(roleInfoDto.getTemplateCode());
+            if (optional.isPresent()) {
+                RoleInfoDto copiedRole = mapper().entityToDto(optional.get());
                 copiedRole.setId(null);
                 copiedRole.setName(roleInfoDto.getName());
                 copiedRole.setCode(null);
@@ -121,17 +118,17 @@ public class RoleInfoController extends MappedCrudController<Long, RoleInfo, Rol
     private void createOrUpdateRolePermission(Map<String, RolePermissionDto> rolePermissionDtos, DistinctApiPermission apiPermission, Boolean canRead, Boolean canWrite, Boolean canDelete) {
         if (rolePermissionDtos.containsKey(apiPermission.getServiceName() + apiPermission.getObject())) {
             RolePermissionDto rolePermission = rolePermissionDtos.get(apiPermission.getServiceName() + apiPermission.getObject());
-            if (canRead != null) rolePermission.setRead(canRead);
-            if (canWrite != null) rolePermission.setWrite(canWrite);
-            if (canDelete != null) rolePermission.setDelete(canDelete);
+            if (Objects.nonNull(canRead)) rolePermission.setRead(canRead);
+            if (Objects.nonNull(canWrite)) rolePermission.setWrite(canWrite);
+            if (Objects.nonNull(canDelete)) rolePermission.setDelete(canDelete);
         } else {
             RolePermissionDto rolePermission = RolePermissionDto.builder()
                     .serviceName(apiPermission.getServiceName())
                     .objectName(apiPermission.getObject())
                     .build();
-            if (canRead != null) rolePermission.setRead(canRead);
-            if (canWrite != null) rolePermission.setWrite(canWrite);
-            if (canDelete != null) rolePermission.setDelete(canDelete);
+            if (Objects.nonNull(canRead)) rolePermission.setRead(canRead);
+            if (Objects.nonNull(canWrite)) rolePermission.setWrite(canWrite);
+            if (Objects.nonNull(canDelete)) rolePermission.setDelete(canDelete);
             rolePermissionDtos.put(apiPermission.getServiceName() + apiPermission.getObject()
                     , rolePermission);
         }

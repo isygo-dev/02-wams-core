@@ -12,6 +12,7 @@ import eu.isygoit.enums.IEnumMsgTemplateName;
 import eu.isygoit.helper.FileHelper;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.model.MsgTemplate;
+import eu.isygoit.model.extendable.NextCodeModel;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.remote.ims.ImsPublicService;
 import eu.isygoit.remote.kms.KmsIncrementalKeyService;
@@ -38,6 +39,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -137,13 +139,13 @@ public class MsgTemplateService extends FileService<Long, MsgTemplate, MsgTempla
             ResponseEntity<DomainDto> result = imsPublicService.getDomainByName(senderDomainName);
             if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
                 DomainDto domain = result.getBody();
-                variables.put(MsgTemplateVariables.V_DOMAIN_URL, domain.getUrl() != null ? domain.getUrl() : "Missed");
-                variables.put(MsgTemplateVariables.V_DOMAIN_PHONE, domain.getPhone() != null ? domain.getPhone() : "Missed");
-                variables.put(MsgTemplateVariables.V_DOMAIN_EMAIL, domain.getEmail() != null ? domain.getEmail() : "Missed");
-                variables.put(MsgTemplateVariables.V_DOMAIN_ADDRESS, domain.getAddress() != null ? domain.getAddress().format() : "Missed");
-                variables.put(MsgTemplateVariables.V_DOMAIN_FACEBOOK, domain.getLnk_facebook() != null ? domain.getLnk_facebook() : "Missed");
-                variables.put(MsgTemplateVariables.V_DOMAIN_LINKEDIN, domain.getLnk_linkedin() != null ? domain.getLnk_linkedin() : "Missed");
-                variables.put(MsgTemplateVariables.V_DOMAIN_XING, domain.getLnk_xing() != null ? domain.getLnk_xing() : "Missed");
+                variables.put(MsgTemplateVariables.V_DOMAIN_URL, Objects.nonNull(domain.getUrl()) ? domain.getUrl() : "Missed");
+                variables.put(MsgTemplateVariables.V_DOMAIN_PHONE, Objects.nonNull(domain.getPhone()) ? domain.getPhone() : "Missed");
+                variables.put(MsgTemplateVariables.V_DOMAIN_EMAIL, Objects.nonNull(domain.getEmail()) ? domain.getEmail() : "Missed");
+                variables.put(MsgTemplateVariables.V_DOMAIN_ADDRESS, Objects.nonNull(domain.getAddress()) ? domain.getAddress().format() : "Missed");
+                variables.put(MsgTemplateVariables.V_DOMAIN_FACEBOOK, Objects.nonNull(domain.getLnk_facebook()) ? domain.getLnk_facebook() : "Missed");
+                variables.put(MsgTemplateVariables.V_DOMAIN_LINKEDIN, Objects.nonNull(domain.getLnk_linkedin()) ? domain.getLnk_linkedin() : "Missed");
+                variables.put(MsgTemplateVariables.V_DOMAIN_XING, Objects.nonNull(domain.getLnk_xing()) ? domain.getLnk_xing() : "Missed");
             } else {
                 variables.put(MsgTemplateVariables.V_DOMAIN_URL, "Missed");
                 variables.put(MsgTemplateVariables.V_DOMAIN_PHONE, "Missed");
@@ -165,8 +167,8 @@ public class MsgTemplateService extends FileService<Long, MsgTemplate, MsgTempla
     }
 
     @Override
-    public AppNextCode initCodeGenerator() {
-        return AppNextCode.builder()
+    public Optional<NextCodeModel> initCodeGenerator() {
+        return Optional.ofNullable(AppNextCode.builder()
                 .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
                 .entity(MsgTemplate.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
@@ -174,7 +176,7 @@ public class MsgTemplateService extends FileService<Long, MsgTemplate, MsgTempla
                 .valueLength(6L)
                 .value(1L)
                 .increment(1)
-                .build();
+                .build());
     }
 
     @Override

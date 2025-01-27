@@ -5,6 +5,8 @@ import eu.isygoit.exception.IncrementalConfigNotFoundException;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.model.RandomKey;
 
+import java.util.Optional;
+
 /**
  * The interface Key service.
  */
@@ -64,5 +66,5 @@ public interface IKeyService {
      * @param name   the name
      * @return the key by name
      */
-    RandomKey getKeyByName(String domain, String name);
+    Optional<RandomKey> getKeyByName(String domain, String name);
 }

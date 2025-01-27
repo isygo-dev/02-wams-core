@@ -11,7 +11,7 @@
 
     <groupId>eu.isygo-it.services</groupId>
     <artifactId>storage-management-jpa</artifactId>
-    <version>WC-1.0.271124-S0916</version>
+    <version>WC-1.0.220125-S0441</version>
     <packaging>jar</packaging>
     <name>storage-management-jpa</name>
     <description>storage-management-jpa</description>
@@ -19,7 +19,7 @@
     <parent>
         <groupId>eu.isygo-it.services</groupId>
         <artifactId>sms-core</artifactId>
-        <version>WC-1.0.271124-S0916</version>
+        <version>WC-1.0.220125-S0441</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>service-stack-jpa</artifactId>
-            <version>WS-1.0.271124-S0916</version>
+            <version>WS-1.0.220125-S0441</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

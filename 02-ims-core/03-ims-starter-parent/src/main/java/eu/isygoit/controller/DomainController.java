@@ -9,6 +9,7 @@ import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.DomainDto;
 import eu.isygoit.dto.data.KmsDomainDto;
 import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.exception.DomainNotFoundException;
 import eu.isygoit.exception.KmsDomainUpdateException;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.mapper.DomainMapper;
@@ -100,7 +101,8 @@ public class DomainController extends MappedCrudController<Long, Domain, DomainD
     public ResponseEntity<DomainDto> getByName(RequestContextDto requestContext) {
         log.info("get by name {}", requestContext.getSenderDomain());
         try {
-            return ResponseFactory.ResponseOk(mapper().entityToDto(crudService().findByName(requestContext.getSenderDomain())));
+            return ResponseFactory.ResponseOk(mapper().entityToDto(crudService().findByName(requestContext.getSenderDomain())
+                    .orElseThrow(() -> new DomainNotFoundException("with name " + requestContext.getSenderDomain()))));
         } catch (Throwable e) {
             log.error("<Error>: get by name : {} ", e);
             return getBackExceptionResponse(e);

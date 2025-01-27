@@ -14,6 +14,7 @@ import eu.isygoit.jasycal.IEvent;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.model.VCalendar;
 import eu.isygoit.model.VCalendarEvent;
+import eu.isygoit.model.extendable.NextCodeModel;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.remote.kms.KmsIncrementalKeyService;
 import eu.isygoit.repository.VEventRepository;
@@ -73,8 +74,8 @@ public class VEventService extends CodifiableService<Long, VCalendarEvent, VEven
 
     @Override
     public VCalendarEvent beforeCreate(VCalendarEvent vCalendarEvent) {
-        VCalendar vCalendar = calendarService.findByDomainAndName(vCalendarEvent.getDomain(), vCalendarEvent.getCalendar());
-        if (vCalendar == null) {
+        Optional<VCalendar> optional = calendarService.findByDomainAndName(vCalendarEvent.getDomain(), vCalendarEvent.getCalendar());
+        if (!optional.isPresent()) {
             if (appProperties.getCreateCalendarIfNotExists()) {
                 calendarService.create(VCalendar.builder()
                         .domain(vCalendarEvent.getDomain())
@@ -90,38 +91,40 @@ public class VEventService extends CodifiableService<Long, VCalendarEvent, VEven
 
     @Override
     public VCalendarEvent afterCreate(VCalendarEvent vCalendarEvent) {
-        VCalendar vCalendar = calendarService.findByDomainAndName(vCalendarEvent.getDomain(), vCalendarEvent.getCalendar());
-        if (vCalendar == null) {
-            throw new CalendarNotFoundException("with domain/name : " + vCalendarEvent.getDomain() + "/" + vCalendarEvent.getCalendar());
-        }
+        calendarService.findByDomainAndName(vCalendarEvent.getDomain(), vCalendarEvent.getCalendar())
+                .ifPresentOrElse(vCalendar -> {
+                            try {
+                                ICalendar calendar = ICalendarBuilder.builder()
+                                        .icsPath(vCalendar.getIcsPath())
+                                        .build()
+                                        .calendar()
+                                        .load()
+                                        .addEvent(IEvent.builder()
+                                                .uid(new Uid(vCalendarEvent.getId().toString()))
+                                                .name(new Name(vCalendarEvent.getName()))
+                                                .description(new Description(vCalendarEvent.getName()))
+                                                .summary(new Summary(vCalendarEvent.getName()))
+                                                .dtStart(new DtStart(vCalendarEvent.getStartDate().toInstant()))
+                                                .dtEnd(new DtEnd(vCalendarEvent.getEndDate().toInstant()))
+                                                .build()
+                                                .event())
+                                        .store();
+                            } catch (IOException e) {
+                                log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
+                            } catch (ParserException e) {
+                                log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
+                            }
+                        },
+                        () -> {
+                            new CalendarNotFoundException("with domain/name : " + vCalendarEvent.getDomain() + "/" + vCalendarEvent.getCalendar());
+                        });
 
-        try {
-            ICalendar calendar = ICalendarBuilder.builder()
-                    .icsPath(vCalendar.getIcsPath())
-                    .build()
-                    .calendar()
-                    .load()
-                    .addEvent(IEvent.builder()
-                            .uid(new Uid(vCalendarEvent.getId().toString()))
-                            .name(new Name(vCalendarEvent.getName()))
-                            .description(new Description(vCalendarEvent.getName()))
-                            .summary(new Summary(vCalendarEvent.getName()))
-                            .dtStart(new DtStart(vCalendarEvent.getStartDate().toInstant()))
-                            .dtEnd(new DtEnd(vCalendarEvent.getEndDate().toInstant()))
-                            .build()
-                            .event())
-                    .store();
-        } catch (IOException e) {
-            log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
-        } catch (ParserException e) {
-            log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
-        }
         return super.afterCreate(vCalendarEvent);
     }
 
     @Override
-    public AppNextCode initCodeGenerator() {
-        return AppNextCode.builder()
+    public Optional<NextCodeModel> initCodeGenerator() {
+        return Optional.ofNullable(AppNextCode.builder()
                 .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
                 .entity(VCalendarEvent.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
@@ -129,6 +132,6 @@ public class VEventService extends CodifiableService<Long, VCalendarEvent, VEven
                 .valueLength(6L)
                 .value(1L)
                 .increment(1)
-                .build();
+                .build());
     }
 }

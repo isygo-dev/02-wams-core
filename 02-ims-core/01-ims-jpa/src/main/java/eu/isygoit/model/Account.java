@@ -21,10 +21,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * The type Account.
@@ -109,7 +106,7 @@ public class Account extends AccountModel<Long> implements IImageEntity {
      * @return the authorities
      */
     public static Collection<? extends GrantedAuthority> getAuthorities(Account account) {
-        if (account.getRoleInfo() == null) {
+        if (Objects.isNull(account.getRoleInfo())) {
             return Collections.EMPTY_LIST;
         }
 

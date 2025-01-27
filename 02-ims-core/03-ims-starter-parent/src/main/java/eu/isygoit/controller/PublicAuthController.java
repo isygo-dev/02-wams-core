@@ -10,7 +10,6 @@ import eu.isygoit.config.JwtProperties;
 import eu.isygoit.dto.common.SystemInfoDto;
 import eu.isygoit.dto.common.UserContextDto;
 import eu.isygoit.dto.data.DomainDto;
-import eu.isygoit.dto.data.ThemeDto;
 import eu.isygoit.dto.request.AccountAuthTypeRequest;
 import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.dto.request.RegisteredUserDto;
@@ -21,6 +20,8 @@ import eu.isygoit.dto.response.UserContext;
 import eu.isygoit.dto.response.UserDataResponseDto;
 import eu.isygoit.enums.IEnumJwtStorage;
 import eu.isygoit.enums.IEnumWebToken;
+import eu.isygoit.exception.AccountNotFoundException;
+import eu.isygoit.exception.DomainNotFoundException;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.mapper.DomainMapper;
 import eu.isygoit.mapper.RegistredUserMapper;
@@ -111,9 +112,12 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
                         .build());
             }
 
-            Account account = accountService.findByDomainAndUserName(authRequestDto.getDomain(), authRequestDto.getUserName());
-            Domain domain = domainService.findByName(authRequestDto.getDomain());
-            ThemeDto theme = themeMapper.entityToDto(themeService.findThemeByAccountCodeAndDomainCode(account.getCode(), domain.getCode()));
+            Account account = accountService.findByDomainAndUserName(authRequestDto.getDomain(), authRequestDto.getUserName())
+                    .orElseThrow(() -> new AccountNotFoundException("with domain " + authRequestDto.getDomain()
+                            + " and user name " + authRequestDto.getUserName()));
+            Domain domain = domainService.findByName(authRequestDto.getDomain())
+                    .orElseThrow(() -> new DomainNotFoundException("with name " + authRequestDto.getDomain()));
+            //ThemeDto theme = themeMapper.entityToDto(themeService.findThemeByAccountCodeAndDomainCode(account.getCode(), domain.getCode()));
             UserDataResponseDto userDataResponseDto = UserDataResponseDto.builder()
                     .id(account.getId())
                     .userName(account.getCode())
@@ -133,7 +137,7 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
                     .refreshToken(authenticate.getRefreshToken())
                     .authorityToken(authenticate.getAuthorityToken())
                     .userDataResponseDto(userDataResponseDto)
-                    .theme(theme)
+                    //.theme(theme)
                     .systemInfo(SystemInfoDto
                             .builder()
                             .name(appProperties.getApplicationName())
@@ -180,7 +184,8 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     public ResponseEntity<DomainDto> getDomainByName(String domain) {
         log.info("get domain by name {}", domain);
         try {
-            return ResponseFactory.ResponseOk(domainMapper.entityToDto(domainService.findByName(domain)));
+            return ResponseFactory.ResponseOk(domainMapper.entityToDto(domainService.findByName(domain)
+                    .orElseThrow(() -> new DomainNotFoundException("with name " + domain))));
         } catch (Throwable e) {
             log.error("<Error>: get by name : {} ", e);
             return getBackExceptionResponse(e);

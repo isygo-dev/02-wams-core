@@ -30,6 +30,8 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * The type Token service.
@@ -64,7 +66,7 @@ public class TokenService extends JwtService implements ITokenService {
     public TokenDto buildTokenAndSave(String domain, String application, IEnumAppToken.Types tokenType, String subject, Map<String, Object> claims) {
         //Get Token config configured by domain and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(domain, tokenType);
-        if (tokenConfig != null) {
+        if (Objects.nonNull(tokenConfig)) {
             TokenDto token = super.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(domain).toString(),
                     claims,
                     tokenConfig.getIssuer(),
@@ -91,7 +93,7 @@ public class TokenService extends JwtService implements ITokenService {
     public TokenDto buildToken(String domain, String application, IEnumAppToken.Types tokenType, String subject, Map<String, Object> claims) {
         //Get Token config configured by domain and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(domain, tokenType);
-        if (tokenConfig != null) {
+        if (Objects.nonNull(tokenConfig)) {
             TokenDto token = super.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(domain).toString(),
                     claims,
                     tokenConfig.getIssuer(),
@@ -109,7 +111,7 @@ public class TokenService extends JwtService implements ITokenService {
     public boolean isTokenValid(String domain, String application, IEnumAppToken.Types tokenType, String token, String subject) {
         //Get Token config configured by domain and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(domain, tokenType);
-        if (tokenConfig != null) {
+        if (Objects.nonNull(tokenConfig)) {
             //Validate token content
             super.validateToken(token, subject, tokenConfig.getSecretKey());
         } else {
@@ -120,31 +122,37 @@ public class TokenService extends JwtService implements ITokenService {
         //Validate token existance
         String[] userNameArray = subject.split("@");
         //TEMP COMMENTED: AccessToken accessToken = accessTokenService.findByApplicationAndAccountCodeAndTokenAndTokenType(application, userNameArray[0], token, tokenType);
-        AccessToken accessToken = accessTokenService.findByAccountCodeAndTokenAndTokenType(userNameArray[0], token, tokenType);
-        if (accessToken == null) {
-            log.error("Token not found for domain: " + domain + "/" + tokenType.name());
-            throw new TokenInvalidException("Invalid JWT: not found or deprecated");
+        Optional<AccessToken> optional = accessTokenService.findByAccountCodeAndTokenAndTokenType(userNameArray[0], token, tokenType);
+        if (optional.isPresent()) {
+            return true;
         }
-        return true;
+
+        log.error("Token not found for domain: " + domain + "/" + tokenType.name());
+        throw new TokenInvalidException("Invalid JWT: not found or deprecated");
     }
 
     @Override
     public void createForgotPasswordAccessToken(String domain, String application, String accountCode) throws JsonProcessingException {
         //Get the account
-        Account account = domainService.checkAccountIfExists(domain, null, null, accountCode, null, false);
-        if (account == null) {
-            log.error("Account not found for domain/username: " + domain + "/" + accountCode);
-            throw new UserNotFoundException("domain/username: " + domain + "/" + accountCode);
-        }
+        Optional<Account> optional = domainService.checkAccountIfExists(domain, null, null, accountCode, null, false);
+        optional.ifPresentOrElse(account -> {
+                    //Generate reset password token
+                    TokenDto token = this.buildTokenAndSave(domain, application, IEnumAppToken.Types.RSTPWD, accountCode,
+                            Map.of(JwtConstants.JWT_SENDER_DOMAIN, domain,
+                                    JwtConstants.JWT_SENDER_USER, accountCode,
+                                    JwtConstants.JWT_LOG_APP, application));
 
-        //Generate reset password token
-        TokenDto token = this.buildTokenAndSave(domain, application, IEnumAppToken.Types.RSTPWD, accountCode,
-                Map.of(JwtConstants.JWT_SENDER_DOMAIN, domain,
-                        JwtConstants.JWT_SENDER_USER, accountCode,
-                        JwtConstants.JWT_LOG_APP, application));
-
-        //Send reset password email
-        sendForgotPasswordEmail(domain, application, account, token);
+                    //Send reset password email
+                    try {
+                        sendForgotPasswordEmail(domain, application, account, token);
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                () -> {
+                    log.error("Account not found for domain/username: " + domain + "/" + accountCode);
+                    throw new UserNotFoundException("domain/username: " + domain + "/" + accountCode);
+                });
     }
 
     private void sendForgotPasswordEmail(String domain, String application, Account account, TokenDto token) throws JsonProcessingException {

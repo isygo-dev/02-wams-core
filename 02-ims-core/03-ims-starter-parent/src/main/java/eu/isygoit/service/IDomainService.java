@@ -6,6 +6,7 @@ import eu.isygoit.enums.IEnumBinaryStatus;
 import eu.isygoit.model.Domain;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The interface Domain service.
@@ -43,7 +44,7 @@ public interface IDomainService extends ICrudServiceMethod<Long, Domain>, IImage
      * @param name the name
      * @return the long
      */
-    Long findDomainIdbyDomainName(String name);
+    Optional<Long> findDomainIdbyDomainName(String name);
 
     /**
      * Find by name domain.
@@ -51,7 +52,7 @@ public interface IDomainService extends ICrudServiceMethod<Long, Domain>, IImage
      * @param name the name
      * @return the domain
      */
-    Domain findByName(String name);
+    Optional<Domain> findByName(String name);
 
     /**
      * Is enabled boolean.

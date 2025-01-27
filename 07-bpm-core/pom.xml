@@ -10,7 +10,7 @@
 
     <groupId>eu.isygo-it.services</groupId>
     <artifactId>bpm-core</artifactId>
-    <version>WC-1.0.271124-S0916</version>
+    <version>WC-1.0.220125-S0441</version>
 
     <name>bpm-core</name>
     <description>bpm-core</description>
@@ -20,7 +20,7 @@
     <parent>
         <groupId>eu.isygo-it.services</groupId>
         <artifactId>service-core</artifactId>
-        <version>WC-1.0.271124-S0916</version>
+        <version>WC-1.0.220125-S0441</version>
     </parent>
 
     <properties>

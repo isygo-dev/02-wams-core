@@ -5,6 +5,7 @@ import eu.isygoit.model.VCalendar;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * The interface Iv calendar service.
@@ -18,7 +19,7 @@ public interface IVCalendarService extends ICrudServiceMethod<Long, VCalendar> {
      * @param name   the name
      * @return the v calendar
      */
-    VCalendar findByDomainAndName(String domain, String name);
+    Optional<VCalendar> findByDomainAndName(String domain, String name);
 
     /**
      * Download resource.

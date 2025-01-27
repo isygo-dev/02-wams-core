@@ -8,7 +8,8 @@ import lombok.experimental.SuperBuilder;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Property;
 
-import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * The type Calendar builder.
@@ -97,16 +98,16 @@ public class ICalendarBuilder {
      * @return the calendar
      */
     public ICalendar calendar() {
-        if (this.calendar == null) {
+        if (Objects.isNull(this.calendar)) {
             Calendar cal = new Calendar();
-            for (Field field : this.getClass().getDeclaredFields()) {
+            Arrays.stream(this.getClass().getDeclaredFields()).forEach(field -> {
                 if (Property.class.isAssignableFrom(field.getType())) {
                     Property fieldValue = BeanHelper.callGetter(this, field.getName());
-                    if (fieldValue != null) {
+                    if (Objects.nonNull(fieldValue)) {
                         cal.withProperty(fieldValue);
                     }
                 }
-            }
+            });
 
             this.calendar = ICalendar.builder()
                     .icsPath(this.icsPath)

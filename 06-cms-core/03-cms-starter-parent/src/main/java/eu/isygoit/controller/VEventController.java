@@ -9,11 +9,9 @@ import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.VCalendarEventDto;
 import eu.isygoit.exception.CalendarNotFoundException;
 import eu.isygoit.exception.handler.CmsExceptionHandler;
-import eu.isygoit.jasycal.ICalendar;
 import eu.isygoit.jasycal.ICalendarBuilder;
 import eu.isygoit.jasycal.IEvent;
 import eu.isygoit.mapper.VCalendarEventMapper;
-import eu.isygoit.model.VCalendar;
 import eu.isygoit.model.VCalendarEvent;
 import eu.isygoit.service.impl.VCalendarService;
 import eu.isygoit.service.impl.VEventService;
@@ -46,62 +44,59 @@ public class VEventController extends MappedCrudController<Long, VCalendarEvent,
 
     @Override
     public VCalendarEventDto beforeUpdate(Long id, VCalendarEventDto eventDto) {
-        VCalendarEvent event = this.crudService().findById(id);
-        if (event != null) {
-            VCalendar vCalendar = calendarService.findByDomainAndName(event.getDomain(), event.getCalendar());
-            if (vCalendar == null) {
-                throw new CalendarNotFoundException("with domain/name : " + event.getDomain() + "/" + event.getCalendar());
-            }
+        this.crudService().findById(id).ifPresent(event -> {
+            calendarService.findByDomainAndName(event.getDomain(), event.getCalendar())
+                    .ifPresentOrElse(vCalendar -> {
+                                try {
+                                    ICalendarBuilder.builder()
+                                            .icsPath(vCalendar.getIcsPath())
+                                            .build()
+                                            .calendar()
+                                            .load()
+                                            .updateEvent(IEvent.builder()
+                                                    .uid(new Uid(eventDto.getId().toString()))
+                                                    .name(new Name(eventDto.getName()))
+                                                    .description(new Description(eventDto.getName()))
+                                                    .summary(new Summary(eventDto.getName()))
+                                                    .dtStart(new DtStart(eventDto.getStartDate().toInstant()))
+                                                    .dtEnd(new DtEnd(eventDto.getEndDate().toInstant()))
+                                                    .build()
+                                                    .event())
+                                            .store();
+                                } catch (IOException e) {
+                                    log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
+                                } catch (ParserException e) {
+                                    log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
+                                }
+                            },
+                            () -> new CalendarNotFoundException("with domain/name : " + event.getDomain() + "/" + event.getCalendar()));
+        });
 
-            try {
-                ICalendar calendar = ICalendarBuilder.builder()
-                        .icsPath(vCalendar.getIcsPath())
-                        .build()
-                        .calendar()
-                        .load()
-                        .updateEvent(IEvent.builder()
-                                .uid(new Uid(eventDto.getId().toString()))
-                                .name(new Name(eventDto.getName()))
-                                .description(new Description(eventDto.getName()))
-                                .summary(new Summary(eventDto.getName()))
-                                .dtStart(new DtStart(eventDto.getStartDate().toInstant()))
-                                .dtEnd(new DtEnd(eventDto.getEndDate().toInstant()))
-                                .build()
-                                .event())
-                        .store();
-            } catch (IOException e) {
-                log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
-            } catch (ParserException e) {
-                log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
-            }
-        }
         return eventDto;
     }
 
     @Override
     public boolean beforeDelete(Long id) {
-        VCalendarEvent event = this.crudService().findById(id);
-        if (event != null) {
-            VCalendar vCalendar = calendarService.findByDomainAndName(event.getDomain(), event.getCalendar());
-            if (vCalendar == null) {
-                throw new CalendarNotFoundException("with domain/name : " + event.getDomain() + "/" + event.getCalendar());
-            }
+        this.crudService().findById(id).ifPresent(event -> {
+            calendarService.findByDomainAndName(event.getDomain(), event.getCalendar())
+                    .ifPresentOrElse(vCalendar -> {
+                                try {
+                                    ICalendarBuilder.builder()
+                                            .icsPath(vCalendar.getIcsPath())
+                                            .build()
+                                            .calendar()
+                                            .load()
+                                            .remove(new Uid(id.toString()))
+                                            .store();
+                                } catch (IOException e) {
+                                    log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
+                                } catch (ParserException e) {
+                                    log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
+                                }
+                            },
+                            () -> new CalendarNotFoundException("with domain/name : " + event.getDomain() + "/" + event.getCalendar()));
 
-
-            try {
-                ICalendar calendar = ICalendarBuilder.builder()
-                        .icsPath(vCalendar.getIcsPath())
-                        .build()
-                        .calendar()
-                        .load()
-                        .remove(new Uid(id.toString()))
-                        .store();
-            } catch (IOException e) {
-                log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
-            } catch (ParserException e) {
-                log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
-            }
-        }
+        });
 
         return true;
     }

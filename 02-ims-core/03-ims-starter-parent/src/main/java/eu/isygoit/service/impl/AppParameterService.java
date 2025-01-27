@@ -4,6 +4,7 @@ import eu.isygoit.annotation.SrvRepo;
 import eu.isygoit.com.rest.service.impl.CrudService;
 import eu.isygoit.constants.AppParameterConstants;
 import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.exception.DomainNotFoundException;
 import eu.isygoit.exception.ObjectNotFoundException;
 import eu.isygoit.model.AppParameter;
 import eu.isygoit.repository.AppParameterRepository;
@@ -50,7 +51,7 @@ public class AppParameterService extends CrudService<Long, AppParameter, AppPara
     }
 
     @Override
-    public AppParameter findById(Long id) throws ObjectNotFoundException {
+    public Optional<AppParameter> findById(Long id) throws ObjectNotFoundException {
         return super.findById(id);
     }
 
@@ -94,7 +95,9 @@ public class AppParameterService extends CrudService<Long, AppParameter, AppPara
                 false,
                 "NA");
         if (!StringUtils.hasText(techAdminEmail)) {
-            techAdminEmail = domainService.findByName(DomainConstants.SUPER_DOMAIN_NAME).getEmail();
+            techAdminEmail = domainService.findByName(DomainConstants.SUPER_DOMAIN_NAME)
+                    .orElseThrow(() -> new DomainNotFoundException("with name " + DomainConstants.SUPER_DOMAIN_NAME))
+                    .getEmail();
         }
         return techAdminEmail;
     }

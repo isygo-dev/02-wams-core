@@ -87,7 +87,7 @@ public class WsChannelInterceptor implements ChannelInterceptor {
         StompHeaderAccessor stompHeaderAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         //get header variables
         Object sessionIdObject = stompHeaderAccessor.getHeader("simpSessionId");
-        if (sessionIdObject == null) {
+        if (Objects.isNull(sessionIdObject)) {
             throw new SessionAuthenticationException("sessionId not provided");
         }
         String sessionId = (String) sessionIdObject;

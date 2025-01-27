@@ -6,6 +6,7 @@ import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.dto.data.DomainDto;
+import eu.isygoit.exception.DomainNotFoundException;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.mapper.DomainMapper;
 import eu.isygoit.service.IDomainService;
@@ -46,7 +47,8 @@ public class PublicController extends ControllerExceptionHandler implements Publ
     public ResponseEntity<DomainDto> getDomainByName(String domain) {
         log.info("get domain by name {}", domain);
         try {
-            return ResponseFactory.ResponseOk(domainMapper.entityToDto(domainService.findByName(domain)));
+            return ResponseFactory.ResponseOk(domainMapper.entityToDto(domainService.findByName(domain)
+                    .orElseThrow(() -> new DomainNotFoundException("with domain " + domain))));
         } catch (Throwable e) {
             log.error("<Error>: get by name : {} ", e);
             return getBackExceptionResponse(e);

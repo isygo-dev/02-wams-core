@@ -21,6 +21,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Objects;
 import java.util.UUID;
 
 
@@ -48,7 +49,7 @@ public class MailMessageController extends MappedCrudController<UUID, MailMessag
 
     public ResponseEntity<?> sendMail(String senderDomainName, IEnumMsgTemplateName.Types template, MailMessageDto mailMessage) {
         try {
-            if (template != null) {
+            if (Objects.nonNull(template)) {
                 String body = templateService.composeMessageBody(senderDomainName, template,
                         mailMessage.getVariablesAsMap(mailMessage.getVariables()));
                 mailMessage.setBody(body);

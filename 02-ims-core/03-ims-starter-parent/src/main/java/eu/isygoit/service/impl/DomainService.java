@@ -10,6 +10,7 @@ import eu.isygoit.enums.IEnumBinaryStatus;
 import eu.isygoit.exception.DomainNotFoundException;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.model.Domain;
+import eu.isygoit.model.extendable.NextCodeModel;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.remote.kms.KmsIncrementalKeyService;
 import eu.isygoit.repository.DomainRepository;
@@ -68,21 +69,17 @@ public class DomainService extends ImageService<Long, Domain, DomainRepository> 
     }
 
     @Override
-    public Long findDomainIdbyDomainName(String name) {
-        Optional<Domain> domain = repository().findByNameIgnoreCase(name);
-        if (domain.isPresent()) {
-            return domain.get().getId();
+    public Optional<Long> findDomainIdbyDomainName(String name) {
+        Optional<Domain> optional = repository().findByNameIgnoreCase(name);
+        if (optional.isPresent()) {
+            return Optional.ofNullable(optional.get().getId());
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Domain findByName(String name) {
-        Optional<Domain> optional = repository().findByNameIgnoreCase(name);
-        if (optional.isPresent()) {
-            return optional.get();
-        }
-        return null;
+    public Optional<Domain> findByName(String name) {
+        return repository().findByNameIgnoreCase(name);
     }
 
     @Override
@@ -117,8 +114,8 @@ public class DomainService extends ImageService<Long, Domain, DomainRepository> 
     }
 
     @Override
-    public AppNextCode initCodeGenerator() {
-        return AppNextCode.builder()
+    public Optional<NextCodeModel> initCodeGenerator() {
+        return Optional.ofNullable(AppNextCode.builder()
                 .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
                 .entity(Domain.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
@@ -126,7 +123,7 @@ public class DomainService extends ImageService<Long, Domain, DomainRepository> 
                 .valueLength(6L)
                 .value(1L)
                 .increment(1)
-                .build();
+                .build());
     }
 
     @Override

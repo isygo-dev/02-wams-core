@@ -29,62 +29,56 @@ public class DomainService extends CrudService<Long, KmsDomain, DomainRepository
     private AccountRepository accountRepository;
 
     @Override
-    public KmsDomain checkDomainIfExists(String domainName, String domainUrl, boolean createIfNotExists) {
+    public Optional<KmsDomain> checkDomainIfExists(String domainName, String domainUrl, boolean createIfNotExists) {
         Optional<KmsDomain> optional = repository().findByNameIgnoreCase(domainName);
         if (optional.isPresent()) {
-            return optional.get();
+            return optional;
         } else if (createIfNotExists) {
             //Create the domain if not exists
-            return this.create(KmsDomain.builder()
+            return Optional.ofNullable(this.create(KmsDomain.builder()
                     .name(domainName)
                     .url(domainUrl)
                     .description(domainName)
-                    .build());
+                    .build()));
         }
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public KmsDomain findByNameIgnoreCase(String domainName) {
-        Optional<KmsDomain> optional = repository().findByNameIgnoreCase(domainName);
-        if (optional.isPresent()) {
-            return optional.get();
-        }
-
-        return null;
+    public Optional<KmsDomain> findByNameIgnoreCase(String domainName) {
+        return repository().findByNameIgnoreCase(domainName);
     }
 
     @Override
-    public Account checkAccountIfExists(String domainName, String domainUrl, String email, String userName, String fullName, boolean createIfNotExists) {
+    public Optional<Account> checkAccountIfExists(String domainName, String domainUrl, String email, String userName, String fullName, boolean createIfNotExists) {
         //Check domain if exists
-        KmsDomain kmsDomain = this.checkDomainIfExists(domainName, domainUrl, createIfNotExists);
-        if (kmsDomain == null) {
-            return null;
-        }
-
-        //Check account if exists
-        Optional<Account> optional = accountRepository.findByDomainIgnoreCaseAndCodeIgnoreCase(domainName, userName);
+        Optional<KmsDomain> optional = this.checkDomainIfExists(domainName, domainUrl, createIfNotExists);
         if (optional.isPresent()) {
-            //Update account email if changed
-            Account account = optional.get();
-            if (StringUtils.hasText(email) && !account.getEmail().equals(email)) {
-                account.setEmail(email);
-                accountRepository.save(account);
+            //Check account if exists
+            Optional<Account> optionalAccount = accountRepository.findByDomainIgnoreCaseAndCodeIgnoreCase(domainName, userName);
+            if (optionalAccount.isPresent()) {
+                //Update account email if changed
+                Account account = optionalAccount.get();
+                if (StringUtils.hasText(email) && !account.getEmail().equals(email)) {
+                    account.setEmail(email);
+                    accountRepository.save(account);
+                }
+                return Optional.ofNullable(account);
             }
-            return account;
+
+            //Create the account if not exists
+            if (createIfNotExists) {
+                return Optional.ofNullable(accountRepository.save(Account.builder()
+                        .code(userName)
+                        .email(email)
+                        .domain(domainName)
+                        .fullName(fullName)
+                        .build()));
+            }
         }
 
-        //Create the account if not exists
-        if (createIfNotExists) {
-            return accountRepository.save(Account.builder()
-                    .code(userName)
-                    .email(email)
-                    .domain(domainName)
-                    .fullName(fullName)
-                    .build());
-        }
-        return null;
+        return Optional.empty();
     }
 
     @Override

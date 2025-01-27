@@ -111,9 +111,12 @@ public class LinkedFileService extends CodifiableService<Long, LinkedFile, Linke
             });
         }
 
-        if (!StringUtils.hasText(linkedFileRequestDto.getCode())) {
-            linkedFileRequestDto.setCode(this.getNextCode());
-        }
+        this.getNextCode().ifPresent(code -> {
+            if (!StringUtils.hasText(linkedFileRequestDto.getCode())) {
+                linkedFileRequestDto.setCode(code);
+            }
+        });
+
 
         if (appProperties.getLocalStorageActive()) {
             log.info("Local file system enabled domain:{}, file:{} , tags:{}",
@@ -226,20 +229,22 @@ public class LinkedFileService extends CodifiableService<Long, LinkedFile, Linke
             log.info(linkedFile.get().getPath());
             if (appProperties.getLocalStorageActive()) {
                 if (StringUtils.hasText(linkedFile.get().getPath())) {
-                    Resource resource = new UrlResource(Path.of(appProperties.getUploadDirectory() +
+                    Path path = Path.of(appProperties.getUploadDirectory() +
                             File.separator + domain +
                             File.separator + linkedFile.get().getPath() +
-                            File.separator + linkedFile.get().getCode() + '.' + linkedFile.get().getExtension()).toUri());
+                            File.separator + linkedFile.get().getCode() + '.' + linkedFile.get().getExtension());
+                    Resource resource = new UrlResource(path.toUri());
                     if (!resource.exists()) {
-                        throw new ResourceNotFoundException("with domain:" + domain + "/code:" + code);
+                        throw new ResourceNotFoundException(path.toUri().getPath());
                     }
                     return resource;
                 } else {
-                    Resource resource = new UrlResource(Path.of(appProperties.getUploadDirectory()
+                    Path path = Path.of(appProperties.getUploadDirectory()
                             + File.separator + domain
-                            + File.separator + linkedFile.get().getCode() + '.' + linkedFile.get().getExtension()).toUri());
+                            + File.separator + linkedFile.get().getCode() + '.' + linkedFile.get().getExtension());
+                    Resource resource = new UrlResource(path.toUri());
                     if (!resource.exists()) {
-                        throw new ResourceNotFoundException("with domain:" + domain + "/code:" + code);
+                        throw new ResourceNotFoundException(path.toUri().getPath());
                     }
                     return resource;
                 }
@@ -255,7 +260,10 @@ public class LinkedFileService extends CodifiableService<Long, LinkedFile, Linke
                 if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
                     return result.getBody();
                 } else {
-                    return null;
+                    Path path = Path.of(appProperties.getUploadDirectory()
+                            + File.separator + domain
+                            + File.separator + linkedFile.get().getCode() + '.' + linkedFile.get().getExtension());
+                    throw new ResourceNotFoundException(path.toUri().getPath());
                 }
             }
         }
@@ -271,8 +279,8 @@ public class LinkedFileService extends CodifiableService<Long, LinkedFile, Linke
     }
 
     @Override
-    public NextCodeModel initCodeGenerator() {
-        return AppNextCode.builder()
+    public Optional<NextCodeModel> initCodeGenerator() {
+        return Optional.ofNullable(AppNextCode.builder()
                 .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
                 .entity(LinkedFile.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
@@ -280,6 +288,6 @@ public class LinkedFileService extends CodifiableService<Long, LinkedFile, Linke
                 .valueLength(6L)
                 .value(1L)
                 .increment(1)
-                .build();
+                .build());
     }
 }

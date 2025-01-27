@@ -2,6 +2,7 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
 import eu.isygoit.api.AnnexControllerApi;
+import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
 import eu.isygoit.dto.common.RequestContextDto;
@@ -13,7 +14,6 @@ import eu.isygoit.service.IAnnexService;
 import eu.isygoit.service.impl.AnnexService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
@@ -43,9 +43,9 @@ public class AnnexController extends MappedCrudController<Long, Annex, AnnexDto,
         try {
             List<AnnexDto> list = mapper().listEntityToDto(annexService.findAnnexByTableCode(code));
             if (!CollectionUtils.isEmpty(list)) {
-                return new ResponseEntity<>(list, HttpStatus.OK);
+                return ResponseFactory.ResponseOk(list);
             } else {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                return ResponseFactory.ResponseNoContent();
             }
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -58,9 +58,9 @@ public class AnnexController extends MappedCrudController<Long, Annex, AnnexDto,
         try {
             List<AnnexDto> list = mapper().listEntityToDto(annexService.findAnnexByTableCodeAndRef(code, reference));
             if (!CollectionUtils.isEmpty(list)) {
-                return new ResponseEntity<>(list, HttpStatus.OK);
+                return ResponseFactory.ResponseOk(list);
             } else {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                return ResponseFactory.ResponseNoContent();
             }
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
