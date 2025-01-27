@@ -107,7 +107,7 @@ public class Account extends AccountModel<Long> implements IImageEntity {
      */
     public static Collection<? extends GrantedAuthority> getAuthorities(Account account) {
         if (Objects.isNull(account.getRoleInfo())) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
 
         return account.getRoleInfo().stream()

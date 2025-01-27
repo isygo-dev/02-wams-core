@@ -122,7 +122,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
             return optional.get().getRoleInfo().stream().flatMap(roleInfo -> roleInfo.getAllowedTools().stream())
                     .distinct().toList();
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     @Override
@@ -307,7 +307,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
                             .functionRole(account.getFunctionRole())
                             .build();
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -374,7 +374,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     public List<Account> chatAccountsByDomain(String domain) {
         List<Account> list = repository().findByDomainIgnoreCaseIn(Arrays.asList(domain, DomainConstants.SUPER_DOMAIN_NAME));
         if (CollectionUtils.isEmpty(list)) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         try {
             ResponseEntity<List<WsConnectDto>> result = mmsChatMessageService.getChatStatus(RequestContextDto.builder().build(),

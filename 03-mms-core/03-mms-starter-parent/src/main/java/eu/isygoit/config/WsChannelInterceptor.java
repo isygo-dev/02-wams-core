@@ -54,7 +54,7 @@ public class WsChannelInterceptor implements ChannelInterceptor {
         if (!CollectionUtils.isEmpty(connectedUsers)) {
             return connectedUsers.values().stream().filter(wsConnectDto -> wsConnectDto.getGroupId().equals(domainId)).toList();
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     /**

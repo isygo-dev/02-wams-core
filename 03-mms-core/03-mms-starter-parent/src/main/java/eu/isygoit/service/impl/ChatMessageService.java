@@ -57,12 +57,12 @@ public class ChatMessageService extends CrudService<Long, ChatMessage, ChatMessa
                                     .read(chats.get(0).getRead())
                                     .chatStatus(WsChannelInterceptor.getStatus(userId))
                                     .build()
-                    ).collect(Collectors.toList());
+                    ).toList();
 
             chatMessages.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
             return chatMessages;
         }
 
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 }
