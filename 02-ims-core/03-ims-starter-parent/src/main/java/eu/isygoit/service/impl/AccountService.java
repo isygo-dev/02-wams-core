@@ -120,7 +120,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
         Optional<Account> optional = findByDomainAndUserName(domain, userName);
         if (optional.isPresent() && !CollectionUtils.isEmpty(optional.get().getRoleInfo())) {
             return optional.get().getRoleInfo().stream().flatMap(roleInfo -> roleInfo.getAllowedTools().stream())
-                    .distinct().toList();
+                    .distinct().collect(Collectors.toUnmodifiableList());
         }
         return Collections.emptyList();
     }
@@ -147,7 +147,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     public List<ApplicationDto> buildAllowedTools(Account account, String token) {
         List<Application> applications = account.getRoleInfo().stream()
                 .flatMap(roleInfo -> roleInfo.getAllowedTools().stream())
-                .distinct().toList();
+                .distinct().collect(Collectors.toUnmodifiableList());
 
         //Add param to load disabled applications
         String hideDisabledApp = parameterService.getValueByDomainAndName(account.getDomain(),
@@ -173,7 +173,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
                                                 JwtConstants.JWT_LOG_APP, application.getName()))
                                         .build()).getBody());
                         return app;
-                    }).toList();
+                    }).collect(Collectors.toUnmodifiableList());
         } else {
             return applications.stream()//.filter(application -> IEnumBinaryStatus.Types.ENABLED == application.getAdminStatus())
                     .distinct().
@@ -191,7 +191,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
                                                 JwtConstants.JWT_LOG_APP, application.getName()))
                                         .build()).getBody());
                         return app;
-                    }).toList();
+                    }).collect(Collectors.toUnmodifiableList());
         }
     }
 
@@ -307,7 +307,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
                             .functionRole(account.getFunctionRole())
                             .build();
                 })
-                .toList();
+                .collect(Collectors.toUnmodifiableList());
     }
 
     @Override

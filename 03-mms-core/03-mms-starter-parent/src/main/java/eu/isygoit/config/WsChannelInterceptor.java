@@ -27,6 +27,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The type Ws channel interceptor.
@@ -52,7 +53,7 @@ public class WsChannelInterceptor implements ChannelInterceptor {
      */
     public static List<WsConnectDto> getConnectionsByDomain(Long domainId) {
         if (!CollectionUtils.isEmpty(connectedUsers)) {
-            return connectedUsers.values().stream().filter(wsConnectDto -> wsConnectDto.getGroupId().equals(domainId)).toList();
+            return connectedUsers.values().stream().filter(wsConnectDto -> wsConnectDto.getGroupId().equals(domainId)).collect(Collectors.toUnmodifiableList());
         }
         return Collections.emptyList();
     }

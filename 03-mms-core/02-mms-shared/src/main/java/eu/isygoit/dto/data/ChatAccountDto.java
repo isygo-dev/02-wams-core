@@ -17,7 +17,6 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-
 public class ChatAccountDto extends AbstractAuditableDto<Long> {
 
     private Long receiverId;

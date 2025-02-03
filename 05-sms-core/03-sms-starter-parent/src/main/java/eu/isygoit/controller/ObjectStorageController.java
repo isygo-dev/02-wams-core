@@ -140,7 +140,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
         log.info("getObjectByTags request received");
         try {
             Map<String, String> tagMap = null;
-            List<String> tagList = Arrays.stream(tags.split("[,:]")).toList();
+            List<String> tagList = Arrays.stream(tags.split("[,:]")).collect(Collectors.toUnmodifiableList());
             if (!CollectionUtils.isEmpty(tagList)) {
                 tagMap = tagList.stream().distinct()
                         .collect(Collectors.toMap(s -> s, s -> s));
@@ -189,7 +189,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
         log.info("deleteObjects request received");
         try {
             List<DeleteObject> objectsMap = new LinkedList<>();
-            List<String> objectsList = Arrays.stream(files.split("[,:]")).toList();
+            List<String> objectsList = Arrays.stream(files.split("[,:]")).collect(Collectors.toUnmodifiableList());
             if (!CollectionUtils.isEmpty(objectsList)) {
                 objectsList.forEach(d -> {
                     objectsMap.add(new DeleteObject(d));

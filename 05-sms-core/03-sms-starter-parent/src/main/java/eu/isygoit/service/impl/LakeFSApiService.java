@@ -173,7 +173,7 @@ public class LakeFSApiService implements ILakeFSApiService {
                 return fileStorage;
             }
             return null;
-        }).toList();
+        }).collect(Collectors.toUnmodifiableList());
     }
 
     public List<FileStorage> getObjects(StorageConfig config, String bucketName) {
@@ -196,7 +196,7 @@ public class LakeFSApiService implements ILakeFSApiService {
                         log.error("<Error>: Happened error when get list objects from minio: {} ", e);
                         throw new MinIoObjectException(e);
                     }
-                }).toList();
+                }).collect(Collectors.toUnmodifiableList());
     }
 
     public void updateTags(StorageConfig config, String bucketName, String objectName, Map<String, String> tags) {
@@ -250,7 +250,7 @@ public class LakeFSApiService implements ILakeFSApiService {
             return minioClientConnection.listBuckets().stream().map(b -> BucketDto.builder()
                     .name(b.name())
                     .creationDate(b.creationDate().toLocalDateTime())
-                    .build()).toList();
+                    .build()).collect(Collectors.toUnmodifiableList());
         } catch (Throwable e) {
             log.error("<Error>: Happened error when removing file: {} ", e);
             throw new MinIoObjectException(e);

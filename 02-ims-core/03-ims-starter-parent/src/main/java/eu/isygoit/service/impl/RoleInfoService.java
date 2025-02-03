@@ -26,6 +26,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * The type Role info service.
@@ -94,7 +95,7 @@ public class RoleInfoService extends CodifiableService<Long, RoleInfo, RoleInfoR
             RoleInfo senderRole = optional.get().getRoleInfo().parallelStream()
                     .min(Comparator.comparing(RoleInfo::getLevel))
                     .get();
-            List<RoleInfoDto> filtered = list.stream().filter(roleInfo -> roleInfo.getLevel() >= senderRole.getLevel()).toList();
+            List<RoleInfoDto> filtered = list.stream().filter(roleInfo -> roleInfo.getLevel() >= senderRole.getLevel()).collect(Collectors.toUnmodifiableList());
             return filtered;
         }
 

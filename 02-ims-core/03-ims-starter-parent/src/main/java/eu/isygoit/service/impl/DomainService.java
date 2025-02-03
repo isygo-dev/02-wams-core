@@ -47,7 +47,7 @@ public class DomainService extends ImageService<Long, Domain, DomainRepository> 
     @Override
     public List<String> getAllDomainNames(String domain) {
         if (DomainConstants.SUPER_DOMAIN_NAME.equals(domain)) {
-            return repository().getAllNames(); //.findAll().stream().map(domain -> domain.getName()).toList();
+            return repository().getAllNames(); //.findAll().stream().map(domain -> domain.getName()).collect(Collectors.toUnmodifiableList());
         }
 
         return Arrays.asList(domain);

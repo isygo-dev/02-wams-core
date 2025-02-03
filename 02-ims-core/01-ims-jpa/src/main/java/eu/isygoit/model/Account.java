@@ -22,6 +22,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The type Account.
@@ -114,7 +115,7 @@ public class Account extends AccountModel<Long> implements IImageEntity {
                 .flatMap(roleInfo -> roleInfo.getPermissions().stream()
                         .map(ApiPermission::getRole)
                         .map(SimpleGrantedAuthority::new)).distinct()
-                .toList();
+                .collect(Collectors.toUnmodifiableList());
     }
 
     /**

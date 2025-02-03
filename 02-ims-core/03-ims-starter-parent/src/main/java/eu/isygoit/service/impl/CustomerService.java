@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * The type Customer service.
@@ -64,7 +65,7 @@ public class CustomerService extends ImageService<Long, Customer, CustomerReposi
 
     @Override
     public List<String> getNames() {
-        return repository().findAll().stream().map(customer -> customer.getName()).toList();
+        return repository().findAll().stream().map(customer -> customer.getName()).collect(Collectors.toUnmodifiableList());
     }
 
     @Override
