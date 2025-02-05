@@ -15,22 +15,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-/**
- * The type Key service.
- */
 @Slf4j
 @Service
 @Transactional
 public class KeyService implements IKeyService {
 
-    @Autowired
-    private AppNextCodeRepository appNextCodeRepository;
+    private final AppNextCodeRepository appNextCodeRepository;
+    private final RandomKeyGenerator randomKeyGenerator;
+    private final RandomKeyRepository randomKeyRepository;
 
     @Autowired
-    private RandomKeyGenerator randomKeyGenerator;
-
-    @Autowired
-    private RandomKeyRepository randomKeyRepository;
+    public KeyService(AppNextCodeRepository appNextCodeRepository, RandomKeyGenerator randomKeyGenerator, RandomKeyRepository randomKeyRepository) {
+        this.appNextCodeRepository = appNextCodeRepository;
+        this.randomKeyGenerator = randomKeyGenerator;
+        this.randomKeyRepository = randomKeyRepository;
+    }
 
     @Override
     public String getRandomKey(int length, IEnumCharSet.Types charSetType) {
@@ -44,50 +43,43 @@ public class KeyService implements IKeyService {
 
     @Override
     public void subscribeIncrementalKeyGenerator(AppNextCode appNextCode) {
-        Optional<AppNextCode> optional = appNextCodeRepository.findByDomainIgnoreCaseAndEntityAndAttribute(appNextCode.getDomain()
-                , appNextCode.getEntity(), appNextCode.getAttribute());
-        if (!optional.isPresent()) {
-            appNextCodeRepository.save(appNextCode);
-        } else {
-            log.warn("Incremental key is already defined: {}", appNextCode);
-        }
+        appNextCodeRepository.findByDomainIgnoreCaseAndEntityAndAttribute(appNextCode.getDomain(), appNextCode.getEntity(), appNextCode.getAttribute())
+                .ifPresentOrElse(
+                        existingCode -> log.warn("Incremental key is already defined: {}", appNextCode),
+                        () -> appNextCodeRepository.save(appNextCode)
+                );
     }
 
     @Override
     public String getIncrementalKey(String domain, String entityName, String attribute) throws IncrementalConfigNotFoundException {
-        AppNextCode appNextCode = null;
-        Optional<AppNextCode> optional = appNextCodeRepository.findByDomainIgnoreCaseAndEntityAndAttribute(domain, entityName, attribute);
-        if (optional.isPresent()) {
-            appNextCode = optional.get();
-        } else {
-            Optional<AppNextCode> defaultOptional = appNextCodeRepository.findByDomainIgnoreCaseAndEntityAndAttribute(DomainConstants.DEFAULT_DOMAIN_NAME, entityName, attribute);
-            if (defaultOptional.isPresent()) {
-                appNextCode = defaultOptional.get();
-                appNextCode.setId(null);
-                appNextCode.setDomain(domain);
-                appNextCode.setValue(0L);
-                appNextCode = appNextCodeRepository.save(appNextCode);
-            } else {
-                throw new IncrementalConfigNotFoundException("with domain/entity/attribute " + domain + "/" + entityName + "/" + attribute);
-            }
-        }
+        AppNextCode appNextCode = appNextCodeRepository.findByDomainIgnoreCaseAndEntityAndAttribute(domain, entityName, attribute)
+                .orElseGet(() -> appNextCodeRepository.findByDomainIgnoreCaseAndEntityAndAttribute(DomainConstants.DEFAULT_DOMAIN_NAME, entityName, attribute)
+                        .map(defaultCode -> {
+                            defaultCode.setId(null);
+                            defaultCode.setDomain(domain);
+                            defaultCode.setValue(0L);
+                            return appNextCodeRepository.save(defaultCode);
+                        })
+                        .orElseThrow(() -> new IncrementalConfigNotFoundException("with domain/entity/attribute " + domain + "/" + entityName + "/" + attribute))
+                );
+
         appNextCodeRepository.increment(domain, entityName, appNextCode.getIncrement());
         return appNextCode.getCode();
     }
 
     @Override
     public RandomKey createOrUpdateKeyByName(String domain, String name, String value) {
-        Optional<RandomKey> optional = randomKeyRepository.findByDomainIgnoreCaseAndName(domain, name);
-        if (optional.isPresent()) {
-            optional.get().setValue(value);
-            return randomKeyRepository.save(optional.get());
-        } else {
-            return randomKeyRepository.save(RandomKey.builder()
-                    .domain(domain)
-                    .name(name)
-                    .value(value)
-                    .build());
-        }
+        return randomKeyRepository.findByDomainIgnoreCaseAndName(domain, name)
+                .map(existingKey -> {
+                    existingKey.setValue(value);
+                    return randomKeyRepository.save(existingKey);
+                })
+                .orElseGet(() -> randomKeyRepository.save(RandomKey.builder()
+                        .domain(domain)
+                        .name(name)
+                        .value(value)
+                        .build())
+                );
     }
 
     @Override

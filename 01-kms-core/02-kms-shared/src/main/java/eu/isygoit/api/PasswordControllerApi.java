@@ -22,10 +22,11 @@ import org.springframework.web.bind.annotation.*;
  */
 public interface PasswordControllerApi {
 
+
     /**
      * Generate response entity.
      *
-     * @param type               the type
+     * @param authType           the auth type
      * @param generatePwdRequest the generate pwd request
      * @return the response entity
      */
@@ -168,6 +169,6 @@ public interface PasswordControllerApi {
                             schema = @Schema(implementation = Boolean.class))})
     })
     @PostMapping(path = "/account")
-    ResponseEntity<Boolean> updateAccount(//@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                          @Valid @RequestBody UpdateAccountRequestDto account);
+    ResponseEntity<UpdateAccountRequestDto> updateAccount(//@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+                                             @Valid @RequestBody UpdateAccountRequestDto account);
 }

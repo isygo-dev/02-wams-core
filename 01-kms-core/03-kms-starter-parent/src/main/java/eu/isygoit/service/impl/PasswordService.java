@@ -42,34 +42,35 @@ public class PasswordService implements IPasswordService {
 
     private final AppProperties appProperties;
 
-    @Autowired
-    private PasswordConfigRepository passwordConfigRepository;
-    @Autowired
-    private IDomainService domainService;
-    @Autowired
-    private PasswordInfoRepository passwordInfoRepository;
-    @Autowired
-    private RandomKeyGenerator randomKeyGenerator;
-    @Autowired
-    private ICryptoService cryptoService;
-    @Autowired
-    private IJwtService jwtService;
-    @Autowired
-    private ITokenConfigService tokenConfigService;
-    @Autowired
-    private IAccessTokenService accessTokenService;
-    @Autowired
-    private IMsgService msgService;
-    @Autowired
-    private ImsAppParameterService imsAppParameterService;
+    private final PasswordConfigRepository passwordConfigRepository;
+    private final IDomainService domainService;
+    private final PasswordInfoRepository passwordInfoRepository;
+    private final RandomKeyGenerator randomKeyGenerator;
+    private final ICryptoService cryptoService;
+    private final IJwtService jwtService;
+    private final ITokenConfigService tokenConfigService;
+    private final IAccessTokenService accessTokenService;
+    private final IMsgService msgService;
+    private final ImsAppParameterService imsAppParameterService;
 
     /**
      * Instantiates a new Password service.
      *
      * @param appProperties the app properties
      */
-    public PasswordService(AppProperties appProperties) {
+    @Autowired
+    public PasswordService(AppProperties appProperties, PasswordConfigRepository passwordConfigRepository, IDomainService domainService, PasswordInfoRepository passwordInfoRepository, RandomKeyGenerator randomKeyGenerator, ICryptoService cryptoService, IJwtService jwtService, ITokenConfigService tokenConfigService, IAccessTokenService accessTokenService, IMsgService msgService, ImsAppParameterService imsAppParameterService) {
         this.appProperties = appProperties;
+        this.passwordConfigRepository = passwordConfigRepository;
+        this.domainService = domainService;
+        this.passwordInfoRepository = passwordInfoRepository;
+        this.randomKeyGenerator = randomKeyGenerator;
+        this.cryptoService = cryptoService;
+        this.jwtService = jwtService;
+        this.tokenConfigService = tokenConfigService;
+        this.accessTokenService = accessTokenService;
+        this.msgService = msgService;
+        this.imsAppParameterService = imsAppParameterService;
     }
 
     @Override

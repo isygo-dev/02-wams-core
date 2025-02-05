@@ -7,6 +7,7 @@ import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
+import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.response.AccessKeyResponseDto;
 import eu.isygoit.dto.response.AccessTokenResponseDto;
@@ -18,6 +19,7 @@ import eu.isygoit.exception.AccountAuthenticationException;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.jwt.IJwtService;
 import eu.isygoit.mapper.AccountMapper;
+import eu.isygoit.model.Account;
 import eu.isygoit.model.TokenConfig;
 import eu.isygoit.service.*;
 import lombok.extern.slf4j.Slf4j;
@@ -213,12 +215,16 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     }
 
     @Override
-    public ResponseEntity<Boolean> updateAccount(//RequestContextDto requestContext,
-                                                 UpdateAccountRequestDto account) {
+    public ResponseEntity<UpdateAccountRequestDto> updateAccount(//RequestContextDto requestContext,
+                                                    UpdateAccountRequestDto account) {
         log.info("Call update account " + account.toString());
         try {
-            return ResponseFactory.ResponseOk(accountService.checkIfExists(accountMapper.dtoToEntity(account),
-                    true));
+            return accountService.checkIfExists(accountMapper.dtoToEntity(account), true)
+                    .map(acc -> {
+                        return ResponseFactory.ResponseOk(accountMapper.entityToDto(acc));
+                    }).orElse(
+                        ResponseFactory.ResponseNotFound()
+                    );
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

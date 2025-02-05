@@ -42,14 +42,14 @@ public class DomainController extends MappedCrudController<Long, Domain, DomainD
     @Override
     public Domain afterUpdate(Domain domain) {
         try {
-            ResponseEntity<Boolean> result = kmsDomainService.updateDomain(//RequestContextDto.builder().build(),
+            ResponseEntity<KmsDomainDto> result = kmsDomainService.updateDomain(//RequestContextDto.builder().build(),
                     KmsDomainDto.builder()
                             .name(domain.getName())
                             .description(domain.getDescription())
                             .url(domain.getUrl())
                             .adminStatus(domain.getAdminStatus())
                             .build());
-            if (result.getStatusCode().is2xxSuccessful() && result.hasBody() && result.getBody()) {
+            if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
                 return super.afterUpdate(domain);
             }
         } catch (Exception e) {

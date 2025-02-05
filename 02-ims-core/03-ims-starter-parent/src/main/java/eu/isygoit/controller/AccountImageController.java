@@ -32,14 +32,14 @@ public class AccountImageController extends MappedImageController<Long, Account,
     @Override
     public AccountDto beforeUpdate(AccountDto account) throws Exception {
         try {
-            ResponseEntity<Boolean> result = kmsPasswordService.updateAccount(//RequestContextDto.builder().build(),
+            ResponseEntity<UpdateAccountRequestDto> result = kmsPasswordService.updateAccount(//RequestContextDto.builder().build(),
                     UpdateAccountRequestDto.builder()
                             .code(account.getCode())
                             .domain(account.getDomain())
                             .email(account.getEmail())
                             .fullName(account.getFullName())
                             .build());
-            if (result.getStatusCode().is2xxSuccessful() && result.hasBody() && result.getBody()) {
+            if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
                 return super.beforeUpdate(account);
             }
         } catch (Exception e) {

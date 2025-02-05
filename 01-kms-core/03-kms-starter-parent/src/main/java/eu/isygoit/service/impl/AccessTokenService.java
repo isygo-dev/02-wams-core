@@ -8,6 +8,7 @@ import eu.isygoit.model.AccessToken;
 import eu.isygoit.repository.AccessTokenRepository;
 import eu.isygoit.service.IAccessTokenService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,7 @@ public class AccessTokenService extends CrudService<Long, AccessToken, AccessTok
      *
      * @param appProperties the app properties
      */
+    @Autowired
     public AccessTokenService(AppProperties appProperties) {
         this.appProperties = appProperties;
     }

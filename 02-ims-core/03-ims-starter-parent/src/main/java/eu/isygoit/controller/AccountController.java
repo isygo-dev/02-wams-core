@@ -70,14 +70,14 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     @Override
     public AccountDto beforeUpdate(Long id, AccountDto account) {
         try {
-            ResponseEntity<Boolean> result = kmsPasswordService.updateAccount(//RequestContextDto.builder().build(),
+            ResponseEntity<UpdateAccountRequestDto> result = kmsPasswordService.updateAccount(//RequestContextDto.builder().build(),
                     UpdateAccountRequestDto.builder()
                             .code(account.getCode())
                             .domain(account.getDomain())
                             .email(account.getEmail())
                             .fullName(account.getFullName())
                             .build());
-            if (result.getStatusCode().is2xxSuccessful() && result.hasBody() && result.getBody()) {
+            if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
                 return super.beforeUpdate(id, account);
             }
         } catch (Exception e) {

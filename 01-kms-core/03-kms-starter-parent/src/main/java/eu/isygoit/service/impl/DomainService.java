@@ -12,7 +12,6 @@ import eu.isygoit.service.IDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 
@@ -25,24 +24,30 @@ import java.util.Optional;
 @SrvRepo(value = DomainRepository.class)
 public class DomainService extends CrudService<Long, KmsDomain, DomainRepository> implements IDomainService {
 
+    private final AccountService accountService;
+
     @Autowired
-    private AccountRepository accountRepository;
+    public DomainService(AccountService accountService) {
+        this.accountService = accountService;
+    }
 
     @Override
-    public Optional<KmsDomain> checkDomainIfExists(String domainName, String domainUrl, boolean createIfNotExists) {
-        Optional<KmsDomain> optional = repository().findByNameIgnoreCase(domainName);
-        if (optional.isPresent()) {
-            return optional;
-        } else if (createIfNotExists) {
-            //Create the domain if not exists
-            return Optional.ofNullable(this.create(KmsDomain.builder()
-                    .name(domainName)
-                    .url(domainUrl)
-                    .description(domainName)
-                    .build()));
-        }
-
-        return Optional.empty();
+    public Optional<KmsDomain> checkIfExists(String domainName, String domainUrl, boolean createIfNotExists) {
+        return repository().findByNameIgnoreCase(domainName).map(domain -> {
+            domain.setUrl(domainUrl);
+            update(domain);
+            return Optional.ofNullable(domain);
+        }).orElseGet(() -> {
+            if (createIfNotExists) {
+                var newDomain = KmsDomain.builder()
+                        .name(domainName)
+                        .url(domainUrl)
+                        .description(domainName)
+                        .build();
+                return Optional.ofNullable(create(newDomain));
+            }
+            return Optional.empty();
+        });
     }
 
     @Override
@@ -52,56 +57,34 @@ public class DomainService extends CrudService<Long, KmsDomain, DomainRepository
 
     @Override
     public Optional<Account> checkAccountIfExists(String domainName, String domainUrl, String email, String userName, String fullName, boolean createIfNotExists) {
-        //Check domain if exists
-        Optional<KmsDomain> optional = this.checkDomainIfExists(domainName, domainUrl, createIfNotExists);
-        if (optional.isPresent()) {
-            //Check account if exists
-            Optional<Account> optionalAccount = accountRepository.findByDomainIgnoreCaseAndCodeIgnoreCase(domainName, userName);
-            if (optionalAccount.isPresent()) {
-                //Update account email if changed
-                Account account = optionalAccount.get();
-                if (StringUtils.hasText(email) && !account.getEmail().equals(email)) {
-                    account.setEmail(email);
-                    accountRepository.save(account);
-                }
-                return Optional.ofNullable(account);
-            }
+        return checkIfExists(domainName, domainUrl, createIfNotExists)
+                .flatMap(kmsDomain -> accountService.checkIfExists(
+                        Account.builder()
+                                .domain(domainName)
+                                .fullName(fullName)
+                                .email(email)
+                                .code(userName)
+                                .build(),
+                        createIfNotExists));
+    }
 
-            //Create the account if not exists
+    @Override
+    public Optional<KmsDomain> checkIfExists(KmsDomain kmsDomain, boolean createIfNotExists) {
+        return repository().findByNameIgnoreCase(kmsDomain.getName()).map(domain -> {
+            domain.setUrl(kmsDomain.getUrl());
+            return Optional.ofNullable(update(domain));
+        }).orElseGet(() -> {
             if (createIfNotExists) {
-                return Optional.ofNullable(accountRepository.save(Account.builder()
-                        .code(userName)
-                        .email(email)
-                        .domain(domainName)
-                        .fullName(fullName)
-                        .build()));
+                return Optional.ofNullable(create(kmsDomain));
             }
-        }
-
-        return Optional.empty();
+            return Optional.empty();
+        });
     }
 
     @Override
-    public boolean checkIfExists(KmsDomain kmsDomain, boolean createIfNotExists) {
-        Optional<KmsDomain> optional = repository().findByNameIgnoreCase(kmsDomain.getName());
-        if (optional.isPresent()) {
-            //Update the domain if not exists
-            kmsDomain.setId(optional.get().getId());
-            this.update(kmsDomain);
-            return true;
-        } else if (createIfNotExists) {
-            //Create the domain if not exists
-            this.create(kmsDomain);
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    public KmsDomain updateAdminStatus(String domain, IEnumBinaryStatus.Types newStatus) {
+    public Optional<KmsDomain> updateAdminStatus(String domain, IEnumBinaryStatus.Types newStatus) {
         repository().updateAdminStatus(domain, newStatus);
-        return repository().findByNameIgnoreCase(domain).orElse(null);
+        return repository().findByNameIgnoreCase(domain);
     }
 
     @Override

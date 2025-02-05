@@ -15,11 +15,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class MsgServiceImpl implements IMsgService {
 
-    @Autowired
-    private MailMessageControllerApi messageService;
+    private final MailMessageControllerApi messageService;
+
+    private final ICamelRepository camelRepository;
 
     @Autowired
-    private ICamelRepository camelRepository;
+    public MsgServiceImpl(MailMessageControllerApi messageService, ICamelRepository camelRepository) {
+        this.messageService = messageService;
+        this.camelRepository = camelRepository;
+    }
 
     @Override
     public void sendMessage(String senderDomainName, MailMessageDto mailMessage, boolean async) {

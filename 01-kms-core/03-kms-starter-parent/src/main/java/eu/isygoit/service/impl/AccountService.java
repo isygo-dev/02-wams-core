@@ -3,6 +3,7 @@ package eu.isygoit.service.impl;
 import eu.isygoit.annotation.CodeGenLocal;
 import eu.isygoit.annotation.SrvRepo;
 import eu.isygoit.com.rest.service.impl.CrudService;
+import eu.isygoit.dto.request.UpdateAccountRequestDto;
 import eu.isygoit.model.Account;
 import eu.isygoit.repository.AccountRepository;
 import eu.isygoit.service.IAccountService;
@@ -21,22 +22,19 @@ import java.util.Optional;
 public class AccountService extends CrudService<Long, Account, AccountRepository> implements IAccountService {
 
     @Override
-    public boolean checkIfExists(Account account, boolean createIfNotExists) {
-        Optional<Account> optional = repository().findByCodeIgnoreCase(account.getCode());
-        if (optional.isPresent()) {
-            Account existing = optional.get();
+    public Optional<Account> checkIfExists(Account account, boolean createIfNotExists) {
+        return Optional.ofNullable(repository().findByCodeIgnoreCase(account.getCode())
+                .map(existing -> {
             existing.setEmail(account.getEmail());
             existing.setAdminStatus(account.getAdminStatus());
             existing.setSystemStatus(account.getSystemStatus());
             existing.setFullName(account.getFullName());
-            this.update(existing);
-            return true;
-        } else if (createIfNotExists) {
-            //Create the account if not exists
-            this.create(account);
-            return true;
-        }
-
-        return false;
+            return this.update(existing);
+        }).orElseGet(() -> {
+            if (createIfNotExists) {
+                return this.create(account);
+            }
+            return null;
+        }));
     }
 }

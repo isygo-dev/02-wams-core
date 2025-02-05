@@ -30,135 +30,109 @@ import java.util.Optional;
 @Transactional
 public class CryptoService implements ICryptoService {
 
-    @Autowired
-    private PEBConfigRepository pebConfigRepository;
+    private final PEBConfigRepository pebConfigRepository;
+    private final DigesterConfigRepository digesterConfigRepository;
 
+    /**
+     * Instantiates a new Crypto service.
+     *
+     * @param pebConfigRepository      the peb config repository
+     * @param digesterConfigRepository the digester config repository
+     */
     @Autowired
-    private DigesterConfigRepository digesterConfigRepository;
+    public CryptoService(PEBConfigRepository pebConfigRepository, DigesterConfigRepository digesterConfigRepository) {
+        this.pebConfigRepository = pebConfigRepository;
+        this.digesterConfigRepository = digesterConfigRepository;
+    }
 
-    private StringEncryptor pebStringEncryptor(PEBConfig pebConfig) {
-        PooledPBEStringEncryptor encryptor = new PooledPBEStringEncryptor();
-        SimpleStringPBEConfig config = new SimpleStringPBEConfig();
-        config.setPassword(pebConfig.getPassword());
-        config.setAlgorithm(pebConfig.getAlgorithm().name());
-        config.setKeyObtentionIterations(pebConfig.getKeyObtentionIterations());
-        config.setPoolSize(pebConfig.getPoolSize());
-        config.setProviderName(pebConfig.getProviderName());
-        config.setProviderClassName(pebConfig.getProviderClassName());
-        config.setSaltGeneratorClassName("org.jasypt.iv." + pebConfig.getSaltGenerator().name());
-        config.setStringOutputType(pebConfig.getStringOutputType().name());
-        encryptor.setConfig(config);
+    private StringEncryptor createPEBEncryptor(PEBConfig config) {
+        var encryptor = new PooledPBEStringEncryptor();
+        var stringConfig = new SimpleStringPBEConfig();
+        stringConfig.setPassword(config.getPassword());
+        stringConfig.setAlgorithm(config.getAlgorithm().name());
+        stringConfig.setKeyObtentionIterations(config.getKeyObtentionIterations());
+        stringConfig.setPoolSize(config.getPoolSize());
+        stringConfig.setProviderName(config.getProviderName());
+        stringConfig.setProviderClassName(config.getProviderClassName());
+        stringConfig.setSaltGeneratorClassName("org.jasypt.iv." + config.getSaltGenerator().name());
+        stringConfig.setStringOutputType(config.getStringOutputType().name());
+        encryptor.setConfig(stringConfig);
         return encryptor;
     }
 
-    private StringDigester digestStringEncryptor(DigestConfig digestConfig) {
-        PooledStringDigester encryptor = new PooledStringDigester();
-        SimpleStringDigesterConfig config = new SimpleStringDigesterConfig();
-        config.setAlgorithm(digestConfig.getAlgorithm().name().replace("_", "-"));
-        config.setIterations(digestConfig.getIterations());
-        config.setSaltSizeBytes(digestConfig.getSaltSizeBytes());
-        config.setSaltGeneratorClassName("org.jasypt.iv." + digestConfig.getSaltGenerator().name());
-        config.setProviderName(digestConfig.getProviderName());
-        config.setProviderClassName(digestConfig.getProviderClassName());
-        config.setInvertPositionOfSaltInMessageBeforeDigesting(digestConfig.getInvertPositionOfSaltInMessageBeforeDigesting());
-        config.setInvertPositionOfPlainSaltInEncryptionResults(digestConfig.getInvertPositionOfPlainSaltInEncryptionResults());
-        config.setUseLenientSaltSizeCheck(digestConfig.getUseLenientSaltSizeCheck());
-        config.setPoolSize(digestConfig.getPoolSize());
-        config.setStringOutputType(digestConfig.getStringOutputType().name());
-        encryptor.setConfig(config);
+    private StringDigester createStringDigester(DigestConfig config) {
+        var digester = new PooledStringDigester();
+        var stringConfig = configureDigester(config);
+        digester.setConfig(stringConfig);
+        return digester;
+    }
+
+    private PasswordEncryptor createPasswordEncryptor(DigestConfig config) {
+        var encryptor = new ConfigurablePasswordEncryptor();
+        var stringConfig = configureDigester(config);
+        encryptor.setConfig(stringConfig);
         return encryptor;
     }
 
-    private PasswordEncryptor passwordEncryptor(DigestConfig digestConfig) {
-        ConfigurablePasswordEncryptor encryptor = new ConfigurablePasswordEncryptor();
-        SimpleStringDigesterConfig config = new SimpleStringDigesterConfig();
-        config.setAlgorithm(digestConfig.getAlgorithm().name().replace("_", "-"));
-        config.setIterations(digestConfig.getIterations());
-        config.setSaltSizeBytes(digestConfig.getSaltSizeBytes());
-        config.setSaltGeneratorClassName("org.jasypt.iv." + digestConfig.getSaltGenerator().name());
-        config.setProviderName(digestConfig.getProviderName());
-        config.setProviderClassName(digestConfig.getProviderClassName());
-        config.setInvertPositionOfSaltInMessageBeforeDigesting(digestConfig.getInvertPositionOfSaltInMessageBeforeDigesting());
-        config.setInvertPositionOfPlainSaltInEncryptionResults(digestConfig.getInvertPositionOfPlainSaltInEncryptionResults());
-        config.setUseLenientSaltSizeCheck(digestConfig.getUseLenientSaltSizeCheck());
-        config.setPoolSize(digestConfig.getPoolSize());
-        config.setStringOutputType(digestConfig.getStringOutputType().name());
-        encryptor.setConfig(config);
-        return encryptor;
+    private SimpleStringDigesterConfig configureDigester(DigestConfig config) {
+        var stringConfig = new SimpleStringDigesterConfig();
+        stringConfig.setAlgorithm(config.getAlgorithm().name().replace("_", "-"));
+        stringConfig.setIterations(config.getIterations());
+        stringConfig.setSaltSizeBytes(config.getSaltSizeBytes());
+        stringConfig.setSaltGeneratorClassName("org.jasypt.iv." + config.getSaltGenerator().name());
+        stringConfig.setProviderName(config.getProviderName());
+        stringConfig.setProviderClassName(config.getProviderClassName());
+        stringConfig.setInvertPositionOfSaltInMessageBeforeDigesting(config.getInvertPositionOfSaltInMessageBeforeDigesting());
+        stringConfig.setInvertPositionOfPlainSaltInEncryptionResults(config.getInvertPositionOfPlainSaltInEncryptionResults());
+        stringConfig.setUseLenientSaltSizeCheck(config.getUseLenientSaltSizeCheck());
+        stringConfig.setPoolSize(config.getPoolSize());
+        stringConfig.setStringOutputType(config.getStringOutputType().name());
+        return stringConfig;
+    }
+
+    private <T> Optional<T> getConfig(String domain, String defaultDomain, ConfigFetcher<T> fetcher) {
+        return fetcher.fetch(domain)
+                .or(() -> fetcher.fetch(defaultDomain));
     }
 
     @Override
     public StringEncryptor getPebEncryptor(String domain) {
-        Optional<PEBConfig> optional = pebConfigRepository.findFirstByDomainIgnoreCase(domain);
-        if (!optional.isPresent()) {
-            optional = pebConfigRepository.findFirstByDomainIgnoreCase(DomainConstants.DEFAULT_DOMAIN_NAME);
-        }
-
-        if (optional.isPresent()) {
-            return this.pebStringEncryptor(optional.get());
-        }
-
-        log.warn("peb config not found with domain {}", domain);
-        return stringEncryptorDefault();
+        return getConfig(domain, DomainConstants.DEFAULT_DOMAIN_NAME, pebConfigRepository::findFirstByDomainIgnoreCase)
+                .map(this::createPEBEncryptor)
+                .orElseGet(() -> {
+                    log.warn("PEB config not found for domain {}", domain);
+                    return new PooledPBEStringEncryptor();
+                });
     }
 
     @Override
     public StringDigester getDigestEncryptor(String domain) {
-        Optional<DigestConfig> optional = digesterConfigRepository.findFirstByDomainIgnoreCase(domain);
-        if (!optional.isPresent()) {
-            optional = digesterConfigRepository.findFirstByDomainIgnoreCase(DomainConstants.DEFAULT_DOMAIN_NAME);
-        }
-
-        if (optional.isPresent()) {
-            return this.digestStringEncryptor(optional.get());
-        }
-
-        log.warn("digest config not found with domain {}", domain);
-        return stringDigesterDefault();
+        return getConfig(domain, DomainConstants.DEFAULT_DOMAIN_NAME, digesterConfigRepository::findFirstByDomainIgnoreCase)
+                .map(this::createStringDigester)
+                .orElseGet(() -> {
+                    log.warn("Digest config not found for domain {}", domain);
+                    return new PooledStringDigester();
+                });
     }
 
     @Override
     public PasswordEncryptor getPasswordEncryptor(String domain) {
-        Optional<DigestConfig> optional = digesterConfigRepository.findFirstByDomainIgnoreCase(domain);
-        if (!optional.isPresent()) {
-            optional = digesterConfigRepository.findFirstByDomainIgnoreCase(DomainConstants.DEFAULT_DOMAIN_NAME);
-        }
-
-        if (optional.isPresent()) {
-            return this.passwordEncryptor(optional.get());
-        }
-
-        log.warn("password config not found with domain {}", domain);
-        return passwordEncryptorDefault();
+        return getConfig(domain, DomainConstants.DEFAULT_DOMAIN_NAME, digesterConfigRepository::findFirstByDomainIgnoreCase)
+                .map(this::createPasswordEncryptor)
+                .orElseGet(() -> {
+                    log.warn("Password config not found for domain {}", domain);
+                    return new StrongPasswordEncryptor();
+                });
     }
 
-    private StringEncryptor stringEncryptorDefault() {
-        Optional<PEBConfig> optional = pebConfigRepository.findFirstByDomainIgnoreCase(DomainConstants.DEFAULT_DOMAIN_NAME);
-        if (optional.isPresent()) {
-            return this.pebStringEncryptor(optional.get());
-        }
-
-        log.warn("No default peb config found");
-        return new PooledPBEStringEncryptor();
-    }
-
-    private StringDigester stringDigesterDefault() {
-        Optional<DigestConfig> optional = digesterConfigRepository.findFirstByDomainIgnoreCase(DomainConstants.DEFAULT_DOMAIN_NAME);
-        if (optional.isPresent()) {
-            return this.digestStringEncryptor(optional.get());
-        }
-
-        log.warn("No default digest config found");
-        return new PooledStringDigester();
-    }
-
-    private PasswordEncryptor passwordEncryptorDefault() {
-        Optional<DigestConfig> optional = digesterConfigRepository.findFirstByDomainIgnoreCase(DomainConstants.DEFAULT_DOMAIN_NAME);
-        if (optional.isPresent()) {
-            return this.passwordEncryptor(optional.get());
-        }
-
-        log.warn("No default digest config found");
-        return new StrongPasswordEncryptor();
+    @FunctionalInterface
+    private interface ConfigFetcher<T> {
+        /**
+         * Fetch optional.
+         *
+         * @param domain the domain
+         * @return the optional
+         */
+        Optional<T> fetch(String domain);
     }
 }

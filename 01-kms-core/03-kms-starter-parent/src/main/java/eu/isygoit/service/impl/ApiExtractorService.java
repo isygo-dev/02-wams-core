@@ -25,34 +25,44 @@ public class ApiExtractorService extends AbstractApiExtractor<ApiPermission> {
     @Value("${spring.application.name}")
     private String serviceName;
 
-    @Autowired(required = false)
-    private KafkaRegisterApisProducer kafkaRegisterApisProducer;
+    private final KafkaRegisterApisProducer kafkaRegisterApisProducer;
+    private final ApiPermissionRepository apiPermissionRepository;
+    private final ApiPermissionMapper apiPermissionMapper;
+
+    /**
+     * Instantiates a new Api extractor service.
+     *
+     * @param kafkaRegisterApisProducer the kafka register apis producer
+     * @param apiPermissionRepository   the api permission repository
+     * @param apiPermissionMapper       the api permission mapper
+     */
     @Autowired
-    private ApiPermissionRepository apiPermissionRepository;
-    @Autowired
-    private ApiPermissionMapper apiPermissionMapper;
+    public ApiExtractorService(KafkaRegisterApisProducer kafkaRegisterApisProducer, ApiPermissionRepository apiPermissionRepository, ApiPermissionMapper apiPermissionMapper) {
+        this.kafkaRegisterApisProducer = kafkaRegisterApisProducer;
+        this.apiPermissionRepository = apiPermissionRepository;
+        this.apiPermissionMapper = apiPermissionMapper;
+    }
 
     @Transactional
     @Override
     public ApiPermission saveApi(ApiPermission api) {
-        Optional<ApiPermission> optional = apiPermissionRepository.findByServiceNameAndObjectAndMethodAndRqTypeAndPath(api.getServiceName()
-                , api.getObject()
-                , api.getMethod()
-                , api.getRqType()
-                , api.getPath());
-        if (optional.isPresent()) {
-            api = optional.get();
-        } else {
-            api = apiPermissionRepository.save(api);
-        }
+        // Retrieve or save the API permission
+        ApiPermission savedApi = apiPermissionRepository.findByServiceNameAndObjectAndMethodAndRqTypeAndPath(
+                        api.getServiceName(),
+                        api.getObject(),
+                        api.getMethod(),
+                        api.getRqType(),
+                        api.getPath())
+                .orElseGet(() -> apiPermissionRepository.save(api));  // Save only if not found
 
+        // Send the message to Kafka
         try {
-            kafkaRegisterApisProducer.sendMessage(apiPermissionMapper.entityToDto(api));
+            kafkaRegisterApisProducer.sendMessage(apiPermissionMapper.entityToDto(savedApi));
         } catch (IOException e) {
-            log.error("<Error>: Register api permission via kafka topic failed with error: {} ", e);
+            log.error("<Error>: Register API permission via Kafka topic failed with error: {} ", e);
         }
 
-        return api;
+        return savedApi;
     }
 
     @Override

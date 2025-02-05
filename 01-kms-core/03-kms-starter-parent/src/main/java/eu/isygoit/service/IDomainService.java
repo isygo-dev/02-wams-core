@@ -20,7 +20,7 @@ public interface IDomainService extends ICrudServiceMethod<Long, KmsDomain> {
      * @param createIfNotExists the create if not exists
      * @return the kms domain
      */
-    Optional<KmsDomain> checkDomainIfExists(String domainName, String domainUrl, boolean createIfNotExists);
+    Optional<KmsDomain> checkIfExists(String domainName, String domainUrl, boolean createIfNotExists);
 
     /**
      * Find by name ignore case kms domain.
@@ -50,7 +50,7 @@ public interface IDomainService extends ICrudServiceMethod<Long, KmsDomain> {
      * @param createIfNotExists the create if not exists
      * @return the boolean
      */
-    boolean checkIfExists(KmsDomain kmsDomain, boolean createIfNotExists);
+    Optional<KmsDomain> checkIfExists(KmsDomain kmsDomain, boolean createIfNotExists);
 
     /**
      * Update admin status kms domain.
@@ -59,7 +59,7 @@ public interface IDomainService extends ICrudServiceMethod<Long, KmsDomain> {
      * @param newStatus the new status
      * @return the kms domain
      */
-    KmsDomain updateAdminStatus(String domain, IEnumBinaryStatus.Types newStatus);
+    Optional<KmsDomain> updateAdminStatus(String domain, IEnumBinaryStatus.Types newStatus);
 
     /**
      * Is enabled boolean.

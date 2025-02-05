@@ -43,25 +43,22 @@ public class TokenService extends JwtService implements ITokenService {
 
     private final AppProperties appProperties;
 
-    @Autowired
-    private ITokenConfigService tokenConfigService;
-    @Autowired
-    private IDomainService domainService;
-    @Autowired
-    private IMsgService msgService;
-    @Autowired
-    private IAccessTokenService accessTokenService;
-    @Autowired
-    private ImsAppParameterService imsAppParameterService;
+    private final ITokenConfigService tokenConfigService;
+    private final IDomainService domainService;
+    private final IMsgService msgService;
+    private final IAccessTokenService accessTokenService;
+    private final ImsAppParameterService imsAppParameterService;
 
-    /**
-     * Instantiates a new Token service.
-     *
-     * @param appProperties the app properties
-     */
-    public TokenService(AppProperties appProperties) {
+    @Autowired
+    public TokenService(AppProperties appProperties, ITokenConfigService tokenConfigService, IDomainService domainService, IMsgService msgService, IAccessTokenService accessTokenService, ImsAppParameterService imsAppParameterService) {
         this.appProperties = appProperties;
+        this.tokenConfigService = tokenConfigService;
+        this.domainService = domainService;
+        this.msgService = msgService;
+        this.accessTokenService = accessTokenService;
+        this.imsAppParameterService = imsAppParameterService;
     }
+
 
     public TokenDto buildTokenAndSave(String domain, String application, IEnumAppToken.Types tokenType, String subject, Map<String, Object> claims) {
         //Get Token config configured by domain and type, otherwise, default one
