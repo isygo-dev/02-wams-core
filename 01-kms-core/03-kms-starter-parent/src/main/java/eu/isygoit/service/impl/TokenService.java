@@ -26,13 +26,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * The type Token service.
+ */
 @Slf4j
 @Service
 @Transactional
@@ -45,6 +46,16 @@ public class TokenService extends JwtService implements ITokenService {
     private final IAccessTokenService accessTokenService;
     private final ImsAppParameterService imsAppParameterService;
 
+    /**
+     * Instantiates a new Token service.
+     *
+     * @param appProperties          the app properties
+     * @param tokenConfigService     the token config service
+     * @param domainService          the domain service
+     * @param msgService             the msg service
+     * @param accessTokenService     the access token service
+     * @param imsAppParameterService the ims app parameter service
+     */
     @Autowired
     public TokenService(AppProperties appProperties, ITokenConfigService tokenConfigService, IDomainService domainService, IMsgService msgService, IAccessTokenService accessTokenService, ImsAppParameterService imsAppParameterService) {
         this.appProperties = appProperties;
@@ -116,7 +127,8 @@ public class TokenService extends JwtService implements ITokenService {
 
         accessTokenService.findByAccountCodeAndTokenAndTokenType(userName, token, tokenType)
                 .ifPresentOrElse(
-                        accessToken -> {}, // Token found, do nothing
+                        accessToken -> {
+                        }, // Token found, do nothing
                         () -> {
                             log.error("Token not found for domain: {} / token type: {}", domain, tokenType.name());
                             throw new TokenInvalidException("Invalid JWT: not found or deprecated");
@@ -146,11 +158,7 @@ public class TokenService extends JwtService implements ITokenService {
     }
 
     private void sendForgotPasswordEmail(String domain, String application, Account account, TokenDto token) throws JsonProcessingException {
-        String resetPwdUrl = Optional.ofNullable(imsAppParameterService.getValueByDomainAndName(RequestContextDto.builder().build(),
-                        domain, AppParameterConstants.APPURL + "." + application.toUpperCase(), true, "http://localhost:4000/reset-password/"))
-                .filter(result -> result.getStatusCode().is2xxSuccessful() && result.hasBody())
-                .map(ResponseEntity::getBody)
-                .orElse("http://localhost:4000/reset-password/");
+        final String resetPwdUrl = getResetPasswordUrl(domain, application);
 
         var variables = Map.of(
                 MsgTemplateVariables.V_USER_NAME, account.getCode(),
@@ -169,6 +177,14 @@ public class TokenService extends JwtService implements ITokenService {
                 .build();
 
         msgService.sendMessage(domain, mailMessageDto, appProperties.isSendAsyncEmail());
+    }
+
+    private String getResetPasswordUrl(String domain, String application) {
+        return Optional.ofNullable(imsAppParameterService.getValueByDomainAndName(RequestContextDto.builder().build(),
+                        domain, AppParameterConstants.APPURL + "." + application.toUpperCase(), true, "http://localhost:4000/reset-password/"))
+                .filter(result -> result.getStatusCode().is2xxSuccessful() && result.hasBody())
+                .map(ResponseEntity::getBody)
+                .orElse("http://localhost:4000/reset-password/");
     }
 
     @Override

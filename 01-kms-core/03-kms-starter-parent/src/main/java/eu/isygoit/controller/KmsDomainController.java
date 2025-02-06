@@ -46,10 +46,10 @@ public class KmsDomainController extends MappedCrudController<Long, KmsDomain, K
 
     @Override
     public ResponseEntity<KmsDomainDto> updateDomain(//RequestContextDto requestContext,
-                                                KmsDomainDto domain) {
+                                                     KmsDomainDto domain) {
         log.info("Call update domain " + domain.toString());
         try {
-            return crudService().checkIfExists(mapper().dtoToEntity(domain),true)
+            return crudService().checkIfExists(mapper().dtoToEntity(domain), true)
                     .map(kmsDomain -> ResponseFactory.ResponseOk(mapper().entityToDto(kmsDomain)))
                     .orElse(ResponseFactory.ResponseNotFound());
         } catch (Throwable e) {

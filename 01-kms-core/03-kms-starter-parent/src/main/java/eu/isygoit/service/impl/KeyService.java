@@ -15,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+/**
+ * The type Key service.
+ */
 @Slf4j
 @Service
 @Transactional
@@ -24,6 +27,13 @@ public class KeyService implements IKeyService {
     private final RandomKeyGenerator randomKeyGenerator;
     private final RandomKeyRepository randomKeyRepository;
 
+    /**
+     * Instantiates a new Key service.
+     *
+     * @param appNextCodeRepository the app next code repository
+     * @param randomKeyGenerator    the random key generator
+     * @param randomKeyRepository   the random key repository
+     */
     @Autowired
     public KeyService(AppNextCodeRepository appNextCodeRepository, RandomKeyGenerator randomKeyGenerator, RandomKeyRepository randomKeyRepository) {
         this.appNextCodeRepository = appNextCodeRepository;

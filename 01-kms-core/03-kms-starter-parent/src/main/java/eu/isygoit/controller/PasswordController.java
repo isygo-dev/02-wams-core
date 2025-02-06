@@ -216,14 +216,14 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
 
     @Override
     public ResponseEntity<UpdateAccountRequestDto> updateAccount(//RequestContextDto requestContext,
-                                                    UpdateAccountRequestDto account) {
+                                                                 UpdateAccountRequestDto account) {
         log.info("Call update account " + account.toString());
         try {
             return accountService.checkIfExists(accountMapper.dtoToEntity(account), true)
                     .map(acc -> {
                         return ResponseFactory.ResponseOk(accountMapper.entityToDto(acc));
                     }).orElse(
-                        ResponseFactory.ResponseNotFound()
+                            ResponseFactory.ResponseNotFound()
                     );
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);

@@ -37,7 +37,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf()
-                .disable()
+                .disable() // Keep CSRF disabled for stateless JWT authentication
                 .authorizeHttpRequests()
                 .requestMatchers(
                         "/api/v1/auth/**",
@@ -53,48 +53,14 @@ public class SecurityConfig {
                         "/swagger-ui.html"
                 )
                 .permitAll()
-                .requestMatchers("**")
-                .permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
                 .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Stateless sessions for JWT-based auth
                 .and()
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                /*.logout()
-                .logoutUrl("/api/v1/auth/logout")
-                .addLogoutHandler(logoutHandler)*/;
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter
 
-        /*http.authorizeHttpRequests((authz) -> {
-                    //permit
-                    authz.requestMatchers(
-                                    "/api/v1/auth/**",
-                                    "/v2/api-docs",
-                                    "/v3/api-docs",
-                                    "/v3/api-docs/**",
-                                    "/swagger-resources",
-                                    "/swagger-resources/**",
-                                    "/configuration/ui",
-                                    "/configuration/security",
-                                    "/swagger-ui/**",
-                                    "/webjars/**",
-                                    "/swagger-ui.html",
-                                    "/public/**"
-                            ).permitAll()
-                            .requestMatchers("**")
-                            .permitAll();
-                    //permit authenticated
-                    List<ApiPermission> listApis = apiPermissionRepository.findAll();
-                    if (!CollectionUtils.isEmpty(listApis)) {
-                        listApis.stream().forEach(apiPermission -> {
-                            authz.requestMatchers(apiPermission.getPath()).hasRole(apiPermission.getRole());
-                        });
-                    }
-                    authz.anyRequest().authenticated();
-                }
-        ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-         */
         return http.build();
     }
 
@@ -111,9 +77,7 @@ public class SecurityConfig {
                 reg.addMapping("/**")
                         .allowedOrigins("*")
                         .allowedMethods("*")
-                        .allowedHeaders("*")
-                ;
-
+                        .allowedHeaders("*");
             }
         };
     }

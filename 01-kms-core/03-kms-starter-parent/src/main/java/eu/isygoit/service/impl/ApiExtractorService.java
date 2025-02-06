@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.util.Optional;
 
 /**
  * The type Api extractor service.
@@ -22,12 +21,11 @@ import java.util.Optional;
 @Transactional
 public class ApiExtractorService extends AbstractApiExtractor<ApiPermission> {
 
-    @Value("${spring.application.name}")
-    private String serviceName;
-
     private final KafkaRegisterApisProducer kafkaRegisterApisProducer;
     private final ApiPermissionRepository apiPermissionRepository;
     private final ApiPermissionMapper apiPermissionMapper;
+    @Value("${spring.application.name}")
+    private String serviceName;
 
     /**
      * Instantiates a new Api extractor service.

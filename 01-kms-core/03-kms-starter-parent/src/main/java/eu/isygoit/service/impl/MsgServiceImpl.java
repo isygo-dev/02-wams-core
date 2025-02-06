@@ -19,6 +19,12 @@ public class MsgServiceImpl implements IMsgService {
 
     private final ICamelRepository camelRepository;
 
+    /**
+     * Instantiates a new Msg service.
+     *
+     * @param messageService  the message service
+     * @param camelRepository the camel repository
+     */
     @Autowired
     public MsgServiceImpl(MailMessageControllerApi messageService, ICamelRepository camelRepository) {
         this.messageService = messageService;

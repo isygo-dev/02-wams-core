@@ -170,5 +170,5 @@ public interface PasswordControllerApi {
     })
     @PostMapping(path = "/account")
     ResponseEntity<UpdateAccountRequestDto> updateAccount(//@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                             @Valid @RequestBody UpdateAccountRequestDto account);
+                                                          @Valid @RequestBody UpdateAccountRequestDto account);
 }

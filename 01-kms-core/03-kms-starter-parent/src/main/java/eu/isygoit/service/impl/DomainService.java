@@ -6,7 +6,6 @@ import eu.isygoit.com.rest.service.impl.CrudService;
 import eu.isygoit.enums.IEnumBinaryStatus;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.KmsDomain;
-import eu.isygoit.repository.AccountRepository;
 import eu.isygoit.repository.DomainRepository;
 import eu.isygoit.service.IDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +25,11 @@ public class DomainService extends CrudService<Long, KmsDomain, DomainRepository
 
     private final AccountService accountService;
 
+    /**
+     * Instantiates a new Domain service.
+     *
+     * @param accountService the account service
+     */
     @Autowired
     public DomainService(AccountService accountService) {
         this.accountService = accountService;

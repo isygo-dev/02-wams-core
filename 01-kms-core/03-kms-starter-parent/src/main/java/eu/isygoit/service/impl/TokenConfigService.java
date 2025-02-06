@@ -34,7 +34,8 @@ public class TokenConfigService extends CodifiableService<Long, TokenConfig, Tok
     /**
      * Instantiates a new Token config service.
      *
-     * @param jwtProperties the jwt properties
+     * @param jwtProperties         the jwt properties
+     * @param tokenConfigRepository the token config repository
      */
     @Autowired
     public TokenConfigService(JwtProperties jwtProperties, TokenConfigRepository tokenConfigRepository) {

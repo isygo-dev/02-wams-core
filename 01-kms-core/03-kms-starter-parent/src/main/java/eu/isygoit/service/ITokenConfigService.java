@@ -12,11 +12,11 @@ import java.util.Optional;
 public interface ITokenConfigService extends ICrudServiceMethod<Long, TokenConfig> {
 
     /**
-     * Build token config token config.
+     * Build token config optional.
      *
      * @param domain    the domain
      * @param tokenType the token type
-     * @return the token config
+     * @return the optional
      */
     Optional<TokenConfig> buildTokenConfig(String domain, IEnumAppToken.Types tokenType);
 }

@@ -13,25 +13,25 @@ import java.util.Optional;
 public interface IDomainService extends ICrudServiceMethod<Long, KmsDomain> {
 
     /**
-     * Check domain if exists kms domain.
+     * Check if exists optional.
      *
      * @param domainName        the domain name
      * @param domainUrl         the domain url
      * @param createIfNotExists the create if not exists
-     * @return the kms domain
+     * @return the optional
      */
     Optional<KmsDomain> checkIfExists(String domainName, String domainUrl, boolean createIfNotExists);
 
     /**
-     * Find by name ignore case kms domain.
+     * Find by name ignore case optional.
      *
      * @param domainName the domain name
-     * @return the kms domain
+     * @return the optional
      */
     Optional<KmsDomain> findByNameIgnoreCase(String domainName);
 
     /**
-     * Check account if exists account.
+     * Check account if exists optional.
      *
      * @param domainName        the domain name
      * @param domainUrl         the domain url
@@ -39,25 +39,25 @@ public interface IDomainService extends ICrudServiceMethod<Long, KmsDomain> {
      * @param userName          the user name
      * @param fullName          the full name
      * @param createIfNotExists the create if not exists
-     * @return the account
+     * @return the optional
      */
     Optional<Account> checkAccountIfExists(String domainName, String domainUrl, String email, String userName, String fullName, boolean createIfNotExists);
 
     /**
-     * Check if exists boolean.
+     * Check if exists optional.
      *
      * @param kmsDomain         the kms domain
      * @param createIfNotExists the create if not exists
-     * @return the boolean
+     * @return the optional
      */
     Optional<KmsDomain> checkIfExists(KmsDomain kmsDomain, boolean createIfNotExists);
 
     /**
-     * Update admin status kms domain.
+     * Update admin status optional.
      *
      * @param domain    the domain
      * @param newStatus the new status
-     * @return the kms domain
+     * @return the optional
      */
     Optional<KmsDomain> updateAdminStatus(String domain, IEnumBinaryStatus.Types newStatus);
 

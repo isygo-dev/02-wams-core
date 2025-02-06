@@ -19,6 +19,11 @@ public class NextCodeService extends AbstractNextCodeService<AppNextCode, Long> 
 
     private final AppNextCodeRepository nextCodeRepository;
 
+    /**
+     * Instantiates a new Next code service.
+     *
+     * @param nextCodeRepository the next code repository
+     */
     @Autowired
     public NextCodeService(AppNextCodeRepository nextCodeRepository) {
         this.nextCodeRepository = nextCodeRepository;

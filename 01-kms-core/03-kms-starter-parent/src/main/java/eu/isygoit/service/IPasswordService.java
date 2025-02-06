@@ -53,7 +53,7 @@ public interface IPasswordService {
 
 
     /**
-     * Check for pattern boolean.
+     * Is password pattern valid boolean.
      *
      * @param domain        the domain
      * @param plainPassword the plain password
@@ -112,7 +112,7 @@ public interface IPasswordService {
      * @param newPassword the new password
      * @param authType    the auth type
      * @return the access key response dto
-     * @throws UnsupportedAuthTypeException the unsuported auth type exception
+     * @throws UnsupportedAuthTypeException the unsupported auth type exception
      */
     AccessKeyResponseDto registerNewPassword(String domain, Account account, String newPassword, IEnumAuth.Types authType) throws UnsupportedAuthTypeException;
 }

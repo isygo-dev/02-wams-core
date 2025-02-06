@@ -12,23 +12,23 @@ import java.util.Optional;
 public interface IAccessTokenService extends ICrudServiceMethod<Long, AccessToken> {
 
     /**
-     * Find by application and account code and token and token type access token.
+     * Find by application and account code and token and token type optional.
      *
      * @param application the application
      * @param accountCode the account code
      * @param token       the token
      * @param tokenType   the token type
-     * @return the access token
+     * @return the optional
      */
     Optional<AccessToken> findByApplicationAndAccountCodeAndTokenAndTokenType(String application, String accountCode, String token, IEnumAppToken.Types tokenType);
 
     /**
-     * Find by account code and token and token type access token.
+     * Find by account code and token and token type optional.
      *
      * @param accountCode the account code
      * @param token       the token
      * @param tokenType   the token type
-     * @return the access token
+     * @return the optional
      */
     Optional<AccessToken> findByAccountCodeAndTokenAndTokenType(String accountCode, String token, IEnumAppToken.Types tokenType);
 }

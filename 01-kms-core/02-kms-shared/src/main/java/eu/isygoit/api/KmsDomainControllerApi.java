@@ -58,5 +58,5 @@ public interface KmsDomainControllerApi extends IMappedCrudApi<Long, KmsDomainDt
     })
     @PostMapping(path = "/update")
     ResponseEntity<KmsDomainDto> updateDomain(//@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                         @Valid @RequestBody KmsDomainDto domain);
+                                              @Valid @RequestBody KmsDomainDto domain);
 }
