@@ -4,6 +4,8 @@ import eu.isygoit.com.rest.service.ICrudServiceMethod;
 import eu.isygoit.enums.IEnumAppToken;
 import eu.isygoit.model.TokenConfig;
 
+import java.util.Optional;
+
 /**
  * The interface Token config service.
  */
@@ -16,5 +18,5 @@ public interface ITokenConfigService extends ICrudServiceMethod<Long, TokenConfi
      * @param tokenType the token type
      * @return the token config
      */
-    TokenConfig buildTokenConfig(String domain, IEnumAppToken.Types tokenType);
+    Optional<TokenConfig> buildTokenConfig(String domain, IEnumAppToken.Types tokenType);
 }

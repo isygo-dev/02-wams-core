@@ -325,7 +325,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
                     }
                     this.update(account);
                 },
-                () -> new AccountNotFoundException("with domain: " + accountAuthTypeRequest.getDomain() + " and username with " + accountAuthTypeRequest.getUserName()));
+                () -> {throw new AccountNotFoundException("with domain: " + accountAuthTypeRequest.getDomain() + " and username with " + accountAuthTypeRequest.getUserName());});
 
         return true;
     }
@@ -367,7 +367,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
                     account.getConnectionTracking().add(connectionTracking);
                     this.saveOrUpdate(account);
                 },
-                () -> new AccountNotFoundException(domain + "/" + userName));
+                () -> { throw new AccountNotFoundException(domain + "/" + userName);});
     }
 
     @Override

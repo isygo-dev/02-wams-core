@@ -35,7 +35,6 @@ public class AccessTokenService extends CrudService<Long, AccessToken, AccessTok
         this.appProperties = appProperties;
     }
 
-    //@Cacheable(cacheNames = SchemaTableConstantName.T_ACCESS_TOKEN, key = "{#application, #accountCode, #token, #tokenType}")
     public Optional<AccessToken> findByApplicationAndAccountCodeAndTokenAndTokenType(String application, String accountCode, String token, IEnumAppToken.Types tokenType) {
         return repository().findFirstByApplicationAndAccountCodeIgnoreCaseAndTokenAndTokenTypeAndDeprecatedFalseOrderByCreateDateDesc(application,
                 accountCode, token, tokenType);
@@ -55,17 +54,5 @@ public class AccessTokenService extends CrudService<Long, AccessToken, AccessTok
                     accessToken.getApplication());
         }
         return accessToken;
-    }
-
-    //@CachePut(cacheNames = SchemaTableConstantName.T_ACCESS_TOKEN, key = "{#accessToken.application, #accessToken.accountCode, #accessToken.token, #accessToken.tokenType}")
-    @Override
-    public AccessToken create(AccessToken accessToken) {
-        return super.create(accessToken);
-    }
-
-    //@CachePut(cacheNames = SchemaTableConstantName.T_ACCESS_TOKEN, key = "{#accessToken.application, #accessToken.accountCode, #accessToken.token, #accessToken.tokenType}")
-    @Override
-    public AccessToken update(AccessToken accessToken) {
-        return super.update(accessToken);
     }
 }

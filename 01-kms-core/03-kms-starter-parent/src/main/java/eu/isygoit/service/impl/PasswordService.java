@@ -8,6 +8,7 @@ import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
 import eu.isygoit.dto.common.UserContextDto;
 import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.dto.response.AccessKeyResponseDto;
+import eu.isygoit.encrypt.config.EncProperties;
 import eu.isygoit.encrypt.helper.CRC16;
 import eu.isygoit.encrypt.helper.CRC32;
 import eu.isygoit.enums.*;
@@ -22,6 +23,7 @@ import eu.isygoit.types.EmailSubjects;
 import eu.isygoit.types.MsgTemplateVariables;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +42,7 @@ import java.util.*;
 @Transactional
 public class PasswordService implements IPasswordService {
 
+    private final EncProperties encProperties;
     private final AppProperties appProperties;
 
     private final PasswordConfigRepository passwordConfigRepository;
@@ -59,7 +62,8 @@ public class PasswordService implements IPasswordService {
      * @param appProperties the app properties
      */
     @Autowired
-    public PasswordService(AppProperties appProperties, PasswordConfigRepository passwordConfigRepository, IDomainService domainService, PasswordInfoRepository passwordInfoRepository, RandomKeyGenerator randomKeyGenerator, ICryptoService cryptoService, IJwtService jwtService, ITokenConfigService tokenConfigService, IAccessTokenService accessTokenService, IMsgService msgService, ImsAppParameterService imsAppParameterService) {
+    public PasswordService(EncProperties encProperties, AppProperties appProperties, PasswordConfigRepository passwordConfigRepository, IDomainService domainService, PasswordInfoRepository passwordInfoRepository, RandomKeyGenerator randomKeyGenerator, ICryptoService cryptoService, IJwtService jwtService, ITokenConfigService tokenConfigService, IAccessTokenService accessTokenService, IMsgService msgService, ImsAppParameterService imsAppParameterService) {
+        this.encProperties = encProperties;
         this.appProperties = appProperties;
         this.passwordConfigRepository = passwordConfigRepository;
         this.domainService = domainService;
@@ -74,81 +78,73 @@ public class PasswordService implements IPasswordService {
     }
 
     @Override
-    public AccessKeyResponseDto generateRandomPassword(String domain, String domainUrl, String email, String userName, String fullName, IEnumAuth.Types authType) throws JsonProcessingException {
-        if (Objects.isNull(authType)) {
-            throw new UnsuportedAuthTypeException("null authType value");
-        }
+    public AccessKeyResponseDto generateRandomPassword(
+            String domain, String domainUrl, String email, String userName,
+            String fullName, IEnumAuth.Types authType) throws JsonProcessingException {
+
+        Objects.requireNonNull(domain, "null domain value");
+        Objects.requireNonNull(userName, "null userName value");
+        Objects.requireNonNull(authType, "null authType value");
 
         if (!domainService.isEnabled(domain)) {
-            throw new AccountAuthenticationException("domain disabled: " + domain);
-        }
-        //Verify the account
-        Optional<Account> optional = domainService.checkAccountIfExists(domain, domainUrl, email, userName, fullName, true);
-        if (optional.isPresent()) {
-            Account account = optional.get();
-            //Generate password
-            AccessKeyResponseDto accessKeyResponse = this.registerNewPassword(domain, account, null, authType);
-            switch (authType) {
-                case PWD -> {
-                    //Get gateway url
-                    String gatewayUrl = "http://localhost:4001";
-                    try {
-                        ResponseEntity<String> result = imsAppParameterService.getValueByDomainAndName(RequestContextDto.builder().build(),
-                                domain, AppParameterConstants.GATEWAY_URL, true, gatewayUrl);
-                        if (result.getStatusCode().is2xxSuccessful() && result.hasBody() && StringUtils.hasText(result.getBody())) {
-                            gatewayUrl = result.getBody();
-                        }
-                    } catch (Exception e) {
-                        log.error("Remote feign call failed : ", e);
-                        //throw new RemoteCallFailedException(e);
-                    }
-
-                    //Build message data object
-                    MailMessageDto mailMessageDto = MailMessageDto.builder()
-                            .subject(EmailSubjects.USER_CREATED_EMAIL_SUBJECT)
-                            .domain(domain)
-                            .toAddr(account.getEmail())
-                            .templateName(IEnumMsgTemplateName.Types.USER_CREATED_TEMPLATE)
-                            .variables(MailMessageDto.getVariablesAsString(Map.of(
-                                    //Common vars
-                                    MsgTemplateVariables.V_USER_NAME, account.getCode(),
-                                    MsgTemplateVariables.V_FULLNAME, account.getFullName(),
-                                    MsgTemplateVariables.V_DOMAIN_NAME, account.getDomain(),
-                                    //Specific vars
-                                    MsgTemplateVariables.V_GATEWAY_URL, gatewayUrl,
-                                    MsgTemplateVariables.V_PASSWORD, accessKeyResponse.getKey())))
-                            .build();
-                    //Send the message
-                    msgService.sendMessage(domain, mailMessageDto, appProperties.isSendAsyncEmail());
-                    return accessKeyResponse;
-                }
-                case OTP -> {
-                    //Build message data object
-                    MailMessageDto mailMessageDto = MailMessageDto.builder()
-                            .subject(EmailSubjects.OTP_CODE_ACCESS_EMAIL_SUBJECT)
-                            .domain(domain)
-                            .toAddr(account.getEmail())
-                            .templateName(IEnumMsgTemplateName.Types.AUTH_OTP_TEMPLATE)
-                            .variables(MailMessageDto.getVariablesAsString(Map.of(
-                                    //Common vars
-                                    MsgTemplateVariables.V_USER_NAME, account.getCode(),
-                                    MsgTemplateVariables.V_FULLNAME, account.getFullName(),
-                                    MsgTemplateVariables.V_DOMAIN_NAME, account.getDomain(),
-                                    //Specific vars
-                                    MsgTemplateVariables.V_OTP_CODE, accessKeyResponse.getKey(),
-                                    MsgTemplateVariables.V_OTP_LIFETIME_IN_M, String.valueOf(accessKeyResponse.getLifeTime()))))
-                            .build();
-                    //Send the message
-                    msgService.sendMessage(domain, mailMessageDto, appProperties.isSendAsyncEmail());
-                    return accessKeyResponse;
-                }
-                case QRC -> {
-                    return accessKeyResponse;
-                }
-            }
+            throw new DomainDisabledException("With name: " + domain);
         }
 
-        throw new UserNotFoundException("domain/username: " + domain + "/" + userName);
+        Account account = domainService.checkAccountIfExists(domain, domainUrl, email, userName, fullName, true)
+                .orElseThrow(() -> new UserNotFoundException("domain/username: " + domain + "/" + userName));
+
+        AccessKeyResponseDto accessKeyResponse = registerNewPassword(domain, account, null, authType);
+
+        switch (authType) {
+            case PWD -> handlePwdAuth(domain, account, accessKeyResponse);
+            case OTP -> handleOtpAuth(domain, account, accessKeyResponse);
+            case QRC -> {} // No additional processing needed
+            default -> throw new UnsupportedAuthTypeException("Unsupported authType: " + authType);
+        }
+
+        return accessKeyResponse;
+    }
+
+    private void handlePwdAuth(String domain, Account account, AccessKeyResponseDto accessKeyResponse) throws JsonProcessingException {
+        String gatewayUrl = Optional.ofNullable(imsAppParameterService.getValueByDomainAndName(
+                        RequestContextDto.builder().build(), domain, AppParameterConstants.GATEWAY_URL, true, "http://localhost:4001"))
+                .filter(res -> res.getStatusCode().is2xxSuccessful() && res.hasBody() && StringUtils.hasText(res.getBody()))
+                .map(ResponseEntity::getBody)
+                .orElse("http://localhost:4001");
+
+        sendEmail(domain, account, EmailSubjects.USER_CREATED_EMAIL_SUBJECT,
+                IEnumMsgTemplateName.Types.USER_CREATED_TEMPLATE,
+                Map.of(
+                        MsgTemplateVariables.V_USER_NAME, account.getCode(),
+                        MsgTemplateVariables.V_FULLNAME, account.getFullName(),
+                        MsgTemplateVariables.V_DOMAIN_NAME, account.getDomain(),
+                        MsgTemplateVariables.V_GATEWAY_URL, gatewayUrl,
+                        MsgTemplateVariables.V_PASSWORD, accessKeyResponse.getKey()
+                ));
+    }
+
+    private void handleOtpAuth(String domain, Account account, AccessKeyResponseDto accessKeyResponse) throws JsonProcessingException {
+        sendEmail(domain, account, EmailSubjects.OTP_CODE_ACCESS_EMAIL_SUBJECT,
+                IEnumMsgTemplateName.Types.AUTH_OTP_TEMPLATE,
+                Map.of(
+                        MsgTemplateVariables.V_USER_NAME, account.getCode(),
+                        MsgTemplateVariables.V_FULLNAME, account.getFullName(),
+                        MsgTemplateVariables.V_DOMAIN_NAME, account.getDomain(),
+                        MsgTemplateVariables.V_OTP_CODE, accessKeyResponse.getKey(),
+                        MsgTemplateVariables.V_OTP_LIFETIME_IN_M, String.valueOf(accessKeyResponse.getLifeTime())
+                ));
+    }
+
+    private void sendEmail(String domain, Account account, String subject, IEnumMsgTemplateName.Types template, Map<String, String> variables) throws JsonProcessingException {
+        MailMessageDto mailMessageDto = MailMessageDto.builder()
+                .subject(subject)
+                .domain(domain)
+                .toAddr(account.getEmail())
+                .templateName(template)
+                .variables(MailMessageDto.getVariablesAsString(variables))
+                .build();
+
+        msgService.sendMessage(domain, mailMessageDto, appProperties.isSendAsyncEmail());
     }
 
     @Override
@@ -158,13 +154,12 @@ public class PasswordService implements IPasswordService {
                     registerNewPassword(domain, account, newPassword, IEnumAuth.Types.PWD);
                     //TODO add email to inform and validate user that the password has been changed
                 },
-                () -> new UserNotFoundException("domain/username: " + domain + "/" + userName));
+                () -> {throw new UserNotFoundException("domain/username: " + domain + "/" + userName);});
     }
 
     @Override
     public void changePassword(String domain, String userName, String oldPassword, String newPassword) {
-        IEnumPasswordStatus.Types passwordMatches = matches(domain, userName, oldPassword, IEnumAuth.Types.PWD);
-        if (passwordMatches == IEnumPasswordStatus.Types.VALID) {
+        if (IEnumPasswordStatus.Types.VALID == matches(domain, userName, oldPassword, IEnumAuth.Types.PWD)) {
             forceChangePassword(domain, userName, newPassword);
         } else {
             throw new PasswordNotValidException("Password not valid");
@@ -173,69 +168,26 @@ public class PasswordService implements IPasswordService {
 
     @Override
     public AccessKeyResponseDto registerNewPassword(String domain, Account account, String newPassword, IEnumAuth.Types authType)
-            throws UnsuportedAuthTypeException {
-        LocalDateTime expiryDate = null;
-        Integer length = null;
-        IEnumCharSet.Types charSetType = null;
-        Integer lifetime = null;
-        Optional<PasswordConfig> passwordConfigOptional = passwordConfigRepository.findByDomainIgnoreCaseAndType(domain, authType);
-        if (passwordConfigOptional.isPresent()) {
-            PasswordConfig passwordConfig = passwordConfigOptional.get();
-            switch (authType) {
-                case PWD -> {
-                    length = passwordConfig.getMaxLength();
-                    charSetType = passwordConfig.getCharSetType();
-                    expiryDate = LocalDateTime.now().plusDays(passwordConfig.getLifeTime());
-                    lifetime = passwordConfig.getLifeTime();
-                    break;
-                }
-                case OTP -> {
-                    length = passwordConfig.getMaxLength();
-                    charSetType = passwordConfig.getCharSetType();
-                    expiryDate = LocalDateTime.now().plusMinutes(passwordConfig.getLifeTime());
-                    lifetime = passwordConfig.getLifeTime();
-                    break;
-                }
-                default -> {
-                    log.error("Auth type is missing or not supported: " + authType);
-                    throw new UnsuportedAuthTypeException("Auth type is missing or not supported: " + authType);
-                }
-            }
-        } else {
-            switch (authType) {
-                case PWD -> {
-                    length = 12;
-                    charSetType = IEnumCharSet.Types.ALL;
-                    lifetime = 90;
-                    expiryDate = LocalDateTime.now().plusDays(90);
-                }
-                case OTP -> {
-                    length = 4;
-                    charSetType = IEnumCharSet.Types.NUMERIC;
-                    lifetime = 3;
-                    expiryDate = LocalDateTime.now().plusMinutes(3);
-                }
-                default -> {
-                    log.error("Auth type is missing or not supported: " + authType);
-                    throw new UnsuportedAuthTypeException("Auth type is missing or not supported: " + authType);
-                }
-            }
-        }
+            throws UnsupportedAuthTypeException {
+
+        PasswordConfig passwordConfig = passwordConfigRepository.findByDomainIgnoreCaseAndType(domain, authType).orElse(null);
+
+        PasswordProperties properties = getPasswordProperties(authType, passwordConfig);
 
         if (!StringUtils.hasText(newPassword)) {
-            newPassword = randomKeyGenerator.nextGuid(length, charSetType);
+            newPassword = randomKeyGenerator.nextGuid(properties.length(), properties.charSetType());
         }
 
         String encodedPassword = cryptoService.getPasswordEncryptor(domain).encryptPassword(newPassword);
-        int[] crc = this.signPassword(encodedPassword);
+        int[] crc = signPassword(encodedPassword);
 
-        //Deactivate all old passwords before saving a new one
+        // Deactivate old passwords before saving a new one
         passwordInfoRepository.deactivateOldPasswords(account.getId(), authType);
 
-        //Save new password
+        // Save new password
         passwordInfoRepository.save(PasswordInfo.builder()
                 .userId(account.getId())
-                .expiryDate(Date.from(expiryDate.atZone(ZoneId.systemDefault()).toInstant()))
+                .expiryDate(Date.from(properties.expiryDate().atZone(ZoneId.systemDefault()).toInstant()))
                 .password(encodedPassword)
                 .status(IEnumPasswordStatus.Types.VALID)
                 .crc16(crc[0])
@@ -246,87 +198,107 @@ public class PasswordService implements IPasswordService {
 
         return AccessKeyResponseDto.builder()
                 .key(newPassword)
-                .length(length)
-                .lifeTime(lifetime)
+                .length(properties.length())
+                .lifeTime(properties.lifetime())
                 .build();
     }
 
-    @Override
-    public boolean checkForPattern(String domain, String plainPassword) {
-        Optional<PasswordConfig> passwordConfigOptional = passwordConfigRepository.findByDomainIgnoreCaseAndType(domain, IEnumAuth.Types.PWD);
-        if (passwordConfigOptional.isPresent() && StringUtils.hasText(passwordConfigOptional.get().getPattern())) {
-            return plainPassword.matches(passwordConfigOptional.get().getPattern());
-        }
+    private PasswordProperties getPasswordProperties(IEnumAuth.Types authType, PasswordConfig passwordConfig) {
+        return switch (authType) {
+            case PWD -> passwordConfig != null
+                    ? new PasswordProperties(passwordConfig.getMaxLength(), passwordConfig.getCharSetType(),
+                    LocalDateTime.now().plusDays(passwordConfig.getLifeTime()), passwordConfig.getLifeTime())
+                    : new PasswordProperties(12, IEnumCharSet.Types.ALL, LocalDateTime.now().plusDays(90), 90);
 
-        log.warn("password config not found for domain: {}" + domain);
-        return plainPassword.matches("^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[/@#$%^&+-=(){}\\[\\]])(?=\\S+$).{8,}$");
+            case OTP -> passwordConfig != null
+                    ? new PasswordProperties(passwordConfig.getMaxLength(), passwordConfig.getCharSetType(),
+                    LocalDateTime.now().plusMinutes(passwordConfig.getLifeTime()), passwordConfig.getLifeTime())
+                    : new PasswordProperties(4, IEnumCharSet.Types.NUMERIC, LocalDateTime.now().plusMinutes(3), 3);
+
+            default -> throw new UnsupportedAuthTypeException("Auth type is missing or not supported: " + authType);
+        };
+    }
+
+    private record PasswordProperties(int length, IEnumCharSet.Types charSetType, LocalDateTime expiryDate, int lifetime) {}
+
+    @Override
+    public boolean isPasswordPatternValid(String domain, String plainPassword) {
+        return passwordConfigRepository.findByDomainIgnoreCaseAndType(domain, IEnumAuth.Types.PWD)
+                .map(PasswordConfig::getPattern)
+                .filter(StringUtils::hasText)
+                .map(plainPassword::matches)
+                .orElseGet(() -> {
+                    log.warn("Password config not found for domain: {}", domain);
+                    return plainPassword.matches(encProperties.getPasswordPattern());
+                });
     }
 
     @Override
     public IEnumPasswordStatus.Types matches(String domain, String userName, String plainPassword, IEnumAuth.Types authType)
             throws UserPasswordNotFoundException, UserNotFoundException {
-        Optional<Account> optional = domainService.checkAccountIfExists(domain, null, null, userName, null, false);
-        if (optional.isPresent()) {
-            if (IEnumAuth.Types.TOKEN == authType) {
-                return IEnumPasswordStatus.Types.VALID;
-            }
-            List<PasswordInfo> passwordInfos = passwordInfoRepository.findByUserIdAndAuthTypeOrderByCreateDateDesc(optional.get().getId(), authType);
-            if (!CollectionUtils.isEmpty(passwordInfos)) {
-                PasswordInfo passwordInfo = passwordInfos.get(0);
-                IEnumPasswordStatus.Types newStatus = passwordInfo.getStatus();
-                switch (passwordInfo.getStatus()) {
-                    case LOCKED:
-                    case EXPIRED:
-                    case BROKEN: {
-                        break;
-                    }
-                    case DEPRECATED:
-                    case VALID: {
-                        int[] crc = this.signPassword(passwordInfo.getPassword());
-                        if (passwordInfo.getCrc16() != crc[0] || passwordInfo.getCrc32() != crc[1]) {
-                            newStatus = IEnumPasswordStatus.Types.BROKEN;
-                        } else if (passwordInfo.isExpired()) {
-                            newStatus = IEnumPasswordStatus.Types.EXPIRED;
-                        } else if (!cryptoService.getPasswordEncryptor(domain).checkPassword(plainPassword, passwordInfo.getPassword())) {
-                            newStatus = IEnumPasswordStatus.Types.BAD;
-                        }
-                        break;
-                    }
-                }
-                //Update password status after check
-                if (passwordInfo.getStatus() != newStatus) {
-                    passwordInfo.setStatus(newStatus);
-                    passwordInfo = passwordInfoRepository.save(passwordInfo);
-                }
-                return passwordInfo.getStatus();
-            }
 
-            throw new UserPasswordNotFoundException("for user name " + userName);
+        Account account = domainService.checkAccountIfExists(domain, null, null, userName, null, false)
+                .orElseThrow(() -> new UserNotFoundException("domain/username: " + domain + "/" + userName));
+
+        if (authType == IEnumAuth.Types.TOKEN) {
+            return IEnumPasswordStatus.Types.VALID;
         }
 
-        throw new UserNotFoundException("domain/username: " + domain + "/" + userName);
+        PasswordInfo passwordInfo = passwordInfoRepository
+                .findByUserIdAndAuthTypeOrderByCreateDateDesc(account.getId(), authType)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new UserPasswordNotFoundException("for user name " + userName));
+
+        IEnumPasswordStatus.Types newStatus = switch (passwordInfo.getStatus()) {
+            case LOCKED, EXPIRED, BROKEN, BAD, UNAUTHORIZED -> passwordInfo.getStatus();
+            case DEPRECATED, VALID -> determinePasswordStatus(domain, plainPassword, passwordInfo);
+        };
+
+        if (passwordInfo.getStatus() != newStatus) {
+            passwordInfo.setStatus(newStatus);
+            passwordInfoRepository.save(passwordInfo);
+        }
+
+        return newStatus;
+    }
+
+    private IEnumPasswordStatus.Types determinePasswordStatus(String domain, String plainPassword, PasswordInfo passwordInfo) {
+        int[] crc = signPassword(passwordInfo.getPassword());
+
+        if (passwordInfo.getCrc16() != crc[0] || passwordInfo.getCrc32() != crc[1]) {
+            return IEnumPasswordStatus.Types.BROKEN;
+        }
+        if (passwordInfo.isExpired()) {
+            return IEnumPasswordStatus.Types.EXPIRED;
+        }
+        if (!cryptoService.getPasswordEncryptor(domain).checkPassword(plainPassword, passwordInfo.getPassword())) {
+            return IEnumPasswordStatus.Types.BAD;
+        }
+
+        return IEnumPasswordStatus.Types.VALID;
     }
 
     @Override
     public int[] signPassword(String password) {
-        return new int[]{CRC16.calculate(password.getBytes()), CRC32.calculate(password.getBytes())};
+        return new int[]{CRC16.calculate(password.getBytes()),
+                CRC32.calculate(password.getBytes())};
     }
 
     @Override
-    public Boolean isExpired(String domain, String email, String userName, IEnumAuth.Types authType)
+    public boolean isExpired(String domain, String email, String userName, IEnumAuth.Types authType)
             throws UserPasswordNotFoundException, UserNotFoundException {
         Optional<Account> optional = domainService.checkAccountIfExists(domain, null, null, userName, null, false);
         if (optional.isPresent()) {
             if (IEnumAuth.Types.TOKEN == authType) {
                 return Boolean.FALSE;
             }
-            List<PasswordInfo> passwordInfos = passwordInfoRepository.findByUserIdAndAuthTypeOrderByCreateDateDesc(optional.get().getId(), authType);
-            if (!CollectionUtils.isEmpty(passwordInfos)) {
-                PasswordInfo passwordInfo = passwordInfos.get(0);
-                return passwordInfo.getStatus() == IEnumPasswordStatus.Types.EXPIRED;
-            } else {
-                throw new UserPasswordNotFoundException("for user name " + userName);
-            }
+
+            return passwordInfoRepository.findByUserIdAndAuthTypeOrderByCreateDateDesc(optional.get().getId(), authType)
+                    .stream()
+                    .findFirst()
+                    .map(passwordInfo -> passwordInfo.getStatus() == IEnumPasswordStatus.Types.EXPIRED)
+                    .orElseThrow(() -> new UserPasswordNotFoundException("for user name " + userName));
         }
         throw new UserNotFoundException("domain/username: " + domain + "/" + userName);
     }
@@ -334,25 +306,35 @@ public class PasswordService implements IPasswordService {
     @Override
     public void resetPasswordViaToken(ResetPwdViaTokenRequestDto resetPwdViaTokenRequestDto)
             throws TokenInvalidException {
-        Optional<String> optional = jwtService.extractSubject(resetPwdViaTokenRequestDto.getToken());
-        if (optional.isPresent() && StringUtils.hasText(optional.get())) {
-            String[] split = optional.get().split("@");
-            Optional<AccessToken> optionalAccessToken = accessTokenService.findByApplicationAndAccountCodeAndTokenAndTokenType(resetPwdViaTokenRequestDto.getApplication(), split[0], resetPwdViaTokenRequestDto.getToken(), IEnumAppToken.Types.RSTPWD);
-            if (split.length >= 2
-                    && optionalAccessToken.isPresent()
-                    && StringUtils.hasText(optionalAccessToken.get().getToken())
-                    && optionalAccessToken.get().getToken().equals(resetPwdViaTokenRequestDto.getToken())) {
-                UserContextDto userContext = UserContextDto.builder()
-                        .domain(split[1])
-                        .userName(split[0])
-                        .build();
-                TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(userContext.getDomain(), IEnumAppToken.Types.RSTPWD);
-                jwtService.validateToken(resetPwdViaTokenRequestDto.getToken(), optional.get(), tokenConfig.getSecretKey());
-                this.forceChangePassword(userContext.getDomain(), userContext.getUserName()
-                        , resetPwdViaTokenRequestDto.getPassword());
-            } else {
-                throw new TokenInvalidException("Invalid JWT:malformed");
-            }
-        }
+
+        var token = resetPwdViaTokenRequestDto.getToken();
+        Optional<String> optionalSubject = jwtService.extractSubject(token);
+
+        optionalSubject.filter(StringUtils::hasText)
+                .ifPresentOrElse(subject -> {
+                    String[] split = subject.split("@");
+
+                    if (split.length < 2) {
+                        throw new TokenInvalidException("Invalid JWT: malformed");
+                    }
+
+                    // Check access token
+                    accessTokenService.findByApplicationAndAccountCodeAndTokenAndTokenType(
+                                    resetPwdViaTokenRequestDto.getApplication(),
+                                    split[0],
+                                    token,
+                                    IEnumAppToken.Types.RSTPWD
+                            ).filter(accessToken -> token.equals(accessToken.getToken()))
+                            .ifPresentOrElse(accessToken -> {
+                                // Validate token and force password change
+                                Optional<TokenConfig> tokenConfig = tokenConfigService.buildTokenConfig(split[1], IEnumAppToken.Types.RSTPWD);
+                                jwtService.validateToken(token, subject, tokenConfig.get().getSecretKey());
+                                forceChangePassword(split[1], split[0], resetPwdViaTokenRequestDto.getPassword());
+                            }, () -> {
+                                throw new TokenInvalidException("Invalid JWT: token mismatch");
+                            });
+                }, () -> {
+                    throw new TokenInvalidException("Invalid JWT: subject is missing or empty");
+                });
     }
 }

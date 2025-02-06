@@ -7,7 +7,6 @@ import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
-import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.response.AccessKeyResponseDto;
 import eu.isygoit.dto.response.AccessTokenResponseDto;
@@ -19,7 +18,6 @@ import eu.isygoit.exception.AccountAuthenticationException;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.jwt.IJwtService;
 import eu.isygoit.mapper.AccountMapper;
-import eu.isygoit.model.Account;
 import eu.isygoit.model.TokenConfig;
 import eu.isygoit.service.*;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +26,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
 
 /**
  * The type Password controller.
@@ -107,7 +107,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                                                 CheckPwdRequestDto checkPwdRequest) {
         log.info("Call check password for domain {}", checkPwdRequest);
         try {
-            return ResponseFactory.ResponseOk(passwordService.checkForPattern(checkPwdRequest.getDomain()
+            return ResponseFactory.ResponseOk(passwordService.isPasswordPatternValid(checkPwdRequest.getDomain()
                     , checkPwdRequest.getPassword()));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -126,14 +126,14 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
 
             if (IEnumAuth.Types.TOKEN == accessRequest.getAuthType()) {
                 try {
-                    TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(accessRequest.getDomain().trim().toLowerCase(),
+                    Optional<TokenConfig> tokenConfig = tokenConfigService.buildTokenConfig(accessRequest.getDomain().trim().toLowerCase(),
                             IEnumAppToken.Types.ACCESS);
                     jwtService.validateToken(accessRequest.getPassword(),
                             new StringBuilder(accessRequest.getUserName().trim().toLowerCase())
                                     .append("@")
                                     .append(accessRequest.getDomain().trim().toLowerCase())
                                     .toString(),
-                            tokenConfig.getSecretKey());
+                            tokenConfig.get().getSecretKey());
                 } catch (Exception e) {
                     return ResponseFactory.ResponseOk(AccessTokenResponseDto.builder()
                             .status(IEnumPasswordStatus.Types.UNAUTHORIZED)

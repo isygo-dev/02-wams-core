@@ -69,7 +69,7 @@ public class VEventController extends MappedCrudController<Long, VCalendarEvent,
                                     log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
                                 }
                             },
-                            () -> new CalendarNotFoundException("with domain/name : " + event.getDomain() + "/" + event.getCalendar()));
+                            () -> { throw new CalendarNotFoundException("with domain/name : " + event.getDomain() + "/" + event.getCalendar());});
         });
 
         return eventDto;
@@ -94,7 +94,7 @@ public class VEventController extends MappedCrudController<Long, VCalendarEvent,
                                     log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
                                 }
                             },
-                            () -> new CalendarNotFoundException("with domain/name : " + event.getDomain() + "/" + event.getCalendar()));
+                            () -> { throw new CalendarNotFoundException("with domain/name : " + event.getDomain() + "/" + event.getCalendar());});
 
         });
 

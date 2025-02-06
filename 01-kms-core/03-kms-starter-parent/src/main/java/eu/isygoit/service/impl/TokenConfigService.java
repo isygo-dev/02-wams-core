@@ -44,19 +44,16 @@ public class TokenConfigService extends CodifiableService<Long, TokenConfig, Tok
 
 
     @Override
-    public TokenConfig buildTokenConfig(String domain, IEnumAppToken.Types tokenType) {
-        //Serach for token config configured for the domein by type
-        Optional<TokenConfig> optional = tokenConfigRepository.findByDomainIgnoreCaseAndTokenType(domain, tokenType);
-        if (!optional.isPresent()) {
-            //Serach for token config configured for default by type
-            optional = tokenConfigRepository.findByDomainIgnoreCaseAndTokenType(DomainConstants.DEFAULT_DOMAIN_NAME, tokenType);
-        }
+    public Optional<TokenConfig> buildTokenConfig(String domain, IEnumAppToken.Types tokenType) {
+        // Attempt to find the token config for the given domain first
+        return Optional.ofNullable(tokenConfigRepository.findByDomainIgnoreCaseAndTokenType(domain, tokenType)
+                // If not found, fallback to default domain search
+                .or(() -> tokenConfigRepository.findByDomainIgnoreCaseAndTokenType(DomainConstants.DEFAULT_DOMAIN_NAME, tokenType))
+                // If still not found, build the default token config
+                .orElseGet(() -> buildDefaultTokenConfig(domain)));
+    }
 
-        if (optional.isPresent()) {
-            return optional.get();
-        }
-
-        //Build token config secified by system properties
+    private TokenConfig buildDefaultTokenConfig(String domain) {
         return TokenConfig.builder()
                 .issuer(domain)
                 .audience(domain)

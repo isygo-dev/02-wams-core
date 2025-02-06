@@ -6,7 +6,7 @@ import eu.isygoit.dto.response.AccessKeyResponseDto;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.enums.IEnumPasswordStatus;
 import eu.isygoit.exception.TokenInvalidException;
-import eu.isygoit.exception.UnsuportedAuthTypeException;
+import eu.isygoit.exception.UnsupportedAuthTypeException;
 import eu.isygoit.exception.UserNotFoundException;
 import eu.isygoit.exception.UserPasswordNotFoundException;
 import eu.isygoit.model.Account;
@@ -59,7 +59,7 @@ public interface IPasswordService {
      * @param plainPassword the plain password
      * @return the boolean
      */
-    boolean checkForPattern(String domain, String plainPassword);
+    boolean isPasswordPatternValid(String domain, String plainPassword);
 
     /**
      * Matches enum password status . types.
@@ -94,7 +94,7 @@ public interface IPasswordService {
      * @throws UserPasswordNotFoundException the user password not found exception
      * @throws UserNotFoundException         the user not found exception
      */
-    Boolean isExpired(String domain, String email, String userName, IEnumAuth.Types authType) throws UserPasswordNotFoundException, UserNotFoundException;
+    boolean isExpired(String domain, String email, String userName, IEnumAuth.Types authType) throws UserPasswordNotFoundException, UserNotFoundException;
 
     /**
      * Reset password via token.
@@ -112,7 +112,7 @@ public interface IPasswordService {
      * @param newPassword the new password
      * @param authType    the auth type
      * @return the access key response dto
-     * @throws UnsuportedAuthTypeException the unsuported auth type exception
+     * @throws UnsupportedAuthTypeException the unsuported auth type exception
      */
-    AccessKeyResponseDto registerNewPassword(String domain, Account account, String newPassword, IEnumAuth.Types authType) throws UnsuportedAuthTypeException;
+    AccessKeyResponseDto registerNewPassword(String domain, Account account, String newPassword, IEnumAuth.Types authType) throws UnsupportedAuthTypeException;
 }
