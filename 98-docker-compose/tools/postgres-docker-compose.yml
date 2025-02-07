@@ -13,15 +13,16 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password  # Using Docker secrets for password
+      POSTGRES_PASSWORD: my_postgres_password  # Explicit value for PostgreSQL password
+#     POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password  # Using Docker secrets for password
       POSTGRES_DB: postgres
     volumes:
       - postgres-data:/var/lib/postgresql/data  # Use volume for data persistence
     networks:
       - tools-net
       - external-net    # External network for communication from host machine
-    secrets:
-      - postgres_password  # Reference to Docker secret
+    # secrets:
+    #   - postgres_password  # Reference to Docker secret (commented out)
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 30s
@@ -40,12 +41,12 @@ services:
       - pgadmin-data:/var/lib/pgadmin  # Use volume for data persistence
     environment:
       PGADMIN_DEFAULT_EMAIL: s.mbarki@isygoit.eu
-      PGADMIN_DEFAULT_PASSWORD_FILE: /run/secrets/pgadmin_password  # Using Docker secrets for password
+      PGADMIN_DEFAULT_PASSWORD: my_pgadmin_password  # Explicit value for pgAdmin password
     networks:
       - tools-net
       - external-net    # External network for communication from host machine
-    secrets:
-      - pgadmin_password  # Reference to Docker secret
+    # secrets:
+    #   - pgadmin_password  # Reference to Docker secret (commented out)
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 30s
@@ -65,8 +66,19 @@ networks:
   external-net:
     driver: bridge    # External communication from the host machine
 
-secrets:
-  postgres_password:
-    external: true  # Assumes the secret has been created externally with `docker secret create postgres_password <password_file>`
-  pgadmin_password:
-    external: true  # Assumes the secret has been created externally with `docker secret create pgadmin_password <password_file>`
+# To use Docker secrets, uncomment the following lines:
+
+# 1. Create the secrets using the `docker secret create` command:
+#    - Run `echo "your-secret-value" | docker secret create postgres_password -` to create a secret for PostgreSQL password.
+#    - Run `echo "your-secret-value" | docker secret create pgadmin_password -` to create a secret for pgAdmin password.
+#
+# 2. Uncomment the `secrets` section in the Docker Compose file to reference the secrets:
+#    - Uncomment the lines below to enable Docker secrets.
+#    - The password for PostgreSQL and pgAdmin will be accessed via `/run/secrets/postgres_password` and `/run/secrets/pgadmin_password`, respectively, inside the containers.
+#    - Docker will automatically inject the secrets into the containers at runtime.
+
+# secrets:
+#   postgres_password:
+#     external: true  # Assumes the secret has been created externally with `docker secret create postgres_password <password_file>`
+#   pgadmin_password:
+#     external: true  # Assumes the secret has been created externally with `docker secret create pgadmin_password <password_file>`

@@ -1,4 +1,4 @@
-version: '3.9'  # Updated to the latest stable version
+version: '3.9'
 
 services:
   cassandra:
@@ -9,24 +9,44 @@ services:
       - "${CASSANDRA_PORT:-9042}:9042"  # External port configurable via environment variables
     environment:
       - CASSANDRA_USER=${CASSANDRA_USER:-admin}  # Credentials using environment variables
-      - CASSANDRA_PASSWORD_FILE=/run/secrets/cassandra_password  # Using Docker secrets for passwords
+      - CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD:-mysecretpassword}  # Using explicit value for password
+#      - CASSANDRA_PASSWORD_FILE=/run/secrets/cassandra_password  # Using Docker secrets for passwords
     volumes:
       - cassandra-data:/var/lib/cassandra  # Volume for data persistence
     networks:
       - tools-net
-      - external-net    # External network for communication from host machine
-    secrets:
-      - cassandra_password  # Reference to Docker secret
+      - external-net  # External network for communication from host machine
     healthcheck:
-      test: ["CMD", "cqlsh", "-u", "${CASSANDRA_USER:-admin}", "-p", "/run/secrets/cassandra_password", "--execute", "SELECT now()"]
+      test: ["CMD", "cqlsh", "-u", "${CASSANDRA_USER:-admin}", "-p", "${CASSANDRA_PASSWORD:-mysecretpassword}", "--execute", "SELECT now()"]
       interval: 30s
       retries: 5
       timeout: 10s
       start_period: 10s  # Added start period to avoid false failures immediately after start
 
-secrets:
-  cassandra_password:
-    external: true  # Assumes the secret has been created externally with `docker secret create`
+    deploy:
+      replicas: 1  # Ensure that only one replica is used for the cassandra service
+      resources:
+        limits:
+          memory: 2g  # Memory limit to prevent container from consuming too much RAM
+        reservations:
+          memory: 512m  # Minimum memory reserved for the container
+
+# To use Docker secrets, uncomment the following lines:
+
+# 1. Create the secret using the `docker secret create` command:
+#    - Run `echo "your-secret-value" | docker secret create cassandra_password -` to create a secret for Cassandra password.
+#
+# 2. Uncomment the `secrets` section in the Docker Compose file to reference the secret:
+#    - Uncomment the lines below to enable Docker secrets.
+#    - The password for Cassandra will be accessed via `/run/secrets/cassandra_password` inside the container.
+#    - You can also reference the secret in the environment variable, as shown below:
+#
+#   environment:
+#     - CASSANDRA_PASSWORD_FILE=/run/secrets/cassandra_password  # Use the secret file for password
+
+# secrets:
+#   cassandra_password:
+#     external: true  # Assumes the secret has been created externally with `docker secret create`
 
 volumes:
   cassandra-data:
@@ -37,4 +57,4 @@ networks:
     driver: bridge  # Consistent with internal network setup
 
   external-net:
-    driver: bridge    # External communication from the host machine
+    driver: bridge  # External communication from the host machine
