@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 public class ChatMessageService extends CrudService<Long, ChatMessage, ChatMessageRepository>
         implements IChatMessageService {
 
+    @Override
     public List<WsConnectDto> getConnectionsByDomain(Long domainId) {
         return WsChannelInterceptor.getConnectionsByDomain(domainId);
     }
@@ -38,31 +39,38 @@ public class ChatMessageService extends CrudService<Long, ChatMessage, ChatMessa
     }
 
     @Override
-    public List<ChatMessage> findByReceiverIdAndSenderId(Long receiverId, Long SenderId, Pageable pageable) {
-        return repository().findChatStack(receiverId, SenderId);
+    public List<ChatMessage> findByReceiverIdAndSenderId(Long receiverId, Long senderId, Pageable pageable) {
+        return repository().findChatStack(receiverId, senderId);
     }
 
     @Override
     public List<ChatAccountDto> getChatAccounts(Long userId, Pageable pageable) {
-        List<ChatMessage> list = repository().findByReceiverIdOrSenderIdOrderByDateDesc(userId, userId);
-        if (!CollectionUtils.isEmpty(list)) {
-            List<ChatAccountDto> chatMessages = list.stream().collect(Collectors.groupingBy(ChatMessage::getGroupKey))
-                    .values().stream().map(chats ->
-                            ChatAccountDto.builder()
-                                    .SenderId(chats.get(0).getSenderId())
-                                    .fromFullName(chats.get(0).getSenderName())
-                                    .receiverId(chats.get(0).getReceiverId())
-                                    .date(chats.get(0).getDate())
-                                    .lastMessage(chats.get(0).getMessage())
-                                    .read(chats.get(0).getRead())
-                                    .chatStatus(WsChannelInterceptor.getStatus(userId))
-                                    .build()
-                    ).collect(Collectors.toUnmodifiableList());
-
-            chatMessages.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));
-            return chatMessages;
+        var list = repository().findByReceiverIdOrSenderIdOrderByDateDesc(userId, userId);
+        if (CollectionUtils.isEmpty(list)) {
+            return List.of();
         }
 
-        return Collections.emptyList();
+        // Group by groupKey and map to ChatAccountDto
+        var chatMessages = list.stream()
+                .collect(Collectors.groupingBy(ChatMessage::getGroupKey))
+                .values()
+                .stream()
+                .map(chats -> {
+                    var firstChat = chats.get(0);
+                    return ChatAccountDto.builder()
+                            .SenderId(firstChat.getSenderId())
+                            .fromFullName(firstChat.getSenderName())
+                            .receiverId(firstChat.getReceiverId())
+                            .date(firstChat.getDate())
+                            .lastMessage(firstChat.getMessage())
+                            .read(firstChat.getRead())
+                            .chatStatus(WsChannelInterceptor.getStatus(userId))
+                            .build();
+                })
+                .collect(Collectors.toUnmodifiableList());
+
+        // Sort messages in descending order based on date
+        chatMessages.sort(Comparator.comparing(ChatAccountDto::getDate, Comparator.reverseOrder()));
+        return (List<ChatAccountDto>) chatMessages;
     }
 }
