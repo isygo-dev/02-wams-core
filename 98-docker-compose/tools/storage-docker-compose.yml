@@ -1,0 +1,52 @@
+version: '3.9'  # Updated to the latest stable version
+
+services:
+  ##############################################################
+  ### Minio
+  ##############################################################
+  minio-server:
+    container_name: minIo
+    image: bitnami/minio:latest
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    restart: unless-stopped
+    volumes:
+      - minio-data:/var/lib/minio  # Use volume for data persistence
+    environment:
+      MINIO_ROOT_USER: admin  # Explicit root user
+      MINIO_ROOT_PASSWORD: password  # Explicit root password
+      MINIO_DEFAULT_BUCKETS: isygoit.eu
+    networks:
+      - tools-net
+      - external-net    # External network for communication from host machine
+    # secrets:
+    #   - minio_root_user  # Reference to Docker secret (commented out)
+    #   - minio_root_password  # Reference to Docker secret (commented out)
+    healthcheck:
+      test: ["CMD", "mc", "admin", "info", "myminio"]
+      interval: 30s
+      retries: 5
+      timeout: 10s
+      start_period: 10s
+
+volumes:
+  minio-data:
+    driver: local  # Ensuring consistent volume driver
+
+networks:
+  tools-net:
+    driver: bridge  # Consistent with internal network setup
+
+  external-net:
+    driver: bridge    # External communication from the host machine
+
+# secrets:
+#   minio_root_user:
+#     external: true  # Assumes the secret has been created externally (commented out)
+#   minio_root_password:
+#     external: true  # Assumes the secret has been created externally (commented out)
+#
+# You need to create these secrets using docker secret create before deploying the stack:
+# docker secret create minio_root_user <user_file>
+# docker secret create minio_root_password <password_file>

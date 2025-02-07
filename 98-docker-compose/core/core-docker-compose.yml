@@ -1,0 +1,162 @@
+version: '3.9'  # Use the latest Docker Compose version 3.9
+
+services:
+  key-service:
+    container_name: key-service
+    image: core/kms-serv:latest
+    restart: always
+    ports:
+      - "${KEY_SERVICE_PORT:-40403}:40403"  # External access (host to container)
+    healthcheck:
+      test: ls -la  # Simple health check to ensure the service is running
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ${KMS_UPLOADS_PATH:-/c/docker/volumes/core/kms-data/uploads}:/uploads  # Mount uploads path
+      - ${KMS_CAMEL_PATH:-/c/docker/volumes/core/kms-data/camel}:/camel  # Mount camel path
+    networks:
+      - core-net
+      - cloud-net
+      - tools-net
+      - external-net    # External network for communication from host machine
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod  # Set profile for Spring-based services (adjust as needed)
+
+  identity-service:
+    container_name: identity-service
+    image: core/ims-serv:latest
+    restart: always
+    depends_on:
+      key-service:
+        condition: service_healthy
+    ports:
+      - "${IDENTITY_SERVICE_PORT:-40402}:40402"  # External access (host to container)
+    healthcheck:
+      test: ls -la  # Simple health check to ensure the service is running
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ${IMS_UPLOADS_PATH:-/c/docker/volumes/core/ims-data/uploads}:/uploads  # Mount uploads path
+      - ${KMS_CAMEL_PATH:-/c/docker/volumes/core/kms-data/camel}:/camel  # Mount camel path
+    networks:
+      - core-net
+      - cloud-net
+      - tools-net
+      - external-net    # External network for communication from host machine
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod  # Set profile for Spring-based services (adjust as needed)
+
+  messaging-service:
+    container_name: messaging-service
+    image: core/mms-serv:latest
+    restart: always
+    depends_on:
+      key-service:
+        condition: service_healthy
+    ports:
+      - "${MESSAGING_SERVICE_PORT:-40404}:40404"  # External access (host to container)
+    healthcheck:
+      test: ls -la  # Simple health check to ensure the service is running
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ${MMS_UPLOADS_PATH:-/c/docker/volumes/core/mms-data/uploads}:/uploads  # Mount uploads path
+      - ${KMS_CAMEL_PATH:-/c/docker/volumes/core/kms-data/camel}:/camel  # Mount camel path
+    networks:
+      - core-net
+      - cloud-net
+      - tools-net
+      - external-net    # External network for communication from host machine
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod  # Set profile for Spring-based services (adjust as needed)
+
+  document-service:
+    container_name: document-service
+    image: core/dms-serv:latest
+    restart: always
+    depends_on:
+      key-service:
+        condition: service_healthy
+    ports:
+      - "${DOCUMENT_SERVICE_PORT:-40405}:40405"  # External access (host to container)
+    healthcheck:
+      test: ls -la  # Simple health check to ensure the service is running
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ${DMS_UPLOADS_PATH:-/c/docker/volumes/core/dms-data/uploads}:/uploads  # Mount uploads path
+      - ${KMS_CAMEL_PATH:-/c/docker/volumes/core/kms-data/camel}:/camel  # Mount camel path
+    networks:
+      - core-net
+      - cloud-net
+      - tools-net
+      - external-net    # External network for communication from host machine
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod  # Set profile for Spring-based services (adjust as needed)
+
+  storage-service:
+    container_name: storage-service
+    image: core/sms-serv:latest
+    restart: always
+    depends_on:
+      key-service:
+        condition: service_healthy
+    ports:
+      - "${STORAGE_SERVICE_PORT:-40400}:40400"  # External access (host to container)
+    healthcheck:
+      test: ls -la  # Simple health check to ensure the service is running
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ${SMS_UPLOADS_PATH:-/c/docker/volumes/core/sms-data/uploads}:/uploads  # Mount uploads path
+      - ${KMS_CAMEL_PATH:-/c/docker/volumes/core/kms-data/camel}:/camel  # Mount camel path
+    networks:
+      - core-net
+      - cloud-net
+      - tools-net
+      - external-net    # External network for communication from host machine
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod  # Set profile for Spring-based services (adjust as needed)
+
+  calendar-service:
+    container_name: calendar-service
+    image: core/cms-serv:latest
+    restart: always
+    depends_on:
+      key-service:
+        condition: service_healthy
+    ports:
+      - "${CALENDAR_SERVICE_PORT:-40407}:40407"  # External access (host to container)
+    healthcheck:
+      test: ls -la  # Simple health check to ensure the service is running
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ${CMS_UPLOADS_PATH:-/c/docker/volumes/core/cms-data/uploads}:/uploads  # Mount uploads path
+      - ${KMS_CAMEL_PATH:-/c/docker/volumes/core/kms-data/camel}:/camel  # Mount camel path
+    networks:
+      - core-net
+      - cloud-net
+      - tools-net
+      - external-net    # External network for communication from host machine
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod  # Set profile for Spring-based services (adjust as needed)
+
+networks:
+  core-net:
+    driver: bridge  # Internal communication between services
+
+  cloud-net:
+    external: true  # External communication from the host machine
+
+  tools-net:
+    external: true  # External communication from the host machine
+
+  external-net:
+    driver: bridge    # External communication from the host machine

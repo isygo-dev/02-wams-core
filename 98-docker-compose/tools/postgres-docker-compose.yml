@@ -1,0 +1,72 @@
+version: '3.9'  # Updated to the latest stable version
+
+services:
+  ##############################################################
+  ### PostgreSQL / PgAdmin
+  ##############################################################
+  postgres:
+    container_name: postgres
+    image: postgres:14-alpine
+    hostname: localhost
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password  # Using Docker secrets for password
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data  # Use volume for data persistence
+    networks:
+      - tools-net
+      - external-net    # External network for communication from host machine
+    secrets:
+      - postgres_password  # Reference to Docker secret
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 30s
+      retries: 5
+      timeout: 10s
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:latest
+    depends_on:
+      - postgres
+    ports:
+      - "5050:80"
+    restart: unless-stopped
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin  # Use volume for data persistence
+    environment:
+      PGADMIN_DEFAULT_EMAIL: s.mbarki@isygoit.eu
+      PGADMIN_DEFAULT_PASSWORD_FILE: /run/secrets/pgadmin_password  # Using Docker secrets for password
+    networks:
+      - tools-net
+      - external-net    # External network for communication from host machine
+    secrets:
+      - pgadmin_password  # Reference to Docker secret
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 30s
+      retries: 5
+      timeout: 10s
+
+volumes:
+  postgres-data:
+    driver: local  # Ensuring consistent volume driver
+  pgadmin-data:
+    driver: local  # Ensuring consistent volume driver
+
+networks:
+  tools-net:
+    driver: bridge  # Consistent with internal network setup
+
+  external-net:
+    driver: bridge    # External communication from the host machine
+
+secrets:
+  postgres_password:
+    external: true  # Assumes the secret has been created externally with `docker secret create postgres_password <password_file>`
+  pgadmin_password:
+    external: true  # Assumes the secret has been created externally with `docker secret create pgadmin_password <password_file>`

@@ -1,0 +1,74 @@
+version: '3.9'  # Use the latest Docker Compose version 3.9
+
+services:
+  config-service:
+    container_name: config-service
+    image: cloud/config-serv:latest
+    ports:
+      - "${CONFIG_PORT:-8088}:8088"  # External access (host to container)
+    restart: unless-stopped
+    healthcheck:
+      test: curl --silent --fail http://localhost:8088/actuator/health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ${CONFIG_DATA_PATH:-/c/docker/volumes/cloud/config-data}:/config  # Mount configuration data
+    networks:
+      - cloud-net       # Internal network
+      - external-net    # External network for communication from host machine
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod  # Set profile for Spring-based services (adjust as needed)
+
+  discovery-service:
+    container_name: discovery-service
+    image: cloud/discovery-serv:latest
+    depends_on:
+      config-service:
+        condition: service_healthy
+    ports:
+      - "${DISCOVERY_PORT:-8061}:8061"  # External access (host to container)
+    restart: unless-stopped
+    healthcheck:
+      test: curl --silent --fail http://localhost:8061/actuator/health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ${DISCOVERY_DATA_PATH:-/c/docker/volumes/cloud/discovery-data}:/discovery  # Mount discovery data
+    networks:
+      - cloud-net       # Internal network
+      - external-net    # External network for communication from host machine
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod  # Set profile for Spring-based services (adjust as needed)
+
+  gateway-service:
+    container_name: gateway-service
+    image: cloud/gateway-serv:latest
+    depends_on:
+      config-service:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    ports:
+      - "${GATEWAY_PORT:-8060}:8060"  # External access (host to container)
+    restart: unless-stopped
+    healthcheck:
+      test: curl --silent --fail http://localhost:8060/actuator/health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ${GATEWAY_DATA_PATH:-/c/docker/volumes/cloud/gateway-data}:/gateway  # Mount gateway data
+    networks:
+      - cloud-net       # Internal network
+      - external-net    # External network for communication from host machine
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod  # Set profile for Spring-based services (adjust as needed)
+
+networks:
+  cloud-net:
+    driver: bridge    # Internal communication between services
+
+  external-net:
+    driver: bridge    # External communication from the host machine
