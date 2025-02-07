@@ -43,7 +43,6 @@ public class WebSocketService extends CrudServiceUtils<ChatMessage, ChatMessageR
             chatMessageService.create(ChatMessage.builder()
                     .receiverId(recieverId)
                     .senderId(message.getSenderId())
-
                     .message(message.getMessage().getContent())
                     .date(new Date())
                     .build());
