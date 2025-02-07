@@ -19,14 +19,16 @@ import org.springframework.stereotype.Component;
 @Qualifier("emailSenderProcessor")
 public class EmailSenderProcessor extends AbstractCamelProcessor<MailMessageDto> {
 
+    private final KafkaEmailSenderProducer kafkaEmailSenderProducer;
+    private final MailMessageControllerApi messageService;
     @Value("${app.email.broker}")
     private String throughBroker;
 
     @Autowired
-    private KafkaEmailSenderProducer kafkaEmailSenderProducer;
-
-    @Autowired
-    private MailMessageControllerApi messageService;
+    public EmailSenderProcessor(KafkaEmailSenderProducer kafkaEmailSenderProducer, MailMessageControllerApi messageService) {
+        this.kafkaEmailSenderProducer = kafkaEmailSenderProducer;
+        this.messageService = messageService;
+    }
 
     @Override
     public void performProcessor(Exchange exchange, MailMessageDto mailMessageDto) throws Exception {

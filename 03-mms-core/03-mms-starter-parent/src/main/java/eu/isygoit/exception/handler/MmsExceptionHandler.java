@@ -2,11 +2,11 @@ package eu.isygoit.exception.handler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.isygoit.api.AppParameterControllerApi;
-import eu.isygoit.api.MailMessageControllerApi;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.enums.IEnumMsgTemplateName;
+import eu.isygoit.service.IMsgService;
 import eu.isygoit.types.EmailSubjects;
 import eu.isygoit.types.MsgTemplateVariables;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * The type Mms exception handler.
@@ -26,47 +27,50 @@ public class MmsExceptionHandler extends ControllerExceptionHandler {
 
     private final AppProperties appProperties;
 
-    @Autowired
-    private MailMessageControllerApi msgService;
-    @Autowired
-    private AppParameterControllerApi appParameterService;
+    private final IMsgService msgService;
+    private final AppParameterControllerApi appParameterService;
 
-    public MmsExceptionHandler(AppProperties appProperties) {
+    @Autowired
+    public MmsExceptionHandler(AppProperties appProperties, IMsgService msgService, AppParameterControllerApi appParameterService) {
         this.appProperties = appProperties;
+        this.msgService = msgService;
+        this.appParameterService = appParameterService;
     }
 
     @Override
     public void processUnmanagedException(String message) {
-        //Email message error to system admin
         log.error(message);
-        try {
-            ResponseEntity<String> result = appParameterService.getTechnicalAdminEmail();
-            if (result.getStatusCode().is2xxSuccessful() && result.hasBody() && StringUtils.hasText(result.getBody())) {
-                String techAdminEmail = result.getBody();
-                MailMessageDto mailMessageDto = null;
-                try {
-                    mailMessageDto = MailMessageDto.builder()
-                            .subject(EmailSubjects.UNMANAGED_EXCEPTION)
-                            .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
-                            .toAddr(techAdminEmail)
-                            .templateName(IEnumMsgTemplateName.Types.UNMANAGED_EXCEPTION_TEMPLATE)
-                            .variables(MailMessageDto.getVariablesAsString(Map.of(
-                                    //Common vars
-                                    MsgTemplateVariables.V_EXCEPTION, message
-                            )))
-                            .build();
-                } catch (JsonProcessingException e) {
-                    log.error("<Error>: send unmanaged exception email : {} ", e);
-                }
-                //Send the email message
-                msgService.sendMail(DomainConstants.SUPER_DOMAIN_NAME, mailMessageDto.getTemplateName(), mailMessageDto);
-            } else {
-                log.error("<Error>: technical email not found");
-            }
-        } catch (Exception e) {
-            log.error("Remote feign call failed : ", e);
-            //throw new RemoteCallFailedException(e);
-        }
 
+        try {
+            var result = appParameterService.getTechnicalAdminEmail();
+
+            Optional.ofNullable(result)
+                    .filter(res -> res.getStatusCode().is2xxSuccessful() && res.hasBody() && StringUtils.hasText(res.getBody()))
+                    .map(ResponseEntity::getBody)
+                    .ifPresentOrElse(
+                            techAdminEmail -> sendUnmanagedExceptionEmail(techAdminEmail, message),
+                            () -> log.error("<Error>: technical email not found")
+                    );
+        } catch (Exception e) {
+            log.error("Remote Feign call failed: ", e);
+        }
+    }
+
+    private void sendUnmanagedExceptionEmail(String techAdminEmail, String message) {
+        try {
+            var mailMessageDto = MailMessageDto.builder()
+                    .subject(EmailSubjects.UNMANAGED_EXCEPTION)
+                    .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
+                    .toAddr(techAdminEmail)
+                    .templateName(IEnumMsgTemplateName.Types.UNMANAGED_EXCEPTION_TEMPLATE)
+                    .variables(MailMessageDto.getVariablesAsString(Map.of(
+                            MsgTemplateVariables.V_EXCEPTION, message
+                    )))
+                    .build();
+
+            msgService.sendMessage(DomainConstants.SUPER_DOMAIN_NAME, mailMessageDto, appProperties.isSendAsyncEmail());
+        } catch (JsonProcessingException e) {
+            log.error("<Error>: sending unmanaged exception email: ", e);
+        }
     }
 }

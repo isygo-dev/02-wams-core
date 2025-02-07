@@ -21,11 +21,12 @@ import java.io.IOException;
 @Transactional
 public class ApiExtractorService extends AbstractApiExtractor<ApiPermission> {
 
+    @Value("${spring.application.name}")
+    private String serviceName;
+
     private final KafkaRegisterApisProducer kafkaRegisterApisProducer;
     private final ApiPermissionRepository apiPermissionRepository;
     private final ApiPermissionMapper apiPermissionMapper;
-    @Value("${spring.application.name}")
-    private String serviceName;
 
     /**
      * Instantiates a new Api extractor service.

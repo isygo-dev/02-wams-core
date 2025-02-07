@@ -29,7 +29,6 @@ import java.util.UUID;
  * The type Mail message controller.
  */
 //http://localhost:8060/webjars/swagger-ui/index.html#/
-//http://localhost:8060/messaging/mms/private/account
 @Slf4j
 @Validated
 @RestController
@@ -38,14 +37,18 @@ import java.util.UUID;
 public class MailMessageController extends MappedCrudController<UUID, MailMessage, MailMessageDto, MailMessageDto, MailMessageService>
         implements MailMessageControllerApi {
 
-    @Autowired
-    private MailMessageService mailMessageService;
+    private final MailMessageService mailMessageService;
+
+    private final MailMessageMapper mailMessageMapper;
+
+    private final IMsgTemplateService templateService;
 
     @Autowired
-    private MailMessageMapper mailMessageMapper;
-
-    @Autowired
-    private IMsgTemplateService templateService;
+    public MailMessageController(MailMessageService mailMessageService, MailMessageMapper mailMessageMapper, IMsgTemplateService templateService) {
+        this.mailMessageService = mailMessageService;
+        this.mailMessageMapper = mailMessageMapper;
+        this.templateService = templateService;
+    }
 
     public ResponseEntity<?> sendMail(String senderDomainName, IEnumMsgTemplateName.Types template, MailMessageDto mailMessage) {
         try {

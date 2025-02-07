@@ -6,7 +6,6 @@ import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.enums.IEnumMsgTemplateName;
 import eu.isygoit.enums.IEnumPasswordStatus;
-import eu.isygoit.model.Account;
 import eu.isygoit.model.PasswordInfo;
 import eu.isygoit.repository.AccountRepository;
 import eu.isygoit.repository.PasswordInfoRepository;
@@ -35,47 +34,57 @@ public class PasswordExpiredService extends AbstractJobService {
 
     private final AppProperties appProperties;
 
+    private final PasswordInfoRepository passwordInfoRepository;
+    private final AccountRepository accountRepository;
+    private final IDomainService domainService;
+    private final IMsgService msgService;
+
     @Autowired
-    private PasswordInfoRepository passwordInfoRepository;
-    @Autowired
-    private AccountRepository accountRepository;
-    @Autowired
-    private IDomainService domainService;
-    @Autowired
-    private IMsgService msgService;
+    public PasswordExpiredService(AppProperties appProperties, PasswordInfoRepository passwordInfoRepository, AccountRepository accountRepository, IDomainService domainService, IMsgService msgService) {
+        this.appProperties = appProperties;
+        this.passwordInfoRepository = passwordInfoRepository;
+        this.accountRepository = accountRepository;
+        this.domainService = domainService;
+        this.msgService = msgService;
+    }
 
     @Override
     public void performJob(JobExecutionContext jobExecutionContext) {
-        List<PasswordInfo> list = passwordInfoRepository.findByStatusAndAuthType(IEnumPasswordStatus.Types.VALID, IEnumAuth.Types.PWD);
-        if (!CollectionUtils.isEmpty(list)) {
-            list.forEach(passwordInfo -> {
-                if (passwordInfo.remainingDays() <= appProperties.getPwdExpiredLessRemainigDays() && passwordInfo.remainingDays() > 0) {
-                    Optional<Account> optional = accountRepository.findById(passwordInfo.getUserId());
-                    if (optional.isPresent()) {
-                        Account account = optional.get();
-                        MailMessageDto mailMessageDto = null;
-                        try {
-                            mailMessageDto = MailMessageDto.builder()
-                                    .subject(EmailSubjects.PASSWORD_WILL_EXPIRE_EMAIL_SUBJECT)
-                                    .domain(account.getDomain())
-                                    .toAddr(account.getEmail())
-                                    .templateName(IEnumMsgTemplateName.Types.PASSWORD_EXPIRE_TEMPLATE)
-                                    .variables(MailMessageDto.getVariablesAsString(Map.of(
-                                            //Common vars
-                                            MsgTemplateVariables.V_USER_NAME, account.getCode(),
-                                            MsgTemplateVariables.V_FULLNAME, account.getFullName(),
-                                            MsgTemplateVariables.V_DOMAIN_NAME, account.getDomain(),
-                                            //Specific vars
-                                            MsgTemplateVariables.V_PWD_EXP_REMAINING_DAYS, passwordInfo.remainingDays().toString())))
-                                    .build();
-                        } catch (JsonProcessingException e) {
-                            log.error("<Error>: send password expire email : {} ", e);
-                        }
-                        //Send the email message
+        List<PasswordInfo> passwordInfoList = passwordInfoRepository.findByStatusAndAuthType(
+                IEnumPasswordStatus.Types.VALID, IEnumAuth.Types.PWD);
+
+        if (CollectionUtils.isEmpty(passwordInfoList)) return;
+
+        passwordInfoList.stream()
+                .filter(passwordInfo -> {
+                    var remainingDays = passwordInfo.remainingDays();
+                    return remainingDays > 0 && remainingDays <= appProperties.getPwdExpiredLessRemainigDays();
+                })
+                .map(passwordInfo -> accountRepository.findById(passwordInfo.getUserId())
+                        .map(account -> Map.entry(account, passwordInfo)))
+                .flatMap(Optional::stream) // Unwraps Optional<Account>
+                .forEach(entry -> {
+                    var account = entry.getKey();
+                    var passwordInfo = entry.getValue();
+
+                    try {
+                        var mailMessageDto = MailMessageDto.builder()
+                                .subject(EmailSubjects.PASSWORD_WILL_EXPIRE_EMAIL_SUBJECT)
+                                .domain(account.getDomain())
+                                .toAddr(account.getEmail())
+                                .templateName(IEnumMsgTemplateName.Types.PASSWORD_EXPIRE_TEMPLATE)
+                                .variables(MailMessageDto.getVariablesAsString(Map.of(
+                                        MsgTemplateVariables.V_USER_NAME, account.getCode(),
+                                        MsgTemplateVariables.V_FULLNAME, account.getFullName(),
+                                        MsgTemplateVariables.V_DOMAIN_NAME, account.getDomain(),
+                                        MsgTemplateVariables.V_PWD_EXP_REMAINING_DAYS, passwordInfo.remainingDays().toString()
+                                )))
+                                .build();
+
                         msgService.sendMessage(account.getDomain(), mailMessageDto, appProperties.isSendAsyncEmail());
+                    } catch (JsonProcessingException e) {
+                        log.error("<Error>: send password expire email : {} ", e);
                     }
-                }
-            });
-        }
+                });
     }
 }

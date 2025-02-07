@@ -24,11 +24,15 @@ import java.util.Properties;
 @Transactional
 public class MailSenderFactoryServiceService implements IMailSenderFactoryService {
 
-    @Autowired
-    private SenderConfigRepository senderConfigRepository;
+    private final SenderConfigRepository senderConfigRepository;
+
+    private final Map<String, MailSender> mailSenders;
 
     @Autowired
-    private Map<String, MailSender> mailSenders;
+    public MailSenderFactoryServiceService(SenderConfigRepository senderConfigRepository, Map<String, MailSender> mailSenders) {
+        this.senderConfigRepository = senderConfigRepository;
+        this.mailSenders = mailSenders;
+    }
 
     /**
      * Sender from config mail sender.

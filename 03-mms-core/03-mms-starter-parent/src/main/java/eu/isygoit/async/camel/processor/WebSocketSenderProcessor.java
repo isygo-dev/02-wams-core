@@ -21,8 +21,12 @@ import org.springframework.stereotype.Component;
 @Qualifier("webSocketSenderProcessor")
 public class WebSocketSenderProcessor extends AbstractCamelProcessor<WsMessageWrapperDto> {
 
+    private final SimpMessagingTemplate messagingTemplate;
+
     @Autowired
-    private SimpMessagingTemplate messagingTemplate;
+    public WebSocketSenderProcessor(SimpMessagingTemplate messagingTemplate) {
+        this.messagingTemplate = messagingTemplate;
+    }
 
     @Override
     public void performProcessor(Exchange exchange, WsMessageWrapperDto wsMessage) throws Exception {

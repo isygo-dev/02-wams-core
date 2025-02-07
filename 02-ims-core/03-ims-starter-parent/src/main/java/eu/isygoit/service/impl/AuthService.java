@@ -39,18 +39,22 @@ import java.util.Date;
 @Transactional
 public class AuthService implements IAuthService {
 
+    private final KmsPasswordService kmsPasswordService;
+    private final AuthenticationManager authenticationManager;
+    private final IAccountService accountService;
+    private final IDomainService domainService;
+    private final IAppParameterService parameterService;
+    private final RegistredUserRepository registredUserRepository;
+
     @Autowired
-    private KmsPasswordService kmsPasswordService;
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private IAccountService accountService;
-    @Autowired
-    private IDomainService domainService;
-    @Autowired
-    private IAppParameterService parameterService;
-    @Autowired
-    private RegistredUserRepository registredUserRepository;
+    public AuthService(KmsPasswordService kmsPasswordService, AuthenticationManager authenticationManager, IAccountService accountService, IDomainService domainService, IAppParameterService parameterService, RegistredUserRepository registredUserRepository) {
+        this.kmsPasswordService = kmsPasswordService;
+        this.authenticationManager = authenticationManager;
+        this.accountService = accountService;
+        this.domainService = domainService;
+        this.parameterService = parameterService;
+        this.registredUserRepository = registredUserRepository;
+    }
 
     @Override
     public AuthResponseDto authenticate(RequestTrackingDto requestTracking, String domain, String userName, String application, String password, IEnumAuth.Types authType) {

@@ -17,8 +17,12 @@ import org.springframework.stereotype.Component;
 @Qualifier("emailSenderProcessor")
 public class EmailSenderProcessor extends AbstractCamelProcessor<MailMessageDto> {
 
+    private final MailMessageControllerApi messageService;
+
     @Autowired
-    private MailMessageControllerApi messageService;
+    public EmailSenderProcessor(MailMessageControllerApi messageService) {
+        this.messageService = messageService;
+    }
 
     @Override
     public void performProcessor(Exchange exchange, MailMessageDto mailMessageDto) throws Exception {

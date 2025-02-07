@@ -29,18 +29,14 @@ public class PublicController extends ControllerExceptionHandler implements Publ
 
     private final AppProperties appProperties;
 
-    @Autowired
-    private IDomainService domainService;
-    @Autowired
-    private DomainMapper domainMapper;
+    private final IDomainService domainService;
+    private final DomainMapper domainMapper;
 
-    /**
-     * Instantiates a new Public controller.
-     *
-     * @param appProperties the app properties
-     */
-    public PublicController(AppProperties appProperties) {
+    @Autowired
+    public PublicController(AppProperties appProperties, IDomainService domainService, DomainMapper domainMapper) {
         this.appProperties = appProperties;
+        this.domainService = domainService;
+        this.domainMapper = domainMapper;
     }
 
     @Override

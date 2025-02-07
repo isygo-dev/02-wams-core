@@ -22,10 +22,14 @@ import java.util.Optional;
 @SrvRepo(value = StorageConfigRepository.class)
 public class StorageConfigService extends CrudService<Long, StorageConfig, StorageConfigRepository> implements IStorageConfigService {
 
+    private final StorageConfigRepository storageConfigRepository;
+    private final IMinIOApiService minIOApiService;
+
     @Autowired
-    private StorageConfigRepository storageConfigRepository;
-    @Autowired
-    private IMinIOApiService minIOApiService;
+    public StorageConfigService(StorageConfigRepository storageConfigRepository, IMinIOApiService minIOApiService) {
+        this.storageConfigRepository = storageConfigRepository;
+        this.minIOApiService = minIOApiService;
+    }
 
     @Override
     public StorageConfig findByDomainIgnoreCase(String domain) {

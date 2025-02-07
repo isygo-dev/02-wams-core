@@ -47,18 +47,19 @@ public class MailMessageService extends CassandraCrudService<UUID, MailMessage, 
 
     private final AppProperties appProperties;
 
-    @Autowired
-    private MailMessageRepository mailMessageRepository;
-    @Autowired
-    private SenderFactory senderFactory;
+    private final MailMessageRepository mailMessageRepository;
+    private final SenderFactory senderFactory;
 
     /**
      * Instantiates a new Mail message service.
      *
      * @param appProperties the app properties
      */
-    public MailMessageService(AppProperties appProperties) {
+    @Autowired
+    public MailMessageService(AppProperties appProperties, MailMessageRepository mailMessageRepository, SenderFactory senderFactory) {
         this.appProperties = appProperties;
+        this.mailMessageRepository = mailMessageRepository;
+        this.senderFactory = senderFactory;
     }
 
     @Override

@@ -61,22 +61,12 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     /**
      * The Register new account mapper.
      */
-    @Autowired
-    private RegistredUserMapper registredUserMapper;
-    @Autowired
-    private KmsPublicPasswordService kmsPublicPasswordService;
-    @Autowired
-    private IAccountService accountService;
-    @Autowired
-    private IThemeService themeService;
-    @Autowired
-    private IAuthService authService;
-    @Autowired
-    private IDomainService domainService;
-    @Autowired
-    private ThemeMapper themeMapper;
-    @Autowired
-    private DomainMapper domainMapper;
+    private final RegistredUserMapper registredUserMapper;
+    private final KmsPublicPasswordService kmsPublicPasswordService;
+    private final IAccountService accountService;
+    private final IAuthService authService;
+    private final IDomainService domainService;
+    private final DomainMapper domainMapper;
 
     /**
      * Instantiates a new Public auth controller.
@@ -84,9 +74,16 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
      * @param appProperties the app properties
      * @param jwtProperties the jwt properties
      */
-    public PublicAuthController(AppProperties appProperties, JwtProperties jwtProperties) {
+    @Autowired
+    public PublicAuthController(AppProperties appProperties, JwtProperties jwtProperties, RegistredUserMapper registredUserMapper, KmsPublicPasswordService kmsPublicPasswordService, IAccountService accountService, IThemeService themeService, IAuthService authService, IDomainService domainService, ThemeMapper themeMapper, DomainMapper domainMapper) {
         this.appProperties = appProperties;
         this.jwtProperties = jwtProperties;
+        this.registredUserMapper = registredUserMapper;
+        this.kmsPublicPasswordService = kmsPublicPasswordService;
+        this.accountService = accountService;
+        this.authService = authService;
+        this.domainService = domainService;
+        this.domainMapper = domainMapper;
     }
 
     public ResponseEntity<AuthResponseDto> authenticate(HttpServletRequest request, HttpServletResponse response,

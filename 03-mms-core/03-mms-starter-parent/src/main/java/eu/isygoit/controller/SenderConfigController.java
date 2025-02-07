@@ -26,8 +26,12 @@ import org.springframework.web.bind.annotation.RestController;
 @CtrlDef(handler = MmsExceptionHandler.class, mapper = SenderConfigMapper.class, minMapper = SenderConfigMapper.class, service = SenderConfigService.class)
 public class SenderConfigController extends MappedCrudController<Long, SenderConfig, SenderConfigDto, SenderConfigDto, SenderConfigService> {
 
+    private final SenderFactory senderFactory;
+
     @Autowired
-    private SenderFactory senderFactory;
+    public SenderConfigController(SenderFactory senderFactory) {
+        this.senderFactory = senderFactory;
+    }
 
     @Override
     public SenderConfig afterUpdate(SenderConfig senderConfig) {

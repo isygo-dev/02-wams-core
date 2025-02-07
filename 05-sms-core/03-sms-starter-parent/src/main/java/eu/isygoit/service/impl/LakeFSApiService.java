@@ -37,8 +37,12 @@ import java.util.stream.StreamSupport;
 @Transactional
 public class LakeFSApiService implements ILakeFSApiService {
 
+    private final Map<String, MinioClient> minIoMap;
+
     @Autowired
-    private Map<String, MinioClient> minIoMap;
+    public LakeFSApiService(Map<String, MinioClient> minIoMap) {
+        this.minIoMap = minIoMap;
+    }
 
     /**
      * Gets connection.

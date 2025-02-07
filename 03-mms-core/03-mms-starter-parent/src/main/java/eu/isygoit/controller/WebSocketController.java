@@ -25,8 +25,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api/v1/private/ws")
 public class WebSocketController extends ControllerExceptionHandler implements WebSocketControllerApi {
 
+    private final IWebSocketService webSocketService;
+
     @Autowired
-    private IWebSocketService webSocketService;
+    public WebSocketController(IWebSocketService webSocketService) {
+        this.webSocketService = webSocketService;
+    }
 
     @Override
     public ResponseEntity<?> sendMessageToUser(RequestContextDto requestContext,

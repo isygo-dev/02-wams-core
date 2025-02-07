@@ -49,16 +49,17 @@ public class VCalendarService extends CodifiableService<Long, VCalendar, VCalend
 
     private final AppProperties appProperties;
 
-    @Autowired
-    private VCalendarRepository vCalendarRepository;
+    private final VCalendarRepository vCalendarRepository;
 
     /**
      * Instantiates a new V calendar service.
      *
      * @param appProperties the app properties
      */
-    public VCalendarService(AppProperties appProperties) {
+    @Autowired
+    public VCalendarService(AppProperties appProperties, VCalendarRepository vCalendarRepository) {
         this.appProperties = appProperties;
+        this.vCalendarRepository = vCalendarRepository;
     }
 
     @Override

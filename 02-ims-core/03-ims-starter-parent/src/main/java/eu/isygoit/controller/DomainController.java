@@ -36,8 +36,12 @@ import java.util.List;
 public class DomainController extends MappedCrudController<Long, Domain, DomainDto, DomainDto, DomainService>
         implements DomainControllerApi {
 
+    private final KmsDomainService kmsDomainService;
+
     @Autowired
-    private KmsDomainService kmsDomainService;
+    public DomainController(KmsDomainService kmsDomainService) {
+        this.kmsDomainService = kmsDomainService;
+    }
 
     @Override
     public Domain afterUpdate(Domain domain) {

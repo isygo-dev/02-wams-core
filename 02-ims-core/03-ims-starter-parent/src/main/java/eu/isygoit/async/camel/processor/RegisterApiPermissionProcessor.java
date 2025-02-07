@@ -24,10 +24,14 @@ import java.util.Optional;
 @Qualifier("registerApiPermissionProcessor")
 public class RegisterApiPermissionProcessor extends AbstractStringProcessor {
 
+    private final ApiPermissionRepository apiPermissionRepository;
+    private final ApiPermissionMapper apiPermissionMapper;
+
     @Autowired
-    private ApiPermissionRepository apiPermissionRepository;
-    @Autowired
-    private ApiPermissionMapper apiPermissionMapper;
+    public RegisterApiPermissionProcessor(ApiPermissionRepository apiPermissionRepository, ApiPermissionMapper apiPermissionMapper) {
+        this.apiPermissionRepository = apiPermissionRepository;
+        this.apiPermissionMapper = apiPermissionMapper;
+    }
 
     @Override
     public void performProcessor(Exchange exchange, String apiPermissionMsg) throws Exception {

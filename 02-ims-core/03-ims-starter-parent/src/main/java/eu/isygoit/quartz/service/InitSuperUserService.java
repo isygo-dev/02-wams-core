@@ -31,16 +31,21 @@ public class InitSuperUserService extends AbstractJobService {
 
     private final AppProperties appProperties;
 
+    private final IAccountService accountService;
+    private final IDomainService domainService;
+    private final IRoleInfoService roleInfoService;
+    private final ApiPermissionRepository apiPermissionRepository;
+    private final IApplicationService applicationService;
+
     @Autowired
-    private IAccountService accountService;
-    @Autowired
-    private IDomainService domainService;
-    @Autowired
-    private IRoleInfoService roleInfoService;
-    @Autowired
-    private ApiPermissionRepository apiPermissionRepository;
-    @Autowired
-    private IApplicationService applicationService;
+    public InitSuperUserService(AppProperties appProperties, IAccountService accountService, IDomainService domainService, IRoleInfoService roleInfoService, ApiPermissionRepository apiPermissionRepository, IApplicationService applicationService) {
+        this.appProperties = appProperties;
+        this.accountService = accountService;
+        this.domainService = domainService;
+        this.roleInfoService = roleInfoService;
+        this.apiPermissionRepository = apiPermissionRepository;
+        this.applicationService = applicationService;
+    }
 
     @Override
     public void performJob(JobExecutionContext jobExecutionContext) {

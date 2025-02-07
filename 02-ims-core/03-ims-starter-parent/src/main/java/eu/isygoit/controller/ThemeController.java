@@ -37,10 +37,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path = "/api/v1/private/theme")
 public class ThemeController extends MappedCrudController<Long, Theme, ThemeDto, ThemeDto, ThemeService> {
 
+    private final IThemeService themeService;
+    private final ThemeMapper themeMapper;
+
     @Autowired
-    private IThemeService themeService;
-    @Autowired
-    private ThemeMapper themeMapper;
+    public ThemeController(IThemeService themeService, ThemeMapper themeMapper) {
+        this.themeService = themeService;
+        this.themeMapper = themeMapper;
+    }
 
     /**
      * Find theme by account code and domain code response entity.

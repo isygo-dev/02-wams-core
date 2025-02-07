@@ -28,8 +28,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api/v1/private/key")
 public class KeyController extends ControllerExceptionHandler implements KeyServiceApi {
 
+    private final IKeyService keyService;
+
     @Autowired
-    private IKeyService keyService;
+    public KeyController(IKeyService keyService) {
+        this.keyService = keyService;
+    }
 
     @Override
     public ResponseEntity<String> generateRandomKey(RequestContextDto requestContext,

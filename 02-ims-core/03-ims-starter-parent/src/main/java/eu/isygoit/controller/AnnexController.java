@@ -34,8 +34,12 @@ import java.util.List;
 public class AnnexController extends MappedCrudController<Long, Annex, AnnexDto, AnnexDto, AnnexService>
         implements AnnexControllerApi {
 
+    private final IAnnexService annexService;
+
     @Autowired
-    private IAnnexService annexService;
+    public AnnexController(IAnnexService annexService) {
+        this.annexService = annexService;
+    }
 
     @Override
     public ResponseEntity<List<AnnexDto>> getAnnexByTableCode(RequestContextDto requestContext,

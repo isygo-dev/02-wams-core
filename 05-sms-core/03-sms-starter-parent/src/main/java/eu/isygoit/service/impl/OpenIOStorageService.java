@@ -25,8 +25,12 @@ import java.util.Map;
 @Transactional
 public class OpenIOStorageService implements IObjectStorageService {
 
+    private final IOpenIOApiService openIOApiService;
+
     @Autowired
-    private IOpenIOApiService openIOApiService;
+    public OpenIOStorageService(IOpenIOApiService openIOApiService) {
+        this.openIOApiService = openIOApiService;
+    }
 
     @Override
     public void upload(StorageConfig config, String bucketName, String path, Map<String, String> tags, MultipartFile multipartFile) {

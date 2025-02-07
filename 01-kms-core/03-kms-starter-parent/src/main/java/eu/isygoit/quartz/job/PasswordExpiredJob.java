@@ -38,16 +38,17 @@ public class PasswordExpiredJob extends AbstractQuartzJob {
     private final AppProperties appProperties;
 
     @Getter
-    @Autowired
-    private PasswordExpiredService jobService;
+    private final PasswordExpiredService jobService;
 
     /**
      * Instantiates a new Password expired job.
      *
      * @param appProperties the app properties
      */
-    public PasswordExpiredJob(AppProperties appProperties) {
+    @Autowired
+    public PasswordExpiredJob(AppProperties appProperties, PasswordExpiredService jobService) {
         this.appProperties = appProperties;
+        this.jobService = jobService;
     }
 
     /**

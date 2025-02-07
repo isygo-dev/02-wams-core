@@ -35,10 +35,14 @@ import java.util.*;
 @RequestMapping(path = "/api/v1/private/roleInfo")
 public class RoleInfoController extends MappedCrudController<Long, RoleInfo, RoleInfoDto, RoleInfoDto, RoleInfoService> {
 
+    private final ApiPermissionRepository apiPermissionRepository;
+    private final ApiPermissionMapper apiPermissionMapper;
+
     @Autowired
-    private ApiPermissionRepository apiPermissionRepository;
-    @Autowired
-    private ApiPermissionMapper apiPermissionMapper;
+    public RoleInfoController(ApiPermissionRepository apiPermissionRepository, ApiPermissionMapper apiPermissionMapper) {
+        this.apiPermissionRepository = apiPermissionRepository;
+        this.apiPermissionMapper = apiPermissionMapper;
+    }
 
     @Override
     public RoleInfoDto afterFindById(RoleInfoDto roleInfoDto) {

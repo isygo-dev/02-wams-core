@@ -38,18 +38,14 @@ public class InitSuperUserJob extends AbstractQuartzJob {
     private final AppProperties appProperties;
 
     @Getter
+    private final InitSuperUserService jobService;
+
     @Autowired
-    private InitSuperUserService jobService;
-
-
-    /**
-     * Instantiates a new Init super user job.
-     *
-     * @param appProperties the app properties
-     */
-    public InitSuperUserJob(AppProperties appProperties) {
+    public InitSuperUserJob(AppProperties appProperties, InitSuperUserService jobService) {
         this.appProperties = appProperties;
+        this.jobService = jobService;
     }
+
 
     /**
      * Init super user job detail job detail.

@@ -20,16 +20,13 @@ import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.exception.AccountNotFoundException;
 import eu.isygoit.exception.DomainNotFoundException;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
-import eu.isygoit.jwt.JwtService;
 import eu.isygoit.mapper.AccountMapper;
 import eu.isygoit.mapper.MinAccountMapper;
-import eu.isygoit.mapper.ThemeMapper;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.Domain;
 import eu.isygoit.remote.kms.KmsPasswordService;
 import eu.isygoit.service.IAccountService;
 import eu.isygoit.service.IDomainService;
-import eu.isygoit.service.IThemeService;
 import eu.isygoit.service.impl.AccountService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,20 +49,18 @@ import java.util.List;
 public class AccountController extends MappedCrudController<Long, Account, MinAccountDto, AccountDto, AccountService>
         implements AccountControllerApi, StatisticControllerApi {
 
+    private final KmsPasswordService kmsPasswordService;
+    private final IAccountService accountService;
+    private final IDomainService domainService;
+    private final MinAccountMapper minAccountMapper;
+
     @Autowired
-    private KmsPasswordService kmsPasswordService;
-    @Autowired
-    private IAccountService accountService;
-    @Autowired
-    private IDomainService domainService;
-    @Autowired
-    private JwtService jwtService;
-    @Autowired
-    private MinAccountMapper minAccountMapper;
-    @Autowired
-    private IThemeService themeService;
-    @Autowired
-    private ThemeMapper themeMapper;
+    public AccountController(KmsPasswordService kmsPasswordService, IAccountService accountService, IDomainService domainService, MinAccountMapper minAccountMapper) {
+        this.kmsPasswordService = kmsPasswordService;
+        this.accountService = accountService;
+        this.domainService = domainService;
+        this.minAccountMapper = minAccountMapper;
+    }
 
     @Override
     public AccountDto beforeUpdate(Long id, AccountDto account) {

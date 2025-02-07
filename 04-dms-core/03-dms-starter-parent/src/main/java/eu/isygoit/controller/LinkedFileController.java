@@ -36,10 +36,14 @@ import java.util.Objects;
 @RequestMapping(path = "/api/v1/private/linked-files")
 public class LinkedFileController extends ControllerExceptionHandler implements LinkedFileApi {
 
+    private final ILinkedFileService linkedFileService;
+    private final LinkedFileMapper linkedFileMapper;
+
     @Autowired
-    private ILinkedFileService linkedFileService;
-    @Autowired
-    private LinkedFileMapper linkedFileMapper;
+    public LinkedFileController(ILinkedFileService linkedFileService, LinkedFileMapper linkedFileMapper) {
+        this.linkedFileService = linkedFileService;
+        this.linkedFileMapper = linkedFileMapper;
+    }
 
     @Override
     public ResponseEntity<List<LinkedFileRequestDto>> searchByTags(RequestContextDto requestContext,

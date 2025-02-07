@@ -42,17 +42,17 @@ import java.util.Optional;
 public class VEventService extends CodifiableService<Long, VCalendarEvent, VEventRepository> implements IVEventService {
 
     private final AppProperties appProperties;
-
-    @Autowired
-    private VCalendarService calendarService;
+    private final VCalendarService calendarService;
 
     /**
      * Instantiates a new V event service.
      *
      * @param appProperties the app properties
      */
-    public VEventService(AppProperties appProperties) {
+    @Autowired
+    public VEventService(AppProperties appProperties, VCalendarService calendarService) {
         this.appProperties = appProperties;
+        this.calendarService = calendarService;
     }
 
     @Override

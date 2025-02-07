@@ -25,8 +25,12 @@ import java.util.Map;
 @Transactional
 public class MinIOStorageService implements IObjectStorageService {
 
+    private final IMinIOApiService minioService;
+
     @Autowired
-    private IMinIOApiService minioService;
+    public MinIOStorageService(IMinIOApiService minioService) {
+        this.minioService = minioService;
+    }
 
     @Override
     public void upload(StorageConfig config, String bucketName, String path, Map<String, String> tags, MultipartFile multipartFile) {

@@ -20,8 +20,12 @@ import org.springframework.stereotype.Component;
 @Qualifier("kafkaEmailSenderConsumerProcessor")
 public class KafkaEmailSenderConsumerProcessor extends AbstractStringProcessor {
 
+    private final ICamelRepository camelRepository;
+
     @Autowired
-    private ICamelRepository camelRepository;
+    public KafkaEmailSenderConsumerProcessor(ICamelRepository camelRepository) {
+        this.camelRepository = camelRepository;
+    }
 
     @Override
     public void performProcessor(Exchange exchange, String mailMsg) throws Exception {

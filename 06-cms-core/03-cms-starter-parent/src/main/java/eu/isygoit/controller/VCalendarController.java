@@ -40,8 +40,12 @@ import java.nio.file.Path;
 @RequestMapping(path = "/api/v1/private/calendar")
 public class VCalendarController extends MappedCrudController<Long, VCalendar, VCalendarDto, VCalendarDto, VCalendarService> {
 
+    private final VCalendarService vCalendarService;
+
     @Autowired
-    private VCalendarService vCalendarService;
+    public VCalendarController(VCalendarService vCalendarService) {
+        this.vCalendarService = vCalendarService;
+    }
 
     /**
      * Download response entity.

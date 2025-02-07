@@ -34,8 +34,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path = "/api/v1/private/account/stat")
 public class AccountStatisticsController extends ControllerExceptionHandler {
 
+    private final IAccountService accountService;
+
     @Autowired
-    private IAccountService accountService;
+    public AccountStatisticsController(IAccountService accountService) {
+        this.accountService = accountService;
+    }
 
     /**
      * Gets global statistics.

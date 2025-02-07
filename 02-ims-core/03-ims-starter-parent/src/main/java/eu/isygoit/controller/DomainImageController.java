@@ -28,8 +28,12 @@ import javax.security.auth.login.AccountException;
 @RequestMapping(path = "/api/v1/private/domain")
 public class DomainImageController extends MappedImageController<Long, Domain, DomainDto, DomainDto, DomainService> {
 
+    private final KmsDomainService kmsDomainService;
+
     @Autowired
-    private KmsDomainService kmsDomainService;
+    public DomainImageController(KmsDomainService kmsDomainService) {
+        this.kmsDomainService = kmsDomainService;
+    }
 
     @Override
     public Domain afterUpdate(Domain domain) throws Exception {

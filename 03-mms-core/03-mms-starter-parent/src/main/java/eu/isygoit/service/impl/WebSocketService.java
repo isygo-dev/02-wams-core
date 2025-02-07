@@ -27,11 +27,15 @@ import java.util.Date;
 public class WebSocketService extends CrudServiceUtils<ChatMessage, ChatMessageRepository>
         implements IWebSocketService {
 
-    @Autowired
-    private IChatMessageService chatMessageService;
+    private final IChatMessageService chatMessageService;
+
+    private final ICamelRepository camelRepository;
 
     @Autowired
-    private ICamelRepository camelRepository;
+    public WebSocketService(IChatMessageService chatMessageService, ICamelRepository camelRepository) {
+        this.chatMessageService = chatMessageService;
+        this.camelRepository = camelRepository;
+    }
 
     @Override
     public void saveAndSendToUser(Long recieverId, WsMessageWrapperDto message) throws IOException {

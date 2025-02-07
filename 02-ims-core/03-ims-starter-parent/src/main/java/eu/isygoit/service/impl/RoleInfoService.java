@@ -38,10 +38,14 @@ import java.util.stream.Collectors;
 @SrvRepo(value = RoleInfoRepository.class)
 public class RoleInfoService extends CodifiableService<Long, RoleInfo, RoleInfoRepository> implements IRoleInfoService {
 
+    private final AssoRoleInfoAccountRepository assoRoleInfoAccountRepository;
+    private final AccountRepository accountRepository;
+
     @Autowired
-    private AssoRoleInfoAccountRepository assoRoleInfoAccountRepository;
-    @Autowired
-    private AccountRepository accountRepository;
+    public RoleInfoService(AssoRoleInfoAccountRepository assoRoleInfoAccountRepository, AccountRepository accountRepository) {
+        this.assoRoleInfoAccountRepository = assoRoleInfoAccountRepository;
+        this.accountRepository = accountRepository;
+    }
 
     @Override
     public Optional<NextCodeModel> initCodeGenerator() {

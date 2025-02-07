@@ -25,8 +25,12 @@ import java.util.Map;
 @Transactional
 public class LakeFSStorageService implements IObjectStorageService {
 
+    private final ILakeFSApiService lakeFSApiService;
+
     @Autowired
-    private ILakeFSApiService lakeFSApiService;
+    public LakeFSStorageService(ILakeFSApiService lakeFSApiService) {
+        this.lakeFSApiService = lakeFSApiService;
+    }
 
     @Override
     public void upload(StorageConfig config, String bucketName, String path, Map<String, String> tags, MultipartFile multipartFile) {

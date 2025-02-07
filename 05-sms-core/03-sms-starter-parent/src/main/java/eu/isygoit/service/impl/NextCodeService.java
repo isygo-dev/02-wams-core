@@ -15,8 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class NextCodeService extends AbstractNextCodeService<AppNextCode, Long> {
 
+    private final AppNextCodeRepository nextCodeRepository;
+
     @Autowired
-    private AppNextCodeRepository nextCodeRepository;
+    public NextCodeService(AppNextCodeRepository nextCodeRepository) {
+        this.nextCodeRepository = nextCodeRepository;
+    }
 
     @Override
     public NextCodeRepository nextCodeRepository() {

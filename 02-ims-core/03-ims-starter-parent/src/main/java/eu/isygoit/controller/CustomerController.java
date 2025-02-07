@@ -37,8 +37,12 @@ import java.util.List;
 @RequestMapping(path = "/api/v1/private/customer")
 public class CustomerController extends MappedCrudController<Long, Customer, CustomerDto, CustomerDto, CustomerService> {
 
+    private final ICustomerService customerService;
+
     @Autowired
-    private ICustomerService customerService;
+    public CustomerController(ICustomerService customerService) {
+        this.customerService = customerService;
+    }
 
     /**
      * Update customer status response entity.

@@ -20,8 +20,12 @@ public class KafkaEmailSenderProducer {
     @Value("${spring.kafka.topics.send-email}")
     private String send_email_topic;
 
-    @Autowired(required = false)
-    private KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+
+    @Autowired
+    public KafkaEmailSenderProducer(KafkaTemplate<String, String> kafkaTemplate) {
+        this.kafkaTemplate = kafkaTemplate;
+    }
 
     /**
      * Send message.

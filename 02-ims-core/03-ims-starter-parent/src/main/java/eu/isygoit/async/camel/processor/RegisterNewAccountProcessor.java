@@ -30,12 +30,16 @@ import java.util.Objects;
 @Qualifier("registerNewAccountProcessor")
 public class RegisterNewAccountProcessor extends AbstractStringProcessor {
 
+    private final IAccountService accountService;
+    private final IAppParameterService parameterService;
+    private final IRoleInfoService roleInfoService;
+
     @Autowired
-    private IAccountService accountService;
-    @Autowired
-    private IAppParameterService parameterService;
-    @Autowired
-    private IRoleInfoService roleInfoService;
+    public RegisterNewAccountProcessor(IAccountService accountService, IAppParameterService parameterService, IRoleInfoService roleInfoService) {
+        this.accountService = accountService;
+        this.parameterService = parameterService;
+        this.roleInfoService = roleInfoService;
+    }
 
     @Override
     public void performProcessor(Exchange exchange, String RegisterNewAccountMsg) throws Exception {

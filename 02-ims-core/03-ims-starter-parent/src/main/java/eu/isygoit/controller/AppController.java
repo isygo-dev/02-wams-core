@@ -38,8 +38,12 @@ import java.util.List;
 @RequestMapping(path = "/api/v1/private/application")
 public class AppController extends MappedCrudController<Long, Application, ApplicationDto, ApplicationDto, ApplicationService> {
 
+    private final IAccountService accountService;
+
     @Autowired
-    private IAccountService accountService;
+    public AppController(IAccountService accountService) {
+        this.accountService = accountService;
+    }
 
     /**
      * Update status response entity.

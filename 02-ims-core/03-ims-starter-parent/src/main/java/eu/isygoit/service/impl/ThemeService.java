@@ -21,8 +21,12 @@ import java.util.Optional;
 @SrvRepo(value = ThemeRepository.class)
 public class ThemeService extends CrudService<Long, Theme, ThemeRepository> implements IThemeService {
 
+    private final ThemeRepository themeRepository;
+
     @Autowired
-    private ThemeRepository themeRepository;
+    public ThemeService(ThemeRepository themeRepository) {
+        this.themeRepository = themeRepository;
+    }
 
     @Override
     public Optional<Theme> findThemeByAccountCodeAndDomainCode(String accountCode, String domainCode) {

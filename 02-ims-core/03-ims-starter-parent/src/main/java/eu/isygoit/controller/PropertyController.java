@@ -31,11 +31,14 @@ import java.util.List;
 @RequestMapping(path = "/api/v1/private/property")
 public class PropertyController extends ControllerExceptionHandler implements PropertyControllerApi {
 
-    @Autowired
-    private IPropertyService propertyService;
+    private final IPropertyService propertyService;
+    private final PropertyMapper propertyMapper;
 
     @Autowired
-    private PropertyMapper propertyMapper;
+    public PropertyController(IPropertyService propertyService, PropertyMapper propertyMapper) {
+        this.propertyService = propertyService;
+        this.propertyMapper = propertyMapper;
+    }
 
     @Override
     public ResponseEntity<PropertyDto> updatePropertyAccount(RequestContextDto requestContext,

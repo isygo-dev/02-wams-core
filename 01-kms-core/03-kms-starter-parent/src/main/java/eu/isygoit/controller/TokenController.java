@@ -28,8 +28,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api/v1/private/token")
 public class TokenController extends ControllerExceptionHandler implements TokenServiceApi {
 
+    private final ITokenService tokenService;
+
     @Autowired
-    private ITokenService tokenService;
+    public TokenController(ITokenService tokenService) {
+        this.tokenService = tokenService;
+    }
 
     @Override
     public ResponseEntity<TokenDto> createTokenByDomain(//RequestContextDto requestContext,

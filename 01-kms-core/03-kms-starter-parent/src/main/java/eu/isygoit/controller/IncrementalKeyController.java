@@ -28,8 +28,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api/v1/private/key")
 public class IncrementalKeyController extends ControllerExceptionHandler implements IncrementalKeyControllerApi {
 
+    private final IKeyService keyService;
+
     @Autowired
-    private IKeyService keyService;
+    public IncrementalKeyController(IKeyService keyService) {
+        this.keyService = keyService;
+    }
 
 
     @Override

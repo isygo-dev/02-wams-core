@@ -57,22 +57,18 @@ public class LinkedFileService extends CodifiableService<Long, LinkedFile, Linke
 
     private final AppProperties appProperties;
 
-    @Autowired
-    private LinkedFileRepository linkedFileRepository;
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private final LinkedFileRepository linkedFileRepository;
+    private final CategoryRepository categoryRepository;
+    private final SmsStorageLinkedFileService smsStorageLinkedFileService;
 
     @Autowired
-    private SmsStorageLinkedFileService smsStorageLinkedFileService;
-
-    /**
-     * Instantiates a new Linked file service.
-     *
-     * @param appProperties the app properties
-     */
-    public LinkedFileService(AppProperties appProperties) {
+    public LinkedFileService(AppProperties appProperties, LinkedFileRepository linkedFileRepository, CategoryRepository categoryRepository, SmsStorageLinkedFileService smsStorageLinkedFileService) {
         this.appProperties = appProperties;
+        this.linkedFileRepository = linkedFileRepository;
+        this.categoryRepository = categoryRepository;
+        this.smsStorageLinkedFileService = smsStorageLinkedFileService;
     }
+
 
     @Override
     public String upload(LinkedFileRequestDto linkedFileRequestDto, MultipartFile file) throws IOException {

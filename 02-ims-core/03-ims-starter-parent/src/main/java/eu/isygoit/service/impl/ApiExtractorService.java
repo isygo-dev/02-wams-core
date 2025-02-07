@@ -22,8 +22,12 @@ public class ApiExtractorService extends AbstractApiExtractor<ApiPermission> {
     @Value("${spring.application.name}")
     private String serviceName;
 
+    private final ApiPermissionRepository apiPermissionRepository;
+
     @Autowired
-    private ApiPermissionRepository apiPermissionRepository;
+    public ApiExtractorService(ApiPermissionRepository apiPermissionRepository) {
+        this.apiPermissionRepository = apiPermissionRepository;
+    }
 
     @Transactional
     @Override

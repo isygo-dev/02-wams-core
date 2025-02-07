@@ -33,11 +33,15 @@ import java.util.Optional;
 @SrvRepo(value = PropertyRepository.class)
 public class PropertyService extends CrudServiceUtils<Property, PropertyRepository> implements IPropertyService {
 
-    @Autowired
-    private AccountRepository accountRepository;
+    private final AccountRepository accountRepository;
+
+    private final AcountPropsRepository acountPropsRepository;
 
     @Autowired
-    private AcountPropsRepository acountPropsRepository;
+    public PropertyService(AccountRepository accountRepository, AcountPropsRepository acountPropsRepository) {
+        this.accountRepository = accountRepository;
+        this.acountPropsRepository = acountPropsRepository;
+    }
 
 
     @Override

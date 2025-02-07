@@ -20,8 +20,12 @@ import java.util.Arrays;
 @Transactional
 public class PasswordEncoderService implements PasswordEncoder {
 
+    private final KmsPasswordService kmsPasswordService;
+
     @Autowired
-    private KmsPasswordService kmsPasswordService;
+    public PasswordEncoderService(KmsPasswordService kmsPasswordService) {
+        this.kmsPasswordService = kmsPasswordService;
+    }
 
     @Override
     public String encode(CharSequence rawPassword) {

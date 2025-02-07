@@ -35,8 +35,12 @@ import java.util.Objects;
 @RequestMapping(path = "/api/v1/private/file/convert")
 public class FileConverterController extends ControllerExceptionHandler implements FileConverterApi {
 
+    private final IConverterService converterService;
+
     @Autowired
-    private IConverterService converterService;
+    public FileConverterController(IConverterService converterService) {
+        this.converterService = converterService;
+    }
 
     @Override
     public ResponseEntity<Resource> convertPdf(//RequestContextDto requestContext,

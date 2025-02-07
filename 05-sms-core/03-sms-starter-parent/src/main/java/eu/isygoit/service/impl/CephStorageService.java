@@ -24,8 +24,12 @@ import java.util.Map;
 @Transactional
 public class CephStorageService implements IObjectStorageService {
 
+    private final CephApiService cephApiService;
+
     @Autowired
-    private CephApiService cephApiService;
+    public CephStorageService(CephApiService cephApiService) {
+        this.cephApiService = cephApiService;
+    }
 
     @Override
     public void upload(StorageConfig config, String bucketName, String path, Map<String, String> tags, MultipartFile multipartFile) {

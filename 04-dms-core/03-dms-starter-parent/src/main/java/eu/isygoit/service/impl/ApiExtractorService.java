@@ -24,12 +24,16 @@ public class ApiExtractorService extends AbstractApiExtractor<ApiPermission> {
     @Value("${spring.application.name}")
     private String serviceName;
 
-    @Autowired(required = false)
-    private KafkaRegisterApisProducer kafkaRegisterApisProducer;
+    private final ApiPermissionRepository apiPermissionRepository;
+    private final ApiPermissionMapper apiPermissionMapper;
+    private final KafkaRegisterApisProducer kafkaRegisterApisProducer;
+
     @Autowired
-    private ApiPermissionRepository apiPermissionRepository;
-    @Autowired
-    private ApiPermissionMapper apiPermissionMapper;
+    public ApiExtractorService(ApiPermissionRepository apiPermissionRepository, ApiPermissionMapper apiPermissionMapper, KafkaRegisterApisProducer kafkaRegisterApisProducer) {
+        this.apiPermissionRepository = apiPermissionRepository;
+        this.apiPermissionMapper = apiPermissionMapper;
+        this.kafkaRegisterApisProducer = kafkaRegisterApisProducer;
+    }
 
     @Transactional
     @Override

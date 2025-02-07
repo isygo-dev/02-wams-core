@@ -41,11 +41,14 @@ import java.util.stream.Collectors;
 @RequestMapping(path = "/api/v1/private/storage")
 public class ObjectStorageController extends ControllerExceptionHandler implements ObjectStorageControllerApi {
 
-    @Autowired
-    private StorageFactoryService storageFactoryService;
+    private final StorageFactoryService storageFactoryService;
+    private final IStorageConfigService storageConfigService;
 
     @Autowired
-    private IStorageConfigService storageConfigService;
+    public ObjectStorageController(StorageFactoryService storageFactoryService, IStorageConfigService storageConfigService) {
+        this.storageFactoryService = storageFactoryService;
+        this.storageConfigService = storageConfigService;
+    }
 
     @Override
     public ResponseEntity<Object> upload(RequestContextDto requestContext,

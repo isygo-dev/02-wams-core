@@ -29,8 +29,12 @@ import java.util.Map;
 @RequestMapping(path = "/api/v1/private/index")
 public class IndexationController extends ControllerExceptionHandler implements IndexationApi {
 
+    private final IConverterService converterService;
+
     @Autowired
-    private IConverterService converterService;
+    public IndexationController(IConverterService converterService) {
+        this.converterService = converterService;
+    }
 
 
     //https://www.baeldung.com/apache-tika

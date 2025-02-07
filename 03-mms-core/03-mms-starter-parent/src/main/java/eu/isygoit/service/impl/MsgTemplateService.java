@@ -56,22 +56,21 @@ public class MsgTemplateService extends FileService<Long, MsgTemplate, MsgTempla
 
     private final AppProperties appProperties;
 
-    @Autowired
-    private MsgTemplateRepository templateRepository;
-
-    @Autowired
-    private ImsPublicService imsPublicService;
-
-    @Autowired
-    private FreeMarkerConfigurer freemarkerConfig;
+    private final MsgTemplateRepository templateRepository;
+    private final ImsPublicService imsPublicService;
+    private final FreeMarkerConfigurer freemarkerConfig;
 
     /**
      * Instantiates a new Template service.
      *
      * @param appProperties the app properties
      */
-    public MsgTemplateService(AppProperties appProperties) {
+    @Autowired
+    public MsgTemplateService(AppProperties appProperties, MsgTemplateRepository templateRepository, ImsPublicService imsPublicService, FreeMarkerConfigurer freemarkerConfig) {
         this.appProperties = appProperties;
+        this.templateRepository = templateRepository;
+        this.imsPublicService = imsPublicService;
+        this.freemarkerConfig = freemarkerConfig;
     }
 
     @Override

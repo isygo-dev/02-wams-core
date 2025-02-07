@@ -20,8 +20,12 @@ public class KafkaRegisterApisProducer {
     @Value("${spring.kafka.topics.register-api-permission}")
     private String register_api_permission_topic;
 
-    @Autowired(required = false)
-    private KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+
+    @Autowired
+    public KafkaRegisterApisProducer(KafkaTemplate<String, String> kafkaTemplate) {
+        this.kafkaTemplate = kafkaTemplate;
+    }
 
     /**
      * Send message.

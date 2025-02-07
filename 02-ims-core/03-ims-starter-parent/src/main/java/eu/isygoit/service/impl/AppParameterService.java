@@ -5,19 +5,16 @@ import eu.isygoit.com.rest.service.impl.CrudService;
 import eu.isygoit.constants.AppParameterConstants;
 import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.exception.DomainNotFoundException;
-import eu.isygoit.exception.ObjectNotFoundException;
 import eu.isygoit.model.AppParameter;
 import eu.isygoit.repository.AppParameterRepository;
 import eu.isygoit.service.IAppParameterService;
 import eu.isygoit.service.IDomainService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -29,33 +26,13 @@ import java.util.Optional;
 @SrvRepo(value = AppParameterRepository.class)
 public class AppParameterService extends CrudService<Long, AppParameter, AppParameterRepository> implements IAppParameterService {
 
+    private final IDomainService domainService;
+
     @Autowired
-    private IDomainService domainService;
-
-    //@CachePut(cacheNames = SchemaTableConstantName.T_APP_PARAMETER, key = "{#appParameter.domain, #appParameter.name}")
-    @Override
-    public AppParameter create(AppParameter appParameter) {
-        return super.create(appParameter);
+    public AppParameterService(IDomainService domainService) {
+        this.domainService = domainService;
     }
 
-    //@CachePut(cacheNames = SchemaTableConstantName.T_APP_PARAMETER, key = "{#appParameter.domain, #appParameter.name}")
-    @Override
-    public AppParameter update(AppParameter appParameter) {
-        return super.update(appParameter);
-    }
-
-    //@Cacheable(cacheNames = SchemaTableConstantName.T_APP_PARAMETER)
-    @Override
-    public List<AppParameter> findAll(Pageable pageable) {
-        return super.findAll(pageable);
-    }
-
-    @Override
-    public Optional<AppParameter> findById(Long id) throws ObjectNotFoundException {
-        return super.findById(id);
-    }
-
-    //@Cacheable(cacheNames = SchemaTableConstantName.T_APP_PARAMETER, key = "{#domain, #name}")
     @Override
     public String getValueByDomainAndName(String domain, String name, boolean allowDefault, String defaultValue) {
         Optional<AppParameter> optional = repository().findByDomainIgnoreCaseAndNameIgnoreCase(domain, name);

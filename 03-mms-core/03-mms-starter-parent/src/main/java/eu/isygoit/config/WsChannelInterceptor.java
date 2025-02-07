@@ -39,11 +39,14 @@ public class WsChannelInterceptor implements ChannelInterceptor {
     private static final StringMessageConverter stringMessageConverter = new StringMessageConverter();
     private static final Map<String, WsConnectDto> connectedUsers = new HashMap<>();
 
-    @Autowired
-    private ICamelRepository camelRepository;
+    private final ICamelRepository camelRepository;
+    private final IWebSocketService webSocketService;
 
     @Autowired
-    private IWebSocketService webSocketService;
+    public WsChannelInterceptor(ICamelRepository camelRepository, IWebSocketService webSocketService) {
+        this.camelRepository = camelRepository;
+        this.webSocketService = webSocketService;
+    }
 
     /**
      * Gets connections by domain.

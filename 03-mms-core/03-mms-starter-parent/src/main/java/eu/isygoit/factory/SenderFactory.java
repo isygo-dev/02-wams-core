@@ -24,11 +24,14 @@ public class SenderFactory {
 
     private final Map<String, JavaMailSenderImpl> senderMap = new HashMap<>();
 
+    private final SenderConfigRepository senderConfigRepository;
+    private final JavaMailSender defaultSender;
+
     @Autowired
-    private SenderConfigRepository senderConfigRepository;
-    @Qualifier("defaultSender")
-    @Autowired
-    private JavaMailSender defaultSender;
+    public SenderFactory(SenderConfigRepository senderConfigRepository, @Qualifier("defaultSender") JavaMailSender defaultSender) {
+        this.senderConfigRepository = senderConfigRepository;
+        this.defaultSender = defaultSender;
+    }
 
     /**
      * Remove sender.

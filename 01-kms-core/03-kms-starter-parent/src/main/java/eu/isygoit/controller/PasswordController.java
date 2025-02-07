@@ -18,7 +18,6 @@ import eu.isygoit.exception.AccountAuthenticationException;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.jwt.IJwtService;
 import eu.isygoit.mapper.AccountMapper;
-import eu.isygoit.model.TokenConfig;
 import eu.isygoit.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +25,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Optional;
 
 /**
  * The type Password controller.
@@ -39,20 +36,24 @@ import java.util.Optional;
 @RequestMapping(path = "/api/v1/private/password")
 public class PasswordController extends ControllerExceptionHandler implements PasswordControllerApi {
 
+    private final IAccountService accountService;
+    private final IDomainService domainService;
+    private final AccountMapper accountMapper;
+    private final IPasswordService passwordService;
+    private final ITokenService tokenService;
+    private final IJwtService jwtService;
+    private final ITokenConfigService tokenConfigService;
+
     @Autowired
-    private IAccountService accountService;
-    @Autowired
-    private IDomainService domainService;
-    @Autowired
-    private AccountMapper accountMapper;
-    @Autowired
-    private IPasswordService passwordService;
-    @Autowired
-    private ITokenService tokenService;
-    @Autowired
-    private IJwtService jwtService;
-    @Autowired
-    private ITokenConfigService tokenConfigService;
+    public PasswordController(IAccountService accountService, IDomainService domainService, AccountMapper accountMapper, IPasswordService passwordService, ITokenService tokenService, IJwtService jwtService, ITokenConfigService tokenConfigService) {
+        this.accountService = accountService;
+        this.domainService = domainService;
+        this.accountMapper = accountMapper;
+        this.passwordService = passwordService;
+        this.tokenService = tokenService;
+        this.jwtService = jwtService;
+        this.tokenConfigService = tokenConfigService;
+    }
 
     @Override
     public ResponseEntity<Integer> generate(//RequestContextDto requestContext,
@@ -116,72 +117,61 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     }
 
     @Override
-    public ResponseEntity<AccessTokenResponseDto> getAccess(//RequestContextDto requestContext,
-                                                            AccessRequestDto accessRequest) {
+    public ResponseEntity<AccessTokenResponseDto> getAccess(AccessRequestDto accessRequest) {
+        var domain = accessRequest.getDomain().trim().toLowerCase();
+        var username = accessRequest.getUserName().trim().toLowerCase();
         log.info("Call access for domain {}", accessRequest);
+
         try {
-            if (!domainService.isEnabled(accessRequest.getDomain().trim().toLowerCase())) {
-                throw new AccountAuthenticationException("domain disabled: " + accessRequest.getDomain());
+            if (!domainService.isEnabled(domain)) {
+                throw new AccountAuthenticationException("domain disabled: " + domain);
             }
 
-            if (IEnumAuth.Types.TOKEN == accessRequest.getAuthType()) {
-                try {
-                    Optional<TokenConfig> tokenConfig = tokenConfigService.buildTokenConfig(accessRequest.getDomain().trim().toLowerCase(),
-                            IEnumAppToken.Types.ACCESS);
-                    jwtService.validateToken(accessRequest.getPassword(),
-                            new StringBuilder(accessRequest.getUserName().trim().toLowerCase())
-                                    .append("@")
-                                    .append(accessRequest.getDomain().trim().toLowerCase())
-                                    .toString(),
-                            tokenConfig.get().getSecretKey());
-                } catch (Exception e) {
-                    return ResponseFactory.ResponseOk(AccessTokenResponseDto.builder()
-                            .status(IEnumPasswordStatus.Types.UNAUTHORIZED)
-                            .build());
-                }
+            // Use a switch statement to handle different authentication types
+            return switch (accessRequest.getAuthType()) {
+                case TOKEN -> handleTokenAuthentication(accessRequest, domain, username);
+                case PWD -> handlePasswordAuthentication(accessRequest, domain, username);
+                default -> handlePasswordAuthentication(accessRequest, domain, username);
+            };
 
-                return ResponseFactory.ResponseOk(AccessTokenResponseDto.builder()
-                        .status(IEnumPasswordStatus.Types.VALID)
-                        .tokenType(IEnumWebToken.Types.Bearer)
-                        .accessToken(tokenService.createAccessToken(accessRequest.getDomain().trim().toLowerCase(),
-                                        accessRequest.getApplication(),
-                                        accessRequest.getUserName().trim().toLowerCase(),
-                                        accessRequest.getIsAdmin())
-                                .getToken())
-                        .refreshToken(tokenService.createRefreshToken(accessRequest.getDomain().trim().toLowerCase(),
-                                        accessRequest.getApplication(),
-                                        accessRequest.getUserName().trim().toLowerCase())
-                                .getToken())
-                        .authorityToken(tokenService.createAuthorityToken(accessRequest.getDomain().trim().toLowerCase(),
-                                        accessRequest.getApplication(),
-                                        accessRequest.getUserName().trim().toLowerCase(),
-                                        accessRequest.getAuthorities())
-                                .getToken())
-                        .build());
-            } else {
-                return ResponseFactory.ResponseOk(AccessTokenResponseDto.builder()
-                        .status(passwordService.matches(accessRequest.getDomain().trim().toLowerCase()
-                                , accessRequest.getUserName().trim().toLowerCase()
-                                , accessRequest.getPassword()
-                                , accessRequest.getAuthType()))
-                        .tokenType(IEnumWebToken.Types.Bearer)
-                        .accessToken(tokenService.createAccessToken(accessRequest.getDomain().trim().toLowerCase(),
-                                accessRequest.getApplication(),
-                                accessRequest.getUserName().trim().toLowerCase(),
-                                accessRequest.getIsAdmin()).getToken())
-                        .refreshToken(tokenService.createRefreshToken(accessRequest.getDomain().trim().toLowerCase(),
-                                accessRequest.getApplication(),
-                                accessRequest.getUserName().trim().toLowerCase()).getToken())
-                        .authorityToken(tokenService.createAuthorityToken(accessRequest.getDomain().trim().toLowerCase(),
-                                accessRequest.getApplication(),
-                                accessRequest.getUserName().trim().toLowerCase(),
-                                accessRequest.getAuthorities()).getToken())
-                        .build());
-            }
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
         }
+    }
+
+    private ResponseEntity<AccessTokenResponseDto> handleTokenAuthentication(AccessRequestDto accessRequest, String domain, String username) {
+        try {
+            var tokenConfig = tokenConfigService.buildTokenConfig(domain, IEnumAppToken.Types.ACCESS)
+                    .orElseThrow(() -> new AccountAuthenticationException("Token config not found for domain: " + domain));
+
+            jwtService.validateToken(accessRequest.getPassword(), username + "@" + domain, tokenConfig.getSecretKey());
+
+            return buildAccessTokenResponse(accessRequest, domain, username, IEnumPasswordStatus.Types.VALID);
+        } catch (Exception e) {
+            return ResponseFactory.ResponseOk(AccessTokenResponseDto.builder()
+                    .status(IEnumPasswordStatus.Types.UNAUTHORIZED)
+                    .build());
+        }
+    }
+
+    private ResponseEntity<AccessTokenResponseDto> handlePasswordAuthentication(AccessRequestDto accessRequest, String domain, String username) {
+        var status = passwordService.matches(domain, username, accessRequest.getPassword(), accessRequest.getAuthType());
+        return buildAccessTokenResponse(accessRequest, domain, username, status);
+    }
+
+    private ResponseEntity<AccessTokenResponseDto> buildAccessTokenResponse(AccessRequestDto accessRequest, String domain, String username, IEnumPasswordStatus.Types status) {
+        var accessToken = tokenService.createAccessToken(domain, accessRequest.getApplication(), username, accessRequest.getIsAdmin()).getToken();
+        var refreshToken = tokenService.createRefreshToken(domain, accessRequest.getApplication(), username).getToken();
+        var authorityToken = tokenService.createAuthorityToken(domain, accessRequest.getApplication(), username, accessRequest.getAuthorities()).getToken();
+
+        return ResponseFactory.ResponseOk(AccessTokenResponseDto.builder()
+                .status(status)
+                .tokenType(IEnumWebToken.Types.Bearer)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .authorityToken(authorityToken)
+                .build());
     }
 
     @Override

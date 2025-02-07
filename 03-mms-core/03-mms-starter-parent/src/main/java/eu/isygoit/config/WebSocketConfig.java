@@ -20,8 +20,12 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 
+    private final WsChannelInterceptor wsChannelInterceptor;
+
     @Autowired
-    private WsChannelInterceptor wsChannelInterceptor;
+    public WebSocketConfig(WsChannelInterceptor wsChannelInterceptor) {
+        this.wsChannelInterceptor = wsChannelInterceptor;
+    }
 
     //Can be tested on https://jxy.me/websocket-debug-tool/
     @Override

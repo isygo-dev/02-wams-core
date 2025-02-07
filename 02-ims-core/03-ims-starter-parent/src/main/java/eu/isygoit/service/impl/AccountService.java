@@ -29,7 +29,6 @@ import eu.isygoit.remote.kms.KmsPasswordService;
 import eu.isygoit.remote.kms.KmsTokenService;
 import eu.isygoit.remote.mms.MmsChatMessageService;
 import eu.isygoit.repository.AccountRepository;
-import eu.isygoit.repository.RegistredUserRepository;
 import eu.isygoit.service.IAccountService;
 import eu.isygoit.service.IAppParameterService;
 import eu.isygoit.service.IDomainService;
@@ -61,32 +60,28 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
 
     private final AppProperties appProperties;
 
-    @Autowired
-    private KmsPasswordService kmsPasswordService;
-    @Autowired
-    private KmsTokenService kmsTokenService;
-    @Autowired
-    private ApplicationMapper applicationMapper;
-    @Autowired
-    private MinAccountMapper minAccountMapper;
-    @Autowired
-    private IDomainService domainService;
-    @Autowired
-    private IAppParameterService parameterService;
-    @Autowired
-    private MmsChatMessageService mmsChatMessageService;
-    @Autowired
-    private IRoleInfoService roleInfoService;
+    private final KmsPasswordService kmsPasswordService;
+    private final KmsTokenService kmsTokenService;
+    private final ApplicationMapper applicationMapper;
+    private final MinAccountMapper minAccountMapper;
+    private final IDomainService domainService;
+    private final IAppParameterService parameterService;
+    private final MmsChatMessageService mmsChatMessageService;
+    private final IRoleInfoService roleInfoService;
 
-    /**
-     * Instantiates a new Account service.
-     *
-     * @param appProperties                 the app properties
-     * @param registredNewAccountRepository the registred new account repository
-     */
-    public AccountService(AppProperties appProperties, RegistredUserRepository registredNewAccountRepository) {
+    @Autowired
+    public AccountService(AppProperties appProperties, KmsPasswordService kmsPasswordService, KmsTokenService kmsTokenService, ApplicationMapper applicationMapper, MinAccountMapper minAccountMapper, IDomainService domainService, IAppParameterService parameterService, MmsChatMessageService mmsChatMessageService, IRoleInfoService roleInfoService) {
         this.appProperties = appProperties;
+        this.kmsPasswordService = kmsPasswordService;
+        this.kmsTokenService = kmsTokenService;
+        this.applicationMapper = applicationMapper;
+        this.minAccountMapper = minAccountMapper;
+        this.domainService = domainService;
+        this.parameterService = parameterService;
+        this.mmsChatMessageService = mmsChatMessageService;
+        this.roleInfoService = roleInfoService;
     }
+
 
     @Override
     public Optional<NextCodeModel> initCodeGenerator() {

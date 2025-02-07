@@ -34,8 +34,12 @@ import java.util.stream.StreamSupport;
 @Transactional
 public class MinIOApiService implements IMinIOApiService {
 
+    private final Map<String, MinioClient> minIoMap;
+
     @Autowired
-    private Map<String, MinioClient> minIoMap;
+    public MinIOApiService(Map<String, MinioClient> minIoMap) {
+        this.minIoMap = minIoMap;
+    }
 
     /**
      * Gets connection.

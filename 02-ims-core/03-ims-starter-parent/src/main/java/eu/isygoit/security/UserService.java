@@ -23,13 +23,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class UserService implements UserDetailsService {
 
-    @Autowired
-    private AccountRepository accountRepository;
+    private final AccountRepository accountRepository;
+    private final KmsPasswordService kmsPasswordService;
+    private final DomainRepository domainRepository;
 
     @Autowired
-    private KmsPasswordService kmsPasswordService;
-    @Autowired
-    private DomainRepository domainRepository;
+    public UserService(AccountRepository accountRepository, KmsPasswordService kmsPasswordService, DomainRepository domainRepository) {
+        this.accountRepository = accountRepository;
+        this.kmsPasswordService = kmsPasswordService;
+        this.domainRepository = domainRepository;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

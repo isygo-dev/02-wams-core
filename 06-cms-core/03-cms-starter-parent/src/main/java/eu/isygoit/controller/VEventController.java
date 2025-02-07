@@ -39,8 +39,12 @@ import java.util.Optional;
 @RequestMapping(path = "/api/v1/private/calendar/event")
 public class VEventController extends MappedCrudController<Long, VCalendarEvent, VCalendarEventDto, VCalendarEventDto, VEventService> implements CalendarEventControllerAPI {
 
+    private final VCalendarService calendarService;
+
     @Autowired
-    private VCalendarService calendarService;
+    public VEventController(VCalendarService calendarService) {
+        this.calendarService = calendarService;
+    }
 
     @Override
     public VCalendarEventDto beforeUpdate(Long id, VCalendarEventDto eventDto) {

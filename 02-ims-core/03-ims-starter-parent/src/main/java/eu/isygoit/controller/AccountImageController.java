@@ -26,8 +26,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api/v1/private/account")
 public class AccountImageController extends MappedImageController<Long, Account, AccountDto, AccountDto, AccountService> {
 
+    private final KmsPasswordService kmsPasswordService;
+
     @Autowired
-    private KmsPasswordService kmsPasswordService;
+    public AccountImageController(KmsPasswordService kmsPasswordService) {
+        this.kmsPasswordService = kmsPasswordService;
+    }
 
     @Override
     public AccountDto beforeUpdate(AccountDto account) throws Exception {

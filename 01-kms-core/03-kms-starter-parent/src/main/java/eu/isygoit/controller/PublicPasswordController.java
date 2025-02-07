@@ -25,8 +25,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api/v1/public/password")
 public class PublicPasswordController extends ControllerExceptionHandler implements PublicPasswordControllerApi {
 
+    private final ITokenService tokenService;
+
     @Autowired
-    private ITokenService tokenService;
+    public PublicPasswordController(ITokenService tokenService) {
+        this.tokenService = tokenService;
+    }
 
     @Override
     public ResponseEntity<Boolean> generateForgotPasswordAccessToken(UserContextDto userContextDto) {
