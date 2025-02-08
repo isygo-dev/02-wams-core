@@ -1,74 +1,79 @@
 version: '3.9'  # Use the latest Docker Compose version 3.9
 
 services:
+  # Config Service for Spring-based applications
   config-service:
     container_name: config-service
     image: cloud/config-serv:latest
     ports:
-      - "${CONFIG_PORT:-8088}:8088"  # External access (host to container)
-    restart: unless-stopped
+      - ${CONFIG_PORT:-8088}:8088  # External access (host to container) on port 8088 or specified by environment variable
+    restart: unless-stopped  # Automatically restart container unless manually stopped
     healthcheck:
-      test: curl --silent --fail http://localhost:8088/actuator/health || exit 1
-      interval: 10s
-      timeout: 5s
-      retries: 3
+      test: curl --silent --fail http://localhost:8088/actuator/health || exit 1  # Health check on Spring Actuator endpoint
+      interval: 10s  # Health check interval
+      timeout: 5s  # Health check timeout
+      retries: 3  # Retry 3 times before failing
     volumes:
-      - ${CONFIG_DATA_PATH:-/c/docker/volumes/cloud/config-data}:/config  # Mount configuration data
+      - ${CONFIG_DATA_PATH:-/c/docker/volumes/cloud/config-data}:/config  # Mount config data from host to container
     networks:
-      - cloud-net       # Internal network
+      - cloud-net       # Internal network for service communication
       - external-net    # External network for communication from host machine
     environment:
-      - SPRING_PROFILES_ACTIVE=prod  # Set profile for Spring-based services (adjust as needed)
+      - SPRING_PROFILES_ACTIVE=prod  # Set Spring profile to 'prod' for production environment
 
+  # Discovery Service for service registration and discovery
   discovery-service:
     container_name: discovery-service
     image: cloud/discovery-serv:latest
     depends_on:
       config-service:
-        condition: service_healthy
+        condition: service_healthy  # Wait for config-service to be healthy before starting
     ports:
-      - "${DISCOVERY_PORT:-8061}:8061"  # External access (host to container)
-    restart: unless-stopped
+      - ${DISCOVERY_PORT:-8061}:8061  # External access (host to container) on port 8061 or specified by environment variable
+    restart: unless-stopped  # Restart container unless stopped manually
     healthcheck:
-      test: curl --silent --fail http://localhost:8061/actuator/health || exit 1
-      interval: 10s
-      timeout: 5s
-      retries: 3
+      test: curl --silent --fail http://localhost:8061/actuator/health || exit 1  # Health check on Spring Actuator endpoint
+      interval: 10s  # Health check interval
+      timeout: 5s  # Health check timeout
+      retries: 3  # Retry 3 times before failing
     volumes:
-      - ${DISCOVERY_DATA_PATH:-/c/docker/volumes/cloud/discovery-data}:/discovery  # Mount discovery data
+      - ${DISCOVERY_DATA_PATH:-/c/docker/volumes/cloud/discovery-data}:/discovery  # Mount discovery data from host to container
     networks:
-      - cloud-net       # Internal network
+      - cloud-net       # Internal network for service communication
       - external-net    # External network for communication from host machine
     environment:
-      - SPRING_PROFILES_ACTIVE=prod  # Set profile for Spring-based services (adjust as needed)
+      - SPRING_PROFILES_ACTIVE=prod  # Set Spring profile to 'prod' for production environment
 
+  # Gateway Service for API routing and handling requests
   gateway-service:
     container_name: gateway-service
     image: cloud/gateway-serv:latest
     depends_on:
       config-service:
-        condition: service_healthy
+        condition: service_healthy  # Wait for config-service to be healthy before starting
       discovery-service:
-        condition: service_healthy
+        condition: service_healthy  # Wait for discovery-service to be healthy before starting
     ports:
-      - "${GATEWAY_PORT:-8060}:8060"  # External access (host to container)
-    restart: unless-stopped
+      - ${GATEWAY_PORT:-8060}:8060  # External access (host to container) on port 8060 or specified by environment variable
+    restart: unless-stopped  # Restart container unless stopped manually
     healthcheck:
-      test: curl --silent --fail http://localhost:8060/actuator/health || exit 1
-      interval: 10s
-      timeout: 5s
-      retries: 3
+      test: curl --silent --fail http://localhost:8060/actuator/health || exit 1  # Health check on Spring Actuator endpoint
+      interval: 10s  # Health check interval
+      timeout: 5s  # Health check timeout
+      retries: 3  # Retry 3 times before failing
     volumes:
-      - ${GATEWAY_DATA_PATH:-/c/docker/volumes/cloud/gateway-data}:/gateway  # Mount gateway data
+      - ${GATEWAY_DATA_PATH:-/c/docker/volumes/cloud/gateway-data}:/gateway  # Mount gateway data from host to container
     networks:
-      - cloud-net       # Internal network
+      - cloud-net       # Internal network for service communication
       - external-net    # External network for communication from host machine
     environment:
-      - SPRING_PROFILES_ACTIVE=prod  # Set profile for Spring-based services (adjust as needed)
+      - SPRING_PROFILES_ACTIVE=prod  # Set Spring profile to 'prod' for production environment
 
 networks:
+  # Internal network for communication between services (config, discovery, gateway)
   cloud-net:
-    driver: bridge    # Internal communication between services
+    driver: bridge    # Using Docker bridge network for internal communication
 
+  # External network for communication from the host machine (e.g., accessing services from the host)
   external-net:
-    driver: bridge    # External communication from the host machine
+    driver: bridge    # Using Docker bridge network for external communication

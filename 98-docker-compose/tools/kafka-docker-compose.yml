@@ -1,65 +1,77 @@
-version: '3.9'  # Updated to the latest stable version
+version: '3.9'  # Updated to the latest stable version of Docker Compose
 
 services:
   ##############################################################
-  ### Kafka/Zookeeper
+  ### Kafka/Zookeeper Setup
   ##############################################################
-  zookeeper:
-    container_name: zookeeper
-    image: confluentinc/cp-zookeeper:latest
-    ports:
-      - 2181:2181
-    restart: unless-stopped
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    volumes:
-      - zookeeper-data:/var/lib/zookeeper/data  # Use volume for data persistence
-    networks:
-      - tools-net
-      - external-net    # External network for communication from host machine
-    healthcheck:
-      test: ["CMD", "zkCli.sh", "-server", "localhost:2181", "ls", "/"]
-      interval: 30s
-      retries: 5
-      timeout: 10s
 
-  kafka:
-    container_name: kafka
-    image: confluentinc/cp-kafka:latest
-    depends_on:
-      - zookeeper
+  # Zookeeper Service: Required by Kafka for managing distributed coordination
+  zookeeper:
+    container_name: zookeeper  # Name the container for easier management
+    image: confluentinc/cp-zookeeper:latest  # Use the latest version of the Zookeeper image from Confluent
     ports:
-      - 9092:9092
-      - 9093:9093
-    restart: unless-stopped
+      - 2181:2181  # Expose Zookeeper's default port (2181) for communication
+    restart: unless-stopped  # Ensure the container restarts unless manually stopped
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://kafka:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      ZOOKEEPER_CLIENT_PORT: 2181  # Set Zookeeper's client port
+      ZOOKEEPER_TICK_TIME: 2000  # Set the tick time (in milliseconds)
     volumes:
-      - kafka-data:/var/lib/kafka/data  # Use volume for data persistence
+      - zookeeper-data:/var/lib/zookeeper/data  # Persistent volume for Zookeeper data, ensuring it persists across restarts
     networks:
-      - tools-net
-      - external-net    # External network for communication from host machine
+      - tools-net  # Internal network for communication between services
+      - external-net  # External network for communication from the host machine
     healthcheck:
+      # Health check to ensure Zookeeper is running and accessible
+      test: ["CMD", "zkCli.sh", "-server", "localhost:2181", "ls", "/"]
+      interval: 30s  # Run the health check every 30 seconds
+      retries: 5  # Retry up to 5 times before marking the service as unhealthy
+      timeout: 10s  # Timeout after 10 seconds if no response
+    deploy:
+      replicas: 1  # Ensure only one replica of Zookeeper is running
+
+  # Kafka Service: Requires Zookeeper for managing brokers and topics
+  kafka:
+    container_name: kafka  # Name the container for easier management
+    image: confluentinc/cp-kafka:latest  # Use the latest version of Kafka from Confluent
+    depends_on:
+      - zookeeper  # Ensure Zookeeper is started before Kafka
+    ports:
+      - 9092:9092  # Expose Kafka's default port (9092) for communication with clients
+      - 9093:9093  # Expose Kafka's internal port (9093) for communication within the Docker network
+    restart: unless-stopped  # Ensure the container restarts unless manually stopped
+    environment:
+      KAFKA_BROKER_ID: 1  # Set a unique broker ID for the Kafka cluster
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181  # Connect Kafka to Zookeeper at the specified address
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://kafka:29092  # Set advertised listeners for client connections
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT  # Define listener security protocols
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT  # Use PLAINTEXT for inter-broker communication
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1  # Set replication factor for the offsets topic
+    volumes:
+      - kafka-data:/var/lib/kafka/data  # Persistent volume for Kafka data, ensuring it persists across restarts
+    networks:
+      - tools-net  # Internal network for communication between services
+      - external-net  # External network for communication from the host machine
+    healthcheck:
+      # Health check to ensure Kafka is running and able to list topics
       test: ["CMD", "kafka-topics", "--bootstrap-server", "kafka:9092", "--list"]
-      interval: 30s
-      retries: 5
-      timeout: 10s
+      interval: 30s  # Run the health check every 30 seconds
+      retries: 5  # Retry up to 5 times before marking the service as unhealthy
+      timeout: 10s  # Timeout after 10 seconds if no response
+    deploy:
+      replicas: 1  # Ensure only one replica of Kafka is running
 
 volumes:
+  # Define persistent volumes for Zookeeper and Kafka data to ensure data is saved
   zookeeper-data:
-    driver: local  # Ensuring consistent volume driver
+    driver: local  # Ensuring the use of the local volume driver
   kafka-data:
-    driver: local  # Ensuring consistent volume driver
+    driver: local  # Ensuring the use of the local volume driver
 
 networks:
+  # Define the internal network for communication between services
   tools-net:
-    driver: bridge  # Consistent with internal network setup
+    driver: bridge  # Use the bridge driver for internal communication
 
+  # Define the external network for communication with the host machine and other external services
   external-net:
-    driver: bridge    # External communication from the host machine
+    driver: bridge  # Use the bridge driver for external communication

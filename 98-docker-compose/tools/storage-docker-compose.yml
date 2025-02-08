@@ -2,51 +2,55 @@ version: '3.9'  # Updated to the latest stable version
 
 services:
   ##############################################################
-  ### Minio
+  ### Minio (S3-Compatible Object Storage)
   ##############################################################
   minio-server:
-    container_name: minIo
-    image: bitnami/minio:latest
+    container_name: minIo  # The container will be named 'minIo'
+    image: bitnami/minio:latest  # Use the latest Minio image from Bitnami
     ports:
-      - '9000:9000'
-      - '9001:9001'
-    restart: unless-stopped
+      - '9000:9000'  # Expose Minio service on port 9000 for S3 API
+      - '9001:9001'  # Expose Minio's web UI on port 9001
+    restart: unless-stopped  # Ensure the container is always restarted unless manually stopped
     volumes:
-      - minio-data:/var/lib/minio  # Use volume for data persistence
+      - minio-data:/var/lib/minio  # Use volume for persistent Minio data storage
     environment:
-      MINIO_ROOT_USER: admin  # Explicit root user
-      MINIO_ROOT_PASSWORD: password  # Explicit root password
-      MINIO_DEFAULT_BUCKETS: isygoit.eu
+      MINIO_ROOT_USER: admin  # Define the Minio root user for administrative access
+      MINIO_ROOT_PASSWORD: password  # Define the root password for Minio
+      MINIO_DEFAULT_BUCKETS: isygoit.eu  # Specify a default bucket name (optional)
     networks:
       - tools-net
-      - external-net    # External network for communication from host machine
+      - external-net  # Define both internal and external networks for communication
+    # Optional: Using Docker secrets for secure credentials
     # secrets:
     #   - minio_root_user  # Reference to Docker secret (commented out)
     #   - minio_root_password  # Reference to Docker secret (commented out)
     healthcheck:
-      test: ["CMD", "mc", "admin", "info", "myminio"]
-      interval: 30s
-      retries: 5
-      timeout: 10s
-      start_period: 10s
+      test: ["CMD", "mc", "admin", "info", "myminio"]  # Check if Minio service is available using Minio client (mc)
+      interval: 30s  # Run the healthcheck every 30 seconds
+      retries: 5  # Retry 5 times before considering the container unhealthy
+      timeout: 10s  # Healthcheck will timeout after 10 seconds
+      start_period: 10s  # Delay the start of healthchecks for 10 seconds after container start
 
 volumes:
   minio-data:
-    driver: local  # Ensuring consistent volume driver
+    driver: local  # Ensure the use of the local volume driver for data persistence
 
 networks:
   tools-net:
-    driver: bridge  # Consistent with internal network setup
+    driver: bridge  # Set up a bridge network for internal communication between services
 
   external-net:
-    driver: bridge    # External communication from the host machine
+    driver: bridge  # Set up a bridge network for external communication with the host machine
 
+# Optional: Docker secrets for secure environment variables
 # secrets:
 #   minio_root_user:
-#     external: true  # Assumes the secret has been created externally (commented out)
+#     external: true  # Assumes the secret has been created externally with `docker secret create minio_root_user <user_file>`
 #   minio_root_password:
-#     external: true  # Assumes the secret has been created externally (commented out)
-#
-# You need to create these secrets using docker secret create before deploying the stack:
-# docker secret create minio_root_user <user_file>
-# docker secret create minio_root_password <password_file>
+#     external: true  # Assumes the secret has been created externally with `docker secret create minio_root_password <password_file>`
+
+# Instructions for Docker secrets (if needed):
+# 1. Create the secrets using the `docker secret create` command:
+#    - `echo "your-user-value" | docker secret create minio_root_user -`  # Creates the Minio root user secret
+#    - `echo "your-password-value" | docker secret create minio_root_password -`  # Creates the Minio root password secret
+# 2. Uncomment the `secrets` section in the Docker Compose file to reference the secrets.

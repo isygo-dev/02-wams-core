@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: key-service
+spec:
+  selector:
+    app: key-service
+  ports:
+    - protocol: TCP
+      port: 40403
+      targetPort: 40403
+  type: NodePort
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: key-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: key-service
+  template:
+    metadata:
+      labels:
+        app: key-service
+    spec:
+      containers:
+        - name: key-service
+          image: core/kms-serv:latest
+          ports:
+            - containerPort: 40403
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
+          volumeMounts:
+            - name: kms-uploads
+              mountPath: /uploads
+            - name: kms-camel
+              mountPath: /camel
+      volumes:
+        - name: kms-uploads
+          persistentVolumeClaim:
+            claimName: kms-uploads-pvc
+        - name: kms-camel
+          persistentVolumeClaim:
+            claimName: kms-camel-pvc
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kms-uploads-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kms-camel-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

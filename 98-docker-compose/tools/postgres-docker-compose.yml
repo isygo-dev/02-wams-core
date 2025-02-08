@@ -1,76 +1,70 @@
-version: '3.9'  # Updated to the latest stable version
+version: '3.9'  # Use the latest stable version of Docker Compose
 
 services:
   ##############################################################
-  ### PostgreSQL / PgAdmin
+  ### PostgreSQL / PgAdmin Setup
   ##############################################################
   postgres:
-    container_name: postgres
-    image: postgres:14-alpine
-    hostname: localhost
+    container_name: postgres  # Name of the PostgreSQL container
+    image: postgres:14-alpine  # Use the lightweight Alpine version of PostgreSQL
+    hostname: localhost  # Set the hostname for the container
     ports:
-      - "5432:5432"
-    restart: unless-stopped
+      - "5432:5432"  # Expose PostgreSQL port to the host machine
+    restart: unless-stopped  # Ensure container restarts unless manually stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: my_postgres_password  # Explicit value for PostgreSQL password
-#     POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password  # Using Docker secrets for password
-      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres  # Default PostgreSQL username
+      POSTGRES_PASSWORD: root  # Explicit PostgreSQL password (consider using Docker secrets for security)
+      POSTGRES_DB: postgres  # Default database to be created
     volumes:
-      - postgres-data:/var/lib/postgresql/data  # Use volume for data persistence
+      - postgres-data:/var/lib/postgresql/data  # Mount volume for persistent data storage
     networks:
-      - tools-net
-      - external-net    # External network for communication from host machine
-    # secrets:
-    #   - postgres_password  # Reference to Docker secret (commented out)
+      - tools-net  # Internal network for communication between services
+      - external-net  # External network to communicate with the host machine
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
-      interval: 30s
-      retries: 5
-      timeout: 10s
+      test: ["CMD", "pg_isready", "-U", "postgres"]  # Simple health check to ensure PostgreSQL is ready
+      interval: 30s  # Interval between health checks
+      retries: 5  # Number of retries before marking the container as unhealthy
+      timeout: 10s  # Timeout for each health check
 
   pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4:latest
+    container_name: pgadmin  # Name of the pgAdmin container
+    image: dpage/pgadmin4:latest  # Use the latest pgAdmin image
     depends_on:
-      - postgres
+      - postgres  # Ensure PostgreSQL service is up before pgAdmin starts
     ports:
-      - "5050:80"
-    restart: unless-stopped
+      - "5050:80"  # Expose pgAdmin web interface to the host machine
+    restart: unless-stopped  # Ensure container restarts unless manually stopped
     volumes:
-      - pgadmin-data:/var/lib/pgadmin  # Use volume for data persistence
+      - pgadmin-data:/var/lib/pgadmin  # Mount volume for persistent data storage
     environment:
-      PGADMIN_DEFAULT_EMAIL: s.mbarki@isygoit.eu
-      PGADMIN_DEFAULT_PASSWORD: my_pgadmin_password  # Explicit value for pgAdmin password
+      PGADMIN_DEFAULT_EMAIL: s.mbarki@isygoit.eu  # Default admin email for pgAdmin login
+      PGADMIN_DEFAULT_PASSWORD: my_pgadmin_password  # Default admin password for pgAdmin login
     networks:
-      - tools-net
-      - external-net    # External network for communication from host machine
-    # secrets:
-    #   - pgadmin_password  # Reference to Docker secret (commented out)
+      - tools-net  # Internal network for communication between services
+      - external-net  # External network to communicate with the host machine
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
-      interval: 30s
-      retries: 5
-      timeout: 10s
+      test: ["CMD", "pg_isready", "-U", "postgres"]  # Simple health check for pgAdmin to ensure it can connect to PostgreSQL
+      interval: 30s  # Interval between health checks
+      retries: 5  # Number of retries before marking the container as unhealthy
+      timeout: 10s  # Timeout for each health check
 
 volumes:
   postgres-data:
-    driver: local  # Ensuring consistent volume driver
+    driver: local  # Use the default local volume driver for PostgreSQL data
   pgadmin-data:
-    driver: local  # Ensuring consistent volume driver
+    driver: local  # Use the default local volume driver for pgAdmin data
 
 networks:
   tools-net:
-    driver: bridge  # Consistent with internal network setup
-
+    driver: bridge  # Internal network setup for communication between services
   external-net:
-    driver: bridge    # External communication from the host machine
+    driver: bridge  # External network for communication with the host machine
 
-# To use Docker secrets, uncomment the following lines:
+# To use Docker secrets for enhanced security, uncomment the following lines:
 
 # 1. Create the secrets using the `docker secret create` command:
-#    - Run `echo "your-secret-value" | docker secret create postgres_password -` to create a secret for PostgreSQL password.
-#    - Run `echo "your-secret-value" | docker secret create pgadmin_password -` to create a secret for pgAdmin password.
+#    - Run `echo "your-secret-value" | docker secret create postgres_password -` to create a secret for the PostgreSQL password.
+#    - Run `echo "your-secret-value" | docker secret create pgadmin_password -` to create a secret for the pgAdmin password.
 #
 # 2. Uncomment the `secrets` section in the Docker Compose file to reference the secrets:
 #    - Uncomment the lines below to enable Docker secrets.

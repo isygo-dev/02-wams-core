@@ -1,35 +1,50 @@
 version: '3.9'
 
 services:
+  # Cassandra database service
   cassandra:
-    container_name: cassandra
-    image: cassandra:latest
-    restart: unless-stopped
+    container_name: cassandra  # Name the container for easier management
+    image: cassandra:latest  # Use the latest version of the Cassandra image
+    restart: unless-stopped  # Ensure container restarts unless stopped manually
     ports:
-      - "${CASSANDRA_PORT:-9042}:9042"  # External port configurable via environment variables
+      - ${CASSANDRA_PORT:-9042}:9042  # Expose Cassandra's default port (9042), configurable via environment variables
     environment:
-      - CASSANDRA_USER=${CASSANDRA_USER:-admin}  # Credentials using environment variables
-      - CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD:-mysecretpassword}  # Using explicit value for password
-#      - CASSANDRA_PASSWORD_FILE=/run/secrets/cassandra_password  # Using Docker secrets for passwords
+      - CASSANDRA_USER=${CASSANDRA_USER:-admin}  # Set Cassandra user with fallback to 'admin' if not specified
+      - CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD:-admin}  # Set Cassandra password with fallback to 'admin'
+    #      - CASSANDRA_PASSWORD_FILE=/run/secrets/cassandra_password  # Optionally use Docker secrets for secure password management
     volumes:
-      - cassandra-data:/var/lib/cassandra  # Volume for data persistence
+      - cassandra-data:/var/lib/cassandra  # Persistent volume to store Cassandra data, ensuring data persists even if the container is recreated
     networks:
-      - tools-net
-      - external-net  # External network for communication from host machine
+      - tools-net  # Internal network for communication with other services
+      - external-net  # External network for communication with the host machine
     healthcheck:
-      test: ["CMD", "cqlsh", "-u", "${CASSANDRA_USER:-admin}", "-p", "${CASSANDRA_PASSWORD:-mysecretpassword}", "--execute", "SELECT now()"]
-      interval: 30s
-      retries: 5
-      timeout: 10s
-      start_period: 10s  # Added start period to avoid false failures immediately after start
+      test: ["CMD", "cqlsh", "-u", "${CASSANDRA_USER:-admin}", "-p", "${CASSANDRA_PASSWORD:-admin}", "--execute", "SELECT now()"]
+      # Health check executes a simple query to ensure Cassandra is up and running
+      interval: 30s  # Run the health check every 30 seconds
+      retries: 5  # Retry up to 5 times before marking the service as unhealthy
+      timeout: 10s  # Timeout after 10 seconds if no response
+      start_period: 10s  # Grace period for container startup to avoid false failures during initial setup
 
     deploy:
-      replicas: 1  # Ensure that only one replica is used for the cassandra service
+      replicas: 1  # Ensure that only one replica of the Cassandra service is running
       resources:
         limits:
-          memory: 2g  # Memory limit to prevent container from consuming too much RAM
+          memory: 2g  # Limit the container’s memory usage to 2 GB
         reservations:
-          memory: 512m  # Minimum memory reserved for the container
+          memory: 512m  # Reserve 512 MB of memory for the container to ensure enough resources
+
+volumes:
+  cassandra-data:
+    driver: local  # Use the local driver for the persistent volume, ensuring consistent storage
+
+networks:
+  # Internal network for communication between services
+  tools-net:
+    driver: bridge  # Default bridge network for internal communication
+
+  # External network for communication with the host machine and other external services
+  external-net:
+    driver: bridge  # Default bridge network for external communication
 
 # To use Docker secrets, uncomment the following lines:
 
@@ -47,14 +62,3 @@ services:
 # secrets:
 #   cassandra_password:
 #     external: true  # Assumes the secret has been created externally with `docker secret create`
-
-volumes:
-  cassandra-data:
-    driver: local  # Ensuring consistent volume driver
-
-networks:
-  tools-net:
-    driver: bridge  # Consistent with internal network setup
-
-  external-net:
-    driver: bridge  # External communication from the host machine
