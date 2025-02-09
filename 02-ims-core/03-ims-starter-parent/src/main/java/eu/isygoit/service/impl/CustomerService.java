@@ -82,7 +82,7 @@ public class CustomerService extends ImageService<Long, Customer, CustomerReposi
         }
 
         //link csustomer to account
-        Optional<Customer> optional = this.findById(id);
+        Optional<Customer> optional = this.getById(id);
         optional.ifPresentOrElse(customer -> customer.setAccountCode(accountCode),
                 () -> {
                     throw new CustomerNotFoundException("with id:" + id);

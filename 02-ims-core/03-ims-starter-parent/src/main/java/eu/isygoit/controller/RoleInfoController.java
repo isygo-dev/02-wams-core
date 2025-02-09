@@ -45,7 +45,7 @@ public class RoleInfoController extends MappedCrudController<Long, RoleInfo, Rol
     }
 
     @Override
-    public RoleInfoDto afterFindById(RoleInfoDto roleInfoDto) {
+    public RoleInfoDto afterGetById(RoleInfoDto roleInfoDto) {
         List<DistinctApiPermission> apiPermissions = apiPermissionRepository.findDistinctServiceNameAndObject();
         Map<String, RolePermissionDto> rolePermissionsMap = new HashMap<>();
 
@@ -139,20 +139,20 @@ public class RoleInfoController extends MappedCrudController<Long, RoleInfo, Rol
     }
 
     @Override
-    public List<RoleInfoDto> afterFindAllFull(RequestContextDto requestContext, List<RoleInfoDto> list) {
+    public List<RoleInfoDto> afterGetAllFull(RequestContextDto requestContext, List<RoleInfoDto> list) {
         if (!CollectionUtils.isEmpty(list)) {
             //filter roles
             list = crudService().filterNotAllowedRoles(requestContext, list);
         }
-        return super.afterFindAllFull(requestContext, list);
+        return super.afterGetAllFull(requestContext, list);
     }
 
     @Override
-    public List<RoleInfoDto> afterFindAll(RequestContextDto requestContext, List<RoleInfoDto> list) {
+    public List<RoleInfoDto> afterGetAll(RequestContextDto requestContext, List<RoleInfoDto> list) {
         if (!CollectionUtils.isEmpty(list)) {
             //filter roles
             list = crudService().filterNotAllowedRoles(requestContext, list);
         }
-        return super.afterFindAll(requestContext, list);
+        return super.afterGetAll(requestContext, list);
     }
 }

@@ -58,7 +58,7 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
     }
 
     @Override
-    public ResponseEntity<Boolean> deleteFile(RequestContextDto requestContext,
+    public ResponseEntity<Boolean> delete(RequestContextDto requestContext,
                                               String domain,
                                               String code) {
         log.info("Delete file by domain: {} / code: {}", domain, code);
@@ -121,7 +121,7 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
 
     @Override
     public ResponseEntity<LinkedFileResponseDto> upload(//RequestContextDto requestContext,
-                                                        LinkedFileRequestDto linkedFile) throws IOException {
+                                                        LinkedFileRequestDto linkedFile) {
         log.info("Uploading file from domain {} : {}", linkedFile.getDomain(), linkedFile.getFile().getOriginalFilename());
         if (Objects.isNull(linkedFile.getFile())) {
             return ResponseFactory.ResponseBadRequest();
@@ -139,7 +139,7 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
     @Override
     public ResponseEntity<Resource> download(RequestContextDto requestContext,
                                              String domain,
-                                             String code) throws IOException {
+                                             String code) {
         log.info("Downloading file from domain {} : {}", domain, code);
         try {
             Resource resource = linkedFileService.download(domain, code);

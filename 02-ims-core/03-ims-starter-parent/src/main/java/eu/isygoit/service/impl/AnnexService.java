@@ -36,14 +36,14 @@ public class AnnexService extends CrudService<Long, Annex, AnnexRepository> impl
 
     //@Cacheable(cacheNames = SchemaTableConstantName.T_ANNEX)
     @Override
-    public List<Annex> findAll(Pageable pageable) {
-        return super.findAll(pageable);
+    public List<Annex> getAll(Pageable pageable) {
+        return super.getAll(pageable);
     }
 
     //@Cacheable(cacheNames = SchemaTableConstantName.T_ANNEX, key = "{#annex.id}")
     @Override
-    public Optional<Annex> findById(Long id) throws ObjectNotFoundException {
-        return super.findById(id);
+    public Optional<Annex> getById(Long id) throws ObjectNotFoundException {
+        return super.getById(id);
     }
 
     @Override

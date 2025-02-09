@@ -75,9 +75,9 @@ public class AppController extends MappedCrudController<Long, Application, Appli
     }
 
     @Override
-    public ResponseEntity<List<ApplicationDto>> subFindAll(RequestContextDto requestContext) {
+    public ResponseEntity<List<ApplicationDto>> subGetAll(RequestContextDto requestContext) {
         if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
-            return super.subFindAll(requestContext);
+            return super.subGetAll(requestContext);
         } else {
             return ResponseFactory.ResponseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
                     requestContext.getSenderUser())));
@@ -85,9 +85,9 @@ public class AppController extends MappedCrudController<Long, Application, Appli
     }
 
     @Override
-    public ResponseEntity<List<ApplicationDto>> subFindAllDefault(RequestContextDto requestContext) {
+    public ResponseEntity<List<ApplicationDto>> subGetAssignedToDefaultDomain(RequestContextDto requestContext) {
         if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
-            return super.subFindAllDefault(requestContext);
+            return super.getAssignedToDefaultDomain(requestContext);
         } else {
             return ResponseFactory.ResponseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
                     requestContext.getSenderUser())));
@@ -95,9 +95,9 @@ public class AppController extends MappedCrudController<Long, Application, Appli
     }
 
     @Override
-    public ResponseEntity<List<ApplicationDto>> subFindAll(RequestContextDto requestContext, Integer page, Integer size) {
+    public ResponseEntity<List<ApplicationDto>> subGetAllPaged(RequestContextDto requestContext, int page, int size) {
         if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
-            return super.subFindAll(requestContext, page, size);
+            return super.subGetAllPaged(requestContext, page, size);
         } else {
             return ResponseFactory.ResponseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
                     requestContext.getSenderUser())));
@@ -105,9 +105,9 @@ public class AppController extends MappedCrudController<Long, Application, Appli
     }
 
     @Override
-    public ResponseEntity<List<ApplicationDto>> subFindAllFull(RequestContextDto requestContext) {
+    public ResponseEntity<List<ApplicationDto>> subGetAllFull(RequestContextDto requestContext) {
         if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
-            return super.subFindAllFull(requestContext);
+            return super.subGetAllFull(requestContext);
         } else {
             return ResponseFactory.ResponseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
                     requestContext.getSenderUser())));
@@ -115,9 +115,9 @@ public class AppController extends MappedCrudController<Long, Application, Appli
     }
 
     @Override
-    public ResponseEntity<List<ApplicationDto>> subFindAllFull(RequestContextDto requestContext, Integer page, Integer size) {
+    public ResponseEntity<List<ApplicationDto>> subGetAllFullPaged(RequestContextDto requestContext, int page, int size) {
         if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
-            return super.subFindAllFull(requestContext, page, size);
+            return super.subGetAllFullPaged(requestContext, page, size);
         } else {
             return ResponseFactory.ResponseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
                     requestContext.getSenderUser())));

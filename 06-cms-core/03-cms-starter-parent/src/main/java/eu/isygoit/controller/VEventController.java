@@ -48,7 +48,7 @@ public class VEventController extends MappedCrudController<Long, VCalendarEvent,
 
     @Override
     public VCalendarEventDto beforeUpdate(Long id, VCalendarEventDto eventDto) {
-        this.crudService().findById(id).ifPresent(event -> {
+        this.crudService().getById(id).ifPresent(event -> {
             calendarService.findByDomainAndName(event.getDomain(), event.getCalendar())
                     .ifPresentOrElse(vCalendar -> {
                                 try {
@@ -83,7 +83,7 @@ public class VEventController extends MappedCrudController<Long, VCalendarEvent,
 
     @Override
     public boolean beforeDelete(Long id) {
-        this.crudService().findById(id).ifPresent(event -> {
+        this.crudService().getById(id).ifPresent(event -> {
             calendarService.findByDomainAndName(event.getDomain(), event.getCalendar())
                     .ifPresentOrElse(vCalendar -> {
                                 try {
@@ -156,7 +156,7 @@ public class VEventController extends MappedCrudController<Long, VCalendarEvent,
                                                          Long id,
                                                          VCalendarEventDto event) {
         try {
-            this.crudService().findById(id);
+            this.crudService().getById(id);
             return ResponseFactory.ResponseOk(this.mapper().entityToDto(this.crudService().update((this.mapper().dtoToEntity(event)))));
         } catch (Exception ex) {
             return getBackExceptionResponse(ex);

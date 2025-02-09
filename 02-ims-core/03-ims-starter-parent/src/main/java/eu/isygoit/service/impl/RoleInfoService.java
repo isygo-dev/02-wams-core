@@ -71,19 +71,19 @@ public class RoleInfoService extends CodifiableService<Long, RoleInfo, RoleInfoR
     }
 
     @Override
-    public List<RoleInfo> afterFindAll(List<RoleInfo> list) {
+    public List<RoleInfo> afterGetAll(List<RoleInfo> list) {
         if (!CollectionUtils.isEmpty(list)) {
             list.stream().forEach(roleInfo -> {
                 roleInfo.setNumberOfUsers(assoRoleInfoAccountRepository.countAllById_RoleInfoCode(roleInfo.getCode()));
             });
         }
-        return super.afterFindAll(list);
+        return super.afterGetAll(list);
     }
 
     @Override
-    public RoleInfo afterFindById(RoleInfo roleInfo) {
+    public RoleInfo afterGetById(RoleInfo roleInfo) {
         roleInfo.setNumberOfUsers(assoRoleInfoAccountRepository.countAllById_RoleInfoCode(roleInfo.getCode()));
-        return super.afterFindById(roleInfo);
+        return super.afterGetById(roleInfo);
     }
 
     /**

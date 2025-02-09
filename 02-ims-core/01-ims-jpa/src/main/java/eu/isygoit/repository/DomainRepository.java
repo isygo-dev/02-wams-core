@@ -40,7 +40,7 @@ public interface DomainRepository extends JpaPagingAndSortingSAASCodifiableRepos
      * @return the all names
      */
     @Query("select d.name from Domain d")
-    List<String> getAllNames();
+    List<String> findAllNames();
 
     /**
      * Gets admin status.

@@ -202,9 +202,9 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     @Override
     public List<MinAccountDto> getMinInfoByDomain(String domain) throws NotSupportedException {
         if (DomainConstants.SUPER_DOMAIN_NAME.equals(domain)) {
-            return minAccountMapper.listEntityToDto(findAll());
+            return minAccountMapper.listEntityToDto(getAll());
         } else {
-            return minAccountMapper.listEntityToDto(findAll(domain));
+            return minAccountMapper.listEntityToDto(getAll(domain));
         }
     }
 
@@ -402,7 +402,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
 
     @Override
     public boolean resendCreationEmail(Long id) {
-        Optional<Account> optional = this.findById(id);
+        Optional<Account> optional = this.getById(id);
         if (!optional.isPresent()) {
             throw new AccountNotFoundException("with id " + id);
         }
@@ -533,6 +533,6 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     //@Cacheable(cacheNames = SchemaTableConstantName.T_ACCOUNT)
     @EventListener(ApplicationReadyEvent.class)
     public List<MinAccountDto> getAllAccountsMin() {
-        return minAccountMapper.listEntityToDto(this.findAll());
+        return minAccountMapper.listEntityToDto(this.getAll());
     }
 }
