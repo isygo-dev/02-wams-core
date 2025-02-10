@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.service.impl.CrudService;
 import eu.isygoit.model.SenderConfig;
 import eu.isygoit.repository.SenderConfigRepository;
@@ -15,5 +16,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @SrvRepo(value = SenderConfigRepository.class)
 public class SenderConfigService extends CrudService<Long, SenderConfig, SenderConfigRepository> implements ISenderConfigService {
+
+    private final ApplicationContextService applicationContextService;
+
+    public SenderConfigService(ApplicationContextService applicationContextService) {
+        this.applicationContextService = applicationContextService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
 
 }

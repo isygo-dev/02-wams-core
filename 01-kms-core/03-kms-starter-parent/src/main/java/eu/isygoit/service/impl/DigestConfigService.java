@@ -2,6 +2,7 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.CodeGenLocal;
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.service.impl.CodifiableService;
 import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.model.AppNextCode;
@@ -23,6 +24,17 @@ import java.util.Optional;
 @CodeGenLocal(value = NextCodeService.class)
 @SrvRepo(value = DigesterConfigRepository.class)
 public class DigestConfigService extends CodifiableService<Long, DigestConfig, DigesterConfigRepository> implements IDigestConfigService {
+
+    private final ApplicationContextService applicationContextService;
+
+    public DigestConfigService(ApplicationContextService applicationContextService) {
+        this.applicationContextService = applicationContextService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
 
     @Override
     public Optional<NextCodeModel> initCodeGenerator() {

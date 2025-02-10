@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.service.impl.CrudService;
 import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.dto.exception.StorageConfigNotFoundException;
@@ -22,11 +23,18 @@ import java.util.Optional;
 @SrvRepo(value = StorageConfigRepository.class)
 public class StorageConfigService extends CrudService<Long, StorageConfig, StorageConfigRepository> implements IStorageConfigService {
 
+    private final ApplicationContextService applicationContextService;
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
+
     private final StorageConfigRepository storageConfigRepository;
     private final IMinIOApiService minIOApiService;
 
     @Autowired
-    public StorageConfigService(StorageConfigRepository storageConfigRepository, IMinIOApiService minIOApiService) {
+    public StorageConfigService(ApplicationContextService applicationContextService, StorageConfigRepository storageConfigRepository, IMinIOApiService minIOApiService) {
+        this.applicationContextService = applicationContextService;
         this.storageConfigRepository = storageConfigRepository;
         this.minIOApiService = minIOApiService;
     }

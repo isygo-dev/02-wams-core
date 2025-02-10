@@ -2,6 +2,7 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.CodeGenLocal;
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.service.impl.CodifiableService;
 import eu.isygoit.config.JwtProperties;
 import eu.isygoit.constants.DomainConstants;
@@ -27,6 +28,13 @@ import java.util.Optional;
 @SrvRepo(value = TokenConfigRepository.class)
 public class TokenConfigService extends CodifiableService<Long, TokenConfig, TokenConfigRepository> implements ITokenConfigService {
 
+    private final ApplicationContextService applicationContextService;
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
+
+
     private final JwtProperties jwtProperties;
 
     private final TokenConfigRepository tokenConfigRepository;
@@ -38,7 +46,8 @@ public class TokenConfigService extends CodifiableService<Long, TokenConfig, Tok
      * @param tokenConfigRepository the token config repository
      */
     @Autowired
-    public TokenConfigService(JwtProperties jwtProperties, TokenConfigRepository tokenConfigRepository) {
+    public TokenConfigService(ApplicationContextService applicationContextService, JwtProperties jwtProperties, TokenConfigRepository tokenConfigRepository) {
+        this.applicationContextService = applicationContextService;
         this.jwtProperties = jwtProperties;
         this.tokenConfigRepository = tokenConfigRepository;
     }

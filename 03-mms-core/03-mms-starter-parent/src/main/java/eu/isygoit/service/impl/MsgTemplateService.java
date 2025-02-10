@@ -3,6 +3,7 @@ package eu.isygoit.service.impl;
 import eu.isygoit.annotation.CodeGenKms;
 import eu.isygoit.annotation.CodeGenLocal;
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.service.impl.FileService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.DomainConstants;
@@ -54,6 +55,12 @@ import java.util.Optional;
 public class MsgTemplateService extends FileService<Long, MsgTemplate, MsgTemplateRepository>
         implements IMsgTemplateService {
 
+    private final ApplicationContextService applicationContextService;
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
+
     private final AppProperties appProperties;
 
     private final MsgTemplateRepository templateRepository;
@@ -66,7 +73,8 @@ public class MsgTemplateService extends FileService<Long, MsgTemplate, MsgTempla
      * @param appProperties the app properties
      */
     @Autowired
-    public MsgTemplateService(AppProperties appProperties, MsgTemplateRepository templateRepository, ImsPublicService imsPublicService, FreeMarkerConfigurer freemarkerConfig) {
+    public MsgTemplateService(ApplicationContextService applicationContextService, AppProperties appProperties, MsgTemplateRepository templateRepository, ImsPublicService imsPublicService, FreeMarkerConfigurer freemarkerConfig) {
+        this.applicationContextService = applicationContextService;
         this.appProperties = appProperties;
         this.templateRepository = templateRepository;
         this.imsPublicService = imsPublicService;

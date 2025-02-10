@@ -27,5 +27,5 @@ public interface IApplicationService extends ICrudServiceMethod<Long, Applicatio
      * @param name the name
      * @return the application
      */
-    Optional<Application> findByName(String name);
+    Optional<Application> getByName(String name);
 }

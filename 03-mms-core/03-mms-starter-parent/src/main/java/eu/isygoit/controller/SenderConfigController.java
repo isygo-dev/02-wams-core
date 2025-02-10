@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
 import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.exception.handler.MmsExceptionHandler;
@@ -26,11 +27,18 @@ import org.springframework.web.bind.annotation.RestController;
 @CtrlDef(handler = MmsExceptionHandler.class, mapper = SenderConfigMapper.class, minMapper = SenderConfigMapper.class, service = SenderConfigService.class)
 public class SenderConfigController extends MappedCrudController<Long, SenderConfig, SenderConfigDto, SenderConfigDto, SenderConfigService> {
 
+    private final ApplicationContextService applicationContextService;
     private final SenderFactory senderFactory;
 
     @Autowired
-    public SenderConfigController(SenderFactory senderFactory) {
+    public SenderConfigController(ApplicationContextService applicationContextService, SenderFactory senderFactory) {
+        this.applicationContextService = applicationContextService;
         this.senderFactory = senderFactory;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     @Override

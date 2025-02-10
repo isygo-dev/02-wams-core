@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlHandler;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
@@ -9,7 +10,7 @@ import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.exception.RandomKeyNotFoundException;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.service.IKeyService;
-import eu.isygoit.service.KeyServiceApi;
+import eu.isygoit.service.key.KeyServiceApi;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +30,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class KeyController extends ControllerExceptionHandler implements KeyServiceApi {
 
     private final IKeyService keyService;
+    private final ApplicationContextService applicationContextService;
 
     @Autowired
-    public KeyController(IKeyService keyService) {
+    public KeyController(IKeyService keyService, ApplicationContextService applicationContextService) {
         this.keyService = keyService;
+        this.applicationContextService = applicationContextService;
     }
 
     @Override
@@ -72,5 +75,10 @@ public class KeyController extends ControllerExceptionHandler implements KeyServ
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
         }
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 }

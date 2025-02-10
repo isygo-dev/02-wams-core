@@ -2,6 +2,7 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlHandler;
 import eu.isygoit.api.LinkedFileApi;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
@@ -21,7 +22,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -36,13 +36,19 @@ import java.util.Objects;
 @RequestMapping(path = "/api/v1/private/linked-files")
 public class LinkedFileController extends ControllerExceptionHandler implements LinkedFileApi {
 
+    private final ApplicationContextService applicationContextService;
     private final ILinkedFileService linkedFileService;
     private final LinkedFileMapper linkedFileMapper;
-
     @Autowired
-    public LinkedFileController(ILinkedFileService linkedFileService, LinkedFileMapper linkedFileMapper) {
+    public LinkedFileController(ApplicationContextService applicationContextService, ILinkedFileService linkedFileService, LinkedFileMapper linkedFileMapper) {
+        this.applicationContextService = applicationContextService;
         this.linkedFileService = linkedFileService;
         this.linkedFileMapper = linkedFileMapper;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     @Override
@@ -59,8 +65,8 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
 
     @Override
     public ResponseEntity<Boolean> delete(RequestContextDto requestContext,
-                                              String domain,
-                                              String code) {
+                                          String domain,
+                                          String code) {
         log.info("Delete file by domain: {} / code: {}", domain, code);
         try {
             linkedFileService.deleteFile(domain, code);

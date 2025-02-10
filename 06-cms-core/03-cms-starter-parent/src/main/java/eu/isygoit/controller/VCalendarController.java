@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
@@ -40,11 +41,18 @@ import java.nio.file.Path;
 @RequestMapping(path = "/api/v1/private/calendar")
 public class VCalendarController extends MappedCrudController<Long, VCalendar, VCalendarDto, VCalendarDto, VCalendarService> {
 
+    private final ApplicationContextService applicationContextService;
     private final VCalendarService vCalendarService;
 
     @Autowired
-    public VCalendarController(VCalendarService vCalendarService) {
+    public VCalendarController(ApplicationContextService applicationContextService, VCalendarService vCalendarService) {
+        this.applicationContextService = applicationContextService;
         this.vCalendarService = vCalendarService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     /**

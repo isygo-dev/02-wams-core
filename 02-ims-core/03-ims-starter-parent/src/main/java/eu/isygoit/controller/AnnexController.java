@@ -2,6 +2,7 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
 import eu.isygoit.api.AnnexControllerApi;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
@@ -34,18 +35,25 @@ import java.util.List;
 public class AnnexController extends MappedCrudController<Long, Annex, AnnexDto, AnnexDto, AnnexService>
         implements AnnexControllerApi {
 
+    private final ApplicationContextService applicationContextService;
     private final IAnnexService annexService;
 
     @Autowired
-    public AnnexController(IAnnexService annexService) {
+    public AnnexController(ApplicationContextService applicationContextService, IAnnexService annexService) {
+        this.applicationContextService = applicationContextService;
         this.annexService = annexService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     @Override
     public ResponseEntity<List<AnnexDto>> getAnnexByTableCode(RequestContextDto requestContext,
                                                               String code) {
         try {
-            List<AnnexDto> list = mapper().listEntityToDto(annexService.findAnnexByTableCode(code));
+            List<AnnexDto> list = mapper().listEntityToDto(annexService.getByTableCode(code));
             if (!CollectionUtils.isEmpty(list)) {
                 return ResponseFactory.ResponseOk(list);
             } else {
@@ -60,7 +68,7 @@ public class AnnexController extends MappedCrudController<Long, Annex, AnnexDto,
     @Override
     public ResponseEntity<List<AnnexDto>> getAnnexByTableCodeAndReference(RequestContextDto requestContext, String code, String reference) {
         try {
-            List<AnnexDto> list = mapper().listEntityToDto(annexService.findAnnexByTableCodeAndRef(code, reference));
+            List<AnnexDto> list = mapper().listEntityToDto(annexService.getByTableCodeAndRef(code, reference));
             if (!CollectionUtils.isEmpty(list)) {
                 return ResponseFactory.ResponseOk(list);
             } else {

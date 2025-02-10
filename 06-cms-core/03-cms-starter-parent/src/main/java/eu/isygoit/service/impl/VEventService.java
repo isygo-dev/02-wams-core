@@ -3,6 +3,7 @@ package eu.isygoit.service.impl;
 import eu.isygoit.annotation.CodeGenKms;
 import eu.isygoit.annotation.CodeGenLocal;
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.service.impl.CodifiableService;
 import eu.isygoit.config.AppProperties;
@@ -43,6 +44,7 @@ public class VEventService extends CodifiableService<Long, VCalendarEvent, VEven
 
     private final AppProperties appProperties;
     private final VCalendarService calendarService;
+    private final ApplicationContextService applicationContextService;
 
     /**
      * Instantiates a new V event service.
@@ -50,9 +52,10 @@ public class VEventService extends CodifiableService<Long, VCalendarEvent, VEven
      * @param appProperties the app properties
      */
     @Autowired
-    public VEventService(AppProperties appProperties, VCalendarService calendarService) {
+    public VEventService(AppProperties appProperties, VCalendarService calendarService, ApplicationContextService applicationContextService) {
         this.appProperties = appProperties;
         this.calendarService = calendarService;
+        this.applicationContextService = applicationContextService;
     }
 
     @Override
@@ -120,6 +123,11 @@ public class VEventService extends CodifiableService<Long, VCalendarEvent, VEven
                         });
 
         return super.afterCreate(vCalendarEvent);
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     @Override

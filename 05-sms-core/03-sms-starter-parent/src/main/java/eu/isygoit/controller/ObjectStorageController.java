@@ -2,6 +2,7 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlHandler;
 import eu.isygoit.api.ObjectStorageControllerApi;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
@@ -41,13 +42,19 @@ import java.util.stream.Collectors;
 @RequestMapping(path = "/api/v1/private/storage")
 public class ObjectStorageController extends ControllerExceptionHandler implements ObjectStorageControllerApi {
 
+    private final ApplicationContextService applicationContextService;
     private final StorageFactoryService storageFactoryService;
     private final IStorageConfigService storageConfigService;
-
     @Autowired
-    public ObjectStorageController(StorageFactoryService storageFactoryService, IStorageConfigService storageConfigService) {
+    public ObjectStorageController(ApplicationContextService applicationContextService, StorageFactoryService storageFactoryService, IStorageConfigService storageConfigService) {
+        this.applicationContextService = applicationContextService;
         this.storageFactoryService = storageFactoryService;
         this.storageConfigService = storageConfigService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     @Override

@@ -2,6 +2,7 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
 import eu.isygoit.api.DomainControllerApi;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
@@ -36,11 +37,18 @@ import java.util.List;
 public class DomainController extends MappedCrudController<Long, Domain, DomainDto, DomainDto, DomainService>
         implements DomainControllerApi {
 
+    private final ApplicationContextService applicationContextService;
     private final KmsDomainService kmsDomainService;
 
     @Autowired
-    public DomainController(KmsDomainService kmsDomainService) {
+    public DomainController(ApplicationContextService applicationContextService, KmsDomainService kmsDomainService) {
+        this.applicationContextService = applicationContextService;
         this.kmsDomainService = kmsDomainService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     @Override
@@ -94,7 +102,7 @@ public class DomainController extends MappedCrudController<Long, Domain, DomainD
     public ResponseEntity<List<String>> getAllDomainNames(RequestContextDto requestContext) {
         log.info("getAllDomainNames {}", requestContext.getSenderDomain());
         try {
-            return ResponseFactory.ResponseOk(crudService().getAllDomainNames(requestContext.getSenderDomain()));
+            return ResponseFactory.ResponseOk(crudService().getAllNames(requestContext.getSenderDomain()));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -105,7 +113,7 @@ public class DomainController extends MappedCrudController<Long, Domain, DomainD
     public ResponseEntity<DomainDto> getByName(RequestContextDto requestContext) {
         log.info("get by name {}", requestContext.getSenderDomain());
         try {
-            return ResponseFactory.ResponseOk(mapper().entityToDto(crudService().findByName(requestContext.getSenderDomain())
+            return ResponseFactory.ResponseOk(mapper().entityToDto(crudService().getByName(requestContext.getSenderDomain())
                     .orElseThrow(() -> new DomainNotFoundException("with name " + requestContext.getSenderDomain()))));
         } catch (Throwable e) {
             log.error("<Error>: get by name : {} ", e);

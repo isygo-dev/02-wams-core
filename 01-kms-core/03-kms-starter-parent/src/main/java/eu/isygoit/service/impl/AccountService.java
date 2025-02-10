@@ -2,6 +2,7 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.CodeGenLocal;
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.service.impl.CrudService;
 import eu.isygoit.model.Account;
 import eu.isygoit.repository.AccountRepository;
@@ -19,6 +20,17 @@ import java.util.Optional;
 @CodeGenLocal(value = NextCodeService.class)
 @SrvRepo(value = AccountRepository.class)
 public class AccountService extends CrudService<Long, Account, AccountRepository> implements IAccountService {
+
+    private final ApplicationContextService applicationContextService;
+
+    public AccountService(ApplicationContextService applicationContextService) {
+        this.applicationContextService = applicationContextService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
 
     @Override
     public Optional<Account> checkIfExists(Account account, boolean createIfNotExists) {

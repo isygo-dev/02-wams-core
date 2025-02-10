@@ -2,6 +2,7 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
 import eu.isygoit.api.MailMessageControllerApi;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
@@ -37,17 +38,22 @@ import java.util.UUID;
 public class MailMessageController extends MappedCrudController<UUID, MailMessage, MailMessageDto, MailMessageDto, MailMessageService>
         implements MailMessageControllerApi {
 
+    private final ApplicationContextService applicationContextService;
     private final MailMessageService mailMessageService;
-
     private final MailMessageMapper mailMessageMapper;
-
     private final IMsgTemplateService templateService;
 
     @Autowired
-    public MailMessageController(MailMessageService mailMessageService, MailMessageMapper mailMessageMapper, IMsgTemplateService templateService) {
+    public MailMessageController(ApplicationContextService applicationContextService, MailMessageService mailMessageService, MailMessageMapper mailMessageMapper, IMsgTemplateService templateService) {
+        this.applicationContextService = applicationContextService;
         this.mailMessageService = mailMessageService;
         this.mailMessageMapper = mailMessageMapper;
         this.templateService = templateService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     public ResponseEntity<?> sendMail(String senderDomainName, IEnumMsgTemplateName.Types template, MailMessageDto mailMessage) {

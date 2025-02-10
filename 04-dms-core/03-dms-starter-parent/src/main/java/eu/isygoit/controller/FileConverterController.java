@@ -2,6 +2,7 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlHandler;
 import eu.isygoit.api.FileConverterApi;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.enums.IEnumFileType;
@@ -35,11 +36,18 @@ import java.util.Objects;
 @RequestMapping(path = "/api/v1/private/file/convert")
 public class FileConverterController extends ControllerExceptionHandler implements FileConverterApi {
 
+    private final ApplicationContextService applicationContextService;
     private final IConverterService converterService;
 
     @Autowired
-    public FileConverterController(IConverterService converterService) {
+    public FileConverterController(ApplicationContextService applicationContextService, IConverterService converterService) {
+        this.applicationContextService = applicationContextService;
         this.converterService = converterService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     @Override

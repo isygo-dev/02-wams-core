@@ -25,7 +25,7 @@ services:
     #   - minio_root_user  # Reference to Docker secret (commented out)
     #   - minio_root_password  # Reference to Docker secret (commented out)
     healthcheck:
-      test: ["CMD", "mc", "admin", "info", "myminio"]  # Check if Minio service is available using Minio client (mc)
+      test: [ "CMD", "mc", "admin", "info", "myminio" ]  # Check if Minio service is available using Minio client (mc)
       interval: 30s  # Run the healthcheck every 30 seconds
       retries: 5  # Retry 5 times before considering the container unhealthy
       timeout: 10s  # Healthcheck will timeout after 10 seconds

@@ -3,6 +3,7 @@ package eu.isygoit.service.impl;
 import eu.isygoit.annotation.CodeGenKms;
 import eu.isygoit.annotation.CodeGenLocal;
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.service.impl.CodifiableService;
 import eu.isygoit.config.AppProperties;
@@ -47,6 +48,12 @@ import java.util.Optional;
 public class VCalendarService extends CodifiableService<Long, VCalendar, VCalendarRepository>
         implements IVCalendarService {
 
+    private final ApplicationContextService applicationContextService;
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
+
     private final AppProperties appProperties;
 
     private final VCalendarRepository vCalendarRepository;
@@ -57,7 +64,8 @@ public class VCalendarService extends CodifiableService<Long, VCalendar, VCalend
      * @param appProperties the app properties
      */
     @Autowired
-    public VCalendarService(AppProperties appProperties, VCalendarRepository vCalendarRepository) {
+    public VCalendarService(ApplicationContextService applicationContextService, AppProperties appProperties, VCalendarRepository vCalendarRepository) {
+        this.applicationContextService = applicationContextService;
         this.appProperties = appProperties;
         this.vCalendarRepository = vCalendarRepository;
     }

@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.service.impl.CrudService;
 import eu.isygoit.exception.ObjectNotFoundException;
 import eu.isygoit.model.Annex;
@@ -22,37 +23,24 @@ import java.util.Optional;
 @SrvRepo(value = AnnexRepository.class)
 public class AnnexService extends CrudService<Long, Annex, AnnexRepository> implements IAnnexService {
 
-    //@CachePut(cacheNames = SchemaTableConstantName.T_ANNEX, key = "{#annex.id}")
-    @Override
-    public Annex create(Annex annex) {
-        return super.create(annex);
-    }
+    private final ApplicationContextService applicationContextService;
 
-    //@CachePut(cacheNames = SchemaTableConstantName.T_ANNEX, key = "{#annex.id}")
-    @Override
-    public Annex update(Annex annex) {
-        return super.update(annex);
-    }
-
-    //@Cacheable(cacheNames = SchemaTableConstantName.T_ANNEX)
-    @Override
-    public List<Annex> getAll(Pageable pageable) {
-        return super.getAll(pageable);
-    }
-
-    //@Cacheable(cacheNames = SchemaTableConstantName.T_ANNEX, key = "{#annex.id}")
-    @Override
-    public Optional<Annex> getById(Long id) throws ObjectNotFoundException {
-        return super.getById(id);
+    public AnnexService(ApplicationContextService applicationContextService) {
+        this.applicationContextService = applicationContextService;
     }
 
     @Override
-    public List<Annex> findAnnexByTableCode(String code) {
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
+
+    @Override
+    public List<Annex> getByTableCode(String code) {
         return repository().findByTableCode(code);
     }
 
     @Override
-    public List<Annex> findAnnexByTableCodeAndRef(String code, String reference) {
+    public List<Annex> getByTableCodeAndRef(String code, String reference) {
         List<Annex> annexes = repository().findByTableCodeAndReference(code, reference);
         if (!annexes.isEmpty()) {
             return annexes;

@@ -2,6 +2,7 @@ package eu.isygoit.service.impl;
 
 
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.service.impl.CrudServiceUtils;
 import eu.isygoit.exception.AccountNotFoundException;
 import eu.isygoit.exception.PropertyNotFoundException;
@@ -33,12 +34,19 @@ import java.util.Optional;
 @SrvRepo(value = PropertyRepository.class)
 public class PropertyService extends CrudServiceUtils<Property, PropertyRepository> implements IPropertyService {
 
+    private final ApplicationContextService applicationContextService;
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
+
     private final AccountRepository accountRepository;
 
     private final AcountPropsRepository acountPropsRepository;
 
     @Autowired
-    public PropertyService(AccountRepository accountRepository, AcountPropsRepository acountPropsRepository) {
+    public PropertyService(ApplicationContextService applicationContextService, AccountRepository accountRepository, AcountPropsRepository acountPropsRepository) {
+        this.applicationContextService = applicationContextService;
         this.accountRepository = accountRepository;
         this.acountPropsRepository = acountPropsRepository;
     }

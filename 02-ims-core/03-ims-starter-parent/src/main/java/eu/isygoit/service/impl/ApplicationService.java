@@ -3,6 +3,7 @@ package eu.isygoit.service.impl;
 import eu.isygoit.annotation.CodeGenKms;
 import eu.isygoit.annotation.CodeGenLocal;
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.service.impl.ImageService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.DomainConstants;
@@ -30,6 +31,12 @@ import java.util.Optional;
 public class ApplicationService extends ImageService<Long, Application, ApplicationRepository>
         implements IApplicationService {
 
+    private final ApplicationContextService applicationContextService;
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
+
     private final AppProperties appProperties;
 
     /**
@@ -37,7 +44,8 @@ public class ApplicationService extends ImageService<Long, Application, Applicat
      *
      * @param appProperties the app properties
      */
-    public ApplicationService(AppProperties appProperties) {
+    public ApplicationService(ApplicationContextService applicationContextService, AppProperties appProperties) {
+        this.applicationContextService = applicationContextService;
         this.appProperties = appProperties;
     }
 
@@ -66,7 +74,7 @@ public class ApplicationService extends ImageService<Long, Application, Applicat
     }
 
     @Override
-    public Optional<Application> findByName(String name) {
+    public Optional<Application> getByName(String name) {
         return repository().findByNameIgnoreCase(name);
     }
 }

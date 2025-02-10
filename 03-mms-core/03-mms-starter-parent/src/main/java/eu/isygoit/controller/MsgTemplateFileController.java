@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.impl.MappedFileController;
 import eu.isygoit.dto.data.MsgTemplateDto;
 import eu.isygoit.exception.handler.MmsExceptionHandler;
@@ -22,5 +23,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api/v1/private/mail/template")
 public class MsgTemplateFileController extends MappedFileController<Long, MsgTemplate, MsgTemplateDto, MsgTemplateDto, MsgTemplateService> {
 
+    private final ApplicationContextService applicationContextService;
 
+    public MsgTemplateFileController(ApplicationContextService applicationContextService) {
+        this.applicationContextService = applicationContextService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
 }

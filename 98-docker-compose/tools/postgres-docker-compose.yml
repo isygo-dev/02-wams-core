@@ -21,7 +21,7 @@ services:
       - tools-net  # Internal network for communication between services
       - external-net  # External network to communicate with the host machine
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]  # Simple health check to ensure PostgreSQL is ready
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]  # Simple health check to ensure PostgreSQL is ready
       interval: 30s  # Interval between health checks
       retries: 5  # Number of retries before marking the container as unhealthy
       timeout: 10s  # Timeout for each health check
@@ -43,7 +43,7 @@ services:
       - tools-net  # Internal network for communication between services
       - external-net  # External network to communicate with the host machine
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]  # Simple health check for pgAdmin to ensure it can connect to PostgreSQL
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]  # Simple health check for pgAdmin to ensure it can connect to PostgreSQL
       interval: 30s  # Interval between health checks
       retries: 5  # Number of retries before marking the container as unhealthy
       timeout: 10s  # Timeout for each health check

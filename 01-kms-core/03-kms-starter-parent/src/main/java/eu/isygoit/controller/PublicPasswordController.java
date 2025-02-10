@@ -2,12 +2,13 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlHandler;
 import eu.isygoit.api.PublicPasswordControllerApi;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.dto.common.UserContextDto;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
-import eu.isygoit.service.ITokenService;
+import eu.isygoit.service.token.ITokenService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,10 +26,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api/v1/public/password")
 public class PublicPasswordController extends ControllerExceptionHandler implements PublicPasswordControllerApi {
 
+    private final ApplicationContextService applicationContextService;
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
+
     private final ITokenService tokenService;
 
     @Autowired
-    public PublicPasswordController(ITokenService tokenService) {
+    public PublicPasswordController(ApplicationContextService applicationContextService, ITokenService tokenService) {
+        this.applicationContextService = applicationContextService;
         this.tokenService = tokenService;
     }
 

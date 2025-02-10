@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.service.impl.CrudService;
 import eu.isygoit.model.Theme;
 import eu.isygoit.repository.ThemeRepository;
@@ -21,10 +22,17 @@ import java.util.Optional;
 @SrvRepo(value = ThemeRepository.class)
 public class ThemeService extends CrudService<Long, Theme, ThemeRepository> implements IThemeService {
 
+    private final ApplicationContextService applicationContextService;
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
+
     private final ThemeRepository themeRepository;
 
     @Autowired
-    public ThemeService(ThemeRepository themeRepository) {
+    public ThemeService(ApplicationContextService applicationContextService, ThemeRepository themeRepository) {
+        this.applicationContextService = applicationContextService;
         this.themeRepository = themeRepository;
     }
 

@@ -2,6 +2,7 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.CodeGenLocal;
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.service.impl.CrudService;
 import eu.isygoit.enums.IEnumBinaryStatus;
 import eu.isygoit.model.Account;
@@ -23,6 +24,12 @@ import java.util.Optional;
 @SrvRepo(value = DomainRepository.class)
 public class DomainService extends CrudService<Long, KmsDomain, DomainRepository> implements IDomainService {
 
+    private final ApplicationContextService applicationContextService;
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
+
     private final AccountService accountService;
 
     /**
@@ -31,7 +38,8 @@ public class DomainService extends CrudService<Long, KmsDomain, DomainRepository
      * @param accountService the account service
      */
     @Autowired
-    public DomainService(AccountService accountService) {
+    public DomainService(ApplicationContextService applicationContextService, AccountService accountService) {
+        this.applicationContextService = applicationContextService;
         this.accountService = accountService;
     }
 

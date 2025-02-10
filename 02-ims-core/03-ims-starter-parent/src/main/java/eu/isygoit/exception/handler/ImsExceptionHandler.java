@@ -6,6 +6,7 @@ import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.enums.IEnumMsgTemplateName;
+import eu.isygoit.i18n.service.LocaleService;
 import eu.isygoit.service.IMsgService;
 import eu.isygoit.types.EmailSubjects;
 import eu.isygoit.types.MsgTemplateVariables;
@@ -25,21 +26,26 @@ import java.util.Optional;
 @Component
 public class ImsExceptionHandler extends ControllerExceptionHandler {
 
+    private final LocaleService localeService;
     private final AppProperties appProperties;
-
     private final IMsgService msgService;
     private final AppParameterControllerApi appParameterService;
-
     /**
      * Instantiates a new Ims exception handler.
      *
      * @param appProperties the app properties
      */
     @Autowired
-    public ImsExceptionHandler(AppProperties appProperties, IMsgService msgService, AppParameterControllerApi appParameterService) {
+    public ImsExceptionHandler(LocaleService localeService, AppProperties appProperties, IMsgService msgService, AppParameterControllerApi appParameterService) {
+        this.localeService = localeService;
         this.appProperties = appProperties;
         this.msgService = msgService;
         this.appParameterService = appParameterService;
+    }
+
+    @Override
+    protected LocaleService getLocaleServiceInstance() {
+        return localeService;
     }
 
     @Override

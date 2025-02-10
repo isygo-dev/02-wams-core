@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
@@ -37,13 +38,19 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path = "/api/v1/private/theme")
 public class ThemeController extends MappedCrudController<Long, Theme, ThemeDto, ThemeDto, ThemeService> {
 
+    private final ApplicationContextService applicationContextService;
     private final IThemeService themeService;
     private final ThemeMapper themeMapper;
-
     @Autowired
-    public ThemeController(IThemeService themeService, ThemeMapper themeMapper) {
+    public ThemeController(ApplicationContextService applicationContextService, IThemeService themeService, ThemeMapper themeMapper) {
+        this.applicationContextService = applicationContextService;
         this.themeService = themeService;
         this.themeMapper = themeMapper;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     /**

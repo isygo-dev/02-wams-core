@@ -2,6 +2,7 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
 import eu.isygoit.api.AppParameterControllerApi;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
 import eu.isygoit.dto.common.RequestContextDto;
@@ -26,6 +27,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api/v1/private/appParameter")
 public class AppParameterController extends MappedCrudController<Long, AppParameter, AppParameterDto, AppParameterDto, AppParameterService>
         implements AppParameterControllerApi {
+
+    private final ApplicationContextService applicationContextService;
+
+    public AppParameterController(ApplicationContextService applicationContextService) {
+        this.applicationContextService = applicationContextService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
 
     @Override
     public ResponseEntity<String> getValueByDomainAndName(RequestContextDto requestContext,

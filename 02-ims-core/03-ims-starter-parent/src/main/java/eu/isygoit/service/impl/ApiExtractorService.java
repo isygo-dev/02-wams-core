@@ -19,10 +19,9 @@ import java.util.Optional;
 @Transactional
 public class ApiExtractorService extends AbstractApiExtractor<ApiPermission> {
 
+    private final ApiPermissionRepository apiPermissionRepository;
     @Value("${spring.application.name}")
     private String serviceName;
-
-    private final ApiPermissionRepository apiPermissionRepository;
 
     @Autowired
     public ApiExtractorService(ApiPermissionRepository apiPermissionRepository) {

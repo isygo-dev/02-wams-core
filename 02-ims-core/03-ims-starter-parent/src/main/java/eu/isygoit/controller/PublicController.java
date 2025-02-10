@@ -2,6 +2,7 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlHandler;
 import eu.isygoit.api.PublicControllerApi;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.config.AppProperties;
@@ -27,23 +28,28 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api/v1/public")
 public class PublicController extends ControllerExceptionHandler implements PublicControllerApi {
 
+    private final ApplicationContextService applicationContextService;
     private final AppProperties appProperties;
-
     private final IDomainService domainService;
     private final DomainMapper domainMapper;
-
     @Autowired
-    public PublicController(AppProperties appProperties, IDomainService domainService, DomainMapper domainMapper) {
+    public PublicController(ApplicationContextService applicationContextService, AppProperties appProperties, IDomainService domainService, DomainMapper domainMapper) {
+        this.applicationContextService = applicationContextService;
         this.appProperties = appProperties;
         this.domainService = domainService;
         this.domainMapper = domainMapper;
     }
 
     @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
+
+    @Override
     public ResponseEntity<DomainDto> getDomainByName(String domain) {
         log.info("get domain by name {}", domain);
         try {
-            return ResponseFactory.ResponseOk(domainMapper.entityToDto(domainService.findByName(domain)
+            return ResponseFactory.ResponseOk(domainMapper.entityToDto(domainService.getByName(domain)
                     .orElseThrow(() -> new DomainNotFoundException("with domain " + domain))));
         } catch (Throwable e) {
             log.error("<Error>: get by name : {} ", e);

@@ -2,6 +2,7 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
 import eu.isygoit.api.ChatMessageControllerApi;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.CrudControllerUtils;
@@ -34,6 +35,17 @@ import java.util.List;
 @CtrlDef(handler = MmsExceptionHandler.class, mapper = ChatMessageMapper.class, minMapper = ChatMessageMapper.class, service = ChatMessageService.class)
 public class ChatMessageController extends CrudControllerUtils<ChatMessage, ChatMessageDto, ChatMessageDto, ChatMessageService>
         implements ChatMessageControllerApi {
+
+    private final ApplicationContextService applicationContextService;
+
+    public ChatMessageController(ApplicationContextService applicationContextService) {
+        this.applicationContextService = applicationContextService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
 
     @Override
     public ResponseEntity<List<ChatMessageDto>> findByReceiverId(RequestContextDto requestContext,

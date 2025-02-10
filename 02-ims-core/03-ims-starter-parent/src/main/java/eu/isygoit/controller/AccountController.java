@@ -3,6 +3,7 @@ package eu.isygoit.controller;
 import eu.isygoit.annotation.CtrlDef;
 import eu.isygoit.api.AccountControllerApi;
 import eu.isygoit.api.StatisticControllerApi;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
@@ -49,17 +50,23 @@ import java.util.List;
 public class AccountController extends MappedCrudController<Long, Account, MinAccountDto, AccountDto, AccountService>
         implements AccountControllerApi, StatisticControllerApi {
 
+    private final ApplicationContextService applicationContextService;
     private final KmsPasswordService kmsPasswordService;
     private final IAccountService accountService;
     private final IDomainService domainService;
     private final MinAccountMapper minAccountMapper;
-
     @Autowired
-    public AccountController(KmsPasswordService kmsPasswordService, IAccountService accountService, IDomainService domainService, MinAccountMapper minAccountMapper) {
+    public AccountController(ApplicationContextService applicationContextService, KmsPasswordService kmsPasswordService, IAccountService accountService, IDomainService domainService, MinAccountMapper minAccountMapper) {
+        this.applicationContextService = applicationContextService;
         this.kmsPasswordService = kmsPasswordService;
         this.accountService = accountService;
         this.domainService = domainService;
         this.minAccountMapper = minAccountMapper;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     @Override
@@ -89,7 +96,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
                     IEnumAuth.Types.PWD,
                     GeneratePwdRequestDto.builder()
                             .domain(account.getDomain())
-                            .domainUrl(domainService.findByName(account.getDomain())
+                            .domainUrl(domainService.getByName(account.getDomain())
                                     .orElseThrow(() -> new DomainNotFoundException("with name " + account.getDomain())).getUrl())
                             .email(account.getEmail())
                             .userName(account.getCode())
@@ -134,7 +141,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
                                                                IEnumBinaryStatus.Types newStatus) {
         log.info("update account admin status");
         try {
-            return ResponseFactory.ResponseOk(mapper().entityToDto(accountService.updateAccountAdminStatus(id, newStatus)));
+            return ResponseFactory.ResponseOk(mapper().entityToDto(accountService.updateAdminStatus(id, newStatus)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -145,7 +152,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     public ResponseEntity<AccountDto> createDomainAdmin(RequestContextDto requestContext, String domain, DomainAdminDto admin) {
         log.info("create domain admin");
         try {
-            return ResponseFactory.ResponseOk(mapper().entityToDto(accountService.createDomainAdmin(domain, admin)));
+            return ResponseFactory.ResponseOk(mapper().entityToDto(accountService.createDomainAdminAccount(domain, admin)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -158,7 +165,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
                                                            boolean newStatus) {
         log.info("update account isAdmin");
         try {
-            return ResponseFactory.ResponseOk(mapper().entityToDto(accountService.updateAccountIsAdmin(id, newStatus)));
+            return ResponseFactory.ResponseOk(mapper().entityToDto(accountService.updateIsAdmin(id, newStatus)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -182,10 +189,10 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     @Override
     public ResponseEntity<UserDataResponseDto> connectedUser(RequestContextDto requestContext) {
         try {
-            Account account = accountService.findByDomainAndUserName(requestContext.getSenderDomain(), requestContext.getSenderUser())
+            Account account = accountService.getByDomainAndUserName(requestContext.getSenderDomain(), requestContext.getSenderUser())
                     .orElseThrow(() -> new AccountNotFoundException("with domain " + requestContext.getSenderDomain()
                             + " and username " + requestContext.getSenderUser()));
-            Domain domain = domainService.findByName(requestContext.getSenderDomain())
+            Domain domain = domainService.getByName(requestContext.getSenderDomain())
                     .orElseThrow(() -> new DomainNotFoundException("with domain " + requestContext.getSenderDomain()));
             //ThemeDto theme = themeMapper.entityToDto(themeService.findThemeByAccountCodeAndDomainCode(account.getCode(), domain.getCode()));
             UserDataResponseDto userDataResponseDto = UserDataResponseDto.builder()
@@ -226,7 +233,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     @Override
     public ResponseEntity<AccountDto> connectedUserFullData(RequestContextDto requestContext) {
         try {
-            return ResponseFactory.ResponseOk(mapper().entityToDto(accountService.findByDomainAndUserName(requestContext.getSenderDomain(),
+            return ResponseFactory.ResponseOk(mapper().entityToDto(accountService.getByDomainAndUserName(requestContext.getSenderDomain(),
                             requestContext.getSenderUser())
                     .orElseThrow(() -> new AccountNotFoundException("with domain " + requestContext.getSenderDomain()
                             + " and username " + requestContext.getSenderUser()))));
@@ -240,7 +247,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     public ResponseEntity<AccountDto> updateConnectedUserAccountData(RequestContextDto requestContext,
                                                                      AccountDto accountDto) {
         try {
-            accountDto.setId(accountService.findByDomainAndUserName(requestContext.getSenderDomain(), requestContext.getSenderUser())
+            accountDto.setId(accountService.getByDomainAndUserName(requestContext.getSenderDomain(), requestContext.getSenderUser())
                     .orElseThrow(() -> new AccountNotFoundException("with domain " + requestContext.getSenderDomain()
                             + " and username " + requestContext.getSenderUser())).getId());
             this.beforeUpdate(accountDto.getId(), accountDto);
@@ -311,7 +318,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     public ResponseEntity<List<MinAccountDto>> chatAccountsByDomain(RequestContextDto requestContext) {
         log.info("get chat accounts by domain");
         try {
-            List<MinAccountDto> list = minAccountMapper.listEntityToDto(accountService.chatAccountsByDomain(requestContext.getSenderDomain()));
+            List<MinAccountDto> list = minAccountMapper.listEntityToDto(accountService.getChatAccountsByDomain(requestContext.getSenderDomain()));
             if (CollectionUtils.isEmpty(list)) {
                 return ResponseFactory.ResponseNoContent();
             }

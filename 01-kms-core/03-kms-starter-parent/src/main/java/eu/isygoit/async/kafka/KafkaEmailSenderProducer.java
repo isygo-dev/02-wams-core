@@ -17,10 +17,9 @@ import java.io.IOException;
 @Service
 public class KafkaEmailSenderProducer {
 
+    private final KafkaTemplate<String, String> kafkaTemplate;
     @Value("${spring.kafka.topics.send-email}")
     private String send_email_topic;
-
-    private final KafkaTemplate<String, String> kafkaTemplate;
 
     @Autowired
     public KafkaEmailSenderProducer(KafkaTemplate<String, String> kafkaTemplate) {

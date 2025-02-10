@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.impl.MappedImageController;
 import eu.isygoit.dto.data.DomainDto;
 import eu.isygoit.dto.data.KmsDomainDto;
@@ -28,11 +29,18 @@ import javax.security.auth.login.AccountException;
 @RequestMapping(path = "/api/v1/private/domain")
 public class DomainImageController extends MappedImageController<Long, Domain, DomainDto, DomainDto, DomainService> {
 
+    private final ApplicationContextService applicationContextService;
     private final KmsDomainService kmsDomainService;
 
     @Autowired
-    public DomainImageController(KmsDomainService kmsDomainService) {
+    public DomainImageController(ApplicationContextService applicationContextService, KmsDomainService kmsDomainService) {
+        this.applicationContextService = applicationContextService;
         this.kmsDomainService = kmsDomainService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     @Override

@@ -2,6 +2,7 @@ package eu.isygoit.service.impl;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.service.cassandra.CassandraCrudService;
 import eu.isygoit.config.AppProperties;
@@ -45,6 +46,12 @@ import java.util.stream.Collectors;
 public class MailMessageService extends CassandraCrudService<UUID, MailMessage, MailMessageRepository>
         implements IMailMessageService {
 
+    private final ApplicationContextService applicationContextService;
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
+
     private final AppProperties appProperties;
 
     private final MailMessageRepository mailMessageRepository;
@@ -56,7 +63,8 @@ public class MailMessageService extends CassandraCrudService<UUID, MailMessage, 
      * @param appProperties the app properties
      */
     @Autowired
-    public MailMessageService(AppProperties appProperties, MailMessageRepository mailMessageRepository, SenderFactory senderFactory) {
+    public MailMessageService(ApplicationContextService applicationContextService, AppProperties appProperties, MailMessageRepository mailMessageRepository, SenderFactory senderFactory) {
+        this.applicationContextService = applicationContextService;
         this.appProperties = appProperties;
         this.mailMessageRepository = mailMessageRepository;
         this.senderFactory = senderFactory;

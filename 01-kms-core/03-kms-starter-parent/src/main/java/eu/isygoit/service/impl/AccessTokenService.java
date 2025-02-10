@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.service.impl.CrudService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.enums.IEnumAppToken;
@@ -23,6 +24,12 @@ import java.util.Optional;
 @SrvRepo(value = AccessTokenRepository.class)
 public class AccessTokenService extends CrudService<Long, AccessToken, AccessTokenRepository> implements IAccessTokenService {
 
+    private final ApplicationContextService applicationContextService;
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
+
     private final AppProperties appProperties;
 
     /**
@@ -31,7 +38,8 @@ public class AccessTokenService extends CrudService<Long, AccessToken, AccessTok
      * @param appProperties the app properties
      */
     @Autowired
-    public AccessTokenService(AppProperties appProperties) {
+    public AccessTokenService(ApplicationContextService applicationContextService, AppProperties appProperties) {
+        this.applicationContextService = applicationContextService;
         this.appProperties = appProperties;
     }
 

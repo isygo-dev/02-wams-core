@@ -18,7 +18,7 @@ services:
       - tools-net  # Internal network for communication with other services
       - external-net  # External network for communication with the host machine
     healthcheck:
-      test: ["CMD", "cqlsh", "-u", "${CASSANDRA_USER:-admin}", "-p", "${CASSANDRA_PASSWORD:-admin}", "--execute", "SELECT now()"]
+      test: [ "CMD", "cqlsh", "-u", "${CASSANDRA_USER:-admin}", "-p", "${CASSANDRA_PASSWORD:-admin}", "--execute", "SELECT now()" ]
       # Health check executes a simple query to ensure Cassandra is up and running
       interval: 30s  # Run the health check every 30 seconds
       retries: 5  # Retry up to 5 times before marking the service as unhealthy

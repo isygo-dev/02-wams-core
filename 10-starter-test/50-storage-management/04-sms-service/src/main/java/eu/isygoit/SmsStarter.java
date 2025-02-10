@@ -1,8 +1,11 @@
 package eu.isygoit;
 
 import eu.isygoit.annotation.IgnoreRepository;
+import eu.isygoit.api.IApiExtractor;
+import eu.isygoit.app.ApplicationContextService;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -30,6 +33,15 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @PropertySource(encoding = "UTF-8", value = {"classpath:i18n/messages.properties"})
 public class SmsStarter extends ServiceStarter {
 
+    private final ApplicationContextService applicationContextService;
+    private final IApiExtractor apiExtractor;
+
+    @Autowired
+    public SmsStarter(ApplicationContextService applicationContextService, IApiExtractor apiExtractor) {
+        this.applicationContextService = applicationContextService;
+        this.apiExtractor = apiExtractor;
+    }
+
     /**
      * The entry point of application.
      *
@@ -39,4 +51,13 @@ public class SmsStarter extends ServiceStarter {
         SpringApplication.run(SmsStarter.class, args);
     }
 
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
+
+    @Override
+    protected IApiExtractor getApiExtractorInstance() {
+        return apiExtractor;
+    }
 }

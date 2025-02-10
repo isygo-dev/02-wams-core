@@ -3,6 +3,7 @@ package eu.isygoit.service.impl;
 import eu.isygoit.annotation.CodeGenKms;
 import eu.isygoit.annotation.CodeGenLocal;
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.service.impl.ImageService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.DomainConstants;
@@ -32,20 +33,26 @@ import java.util.Optional;
 @SrvRepo(value = DomainRepository.class)
 public class DomainService extends ImageService<Long, Domain, DomainRepository> implements IDomainService {
 
-    private final AppProperties appProperties;
+    private final ApplicationContextService applicationContextService;
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
 
+    private final AppProperties appProperties;
 
     /**
      * Instantiates a new Domain service.
      *
      * @param appProperties the app properties
      */
-    public DomainService(AppProperties appProperties) {
+    public DomainService(ApplicationContextService applicationContextService, AppProperties appProperties) {
+        this.applicationContextService = applicationContextService;
         this.appProperties = appProperties;
     }
 
     @Override
-    public List<String> getAllDomainNames(String domain) {
+    public List<String> getAllNames(String domain) {
         if (DomainConstants.SUPER_DOMAIN_NAME.equals(domain)) {
             return repository().findAllNames(); //.getAll().stream().map(domain -> domain.getName()).collect(Collectors.toUnmodifiableList());
         }
@@ -69,7 +76,7 @@ public class DomainService extends ImageService<Long, Domain, DomainRepository> 
     }
 
     @Override
-    public Optional<Long> findDomainIdbyDomainName(String name) {
+    public Optional<Long> getIdByName(String name) {
         Optional<Domain> optional = repository().findByNameIgnoreCase(name);
         if (optional.isPresent()) {
             return Optional.ofNullable(optional.get().getId());
@@ -78,7 +85,7 @@ public class DomainService extends ImageService<Long, Domain, DomainRepository> 
     }
 
     @Override
-    public Optional<Domain> findByName(String name) {
+    public Optional<Domain> getByName(String name) {
         return repository().findByNameIgnoreCase(name);
     }
 

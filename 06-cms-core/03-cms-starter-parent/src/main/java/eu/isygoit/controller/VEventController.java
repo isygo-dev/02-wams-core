@@ -2,6 +2,7 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
 import eu.isygoit.api.CalendarEventControllerAPI;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
@@ -39,11 +40,18 @@ import java.util.Optional;
 @RequestMapping(path = "/api/v1/private/calendar/event")
 public class VEventController extends MappedCrudController<Long, VCalendarEvent, VCalendarEventDto, VCalendarEventDto, VEventService> implements CalendarEventControllerAPI {
 
+    private final ApplicationContextService applicationContextService;
     private final VCalendarService calendarService;
 
     @Autowired
-    public VEventController(VCalendarService calendarService) {
+    public VEventController(ApplicationContextService applicationContextService, VCalendarService calendarService) {
+        this.applicationContextService = applicationContextService;
         this.calendarService = calendarService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     @Override

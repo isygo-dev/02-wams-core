@@ -31,7 +31,7 @@ public interface IAccountService extends ICrudServiceMethod<Long, Account>, IIma
      * @param userName the user name
      * @return the account
      */
-    Optional<Account> findByDomainAndUserName(String domain, String userName);
+    Optional<Account> getByDomainAndUserName(String domain, String userName);
 
     /**
      * Find distinct allowed tools by domain and username list.
@@ -40,7 +40,7 @@ public interface IAccountService extends ICrudServiceMethod<Long, Account>, IIma
      * @param userName the username
      * @return the list
      */
-    List<Application> findDistinctAllowedToolsByDomainAndUserName(String domain, String userName);
+    List<Application> getDistinctAllowedToolsByDomainAndUserName(String domain, String userName);
 
     /**
      * Update account admin status account.
@@ -49,7 +49,7 @@ public interface IAccountService extends ICrudServiceMethod<Long, Account>, IIma
      * @param newStatus the new status
      * @return the account
      */
-    Account updateAccountAdminStatus(Long id, IEnumBinaryStatus.Types newStatus);
+    Account updateAdminStatus(Long id, IEnumBinaryStatus.Types newStatus);
 
     /**
      * Update account is admin account.
@@ -58,7 +58,7 @@ public interface IAccountService extends ICrudServiceMethod<Long, Account>, IIma
      * @param newStatus the new status
      * @return the account
      */
-    Account updateAccountIsAdmin(Long id, boolean newStatus);
+    Account updateIsAdmin(Long id, boolean newStatus);
 
     /**
      * Find emails by domain list.
@@ -131,7 +131,7 @@ public interface IAccountService extends ICrudServiceMethod<Long, Account>, IIma
      * @param application the application
      * @return the boolean
      */
-    boolean checkIfApplicationAllowed(String domain, String userName, String application);
+    boolean isApplicationAllowed(String domain, String userName, String application);
 
     /**
      * Track user connections.
@@ -148,7 +148,7 @@ public interface IAccountService extends ICrudServiceMethod<Long, Account>, IIma
      * @param domain the domain
      * @return the list
      */
-    List<Account> chatAccountsByDomain(String domain);
+    List<Account> getChatAccountsByDomain(String domain);
 
     /**
      * Resend creation email boolean.
@@ -198,7 +198,7 @@ public interface IAccountService extends ICrudServiceMethod<Long, Account>, IIma
      * @param admin  the admin
      * @return the account
      */
-    Account createDomainAdmin(String domain, DomainAdminDto admin);
+    Account createDomainAdminAccount(String domain, DomainAdminDto admin);
 
     /**
      * Gets authentication data.

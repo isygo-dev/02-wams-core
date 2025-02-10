@@ -6,7 +6,6 @@ import eu.isygoit.mapper.ApiPermissionMapper;
 import eu.isygoit.model.ApiPermission;
 import eu.isygoit.repository.ApiPermissionRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,12 +20,11 @@ import java.io.IOException;
 @Transactional
 public class ApiExtractorService extends AbstractApiExtractor<ApiPermission> {
 
-    @Value("${spring.application.name}")
-    private String serviceName;
-
     private final ApiPermissionRepository apiPermissionRepository;
     private final ApiPermissionMapper apiPermissionMapper;
     private final KafkaRegisterApisProducer kafkaRegisterApisProducer;
+    @Value("${spring.application.name}")
+    private String serviceName;
 
     public ApiExtractorService(ApiPermissionRepository apiPermissionRepository, ApiPermissionMapper apiPermissionMapper, KafkaRegisterApisProducer kafkaRegisterApisProducer) {
         this.apiPermissionRepository = apiPermissionRepository;

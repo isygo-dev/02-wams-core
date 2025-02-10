@@ -19,7 +19,7 @@ public interface IDomainService extends ICrudServiceMethod<Long, Domain>, IImage
      * @param domain the domain
      * @return the all domain names
      */
-    List<String> getAllDomainNames(String domain);
+    List<String> getAllNames(String domain);
 
     /**
      * Update admin status domain.
@@ -44,7 +44,7 @@ public interface IDomainService extends ICrudServiceMethod<Long, Domain>, IImage
      * @param name the name
      * @return the long
      */
-    Optional<Long> findDomainIdbyDomainName(String name);
+    Optional<Long> getIdByName(String name);
 
     /**
      * Find by name domain.
@@ -52,7 +52,7 @@ public interface IDomainService extends ICrudServiceMethod<Long, Domain>, IImage
      * @param name the name
      * @return the domain
      */
-    Optional<Domain> findByName(String name);
+    Optional<Domain> getByName(String name);
 
     /**
      * Is enabled boolean.

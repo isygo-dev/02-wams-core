@@ -3,6 +3,7 @@ package eu.isygoit.service.impl;
 import eu.isygoit.annotation.CodeGenKms;
 import eu.isygoit.annotation.CodeGenLocal;
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.service.impl.ImageService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.AccountTypeConstants;
@@ -58,6 +59,12 @@ import java.util.stream.Collectors;
 public class AccountService extends ImageService<Long, Account, AccountRepository>
         implements IAccountService {
 
+    private final ApplicationContextService applicationContextService;
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
+
     private final AppProperties appProperties;
 
     private final KmsPasswordService kmsPasswordService;
@@ -70,7 +77,8 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     private final IRoleInfoService roleInfoService;
 
     @Autowired
-    public AccountService(AppProperties appProperties, KmsPasswordService kmsPasswordService, KmsTokenService kmsTokenService, ApplicationMapper applicationMapper, MinAccountMapper minAccountMapper, IDomainService domainService, IAppParameterService parameterService, MmsChatMessageService mmsChatMessageService, IRoleInfoService roleInfoService) {
+    public AccountService(ApplicationContextService applicationContextService, AppProperties appProperties, KmsPasswordService kmsPasswordService, KmsTokenService kmsTokenService, ApplicationMapper applicationMapper, MinAccountMapper minAccountMapper, IDomainService domainService, IAppParameterService parameterService, MmsChatMessageService mmsChatMessageService, IRoleInfoService roleInfoService) {
+        this.applicationContextService = applicationContextService;
         this.appProperties = appProperties;
         this.kmsPasswordService = kmsPasswordService;
         this.kmsTokenService = kmsTokenService;
@@ -97,7 +105,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     }
 
     @Override
-    public Optional<Account> findByDomainAndUserName(String domain, String userName) {
+    public Optional<Account> getByDomainAndUserName(String domain, String userName) {
         return repository().findByDomainIgnoreCaseAndCodeIgnoreCase(domain, userName);
     }
 
@@ -111,8 +119,8 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     }
 
     @Override
-    public List<Application> findDistinctAllowedToolsByDomainAndUserName(String domain, String userName) {
-        Optional<Account> optional = findByDomainAndUserName(domain, userName);
+    public List<Application> getDistinctAllowedToolsByDomainAndUserName(String domain, String userName) {
+        Optional<Account> optional = getByDomainAndUserName(domain, userName);
         if (optional.isPresent() && !CollectionUtils.isEmpty(optional.get().getRoleInfo())) {
             return optional.get().getRoleInfo().stream().flatMap(roleInfo -> roleInfo.getAllowedTools().stream())
                     .distinct().collect(Collectors.toUnmodifiableList());
@@ -121,14 +129,14 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     }
 
     @Override
-    public Account updateAccountAdminStatus(Long id, IEnumBinaryStatus.Types newStatus) {
+    public Account updateAdminStatus(Long id, IEnumBinaryStatus.Types newStatus) {
         repository().updateAccountAdminStatus(newStatus, id);
         return repository().findById(id).orElse(null);
     }
 
 
     @Override
-    public Account updateAccountIsAdmin(Long id, boolean newStatus) {
+    public Account updateIsAdmin(Long id, boolean newStatus) {
         repository().updateAccountIsAdmin(newStatus, id);
         return repository().findById(id).orElse(null);
     }
@@ -156,7 +164,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
                     .distinct()
                     .map(application -> {
                         ApplicationDto app = applicationMapper.entityToDto(application);
-                        app.setToken(kmsTokenService.createTokenByDomain(//RequestContextDto.builder().build(),
+                        app.setToken(kmsTokenService.generateToken(//RequestContextDto.builder().build(),
                                 account.getDomain(),
                                 application.getName(),
                                 IEnumAppToken.Types.ACCESS,
@@ -174,7 +182,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
                     .distinct().
                     map(application -> {
                         ApplicationDto app = applicationMapper.entityToDto(application);
-                        app.setToken(kmsTokenService.createTokenByDomain(//RequestContextDto.builder().build(),
+                        app.setToken(kmsTokenService.generateToken(//RequestContextDto.builder().build(),
                                 account.getDomain(),
                                 application.getName(),
                                 IEnumAppToken.Types.ACCESS,
@@ -218,7 +226,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
             throw new AccountAuthenticationException("domain disabled: " + accountAuthTypeRequest.getDomain());
         }
 
-        Optional<Account> optional = findByDomainAndUserName(accountAuthTypeRequest.getDomain(), accountAuthTypeRequest.getUserName());
+        Optional<Account> optional = getByDomainAndUserName(accountAuthTypeRequest.getDomain(), accountAuthTypeRequest.getUserName());
         if (optional.isPresent()) {
             Account account = optional.get();
             if (IEnumAuth.Types.OTP == account.getAuthType()) {
@@ -246,7 +254,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
 
             } else if (IEnumAuth.Types.QRC == account.getAuthType()) {
                 try {
-                    ResponseEntity<TokenDto> result = kmsTokenService.createTokenByDomain(//RequestContextDto.builder().build(),
+                    ResponseEntity<TokenDto> result = kmsTokenService.generateToken(//RequestContextDto.builder().build(),
                             account.getDomain(),
                             IEnumAuth.Types.QRC.meaning(),
                             IEnumAppToken.Types.QRC,
@@ -296,7 +304,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
                     return UserAccountDto.builder()
                             .code(account.getCode())
                             .domain(account.getDomain())
-                            .domainId(domainService.findByName(account.getDomain())
+                            .domainId(domainService.getByName(account.getDomain())
                                     .orElseThrow(() -> new DomainNotFoundException("with name " + account.getDomain())).getId())
                             .fullName(account.getFullName())
                             .functionRole(account.getFunctionRole())
@@ -307,7 +315,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
 
     @Override
     public boolean switchAuthType(AccountAuthTypeRequest accountAuthTypeRequest) throws AccountNotFoundException {
-        Optional<Account> optional = findByDomainAndUserName(accountAuthTypeRequest.getDomain(), accountAuthTypeRequest.getUserName());
+        Optional<Account> optional = getByDomainAndUserName(accountAuthTypeRequest.getDomain(), accountAuthTypeRequest.getUserName());
         optional.ifPresentOrElse(account -> {
                     if (Objects.isNull(accountAuthTypeRequest.getAuthType())) {
                         if (account.getAuthType().equals(IEnumAuth.Types.OTP)) {
@@ -333,7 +341,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     }
 
     @Override
-    public boolean checkIfApplicationAllowed(String domain, String userName, String application) {
+    public boolean isApplicationAllowed(String domain, String userName, String application) {
         //allow webapp-gw/gateway for all users
         if ("webapp-gw".equals(application)) {
             return true;
@@ -355,7 +363,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
 
     @Override
     public void trackUserConnections(String domain, String userName, ConnectionTracking connectionTracking) {
-        Optional<Account> optional = this.findByDomainAndUserName(domain, userName);
+        Optional<Account> optional = this.getByDomainAndUserName(domain, userName);
         optional.ifPresentOrElse(account -> {
                     if (CollectionUtils.isEmpty(account.getConnectionTracking())) {
                         account.setConnectionTracking(new ArrayList<>());
@@ -370,14 +378,14 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     }
 
     @Override
-    public List<Account> chatAccountsByDomain(String domain) {
+    public List<Account> getChatAccountsByDomain(String domain) {
         List<Account> list = repository().findByDomainIgnoreCaseIn(Arrays.asList(domain, DomainConstants.SUPER_DOMAIN_NAME));
         if (CollectionUtils.isEmpty(list)) {
             return Collections.emptyList();
         }
         try {
             ResponseEntity<List<WsConnectDto>> result = mmsChatMessageService.getChatStatus(RequestContextDto.builder().build(),
-                    domainService.findByName(domain)
+                    domainService.getByName(domain)
                             .orElseThrow(() -> new DomainNotFoundException("with name " + domain)).getId());
             if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
                 List<WsConnectDto> connections = result.getBody();
@@ -413,7 +421,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
                     IEnumAuth.Types.PWD,
                     GeneratePwdRequestDto.builder()
                             .domain(account.getDomain())
-                            .domainUrl(domainService.findByName(account.getDomain())
+                            .domainUrl(domainService.getByName(account.getDomain())
                                     .orElseThrow(() -> new DomainNotFoundException("with name " + account.getDomain())).getUrl())
                             .email(account.getEmail())
                             .userName(account.getCode())
@@ -504,7 +512,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     }
 
     @Override
-    public Account createDomainAdmin(String domain, DomainAdminDto admin) {
+    public Account createDomainAdminAccount(String domain, DomainAdminDto admin) {
         return this.create(Account.builder()
                 .domain(domain)
                 .isAdmin(Boolean.TRUE)
@@ -515,7 +523,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
                         .lastName(admin.getLastName())
                         .build())
                 .functionRole("Domain administrator")
-                .roleInfo(Arrays.asList(roleInfoService.findByName(AccountTypeConstants.DOMAIN_ADMIN)
+                .roleInfo(Arrays.asList(roleInfoService.getByName(AccountTypeConstants.DOMAIN_ADMIN)
                         .orElseThrow(() -> new AdminRoleNotFoundException("for domain " + domain))))
                 .build());
     }

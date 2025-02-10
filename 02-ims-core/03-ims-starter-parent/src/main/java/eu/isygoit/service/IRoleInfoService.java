@@ -16,7 +16,7 @@ public interface IRoleInfoService extends ICrudServiceMethod<Long, RoleInfo> {
      * @param name the name
      * @return the role info
      */
-    Optional<RoleInfo> findByName(String name);
+    Optional<RoleInfo> getByName(String name);
 
     /**
      * Find by code ignore case role info.
@@ -24,5 +24,5 @@ public interface IRoleInfoService extends ICrudServiceMethod<Long, RoleInfo> {
      * @param code the code
      * @return the role info
      */
-    Optional<RoleInfo> findByCodeIgnoreCase(String code);
+    Optional<RoleInfo> getByCode(String code);
 }

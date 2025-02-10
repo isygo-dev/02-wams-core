@@ -2,6 +2,7 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlHandler;
 import eu.isygoit.api.PasswordControllerApi;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
@@ -18,7 +19,11 @@ import eu.isygoit.exception.AccountAuthenticationException;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.jwt.IJwtService;
 import eu.isygoit.mapper.AccountMapper;
-import eu.isygoit.service.*;
+import eu.isygoit.service.IAccountService;
+import eu.isygoit.service.IDomainService;
+import eu.isygoit.service.IPasswordService;
+import eu.isygoit.service.ITokenConfigService;
+import eu.isygoit.service.token.ITokenService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api/v1/private/password")
 public class PasswordController extends ControllerExceptionHandler implements PasswordControllerApi {
 
+    private final ApplicationContextService applicationContextService;
     private final IAccountService accountService;
     private final IDomainService domainService;
     private final AccountMapper accountMapper;
@@ -43,9 +49,9 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     private final ITokenService tokenService;
     private final IJwtService jwtService;
     private final ITokenConfigService tokenConfigService;
-
     @Autowired
-    public PasswordController(IAccountService accountService, IDomainService domainService, AccountMapper accountMapper, IPasswordService passwordService, ITokenService tokenService, IJwtService jwtService, ITokenConfigService tokenConfigService) {
+    public PasswordController(ApplicationContextService applicationContextService, IAccountService accountService, IDomainService domainService, AccountMapper accountMapper, IPasswordService passwordService, ITokenService tokenService, IJwtService jwtService, ITokenConfigService tokenConfigService) {
+        this.applicationContextService = applicationContextService;
         this.accountService = accountService;
         this.domainService = domainService;
         this.accountMapper = accountMapper;
@@ -53,6 +59,11 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
         this.tokenService = tokenService;
         this.jwtService = jwtService;
         this.tokenConfigService = tokenConfigService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     @Override

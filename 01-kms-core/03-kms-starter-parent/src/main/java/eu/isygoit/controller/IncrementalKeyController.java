@@ -2,6 +2,7 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlHandler;
 import eu.isygoit.api.IncrementalKeyControllerApi;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
@@ -28,13 +29,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api/v1/private/key")
 public class IncrementalKeyController extends ControllerExceptionHandler implements IncrementalKeyControllerApi {
 
+    private final ApplicationContextService applicationContextService;
     private final IKeyService keyService;
 
     @Autowired
-    public IncrementalKeyController(IKeyService keyService) {
+    public IncrementalKeyController(ApplicationContextService applicationContextService, IKeyService keyService) {
+        this.applicationContextService = applicationContextService;
         this.keyService = keyService;
     }
 
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
 
     @Override
     public ResponseEntity<String> generateNextCode(RequestContextDto requestContext,

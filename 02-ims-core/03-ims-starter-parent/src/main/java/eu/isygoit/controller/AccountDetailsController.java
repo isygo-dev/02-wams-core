@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
 import eu.isygoit.dto.data.AccountDetailsDto;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
@@ -21,4 +22,15 @@ import org.springframework.web.bind.annotation.RestController;
 @CtrlDef(handler = ImsExceptionHandler.class, mapper = AccountDetailsMapper.class, minMapper = AccountDetailsMapper.class, service = AccountDetailsService.class)
 @RequestMapping(path = "/api/v1/private/account/details")
 public class AccountDetailsController extends MappedCrudController<Long, AccountDetails, AccountDetailsDto, AccountDetailsDto, AccountDetailsService> {
+
+    private final ApplicationContextService applicationContextService;
+
+    public AccountDetailsController(ApplicationContextService applicationContextService) {
+        this.applicationContextService = applicationContextService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
 }

@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.ApiPermissionDto;
@@ -35,13 +36,19 @@ import java.util.*;
 @RequestMapping(path = "/api/v1/private/roleInfo")
 public class RoleInfoController extends MappedCrudController<Long, RoleInfo, RoleInfoDto, RoleInfoDto, RoleInfoService> {
 
+    private final ApplicationContextService applicationContextService;
     private final ApiPermissionRepository apiPermissionRepository;
     private final ApiPermissionMapper apiPermissionMapper;
-
     @Autowired
-    public RoleInfoController(ApiPermissionRepository apiPermissionRepository, ApiPermissionMapper apiPermissionMapper) {
+    public RoleInfoController(ApplicationContextService applicationContextService, ApiPermissionRepository apiPermissionRepository, ApiPermissionMapper apiPermissionMapper) {
+        this.applicationContextService = applicationContextService;
         this.apiPermissionRepository = apiPermissionRepository;
         this.apiPermissionMapper = apiPermissionMapper;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     @Override
@@ -82,7 +89,7 @@ public class RoleInfoController extends MappedCrudController<Long, RoleInfo, Rol
     @Override
     public RoleInfoDto beforeCreate(RoleInfoDto roleInfoDto) {
         if (StringUtils.hasText(roleInfoDto.getTemplateCode())) {
-            Optional<RoleInfo> optional = this.crudService().findByCodeIgnoreCase(roleInfoDto.getTemplateCode());
+            Optional<RoleInfo> optional = this.crudService().getByCode(roleInfoDto.getTemplateCode());
             if (optional.isPresent()) {
                 RoleInfoDto copiedRole = mapper().entityToDto(optional.get());
                 copiedRole.setId(null);

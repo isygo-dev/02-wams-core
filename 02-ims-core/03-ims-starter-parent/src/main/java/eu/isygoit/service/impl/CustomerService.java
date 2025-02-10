@@ -3,6 +3,7 @@ package eu.isygoit.service.impl;
 import eu.isygoit.annotation.CodeGenKms;
 import eu.isygoit.annotation.CodeGenLocal;
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.service.impl.ImageService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.DomainConstants;
@@ -36,6 +37,12 @@ import java.util.stream.Collectors;
 @SrvRepo(value = CustomerRepository.class)
 public class CustomerService extends ImageService<Long, Customer, CustomerRepository> implements ICustomerService {
 
+    private final ApplicationContextService applicationContextService;
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
+
     private final AppProperties appProperties;
     private final AccountRepository accountRepository;
 
@@ -46,7 +53,8 @@ public class CustomerService extends ImageService<Long, Customer, CustomerReposi
      * @param appProperties     the app properties
      * @param accountRepository the account repository
      */
-    public CustomerService(AppProperties appProperties, AccountRepository accountRepository) {
+    public CustomerService(ApplicationContextService applicationContextService, AppProperties appProperties, AccountRepository accountRepository) {
+        this.applicationContextService = applicationContextService;
         this.appProperties = appProperties;
         this.accountRepository = accountRepository;
     }

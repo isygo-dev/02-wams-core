@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
 import eu.isygoit.constants.JwtConstants;
@@ -32,6 +33,16 @@ import org.springframework.web.bind.annotation.*;
 @CtrlDef(handler = SmsExceptionHandler.class, mapper = StorageConfigMapper.class, minMapper = StorageConfigMapper.class, service = StorageConfigService.class)
 public class StorageConfigController extends MappedCrudController<Long, StorageConfig, StorageConfigDto, StorageConfigDto, StorageConfigService> {
 
+    private final ApplicationContextService applicationContextService;
+
+    public StorageConfigController(ApplicationContextService applicationContextService) {
+        this.applicationContextService = applicationContextService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
 
     /**
      * Find by domain ignore case response entity.

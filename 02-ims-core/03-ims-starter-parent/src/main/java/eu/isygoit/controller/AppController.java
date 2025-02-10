@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
@@ -38,11 +39,18 @@ import java.util.List;
 @RequestMapping(path = "/api/v1/private/application")
 public class AppController extends MappedCrudController<Long, Application, ApplicationDto, ApplicationDto, ApplicationService> {
 
+    private final ApplicationContextService applicationContextService;
     private final IAccountService accountService;
 
     @Autowired
-    public AppController(IAccountService accountService) {
+    public AppController(ApplicationContextService applicationContextService, IAccountService accountService) {
+        this.applicationContextService = applicationContextService;
         this.accountService = accountService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     /**
@@ -79,7 +87,7 @@ public class AppController extends MappedCrudController<Long, Application, Appli
         if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
             return super.subGetAll(requestContext);
         } else {
-            return ResponseFactory.ResponseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
+            return ResponseFactory.ResponseOk(mapper().listEntityToDto(accountService.getDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
                     requestContext.getSenderUser())));
         }
     }
@@ -89,7 +97,7 @@ public class AppController extends MappedCrudController<Long, Application, Appli
         if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
             return super.getAssignedToDefaultDomain(requestContext);
         } else {
-            return ResponseFactory.ResponseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
+            return ResponseFactory.ResponseOk(mapper().listEntityToDto(accountService.getDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
                     requestContext.getSenderUser())));
         }
     }
@@ -99,7 +107,7 @@ public class AppController extends MappedCrudController<Long, Application, Appli
         if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
             return super.subGetAllPaged(requestContext, page, size);
         } else {
-            return ResponseFactory.ResponseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
+            return ResponseFactory.ResponseOk(mapper().listEntityToDto(accountService.getDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
                     requestContext.getSenderUser())));
         }
     }
@@ -109,7 +117,7 @@ public class AppController extends MappedCrudController<Long, Application, Appli
         if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
             return super.subGetAllFull(requestContext);
         } else {
-            return ResponseFactory.ResponseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
+            return ResponseFactory.ResponseOk(mapper().listEntityToDto(accountService.getDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
                     requestContext.getSenderUser())));
         }
     }
@@ -119,7 +127,7 @@ public class AppController extends MappedCrudController<Long, Application, Appli
         if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
             return super.subGetAllFullPaged(requestContext, page, size);
         } else {
-            return ResponseFactory.ResponseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
+            return ResponseFactory.ResponseOk(mapper().listEntityToDto(accountService.getDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
                     requestContext.getSenderUser())));
         }
     }

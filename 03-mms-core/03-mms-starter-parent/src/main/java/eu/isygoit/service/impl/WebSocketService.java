@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.camel.repository.ICamelRepository;
 import eu.isygoit.com.rest.service.impl.CrudServiceUtils;
 import eu.isygoit.dto.wsocket.WsMessageWrapperDto;
@@ -27,12 +28,19 @@ import java.util.Date;
 public class WebSocketService extends CrudServiceUtils<ChatMessage, ChatMessageRepository>
         implements IWebSocketService {
 
+    private final ApplicationContextService applicationContextService;
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
+
     private final IChatMessageService chatMessageService;
 
     private final ICamelRepository camelRepository;
 
     @Autowired
-    public WebSocketService(IChatMessageService chatMessageService, ICamelRepository camelRepository) {
+    public WebSocketService(ApplicationContextService applicationContextService, IChatMessageService chatMessageService, ICamelRepository camelRepository) {
+        this.applicationContextService = applicationContextService;
         this.chatMessageService = chatMessageService;
         this.camelRepository = camelRepository;
     }

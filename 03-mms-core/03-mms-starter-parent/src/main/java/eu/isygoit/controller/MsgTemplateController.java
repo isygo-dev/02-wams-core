@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
@@ -35,6 +36,17 @@ import java.util.List;
 @RequestMapping(path = "/api/v1/private/mail/template")
 @CtrlDef(handler = MmsExceptionHandler.class, mapper = MsgTemplateMapper.class, minMapper = MsgTemplateMapper.class, service = MsgTemplateService.class)
 public class MsgTemplateController extends MappedCrudController<Long, MsgTemplate, MsgTemplateDto, MsgTemplateDto, MsgTemplateService> {
+
+    private final ApplicationContextService applicationContextService;
+
+    public MsgTemplateController(ApplicationContextService applicationContextService) {
+        this.applicationContextService = applicationContextService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
 
     /**
      * Get template names response entity.

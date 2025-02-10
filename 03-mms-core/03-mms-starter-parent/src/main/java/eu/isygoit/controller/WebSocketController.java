@@ -2,6 +2,7 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlHandler;
 import eu.isygoit.api.WebSocketControllerApi;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.dto.common.RequestContextDto;
@@ -25,11 +26,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api/v1/private/ws")
 public class WebSocketController extends ControllerExceptionHandler implements WebSocketControllerApi {
 
+    private final ApplicationContextService applicationContextService;
     private final IWebSocketService webSocketService;
 
     @Autowired
-    public WebSocketController(IWebSocketService webSocketService) {
+    public WebSocketController(ApplicationContextService applicationContextService, IWebSocketService webSocketService) {
+        this.applicationContextService = applicationContextService;
         this.webSocketService = webSocketService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     @Override

@@ -2,6 +2,7 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlHandler;
 import eu.isygoit.api.IndexationApi;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
@@ -29,13 +30,19 @@ import java.util.Map;
 @RequestMapping(path = "/api/v1/private/index")
 public class IndexationController extends ControllerExceptionHandler implements IndexationApi {
 
+    private final ApplicationContextService applicationContextService;
     private final IConverterService converterService;
 
     @Autowired
-    public IndexationController(IConverterService converterService) {
+    public IndexationController(ApplicationContextService applicationContextService, IConverterService converterService) {
+        this.applicationContextService = applicationContextService;
         this.converterService = converterService;
     }
 
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
 
     //https://www.baeldung.com/apache-tika
     @Override

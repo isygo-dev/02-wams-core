@@ -17,10 +17,9 @@ import java.io.IOException;
 @Service
 public class KafkaRegisterApisProducer {
 
+    private final KafkaTemplate<String, String> kafkaTemplate;
     @Value("${spring.kafka.topics.register-api-permission}")
     private String register_api_permission_topic;
-
-    private final KafkaTemplate<String, String> kafkaTemplate;
 
     @Autowired
     public KafkaRegisterApisProducer(KafkaTemplate<String, String> kafkaTemplate) {

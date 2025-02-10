@@ -51,7 +51,7 @@ public class InitSuperUserService extends AbstractJobService {
     public void performJob(JobExecutionContext jobExecutionContext) {
 
         //Check default domain existence
-        Domain defaultDomain = domainService.findByName(DomainConstants.DEFAULT_DOMAIN_NAME)
+        Domain defaultDomain = domainService.getByName(DomainConstants.DEFAULT_DOMAIN_NAME)
                 .orElse(domainService.create(Domain.builder()
                         .domain(DomainConstants.SUPER_DOMAIN_NAME)
                         .name(DomainConstants.DEFAULT_DOMAIN_NAME)
@@ -60,7 +60,7 @@ public class InitSuperUserService extends AbstractJobService {
                         .build()));
 
         //Check super domain existence
-        Domain superDomain = domainService.findByName(DomainConstants.SUPER_DOMAIN_NAME)
+        Domain superDomain = domainService.getByName(DomainConstants.SUPER_DOMAIN_NAME)
                 .orElse(domainService.create(Domain.builder()
                         .domain(DomainConstants.SUPER_DOMAIN_NAME)
                         .name(DomainConstants.SUPER_DOMAIN_NAME)
@@ -69,7 +69,7 @@ public class InitSuperUserService extends AbstractJobService {
                         .build()));
 
         //Check sysadmin application existence
-        Application application = applicationService.findByName("webapp-sysadmin")
+        Application application = applicationService.getByName("webapp-sysadmin")
                 .orElse(applicationService.create(Application.builder()
                         .domain(DomainConstants.SUPER_DOMAIN_NAME)
                         .title("System administration")
@@ -81,7 +81,7 @@ public class InitSuperUserService extends AbstractJobService {
                         .build()));
 
         //Check super role existence
-        RoleInfo superAdmin = roleInfoService.findByName(AccountTypeConstants.SUPER_ADMIN)
+        RoleInfo superAdmin = roleInfoService.getByName(AccountTypeConstants.SUPER_ADMIN)
                 .orElse(roleInfoService.create(RoleInfo.builder()
                         .domain(DomainConstants.SUPER_DOMAIN_NAME)
                         .name(AccountTypeConstants.SUPER_ADMIN)
@@ -91,7 +91,7 @@ public class InitSuperUserService extends AbstractJobService {
                         .build()));
 
         //Check domain admin role existence
-        RoleInfo domainAdmin = roleInfoService.findByName(AccountTypeConstants.DOMAIN_ADMIN)
+        RoleInfo domainAdmin = roleInfoService.getByName(AccountTypeConstants.DOMAIN_ADMIN)
                 .orElse(roleInfoService.create(RoleInfo.builder()
                         .domain(DomainConstants.SUPER_DOMAIN_NAME)
                         .name(AccountTypeConstants.DOMAIN_ADMIN)
@@ -101,7 +101,7 @@ public class InitSuperUserService extends AbstractJobService {
                         .build()));
 
         //Check super user existence
-        Account superUser = accountService.findByDomainAndUserName(DomainConstants.SUPER_DOMAIN_NAME, "root")
+        Account superUser = accountService.getByDomainAndUserName(DomainConstants.SUPER_DOMAIN_NAME, "root")
                 .orElse(accountService.create(Account.builder()
                         .domain(DomainConstants.SUPER_DOMAIN_NAME)
                         .code("root")

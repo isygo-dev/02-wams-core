@@ -2,7 +2,7 @@ package eu.isygoit.remote.kms;
 
 
 import eu.isygoit.config.FeignConfig;
-import eu.isygoit.service.TokenServiceApi;
+import eu.isygoit.service.token.TokenServiceApi;
 import org.springframework.cloud.openfeign.FeignClient;
 
 /**

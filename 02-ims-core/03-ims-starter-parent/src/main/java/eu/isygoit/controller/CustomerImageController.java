@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.impl.MappedImageController;
 import eu.isygoit.dto.data.CustomerDto;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
@@ -22,4 +23,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api/v1/private/customer")
 public class CustomerImageController extends MappedImageController<Long, Customer, CustomerDto, CustomerDto, CustomerService> {
 
+    private final ApplicationContextService applicationContextService;
+
+    public CustomerImageController(ApplicationContextService applicationContextService) {
+        this.applicationContextService = applicationContextService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
 }

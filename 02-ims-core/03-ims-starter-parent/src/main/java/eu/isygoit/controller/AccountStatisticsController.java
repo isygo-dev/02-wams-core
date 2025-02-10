@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlHandler;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
@@ -36,9 +37,17 @@ public class AccountStatisticsController extends ControllerExceptionHandler {
 
     private final IAccountService accountService;
 
+    private final ApplicationContextService applicationContextService;
+
     @Autowired
-    public AccountStatisticsController(IAccountService accountService) {
+    public AccountStatisticsController(IAccountService accountService, ApplicationContextService applicationContextService) {
         this.accountService = accountService;
+        this.applicationContextService = applicationContextService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     /**

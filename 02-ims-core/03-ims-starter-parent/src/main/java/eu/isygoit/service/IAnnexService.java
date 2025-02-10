@@ -16,7 +16,7 @@ public interface IAnnexService extends ICrudServiceMethod<Long, Annex> {
      * @param code the code
      * @return the list
      */
-    List<Annex> findAnnexByTableCode(String code);
+    List<Annex> getByTableCode(String code);
 
     /**
      * Find annex by code and ref list.
@@ -25,5 +25,5 @@ public interface IAnnexService extends ICrudServiceMethod<Long, Annex> {
      * @param reference the reference
      * @return the list
      */
-    List<Annex> findAnnexByTableCodeAndRef(String code, String reference);
+    List<Annex> getByTableCodeAndRef(String code, String reference);
 }

@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.service.impl.CrudService;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.repository.AppNextCodeRepository;
@@ -14,5 +15,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @SrvRepo(value = AppNextCodeRepository.class)
 public class AppNextCodeService extends CrudService<Long, AppNextCode, AppNextCodeRepository> {
+
+    private final ApplicationContextService applicationContextService;
+
+    public AppNextCodeService(ApplicationContextService applicationContextService) {
+        this.applicationContextService = applicationContextService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
 
 }

@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.impl.MappedImageController;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.request.UpdateAccountRequestDto;
@@ -28,9 +29,17 @@ public class AccountImageController extends MappedImageController<Long, Account,
 
     private final KmsPasswordService kmsPasswordService;
 
+    private final ApplicationContextService applicationContextService;
+
     @Autowired
-    public AccountImageController(KmsPasswordService kmsPasswordService) {
+    public AccountImageController(KmsPasswordService kmsPasswordService, ApplicationContextService applicationContextService) {
         this.kmsPasswordService = kmsPasswordService;
+        this.applicationContextService = applicationContextService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     @Override

@@ -3,6 +3,7 @@ package eu.isygoit.service.impl;
 import eu.isygoit.annotation.CodeGenKms;
 import eu.isygoit.annotation.CodeGenLocal;
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.service.impl.CodifiableService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.DomainConstants;
@@ -55,6 +56,11 @@ import java.util.Optional;
 @SrvRepo(value = LinkedFileRepository.class)
 public class LinkedFileService extends CodifiableService<Long, LinkedFile, LinkedFileRepository> implements ILinkedFileService {
 
+    private final ApplicationContextService applicationContextService;
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
     private final AppProperties appProperties;
 
     private final LinkedFileRepository linkedFileRepository;
@@ -62,7 +68,8 @@ public class LinkedFileService extends CodifiableService<Long, LinkedFile, Linke
     private final SmsStorageLinkedFileService smsStorageLinkedFileService;
 
     @Autowired
-    public LinkedFileService(AppProperties appProperties, LinkedFileRepository linkedFileRepository, CategoryRepository categoryRepository, SmsStorageLinkedFileService smsStorageLinkedFileService) {
+    public LinkedFileService(ApplicationContextService applicationContextService, AppProperties appProperties, LinkedFileRepository linkedFileRepository, CategoryRepository categoryRepository, SmsStorageLinkedFileService smsStorageLinkedFileService) {
+        this.applicationContextService = applicationContextService;
         this.appProperties = appProperties;
         this.linkedFileRepository = linkedFileRepository;
         this.categoryRepository = categoryRepository;

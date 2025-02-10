@@ -3,6 +3,7 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlHandler;
 import eu.isygoit.api.PropertyControllerApi;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
@@ -31,13 +32,19 @@ import java.util.List;
 @RequestMapping(path = "/api/v1/private/property")
 public class PropertyController extends ControllerExceptionHandler implements PropertyControllerApi {
 
+    private final ApplicationContextService applicationContextService;
     private final IPropertyService propertyService;
     private final PropertyMapper propertyMapper;
-
     @Autowired
-    public PropertyController(IPropertyService propertyService, PropertyMapper propertyMapper) {
+    public PropertyController(ApplicationContextService applicationContextService, IPropertyService propertyService, PropertyMapper propertyMapper) {
+        this.applicationContextService = applicationContextService;
         this.propertyService = propertyService;
         this.propertyMapper = propertyMapper;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     @Override

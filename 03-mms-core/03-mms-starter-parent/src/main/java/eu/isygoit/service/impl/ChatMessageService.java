@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.service.impl.CrudService;
 import eu.isygoit.config.WsChannelInterceptor;
 import eu.isygoit.dto.data.ChatAccountDto;
@@ -27,6 +28,17 @@ import java.util.stream.Collectors;
 @SrvRepo(value = ChatMessageRepository.class)
 public class ChatMessageService extends CrudService<Long, ChatMessage, ChatMessageRepository>
         implements IChatMessageService {
+
+    private final ApplicationContextService applicationContextService;
+
+    public ChatMessageService(ApplicationContextService applicationContextService) {
+        this.applicationContextService = applicationContextService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
 
     @Override
     public List<WsConnectDto> getConnectionsByDomain(Long domainId) {

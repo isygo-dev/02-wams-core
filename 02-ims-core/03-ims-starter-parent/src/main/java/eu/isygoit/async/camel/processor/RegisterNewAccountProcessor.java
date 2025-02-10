@@ -53,7 +53,7 @@ public class RegisterNewAccountProcessor extends AbstractStringProcessor {
         String[] splitOrigin = newAccount.getOrigin().split("-");
         String roleName = parameterService.getValueByDomainAndName(newAccount.getDomain(), splitOrigin[0] + "_ROLE", true, "");
         if (StringUtils.hasText(roleName)) {
-            roleInfo = roleInfoService.findByName(roleName)
+            roleInfo = roleInfoService.getByName(roleName)
                     .orElseThrow(() -> new RoleNotDefinedException("with name " + roleName));
         } else {
             log.error("<Error>: No role parametrized for account origin : {} ", newAccount.getOrigin());

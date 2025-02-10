@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlHandler;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.dto.common.RequestContextDto;
@@ -8,8 +9,8 @@ import eu.isygoit.dto.common.TokenDto;
 import eu.isygoit.dto.data.TokenRequestDto;
 import eu.isygoit.enums.IEnumAppToken;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
-import eu.isygoit.service.ITokenService;
-import eu.isygoit.service.TokenServiceApi;
+import eu.isygoit.service.token.ITokenService;
+import eu.isygoit.service.token.TokenServiceApi;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,19 +29,26 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api/v1/private/token")
 public class TokenController extends ControllerExceptionHandler implements TokenServiceApi {
 
+    private final ApplicationContextService applicationContextService;
     private final ITokenService tokenService;
 
     @Autowired
-    public TokenController(ITokenService tokenService) {
+    public TokenController(ApplicationContextService applicationContextService, ITokenService tokenService) {
+        this.applicationContextService = applicationContextService;
         this.tokenService = tokenService;
     }
 
     @Override
-    public ResponseEntity<TokenDto> createTokenByDomain(//RequestContextDto requestContext,
-                                                        String domain,
-                                                        String application,
-                                                        IEnumAppToken.Types tokenType,
-                                                        TokenRequestDto tokenRequestDto) {
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
+
+    @Override
+    public ResponseEntity<TokenDto> generateToken(//RequestContextDto requestContext,
+                                                  String domain,
+                                                  String application,
+                                                  IEnumAppToken.Types tokenType,
+                                                  TokenRequestDto tokenRequestDto) {
         log.info("Call create Token By Domain");
         try {
             return ResponseFactory.ResponseOk(tokenService.buildTokenAndSave(domain, application, tokenType, tokenRequestDto.getSubject(), tokenRequestDto.getClaims()));
@@ -51,12 +59,12 @@ public class TokenController extends ControllerExceptionHandler implements Token
     }
 
     @Override
-    public ResponseEntity<Boolean> isTokenValid(RequestContextDto requestContext,
-                                                String domain,
-                                                String application,
-                                                IEnumAppToken.Types tokenType,
-                                                String token,
-                                                String subject) {
+    public ResponseEntity<Boolean> validateToken(RequestContextDto requestContext,
+                                                 String domain,
+                                                 String application,
+                                                 IEnumAppToken.Types tokenType,
+                                                 String token,
+                                                 String subject) {
         log.info("Call is Token Valid");
         try {
             return ResponseFactory.ResponseOk(tokenService.isTokenValid(domain, application, tokenType, token, subject));

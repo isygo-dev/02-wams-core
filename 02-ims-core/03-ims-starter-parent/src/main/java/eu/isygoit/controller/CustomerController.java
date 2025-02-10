@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
@@ -37,11 +38,18 @@ import java.util.List;
 @RequestMapping(path = "/api/v1/private/customer")
 public class CustomerController extends MappedCrudController<Long, Customer, CustomerDto, CustomerDto, CustomerService> {
 
+    private final ApplicationContextService applicationContextService;
     private final ICustomerService customerService;
 
     @Autowired
-    public CustomerController(ICustomerService customerService) {
+    public CustomerController(ApplicationContextService applicationContextService, ICustomerService customerService) {
+        this.applicationContextService = applicationContextService;
         this.customerService = customerService;
+    }
+
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
     }
 
     /**

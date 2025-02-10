@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.service.impl.CrudService;
 import eu.isygoit.constants.AppParameterConstants;
 import eu.isygoit.constants.DomainConstants;
@@ -26,10 +27,17 @@ import java.util.Optional;
 @SrvRepo(value = AppParameterRepository.class)
 public class AppParameterService extends CrudService<Long, AppParameter, AppParameterRepository> implements IAppParameterService {
 
+    private final ApplicationContextService applicationContextService;
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
+
     private final IDomainService domainService;
 
     @Autowired
-    public AppParameterService(IDomainService domainService) {
+    public AppParameterService(ApplicationContextService applicationContextService, IDomainService domainService) {
+        this.applicationContextService = applicationContextService;
         this.domainService = domainService;
     }
 
@@ -72,7 +80,7 @@ public class AppParameterService extends CrudService<Long, AppParameter, AppPara
                 false,
                 "NA");
         if (!StringUtils.hasText(techAdminEmail)) {
-            techAdminEmail = domainService.findByName(DomainConstants.SUPER_DOMAIN_NAME)
+            techAdminEmail = domainService.getByName(DomainConstants.SUPER_DOMAIN_NAME)
                     .orElseThrow(() -> new DomainNotFoundException("with name " + DomainConstants.SUPER_DOMAIN_NAME))
                     .getEmail();
         }

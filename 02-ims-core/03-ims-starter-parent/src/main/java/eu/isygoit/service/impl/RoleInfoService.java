@@ -3,6 +3,7 @@ package eu.isygoit.service.impl;
 import eu.isygoit.annotation.CodeGenKms;
 import eu.isygoit.annotation.CodeGenLocal;
 import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.app.ApplicationContextService;
 import eu.isygoit.com.rest.service.impl.CodifiableService;
 import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.dto.common.RequestContextDto;
@@ -38,11 +39,18 @@ import java.util.stream.Collectors;
 @SrvRepo(value = RoleInfoRepository.class)
 public class RoleInfoService extends CodifiableService<Long, RoleInfo, RoleInfoRepository> implements IRoleInfoService {
 
+    private final ApplicationContextService applicationContextService;
+    @Override
+    protected ApplicationContextService getApplicationContextServiceInstance() {
+        return applicationContextService;
+    }
+
     private final AssoRoleInfoAccountRepository assoRoleInfoAccountRepository;
     private final AccountRepository accountRepository;
 
     @Autowired
-    public RoleInfoService(AssoRoleInfoAccountRepository assoRoleInfoAccountRepository, AccountRepository accountRepository) {
+    public RoleInfoService(ApplicationContextService applicationContextService, AssoRoleInfoAccountRepository assoRoleInfoAccountRepository, AccountRepository accountRepository) {
+        this.applicationContextService = applicationContextService;
         this.assoRoleInfoAccountRepository = assoRoleInfoAccountRepository;
         this.accountRepository = accountRepository;
     }
@@ -61,12 +69,12 @@ public class RoleInfoService extends CodifiableService<Long, RoleInfo, RoleInfoR
     }
 
     @Override
-    public Optional<RoleInfo> findByName(String name) {
+    public Optional<RoleInfo> getByName(String name) {
         return repository().findByName(name);
     }
 
     @Override
-    public Optional<RoleInfo> findByCodeIgnoreCase(String code) {
+    public Optional<RoleInfo> getByCode(String code) {
         return repository().findByCodeIgnoreCase(code);
     }
 
