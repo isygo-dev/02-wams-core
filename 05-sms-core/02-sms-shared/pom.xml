@@ -11,7 +11,7 @@
 
     <groupId>eu.isygo-it.services</groupId>
     <artifactId>storage-management-shared</artifactId>
-    <version>WC-1.0.271124-S0916</version>
+    <version>WC-1.0.250225-T1202</version>
     <packaging>jar</packaging>
     <name>storage-management-shared</name>
     <description>storage-management-shared</description>
@@ -19,7 +19,7 @@
     <parent>
         <groupId>eu.isygo-it.services</groupId>
         <artifactId>sms-core</artifactId>
-        <version>WC-1.0.271124-S0916</version>
+        <version>WC-1.0.250225-T1202</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>service-stack-shared</artifactId>
-            <version>WS-1.0.271124-S0916</version>
+            <version>WS-1.0.250225-T1202</version>
         </dependency>
         <dependency>
             <groupId>jakarta.servlet</groupId>

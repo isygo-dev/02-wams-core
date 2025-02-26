@@ -8,10 +8,10 @@ import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
 import eu.isygoit.dto.common.UserContextDto;
 import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.dto.response.AccessKeyResponseDto;
-import eu.isygoit.encrypt.helper.CRC16;
-import eu.isygoit.encrypt.helper.CRC32;
 import eu.isygoit.enums.*;
 import eu.isygoit.exception.*;
+import eu.isygoit.helper.CRC16Helper;
+import eu.isygoit.helper.CRC32Helper;
 import eu.isygoit.jwt.IJwtService;
 import eu.isygoit.model.*;
 import eu.isygoit.remote.ims.ImsAppParameterService;
@@ -232,7 +232,7 @@ public class PasswordService implements IPasswordService {
         }
 
         String encodedPassword = cryptoService.getPasswordEncryptor(domain).encryptPassword(newPassword);
-        int[] crc = this.signPassword(encodedPassword);
+        long[] crc = this.signPassword(encodedPassword);
 
         //Deactivate all old passwords before saving a new one
         passwordInfoRepository.deactivateOldPasswords(account.getId(), authType);
@@ -287,7 +287,7 @@ public class PasswordService implements IPasswordService {
                     }
                     case DEPRECATED:
                     case VALID: {
-                        int[] crc = this.signPassword(passwordInfo.getPassword());
+                        long[] crc = this.signPassword(passwordInfo.getPassword());
                         if (passwordInfo.getCrc16() != crc[0] || passwordInfo.getCrc32() != crc[1]) {
                             newStatus = IEnumPasswordStatus.Types.BROKEN;
                         } else if (passwordInfo.isExpired()) {
@@ -313,8 +313,8 @@ public class PasswordService implements IPasswordService {
     }
 
     @Override
-    public int[] signPassword(String password) {
-        return new int[]{CRC16.calculate(password.getBytes()), CRC32.calculate(password.getBytes())};
+    public long[] signPassword(String password) {
+        return new long[]{CRC16Helper.calculate(password.getBytes()), CRC32Helper.calculate(password.getBytes())};
     }
 
     @Override

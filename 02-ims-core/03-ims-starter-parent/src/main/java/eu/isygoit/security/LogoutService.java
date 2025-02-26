@@ -24,7 +24,7 @@ public class LogoutService implements LogoutHandler {
             HttpServletResponse response,
             Authentication authentication
     ) {
-        final String authHeader = UrlHelper.getJwtFromRequest(request);
+        final String authHeader = UrlHelper.getJwtTokenFromRequest(request);
         final String jwt;
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return;

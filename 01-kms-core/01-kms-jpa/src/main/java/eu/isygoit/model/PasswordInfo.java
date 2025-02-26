@@ -54,9 +54,9 @@ public class PasswordInfo extends AuditableEntity<Long> {
     @Column(name = SchemaColumnConstantName.C_EXPIRY_DATE, nullable = false, updatable = false)
     private Date expiryDate;
     @Column(name = SchemaColumnConstantName.C_CRC16, nullable = false, updatable = false)
-    private Integer crc16;
+    private Long crc16;
     @Column(name = SchemaColumnConstantName.C_CRC32, nullable = false, updatable = false)
-    private Integer crc32;
+    private Long crc32;
 
     /**
      * Is expired boolean.

@@ -46,8 +46,9 @@ public class VEventController extends MappedCrudController<Long, VCalendarEvent,
 
     @Override
     public VCalendarEventDto beforeUpdate(Long id, VCalendarEventDto eventDto) {
-        VCalendarEvent event = this.crudService().findById(id);
-        if (event != null) {
+        Optional<VCalendarEvent> optional = this.crudService().findById(id);
+        if (optional.isPresent()) {
+            VCalendarEvent event = optional.get();
             VCalendar vCalendar = calendarService.findByDomainAndName(event.getDomain(), event.getCalendar());
             if (vCalendar == null) {
                 throw new CalendarNotFoundException("with domain/name : " + event.getDomain() + "/" + event.getCalendar());
@@ -80,8 +81,9 @@ public class VEventController extends MappedCrudController<Long, VCalendarEvent,
 
     @Override
     public boolean beforeDelete(Long id) {
-        VCalendarEvent event = this.crudService().findById(id);
-        if (event != null) {
+        Optional<VCalendarEvent> optional = this.crudService().findById(id);
+        if (optional.isPresent()) {
+            VCalendarEvent event = optional.get();
             VCalendar vCalendar = calendarService.findByDomainAndName(event.getDomain(), event.getCalendar());
             if (vCalendar == null) {
                 throw new CalendarNotFoundException("with domain/name : " + event.getDomain() + "/" + event.getCalendar());

@@ -31,9 +31,9 @@ public class RequestTrackingDto extends AbstractAuditableDto<Long> {
      */
     public static RequestTrackingDto getFromRequest(HttpServletRequest request) {
         return RequestTrackingDto.builder()
-                .device(UrlHelper.getDevice(request))
-                .browser(UrlHelper.getBrowser(request))
-                .ipOrigin(UrlHelper.getClientIp(request))
+                .device(UrlHelper.getDeviceType(request))
+                .browser(UrlHelper.getBrowserType(request))
+                .ipOrigin(UrlHelper.getClientIpAddress(request))
                 .build();
     }
 }

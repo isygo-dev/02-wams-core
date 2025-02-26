@@ -21,30 +21,6 @@ import java.util.List;
 @SrvRepo(value = AnnexRepository.class)
 public class AnnexService extends CrudService<Long, Annex, AnnexRepository> implements IAnnexService {
 
-    //@CachePut(cacheNames = SchemaTableConstantName.T_ANNEX, key = "{#annex.id}")
-    @Override
-    public Annex create(Annex annex) {
-        return super.create(annex);
-    }
-
-    //@CachePut(cacheNames = SchemaTableConstantName.T_ANNEX, key = "{#annex.id}")
-    @Override
-    public Annex update(Annex annex) {
-        return super.update(annex);
-    }
-
-    //@Cacheable(cacheNames = SchemaTableConstantName.T_ANNEX)
-    @Override
-    public List<Annex> findAll(Pageable pageable) {
-        return super.findAll(pageable);
-    }
-
-    //@Cacheable(cacheNames = SchemaTableConstantName.T_ANNEX, key = "{#annex.id}")
-    @Override
-    public Annex findById(Long id) throws ObjectNotFoundException {
-        return super.findById(id);
-    }
-
     @Override
     public List<Annex> findAnnexByTableCode(String code) {
         return repository().findByTableCode(code);

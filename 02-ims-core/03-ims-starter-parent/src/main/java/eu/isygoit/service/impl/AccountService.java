@@ -402,21 +402,26 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
 
     @Override
     public boolean resendCreationEmail(Long id) {
-        Account account = this.findById(id);
         try {
-            ResponseEntity<Integer> result = kmsPasswordService.generate(//RequestContextDto.builder().build(),
-                    IEnumAuth.Types.PWD,
-                    GeneratePwdRequestDto.builder()
-                            .domain(account.getDomain())
-                            .domainUrl(domainService.findByName(account.getDomain()).getUrl())
-                            .email(account.getEmail())
-                            .userName(account.getCode())
-                            .fullName(account.getFullName())
-                            .build());
-            if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
-                return true;
+            Optional<Account> optional = this.findById(id);
+            if(optional.isPresent()) {
+                Account account = optional.get();
+                ResponseEntity<Integer> result = kmsPasswordService.generate(//RequestContextDto.builder().build(),
+                        IEnumAuth.Types.PWD,
+                        GeneratePwdRequestDto.builder()
+                                .domain(account.getDomain())
+                                .domainUrl(domainService.findByName(account.getDomain()).getUrl())
+                                .email(account.getEmail())
+                                .userName(account.getCode())
+                                .fullName(account.getFullName())
+                                .build());
+                if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
+                    return true;
+                } else {
+                    throw new SendEmailException("Account email reminder");
+                }
             } else {
-                throw new SendEmailException("Account email reminder");
+                throw new AccountNotFoundException("with id " + id);
             }
         } catch (Exception e) {
             log.error("Remote feign call failed : ", e);

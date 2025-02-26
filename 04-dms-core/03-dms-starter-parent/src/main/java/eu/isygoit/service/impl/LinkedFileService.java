@@ -8,12 +8,12 @@ import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.dto.common.LinkedFileRequestDto;
 import eu.isygoit.dto.common.RequestContextDto;
-import eu.isygoit.encrypt.helper.CRC16;
-import eu.isygoit.encrypt.helper.CRC32;
 import eu.isygoit.exception.FileAlreadyExistsException;
 import eu.isygoit.exception.FileNotFoundException;
 import eu.isygoit.exception.LinkedFileNotFoundException;
 import eu.isygoit.exception.ResourceNotFoundException;
+import eu.isygoit.helper.CRC16Helper;
+import eu.isygoit.helper.CRC32Helper;
 import eu.isygoit.helper.FileHelper;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.model.Category;
@@ -43,6 +43,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.zip.CRC32;
 
 /**
  * The type Linked file service.
@@ -78,8 +79,8 @@ public class LinkedFileService extends CodifiableService<Long, LinkedFile, Linke
     public String upload(LinkedFileRequestDto linkedFileRequestDto, MultipartFile file) throws IOException {
         //Calculate the 16 and 32 bit checksum
         byte[] buffer = file.getInputStream().readAllBytes();
-        int crc16 = CRC16.calculate(buffer);
-        int crc32 = CRC32.calculate(buffer);
+        long crc16 = CRC16Helper.calculate(buffer);
+        long crc32 = CRC32Helper.calculate(buffer);
 
         //fetch same domain and original file name files
         List<LinkedFile> sameDomainAndOriginalFileNameFiles = linkedFileRepository.findByDomainIgnoreCaseAndOriginalFileNameOrderByCreateDateDesc(linkedFileRequestDto.getDomain(),
@@ -262,9 +263,10 @@ public class LinkedFileService extends CodifiableService<Long, LinkedFile, Linke
     }
 
     private void storeInLocalFileSystem(LinkedFileRequestDto linkedFile, MultipartFile file) throws IOException {
-        FileHelper.storeMultipartFile(appProperties.getUploadDirectory() +
-                        File.separator + linkedFile.getDomain() +
-                        File.separator + linkedFile.getPath(),
+        Path target = Path.of(appProperties.getUploadDirectory())
+                .resolve(linkedFile.getDomain())
+                .resolve(linkedFile.getPath());
+        FileHelper.saveMultipartFile(target,
                 linkedFile.getCode(),
                 file,
                 FilenameUtils.getExtension(file.getOriginalFilename()));

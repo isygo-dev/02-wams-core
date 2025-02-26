@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The type Customer service.
@@ -73,17 +74,18 @@ public class CustomerService extends ImageService<Long, Customer, CustomerReposi
 
     @Override
     public Customer linkToAccount(Long id, String accountCode) {
-        Customer customer = this.findById(id);
-        if (customer == null) {
+        Optional<Customer> optional = this.findById(id);
+        if(optional.isPresent()){
+            Customer customer = optional.get();
+            if (!accountRepository.existsByCodeIgnoreCase(accountCode)) {
+                throw new AccountNotFoundException("with code:" + accountCode);
+            }
+
+            customer.setAccountCode(accountCode);
+            return this.update(customer);
+        } else {
             throw new CustomerNotFoundException("with id:" + id);
         }
-
-        if (!accountRepository.existsByCodeIgnoreCase(accountCode)) {
-            throw new AccountNotFoundException("with code:" + accountCode);
-        }
-
-        customer.setAccountCode(accountCode);
-        return this.update(customer);
     }
 
     @Override

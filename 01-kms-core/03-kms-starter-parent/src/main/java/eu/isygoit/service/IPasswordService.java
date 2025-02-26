@@ -81,7 +81,7 @@ public interface IPasswordService {
      * @param password the password
      * @return the int [ ]
      */
-    int[] signPassword(String password);
+    long[] signPassword(String password);
 
     /**
      * Is expired boolean.

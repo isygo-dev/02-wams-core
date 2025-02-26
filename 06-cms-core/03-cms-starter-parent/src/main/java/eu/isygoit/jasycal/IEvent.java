@@ -99,7 +99,7 @@ public class IEvent {
             this.event = new VEvent();
             for (Field field : this.getClass().getDeclaredFields()) {
                 if (Property.class.isAssignableFrom(field.getType())) {
-                    Property fieldValue = BeanHelper.callGetter(this, field.getName());
+                    Property fieldValue = BeanHelper.callGetter(this, field.getName(), true);
                     if (fieldValue != null) {
                         this.event.add(fieldValue);
                     }

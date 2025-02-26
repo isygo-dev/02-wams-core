@@ -31,30 +31,6 @@ public class AppParameterService extends CrudService<Long, AppParameter, AppPara
     @Autowired
     private IDomainService domainService;
 
-    //@CachePut(cacheNames = SchemaTableConstantName.T_APP_PARAMETER, key = "{#appParameter.domain, #appParameter.name}")
-    @Override
-    public AppParameter create(AppParameter appParameter) {
-        return super.create(appParameter);
-    }
-
-    //@CachePut(cacheNames = SchemaTableConstantName.T_APP_PARAMETER, key = "{#appParameter.domain, #appParameter.name}")
-    @Override
-    public AppParameter update(AppParameter appParameter) {
-        return super.update(appParameter);
-    }
-
-    //@Cacheable(cacheNames = SchemaTableConstantName.T_APP_PARAMETER)
-    @Override
-    public List<AppParameter> findAll(Pageable pageable) {
-        return super.findAll(pageable);
-    }
-
-    @Override
-    public AppParameter findById(Long id) throws ObjectNotFoundException {
-        return super.findById(id);
-    }
-
-    //@Cacheable(cacheNames = SchemaTableConstantName.T_APP_PARAMETER, key = "{#domain, #name}")
     @Override
     public String getValueByDomainAndName(String domain, String name, boolean allowDefault, String defaultValue) {
         Optional<AppParameter> optional = repository().findByDomainIgnoreCaseAndNameIgnoreCase(domain, name);

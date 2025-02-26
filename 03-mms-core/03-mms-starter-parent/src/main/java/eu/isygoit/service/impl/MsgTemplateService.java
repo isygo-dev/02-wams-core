@@ -122,7 +122,7 @@ public class MsgTemplateService extends FileService<Long, MsgTemplate, MsgTempla
                 template.setFileName(template.getCode().toLowerCase() + "." + FilenameUtils.getExtension(resource.getFilename()));
                 template.setExtension(FilenameUtils.getExtension(resource.getFilename()));
                 this.update(template);
-                FileHelper.makeDirectoryIfNotExist(filePath.toString());
+                FileHelper.createDirectoryIfAbsent(filePath);
                 FileUtils.copyURLToFile(resource.getURL(), new File(filePath.toString(), template.getFileName()));
             } else {
                 log.error("<Error>: Template resource not found: {}", MsgTemplate.class.getSimpleName().toLowerCase()
