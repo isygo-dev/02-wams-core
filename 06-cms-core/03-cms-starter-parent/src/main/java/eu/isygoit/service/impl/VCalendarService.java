@@ -4,7 +4,7 @@ import eu.isygoit.annotation.CodeGenKms;
 import eu.isygoit.annotation.CodeGenLocal;
 import eu.isygoit.annotation.SrvRepo;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
-import eu.isygoit.com.rest.service.impl.CodifiableService;
+import eu.isygoit.com.rest.service.impl.CodeAssignableService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.exception.CalendarAlreadyExistsException;
@@ -43,7 +43,7 @@ import java.util.Optional;
 @CodeGenLocal(value = NextCodeService.class)
 @CodeGenKms(value = KmsIncrementalKeyService.class)
 @SrvRepo(value = VCalendarRepository.class)
-public class VCalendarService extends CodifiableService<Long, VCalendar, VCalendarRepository>
+public class VCalendarService extends CodeAssignableService<Long, VCalendar, VCalendarRepository>
         implements IVCalendarService {
 
     private final AppProperties appProperties;

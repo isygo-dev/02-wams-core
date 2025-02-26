@@ -3,7 +3,7 @@ package eu.isygoit.service.impl;
 import eu.isygoit.annotation.CodeGenKms;
 import eu.isygoit.annotation.CodeGenLocal;
 import eu.isygoit.annotation.SrvRepo;
-import eu.isygoit.com.rest.service.impl.CodifiableService;
+import eu.isygoit.com.rest.service.impl.CodeAssignableService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.dto.common.LinkedFileRequestDto;
@@ -54,7 +54,7 @@ import java.util.zip.CRC32;
 @CodeGenLocal(value = NextCodeService.class)
 @CodeGenKms(value = KmsIncrementalKeyService.class)
 @SrvRepo(value = LinkedFileRepository.class)
-public class LinkedFileService extends CodifiableService<Long, LinkedFile, LinkedFileRepository> implements ILinkedFileService {
+public class LinkedFileService extends CodeAssignableService<Long, LinkedFile, LinkedFileRepository> implements ILinkedFileService {
 
     private final AppProperties appProperties;
 

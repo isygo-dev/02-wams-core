@@ -2,7 +2,7 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.CodeGenLocal;
 import eu.isygoit.annotation.SrvRepo;
-import eu.isygoit.com.rest.service.impl.CodifiableService;
+import eu.isygoit.com.rest.service.impl.CodeAssignableService;
 import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.model.PasswordConfig;
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @CodeGenLocal(value = NextCodeService.class)
 @SrvRepo(value = PasswordConfigRepository.class)
-public class PasswordConfigService extends CodifiableService<Long, PasswordConfig, PasswordConfigRepository> implements IPasswordConfigService {
+public class PasswordConfigService extends CodeAssignableService<Long, PasswordConfig, PasswordConfigRepository> implements IPasswordConfigService {
 
     @Override
     public AppNextCode initCodeGenerator() {

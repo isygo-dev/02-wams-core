@@ -3,7 +3,7 @@ package eu.isygoit.service.impl;
 import eu.isygoit.annotation.CodeGenKms;
 import eu.isygoit.annotation.CodeGenLocal;
 import eu.isygoit.annotation.SrvRepo;
-import eu.isygoit.com.rest.service.impl.CodifiableService;
+import eu.isygoit.com.rest.service.impl.CodeAssignableService;
 import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.RoleInfoDto;
@@ -34,7 +34,7 @@ import java.util.Optional;
 @CodeGenLocal(value = NextCodeService.class)
 @CodeGenKms(value = KmsIncrementalKeyService.class)
 @SrvRepo(value = RoleInfoRepository.class)
-public class RoleInfoService extends CodifiableService<Long, RoleInfo, RoleInfoRepository> implements IRoleInfoService {
+public class RoleInfoService extends CodeAssignableService<Long, RoleInfo, RoleInfoRepository> implements IRoleInfoService {
 
     @Autowired
     private AssoRoleInfoAccountRepository assoRoleInfoAccountRepository;
