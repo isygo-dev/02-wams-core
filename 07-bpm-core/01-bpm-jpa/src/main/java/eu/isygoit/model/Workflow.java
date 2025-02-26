@@ -33,7 +33,7 @@ import java.util.List;
 })
 @SQLDelete(sql = "update " + SchemaTableConstantName.T_WORKFLOW + " set " + SchemaColumnConstantName.C_CHECK_CANCEL + "= true , " + SchemaColumnConstantName.C_CANCEL_DATE + " = current_timestamp WHERE id = ?")
 @Where(clause = SchemaColumnConstantName.C_CHECK_CANCEL + "=false")
-public class Workflow extends AuditableCancelableEntity<Long> implements ISAASEntity, ICodifiable {
+public class Workflow extends AuditableCancelableEntity<Long> implements IDomainAssignable, ICodeAssignable {
 
     @Id
     @SequenceGenerator(name = "workflow_sequence_generator", sequenceName = "workflow_sequence", allocationSize = 1)

@@ -26,7 +26,7 @@ import java.util.List;
         @UniqueConstraint(name = SchemaUcConstantName.UC_WORKFLOW_BOARD_DOMAIN_NAME,
                 columnNames = {SchemaColumnConstantName.C_DOMAIN, SchemaColumnConstantName.C_NAME})
 })
-public class WorkflowBoard extends AuditableEntity<Long> implements ISAASEntity, ICodifiable {
+public class WorkflowBoard extends AuditableEntity<Long> implements IDomainAssignable, ICodeAssignable {
 
     @Id
     @SequenceGenerator(name = "workflow_board_sequence_generator", sequenceName = "workflow_board_sequence", allocationSize = 1)

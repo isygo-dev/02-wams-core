@@ -33,7 +33,7 @@ import org.hibernate.validator.constraints.Length;
         @UniqueConstraint(name = SchemaUcConstantName.UC_DIGESTER_CONFIG_DOMAIN,
                 columnNames = {SchemaColumnConstantName.C_DOMAIN})
 })
-public class DigestConfig extends AuditableEntity<Long> implements ISAASEntity, ICodifiable {
+public class DigestConfig extends AuditableEntity<Long> implements IDomainAssignable, ICodeAssignable {
 
     @Id
     @SequenceGenerator(name = "digester_config_sequence_generator", sequenceName = "digester_config_sequence", allocationSize = 1)

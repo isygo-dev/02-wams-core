@@ -31,7 +31,7 @@ import org.hibernate.annotations.ColumnDefault;
         @UniqueConstraint(name = SchemaUcConstantName.UC_TOKEN_CONFIG_DOMAIN_TYPE,
                 columnNames = {SchemaColumnConstantName.C_DOMAIN, SchemaColumnConstantName.C_TOKEN_TYPE})
 })
-public class TokenConfig extends AuditableEntity<Long> implements ISAASEntity, ICodifiable {
+public class TokenConfig extends AuditableEntity<Long> implements IDomainAssignable, ICodeAssignable {
 
     @Id
     @SequenceGenerator(name = "token_config_sequence_generator", sequenceName = "token_config_sequence", allocationSize = 1)

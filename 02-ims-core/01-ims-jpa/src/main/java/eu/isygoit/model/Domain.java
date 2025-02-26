@@ -26,7 +26,7 @@ import org.hibernate.annotations.Where;
 })
 @SQLDelete(sql = "update " + SchemaTableConstantName.T_DOMAIN + " set " + SchemaColumnConstantName.C_CHECK_CANCEL + "= true , " + SchemaColumnConstantName.C_CANCEL_DATE + " = current_timestamp WHERE id = ?")
 @Where(clause = SchemaColumnConstantName.C_CHECK_CANCEL + "=false")
-public class Domain extends DomainModel<Long> implements ISAASEntity, IImageEntity, ICodifiable {
+public class Domain extends DomainModel<Long> implements IDomainAssignable, IImageEntity, ICodeAssignable {
 
     @Id
     @SequenceGenerator(name = "domain_sequence_generator", sequenceName = "domain_sequence", allocationSize = 1)

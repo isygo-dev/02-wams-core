@@ -24,7 +24,7 @@ import lombok.experimental.SuperBuilder;
         @UniqueConstraint(name = SchemaUcConstantName.UC_WORKFLOW_STATE_CODE,
                 columnNames = {SchemaColumnConstantName.C_CODE})
 })
-public class WorkflowState extends AuditableEntity<Long> implements ICodifiable {
+public class WorkflowState extends AuditableEntity<Long> implements ICodeAssignable {
 
     @Id
     @SequenceGenerator(name = "workflow_state_sequence_generator", sequenceName = "workflow_state_sequence", allocationSize = 1)

@@ -25,7 +25,7 @@ import org.hibernate.annotations.ColumnDefault;
         @UniqueConstraint(name = SchemaUcConstantName.UC_APP_PARAM_DOMAIN_NAME,
                 columnNames = {SchemaColumnConstantName.C_DOMAIN, SchemaColumnConstantName.C_NAME})
 })
-public class AppParameter extends AuditableEntity<Long> implements ISAASEntity {
+public class AppParameter extends AuditableEntity<Long> implements IDomainAssignable {
 
     @Id
     @SequenceGenerator(name = "app_parameter_sequence_generator", sequenceName = "app_parameter_sequence", allocationSize = 1)

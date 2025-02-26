@@ -32,7 +32,7 @@ import java.util.Date;
                 columnNames = {SchemaColumnConstantName.C_DOMAIN, SchemaColumnConstantName.C_NAME})})
 @SQLDelete(sql = "update " + SchemaTableConstantName.T_EVENT + " set " + SchemaColumnConstantName.C_CHECK_CANCEL + "= true , " + SchemaColumnConstantName.C_CANCEL_DATE + " = current_timestamp WHERE id = ?")
 @Where(clause = SchemaColumnConstantName.C_CHECK_CANCEL + "=false")
-public class VCalendarEvent extends AuditableCancelableEntity<Long> implements ISAASEntity, ICodifiable {
+public class VCalendarEvent extends AuditableCancelableEntity<Long> implements IDomainAssignable, ICodeAssignable {
 
     @Id
     @SequenceGenerator(name = "event_sequence_generator", sequenceName = "event_sequence", allocationSize = 1)

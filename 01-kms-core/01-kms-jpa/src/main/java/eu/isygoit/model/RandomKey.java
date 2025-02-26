@@ -26,7 +26,7 @@ import org.hibernate.annotations.ColumnDefault;
         @UniqueConstraint(name = SchemaUcConstantName.UC_RANDOM_KEY_DOMAIN_NAME,
                 columnNames = {SchemaColumnConstantName.C_DOMAIN, SchemaColumnConstantName.C_NAME})
 })
-public class RandomKey extends AuditableEntity<Long> implements ISAASEntity {
+public class RandomKey extends AuditableEntity<Long> implements IDomainAssignable {
 
     @Id
     @SequenceGenerator(name = "random_key_sequence_generator", sequenceName = "random_key_sequence", allocationSize = 1)

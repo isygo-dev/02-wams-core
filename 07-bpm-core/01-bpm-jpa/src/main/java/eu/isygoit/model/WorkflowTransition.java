@@ -26,7 +26,7 @@ import java.util.List;
         @UniqueConstraint(name = SchemaUcConstantName.UC_WORKFLOW_TRANSITION_CODE,
                 columnNames = {SchemaColumnConstantName.C_CODE})
 })
-public class WorkflowTransition extends AuditableEntity<Long> implements ICodifiable {
+public class WorkflowTransition extends AuditableEntity<Long> implements ICodeAssignable {
 
     @Id
     @SequenceGenerator(name = "workflow_transition_sequence_generator", sequenceName = "workflow_transition_sequence", allocationSize = 1)

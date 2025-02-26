@@ -36,7 +36,7 @@ import java.util.List;
                 referencedColumnName = SchemaColumnConstantName.C_ID)
 )
 public class MsgTemplate extends AuditableEntity<Long>
-        implements ISAASEntity, ICodifiable, IFileEntity {
+        implements IDomainAssignable, ICodeAssignable, IFileEntity {
 
     @Id
     @SequenceGenerator(name = "template_sequence_generator", sequenceName = "template_sequence", allocationSize = 1)

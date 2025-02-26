@@ -28,7 +28,7 @@ import java.util.List;
         @UniqueConstraint(name = SchemaUcConstantName.UC_APPLICATION_DOMAIN_NAME,
                 columnNames = {SchemaColumnConstantName.C_DOMAIN, SchemaColumnConstantName.C_NAME})
 })
-public class Application extends AuditableEntity<Long> implements ISAASEntity, ICodifiable, IImageEntity {
+public class Application extends AuditableEntity<Long> implements IDomainAssignable, ICodeAssignable, IImageEntity {
 
     @Id
     @SequenceGenerator(name = "application_sequence_generator", sequenceName = "application_sequence", allocationSize = 1)

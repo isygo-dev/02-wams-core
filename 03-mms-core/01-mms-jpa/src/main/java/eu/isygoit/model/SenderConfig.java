@@ -26,7 +26,7 @@ import org.hibernate.annotations.ColumnDefault;
         , uniqueConstraints = {
         @UniqueConstraint(name = SchemaUcConstantName.UC_SENDER_CONFIG_DOMAIN, columnNames = {SchemaColumnConstantName.C_DOMAIN})
 })
-public class SenderConfig extends AuditableEntity<Long> implements ISAASEntity {
+public class SenderConfig extends AuditableEntity<Long> implements IDomainAssignable {
 
     @Id
     @SequenceGenerator(name = "sender_config_sequence_generator", sequenceName = "sender_config_sequence", allocationSize = 1)

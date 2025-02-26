@@ -31,7 +31,7 @@ import org.hibernate.annotations.ColumnDefault;
         @UniqueConstraint(name = SchemaUcConstantName.UC_PASSWORD_CONFIG_DOMAIN_TYPE,
                 columnNames = {SchemaColumnConstantName.C_DOMAIN, SchemaColumnConstantName.C_TYPE})
 })
-public class PasswordConfig extends AuditableEntity<Long> implements ISAASEntity, ICodifiable {
+public class PasswordConfig extends AuditableEntity<Long> implements IDomainAssignable, ICodeAssignable {
 
     @Id
     @SequenceGenerator(name = "password_config_sequence_generator", sequenceName = "password_config_sequence", allocationSize = 1)

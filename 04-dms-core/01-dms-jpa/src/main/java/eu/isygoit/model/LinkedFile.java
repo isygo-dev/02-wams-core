@@ -35,7 +35,7 @@ import java.util.List;
                         SchemaColumnConstantName.C_VERSION,
                 })
 })
-public class LinkedFile extends LinkedFileModel<Long> implements ISAASEntity {
+public class LinkedFile extends LinkedFileModel<Long> implements IDomainAssignable {
 
     @Id
     @SequenceGenerator(name = "linkedfile_sequence_generator", sequenceName = "linkedfile_sequence", allocationSize = 1)

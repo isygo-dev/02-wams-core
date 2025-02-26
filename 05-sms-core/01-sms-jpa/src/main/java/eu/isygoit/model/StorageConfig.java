@@ -27,7 +27,7 @@ import org.hibernate.annotations.ColumnDefault;
         , uniqueConstraints = {
         @UniqueConstraint(name = SchemaUcConstantName.UC_STORAGE_CONFIG_DOMAIN, columnNames = {SchemaColumnConstantName.C_DOMAIN})
 })
-public class StorageConfig extends AuditableEntity<Long> implements ISAASEntity {
+public class StorageConfig extends AuditableEntity<Long> implements IDomainAssignable {
 
     @Id
     @SequenceGenerator(name = "storageConfig_sequence_generator", sequenceName = "storageConfig_sequence", allocationSize = 1)

@@ -4,7 +4,7 @@ package eu.isygoit.dto.data;
 import eu.isygoit.dto.AddressDto;
 import eu.isygoit.dto.IImageUploadDto;
 import eu.isygoit.dto.extendable.DomainModelDto;
-import eu.isygoit.model.ISAASEntity;
+import eu.isygoit.model.IDomainAssignable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class DomainDto extends DomainModelDto<Long> implements ISAASEntity, IImageUploadDto {
+public class DomainDto extends DomainModelDto<Long> implements IDomainAssignable, IImageUploadDto {
 
     private String domain;
     private String code;

@@ -34,7 +34,7 @@ import org.hibernate.validator.constraints.Length;
         @UniqueConstraint(name = SchemaUcConstantName.UC_PEB_CONFIG_DOMAIN,
                 columnNames = {SchemaColumnConstantName.C_DOMAIN})
 })
-public class PEBConfig extends AuditableEntity<Long> implements ISAASEntity, ICodifiable {
+public class PEBConfig extends AuditableEntity<Long> implements IDomainAssignable, ICodeAssignable {
 
     @Id
     @SequenceGenerator(name = "peb_config_sequence_generator", sequenceName = "peb_config_sequence", allocationSize = 1)

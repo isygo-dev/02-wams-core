@@ -24,7 +24,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(SchemaTableConstantName.T_MAIL_MESSAGE)
-public class MailMessage extends AuditableEntity<UUID> implements ISAASEntity {
+public class MailMessage extends AuditableEntity<UUID> implements IDomainAssignable {
 
     @PrimaryKey
     @CassandraType(type = CassandraType.Name.TIMEUUID)

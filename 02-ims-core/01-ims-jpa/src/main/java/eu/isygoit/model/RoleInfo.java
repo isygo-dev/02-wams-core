@@ -31,7 +31,7 @@ import java.util.List;
         @UniqueConstraint(name = SchemaUcConstantName.UC_ROLE_INFO_DOMAIN_NAME
                 , columnNames = {SchemaColumnConstantName.C_DOMAIN, SchemaColumnConstantName.C_NAME})
 })
-public class RoleInfo extends AuditableEntity<Long> implements ISAASEntity, ICodifiable {
+public class RoleInfo extends AuditableEntity<Long> implements IDomainAssignable, ICodeAssignable {
 
     @Id
     @SequenceGenerator(name = "role_info_sequence_generator", sequenceName = "role_info_sequence", allocationSize = 1)
