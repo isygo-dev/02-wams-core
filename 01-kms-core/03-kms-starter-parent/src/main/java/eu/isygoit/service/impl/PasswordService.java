@@ -339,21 +339,24 @@ public class PasswordService implements IPasswordService {
     @Override
     public void resetPasswordViaToken(ResetPwdViaTokenRequestDto resetPwdViaTokenRequestDto)
             throws TokenInvalidException {
-        String userContextString = jwtService.extractSubject(resetPwdViaTokenRequestDto.getToken());
-        if (StringUtils.hasText(userContextString)) {
-            String[] split = userContextString.split("@");
-            AccessToken accessToken = accessTokenService.findByApplicationAndAccountCodeAndTokenAndTokenType(resetPwdViaTokenRequestDto.getApplication(), split[0], resetPwdViaTokenRequestDto.getToken(), IEnumAppToken.Types.RSTPWD);
-            if (split.length >= 2 && accessToken != null && StringUtils.hasText(accessToken.getToken()) && accessToken.getToken().equals(resetPwdViaTokenRequestDto.getToken())) {
-                UserContextDto userContext = UserContextDto.builder()
-                        .domain(split[1])
-                        .userName(split[0])
-                        .build();
-                TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(userContext.getDomain(), IEnumAppToken.Types.RSTPWD);
-                jwtService.validateToken(resetPwdViaTokenRequestDto.getToken(), userContextString, tokenConfig.getSecretKey());
-                this.forceChangePassword(userContext.getDomain(), userContext.getUserName()
-                        , resetPwdViaTokenRequestDto.getPassword());
-            } else {
-                throw new TokenInvalidException("Invalid JWT:malformed");
+        Optional<String> optional = jwtService.extractSubject(resetPwdViaTokenRequestDto.getToken());
+        if(optional.isPresent()) {
+            String userContextString = optional.get();
+            if (StringUtils.hasText(userContextString)) {
+                String[] split = userContextString.split("@");
+                AccessToken accessToken = accessTokenService.findByApplicationAndAccountCodeAndTokenAndTokenType(resetPwdViaTokenRequestDto.getApplication(), split[0], resetPwdViaTokenRequestDto.getToken(), IEnumAppToken.Types.RSTPWD);
+                if (split.length >= 2 && accessToken != null && StringUtils.hasText(accessToken.getToken()) && accessToken.getToken().equals(resetPwdViaTokenRequestDto.getToken())) {
+                    UserContextDto userContext = UserContextDto.builder()
+                            .domain(split[1])
+                            .userName(split[0])
+                            .build();
+                    TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(userContext.getDomain(), IEnumAppToken.Types.RSTPWD);
+                    jwtService.validateToken(resetPwdViaTokenRequestDto.getToken(), userContextString, tokenConfig.getSecretKey());
+                    this.forceChangePassword(userContext.getDomain(), userContext.getUserName()
+                            , resetPwdViaTokenRequestDto.getPassword());
+                } else {
+                    throw new TokenInvalidException("Invalid JWT:malformed");
+                }
             }
         }
     }

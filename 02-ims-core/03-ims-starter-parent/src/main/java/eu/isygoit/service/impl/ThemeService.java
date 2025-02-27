@@ -1,7 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.SrvRepo;
-import eu.isygoit.com.rest.service.impl.CrudService;
+import eu.isygoit.com.rest.service.CrudService;
 import eu.isygoit.model.Theme;
 import eu.isygoit.repository.ThemeRepository;
 import eu.isygoit.service.IThemeService;

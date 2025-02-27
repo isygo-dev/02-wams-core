@@ -2,7 +2,7 @@ package eu.isygoit.service.impl;
 
 
 import eu.isygoit.annotation.SrvRepo;
-import eu.isygoit.com.rest.service.impl.CrudServiceUtils;
+import eu.isygoit.com.rest.service.CrudServiceUtils;
 import eu.isygoit.exception.AccountNotFoundException;
 import eu.isygoit.exception.PropertyNotFoundException;
 import eu.isygoit.model.Account;

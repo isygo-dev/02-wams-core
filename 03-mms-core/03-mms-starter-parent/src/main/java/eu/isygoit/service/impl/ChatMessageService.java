@@ -1,7 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.SrvRepo;
-import eu.isygoit.com.rest.service.impl.CrudService;
+import eu.isygoit.com.rest.service.CrudService;
 import eu.isygoit.config.WsChannelInterceptor;
 import eu.isygoit.dto.data.ChatAccountDto;
 import eu.isygoit.dto.wsocket.WsConnectDto;

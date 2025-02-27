@@ -2,7 +2,7 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.SrvRepo;
 import eu.isygoit.com.camel.repository.ICamelRepository;
-import eu.isygoit.com.rest.service.impl.CrudServiceUtils;
+import eu.isygoit.com.rest.service.CrudServiceUtils;
 import eu.isygoit.dto.wsocket.WsMessageWrapperDto;
 import eu.isygoit.enums.IEnumWSEndpoint;
 import eu.isygoit.model.ChatMessage;
