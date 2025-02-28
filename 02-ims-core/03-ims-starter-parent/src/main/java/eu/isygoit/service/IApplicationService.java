@@ -2,7 +2,7 @@ package eu.isygoit.service;
 
 import eu.isygoit.com.rest.service.ICrudServiceMethod;
 import eu.isygoit.com.rest.service.IImageServiceMethods;
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Application;
 
 /**
@@ -17,7 +17,7 @@ public interface IApplicationService extends ICrudServiceMethod<Long, Applicatio
      * @param newStatus the new status
      * @return the application
      */
-    Application updateStatus(Long id, IEnumBinaryStatus.Types newStatus);
+    Application updateStatus(Long id, IEnumEnabledBinaryStatus.Types newStatus);
 
     /**
      * Find by name application.

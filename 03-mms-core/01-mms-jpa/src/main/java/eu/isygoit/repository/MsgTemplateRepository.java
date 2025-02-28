@@ -1,6 +1,6 @@
 package eu.isygoit.repository;
 
-import eu.isygoit.enums.IEnumMsgTemplateName;
+import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.model.MsgTemplate;
 
 import java.util.Optional;
@@ -18,5 +18,5 @@ public interface MsgTemplateRepository extends JpaPagingAndSortingSAASCodifiable
      * @param name   the name
      * @return the optional
      */
-    Optional<MsgTemplate> findByDomainIgnoreCaseAndName(String domain, IEnumMsgTemplateName.Types name);
+    Optional<MsgTemplate> findByDomainIgnoreCaseAndName(String domain, IEnumEmailTemplate.Types name);
 }

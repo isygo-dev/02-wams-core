@@ -9,7 +9,7 @@ import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.ApplicationDto;
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.mapper.ApplicationMapper;
 import eu.isygoit.model.Application;
@@ -60,7 +60,7 @@ public class AppController extends MappedCrudController<Long, Application, Appli
     @PutMapping(path = "/update-status")
     public ResponseEntity<ApplicationDto> updateStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) RequestContextDto requestContext,
                                                        @RequestParam(name = RestApiConstants.ID) Long id,
-                                                       @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumBinaryStatus.Types newStatus) {
+                                                       @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus) {
         log.info("in update status");
         try {
             return ResponseFactory.ResponseOk(mapper().entityToDto(crudService().updateStatus(id, newStatus)));

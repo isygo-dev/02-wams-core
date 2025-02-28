@@ -1,7 +1,7 @@
 package eu.isygoit.model;
 
 import eu.isygoit.enums.IEnumAuth;
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.enums.IEnumPasswordStatus;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
@@ -41,7 +41,7 @@ public class PasswordInfo extends AuditableEntity<Long> {
     @Builder.Default
     @ColumnDefault("'PWD'")
     @Enumerated(EnumType.STRING)
-    @Column(name = SchemaColumnConstantName.C_AUTH_TYPE, length = IEnumBinaryStatus.STR_ENUM_SIZE, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_AUTH_TYPE, length = IEnumEnabledBinaryStatus.STR_ENUM_SIZE, nullable = false)
     private IEnumAuth.Types authType = IEnumAuth.Types.PWD;
     @Column(name = SchemaColumnConstantName.C_USER_PASSWORD, length = SchemaConstantSize.PASS_WORD, nullable = false, updatable = false)
     private String password;

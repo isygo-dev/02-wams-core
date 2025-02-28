@@ -5,7 +5,7 @@ import eu.isygoit.constants.AccountTypeConstants;
 import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.enums.IEnumAccountSystemStatus;
 import eu.isygoit.enums.IEnumAuth;
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.model.*;
 import eu.isygoit.repository.ApiPermissionRepository;
@@ -52,7 +52,7 @@ public class InitSuperUserService extends AbstractJobService {
                     .domain(DomainConstants.SUPER_DOMAIN_NAME)
                     .name(DomainConstants.DEFAULT_DOMAIN_NAME)
                     .description(DomainConstants.DEFAULT_DOMAIN_NAME)
-                    .adminStatus(IEnumBinaryStatus.Types.ENABLED)
+                    .adminStatus(IEnumEnabledBinaryStatus.Types.ENABLED)
                     .build());
         }
 
@@ -63,7 +63,7 @@ public class InitSuperUserService extends AbstractJobService {
                     .domain(DomainConstants.SUPER_DOMAIN_NAME)
                     .name(DomainConstants.SUPER_DOMAIN_NAME)
                     .description(DomainConstants.SUPER_DOMAIN_NAME)
-                    .adminStatus(IEnumBinaryStatus.Types.ENABLED)
+                    .adminStatus(IEnumEnabledBinaryStatus.Types.ENABLED)
                     .build());
         }
 
@@ -115,7 +115,7 @@ public class InitSuperUserService extends AbstractJobService {
                     .language(IEnumLanguage.Types.EN)
                     .phoneNumber("0021653579452")
                     .systemStatus(IEnumAccountSystemStatus.Types.IDLE)
-                    .adminStatus(IEnumBinaryStatus.Types.ENABLED)
+                    .adminStatus(IEnumEnabledBinaryStatus.Types.ENABLED)
                     .authType(IEnumAuth.Types.OTP)
                     .accountType(AccountTypeConstants.SUPER_ADMIN)
                     .functionRole(AccountTypeConstants.SUPER_ADMIN)

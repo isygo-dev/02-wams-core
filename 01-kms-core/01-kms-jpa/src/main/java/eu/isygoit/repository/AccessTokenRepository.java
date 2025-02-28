@@ -1,6 +1,6 @@
 package eu.isygoit.repository;
 
-import eu.isygoit.enums.IEnumAppToken;
+import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.model.AccessToken;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -32,7 +32,7 @@ public interface AccessTokenRepository extends JpaPagingAndSortingRepository<Acc
      * @param tokenType   the token type
      * @return the optional
      */
-    Optional<AccessToken> findFirstByApplicationAndAccountCodeIgnoreCaseAndTokenAndTokenTypeAndDeprecatedFalseOrderByCreateDateDesc(String application, String accountCode, String token, IEnumAppToken.Types tokenType);
+    Optional<AccessToken> findFirstByApplicationAndAccountCodeIgnoreCaseAndTokenAndTokenTypeAndDeprecatedFalseOrderByCreateDateDesc(String application, String accountCode, String token, IEnumToken.Types tokenType);
 
     /**
      * Find first by account code ignore case and token and token type and deprecated false order by create date desc optional.
@@ -42,7 +42,7 @@ public interface AccessTokenRepository extends JpaPagingAndSortingRepository<Acc
      * @param tokenType   the token type
      * @return the optional
      */
-    Optional<AccessToken> findFirstByAccountCodeIgnoreCaseAndTokenAndTokenTypeAndDeprecatedFalseOrderByCreateDateDesc(String accountCode, String token, IEnumAppToken.Types tokenType);
+    Optional<AccessToken> findFirstByAccountCodeIgnoreCaseAndTokenAndTokenTypeAndDeprecatedFalseOrderByCreateDateDesc(String accountCode, String token, IEnumToken.Types tokenType);
 
     /**
      * Delete by token type and account code ignore case.
@@ -51,7 +51,7 @@ public interface AccessTokenRepository extends JpaPagingAndSortingRepository<Acc
      * @param accountCode the account code
      */
     @Modifying
-    void deleteByTokenTypeAndAccountCodeIgnoreCase(IEnumAppToken.Types tokenType, String accountCode);
+    void deleteByTokenTypeAndAccountCodeIgnoreCase(IEnumToken.Types tokenType, String accountCode);
 
     /**
      * Deactivate old tokens int.
@@ -64,6 +64,6 @@ public interface AccessTokenRepository extends JpaPagingAndSortingRepository<Acc
     @Modifying
     @Query("update AccessToken at set at.deprecated = true where at.accountCode= :accountCode and at.tokenType= :tokenType and at.application= :application")
     int deactivateOldTokens(@Param("accountCode") String accountCode,
-                            @Param("tokenType") IEnumAppToken.Types tokenType,
+                            @Param("tokenType") IEnumToken.Types tokenType,
                             @Param("application") String application);
 }

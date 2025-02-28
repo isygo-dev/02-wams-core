@@ -1,6 +1,6 @@
 package eu.isygoit.repository;
 
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.KmsDomain;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -31,7 +31,7 @@ public interface DomainRepository extends JpaPagingAndSortingRepository<KmsDomai
     @Modifying
     @Query("UPDATE KmsDomain d SET d.adminStatus = :newStatus WHERE d.name = :domain")
     int updateAdminStatus(@Param("domain") String domain,
-                          @Param("newStatus") IEnumBinaryStatus.Types newStatus);
+                          @Param("newStatus") IEnumEnabledBinaryStatus.Types newStatus);
 
     /**
      * Gets admin status.
@@ -40,5 +40,5 @@ public interface DomainRepository extends JpaPagingAndSortingRepository<KmsDomai
      * @return the admin status
      */
     @Query("select d.adminStatus from KmsDomain d where d.name = :domain")
-    IEnumBinaryStatus.Types getAdminStatus(@Param("domain") String domain);
+    IEnumEnabledBinaryStatus.Types getAdminStatus(@Param("domain") String domain);
 }

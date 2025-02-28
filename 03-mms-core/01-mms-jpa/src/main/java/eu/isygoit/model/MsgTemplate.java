@@ -3,7 +3,7 @@ package eu.isygoit.model;
 
 import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.enums.IEnumLanguage;
-import eu.isygoit.enums.IEnumMsgTemplateName;
+import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.*;
 import jakarta.persistence.*;
@@ -52,8 +52,8 @@ public class MsgTemplate extends AuditableEntity<Long>
     @Column(name = SchemaColumnConstantName.C_DOMAIN, length = SchemaConstantSize.DOMAIN, updatable = false, nullable = false)
     private String domain;
     @Enumerated(EnumType.STRING)
-    @Column(name = SchemaColumnConstantName.C_NAME, length = IEnumMsgTemplateName.STR_ENUM_SIZE, nullable = false)
-    private IEnumMsgTemplateName.Types name;
+    @Column(name = SchemaColumnConstantName.C_NAME, length = IEnumEmailTemplate.STR_ENUM_SIZE, nullable = false)
+    private IEnumEmailTemplate.Types name;
     @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = SchemaConstantSize.DESCRIPTION)
     private String description;
     @Builder.Default

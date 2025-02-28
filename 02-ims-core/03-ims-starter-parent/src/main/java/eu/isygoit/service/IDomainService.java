@@ -2,7 +2,7 @@ package eu.isygoit.service;
 
 import eu.isygoit.com.rest.service.ICrudServiceMethod;
 import eu.isygoit.com.rest.service.IImageServiceMethods;
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Domain;
 
 import java.util.List;
@@ -27,7 +27,7 @@ public interface IDomainService extends ICrudServiceMethod<Long, Domain>, IImage
      * @param newStatus the new status
      * @return the domain
      */
-    Domain updateAdminStatus(Long id, IEnumBinaryStatus.Types newStatus);
+    Domain updateAdminStatus(Long id, IEnumEnabledBinaryStatus.Types newStatus);
 
     /**
      * Gets image.

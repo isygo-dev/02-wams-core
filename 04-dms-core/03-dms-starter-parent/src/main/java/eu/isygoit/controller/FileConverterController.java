@@ -4,7 +4,7 @@ import eu.isygoit.annotation.CtrlHandler;
 import eu.isygoit.api.FileConverterApi;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
-import eu.isygoit.enums.IEnumFileType;
+import eu.isygoit.enums.IEnumFile;
 import eu.isygoit.exception.ConvertFileException;
 import eu.isygoit.exception.ResourceNotFoundException;
 import eu.isygoit.exception.UnsupportedFileTypeException;
@@ -39,7 +39,7 @@ public class FileConverterController extends ControllerExceptionHandler implemen
 
     @Override
     public ResponseEntity<Resource> convertPdf(//RequestContextDto requestContext,
-                                               IEnumFileType.Types targetFormat,
+                                               IEnumFile.Types targetFormat,
                                                MultipartFile file) {
         try {
             File responseFile = null;
@@ -74,7 +74,7 @@ public class FileConverterController extends ControllerExceptionHandler implemen
 
     @Override
     public ResponseEntity<Resource> convertHtml(//RequestContextDto requestContext,
-                                                IEnumFileType.Types targetFormat,
+                                                IEnumFile.Types targetFormat,
                                                 MultipartFile file) {
         try {
             File responseFile = null;

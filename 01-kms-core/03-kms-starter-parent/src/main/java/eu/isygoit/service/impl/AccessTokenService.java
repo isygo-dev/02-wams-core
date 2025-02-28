@@ -3,7 +3,7 @@ package eu.isygoit.service.impl;
 import eu.isygoit.annotation.SrvRepo;
 import eu.isygoit.com.rest.service.CrudService;
 import eu.isygoit.config.AppProperties;
-import eu.isygoit.enums.IEnumAppToken;
+import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.model.AccessToken;
 import eu.isygoit.repository.AccessTokenRepository;
 import eu.isygoit.service.IAccessTokenService;
@@ -34,7 +34,7 @@ public class AccessTokenService extends CrudService<Long, AccessToken, AccessTok
     }
 
     //@Cacheable(cacheNames = SchemaTableConstantName.T_ACCESS_TOKEN, key = "{#application, #accountCode, #token, #tokenType}")
-    public AccessToken findByApplicationAndAccountCodeAndTokenAndTokenType(String application, String accountCode, String token, IEnumAppToken.Types tokenType) {
+    public AccessToken findByApplicationAndAccountCodeAndTokenAndTokenType(String application, String accountCode, String token, IEnumToken.Types tokenType) {
         Optional<AccessToken> optional = repository().findFirstByApplicationAndAccountCodeIgnoreCaseAndTokenAndTokenTypeAndDeprecatedFalseOrderByCreateDateDesc(application, accountCode, token, tokenType);
         if (optional.isPresent()) {
             return optional.get();
@@ -43,7 +43,7 @@ public class AccessTokenService extends CrudService<Long, AccessToken, AccessTok
     }
 
     @Override
-    public AccessToken findByAccountCodeAndTokenAndTokenType(String accountCode, String token, IEnumAppToken.Types tokenType) {
+    public AccessToken findByAccountCodeAndTokenAndTokenType(String accountCode, String token, IEnumToken.Types tokenType) {
         Optional<AccessToken> optional = repository().findFirstByAccountCodeIgnoreCaseAndTokenAndTokenTypeAndDeprecatedFalseOrderByCreateDateDesc(accountCode, token, tokenType);
         if (optional.isPresent()) {
             return optional.get();

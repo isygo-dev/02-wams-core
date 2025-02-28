@@ -1,7 +1,7 @@
 package eu.isygoit.model;
 
 import eu.isygoit.constants.DomainConstants;
-import eu.isygoit.enums.IEnumAppToken;
+import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
@@ -54,8 +54,8 @@ public class TokenConfig extends AuditableEntity<Long> implements IDomainAssigna
     @Builder.Default
     @ColumnDefault("'ACCESS'")
     @Enumerated(EnumType.STRING)
-    @Column(name = SchemaColumnConstantName.C_TOKEN_TYPE, length = IEnumAppToken.STR_ENUM_SIZE, nullable = false)
-    private IEnumAppToken.Types tokenType = IEnumAppToken.Types.ACCESS;
+    @Column(name = SchemaColumnConstantName.C_TOKEN_TYPE, length = IEnumToken.STR_ENUM_SIZE, nullable = false)
+    private IEnumToken.Types tokenType = IEnumToken.Types.ACCESS;
 
     @Column(name = SchemaColumnConstantName.C_AUDIENCE, updatable = false, nullable = false)
     private String audience;

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.enums.IEnumAuth;
-import eu.isygoit.enums.IEnumMsgTemplateName;
+import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.enums.IEnumPasswordStatus;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.PasswordInfo;
@@ -59,7 +59,7 @@ public class PasswordExpiredService extends AbstractJobService {
                                     .subject(EmailSubjects.PASSWORD_WILL_EXPIRE_EMAIL_SUBJECT)
                                     .domain(account.getDomain())
                                     .toAddr(account.getEmail())
-                                    .templateName(IEnumMsgTemplateName.Types.PASSWORD_EXPIRE_TEMPLATE)
+                                    .templateName(IEnumEmailTemplate.Types.PASSWORD_EXPIRE_TEMPLATE)
                                     .variables(MailMessageDto.getVariablesAsString(Map.of(
                                             //Common vars
                                             MsgTemplateVariables.V_USER_NAME, account.getCode(),

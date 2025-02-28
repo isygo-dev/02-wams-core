@@ -2,7 +2,7 @@ package eu.isygoit.service;
 
 import eu.isygoit.com.rest.service.ICrudServiceMethod;
 import eu.isygoit.com.rest.service.IFileServiceMethods;
-import eu.isygoit.enums.IEnumMsgTemplateName;
+import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.model.MsgTemplate;
 import freemarker.template.TemplateException;
 
@@ -27,6 +27,6 @@ public interface IMsgTemplateService extends ICrudServiceMethod<Long, MsgTemplat
      * @throws TemplateException the template exception
      */
     String composeMessageBody(String senderDomainName,
-                              IEnumMsgTemplateName.Types templateName,
+                              IEnumEmailTemplate.Types templateName,
                               Map<String, String> variables) throws IOException, TemplateException;
 }

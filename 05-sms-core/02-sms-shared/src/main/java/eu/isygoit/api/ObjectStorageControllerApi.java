@@ -6,7 +6,7 @@ import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.BucketDto;
 import eu.isygoit.dto.data.FileTagsDto;
 import eu.isygoit.dto.extendable.IdentifiableDto;
-import eu.isygoit.enums.IEnumLogicalOpe;
+import eu.isygoit.enums.IEnumLogicalOperator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -154,7 +154,7 @@ public interface ObjectStorageControllerApi {
                                          @RequestParam(name = RestApiConstants.DOMAIN_NAME) String domain,
                                          @RequestParam(name = RestApiConstants.BUCKET_NAME) String bucketName,
                                          @RequestParam(name = RestApiConstants.TAGS) String tags,
-                                         @RequestParam(name = RestApiConstants.CONDITION) IEnumLogicalOpe.Types condition);
+                                         @RequestParam(name = RestApiConstants.CONDITION) IEnumLogicalOperator.Types condition);
 
     /**
      * Update tags response entity.

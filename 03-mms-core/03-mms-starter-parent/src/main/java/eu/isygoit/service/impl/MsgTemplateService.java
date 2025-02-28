@@ -8,7 +8,7 @@ import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.dto.data.DomainDto;
 import eu.isygoit.enums.IEnumLanguage;
-import eu.isygoit.enums.IEnumMsgTemplateName;
+import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.helper.FileHelper;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.model.MsgTemplate;
@@ -94,7 +94,7 @@ public class MsgTemplateService extends FileService<Long, MsgTemplate, MsgTempla
     @Transactional
     @Override
     public String composeMessageBody(String senderDomainName,
-                                     IEnumMsgTemplateName.Types templateName,
+                                     IEnumEmailTemplate.Types templateName,
                                      Map<String, String> variables)
             throws IOException, TemplateException {
         Optional<MsgTemplate> optional = templateRepository.findByDomainIgnoreCaseAndName(senderDomainName, templateName);

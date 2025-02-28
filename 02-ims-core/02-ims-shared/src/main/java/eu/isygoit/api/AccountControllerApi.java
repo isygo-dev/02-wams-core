@@ -10,7 +10,7 @@ import eu.isygoit.dto.data.DomainAdminDto;
 import eu.isygoit.dto.data.MinAccountDto;
 import eu.isygoit.dto.extendable.IdentifiableDto;
 import eu.isygoit.dto.response.UserDataResponseDto;
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.enums.IEnumLanguage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -82,7 +82,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
     @PutMapping(path = "/updateStatusAccount")
     ResponseEntity<AccountDto> updateAccountAdminStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
                                                         @RequestParam(name = RestApiConstants.ID) Long id,
-                                                        @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumBinaryStatus.Types newStatus);
+                                                        @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus);
 
     @Operation(summary = "Create Domain Admin Api",
             description = "Create Domain Admin")

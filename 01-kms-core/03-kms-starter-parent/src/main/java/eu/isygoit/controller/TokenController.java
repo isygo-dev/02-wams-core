@@ -6,7 +6,7 @@ import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.common.TokenDto;
 import eu.isygoit.dto.data.TokenRequestDto;
-import eu.isygoit.enums.IEnumAppToken;
+import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.service.ITokenService;
 import eu.isygoit.service.TokenServiceApi;
@@ -35,7 +35,7 @@ public class TokenController extends ControllerExceptionHandler implements Token
     public ResponseEntity<TokenDto> createTokenByDomain(//RequestContextDto requestContext,
                                                         String domain,
                                                         String application,
-                                                        IEnumAppToken.Types tokenType,
+                                                        IEnumToken.Types tokenType,
                                                         TokenRequestDto tokenRequestDto) {
         log.info("Call create Token By Domain");
         try {
@@ -50,7 +50,7 @@ public class TokenController extends ControllerExceptionHandler implements Token
     public ResponseEntity<Boolean> isTokenValid(RequestContextDto requestContext,
                                                 String domain,
                                                 String application,
-                                                IEnumAppToken.Types tokenType,
+                                                IEnumToken.Types tokenType,
                                                 String token,
                                                 String subject) {
         log.info("Call is Token Valid");

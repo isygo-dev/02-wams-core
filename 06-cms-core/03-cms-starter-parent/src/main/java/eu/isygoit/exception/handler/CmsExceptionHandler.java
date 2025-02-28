@@ -5,7 +5,7 @@ import eu.isygoit.api.AppParameterControllerApi;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.dto.data.MailMessageDto;
-import eu.isygoit.enums.IEnumMsgTemplateName;
+import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.service.IMsgService;
 import eu.isygoit.types.EmailSubjects;
 import eu.isygoit.types.MsgTemplateVariables;
@@ -48,7 +48,7 @@ public class CmsExceptionHandler extends ControllerExceptionHandler {
                             .subject(EmailSubjects.UNMANAGED_EXCEPTION)
                             .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
                             .toAddr(techAdminEmail)
-                            .templateName(IEnumMsgTemplateName.Types.UNMANAGED_EXCEPTION_TEMPLATE)
+                            .templateName(IEnumEmailTemplate.Types.UNMANAGED_EXCEPTION_TEMPLATE)
                             .variables(MailMessageDto.getVariablesAsString(Map.of(
                                     //Common vars
                                     MsgTemplateVariables.V_EXCEPTION, message

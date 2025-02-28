@@ -6,7 +6,7 @@ import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
 import eu.isygoit.dto.data.MsgTemplateDto;
 import eu.isygoit.dto.extendable.IdentifiableDto;
-import eu.isygoit.enums.IEnumMsgTemplateName;
+import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.exception.handler.MmsExceptionHandler;
 import eu.isygoit.mapper.MsgTemplateMapper;
 import eu.isygoit.model.MsgTemplate;
@@ -52,7 +52,7 @@ public class MsgTemplateController extends MappedCrudController<Long, MsgTemplat
     @GetMapping(path = "/names")
     public ResponseEntity<List<String>> getTemplateNames() {
         try {
-            return ResponseFactory.ResponseOk(Arrays.stream(Arrays.stream(IEnumMsgTemplateName.Types.class.getEnumConstants()).map(Enum::name)
+            return ResponseFactory.ResponseOk(Arrays.stream(Arrays.stream(IEnumEmailTemplate.Types.class.getEnumConstants()).map(Enum::name)
                             .toArray(String[]::new))
                     .toList());
         } catch (Throwable e) {

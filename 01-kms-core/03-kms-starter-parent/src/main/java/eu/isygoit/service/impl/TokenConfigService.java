@@ -5,7 +5,7 @@ import eu.isygoit.annotation.SrvRepo;
 import eu.isygoit.com.rest.service.CodeAssignableService;
 import eu.isygoit.config.JwtProperties;
 import eu.isygoit.constants.DomainConstants;
-import eu.isygoit.enums.IEnumAppToken;
+import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.model.TokenConfig;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
@@ -42,7 +42,7 @@ public class TokenConfigService extends CodeAssignableService<Long, TokenConfig,
 
 
     @Override
-    public TokenConfig buildTokenConfig(String domain, IEnumAppToken.Types tokenType) {
+    public TokenConfig buildTokenConfig(String domain, IEnumToken.Types tokenType) {
         //Serach for token config configured for the domein by type
         Optional<TokenConfig> optional = tokenConfigRepository.findByDomainIgnoreCaseAndTokenType(domain, tokenType);
         if (!optional.isPresent()) {

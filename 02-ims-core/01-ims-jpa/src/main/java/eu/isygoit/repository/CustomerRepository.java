@@ -1,6 +1,6 @@
 package eu.isygoit.repository;
 
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Customer;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -21,5 +21,5 @@ public interface CustomerRepository extends JpaPagingAndSortingSAASCodifiableRep
     @Modifying
     @Query("UPDATE Customer c SET c.adminStatus = :newStatus WHERE c.id = :id")
     int updateAdminStatusById(@Param("id") Long id,
-                              @Param("newStatus") IEnumBinaryStatus.Types newStatus);
+                              @Param("newStatus") IEnumEnabledBinaryStatus.Types newStatus);
 }

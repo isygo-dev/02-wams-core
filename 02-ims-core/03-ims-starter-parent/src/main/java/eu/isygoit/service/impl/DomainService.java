@@ -6,7 +6,7 @@ import eu.isygoit.annotation.SrvRepo;
 import eu.isygoit.com.rest.service.ImageService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.DomainConstants;
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.exception.DomainNotFoundException;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.model.Domain;
@@ -53,7 +53,7 @@ public class DomainService extends ImageService<Long, Domain, DomainRepository> 
     }
 
     @Override
-    public Domain updateAdminStatus(Long id, IEnumBinaryStatus.Types newStatus) {
+    public Domain updateAdminStatus(Long id, IEnumEnabledBinaryStatus.Types newStatus) {
         repository().updateAdminStatusById(id, newStatus);
         return repository().findById(id).orElse(null);
     }
@@ -87,7 +87,7 @@ public class DomainService extends ImageService<Long, Domain, DomainRepository> 
 
     @Override
     public boolean isEnabled(String domain) {
-        return repository().getAdminStatus(domain) == IEnumBinaryStatus.Types.ENABLED;
+        return repository().getAdminStatus(domain) == IEnumEnabledBinaryStatus.Types.ENABLED;
     }
 
     @Override

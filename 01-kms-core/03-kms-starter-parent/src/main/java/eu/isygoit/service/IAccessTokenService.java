@@ -1,7 +1,7 @@
 package eu.isygoit.service;
 
 import eu.isygoit.com.rest.service.ICrudServiceMethod;
-import eu.isygoit.enums.IEnumAppToken;
+import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.model.AccessToken;
 
 /**
@@ -18,7 +18,7 @@ public interface IAccessTokenService extends ICrudServiceMethod<Long, AccessToke
      * @param tokenType   the token type
      * @return the access token
      */
-    AccessToken findByApplicationAndAccountCodeAndTokenAndTokenType(String application, String accountCode, String token, IEnumAppToken.Types tokenType);
+    AccessToken findByApplicationAndAccountCodeAndTokenAndTokenType(String application, String accountCode, String token, IEnumToken.Types tokenType);
 
     /**
      * Find by account code and token and token type access token.
@@ -28,5 +28,5 @@ public interface IAccessTokenService extends ICrudServiceMethod<Long, AccessToke
      * @param tokenType   the token type
      * @return the access token
      */
-    AccessToken findByAccountCodeAndTokenAndTokenType(String accountCode, String token, IEnumAppToken.Types tokenType);
+    AccessToken findByAccountCodeAndTokenAndTokenType(String accountCode, String token, IEnumToken.Types tokenType);
 }

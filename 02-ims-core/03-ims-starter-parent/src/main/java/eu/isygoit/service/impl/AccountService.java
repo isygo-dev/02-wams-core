@@ -132,7 +132,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     }
 
     @Override
-    public Account updateAccountAdminStatus(Long id, IEnumBinaryStatus.Types newStatus) {
+    public Account updateAccountAdminStatus(Long id, IEnumEnabledBinaryStatus.Types newStatus) {
         repository().updateAccountAdminStatus(newStatus, id);
         return repository().findById(id).orElse(null);
     }
@@ -160,14 +160,14 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
         String hideDisabledApp = parameterService.getValueByDomainAndName(account.getDomain(), AppParameterConstants.HIDE_DISABLED_APP, true, AppParameterConstants.NO);
         if (AppParameterConstants.YES.equals(hideDisabledApp)) {
             return applications.stream()
-                    .filter(application -> IEnumBinaryStatus.Types.ENABLED == application.getAdminStatus())
+                    .filter(application -> IEnumEnabledBinaryStatus.Types.ENABLED == application.getAdminStatus())
                     .distinct()
                     .map(application -> {
                         ApplicationDto app = applicationMapper.entityToDto(application);
                         app.setToken(kmsTokenService.createTokenByDomain(//RequestContextDto.builder().build(),
                                 account.getDomain(),
                                 application.getName(),
-                                IEnumAppToken.Types.ACCESS,
+                                IEnumToken.Types.ACCESS,
                                 TokenRequestDto.builder()
                                         .subject(account.getCode())
                                         .claims(Map.of(JwtConstants.JWT_SENDER_DOMAIN, account.getDomain(),
@@ -178,14 +178,14 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
                         return app;
                     }).toList();
         } else {
-            return applications.stream()//.filter(application -> IEnumBinaryStatus.Types.ENABLED == application.getAdminStatus())
+            return applications.stream()//.filter(application -> IEnumEnabledBinaryStatus.Types.ENABLED == application.getAdminStatus())
                     .distinct().
                     map(application -> {
                         ApplicationDto app = applicationMapper.entityToDto(application);
                         app.setToken(kmsTokenService.createTokenByDomain(//RequestContextDto.builder().build(),
                                 account.getDomain(),
                                 application.getName(),
-                                IEnumAppToken.Types.ACCESS,
+                                IEnumToken.Types.ACCESS,
                                 TokenRequestDto.builder()
                                         .subject(account.getCode())
                                         .claims(Map.of(JwtConstants.JWT_SENDER_DOMAIN, account.getDomain(),
@@ -256,7 +256,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
                     ResponseEntity<TokenDto> result = kmsTokenService.createTokenByDomain(//RequestContextDto.builder().build(),
                             account.getDomain(),
                             IEnumAuth.Types.QRC.meaning(),
-                            IEnumAppToken.Types.QRC,
+                            IEnumToken.Types.QRC,
                             TokenRequestDto.builder()
                                     .subject(account.getCode())
                                     .claims(Map.of(JwtConstants.JWT_SENDER_DOMAIN, accountAuthTypeRequest.getDomain(),
@@ -295,7 +295,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
         }
 
         return accounts.stream()
-                .filter(account -> account.getAdminStatus().equals(IEnumBinaryStatus.Types.ENABLED))
+                .filter(account -> account.getAdminStatus().equals(IEnumEnabledBinaryStatus.Types.ENABLED))
                 .map(account -> {
                     if (!domainService.isEnabled(account.getDomain())) {
                         throw new AccountAuthenticationException("domain disabled: " + account.getDomain());
@@ -346,7 +346,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
         Optional<Account> optional = repository().findByDomainIgnoreCaseAndCodeIgnoreCase(domain, userName);
         if (optional.isPresent()) {
             for (RoleInfo roleInfo : optional.get().getRoleInfo()) {
-                if (roleInfo.getAllowedTools().stream().parallel().anyMatch(app -> (app.getName().equals(application) && IEnumBinaryStatus.Types.ENABLED == app.getAdminStatus()))) {
+                if (roleInfo.getAllowedTools().stream().parallel().anyMatch(app -> (app.getName().equals(application) && IEnumEnabledBinaryStatus.Types.ENABLED == app.getAdminStatus()))) {
                     return true;
                 }
             }
@@ -470,9 +470,9 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
 
     private Long stat_GetActiveAccountsCount(RequestContextDto requestContext) {
         if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
-            return repository().countByAdminStatus(IEnumBinaryStatus.Types.ENABLED);
+            return repository().countByAdminStatus(IEnumEnabledBinaryStatus.Types.ENABLED);
         } else {
-            return repository().countByDomainIgnoreCaseAndAdminStatus(requestContext.getSenderDomain(), IEnumBinaryStatus.Types.ENABLED);
+            return repository().countByDomainIgnoreCaseAndAdminStatus(requestContext.getSenderDomain(), IEnumEnabledBinaryStatus.Types.ENABLED);
         }
     }
 

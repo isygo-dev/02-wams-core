@@ -5,7 +5,7 @@ import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.KmsDomainDto;
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -40,7 +40,7 @@ public interface KmsDomainControllerApi extends IMappedCrudApi<Long, KmsDomainDt
     @PutMapping(path = "/update-status")
     ResponseEntity<KmsDomainDto> updateAdminStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
                                                    @RequestParam(name = RestApiConstants.DOMAIN_NAME) String domain,
-                                                   @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumBinaryStatus.Types newStatus);
+                                                   @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus);
 
     /**
      * Update domain response entity.

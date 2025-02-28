@@ -1,7 +1,7 @@
 package eu.isygoit.dto.data;
 
 import eu.isygoit.dto.extendable.AbstractAuditableDto;
-import eu.isygoit.enums.IEnumAppToken;
+import eu.isygoit.enums.IEnumToken;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,7 +19,7 @@ public class TokenConfigDto extends AbstractAuditableDto<Long> {
 
     private String domain;
     private String code;
-    private IEnumAppToken.Types tokenType;
+    private IEnumToken.Types tokenType;
     private String issuer;
     private String audience;
     private String signatureAlgorithm;

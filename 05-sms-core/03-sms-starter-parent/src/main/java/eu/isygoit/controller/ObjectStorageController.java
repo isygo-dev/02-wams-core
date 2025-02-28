@@ -9,7 +9,7 @@ import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.BucketDto;
 import eu.isygoit.dto.data.FileTagsDto;
 import eu.isygoit.dto.exception.MinIoObjectException;
-import eu.isygoit.enums.IEnumLogicalOpe;
+import eu.isygoit.enums.IEnumLogicalOperator;
 import eu.isygoit.exception.handler.SmsExceptionHandler;
 import eu.isygoit.factory.StorageFactoryService;
 import eu.isygoit.model.FileStorage;
@@ -136,7 +136,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
                                                 String domain,
                                                 String bucketName,
                                                 String tags,
-                                                IEnumLogicalOpe.Types condition) {
+                                                IEnumLogicalOperator.Types condition) {
         log.info("getObjectByTags request received");
         try {
             Map<String, String> tagMap = null;

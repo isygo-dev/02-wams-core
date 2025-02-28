@@ -3,7 +3,7 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.data.BucketDto;
 import eu.isygoit.dto.exception.MinIoObjectException;
-import eu.isygoit.enums.IEnumLogicalOpe;
+import eu.isygoit.enums.IEnumLogicalOperator;
 import eu.isygoit.model.FileStorage;
 import eu.isygoit.model.StorageConfig;
 import eu.isygoit.service.ICephApiService;
@@ -143,7 +143,7 @@ public class CephApiService implements ICephApiService {
         }
     }
 
-    public List<FileStorage> getObjectByTags(StorageConfig config, String bucketName, Map<String, String> tags, IEnumLogicalOpe.Types condition) {
+    public List<FileStorage> getObjectByTags(StorageConfig config, String bucketName, Map<String, String> tags, IEnumLogicalOperator.Types condition) {
         try {
             List<FileStorage> listFileStorage = new ArrayList<>();
             List<FileStorage> allObject = this.getObjects(config, bucketName);
@@ -156,7 +156,7 @@ public class CephApiService implements ICephApiService {
                         .build());
 
                 boolean accepted = false;
-                if (condition == IEnumLogicalOpe.Types.AND) {
+                if (condition == IEnumLogicalOperator.Types.AND) {
                     accepted = tagsList.get().values().containsAll(tags.values());
                     object.tags = tags.values().stream().toList();
                 } else {

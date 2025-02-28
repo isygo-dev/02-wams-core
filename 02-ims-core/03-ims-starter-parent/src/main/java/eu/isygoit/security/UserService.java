@@ -3,7 +3,7 @@ package eu.isygoit.security;
 import eu.isygoit.dto.request.IsPwdExpiredRequestDto;
 import eu.isygoit.enums.IEnumAccountSystemStatus;
 import eu.isygoit.enums.IEnumAuth;
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.Domain;
 import eu.isygoit.remote.kms.KmsPasswordService;
@@ -49,8 +49,8 @@ public class UserService implements UserDetailsService {
                                     .authType(IEnumAuth.Types.valueOf(userNameArray[2]))
                                     .build()).getBody())
                     .authorities(Account.getAuthorities(account))
-                    .domainEnabled(domain.getAdminStatus() == IEnumBinaryStatus.Types.ENABLED)
-                    .accountEnabled(account.getAdminStatus() == IEnumBinaryStatus.Types.ENABLED)
+                    .domainEnabled(domain.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED)
+                    .accountEnabled(account.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED)
                     .accountExpired(account.getSystemStatus() == IEnumAccountSystemStatus.Types.EXPIRED)
                     .accountLocked(account.getSystemStatus() == IEnumAccountSystemStatus.Types.LOCKED
                             || account.getSystemStatus() == IEnumAccountSystemStatus.Types.TEM_LOCKED)

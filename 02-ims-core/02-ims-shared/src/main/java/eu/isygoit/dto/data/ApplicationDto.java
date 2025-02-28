@@ -3,7 +3,7 @@ package eu.isygoit.dto.data;
 import eu.isygoit.dto.IImageUploadDto;
 import eu.isygoit.dto.common.TokenDto;
 import eu.isygoit.dto.extendable.AbstractAuditableDto;
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,7 +36,7 @@ public class ApplicationDto extends AbstractAuditableDto<Long> implements IImage
     private String imagePath;
 
     @Builder.Default
-    private IEnumBinaryStatus.Types adminStatus = IEnumBinaryStatus.Types.ENABLED;
+    private IEnumEnabledBinaryStatus.Types adminStatus = IEnumEnabledBinaryStatus.Types.ENABLED;
 
     //App authorization token
     private TokenDto token;

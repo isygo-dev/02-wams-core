@@ -7,8 +7,8 @@ import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.common.TokenDto;
 import eu.isygoit.dto.data.MailMessageDto;
-import eu.isygoit.enums.IEnumAppToken;
-import eu.isygoit.enums.IEnumMsgTemplateName;
+import eu.isygoit.enums.IEnumToken;
+import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.exception.TokenConfigNotFoundException;
 import eu.isygoit.exception.TokenInvalidException;
 import eu.isygoit.exception.UserNotFoundException;
@@ -61,7 +61,7 @@ public class TokenService extends JwtService implements ITokenService {
         this.appProperties = appProperties;
     }
 
-    public TokenDto buildTokenAndSave(String domain, String application, IEnumAppToken.Types tokenType, String subject, Map<String, Object> claims) {
+    public TokenDto buildTokenAndSave(String domain, String application, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
         //Get Token config configured by domain and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(domain, tokenType);
         if (tokenConfig != null) {
@@ -88,7 +88,7 @@ public class TokenService extends JwtService implements ITokenService {
         }
     }
 
-    public TokenDto buildToken(String domain, String application, IEnumAppToken.Types tokenType, String subject, Map<String, Object> claims) {
+    public TokenDto buildToken(String domain, String application, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
         //Get Token config configured by domain and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(domain, tokenType);
         if (tokenConfig != null) {
@@ -106,7 +106,7 @@ public class TokenService extends JwtService implements ITokenService {
     }
 
     @Override
-    public boolean isTokenValid(String domain, String application, IEnumAppToken.Types tokenType, String token, String subject) {
+    public boolean isTokenValid(String domain, String application, IEnumToken.Types tokenType, String token, String subject) {
         //Get Token config configured by domain and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(domain, tokenType);
         if (tokenConfig != null) {
@@ -138,7 +138,7 @@ public class TokenService extends JwtService implements ITokenService {
         }
 
         //Generate reset password token
-        TokenDto token = this.buildTokenAndSave(domain, application, IEnumAppToken.Types.RSTPWD, accountCode,
+        TokenDto token = this.buildTokenAndSave(domain, application, IEnumToken.Types.RSTPWD, accountCode,
                 Map.of(JwtConstants.JWT_SENDER_DOMAIN, domain,
                         JwtConstants.JWT_SENDER_USER, accountCode,
                         JwtConstants.JWT_LOG_APP, application));
@@ -165,7 +165,7 @@ public class TokenService extends JwtService implements ITokenService {
                 .subject(EmailSubjects.FORGOT_PASSWORD_EMAIL_SUBJECT)
                 .domain(domain)
                 .toAddr(account.getEmail())
-                .templateName(IEnumMsgTemplateName.Types.FORGOT_PASSWORD_TEMPLATE)
+                .templateName(IEnumEmailTemplate.Types.FORGOT_PASSWORD_TEMPLATE)
                 .variables(MailMessageDto.getVariablesAsString(Map.of(
                         //Common vars
                         MsgTemplateVariables.V_USER_NAME, account.getCode(),
@@ -181,7 +181,7 @@ public class TokenService extends JwtService implements ITokenService {
 
     @Override
     public TokenDto createAccessToken(String domain, String application, String userName, Boolean isAdmin) {
-        TokenDto token = this.buildTokenAndSave(domain, application, IEnumAppToken.Types.ACCESS, userName,
+        TokenDto token = this.buildTokenAndSave(domain, application, IEnumToken.Types.ACCESS, userName,
                 Map.of(JwtConstants.JWT_SENDER_DOMAIN, domain,
                         JwtConstants.JWT_SENDER_USER, userName,
                         JwtConstants.JWT_LOG_APP, application,
@@ -192,7 +192,7 @@ public class TokenService extends JwtService implements ITokenService {
 
     @Override
     public TokenDto createRefreshToken(String domain, String application, String userName) {
-        TokenDto token = this.buildTokenAndSave(domain, application, IEnumAppToken.Types.REFRESH, userName,
+        TokenDto token = this.buildTokenAndSave(domain, application, IEnumToken.Types.REFRESH, userName,
                 Map.of(JwtConstants.JWT_SENDER_DOMAIN, domain,
                         JwtConstants.JWT_SENDER_USER, userName,
                         JwtConstants.JWT_LOG_APP, application)
@@ -202,7 +202,7 @@ public class TokenService extends JwtService implements ITokenService {
 
     @Override
     public TokenDto createAuthorityToken(String domain, String application, String userName, List<String> authorities) {
-        TokenDto token = this.buildToken(domain, application, IEnumAppToken.Types.AUTHORITY, userName,
+        TokenDto token = this.buildToken(domain, application, IEnumToken.Types.AUTHORITY, userName,
                 Map.of(JwtConstants.JWT_SENDER_DOMAIN, domain,
                         JwtConstants.JWT_SENDER_USER, userName,
                         JwtConstants.JWT_LOG_APP, application,

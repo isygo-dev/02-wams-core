@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import eu.isygoit.deserializer.UuidDeserializer;
 import eu.isygoit.dto.extendable.AbstractAuditableDto;
-import eu.isygoit.enums.IEnumMsgTemplateName;
+import eu.isygoit.enums.IEnumEmailTemplate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,7 +33,7 @@ public class MailMessageDto extends AbstractAuditableDto<UUID> {
     private UUID id;
 
     private String domain;
-    private IEnumMsgTemplateName.Types templateName;
+    private IEnumEmailTemplate.Types templateName;
     private boolean returnDelivered;
     private boolean returnRead;
     private String subject;

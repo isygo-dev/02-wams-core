@@ -1,7 +1,7 @@
 package eu.isygoit.api;
 
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.enums.IEnumFileType;
+import eu.isygoit.enums.IEnumFile;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -39,7 +39,7 @@ public interface FileConverterApi {
     })
     @PostMapping(path = "/pdf", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<Resource> convertPdf(//@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                        @RequestParam(name = RestApiConstants.TARGET) IEnumFileType.Types targetFormat,
+                                        @RequestParam(name = RestApiConstants.TARGET) IEnumFile.Types targetFormat,
                                         @Valid @RequestBody MultipartFile file);
 
     /**
@@ -59,6 +59,6 @@ public interface FileConverterApi {
     })
     @PostMapping(path = "/html", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<Resource> convertHtml(//@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                         @RequestParam(name = RestApiConstants.TARGET) IEnumFileType.Types targetFormat,
+                                         @RequestParam(name = RestApiConstants.TARGET) IEnumFile.Types targetFormat,
                                          @Valid @RequestBody MultipartFile file);
 }

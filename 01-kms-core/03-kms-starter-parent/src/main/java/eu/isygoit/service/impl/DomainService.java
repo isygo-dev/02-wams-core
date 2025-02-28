@@ -3,7 +3,7 @@ package eu.isygoit.service.impl;
 import eu.isygoit.annotation.CodeGenLocal;
 import eu.isygoit.annotation.SrvRepo;
 import eu.isygoit.com.rest.service.CrudService;
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.KmsDomain;
 import eu.isygoit.repository.AccountRepository;
@@ -105,13 +105,13 @@ public class DomainService extends CrudService<Long, KmsDomain, DomainRepository
     }
 
     @Override
-    public KmsDomain updateAdminStatus(String domain, IEnumBinaryStatus.Types newStatus) {
+    public KmsDomain updateAdminStatus(String domain, IEnumEnabledBinaryStatus.Types newStatus) {
         repository().updateAdminStatus(domain, newStatus);
         return repository().findByNameIgnoreCase(domain).orElse(null);
     }
 
     @Override
     public boolean isEnabled(String domain) {
-        return repository().getAdminStatus(domain) == IEnumBinaryStatus.Types.ENABLED;
+        return repository().getAdminStatus(domain) == IEnumEnabledBinaryStatus.Types.ENABLED;
     }
 }

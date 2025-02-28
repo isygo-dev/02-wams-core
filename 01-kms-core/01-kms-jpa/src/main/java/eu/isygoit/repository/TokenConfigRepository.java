@@ -1,6 +1,6 @@
 package eu.isygoit.repository;
 
-import eu.isygoit.enums.IEnumAppToken;
+import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.model.TokenConfig;
 
 import java.util.Optional;
@@ -17,5 +17,5 @@ public interface TokenConfigRepository extends JpaPagingAndSortingSAASCodifiable
      * @param tokenType the token type
      * @return the optional
      */
-    Optional<TokenConfig> findByDomainIgnoreCaseAndTokenType(String domain, IEnumAppToken.Types tokenType);
+    Optional<TokenConfig> findByDomainIgnoreCaseAndTokenType(String domain, IEnumToken.Types tokenType);
 }

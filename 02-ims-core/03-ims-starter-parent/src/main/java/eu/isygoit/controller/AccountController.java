@@ -15,7 +15,7 @@ import eu.isygoit.dto.request.GeneratePwdRequestDto;
 import eu.isygoit.dto.request.UpdateAccountRequestDto;
 import eu.isygoit.dto.response.UserDataResponseDto;
 import eu.isygoit.enums.IEnumAuth;
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.jwt.JwtService;
@@ -133,7 +133,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     @Override
     public ResponseEntity<AccountDto> updateAccountAdminStatus(RequestContextDto requestContext,
                                                                Long id,
-                                                               IEnumBinaryStatus.Types newStatus) {
+                                                               IEnumEnabledBinaryStatus.Types newStatus) {
         log.info("update account admin status");
         try {
             return ResponseFactory.ResponseOk(mapper().entityToDto(accountService.updateAccountAdminStatus(id, newStatus)));

@@ -10,7 +10,7 @@ import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
 import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.response.AccessKeyResponseDto;
 import eu.isygoit.dto.response.AccessTokenResponseDto;
-import eu.isygoit.enums.IEnumAppToken;
+import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.enums.IEnumPasswordStatus;
 import eu.isygoit.enums.IEnumWebToken;
@@ -125,7 +125,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
             if (IEnumAuth.Types.TOKEN == accessRequest.getAuthType()) {
                 try {
                     TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(accessRequest.getDomain().trim().toLowerCase(),
-                            IEnumAppToken.Types.ACCESS);
+                            IEnumToken.Types.ACCESS);
                     jwtService.validateToken(accessRequest.getPassword(),
                             new StringBuilder(accessRequest.getUserName().trim().toLowerCase())
                                     .append("@")

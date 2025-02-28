@@ -7,7 +7,7 @@ import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
 import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.dto.data.MailOptionsDto;
-import eu.isygoit.enums.IEnumMsgTemplateName;
+import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.exception.handler.MmsExceptionHandler;
 import eu.isygoit.mapper.MailMessageMapper;
 import eu.isygoit.model.MailMessage;
@@ -46,7 +46,7 @@ public class MailMessageController extends MappedCrudController<UUID, MailMessag
     @Autowired
     private IMsgTemplateService templateService;
 
-    public ResponseEntity<?> sendMail(String senderDomainName, IEnumMsgTemplateName.Types template, MailMessageDto mailMessage) {
+    public ResponseEntity<?> sendMail(String senderDomainName, IEnumEmailTemplate.Types template, MailMessageDto mailMessage) {
         try {
             if (template != null) {
                 String body = templateService.composeMessageBody(senderDomainName, template,

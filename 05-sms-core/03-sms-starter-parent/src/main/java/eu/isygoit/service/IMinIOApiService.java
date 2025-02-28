@@ -2,7 +2,7 @@ package eu.isygoit.service;
 
 
 import eu.isygoit.dto.data.BucketDto;
-import eu.isygoit.enums.IEnumLogicalOpe;
+import eu.isygoit.enums.IEnumLogicalOperator;
 import eu.isygoit.model.FileStorage;
 import eu.isygoit.model.StorageConfig;
 import io.minio.messages.DeleteObject;
@@ -75,7 +75,7 @@ public interface IMinIOApiService {
      * @param condition  the condition
      * @return the object by tags
      */
-    List<FileStorage> getObjectByTags(StorageConfig config, String bucketName, Map<String, String> tags, IEnumLogicalOpe.Types condition);
+    List<FileStorage> getObjectByTags(StorageConfig config, String bucketName, Map<String, String> tags, IEnumLogicalOperator.Types condition);
 
     /**
      * Gets objects.

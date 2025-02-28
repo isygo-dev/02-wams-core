@@ -109,7 +109,7 @@ public class PasswordService implements IPasswordService {
                         .subject(EmailSubjects.USER_CREATED_EMAIL_SUBJECT)
                         .domain(domain)
                         .toAddr(account.getEmail())
-                        .templateName(IEnumMsgTemplateName.Types.USER_CREATED_TEMPLATE)
+                        .templateName(IEnumEmailTemplate.Types.USER_CREATED_TEMPLATE)
                         .variables(MailMessageDto.getVariablesAsString(Map.of(
                                 //Common vars
                                 MsgTemplateVariables.V_USER_NAME, account.getCode(),
@@ -131,7 +131,7 @@ public class PasswordService implements IPasswordService {
                         .subject(EmailSubjects.OTP_CODE_ACCESS_EMAIL_SUBJECT)
                         .domain(domain)
                         .toAddr(account.getEmail())
-                        .templateName(IEnumMsgTemplateName.Types.AUTH_OTP_TEMPLATE)
+                        .templateName(IEnumEmailTemplate.Types.AUTH_OTP_TEMPLATE)
                         .variables(MailMessageDto.getVariablesAsString(Map.of(
                                 //Common vars
                                 MsgTemplateVariables.V_USER_NAME, account.getCode(),
@@ -344,13 +344,13 @@ public class PasswordService implements IPasswordService {
             String userContextString = optional.get();
             if (StringUtils.hasText(userContextString)) {
                 String[] split = userContextString.split("@");
-                AccessToken accessToken = accessTokenService.findByApplicationAndAccountCodeAndTokenAndTokenType(resetPwdViaTokenRequestDto.getApplication(), split[0], resetPwdViaTokenRequestDto.getToken(), IEnumAppToken.Types.RSTPWD);
+                AccessToken accessToken = accessTokenService.findByApplicationAndAccountCodeAndTokenAndTokenType(resetPwdViaTokenRequestDto.getApplication(), split[0], resetPwdViaTokenRequestDto.getToken(), IEnumToken.Types.RSTPWD);
                 if (split.length >= 2 && accessToken != null && StringUtils.hasText(accessToken.getToken()) && accessToken.getToken().equals(resetPwdViaTokenRequestDto.getToken())) {
                     UserContextDto userContext = UserContextDto.builder()
                             .domain(split[1])
                             .userName(split[0])
                             .build();
-                    TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(userContext.getDomain(), IEnumAppToken.Types.RSTPWD);
+                    TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(userContext.getDomain(), IEnumToken.Types.RSTPWD);
                     jwtService.validateToken(resetPwdViaTokenRequestDto.getToken(), userContextString, tokenConfig.getSecretKey());
                     this.forceChangePassword(userContext.getDomain(), userContext.getUserName()
                             , resetPwdViaTokenRequestDto.getPassword());

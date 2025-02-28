@@ -3,7 +3,7 @@ package eu.isygoit.api;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.dto.extendable.IdentifiableDto;
-import eu.isygoit.enums.IEnumMsgTemplateName;
+import eu.isygoit.enums.IEnumEmailTemplate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -39,6 +39,6 @@ public interface MailMessageControllerApi {
     })
     @PostMapping(path = "/send/{senderDomainName}/{template}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     ResponseEntity<?> sendMail(@PathVariable(name = RestApiConstants.SENDER_DOMAIN_NAME) String senderDomainName,
-                               @PathVariable(name = RestApiConstants.TEMPLATE) IEnumMsgTemplateName.Types template,
+                               @PathVariable(name = RestApiConstants.TEMPLATE) IEnumEmailTemplate.Types template,
                                @ModelAttribute(name = RestApiConstants.mailMessage) MailMessageDto mailMessage);
 }

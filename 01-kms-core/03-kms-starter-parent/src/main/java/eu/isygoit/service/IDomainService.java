@@ -1,7 +1,7 @@
 package eu.isygoit.service;
 
 import eu.isygoit.com.rest.service.ICrudServiceMethod;
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.KmsDomain;
 
@@ -57,7 +57,7 @@ public interface IDomainService extends ICrudServiceMethod<Long, KmsDomain> {
      * @param newStatus the new status
      * @return the kms domain
      */
-    KmsDomain updateAdminStatus(String domain, IEnumBinaryStatus.Types newStatus);
+    KmsDomain updateAdminStatus(String domain, IEnumEnabledBinaryStatus.Types newStatus);
 
     /**
      * Is enabled boolean.

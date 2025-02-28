@@ -7,7 +7,7 @@ import eu.isygoit.dto.data.*;
 import eu.isygoit.dto.request.AccountAuthTypeRequest;
 import eu.isygoit.dto.response.UserAccountDto;
 import eu.isygoit.dto.response.UserContext;
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.enums.IEnumSharedStatType;
 import eu.isygoit.exception.AccountNotFoundException;
@@ -48,7 +48,7 @@ public interface IAccountService extends ICrudServiceMethod<Long, Account>, IIma
      * @param newStatus the new status
      * @return the account
      */
-    Account updateAccountAdminStatus(Long id, IEnumBinaryStatus.Types newStatus);
+    Account updateAccountAdminStatus(Long id, IEnumEnabledBinaryStatus.Types newStatus);
 
     /**
      * Update account is admin account.

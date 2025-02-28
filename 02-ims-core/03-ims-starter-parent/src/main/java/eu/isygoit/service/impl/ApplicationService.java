@@ -6,7 +6,7 @@ import eu.isygoit.annotation.SrvRepo;
 import eu.isygoit.com.rest.service.ImageService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.DomainConstants;
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.model.Application;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
@@ -57,7 +57,7 @@ public class ApplicationService extends ImageService<Long, Application, Applicat
     }
 
     @Override
-    public Application updateStatus(Long id, IEnumBinaryStatus.Types newStatus) {
+    public Application updateStatus(Long id, IEnumEnabledBinaryStatus.Types newStatus) {
         repository().updateAdminStatusById(id, newStatus);
         return repository().findById(id).orElse(null);
     }

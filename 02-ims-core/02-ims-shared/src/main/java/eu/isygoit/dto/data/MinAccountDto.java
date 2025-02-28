@@ -5,7 +5,7 @@ import eu.isygoit.constants.AccountTypeConstants;
 import eu.isygoit.dto.extendable.AccountModelDto;
 import eu.isygoit.enums.IEnumAccountSystemStatus;
 import eu.isygoit.enums.IEnumAuth;
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.enums.IEnumWSStatus;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
@@ -32,7 +32,7 @@ public class MinAccountDto extends AccountModelDto<Long> {
     private Boolean isAdmin;
     private Date lastConnectionDate;
     @Builder.Default
-    private IEnumBinaryStatus.Types adminStatus = IEnumBinaryStatus.Types.ENABLED;
+    private IEnumEnabledBinaryStatus.Types adminStatus = IEnumEnabledBinaryStatus.Types.ENABLED;
     @Builder.Default
     private IEnumAccountSystemStatus.Types systemStatus = IEnumAccountSystemStatus.Types.IDLE;
 

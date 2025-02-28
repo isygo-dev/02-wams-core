@@ -2,7 +2,7 @@ package eu.isygoit.service;
 
 import eu.isygoit.com.rest.service.ICrudServiceMethod;
 import eu.isygoit.com.rest.service.IImageServiceMethods;
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Customer;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public interface ICustomerService extends ICrudServiceMethod<Long, Customer>, II
      * @param newStatus the new status
      * @return the customer
      */
-    Customer updateStatus(Long id, IEnumBinaryStatus.Types newStatus);
+    Customer updateStatus(Long id, IEnumEnabledBinaryStatus.Types newStatus);
 
     /**
      * Link to account customer.

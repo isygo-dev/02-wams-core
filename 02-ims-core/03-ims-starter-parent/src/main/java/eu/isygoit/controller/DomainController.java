@@ -8,7 +8,7 @@ import eu.isygoit.com.rest.controller.impl.MappedCrudController;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.DomainDto;
 import eu.isygoit.dto.data.KmsDomainDto;
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.exception.KmsDomainUpdateException;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.mapper.DomainMapper;
@@ -62,7 +62,7 @@ public class DomainController extends MappedCrudController<Long, Domain, DomainD
     @Override
     public ResponseEntity<DomainDto> updateAdminStatus(RequestContextDto requestContext,
                                                        Long id,
-                                                       IEnumBinaryStatus.Types newStatus) {
+                                                       IEnumEnabledBinaryStatus.Types newStatus) {
         log.info("in update status");
         try {
             DomainDto domain = mapper().entityToDto(crudService().updateAdminStatus(id, newStatus));

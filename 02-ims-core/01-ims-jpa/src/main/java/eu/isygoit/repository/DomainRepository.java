@@ -1,6 +1,6 @@
 package eu.isygoit.repository;
 
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Domain;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -24,7 +24,7 @@ public interface DomainRepository extends JpaPagingAndSortingSAASCodifiableRepos
     @Modifying
     @Query("UPDATE Domain d SET d.adminStatus = :newStatus WHERE d.id = :id")
     int updateAdminStatusById(@Param("id") Long id,
-                              @Param("newStatus") IEnumBinaryStatus.Types newStatus);
+                              @Param("newStatus") IEnumEnabledBinaryStatus.Types newStatus);
 
     /**
      * Find by name ignore case optional.
@@ -48,5 +48,5 @@ public interface DomainRepository extends JpaPagingAndSortingSAASCodifiableRepos
      * @return the admin status
      */
     @Query("select d.adminStatus from Domain d where d.name = :domain")
-    IEnumBinaryStatus.Types getAdminStatus(@Param("domain") String domain);
+    IEnumEnabledBinaryStatus.Types getAdminStatus(@Param("domain") String domain);
 }

@@ -6,7 +6,7 @@ import eu.isygoit.annotation.SrvRepo;
 import eu.isygoit.com.rest.service.ImageService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.DomainConstants;
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.exception.AccountNotFoundException;
 import eu.isygoit.exception.CustomerNotFoundException;
 import eu.isygoit.model.AppNextCode;
@@ -67,7 +67,7 @@ public class CustomerService extends ImageService<Long, Customer, CustomerReposi
     }
 
     @Override
-    public Customer updateStatus(Long id, IEnumBinaryStatus.Types newStatus) {
+    public Customer updateStatus(Long id, IEnumEnabledBinaryStatus.Types newStatus) {
         repository().updateAdminStatusById(id, newStatus);
         return repository().findById(id).orElse(null);
     }

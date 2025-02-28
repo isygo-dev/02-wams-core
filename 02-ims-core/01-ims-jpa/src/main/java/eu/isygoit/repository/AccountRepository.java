@@ -1,6 +1,6 @@
 package eu.isygoit.repository;
 
-import eu.isygoit.enums.IEnumBinaryStatus;
+import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.model.Account;
 import org.springframework.data.jpa.repository.Modifying;
@@ -22,7 +22,7 @@ public interface AccountRepository extends JpaPagingAndSortingSAASCodifiableRepo
      */
     @Modifying
     @Query("update Account u set u.adminStatus = :newStatus  where u.id = :id")
-    void updateAccountAdminStatus(@Param("newStatus") IEnumBinaryStatus.Types enabled,
+    void updateAccountAdminStatus(@Param("newStatus") IEnumEnabledBinaryStatus.Types enabled,
                                   @Param("id") Long id);
 
 
@@ -75,9 +75,9 @@ public interface AccountRepository extends JpaPagingAndSortingSAASCodifiableRepo
             "where a.origin like :origin", nativeQuery = true)
     Long countByOrigin(@Param("origin") String origin);
 
-    Long countByDomainIgnoreCaseAndAdminStatus(String senderDomain, IEnumBinaryStatus.Types status);
+    Long countByDomainIgnoreCaseAndAdminStatus(String senderDomain, IEnumEnabledBinaryStatus.Types status);
 
-    Long countByAdminStatus(IEnumBinaryStatus.Types status);
+    Long countByAdminStatus(IEnumEnabledBinaryStatus.Types status);
 
     Long countByDomainIgnoreCaseAndIsAdminTrue(String senderDomain);
 
