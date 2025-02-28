@@ -32,7 +32,7 @@ public class TokenController extends ControllerExceptionHandler implements Token
     private ITokenService tokenService;
 
     @Override
-    public ResponseEntity<TokenDto> createTokenByDomain(//RequestContextDto requestContext,
+    public ResponseEntity<TokenDto> buildTokenByDomain(//RequestContextDto requestContext,
                                                         String domain,
                                                         String application,
                                                         IEnumToken.Types tokenType,

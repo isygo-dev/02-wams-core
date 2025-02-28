@@ -31,7 +31,7 @@ public class KeyController extends ControllerExceptionHandler implements KeyServ
     private IKeyService keyService;
 
     @Override
-    public ResponseEntity<String> generateRandomKey(RequestContextDto requestContext,
+    public ResponseEntity<String> newRandomKey(RequestContextDto requestContext,
                                                     Integer length, IEnumCharSet.Types charSetType) {
         log.info("Call generateRandomKey");
         try {
@@ -43,7 +43,7 @@ public class KeyController extends ControllerExceptionHandler implements KeyServ
     }
 
     @Override
-    public ResponseEntity<String> renewKeyByName(RequestContextDto requestContext,
+    public ResponseEntity<String> renewRandomKey(RequestContextDto requestContext,
                                                  String domain, String keyName, Integer length, IEnumCharSet.Types charSetType) {
         log.info("Call generateRandomKeyName");
         try {
@@ -57,7 +57,7 @@ public class KeyController extends ControllerExceptionHandler implements KeyServ
     }
 
     @Override
-    public ResponseEntity<String> getKeyByName(RequestContextDto requestContext,
+    public ResponseEntity<String> getRandomKey(RequestContextDto requestContext,
                                                String domain, String keyName) {
         log.info("Call getRandomKeyName");
         try {
