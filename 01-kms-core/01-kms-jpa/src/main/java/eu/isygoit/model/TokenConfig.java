@@ -1,8 +1,8 @@
 package eu.isygoit.model;
 
 import eu.isygoit.constants.DomainConstants;
-import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.enums.IEnumCharSet;
+import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaConstantSize;

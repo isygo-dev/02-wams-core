@@ -404,7 +404,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     public boolean resendCreationEmail(Long id) {
         try {
             Optional<Account> optional = this.findById(id);
-            if(optional.isPresent()) {
+            if (optional.isPresent()) {
                 Account account = optional.get();
                 ResponseEntity<Integer> result = kmsPasswordService.generate(//RequestContextDto.builder().build(),
                         IEnumAuth.Types.PWD,

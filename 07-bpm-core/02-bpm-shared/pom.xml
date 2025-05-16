@@ -11,7 +11,7 @@
 
     <groupId>eu.isygo-it.services</groupId>
     <artifactId>process-management-shared</artifactId>
-    <version>WC-1.0.250225-T1202</version>
+    <version>WC-1.0.250516-T0922</version>
     <packaging>jar</packaging>
     <name>process-management-shared</name>
     <description>process-management-shared</description>
@@ -19,7 +19,7 @@
     <parent>
         <groupId>eu.isygo-it.services</groupId>
         <artifactId>bpm-core</artifactId>
-        <version>WC-1.0.250225-T1202</version>
+        <version>WC-1.0.250516-T0922</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>service-stack-shared</artifactId>
-            <version>WS-1.0.250225-T1202</version>
+            <version>WS-1.0.250516-T0922</version>
         </dependency>
     </dependencies>
 

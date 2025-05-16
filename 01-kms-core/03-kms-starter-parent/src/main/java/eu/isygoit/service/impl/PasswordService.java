@@ -340,7 +340,7 @@ public class PasswordService implements IPasswordService {
     public void resetPasswordViaToken(ResetPwdViaTokenRequestDto resetPwdViaTokenRequestDto)
             throws TokenInvalidException {
         Optional<String> optional = jwtService.extractSubject(resetPwdViaTokenRequestDto.getToken());
-        if(optional.isPresent()) {
+        if (optional.isPresent()) {
             String userContextString = optional.get();
             if (StringUtils.hasText(userContextString)) {
                 String[] split = userContextString.split("@");

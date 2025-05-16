@@ -2,8 +2,8 @@ package eu.isygoit.model;
 
 
 import eu.isygoit.constants.DomainConstants;
-import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.enums.IEnumEmailTemplate;
+import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.*;
 import jakarta.persistence.*;

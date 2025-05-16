@@ -75,7 +75,7 @@ public class CustomerService extends ImageService<Long, Customer, CustomerReposi
     @Override
     public Customer linkToAccount(Long id, String accountCode) {
         Optional<Customer> optional = this.findById(id);
-        if(optional.isPresent()){
+        if (optional.isPresent()) {
             Customer customer = optional.get();
             if (!accountRepository.existsByCodeIgnoreCase(accountCode)) {
                 throw new AccountNotFoundException("with code:" + accountCode);

@@ -32,7 +32,7 @@ public class KeyController extends ControllerExceptionHandler implements KeyServ
 
     @Override
     public ResponseEntity<String> newRandomKey(RequestContextDto requestContext,
-                                                    Integer length, IEnumCharSet.Types charSetType) {
+                                               Integer length, IEnumCharSet.Types charSetType) {
         log.info("Call generateRandomKey");
         try {
             return ResponseFactory.ResponseOk(keyService.getRandomKey(length, charSetType));

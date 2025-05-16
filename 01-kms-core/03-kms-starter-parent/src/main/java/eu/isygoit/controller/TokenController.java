@@ -33,10 +33,10 @@ public class TokenController extends ControllerExceptionHandler implements Token
 
     @Override
     public ResponseEntity<TokenDto> buildTokenByDomain(//RequestContextDto requestContext,
-                                                        String domain,
-                                                        String application,
-                                                        IEnumToken.Types tokenType,
-                                                        TokenRequestDto tokenRequestDto) {
+                                                       String domain,
+                                                       String application,
+                                                       IEnumToken.Types tokenType,
+                                                       TokenRequestDto tokenRequestDto) {
         log.info("Call create Token By Domain");
         try {
             return ResponseFactory.ResponseOk(tokenService.buildTokenAndSave(domain, application, tokenType, tokenRequestDto.getSubject(), tokenRequestDto.getClaims()));

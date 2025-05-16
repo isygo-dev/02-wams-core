@@ -4,19 +4,16 @@ import eu.isygoit.annotation.SrvRepo;
 import eu.isygoit.com.rest.service.CrudService;
 import eu.isygoit.constants.AppParameterConstants;
 import eu.isygoit.constants.DomainConstants;
-import eu.isygoit.exception.ObjectNotFoundException;
 import eu.isygoit.model.AppParameter;
 import eu.isygoit.repository.AppParameterRepository;
 import eu.isygoit.service.IAppParameterService;
 import eu.isygoit.service.IDomainService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
