@@ -76,8 +76,8 @@ public class MsgTemplateService extends FileService<Long, MsgTemplate, MsgTempla
     public void beforeDelete(Long id) {
         Optional<MsgTemplate> optional = templateRepository.findById(id);
         if (optional.isPresent()) {
-            deleteFile(optional.get().getPath()
-                    + File.separator + optional.get().getOriginalFileName());
+            deleteFile(Path.of(optional.get().getPath())
+                    .resolve(optional.get().getOriginalFileName()).toString());
         }
         super.beforeDelete(id);
     }
@@ -103,9 +103,9 @@ public class MsgTemplateService extends FileService<Long, MsgTemplate, MsgTempla
             template = optional.get();
         } else {
             log.warn("Template {} is not present for domain {}, we will create a default one!", templateName, senderDomainName);
-            Path filePath = Path.of(this.getUploadDirectory()
-                    + File.separator + senderDomainName
-                    + File.separator + MsgTemplate.class.getSimpleName().toLowerCase());
+            Path filePath = Path.of(this.getUploadDirectory())
+                    .resolve(senderDomainName)
+                    .resolve(MsgTemplate.class.getSimpleName().toLowerCase());
             template = this.create(MsgTemplate.builder()
                     .domain(senderDomainName)
                     .name(templateName)
@@ -116,8 +116,8 @@ public class MsgTemplateService extends FileService<Long, MsgTemplate, MsgTempla
             log.info(Path.of(MsgTemplate.class.getSimpleName().toLowerCase(), templateName.name().toLowerCase() + ".ftl").toUri().getPath());
             Resource resource = new UrlResource(Path.of(MsgTemplate.class.getSimpleName().toLowerCase(), templateName.name().toLowerCase() + ".ftl").toUri());
             if (resource.exists()) {
-                log.info("Copying Template resource: {}", MsgTemplate.class.getSimpleName().toLowerCase()
-                        + File.separator + templateName.name().toLowerCase() + ".ftl");
+                log.info("Copying Template resource: {}", Path.of(MsgTemplate.class.getSimpleName().toLowerCase())
+                        .resolve(templateName.name().toLowerCase() + ".ftl").toString());
                 template.setOriginalFileName(templateName.name().toLowerCase() + ".ftl");
                 template.setFileName(template.getCode().toLowerCase() + "." + FilenameUtils.getExtension(resource.getFilename()));
                 template.setExtension(FilenameUtils.getExtension(resource.getFilename()));
@@ -125,8 +125,8 @@ public class MsgTemplateService extends FileService<Long, MsgTemplate, MsgTempla
                 FileHelper.createDirectoryIfAbsent(filePath);
                 FileUtils.copyURLToFile(resource.getURL(), new File(filePath.toString(), template.getFileName()));
             } else {
-                log.error("<Error>: Template resource not found: {}", MsgTemplate.class.getSimpleName().toLowerCase()
-                        + File.separator + templateName.name().toLowerCase() + ".ftl");
+                log.error("<Error>: Template resource not found: {}", Path.of(MsgTemplate.class.getSimpleName().toLowerCase())
+                        .resolve(templateName.name().toLowerCase() + ".ftl").toString());
             }
         }
 

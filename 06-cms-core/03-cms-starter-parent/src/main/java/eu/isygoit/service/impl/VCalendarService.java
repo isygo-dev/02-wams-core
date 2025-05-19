@@ -28,7 +28,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -102,8 +101,8 @@ public class VCalendarService extends CodeAssignableService<Long, VCalendar, VCa
         }
 
         //preparing ics file path
-        Path filePath = Path.of(appProperties.getCalanedarRepo()
-                + File.separator + vCalendar.getDomain());
+        Path filePath = Path.of(appProperties.getCalanedarRepo())
+                .resolve(vCalendar.getDomain());
         if (!Files.exists(filePath)) {
             try {
                 Files.createDirectories(filePath);

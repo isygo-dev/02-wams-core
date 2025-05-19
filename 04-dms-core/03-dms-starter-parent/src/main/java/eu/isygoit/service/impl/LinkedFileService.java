@@ -40,7 +40,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,79 +74,72 @@ public class LinkedFileService extends CodeAssignableService<Long, LinkedFile, L
     }
 
     @Override
-    public String upload(LinkedFileRequestDto linkedFileRequestDto, MultipartFile file) throws IOException {
-        //Calculate the 16 and 32 bit checksum
+    public String upload(LinkedFileRequestDto dto, MultipartFile file) throws IOException {
+        // Read bytes once and calculate checksums
         byte[] buffer = file.getInputStream().readAllBytes();
         long crc16 = CRC16Helper.calculate(buffer);
         long crc32 = CRC32Helper.calculate(buffer);
+        long fileSize = buffer.length;
 
-        //fetch same domain and original file name files
-        List<LinkedFile> sameDomainAndOriginalFileNameFiles = linkedFileRepository.findByDomainIgnoreCaseAndOriginalFileNameOrderByCreateDateDesc(linkedFileRequestDto.getDomain(),
-                linkedFileRequestDto.getOriginalFileName());
+        // Fetch existing files
+        var existingFiles = linkedFileRepository
+                .findByDomainIgnoreCaseAndOriginalFileNameOrderByCreateDateDesc(dto.getDomain(), dto.getOriginalFileName());
 
-        if (appProperties.getDoNotDuplicate()) {
-            //Verify if the file is already uploaded for the same domain
-            if (!CollectionUtils.isEmpty(sameDomainAndOriginalFileNameFiles)) {
-                LinkedFile linkedFile = sameDomainAndOriginalFileNameFiles.get(sameDomainAndOriginalFileNameFiles.size() - 1);
-                if (crc32 == linkedFile.getCrc32() && crc16 == linkedFile.getCrc16()) {
-                    throw new FileAlreadyExistsException(file.getOriginalFilename());
-                }
+        // Deduplication check
+        if (appProperties.getDoNotDuplicate() && !existingFiles.isEmpty()) {
+            var lastFile = existingFiles.get(existingFiles.size() - 1); // Java 21 preferred; or get(size - 1)
+            if (crc32 == lastFile.getCrc32() && crc16 == lastFile.getCrc16()) {
+                throw new FileAlreadyExistsException(file.getOriginalFilename());
             }
         }
 
-        //Collect and create categories
-        final List<Category> categories = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(linkedFileRequestDto.getCategoryNames())) {
-            linkedFileRequestDto.getCategoryNames().forEach(category -> {
-                Optional<Category> optional = categoryRepository.findByName(category);
-                if (!optional.isPresent()) {
-                    categories.add(categoryRepository.save(Category.builder()
-                            .name(category)
-                            .description(category)
-                            .build()));
-                } else {
-                    categories.add(optional.get());
-                }
-            });
+        // Handle categories (avoid repeated DB saves if category already exists)
+        List<Category> categories = dto.getCategoryNames() == null ? List.of() :
+                dto.getCategoryNames().stream()
+                        .map(name -> categoryRepository.findByName(name)
+                                .orElseGet(() -> categoryRepository.save(
+                                        Category.builder().name(name).description(name).build())))
+                        .toList();
+
+        // Set default code if missing
+        if (!StringUtils.hasText(dto.getCode())) {
+            dto.setCode(this.getNextCode());
         }
 
-        if (!StringUtils.hasText(linkedFileRequestDto.getCode())) {
-            linkedFileRequestDto.setCode(this.getNextCode());
-        }
+        // Storage
+        log.info("{} storage enabled - domain: {}, file: {}, tags: {}",
+                appProperties.getLocalStorageActive() ? "Local" : "Remote",
+                dto.getDomain(), file.getOriginalFilename(), dto.getTags());
 
         if (appProperties.getLocalStorageActive()) {
-            log.info("Local file system enabled domain:{}, file:{} , tags:{}",
-                    linkedFileRequestDto.getDomain(),
-                    file.getOriginalFilename(),
-                    linkedFileRequestDto.getTags());
-            //Use local storage file system
-            storeInLocalFileSystem(linkedFileRequestDto, file);
+            storeInLocalFileSystem(dto, file);
         } else {
-            //Use remote hosted storage system
-            log.info("Remote hosted storage system enabled domain:{}, file:{} , tags:{}",
-                    linkedFileRequestDto.getDomain(),
-                    file.getOriginalFilename(),
-                    linkedFileRequestDto.getTags());
-            storeInRemoteHostedStorageSystem(linkedFileRequestDto, file);
+            storeInRemoteHostedStorageSystem(dto, file);
         }
 
-        //Persist linked file instance
-        linkedFileRepository.save(LinkedFile.builder()
-                .code(linkedFileRequestDto.getCode())
+        // Build file entity
+        LinkedFile linkedFile = LinkedFile.builder()
+                .code(dto.getCode())
                 .originalFileName(file.getOriginalFilename())
                 .extension(FilenameUtils.getExtension(file.getOriginalFilename()))
-                .domain(linkedFileRequestDto.getDomain())
-                .tags(linkedFileRequestDto.getTags())
+                .domain(dto.getDomain())
+                .tags(dto.getTags())
                 .crc16(crc16)
                 .crc32(crc32)
-                .size(file.getSize())
-                .path(linkedFileRequestDto.getPath())
+                .size(fileSize)
+                .path(dto.getPath())
                 .categories(categories)
                 .mimetype(file.getContentType())
-                .version(CollectionUtils.isEmpty(sameDomainAndOriginalFileNameFiles) ? 1L : (long) (sameDomainAndOriginalFileNameFiles.size() + 1))
-                .build());
+                .version(existingFiles.isEmpty() ? 1L : existingFiles.size() + 1L)
+                .build();
 
-        return linkedFileRequestDto.getCode();
+        // Save (update if code already exists)
+        linkedFileRepository.findByCodeIgnoreCase(dto.getCode())
+                .ifPresent(existing -> linkedFile.setId(existing.getId()));
+
+        linkedFileRepository.save(linkedFile);
+
+        return dto.getCode();
     }
 
     private void storeInRemoteHostedStorageSystem(LinkedFileRequestDto linkedFileRequestDto, MultipartFile file) {
@@ -226,18 +218,18 @@ public class LinkedFileService extends CodeAssignableService<Long, LinkedFile, L
             log.info(linkedFile.get().getPath());
             if (appProperties.getLocalStorageActive()) {
                 if (StringUtils.hasText(linkedFile.get().getPath())) {
-                    Resource resource = new UrlResource(Path.of(appProperties.getUploadDirectory() +
-                            File.separator + domain +
-                            File.separator + linkedFile.get().getPath() +
-                            File.separator + linkedFile.get().getCode() + '.' + linkedFile.get().getExtension()).toUri());
+                    Resource resource = new UrlResource(Path.of(appProperties.getUploadDirectory())
+                            .resolve(domain)
+                            .resolve(linkedFile.get().getPath())
+                            .resolve(linkedFile.get().getCode() + '.' + linkedFile.get().getExtension()).toUri());
                     if (!resource.exists()) {
                         throw new ResourceNotFoundException("with domain:" + domain + "/code:" + code);
                     }
                     return resource;
                 } else {
-                    Resource resource = new UrlResource(Path.of(appProperties.getUploadDirectory()
-                            + File.separator + domain
-                            + File.separator + linkedFile.get().getCode() + '.' + linkedFile.get().getExtension()).toUri());
+                    Resource resource = new UrlResource(Path.of(appProperties.getUploadDirectory())
+                            .resolve(domain)
+                            .resolve(linkedFile.get().getCode() + '.' + linkedFile.get().getExtension()).toUri());
                     if (!resource.exists()) {
                         throw new ResourceNotFoundException("with domain:" + domain + "/code:" + code);
                     }

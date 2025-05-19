@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.UUID;
 
 /**
@@ -47,14 +48,10 @@ public class ConverterService implements IConverterService {
     @Override
     public File doConvertPdfToHtml(final InputStream inputFile) throws IOException {
         log.info("Converting from pdf to html ...");
-        String filePath = new StringBuilder(appProperties.getUploadDirectory())
-                .append(File.separator)
-                .append("convert")
-                .append(File.separator)
-                .append("temp")
-                .append(File.separator)
-                .append(UUID.randomUUID())
-                .append(".html")
+        String filePath = Path.of(appProperties.getUploadDirectory())
+                .resolve("convert")
+                .resolve("temp")
+                .resolve(UUID.randomUUID() + ".html")
                 .toString();
         PDDocument pdDocument = PDDocument.load(inputFile);
         Writer outputStream = new PrintWriter(filePath, StandardCharsets.UTF_8);
@@ -67,14 +64,10 @@ public class ConverterService implements IConverterService {
     @Override
     public File doConvertHtmlToPdf(final InputStream inputFile) throws DocumentException, IOException {
         log.info("Converting from html to pdf ...");
-        String filePath = new StringBuilder(appProperties.getUploadDirectory())
-                .append(File.separator)
-                .append("convert")
-                .append(File.separator)
-                .append("temp")
-                .append(File.separator)
-                .append(UUID.randomUUID())
-                .append(".pdf")
+        String filePath = Path.of(appProperties.getUploadDirectory())
+                .resolve("convert")
+                .resolve("temp")
+                .resolve(UUID.randomUUID() + ".pdf")
                 .toString();
         Document document = new Document();
         PdfWriter writer = PdfWriter.getInstance(document,
@@ -89,15 +82,13 @@ public class ConverterService implements IConverterService {
     @Override
     public File doConvertPdfToText(InputStream inputStream) throws IOException {
         //Save PDF file
-        File pdfFile = new File(new StringBuilder(appProperties.getUploadDirectory())
-                .append(File.separator)
-                .append("convert")
-                .append(File.separator)
-                .append("temp")
-                .append(File.separator)
-                .append(UUID.randomUUID())
-                .append(".pdf")
-                .toString());
+        String temp_file_name = UUID.randomUUID().toString();
+        String pdfPath = Path.of(appProperties.getUploadDirectory())
+                .resolve("convert")
+                .resolve("temp")
+                .resolve(temp_file_name + ".pdf")
+                .toString();
+        File pdfFile = new File(pdfPath);
         FileUtils.copyInputStreamToFile(inputStream, pdfFile);
         //loading PDF
         PDFParser parser = new PDFParser(new RandomAccessFile(pdfFile, "r"));
@@ -110,19 +101,15 @@ public class ConverterService implements IConverterService {
         String parsedText = pdfStripper.getText(pdDoc);
 
         //Save Text file
-        String filePath = new StringBuilder(appProperties.getUploadDirectory())
-                .append(File.separator)
-                .append("convert")
-                .append(File.separator)
-                .append("temp")
-                .append(File.separator)
-                .append(UUID.randomUUID())
-                .append(".txt")
+        String textPath = Path.of(appProperties.getUploadDirectory())
+                .resolve("convert")
+                .resolve("temp")
+                .resolve(temp_file_name + ".txt")
                 .toString();
-        PrintWriter pw = new PrintWriter(filePath);
+        PrintWriter pw = new PrintWriter(textPath);
         pw.print(parsedText);
         pw.close();
 
-        return new File(filePath);
+        return new File(textPath);
     }
 }

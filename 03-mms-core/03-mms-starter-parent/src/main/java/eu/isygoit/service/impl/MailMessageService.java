@@ -32,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -157,10 +158,10 @@ public class MailMessageService extends CassandraCrudService<UUID, MailMessage, 
         }
 
         return resources.stream().map(multipartFile -> {
-            File file = new File(appProperties.getUploadDirectory()
-                    + File.separator + senderDomainName
-                    + File.separator + "resources"
-                    + File.separator + multipartFile.getOriginalFilename());
+            File file = new File(Path.of(appProperties.getUploadDirectory())
+                    .resolve(senderDomainName)
+                    .resolve("resources")
+                    .resolve(multipartFile.getOriginalFilename()).toUri());
             try {
                 multipartFile.transferTo(file);
                 return multipartFile;
@@ -168,10 +169,10 @@ public class MailMessageService extends CassandraCrudService<UUID, MailMessage, 
                 throw new StoreFileException("Resource to file");
             }
         }).collect(Collectors.toMap(multipartFile -> multipartFile.getOriginalFilename(), multipartFile
-                -> new File(appProperties.getUploadDirectory()
-                + File.separator + senderDomainName
-                + File.separator + "resources"
-                + File.separator + multipartFile.getOriginalFilename())));
+                -> new File(Path.of(appProperties.getUploadDirectory())
+                .resolve(senderDomainName)
+                .resolve("resources")
+                .resolve(multipartFile.getOriginalFilename()).toUri())));
     }
 
 }
