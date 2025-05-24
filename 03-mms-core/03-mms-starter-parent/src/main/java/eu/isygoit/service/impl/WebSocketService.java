@@ -1,6 +1,6 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.annotation.ServRepo;
 import eu.isygoit.com.camel.repository.ICamelRepository;
 import eu.isygoit.com.rest.service.CrudServiceUtils;
 import eu.isygoit.dto.wsocket.WsMessageWrapperDto;
@@ -23,8 +23,8 @@ import java.util.Date;
 @Slf4j
 @Service
 @Transactional
-@SrvRepo(value = ChatMessageRepository.class)
-public class WebSocketService extends CrudServiceUtils<ChatMessage, ChatMessageRepository>
+@ServRepo(value = ChatMessageRepository.class)
+public class WebSocketService extends CrudServiceUtils<Long, ChatMessage, ChatMessageRepository>
         implements IWebSocketService {
 
     @Autowired

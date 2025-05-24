@@ -1,7 +1,7 @@
 package eu.isygoit.service.impl;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
-import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.annotation.ServRepo;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.service.cassandra.CassandraCrudService;
 import eu.isygoit.config.AppProperties;
@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @Slf4j
-@SrvRepo(value = MailMessageRepository.class)
+@ServRepo(value = MailMessageRepository.class)
 public class MailMessageService extends CassandraCrudService<UUID, MailMessage, MailMessageRepository>
         implements IMailMessageService {
 

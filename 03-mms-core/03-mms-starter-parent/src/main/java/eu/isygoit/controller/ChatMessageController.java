@@ -32,7 +32,7 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/api/v1/private/chat")
 @CtrlDef(handler = MmsExceptionHandler.class, mapper = ChatMessageMapper.class, minMapper = ChatMessageMapper.class, service = ChatMessageService.class)
-public class ChatMessageController extends CrudControllerUtils<ChatMessage, ChatMessageDto, ChatMessageDto, ChatMessageService>
+public class ChatMessageController extends CrudControllerUtils<Long, ChatMessage, ChatMessageDto, ChatMessageDto, ChatMessageService>
         implements ChatMessageControllerApi {
 
     @Override

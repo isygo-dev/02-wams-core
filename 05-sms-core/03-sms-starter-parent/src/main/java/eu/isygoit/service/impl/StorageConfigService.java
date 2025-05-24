@@ -1,6 +1,6 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.annotation.ServRepo;
 import eu.isygoit.com.rest.service.CrudService;
 import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.dto.exception.StorageConfigNotFoundException;
@@ -19,7 +19,7 @@ import java.util.Optional;
  */
 @Service
 @Transactional
-@SrvRepo(value = StorageConfigRepository.class)
+@ServRepo(value = StorageConfigRepository.class)
 public class StorageConfigService extends CrudService<Long, StorageConfig, StorageConfigRepository> implements IStorageConfigService {
 
     @Autowired

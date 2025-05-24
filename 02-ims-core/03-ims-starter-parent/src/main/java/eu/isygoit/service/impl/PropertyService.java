@@ -1,7 +1,7 @@
 package eu.isygoit.service.impl;
 
 
-import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.annotation.ServRepo;
 import eu.isygoit.com.rest.service.CrudServiceUtils;
 import eu.isygoit.exception.AccountNotFoundException;
 import eu.isygoit.exception.PropertyNotFoundException;
@@ -30,8 +30,8 @@ import java.util.Optional;
 @Slf4j
 @Service
 @Transactional
-@SrvRepo(value = PropertyRepository.class)
-public class PropertyService extends CrudServiceUtils<Property, PropertyRepository> implements IPropertyService {
+@ServRepo(value = PropertyRepository.class)
+public class PropertyService extends CrudServiceUtils<Long, Property, PropertyRepository> implements IPropertyService {
 
     @Autowired
     private AccountRepository accountRepository;

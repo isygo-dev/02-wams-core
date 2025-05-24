@@ -1,6 +1,6 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.annotation.ServRepo;
 import eu.isygoit.com.rest.service.CrudService;
 import eu.isygoit.model.Theme;
 import eu.isygoit.repository.ThemeRepository;
@@ -18,7 +18,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @Transactional
-@SrvRepo(value = ThemeRepository.class)
+@ServRepo(value = ThemeRepository.class)
 public class ThemeService extends CrudService<Long, Theme, ThemeRepository> implements IThemeService {
 
     @Autowired

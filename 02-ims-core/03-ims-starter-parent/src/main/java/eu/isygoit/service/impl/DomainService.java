@@ -2,7 +2,7 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.CodeGenKms;
 import eu.isygoit.annotation.CodeGenLocal;
-import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.annotation.ServRepo;
 import eu.isygoit.com.rest.service.ImageService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.DomainConstants;
@@ -28,7 +28,7 @@ import java.util.Optional;
 @Transactional
 @CodeGenLocal(value = NextCodeService.class)
 @CodeGenKms(value = KmsIncrementalKeyService.class)
-@SrvRepo(value = DomainRepository.class)
+@ServRepo(value = DomainRepository.class)
 public class DomainService extends ImageService<Long, Domain, DomainRepository> implements IDomainService {
 
     private final AppProperties appProperties;

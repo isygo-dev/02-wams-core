@@ -1,6 +1,6 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.annotation.ServRepo;
 import eu.isygoit.com.rest.service.CrudService;
 import eu.isygoit.model.AccountDetails;
 import eu.isygoit.repository.AccountDetailsRepository;
@@ -13,6 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-@SrvRepo(value = AccountDetailsRepository.class)
+@ServRepo(value = AccountDetailsRepository.class)
 public class AccountDetailsService extends CrudService<Long, AccountDetails, AccountDetailsRepository> implements IAccountDetailsService {
 }

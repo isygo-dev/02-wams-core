@@ -1,7 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.CodeGenLocal;
-import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.annotation.ServRepo;
 import eu.isygoit.com.rest.service.CodeAssignableService;
 import eu.isygoit.config.JwtProperties;
 import eu.isygoit.constants.DomainConstants;
@@ -23,7 +23,7 @@ import java.util.Optional;
 @Service
 @Transactional
 @CodeGenLocal(value = NextCodeService.class)
-@SrvRepo(value = TokenConfigRepository.class)
+@ServRepo(value = TokenConfigRepository.class)
 public class TokenConfigService extends CodeAssignableService<Long, TokenConfig, TokenConfigRepository> implements ITokenConfigService {
 
     private final JwtProperties jwtProperties;

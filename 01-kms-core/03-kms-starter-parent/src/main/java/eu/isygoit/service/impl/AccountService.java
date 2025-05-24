@@ -1,7 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.CodeGenLocal;
-import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.annotation.ServRepo;
 import eu.isygoit.com.rest.service.CrudService;
 import eu.isygoit.model.Account;
 import eu.isygoit.repository.AccountRepository;
@@ -17,7 +17,7 @@ import java.util.Optional;
 @Service
 @Transactional
 @CodeGenLocal(value = NextCodeService.class)
-@SrvRepo(value = AccountRepository.class)
+@ServRepo(value = AccountRepository.class)
 public class AccountService extends CrudService<Long, Account, AccountRepository> implements IAccountService {
 
     @Override

@@ -1,6 +1,6 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.annotation.ServRepo;
 import eu.isygoit.com.rest.service.CrudService;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.repository.AppNextCodeRepository;
@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-@SrvRepo(value = AppNextCodeRepository.class)
+@ServRepo(value = AppNextCodeRepository.class)
 public class AppNextCodeService extends CrudService<Long, AppNextCode, AppNextCodeRepository> {
 
 }

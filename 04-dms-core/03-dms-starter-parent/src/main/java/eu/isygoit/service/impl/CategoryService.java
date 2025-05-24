@@ -1,6 +1,6 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.annotation.ServRepo;
 import eu.isygoit.com.rest.service.CrudService;
 import eu.isygoit.model.Category;
 import eu.isygoit.repository.CategoryRepository;
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-@SrvRepo(value = CategoryRepository.class)
+@ServRepo(value = CategoryRepository.class)
 public class CategoryService extends CrudService<Long, Category, CategoryRepository> implements ICategoryService {
 
 }

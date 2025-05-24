@@ -1,7 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.CodeGenLocal;
-import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.annotation.ServRepo;
 import eu.isygoit.com.rest.service.CrudService;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Account;
@@ -22,7 +22,7 @@ import java.util.Optional;
 @Service
 @Transactional
 @CodeGenLocal(value = NextCodeService.class)
-@SrvRepo(value = DomainRepository.class)
+@ServRepo(value = DomainRepository.class)
 public class DomainService extends CrudService<Long, KmsDomain, DomainRepository> implements IDomainService {
 
     @Autowired

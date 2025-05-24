@@ -1,6 +1,6 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.annotation.ServRepo;
 import eu.isygoit.com.rest.service.CrudService;
 import eu.isygoit.constants.AppParameterConstants;
 import eu.isygoit.constants.DomainConstants;
@@ -22,7 +22,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @Transactional
-@SrvRepo(value = AppParameterRepository.class)
+@ServRepo(value = AppParameterRepository.class)
 public class AppParameterService extends CrudService<Long, AppParameter, AppParameterRepository> implements IAppParameterService {
 
     @Autowired

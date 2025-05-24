@@ -1,6 +1,6 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.annotation.ServRepo;
 import eu.isygoit.com.rest.service.CrudService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.enums.IEnumToken;
@@ -19,7 +19,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @Transactional
-@SrvRepo(value = AccessTokenRepository.class)
+@ServRepo(value = AccessTokenRepository.class)
 public class AccessTokenService extends CrudService<Long, AccessToken, AccessTokenRepository> implements IAccessTokenService {
 
     private final AppProperties appProperties;

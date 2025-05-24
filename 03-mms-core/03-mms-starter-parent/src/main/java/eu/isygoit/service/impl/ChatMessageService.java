@@ -1,6 +1,6 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.annotation.ServRepo;
 import eu.isygoit.com.rest.service.CrudService;
 import eu.isygoit.config.WsChannelInterceptor;
 import eu.isygoit.dto.data.ChatAccountDto;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @Transactional
-@SrvRepo(value = ChatMessageRepository.class)
+@ServRepo(value = ChatMessageRepository.class)
 public class ChatMessageService extends CrudService<Long, ChatMessage, ChatMessageRepository>
         implements IChatMessageService {
 

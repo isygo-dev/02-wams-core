@@ -2,7 +2,7 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.CodeGenKms;
 import eu.isygoit.annotation.CodeGenLocal;
-import eu.isygoit.annotation.SrvRepo;
+import eu.isygoit.annotation.ServRepo;
 import eu.isygoit.com.rest.service.ImageService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.AccountTypeConstants;
@@ -54,7 +54,7 @@ import java.util.stream.Collectors;
 @Transactional
 @CodeGenLocal(value = NextCodeService.class)
 @CodeGenKms(value = KmsIncrementalKeyService.class)
-@SrvRepo(value = AccountRepository.class)
+@ServRepo(value = AccountRepository.class)
 public class AccountService extends ImageService<Long, Account, AccountRepository>
         implements IAccountService {
 
