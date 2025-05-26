@@ -66,7 +66,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
                     path.replace("#", "/").toLowerCase(),
                     tagMap,
                     file);
-            return ResponseFactory.ResponseOk();
+            return ResponseFactory.responseOk();
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -89,7 +89,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
                             path.replace("#", "/").toLowerCase() + "/" + fileName,
                             versionID);
             ByteArrayResource resource = new ByteArrayResource(data);
-            return ResponseFactory.ResponseOk(resource);
+            return ResponseFactory.responseOk(resource);
         } catch (Throwable e) {
             throw new MinIoObjectException(e);
         }
@@ -109,7 +109,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
                             bucketName.toLowerCase(),
                             path.replace("#", "/").toLowerCase() + "/" + fileName
                     );
-            return ResponseFactory.ResponseOk();
+            return ResponseFactory.responseOk();
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -122,7 +122,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
         log.info("get objects request received");
         try {
             StorageConfig config = storageConfigService.findByDomainIgnoreCase(domain);
-            return ResponseFactory.ResponseOk(storageFactoryService.getService(config.getType())
+            return ResponseFactory.responseOk(storageFactoryService.getService(config.getType())
                     .getObjects(config,
                             bucketName.toLowerCase()));
         } catch (Throwable e) {
@@ -153,7 +153,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
                             tagMap,
                             condition);
 
-            return ResponseFactory.ResponseOk(results);
+            return ResponseFactory.responseOk(results);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -174,7 +174,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
             storageFactoryService.getService(config.getType())
                     .updateTags(config, fileTags.getBucketName(), fileTags.getFiletName(), tagMap);
 
-            return ResponseFactory.ResponseOk();
+            return ResponseFactory.responseOk();
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -199,7 +199,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
             storageFactoryService.getService(config.getType()).deleteObjects(config,
                     bucketName.toLowerCase(),
                     objectsMap);
-            return ResponseFactory.ResponseOk();
+            return ResponseFactory.responseOk();
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -215,7 +215,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
             StorageConfig config = storageConfigService.findByDomainIgnoreCase(domain);
             storageFactoryService.getService(config.getType()).saveBuckets(config,
                     bucketName.toLowerCase());
-            return ResponseFactory.ResponseOk();
+            return ResponseFactory.responseOk();
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -233,7 +233,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
             storageFactoryService.getService(config.getType()).setVersioningBucket(config,
                     bucketName.toLowerCase(),
                     status);
-            return ResponseFactory.ResponseOk();
+            return ResponseFactory.responseOk();
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -246,7 +246,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
         log.info("getBucketList request received");
         try {
             StorageConfig config = storageConfigService.findByDomainIgnoreCase(domain);
-            return ResponseFactory.ResponseOk(storageFactoryService.getService(config.getType()).getBuckets(config));
+            return ResponseFactory.responseOk(storageFactoryService.getService(config.getType()).getBuckets(config));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -262,7 +262,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
             StorageConfig config = storageConfigService.findByDomainIgnoreCase(domain);
             storageFactoryService.getService(config.getType()).deletebucket(config,
                     bucketName.toLowerCase());
-            return ResponseFactory.ResponseOk();
+            return ResponseFactory.responseOk();
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

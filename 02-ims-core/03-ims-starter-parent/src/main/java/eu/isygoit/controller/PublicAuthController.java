@@ -107,7 +107,7 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
                 response.addCookie(this.createCookie("token_type", IEnumWebToken.Types.Bearer.meaning()));
                 response.addCookie(this.createCookie("access_token", authenticate.getAccessToken()));
                 response.addCookie(this.createCookie("refresh_token", authenticate.getRefreshToken()));
-                return ResponseFactory.ResponseOk(AuthResponseDto.builder()
+                return ResponseFactory.responseOk(AuthResponseDto.builder()
                         .build());
             }
 
@@ -127,7 +127,7 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
                     .role(account.getFunctionRole())
                     .build();
 
-            return ResponseFactory.ResponseOk(AuthResponseDto.builder()
+            return ResponseFactory.responseOk(AuthResponseDto.builder()
                     .tokenType(IEnumWebToken.Types.Bearer)
                     .accessToken(authenticate.getAccessToken())
                     .refreshToken(authenticate.getRefreshToken())
@@ -150,7 +150,7 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     public ResponseEntity<Boolean> generateForgotPWDToken(UserContextDto userContextDto) {
         try {
             kmsPublicPasswordService.generateForgotPasswordAccessToken(userContextDto);
-            return ResponseFactory.ResponseOk(true);
+            return ResponseFactory.responseOk(true);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -169,7 +169,7 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     @Override
     public ResponseEntity<Boolean> registerUser(RegisteredUserDto registeredUserDto) {
         try {
-            return ResponseFactory.ResponseOk(authService.registerUser(registredUserMapper.dtoToEntity(registeredUserDto)));
+            return ResponseFactory.responseOk(authService.registerUser(registredUserMapper.dtoToEntity(registeredUserDto)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -180,7 +180,7 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     public ResponseEntity<DomainDto> getDomainByName(String domain) {
         log.info("get domain by name {}", domain);
         try {
-            return ResponseFactory.ResponseOk(domainMapper.entityToDto(domainService.findByName(domain)));
+            return ResponseFactory.responseOk(domainMapper.entityToDto(domainService.findByName(domain)));
         } catch (Throwable e) {
             log.error("<Error>: get by name : {} ", e);
             return getBackExceptionResponse(e);
@@ -190,7 +190,7 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     @Override
     public ResponseEntity<UserContext> getAuthenticationType(AccountAuthTypeRequest accountAuthTypeRequest) {
         try {
-            return ResponseFactory.ResponseOk(accountService.getAuthenticationType(accountAuthTypeRequest));
+            return ResponseFactory.responseOk(accountService.getAuthenticationType(accountAuthTypeRequest));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -200,7 +200,7 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     @Override
     public ResponseEntity<List<UserAccountDto>> getAvailableEmailAccounts(String email) {
         try {
-            return ResponseFactory.ResponseOk(accountService.getAvailableEmailAccounts(email));
+            return ResponseFactory.responseOk(accountService.getAvailableEmailAccounts(email));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -210,7 +210,7 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     @Override
     public ResponseEntity<Boolean> switchAuthType(AccountAuthTypeRequest accountAuthTypeRequest) {
         try {
-            return ResponseFactory.ResponseOk(accountService.switchAuthType(accountAuthTypeRequest));
+            return ResponseFactory.responseOk(accountService.switchAuthType(accountAuthTypeRequest));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

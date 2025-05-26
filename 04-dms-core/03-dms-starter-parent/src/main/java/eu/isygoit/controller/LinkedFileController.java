@@ -45,7 +45,7 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
                                                                    String domain, String tags) {
         log.info("Search file by tags from domain: {} / tags:{}", domain, tags);
         try {
-            return ResponseFactory.ResponseOk(linkedFileMapper.listEntityToDto(linkedFileService.searchByTags(domain, tags)));
+            return ResponseFactory.responseOk(linkedFileMapper.listEntityToDto(linkedFileService.searchByTags(domain, tags)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -59,7 +59,7 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
         log.info("Delete file by domain: {} / code: {}", domain, code);
         try {
             linkedFileService.deleteFile(domain, code);
-            return ResponseFactory.ResponseOk(true);
+            return ResponseFactory.responseOk(true);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -72,7 +72,7 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
                                                                      String originalFileName) {
         log.info("Search file by original name from domain {} : {}", domain, originalFileName);
         try {
-            return ResponseFactory.ResponseOk(linkedFileMapper.entityToDto(linkedFileService.searchByOriginalFileName(domain, originalFileName)));
+            return ResponseFactory.responseOk(linkedFileMapper.entityToDto(linkedFileService.searchByOriginalFileName(domain, originalFileName)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -86,7 +86,7 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
                                                            String newName) {
         log.info("rename file by domain: {} / code: {} to new name: {}", code, newName);
         try {
-            return ResponseFactory.ResponseOk(linkedFileMapper.entityToDto(linkedFileService.renameFile(domain, code, newName)));
+            return ResponseFactory.responseOk(linkedFileMapper.entityToDto(linkedFileService.renameFile(domain, code, newName)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -103,11 +103,11 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
             if (catArray.length > 0) {
                 List<LinkedFileRequestDto> list = linkedFileMapper.listEntityToDto(linkedFileService.searchByCategories(domain, Arrays.stream(categories.split(",")).toList()));
                 if (CollectionUtils.isEmpty(list)) {
-                    return ResponseFactory.ResponseNoContent();
+                    return ResponseFactory.responseNoContent();
                 }
-                return ResponseFactory.ResponseOk(list);
+                return ResponseFactory.responseOk(list);
             }
-            return ResponseFactory.ResponseBadRequest();
+            return ResponseFactory.responseBadRequest();
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -119,10 +119,10 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
                                                         LinkedFileRequestDto linkedFile) throws IOException {
         log.info("Uploading file from domain {} : {}", linkedFile.getDomain(), linkedFile.getFile().getOriginalFilename());
         if (linkedFile.getFile() == null) {
-            return ResponseFactory.ResponseBadRequest();
+            return ResponseFactory.responseBadRequest();
         }
         try {
-            return ResponseFactory.ResponseOk(LinkedFileResponseDto.builder()
+            return ResponseFactory.responseOk(LinkedFileResponseDto.builder()
                     .code(linkedFileService.upload(linkedFile, linkedFile.getFile()))
                     .build());
         } catch (Throwable e) {

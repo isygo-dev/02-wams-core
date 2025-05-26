@@ -70,7 +70,7 @@ public class DomainController extends MappedCrudController<Long, Domain, DomainD
                 ResponseEntity<KmsDomainDto> result = kmsDomainService.updateAdminStatus(RequestContextDto.builder().build(),
                         domain.getName(), newStatus);
                 if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
-                    return ResponseFactory.ResponseOk(domain);
+                    return ResponseFactory.responseOk(domain);
                 } else {
                     throw new KmsDomainUpdateException("for domain id: " + id);
                 }
@@ -78,7 +78,7 @@ public class DomainController extends MappedCrudController<Long, Domain, DomainD
                 log.error("Remote feign call failed : ", e);
                 //throw new RemoteCallFailedException(e);
             }
-            return ResponseFactory.ResponseOk(domain);
+            return ResponseFactory.responseOk(domain);
         } catch (Throwable e) {
             log.error("<Error>: update Domain Status : {} ", e);
             return getBackExceptionResponse(e);
@@ -89,7 +89,7 @@ public class DomainController extends MappedCrudController<Long, Domain, DomainD
     public ResponseEntity<List<String>> getAllDomainNames(RequestContextDto requestContext) {
         log.info("getAllDomainNames {}", requestContext.getSenderDomain());
         try {
-            return ResponseFactory.ResponseOk(crudService().getAllDomainNames(requestContext.getSenderDomain()));
+            return ResponseFactory.responseOk(crudService().getAllDomainNames(requestContext.getSenderDomain()));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -100,7 +100,7 @@ public class DomainController extends MappedCrudController<Long, Domain, DomainD
     public ResponseEntity<DomainDto> getByName(RequestContextDto requestContext) {
         log.info("get by name {}", requestContext.getSenderDomain());
         try {
-            return ResponseFactory.ResponseOk(mapper().entityToDto(crudService().findByName(requestContext.getSenderDomain())));
+            return ResponseFactory.responseOk(mapper().entityToDto(crudService().findByName(requestContext.getSenderDomain())));
         } catch (Throwable e) {
             log.error("<Error>: get by name : {} ", e);
             return getBackExceptionResponse(e);
@@ -111,7 +111,7 @@ public class DomainController extends MappedCrudController<Long, Domain, DomainD
     public ResponseEntity<DomainDto> updateSocialLink(RequestContextDto requestContext, Long id, String social, String link) {
         log.info("update Social Link ");
         try {
-            return ResponseFactory.ResponseOk(mapper().entityToDto(crudService().updateSocialLink(requestContext.getSenderDomain(), id, social, link)));
+            return ResponseFactory.responseOk(mapper().entityToDto(crudService().updateSocialLink(requestContext.getSenderDomain(), id, social, link)));
         } catch (Throwable e) {
             log.error("<Error>: update Social Link : {} ", e);
             return getBackExceptionResponse(e);

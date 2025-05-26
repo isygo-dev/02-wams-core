@@ -57,7 +57,7 @@ public class AccountStatisticsController extends ControllerExceptionHandler {
                                                              @RequestParam(name = RestApiConstants.STAT_TYPE) IEnumSharedStatType.Types statType) {
         log.info("Get global statistics");
         try {
-            return ResponseFactory.ResponseOk(accountService.getGlobalStatistics(statType, requestContext));
+            return ResponseFactory.responseOk(accountService.getGlobalStatistics(statType, requestContext));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -84,7 +84,7 @@ public class AccountStatisticsController extends ControllerExceptionHandler {
                                                        @RequestParam(name = RestApiConstants.CODE) String code) {
         log.info("Get object statistics with code: ", code);
         try {
-            return ResponseFactory.ResponseOk(accountService.getObjectStatistics(code));
+            return ResponseFactory.responseOk(accountService.getObjectStatistics(code));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

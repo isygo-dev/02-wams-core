@@ -35,7 +35,7 @@ public class KmsDomainController extends MappedCrudController<Long, KmsDomain, K
                                                           IEnumEnabledBinaryStatus.Types newStatus) {
         log.info("in update status");
         try {
-            return ResponseFactory.ResponseOk(mapper().entityToDto(crudService().updateAdminStatus(domain, newStatus)));
+            return ResponseFactory.responseOk(mapper().entityToDto(crudService().updateAdminStatus(domain, newStatus)));
         } catch (Throwable e) {
             log.error("<Error>: update Domain Status : {} ", e);
             return getBackExceptionResponse(e);
@@ -47,7 +47,7 @@ public class KmsDomainController extends MappedCrudController<Long, KmsDomain, K
                                                 KmsDomainDto domain) {
         log.info("Call update domain " + domain.toString());
         try {
-            return ResponseFactory.ResponseOk(crudService().checkIfExists(mapper().dtoToEntity(domain),
+            return ResponseFactory.responseOk(crudService().checkIfExists(mapper().dtoToEntity(domain),
                     true));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);

@@ -41,7 +41,7 @@ public class PropertyController extends ControllerExceptionHandler implements Pr
     public ResponseEntity<PropertyDto> updatePropertyAccount(RequestContextDto requestContext,
                                                              String accountCode, PropertyDto property) {
         try {
-            return ResponseFactory.ResponseOk(propertyMapper.entityToDto(propertyService.updateProperty(accountCode, propertyMapper.dtoToEntity(property))));
+            return ResponseFactory.responseOk(propertyMapper.entityToDto(propertyService.updateProperty(accountCode, propertyMapper.dtoToEntity(property))));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -52,7 +52,7 @@ public class PropertyController extends ControllerExceptionHandler implements Pr
     public ResponseEntity<PropertyDto> getPropertyByAccount(RequestContextDto requestContext,
                                                             String accountCode, String guiName, String name) {
         try {
-            return ResponseFactory.ResponseOk(propertyMapper.entityToDto(propertyService.getPropertyByAccount(accountCode, guiName, name)));
+            return ResponseFactory.responseOk(propertyMapper.entityToDto(propertyService.getPropertyByAccount(accountCode, guiName, name)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -63,7 +63,7 @@ public class PropertyController extends ControllerExceptionHandler implements Pr
     public ResponseEntity<List<PropertyDto>> getPropertyByAccountAndGui(RequestContextDto requestContext,
                                                                         String accountCode, String guiName) {
         try {
-            return ResponseFactory.ResponseOk(propertyMapper.listEntityToDto(propertyService.getPropertyByAccountAndGui(accountCode, guiName)));
+            return ResponseFactory.responseOk(propertyMapper.listEntityToDto(propertyService.getPropertyByAccountAndGui(accountCode, guiName)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

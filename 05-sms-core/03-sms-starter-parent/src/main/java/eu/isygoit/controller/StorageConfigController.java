@@ -52,7 +52,7 @@ public class StorageConfigController extends MappedCrudController<Long, StorageC
     public ResponseEntity<StorageConfigDto> findByDomainIgnoreCase(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) RequestContextDto requestContext,
                                                                    @PathVariable(name = RestApiConstants.DOMAIN_NAME) String domain) {
         try {
-            return ResponseFactory.ResponseOk(this.mapper().entityToDto(crudService().findByDomainIgnoreCase(domain)));
+            return ResponseFactory.responseOk(this.mapper().entityToDto(crudService().findByDomainIgnoreCase(domain)));
         } catch (Throwable e) {
             log.error("<Error>: Error calling api getNotificationsByReceiverId : {}", e);
             return getBackExceptionResponse(e);

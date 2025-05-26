@@ -35,7 +35,7 @@ public class PublicPasswordController extends ControllerExceptionHandler impleme
             tokenService.createForgotPasswordAccessToken(userContextDto.getDomain(),
                     userContextDto.getApplication(),
                     userContextDto.getUserName());
-            return ResponseFactory.ResponseOk(true);
+            return ResponseFactory.responseOk(true);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

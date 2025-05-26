@@ -111,7 +111,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     public ResponseEntity<List<String>> getEmailsByDomain(RequestContextDto requestContext) {
         log.info("get accounts email by domain");
         try {
-            return ResponseFactory.ResponseOk(accountService.findEmailsByDomain(requestContext.getSenderDomain()));
+            return ResponseFactory.responseOk(accountService.findEmailsByDomain(requestContext.getSenderDomain()));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -123,7 +123,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     public ResponseEntity<List<MinAccountDto>> getAccounts(RequestContextDto requestContext) {
         log.info("get accounts mini data");
         try {
-            return ResponseFactory.ResponseOk(accountService.getMinInfoByDomain(requestContext.getSenderDomain()));
+            return ResponseFactory.responseOk(accountService.getMinInfoByDomain(requestContext.getSenderDomain()));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -136,7 +136,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
                                                                IEnumEnabledBinaryStatus.Types newStatus) {
         log.info("update account admin status");
         try {
-            return ResponseFactory.ResponseOk(mapper().entityToDto(accountService.updateAccountAdminStatus(id, newStatus)));
+            return ResponseFactory.responseOk(mapper().entityToDto(accountService.updateAccountAdminStatus(id, newStatus)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -147,7 +147,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     public ResponseEntity<AccountDto> createDomainAdmin(RequestContextDto requestContext, String domain, DomainAdminDto admin) {
         log.info("create domain admin");
         try {
-            return ResponseFactory.ResponseOk(mapper().entityToDto(accountService.createDomainAdmin(domain, admin)));
+            return ResponseFactory.responseOk(mapper().entityToDto(accountService.createDomainAdmin(domain, admin)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -160,7 +160,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
                                                            boolean newStatus) {
         log.info("update account isAdmin");
         try {
-            return ResponseFactory.ResponseOk(mapper().entityToDto(accountService.updateAccountIsAdmin(id, newStatus)));
+            return ResponseFactory.responseOk(mapper().entityToDto(accountService.updateAccountIsAdmin(id, newStatus)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -173,7 +173,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
                                                      IEnumLanguage.Types language) {
         log.info("update account language");
         try {
-            return ResponseFactory.ResponseOk(mapper().entityToDto(accountService.updateLanguage(id, language)));
+            return ResponseFactory.responseOk(mapper().entityToDto(accountService.updateLanguage(id, language)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -201,7 +201,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
                     .build();
 
             /*
-            return ResponseFactory.ResponseOk(AuthResponseDto.builder()
+            return ResponseFactory.responseOk(AuthResponseDto.builder()
                     .tokenType(IEnumWebToken.Types.Bearer)
                     .accessToken(authenticate.getAccessToken())
                     .refreshToken(authenticate.getRefreshToken())
@@ -215,7 +215,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
                     .build());
              */
 
-            return ResponseFactory.ResponseOk(userDataResponseDto);
+            return ResponseFactory.responseOk(userDataResponseDto);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -225,7 +225,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     @Override
     public ResponseEntity<AccountDto> connectedUserFullData(RequestContextDto requestContext) {
         try {
-            return ResponseFactory.ResponseOk(mapper().entityToDto(accountService.findByDomainAndUserName(requestContext.getSenderDomain(),
+            return ResponseFactory.responseOk(mapper().entityToDto(accountService.findByDomainAndUserName(requestContext.getSenderDomain(),
                     requestContext.getSenderUser())));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -240,7 +240,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
             Account account = accountService.findByDomainAndUserName(requestContext.getSenderDomain(), requestContext.getSenderUser());
             accountDto.setId(account.getId());
             this.beforeUpdate(accountDto.getId(), accountDto);
-            return ResponseFactory.ResponseOk(mapper().entityToDto(accountService.update(mapper().dtoToEntity(accountDto))));
+            return ResponseFactory.responseOk(mapper().entityToDto(accountService.update(mapper().dtoToEntity(accountDto))));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -254,7 +254,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
         try {
             accountDto.setId(id);
             this.beforeUpdate(accountDto.getId(), accountDto);
-            return ResponseFactory.ResponseOk(mapper().entityToDto(accountService.update(mapper().dtoToEntity(accountDto))));
+            return ResponseFactory.responseOk(mapper().entityToDto(accountService.update(mapper().dtoToEntity(accountDto))));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -279,9 +279,9 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
         try {
             List<MinAccountDto> list = minAccountMapper.listEntityToDto(accountService.getByDomain(requestContext.getSenderDomain()));
             if (CollectionUtils.isEmpty(list)) {
-                return ResponseFactory.ResponseNoContent();
+                return ResponseFactory.responseNoContent();
             }
-            return ResponseFactory.ResponseOk(list);
+            return ResponseFactory.responseOk(list);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -294,9 +294,9 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
         try {
             List<MinAccountDto> list = minAccountMapper.listEntityToDto(accountService.getByDomain(domain));
             if (CollectionUtils.isEmpty(list)) {
-                return ResponseFactory.ResponseNoContent();
+                return ResponseFactory.responseNoContent();
             }
-            return ResponseFactory.ResponseOk(list);
+            return ResponseFactory.responseOk(list);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -309,9 +309,9 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
         try {
             List<MinAccountDto> list = minAccountMapper.listEntityToDto(accountService.chatAccountsByDomain(requestContext.getSenderDomain()));
             if (CollectionUtils.isEmpty(list)) {
-                return ResponseFactory.ResponseNoContent();
+                return ResponseFactory.responseNoContent();
             }
-            return ResponseFactory.ResponseOk(list);
+            return ResponseFactory.responseOk(list);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -322,7 +322,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     public ResponseEntity<?> resendCreationEmail(RequestContextDto requestContext, Long id) {
         try {
             accountService.resendCreationEmail(id);
-            return ResponseFactory.ResponseOk();
+            return ResponseFactory.responseOk();
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -332,7 +332,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     @Override
     public ResponseEntity<Long> getConfirmedResumeAccountsCount(RequestContextDto requestContext) {
         try {
-            return ResponseFactory.ResponseOk(accountService.stat_GetConfirmedResumeAccountsCount(requestContext));
+            return ResponseFactory.responseOk(accountService.stat_GetConfirmedResumeAccountsCount(requestContext));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -342,7 +342,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     @Override
     public ResponseEntity<Long> getConfirmedAccountNumberByEmployee(RequestContextDto requestContext) {
         try {
-            return ResponseFactory.ResponseOk(accountService.stat_GetConfirmedEmployeeAccountsCount(requestContext));
+            return ResponseFactory.responseOk(accountService.stat_GetConfirmedEmployeeAccountsCount(requestContext));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

@@ -62,7 +62,7 @@ public class MailMessageController extends MappedCrudController<UUID, MailMessag
                             .returnRead(mailMessage.isReturnRead())
                             .build()
                     , mailMessageService.multiPartFileToResource(senderDomainName, mailMessage.getResources())); //convert multipart file list to resources
-            return ResponseFactory.ResponseOk();
+            return ResponseFactory.responseOk();
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

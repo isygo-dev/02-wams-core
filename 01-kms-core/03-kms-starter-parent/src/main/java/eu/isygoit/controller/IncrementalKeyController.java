@@ -37,7 +37,7 @@ public class IncrementalKeyController extends ControllerExceptionHandler impleme
                                                    String domain, String entity, String attribute) {
         log.info("Call generate next code for: {}/{}/{}", domain, entity, attribute);
         try {
-            return ResponseFactory.ResponseOk(keyService.getIncrementalKey(domain, entity, attribute));
+            return ResponseFactory.responseOk(keyService.getIncrementalKey(domain, entity, attribute));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -60,7 +60,7 @@ public class IncrementalKeyController extends ControllerExceptionHandler impleme
                     .increment(incrementalConfig.getIncrement())
                     .build());
 
-            return ResponseFactory.ResponseOk();
+            return ResponseFactory.responseOk();
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

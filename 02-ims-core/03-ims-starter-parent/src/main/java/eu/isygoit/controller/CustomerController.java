@@ -62,7 +62,7 @@ public class CustomerController extends MappedCrudController<Long, Customer, Cus
                                                             @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus) {
         log.info("in update status");
         try {
-            return ResponseFactory.ResponseOk(mapper().entityToDto(crudService().updateStatus(id, newStatus)));
+            return ResponseFactory.responseOk(mapper().entityToDto(crudService().updateStatus(id, newStatus)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -91,7 +91,7 @@ public class CustomerController extends MappedCrudController<Long, Customer, Cus
                                                              @RequestParam(name = RestApiConstants.ACCOUNT_CODE) String accountCode) {
         log.info("Link to existing account");
         try {
-            return ResponseFactory.ResponseOk(mapper().entityToDto(crudService().linkToAccount(id, accountCode)));
+            return ResponseFactory.responseOk(mapper().entityToDto(crudService().linkToAccount(id, accountCode)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -115,7 +115,7 @@ public class CustomerController extends MappedCrudController<Long, Customer, Cus
     @GetMapping(path = "/names")
     public ResponseEntity<List<String>> getCustomersNames(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) RequestContextDto requestContext) {
         try {
-            return ResponseFactory.ResponseOk(customerService.getNames());
+            return ResponseFactory.responseOk(customerService.getNames());
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

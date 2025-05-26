@@ -39,7 +39,7 @@ public class IndexationController extends ControllerExceptionHandler implements 
                                                                     String[] keys, MultipartFile file) {
         try {
             File txtFile = converterService.doConvertPdfToText(file.getInputStream());
-            return ResponseFactory.ResponseOk();
+            return ResponseFactory.responseOk();
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

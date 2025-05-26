@@ -43,9 +43,9 @@ public class ChatMessageController extends CrudControllerUtils<Long, ChatMessage
         try {
             List<ChatMessage> list = crudService().findByReceiverId(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createDate")));
             if (CollectionUtils.isEmpty(list)) {
-                return ResponseFactory.ResponseNoContent();
+                return ResponseFactory.responseNoContent();
             }
-            return ResponseFactory.ResponseOk(mapper().listEntityToDto(list));
+            return ResponseFactory.responseOk(mapper().listEntityToDto(list));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -61,9 +61,9 @@ public class ChatMessageController extends CrudControllerUtils<Long, ChatMessage
         try {
             List<ChatMessage> list = crudService().findByReceiverIdAndSenderId(userId, SenderId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createDate")));
             if (CollectionUtils.isEmpty(list)) {
-                return ResponseFactory.ResponseNoContent();
+                return ResponseFactory.responseNoContent();
             }
-            return ResponseFactory.ResponseOk(mapper().listEntityToDto(list));
+            return ResponseFactory.responseOk(mapper().listEntityToDto(list));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -78,9 +78,9 @@ public class ChatMessageController extends CrudControllerUtils<Long, ChatMessage
         try {
             List<ChatAccountDto> list = crudService().getChatAccounts(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createDate")));
             if (CollectionUtils.isEmpty(list)) {
-                return ResponseFactory.ResponseNoContent();
+                return ResponseFactory.responseNoContent();
             }
-            return ResponseFactory.ResponseOk(list);
+            return ResponseFactory.responseOk(list);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -93,9 +93,9 @@ public class ChatMessageController extends CrudControllerUtils<Long, ChatMessage
         try {
             List<WsConnectDto> list = crudService().getConnectionsByDomain(domainId);
             if (CollectionUtils.isEmpty(list)) {
-                return ResponseFactory.ResponseNoContent();
+                return ResponseFactory.responseNoContent();
             }
-            return ResponseFactory.ResponseOk(list);
+            return ResponseFactory.responseOk(list);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

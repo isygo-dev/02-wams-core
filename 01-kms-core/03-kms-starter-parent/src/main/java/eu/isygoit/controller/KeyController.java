@@ -35,7 +35,7 @@ public class KeyController extends ControllerExceptionHandler implements KeyServ
                                                Integer length, IEnumCharSet.Types charSetType) {
         log.info("Call generateRandomKey");
         try {
-            return ResponseFactory.ResponseOk(keyService.getRandomKey(length, charSetType));
+            return ResponseFactory.responseOk(keyService.getRandomKey(length, charSetType));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -49,7 +49,7 @@ public class KeyController extends ControllerExceptionHandler implements KeyServ
         try {
             String keyValue = keyService.getRandomKey(length, charSetType);
             keyService.createOrUpdateKeyByName(domain, keyName, keyValue);
-            return ResponseFactory.ResponseOk(keyValue);
+            return ResponseFactory.responseOk(keyValue);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -61,7 +61,7 @@ public class KeyController extends ControllerExceptionHandler implements KeyServ
                                                String domain, String keyName) {
         log.info("Call getRandomKeyName");
         try {
-            return ResponseFactory.ResponseOk(keyService.getKeyByName(domain, keyName).getValue());
+            return ResponseFactory.responseOk(keyService.getKeyByName(domain, keyName).getValue());
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

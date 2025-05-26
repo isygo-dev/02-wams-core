@@ -46,7 +46,7 @@ public class PublicController extends ControllerExceptionHandler implements Publ
     public ResponseEntity<DomainDto> getDomainByName(String domain) {
         log.info("get domain by name {}", domain);
         try {
-            return ResponseFactory.ResponseOk(domainMapper.entityToDto(domainService.findByName(domain)));
+            return ResponseFactory.responseOk(domainMapper.entityToDto(domainService.findByName(domain)));
         } catch (Throwable e) {
             log.error("<Error>: get by name : {} ", e);
             return getBackExceptionResponse(e);

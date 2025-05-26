@@ -32,7 +32,7 @@ public class AppParameterController extends MappedCrudController<Long, AppParame
                                                           String domain, String name, Boolean allowDefault, String defaultValue) {
         log.info("Call api getPropertyByAccount {} /{}", domain, name);
         try {
-            return ResponseFactory.ResponseOk(crudService().getValueByDomainAndName(domain, name, true, defaultValue));
+            return ResponseFactory.responseOk(crudService().getValueByDomainAndName(domain, name, true, defaultValue));
         } catch (Throwable e) {
             log.error("<Error>: Call api getPropertyByAccount {} /{} {}", domain, name, e);
             return getBackExceptionResponse(e);
@@ -43,7 +43,7 @@ public class AppParameterController extends MappedCrudController<Long, AppParame
     public ResponseEntity<String> getTechnicalAdminEmail() {
         log.info("Call api getTechnicalAdminEmail");
         try {
-            return ResponseFactory.ResponseOk(crudService().getTechnicalAdminEmail());
+            return ResponseFactory.responseOk(crudService().getTechnicalAdminEmail());
         } catch (Throwable e) {
             log.error("<Error>: Call api getTechnicalAdminEmail", e);
             return getBackExceptionResponse(e);

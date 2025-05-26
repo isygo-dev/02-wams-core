@@ -67,7 +67,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                     , authType);
             //Never return the password
             log.info("password generated for {}/{} : {}", generatePwdRequest.getDomain(), generatePwdRequest.getUserName(), accessKeyResponse.getKey());
-            return ResponseFactory.ResponseOk(accessKeyResponse.getLength());
+            return ResponseFactory.responseOk(accessKeyResponse.getLength());
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -79,7 +79,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                                                         ResetPwdViaTokenRequestDto resetPwdViaTokenRequestDto) {
         try {
             passwordService.resetPasswordViaToken(resetPwdViaTokenRequestDto);
-            return ResponseFactory.ResponseOk("password changed successfully");
+            return ResponseFactory.responseOk("password changed successfully");
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -93,7 +93,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
         try {
             passwordService.changePassword(requestContext.getSenderDomain(), requestContext.getSenderUser(),
                     oldPassword, newPassword);
-            return ResponseFactory.ResponseOk("password changed successfully");
+            return ResponseFactory.responseOk("password changed successfully");
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -105,7 +105,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                                                 CheckPwdRequestDto checkPwdRequest) {
         log.info("Call check password for domain {}", checkPwdRequest);
         try {
-            return ResponseFactory.ResponseOk(passwordService.checkForPattern(checkPwdRequest.getDomain()
+            return ResponseFactory.responseOk(passwordService.checkForPattern(checkPwdRequest.getDomain()
                     , checkPwdRequest.getPassword()));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -133,12 +133,12 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                                     .toString(),
                             tokenConfig.getSecretKey());
                 } catch (Exception e) {
-                    return ResponseFactory.ResponseOk(AccessTokenResponseDto.builder()
+                    return ResponseFactory.responseOk(AccessTokenResponseDto.builder()
                             .status(IEnumPasswordStatus.Types.UNAUTHORIZED)
                             .build());
                 }
 
-                return ResponseFactory.ResponseOk(AccessTokenResponseDto.builder()
+                return ResponseFactory.responseOk(AccessTokenResponseDto.builder()
                         .status(IEnumPasswordStatus.Types.VALID)
                         .tokenType(IEnumWebToken.Types.Bearer)
                         .accessToken(tokenService.createAccessToken(accessRequest.getDomain().trim().toLowerCase(),
@@ -157,7 +157,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                                 .getToken())
                         .build());
             } else {
-                return ResponseFactory.ResponseOk(AccessTokenResponseDto.builder()
+                return ResponseFactory.responseOk(AccessTokenResponseDto.builder()
                         .status(passwordService.matches(accessRequest.getDomain().trim().toLowerCase()
                                 , accessRequest.getUserName().trim().toLowerCase()
                                 , accessRequest.getPassword()
@@ -187,7 +187,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                                                              MatchesRequestDto matchesRequest) {
         log.info("Call match password for domain {}", matchesRequest);
         try {
-            return ResponseFactory.ResponseOk(passwordService.matches(matchesRequest.getDomain()
+            return ResponseFactory.responseOk(passwordService.matches(matchesRequest.getDomain()
                     , matchesRequest.getUserName()
                     , matchesRequest.getPassword()
                     , matchesRequest.getAuthType()));
@@ -202,7 +202,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                                                      IsPwdExpiredRequestDto isPwdExpiredRequestDto) {
         log.info("Call isPasswordExpired {}", isPwdExpiredRequestDto);
         try {
-            return ResponseFactory.ResponseOk(passwordService.isExpired(isPwdExpiredRequestDto.getDomain().trim().toLowerCase()
+            return ResponseFactory.responseOk(passwordService.isExpired(isPwdExpiredRequestDto.getDomain().trim().toLowerCase()
                     , isPwdExpiredRequestDto.getEmail().trim().toLowerCase()
                     , isPwdExpiredRequestDto.getUserName().trim().toLowerCase()
                     , isPwdExpiredRequestDto.getAuthType()));
@@ -217,7 +217,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                                                  UpdateAccountRequestDto account) {
         log.info("Call update account " + account.toString());
         try {
-            return ResponseFactory.ResponseOk(accountService.checkIfExists(accountMapper.dtoToEntity(account),
+            return ResponseFactory.responseOk(accountService.checkIfExists(accountMapper.dtoToEntity(account),
                     true));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);

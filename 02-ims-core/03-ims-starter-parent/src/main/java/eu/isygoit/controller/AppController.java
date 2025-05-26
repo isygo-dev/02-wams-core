@@ -63,7 +63,7 @@ public class AppController extends MappedCrudController<Long, Application, Appli
                                                        @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus) {
         log.info("in update status");
         try {
-            return ResponseFactory.ResponseOk(mapper().entityToDto(crudService().updateStatus(id, newStatus)));
+            return ResponseFactory.responseOk(mapper().entityToDto(crudService().updateStatus(id, newStatus)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -75,7 +75,7 @@ public class AppController extends MappedCrudController<Long, Application, Appli
         if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
             return super.subFindAll(requestContext);
         } else {
-            return ResponseFactory.ResponseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
+            return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
                     requestContext.getSenderUser())));
         }
     }
@@ -85,7 +85,7 @@ public class AppController extends MappedCrudController<Long, Application, Appli
         if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
             return super.subFindAllDefault(requestContext);
         } else {
-            return ResponseFactory.ResponseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
+            return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
                     requestContext.getSenderUser())));
         }
     }
@@ -95,7 +95,7 @@ public class AppController extends MappedCrudController<Long, Application, Appli
         if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
             return super.subFindAll(requestContext, page, size);
         } else {
-            return ResponseFactory.ResponseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
+            return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
                     requestContext.getSenderUser())));
         }
     }
@@ -105,7 +105,7 @@ public class AppController extends MappedCrudController<Long, Application, Appli
         if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
             return super.subFindAllFull(requestContext);
         } else {
-            return ResponseFactory.ResponseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
+            return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
                     requestContext.getSenderUser())));
         }
     }
@@ -115,7 +115,7 @@ public class AppController extends MappedCrudController<Long, Application, Appli
         if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
             return super.subFindAllFull(requestContext, page, size);
         } else {
-            return ResponseFactory.ResponseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
+            return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
                     requestContext.getSenderUser())));
         }
     }

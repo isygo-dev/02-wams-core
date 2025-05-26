@@ -33,7 +33,7 @@ public class WebSocketController extends ControllerExceptionHandler implements W
                                                Long recieverId, WsMessageWrapperDto message) {
         try {
             webSocketService.saveAndSendToUser(recieverId, message);
-            return ResponseFactory.ResponseOk();
+            return ResponseFactory.responseOk();
         } catch (Exception ex) {
             return getBackExceptionResponse(ex);
         }
@@ -44,7 +44,7 @@ public class WebSocketController extends ControllerExceptionHandler implements W
                                                 Long groupId, WsMessageWrapperDto message) {
         try {
             webSocketService.saveAndSendToGroup(groupId, message);
-            return ResponseFactory.ResponseOk();
+            return ResponseFactory.responseOk();
         } catch (Exception ex) {
             return getBackExceptionResponse(ex);
         }
@@ -55,7 +55,7 @@ public class WebSocketController extends ControllerExceptionHandler implements W
                                               WsMessageWrapperDto message) {
         try {
             webSocketService.saveAndSendToAll(message);
-            return ResponseFactory.ResponseOk();
+            return ResponseFactory.responseOk();
         } catch (Exception ex) {
             return getBackExceptionResponse(ex);
         }

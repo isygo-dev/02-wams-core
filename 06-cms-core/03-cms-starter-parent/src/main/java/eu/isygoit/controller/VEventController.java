@@ -115,9 +115,9 @@ public class VEventController extends MappedCrudController<Long, VCalendarEvent,
         try {
             Optional<VCalendarEvent> event = this.crudService().findByDomainAndCalendarAndCode(domain, calendar, code);
             if (event.isPresent()) {
-                return ResponseFactory.ResponseOk(this.mapper().entityToDto(event.get()));
+                return ResponseFactory.responseOk(this.mapper().entityToDto(event.get()));
             } else {
-                return ResponseFactory.ResponseNoContent();
+                return ResponseFactory.responseNoContent();
             }
         } catch (Exception ex) {
             return getBackExceptionResponse(ex);
@@ -131,9 +131,9 @@ public class VEventController extends MappedCrudController<Long, VCalendarEvent,
             List<VCalendarEventDto> listEvent =
                     this.mapper().listEntityToDto(this.crudService().findByDomainAndCalendar(domain, calendar));
             if (CollectionUtils.isEmpty(listEvent)) {
-                return ResponseFactory.ResponseNoContent();
+                return ResponseFactory.responseNoContent();
             } else {
-                return ResponseFactory.ResponseOk(listEvent);
+                return ResponseFactory.responseOk(listEvent);
             }
         } catch (Exception ex) {
             return getBackExceptionResponse(ex);
@@ -144,7 +144,7 @@ public class VEventController extends MappedCrudController<Long, VCalendarEvent,
     public ResponseEntity<VCalendarEventDto> saveEvent(//RequestContextDto requestContext,
                                                        VCalendarEventDto event) {
         try {
-            return ResponseFactory.ResponseOk(this.mapper().entityToDto(this.crudService().create((this.mapper().dtoToEntity(event)))));
+            return ResponseFactory.responseOk(this.mapper().entityToDto(this.crudService().create((this.mapper().dtoToEntity(event)))));
         } catch (Exception ex) {
             return getBackExceptionResponse(ex);
         }
@@ -156,7 +156,7 @@ public class VEventController extends MappedCrudController<Long, VCalendarEvent,
                                                          VCalendarEventDto event) {
         try {
             this.crudService().findById(id);
-            return ResponseFactory.ResponseOk(this.mapper().entityToDto(this.crudService().update((this.mapper().dtoToEntity(event)))));
+            return ResponseFactory.responseOk(this.mapper().entityToDto(this.crudService().update((this.mapper().dtoToEntity(event)))));
         } catch (Exception ex) {
             return getBackExceptionResponse(ex);
         }

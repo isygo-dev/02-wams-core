@@ -91,7 +91,7 @@ public class VCalendarController extends MappedCrudController<Long, VCalendar, V
                                                                    @RequestParam(name = RestApiConstants.ID) Long id,
                                                                    @RequestParam(name = RestApiConstants.IS_LOCKED) Boolean locked) {
         try {
-            return ResponseFactory.ResponseOk(mapper().entityToDto(crudService().updateLockedStatus(id, locked)));
+            return ResponseFactory.responseOk(mapper().entityToDto(crudService().updateLockedStatus(id, locked)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

@@ -39,7 +39,7 @@ public class TokenController extends ControllerExceptionHandler implements Token
                                                        TokenRequestDto tokenRequestDto) {
         log.info("Call create Token By Domain");
         try {
-            return ResponseFactory.ResponseOk(tokenService.buildTokenAndSave(domain, application, tokenType, tokenRequestDto.getSubject(), tokenRequestDto.getClaims()));
+            return ResponseFactory.responseOk(tokenService.buildTokenAndSave(domain, application, tokenType, tokenRequestDto.getSubject(), tokenRequestDto.getClaims()));
         } catch (Throwable e) {
             log.error("<Error>: create Token By Domain: {} ", e);
             return getBackExceptionResponse(e);
@@ -55,7 +55,7 @@ public class TokenController extends ControllerExceptionHandler implements Token
                                                 String subject) {
         log.info("Call is Token Valid");
         try {
-            return ResponseFactory.ResponseOk(tokenService.isTokenValid(domain, application, tokenType, token, subject));
+            return ResponseFactory.responseOk(tokenService.isTokenValid(domain, application, tokenType, token, subject));
         } catch (Throwable e) {
             log.error("<Error>: Invalid token: {} ", e);
             return getBackExceptionResponse(e);
