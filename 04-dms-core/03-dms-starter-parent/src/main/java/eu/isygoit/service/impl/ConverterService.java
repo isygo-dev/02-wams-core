@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.UUID;
 
 /**
@@ -47,21 +48,16 @@ public class ConverterService implements IConverterService {
     @Override
     public File doConvertPdfToHtml(final InputStream inputFile) throws IOException {
         log.info("Converting from pdf to html ...");
-        String filePath = new StringBuilder(appProperties.getUploadDirectory())
-                .append(File.separator)
-                .append("convert")
-                .append(File.separator)
-                .append("temp")
-                .append(File.separator)
-                .append(UUID.randomUUID())
-                .append(".html")
-                .toString();
+        Path filePath = Path.of(appProperties.getUploadDirectory())
+                .resolve("convert")
+                .resolve("temp")
+                .resolve(UUID.randomUUID() + ".html");
         PDDocument pdDocument = PDDocument.load(inputFile);
-        Writer outputStream = new PrintWriter(filePath, StandardCharsets.UTF_8);
+        Writer outputStream = new PrintWriter(filePath.toString(), StandardCharsets.UTF_8);
         new PDFDomTree().writeText(pdDocument, outputStream);
         outputStream.close();
         log.info("File was converted from pdf to html successfully. {}", filePath);
-        return new File(filePath);
+        return new File(filePath.toString());
     }
 
     @Override

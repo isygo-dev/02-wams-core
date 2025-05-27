@@ -226,18 +226,18 @@ public class LinkedFileService extends CodifiableService<Long, LinkedFile, Linke
             log.info(linkedFile.get().getPath());
             if (appProperties.getLocalStorageActive()) {
                 if (StringUtils.hasText(linkedFile.get().getPath())) {
-                    Resource resource = new UrlResource(Path.of(appProperties.getUploadDirectory() +
-                            File.separator + domain +
-                            File.separator + linkedFile.get().getPath() +
-                            File.separator + linkedFile.get().getCode() + '.' + linkedFile.get().getExtension()).toUri());
+                    Resource resource = new UrlResource(Path.of(appProperties.getUploadDirectory() )
+                            .resolve(domain)
+                            .resolve(linkedFile.get().getPath())
+                            .resolve(linkedFile.get().getCode() + '.' + linkedFile.get().getExtension()).toUri());
                     if (!resource.exists()) {
                         throw new ResourceNotFoundException("with domain:" + domain + "/code:" + code);
                     }
                     return resource;
                 } else {
-                    Resource resource = new UrlResource(Path.of(appProperties.getUploadDirectory()
-                            + File.separator + domain
-                            + File.separator + linkedFile.get().getCode() + '.' + linkedFile.get().getExtension()).toUri());
+                    Resource resource = new UrlResource(Path.of(appProperties.getUploadDirectory())
+                            .resolve(domain)
+                            .resolve(linkedFile.get().getCode() + '.' + linkedFile.get().getExtension()).toUri());
                     if (!resource.exists()) {
                         throw new ResourceNotFoundException("with domain:" + domain + "/code:" + code);
                     }
