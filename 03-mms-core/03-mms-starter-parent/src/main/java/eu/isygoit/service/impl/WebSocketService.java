@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * The type Web socket service.
@@ -24,7 +25,7 @@ import java.util.Date;
 @Service
 @Transactional
 @ServRepo(value = ChatMessageRepository.class)
-public class WebSocketService extends CrudServiceUtils<Long, ChatMessage, ChatMessageRepository>
+public class WebSocketService extends CrudServiceUtils<UUID, ChatMessage, ChatMessageRepository>
         implements IWebSocketService {
 
     @Autowired

@@ -67,7 +67,7 @@ public interface ChatMessageControllerApi {
     @GetMapping(path = "/from")
     ResponseEntity<List<ChatMessageDto>> findByReceiverIdAndSenderId(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
                                                                      @RequestParam(name = RestApiConstants.USER_ID) Long userId,
-                                                                     @RequestParam(name = RestApiConstants.SENDER_ID) Long SenderId,
+                                                                     @RequestParam(name = RestApiConstants.SENDER_ID) Long senderId,
                                                                      @RequestParam(name = RestApiConstants.PAGE) Integer page,
                                                                      @RequestParam(name = RestApiConstants.SIZE) Integer size);
 

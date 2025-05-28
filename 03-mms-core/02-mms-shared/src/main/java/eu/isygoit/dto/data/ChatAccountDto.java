@@ -21,7 +21,7 @@ import java.util.Date;
 public class ChatAccountDto extends AbstractAuditableDto<Long> {
 
     private Long receiverId;
-    private Long SenderId;
+    private Long senderId;
     private String fromFullName;
     private String lastMessage;
     private Date date;

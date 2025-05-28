@@ -1,7 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.ServRepo;
-import eu.isygoit.com.rest.service.CrudService;
+import eu.isygoit.com.rest.service.cassandra.CassandraCrudService;
 import eu.isygoit.config.WsChannelInterceptor;
 import eu.isygoit.dto.data.ChatAccountDto;
 import eu.isygoit.dto.wsocket.WsConnectDto;
@@ -14,8 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @ServRepo(value = ChatMessageRepository.class)
-public class ChatMessageService extends CrudService<Long, ChatMessage, ChatMessageRepository>
+public class ChatMessageService extends CassandraCrudService<UUID, ChatMessage, ChatMessageRepository>
         implements IChatMessageService {
 
     public List<WsConnectDto> getConnectionsByDomain(Long domainId) {
@@ -38,8 +37,17 @@ public class ChatMessageService extends CrudService<Long, ChatMessage, ChatMessa
     }
 
     @Override
-    public List<ChatMessage> findByReceiverIdAndSenderId(Long receiverId, Long SenderId, Pageable pageable) {
-        return repository().findChatStack(receiverId, SenderId);
+    public List<ChatMessage> findByReceiverIdAndSenderId(Long receiverId, Long senderId, Pageable pageable) {
+        List<ChatMessage> messages1 = repository().findByReceiverIdAndSenderId(receiverId, senderId);
+        List<ChatMessage> messages2 = repository().findByReceiverIdAndSenderId(senderId, receiverId);
+
+        List<ChatMessage> allMessages = new ArrayList<>();
+        allMessages.addAll(messages1);
+        allMessages.addAll(messages2);
+
+        // Sort messages by date
+        allMessages.sort(Comparator.comparing(ChatMessage::getDate));
+        return allMessages;
     }
 
     @Override
@@ -49,7 +57,7 @@ public class ChatMessageService extends CrudService<Long, ChatMessage, ChatMessa
             List<ChatAccountDto> chatMessages = list.stream().collect(Collectors.groupingBy(ChatMessage::getGroupKey))
                     .values().stream().map(chats ->
                             ChatAccountDto.builder()
-                                    .SenderId(chats.get(0).getSenderId())
+                                    .senderId(chats.get(0).getSenderId())
                                     .fromFullName(chats.get(0).getSenderName())
                                     .receiverId(chats.get(0).getReceiverId())
                                     .date(chats.get(0).getDate())

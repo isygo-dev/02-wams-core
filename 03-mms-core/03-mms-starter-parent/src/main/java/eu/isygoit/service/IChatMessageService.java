@@ -7,12 +7,13 @@ import eu.isygoit.model.ChatMessage;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.UUID;
 
 
 /**
  * The interface Chat message service.
  */
-public interface IChatMessageService extends ICrudServiceMethod<Long, ChatMessage> {
+public interface IChatMessageService extends ICrudServiceMethod<UUID, ChatMessage> {
 
     /**
      * Find by receiver id list.
@@ -27,11 +28,11 @@ public interface IChatMessageService extends ICrudServiceMethod<Long, ChatMessag
      * Find by receiver id and sender id list.
      *
      * @param receiverId the receiver id
-     * @param SenderId   the sender id
+     * @param senderId   the sender id
      * @param pageable   the pageable
      * @return the list
      */
-    List<ChatMessage> findByReceiverIdAndSenderId(Long receiverId, Long SenderId, Pageable pageable);
+    List<ChatMessage> findByReceiverIdAndSenderId(Long receiverId, Long senderId, Pageable pageable);
 
     /**
      * Gets chat accounts.

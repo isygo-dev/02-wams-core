@@ -36,8 +36,6 @@ import eu.isygoit.service.IRoleInfoService;
 import jakarta.transaction.NotSupportedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -531,7 +529,6 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
      * @return the all accounts min
      */
     //@Cacheable(cacheNames = SchemaTableConstantName.T_ACCOUNT)
-    @EventListener(ApplicationReadyEvent.class)
     public List<MinAccountDto> getAllAccountsMin() {
         return minAccountMapper.listEntityToDto(this.findAll());
     }

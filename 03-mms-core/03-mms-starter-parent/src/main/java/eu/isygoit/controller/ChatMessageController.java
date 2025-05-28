@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * The type Chat message controller.
@@ -32,7 +33,7 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/api/v1/private/chat")
 @CtrlDef(handler = MmsExceptionHandler.class, mapper = ChatMessageMapper.class, minMapper = ChatMessageMapper.class, service = ChatMessageService.class)
-public class ChatMessageController extends CrudControllerUtils<Long, ChatMessage, ChatMessageDto, ChatMessageDto, ChatMessageService>
+public class ChatMessageController extends CrudControllerUtils<UUID, ChatMessage, ChatMessageDto, ChatMessageDto, ChatMessageService>
         implements ChatMessageControllerApi {
 
     @Override
@@ -55,11 +56,11 @@ public class ChatMessageController extends CrudControllerUtils<Long, ChatMessage
     @Override
     public ResponseEntity<List<ChatMessageDto>> findByReceiverIdAndSenderId(RequestContextDto requestContext,
                                                                             Long userId,
-                                                                            Long SenderId,
+                                                                            Long senderId,
                                                                             Integer page,
                                                                             Integer size) {
         try {
-            List<ChatMessage> list = crudService().findByReceiverIdAndSenderId(userId, SenderId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createDate")));
+            List<ChatMessage> list = crudService().findByReceiverIdAndSenderId(userId, senderId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createDate")));
             if (CollectionUtils.isEmpty(list)) {
                 return ResponseFactory.responseNoContent();
             }

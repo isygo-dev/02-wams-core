@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * The type Chat message dto.
@@ -16,7 +17,7 @@ import java.util.Date;
 @NoArgsConstructor
 @SuperBuilder
 
-public class ChatMessageDto extends AbstractAuditableDto<Long> {
+public class ChatMessageDto extends AbstractAuditableDto<UUID> {
 
     private Long receiverId;
     private Long senderId;
