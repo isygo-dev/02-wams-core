@@ -40,6 +40,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Optional;
 
@@ -260,7 +261,11 @@ public class LinkedFileService extends CodeAssignableService<Long, LinkedFile, L
         FileHelper.saveMultipartFile(target,
                 linkedFile.getCode(),
                 file,
-                FilenameUtils.getExtension(file.getOriginalFilename()));
+                FilenameUtils.getExtension(file.getOriginalFilename()),
+                StandardOpenOption.CREATE,
+                StandardOpenOption.WRITE,
+                StandardOpenOption.TRUNCATE_EXISTING,
+                StandardOpenOption.SYNC);
     }
 
     @Override
