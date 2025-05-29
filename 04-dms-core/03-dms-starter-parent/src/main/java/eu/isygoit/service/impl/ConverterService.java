@@ -8,9 +8,6 @@ import eu.isygoit.config.AppProperties;
 import eu.isygoit.service.IConverterService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.apache.pdfbox.cos.COSDocument;
-import org.apache.pdfbox.io.RandomAccessFile;
-import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.fit.pdfdom.PDFDomTree;
@@ -19,15 +16,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 
 /**
- * The type Converter service.
- */
-/*
- * Implement all available conversions in the link
- * https://www.baeldung.com/pdf-conversions-java
+ * ConverterService provides implementations for converting files
+ * between PDF, HTML, and plain text formats.
  */
 @Slf4j
 @Service
@@ -36,80 +31,116 @@ public class ConverterService implements IConverterService {
 
     private final AppProperties appProperties;
 
-    /**
-     * Instantiates a new Converter service.
-     *
-     * @param appProperties the app properties
-     */
     public ConverterService(AppProperties appProperties) {
         this.appProperties = appProperties;
     }
 
+    /**
+     * Generates a temporary file path and executes a function that uses it.
+     *
+     * @param extension File extension (e.g., .pdf, .html, .txt)
+     * @param action    The function to execute with the path
+     * @param <T>       Return type
+     * @return The result from the function
+     * @throws IOException In case of any IO error
+     */
+    private <T> T withGeneratedTempPath(String extension, WithTempPath<T> action) throws IOException {
+        Path tempPath = Path.of(appProperties.getUploadDirectory(), "convert", "temp", UUID.randomUUID() + extension);
+        Files.createDirectories(tempPath.getParent());
+        try {
+            return action.apply(tempPath);
+        } catch (Exception e) {
+            log.error("Error while handling temporary path operation: {}", tempPath, e);
+            throw (e instanceof IOException io) ? io : new IOException("Unexpected error", e);
+        }
+    }
+
+    /**
+     * Converts a PDF input stream to an HTML file.
+     *
+     * @param inputFile PDF file input stream
+     * @return Generated HTML file
+     * @throws IOException if the conversion fails
+     */
     @Override
     public File doConvertPdfToHtml(final InputStream inputFile) throws IOException {
-        log.info("Converting from pdf to html ...");
-        String filePath = Path.of(appProperties.getUploadDirectory())
-                .resolve("convert")
-                .resolve("temp")
-                .resolve(UUID.randomUUID() + ".html")
-                .toString();
-        PDDocument pdDocument = PDDocument.load(inputFile);
-        Writer outputStream = new PrintWriter(filePath, StandardCharsets.UTF_8);
-        new PDFDomTree().writeText(pdDocument, outputStream);
-        outputStream.close();
-        log.info("File was converted from pdf to html successfully. {}", filePath);
-        return new File(filePath);
+        log.info("Converting PDF to HTML...");
+        return withGeneratedTempPath(".html", htmlPath -> {
+            try (PDDocument pdDocument = PDDocument.load(inputFile);
+                 Writer writer = Files.newBufferedWriter(htmlPath, StandardCharsets.UTF_8)) {
+                new PDFDomTree().writeText(pdDocument, writer);
+                log.info("PDF successfully converted to HTML at {}", htmlPath);
+                return htmlPath.toFile();
+            }
+        });
     }
 
+    /**
+     * Converts an HTML input stream to a PDF file.
+     *
+     * @param inputFile HTML input stream
+     * @return Generated PDF file
+     * @throws DocumentException If PDF creation fails
+     * @throws IOException       If file IO fails
+     */
     @Override
     public File doConvertHtmlToPdf(final InputStream inputFile) throws DocumentException, IOException {
-        log.info("Converting from html to pdf ...");
-        String filePath = Path.of(appProperties.getUploadDirectory())
-                .resolve("convert")
-                .resolve("temp")
-                .resolve(UUID.randomUUID() + ".pdf")
-                .toString();
-        Document document = new Document();
-        PdfWriter writer = PdfWriter.getInstance(document,
-                new FileOutputStream(filePath));
-        document.open();
-        XMLWorkerHelper.getInstance().parseXHtml(writer, document, inputFile);
-        document.close();
-        log.info("File was converted from html to pdf successfully. {}", filePath);
-        return new File(filePath);
+        log.info("Converting HTML to PDF...");
+        try {
+            return withGeneratedTempPath(".pdf", pdfPath -> {
+                try (OutputStream os = Files.newOutputStream(pdfPath)) {
+                    Document document = new Document();
+                    PdfWriter writer = PdfWriter.getInstance(document, os);
+                    document.open();
+                    XMLWorkerHelper.getInstance().parseXHtml(writer, document, inputFile, StandardCharsets.UTF_8);
+                    document.close();
+                    log.info("HTML successfully converted to PDF at {}", pdfPath);
+                    return pdfPath.toFile();
+                } catch (DocumentException | IOException e) {
+                    log.error("Error converting HTML to PDF", e);
+                    throw e;
+                }
+            });
+        } catch (IOException e) {
+            throw new IOException("Failed to convert HTML to PDF", e);
+        }
     }
 
+    /**
+     * Converts a PDF input stream to a plain text file.
+     *
+     * @param inputStream PDF file input stream
+     * @return Generated TXT file
+     * @throws IOException if the conversion fails
+     */
     @Override
     public File doConvertPdfToText(InputStream inputStream) throws IOException {
-        //Save PDF file
-        String temp_file_name = UUID.randomUUID().toString();
-        String pdfPath = Path.of(appProperties.getUploadDirectory())
-                .resolve("convert")
-                .resolve("temp")
-                .resolve(temp_file_name + ".pdf")
-                .toString();
-        File pdfFile = new File(pdfPath);
-        FileUtils.copyInputStreamToFile(inputStream, pdfFile);
-        //loading PDF
-        PDFParser parser = new PDFParser(new RandomAccessFile(pdfFile, "r"));
-        parser.parse();
+        log.info("Converting PDF to Text...");
 
-        //Extracting Text
-        COSDocument cosDoc = parser.getDocument();
-        PDFTextStripper pdfStripper = new PDFTextStripper();
-        PDDocument pdDoc = new PDDocument(cosDoc);
-        String parsedText = pdfStripper.getText(pdDoc);
+        // Save PDF to temp file first
+        return withGeneratedTempPath(".pdf", pdfPath -> {
+            FileUtils.copyInputStreamToFile(inputStream, pdfPath.toFile());
 
-        //Save Text file
-        String textPath = Path.of(appProperties.getUploadDirectory())
-                .resolve("convert")
-                .resolve("temp")
-                .resolve(temp_file_name + ".txt")
-                .toString();
-        PrintWriter pw = new PrintWriter(textPath);
-        pw.print(parsedText);
-        pw.close();
+            return withGeneratedTempPath(".txt", textPath -> {
+                try (PDDocument document = PDDocument.load(pdfPath.toFile());
+                     Writer writer = Files.newBufferedWriter(textPath, StandardCharsets.UTF_8)) {
+                    PDFTextStripper stripper = new PDFTextStripper();
+                    writer.write(stripper.getText(document));
+                    log.info("PDF successfully converted to Text at {}", textPath);
+                    return textPath.toFile();
+                } catch (IOException e) {
+                    log.error("Error converting PDF to text", e);
+                    throw e;
+                }
+            });
+        });
+    }
 
-        return new File(textPath);
+    /**
+     * Functional interface used to encapsulate logic that needs a temporary file path.
+     */
+    @FunctionalInterface
+    private interface WithTempPath<T> {
+        T apply(Path path) throws Exception;
     }
 }

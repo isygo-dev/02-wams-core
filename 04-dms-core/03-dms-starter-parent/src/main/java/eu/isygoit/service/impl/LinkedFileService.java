@@ -8,10 +8,7 @@ import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.DomainConstants;
 import eu.isygoit.dto.common.LinkedFileRequestDto;
 import eu.isygoit.dto.common.RequestContextDto;
-import eu.isygoit.exception.FileAlreadyExistsException;
-import eu.isygoit.exception.FileNotFoundException;
-import eu.isygoit.exception.LinkedFileNotFoundException;
-import eu.isygoit.exception.ResourceNotFoundException;
+import eu.isygoit.exception.*;
 import eu.isygoit.helper.CRC16Helper;
 import eu.isygoit.helper.CRC32Helper;
 import eu.isygoit.helper.FileHelper;
@@ -27,7 +24,6 @@ import eu.isygoit.repository.LinkedFileRepository;
 import eu.isygoit.service.ILinkedFileService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +38,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * The type Linked file service.
@@ -56,70 +51,94 @@ import java.util.Optional;
 public class LinkedFileService extends CodeAssignableService<Long, LinkedFile, LinkedFileRepository> implements ILinkedFileService {
 
     private final AppProperties appProperties;
+    private final LinkedFileRepository linkedFileRepository;
+    private final CategoryRepository categoryRepository;
+    private final SmsStorageLinkedFileService smsStorageLinkedFileService;
 
-    @Autowired
-    private LinkedFileRepository linkedFileRepository;
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private SmsStorageLinkedFileService smsStorageLinkedFileService;
-
-    /**
-     * Instantiates a new Linked file service.
-     *
-     * @param appProperties the app properties
-     */
-    public LinkedFileService(AppProperties appProperties) {
+    public LinkedFileService(AppProperties appProperties,
+                             LinkedFileRepository linkedFileRepository,
+                             CategoryRepository categoryRepository,
+                             SmsStorageLinkedFileService smsStorageLinkedFileService) {
         this.appProperties = appProperties;
+        this.linkedFileRepository = linkedFileRepository;
+        this.categoryRepository = categoryRepository;
+        this.smsStorageLinkedFileService = smsStorageLinkedFileService;
     }
 
+    /**
+     * Uploads a file to either local or remote storage, handles deduplication,
+     * and saves metadata in the database.
+     */
     @Override
     public String upload(LinkedFileRequestDto dto, MultipartFile file) throws IOException {
-        // Read bytes once and calculate checksums
-        byte[] buffer = file.getInputStream().readAllBytes();
-        long crc16 = CRC16Helper.calculate(buffer);
-        long crc32 = CRC32Helper.calculate(buffer);
-        long fileSize = buffer.length;
+        byte[] content = file.getInputStream().readAllBytes();
+        long crc16 = CRC16Helper.calculate(content);
+        long crc32 = CRC32Helper.calculate(content);
 
-        // Fetch existing files
-        var existingFiles = linkedFileRepository
+        // Check for file duplication based on name and CRCs
+        List<LinkedFile> existingFiles = linkedFileRepository
                 .findByDomainIgnoreCaseAndOriginalFileNameOrderByCreateDateDesc(dto.getDomain(), dto.getOriginalFileName());
 
-        // Deduplication check
         if (appProperties.getDoNotDuplicate() && !existingFiles.isEmpty()) {
             var lastFile = existingFiles.get(existingFiles.size() - 1); // Java 21 preferred; or get(size - 1)
             if (crc32 == lastFile.getCrc32() && crc16 == lastFile.getCrc16()) {
-                throw new FileAlreadyExistsException(file.getOriginalFilename());
+                throw new FileAlreadyExistsException("Duplicate file: " + file.getOriginalFilename());
             }
         }
 
-        // Handle categories (avoid repeated DB saves if category already exists)
-        List<Category> categories = dto.getCategoryNames() == null ? List.of() :
-                dto.getCategoryNames().stream()
-                        .map(name -> categoryRepository.findByName(name)
-                                .orElseGet(() -> categoryRepository.save(
-                                        Category.builder().name(name).description(name).build())))
-                        .toList();
+        // Resolve categories from names (create them if necessary)
+        List<Category> categories = resolveCategories(dto.getCategoryNames());
 
-        // Set default code if missing
+        // Generate a code if not provided
         if (!StringUtils.hasText(dto.getCode())) {
-            dto.setCode(this.getNextCode());
+            dto.setCode(getNextCode());
         }
 
-        // Storage
         log.info("{} storage enabled - domain: {}, file: {}, tags: {}",
                 appProperties.getLocalStorageActive() ? "Local" : "Remote",
                 dto.getDomain(), file.getOriginalFilename(), dto.getTags());
 
+        // Store file either locally or remotely
         if (appProperties.getLocalStorageActive()) {
-            storeInLocalFileSystem(dto, file);
+            try {
+                storeInLocalFileSystem(dto, file);
+            } catch (IOException e) {
+                log.error("File local storage failed", e);
+                throw new StoreFileException("Unable to loaclly store file: " + file.getOriginalFilename(), e);
+            }
         } else {
             storeInRemoteHostedStorageSystem(dto, file);
         }
 
-        // Build file entity
-        LinkedFile linkedFile = LinkedFile.builder()
+
+        // Build LinkedFile entity
+        LinkedFile linkedFile = buildLinkedFile(dto, file, content.length, crc16, crc32, categories, existingFiles.size());
+
+        // Update existing record if same code already exists
+        linkedFileRepository.findByCodeIgnoreCase(dto.getCode())
+                .ifPresent(existing -> linkedFile.setId(existing.getId()));
+
+        linkedFileRepository.save(linkedFile);
+        return dto.getCode();
+    }
+
+    /**
+     * Resolves a list of category names into Category entities (creates if not found).
+     */
+    private List<Category> resolveCategories(List<String> categoryNames) {
+        if (CollectionUtils.isEmpty(categoryNames)) return List.of();
+        return categoryNames.stream()
+                .map(name -> categoryRepository.findByName(name)
+                        .orElseGet(() -> categoryRepository.save(Category.builder().name(name).description(name).build())))
+                .toList();
+    }
+
+    /**
+     * Creates a LinkedFile entity with calculated fields and resolved relationships.
+     */
+    private LinkedFile buildLinkedFile(LinkedFileRequestDto dto, MultipartFile file, long fileSize,
+                                       long crc16, long crc32, List<Category> categories, int existingCount) {
+        return LinkedFile.builder()
                 .code(dto.getCode())
                 .originalFileName(file.getOriginalFilename())
                 .extension(FilenameUtils.getExtension(file.getOriginalFilename()))
@@ -131,143 +150,133 @@ public class LinkedFileService extends CodeAssignableService<Long, LinkedFile, L
                 .path(dto.getPath())
                 .categories(categories)
                 .mimetype(file.getContentType())
-                .version(existingFiles.isEmpty() ? 1L : existingFiles.size() + 1L)
+                .version(existingCount == 0 ? 1L : existingCount + 1L)
                 .build();
-
-        // Save (update if code already exists)
-        linkedFileRepository.findByCodeIgnoreCase(dto.getCode())
-                .ifPresent(existing -> linkedFile.setId(existing.getId()));
-
-        linkedFileRepository.save(linkedFile);
-
-        return dto.getCode();
     }
 
-    private void storeInRemoteHostedStorageSystem(LinkedFileRequestDto linkedFileRequestDto, MultipartFile file) {
+    /**
+     * Stores the file in a remote file storage system.
+     */
+    private void storeInRemoteHostedStorageSystem(LinkedFileRequestDto dto, MultipartFile file) {
         try {
-            ResponseEntity<Object> result = smsStorageLinkedFileService.upload(
+            ResponseEntity<Object> response = smsStorageLinkedFileService.upload(
                     RequestContextDto.builder().build(),
-                    linkedFileRequestDto.getDomain(),
-                    linkedFileRequestDto.getDomain(),
-                    linkedFileRequestDto.getPath().replace(File.separator, "#"),
+                    dto.getDomain(), dto.getDomain(),
+                    dto.getPath().replace(File.separator, "#"),
                     file.getOriginalFilename(),
-                    linkedFileRequestDto.getTags(),
-                    file
+                    dto.getTags(), file
             );
-            if (result.getStatusCode().is2xxSuccessful()) {
-                log.info("File uploaded successfully domain:{}, file:{} , tags:{}",
-                        linkedFileRequestDto.getDomain(),
-                        file.getOriginalFilename(), linkedFileRequestDto.getTags());
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info("Remote upload success: domain={}, file={}, tags={}",
+                        dto.getDomain(), file.getOriginalFilename(), dto.getTags());
             }
         } catch (Exception e) {
-            log.error("Remote feign call failed : ", e);
-            //throw new RemoteCallFailedException(e);
+            log.error("Remote storage error", e);
         }
     }
 
+    /**
+     * Stores the file in the local filesystem.
+     */
+    private void storeInLocalFileSystem(LinkedFileRequestDto dto, MultipartFile file) throws IOException {
+        Path target = Path.of(appProperties.getUploadDirectory(), dto.getDomain(), dto.getPath());
+        FileHelper.saveMultipartFile(target, dto.getCode(), file,
+                FilenameUtils.getExtension(file.getOriginalFilename()),
+                StandardOpenOption.CREATE, StandardOpenOption.WRITE,
+                StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.SYNC);
+    }
+
+    /**
+     * Downloads a file (either locally or remotely) using domain and code.
+     */
     @Override
-    public List<LinkedFile> searchByTags(String domain, String tags) throws IOException {
+    public Resource download(String domain, String code) throws IOException {
+        LinkedFile file = linkedFileRepository.findByDomainIgnoreCaseAndCodeIgnoreCase(domain, code)
+                .orElseThrow(() -> new LinkedFileNotFoundException("with domain: " + domain + "/code:" + code));
+
+        if (appProperties.getLocalStorageActive()) {
+            return resolveLocalFile(domain, file);
+        } else {
+            ResponseEntity<Resource> response = smsStorageLinkedFileService.download(
+                    RequestContextDto.builder().build(),
+                    file.getDomain(), file.getDomain(),
+                    file.getPath().replace(File.separator, "#"),
+                    file.getOriginalFileName(), "");
+
+            if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+                throw new FileNotFoundException("Remote file not found");
+            }
+            return response.getBody();
+        }
+    }
+
+    /**
+     * Resolves a local file path and loads it as a Resource.
+     */
+    private Resource resolveLocalFile(String domain, LinkedFile file) throws IOException {
+        Path basePath = Path.of(appProperties.getUploadDirectory(), domain);
+        Path filePath = StringUtils.hasText(file.getPath()) ?
+                basePath.resolve(file.getPath()) : basePath;
+        Path fullPath = filePath.resolve(file.getCode() + "." + file.getExtension());
+
+        Resource resource = new UrlResource(fullPath.toUri());
+        if (!resource.exists()) {
+            throw new ResourceNotFoundException("File not found with domain:" + domain + "/code:" + file.getCode());
+        }
+        return resource;
+    }
+
+    /**
+     * Deletes a file using its domain and code.
+     */
+    @Override
+    public void deleteFile(String domain, String code) throws IOException {
+        LinkedFile file = linkedFileRepository.findByDomainIgnoreCaseAndCodeIgnoreCase(domain, code)
+                .orElseThrow(() -> new FileNotFoundException("File not found with domain:" + domain + " code:" + code));
+        this.delete(domain, file.getId());
+    }
+
+    /**
+     * Finds the most recent uploaded file with the same original file name.
+     */
+    @Override
+    public LinkedFile searchByOriginalFileName(String domain, String originalFileName) throws IOException {
+        return linkedFileRepository.findByDomainIgnoreCaseAndOriginalFileNameOrderByCreateDateDesc(domain, originalFileName)
+                .stream()
+                .reduce((first, second) -> second) // Get last (most recent)
+                .orElseThrow(() -> new FileNotFoundException("File not found with domain:" + domain + " originalFileName:" + originalFileName));
+    }
+
+    /**
+     * Updates the original filename of a stored file.
+     */
+    @Override
+    public LinkedFile renameFile(String domain, String code, String newName) throws IOException {
+        LinkedFile file = linkedFileRepository.findByDomainIgnoreCaseAndCodeIgnoreCase(domain, code)
+                .orElseThrow(() -> new FileNotFoundException("with domain:" + domain + "/code:" + code));
+        file.setOriginalFileName(newName);
+        return linkedFileRepository.save(file);
+    }
+
+    /**
+     * Searches files by matching tags.
+     */
+    @Override
+    public List<LinkedFile> searchByTags(String domain, String tags) {
         return linkedFileRepository.findByDomainIgnoreCaseAndTagsContaining(domain, tags);
     }
 
+    /**
+     * Searches files by matching categories.
+     */
     @Override
-    public void deleteFile(String domain, String code) throws IOException {
-        Optional<LinkedFile> optional = linkedFileRepository.findByDomainIgnoreCaseAndCodeIgnoreCase(domain, code);
-        if (optional.isPresent()) {
-            this.delete(domain, optional.get().getId());
-        } else {
-            log.error("Rename File: not found with domain {} and code {}", domain, code);
-            throw new FileNotFoundException("File not found with domain:" + domain + " code:" + code);
-        }
-    }
-
-    @Override
-    public LinkedFile searchByOriginalFileName(String domain, String originalFileName) throws IOException {
-        List<LinkedFile> sameDomainAndOriginalFileNameFiles = linkedFileRepository.findByDomainIgnoreCaseAndOriginalFileNameOrderByCreateDateDesc(domain, originalFileName);
-        if (!CollectionUtils.isEmpty(sameDomainAndOriginalFileNameFiles)) {
-            LinkedFile linkedFile = sameDomainAndOriginalFileNameFiles.get(sameDomainAndOriginalFileNameFiles.size() - 1);
-            return linkedFile;
-        } else {
-            log.error("Rename File: not found with domain {} and originalFileName {}", domain, originalFileName);
-            throw new FileNotFoundException("File not found with domain:" + domain + " originalFileName:" + originalFileName);
-        }
-    }
-
-    @Override
-    public LinkedFile renameFile(String domain, String code, String newName) throws IOException {
-        Optional<LinkedFile> optional = linkedFileRepository.findByDomainIgnoreCaseAndCodeIgnoreCase(domain, code);
-        if (optional.isEmpty()) {
-            optional.get().setOriginalFileName(newName);
-            return linkedFileRepository.save(optional.get());
-        } else {
-            log.error("Rename File: not found with domain {} and code {}", domain, code);
-            throw new FileNotFoundException("with domain:" + domain + "/code:" + code);
-        }
-    }
-
-    @Override
-    public List<LinkedFile> searchByCategories(String domain, List<String> categories) throws IOException {
+    public List<LinkedFile> searchByCategories(String domain, List<String> categories) {
         return linkedFileRepository.findByDomainIgnoreCaseAndCategoriesIn(domain, categories);
     }
 
-    @Override
-    public Resource download(String domain, String code) throws IOException {
-        Optional<LinkedFile> linkedFile = linkedFileRepository.findByDomainIgnoreCaseAndCodeIgnoreCase(domain, code);
-        if (!linkedFile.isPresent()) {
-            throw new LinkedFileNotFoundException("with domain: " + domain + "/code:" + code);
-        } else {
-            log.info(linkedFile.get().getPath());
-            if (appProperties.getLocalStorageActive()) {
-                if (StringUtils.hasText(linkedFile.get().getPath())) {
-                    Resource resource = new UrlResource(Path.of(appProperties.getUploadDirectory())
-                            .resolve(domain)
-                            .resolve(linkedFile.get().getPath())
-                            .resolve(linkedFile.get().getCode() + '.' + linkedFile.get().getExtension()).toUri());
-                    if (!resource.exists()) {
-                        throw new ResourceNotFoundException("with domain:" + domain + "/code:" + code);
-                    }
-                    return resource;
-                } else {
-                    Resource resource = new UrlResource(Path.of(appProperties.getUploadDirectory())
-                            .resolve(domain)
-                            .resolve(linkedFile.get().getCode() + '.' + linkedFile.get().getExtension()).toUri());
-                    if (!resource.exists()) {
-                        throw new ResourceNotFoundException("with domain:" + domain + "/code:" + code);
-                    }
-                    return resource;
-                }
-            } else {
-                log.info("Storage in minio enabled domain:{}, file:{} - {}", domain, code, linkedFile.get().getOriginalFileName());
-                ResponseEntity<Resource> result = smsStorageLinkedFileService.download(
-                        RequestContextDto.builder().build(),
-                        linkedFile.get().getDomain(),
-                        linkedFile.get().getDomain(),
-                        linkedFile.get().getPath().replace(File.separator, "#"),
-                        linkedFile.get().getOriginalFileName(),
-                        "");
-                if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
-                    return result.getBody();
-                } else {
-                    return null;
-                }
-            }
-        }
-    }
-
-    private void storeInLocalFileSystem(LinkedFileRequestDto linkedFile, MultipartFile file) throws IOException {
-        Path target = Path.of(appProperties.getUploadDirectory())
-                .resolve(linkedFile.getDomain())
-                .resolve(linkedFile.getPath());
-        FileHelper.saveMultipartFile(target,
-                linkedFile.getCode(),
-                file,
-                FilenameUtils.getExtension(file.getOriginalFilename()),
-                StandardOpenOption.CREATE,
-                StandardOpenOption.WRITE,
-                StandardOpenOption.TRUNCATE_EXISTING,
-                StandardOpenOption.SYNC);
-    }
-
+    /**
+     * Initializes the code generation strategy used for file codes.
+     */
     @Override
     public NextCodeModel initCodeGenerator() {
         return AppNextCode.builder()
