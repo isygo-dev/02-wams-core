@@ -7,7 +7,7 @@ import java.util.Optional;
 /**
  * The interface Role info repository.
  */
-public interface RoleInfoRepository extends JpaPagingAndSortingSAASCodifiableRepository<RoleInfo, Long> {
+public interface RoleInfoRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<RoleInfo, Long> {
 
     /**
      * Find by name optional.

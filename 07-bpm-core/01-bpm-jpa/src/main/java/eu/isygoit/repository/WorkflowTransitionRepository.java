@@ -5,5 +5,5 @@ import eu.isygoit.model.WorkflowTransition;
 /**
  * The interface Workflow transition repository.
  */
-public interface WorkflowTransitionRepository extends JpaPagingAndSortingCodifiableRepository<WorkflowTransition, Long> {
+public interface WorkflowTransitionRepository extends JpaPagingAndSortingCodeAssingnableRepository<WorkflowTransition, Long> {
 }

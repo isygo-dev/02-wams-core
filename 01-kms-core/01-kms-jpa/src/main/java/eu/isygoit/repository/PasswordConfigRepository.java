@@ -8,7 +8,7 @@ import java.util.Optional;
 /**
  * The interface Password config repository.
  */
-public interface PasswordConfigRepository extends JpaPagingAndSortingSAASCodifiableRepository<PasswordConfig, Long> {
+public interface PasswordConfigRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<PasswordConfig, Long> {
 
     /**
      * Find by domain ignore case and type optional.

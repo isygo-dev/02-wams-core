@@ -9,7 +9,7 @@ import java.util.Optional;
 /**
  * The interface Msg template repository.
  */
-public interface MsgTemplateRepository extends JpaPagingAndSortingSAASCodifiableRepository<MsgTemplate, Long> {
+public interface MsgTemplateRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<MsgTemplate, Long> {
 
     /**
      * Find by domain ignore case and name optional.

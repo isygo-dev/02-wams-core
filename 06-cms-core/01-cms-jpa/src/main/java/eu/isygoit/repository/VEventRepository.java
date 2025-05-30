@@ -8,7 +8,7 @@ import java.util.Optional;
 /**
  * The interface V event repository.
  */
-public interface VEventRepository extends JpaPagingAndSortingSAASCodifiableRepository<VCalendarEvent, Long> {
+public interface VEventRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<VCalendarEvent, Long> {
 
     /**
      * Find by name optional.

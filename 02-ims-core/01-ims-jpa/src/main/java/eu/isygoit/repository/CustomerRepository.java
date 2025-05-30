@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 /**
  * The interface Customer repository.
  */
-public interface CustomerRepository extends JpaPagingAndSortingSAASCodifiableRepository<Customer, Long> {
+public interface CustomerRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<Customer, Long> {
 
     /**
      * Update admin status by id int.

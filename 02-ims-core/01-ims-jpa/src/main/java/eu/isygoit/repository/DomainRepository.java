@@ -12,7 +12,7 @@ import java.util.Optional;
 /**
  * The interface Domain repository.
  */
-public interface DomainRepository extends JpaPagingAndSortingSAASCodifiableRepository<Domain, Long> {
+public interface DomainRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<Domain, Long> {
 
     /**
      * Update admin status by id int.

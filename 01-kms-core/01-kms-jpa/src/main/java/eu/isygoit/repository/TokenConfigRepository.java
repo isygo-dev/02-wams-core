@@ -8,7 +8,7 @@ import java.util.Optional;
 /**
  * The interface Token config repository.
  */
-public interface TokenConfigRepository extends JpaPagingAndSortingSAASCodifiableRepository<TokenConfig, Long> {
+public interface TokenConfigRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<TokenConfig, Long> {
 
     /**
      * Find by domain ignore case and token type optional.

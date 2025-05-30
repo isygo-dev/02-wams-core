@@ -5,6 +5,6 @@ import eu.isygoit.model.WorkflowState;
 /**
  * The interface Workflow state repository.
  */
-public interface WorkflowStateRepository extends JpaPagingAndSortingCodifiableRepository<WorkflowState, Long> {
+public interface WorkflowStateRepository extends JpaPagingAndSortingCodeAssingnableRepository<WorkflowState, Long> {
 
 }

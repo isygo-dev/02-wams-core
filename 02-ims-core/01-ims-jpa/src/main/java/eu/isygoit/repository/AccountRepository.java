@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * The interface Account repository.
  */
-public interface AccountRepository extends JpaPagingAndSortingSAASCodifiableRepository<Account, Long> {
+public interface AccountRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<Account, Long> {
 
     /**
      * Update account admin status.

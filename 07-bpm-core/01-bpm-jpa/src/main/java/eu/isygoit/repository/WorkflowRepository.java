@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * The interface Workflow repository.
  */
-public interface WorkflowRepository extends JpaPagingAndSortingSAASCodifiableRepository<Workflow, Long> {
+public interface WorkflowRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<Workflow, Long> {
 
     /**
      * Find workflow not associated list.

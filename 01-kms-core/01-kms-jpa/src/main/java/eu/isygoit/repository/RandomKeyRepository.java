@@ -7,7 +7,7 @@ import java.util.Optional;
 /**
  * The interface Random key repository.
  */
-public interface RandomKeyRepository extends JpaPagingAndSortingSAASRepository<RandomKey, Long> {
+public interface RandomKeyRepository extends JpaPagingAndSortingDomainAssignableRepository<RandomKey, Long> {
 
     /**
      * Find by domain ignore case and name optional.

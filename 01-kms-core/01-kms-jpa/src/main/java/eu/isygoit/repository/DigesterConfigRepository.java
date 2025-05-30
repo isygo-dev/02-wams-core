@@ -5,6 +5,6 @@ import eu.isygoit.model.DigestConfig;
 /**
  * The interface Digester config repository.
  */
-public interface DigesterConfigRepository extends JpaPagingAndSortingSAASCodifiableRepository<DigestConfig, Long> {
+public interface DigesterConfigRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<DigestConfig, Long> {
 
 }

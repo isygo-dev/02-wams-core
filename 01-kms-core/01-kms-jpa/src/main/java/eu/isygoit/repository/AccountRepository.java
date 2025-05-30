@@ -5,6 +5,6 @@ import eu.isygoit.model.Account;
 /**
  * The interface Account repository.
  */
-public interface AccountRepository extends JpaPagingAndSortingSAASCodifiableRepository<Account, Long> {
+public interface AccountRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<Account, Long> {
 
 }

@@ -10,7 +10,7 @@ import java.util.Optional;
 /**
  * The interface V calendar repository.
  */
-public interface VCalendarRepository extends JpaPagingAndSortingSAASRepository<VCalendar, Long> {
+public interface VCalendarRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<VCalendar, Long> {
 
     /**
      * Find by domain ignore case and name optional.

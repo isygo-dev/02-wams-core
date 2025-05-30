@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * The interface Annex repository.
  */
-public interface AnnexRepository extends JpaPagingAndSortingSAASRepository<Annex, Long> {
+public interface AnnexRepository extends JpaPagingAndSortingDomainAssignableRepository<Annex, Long> {
     /**
      * Find by table code list.
      *

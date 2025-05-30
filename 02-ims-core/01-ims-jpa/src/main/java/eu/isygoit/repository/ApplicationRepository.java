@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 /**
  * The interface Application repository.
  */
-public interface ApplicationRepository extends JpaPagingAndSortingSAASCodifiableRepository<Application, Long> {
+public interface ApplicationRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<Application, Long> {
 
     @Modifying
     @Query("UPDATE Application app SET app.adminStatus = :newStatus WHERE app.id = :id")

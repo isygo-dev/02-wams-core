@@ -5,6 +5,6 @@ import eu.isygoit.model.StorageConfig;
 /**
  * The interface Storage config repository.
  */
-public interface StorageConfigRepository extends JpaPagingAndSortingSAASRepository<StorageConfig, Long> {
+public interface StorageConfigRepository extends JpaPagingAndSortingDomainAssignableRepository<StorageConfig, Long> {
 
 }

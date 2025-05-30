@@ -11,7 +11,7 @@ import java.util.Optional;
  * The interface Linked file repository.
  */
 @Repository
-public interface LinkedFileRepository extends JpaPagingAndSortingSAASCodifiableRepository<LinkedFile, Long> {
+public interface LinkedFileRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<LinkedFile, Long> {
 
     /**
      * Find by domain ignore case and original file name and check cancel false list.

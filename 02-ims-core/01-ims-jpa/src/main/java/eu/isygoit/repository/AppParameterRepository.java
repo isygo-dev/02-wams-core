@@ -10,7 +10,7 @@ import java.util.Optional;
  * The interface App parameter repository.
  */
 @Repository
-public interface AppParameterRepository extends JpaPagingAndSortingSAASRepository<AppParameter, Long> {
+public interface AppParameterRepository extends JpaPagingAndSortingDomainAssignableRepository<AppParameter, Long> {
 
     /**
      * Find by domain ignore case and name ignore case optional.
