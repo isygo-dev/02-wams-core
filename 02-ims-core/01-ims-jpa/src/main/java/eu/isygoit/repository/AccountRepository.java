@@ -1,5 +1,9 @@
 package eu.isygoit.repository;
 
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAssignableRepository;
+
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.model.Account;
@@ -12,7 +16,7 @@ import java.util.List;
 /**
  * The interface Account repository.
  */
-public interface AccountRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<Account, Long> {
+public interface AccountRepository extends JpaPagingAndSortingTenantAndCodeAssignableRepository<Account, Long> {
 
     /**
      * Update account admin status.
@@ -49,13 +53,13 @@ public interface AccountRepository extends JpaPagingAndSortingDomainAndCodeAssig
                         @Param("id") Long id);
 
     /**
-     * Find distinct emails by domain list.
+     * Find distinct emails by tenant list.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @return the list
      */
-    @Query("select distinct a.email from Account a where lower(a.domain) = lower(:domain)")
-    List<String> findDistinctEmailsByDomain(@Param("domain") String domain);
+    @Query("select distinct a.email from Account a where lower(a.tenant) = lower(:tenant)")
+    List<String> findDistinctEmailsByTenant(@Param("tenant") String tenant);
 
     /**
      * Find distinct emails list.
@@ -67,19 +71,19 @@ public interface AccountRepository extends JpaPagingAndSortingDomainAndCodeAssig
 
     @Query(value = "select count(distinct a.code) from t_account a " +
             "inner join t_connection_tracking tct on a.code=tct.account_code " +
-            "where lower(a.domain) = lower(:domain) and a.origin like :origin", nativeQuery = true)
-    Long countByDomainAndOrigin(@Param("domain") String domain, @Param("origin") String origin);
+            "where lower(a.tenant) = lower(:tenant) and a.origin like :origin", nativeQuery = true)
+    Long countByTenantAndOrigin(@Param("tenant") String tenant, @Param("origin") String origin);
 
     @Query(value = "select count(distinct a.code) from t_account a " +
             "inner join t_connection_tracking tct on a.code=tct.account_code " +
             "where a.origin like :origin", nativeQuery = true)
     Long countByOrigin(@Param("origin") String origin);
 
-    Long countByDomainIgnoreCaseAndAdminStatus(String senderDomain, IEnumEnabledBinaryStatus.Types status);
+    Long countByTenantIgnoreCaseAndAdminStatus(String tenant, IEnumEnabledBinaryStatus.Types status);
 
     Long countByAdminStatus(IEnumEnabledBinaryStatus.Types status);
 
-    Long countByDomainIgnoreCaseAndIsAdminTrue(String senderDomain);
+    Long countByTenantIgnoreCaseAndIsAdminTrue(String tenant);
 
     Long countByIsAdminTrue();
 

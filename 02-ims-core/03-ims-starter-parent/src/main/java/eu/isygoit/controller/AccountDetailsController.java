@@ -1,7 +1,8 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.dto.data.AccountDetailsDto;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.mapper.AccountDetailsMapper;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@CtrlDef(handler = ImsExceptionHandler.class, mapper = AccountDetailsMapper.class, minMapper = AccountDetailsMapper.class, service = AccountDetailsService.class)
+@InjectMapperAndService(handler = ImsExceptionHandler.class, mapper = AccountDetailsMapper.class, minMapper = AccountDetailsMapper.class, service = AccountDetailsService.class)
 @RequestMapping(path = "/api/v1/private/account/details")
 public class AccountDetailsController extends MappedCrudController<Long, AccountDetails, AccountDetailsDto, AccountDetailsDto, AccountDetailsService> {
 }

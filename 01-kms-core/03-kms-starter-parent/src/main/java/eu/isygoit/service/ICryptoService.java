@@ -12,24 +12,24 @@ public interface ICryptoService {
     /**
      * Gets peb encryptor.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @return the peb encryptor
      */
-    StringEncryptor getPebEncryptor(String domain);
+    StringEncryptor getPebEncryptor(String tenant);
 
     /**
      * Gets digest encryptor.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @return the digest encryptor
      */
-    StringDigester getDigestEncryptor(String domain);
+    StringDigester getDigestEncryptor(String tenant);
 
     /**
      * Gets password encryptor.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @return the password encryptor
      */
-    PasswordEncryptor getPasswordEncryptor(String domain);
+    PasswordEncryptor getPasswordEncryptor(String tenant);
 }

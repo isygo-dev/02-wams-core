@@ -1,5 +1,9 @@
 package eu.isygoit.repository;
 
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAssignableRepository;
+
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Domain;
 import org.springframework.data.jpa.repository.Modifying;
@@ -12,7 +16,7 @@ import java.util.Optional;
 /**
  * The interface Domain repository.
  */
-public interface DomainRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<Domain, Long> {
+public interface DomainRepository extends JpaPagingAndSortingTenantAndCodeAssignableRepository<Domain, Long> {
 
     /**
      * Update admin status by id int.
@@ -47,6 +51,6 @@ public interface DomainRepository extends JpaPagingAndSortingDomainAndCodeAssign
      *
      * @return the admin status
      */
-    @Query("select d.adminStatus from Domain d where d.name = :domain")
-    IEnumEnabledBinaryStatus.Types getAdminStatus(@Param("domain") String domain);
+    @Query("select d.adminStatus from Domain d where d.name = :tenant")
+    IEnumEnabledBinaryStatus.Types getAdminStatus(@Param("tenant") String tenant);
 }

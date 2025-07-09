@@ -17,12 +17,12 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = SchemaTableConstantName.T_DOMAIN_ADDRESS)
+@Table(name = SchemaTableConstantName.T_TENANT_ADDRESS)
 public class DomainAddress extends AddressModel<Long> {
 
     @Id
-    @SequenceGenerator(name = "domain_address_sequence_generator", sequenceName = "domain_address_sequence", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "domain_address_sequence_generator")
+    @SequenceGenerator(name = "tenant_address_sequence_generator", sequenceName = "tenant_address_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tenant_address_sequence_generator")
     @Column(name = SchemaColumnConstantName.C_ID, updatable = false, nullable = false)
     private Long id;
 }

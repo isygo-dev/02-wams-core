@@ -1,10 +1,11 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.api.MailMessageControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.dto.data.MailOptionsDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
@@ -32,9 +33,9 @@ import java.util.UUID;
 @Slf4j
 @Validated
 @RestController
-@CtrlDef(handler = MmsExceptionHandler.class, mapper = MailMessageMapper.class, minMapper = MailMessageMapper.class, service = MailMessageService.class)
+@InjectMapperAndService(handler = MmsExceptionHandler.class, mapper = MailMessageMapper.class, minMapper = MailMessageMapper.class, service = MailMessageService.class)
 @RequestMapping(path = "/api/v1/private/mail")
-public class MailMessageController extends MappedCrudController<UUID, MailMessage, MailMessageDto, MailMessageDto, MailMessageService>
+public class MailMessageController extends MappedCrudTenantController<UUID, MailMessage, MailMessageDto, MailMessageDto, MailMessageService>
         implements MailMessageControllerApi {
 
     @Autowired

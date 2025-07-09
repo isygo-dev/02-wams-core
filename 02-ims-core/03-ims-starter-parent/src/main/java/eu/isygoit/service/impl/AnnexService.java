@@ -1,7 +1,10 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.ServRepo;
+import eu.isygoit.annotation.InjectRepository;
+import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.com.rest.service.CrudService;
+import eu.isygoit.com.rest.service.tenancy.CrudTenantService;
 import eu.isygoit.model.Annex;
 import eu.isygoit.repository.AnnexRepository;
 import eu.isygoit.service.IAnnexService;
@@ -16,8 +19,8 @@ import java.util.List;
  */
 @Service
 @Transactional
-@ServRepo(value = AnnexRepository.class)
-public class AnnexService extends CrudService<Long, Annex, AnnexRepository> implements IAnnexService {
+@InjectRepository(value = AnnexRepository.class)
+public class AnnexService extends CrudTenantService<Long, Annex, AnnexRepository> implements IAnnexService {
 
     @Override
     public List<Annex> findAnnexByTableCode(String code) {

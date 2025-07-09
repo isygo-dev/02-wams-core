@@ -1,13 +1,14 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.ICrudServiceMethod;
+import eu.isygoit.com.rest.service.ICrudServiceMethods;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
 import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.model.AccessToken;
 
 /**
  * The interface Access token service.
  */
-public interface IAccessTokenService extends ICrudServiceMethod<Long, AccessToken> {
+public interface IAccessTokenService extends ICrudServiceMethods<Long, AccessToken> {
 
     /**
      * Find by application and account code and token and token type access token.

@@ -1,5 +1,9 @@
 package eu.isygoit.repository;
 
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAssignableRepository;
+
 import eu.isygoit.model.VCalendarEvent;
 
 import java.util.List;
@@ -8,7 +12,7 @@ import java.util.Optional;
 /**
  * The interface V event repository.
  */
-public interface VEventRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<VCalendarEvent, Long> {
+public interface VEventRepository extends JpaPagingAndSortingTenantAndCodeAssignableRepository<VCalendarEvent, Long> {
 
     /**
      * Find by name optional.
@@ -19,21 +23,21 @@ public interface VEventRepository extends JpaPagingAndSortingDomainAndCodeAssign
     Optional<VCalendarEvent> findByName(String name);
 
     /**
-     * Find by domain ignore case and calendar list.
+     * Find by tenant ignore case and calendar list.
      *
-     * @param domain   the domain
+     * @param tenant   the tenant
      * @param calendar the calendar
      * @return the list
      */
-    List<VCalendarEvent> findByDomainIgnoreCaseAndCalendar(String domain, String calendar);
+    List<VCalendarEvent> findByTenantIgnoreCaseAndCalendar(String tenant, String calendar);
 
     /**
-     * Find by domain ignore case and calendar and code ignore case optional.
+     * Find by tenant ignore case and calendar and code ignore case optional.
      *
-     * @param domain   the domain
+     * @param tenant   the tenant
      * @param calendar the calendar
      * @param Code     the code
      * @return the optional
      */
-    Optional<VCalendarEvent> findByDomainIgnoreCaseAndCalendarAndCodeIgnoreCase(String domain, String calendar, String Code);
+    Optional<VCalendarEvent> findByTenantIgnoreCaseAndCalendarAndCodeIgnoreCase(String tenant, String calendar, String Code);
 }

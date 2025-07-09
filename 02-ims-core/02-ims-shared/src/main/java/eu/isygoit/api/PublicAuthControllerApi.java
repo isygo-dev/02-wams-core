@@ -1,6 +1,8 @@
 package eu.isygoit.api;
 
+import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
+import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.common.UserContextDto;
 import eu.isygoit.dto.data.DomainDto;
 import eu.isygoit.dto.request.AccountAuthTypeRequest;
@@ -18,10 +20,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -111,7 +110,8 @@ public interface PublicAuthControllerApi {
                             schema = @Schema(implementation = Boolean.class))})
     })
     @PostMapping(path = "/updateAuthType")
-    ResponseEntity<Boolean> switchAuthType(@Valid @RequestBody AccountAuthTypeRequest accountAuthTypeRequest);
+    ResponseEntity<Boolean> switchAuthType(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+                                           @Valid @RequestBody AccountAuthTypeRequest accountAuthTypeRequest);
 
     /**
      * Register new account response entity.
@@ -132,19 +132,19 @@ public interface PublicAuthControllerApi {
     ResponseEntity<Boolean> registerUser(@Valid @RequestBody RegisteredUserDto registeredUserDto);
 
     /**
-     * Gets domain by name.
+     * Gets tenant by name.
      *
-     * @param domain the domain
-     * @return the domain by name
+     * @param tenant the tenant
+     * @return the tenant by name
      */
-    @Operation(summary = "getDomainByName Api",
-            description = "getDomainByName")
+    @Operation(summary = "getTenantByName Api",
+            description = "getTenantByName")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = DomainDto.class))})
     })
-    @GetMapping(path = "/domain")
-    ResponseEntity<DomainDto> getDomainByName(@RequestParam(name = RestApiConstants.DOMAIN_NAME) String domain);
+    @GetMapping(path = "/tenant")
+    ResponseEntity<DomainDto> getTenantByName(@RequestParam(name = RestApiConstants.TENANT_NAME) String tenant);
 }

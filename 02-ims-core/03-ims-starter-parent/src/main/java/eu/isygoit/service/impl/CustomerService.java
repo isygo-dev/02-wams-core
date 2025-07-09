@@ -1,11 +1,14 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.CodeGenKms;
-import eu.isygoit.annotation.CodeGenLocal;
-import eu.isygoit.annotation.ServRepo;
+import eu.isygoit.annotation.InjectCodeGenKms;
+import eu.isygoit.annotation.InjectCodeGen;
+import eu.isygoit.annotation.InjectRepository;
+import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.com.rest.service.ImageService;
+import eu.isygoit.com.rest.service.tenancy.ImageTenantService;
 import eu.isygoit.config.AppProperties;
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.exception.AccountNotFoundException;
 import eu.isygoit.exception.CustomerNotFoundException;
@@ -29,10 +32,10 @@ import java.util.Optional;
 @Slf4j
 @Service
 @Transactional
-@CodeGenLocal(value = NextCodeService.class)
-@CodeGenKms(value = KmsIncrementalKeyService.class)
-@ServRepo(value = CustomerRepository.class)
-public class CustomerService extends ImageService<Long, Customer, CustomerRepository> implements ICustomerService {
+@InjectCodeGen(value = NextCodeService.class)
+@InjectCodeGenKms(value = KmsIncrementalKeyService.class)
+@InjectRepository(value = CustomerRepository.class)
+public class CustomerService extends ImageTenantService<Long, Customer, CustomerRepository> implements ICustomerService {
 
     private final AppProperties appProperties;
     private final AccountRepository accountRepository;
@@ -52,7 +55,7 @@ public class CustomerService extends ImageService<Long, Customer, CustomerReposi
     @Override
     public AppNextCode initCodeGenerator() {
         return AppNextCode.builder()
-                .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
+                .tenant(TenantConstants.DEFAULT_TENANT_NAME)
                 .entity(Customer.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("CUS")
@@ -73,8 +76,8 @@ public class CustomerService extends ImageService<Long, Customer, CustomerReposi
     }
 
     @Override
-    public Customer linkToAccount(Long id, String accountCode) {
-        Optional<Customer> optional = this.findById(id);
+    public Customer linkToAccount(String tenant, Long id, String accountCode) {
+        Optional<Customer> optional = this.findById(tenant, id);
         if (optional.isPresent()) {
             Customer customer = optional.get();
             if (!accountRepository.existsByCodeIgnoreCase(accountCode)) {
@@ -82,7 +85,7 @@ public class CustomerService extends ImageService<Long, Customer, CustomerReposi
             }
 
             customer.setAccountCode(accountCode);
-            return this.update(customer);
+            return this.update(tenant, customer);
         } else {
             throw new CustomerNotFoundException("with id:" + id);
         }

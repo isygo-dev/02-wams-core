@@ -1,6 +1,6 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlHandler;
+import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.api.PasswordControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
@@ -33,14 +33,14 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@CtrlHandler(KmsExceptionHandler.class)
+@InjectExceptionHandler(KmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/password")
 public class PasswordController extends ControllerExceptionHandler implements PasswordControllerApi {
 
     @Autowired
     private IAccountService accountService;
     @Autowired
-    private IDomainService domainService;
+    private IDomainService tenantService;
     @Autowired
     private AccountMapper accountMapper;
     @Autowired
@@ -56,17 +56,17 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     public ResponseEntity<Integer> generate(//RequestContextDto requestContext,
                                             IEnumAuth.Types authType,
                                             GeneratePwdRequestDto generatePwdRequest) {
-        log.info("Call generate password for domain {}", generatePwdRequest);
+        log.info("Call generate password for tenant {}", generatePwdRequest);
         try {
             AccessKeyResponseDto accessKeyResponse = passwordService.generateRandomPassword(
-                    generatePwdRequest.getDomain()
-                    , generatePwdRequest.getDomainUrl()
+                    generatePwdRequest.getTenant()
+                    , generatePwdRequest.getTenantUrl()
                     , generatePwdRequest.getEmail()
                     , generatePwdRequest.getUserName()
                     , generatePwdRequest.getFullName()
                     , authType);
             //Never return the password
-            log.info("password generated for {}/{} : {}", generatePwdRequest.getDomain(), generatePwdRequest.getUserName(), accessKeyResponse.getKey());
+            log.info("password generated for {}/{} : {}", generatePwdRequest.getTenant(), generatePwdRequest.getUserName(), accessKeyResponse.getKey());
             return ResponseFactory.responseOk(accessKeyResponse.getLength());
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -91,7 +91,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                                                  String oldPassword,
                                                  String newPassword) {
         try {
-            passwordService.changePassword(requestContext.getSenderDomain(), requestContext.getSenderUser(),
+            passwordService.changePassword(requestContext.getSenderTenant(), requestContext.getSenderUser(),
                     oldPassword, newPassword);
             return ResponseFactory.responseOk("password changed successfully");
         } catch (Throwable e) {
@@ -103,9 +103,9 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     @Override
     public ResponseEntity<Boolean> patternCheck(//RequestContextDto requestContext,
                                                 CheckPwdRequestDto checkPwdRequest) {
-        log.info("Call check password for domain {}", checkPwdRequest);
+        log.info("Call check password for tenant {}", checkPwdRequest);
         try {
-            return ResponseFactory.responseOk(passwordService.checkForPattern(checkPwdRequest.getDomain()
+            return ResponseFactory.responseOk(passwordService.checkForPattern(checkPwdRequest.getTenant()
                     , checkPwdRequest.getPassword()));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -116,20 +116,20 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     @Override
     public ResponseEntity<AccessTokenResponseDto> getAccess(//RequestContextDto requestContext,
                                                             AccessRequestDto accessRequest) {
-        log.info("Call access for domain {}", accessRequest);
+        log.info("Call access for tenant {}", accessRequest);
         try {
-            if (!domainService.isEnabled(accessRequest.getDomain().trim().toLowerCase())) {
-                throw new AccountAuthenticationException("domain disabled: " + accessRequest.getDomain());
+            if (!tenantService.isEnabled(accessRequest.getTenant().trim().toLowerCase())) {
+                throw new AccountAuthenticationException("tenant disabled: " + accessRequest.getTenant());
             }
 
             if (IEnumAuth.Types.TOKEN == accessRequest.getAuthType()) {
                 try {
-                    TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(accessRequest.getDomain().trim().toLowerCase(),
+                    TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(accessRequest.getTenant().trim().toLowerCase(),
                             IEnumToken.Types.ACCESS);
                     jwtService.validateToken(accessRequest.getPassword(),
                             new StringBuilder(accessRequest.getUserName().trim().toLowerCase())
                                     .append("@")
-                                    .append(accessRequest.getDomain().trim().toLowerCase())
+                                    .append(accessRequest.getTenant().trim().toLowerCase())
                                     .toString(),
                             tokenConfig.getSecretKey());
                 } catch (Exception e) {
@@ -141,16 +141,16 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                 return ResponseFactory.responseOk(AccessTokenResponseDto.builder()
                         .status(IEnumPasswordStatus.Types.VALID)
                         .tokenType(IEnumWebToken.Types.Bearer)
-                        .accessToken(tokenService.createAccessToken(accessRequest.getDomain().trim().toLowerCase(),
+                        .accessToken(tokenService.createAccessToken(accessRequest.getTenant().trim().toLowerCase(),
                                         accessRequest.getApplication(),
                                         accessRequest.getUserName().trim().toLowerCase(),
                                         accessRequest.getIsAdmin())
                                 .getToken())
-                        .refreshToken(tokenService.createRefreshToken(accessRequest.getDomain().trim().toLowerCase(),
+                        .refreshToken(tokenService.createRefreshToken(accessRequest.getTenant().trim().toLowerCase(),
                                         accessRequest.getApplication(),
                                         accessRequest.getUserName().trim().toLowerCase())
                                 .getToken())
-                        .authorityToken(tokenService.createAuthorityToken(accessRequest.getDomain().trim().toLowerCase(),
+                        .authorityToken(tokenService.createAuthorityToken(accessRequest.getTenant().trim().toLowerCase(),
                                         accessRequest.getApplication(),
                                         accessRequest.getUserName().trim().toLowerCase(),
                                         accessRequest.getAuthorities())
@@ -158,19 +158,19 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                         .build());
             } else {
                 return ResponseFactory.responseOk(AccessTokenResponseDto.builder()
-                        .status(passwordService.matches(accessRequest.getDomain().trim().toLowerCase()
+                        .status(passwordService.matches(accessRequest.getTenant().trim().toLowerCase()
                                 , accessRequest.getUserName().trim().toLowerCase()
                                 , accessRequest.getPassword()
                                 , accessRequest.getAuthType()))
                         .tokenType(IEnumWebToken.Types.Bearer)
-                        .accessToken(tokenService.createAccessToken(accessRequest.getDomain().trim().toLowerCase(),
+                        .accessToken(tokenService.createAccessToken(accessRequest.getTenant().trim().toLowerCase(),
                                 accessRequest.getApplication(),
                                 accessRequest.getUserName().trim().toLowerCase(),
                                 accessRequest.getIsAdmin()).getToken())
-                        .refreshToken(tokenService.createRefreshToken(accessRequest.getDomain().trim().toLowerCase(),
+                        .refreshToken(tokenService.createRefreshToken(accessRequest.getTenant().trim().toLowerCase(),
                                 accessRequest.getApplication(),
                                 accessRequest.getUserName().trim().toLowerCase()).getToken())
-                        .authorityToken(tokenService.createAuthorityToken(accessRequest.getDomain().trim().toLowerCase(),
+                        .authorityToken(tokenService.createAuthorityToken(accessRequest.getTenant().trim().toLowerCase(),
                                 accessRequest.getApplication(),
                                 accessRequest.getUserName().trim().toLowerCase(),
                                 accessRequest.getAuthorities()).getToken())
@@ -185,9 +185,9 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     @Override
     public ResponseEntity<IEnumPasswordStatus.Types> matches(//RequestContextDto requestContext,
                                                              MatchesRequestDto matchesRequest) {
-        log.info("Call match password for domain {}", matchesRequest);
+        log.info("Call match password for tenant {}", matchesRequest);
         try {
-            return ResponseFactory.responseOk(passwordService.matches(matchesRequest.getDomain()
+            return ResponseFactory.responseOk(passwordService.matches(matchesRequest.getTenant()
                     , matchesRequest.getUserName()
                     , matchesRequest.getPassword()
                     , matchesRequest.getAuthType()));
@@ -202,7 +202,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                                                      IsPwdExpiredRequestDto isPwdExpiredRequestDto) {
         log.info("Call isPasswordExpired {}", isPwdExpiredRequestDto);
         try {
-            return ResponseFactory.responseOk(passwordService.isExpired(isPwdExpiredRequestDto.getDomain().trim().toLowerCase()
+            return ResponseFactory.responseOk(passwordService.isExpired(isPwdExpiredRequestDto.getTenant().trim().toLowerCase()
                     , isPwdExpiredRequestDto.getEmail().trim().toLowerCase()
                     , isPwdExpiredRequestDto.getUserName().trim().toLowerCase()
                     , isPwdExpiredRequestDto.getAuthType()));

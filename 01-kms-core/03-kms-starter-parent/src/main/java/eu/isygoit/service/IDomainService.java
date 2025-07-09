@@ -1,6 +1,7 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.ICrudServiceMethod;
+import eu.isygoit.com.rest.service.ICrudServiceMethods;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.KmsDomain;
@@ -8,62 +9,62 @@ import eu.isygoit.model.KmsDomain;
 /**
  * The interface Domain service.
  */
-public interface IDomainService extends ICrudServiceMethod<Long, KmsDomain> {
+public interface IDomainService extends ICrudServiceMethods<Long, KmsDomain> {
 
     /**
-     * Check domain if exists kms domain.
+     * Check tenant if exists kms tenant.
      *
-     * @param domainName        the domain name
-     * @param domainUrl         the domain url
+     * @param tenantName        the tenant name
+     * @param tenantUrl         the tenant url
      * @param createIfNotExists the create if not exists
-     * @return the kms domain
+     * @return the kms tenant
      */
-    KmsDomain checkDomainIfExists(String domainName, String domainUrl, boolean createIfNotExists);
+    KmsDomain checkDomainIfExists(String tenantName, String tenantUrl, boolean createIfNotExists);
 
     /**
-     * Find by name ignore case kms domain.
+     * Find by name ignore case kms tenant.
      *
-     * @param domainName the domain name
-     * @return the kms domain
+     * @param tenantName the tenant name
+     * @return the kms tenant
      */
-    KmsDomain findByNameIgnoreCase(String domainName);
+    KmsDomain findByNameIgnoreCase(String tenantName);
 
     /**
      * Check account if exists account.
      *
-     * @param domainName        the domain name
-     * @param domainUrl         the domain url
+     * @param tenantName        the tenant name
+     * @param tenantUrl         the tenant url
      * @param email             the email
      * @param userName          the user name
      * @param fullName          the full name
      * @param createIfNotExists the create if not exists
      * @return the account
      */
-    Account checkAccountIfExists(String domainName, String domainUrl, String email, String userName, String fullName, boolean createIfNotExists);
+    Account checkAccountIfExists(String tenantName, String tenantUrl, String email, String userName, String fullName, boolean createIfNotExists);
 
     /**
      * Check if exists boolean.
      *
-     * @param kmsDomain         the kms domain
+     * @param kmsDomain         the kms tenant
      * @param createIfNotExists the create if not exists
      * @return the boolean
      */
     boolean checkIfExists(KmsDomain kmsDomain, boolean createIfNotExists);
 
     /**
-     * Update admin status kms domain.
+     * Update admin status kms tenant.
      *
-     * @param domain    the domain
+     * @param tenant    the tenant
      * @param newStatus the new status
-     * @return the kms domain
+     * @return the kms tenant
      */
-    KmsDomain updateAdminStatus(String domain, IEnumEnabledBinaryStatus.Types newStatus);
+    KmsDomain updateAdminStatus(String tenant, IEnumEnabledBinaryStatus.Types newStatus);
 
     /**
      * Is enabled boolean.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @return the boolean
      */
-    boolean isEnabled(String domain);
+    boolean isEnabled(String tenant);
 }

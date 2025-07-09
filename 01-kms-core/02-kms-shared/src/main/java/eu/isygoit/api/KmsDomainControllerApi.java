@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 /**
- * The interface Kms domain controller api.
+ * The interface Kms tenant controller api.
  */
 public interface KmsDomainControllerApi extends IMappedCrudApi<Long, KmsDomainDto, KmsDomainDto> {
 
@@ -25,7 +25,7 @@ public interface KmsDomainControllerApi extends IMappedCrudApi<Long, KmsDomainDt
      * Update admin status response entity.
      *
      * @param requestContext the request context
-     * @param domain         the domain
+     * @param tenant         the tenant
      * @param newStatus      the new status
      * @return the response entity
      */
@@ -39,17 +39,17 @@ public interface KmsDomainControllerApi extends IMappedCrudApi<Long, KmsDomainDt
     })
     @PutMapping(path = "/update-status")
     ResponseEntity<KmsDomainDto> updateAdminStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                                   @RequestParam(name = RestApiConstants.DOMAIN_NAME) String domain,
+                                                   @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                                    @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus);
 
     /**
-     * Update domain response entity.
+     * Update tenant response entity.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @return the response entity
      */
-    @Operation(summary = "Update domain info Api",
-            description = "Update domain info")
+    @Operation(summary = "Update tenant info Api",
+            description = "Update tenant info")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
@@ -58,5 +58,5 @@ public interface KmsDomainControllerApi extends IMappedCrudApi<Long, KmsDomainDt
     })
     @PostMapping(path = "/update")
     ResponseEntity<Boolean> updateDomain(//@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                         @Valid @RequestBody KmsDomainDto domain);
+                                         @Valid @RequestBody KmsDomainDto tenant);
 }

@@ -1,12 +1,14 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlHandler;
+import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.api.PublicAuthControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.config.JwtProperties;
+import eu.isygoit.constants.JwtConstants;
+import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.common.SystemInfoDto;
 import eu.isygoit.dto.common.UserContextDto;
 import eu.isygoit.dto.data.DomainDto;
@@ -39,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -50,7 +53,7 @@ import java.util.List;
 @Slf4j
 @Validated
 @RestController
-@CtrlHandler(ImsExceptionHandler.class)
+@InjectExceptionHandler(ImsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/public/user")
 public class PublicAuthController extends ControllerExceptionHandler implements PublicAuthControllerApi {
 
@@ -71,11 +74,11 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     @Autowired
     private IAuthService authService;
     @Autowired
-    private IDomainService domainService;
+    private IDomainService tenantService;
     @Autowired
     private ThemeMapper themeMapper;
     @Autowired
-    private DomainMapper domainMapper;
+    private DomainMapper tenantMapper;
 
     /**
      * Instantiates a new Public auth controller.
@@ -92,12 +95,12 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
                                                         AuthenticationRequestDto authRequestDto) {
         try {
             //Remove left & right spaces
-            authRequestDto.setDomain(authRequestDto.getDomain().trim().toLowerCase());
+            authRequestDto.setTenant(authRequestDto.getTenant().trim().toLowerCase());
             authRequestDto.setUserName(authRequestDto.getUserName().trim().toLowerCase());
             authRequestDto.setPassword(authRequestDto.getPassword().trim());
 
             AuthResponseDto authenticate = authService.authenticate(RequestTrackingDto.getFromRequest(request),
-                    authRequestDto.getDomain(),
+                    authRequestDto.getTenant(),
                     authRequestDto.getUserName(),
                     authRequestDto.getApplication(),
                     authRequestDto.getPassword(),
@@ -111,9 +114,9 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
                         .build());
             }
 
-            Account account = accountService.findByDomainAndUserName(authRequestDto.getDomain(), authRequestDto.getUserName());
-            Domain domain = domainService.findByName(authRequestDto.getDomain());
-            ThemeDto theme = themeMapper.entityToDto(themeService.findThemeByAccountCodeAndDomainCode(account.getCode(), domain.getCode()));
+            Account account = accountService.findByTenantAndUserName(authRequestDto.getTenant(), authRequestDto.getUserName());
+            Domain tenant = tenantService.findByName(authRequestDto.getTenant());
+            ThemeDto theme = themeMapper.entityToDto(themeService.findThemeByAccountCodeAndDomainCode(account.getCode(), tenant.getCode()));
             UserDataResponseDto userDataResponseDto = UserDataResponseDto.builder()
                     .id(account.getId())
                     .userName(account.getCode())
@@ -121,8 +124,8 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
                     .lastName(account.getAccountDetails().getLastName())
                     .applications(accountService.buildAllowedTools(account, authenticate.getAccessToken()))
                     .email(account.getEmail())
-                    .domainId(domain.getId())
-                    .domainImagePath(domain.getImagePath())
+                    .tenantId(tenant.getId())
+                    .tenantImagePath(tenant.getImagePath())
                     .language(account.getLanguage())
                     .role(account.getFunctionRole())
                     .build();
@@ -177,10 +180,10 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     }
 
     @Override
-    public ResponseEntity<DomainDto> getDomainByName(String domain) {
-        log.info("get domain by name {}", domain);
+    public ResponseEntity<DomainDto> getTenantByName(String tenant) {
+        log.info("get tenant by name {}", tenant);
         try {
-            return ResponseFactory.responseOk(domainMapper.entityToDto(domainService.findByName(domain)));
+            return ResponseFactory.responseOk(tenantMapper.entityToDto(tenantService.findByName(tenant)));
         } catch (Throwable e) {
             log.error("<Error>: get by name : {} ", e);
             return getBackExceptionResponse(e);
@@ -208,9 +211,10 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     }
 
     @Override
-    public ResponseEntity<Boolean> switchAuthType(AccountAuthTypeRequest accountAuthTypeRequest) {
+    public ResponseEntity<Boolean> switchAuthType(RequestContextDto requestContext,
+                                                  AccountAuthTypeRequest accountAuthTypeRequest) {
         try {
-            return ResponseFactory.responseOk(accountService.switchAuthType(accountAuthTypeRequest));
+            return ResponseFactory.responseOk(accountService.switchAuthType(requestContext.getSenderTenant(), accountAuthTypeRequest));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

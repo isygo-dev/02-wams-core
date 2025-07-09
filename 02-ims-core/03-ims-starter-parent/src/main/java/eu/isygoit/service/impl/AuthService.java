@@ -46,22 +46,22 @@ public class AuthService implements IAuthService {
     @Autowired
     private IAccountService accountService;
     @Autowired
-    private IDomainService domainService;
+    private IDomainService tenantService;
     @Autowired
     private IAppParameterService parameterService;
     @Autowired
     private RegistredUserRepository registredUserRepository;
 
     @Override
-    public AuthResponseDto authenticate(RequestTrackingDto requestTracking, String domain, String userName, String application, String password, IEnumAuth.Types authType) {
-        if (!domainService.isEnabled(domain)) {
-            throw new AccountAuthenticationException("domain disabled: " + domain);
+    public AuthResponseDto authenticate(RequestTrackingDto requestTracking, String tenant, String userName, String application, String password, IEnumAuth.Types authType) {
+        if (!tenantService.isEnabled(tenant)) {
+            throw new AccountAuthenticationException("tenant disabled: " + tenant);
         }
         //Check if application is allowed for the user (if param is set)
-        log.info("Authenticate {} from domain {} to application {}", userName, domain, application);
-        String checkAppAllowed = parameterService.getValueByDomainAndName(domain, AppParameterConstants.IS_APP_ALLOWED, true, AppParameterConstants.NO);
+        log.info("Authenticate {} from tenant {} to application {}", userName, tenant, application);
+        String checkAppAllowed = parameterService.getValueByTenantAndName(tenant, AppParameterConstants.IS_APP_ALLOWED, true, AppParameterConstants.NO);
         log.info("Checking if application {} is allowed {}", application, checkAppAllowed);
-        if (AppParameterConstants.YES.equals(checkAppAllowed) && !accountService.checkIfApplicationAllowed(domain,
+        if (AppParameterConstants.YES.equals(checkAppAllowed) && !accountService.checkIfApplicationAllowed(tenant,
                 userName,
                 application)) {
             log.info("Application Not Allowed ...........................................");
@@ -71,7 +71,7 @@ public class AuthService implements IAuthService {
         try {
             Authentication authentication = authenticationManager
                     .authenticate(new CustomAuthentification(new StringBuilder(userName)
-                            .append("@").append(domain)
+                            .append("@").append(tenant)
                             .append("@").append(authType),
                             password,
                             new ArrayList<>()));
@@ -79,7 +79,7 @@ public class AuthService implements IAuthService {
             try {
                 ResponseEntity<AccessTokenResponseDto> result = kmsPasswordService.getAccess(//RequestContextDto.builder().build(),
                         AccessRequestDto.builder()
-                                .domain(domain)
+                                .tenant(tenant)
                                 .userName(userName)
                                 .application(application)
                                 .isAdmin(((CustomUserDetails) authentication.getPrincipal()).getIsAdmin())
@@ -94,7 +94,7 @@ public class AuthService implements IAuthService {
                     switch (accessResponse.getStatus()) {
                         case VALID -> {
                             requestTracking.setAppOrigin(application);
-                            this.trackUserConnections(domain,
+                            this.trackUserConnections(tenant,
                                     userName,
                                     application,
                                     requestTracking);
@@ -106,18 +106,18 @@ public class AuthService implements IAuthService {
                                     .build();
                         }
                         case LOCKED -> {
-                            throw new LockedPasswordException("with domain/username: " + domain + "/" + userName);
+                            throw new LockedPasswordException("with tenant/username: " + tenant + "/" + userName);
                         }
                         case EXPIRED -> {
-                            throw new ExpiredPasswordException("with domain/username: " + domain + "/" + userName);
+                            throw new ExpiredPasswordException("with tenant/username: " + tenant + "/" + userName);
                         }
                         case DEPRECATED, BROKEN, BAD -> {
-                            throw new DeprecatedPasswordException("with domain/username: " + domain + "/" + userName);
+                            throw new DeprecatedPasswordException("with tenant/username: " + tenant + "/" + userName);
                         }
-                        default -> throw new UnauthorizedException("with domain/username: " + domain + "/" + userName);
+                        default -> throw new UnauthorizedException("with tenant/username: " + tenant + "/" + userName);
                     }
                 } else {
-                    throw new UnauthorizedException("with domain/username: " + domain + "/" + userName);
+                    throw new UnauthorizedException("with tenant/username: " + tenant + "/" + userName);
                 }
             } catch (Exception e) {
                 log.error("Remote feign call failed : ", e);
@@ -125,13 +125,13 @@ public class AuthService implements IAuthService {
             }
 
         } catch (AuthenticationException e) {
-            log.error("<Error>: Authentication failed for user: " + userName + "@" + domain, e);
-            throw new AccountAuthenticationException("Authentication failed for user: " + userName + "@" + domain);
+            log.error("<Error>: Authentication failed for user: " + userName + "@" + tenant, e);
+            throw new AccountAuthenticationException("Authentication failed for user: " + userName + "@" + tenant);
         }
     }
 
-    private void trackUserConnections(String domain, String userName, String application, RequestTrackingDto requestTracking) {
-        accountService.trackUserConnections(domain, userName, ConnectionTracking.builder()
+    private void trackUserConnections(String tenant, String userName, String application, RequestTrackingDto requestTracking) {
+        accountService.trackUserConnections(tenant, userName, ConnectionTracking.builder()
                 .device(requestTracking.getDevice())
                 .browser(requestTracking.getBrowser())
                 .ipAddress(requestTracking.getIpOrigin())

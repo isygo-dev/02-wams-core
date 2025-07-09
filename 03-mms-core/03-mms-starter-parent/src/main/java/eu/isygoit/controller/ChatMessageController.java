@@ -1,6 +1,6 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.api.ChatMessageControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
@@ -32,7 +32,7 @@ import java.util.UUID;
 @Validated
 @RestController
 @RequestMapping(path = "/api/v1/private/chat")
-@CtrlDef(handler = MmsExceptionHandler.class, mapper = ChatMessageMapper.class, minMapper = ChatMessageMapper.class, service = ChatMessageService.class)
+@InjectMapperAndService(handler = MmsExceptionHandler.class, mapper = ChatMessageMapper.class, minMapper = ChatMessageMapper.class, service = ChatMessageService.class)
 public class ChatMessageController extends CrudControllerUtils<UUID, ChatMessage, ChatMessageDto, ChatMessageDto, ChatMessageService>
         implements ChatMessageControllerApi {
 
@@ -90,9 +90,9 @@ public class ChatMessageController extends CrudControllerUtils<UUID, ChatMessage
 
     @Override
     public ResponseEntity<List<WsConnectDto>> getChatStatus(RequestContextDto requestContext,
-                                                            Long domainId) {
+                                                            Long tenantId) {
         try {
-            List<WsConnectDto> list = crudService().getConnectionsByDomain(domainId);
+            List<WsConnectDto> list = crudService().getConnectionsByTenant(tenantId);
             if (CollectionUtils.isEmpty(list)) {
                 return ResponseFactory.responseNoContent();
             }

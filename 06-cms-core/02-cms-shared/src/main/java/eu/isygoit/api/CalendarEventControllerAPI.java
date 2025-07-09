@@ -21,47 +21,47 @@ import java.util.List;
 public interface CalendarEventControllerAPI {
 
     /**
-     * Event by domain and calendar and code response entity.
+     * Event by tenant and calendar and code response entity.
      *
      * @param requestContext the request context
-     * @param domain         the domain
+     * @param tenant         the tenant
      * @param calendar       the calendar
      * @param code           the code
      * @return the response entity
      */
-    @Operation(summary = "eventByDomainAndCalendarAndCode Api",
-            description = "eventByDomainAndCalendarAndCode")
+    @Operation(summary = "eventByTenantAndCalendarAndCode Api",
+            description = "eventByTenantAndCalendarAndCode")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = VCalendarEventDto.class))})
     })
-    @GetMapping(path = "/byDomainAndCalendarAndCode/{domain}/{calendar}/{code}")
-    ResponseEntity<VCalendarEventDto> eventByDomainAndCalendarAndCode(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                                                      @PathVariable(name = RestApiConstants.DOMAIN_NAME) String domain,
+    @GetMapping(path = "/byDomainAndCalendarAndCode/{tenant}/{calendar}/{code}")
+    ResponseEntity<VCalendarEventDto> eventByTenantAndCalendarAndCode(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+                                                                      @PathVariable(name = RestApiConstants.TENANT_NAME) String tenant,
                                                                       @PathVariable(name = RestApiConstants.CALENDAR) String calendar,
                                                                       @PathVariable(name = RestApiConstants.CODE) String code);
 
     /**
-     * Gets all by domain and calendar name.
+     * Gets all by tenant and calendar name.
      *
      * @param requestContext the request context
-     * @param domain         the domain
+     * @param tenant         the tenant
      * @param calendar       the calendar
-     * @return the all by domain and calendar name
+     * @return the all by tenant and calendar name
      */
-    @Operation(summary = "getAllByDomainAndCalendarName Api",
-            description = "getAllByDomainAndCalendarName")
+    @Operation(summary = "getAllByTenantAndCalendarName Api",
+            description = "getAllByTenantAndCalendarName")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = VCalendarEventDto.class))})
     })
-    @GetMapping(path = "/byDomainAndCalendarName/{domain}/{calendar}")
-    ResponseEntity<List<VCalendarEventDto>> getAllByDomainAndCalendarName(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                                                          @PathVariable(name = RestApiConstants.DOMAIN_NAME) String domain,
+    @GetMapping(path = "/byDomainAndCalendarName/{tenant}/{calendar}")
+    ResponseEntity<List<VCalendarEventDto>> getAllByTenantAndCalendarName(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+                                                                          @PathVariable(name = RestApiConstants.TENANT_NAME) String tenant,
                                                                           @PathVariable(name = RestApiConstants.CALENDAR) String calendar);
 
     /**
@@ -79,7 +79,7 @@ public interface CalendarEventControllerAPI {
                             schema = @Schema(implementation = VCalendarEventDto.class))})
     })
     @PostMapping()
-    ResponseEntity<VCalendarEventDto> saveEvent(//@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<VCalendarEventDto> saveEvent(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
                                                 @Valid @RequestBody VCalendarEventDto event);
 
     /**
@@ -98,7 +98,7 @@ public interface CalendarEventControllerAPI {
                             schema = @Schema(implementation = VCalendarEventDto.class))})
     })
     @PutMapping(path = "/{id}")
-    ResponseEntity<VCalendarEventDto> updateEvent(//@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<VCalendarEventDto> updateEvent(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
                                                   @PathVariable(name = RestApiConstants.ID) Long id,
                                                   @Valid @RequestBody VCalendarEventDto event);
 }

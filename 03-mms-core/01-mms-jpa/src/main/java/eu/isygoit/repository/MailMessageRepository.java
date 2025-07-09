@@ -1,5 +1,9 @@
 package eu.isygoit.repository;
 
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAssignableRepository;
+
 import eu.isygoit.annotation.IgnoreRepository;
 import eu.isygoit.model.MailMessage;
 import org.springframework.data.cassandra.repository.AllowFiltering;
@@ -15,11 +19,11 @@ import java.util.UUID;
 public interface MailMessageRepository extends CassandraRepository<MailMessage, UUID> {
 
     /**
-     * Find all by domain ignore case list.
+     * Find all by tenant ignore case list.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @return the list
      */
     @AllowFiltering
-    List<MailMessage> findAllByDomainIgnoreCase(String domain);
+    List<MailMessage> findAllByTenantIgnoreCase(String tenant);
 }

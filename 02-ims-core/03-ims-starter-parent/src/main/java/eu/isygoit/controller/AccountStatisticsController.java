@@ -1,6 +1,6 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlHandler;
+import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @Validated
 @RestController
-@CtrlHandler(ImsExceptionHandler.class)
+@InjectExceptionHandler(ImsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/account/stat")
 public class AccountStatisticsController extends ControllerExceptionHandler {
 

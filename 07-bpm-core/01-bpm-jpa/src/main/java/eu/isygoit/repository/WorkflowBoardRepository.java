@@ -1,11 +1,15 @@
 package eu.isygoit.repository;
 
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAssignableRepository;
+
 
 import eu.isygoit.model.WorkflowBoard;
 
 /**
  * The interface Workflow board repository.
  */
-public interface WorkflowBoardRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<WorkflowBoard, Long> {
+public interface WorkflowBoardRepository extends JpaPagingAndSortingTenantAndCodeAssignableRepository<WorkflowBoard, Long> {
 
 }

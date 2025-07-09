@@ -18,9 +18,9 @@ import lombok.experimental.SuperBuilder;
 public class UserAccountDto extends AbstractAuditableDto<Long> {
 
     @NotEmpty
-    private String domain;
+    private String tenant;
     @NotNull
-    private Long domainId;
+    private Long tenantId;
     @NotEmpty
     private String code;
     @NotEmpty

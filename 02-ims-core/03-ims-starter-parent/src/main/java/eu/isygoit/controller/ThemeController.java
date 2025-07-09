@@ -1,13 +1,14 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.ThemeDto;
-import eu.isygoit.dto.extendable.IdentifiableDto;
+import eu.isygoit.dto.extendable.IdAssignableDto;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.mapper.ThemeMapper;
 import eu.isygoit.model.Theme;
@@ -32,7 +33,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @Validated
 @RestController
-@CtrlDef(handler = ImsExceptionHandler.class, mapper = ThemeMapper.class, minMapper = ThemeMapper.class, service = ThemeService.class)
+@InjectMapperAndService(handler = ImsExceptionHandler.class, mapper = ThemeMapper.class, minMapper = ThemeMapper.class, service = ThemeService.class)
 @RequestMapping(path = "/api/v1/private/theme")
 public class ThemeController extends MappedCrudController<Long, Theme, ThemeDto, ThemeDto, ThemeService> {
 
@@ -42,10 +43,10 @@ public class ThemeController extends MappedCrudController<Long, Theme, ThemeDto,
     private ThemeMapper themeMapper;
 
     /**
-     * Find theme by account code and domain code response entity.
+     * Find theme by account code and tenant code response entity.
      *
      * @param requestContext the request context
-     * @param domainCode     the domain code
+     * @param tenantCode     the tenant code
      * @param accountCode    the account code
      * @return the response entity
      */
@@ -55,14 +56,14 @@ public class ThemeController extends MappedCrudController<Long, Theme, ThemeDto,
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = IdentifiableDto.class))})
+                            schema = @Schema(implementation = IdAssignableDto.class))})
     })
-    @GetMapping(path = "/find/{domainCode}/{accountCode}")
+    @GetMapping(path = "/find/{tenantCode}/{accountCode}")
     public ResponseEntity<ThemeDto> findThemeByAccountCodeAndDomainCode(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) RequestContextDto requestContext,
-                                                                        @PathVariable(name = RestApiConstants.DOMAIN_CODE) String domainCode,
+                                                                        @PathVariable(name = RestApiConstants.TENANT_CODE) String tenantCode,
                                                                         @PathVariable(name = RestApiConstants.ACCOUNT_CODE) String accountCode) {
         try {
-            Theme theme = themeService.findThemeByAccountCodeAndDomainCode(accountCode, domainCode);
+            Theme theme = themeService.findThemeByAccountCodeAndDomainCode(accountCode, tenantCode);
 
             if (theme != null) {
                 ThemeDto themeDto = themeMapper.entityToDto(theme);
@@ -89,7 +90,7 @@ public class ThemeController extends MappedCrudController<Long, Theme, ThemeDto,
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = IdentifiableDto.class))})
+                            schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @PutMapping
     public ResponseEntity<ThemeDto> updateTheme(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) RequestContextDto requestContext,

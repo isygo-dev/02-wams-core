@@ -1,12 +1,13 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.ICrudServiceMethod;
+import eu.isygoit.com.rest.service.ICrudServiceMethods;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
 import eu.isygoit.model.Account;
 
 /**
  * The interface Account service.
  */
-public interface IAccountService extends ICrudServiceMethod<Long, Account> {
+public interface IAccountService extends ICrudTenantServiceMethods<Long, Account> {
 
     /**
      * Check if exists boolean.

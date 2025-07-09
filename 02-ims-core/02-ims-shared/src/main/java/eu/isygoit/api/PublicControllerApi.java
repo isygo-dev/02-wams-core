@@ -17,19 +17,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface PublicControllerApi {
 
     /**
-     * Gets domain by name.
+     * Gets tenant by name.
      *
-     * @param domain the domain
-     * @return the domain by name
+     * @param tenant the tenant
+     * @return the tenant by name
      */
-    @Operation(summary = "Get domain by name Api",
-            description = "Get domain by name")
+    @Operation(summary = "Get tenant by name Api",
+            description = "Get tenant by name")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = DomainDto.class))})
     })
-    @GetMapping(path = "/domain/{name}")
-    ResponseEntity<DomainDto> getDomainByName(@RequestParam(name = RestApiConstants.NAME) String domain);
+    @GetMapping(path = "/tenant/{name}")
+    ResponseEntity<DomainDto> getTenantByName(@RequestParam(name = RestApiConstants.NAME) String tenant);
 }

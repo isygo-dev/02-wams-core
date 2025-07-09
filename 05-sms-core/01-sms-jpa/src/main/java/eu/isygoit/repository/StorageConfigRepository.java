@@ -1,10 +1,16 @@
 package eu.isygoit.repository;
 
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAssignableRepository;
+
 import eu.isygoit.model.StorageConfig;
 
 /**
  * The interface Storage config repository.
  */
-public interface StorageConfigRepository extends JpaPagingAndSortingDomainAssignableRepository<StorageConfig, Long> {
+public interface StorageConfigRepository extends JpaPagingAndSortingTenantAssignableRepository<StorageConfig, Long> {
 
 }

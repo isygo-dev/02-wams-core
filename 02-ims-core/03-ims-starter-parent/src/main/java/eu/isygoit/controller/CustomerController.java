@@ -1,9 +1,10 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.common.RequestContextDto;
@@ -33,9 +34,9 @@ import java.util.List;
 @Slf4j
 @Validated
 @RestController
-@CtrlDef(handler = ImsExceptionHandler.class, mapper = CustomerMapper.class, minMapper = CustomerMapper.class, service = CustomerService.class)
+@InjectMapperAndService(handler = ImsExceptionHandler.class, mapper = CustomerMapper.class, minMapper = CustomerMapper.class, service = CustomerService.class)
 @RequestMapping(path = "/api/v1/private/customer")
-public class CustomerController extends MappedCrudController<Long, Customer, CustomerDto, CustomerDto, CustomerService> {
+public class CustomerController extends MappedCrudTenantController<Long, Customer, CustomerDto, CustomerDto, CustomerService> {
 
     @Autowired
     private ICustomerService customerService;
@@ -91,7 +92,7 @@ public class CustomerController extends MappedCrudController<Long, Customer, Cus
                                                              @RequestParam(name = RestApiConstants.ACCOUNT_CODE) String accountCode) {
         log.info("Link to existing account");
         try {
-            return ResponseFactory.responseOk(mapper().entityToDto(crudService().linkToAccount(id, accountCode)));
+            return ResponseFactory.responseOk(mapper().entityToDto(crudService().linkToAccount(requestContext.getSenderTenant(), id, accountCode)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

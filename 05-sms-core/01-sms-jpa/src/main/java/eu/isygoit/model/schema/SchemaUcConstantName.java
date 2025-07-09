@@ -22,9 +22,9 @@ public interface SchemaUcConstantName extends ComSchemaUcConstantName {
      */
     String UC_ROLE_INFO_CODE = "UC_ROLE_INFO_CODE";
     /**
-     * The constant UC_STORAGE_CONFIG_DOMAIN.
+     * The constant UC_STORAGE_CONFIG_TENANT.
      */
-    String UC_STORAGE_CONFIG_DOMAIN = "UC_STORAGE_CONFIG_DOMAIN";
+    String UC_STORAGE_CONFIG_TENANT = "UC_STORAGE_CONFIG_TENANT";
     //public static final String UC_XXX = "UC_XXX";
     //public static final String UC_XXX = "UC_XXX";
     //public static final String UC_XXX = "UC_XXX";

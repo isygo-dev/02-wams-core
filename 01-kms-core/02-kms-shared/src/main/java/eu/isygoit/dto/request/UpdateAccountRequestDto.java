@@ -18,7 +18,7 @@ import lombok.experimental.SuperBuilder;
 public class UpdateAccountRequestDto extends AbstractAuditableDto<Long> {
 
     @NotEmpty
-    private String domain;
+    private String tenant;
     @NotEmpty
     private String code;
     @NotEmpty

@@ -19,7 +19,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class PEBConfigDto extends AbstractAuditableDto<Long> {
 
-    private String domain;
+    private String tenant;
     private String code;
     //PBE ALGORITHMS:   [PBEWITHMD5ANDDES, PBEWITHMD5ANDTRIPLEDES, PBEWITHSHA1ANDDESEDE, PBEWITHSHA1ANDRC2_40]
     private IEnumAlgoPEBConfig.Types algorithm;

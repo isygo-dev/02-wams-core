@@ -59,7 +59,7 @@ public interface SchemaFkConstantName extends ComSchemaFkConstantName {
     String FK_CUSTOMER_REF_ADDRESS = "FK_CUSTOMER_REF_ADDRESS";
 
     /**
-     * The constant FK_DOMAIN_REF_ADDRESS.
+     * The constant FK_TENANT_REF_ADDRESS.
      */
-    String FK_DOMAIN_REF_ADDRESS = "FK_DOMAIN_REF_ADDRESS";
+    String FK_TENANT_REF_ADDRESS = "FK_TENANT_REF_ADDRESS";
 }

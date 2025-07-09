@@ -1,6 +1,8 @@
 package eu.isygoit;
 
 import eu.isygoit.annotation.IgnoreRepository;
+import eu.isygoit.api.IApiExtractor;
+import eu.isygoit.app.ApplicationContextService;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import org.springframework.boot.SpringApplication;
@@ -29,6 +31,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 )
 @PropertySource(encoding = "UTF-8", value = {"classpath:i18n/messages.properties"})
 public class CmsStarter extends ServiceStarter {
+
+    protected CmsStarter(ApplicationContextService applicationContextService, IApiExtractor apiExtractor) {
+        super(applicationContextService, apiExtractor);
+    }
 
     /**
      * The entry point of application.

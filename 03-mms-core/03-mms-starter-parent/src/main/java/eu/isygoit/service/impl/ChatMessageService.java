@@ -1,6 +1,8 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.ServRepo;
+import eu.isygoit.annotation.InjectRepository;
+import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.com.rest.service.cassandra.CassandraCrudService;
 import eu.isygoit.config.WsChannelInterceptor;
 import eu.isygoit.dto.data.ChatAccountDto;
@@ -23,12 +25,12 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @Transactional
-@ServRepo(value = ChatMessageRepository.class)
+@InjectRepository(value = ChatMessageRepository.class)
 public class ChatMessageService extends CassandraCrudService<UUID, ChatMessage, ChatMessageRepository>
         implements IChatMessageService {
 
-    public List<WsConnectDto> getConnectionsByDomain(Long domainId) {
-        return WsChannelInterceptor.getConnectionsByDomain(domainId);
+    public List<WsConnectDto> getConnectionsByTenant(Long tenantId) {
+        return WsChannelInterceptor.getConnectionsByTenant(tenantId);
     }
 
     @Override

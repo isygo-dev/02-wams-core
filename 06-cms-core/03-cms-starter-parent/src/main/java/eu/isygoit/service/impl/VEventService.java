@@ -1,12 +1,15 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.CodeGenKms;
-import eu.isygoit.annotation.CodeGenLocal;
-import eu.isygoit.annotation.ServRepo;
+import eu.isygoit.annotation.InjectCodeGenKms;
+import eu.isygoit.annotation.InjectCodeGen;
+import eu.isygoit.annotation.InjectRepository;
+import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.config.AppProperties;
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.exception.CalendarNotFoundException;
 import eu.isygoit.jasycal.ICalendar;
 import eu.isygoit.jasycal.ICalendarBuilder;
@@ -35,10 +38,10 @@ import java.util.Optional;
 @Slf4j
 @Service
 @Transactional
-@CodeGenLocal(value = NextCodeService.class)
-@CodeGenKms(value = KmsIncrementalKeyService.class)
-@ServRepo(value = VEventRepository.class)
-public class VEventService extends CodeAssignableService<Long, VCalendarEvent, VEventRepository> implements IVEventService {
+@InjectCodeGen(value = NextCodeService.class)
+@InjectCodeGenKms(value = KmsIncrementalKeyService.class)
+@InjectRepository(value = VEventRepository.class)
+public class VEventService extends CodeAssignableTenantService<Long, VCalendarEvent, VEventRepository> implements IVEventService {
 
     private final AppProperties appProperties;
 
@@ -55,44 +58,45 @@ public class VEventService extends CodeAssignableService<Long, VCalendarEvent, V
     }
 
     @Override
-    public List<VCalendarEvent> findByDomainAndCalendar(String domain, String calendar) {
-        return repository().findByDomainIgnoreCaseAndCalendar(domain, calendar);
+    public List<VCalendarEvent> findByTenantAndCalendar(String tenant, String calendar) {
+        return repository().findByTenantIgnoreCaseAndCalendar(tenant, calendar);
     }
 
     /**
-     * Find by domain and calendar and code optional.
+     * Find by tenant and calendar and code optional.
      *
-     * @param domain   the domain
+     * @param tenant   the tenant
      * @param calendar the calendar
      * @param code     the code
      * @return the optional
      */
-    public Optional<VCalendarEvent> findByDomainAndCalendarAndCode(String domain, String calendar, String code) {
-        return repository().findByDomainIgnoreCaseAndCalendarAndCodeIgnoreCase(domain, calendar, code);
+    public Optional<VCalendarEvent> findByTenantAndCalendarAndCode(String tenant, String calendar, String code) {
+        return repository().findByTenantIgnoreCaseAndCalendarAndCodeIgnoreCase(tenant, calendar, code);
     }
 
     @Override
-    public VCalendarEvent beforeCreate(VCalendarEvent vCalendarEvent) {
-        VCalendar vCalendar = calendarService.findByDomainAndName(vCalendarEvent.getDomain(), vCalendarEvent.getCalendar());
+    public VCalendarEvent beforeCreate(String tenant, VCalendarEvent vCalendarEvent) {
+        VCalendar vCalendar = calendarService.findByTenantAndName(vCalendarEvent.getTenant(), vCalendarEvent.getCalendar());
         if (vCalendar == null) {
             if (appProperties.getCreateCalendarIfNotExists()) {
-                calendarService.create(VCalendar.builder()
-                        .domain(vCalendarEvent.getDomain())
+                calendarService.create(vCalendarEvent.getTenant(),
+                        VCalendar.builder()
+                        .tenant(vCalendarEvent.getTenant())
                         .name(vCalendarEvent.getCalendar())
                         .description(vCalendarEvent.getCalendar())
                         .build());
             } else {
-                throw new CalendarNotFoundException("with domain/name : " + vCalendarEvent.getDomain() + "/" + vCalendarEvent.getCalendar());
+                throw new CalendarNotFoundException("with tenant/name : " + vCalendarEvent.getTenant() + "/" + vCalendarEvent.getCalendar());
             }
         }
-        return super.beforeCreate(vCalendarEvent);
+        return super.beforeCreate(tenant, vCalendarEvent);
     }
 
     @Override
-    public VCalendarEvent afterCreate(VCalendarEvent vCalendarEvent) {
-        VCalendar vCalendar = calendarService.findByDomainAndName(vCalendarEvent.getDomain(), vCalendarEvent.getCalendar());
+    public VCalendarEvent afterCreate(String tenant, VCalendarEvent vCalendarEvent) {
+        VCalendar vCalendar = calendarService.findByTenantAndName(vCalendarEvent.getTenant(), vCalendarEvent.getCalendar());
         if (vCalendar == null) {
-            throw new CalendarNotFoundException("with domain/name : " + vCalendarEvent.getDomain() + "/" + vCalendarEvent.getCalendar());
+            throw new CalendarNotFoundException("with tenant/name : " + vCalendarEvent.getTenant() + "/" + vCalendarEvent.getCalendar());
         }
 
         try {
@@ -116,13 +120,13 @@ public class VEventService extends CodeAssignableService<Long, VCalendarEvent, V
         } catch (ParserException e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
         }
-        return super.afterCreate(vCalendarEvent);
+        return super.afterCreate(tenant, vCalendarEvent);
     }
 
     @Override
     public AppNextCode initCodeGenerator() {
         return AppNextCode.builder()
-                .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
+                .tenant(TenantConstants.DEFAULT_TENANT_NAME)
                 .entity(VCalendarEvent.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("EVT")

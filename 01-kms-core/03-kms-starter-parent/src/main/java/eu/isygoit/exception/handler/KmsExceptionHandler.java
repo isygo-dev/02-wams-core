@@ -3,7 +3,7 @@ package eu.isygoit.exception.handler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.isygoit.api.AppParameterControllerApi;
 import eu.isygoit.config.AppProperties;
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.service.IMsgService;
@@ -51,7 +51,7 @@ public class KmsExceptionHandler extends ControllerExceptionHandler {
                 try {
                     MailMessageDto mailMessageDto = MailMessageDto.builder()
                             .subject(EmailSubjects.UNMANAGED_EXCEPTION)
-                            .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
+                            .tenant(TenantConstants.DEFAULT_TENANT_NAME)
                             .toAddr(techAdminEmail)
                             .templateName(IEnumEmailTemplate.Types.UNMANAGED_EXCEPTION_TEMPLATE)
                             .variables(MailMessageDto.getVariablesAsString(Map.of(
@@ -60,7 +60,7 @@ public class KmsExceptionHandler extends ControllerExceptionHandler {
                             )))
                             .build();
                     //Send the email message
-                    msgService.sendMessage(DomainConstants.SUPER_DOMAIN_NAME, mailMessageDto, appProperties.isSendAsyncEmail());
+                    msgService.sendMessage(TenantConstants.SUPER_TENANT_NAME, mailMessageDto, appProperties.isSendAsyncEmail());
                 } catch (JsonProcessingException e) {
                     log.error("<Error>: send unmanaged exception email : {} ", e);
                 }

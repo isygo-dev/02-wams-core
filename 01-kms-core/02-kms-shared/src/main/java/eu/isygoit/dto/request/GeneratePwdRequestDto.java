@@ -18,8 +18,8 @@ import lombok.experimental.SuperBuilder;
 public class GeneratePwdRequestDto extends AbstractAuditableDto<Long> {
 
     @NotEmpty
-    private String domain;
-    private String domainUrl;
+    private String tenant;
+    private String tenantUrl;
     @NotEmpty
     private String email;
     @NotEmpty

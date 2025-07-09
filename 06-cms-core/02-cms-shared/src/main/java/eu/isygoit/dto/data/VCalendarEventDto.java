@@ -21,7 +21,7 @@ public class VCalendarEventDto extends AbstractAuditableDto<Long> {
 
     @NotNull
     @NotEmpty
-    private String domain;
+    private String tenant;
     private String code;
     @NotNull
     @NotEmpty

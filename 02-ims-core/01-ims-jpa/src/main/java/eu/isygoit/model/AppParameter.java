@@ -1,6 +1,6 @@
 package eu.isygoit.model;
 
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaConstantSize;
@@ -22,10 +22,10 @@ import org.hibernate.annotations.ColumnDefault;
 @AllArgsConstructor
 @Entity
 @Table(name = SchemaTableConstantName.T_APP_PARAMETER, uniqueConstraints = {
-        @UniqueConstraint(name = SchemaUcConstantName.UC_APP_PARAM_DOMAIN_NAME,
-                columnNames = {SchemaColumnConstantName.C_DOMAIN, SchemaColumnConstantName.C_NAME})
+        @UniqueConstraint(name = SchemaUcConstantName.UC_APP_PARAM_TENANT_NAME,
+                columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_NAME})
 })
-public class AppParameter extends AuditableEntity<Long> implements IDomainAssignable {
+public class AppParameter extends AuditableEntity<Long> implements ITenantAssignable {
 
     @Id
     @SequenceGenerator(name = "app_parameter_sequence_generator", sequenceName = "app_parameter_sequence", allocationSize = 1)
@@ -34,9 +34,9 @@ public class AppParameter extends AuditableEntity<Long> implements IDomainAssign
     private Long id;
 
     //@Convert(converter = LowerCaseConverter.class)
-    @ColumnDefault("'" + DomainConstants.DEFAULT_DOMAIN_NAME + "'")
-    @Column(name = SchemaColumnConstantName.C_DOMAIN, length = SchemaConstantSize.DOMAIN, updatable = false, nullable = false)
-    private String domain;
+    @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
+    @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
+    private String tenant;
     @Column(name = SchemaColumnConstantName.C_NAME, length = SchemaConstantSize.S_NAME, updatable = false, nullable = false)
     private String name;
     @Column(name = SchemaColumnConstantName.C_VALUE, length = SchemaConstantSize.XXL_VALUE, nullable = false)

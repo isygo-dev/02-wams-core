@@ -1,7 +1,8 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.ApiPermissionDto;
 import eu.isygoit.dto.data.RoleInfoDto;
@@ -34,9 +35,9 @@ import java.util.Map;
 @Slf4j
 @Validated
 @RestController
-@CtrlDef(handler = ImsExceptionHandler.class, mapper = RoleInfoMapper.class, minMapper = RoleInfoMapper.class, service = RoleInfoService.class)
+@InjectMapperAndService(handler = ImsExceptionHandler.class, mapper = RoleInfoMapper.class, minMapper = RoleInfoMapper.class, service = RoleInfoService.class)
 @RequestMapping(path = "/api/v1/private/roleInfo")
-public class RoleInfoController extends MappedCrudController<Long, RoleInfo, RoleInfoDto, RoleInfoDto, RoleInfoService> {
+public class RoleInfoController extends MappedCrudTenantController<Long, RoleInfo, RoleInfoDto, RoleInfoDto, RoleInfoService> {
 
     @Autowired
     private ApiPermissionRepository apiPermissionRepository;
@@ -87,7 +88,7 @@ public class RoleInfoController extends MappedCrudController<Long, RoleInfo, Rol
                 copiedRole.setId(null);
                 copiedRole.setName(roleInfoDto.getName());
                 copiedRole.setCode(null);
-                copiedRole.setDomain(roleInfoDto.getDomain());
+                copiedRole.setTenant(roleInfoDto.getTenant());
                 if (StringUtils.hasText(roleInfoDto.getDescription())) {
                     copiedRole.setDescription(roleInfoDto.getDescription());
                 }

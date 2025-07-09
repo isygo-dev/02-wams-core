@@ -1,9 +1,12 @@
 package eu.isygoit.service.impl;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
-import eu.isygoit.annotation.ServRepo;
+import eu.isygoit.annotation.InjectRepository;
+import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.service.cassandra.CassandraCrudService;
+import eu.isygoit.com.rest.service.cassandra.CassandraCrudTenantService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.dto.data.MailOptionsDto;
 import eu.isygoit.exception.StoreFileException;
@@ -44,8 +47,8 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @Slf4j
-@ServRepo(value = MailMessageRepository.class)
-public class MailMessageService extends CassandraCrudService<UUID, MailMessage, MailMessageRepository>
+@InjectRepository(value = MailMessageRepository.class)
+public class MailMessageService extends CassandraCrudTenantService<UUID, MailMessage, MailMessageRepository>
         implements IMailMessageService {
 
     private final AppProperties appProperties;
@@ -174,5 +177,4 @@ public class MailMessageService extends CassandraCrudService<UUID, MailMessage, 
                 .resolve("resources")
                 .resolve(multipartFile.getOriginalFilename()).toUri())));
     }
-
 }

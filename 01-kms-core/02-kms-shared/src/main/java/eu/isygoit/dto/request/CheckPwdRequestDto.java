@@ -18,7 +18,7 @@ import lombok.experimental.SuperBuilder;
 public class CheckPwdRequestDto extends AbstractAuditableDto<Long> {
 
     @NotEmpty
-    private String domain;
+    private String tenant;
     @NotEmpty
     private String password;
 }

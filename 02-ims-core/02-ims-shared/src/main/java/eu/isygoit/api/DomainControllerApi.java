@@ -33,8 +33,8 @@ public interface DomainControllerApi extends IMappedCrudApi<Long, DomainDto, Dom
      * @param newStatus      the new status
      * @return the response entity
      */
-    @Operation(summary = "Update domain status Api",
-            description = "Update domain status")
+    @Operation(summary = "Update tenant status Api",
+            description = "Update tenant status")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
@@ -47,13 +47,13 @@ public interface DomainControllerApi extends IMappedCrudApi<Long, DomainDto, Dom
                                                 @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus);
 
     /**
-     * Gets all domain names.
+     * Gets all tenant names.
      *
      * @param requestContext the request context
-     * @return the all domain names
+     * @return the all tenant names
      */
-    @Operation(summary = "Get all domain names Api",
-            description = "Get all domain names")
+    @Operation(summary = "Get all tenant names Api",
+            description = "Get all tenant names")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
@@ -69,8 +69,8 @@ public interface DomainControllerApi extends IMappedCrudApi<Long, DomainDto, Dom
      * @param requestContext the request context
      * @return the by name
      */
-    @Operation(summary = "Get domain by name Api",
-            description = "Get domain by name")
+    @Operation(summary = "Get tenant by name Api",
+            description = "Get tenant by name")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
@@ -80,8 +80,8 @@ public interface DomainControllerApi extends IMappedCrudApi<Long, DomainDto, Dom
     @GetMapping(path = "/name")
     ResponseEntity<DomainDto> getByName(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext);
 
-    @Operation(summary = "Update domain social link Api",
-            description = "Update domain social link")
+    @Operation(summary = "Update tenant social link Api",
+            description = "Update tenant social link")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",

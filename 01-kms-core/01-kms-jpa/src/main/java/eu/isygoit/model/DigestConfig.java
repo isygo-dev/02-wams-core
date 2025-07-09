@@ -1,6 +1,6 @@
 package eu.isygoit.model;
 
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumAlgoDigestConfig;
 import eu.isygoit.enums.IEnumSaltGenerator;
 import eu.isygoit.enums.IEnumStringOutputType;
@@ -30,10 +30,10 @@ import org.hibernate.validator.constraints.Length;
         , uniqueConstraints = {
         @UniqueConstraint(name = SchemaUcConstantName.UC_DIGESTER_CONFIG_CODE,
                 columnNames = {SchemaColumnConstantName.C_CODE}),
-        @UniqueConstraint(name = SchemaUcConstantName.UC_DIGESTER_CONFIG_DOMAIN,
-                columnNames = {SchemaColumnConstantName.C_DOMAIN})
+        @UniqueConstraint(name = SchemaUcConstantName.UC_DIGESTER_CONFIG_TENANT,
+                columnNames = {SchemaColumnConstantName.C_TENANT})
 })
-public class DigestConfig extends AuditableEntity<Long> implements IDomainAssignable, ICodeAssignable {
+public class DigestConfig extends AuditableEntity<Long> implements ITenantAssignable, ICodeAssignable {
 
     @Id
     @SequenceGenerator(name = "digester_config_sequence_generator", sequenceName = "digester_config_sequence", allocationSize = 1)
@@ -47,9 +47,9 @@ public class DigestConfig extends AuditableEntity<Long> implements IDomainAssign
     private String code;
 
     //@Convert(converter = LowerCaseConverter.class)
-    @ColumnDefault("'" + DomainConstants.DEFAULT_DOMAIN_NAME + "'")
-    @Column(name = SchemaColumnConstantName.C_DOMAIN, length = SchemaConstantSize.DOMAIN, updatable = false, nullable = false)
-    private String domain;
+    @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
+    @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
+    private String tenant;
 
     //DIGEST ALGORITHMS:   [MD2, MD5, SHA, SHA-256, SHA-384, SHA-512]
     @Enumerated(EnumType.STRING)

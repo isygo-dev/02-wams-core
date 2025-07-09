@@ -1,9 +1,10 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.common.RequestContextDto;
@@ -36,9 +37,9 @@ import java.nio.file.Path;
 @Slf4j
 @Validated
 @RestController
-@CtrlDef(handler = CmsExceptionHandler.class, mapper = VCalendarMapper.class, minMapper = VCalendarMapper.class, service = VCalendarService.class)
+@InjectMapperAndService(handler = CmsExceptionHandler.class, mapper = VCalendarMapper.class, minMapper = VCalendarMapper.class, service = VCalendarService.class)
 @RequestMapping(path = "/api/v1/private/calendar")
-public class VCalendarController extends MappedCrudController<Long, VCalendar, VCalendarDto, VCalendarDto, VCalendarService> {
+public class VCalendarController extends MappedCrudTenantController<Long, VCalendar, VCalendarDto, VCalendarDto, VCalendarService> {
 
     @Autowired
     private VCalendarService vCalendarService;
@@ -47,7 +48,7 @@ public class VCalendarController extends MappedCrudController<Long, VCalendar, V
      * Download response entity.
      *
      * @param requestContext the request context
-     * @param domain         the domain
+     * @param tenant         the tenant
      * @param name           the name
      * @return the response entity
      * @throws IOException the io exception
@@ -62,10 +63,10 @@ public class VCalendarController extends MappedCrudController<Long, VCalendar, V
     })
     @GetMapping(path = "/ics/download", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Resource> download(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) RequestContextDto requestContext,
-                                             @RequestParam(name = RestApiConstants.DOMAIN_NAME) String domain,
+                                             @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                              @RequestParam(name = RestApiConstants.NAME) String name) throws IOException {
         try {
-            Resource resource = vCalendarService.download(domain, name);
+            Resource resource = vCalendarService.download(tenant, name);
             Path path = resource.getFile().toPath();
             log.info(resource.getFilename());
             return ResponseEntity.ok()

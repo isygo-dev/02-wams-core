@@ -20,7 +20,7 @@ import lombok.experimental.SuperBuilder;
 public class AuthenticationRequestDto extends AbstractDto {
 
     @NotEmpty
-    private String domain;
+    private String tenant;
     @NotEmpty
     private String application;
     @NotEmpty

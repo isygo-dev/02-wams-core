@@ -1,6 +1,7 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.ICrudServiceMethod;
+import eu.isygoit.com.rest.service.ICrudServiceMethods;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
 import eu.isygoit.model.VCalendar;
 import org.springframework.core.io.Resource;
 
@@ -9,26 +10,26 @@ import java.io.IOException;
 /**
  * The interface Iv calendar service.
  */
-public interface IVCalendarService extends ICrudServiceMethod<Long, VCalendar> {
+public interface IVCalendarService extends ICrudTenantServiceMethods<Long, VCalendar> {
 
     /**
-     * Find by domain and name v calendar.
+     * Find by tenant and name v calendar.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @param name   the name
      * @return the v calendar
      */
-    VCalendar findByDomainAndName(String domain, String name);
+    VCalendar findByTenantAndName(String tenant, String name);
 
     /**
      * Download resource.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @param name   the name
      * @return the resource
      * @throws IOException the io exception
      */
-    Resource download(String domain, String name) throws IOException;
+    Resource download(String tenant, String name) throws IOException;
 
     VCalendar updateLockedStatus(Long id, Boolean locked) throws IOException;
 }

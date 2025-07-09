@@ -21,7 +21,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @Table(name = SchemaTableConstantName.T_APP_NEXT_CODE
         , uniqueConstraints = {@UniqueConstraint(name = SchemaUcConstantName.UC_NEXT_CODE_ENTITY
-        , columnNames = {SchemaColumnConstantName.C_ENTITY, SchemaColumnConstantName.C_ATTRIBUTE, SchemaColumnConstantName.C_DOMAIN})})
+        , columnNames = {SchemaColumnConstantName.C_ENTITY, SchemaColumnConstantName.C_ATTRIBUTE, SchemaColumnConstantName.C_TENANT})})
 @ToString(callSuper = true)
 public class AppNextCode extends NextCodeModel<Long> {
 

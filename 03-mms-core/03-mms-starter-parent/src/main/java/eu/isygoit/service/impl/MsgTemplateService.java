@@ -1,11 +1,14 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.CodeGenKms;
-import eu.isygoit.annotation.CodeGenLocal;
-import eu.isygoit.annotation.ServRepo;
+import eu.isygoit.annotation.InjectCodeGenKms;
+import eu.isygoit.annotation.InjectCodeGen;
+import eu.isygoit.annotation.InjectRepository;
+import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.com.rest.service.FileService;
+import eu.isygoit.com.rest.service.tenancy.FileTenantService;
 import eu.isygoit.config.AppProperties;
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.data.DomainDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.enums.IEnumLanguage;
@@ -46,10 +49,10 @@ import java.util.Optional;
 @Slf4j
 @Service
 @Transactional
-@CodeGenLocal(value = NextCodeService.class)
-@CodeGenKms(value = KmsIncrementalKeyService.class)
-@ServRepo(value = MsgTemplateRepository.class)
-public class MsgTemplateService extends FileService<Long, MsgTemplate, MsgTemplateRepository>
+@InjectCodeGen(value = NextCodeService.class)
+@InjectCodeGenKms(value = KmsIncrementalKeyService.class)
+@InjectRepository(value = MsgTemplateRepository.class)
+public class MsgTemplateService extends FileTenantService<Long, MsgTemplate, MsgTemplateRepository>
         implements IMsgTemplateService {
 
     private final AppProperties appProperties;
@@ -73,13 +76,13 @@ public class MsgTemplateService extends FileService<Long, MsgTemplate, MsgTempla
     }
 
     @Override
-    public void beforeDelete(Long id) {
+    public void beforeDelete(String tenant, Long id) {
         Optional<MsgTemplate> optional = templateRepository.findById(id);
         if (optional.isPresent()) {
             deleteFile(Path.of(optional.get().getPath())
                     .resolve(optional.get().getOriginalFileName()).toString());
         }
-        super.beforeDelete(id);
+        super.beforeDelete(tenant, id);
     }
 
     private void deleteFile(String filePath) {
@@ -93,21 +96,22 @@ public class MsgTemplateService extends FileService<Long, MsgTemplate, MsgTempla
 
     @Transactional
     @Override
-    public String composeMessageBody(String senderDomainName,
+    public String composeMessageBody(String tenant,
                                      IEnumEmailTemplate.Types templateName,
                                      Map<String, String> variables)
             throws IOException, TemplateException {
-        Optional<MsgTemplate> optional = templateRepository.findByDomainIgnoreCaseAndName(senderDomainName, templateName);
+        Optional<MsgTemplate> optional = templateRepository.findByTenantIgnoreCaseAndName(tenant, templateName);
         MsgTemplate template = null;
         if (optional.isPresent()) {
             template = optional.get();
         } else {
-            log.warn("Template {} is not present for domain {}, we will create a default one!", templateName, senderDomainName);
+            log.warn("Template {} is not present for tenant {}, we will create a default one!", templateName, tenant);
             Path filePath = Path.of(this.getUploadDirectory())
-                    .resolve(senderDomainName)
+                    .resolve(tenant)
                     .resolve(MsgTemplate.class.getSimpleName().toLowerCase());
-            template = this.create(MsgTemplate.builder()
-                    .domain(senderDomainName)
+            template = this.create(tenant,
+                    MsgTemplate.builder()
+                    .tenant(tenant)
                     .name(templateName)
                     .description(templateName.meaning())
                     .path(filePath.toString())
@@ -121,7 +125,7 @@ public class MsgTemplateService extends FileService<Long, MsgTemplate, MsgTempla
                 template.setOriginalFileName(templateName.name().toLowerCase() + ".ftl");
                 template.setFileName(template.getCode().toLowerCase() + "." + FilenameUtils.getExtension(resource.getFilename()));
                 template.setExtension(FilenameUtils.getExtension(resource.getFilename()));
-                this.update(template);
+                this.update(tenant, template);
                 FileHelper.createDirectoryIfAbsent(filePath);
                 FileUtils.copyURLToFile(resource.getURL(), new File(filePath.toString(), template.getFileName()));
             } else {
@@ -134,30 +138,30 @@ public class MsgTemplateService extends FileService<Long, MsgTemplate, MsgTempla
         freemarkerConfig.getConfiguration().setTemplateLoader(templateLoader);
 
         try {
-            ResponseEntity<DomainDto> result = imsPublicService.getDomainByName(senderDomainName);
+            ResponseEntity<DomainDto> result = imsPublicService.getTenantByName(tenant);
             if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
                 DomainDto domain = result.getBody();
-                variables.put(MsgTemplateVariables.V_DOMAIN_URL, domain.getUrl() != null ? domain.getUrl() : "Missed");
-                variables.put(MsgTemplateVariables.V_DOMAIN_PHONE, domain.getPhone() != null ? domain.getPhone() : "Missed");
-                variables.put(MsgTemplateVariables.V_DOMAIN_EMAIL, domain.getEmail() != null ? domain.getEmail() : "Missed");
-                variables.put(MsgTemplateVariables.V_DOMAIN_ADDRESS, domain.getAddress() != null ? domain.getAddress().format() : "Missed");
-                variables.put(MsgTemplateVariables.V_DOMAIN_FACEBOOK, domain.getLnk_facebook() != null ? domain.getLnk_facebook() : "Missed");
-                variables.put(MsgTemplateVariables.V_DOMAIN_LINKEDIN, domain.getLnk_linkedin() != null ? domain.getLnk_linkedin() : "Missed");
-                variables.put(MsgTemplateVariables.V_DOMAIN_XING, domain.getLnk_xing() != null ? domain.getLnk_xing() : "Missed");
+                variables.put(MsgTemplateVariables.V_TENANT_URL, domain.getUrl() != null ? domain.getUrl() : "Missed");
+                variables.put(MsgTemplateVariables.V_TENANT_PHONE, domain.getPhone() != null ? domain.getPhone() : "Missed");
+                variables.put(MsgTemplateVariables.V_TENANT_EMAIL, domain.getEmail() != null ? domain.getEmail() : "Missed");
+                variables.put(MsgTemplateVariables.V_TENANT_ADDRESS, domain.getAddress() != null ? domain.getAddress().format() : "Missed");
+                variables.put(MsgTemplateVariables.V_TENANT_FACEBOOK, domain.getLnk_facebook() != null ? domain.getLnk_facebook() : "Missed");
+                variables.put(MsgTemplateVariables.V_TENANT_LINKEDIN, domain.getLnk_linkedin() != null ? domain.getLnk_linkedin() : "Missed");
+                variables.put(MsgTemplateVariables.V_TENANT_XING, domain.getLnk_xing() != null ? domain.getLnk_xing() : "Missed");
             } else {
-                variables.put(MsgTemplateVariables.V_DOMAIN_URL, "Missed");
-                variables.put(MsgTemplateVariables.V_DOMAIN_PHONE, "Missed");
-                variables.put(MsgTemplateVariables.V_DOMAIN_EMAIL, "Missed");
-                variables.put(MsgTemplateVariables.V_DOMAIN_ADDRESS, "Missed");
-                variables.put(MsgTemplateVariables.V_DOMAIN_FACEBOOK, "Missed");
-                variables.put(MsgTemplateVariables.V_DOMAIN_LINKEDIN, "Missed");
-                variables.put(MsgTemplateVariables.V_DOMAIN_XING, "Missed");
+                variables.put(MsgTemplateVariables.V_TENANT_URL, "Missed");
+                variables.put(MsgTemplateVariables.V_TENANT_PHONE, "Missed");
+                variables.put(MsgTemplateVariables.V_TENANT_EMAIL, "Missed");
+                variables.put(MsgTemplateVariables.V_TENANT_ADDRESS, "Missed");
+                variables.put(MsgTemplateVariables.V_TENANT_FACEBOOK, "Missed");
+                variables.put(MsgTemplateVariables.V_TENANT_LINKEDIN, "Missed");
+                variables.put(MsgTemplateVariables.V_TENANT_XING, "Missed");
             }
         } catch (Exception e) {
             log.error("Remote feign call failed : ", e);
             //throw new RemoteCallFailedException(e);
         }
-        //get sender domain variables
+        //get sender tenant variables
 
         return FreeMarkerTemplateUtils.processTemplateIntoString(
                 freemarkerConfig.getConfiguration().getTemplate(template.getFileName()),
@@ -167,7 +171,7 @@ public class MsgTemplateService extends FileService<Long, MsgTemplate, MsgTempla
     @Override
     public AppNextCode initCodeGenerator() {
         return AppNextCode.builder()
-                .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
+                .tenant(TenantConstants.DEFAULT_TENANT_NAME)
                 .entity(MsgTemplate.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("MTP")

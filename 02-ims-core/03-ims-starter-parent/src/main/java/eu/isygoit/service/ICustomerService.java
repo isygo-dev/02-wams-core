@@ -1,6 +1,8 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.ICrudServiceMethod;
+import eu.isygoit.com.rest.controller.impl.tenancy.IImageTenantServiceMethods;
+import eu.isygoit.com.rest.service.ICrudServiceMethods;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
 import eu.isygoit.com.rest.service.IImageServiceMethods;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Customer;
@@ -10,7 +12,8 @@ import java.util.List;
 /**
  * The interface Customer service.
  */
-public interface ICustomerService extends ICrudServiceMethod<Long, Customer>, IImageServiceMethods<Long, Customer> {
+public interface ICustomerService extends ICrudTenantServiceMethods<Long, Customer>,
+        IImageTenantServiceMethods<Long, Customer> {
 
     /**
      * Gets names.
@@ -35,5 +38,5 @@ public interface ICustomerService extends ICrudServiceMethod<Long, Customer>, II
      * @param accountCode the account code
      * @return the customer
      */
-    Customer linkToAccount(Long id, String accountCode);
+    Customer linkToAccount(String tenant, Long id, String accountCode);
 }

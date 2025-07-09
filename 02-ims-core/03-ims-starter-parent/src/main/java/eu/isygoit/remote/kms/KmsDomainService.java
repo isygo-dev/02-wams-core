@@ -5,9 +5,9 @@ import eu.isygoit.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 
 /**
- * The interface Kms domain service.
+ * The interface Kms tenant service.
  */
-@FeignClient(configuration = FeignConfig.class, name = "key-service", contextId = "kms-domain", path = "/api/v1/private/domain")
+@FeignClient(configuration = FeignConfig.class, name = "key-service", contextId = "kms-tenant", path = "/api/v1/private/tenant")
 public interface KmsDomainService extends KmsDomainControllerApi {
 
 }

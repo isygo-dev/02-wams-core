@@ -9,13 +9,13 @@
 
     <groupId>eu.isygo-it.services</groupId>
     <artifactId>storage-management-starter-parent</artifactId>
-    <version>WC-1.0.250516-T0922</version>
+    <version>WC-1.0.250707-T0839</version>
     <packaging>jar</packaging>
 
     <parent>
         <groupId>eu.isygo-it.services</groupId>
         <artifactId>service-stack-parent</artifactId>
-        <version>WS-1.0.250516-T0922</version>
+        <version>WS-1.0.250707-T0839</version>
     </parent>
 
     <profiles>
@@ -64,33 +64,33 @@
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>storage-management-jpa</artifactId>
-            <version>WC-1.0.250516-T0922</version>
+            <version>WC-1.0.250707-T0839</version>
         </dependency>
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>storage-management-shared</artifactId>
-            <version>WC-1.0.250516-T0922</version>
+            <version>WC-1.0.250707-T0839</version>
         </dependency>
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>messaging-management-shared</artifactId>
-            <version>WC-1.0.250516-T0922</version>
+            <version>WC-1.0.250707-T0839</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>service-stack-web</artifactId>
-            <version>WS-1.0.250516-T0922</version>
+            <version>WS-1.0.250707-T0839</version>
         </dependency>
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>key-management-shared</artifactId>
-            <version>WC-1.0.250516-T0922</version>
+            <version>WC-1.0.250707-T0839</version>
         </dependency>
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>identity-management-shared</artifactId>
-            <version>WC-1.0.250516-T0922</version>
+            <version>WC-1.0.250707-T0839</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/io.minio/minio -->
         <dependency>

@@ -98,7 +98,7 @@ public interface ChatMessageControllerApi {
      * Gets chat status.
      *
      * @param requestContext the request context
-     * @param domainId       the domain id
+     * @param tenantId       the tenant id
      * @return the chat status
      */
     @Operation(summary = "Get chat accounts status Api",
@@ -109,7 +109,7 @@ public interface ChatMessageControllerApi {
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = WsConnectDto.class))})
     })
-    @GetMapping(path = "/status/domain")
+    @GetMapping(path = "/status/tenant")
     ResponseEntity<List<WsConnectDto>> getChatStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                                     @RequestParam(name = RestApiConstants.DOMAIN_ID) Long domainId);
+                                                     @RequestParam(name = RestApiConstants.TENANT_ID) Long tenantId);
 }

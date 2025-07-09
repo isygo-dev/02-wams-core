@@ -1,7 +1,7 @@
 package eu.isygoit.model;
 
 
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.model.jakarta.AuditableEntity;
@@ -29,14 +29,14 @@ import java.util.List;
                 @UniqueConstraint(name = SchemaUcConstantName.UC_MSG_TEMPLATE_CODE,
                         columnNames = {SchemaColumnConstantName.C_CODE}),
                 @UniqueConstraint(name = SchemaUcConstantName.UC_TEMPLATE_DOM_NAME_LANG,
-                        columnNames = {SchemaColumnConstantName.C_DOMAIN, SchemaColumnConstantName.C_NAME, SchemaColumnConstantName.C_LANGUAGE})
+                        columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_NAME, SchemaColumnConstantName.C_LANGUAGE})
         })
 @SecondaryTable(name = SchemaTableConstantName.T_MSG_TEMPLATE_FILE,
         pkJoinColumns = @PrimaryKeyJoinColumn(name = SchemaColumnConstantName.C_ID,
                 referencedColumnName = SchemaColumnConstantName.C_ID)
 )
 public class MsgTemplate extends AuditableEntity<Long>
-        implements IDomainAssignable, ICodeAssignable, IFileEntity {
+        implements ITenantAssignable, ICodeAssignable, IFileEntity {
 
     @Id
     @SequenceGenerator(name = "template_sequence_generator", sequenceName = "template_sequence", allocationSize = 1)
@@ -48,9 +48,9 @@ public class MsgTemplate extends AuditableEntity<Long>
     @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;
     //@Convert(converter = LowerCaseConverter.class)
-    @ColumnDefault("'" + DomainConstants.DEFAULT_DOMAIN_NAME + "'")
-    @Column(name = SchemaColumnConstantName.C_DOMAIN, length = SchemaConstantSize.DOMAIN, updatable = false, nullable = false)
-    private String domain;
+    @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
+    @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
+    private String tenant;
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_NAME, length = IEnumEmailTemplate.STR_ENUM_SIZE, nullable = false)
     private IEnumEmailTemplate.Types name;

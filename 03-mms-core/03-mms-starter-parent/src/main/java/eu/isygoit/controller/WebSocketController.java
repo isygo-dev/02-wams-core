@@ -1,6 +1,6 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlHandler;
+import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.api.WebSocketControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@CtrlHandler(MmsExceptionHandler.class)
+@InjectExceptionHandler(MmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/ws")
 public class WebSocketController extends ControllerExceptionHandler implements WebSocketControllerApi {
 

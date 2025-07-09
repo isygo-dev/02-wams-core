@@ -1,7 +1,10 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.ServRepo;
+import eu.isygoit.annotation.InjectRepository;
+import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.com.rest.service.CrudService;
+import eu.isygoit.com.rest.service.tenancy.CrudTenantService;
 import eu.isygoit.model.Theme;
 import eu.isygoit.repository.ThemeRepository;
 import eu.isygoit.service.IThemeService;
@@ -18,15 +21,15 @@ import java.util.Optional;
 @Slf4j
 @Service
 @Transactional
-@ServRepo(value = ThemeRepository.class)
+@InjectRepository(value = ThemeRepository.class)
 public class ThemeService extends CrudService<Long, Theme, ThemeRepository> implements IThemeService {
 
     @Autowired
     private ThemeRepository themeRepository;
 
     @Override
-    public Theme findThemeByAccountCodeAndDomainCode(String accountCode, String domainCode) {
-        Optional<Theme> theme = themeRepository.findByAccountCodeIgnoreCaseAndDomainCodeIgnoreCase(accountCode, domainCode);
+    public Theme findThemeByAccountCodeAndDomainCode(String accountCode, String tenantCode) {
+        Optional<Theme> theme = themeRepository.findByAccountCodeIgnoreCaseAndDomainCodeIgnoreCase(accountCode, tenantCode);
         if (theme.isPresent()) {
             return theme.get();
         }
@@ -35,7 +38,7 @@ public class ThemeService extends CrudService<Long, Theme, ThemeRepository> impl
 
     @Override
     public Theme updateTheme(Theme theme) {
-        Theme oldTheme = this.findThemeByAccountCodeAndDomainCode(theme.getAccountCode(), theme.getDomainCode());
+        Theme oldTheme = this.findThemeByAccountCodeAndDomainCode(theme.getAccountCode(), theme.getTenantCode());
         if (oldTheme != null) {
             theme.setId(oldTheme.getId());
         }

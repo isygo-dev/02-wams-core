@@ -1,6 +1,6 @@
 package eu.isygoit.security.config;
 
-import eu.isygoit.jwt.filter.JwtKmsClientAuthFilter;
+import eu.isygoit.filter.jwt.JwtKmsClientAuthFilter;
 import eu.isygoit.repository.ApiPermissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

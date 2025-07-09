@@ -39,30 +39,30 @@ public interface IKeyService {
     /**
      * Gets incremental key.
      *
-     * @param domain     the domain
+     * @param tenant     the tenant
      * @param entityName the entity name
      * @param attribute  the attribute
      * @return the incremental key
      * @throws IncrementalConfigNotFoundException the incremental config not found exception
      */
-    String getIncrementalKey(String domain, String entityName, String attribute) throws IncrementalConfigNotFoundException;
+    String getIncrementalKey(String tenant, String entityName, String attribute) throws IncrementalConfigNotFoundException;
 
     /**
      * Create or update key by name random key.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @param name   the name
      * @param value  the value
      * @return the random key
      */
-    RandomKey createOrUpdateKeyByName(String domain, String name, String value);
+    RandomKey createOrUpdateKeyByName(String tenant, String name, String value);
 
     /**
      * Gets key by name.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @param name   the name
      * @return the key by name
      */
-    RandomKey getKeyByName(String domain, String name);
+    RandomKey getKeyByName(String tenant, String name);
 }

@@ -1,6 +1,7 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.ICrudServiceMethod;
+import eu.isygoit.com.rest.service.ICrudServiceMethods;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
 import eu.isygoit.dto.data.ChatAccountDto;
 import eu.isygoit.dto.wsocket.WsConnectDto;
 import eu.isygoit.model.ChatMessage;
@@ -13,7 +14,7 @@ import java.util.UUID;
 /**
  * The interface Chat message service.
  */
-public interface IChatMessageService extends ICrudServiceMethod<UUID, ChatMessage> {
+public interface IChatMessageService extends ICrudServiceMethods<UUID, ChatMessage> {
 
     /**
      * Find by receiver id list.
@@ -44,10 +45,10 @@ public interface IChatMessageService extends ICrudServiceMethod<UUID, ChatMessag
     List<ChatAccountDto> getChatAccounts(Long userId, Pageable pageable);
 
     /**
-     * Gets connections by domain.
+     * Gets connections by tenant.
      *
-     * @param domainId the domain id
-     * @return the connections by domain
+     * @param tenantId the tenant id
+     * @return the connections by tenant
      */
-    List<WsConnectDto> getConnectionsByDomain(Long domainId);
+    List<WsConnectDto> getConnectionsByTenant(Long tenantId);
 }

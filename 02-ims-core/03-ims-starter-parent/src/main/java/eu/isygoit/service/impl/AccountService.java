@@ -1,13 +1,17 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.CodeGenKms;
-import eu.isygoit.annotation.CodeGenLocal;
-import eu.isygoit.annotation.ServRepo;
+import eu.isygoit.annotation.InjectCodeGenKms;
+import eu.isygoit.annotation.InjectCodeGen;
+import eu.isygoit.annotation.InjectRepository;
+import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.com.rest.service.ImageService;
+import eu.isygoit.com.rest.service.tenancy.ImageTenantService;
+import eu.isygoit.com.rest.service.tenancy.ImageTenantService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.AccountTypeConstants;
 import eu.isygoit.constants.AppParameterConstants;
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.common.TokenDto;
@@ -50,10 +54,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @Transactional
-@CodeGenLocal(value = NextCodeService.class)
-@CodeGenKms(value = KmsIncrementalKeyService.class)
-@ServRepo(value = AccountRepository.class)
-public class AccountService extends ImageService<Long, Account, AccountRepository>
+@InjectCodeGen(value = NextCodeService.class)
+@InjectCodeGenKms(value = KmsIncrementalKeyService.class)
+@InjectRepository(value = AccountRepository.class)
+public class AccountService extends ImageTenantService<Long, Account, AccountRepository>
         implements IAccountService {
 
     private final AppProperties appProperties;
@@ -67,7 +71,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     @Autowired
     private MinAccountMapper minAccountMapper;
     @Autowired
-    private IDomainService domainService;
+    private IDomainService tenantService;
     @Autowired
     private IAppParameterService parameterService;
     @Autowired
@@ -88,7 +92,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     @Override
     public AppNextCode initCodeGenerator() {
         return AppNextCode.builder()
-                .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
+                .tenant(TenantConstants.DEFAULT_TENANT_NAME)
                 .entity(Account.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("ACT")
@@ -99,8 +103,8 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     }
 
     @Override
-    public Account findByDomainAndUserName(String domain, String userName) {
-        Optional<Account> optional = repository().findByDomainIgnoreCaseAndCodeIgnoreCase(domain, userName);
+    public Account findByTenantAndUserName(String tenant, String userName) {
+        Optional<Account> optional = repository().findByTenantIgnoreCaseAndCodeIgnoreCase(tenant, userName);
         if (optional.isPresent()) {
             return optional.get();
         }
@@ -108,17 +112,17 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     }
 
     @Override
-    public List<String> findEmailsByDomain(String domain) {
-        if (DomainConstants.SUPER_DOMAIN_NAME.equals(domain)) {
+    public List<String> findEmailsByTenant(String tenant) {
+        if (TenantConstants.SUPER_TENANT_NAME.equals(tenant)) {
             return repository().findDistinctEmails();
         } else {
-            return repository().findDistinctEmailsByDomain(domain);
+            return repository().findDistinctEmailsByTenant(tenant);
         }
     }
 
     @Override
-    public List<Application> findDistinctAllowedToolsByDomainAndUserName(String domain, String userName) {
-        Account account = findByDomainAndUserName(domain, userName);
+    public List<Application> findDistinctAllowedToolsByTenantAndUserName(String tenant, String userName) {
+        Account account = findByTenantAndUserName(tenant, userName);
         if (account != null) {
             List<Application> applications = new ArrayList<>();
             for (RoleInfo role : account.getRoleInfo()) {
@@ -155,20 +159,20 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
         }
 
         //Add param to load disabled applications
-        String hideDisabledApp = parameterService.getValueByDomainAndName(account.getDomain(), AppParameterConstants.HIDE_DISABLED_APP, true, AppParameterConstants.NO);
+        String hideDisabledApp = parameterService.getValueByTenantAndName(account.getTenant(), AppParameterConstants.HIDE_DISABLED_APP, true, AppParameterConstants.NO);
         if (AppParameterConstants.YES.equals(hideDisabledApp)) {
             return applications.stream()
                     .filter(application -> IEnumEnabledBinaryStatus.Types.ENABLED == application.getAdminStatus())
                     .distinct()
                     .map(application -> {
                         ApplicationDto app = applicationMapper.entityToDto(application);
-                        app.setToken(kmsTokenService.buildTokenByDomain(//RequestContextDto.builder().build(),
-                                account.getDomain(),
+                        app.setToken(kmsTokenService.buildTokenByTenant(//RequestContextDto.builder().build(),
+                                account.getTenant(),
                                 application.getName(),
                                 IEnumToken.Types.ACCESS,
                                 TokenRequestDto.builder()
                                         .subject(account.getCode())
-                                        .claims(Map.of(JwtConstants.JWT_SENDER_DOMAIN, account.getDomain(),
+                                        .claims(Map.of(JwtConstants.JWT_SENDER_TENANT, account.getTenant(),
                                                 JwtConstants.JWT_SENDER_ACCOUNT_TYPE, account.getAccountType(),
                                                 JwtConstants.JWT_SENDER_USER, account.getCode(),
                                                 JwtConstants.JWT_LOG_APP, application.getName()))
@@ -180,13 +184,13 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
                     .distinct().
                     map(application -> {
                         ApplicationDto app = applicationMapper.entityToDto(application);
-                        app.setToken(kmsTokenService.buildTokenByDomain(//RequestContextDto.builder().build(),
-                                account.getDomain(),
+                        app.setToken(kmsTokenService.buildTokenByTenant(//RequestContextDto.builder().build(),
+                                account.getTenant(),
                                 application.getName(),
                                 IEnumToken.Types.ACCESS,
                                 TokenRequestDto.builder()
                                         .subject(account.getCode())
-                                        .claims(Map.of(JwtConstants.JWT_SENDER_DOMAIN, account.getDomain(),
+                                        .claims(Map.of(JwtConstants.JWT_SENDER_TENANT, account.getTenant(),
                                                 JwtConstants.JWT_SENDER_ACCOUNT_TYPE, account.getAccountType(),
                                                 JwtConstants.JWT_SENDER_USER, account.getCode(),
                                                 JwtConstants.JWT_LOG_APP, application.getName()))
@@ -197,41 +201,41 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     }
 
     @Override
-    public List<Account> getByDomain(String domain) {
-        if (DomainConstants.SUPER_DOMAIN_NAME.equals(domain)) {
+    public List<Account> getByTenant(String tenant) {
+        if (TenantConstants.SUPER_TENANT_NAME.equals(tenant)) {
             return repository().findAll();
         } else {
-            return repository().findByDomainIgnoreCaseIn(Arrays.asList(domain));
+            return repository().findByTenantIgnoreCaseIn(Arrays.asList(tenant));
         }
     }
 
     @Override
-    public List<MinAccountDto> getMinInfoByDomain(String domain) throws NotSupportedException {
-        if (DomainConstants.SUPER_DOMAIN_NAME.equals(domain)) {
-            return minAccountMapper.listEntityToDto(findAll());
+    public List<MinAccountDto> getMinInfoByTenant(String tenant) throws NotSupportedException {
+        if (TenantConstants.SUPER_TENANT_NAME.equals(tenant)) {
+            return minAccountMapper.listEntityToDto(findAll(tenant));
         } else {
-            return minAccountMapper.listEntityToDto(findAll(domain));
+            return minAccountMapper.listEntityToDto(findAll(tenant));
         }
     }
 
     @Override
     public UserContext getAuthenticationType(AccountAuthTypeRequest accountAuthTypeRequest) throws AccountNotFoundException {
         //Remove left & right spaces
-        accountAuthTypeRequest.setDomain(accountAuthTypeRequest.getDomain().trim());
+        accountAuthTypeRequest.setTenant(accountAuthTypeRequest.getTenant().trim());
         accountAuthTypeRequest.setUserName(accountAuthTypeRequest.getUserName().trim());
 
-        if (!domainService.isEnabled(accountAuthTypeRequest.getDomain())) {
-            throw new AccountAuthenticationException("domain disabled: " + accountAuthTypeRequest.getDomain());
+        if (!tenantService.isEnabled(accountAuthTypeRequest.getTenant())) {
+            throw new AccountAuthenticationException("tenant disabled: " + accountAuthTypeRequest.getTenant());
         }
 
-        Account account = findByDomainAndUserName(accountAuthTypeRequest.getDomain(), accountAuthTypeRequest.getUserName());
+        Account account = findByTenantAndUserName(accountAuthTypeRequest.getTenant(), accountAuthTypeRequest.getUserName());
         if (account != null) {
             if (IEnumAuth.Types.OTP == account.getAuthType()) {
                 try {
                     ResponseEntity<Integer> result = kmsPasswordService.generate(//RequestContextDto.builder().build(),
                             IEnumAuth.Types.OTP,
                             GeneratePwdRequestDto.builder()
-                                    .domain(account.getDomain())
+                                    .tenant(account.getTenant())
                                     .email(account.getEmail())
                                     .userName(account.getCode())
                                     .fullName(account.getFullName())
@@ -251,13 +255,13 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
 
             } else if (IEnumAuth.Types.QRC == account.getAuthType()) {
                 try {
-                    ResponseEntity<TokenDto> result = kmsTokenService.buildTokenByDomain(//RequestContextDto.builder().build(),
-                            account.getDomain(),
+                    ResponseEntity<TokenDto> result = kmsTokenService.buildTokenByTenant(//RequestContextDto.builder().build(),
+                            account.getTenant(),
                             IEnumAuth.Types.QRC.meaning(),
                             IEnumToken.Types.QRC,
                             TokenRequestDto.builder()
                                     .subject(account.getCode())
-                                    .claims(Map.of(JwtConstants.JWT_SENDER_DOMAIN, accountAuthTypeRequest.getDomain(),
+                                    .claims(Map.of(JwtConstants.JWT_SENDER_TENANT, accountAuthTypeRequest.getTenant(),
                                             JwtConstants.JWT_LOG_APP, IEnumAuth.Types.QRC.meaning(),
                                             JwtConstants.JWT_SENDER_USER, account.getCode()))
                                     .build());
@@ -280,7 +284,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
             }
 
         } else {
-            throw new AccountNotFoundException("with domain: " + accountAuthTypeRequest.getDomain() + " and username with " + accountAuthTypeRequest.getUserName());
+            throw new AccountNotFoundException("with tenant: " + accountAuthTypeRequest.getTenant() + " and username with " + accountAuthTypeRequest.getUserName());
         }
     }
 
@@ -295,13 +299,13 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
         return accounts.stream()
                 .filter(account -> account.getAdminStatus().equals(IEnumEnabledBinaryStatus.Types.ENABLED))
                 .map(account -> {
-                    if (!domainService.isEnabled(account.getDomain())) {
-                        throw new AccountAuthenticationException("domain disabled: " + account.getDomain());
+                    if (!tenantService.isEnabled(account.getTenant())) {
+                        throw new AccountAuthenticationException("tenant disabled: " + account.getTenant());
                     }
                     return UserAccountDto.builder()
                             .code(account.getCode())
-                            .domain(account.getDomain())
-                            .domainId(domainService.findByName(account.getDomain()).getId())
+                            .tenant(account.getTenant())
+                            .tenantId(tenantService.findByName(account.getTenant()).getId())
                             .fullName(account.getFullName())
                             .functionRole(account.getFunctionRole())
                             .build();
@@ -310,8 +314,8 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     }
 
     @Override
-    public boolean switchAuthType(AccountAuthTypeRequest accountAuthTypeRequest) throws AccountNotFoundException {
-        Account account = findByDomainAndUserName(accountAuthTypeRequest.getDomain(), accountAuthTypeRequest.getUserName());
+    public boolean switchAuthType(String tenant, AccountAuthTypeRequest accountAuthTypeRequest) throws AccountNotFoundException {
+        Account account = findByTenantAndUserName(accountAuthTypeRequest.getTenant(), accountAuthTypeRequest.getUserName());
         if (account != null) {
             if (accountAuthTypeRequest.getAuthType() == null) {
                 if (account.getAuthType().equals(IEnumAuth.Types.OTP)) {
@@ -322,10 +326,10 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
             } else {
                 account.setAuthType(accountAuthTypeRequest.getAuthType());
             }
-            this.update(account);
+            this.update(tenant, account);
             return true;
         } else {
-            throw new AccountNotFoundException("with domain: " + accountAuthTypeRequest.getDomain() + " and username with " + accountAuthTypeRequest.getUserName());
+            throw new AccountNotFoundException("with tenant: " + accountAuthTypeRequest.getTenant() + " and username with " + accountAuthTypeRequest.getUserName());
         }
     }
 
@@ -335,13 +339,13 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     }
 
     @Override
-    public boolean checkIfApplicationAllowed(String domain, String userName, String application) {
+    public boolean checkIfApplicationAllowed(String tenant, String userName, String application) {
         //allow webapp-gw/gateway for all users
         if ("webapp-gw".equals(application)) {
             return true;
         }
 
-        Optional<Account> optional = repository().findByDomainIgnoreCaseAndCodeIgnoreCase(domain, userName);
+        Optional<Account> optional = repository().findByTenantIgnoreCaseAndCodeIgnoreCase(tenant, userName);
         if (optional.isPresent()) {
             for (RoleInfo roleInfo : optional.get().getRoleInfo()) {
                 if (roleInfo.getAllowedTools().stream().parallel().anyMatch(app -> (app.getName().equals(application) && IEnumEnabledBinaryStatus.Types.ENABLED == app.getAdminStatus()))) {
@@ -349,34 +353,34 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
                 }
             }
         } else {
-            throw new AccountNotFoundException(domain + "/" + userName);
+            throw new AccountNotFoundException(tenant + "/" + userName);
         }
 
         return false;
     }
 
     @Override
-    public void trackUserConnections(String domain, String userName, ConnectionTracking connectionTracking) {
-        Account account = this.findByDomainAndUserName(domain, userName);
+    public void trackUserConnections(String tenant, String userName, ConnectionTracking connectionTracking) {
+        Account account = this.findByTenantAndUserName(tenant, userName);
         if (account != null) {
             if (CollectionUtils.isEmpty(account.getConnectionTracking())) {
                 account.setConnectionTracking(new ArrayList<>());
             }
 
             account.getConnectionTracking().add(connectionTracking);
-            this.saveOrUpdate(account);
+            this.saveOrUpdate(tenant, account);
         }
     }
 
     @Override
-    public List<Account> chatAccountsByDomain(String domain) {
-        List<Account> list = repository().findByDomainIgnoreCaseIn(Arrays.asList(domain, DomainConstants.SUPER_DOMAIN_NAME));
+    public List<Account> chatAccountsByTenant(String tenant) {
+        List<Account> list = repository().findByTenantIgnoreCaseIn(Arrays.asList(tenant, TenantConstants.SUPER_TENANT_NAME));
         if (CollectionUtils.isEmpty(list)) {
             return Collections.EMPTY_LIST;
         }
         try {
             ResponseEntity<List<WsConnectDto>> result = mmsChatMessageService.getChatStatus(RequestContextDto.builder().build(),
-                    domainService.findByName(domain).getId());
+                    tenantService.findByName(tenant).getId());
             if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
                 List<WsConnectDto> connections = result.getBody();
                 if (!CollectionUtils.isEmpty(connections)) {
@@ -399,16 +403,16 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     }
 
     @Override
-    public boolean resendCreationEmail(Long id) {
+    public boolean resendCreationEmail(String tenant, Long id) {
         try {
-            Optional<Account> optional = this.findById(id);
+            Optional<Account> optional = this.findById(tenant, id);
             if (optional.isPresent()) {
                 Account account = optional.get();
                 ResponseEntity<Integer> result = kmsPasswordService.generate(//RequestContextDto.builder().build(),
                         IEnumAuth.Types.PWD,
                         GeneratePwdRequestDto.builder()
-                                .domain(account.getDomain())
-                                .domainUrl(domainService.findByName(account.getDomain()).getUrl())
+                                .tenant(account.getTenant())
+                                .tenantUrl(tenantService.findByName(account.getTenant()).getUrl())
                                 .email(account.getEmail())
                                 .userName(account.getCode())
                                 .fullName(account.getFullName())
@@ -451,61 +455,61 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
     }
 
     private Long stat_GetAdminsCount(RequestContextDto requestContext) {
-        if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
+        if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return repository().countByIsAdminTrue();
         } else {
-            return repository().countByDomainIgnoreCaseAndIsAdminTrue(requestContext.getSenderDomain());
+            return repository().countByTenantIgnoreCaseAndIsAdminTrue(requestContext.getSenderTenant());
         }
     }
 
     private Long stat_GetAccountsCount(RequestContextDto requestContext) {
-        if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
+        if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return repository().count();
         } else {
-            return repository().countByDomainIgnoreCase(requestContext.getSenderDomain());
+            return repository().countByTenantIgnoreCase(requestContext.getSenderTenant());
         }
     }
 
     private Long stat_GetActiveAccountsCount(RequestContextDto requestContext) {
-        if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
+        if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return repository().countByAdminStatus(IEnumEnabledBinaryStatus.Types.ENABLED);
         } else {
-            return repository().countByDomainIgnoreCaseAndAdminStatus(requestContext.getSenderDomain(), IEnumEnabledBinaryStatus.Types.ENABLED);
+            return repository().countByTenantIgnoreCaseAndAdminStatus(requestContext.getSenderTenant(), IEnumEnabledBinaryStatus.Types.ENABLED);
         }
     }
 
     private Long stat_GetConfirmedAccountsCount(RequestContextDto requestContext) {
-        if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
+        if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return repository().countByOrigin("SYS_ADMIN%");
         } else {
-            return repository().countByDomainAndOrigin(requestContext.getSenderDomain(), "SYS_ADMIN%");
+            return repository().countByTenantAndOrigin(requestContext.getSenderTenant(), "SYS_ADMIN%");
         }
     }
 
     @Override
     public Long stat_GetConfirmedResumeAccountsCount(RequestContextDto requestContext) {
-        if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
+        if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return repository().countByOrigin("RESUME%");
         } else {
-            return repository().countByDomainAndOrigin(requestContext.getSenderDomain(), "RESUME%");
+            return repository().countByTenantAndOrigin(requestContext.getSenderTenant(), "RESUME%");
         }
     }
 
     @Override
     public Long stat_GetConfirmedEmployeeAccountsCount(RequestContextDto requestContext) {
-        if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
+        if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return repository().countByOrigin("EMPLOYEE%");
         } else {
-            return repository().countByDomainAndOrigin(requestContext.getSenderDomain(), "EMPLOYEE%");
+            return repository().countByTenantAndOrigin(requestContext.getSenderTenant(), "EMPLOYEE%");
         }
     }
 
     @Override
-    public Account createDomainAdmin(String domain, DomainAdminDto admin) {
-        RoleInfo domainAdmin = roleInfoService.findByName(AccountTypeConstants.DOMAIN_ADMIN);
+    public Account createDomainAdmin(String tenant, DomainAdminDto admin) {
+        RoleInfo tenantAdmin = roleInfoService.findByName(AccountTypeConstants.TENANT_ADMIN);
 
-        return this.create(Account.builder()
-                .domain(domain)
+        return this.create(tenant, Account.builder()
+                .tenant(tenant)
                 .isAdmin(Boolean.TRUE)
                 .phoneNumber(admin.getPhone())
                 .email(admin.getEmail())
@@ -514,7 +518,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
                         .lastName(admin.getLastName())
                         .build())
                 .functionRole("Domain administrator")
-                .roleInfo(Arrays.asList(domainAdmin))
+                .roleInfo(Arrays.asList(tenantAdmin))
                 .build());
     }
 
@@ -529,7 +533,7 @@ public class AccountService extends ImageService<Long, Account, AccountRepositor
      * @return the all accounts min
      */
     //@Cacheable(cacheNames = SchemaTableConstantName.T_ACCOUNT)
-    public List<MinAccountDto> getAllAccountsMin() {
-        return minAccountMapper.listEntityToDto(this.findAll());
+    public List<MinAccountDto> getAllAccountsMin(String tenant) {
+        return minAccountMapper.listEntityToDto(this.findAll(tenant));
     }
 }

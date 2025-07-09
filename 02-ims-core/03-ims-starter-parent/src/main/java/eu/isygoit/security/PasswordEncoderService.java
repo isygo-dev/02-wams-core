@@ -36,7 +36,7 @@ public class PasswordEncoderService implements PasswordEncoder {
             return !Arrays.asList(IEnumPasswordStatus.Types.BAD, IEnumPasswordStatus.Types.BROKEN).contains(
                     kmsPasswordService.matches(//RequestContextDto.builder().build(),
                             MatchesRequestDto.builder()
-                                    .domain(encodedPasswordArray[1])
+                                    .tenant(encodedPasswordArray[1])
                                     .userName(encodedPasswordArray[0])
                                     .authType(IEnumAuth.Types.valueOf(encodedPasswordArray[2]))
                                     .password(rawPassword.toString())

@@ -1,6 +1,6 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlHandler;
+import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.api.IncrementalKeyControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@CtrlHandler(KmsExceptionHandler.class)
+@InjectExceptionHandler(KmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/key")
 public class IncrementalKeyController extends ControllerExceptionHandler implements IncrementalKeyControllerApi {
 
@@ -34,10 +34,10 @@ public class IncrementalKeyController extends ControllerExceptionHandler impleme
 
     @Override
     public ResponseEntity<String> generateNextCode(RequestContextDto requestContext,
-                                                   String domain, String entity, String attribute) {
-        log.info("Call generate next code for: {}/{}/{}", domain, entity, attribute);
+                                                   String tenant, String entity, String attribute) {
+        log.info("Call generate next code for: {}/{}/{}", tenant, entity, attribute);
         try {
-            return ResponseFactory.responseOk(keyService.getIncrementalKey(domain, entity, attribute));
+            return ResponseFactory.responseOk(keyService.getIncrementalKey(tenant, entity, attribute));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -46,11 +46,11 @@ public class IncrementalKeyController extends ControllerExceptionHandler impleme
 
     @Override
     public ResponseEntity<String> subscribeNextCode(//RequestContextDto requestContext,
-                                                    String domain, NextCodeDto incrementalConfig) {
-        log.info("Call subscribe next code generator for: {}/{}", domain, incrementalConfig);
+                                                    String tenant, NextCodeDto incrementalConfig) {
+        log.info("Call subscribe next code generator for: {}/{}", tenant, incrementalConfig);
         try {
             keyService.subscribeIncrementalKeyGenerator(AppNextCode.builder()
-                    .domain(domain)
+                    .tenant(tenant)
                     .entity(incrementalConfig.getEntity())
                     .attribute(incrementalConfig.getAttribute())
                     .prefix(incrementalConfig.getPrefix())

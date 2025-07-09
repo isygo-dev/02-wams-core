@@ -1,7 +1,10 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.ServRepo;
+import eu.isygoit.annotation.InjectRepository;
+import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.com.rest.service.CrudService;
+import eu.isygoit.com.rest.service.tenancy.CrudTenantService;
 import eu.isygoit.model.SenderConfig;
 import eu.isygoit.repository.SenderConfigRepository;
 import eu.isygoit.service.ISenderConfigService;
@@ -13,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-@ServRepo(value = SenderConfigRepository.class)
-public class SenderConfigService extends CrudService<Long, SenderConfig, SenderConfigRepository> implements ISenderConfigService {
+@InjectRepository(value = SenderConfigRepository.class)
+public class SenderConfigService extends CrudTenantService<Long, SenderConfig, SenderConfigRepository> implements ISenderConfigService {
 
 }

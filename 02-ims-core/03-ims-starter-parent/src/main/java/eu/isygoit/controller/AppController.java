@@ -1,10 +1,11 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.common.RequestContextDto;
@@ -34,9 +35,9 @@ import java.util.List;
 @Slf4j
 @Validated
 @RestController
-@CtrlDef(handler = ImsExceptionHandler.class, mapper = ApplicationMapper.class, minMapper = ApplicationMapper.class, service = ApplicationService.class)
+@InjectMapperAndService(handler = ImsExceptionHandler.class, mapper = ApplicationMapper.class, minMapper = ApplicationMapper.class, service = ApplicationService.class)
 @RequestMapping(path = "/api/v1/private/application")
-public class AppController extends MappedCrudController<Long, Application, ApplicationDto, ApplicationDto, ApplicationService> {
+public class AppController extends MappedCrudTenantController<Long, Application, ApplicationDto, ApplicationDto, ApplicationService> {
 
     @Autowired
     private IAccountService accountService;
@@ -72,50 +73,50 @@ public class AppController extends MappedCrudController<Long, Application, Appli
 
     @Override
     public ResponseEntity<List<ApplicationDto>> subFindAll(RequestContextDto requestContext) {
-        if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
+        if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return super.subFindAll(requestContext);
         } else {
-            return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
+            return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByTenantAndUserName(requestContext.getSenderTenant(),
                     requestContext.getSenderUser())));
         }
     }
 
     @Override
     public ResponseEntity<List<ApplicationDto>> subFindAllDefault(RequestContextDto requestContext) {
-        if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
+        if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return super.subFindAllDefault(requestContext);
         } else {
-            return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
+            return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByTenantAndUserName(requestContext.getSenderTenant(),
                     requestContext.getSenderUser())));
         }
     }
 
     @Override
     public ResponseEntity<List<ApplicationDto>> subFindAll(RequestContextDto requestContext, Integer page, Integer size) {
-        if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
+        if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return super.subFindAll(requestContext, page, size);
         } else {
-            return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
+            return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByTenantAndUserName(requestContext.getSenderTenant(),
                     requestContext.getSenderUser())));
         }
     }
 
     @Override
     public ResponseEntity<List<ApplicationDto>> subFindAllFull(RequestContextDto requestContext) {
-        if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
+        if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return super.subFindAllFull(requestContext);
         } else {
-            return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
+            return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByTenantAndUserName(requestContext.getSenderTenant(),
                     requestContext.getSenderUser())));
         }
     }
 
     @Override
     public ResponseEntity<List<ApplicationDto>> subFindAllFull(RequestContextDto requestContext, Integer page, Integer size) {
-        if (DomainConstants.SUPER_DOMAIN_NAME.equals(requestContext.getSenderDomain())) {
+        if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return super.subFindAllFull(requestContext, page, size);
         } else {
-            return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByDomainAndUserName(requestContext.getSenderDomain(),
+            return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByTenantAndUserName(requestContext.getSenderTenant(),
                     requestContext.getSenderUser())));
         }
     }

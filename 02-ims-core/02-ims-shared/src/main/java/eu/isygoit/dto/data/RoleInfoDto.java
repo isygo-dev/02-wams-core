@@ -22,7 +22,7 @@ import java.util.List;
 public class RoleInfoDto extends AbstractAuditableDto<Long> {
 
     @NotEmpty
-    private String domain;
+    private String tenant;
     private String templateCode;
     private String code;
     @NotEmpty

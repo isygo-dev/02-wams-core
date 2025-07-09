@@ -45,16 +45,17 @@ public class RegisterNewAccountProcessor extends AbstractStringProcessor {
 
         RoleInfo roleInfo = null;
         String[] splitOrigin = newAccount.getOrigin().split("-");
-        String roleName = parameterService.getValueByDomainAndName(newAccount.getDomain(), splitOrigin[0] + "_ROLE", true, "");
+        String roleName = parameterService.getValueByTenantAndName(newAccount.getTenant(), splitOrigin[0] + "_ROLE", true, "");
         if (StringUtils.hasText(roleName)) {
             roleInfo = roleInfoService.findByName(roleName);
         } else {
             log.error("<Error>: No role parametrized for account origin : {} ", newAccount.getOrigin());
         }
 
-        Account account = accountService.create(Account.builder()
+        Account account = accountService.create(newAccount.getTenant(),
+                Account.builder()
                 .origin(newAccount.getOrigin())
-                .domain(newAccount.getDomain())
+                .tenant(newAccount.getTenant())
                 .email(newAccount.getEmail())
                 .phoneNumber(newAccount.getPhoneNumber())
                 .roleInfo(roleInfo != null ? Arrays.asList(roleInfo) : null)

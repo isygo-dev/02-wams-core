@@ -1,6 +1,6 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlHandler;
+import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.api.FileConverterApi;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
@@ -30,7 +30,7 @@ import java.nio.file.Files;
 @Slf4j
 @Validated
 @RestController
-@CtrlHandler(DmsExceptionHandler.class)
+@InjectExceptionHandler(DmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/file/convert")
 public class FileConverterController extends ControllerExceptionHandler implements FileConverterApi {
 

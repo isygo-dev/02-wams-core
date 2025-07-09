@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.isygoit.api.AppParameterControllerApi;
 import eu.isygoit.api.MailMessageControllerApi;
 import eu.isygoit.config.AppProperties;
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.types.EmailSubjects;
@@ -47,7 +47,7 @@ public class MmsExceptionHandler extends ControllerExceptionHandler {
                 try {
                     mailMessageDto = MailMessageDto.builder()
                             .subject(EmailSubjects.UNMANAGED_EXCEPTION)
-                            .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
+                            .tenant(TenantConstants.DEFAULT_TENANT_NAME)
                             .toAddr(techAdminEmail)
                             .templateName(IEnumEmailTemplate.Types.UNMANAGED_EXCEPTION_TEMPLATE)
                             .variables(MailMessageDto.getVariablesAsString(Map.of(
@@ -59,7 +59,7 @@ public class MmsExceptionHandler extends ControllerExceptionHandler {
                     log.error("<Error>: send unmanaged exception email : {} ", e);
                 }
                 //Send the email message
-                msgService.sendMail(DomainConstants.SUPER_DOMAIN_NAME, mailMessageDto.getTemplateName(), mailMessageDto);
+                msgService.sendMail(TenantConstants.SUPER_TENANT_NAME, mailMessageDto.getTemplateName(), mailMessageDto);
             } else {
                 log.error("<Error>: technical email not found");
             }

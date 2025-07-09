@@ -1,6 +1,6 @@
 package eu.isygoit.model;
 
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaConstantSize;
@@ -28,10 +28,10 @@ import java.util.List;
         , uniqueConstraints = {
         @UniqueConstraint(name = SchemaUcConstantName.UC_ROLE_INFO_CODE,
                 columnNames = {SchemaColumnConstantName.C_CODE}),
-        @UniqueConstraint(name = SchemaUcConstantName.UC_ROLE_INFO_DOMAIN_NAME
-                , columnNames = {SchemaColumnConstantName.C_DOMAIN, SchemaColumnConstantName.C_NAME})
+        @UniqueConstraint(name = SchemaUcConstantName.UC_ROLE_INFO_TENANT_NAME
+                , columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_NAME})
 })
-public class RoleInfo extends AuditableEntity<Long> implements IDomainAssignable, ICodeAssignable {
+public class RoleInfo extends AuditableEntity<Long> implements ITenantAssignable, ICodeAssignable {
 
     @Id
     @SequenceGenerator(name = "role_info_sequence_generator", sequenceName = "role_info_sequence", allocationSize = 1)
@@ -39,9 +39,9 @@ public class RoleInfo extends AuditableEntity<Long> implements IDomainAssignable
     private Long id;
 
     //@Convert(converter = LowerCaseConverter.class)
-    @ColumnDefault("'" + DomainConstants.DEFAULT_DOMAIN_NAME + "'")
-    @Column(name = SchemaColumnConstantName.C_DOMAIN, length = SchemaConstantSize.DOMAIN, updatable = false, nullable = false)
-    private String domain;
+    @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
+    @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
+    private String tenant;
 
     //@Convert(converter = LowerCaseConverter.class)
     @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)

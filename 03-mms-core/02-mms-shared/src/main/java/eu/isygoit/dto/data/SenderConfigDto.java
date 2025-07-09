@@ -15,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class SenderConfigDto extends AbstractAuditableDto<Long> {
 
-    private String domain;
+    private String tenant;
     private String host;
     private String port;
     private String username;

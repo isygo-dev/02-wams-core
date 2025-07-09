@@ -23,7 +23,7 @@ public class KeyControllerTests {
     @Test
     void renewKeyByName() throws Exception {
         /*mockMvc.perform(post("/api/v1/private/key").contentType(MediaType.APPLICATION_JSON)
-                        .queryParam(RestApiConstants.DOMAIN_NAME, "")
+                        .queryParam(RestApiConstants.TENANT_NAME, "")
                         .queryParam(RestApiConstants.keyName, "")
                         .queryParam(RestApiConstants.length, "")
                         .queryParam(RestApiConstants.charSetType, "")

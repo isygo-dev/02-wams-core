@@ -10,7 +10,7 @@ public interface IMsgService {
     /**
      * Send message.
      *
-     * @param senderDomainName the sender domain name
+     * @param senderDomainName the sender tenant name
      * @param mailMessage      the mail message
      * @param async            the async
      */

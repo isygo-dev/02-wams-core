@@ -1,12 +1,15 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.CodeGenKms;
-import eu.isygoit.annotation.CodeGenLocal;
-import eu.isygoit.annotation.ServRepo;
+import eu.isygoit.annotation.InjectCodeGenKms;
+import eu.isygoit.annotation.InjectCodeGen;
+import eu.isygoit.annotation.InjectRepository;
+import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.config.AppProperties;
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.exception.CalendarAlreadyExistsException;
 import eu.isygoit.exception.EmptyPathException;
 import eu.isygoit.exception.ResourceNotFoundException;
@@ -39,10 +42,10 @@ import java.util.Optional;
 @Slf4j
 @Service
 @Transactional
-@CodeGenLocal(value = NextCodeService.class)
-@CodeGenKms(value = KmsIncrementalKeyService.class)
-@ServRepo(value = VCalendarRepository.class)
-public class VCalendarService extends CodeAssignableService<Long, VCalendar, VCalendarRepository>
+@InjectCodeGen(value = NextCodeService.class)
+@InjectCodeGenKms(value = KmsIncrementalKeyService.class)
+@InjectRepository(value = VCalendarRepository.class)
+public class VCalendarService extends CodeAssignableTenantService<Long, VCalendar, VCalendarRepository>
         implements IVCalendarService {
 
     private final AppProperties appProperties;
@@ -60,8 +63,8 @@ public class VCalendarService extends CodeAssignableService<Long, VCalendar, VCa
     }
 
     @Override
-    public VCalendar findByDomainAndName(String domain, String name) {
-        Optional<VCalendar> optional = vCalendarRepository.findByDomainIgnoreCaseAndName(domain, name);
+    public VCalendar findByTenantAndName(String tenant, String name) {
+        Optional<VCalendar> optional = vCalendarRepository.findByTenantIgnoreCaseAndName(tenant, name);
         if (optional.isPresent()) {
             return optional.get();
         }
@@ -76,33 +79,33 @@ public class VCalendarService extends CodeAssignableService<Long, VCalendar, VCa
     }
 
     @Override
-    public Resource download(String domain, String name) throws IOException {
-        Optional<VCalendar> vCalendar = vCalendarRepository.findByDomainIgnoreCaseAndName(domain, name);
+    public Resource download(String tenant, String name) throws IOException {
+        Optional<VCalendar> vCalendar = vCalendarRepository.findByTenantIgnoreCaseAndName(tenant, name);
         if (!vCalendar.isPresent()) {
             throw new RuntimeException("Could not read the file!");
         } else {
             if (StringUtils.hasText(vCalendar.get().getIcsPath())) {
                 Resource resource = new UrlResource(Path.of(vCalendar.get().getIcsPath()).toUri());
                 if (!resource.exists()) {
-                    throw new ResourceNotFoundException("for file " + domain + "/" + name);
+                    throw new ResourceNotFoundException("for file " + tenant + "/" + name);
                 }
                 return resource;
             } else {
-                throw new EmptyPathException("for file " + domain + "/" + name);
+                throw new EmptyPathException("for file " + tenant + "/" + name);
             }
         }
     }
 
     @Override
-    public VCalendar beforeCreate(VCalendar vCalendar) {
-        VCalendar find = this.findByDomainAndName(vCalendar.getDomain(), vCalendar.getName());
+    public VCalendar beforeCreate(String tenant, VCalendar vCalendar) {
+        VCalendar find = this.findByTenantAndName(vCalendar.getTenant(), vCalendar.getName());
         if (find != null) {
-            throw new CalendarAlreadyExistsException("with domain/name : " + vCalendar.getDomain() + "/" + vCalendar.getName());
+            throw new CalendarAlreadyExistsException("with tenant/name : " + vCalendar.getTenant() + "/" + vCalendar.getName());
         }
 
         //preparing ics file path
         Path filePath = Path.of(appProperties.getCalanedarRepo())
-                .resolve(vCalendar.getDomain());
+                .resolve(vCalendar.getTenant());
         if (!Files.exists(filePath)) {
             try {
                 Files.createDirectories(filePath);
@@ -111,11 +114,11 @@ public class VCalendarService extends CodeAssignableService<Long, VCalendar, VCa
             }
         }
         vCalendar.setIcsPath(filePath.resolve(vCalendar.getName() + ".ics").toString());
-        return super.beforeCreate(vCalendar);
+        return super.beforeCreate(tenant, vCalendar);
     }
 
     @Override
-    public VCalendar afterCreate(VCalendar vCalendar) {
+    public VCalendar afterCreate(String tenant, VCalendar vCalendar) {
         try {
             ICalendarBuilder.builder()
                     .uid(new Uid(vCalendar.getId().toString()))
@@ -133,13 +136,13 @@ public class VCalendarService extends CodeAssignableService<Long, VCalendar, VCa
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
         }
 
-        return super.afterCreate(vCalendar);
+        return super.afterCreate(tenant, vCalendar);
     }
 
     @Override
     public AppNextCode initCodeGenerator() {
         return AppNextCode.builder()
-                .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
+                .tenant(TenantConstants.DEFAULT_TENANT_NAME)
                 .entity(VCalendar.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("CAL")

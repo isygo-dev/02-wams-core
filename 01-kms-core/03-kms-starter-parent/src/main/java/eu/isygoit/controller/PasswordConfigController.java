@@ -1,7 +1,8 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.dto.data.PasswordConfigDto;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.mapper.PasswordConfigMapper;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@CtrlDef(handler = KmsExceptionHandler.class, mapper = PasswordConfigMapper.class, minMapper = PasswordConfigMapper.class, service = PasswordConfigService.class)
+@InjectMapperAndService(handler = KmsExceptionHandler.class, mapper = PasswordConfigMapper.class, minMapper = PasswordConfigMapper.class, service = PasswordConfigService.class)
 @RequestMapping(path = "/api/v1/private/config/password")
-public class PasswordConfigController extends MappedCrudController<Long, PasswordConfig, PasswordConfigDto, PasswordConfigDto, PasswordConfigService> {
+public class PasswordConfigController extends MappedCrudTenantController<Long, PasswordConfig, PasswordConfigDto, PasswordConfigDto, PasswordConfigService> {
 }

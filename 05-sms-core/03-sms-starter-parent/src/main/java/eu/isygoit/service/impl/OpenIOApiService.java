@@ -49,13 +49,13 @@ public class OpenIOApiService implements IOpenIOApiService {
     public MinioClient getConnection(StorageConfig config) {
 
         log.info("ok connection");
-        if (minIoMap.containsKey(config.getDomain())) {
-            return minIoMap.get(config.getDomain());
+        if (minIoMap.containsKey(config.getTenant())) {
+            return minIoMap.get(config.getTenant());
         }
         MinioClient minioClient = new MinioClient.Builder().credentials(config.getUserName(),
                         config.getPassword())
                 .endpoint(config.getUrl()).build();
-        minIoMap.put(config.getDomain(), minioClient);
+        minIoMap.put(config.getTenant(), minioClient);
         return minioClient;
     }
 

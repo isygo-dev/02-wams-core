@@ -1,7 +1,7 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
-import eu.isygoit.com.rest.controller.impl.MappedImageController;
+import eu.isygoit.annotation.InjectMapperAndService;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedImageTenantController;
 import eu.isygoit.dto.data.ApplicationDto;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.mapper.ApplicationMapper;
@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@CtrlDef(handler = ImsExceptionHandler.class, mapper = ApplicationMapper.class, minMapper = ApplicationMapper.class, service = ApplicationService.class)
+@InjectMapperAndService(handler = ImsExceptionHandler.class, mapper = ApplicationMapper.class, minMapper = ApplicationMapper.class, service = ApplicationService.class)
 @RequestMapping(path = "/api/v1/private/application")
-public class AppImageController extends MappedImageController<Long, Application, ApplicationDto, ApplicationDto, ApplicationService> {
+public class AppImageController extends eu.isygoit.com.rest.controller.impl.tenancy.MappedImageTenantController<Long, Application, ApplicationDto, ApplicationDto, ApplicationService> {
 
 }

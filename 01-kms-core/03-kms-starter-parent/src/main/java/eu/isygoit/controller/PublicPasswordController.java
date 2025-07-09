@@ -1,6 +1,6 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlHandler;
+import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.api.PublicPasswordControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@CtrlHandler(KmsExceptionHandler.class)
+@InjectExceptionHandler(KmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/public/password")
 public class PublicPasswordController extends ControllerExceptionHandler implements PublicPasswordControllerApi {
 
@@ -32,7 +32,7 @@ public class PublicPasswordController extends ControllerExceptionHandler impleme
     public ResponseEntity<Boolean> generateForgotPasswordAccessToken(UserContextDto userContextDto) {
         log.info("Call generateForgotPasswordAccessToken " + userContextDto.toString());
         try {
-            tokenService.createForgotPasswordAccessToken(userContextDto.getDomain(),
+            tokenService.createForgotPasswordAccessToken(userContextDto.getTenant(),
                     userContextDto.getApplication(),
                     userContextDto.getUserName());
             return ResponseFactory.responseOk(true);

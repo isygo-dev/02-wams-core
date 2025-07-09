@@ -1,24 +1,25 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.ICrudServiceMethod;
+import eu.isygoit.com.rest.service.ICrudServiceMethods;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
 import eu.isygoit.model.AppParameter;
 
 
 /**
  * The interface App parameter service.
  */
-public interface IAppParameterService extends ICrudServiceMethod<Long, AppParameter> {
+public interface IAppParameterService extends ICrudTenantServiceMethods<Long, AppParameter> {
 
     /**
-     * Gets value by domain and name.
+     * Gets value by tenant and name.
      *
-     * @param domain       the domain
+     * @param tenant       the tenant
      * @param name         the name
      * @param allowDefault the allow default
      * @param defaultValue the default value
-     * @return the value by domain and name
+     * @return the value by tenant and name
      */
-    String getValueByDomainAndName(String domain, String name, boolean allowDefault, String defaultValue);
+    String getValueByTenantAndName(String tenant, String name, boolean allowDefault, String defaultValue);
 
     /**
      * Gets technical admin email.

@@ -34,9 +34,9 @@ public interface SchemaUcConstantName extends ComSchemaUcConstantName {
      */
     String UC_APPLICATION_CODE = "UC_APPLICATION_CODE";
     /**
-     * The constant UC_DOMAIN_CODE.
+     * The constant UC_TENANT_CODE.
      */
-    String UC_DOMAIN_CODE = "UC_DOMAIN_CODE";
+    String UC_TENANT_CODE = "UC_TENANT_CODE";
     /**
      * The constant UC_CUSTOMER.
      */
@@ -52,9 +52,9 @@ public interface SchemaUcConstantName extends ComSchemaUcConstantName {
      */
     String UC_ACCOUNT_PROPERTY = "UC_ACCOUNT_PROPERTY";
     /**
-     * The constant UC_ACCOUNT_AND_DOMAIN.
+     * The constant UC_ACCOUNT_AND_TENANT.
      */
-    String UC_ACCOUNT_AND_DOMAIN = "UC_ACCOUNT_AND_DOMAIN";
+    String UC_ACCOUNT_AND_TENANT = "UC_ACCOUNT_AND_TENANT";
     /**
      * The constant UC_CODETABLE_VALUE_AND_LANGUAGE.
      */
@@ -63,13 +63,13 @@ public interface SchemaUcConstantName extends ComSchemaUcConstantName {
     /**
      * The constant UC_NAME.
      */
-    String UC_APPLICATION_DOMAIN_NAME = "UC_NAME";
+    String UC_APPLICATION_TENANT_NAME = "UC_NAME";
     /**
-     * The constant UC_APP_PARAM_DOMAIN_NAME.
+     * The constant UC_APP_PARAM_TENANT_NAME.
      */
-    String UC_APP_PARAM_DOMAIN_NAME = "UC_APP_PARAM_DOMAIN_NAME";
+    String UC_APP_PARAM_TENANT_NAME = "UC_APP_PARAM_TENANT_NAME";
     /**
-     * The constant UC_ROLE_INFO_DOMAIN_NAME.
+     * The constant UC_ROLE_INFO_TENANT_NAME.
      */
-    String UC_ROLE_INFO_DOMAIN_NAME = "UC_ROLE_INFO_DOMAIN_NAME";
+    String UC_ROLE_INFO_TENANT_NAME = "UC_ROLE_INFO_TENANT_NAME";
 }

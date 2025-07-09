@@ -1,6 +1,6 @@
 package eu.isygoit.model;
 
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.*;
 import jakarta.persistence.*;
@@ -23,10 +23,10 @@ import java.util.List;
 @Table(name = SchemaTableConstantName.T_WORKFLOW_BOARD, uniqueConstraints = {
         @UniqueConstraint(name = SchemaUcConstantName.UC_WORKFLOW_BOARD_CODE,
                 columnNames = {SchemaColumnConstantName.C_CODE}),
-        @UniqueConstraint(name = SchemaUcConstantName.UC_WORKFLOW_BOARD_DOMAIN_NAME,
-                columnNames = {SchemaColumnConstantName.C_DOMAIN, SchemaColumnConstantName.C_NAME})
+        @UniqueConstraint(name = SchemaUcConstantName.UC_WORKFLOW_BOARD_TENANT_NAME,
+                columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_NAME})
 })
-public class WorkflowBoard extends AuditableEntity<Long> implements IDomainAssignable, ICodeAssignable {
+public class WorkflowBoard extends AuditableEntity<Long> implements ITenantAssignable, ICodeAssignable {
 
     @Id
     @SequenceGenerator(name = "workflow_board_sequence_generator", sequenceName = "workflow_board_sequence", allocationSize = 1)
@@ -35,9 +35,9 @@ public class WorkflowBoard extends AuditableEntity<Long> implements IDomainAssig
     private Long id;
 
     //@Convert(converter = LowerCaseConverter.class)
-    @ColumnDefault("'" + DomainConstants.DEFAULT_DOMAIN_NAME + "'")
-    @Column(name = SchemaColumnConstantName.C_DOMAIN, length = SchemaConstantSize.DOMAIN, updatable = false, nullable = false)
-    private String domain;
+    @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
+    @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
+    private String tenant;
 
     //@Convert(converter = LowerCaseConverter.class)
     @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)

@@ -22,7 +22,7 @@ import java.util.List;
 public class AccessRequestDto extends AbstractAuditableDto<Long> {
 
     @NotEmpty
-    private String domain;
+    private String tenant;
     @NotEmpty
     private String application;
     @NotEmpty

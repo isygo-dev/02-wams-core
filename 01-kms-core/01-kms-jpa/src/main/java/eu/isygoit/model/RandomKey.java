@@ -1,6 +1,6 @@
 package eu.isygoit.model;
 
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaConstantSize;
@@ -23,10 +23,10 @@ import org.hibernate.annotations.ColumnDefault;
 @Entity
 @Table(name = SchemaTableConstantName.T_RANDOM_KEY
         , uniqueConstraints = {
-        @UniqueConstraint(name = SchemaUcConstantName.UC_RANDOM_KEY_DOMAIN_NAME,
-                columnNames = {SchemaColumnConstantName.C_DOMAIN, SchemaColumnConstantName.C_NAME})
+        @UniqueConstraint(name = SchemaUcConstantName.UC_RANDOM_KEY_TENANT_NAME,
+                columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_NAME})
 })
-public class RandomKey extends AuditableEntity<Long> implements IDomainAssignable {
+public class RandomKey extends AuditableEntity<Long> implements ITenantAssignable {
 
     @Id
     @SequenceGenerator(name = "random_key_sequence_generator", sequenceName = "random_key_sequence", allocationSize = 1)
@@ -35,9 +35,9 @@ public class RandomKey extends AuditableEntity<Long> implements IDomainAssignabl
     private Long id;
 
     //@Convert(converter = LowerCaseConverter.class)
-    @ColumnDefault("'" + DomainConstants.DEFAULT_DOMAIN_NAME + "'")
-    @Column(name = SchemaColumnConstantName.C_DOMAIN, length = SchemaConstantSize.DOMAIN, updatable = false, nullable = false)
-    private String domain;
+    @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
+    @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
+    private String tenant;
 
     @Column(name = SchemaColumnConstantName.C_NAME, length = SchemaConstantSize.S_NAME, updatable = false, nullable = false)
     private String name;

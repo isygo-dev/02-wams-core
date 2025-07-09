@@ -6,9 +6,9 @@ package eu.isygoit.model.schema;
 public interface SchemaUcConstantName extends ComSchemaUcConstantName {
 
     /**
-     * The constant UC_SENDER_CONFIG_DOMAIN.
+     * The constant UC_SENDER_CONFIG_TENANT.
      */
-    String UC_SENDER_CONFIG_DOMAIN = "UC_SENDER_CONFIG_DOMAIN";
+    String UC_SENDER_CONFIG_TENANT = "UC_SENDER_CONFIG_TENANT";
     /**
      * The constant UC_TEMPLATE_DOM_NAME_LANG.
      */

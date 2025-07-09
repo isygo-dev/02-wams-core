@@ -19,7 +19,7 @@ import lombok.experimental.SuperBuilder;
 public class PasswordConfigDto extends AbstractAuditableDto<Long> {
 
     private String code;
-    private String domain;
+    private String tenant;
     private IEnumAuth.Types type;
     private String pattern;
     private IEnumCharSet.Types charSetType;

@@ -1,7 +1,11 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.ServRepo;
+import eu.isygoit.annotation.InjectRepository;
+import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.com.rest.service.CrudService;
+import eu.isygoit.com.rest.service.tenancy.CrudTenantService;
+import eu.isygoit.com.rest.service.tenancy.CrudTenantService;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.repository.AppNextCodeRepository;
 import org.springframework.stereotype.Service;
@@ -12,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-@ServRepo(value = AppNextCodeRepository.class)
-public class AppNextCodeService extends CrudService<Long, AppNextCode, AppNextCodeRepository> {
+@InjectRepository(value = AppNextCodeRepository.class)
+public class AppNextCodeService extends CrudTenantService<Long, AppNextCode, AppNextCodeRepository> {
 
 }

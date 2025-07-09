@@ -1,6 +1,8 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.ICrudServiceMethod;
+import eu.isygoit.com.rest.controller.impl.tenancy.IImageTenantServiceMethods;
+import eu.isygoit.com.rest.service.ICrudServiceMethods;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
 import eu.isygoit.com.rest.service.IImageServiceMethods;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.*;
@@ -21,25 +23,25 @@ import java.util.List;
 /**
  * The interface Account service.
  */
-public interface IAccountService extends ICrudServiceMethod<Long, Account>, IImageServiceMethods<Long, Account> {
+public interface IAccountService extends ICrudTenantServiceMethods<Long, Account>, IImageTenantServiceMethods<Long, Account> {
 
     /**
-     * Find by domain and user name account.
+     * Find by tenant and user name account.
      *
-     * @param domain   the domain
+     * @param tenant   the tenant
      * @param userName the user name
      * @return the account
      */
-    Account findByDomainAndUserName(String domain, String userName);
+    Account findByTenantAndUserName(String tenant, String userName);
 
     /**
-     * Find distinct allowed tools by domain and username list.
+     * Find distinct allowed tools by tenant and username list.
      *
-     * @param domain   the domain
+     * @param tenant   the tenant
      * @param userName the username
      * @return the list
      */
-    List<Application> findDistinctAllowedToolsByDomainAndUserName(String domain, String userName);
+    List<Application> findDistinctAllowedToolsByTenantAndUserName(String tenant, String userName);
 
     /**
      * Update account admin status account.
@@ -60,12 +62,12 @@ public interface IAccountService extends ICrudServiceMethod<Long, Account>, IIma
     Account updateAccountIsAdmin(Long id, boolean newStatus);
 
     /**
-     * Find emails by domain list.
+     * Find emails by tenant list.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @return the list
      */
-    List<String> findEmailsByDomain(String domain);
+    List<String> findEmailsByTenant(String tenant);
 
     /**
      * Build allowed tools list.
@@ -78,13 +80,13 @@ public interface IAccountService extends ICrudServiceMethod<Long, Account>, IIma
 
 
     /**
-     * Gets min info by domain.
+     * Gets min info by tenant.
      *
-     * @param domain the domain
-     * @return the min info by domain
+     * @param tenant the tenant
+     * @return the min info by tenant
      * @throws NotSupportedException the not supported exception
      */
-    List<MinAccountDto> getMinInfoByDomain(String domain) throws NotSupportedException;
+    List<MinAccountDto> getMinInfoByTenant(String tenant) throws NotSupportedException;
 
 
     /**
@@ -103,7 +105,7 @@ public interface IAccountService extends ICrudServiceMethod<Long, Account>, IIma
      * @return the boolean
      * @throws AccountNotFoundException the account not found exception
      */
-    boolean switchAuthType(AccountAuthTypeRequest accountAuthTypeRequest) throws AccountNotFoundException;
+    boolean switchAuthType(String tenant, AccountAuthTypeRequest accountAuthTypeRequest) throws AccountNotFoundException;
 
     /**
      * Update language account.
@@ -115,39 +117,39 @@ public interface IAccountService extends ICrudServiceMethod<Long, Account>, IIma
     Account updateLanguage(Long id, IEnumLanguage.Types language);
 
     /**
-     * Gets by domain.
+     * Gets by tenant.
      *
-     * @param domain the domain
-     * @return the by domain
+     * @param tenant the tenant
+     * @return the by tenant
      */
-    List<Account> getByDomain(String domain);
+    List<Account> getByTenant(String tenant);
 
     /**
      * Check if application allowed boolean.
      *
-     * @param domain      the domain
+     * @param tenant      the tenant
      * @param userName    the user name
      * @param application the application
      * @return the boolean
      */
-    boolean checkIfApplicationAllowed(String domain, String userName, String application);
+    boolean checkIfApplicationAllowed(String tenant, String userName, String application);
 
     /**
      * Track user connections.
      *
-     * @param domain             the domain
+     * @param tenant             the tenant
      * @param userName           the user name
      * @param connectionTracking the connection tracking
      */
-    void trackUserConnections(String domain, String userName, ConnectionTracking connectionTracking);
+    void trackUserConnections(String tenant, String userName, ConnectionTracking connectionTracking);
 
     /**
-     * Chat accounts by domain list.
+     * Chat accounts by tenant list.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @return the list
      */
-    List<Account> chatAccountsByDomain(String domain);
+    List<Account> chatAccountsByTenant(String tenant);
 
     /**
      * Resend creation email boolean.
@@ -155,7 +157,7 @@ public interface IAccountService extends ICrudServiceMethod<Long, Account>, IIma
      * @param id the id
      * @return the boolean
      */
-    boolean resendCreationEmail(Long id);
+    boolean resendCreationEmail(String tenant, Long id);
 
     /**
      * Gets global statistics.
@@ -191,13 +193,13 @@ public interface IAccountService extends ICrudServiceMethod<Long, Account>, IIma
     Long stat_GetConfirmedEmployeeAccountsCount(RequestContextDto requestContext);
 
     /**
-     * Create domain admin account.
+     * Create tenant admin account.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @param admin  the admin
      * @return the account
      */
-    Account createDomainAdmin(String domain, DomainAdminDto admin);
+    Account createDomainAdmin(String tenant, DomainAdminDto admin);
 
     /**
      * Gets authentication data.

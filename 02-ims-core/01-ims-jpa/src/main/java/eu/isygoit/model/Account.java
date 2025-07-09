@@ -66,9 +66,9 @@ public class Account extends AccountModel<Long> implements IImageEntity {
             joinColumns = @JoinColumn(name = SchemaColumnConstantName.C_ROLE_INFO_CODE, referencedColumnName = SchemaColumnConstantName.C_CODE),
             inverseJoinColumns = @JoinColumn(name = SchemaColumnConstantName.C_ACCOUNT_CODE, referencedColumnName = SchemaColumnConstantName.C_CODE))
     private List<RoleInfo> roleInfo;
-    @ColumnDefault("'" + AccountTypeConstants.DOMAIN_USER + "'")
+    @ColumnDefault("'" + AccountTypeConstants.TENANT_USER + "'")
     @Column(name = SchemaColumnConstantName.C_FUNCTION_ROLE, length = SchemaConstantSize.S_NAME, nullable = false)
-    private String functionRole = AccountTypeConstants.DOMAIN_USER;
+    private String functionRole = AccountTypeConstants.TENANT_USER;
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL /* CASCADE only for OneToOne*/)
     @JoinColumn(name = SchemaColumnConstantName.C_ACCOUNT_DETAILS_ID, referencedColumnName = SchemaColumnConstantName.C_ID
             , foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_ACCOUNT_REF_DETAILS))
@@ -90,9 +90,9 @@ public class Account extends AccountModel<Long> implements IImageEntity {
             , foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_CONNECTION_TRACKING_REF_ACCOUNT))
     private List<ConnectionTracking> connectionTracking;
     @Builder.Default
-    @ColumnDefault("'" + AccountTypeConstants.DOMAIN_USER + "'")
+    @ColumnDefault("'" + AccountTypeConstants.TENANT_USER + "'")
     @Column(name = SchemaColumnConstantName.C_TYPE, length = SchemaConstantSize.ACCOUNT_TYPE)
-    private String accountType = AccountTypeConstants.DOMAIN_USER;
+    private String accountType = AccountTypeConstants.TENANT_USER;
     @Builder.Default
     @ColumnDefault("'SYS_ADMIN'")
     @Column(name = SchemaColumnConstantName.C_ORIGIN, nullable = false)
@@ -127,7 +127,7 @@ public class Account extends AccountModel<Long> implements IImageEntity {
      */
     public String getPassword() {
         return new StringBuilder(this.getCode().toLowerCase())
-                .append("@").append(this.getDomain())
+                .append("@").append(this.getTenant())
                 .append("@").append(this.getAuthType())
                 .toString();
     }

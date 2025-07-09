@@ -1,13 +1,14 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.StorageConfigDto;
-import eu.isygoit.dto.extendable.IdentifiableDto;
+import eu.isygoit.dto.extendable.IdAssignableDto;
 import eu.isygoit.exception.handler.SmsExceptionHandler;
 import eu.isygoit.mapper.StorageConfigMapper;
 import eu.isygoit.model.StorageConfig;
@@ -29,30 +30,30 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 @RestController
 @RequestMapping(path = "/api/v1/private/storage/config")
-@CtrlDef(handler = SmsExceptionHandler.class, mapper = StorageConfigMapper.class, minMapper = StorageConfigMapper.class, service = StorageConfigService.class)
-public class StorageConfigController extends MappedCrudController<Long, StorageConfig, StorageConfigDto, StorageConfigDto, StorageConfigService> {
+@InjectMapperAndService(handler = SmsExceptionHandler.class, mapper = StorageConfigMapper.class, minMapper = StorageConfigMapper.class, service = StorageConfigService.class)
+public class StorageConfigController extends MappedCrudTenantController<Long, StorageConfig, StorageConfigDto, StorageConfigDto, StorageConfigService> {
 
 
     /**
-     * Find by domain ignore case response entity.
+     * Find by tenant ignore case response entity.
      *
      * @param requestContext the request context
-     * @param domain         the domain
+     * @param tenant         the tenant
      * @return the response entity
      */
-    @Operation(summary = "findByDomainIgnoreCase Api",
-            description = "findByDomainIgnoreCase")
+    @Operation(summary = "findByTenantIgnoreCase Api",
+            description = "findByTenantIgnoreCase")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = IdentifiableDto.class))})
+                            schema = @Schema(implementation = IdAssignableDto.class))})
     })
-    @GetMapping(path = "/domain/{domain}")
-    public ResponseEntity<StorageConfigDto> findByDomainIgnoreCase(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) RequestContextDto requestContext,
-                                                                   @PathVariable(name = RestApiConstants.DOMAIN_NAME) String domain) {
+    @GetMapping(path = "/tenant/{tenant}")
+    public ResponseEntity<StorageConfigDto> findByTenantIgnoreCase(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) RequestContextDto requestContext,
+                                                                   @PathVariable(name = RestApiConstants.TENANT_NAME) String tenant) {
         try {
-            return ResponseFactory.responseOk(this.mapper().entityToDto(crudService().findByDomainIgnoreCase(domain)));
+            return ResponseFactory.responseOk(this.mapper().entityToDto(crudService().findByTenantIgnoreCase(tenant)));
         } catch (Throwable e) {
             log.error("<Error>: Error calling api getNotificationsByReceiverId : {}", e);
             return getBackExceptionResponse(e);

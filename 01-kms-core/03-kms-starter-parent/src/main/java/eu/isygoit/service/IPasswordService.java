@@ -19,8 +19,8 @@ public interface IPasswordService {
     /**
      * Generate random password access key response dto.
      *
-     * @param domain    the domain
-     * @param domainUrl the domain url
+     * @param tenant    the tenant
+     * @param tenantUrl the tenant url
      * @param email     the email
      * @param userName  the user name
      * @param fullName  the full name
@@ -28,43 +28,43 @@ public interface IPasswordService {
      * @return the access key response dto
      * @throws JsonProcessingException the json processing exception
      */
-    AccessKeyResponseDto generateRandomPassword(String domain, String domainUrl, String email, String userName, String fullName, IEnumAuth.Types authType) throws JsonProcessingException;
+    AccessKeyResponseDto generateRandomPassword(String tenant, String tenantUrl, String email, String userName, String fullName, IEnumAuth.Types authType) throws JsonProcessingException;
 
 
     /**
      * Force change password.
      *
-     * @param domain     the domain
+     * @param tenant     the tenant
      * @param userName   the user name
      * @param newPasswor the new passwor
      */
-    void forceChangePassword(String domain, String userName, String newPasswor);
+    void forceChangePassword(String tenant, String userName, String newPasswor);
 
 
     /**
      * Change password.
      *
-     * @param domain      the domain
+     * @param tenant      the tenant
      * @param userName    the user name
      * @param oldPassword the old password
      * @param newPassword the new password
      */
-    void changePassword(String domain, String userName, String oldPassword, String newPassword);
+    void changePassword(String tenant, String userName, String oldPassword, String newPassword);
 
 
     /**
      * Check for pattern boolean.
      *
-     * @param domain        the domain
+     * @param tenant        the tenant
      * @param plainPassword the plain password
      * @return the boolean
      */
-    boolean checkForPattern(String domain, String plainPassword);
+    boolean checkForPattern(String tenant, String plainPassword);
 
     /**
      * Matches enum password status . types.
      *
-     * @param domain        the domain
+     * @param tenant        the tenant
      * @param userName      the user name
      * @param plainPassword the plain password
      * @param authType      the auth type
@@ -72,7 +72,7 @@ public interface IPasswordService {
      * @throws UserPasswordNotFoundException the user password not found exception
      * @throws UserNotFoundException         the user not found exception
      */
-    IEnumPasswordStatus.Types matches(String domain, String userName, String plainPassword, IEnumAuth.Types authType) throws UserPasswordNotFoundException, UserNotFoundException;
+    IEnumPasswordStatus.Types matches(String tenant, String userName, String plainPassword, IEnumAuth.Types authType) throws UserPasswordNotFoundException, UserNotFoundException;
 
 
     /**
@@ -86,7 +86,7 @@ public interface IPasswordService {
     /**
      * Is expired boolean.
      *
-     * @param domain   the domain
+     * @param tenant   the tenant
      * @param email    the email
      * @param userName the user name
      * @param authType the auth type
@@ -94,7 +94,7 @@ public interface IPasswordService {
      * @throws UserPasswordNotFoundException the user password not found exception
      * @throws UserNotFoundException         the user not found exception
      */
-    Boolean isExpired(String domain, String email, String userName, IEnumAuth.Types authType) throws UserPasswordNotFoundException, UserNotFoundException;
+    Boolean isExpired(String tenant, String email, String userName, IEnumAuth.Types authType) throws UserPasswordNotFoundException, UserNotFoundException;
 
     /**
      * Reset password via token.
@@ -107,12 +107,12 @@ public interface IPasswordService {
     /**
      * Register new password access key response dto.
      *
-     * @param domain      the domain
+     * @param tenant      the tenant
      * @param account     the account
      * @param newPassword the new password
      * @param authType    the auth type
      * @return the access key response dto
      * @throws UnsuportedAuthTypeException the unsuported auth type exception
      */
-    AccessKeyResponseDto registerNewPassword(String domain, Account account, String newPassword, IEnumAuth.Types authType) throws UnsuportedAuthTypeException;
+    AccessKeyResponseDto registerNewPassword(String tenant, Account account, String newPassword, IEnumAuth.Types authType) throws UnsuportedAuthTypeException;
 }

@@ -1,6 +1,6 @@
 package eu.isygoit.model;
 
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.extendable.LinkedFileModel;
 import eu.isygoit.model.schema.*;
 import jakarta.persistence.*;
@@ -30,12 +30,12 @@ import java.util.List;
         @UniqueConstraint(
                 name = SchemaUcConstantName.UC_LINKED_FILE,
                 columnNames = {
-                        SchemaColumnConstantName.C_DOMAIN,
+                        SchemaColumnConstantName.C_TENANT,
                         SchemaColumnConstantName.C_ORIGINAL_FILE_NAME,
                         SchemaColumnConstantName.C_VERSION,
                 })
 })
-public class LinkedFile extends LinkedFileModel<Long> implements IDomainAssignable {
+public class LinkedFile extends LinkedFileModel<Long> implements ITenantAssignable {
 
     @Id
     @SequenceGenerator(name = "linkedfile_sequence_generator", sequenceName = "linkedfile_sequence", allocationSize = 1)
@@ -44,9 +44,9 @@ public class LinkedFile extends LinkedFileModel<Long> implements IDomainAssignab
     private Long id;
 
     //@Convert(converter = LowerCaseConverter.class)
-    @ColumnDefault("'" + DomainConstants.DEFAULT_DOMAIN_NAME + "'")
-    @Column(name = SchemaColumnConstantName.C_DOMAIN, length = SchemaConstantSize.DOMAIN, updatable = false, nullable = false)
-    private String domain;
+    @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
+    @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
+    private String tenant;
 
     @ElementCollection
     @CollectionTable(name = SchemaTableConstantName.T_LINKED_FILE_TAGS

@@ -1,6 +1,6 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlHandler;
+import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.api.PublicControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
@@ -22,16 +22,16 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@CtrlHandler(ImsExceptionHandler.class)
+@InjectExceptionHandler(ImsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/public")
 public class PublicController extends ControllerExceptionHandler implements PublicControllerApi {
 
     private final AppProperties appProperties;
 
     @Autowired
-    private IDomainService domainService;
+    private IDomainService tenantService;
     @Autowired
-    private DomainMapper domainMapper;
+    private DomainMapper tenantMapper;
 
     /**
      * Instantiates a new Public controller.
@@ -43,10 +43,10 @@ public class PublicController extends ControllerExceptionHandler implements Publ
     }
 
     @Override
-    public ResponseEntity<DomainDto> getDomainByName(String domain) {
-        log.info("get domain by name {}", domain);
+    public ResponseEntity<DomainDto> getTenantByName(String tenant) {
+        log.info("get tenant by name {}", tenant);
         try {
-            return ResponseFactory.responseOk(domainMapper.entityToDto(domainService.findByName(domain)));
+            return ResponseFactory.responseOk(tenantMapper.entityToDto(tenantService.findByName(tenant)));
         } catch (Throwable e) {
             log.error("<Error>: get by name : {} ", e);
             return getBackExceptionResponse(e);

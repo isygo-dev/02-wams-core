@@ -16,7 +16,7 @@ import java.util.List;
 @SuperBuilder
 public class FileTagsDto {
 
-    private String domain;
+    private String tenant;
     private String bucketName;
     private String filetName;
     private List<String> tags;

@@ -21,16 +21,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface AppParameterControllerApi extends IMappedCrudApi<Long, AppParameterDto, AppParameterDto> {
 
     /**
-     * Gets value by domain and name.
+     * Gets value by tenant and name.
      *
      * @param requestContext the request context
-     * @param domain         the domain
+     * @param tenant         the tenant
      * @param name           the name
      * @param allowDefault   the allow default
-     * @return the value by domain and name
+     * @return the value by tenant and name
      */
-    @Operation(summary = "getValueByDomainAndName Api",
-            description = "getValueByDomainAndName")
+    @Operation(summary = "getValueByTenantAndName Api",
+            description = "getValueByTenantAndName")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
@@ -38,14 +38,14 @@ public interface AppParameterControllerApi extends IMappedCrudApi<Long, AppParam
                             schema = @Schema(implementation = String.class))})
     })
     @GetMapping(path = "/value/byDomainAndName")
-    ResponseEntity<String> getValueByDomainAndName(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                                   @RequestParam(name = RestApiConstants.DOMAIN_NAME) String domain,
+    ResponseEntity<String> getValueByTenantAndName(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+                                                   @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                                    @RequestParam(name = RestApiConstants.NAME) String name,
                                                    @RequestParam(name = RestApiConstants.ALLOW_DEFAULT) Boolean allowDefault,
                                                    @RequestParam(name = RestApiConstants.DEFAULT_VALUE) String defaultValue);
 
-    @Operation(summary = "getValueByDomainAndName Api",
-            description = "getValueByDomainAndName")
+    @Operation(summary = "getValueByTenantAndName Api",
+            description = "getValueByTenantAndName")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",

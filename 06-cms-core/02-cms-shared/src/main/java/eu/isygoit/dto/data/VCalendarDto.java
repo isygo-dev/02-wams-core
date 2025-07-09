@@ -19,7 +19,7 @@ import lombok.experimental.SuperBuilder;
 public class VCalendarDto extends AbstractAuditableDto<Long> {
 
     @NotEmpty
-    private String domain;
+    private String tenant;
     private String code;
     @NotEmpty
     private String name;

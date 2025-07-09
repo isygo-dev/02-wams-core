@@ -17,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class ThemeDto extends AbstractAuditableDto<Long> {
 
-    private String domainCode;
+    private String tenantCode;
     private String accountCode;
     private String themeColor;
     private IEnumSkin.Types skin;

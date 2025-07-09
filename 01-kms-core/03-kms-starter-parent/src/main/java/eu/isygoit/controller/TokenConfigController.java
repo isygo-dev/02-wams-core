@@ -1,7 +1,9 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.dto.data.TokenConfigDto;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.mapper.TokenConfigMapper;
@@ -19,6 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequestMapping(path = "/api/v1/private/config/token")
-@CtrlDef(handler = KmsExceptionHandler.class, mapper = TokenConfigMapper.class, minMapper = TokenConfigMapper.class, service = TokenConfigService.class)
-public class TokenConfigController extends MappedCrudController<Long, TokenConfig, TokenConfigDto, TokenConfigDto, TokenConfigService> {
+@InjectMapperAndService(handler = KmsExceptionHandler.class, mapper = TokenConfigMapper.class, minMapper = TokenConfigMapper.class, service = TokenConfigService.class)
+public class TokenConfigController extends MappedCrudTenantController<Long, TokenConfig, TokenConfigDto, TokenConfigDto, TokenConfigService> {
 }

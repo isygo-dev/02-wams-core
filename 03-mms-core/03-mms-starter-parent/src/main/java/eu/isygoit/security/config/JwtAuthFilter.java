@@ -1,6 +1,6 @@
 package eu.isygoit.security.config;
 
-import eu.isygoit.jwt.filter.JwtKmsClientAuthFilter;
+import eu.isygoit.filter.jwt.JwtKmsClientAuthFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

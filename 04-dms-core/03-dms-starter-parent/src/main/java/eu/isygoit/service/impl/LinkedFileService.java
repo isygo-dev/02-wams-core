@@ -1,11 +1,11 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.CodeGenKms;
-import eu.isygoit.annotation.CodeGenLocal;
-import eu.isygoit.annotation.ServRepo;
-import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.annotation.InjectCodeGenKms;
+import eu.isygoit.annotation.InjectCodeGen;
+import eu.isygoit.annotation.InjectRepository;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.config.AppProperties;
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.common.LinkedFileRequestDto;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.exception.*;
@@ -45,10 +45,10 @@ import java.util.List;
 @Slf4j
 @Service
 @Transactional
-@CodeGenLocal(value = NextCodeService.class)
-@CodeGenKms(value = KmsIncrementalKeyService.class)
-@ServRepo(value = LinkedFileRepository.class)
-public class LinkedFileService extends CodeAssignableService<Long, LinkedFile, LinkedFileRepository> implements ILinkedFileService {
+@InjectCodeGen(value = NextCodeService.class)
+@InjectCodeGenKms(value = KmsIncrementalKeyService.class)
+@InjectRepository(value = LinkedFileRepository.class)
+public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedFile, LinkedFileRepository> implements ILinkedFileService {
 
     private final AppProperties appProperties;
     private final LinkedFileRepository linkedFileRepository;
@@ -77,7 +77,7 @@ public class LinkedFileService extends CodeAssignableService<Long, LinkedFile, L
 
         // Check for file duplication based on name and CRCs
         List<LinkedFile> existingFiles = linkedFileRepository
-                .findByDomainIgnoreCaseAndOriginalFileNameOrderByCreateDateDesc(dto.getDomain(), dto.getOriginalFileName());
+                .findByTenantIgnoreCaseAndOriginalFileNameOrderByCreateDateDesc(dto.getTenant(), dto.getOriginalFileName());
 
         if (appProperties.getDoNotDuplicate() && !existingFiles.isEmpty()) {
             var lastFile = existingFiles.get(existingFiles.size() - 1); // Java 21 preferred; or get(size - 1)
@@ -94,9 +94,9 @@ public class LinkedFileService extends CodeAssignableService<Long, LinkedFile, L
             dto.setCode(getNextCode());
         }
 
-        log.info("{} storage enabled - domain: {}, file: {}, tags: {}",
+        log.info("{} storage enabled - tenant: {}, file: {}, tags: {}",
                 appProperties.getLocalStorageActive() ? "Local" : "Remote",
-                dto.getDomain(), file.getOriginalFilename(), dto.getTags());
+                dto.getTenant(), file.getOriginalFilename(), dto.getTags());
 
         // Store file either locally or remotely
         if (appProperties.getLocalStorageActive()) {
@@ -142,7 +142,7 @@ public class LinkedFileService extends CodeAssignableService<Long, LinkedFile, L
                 .code(dto.getCode())
                 .originalFileName(file.getOriginalFilename())
                 .extension(FilenameUtils.getExtension(file.getOriginalFilename()))
-                .domain(dto.getDomain())
+                .tenant(dto.getTenant())
                 .tags(dto.getTags())
                 .crc16(crc16)
                 .crc32(crc32)
@@ -161,14 +161,14 @@ public class LinkedFileService extends CodeAssignableService<Long, LinkedFile, L
         try {
             ResponseEntity<Object> response = smsStorageLinkedFileService.upload(
                     RequestContextDto.builder().build(),
-                    dto.getDomain(), dto.getDomain(),
+                    dto.getTenant(), dto.getTenant(),
                     dto.getPath().replace(File.separator, "#"),
                     file.getOriginalFilename(),
                     dto.getTags(), file
             );
             if (response.getStatusCode().is2xxSuccessful()) {
-                log.info("Remote upload success: domain={}, file={}, tags={}",
-                        dto.getDomain(), file.getOriginalFilename(), dto.getTags());
+                log.info("Remote upload success: tenant={}, file={}, tags={}",
+                        dto.getTenant(), file.getOriginalFilename(), dto.getTags());
             }
         } catch (Exception e) {
             log.error("Remote storage error", e);
@@ -179,7 +179,7 @@ public class LinkedFileService extends CodeAssignableService<Long, LinkedFile, L
      * Stores the file in the local filesystem.
      */
     private void storeInLocalFileSystem(LinkedFileRequestDto dto, MultipartFile file) throws IOException {
-        Path target = Path.of(appProperties.getUploadDirectory(), dto.getDomain(), dto.getPath());
+        Path target = Path.of(appProperties.getUploadDirectory(), dto.getTenant(), dto.getPath());
         FileHelper.saveMultipartFile(target, dto.getCode(), file,
                 FilenameUtils.getExtension(file.getOriginalFilename()),
                 StandardOpenOption.CREATE, StandardOpenOption.WRITE,
@@ -187,19 +187,19 @@ public class LinkedFileService extends CodeAssignableService<Long, LinkedFile, L
     }
 
     /**
-     * Downloads a file (either locally or remotely) using domain and code.
+     * Downloads a file (either locally or remotely) using tenant and code.
      */
     @Override
-    public Resource download(String domain, String code) throws IOException {
-        LinkedFile file = linkedFileRepository.findByDomainIgnoreCaseAndCodeIgnoreCase(domain, code)
-                .orElseThrow(() -> new LinkedFileNotFoundException("with domain: " + domain + "/code:" + code));
+    public Resource download(String tenant, String code) throws IOException {
+        LinkedFile file = linkedFileRepository.findByTenantIgnoreCaseAndCodeIgnoreCase(tenant, code)
+                .orElseThrow(() -> new LinkedFileNotFoundException("with tenant: " + tenant + "/code:" + code));
 
         if (appProperties.getLocalStorageActive()) {
-            return resolveLocalFile(domain, file);
+            return resolveLocalFile(tenant, file);
         } else {
             ResponseEntity<Resource> response = smsStorageLinkedFileService.download(
                     RequestContextDto.builder().build(),
-                    file.getDomain(), file.getDomain(),
+                    file.getTenant(), file.getTenant(),
                     file.getPath().replace(File.separator, "#"),
                     file.getOriginalFileName(), "");
 
@@ -213,47 +213,47 @@ public class LinkedFileService extends CodeAssignableService<Long, LinkedFile, L
     /**
      * Resolves a local file path and loads it as a Resource.
      */
-    private Resource resolveLocalFile(String domain, LinkedFile file) throws IOException {
-        Path basePath = Path.of(appProperties.getUploadDirectory(), domain);
+    private Resource resolveLocalFile(String tenant, LinkedFile file) throws IOException {
+        Path basePath = Path.of(appProperties.getUploadDirectory(), tenant);
         Path filePath = StringUtils.hasText(file.getPath()) ?
                 basePath.resolve(file.getPath()) : basePath;
         Path fullPath = filePath.resolve(file.getCode() + "." + file.getExtension());
 
         Resource resource = new UrlResource(fullPath.toUri());
         if (!resource.exists()) {
-            throw new ResourceNotFoundException("File not found with domain:" + domain + "/code:" + file.getCode());
+            throw new ResourceNotFoundException("File not found with tenant:" + tenant + "/code:" + file.getCode());
         }
         return resource;
     }
 
     /**
-     * Deletes a file using its domain and code.
+     * Deletes a file using its tenant and code.
      */
     @Override
-    public void deleteFile(String domain, String code) throws IOException {
-        LinkedFile file = linkedFileRepository.findByDomainIgnoreCaseAndCodeIgnoreCase(domain, code)
-                .orElseThrow(() -> new FileNotFoundException("File not found with domain:" + domain + " code:" + code));
-        this.delete(domain, file.getId());
+    public void deleteFile(String tenant, String code) throws IOException {
+        LinkedFile file = linkedFileRepository.findByTenantIgnoreCaseAndCodeIgnoreCase(tenant, code)
+                .orElseThrow(() -> new FileNotFoundException("File not found with tenant:" + tenant + " code:" + code));
+        this.delete(tenant, file.getId());
     }
 
     /**
      * Finds the most recent uploaded file with the same original file name.
      */
     @Override
-    public LinkedFile searchByOriginalFileName(String domain, String originalFileName) throws IOException {
-        return linkedFileRepository.findByDomainIgnoreCaseAndOriginalFileNameOrderByCreateDateDesc(domain, originalFileName)
+    public LinkedFile searchByOriginalFileName(String tenant, String originalFileName) throws IOException {
+        return linkedFileRepository.findByTenantIgnoreCaseAndOriginalFileNameOrderByCreateDateDesc(tenant, originalFileName)
                 .stream()
                 .reduce((first, second) -> second) // Get last (most recent)
-                .orElseThrow(() -> new FileNotFoundException("File not found with domain:" + domain + " originalFileName:" + originalFileName));
+                .orElseThrow(() -> new FileNotFoundException("File not found with tenant:" + tenant + " originalFileName:" + originalFileName));
     }
 
     /**
      * Updates the original filename of a stored file.
      */
     @Override
-    public LinkedFile renameFile(String domain, String code, String newName) throws IOException {
-        LinkedFile file = linkedFileRepository.findByDomainIgnoreCaseAndCodeIgnoreCase(domain, code)
-                .orElseThrow(() -> new FileNotFoundException("with domain:" + domain + "/code:" + code));
+    public LinkedFile renameFile(String tenant, String code, String newName) throws IOException {
+        LinkedFile file = linkedFileRepository.findByTenantIgnoreCaseAndCodeIgnoreCase(tenant, code)
+                .orElseThrow(() -> new FileNotFoundException("with tenant:" + tenant + "/code:" + code));
         file.setOriginalFileName(newName);
         return linkedFileRepository.save(file);
     }
@@ -262,16 +262,16 @@ public class LinkedFileService extends CodeAssignableService<Long, LinkedFile, L
      * Searches files by matching tags.
      */
     @Override
-    public List<LinkedFile> searchByTags(String domain, String tags) {
-        return linkedFileRepository.findByDomainIgnoreCaseAndTagsContaining(domain, tags);
+    public List<LinkedFile> searchByTags(String tenant, String tags) {
+        return linkedFileRepository.findByTenantIgnoreCaseAndTagsContaining(tenant, tags);
     }
 
     /**
      * Searches files by matching categories.
      */
     @Override
-    public List<LinkedFile> searchByCategories(String domain, List<String> categories) {
-        return linkedFileRepository.findByDomainIgnoreCaseAndCategoriesIn(domain, categories);
+    public List<LinkedFile> searchByCategories(String tenant, List<String> categories) {
+        return linkedFileRepository.findByTenantIgnoreCaseAndCategoriesIn(tenant, categories);
     }
 
     /**
@@ -280,7 +280,7 @@ public class LinkedFileService extends CodeAssignableService<Long, LinkedFile, L
     @Override
     public NextCodeModel initCodeGenerator() {
         return AppNextCode.builder()
-                .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
+                .tenant(TenantConstants.DEFAULT_TENANT_NAME)
                 .entity(LinkedFile.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("FLE")

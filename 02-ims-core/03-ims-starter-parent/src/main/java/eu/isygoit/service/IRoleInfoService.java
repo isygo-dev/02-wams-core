@@ -1,12 +1,13 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.ICrudServiceMethod;
+import eu.isygoit.com.rest.service.ICrudServiceMethods;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
 import eu.isygoit.model.RoleInfo;
 
 /**
  * The interface Role info service.
  */
-public interface IRoleInfoService extends ICrudServiceMethod<Long, RoleInfo> {
+public interface IRoleInfoService extends ICrudTenantServiceMethods<Long, RoleInfo> {
 
     /**
      * Find by name role info.

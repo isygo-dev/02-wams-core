@@ -80,41 +80,41 @@ public interface MsgTemplateVariables {
     String V_RESET_PWD_URL = "V_RESET_PWD_URL";
 
     /**
-     * The constant V_DOMAIN_URL.
+     * The constant V_TENANT_URL.
      */
-    String V_DOMAIN_URL = "V_DOMAIN_URL";
+    String V_TENANT_URL = "V_TENANT_URL";
     /**
-     * The constant V_DOMAIN_NAME.
+     * The constant V_TENANT_NAME.
      */
-    String V_DOMAIN_NAME = "V_DOMAIN_NAME";
+    String V_TENANT_NAME = "V_TENANT_NAME";
     /**
      * The constant V_PWD_EXP_REMAINING_DAYS.
      */
     String V_PWD_EXP_REMAINING_DAYS = "V_PWD_EXP_REMAINIG_DAYS";
     /**
-     * The constant V_DOMAIN_ADDRESS.
+     * The constant V_TENANT_ADDRESS.
      */
-    String V_DOMAIN_ADDRESS = "V_DOMAIN_ADDRESS";
+    String V_TENANT_ADDRESS = "V_TENANT_ADDRESS";
     /**
-     * The constant V_DOMAIN_PHONE.
+     * The constant V_TENANT_PHONE.
      */
-    String V_DOMAIN_PHONE = "V_DOMAIN_PHONE";
+    String V_TENANT_PHONE = "V_TENANT_PHONE";
     /**
-     * The constant V_DOMAIN_EMAIL.
+     * The constant V_TENANT_EMAIL.
      */
-    String V_DOMAIN_EMAIL = "V_DOMAIN_EMAIL";
+    String V_TENANT_EMAIL = "V_TENANT_EMAIL";
     /**
-     * The constant V_DOMAIN_FACEBOOK.
+     * The constant V_TENANT_FACEBOOK.
      */
-    String V_DOMAIN_FACEBOOK = "V_DOMAIN_FACEBOOK";
+    String V_TENANT_FACEBOOK = "V_TENANT_FACEBOOK";
     /**
-     * The constant V_DOMAIN_LINKEDIN.
+     * The constant V_TENANT_LINKEDIN.
      */
-    String V_DOMAIN_LINKEDIN = "V_DOMAIN_LINKEDIN";
+    String V_TENANT_LINKEDIN = "V_TENANT_LINKEDIN";
     /**
-     * The constant V_DOMAIN_XING.
+     * The constant V_TENANT_XING.
      */
-    String V_DOMAIN_XING = "V_DOMAIN_XING";
+    String V_TENANT_XING = "V_TENANT_XING";
     /**
      * The constant V_POST_URL.
      */

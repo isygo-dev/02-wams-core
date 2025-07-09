@@ -1,6 +1,6 @@
 package eu.isygoit.factory;
 
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.SenderConfig;
 import eu.isygoit.repository.SenderConfigRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -33,27 +33,27 @@ public class SenderFactory {
     /**
      * Remove sender.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      */
-    public void removeSender(String domain) {
-        senderMap.remove(domain);
+    public void removeSender(String tenant) {
+        senderMap.remove(tenant);
     }
 
     /**
      * Gets sender.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @return the sender
      */
-    public JavaMailSenderImpl getSender(String domain) {
+    public JavaMailSenderImpl getSender(String tenant) {
         // get data from table config
-        if (senderMap.containsKey(domain)) {
-            return senderMap.get(domain);
+        if (senderMap.containsKey(tenant)) {
+            return senderMap.get(tenant);
         }
 
-        Optional<SenderConfig> optional = senderConfigRepository.findFirstByDomainIgnoreCase(domain);
+        Optional<SenderConfig> optional = senderConfigRepository.findFirstByTenantIgnoreCase(tenant);
         if (!optional.isPresent()) {
-            optional = senderConfigRepository.findFirstByDomainIgnoreCase(DomainConstants.DEFAULT_DOMAIN_NAME);
+            optional = senderConfigRepository.findFirstByTenantIgnoreCase(TenantConstants.DEFAULT_TENANT_NAME);
         }
 
         if (optional.isPresent()) {
@@ -70,7 +70,7 @@ public class SenderFactory {
             props.put("mail.smtp.starttls.enable", senderConfig.getSmtpStarttlsRequired());
             props.put("mail.debug", senderConfig.getDebug());
 
-            senderMap.put(domain, mailSender);
+            senderMap.put(tenant, mailSender);
             return mailSender;
         } else {
             return (JavaMailSenderImpl) defaultSender;

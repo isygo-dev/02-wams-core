@@ -25,7 +25,7 @@ public class UserDataResponseDto {
     private String lastName;
     private String userName;
     private List<ApplicationDto> applications;
-    private String domainImagePath;
+    private String tenantImagePath;
     private IEnumLanguage.Types language;
-    private long domainId;
+    private long tenantId;
 }

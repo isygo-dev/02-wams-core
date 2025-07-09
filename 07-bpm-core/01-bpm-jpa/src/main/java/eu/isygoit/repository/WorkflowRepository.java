@@ -1,5 +1,9 @@
 package eu.isygoit.repository;
 
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAssignableRepository;
+
 import eu.isygoit.model.Workflow;
 import org.springframework.data.jpa.repository.Query;
 
@@ -8,7 +12,7 @@ import java.util.List;
 /**
  * The interface Workflow repository.
  */
-public interface WorkflowRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<Workflow, Long> {
+public interface WorkflowRepository extends JpaPagingAndSortingTenantAndCodeAssignableRepository<Workflow, Long> {
 
     /**
      * Find workflow not associated list.

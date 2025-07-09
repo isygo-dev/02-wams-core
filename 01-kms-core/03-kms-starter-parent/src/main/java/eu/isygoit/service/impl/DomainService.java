@@ -1,8 +1,11 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.CodeGenLocal;
-import eu.isygoit.annotation.ServRepo;
+import eu.isygoit.annotation.InjectCodeGen;
+import eu.isygoit.annotation.InjectRepository;
+import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.com.rest.service.CrudService;
+import eu.isygoit.com.rest.service.tenancy.CrudTenantService;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.KmsDomain;
@@ -21,24 +24,24 @@ import java.util.Optional;
  */
 @Service
 @Transactional
-@CodeGenLocal(value = NextCodeService.class)
-@ServRepo(value = DomainRepository.class)
+@InjectCodeGen(value = NextCodeService.class)
+@InjectRepository(value = DomainRepository.class)
 public class DomainService extends CrudService<Long, KmsDomain, DomainRepository> implements IDomainService {
 
     @Autowired
     private AccountRepository accountRepository;
 
     @Override
-    public KmsDomain checkDomainIfExists(String domainName, String domainUrl, boolean createIfNotExists) {
-        Optional<KmsDomain> optional = repository().findByNameIgnoreCase(domainName);
+    public KmsDomain checkDomainIfExists(String tenantName, String tenantUrl, boolean createIfNotExists) {
+        Optional<KmsDomain> optional = repository().findByNameIgnoreCase(tenantName);
         if (optional.isPresent()) {
             return optional.get();
         } else if (createIfNotExists) {
-            //Create the domain if not exists
+            //Create the tenant if not exists
             return this.create(KmsDomain.builder()
-                    .name(domainName)
-                    .url(domainUrl)
-                    .description(domainName)
+                    .name(tenantName)
+                    .url(tenantUrl)
+                    .description(tenantName)
                     .build());
         }
 
@@ -46,8 +49,8 @@ public class DomainService extends CrudService<Long, KmsDomain, DomainRepository
     }
 
     @Override
-    public KmsDomain findByNameIgnoreCase(String domainName) {
-        Optional<KmsDomain> optional = repository().findByNameIgnoreCase(domainName);
+    public KmsDomain findByNameIgnoreCase(String tenantName) {
+        Optional<KmsDomain> optional = repository().findByNameIgnoreCase(tenantName);
         if (optional.isPresent()) {
             return optional.get();
         }
@@ -56,15 +59,15 @@ public class DomainService extends CrudService<Long, KmsDomain, DomainRepository
     }
 
     @Override
-    public Account checkAccountIfExists(String domainName, String domainUrl, String email, String userName, String fullName, boolean createIfNotExists) {
-        //Check domain if exists
-        KmsDomain kmsDomain = this.checkDomainIfExists(domainName, domainUrl, createIfNotExists);
+    public Account checkAccountIfExists(String tenantName, String tenantUrl, String email, String userName, String fullName, boolean createIfNotExists) {
+        //Check tenant if exists
+        KmsDomain kmsDomain = this.checkDomainIfExists(tenantName, tenantUrl, createIfNotExists);
         if (kmsDomain == null) {
             return null;
         }
 
         //Check account if exists
-        Optional<Account> optional = accountRepository.findByDomainIgnoreCaseAndCodeIgnoreCase(domainName, userName);
+        Optional<Account> optional = accountRepository.findByTenantIgnoreCaseAndCodeIgnoreCase(tenantName, userName);
         if (optional.isPresent()) {
             //Update account email if changed
             Account account = optional.get();
@@ -80,7 +83,7 @@ public class DomainService extends CrudService<Long, KmsDomain, DomainRepository
             return accountRepository.save(Account.builder()
                     .code(userName)
                     .email(email)
-                    .domain(domainName)
+                    .tenant(tenantName)
                     .fullName(fullName)
                     .build());
         }
@@ -91,12 +94,12 @@ public class DomainService extends CrudService<Long, KmsDomain, DomainRepository
     public boolean checkIfExists(KmsDomain kmsDomain, boolean createIfNotExists) {
         Optional<KmsDomain> optional = repository().findByNameIgnoreCase(kmsDomain.getName());
         if (optional.isPresent()) {
-            //Update the domain if not exists
+            //Update the tenant if not exists
             kmsDomain.setId(optional.get().getId());
             this.update(kmsDomain);
             return true;
         } else if (createIfNotExists) {
-            //Create the domain if not exists
+            //Create the tenant if not exists
             this.create(kmsDomain);
             return true;
         }
@@ -105,13 +108,13 @@ public class DomainService extends CrudService<Long, KmsDomain, DomainRepository
     }
 
     @Override
-    public KmsDomain updateAdminStatus(String domain, IEnumEnabledBinaryStatus.Types newStatus) {
-        repository().updateAdminStatus(domain, newStatus);
-        return repository().findByNameIgnoreCase(domain).orElse(null);
+    public KmsDomain updateAdminStatus(String tenant, IEnumEnabledBinaryStatus.Types newStatus) {
+        repository().updateAdminStatus(tenant, newStatus);
+        return repository().findByNameIgnoreCase(tenant).orElse(null);
     }
 
     @Override
-    public boolean isEnabled(String domain) {
-        return repository().getAdminStatus(domain) == IEnumEnabledBinaryStatus.Types.ENABLED;
+    public boolean isEnabled(String tenant) {
+        return repository().getAdminStatus(tenant) == IEnumEnabledBinaryStatus.Types.ENABLED;
     }
 }

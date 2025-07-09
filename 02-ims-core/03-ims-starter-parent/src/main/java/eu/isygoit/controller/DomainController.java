@@ -1,10 +1,11 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.api.DomainControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.DomainDto;
 import eu.isygoit.dto.data.KmsDomainDto;
@@ -30,33 +31,33 @@ import java.util.List;
 @Slf4j
 @Validated
 @RestController
-@CtrlDef(handler = ImsExceptionHandler.class, mapper = DomainMapper.class, minMapper = DomainMapper.class, service = DomainService.class)
-@RequestMapping(path = "/api/v1/private/domain")
-public class DomainController extends MappedCrudController<Long, Domain, DomainDto, DomainDto, DomainService>
+@InjectMapperAndService(handler = ImsExceptionHandler.class, mapper = DomainMapper.class, minMapper = DomainMapper.class, service = DomainService.class)
+@RequestMapping(path = "/api/v1/private/tenant")
+public class DomainController extends MappedCrudTenantController<Long, Domain, DomainDto, DomainDto, DomainService>
         implements DomainControllerApi {
 
     @Autowired
     private KmsDomainService kmsDomainService;
 
     @Override
-    public Domain afterUpdate(Domain domain) {
+    public Domain afterUpdate(Domain tenant) {
         try {
             ResponseEntity<Boolean> result = kmsDomainService.updateDomain(//RequestContextDto.builder().build(),
                     KmsDomainDto.builder()
-                            .name(domain.getName())
-                            .description(domain.getDescription())
-                            .url(domain.getUrl())
-                            .adminStatus(domain.getAdminStatus())
+                            .name(tenant.getName())
+                            .description(tenant.getDescription())
+                            .url(tenant.getUrl())
+                            .adminStatus(tenant.getAdminStatus())
                             .build());
             if (result.getStatusCode().is2xxSuccessful() && result.hasBody() && result.getBody()) {
-                return super.afterUpdate(domain);
+                return super.afterUpdate(tenant);
             }
         } catch (Exception e) {
             log.error("Remote feign call failed : ", e);
             //throw new RemoteCallFailedException(e);
         }
 
-        throw new KmsDomainUpdateException("for domain id: " + domain.getId());
+        throw new KmsDomainUpdateException("for tenant id: " + tenant.getId());
     }
 
     @Override
@@ -65,20 +66,20 @@ public class DomainController extends MappedCrudController<Long, Domain, DomainD
                                                        IEnumEnabledBinaryStatus.Types newStatus) {
         log.info("in update status");
         try {
-            DomainDto domain = mapper().entityToDto(crudService().updateAdminStatus(id, newStatus));
+            DomainDto tenant = mapper().entityToDto(crudService().updateAdminStatus(id, newStatus));
             try {
                 ResponseEntity<KmsDomainDto> result = kmsDomainService.updateAdminStatus(RequestContextDto.builder().build(),
-                        domain.getName(), newStatus);
+                        tenant.getName(), newStatus);
                 if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
-                    return ResponseFactory.responseOk(domain);
+                    return ResponseFactory.responseOk(tenant);
                 } else {
-                    throw new KmsDomainUpdateException("for domain id: " + id);
+                    throw new KmsDomainUpdateException("for tenant id: " + id);
                 }
             } catch (Exception e) {
                 log.error("Remote feign call failed : ", e);
                 //throw new RemoteCallFailedException(e);
             }
-            return ResponseFactory.responseOk(domain);
+            return ResponseFactory.responseOk(tenant);
         } catch (Throwable e) {
             log.error("<Error>: update Domain Status : {} ", e);
             return getBackExceptionResponse(e);
@@ -87,9 +88,9 @@ public class DomainController extends MappedCrudController<Long, Domain, DomainD
 
     @Override
     public ResponseEntity<List<String>> getAllDomainNames(RequestContextDto requestContext) {
-        log.info("getAllDomainNames {}", requestContext.getSenderDomain());
+        log.info("getAllDomainNames {}", requestContext.getSenderTenant());
         try {
-            return ResponseFactory.responseOk(crudService().getAllDomainNames(requestContext.getSenderDomain()));
+            return ResponseFactory.responseOk(crudService().getAllDomainNames(requestContext.getSenderTenant()));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -98,9 +99,9 @@ public class DomainController extends MappedCrudController<Long, Domain, DomainD
 
     @Override
     public ResponseEntity<DomainDto> getByName(RequestContextDto requestContext) {
-        log.info("get by name {}", requestContext.getSenderDomain());
+        log.info("get by name {}", requestContext.getSenderTenant());
         try {
-            return ResponseFactory.responseOk(mapper().entityToDto(crudService().findByName(requestContext.getSenderDomain())));
+            return ResponseFactory.responseOk(mapper().entityToDto(crudService().findByName(requestContext.getSenderTenant())));
         } catch (Throwable e) {
             log.error("<Error>: get by name : {} ", e);
             return getBackExceptionResponse(e);
@@ -111,7 +112,7 @@ public class DomainController extends MappedCrudController<Long, Domain, DomainD
     public ResponseEntity<DomainDto> updateSocialLink(RequestContextDto requestContext, Long id, String social, String link) {
         log.info("update Social Link ");
         try {
-            return ResponseFactory.responseOk(mapper().entityToDto(crudService().updateSocialLink(requestContext.getSenderDomain(), id, social, link)));
+            return ResponseFactory.responseOk(mapper().entityToDto(crudService().updateSocialLink(requestContext.getSenderTenant(), id, social, link)));
         } catch (Throwable e) {
             log.error("<Error>: update Social Link : {} ", e);
             return getBackExceptionResponse(e);

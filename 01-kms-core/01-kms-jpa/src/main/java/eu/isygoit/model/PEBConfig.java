@@ -1,6 +1,6 @@
 package eu.isygoit.model;
 
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumAlgoPEBConfig;
 import eu.isygoit.enums.IEnumIvGenerator;
 import eu.isygoit.enums.IEnumSaltGenerator;
@@ -31,10 +31,10 @@ import org.hibernate.validator.constraints.Length;
         , uniqueConstraints = {
         @UniqueConstraint(name = SchemaUcConstantName.UC_PEB_CONFIG_CODE,
                 columnNames = {SchemaColumnConstantName.C_CODE}),
-        @UniqueConstraint(name = SchemaUcConstantName.UC_PEB_CONFIG_DOMAIN,
-                columnNames = {SchemaColumnConstantName.C_DOMAIN})
+        @UniqueConstraint(name = SchemaUcConstantName.UC_PEB_CONFIG_TENANT,
+                columnNames = {SchemaColumnConstantName.C_TENANT})
 })
-public class PEBConfig extends AuditableEntity<Long> implements IDomainAssignable, ICodeAssignable {
+public class PEBConfig extends AuditableEntity<Long> implements ITenantAssignable, ICodeAssignable {
 
     @Id
     @SequenceGenerator(name = "peb_config_sequence_generator", sequenceName = "peb_config_sequence", allocationSize = 1)
@@ -48,9 +48,9 @@ public class PEBConfig extends AuditableEntity<Long> implements IDomainAssignabl
     private String code;
 
     //@Convert(converter = LowerCaseConverter.class)
-    @ColumnDefault("'" + DomainConstants.DEFAULT_DOMAIN_NAME + "'")
-    @Column(name = SchemaColumnConstantName.C_DOMAIN, length = SchemaConstantSize.DOMAIN, updatable = false, nullable = false)
-    private String domain;
+    @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
+    @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
+    private String tenant;
 
     //PBE ALGORITHMS:      [PBEWITHMD5ANDDES, PBEWITHMD5ANDTRIPLEDES, PBEWITHSHA1ANDDESEDE, PBEWITHSHA1ANDRC2_40]
     @Enumerated(EnumType.STRING)

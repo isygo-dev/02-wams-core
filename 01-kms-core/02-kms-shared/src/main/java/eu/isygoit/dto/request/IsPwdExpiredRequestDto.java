@@ -20,7 +20,7 @@ import lombok.experimental.SuperBuilder;
 public class IsPwdExpiredRequestDto extends AbstractAuditableDto<Long> {
 
     @NotEmpty
-    private String domain;
+    private String tenant;
     @NotEmpty
     private String email;
     @NotEmpty

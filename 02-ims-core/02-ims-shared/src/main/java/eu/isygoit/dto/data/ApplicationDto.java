@@ -20,7 +20,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class ApplicationDto extends AbstractAuditableDto<Long> implements IImageUploadDto {
 
-    private String domain;
+    private String tenant;
     private String code;
     @NotEmpty
     private String name;

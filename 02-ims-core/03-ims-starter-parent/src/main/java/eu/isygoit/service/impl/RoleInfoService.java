@@ -1,10 +1,13 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.CodeGenKms;
-import eu.isygoit.annotation.CodeGenLocal;
-import eu.isygoit.annotation.ServRepo;
+import eu.isygoit.annotation.InjectCodeGenKms;
+import eu.isygoit.annotation.InjectCodeGen;
+import eu.isygoit.annotation.InjectRepository;
 import eu.isygoit.com.rest.service.CodeAssignableService;
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
+import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.RoleInfoDto;
 import eu.isygoit.exception.AccountNotFoundException;
@@ -31,10 +34,10 @@ import java.util.Optional;
  */
 @Service
 @Transactional
-@CodeGenLocal(value = NextCodeService.class)
-@CodeGenKms(value = KmsIncrementalKeyService.class)
-@ServRepo(value = RoleInfoRepository.class)
-public class RoleInfoService extends CodeAssignableService<Long, RoleInfo, RoleInfoRepository> implements IRoleInfoService {
+@InjectCodeGen(value = NextCodeService.class)
+@InjectCodeGenKms(value = KmsIncrementalKeyService.class)
+@InjectRepository(value = RoleInfoRepository.class)
+public class RoleInfoService extends CodeAssignableTenantService<Long, RoleInfo, RoleInfoRepository> implements IRoleInfoService {
 
     @Autowired
     private AssoRoleInfoAccountRepository assoRoleInfoAccountRepository;
@@ -44,7 +47,7 @@ public class RoleInfoService extends CodeAssignableService<Long, RoleInfo, RoleI
     @Override
     public AppNextCode initCodeGenerator() {
         return AppNextCode.builder()
-                .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
+                .tenant(TenantConstants.DEFAULT_TENANT_NAME)
                 .entity(RoleInfo.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("RLE")
@@ -65,19 +68,19 @@ public class RoleInfoService extends CodeAssignableService<Long, RoleInfo, RoleI
     }
 
     @Override
-    public List<RoleInfo> afterFindAll(List<RoleInfo> list) {
+    public List<RoleInfo> afterFindAll(String tenant, List<RoleInfo> list) {
         if (!CollectionUtils.isEmpty(list)) {
             list.stream().forEach(roleInfo -> {
                 roleInfo.setNumberOfUsers(assoRoleInfoAccountRepository.countAllById_RoleInfoCode(roleInfo.getCode()));
             });
         }
-        return super.afterFindAll(list);
+        return super.afterFindAll(tenant,list);
     }
 
     @Override
-    public RoleInfo afterFindById(RoleInfo roleInfo) {
+    public RoleInfo afterFindById(String tenant, RoleInfo roleInfo) {
         roleInfo.setNumberOfUsers(assoRoleInfoAccountRepository.countAllById_RoleInfoCode(roleInfo.getCode()));
-        return super.afterFindById(roleInfo);
+        return super.afterFindById(tenant, roleInfo);
     }
 
     /**
@@ -88,7 +91,7 @@ public class RoleInfoService extends CodeAssignableService<Long, RoleInfo, RoleI
      * @return the list
      */
     public List<RoleInfoDto> filterNotAllowedRoles(RequestContextDto requestContext, List<RoleInfoDto> list) {
-        Optional<Account> optional = accountRepository.findByDomainIgnoreCaseAndCodeIgnoreCase(requestContext.getSenderDomain(), requestContext.getSenderUser());
+        Optional<Account> optional = accountRepository.findByTenantIgnoreCaseAndCodeIgnoreCase(requestContext.getSenderTenant(), requestContext.getSenderUser());
         if (optional.isPresent()) {
             RoleInfo senderRole = optional.get().getRoleInfo().parallelStream()
                     .min(Comparator.comparing(RoleInfo::getLevel))
@@ -97,6 +100,6 @@ public class RoleInfoService extends CodeAssignableService<Long, RoleInfo, RoleI
             return filtered;
         }
 
-        throw new AccountNotFoundException("domain " + requestContext.getSenderDomain() + " user " + requestContext.getSenderUser());
+        throw new AccountNotFoundException("tenant " + requestContext.getSenderTenant() + " user " + requestContext.getSenderUser());
     }
 }

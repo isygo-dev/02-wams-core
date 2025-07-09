@@ -1,6 +1,6 @@
 package eu.isygoit.dto.request;
 
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.extendable.AbstractAuditableDto;
 import eu.isygoit.enums.IEnumAccountOrigin;
 import jakarta.validation.constraints.NotEmpty;
@@ -20,7 +20,7 @@ import lombok.experimental.SuperBuilder;
 public class NewAccountDto extends AbstractAuditableDto<Long> {
 
     @Builder.Default
-    private String domain = DomainConstants.DEFAULT_DOMAIN_NAME;
+    private String tenant = TenantConstants.DEFAULT_TENANT_NAME;
     @Builder.Default
     private String origin = IEnumAccountOrigin.Types.SYS_ADMIN.name();
 

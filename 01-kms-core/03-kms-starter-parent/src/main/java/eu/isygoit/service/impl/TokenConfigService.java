@@ -1,10 +1,13 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.CodeGenLocal;
-import eu.isygoit.annotation.ServRepo;
+import eu.isygoit.annotation.InjectCodeGen;
+import eu.isygoit.annotation.InjectRepository;
 import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
+import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.config.JwtProperties;
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.model.TokenConfig;
@@ -22,9 +25,9 @@ import java.util.Optional;
  */
 @Service
 @Transactional
-@CodeGenLocal(value = NextCodeService.class)
-@ServRepo(value = TokenConfigRepository.class)
-public class TokenConfigService extends CodeAssignableService<Long, TokenConfig, TokenConfigRepository> implements ITokenConfigService {
+@InjectCodeGen(value = NextCodeService.class)
+@InjectRepository(value = TokenConfigRepository.class)
+public class TokenConfigService extends CodeAssignableTenantService<Long, TokenConfig, TokenConfigRepository> implements ITokenConfigService {
 
     private final JwtProperties jwtProperties;
 
@@ -42,12 +45,12 @@ public class TokenConfigService extends CodeAssignableService<Long, TokenConfig,
 
 
     @Override
-    public TokenConfig buildTokenConfig(String domain, IEnumToken.Types tokenType) {
+    public TokenConfig buildTokenConfig(String tenant, IEnumToken.Types tokenType) {
         //Serach for token config configured for the domein by type
-        Optional<TokenConfig> optional = tokenConfigRepository.findByDomainIgnoreCaseAndTokenType(domain, tokenType);
+        Optional<TokenConfig> optional = tokenConfigRepository.findByTenantIgnoreCaseAndTokenType(tenant, tokenType);
         if (!optional.isPresent()) {
             //Serach for token config configured for default by type
-            optional = tokenConfigRepository.findByDomainIgnoreCaseAndTokenType(DomainConstants.DEFAULT_DOMAIN_NAME, tokenType);
+            optional = tokenConfigRepository.findByTenantIgnoreCaseAndTokenType(TenantConstants.DEFAULT_TENANT_NAME, tokenType);
         }
 
         if (optional.isPresent()) {
@@ -56,8 +59,8 @@ public class TokenConfigService extends CodeAssignableService<Long, TokenConfig,
 
         //Build token config secified by system properties
         return TokenConfig.builder()
-                .issuer(domain)
-                .audience(domain)
+                .issuer(tenant)
+                .audience(tenant)
                 .signatureAlgorithm(jwtProperties.getSignatureAlgorithm().name())
                 .secretKey(jwtProperties.getSecretKey())
                 .lifeTimeInMs(jwtProperties.getLifeTimeInMs())
@@ -67,7 +70,7 @@ public class TokenConfigService extends CodeAssignableService<Long, TokenConfig,
     @Override
     public AppNextCode initCodeGenerator() {
         return AppNextCode.builder()
-                .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
+                .tenant(TenantConstants.DEFAULT_TENANT_NAME)
                 .entity(TokenConfig.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("TKN")

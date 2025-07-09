@@ -1,6 +1,8 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.ICrudServiceMethod;
+import eu.isygoit.com.rest.controller.impl.tenancy.IImageTenantServiceMethods;
+import eu.isygoit.com.rest.service.ICrudServiceMethods;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
 import eu.isygoit.com.rest.service.IImageServiceMethods;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Domain;
@@ -10,35 +12,35 @@ import java.util.List;
 /**
  * The interface Domain service.
  */
-public interface IDomainService extends ICrudServiceMethod<Long, Domain>, IImageServiceMethods<Long, Domain> {
+public interface IDomainService extends ICrudTenantServiceMethods<Long, Domain>, IImageTenantServiceMethods<Long, Domain> {
 
     /**
-     * Gets all domain names.
+     * Gets all tenant names.
      *
-     * @param domain the domain
-     * @return the all domain names
+     * @param tenant the tenant
+     * @return the all tenant names
      */
-    List<String> getAllDomainNames(String domain);
+    List<String> getAllDomainNames(String tenant);
 
     /**
-     * Update admin status domain.
+     * Update admin status tenant.
      *
      * @param id        the id
      * @param newStatus the new status
-     * @return the domain
+     * @return the tenant
      */
     Domain updateAdminStatus(Long id, IEnumEnabledBinaryStatus.Types newStatus);
 
     /**
      * Gets image.
      *
-     * @param domainName the domain name
+     * @param tenantName the tenant name
      * @return the image
      */
-    String getImage(String domainName);
+    String getImage(String tenantName);
 
     /**
-     * Find domain idby domain name long.
+     * Find tenant idby tenant name long.
      *
      * @param name the name
      * @return the long
@@ -46,29 +48,29 @@ public interface IDomainService extends ICrudServiceMethod<Long, Domain>, IImage
     Long findDomainIdbyDomainName(String name);
 
     /**
-     * Find by name domain.
+     * Find by name tenant.
      *
      * @param name the name
-     * @return the domain
+     * @return the tenant
      */
     Domain findByName(String name);
 
     /**
      * Is enabled boolean.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @return the boolean
      */
-    boolean isEnabled(String domain);
+    boolean isEnabled(String tenant);
 
     /**
-     * Update social link domain.
+     * Update social link tenant.
      *
-     * @param senderDomain the sender domain
+     * @param tenant the sender tenant
      * @param id           the id
      * @param social       the social
      * @param link         the link
-     * @return the domain
+     * @return the tenant
      */
-    Domain updateSocialLink(String senderDomain, Long id, String social, String link);
+    Domain updateSocialLink(String tenant, Long id, String social, String link);
 }

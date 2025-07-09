@@ -1,6 +1,6 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.exception.SenderConfigNotFoundException;
 import eu.isygoit.model.SenderConfig;
 import eu.isygoit.repository.SenderConfigRepository;
@@ -33,13 +33,13 @@ public class MailSenderFactoryServiceService implements IMailSenderFactoryServic
     /**
      * Sender from config mail sender.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @return the mail sender
      */
-    public MailSender senderFromConfig(String domain) {
-        Optional<SenderConfig> optional = senderConfigRepository.findFirstByDomainIgnoreCase(domain);
+    public MailSender senderFromConfig(String tenant) {
+        Optional<SenderConfig> optional = senderConfigRepository.findFirstByTenantIgnoreCase(tenant);
         if (!optional.isPresent()) {
-            optional = senderConfigRepository.findFirstByDomainIgnoreCase(DomainConstants.DEFAULT_DOMAIN_NAME);
+            optional = senderConfigRepository.findFirstByTenantIgnoreCase(TenantConstants.DEFAULT_TENANT_NAME);
         }
 
         if (optional.isPresent()) {
@@ -59,22 +59,22 @@ public class MailSenderFactoryServiceService implements IMailSenderFactoryServic
             return mailSender;
         }
 
-        throw new SenderConfigNotFoundException("for domain: " + domain);
+        throw new SenderConfigNotFoundException("for tenant: " + tenant);
     }
 
     /**
      * Gets sender.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @return the sender
      */
-    public MailSender getSender(String domain) {
-        if (mailSenders.containsKey(domain)) {
-            return mailSenders.get(domain);
+    public MailSender getSender(String tenant) {
+        if (mailSenders.containsKey(tenant)) {
+            return mailSenders.get(tenant);
         }
 
-        MailSender mailSender = senderFromConfig(domain);
-        mailSenders.put(domain, mailSender);
+        MailSender mailSender = senderFromConfig(tenant);
+        mailSenders.put(tenant, mailSender);
         return mailSender;
     }
 }

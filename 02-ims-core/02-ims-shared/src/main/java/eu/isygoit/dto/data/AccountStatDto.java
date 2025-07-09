@@ -1,7 +1,7 @@
 package eu.isygoit.dto.data;
 
 
-import eu.isygoit.dto.extendable.IdentifiableDto;
+import eu.isygoit.dto.extendable.IdAssignableDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
@@ -12,6 +12,6 @@ import lombok.experimental.SuperBuilder;
 @Data
 @AllArgsConstructor
 @SuperBuilder
-public class AccountStatDto extends IdentifiableDto<Long> {
+public class AccountStatDto extends IdAssignableDto<Long> {
 
 }

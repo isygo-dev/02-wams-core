@@ -1,6 +1,6 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlHandler;
+import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.api.IndexationApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
@@ -25,7 +25,7 @@ import java.util.Map;
 @Slf4j
 @Validated
 @RestController
-@CtrlHandler(DmsExceptionHandler.class)
+@InjectExceptionHandler(DmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/index")
 public class IndexationController extends ControllerExceptionHandler implements IndexationApi {
 

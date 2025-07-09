@@ -7,7 +7,7 @@ import eu.isygoit.annotation.MsgLocale;
 /**
  * The type Account not found exception.
  */
-@MsgLocale("domain.not.found.exception")
+@MsgLocale("tenant.not.found.exception")
 public class DomainNotFoundException extends ManagedException {
 
     /**

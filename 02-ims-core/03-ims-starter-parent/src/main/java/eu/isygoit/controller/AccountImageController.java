@@ -1,7 +1,9 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.impl.MappedImageController;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedImageTenantController;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedImageTenantController;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.request.UpdateAccountRequestDto;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
@@ -22,9 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@CtrlDef(handler = ImsExceptionHandler.class, mapper = AccountMapper.class, minMapper = AccountMapper.class, service = AccountService.class)
+@InjectMapperAndService(handler = ImsExceptionHandler.class, mapper = AccountMapper.class, minMapper = AccountMapper.class, service = AccountService.class)
 @RequestMapping(path = "/api/v1/private/account")
-public class AccountImageController extends MappedImageController<Long, Account, AccountDto, AccountDto, AccountService> {
+public class AccountImageController extends MappedImageTenantController<Long, Account, AccountDto, AccountDto, AccountService> {
 
     @Autowired
     private KmsPasswordService kmsPasswordService;
@@ -35,7 +37,7 @@ public class AccountImageController extends MappedImageController<Long, Account,
             ResponseEntity<Boolean> result = kmsPasswordService.updateAccount(//RequestContextDto.builder().build(),
                     UpdateAccountRequestDto.builder()
                             .code(account.getCode())
-                            .domain(account.getDomain())
+                            .tenant(account.getTenant())
                             .email(account.getEmail())
                             .fullName(account.getFullName())
                             .build());

@@ -113,7 +113,7 @@ public interface SchemaTableConstantName extends ComSchemaTableConstantName {
      */
     String T_REGISTRED_USER = "T_REGISTRED_USER";
     /**
-     * The constant T_DOMAIN_ADDRESS.
+     * The constant T_TENANT_ADDRESS.
      */
-    String T_DOMAIN_ADDRESS = "T_DOMAIN_ADDRESS";
+    String T_TENANT_ADDRESS = "T_TENANT_ADDRESS";
 }

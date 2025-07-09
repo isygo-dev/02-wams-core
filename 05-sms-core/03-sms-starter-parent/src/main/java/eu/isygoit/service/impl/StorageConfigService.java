@@ -1,8 +1,11 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.ServRepo;
+import eu.isygoit.annotation.InjectRepository;
+import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.com.rest.service.CrudService;
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.com.rest.service.tenancy.CrudTenantService;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.exception.StorageConfigNotFoundException;
 import eu.isygoit.model.StorageConfig;
 import eu.isygoit.repository.StorageConfigRepository;
@@ -19,8 +22,8 @@ import java.util.Optional;
  */
 @Service
 @Transactional
-@ServRepo(value = StorageConfigRepository.class)
-public class StorageConfigService extends CrudService<Long, StorageConfig, StorageConfigRepository> implements IStorageConfigService {
+@InjectRepository(value = StorageConfigRepository.class)
+public class StorageConfigService extends CrudTenantService<Long, StorageConfig, StorageConfigRepository> implements IStorageConfigService {
 
     @Autowired
     private StorageConfigRepository storageConfigRepository;
@@ -28,21 +31,21 @@ public class StorageConfigService extends CrudService<Long, StorageConfig, Stora
     private IMinIOApiService minIOApiService;
 
     @Override
-    public StorageConfig findByDomainIgnoreCase(String domain) {
-        Optional<StorageConfig> optional = storageConfigRepository.findFirstByDomainIgnoreCase(domain);
+    public StorageConfig findByTenantIgnoreCase(String tenant) {
+        Optional<StorageConfig> optional = storageConfigRepository.findFirstByTenantIgnoreCase(tenant);
         if (!optional.isPresent()) {
-            optional = storageConfigRepository.findFirstByDomainIgnoreCase(DomainConstants.DEFAULT_DOMAIN_NAME);
+            optional = storageConfigRepository.findFirstByTenantIgnoreCase(TenantConstants.DEFAULT_TENANT_NAME);
         }
 
         if (optional.isPresent()) {
             return optional.get();
         } else {
-            throw new StorageConfigNotFoundException("for domain: " + domain);
+            throw new StorageConfigNotFoundException("for tenant: " + tenant);
         }
     }
 
     @Override
-    public StorageConfig afterUpdate(StorageConfig storageConfig) {
+    public StorageConfig afterUpdate(String tenant, StorageConfig storageConfig) {
         switch (storageConfig.getType()) {
             case MINIO_STORAGE: {
                 minIOApiService.updateConnection(storageConfig);
@@ -61,6 +64,6 @@ public class StorageConfigService extends CrudService<Long, StorageConfig, Stora
             }
             break;
         }
-        return super.afterUpdate(storageConfig);
+        return super.afterUpdate(tenant, storageConfig);
     }
 }

@@ -1,5 +1,9 @@
 package eu.isygoit.repository;
 
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAssignableRepository;
+
 import eu.isygoit.model.VCalendar;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,16 +14,16 @@ import java.util.Optional;
 /**
  * The interface V calendar repository.
  */
-public interface VCalendarRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<VCalendar, Long> {
+public interface VCalendarRepository extends JpaPagingAndSortingTenantAndCodeAssignableRepository<VCalendar, Long> {
 
     /**
-     * Find by domain ignore case and name optional.
+     * Find by tenant ignore case and name optional.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @param name   the name
      * @return the optional
      */
-    Optional<VCalendar> findByDomainIgnoreCaseAndName(String domain, String name);
+    Optional<VCalendar> findByTenantIgnoreCaseAndName(String tenant, String name);
 
     @Modifying
     @Query("update VCalendar u set u.locked = :locked  where u.id = :id")

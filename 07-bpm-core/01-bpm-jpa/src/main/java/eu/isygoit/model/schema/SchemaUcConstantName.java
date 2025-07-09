@@ -26,11 +26,11 @@ public interface SchemaUcConstantName extends ComSchemaUcConstantName {
      */
     String UC_WORKFLOW_TRANSITION_CODE = "UC_WORKFLOW_TRANSITION_CODE";
     /**
-     * The constant UC_WORKFLOW_BOARD_DOMAIN_NAME.
+     * The constant UC_WORKFLOW_BOARD_TENANT_NAME.
      */
-    String UC_WORKFLOW_BOARD_DOMAIN_NAME = "UC_WORKFLOW_BOARD_DOMAIN_NAME";
+    String UC_WORKFLOW_BOARD_TENANT_NAME = "UC_WORKFLOW_BOARD_TENANT_NAME";
     /**
-     * The constant UC_WORKFLOW_DOMAIN_NAME.
+     * The constant UC_WORKFLOW_TENANT_NAME.
      */
-    String UC_WORKFLOW_DOMAIN_NAME = "UC_WORKFLOW_DOMAIN_NAME";
+    String UC_WORKFLOW_TENANT_NAME = "UC_WORKFLOW_TENANT_NAME";
 }

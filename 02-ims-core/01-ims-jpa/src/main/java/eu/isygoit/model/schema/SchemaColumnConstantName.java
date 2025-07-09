@@ -99,9 +99,9 @@ public interface SchemaColumnConstantName extends ComSchemaColumnConstantName {
      */
     String C_CODE_ACCOUNT = "CODE_ACCOUNT";
     /**
-     * The constant C_CODE_DOMAIN.
+     * The constant C_CODE_TENANT.
      */
-    String C_CODE_DOMAIN = "CODE_DOMAIN";
+    String C_CODE_TENANT = "CODE_TENANT";
     /**
      * The constant C_COLOR.
      */

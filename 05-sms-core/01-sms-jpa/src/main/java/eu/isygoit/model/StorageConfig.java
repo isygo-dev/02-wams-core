@@ -1,6 +1,6 @@
 package eu.isygoit.model;
 
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumStorage;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
@@ -25,9 +25,9 @@ import org.hibernate.annotations.ColumnDefault;
 @Entity
 @Table(name = SchemaTableConstantName.T_STORAGE_CONFIG
         , uniqueConstraints = {
-        @UniqueConstraint(name = SchemaUcConstantName.UC_STORAGE_CONFIG_DOMAIN, columnNames = {SchemaColumnConstantName.C_DOMAIN})
+        @UniqueConstraint(name = SchemaUcConstantName.UC_STORAGE_CONFIG_TENANT, columnNames = {SchemaColumnConstantName.C_TENANT})
 })
-public class StorageConfig extends AuditableEntity<Long> implements IDomainAssignable {
+public class StorageConfig extends AuditableEntity<Long> implements ITenantAssignable {
 
     @Id
     @SequenceGenerator(name = "storageConfig_sequence_generator", sequenceName = "storageConfig_sequence", allocationSize = 1)
@@ -36,9 +36,9 @@ public class StorageConfig extends AuditableEntity<Long> implements IDomainAssig
     private Long id;
 
     //@Convert(converter = LowerCaseConverter.class)
-    @ColumnDefault("'" + DomainConstants.DEFAULT_DOMAIN_NAME + "'")
-    @Column(name = SchemaColumnConstantName.C_DOMAIN, length = SchemaConstantSize.DOMAIN, updatable = false, nullable = false)
-    private String domain;
+    @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
+    @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
+    private String tenant;
 
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_TYPE, length = IEnumStorage.STR_ENUM_SIZE, nullable = false)

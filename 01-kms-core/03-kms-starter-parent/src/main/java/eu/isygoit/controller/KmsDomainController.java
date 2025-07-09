@@ -1,10 +1,11 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.api.KmsDomainControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.KmsDomainDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
@@ -19,23 +20,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * The type Kms domain controller.
+ * The type Kms tenant controller.
  */
 @Slf4j
 @Validated
 @RestController
-@CtrlDef(handler = KmsExceptionHandler.class, mapper = DomainMapper.class, minMapper = DomainMapper.class, service = DomainService.class)
-@RequestMapping(path = "/api/v1/private/domain")
+@InjectMapperAndService(handler = KmsExceptionHandler.class, mapper = DomainMapper.class, minMapper = DomainMapper.class, service = DomainService.class)
+@RequestMapping(path = "/api/v1/private/tenant")
 public class KmsDomainController extends MappedCrudController<Long, KmsDomain, KmsDomainDto, KmsDomainDto, DomainService>
         implements KmsDomainControllerApi {
 
     @Override
     public ResponseEntity<KmsDomainDto> updateAdminStatus(RequestContextDto requestContext,
-                                                          String domain,
+                                                          String tenant,
                                                           IEnumEnabledBinaryStatus.Types newStatus) {
         log.info("in update status");
         try {
-            return ResponseFactory.responseOk(mapper().entityToDto(crudService().updateAdminStatus(domain, newStatus)));
+            return ResponseFactory.responseOk(mapper().entityToDto(crudService().updateAdminStatus(tenant, newStatus)));
         } catch (Throwable e) {
             log.error("<Error>: update Domain Status : {} ", e);
             return getBackExceptionResponse(e);
@@ -44,10 +45,10 @@ public class KmsDomainController extends MappedCrudController<Long, KmsDomain, K
 
     @Override
     public ResponseEntity<Boolean> updateDomain(//RequestContextDto requestContext,
-                                                KmsDomainDto domain) {
-        log.info("Call update domain " + domain.toString());
+                                                KmsDomainDto tenant) {
+        log.info("Call update tenant " + tenant.toString());
         try {
-            return ResponseFactory.responseOk(crudService().checkIfExists(mapper().dtoToEntity(domain),
+            return ResponseFactory.responseOk(crudService().checkIfExists(mapper().dtoToEntity(tenant),
                     true));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);

@@ -1,9 +1,10 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.api.AppParameterControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.AppParameterDto;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
@@ -22,19 +23,19 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@CtrlDef(handler = ImsExceptionHandler.class, mapper = AppParameterMapper.class, minMapper = AppParameterMapper.class, service = AppParameterService.class)
+@InjectMapperAndService(handler = ImsExceptionHandler.class, mapper = AppParameterMapper.class, minMapper = AppParameterMapper.class, service = AppParameterService.class)
 @RequestMapping(path = "/api/v1/private/appParameter")
-public class AppParameterController extends MappedCrudController<Long, AppParameter, AppParameterDto, AppParameterDto, AppParameterService>
+public class AppParameterController extends MappedCrudTenantController<Long, AppParameter, AppParameterDto, AppParameterDto, AppParameterService>
         implements AppParameterControllerApi {
 
     @Override
-    public ResponseEntity<String> getValueByDomainAndName(RequestContextDto requestContext,
-                                                          String domain, String name, Boolean allowDefault, String defaultValue) {
-        log.info("Call api getPropertyByAccount {} /{}", domain, name);
+    public ResponseEntity<String> getValueByTenantAndName(RequestContextDto requestContext,
+                                                          String tenant, String name, Boolean allowDefault, String defaultValue) {
+        log.info("Call api getPropertyByAccount {} /{}", tenant, name);
         try {
-            return ResponseFactory.responseOk(crudService().getValueByDomainAndName(domain, name, true, defaultValue));
+            return ResponseFactory.responseOk(crudService().getValueByTenantAndName(tenant, name, true, defaultValue));
         } catch (Throwable e) {
-            log.error("<Error>: Call api getPropertyByAccount {} /{} {}", domain, name, e);
+            log.error("<Error>: Call api getPropertyByAccount {} /{} {}", tenant, name, e);
             return getBackExceptionResponse(e);
         }
     }

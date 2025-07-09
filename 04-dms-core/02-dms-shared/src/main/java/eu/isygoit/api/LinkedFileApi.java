@@ -27,7 +27,7 @@ public interface LinkedFileApi extends ILinkedFileApi<LinkedFileRequestDto> {
      * Search by tags response entity.
      *
      * @param requestContext the request context
-     * @param domain         the domain
+     * @param tenant         the tenant
      * @param tags           the tags
      * @return the response entity
      */
@@ -41,7 +41,7 @@ public interface LinkedFileApi extends ILinkedFileApi<LinkedFileRequestDto> {
     })
     @GetMapping(path = "/searchByTags")
     ResponseEntity<List<LinkedFileRequestDto>> searchByTags(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                                            @RequestParam(name = RestApiConstants.DOMAIN_NAME) String domain,
+                                                            @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                                             @RequestParam(name = RestApiConstants.TAGS) String tags);
 
 
@@ -49,7 +49,7 @@ public interface LinkedFileApi extends ILinkedFileApi<LinkedFileRequestDto> {
      * Search by original name response entity.
      *
      * @param requestContext   the request context
-     * @param domain           the domain
+     * @param tenant           the tenant
      * @param originalFileName the original file name
      * @return the response entity
      */
@@ -63,14 +63,14 @@ public interface LinkedFileApi extends ILinkedFileApi<LinkedFileRequestDto> {
     })
     @GetMapping(path = "/searchByOriginalName")
     ResponseEntity<LinkedFileRequestDto> searchByOriginalName(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                                              @RequestParam(name = RestApiConstants.DOMAIN_NAME) String domain,
+                                                              @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                                               @RequestParam(name = RestApiConstants.ORIGINAL_FILE_NAME) String originalFileName);
 
     /**
      * Rename file response entity.
      *
      * @param requestContext the request context
-     * @param domain         the domain
+     * @param tenant         the tenant
      * @param code           the code
      * @param newName        the new name
      * @return the response entity
@@ -85,7 +85,7 @@ public interface LinkedFileApi extends ILinkedFileApi<LinkedFileRequestDto> {
     })
     @GetMapping(path = "/renameFile")
     ResponseEntity<LinkedFileRequestDto> renameFile(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                                    @RequestParam(name = RestApiConstants.DOMAIN_NAME) String domain,
+                                                    @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                                     @RequestParam(name = RestApiConstants.CODE) String code,
                                                     @RequestParam(name = RestApiConstants.NEW_NAME) String newName);
 
@@ -93,7 +93,7 @@ public interface LinkedFileApi extends ILinkedFileApi<LinkedFileRequestDto> {
      * Search by categories response entity.
      *
      * @param requestContext the request context
-     * @param domain         the domain
+     * @param tenant         the tenant
      * @param categories     the categories
      * @return the response entity
      */
@@ -107,6 +107,6 @@ public interface LinkedFileApi extends ILinkedFileApi<LinkedFileRequestDto> {
     })
     @GetMapping(path = "/searchByCategories")
     ResponseEntity<List<LinkedFileRequestDto>> searchByCategories(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                                                  @RequestParam(name = RestApiConstants.DOMAIN_NAME) String domain,
+                                                                  @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                                                   @RequestParam(name = RestApiConstants.CATEGORIES) String categories);
 }

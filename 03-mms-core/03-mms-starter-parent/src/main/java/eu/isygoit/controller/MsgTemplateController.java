@@ -1,11 +1,12 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.dto.data.MsgTemplateDto;
-import eu.isygoit.dto.extendable.IdentifiableDto;
+import eu.isygoit.dto.extendable.IdAssignableDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.exception.handler.MmsExceptionHandler;
 import eu.isygoit.mapper.MsgTemplateMapper;
@@ -33,8 +34,8 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping(path = "/api/v1/private/mail/template")
-@CtrlDef(handler = MmsExceptionHandler.class, mapper = MsgTemplateMapper.class, minMapper = MsgTemplateMapper.class, service = MsgTemplateService.class)
-public class MsgTemplateController extends MappedCrudController<Long, MsgTemplate, MsgTemplateDto, MsgTemplateDto, MsgTemplateService> {
+@InjectMapperAndService(handler = MmsExceptionHandler.class, mapper = MsgTemplateMapper.class, minMapper = MsgTemplateMapper.class, service = MsgTemplateService.class)
+public class MsgTemplateController extends MappedCrudTenantController<Long, MsgTemplate, MsgTemplateDto, MsgTemplateDto, MsgTemplateService> {
 
     /**
      * Get template names response entity.
@@ -47,7 +48,7 @@ public class MsgTemplateController extends MappedCrudController<Long, MsgTemplat
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = IdentifiableDto.class))})
+                            schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @GetMapping(path = "/names")
     public ResponseEntity<List<String>> getTemplateNames() {

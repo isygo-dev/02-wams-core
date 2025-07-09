@@ -24,15 +24,15 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(SchemaTableConstantName.T_MAIL_MESSAGE)
-public class MailMessage extends AuditableEntity<UUID> implements IDomainAssignable {
+public class MailMessage extends AuditableEntity<UUID> implements ITenantAssignable {
 
     @PrimaryKey
     @CassandraType(type = CassandraType.Name.TIMEUUID)
     private UUID id;
 
     @CassandraType(type = CassandraType.Name.TEXT)
-    @Column(SchemaColumnConstantName.C_DOMAIN)
-    private String domain;
+    @Column(SchemaColumnConstantName.C_TENANT)
+    private String tenant;
 
     @CassandraType(type = CassandraType.Name.TEXT)
     @Column(SchemaColumnConstantName.C_SUBJECT)

@@ -29,27 +29,27 @@ public class UserService implements UserDetailsService {
     @Autowired
     private KmsPasswordService kmsPasswordService;
     @Autowired
-    private DomainRepository domainRepository;
+    private DomainRepository tenantRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         String[] userNameArray = username.split("@");
         if (userNameArray.length >= 2) {
-            Domain domain = domainRepository.findByNameIgnoreCase(userNameArray[1]).orElseThrow(() -> new UsernameNotFoundException("User Not Found!"));
-            Account account = accountRepository.findByDomainIgnoreCaseAndCodeIgnoreCase(userNameArray[1], userNameArray[0]).orElseThrow(() -> new UsernameNotFoundException("User Not Found!"));
+            Domain tenant = tenantRepository.findByNameIgnoreCase(userNameArray[1]).orElseThrow(() -> new UsernameNotFoundException("User Not Found!"));
+            Account account = accountRepository.findByTenantIgnoreCaseAndCodeIgnoreCase(userNameArray[1], userNameArray[0]).orElseThrow(() -> new UsernameNotFoundException("User Not Found!"));
             return CustomUserDetails.builder()
                     .username(account.getCode())
                     .isAdmin(account.getIsAdmin())
                     .password(username)
                     .passwordExpired(kmsPasswordService.isPasswordExpired(//RequestContextDto.builder().build(),
                             IsPwdExpiredRequestDto.builder()
-                                    .domain(account.getDomain())
+                                    .tenant(account.getTenant())
                                     .email(account.getEmail())
                                     .userName(account.getCode())
                                     .authType(IEnumAuth.Types.valueOf(userNameArray[2]))
                                     .build()).getBody())
                     .authorities(Account.getAuthorities(account))
-                    .domainEnabled(domain.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED)
+                    .tenantEnabled(tenant.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED)
                     .accountEnabled(account.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED)
                     .accountExpired(account.getSystemStatus() == IEnumAccountSystemStatus.Types.EXPIRED)
                     .accountLocked(account.getSystemStatus() == IEnumAccountSystemStatus.Types.LOCKED

@@ -38,30 +38,30 @@ public interface SchemaFkConstantName extends ComSchemaFkConstantName {
      */
     String FK_PASSWORD_INFO_REF_USER = "FK_USER_REF_PASSWORD_INFO";
     /**
-     * The constant FK_DOMAIN_REF_PEB_CONFIG.
+     * The constant FK_TENANT_REF_PEB_CONFIG.
      */
-    String FK_DOMAIN_REF_PEB_CONFIG = "FK_DOMAIN_REF_PEB_CONFIG";
+    String FK_TENANT_REF_PEB_CONFIG = "FK_TENANT_REF_PEB_CONFIG";
     /**
-     * The constant FK_DOMAIN_REF_DIGESTER_CONFIG.
+     * The constant FK_TENANT_REF_DIGESTER_CONFIG.
      */
-    String FK_DOMAIN_REF_DIGESTER_CONFIG = "FK_DOMAIN_REF_DIGESTER_CONFIG";
+    String FK_TENANT_REF_DIGESTER_CONFIG = "FK_TENANT_REF_DIGESTER_CONFIG";
     /**
-     * The constant FK_USER_REF_DOMAIN.
+     * The constant FK_USER_REF_TENANT.
      */
-    String FK_USER_REF_DOMAIN = "FK_USER_REF_DOMAIN";
+    String FK_USER_REF_TENANT = "FK_USER_REF_TENANT";
     /**
-     * The constant FK_DOMAIN_REF_TOKEN_CONFIG.
+     * The constant FK_TENANT_REF_TOKEN_CONFIG.
      */
-    String FK_DOMAIN_REF_TOKEN_CONFIG = "FK_DOMAIN_REF_TOKEN_CONFIG";
+    String FK_TENANT_REF_TOKEN_CONFIG = "FK_TENANT_REF_TOKEN_CONFIG";
     /**
-     * The constant FK_DOMAIN_REF_PASSWORD_CONFIG.
+     * The constant FK_TENANT_REF_PASSWORD_CONFIG.
      */
-    String FK_DOMAIN_REF_PASSWORD_CONFIG = "FK_DOMAIN_REF_PASSWORD_CONFIG";
+    String FK_TENANT_REF_PASSWORD_CONFIG = "FK_TENANT_REF_PASSWORD_CONFIG";
 
     /**
-     * The constant FK_ACCOUNT_REF_DOMAIN.
+     * The constant FK_ACCOUNT_REF_TENANT.
      */
-    String FK_ACCOUNT_REF_DOMAIN = "FK_ACCOUNT_REF_DOMAIN";
+    String FK_ACCOUNT_REF_TENANT = "FK_ACCOUNT_REF_TENANT";
 
     /**
      * The constant FK_PASSWORD_INFO_REF_ACCOUNT.

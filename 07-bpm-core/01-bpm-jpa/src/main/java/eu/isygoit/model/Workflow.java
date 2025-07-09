@@ -1,6 +1,6 @@
 package eu.isygoit.model;
 
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumWorkflow;
 import eu.isygoit.enums.IEnumWorkflowCategory;
 import eu.isygoit.model.jakarta.AuditableCancelableEntity;
@@ -28,12 +28,12 @@ import java.util.List;
 @Table(name = SchemaTableConstantName.T_WORKFLOW, uniqueConstraints = {
         @UniqueConstraint(name = SchemaUcConstantName.UC_WORKFLOW_CODE,
                 columnNames = {SchemaColumnConstantName.C_CODE}),
-        @UniqueConstraint(name = SchemaUcConstantName.UC_WORKFLOW_DOMAIN_NAME,
-                columnNames = {SchemaColumnConstantName.C_DOMAIN, SchemaColumnConstantName.C_NAME})
+        @UniqueConstraint(name = SchemaUcConstantName.UC_WORKFLOW_TENANT_NAME,
+                columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_NAME})
 })
 @SQLDelete(sql = "update " + SchemaTableConstantName.T_WORKFLOW + " set " + SchemaColumnConstantName.C_CHECK_CANCEL + "= true , " + SchemaColumnConstantName.C_CANCEL_DATE + " = current_timestamp WHERE id = ?")
 @Where(clause = SchemaColumnConstantName.C_CHECK_CANCEL + "=false")
-public class Workflow extends AuditableCancelableEntity<Long> implements IDomainAssignable, ICodeAssignable {
+public class Workflow extends AuditableCancelableEntity<Long> implements ITenantAssignable, ICodeAssignable {
 
     @Id
     @SequenceGenerator(name = "workflow_sequence_generator", sequenceName = "workflow_sequence", allocationSize = 1)
@@ -42,9 +42,9 @@ public class Workflow extends AuditableCancelableEntity<Long> implements IDomain
     private Long id;
 
     //@Convert(converter = LowerCaseConverter.class)
-    @ColumnDefault("'" + DomainConstants.DEFAULT_DOMAIN_NAME + "'")
-    @Column(name = SchemaColumnConstantName.C_DOMAIN, length = SchemaConstantSize.DOMAIN, updatable = false, nullable = false)
-    private String domain;
+    @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
+    @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
+    private String tenant;
     //@Convert(converter = LowerCaseConverter.class)
     @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;

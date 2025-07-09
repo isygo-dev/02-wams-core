@@ -8,7 +8,7 @@ import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.data.DomainAdminDto;
 import eu.isygoit.dto.data.MinAccountDto;
-import eu.isygoit.dto.extendable.IdentifiableDto;
+import eu.isygoit.dto.extendable.IdAssignableDto;
 import eu.isygoit.dto.response.UserDataResponseDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.enums.IEnumLanguage;
@@ -30,10 +30,10 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
 
 
     /**
-     * Gets emails by domain.
+     * Gets emails by tenant.
      *
      * @param requestContext the request context
-     * @return the emails by domain
+     * @return the emails by tenant
      */
     @Operation(summary = "get Emails By Domain Api",
             description = "get Emails By Domain")
@@ -44,7 +44,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = String.class))})
     })
     @GetMapping(path = "/emails")
-    ResponseEntity<List<String>> getEmailsByDomain(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext);
+    ResponseEntity<List<String>> getEmailsByTenant(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext);
 
     /**
      * Gets accounts.
@@ -94,7 +94,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
     })
     @PostMapping(path = "/admin")
     ResponseEntity<AccountDto> createDomainAdmin(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                                 @RequestParam(name = RestApiConstants.DOMAIN_NAME) String domain,
+                                                 @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                                  @RequestBody DomainAdminDto admin);
 
     /**
@@ -234,7 +234,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
 
 
     /**
-     * Accounts by domain response entity.
+     * Accounts by tenant response entity.
      *
      * @param requestContext the request context
      * @return the response entity
@@ -247,11 +247,11 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = MinAccountDto.class))})
     })
-    @GetMapping(path = "/domain/sender")
-    ResponseEntity<List<MinAccountDto>> accountsByDomain(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext);
+    @GetMapping(path = "/tenant/sender")
+    ResponseEntity<List<MinAccountDto>> accountsByTenant(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext);
 
     /**
-     * Accounts by domain response entity.
+     * Accounts by tenant response entity.
      *
      * @param requestContext the request context
      * @return the response entity
@@ -264,13 +264,13 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = MinAccountDto.class))})
     })
-    @GetMapping(path = "/domain")
-    ResponseEntity<List<MinAccountDto>> userAccountsByDomain(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                                             @RequestParam(name = RestApiConstants.DOMAIN_NAME) String domain);
+    @GetMapping(path = "/tenant")
+    ResponseEntity<List<MinAccountDto>> userAccountsByTenant(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+                                                             @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant);
 
 
     /**
-     * Chat accounts by domain response entity.
+     * Chat accounts by tenant response entity.
      *
      * @param requestContext the request context
      * @return the response entity
@@ -283,8 +283,8 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = MinAccountDto.class))})
     })
-    @GetMapping(path = "/chat/domain")
-    ResponseEntity<List<MinAccountDto>> chatAccountsByDomain(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext);
+    @GetMapping(path = "/chat/tenant")
+    ResponseEntity<List<MinAccountDto>> chatAccountsByTenant(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext);
 
     /**
      * Resend email creation response entity.
@@ -299,7 +299,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = IdentifiableDto.class))})
+                            schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @GetMapping(path = "/resend/email/creation/{id}")
     ResponseEntity<?> resendCreationEmail(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,

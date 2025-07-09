@@ -1,5 +1,9 @@
 package eu.isygoit.repository;
 
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAssignableRepository;
+
 import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.model.MsgTemplate;
 
@@ -9,14 +13,14 @@ import java.util.Optional;
 /**
  * The interface Msg template repository.
  */
-public interface MsgTemplateRepository extends JpaPagingAndSortingDomainAndCodeAssignableRepository<MsgTemplate, Long> {
+public interface MsgTemplateRepository extends JpaPagingAndSortingTenantAndCodeAssignableRepository<MsgTemplate, Long> {
 
     /**
-     * Find by domain ignore case and name optional.
+     * Find by tenant ignore case and name optional.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @param name   the name
      * @return the optional
      */
-    Optional<MsgTemplate> findByDomainIgnoreCaseAndName(String domain, IEnumEmailTemplate.Types name);
+    Optional<MsgTemplate> findByTenantIgnoreCaseAndName(String tenant, IEnumEmailTemplate.Types name);
 }

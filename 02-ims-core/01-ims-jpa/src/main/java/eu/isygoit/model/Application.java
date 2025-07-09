@@ -1,6 +1,6 @@
 package eu.isygoit.model;
 
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.*;
@@ -25,10 +25,10 @@ import java.util.List;
 @Table(name = SchemaTableConstantName.T_APPLICATION, uniqueConstraints = {
         @UniqueConstraint(name = SchemaUcConstantName.UC_APPLICATION_CODE,
                 columnNames = {SchemaColumnConstantName.C_CODE}),
-        @UniqueConstraint(name = SchemaUcConstantName.UC_APPLICATION_DOMAIN_NAME,
-                columnNames = {SchemaColumnConstantName.C_DOMAIN, SchemaColumnConstantName.C_NAME})
+        @UniqueConstraint(name = SchemaUcConstantName.UC_APPLICATION_TENANT_NAME,
+                columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_NAME})
 })
-public class Application extends AuditableEntity<Long> implements IDomainAssignable, ICodeAssignable, IImageEntity {
+public class Application extends AuditableEntity<Long> implements ITenantAssignable, ICodeAssignable, IImageEntity {
 
     @Id
     @SequenceGenerator(name = "application_sequence_generator", sequenceName = "application_sequence", allocationSize = 1)
@@ -37,9 +37,9 @@ public class Application extends AuditableEntity<Long> implements IDomainAssigna
     private Long id;
 
     //@Convert(converter = LowerCaseConverter.class)
-    @ColumnDefault("'" + DomainConstants.DEFAULT_DOMAIN_NAME + "'")
-    @Column(name = SchemaColumnConstantName.C_DOMAIN, length = SchemaConstantSize.DOMAIN, updatable = false, nullable = false)
-    private String domain;
+    @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
+    @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
+    private String tenant;
     //@Convert(converter = LowerCaseConverter.class)
     @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;

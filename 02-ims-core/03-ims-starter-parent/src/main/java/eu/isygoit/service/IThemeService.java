@@ -1,22 +1,23 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.ICrudServiceMethod;
+import eu.isygoit.com.rest.service.ICrudServiceMethods;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
 import eu.isygoit.model.Theme;
 
 
 /**
  * The interface Theme service.
  */
-public interface IThemeService extends ICrudServiceMethod<Long, Theme> {
+public interface IThemeService extends ICrudServiceMethods<Long, Theme> {
 
     /**
-     * Find theme by account code and domain code theme.
+     * Find theme by account code and tenant code theme.
      *
      * @param accountCode the account code
-     * @param domainCode  the domain code
+     * @param tenantCode  the tenant code
      * @return the theme
      */
-    Theme findThemeByAccountCodeAndDomainCode(String accountCode, String domainCode);
+    Theme findThemeByAccountCodeAndDomainCode(String accountCode, String tenantCode);
 
     /**
      * Update theme theme.

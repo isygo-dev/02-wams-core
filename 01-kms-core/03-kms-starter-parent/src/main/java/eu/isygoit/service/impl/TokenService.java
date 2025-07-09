@@ -44,7 +44,7 @@ public class TokenService extends JwtService implements ITokenService {
     @Autowired
     private ITokenConfigService tokenConfigService;
     @Autowired
-    private IDomainService domainService;
+    private IDomainService tenantService;
     @Autowired
     private IMsgService msgService;
     @Autowired
@@ -61,11 +61,11 @@ public class TokenService extends JwtService implements ITokenService {
         this.appProperties = appProperties;
     }
 
-    public TokenDto buildTokenAndSave(String domain, String application, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
-        //Get Token config configured by domain and type, otherwise, default one
-        TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(domain, tokenType);
+    public TokenDto buildTokenAndSave(String tenant, String application, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
+        //Get Token config configured by tenant and type, otherwise, default one
+        TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
-            TokenDto token = super.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(domain).toString(),
+            TokenDto token = super.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(tenant).toString(),
                     claims,
                     tokenConfig.getIssuer(),
                     tokenConfig.getAudience(),
@@ -84,15 +84,15 @@ public class TokenService extends JwtService implements ITokenService {
             accessTokenService.create(accessToken);
             return token;
         } else {
-            throw new TokenConfigNotFoundException("for domain: " + domain + "/" + tokenType.name());
+            throw new TokenConfigNotFoundException("for tenant: " + tenant + "/" + tokenType.name());
         }
     }
 
-    public TokenDto buildToken(String domain, String application, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
-        //Get Token config configured by domain and type, otherwise, default one
-        TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(domain, tokenType);
+    public TokenDto buildToken(String tenant, String application, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
+        //Get Token config configured by tenant and type, otherwise, default one
+        TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
-            TokenDto token = super.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(domain).toString(),
+            TokenDto token = super.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(tenant).toString(),
                     claims,
                     tokenConfig.getIssuer(),
                     tokenConfig.getAudience(),
@@ -101,20 +101,20 @@ public class TokenService extends JwtService implements ITokenService {
                     tokenConfig.getLifeTimeInMs());
             return token;
         } else {
-            throw new TokenConfigNotFoundException("for domain: " + domain + "/" + tokenType.name());
+            throw new TokenConfigNotFoundException("for tenant: " + tenant + "/" + tokenType.name());
         }
     }
 
     @Override
-    public boolean isTokenValid(String domain, String application, IEnumToken.Types tokenType, String token, String subject) {
-        //Get Token config configured by domain and type, otherwise, default one
-        TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(domain, tokenType);
+    public boolean isTokenValid(String tenant, String application, IEnumToken.Types tokenType, String token, String subject) {
+        //Get Token config configured by tenant and type, otherwise, default one
+        TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
             //Validate token content
             super.validateToken(token, subject, tokenConfig.getSecretKey());
         } else {
-            log.error("Token config not found for domain: " + domain + "/" + tokenType.name());
-            throw new TokenConfigNotFoundException("for domain: " + domain + "/" + tokenType.name());
+            log.error("Token config not found for tenant: " + tenant + "/" + tokenType.name());
+            throw new TokenConfigNotFoundException("for tenant: " + tenant + "/" + tokenType.name());
         }
 
         //Validate token existance
@@ -122,37 +122,37 @@ public class TokenService extends JwtService implements ITokenService {
         //TEMP COMMENTED: AccessToken accessToken = accessTokenService.findByApplicationAndAccountCodeAndTokenAndTokenType(application, userNameArray[0], token, tokenType);
         AccessToken accessToken = accessTokenService.findByAccountCodeAndTokenAndTokenType(userNameArray[0], token, tokenType);
         if (accessToken == null) {
-            log.error("Token not found for domain: " + domain + "/" + tokenType.name());
+            log.error("Token not found for tenant: " + tenant + "/" + tokenType.name());
             throw new TokenInvalidException("Invalid JWT: not found or deprecated");
         }
         return true;
     }
 
     @Override
-    public void createForgotPasswordAccessToken(String domain, String application, String accountCode) throws JsonProcessingException {
+    public void createForgotPasswordAccessToken(String tenant, String application, String accountCode) throws JsonProcessingException {
         //Get the account
-        Account account = domainService.checkAccountIfExists(domain, null, null, accountCode, null, false);
+        Account account = tenantService.checkAccountIfExists(tenant, null, null, accountCode, null, false);
         if (account == null) {
-            log.error("Account not found for domain/username: " + domain + "/" + accountCode);
-            throw new UserNotFoundException("domain/username: " + domain + "/" + accountCode);
+            log.error("Account not found for tenant/username: " + tenant + "/" + accountCode);
+            throw new UserNotFoundException("tenant/username: " + tenant + "/" + accountCode);
         }
 
         //Generate reset password token
-        TokenDto token = this.buildTokenAndSave(domain, application, IEnumToken.Types.RSTPWD, accountCode,
-                Map.of(JwtConstants.JWT_SENDER_DOMAIN, domain,
+        TokenDto token = this.buildTokenAndSave(tenant, application, IEnumToken.Types.RSTPWD, accountCode,
+                Map.of(JwtConstants.JWT_SENDER_TENANT, tenant,
                         JwtConstants.JWT_SENDER_USER, accountCode,
                         JwtConstants.JWT_LOG_APP, application));
 
         //Send reset password email
-        sendForgotPasswordEmail(domain, application, account, token);
+        sendForgotPasswordEmail(tenant, application, account, token);
     }
 
-    private void sendForgotPasswordEmail(String domain, String application, Account account, TokenDto token) throws JsonProcessingException {
+    private void sendForgotPasswordEmail(String tenant, String application, Account account, TokenDto token) throws JsonProcessingException {
         //Build Email template data
         String resetPwdUrl = "http://localhost:4000/reset-password/";
         try {
-            ResponseEntity<String> result = imsAppParameterService.getValueByDomainAndName(RequestContextDto.builder().build(),
-                    domain, AppParameterConstants.APPURL + "." + application.toUpperCase(), true, "http://localhost:4000/reset-password/");
+            ResponseEntity<String> result = imsAppParameterService.getValueByTenantAndName(RequestContextDto.builder().build(),
+                    tenant, AppParameterConstants.APPURL + "." + application.toUpperCase(), true, "http://localhost:4000/reset-password/");
             if (result.getStatusCode().is2xxSuccessful() && result.hasBody() && StringUtils.hasText(result.getBody())) {
                 resetPwdUrl = result.getBody();
             }
@@ -163,26 +163,26 @@ public class TokenService extends JwtService implements ITokenService {
 
         MailMessageDto mailMessageDto = MailMessageDto.builder()
                 .subject(EmailSubjects.FORGOT_PASSWORD_EMAIL_SUBJECT)
-                .domain(domain)
+                .tenant(tenant)
                 .toAddr(account.getEmail())
                 .templateName(IEnumEmailTemplate.Types.FORGOT_PASSWORD_TEMPLATE)
                 .variables(MailMessageDto.getVariablesAsString(Map.of(
                         //Common vars
                         MsgTemplateVariables.V_USER_NAME, account.getCode(),
                         MsgTemplateVariables.V_FULLNAME, account.getFullName(),
-                        MsgTemplateVariables.V_DOMAIN_NAME, account.getDomain(),
+                        MsgTemplateVariables.V_TENANT_NAME, account.getTenant(),
                         //Specific vars
                         MsgTemplateVariables.V_RESET_TOKEN, token.getToken(),
                         MsgTemplateVariables.V_RESET_PWD_URL, resetPwdUrl + "/reset-password/?token=")))
                 .build();
         //Send the email message
-        msgService.sendMessage(domain, mailMessageDto, appProperties.isSendAsyncEmail());
+        msgService.sendMessage(tenant, mailMessageDto, appProperties.isSendAsyncEmail());
     }
 
     @Override
-    public TokenDto createAccessToken(String domain, String application, String userName, Boolean isAdmin) {
-        TokenDto token = this.buildTokenAndSave(domain, application, IEnumToken.Types.ACCESS, userName,
-                Map.of(JwtConstants.JWT_SENDER_DOMAIN, domain,
+    public TokenDto createAccessToken(String tenant, String application, String userName, Boolean isAdmin) {
+        TokenDto token = this.buildTokenAndSave(tenant, application, IEnumToken.Types.ACCESS, userName,
+                Map.of(JwtConstants.JWT_SENDER_TENANT, tenant,
                         JwtConstants.JWT_SENDER_USER, userName,
                         JwtConstants.JWT_LOG_APP, application,
                         JwtConstants.JWT_IS_ADMIN, isAdmin)
@@ -191,9 +191,9 @@ public class TokenService extends JwtService implements ITokenService {
     }
 
     @Override
-    public TokenDto createRefreshToken(String domain, String application, String userName) {
-        TokenDto token = this.buildTokenAndSave(domain, application, IEnumToken.Types.REFRESH, userName,
-                Map.of(JwtConstants.JWT_SENDER_DOMAIN, domain,
+    public TokenDto createRefreshToken(String tenant, String application, String userName) {
+        TokenDto token = this.buildTokenAndSave(tenant, application, IEnumToken.Types.REFRESH, userName,
+                Map.of(JwtConstants.JWT_SENDER_TENANT, tenant,
                         JwtConstants.JWT_SENDER_USER, userName,
                         JwtConstants.JWT_LOG_APP, application)
         );
@@ -201,9 +201,9 @@ public class TokenService extends JwtService implements ITokenService {
     }
 
     @Override
-    public TokenDto createAuthorityToken(String domain, String application, String userName, List<String> authorities) {
-        TokenDto token = this.buildToken(domain, application, IEnumToken.Types.AUTHORITY, userName,
-                Map.of(JwtConstants.JWT_SENDER_DOMAIN, domain,
+    public TokenDto createAuthorityToken(String tenant, String application, String userName, List<String> authorities) {
+        TokenDto token = this.buildToken(tenant, application, IEnumToken.Types.AUTHORITY, userName,
+                Map.of(JwtConstants.JWT_SENDER_TENANT, tenant,
                         JwtConstants.JWT_SENDER_USER, userName,
                         JwtConstants.JWT_LOG_APP, application,
                         JwtConstants.JWT_GRANTED_AUTHORITY, authorities)

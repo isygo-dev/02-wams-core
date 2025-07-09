@@ -18,6 +18,6 @@ public class AppParameterDto extends AbstractAuditableDto<Long> {
 
     private String name;
     private String value;
-    private String domain;
+    private String tenant;
     private String description;
 }

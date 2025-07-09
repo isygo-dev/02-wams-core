@@ -1,6 +1,6 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlHandler;
+import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.api.LinkedFileApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
@@ -31,7 +31,7 @@ import java.util.List;
 @Slf4j
 @Validated
 @RestController
-@CtrlHandler(DmsExceptionHandler.class)
+@InjectExceptionHandler(DmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/linked-files")
 public class LinkedFileController extends ControllerExceptionHandler implements LinkedFileApi {
 
@@ -42,10 +42,10 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
 
     @Override
     public ResponseEntity<List<LinkedFileRequestDto>> searchByTags(RequestContextDto requestContext,
-                                                                   String domain, String tags) {
-        log.info("Search file by tags from domain: {} / tags:{}", domain, tags);
+                                                                   String tenant, String tags) {
+        log.info("Search file by tags from tenant: {} / tags:{}", tenant, tags);
         try {
-            return ResponseFactory.responseOk(linkedFileMapper.listEntityToDto(linkedFileService.searchByTags(domain, tags)));
+            return ResponseFactory.responseOk(linkedFileMapper.listEntityToDto(linkedFileService.searchByTags(tenant, tags)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -54,11 +54,11 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
 
     @Override
     public ResponseEntity<Boolean> deleteFile(RequestContextDto requestContext,
-                                              String domain,
+                                              String tenant,
                                               String code) {
-        log.info("Delete file by domain: {} / code: {}", domain, code);
+        log.info("Delete file by tenant: {} / code: {}", tenant, code);
         try {
-            linkedFileService.deleteFile(domain, code);
+            linkedFileService.deleteFile(tenant, code);
             return ResponseFactory.responseOk(true);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -68,11 +68,11 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
 
     @Override
     public ResponseEntity<LinkedFileRequestDto> searchByOriginalName(RequestContextDto requestContext,
-                                                                     String domain,
+                                                                     String tenant,
                                                                      String originalFileName) {
-        log.info("Search file by original name from domain {} : {}", domain, originalFileName);
+        log.info("Search file by original name from tenant {} : {}", tenant, originalFileName);
         try {
-            return ResponseFactory.responseOk(linkedFileMapper.entityToDto(linkedFileService.searchByOriginalFileName(domain, originalFileName)));
+            return ResponseFactory.responseOk(linkedFileMapper.entityToDto(linkedFileService.searchByOriginalFileName(tenant, originalFileName)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -81,12 +81,12 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
 
     @Override
     public ResponseEntity<LinkedFileRequestDto> renameFile(RequestContextDto requestContext,
-                                                           String domain,
+                                                           String tenant,
                                                            String code,
                                                            String newName) {
-        log.info("rename file by domain: {} / code: {} to new name: {}", code, newName);
+        log.info("rename file by tenant: {} / code: {} to new name: {}", code, newName);
         try {
-            return ResponseFactory.responseOk(linkedFileMapper.entityToDto(linkedFileService.renameFile(domain, code, newName)));
+            return ResponseFactory.responseOk(linkedFileMapper.entityToDto(linkedFileService.renameFile(tenant, code, newName)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -95,13 +95,13 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
 
     @Override
     public ResponseEntity<List<LinkedFileRequestDto>> searchByCategories(RequestContextDto requestContext,
-                                                                         String domain,
+                                                                         String tenant,
                                                                          String categories) {
-        log.info("Search files by categories from domain {} : {}", domain, categories);
+        log.info("Search files by categories from tenant {} : {}", tenant, categories);
         try {
             String[] catArray = categories.split(",");
             if (catArray.length > 0) {
-                List<LinkedFileRequestDto> list = linkedFileMapper.listEntityToDto(linkedFileService.searchByCategories(domain, Arrays.stream(categories.split(",")).toList()));
+                List<LinkedFileRequestDto> list = linkedFileMapper.listEntityToDto(linkedFileService.searchByCategories(tenant, Arrays.stream(categories.split(",")).toList()));
                 if (CollectionUtils.isEmpty(list)) {
                     return ResponseFactory.responseNoContent();
                 }
@@ -117,7 +117,7 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
     @Override
     public ResponseEntity<LinkedFileResponseDto> upload(//RequestContextDto requestContext,
                                                         LinkedFileRequestDto linkedFile) throws IOException {
-        log.info("Uploading file from domain {} : {}", linkedFile.getDomain(), linkedFile.getFile().getOriginalFilename());
+        log.info("Uploading file from tenant {} : {}", linkedFile.getTenant(), linkedFile.getFile().getOriginalFilename());
         if (linkedFile.getFile() == null) {
             return ResponseFactory.responseBadRequest();
         }
@@ -133,11 +133,11 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
 
     @Override
     public ResponseEntity<Resource> download(RequestContextDto requestContext,
-                                             String domain,
+                                             String tenant,
                                              String code) throws IOException {
-        log.info("Downloading file from domain {} : {}", domain, code);
+        log.info("Downloading file from tenant {} : {}", tenant, code);
         try {
-            Resource resource = linkedFileService.download(domain, code);
+            Resource resource = linkedFileService.download(tenant, code);
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, "multipart/form-data")
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")

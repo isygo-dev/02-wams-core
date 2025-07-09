@@ -36,9 +36,9 @@ public interface SchemaColumnConstantName extends ComSchemaColumnConstantName {
 
 
     /**
-     * The constant C_DOMAIN.
+     * The constant C_TENANT.
      */
-    String C_DOMAIN = "DOMAIN";
+    String C_TENANT = "TENANT";
     /**
      * The constant C_ACCOUNT_ID.
      */

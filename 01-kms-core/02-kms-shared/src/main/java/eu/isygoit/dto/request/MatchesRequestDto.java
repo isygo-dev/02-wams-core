@@ -20,7 +20,7 @@ import lombok.experimental.SuperBuilder;
 public class MatchesRequestDto extends AbstractAuditableDto<Long> {
 
     @NotEmpty
-    private String domain;
+    private String tenant;
     @NotEmpty
     private String userName;
     @NotEmpty

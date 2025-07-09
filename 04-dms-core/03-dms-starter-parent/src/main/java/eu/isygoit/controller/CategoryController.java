@@ -1,7 +1,8 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.dto.data.CategoryDto;
 import eu.isygoit.exception.handler.DmsExceptionHandler;
 import eu.isygoit.mapper.CategoryMapper;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@CtrlDef(handler = DmsExceptionHandler.class, mapper = CategoryMapper.class, minMapper = CategoryMapper.class, service = CategoryService.class)
+@InjectMapperAndService(handler = DmsExceptionHandler.class, mapper = CategoryMapper.class, minMapper = CategoryMapper.class, service = CategoryService.class)
 @RequestMapping(path = "/api/v1/private/category")
 public class CategoryController extends MappedCrudController<Long, Category, CategoryDto, CategoryDto, CategoryService> {
 

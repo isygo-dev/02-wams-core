@@ -1,6 +1,6 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.ICrudServiceMethod;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
 import eu.isygoit.dto.common.LinkedFileRequestDto;
 import eu.isygoit.model.LinkedFile;
 import org.springframework.core.io.Resource;
@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * The interface Linked file service.
  */
-public interface ILinkedFileService extends ICrudServiceMethod<Long, LinkedFile> {
+public interface ILinkedFileService extends ICrudTenantServiceMethods<Long, LinkedFile> {
     /**
      * Upload string.
      *
@@ -26,62 +26,62 @@ public interface ILinkedFileService extends ICrudServiceMethod<Long, LinkedFile>
     /**
      * Search by tags list.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @param tags   the tags
      * @return the list
      * @throws IOException the io exception
      */
-    List<LinkedFile> searchByTags(String domain, String tags) throws IOException;
+    List<LinkedFile> searchByTags(String tenant, String tags) throws IOException;
 
     /**
      * Delete file.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @param code   the code
      * @throws IOException the io exception
      */
-    void deleteFile(String domain, String code) throws IOException;
+    void deleteFile(String tenant, String code) throws IOException;
 
     /**
      * Search by original name linked file.
      *
-     * @param domain           the domain
+     * @param tenant           the tenant
      * @param originalFileName the original name
      * @return the linked file
      * @throws IOException the io exception
      */
-    LinkedFile searchByOriginalFileName(String domain, String originalFileName) throws IOException;
+    LinkedFile searchByOriginalFileName(String tenant, String originalFileName) throws IOException;
 
     /**
      * Rename file linked file.
      *
-     * @param domain  the domain
+     * @param tenant  the tenant
      * @param code    the old name
      * @param newName the new name
      * @return the linked file
      * @throws IOException the io exception
      */
-    LinkedFile renameFile(String domain, String code, String newName) throws IOException;
+    LinkedFile renameFile(String tenant, String code, String newName) throws IOException;
 
 
     /**
      * Search by categories list.
      *
-     * @param domain     the domain
+     * @param tenant     the tenant
      * @param categories the categories
      * @return the list
      * @throws IOException the io exception
      */
-    List<LinkedFile> searchByCategories(String domain, List<String> categories) throws IOException;
+    List<LinkedFile> searchByCategories(String tenant, List<String> categories) throws IOException;
 
     /**
      * Download resource.
      *
      * @param originalFileName the original file name
-     * @param domain           the domain
+     * @param tenant           the tenant
      * @param version          the version
      * @return the resource
      * @throws IOException the io exception
      */
-    Resource download(String domain, String code) throws IOException;
+    Resource download(String tenant, String code) throws IOException;
 }

@@ -1,9 +1,12 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.CodeGenLocal;
-import eu.isygoit.annotation.ServRepo;
+import eu.isygoit.annotation.InjectCodeGen;
+import eu.isygoit.annotation.InjectRepository;
 import eu.isygoit.com.rest.service.CodeAssignableService;
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
+import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.model.PasswordConfig;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
@@ -17,14 +20,14 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-@CodeGenLocal(value = NextCodeService.class)
-@ServRepo(value = PasswordConfigRepository.class)
-public class PasswordConfigService extends CodeAssignableService<Long, PasswordConfig, PasswordConfigRepository> implements IPasswordConfigService {
+@InjectCodeGen(value = NextCodeService.class)
+@InjectRepository(value = PasswordConfigRepository.class)
+public class PasswordConfigService extends CodeAssignableTenantService<Long, PasswordConfig, PasswordConfigRepository> implements IPasswordConfigService {
 
     @Override
     public AppNextCode initCodeGenerator() {
         return AppNextCode.builder()
-                .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
+                .tenant(TenantConstants.DEFAULT_TENANT_NAME)
                 .entity(PasswordConfig.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("PWD")

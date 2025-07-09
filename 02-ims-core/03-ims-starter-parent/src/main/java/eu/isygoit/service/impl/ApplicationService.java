@@ -1,11 +1,14 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.CodeGenKms;
-import eu.isygoit.annotation.CodeGenLocal;
-import eu.isygoit.annotation.ServRepo;
+import eu.isygoit.annotation.InjectCodeGenKms;
+import eu.isygoit.annotation.InjectCodeGen;
+import eu.isygoit.annotation.InjectRepository;
+import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.com.rest.service.ImageService;
+import eu.isygoit.com.rest.service.tenancy.ImageTenantService;
 import eu.isygoit.config.AppProperties;
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.model.Application;
@@ -21,10 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-@CodeGenLocal(value = NextCodeService.class)
-@CodeGenKms(value = KmsIncrementalKeyService.class)
-@ServRepo(value = ApplicationRepository.class)
-public class ApplicationService extends ImageService<Long, Application, ApplicationRepository>
+@InjectCodeGen(value = NextCodeService.class)
+@InjectCodeGenKms(value = KmsIncrementalKeyService.class)
+@InjectRepository(value = ApplicationRepository.class)
+public class ApplicationService extends ImageTenantService<Long, Application, ApplicationRepository>
         implements IApplicationService {
 
     private final AppProperties appProperties;
@@ -41,7 +44,7 @@ public class ApplicationService extends ImageService<Long, Application, Applicat
     @Override
     public AppNextCode initCodeGenerator() {
         return AppNextCode.builder()
-                .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
+                .tenant(TenantConstants.DEFAULT_TENANT_NAME)
                 .entity(Application.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("APP")

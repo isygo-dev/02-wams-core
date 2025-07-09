@@ -1,6 +1,8 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.ICrudServiceMethod;
+import eu.isygoit.com.rest.service.ICrudServiceMethods;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
 import eu.isygoit.dto.data.MailOptionsDto;
 import eu.isygoit.model.MailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -14,7 +16,7 @@ import java.util.UUID;
 /**
  * The interface Mail message service.
  */
-public interface IMailMessageService extends ICrudServiceMethod<UUID, MailMessage> {
+public interface IMailMessageService extends ICrudTenantServiceMethods<UUID, MailMessage> {
     /**
      * The constant encodingOptions.
      */
@@ -35,7 +37,7 @@ public interface IMailMessageService extends ICrudServiceMethod<UUID, MailMessag
     /**
      * Send mail boolean.
      *
-     * @param senderDomainName the sender domain name
+     * @param senderDomainName the sender tenant name
      * @param mailMessageData  the mail message data
      * @param options          the options
      * @param resources        the resources
@@ -46,7 +48,7 @@ public interface IMailMessageService extends ICrudServiceMethod<UUID, MailMessag
     /**
      * Multi part file to resource map.
      *
-     * @param senderDomainName the sender domain name
+     * @param senderDomainName the sender tenant name
      * @param resources        the resources
      * @return the map
      */

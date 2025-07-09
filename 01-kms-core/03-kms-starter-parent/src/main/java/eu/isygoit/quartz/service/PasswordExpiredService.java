@@ -40,7 +40,7 @@ public class PasswordExpiredService extends AbstractJobService {
     @Autowired
     private AccountRepository accountRepository;
     @Autowired
-    private IDomainService domainService;
+    private IDomainService tenantService;
     @Autowired
     private IMsgService msgService;
 
@@ -57,14 +57,14 @@ public class PasswordExpiredService extends AbstractJobService {
                         try {
                             mailMessageDto = MailMessageDto.builder()
                                     .subject(EmailSubjects.PASSWORD_WILL_EXPIRE_EMAIL_SUBJECT)
-                                    .domain(account.getDomain())
+                                    .tenant(account.getTenant())
                                     .toAddr(account.getEmail())
                                     .templateName(IEnumEmailTemplate.Types.PASSWORD_EXPIRE_TEMPLATE)
                                     .variables(MailMessageDto.getVariablesAsString(Map.of(
                                             //Common vars
                                             MsgTemplateVariables.V_USER_NAME, account.getCode(),
                                             MsgTemplateVariables.V_FULLNAME, account.getFullName(),
-                                            MsgTemplateVariables.V_DOMAIN_NAME, account.getDomain(),
+                                            MsgTemplateVariables.V_TENANT_NAME, account.getTenant(),
                                             //Specific vars
                                             MsgTemplateVariables.V_PWD_EXP_REMAINING_DAYS, passwordInfo.remainingDays().toString())))
                                     .build();
@@ -72,7 +72,7 @@ public class PasswordExpiredService extends AbstractJobService {
                             log.error("<Error>: send password expire email : {} ", e);
                         }
                         //Send the email message
-                        msgService.sendMessage(account.getDomain(), mailMessageDto, appProperties.isSendAsyncEmail());
+                        msgService.sendMessage(account.getTenant(), mailMessageDto, appProperties.isSendAsyncEmail());
                     }
                 }
             });

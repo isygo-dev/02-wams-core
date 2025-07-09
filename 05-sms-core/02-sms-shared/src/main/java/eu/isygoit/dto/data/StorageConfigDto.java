@@ -17,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class StorageConfigDto extends AbstractAuditableDto<Long> {
 
-    private String domain;
+    private String tenant;
     private IEnumStorage.Types type;
     private String userName;
     private String password;

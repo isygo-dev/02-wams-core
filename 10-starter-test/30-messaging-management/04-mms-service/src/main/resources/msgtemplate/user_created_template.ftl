@@ -355,7 +355,7 @@
                                                            style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px">
                                                         <tr>
                                                             <td align="center" style="padding:0;Margin:0;font-size:0px">
-                                                                <a target="_blank" href="${V_DOMAIN_URL}"
+                                                                <a target="_blank" href="${V_TENANT_URL}"
                                                                    style="mso-line-height-rule:exactly;text-decoration:underline;color:#EDEDED;font-size:14px"><img
                                                                             src="https://isygo-it.eu/assets/images/logo.png"
                                                                             alt="Logo"
@@ -430,7 +430,7 @@
                                                         </tr>
                                                         <tr>
                                                             <td align="center" style="padding:0;Margin:0"><!--[if mso]>
-                                                                <a href="${V_DOMAIN_URL}" target="_blank"
+                                                                <a href="${V_TENANT_URL}" target="_blank"
                                                                    hidden>
                                                                     <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml"
                                                                                  xmlns:w="urn:schemas-microsoft-com:office:word"
@@ -488,7 +488,7 @@
                                                         <tr>
                                                             <td align="center"
                                                                 style="padding:0;Margin:0;padding-bottom:20px;font-size:0px">
-                                                                <a target="_blank" href="${V_DOMAIN_URL}"
+                                                                <a target="_blank" href="${V_TENANT_URL}"
                                                                    style="mso-line-height-rule:exactly;text-decoration:underline;color:#2C2C2C;font-size:14px"><img
                                                                             src="https://fiiflbd.stripocdn.email/content/guids/CABINET_26f7726bcadd97a2ab03d54f86a8b630ca314b98bfcd8c5969ac3c828e7d2b89/images/question.png"
                                                                             alt=""
@@ -532,26 +532,26 @@
                                                            style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px">
                                                         <tr>
                                                             <td align="center" style="padding:0;Margin:0"><!--[if mso]>
-                                                                <a href="tel:${V_DOMAIN_PHONE}" target="_blank" hidden>
+                                                                <a href="tel:${V_TENANT_PHONE}" target="_blank" hidden>
                                                                     <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml"
                                                                                  xmlns:w="urn:schemas-microsoft-com:office:word"
-                                                                                 esdevVmlButton href="tel:${V_DOMAIN_PHONE}"
+                                                                                 esdevVmlButton href="tel:${V_TENANT_PHONE}"
                                                                                  style="height:41px; v-text-anchor:middle; width:191px"
                                                                                  arcsize="50%" stroke="f"
                                                                                  fillcolor="#ff4a4a">
                                                                         <w:anchorlock></w:anchorlock>
                                                                         <center style='color:#ffffff; font-family:Lexend, Arial, sans-serif; font-size:15px; font-weight:400; line-height:15px;  mso-text-raise:1px'>
-                                                                            ${V_DOMAIN_PHONE}
+                                                                            ${V_TENANT_PHONE}
                                                                         </center>
                                                                     </v:roundrect>
                                                                 </a>
                                                                 <![endif]--><!--[if !mso]><!-- --><span
                                                                         class="es-button-border msohide"
                                                                         style="border-style:solid;border-color:#2CB543;background:#3e60a6;border-width:0px;display:inline-block;border-radius:30px;width:auto;mso-hide:all"><a
-                                                                            href="tel:${V_DOMAIN_PHONE}"
+                                                                            href="tel:${V_TENANT_PHONE}"
                                                                             class="es-button"
                                                                             target="_blank"
-                                                                            style="mso-style-priority:100 !important;text-decoration:none !important;mso-line-height-rule:exactly;color:#FFFFFF;font-size:18px;padding:10px 30px 10px 30px;display:inline-block;background:#3e60a6;border-radius:30px;font-family:Lexend, Arial, sans-serif;font-weight:normal;font-style:normal;line-height:22px;width:auto;text-align:center;letter-spacing:0;mso-padding-alt:0;mso-border-alt:10px solid #FF4A4A">${V_DOMAIN_PHONE}</a></span>
+                                                                            style="mso-style-priority:100 !important;text-decoration:none !important;mso-line-height-rule:exactly;color:#FFFFFF;font-size:18px;padding:10px 30px 10px 30px;display:inline-block;background:#3e60a6;border-radius:30px;font-family:Lexend, Arial, sans-serif;font-weight:normal;font-style:normal;line-height:22px;width:auto;text-align:center;letter-spacing:0;mso-padding-alt:0;mso-border-alt:10px solid #FF4A4A">${V_TENANT_PHONE}</a></span>
                                                                 <!--<![endif]--></td>
                                                         </tr>
                                                     </table>
@@ -571,26 +571,26 @@
                                                            style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px">
                                                         <tr>
                                                             <td align="center" style="padding:0;Margin:0"><!--[if mso]>
-                                                                <a href="mailto:${V_DOMAIN_EMAIL}" target="_blank" hidden>
+                                                                <a href="mailto:${V_TENANT_EMAIL}" target="_blank" hidden>
                                                                     <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml"
                                                                                  xmlns:w="urn:schemas-microsoft-com:office:word"
                                                                                  esdevVmlButton
-                                                                                 href="mailto:${V_DOMAIN_EMAIL}"
+                                                                                 href="mailto:${V_TENANT_EMAIL}"
                                                                                  style="height:41px; v-text-anchor:middle; width:205px"
                                                                                  arcsize="50%" stroke="f"
                                                                                  fillcolor="#ff4a4a">
                                                                         <w:anchorlock></w:anchorlock>
                                                                         <center style='color:#ffffff; font-family:Lexend, Arial, sans-serif; font-size:15px; font-weight:400; line-height:15px;  mso-text-raise:1px'>
-                                                                            ${V_DOMAIN_EMAIL}
+                                                                            ${V_TENANT_EMAIL}
                                                                         </center>
                                                                     </v:roundrect>
                                                                 </a>
                                                                 <![endif]--><!--[if !mso]><!-- --><span
                                                                         class="es-button-border msohide"
                                                                         style="border-style:solid;border-color:#2CB543;background:#3e60a6;border-width:0px;display:inline-block;border-radius:30px;width:auto;mso-hide:all"><a
-                                                                            href="mailto:${V_DOMAIN_EMAIL}"
+                                                                            href="mailto:${V_TENANT_EMAIL}"
                                                                             class="es-button" target="_blank"
-                                                                            style="mso-style-priority:100 !important;text-decoration:none !important;mso-line-height-rule:exactly;color:#FFFFFF;font-size:18px;padding:10px 30px 10px 30px;display:inline-block;background:#3e60a6;border-radius:30px;font-family:Lexend, Arial, sans-serif;font-weight:normal;font-style:normal;line-height:22px;width:auto;text-align:center;letter-spacing:0;mso-padding-alt:0;mso-border-alt:10px solid #FF4A4A">${V_DOMAIN_EMAIL}</a></span>
+                                                                            style="mso-style-priority:100 !important;text-decoration:none !important;mso-line-height-rule:exactly;color:#FFFFFF;font-size:18px;padding:10px 30px 10px 30px;display:inline-block;background:#3e60a6;border-radius:30px;font-family:Lexend, Arial, sans-serif;font-weight:normal;font-style:normal;line-height:22px;width:auto;text-align:center;letter-spacing:0;mso-padding-alt:0;mso-border-alt:10px solid #FF4A4A">${V_TENANT_EMAIL}</a></span>
                                                                 <!--<![endif]--></td>
                                                         </tr>
                                                     </table>
@@ -654,8 +654,8 @@
                                                             <td align="left"
                                                                 style="padding:0;Margin:0;padding-bottom:5px;padding-top:15px">
                                                                 <p style="Margin:0;mso-line-height-rule:exactly;font-family:Lexend, Arial, sans-serif;line-height:21px;letter-spacing:0;color:#2C2C2C;font-size:14px">
-                                                                    <a target="_blank" href="mailto:${V_DOMAIN_EMAIL}"
-                                                                       style="mso-line-height-rule:exactly;text-decoration:none;color:#2C2C2C;font-size:14px">${V_DOMAIN_EMAIL}</a>
+                                                                    <a target="_blank" href="mailto:${V_TENANT_EMAIL}"
+                                                                       style="mso-line-height-rule:exactly;text-decoration:none;color:#2C2C2C;font-size:14px">${V_TENANT_EMAIL}</a>
                                                                 </p></td>
                                                         </tr>
                                                         <tr>
@@ -664,14 +664,14 @@
                                                                 <p style="Margin:0;mso-line-height-rule:exactly;font-family:Lexend, Arial, sans-serif;line-height:21px;letter-spacing:0;color:#2C2C2C;font-size:14px">
                                                                     <a target="_blank"
                                                                        style="mso-line-height-rule:exactly;text-decoration:none;color:#2C2C2C;font-size:14px"
-                                                                       href="tel:${V_DOMAIN_PHONE}">${V_DOMAIN_PHONE}</a>
+                                                                       href="tel:${V_TENANT_PHONE}">${V_TENANT_PHONE}</a>
                                                                 </p></td>
                                                         </tr>
                                                         <tr>
                                                             <td align="left"
                                                                 style="padding:0;Margin:0;padding-bottom:5px;padding-top:5px">
                                                                 <p style="Margin:0;mso-line-height-rule:exactly;font-family:Lexend, Arial, sans-serif;line-height:21px;letter-spacing:0;color:#2C2C2C;font-size:14px">
-                                                                    ${V_DOMAIN_ADDRESS}
+                                                                    ${V_TENANT_ADDRESS}
                                                                 </p>
                                                             </td>
                                                         </tr>
@@ -707,7 +707,7 @@
                                                                         <td align="center" valign="top"
                                                                             style="padding:0;Margin:0;padding-right:15px">
                                                                             <a target="_blank"
-                                                                               href="${V_DOMAIN_FACEBOOK}"
+                                                                               href="${V_TENANT_FACEBOOK}"
                                                                                style="mso-line-height-rule:exactly;text-decoration:underline;color:#2C2C2C;font-size:14px"><img
                                                                                         src="https://fiiflbd.stripocdn.email/content/assets/img/social-icons/rounded-black/facebook-rounded-black.png"
                                                                                         alt="Fb" title="Facebook"
@@ -717,7 +717,7 @@
                                                                         <td align="center" valign="top"
                                                                             style="padding:0;Margin:0;padding-right:15px">
                                                                             <a target="_blank"
-                                                                               href="${V_DOMAIN_LINKEDIN}"
+                                                                               href="${V_TENANT_LINKEDIN}"
                                                                                style="mso-line-height-rule:exactly;text-decoration:underline;color:#2C2C2C;font-size:14px"><img
                                                                                         src="https://fiiflbd.stripocdn.email/content/assets/img/social-icons/rounded-black/linkedin-rounded-black.png"
                                                                                         alt="Ig" title="LinkedIn"
@@ -727,7 +727,7 @@
                                                                         <td align="center" valign="top"
                                                                             style="padding:0;Margin:0"><a
                                                                                     target="_blank"
-                                                                                    href="${V_DOMAIN_XING}"
+                                                                                    href="${V_TENANT_XING}"
                                                                                     style="mso-line-height-rule:exactly;text-decoration:underline;color:#2C2C2C;font-size:14px"><img
                                                                                         src="https://fiiflbd.stripocdn.email/content/assets/img/social-icons/rounded-black/x-rounded-black.png"
                                                                                         alt="X" title="X.com" width="32"
@@ -742,7 +742,7 @@
                                                                 style="padding:0;Margin:0;padding-top:35px"><p
                                                                         style="Margin:0;mso-line-height-rule:exactly;font-family:Lexend, Arial, sans-serif;line-height:21px;letter-spacing:0;color:#2C2C2C;font-size:14px">
                                                                     <em>To unsubscribe from&nbsp;&nbsp;updates, click <a
-                                                                                href="${V_DOMAIN_URL}"
+                                                                                href="${V_TENANT_URL}"
                                                                                 target="_new"
                                                                                 style="mso-line-height-rule:exactly;text-decoration:underline;color:#2C2C2C;font-size:14px">here</a></em>&nbsp;
                                                                 </p></td>

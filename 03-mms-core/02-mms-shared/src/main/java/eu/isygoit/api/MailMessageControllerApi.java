@@ -2,7 +2,7 @@ package eu.isygoit.api;
 
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.data.MailMessageDto;
-import eu.isygoit.dto.extendable.IdentifiableDto;
+import eu.isygoit.dto.extendable.IdAssignableDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,7 +24,7 @@ public interface MailMessageControllerApi {
     /**
      * Send mail response entity.
      *
-     * @param senderDomainName the sender domain name
+     * @param senderDomainName the sender tenant name
      * @param template         the template
      * @param mailMessage      the mail message
      * @return the response entity
@@ -35,10 +35,10 @@ public interface MailMessageControllerApi {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = IdentifiableDto.class))})
+                            schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @PostMapping(path = "/send/{senderDomainName}/{template}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    ResponseEntity<?> sendMail(@PathVariable(name = RestApiConstants.SENDER_DOMAIN_NAME) String senderDomainName,
+    ResponseEntity<?> sendMail(@PathVariable(name = RestApiConstants.SENDER_TENANT_NAME) String senderDomainName,
                                @PathVariable(name = RestApiConstants.TEMPLATE) IEnumEmailTemplate.Types template,
                                @ModelAttribute(name = RestApiConstants.mailMessage) MailMessageDto mailMessage);
 }

@@ -1,7 +1,8 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.impl.MappedFileController;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedFileTenantController;
 import eu.isygoit.dto.data.MsgTemplateDto;
 import eu.isygoit.exception.handler.MmsExceptionHandler;
 import eu.isygoit.mapper.MsgTemplateMapper;
@@ -18,9 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@CtrlDef(handler = MmsExceptionHandler.class, mapper = MsgTemplateMapper.class, minMapper = MsgTemplateMapper.class, service = MsgTemplateService.class)
+@InjectMapperAndService(handler = MmsExceptionHandler.class, mapper = MsgTemplateMapper.class, minMapper = MsgTemplateMapper.class, service = MsgTemplateService.class)
 @RequestMapping(path = "/api/v1/private/mail/template")
-public class MsgTemplateFileController extends MappedFileController<Long, MsgTemplate, MsgTemplateDto, MsgTemplateDto, MsgTemplateService> {
+public class MsgTemplateFileController extends MappedFileTenantController<Long, MsgTemplate, MsgTemplateDto, MsgTemplateDto, MsgTemplateService> {
 
 
 }

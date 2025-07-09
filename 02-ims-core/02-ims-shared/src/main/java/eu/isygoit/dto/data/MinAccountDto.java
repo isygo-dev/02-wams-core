@@ -26,7 +26,7 @@ import java.util.Date;
 public class MinAccountDto extends AccountModelDto<Long> {
 
     @NotEmpty
-    private String domain;
+    private String tenant;
     private String imagePath;
     private String functionRole;
     private Boolean isAdmin;
@@ -38,7 +38,7 @@ public class MinAccountDto extends AccountModelDto<Long> {
 
     private IEnumAuth.Types authType;
     @Builder.Default
-    private String accountType = AccountTypeConstants.DOMAIN_USER;
+    private String accountType = AccountTypeConstants.TENANT_USER;
 
     private AccountDetailsDto accountDetails;
 

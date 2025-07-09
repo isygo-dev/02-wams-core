@@ -1,6 +1,6 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlHandler;
+import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@CtrlHandler(KmsExceptionHandler.class)
+@InjectExceptionHandler(KmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/key")
 public class KeyController extends ControllerExceptionHandler implements KeyServiceApi {
 
@@ -44,11 +44,11 @@ public class KeyController extends ControllerExceptionHandler implements KeyServ
 
     @Override
     public ResponseEntity<String> renewRandomKey(RequestContextDto requestContext,
-                                                 String domain, String keyName, Integer length, IEnumCharSet.Types charSetType) {
+                                                 String tenant, String keyName, Integer length, IEnumCharSet.Types charSetType) {
         log.info("Call generateRandomKeyName");
         try {
             String keyValue = keyService.getRandomKey(length, charSetType);
-            keyService.createOrUpdateKeyByName(domain, keyName, keyValue);
+            keyService.createOrUpdateKeyByName(tenant, keyName, keyValue);
             return ResponseFactory.responseOk(keyValue);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -58,10 +58,10 @@ public class KeyController extends ControllerExceptionHandler implements KeyServ
 
     @Override
     public ResponseEntity<String> getRandomKey(RequestContextDto requestContext,
-                                               String domain, String keyName) {
+                                               String tenant, String keyName) {
         log.info("Call getRandomKeyName");
         try {
-            return ResponseFactory.responseOk(keyService.getKeyByName(domain, keyName).getValue());
+            return ResponseFactory.responseOk(keyService.getKeyByName(tenant, keyName).getValue());
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

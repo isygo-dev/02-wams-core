@@ -1,6 +1,6 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlHandler;
+import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.dto.common.RequestContextDto;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@CtrlHandler(KmsExceptionHandler.class)
+@InjectExceptionHandler(KmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/token")
 public class TokenController extends ControllerExceptionHandler implements TokenServiceApi {
 
@@ -32,14 +32,14 @@ public class TokenController extends ControllerExceptionHandler implements Token
     private ITokenService tokenService;
 
     @Override
-    public ResponseEntity<TokenDto> buildTokenByDomain(//RequestContextDto requestContext,
-                                                       String domain,
+    public ResponseEntity<TokenDto> buildTokenByTenant(//RequestContextDto requestContext,
+                                                       String tenant,
                                                        String application,
                                                        IEnumToken.Types tokenType,
                                                        TokenRequestDto tokenRequestDto) {
         log.info("Call create Token By Domain");
         try {
-            return ResponseFactory.responseOk(tokenService.buildTokenAndSave(domain, application, tokenType, tokenRequestDto.getSubject(), tokenRequestDto.getClaims()));
+            return ResponseFactory.responseOk(tokenService.buildTokenAndSave(tenant, application, tokenType, tokenRequestDto.getSubject(), tokenRequestDto.getClaims()));
         } catch (Throwable e) {
             log.error("<Error>: create Token By Domain: {} ", e);
             return getBackExceptionResponse(e);
@@ -48,14 +48,14 @@ public class TokenController extends ControllerExceptionHandler implements Token
 
     @Override
     public ResponseEntity<Boolean> isTokenValid(RequestContextDto requestContext,
-                                                String domain,
+                                                String tenant,
                                                 String application,
                                                 IEnumToken.Types tokenType,
                                                 String token,
                                                 String subject) {
         log.info("Call is Token Valid");
         try {
-            return ResponseFactory.responseOk(tokenService.isTokenValid(domain, application, tokenType, token, subject));
+            return ResponseFactory.responseOk(tokenService.isTokenValid(tenant, application, tokenType, token, subject));
         } catch (Throwable e) {
             log.error("<Error>: Invalid token: {} ", e);
             return getBackExceptionResponse(e);

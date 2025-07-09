@@ -22,12 +22,12 @@ public interface IAuthService {
      * Authenticate auth response dto.
      *
      * @param requestTracking the request tracking
-     * @param domain          the domain
+     * @param tenant          the tenant
      * @param userName        the user name
      * @param application     the application
      * @param password        the password
      * @param authType        the auth type
      * @return the auth response dto
      */
-    AuthResponseDto authenticate(RequestTrackingDto requestTracking, String domain, String userName, String application, String password, IEnumAuth.Types authType);
+    AuthResponseDto authenticate(RequestTrackingDto requestTracking, String tenant, String userName, String application, String password, IEnumAuth.Types authType);
 }

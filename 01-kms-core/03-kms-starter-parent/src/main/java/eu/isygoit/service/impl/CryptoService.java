@@ -1,6 +1,6 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.DigestConfig;
 import eu.isygoit.model.PEBConfig;
 import eu.isygoit.repository.DigesterConfigRepository;
@@ -88,52 +88,52 @@ public class CryptoService implements ICryptoService {
     }
 
     @Override
-    public StringEncryptor getPebEncryptor(String domain) {
-        Optional<PEBConfig> optional = pebConfigRepository.findFirstByDomainIgnoreCase(domain);
+    public StringEncryptor getPebEncryptor(String tenant) {
+        Optional<PEBConfig> optional = pebConfigRepository.findFirstByTenantIgnoreCase(tenant);
         if (!optional.isPresent()) {
-            optional = pebConfigRepository.findFirstByDomainIgnoreCase(DomainConstants.DEFAULT_DOMAIN_NAME);
+            optional = pebConfigRepository.findFirstByTenantIgnoreCase(TenantConstants.DEFAULT_TENANT_NAME);
         }
 
         if (optional.isPresent()) {
             return this.pebStringEncryptor(optional.get());
         }
 
-        log.warn("peb config not found with domain {}", domain);
+        log.warn("peb config not found with tenant {}", tenant);
         return stringEncryptorDefault();
     }
 
     @Override
-    public StringDigester getDigestEncryptor(String domain) {
-        Optional<DigestConfig> optional = digesterConfigRepository.findFirstByDomainIgnoreCase(domain);
+    public StringDigester getDigestEncryptor(String tenant) {
+        Optional<DigestConfig> optional = digesterConfigRepository.findFirstByTenantIgnoreCase(tenant);
         if (!optional.isPresent()) {
-            optional = digesterConfigRepository.findFirstByDomainIgnoreCase(DomainConstants.DEFAULT_DOMAIN_NAME);
+            optional = digesterConfigRepository.findFirstByTenantIgnoreCase(TenantConstants.DEFAULT_TENANT_NAME);
         }
 
         if (optional.isPresent()) {
             return this.digestStringEncryptor(optional.get());
         }
 
-        log.warn("digest config not found with domain {}", domain);
+        log.warn("digest config not found with tenant {}", tenant);
         return stringDigesterDefault();
     }
 
     @Override
-    public PasswordEncryptor getPasswordEncryptor(String domain) {
-        Optional<DigestConfig> optional = digesterConfigRepository.findFirstByDomainIgnoreCase(domain);
+    public PasswordEncryptor getPasswordEncryptor(String tenant) {
+        Optional<DigestConfig> optional = digesterConfigRepository.findFirstByTenantIgnoreCase(tenant);
         if (!optional.isPresent()) {
-            optional = digesterConfigRepository.findFirstByDomainIgnoreCase(DomainConstants.DEFAULT_DOMAIN_NAME);
+            optional = digesterConfigRepository.findFirstByTenantIgnoreCase(TenantConstants.DEFAULT_TENANT_NAME);
         }
 
         if (optional.isPresent()) {
             return this.passwordEncryptor(optional.get());
         }
 
-        log.warn("password config not found with domain {}", domain);
+        log.warn("password config not found with tenant {}", tenant);
         return passwordEncryptorDefault();
     }
 
     private StringEncryptor stringEncryptorDefault() {
-        Optional<PEBConfig> optional = pebConfigRepository.findFirstByDomainIgnoreCase(DomainConstants.DEFAULT_DOMAIN_NAME);
+        Optional<PEBConfig> optional = pebConfigRepository.findFirstByTenantIgnoreCase(TenantConstants.DEFAULT_TENANT_NAME);
         if (optional.isPresent()) {
             return this.pebStringEncryptor(optional.get());
         }
@@ -143,7 +143,7 @@ public class CryptoService implements ICryptoService {
     }
 
     private StringDigester stringDigesterDefault() {
-        Optional<DigestConfig> optional = digesterConfigRepository.findFirstByDomainIgnoreCase(DomainConstants.DEFAULT_DOMAIN_NAME);
+        Optional<DigestConfig> optional = digesterConfigRepository.findFirstByTenantIgnoreCase(TenantConstants.DEFAULT_TENANT_NAME);
         if (optional.isPresent()) {
             return this.digestStringEncryptor(optional.get());
         }
@@ -153,7 +153,7 @@ public class CryptoService implements ICryptoService {
     }
 
     private PasswordEncryptor passwordEncryptorDefault() {
-        Optional<DigestConfig> optional = digesterConfigRepository.findFirstByDomainIgnoreCase(DomainConstants.DEFAULT_DOMAIN_NAME);
+        Optional<DigestConfig> optional = digesterConfigRepository.findFirstByTenantIgnoreCase(TenantConstants.DEFAULT_TENANT_NAME);
         if (optional.isPresent()) {
             return this.passwordEncryptor(optional.get());
         }

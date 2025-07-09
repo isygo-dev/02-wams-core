@@ -1,18 +1,19 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.ICrudServiceMethod;
+import eu.isygoit.com.rest.service.ICrudServiceMethods;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
 import eu.isygoit.model.StorageConfig;
 
 /**
  * The interface Storage config service.
  */
-public interface IStorageConfigService extends ICrudServiceMethod<Long, StorageConfig> {
+public interface IStorageConfigService extends ICrudTenantServiceMethods<Long, StorageConfig> {
 
     /**
-     * Find by domain ignore case storage config.
+     * Find by tenant ignore case storage config.
      *
-     * @param domain the domain
+     * @param tenant the tenant
      * @return the storage config
      */
-    StorageConfig findByDomainIgnoreCase(String domain);
+    StorageConfig findByTenantIgnoreCase(String tenant);
 }

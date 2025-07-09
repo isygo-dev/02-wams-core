@@ -1,6 +1,6 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlHandler;
+import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.api.ObjectStorageControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @RestController
-@CtrlHandler(SmsExceptionHandler.class)
+@InjectExceptionHandler(SmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/storage")
 public class ObjectStorageController extends ControllerExceptionHandler implements ObjectStorageControllerApi {
 
@@ -49,7 +49,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
 
     @Override
     public ResponseEntity<Object> upload(RequestContextDto requestContext,
-                                         String domain,
+                                         String tenant,
                                          String bucketName,
                                          String path,
                                          String fileName,
@@ -60,7 +60,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
             if (!CollectionUtils.isEmpty(tags)) {
                 tagMap = tags.stream().distinct().collect(Collectors.toMap(s -> s, s -> s));
             }
-            StorageConfig config = storageConfigService.findByDomainIgnoreCase(domain);
+            StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);
             storageFactoryService.getService(config.getType()).upload(config,
                     bucketName.toLowerCase(),
                     path.replace("#", "/").toLowerCase(),
@@ -75,13 +75,13 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
 
     @Override
     public ResponseEntity<Resource> download(RequestContextDto requestContext,
-                                             String domain,
+                                             String tenant,
                                              String bucketName,
                                              String path,
                                              String fileName,
                                              String versionID) {
         try {
-            StorageConfig config = storageConfigService.findByDomainIgnoreCase(domain);
+            StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);
             byte[] data = storageFactoryService
                     .getService(config.getType())
                     .download(config,
@@ -97,13 +97,13 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
 
     @Override
     public ResponseEntity<Object> delete(RequestContextDto requestContext,
-                                         String domain,
+                                         String tenant,
                                          String bucketName,
                                          String path,
                                          String fileName) {
         log.info("delete request received");
         try {
-            StorageConfig config = storageConfigService.findByDomainIgnoreCase(domain);
+            StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);
             storageFactoryService.getService(config.getType())
                     .deleteFile(config,
                             bucketName.toLowerCase(),
@@ -118,10 +118,10 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
 
     @Override
     public ResponseEntity<Object> getObjects(RequestContextDto requestContext,
-                                             String domain, String bucketName) {
+                                             String tenant, String bucketName) {
         log.info("get objects request received");
         try {
-            StorageConfig config = storageConfigService.findByDomainIgnoreCase(domain);
+            StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);
             return ResponseFactory.responseOk(storageFactoryService.getService(config.getType())
                     .getObjects(config,
                             bucketName.toLowerCase()));
@@ -133,7 +133,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
 
     @Override
     public ResponseEntity<Object> filterObjects(RequestContextDto requestContext,
-                                                String domain,
+                                                String tenant,
                                                 String bucketName,
                                                 String tags,
                                                 IEnumLogicalOperator.Types condition) {
@@ -145,7 +145,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
                 tagMap = tagList.stream().distinct()
                         .collect(Collectors.toMap(s -> s, s -> s));
             }
-            StorageConfig config = storageConfigService.findByDomainIgnoreCase(domain);
+            StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);
             List<FileStorage> results = storageFactoryService
                     .getService(config.getType())
                     .getObjectByTags(config,
@@ -170,7 +170,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
                 tagMap = fileTags.getTags().stream().distinct()
                         .collect(Collectors.toMap(s -> s, s -> s));
             }
-            StorageConfig config = storageConfigService.findByDomainIgnoreCase(fileTags.getDomain());
+            StorageConfig config = storageConfigService.findByTenantIgnoreCase(fileTags.getTenant());
             storageFactoryService.getService(config.getType())
                     .updateTags(config, fileTags.getBucketName(), fileTags.getFiletName(), tagMap);
 
@@ -183,7 +183,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
 
     @Override
     public ResponseEntity<Object> deleteObjects(RequestContextDto requestContext,
-                                                String domain,
+                                                String tenant,
                                                 String bucketName,
                                                 String files) {
         log.info("deleteObjects request received");
@@ -195,7 +195,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
                     objectsMap.add(new DeleteObject(d));
                 });
             }
-            StorageConfig config = storageConfigService.findByDomainIgnoreCase(domain);
+            StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);
             storageFactoryService.getService(config.getType()).deleteObjects(config,
                     bucketName.toLowerCase(),
                     objectsMap);
@@ -208,11 +208,11 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
 
     @Override
     public ResponseEntity<Object> saveBucket(RequestContextDto requestContext,
-                                             String domain,
+                                             String tenant,
                                              String bucketName) {
         log.info("getBucketList request received");
         try {
-            StorageConfig config = storageConfigService.findByDomainIgnoreCase(domain);
+            StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);
             storageFactoryService.getService(config.getType()).saveBuckets(config,
                     bucketName.toLowerCase());
             return ResponseFactory.responseOk();
@@ -224,12 +224,12 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
 
     @Override
     public ResponseEntity<Object> setVersioningBucket(RequestContextDto requestContext,
-                                                      String domain,
+                                                      String tenant,
                                                       String bucketName,
                                                       boolean status) {
         log.info("getBucketList request received");
         try {
-            StorageConfig config = storageConfigService.findByDomainIgnoreCase(domain);
+            StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);
             storageFactoryService.getService(config.getType()).setVersioningBucket(config,
                     bucketName.toLowerCase(),
                     status);
@@ -242,10 +242,10 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
 
     @Override
     public ResponseEntity<List<BucketDto>> getBuckets(RequestContextDto requestContext,
-                                                      String domain) {
+                                                      String tenant) {
         log.info("getBucketList request received");
         try {
-            StorageConfig config = storageConfigService.findByDomainIgnoreCase(domain);
+            StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);
             return ResponseFactory.responseOk(storageFactoryService.getService(config.getType()).getBuckets(config));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -255,11 +255,11 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
 
     @Override
     public ResponseEntity<Object> deleteBucket(RequestContextDto requestContext,
-                                               String domain,
+                                               String tenant,
                                                String bucketName) {
         log.info("deleteBucket request received");
         try {
-            StorageConfig config = storageConfigService.findByDomainIgnoreCase(domain);
+            StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);
             storageFactoryService.getService(config.getType()).deletebucket(config,
                     bucketName.toLowerCase());
             return ResponseFactory.responseOk();

@@ -1,11 +1,14 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.CodeGenKms;
-import eu.isygoit.annotation.CodeGenLocal;
-import eu.isygoit.annotation.ServRepo;
+import eu.isygoit.annotation.InjectCodeGenKms;
+import eu.isygoit.annotation.InjectCodeGen;
+import eu.isygoit.annotation.InjectRepository;
+import eu.isygoit.com.rest.service.CodeAssignableService;
+import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.com.rest.service.ImageService;
+import eu.isygoit.com.rest.service.tenancy.ImageTenantService;
 import eu.isygoit.config.AppProperties;
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.exception.DomainNotFoundException;
 import eu.isygoit.model.AppNextCode;
@@ -26,10 +29,10 @@ import java.util.Optional;
  */
 @Service
 @Transactional
-@CodeGenLocal(value = NextCodeService.class)
-@CodeGenKms(value = KmsIncrementalKeyService.class)
-@ServRepo(value = DomainRepository.class)
-public class DomainService extends ImageService<Long, Domain, DomainRepository> implements IDomainService {
+@InjectCodeGen(value = NextCodeService.class)
+@InjectCodeGenKms(value = KmsIncrementalKeyService.class)
+@InjectRepository(value = DomainRepository.class)
+public class DomainService extends ImageTenantService<Long, Domain, DomainRepository> implements IDomainService {
 
     private final AppProperties appProperties;
 
@@ -44,12 +47,12 @@ public class DomainService extends ImageService<Long, Domain, DomainRepository> 
     }
 
     @Override
-    public List<String> getAllDomainNames(String domain) {
-        if (DomainConstants.SUPER_DOMAIN_NAME.equals(domain)) {
-            return repository().getAllNames(); //.findAll().stream().map(domain -> domain.getName()).toList();
+    public List<String> getAllDomainNames(String tenant) {
+        if (TenantConstants.SUPER_TENANT_NAME.equals(tenant)) {
+            return repository().getAllNames(); //.findAll().stream().map(tenant -> tenant.getName()).toList();
         }
 
-        return Arrays.asList(domain);
+        return Arrays.asList(tenant);
     }
 
     @Override
@@ -59,19 +62,19 @@ public class DomainService extends ImageService<Long, Domain, DomainRepository> 
     }
 
     @Override
-    public String getImage(String domainName) {
-        Optional<Domain> domainOptional = repository().findByNameIgnoreCase(domainName);
-        if (domainOptional.isPresent()) {
-            return domainOptional.get().getImagePath();
+    public String getImage(String tenantName) {
+        Optional<Domain> tenantOptional = repository().findByNameIgnoreCase(tenantName);
+        if (tenantOptional.isPresent()) {
+            return tenantOptional.get().getImagePath();
         }
         return "";
     }
 
     @Override
     public Long findDomainIdbyDomainName(String name) {
-        Optional<Domain> domain = repository().findByNameIgnoreCase(name);
-        if (domain.isPresent()) {
-            return domain.get().getId();
+        Optional<Domain> tenant = repository().findByNameIgnoreCase(name);
+        if (tenant.isPresent()) {
+            return tenant.get().getId();
         }
         return null;
     }
@@ -86,12 +89,12 @@ public class DomainService extends ImageService<Long, Domain, DomainRepository> 
     }
 
     @Override
-    public boolean isEnabled(String domain) {
-        return repository().getAdminStatus(domain) == IEnumEnabledBinaryStatus.Types.ENABLED;
+    public boolean isEnabled(String tenant) {
+        return repository().getAdminStatus(tenant) == IEnumEnabledBinaryStatus.Types.ENABLED;
     }
 
     @Override
-    public Domain updateSocialLink(String senderDomain, Long id, String social, String link) {
+    public Domain updateSocialLink(String tenant, Long id, String social, String link) {
         Optional<Domain> optional = repository().findById(id);
         if (!optional.isPresent()) {
             throw new DomainNotFoundException("with id " + id);
@@ -113,13 +116,13 @@ public class DomainService extends ImageService<Long, Domain, DomainRepository> 
             break;
         }
 
-        return this.update(domain);
+        return this.update(tenant, domain);
     }
 
     @Override
     public AppNextCode initCodeGenerator() {
         return AppNextCode.builder()
-                .domain(DomainConstants.DEFAULT_DOMAIN_NAME)
+                .tenant(TenantConstants.DEFAULT_TENANT_NAME)
                 .entity(Domain.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("DOM")

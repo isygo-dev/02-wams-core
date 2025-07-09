@@ -18,7 +18,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class DigestConfigDto extends AbstractAuditableDto<Long> {
 
-    private String domain;
+    private String tenant;
     private String code;
     //DIGEST ALGORITHMS:   [MD2, MD5, SHA, SHA-256, SHA-384, SHA-512]
     private IEnumAlgoDigestConfig.Types algorithm;

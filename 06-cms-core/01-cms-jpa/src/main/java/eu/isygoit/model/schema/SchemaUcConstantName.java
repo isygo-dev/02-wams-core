@@ -6,13 +6,13 @@ package eu.isygoit.model.schema;
 public interface SchemaUcConstantName extends ComSchemaUcConstantName {
 
     /**
-     * The constant UC_CALENDAR_DOMAIN_NAME.
+     * The constant UC_CALENDAR_TENANT_NAME.
      */
-    String UC_CALENDAR_DOMAIN_NAME = "UC_CALENDAR_DOMAIN_NAME";
+    String UC_CALENDAR_TENANT_NAME = "UC_CALENDAR_TENANT_NAME";
     /**
-     * The constant UC_EVENT_DOMAIN_CALENDAR_CODE.
+     * The constant UC_EVENT_TENANT_CALENDAR_CODE.
      */
-    String UC_EVENT_DOMAIN_CALENDAR_CODE = "UC_EVENT_DOMAIN_CALENDAR_CODE";
+    String UC_EVENT_TENANT_CALENDAR_CODE = "UC_EVENT_TENANT_CALENDAR_CODE";
     /**
      * The constant UC_VCALENDAR_CODE.
      */
@@ -22,7 +22,7 @@ public interface SchemaUcConstantName extends ComSchemaUcConstantName {
      */
     String UC_VCALENDAR_EVENT_CODE = "UC_VCALENDAR_EVENT_CODE";
     /**
-     * The constant UC_CALENDAR_EVENT_DOMAIN_NAME.
+     * The constant UC_CALENDAR_EVENT_TENANT_NAME.
      */
-    String UC_CALENDAR_EVENT_DOMAIN_NAME = "UC_CALENDAR_EVENT_DOMAIN_NAME";
+    String UC_CALENDAR_EVENT_TENANT_NAME = "UC_CALENDAR_EVENT_TENANT_NAME";
 }

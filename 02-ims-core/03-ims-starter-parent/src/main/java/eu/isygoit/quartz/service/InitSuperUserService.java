@@ -2,7 +2,7 @@ package eu.isygoit.quartz.service;
 
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.AccountTypeConstants;
-import eu.isygoit.constants.DomainConstants;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumAccountSystemStatus;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
@@ -34,7 +34,7 @@ public class InitSuperUserService extends AbstractJobService {
     @Autowired
     private IAccountService accountService;
     @Autowired
-    private IDomainService domainService;
+    private IDomainService tenantService;
     @Autowired
     private IRoleInfoService roleInfoService;
     @Autowired
@@ -45,24 +45,26 @@ public class InitSuperUserService extends AbstractJobService {
     @Override
     public void performJob(JobExecutionContext jobExecutionContext) {
 
-        //Check default domain existence
-        Domain defaultDomain = domainService.findByName(DomainConstants.DEFAULT_DOMAIN_NAME);
+        //Check default tenant existence
+        Domain defaultDomain = tenantService.findByName(TenantConstants.DEFAULT_TENANT_NAME);
         if (defaultDomain == null) {
-            defaultDomain = domainService.create(Domain.builder()
-                    .domain(DomainConstants.SUPER_DOMAIN_NAME)
-                    .name(DomainConstants.DEFAULT_DOMAIN_NAME)
-                    .description(DomainConstants.DEFAULT_DOMAIN_NAME)
+            defaultDomain = tenantService.create(TenantConstants.SUPER_TENANT_NAME,
+                    Domain.builder()
+                    .tenant(TenantConstants.SUPER_TENANT_NAME)
+                    .name(TenantConstants.DEFAULT_TENANT_NAME)
+                    .description(TenantConstants.DEFAULT_TENANT_NAME)
                     .adminStatus(IEnumEnabledBinaryStatus.Types.ENABLED)
                     .build());
         }
 
-        //Check super domain existence
-        Domain superDomain = domainService.findByName(DomainConstants.SUPER_DOMAIN_NAME);
+        //Check super tenant existence
+        Domain superDomain = tenantService.findByName(TenantConstants.SUPER_TENANT_NAME);
         if (superDomain == null) {
-            superDomain = domainService.create(Domain.builder()
-                    .domain(DomainConstants.SUPER_DOMAIN_NAME)
-                    .name(DomainConstants.SUPER_DOMAIN_NAME)
-                    .description(DomainConstants.SUPER_DOMAIN_NAME)
+            superDomain = tenantService.create(TenantConstants.SUPER_TENANT_NAME,
+                    Domain.builder()
+                    .tenant(TenantConstants.SUPER_TENANT_NAME)
+                    .name(TenantConstants.SUPER_TENANT_NAME)
+                    .description(TenantConstants.SUPER_TENANT_NAME)
                     .adminStatus(IEnumEnabledBinaryStatus.Types.ENABLED)
                     .build());
         }
@@ -70,8 +72,9 @@ public class InitSuperUserService extends AbstractJobService {
         //Check sysadmin application existence
         Application application = applicationService.findByName("webapp-sysadmin");
         if (application == null) {
-            application = applicationService.create(Application.builder()
-                    .domain(DomainConstants.SUPER_DOMAIN_NAME)
+            application = applicationService.create(TenantConstants.SUPER_TENANT_NAME,
+                    Application.builder()
+                    .tenant(TenantConstants.SUPER_TENANT_NAME)
                     .title("System administration")
                     .category("PRM Store")
                     .name("webapp-sysadmin")
@@ -84,8 +87,9 @@ public class InitSuperUserService extends AbstractJobService {
         //Check super role existence
         RoleInfo superAdmin = roleInfoService.findByName(AccountTypeConstants.SUPER_ADMIN);
         if (superAdmin == null) {
-            superAdmin = roleInfoService.create(RoleInfo.builder()
-                    .domain(DomainConstants.SUPER_DOMAIN_NAME)
+            superAdmin = roleInfoService.create(AccountTypeConstants.SUPER_ADMIN,
+                    RoleInfo.builder()
+                    .tenant(TenantConstants.SUPER_TENANT_NAME)
                     .name(AccountTypeConstants.SUPER_ADMIN)
                     .description(AccountTypeConstants.SUPER_ADMIN)
                     .permissions(apiPermissionRepository.findAll())
@@ -93,23 +97,25 @@ public class InitSuperUserService extends AbstractJobService {
                     .build());
         }
 
-        //Check domain admin role existence
-        RoleInfo domainAdmin = roleInfoService.findByName(AccountTypeConstants.DOMAIN_ADMIN);
+        //Check tenant admin role existence
+        RoleInfo tenantAdmin = roleInfoService.findByName(AccountTypeConstants.TENANT_ADMIN);
         if (superAdmin == null) {
-            superAdmin = roleInfoService.create(RoleInfo.builder()
-                    .domain(DomainConstants.SUPER_DOMAIN_NAME)
-                    .name(AccountTypeConstants.DOMAIN_ADMIN)
-                    .description(AccountTypeConstants.DOMAIN_ADMIN)
+            superAdmin = roleInfoService.create(AccountTypeConstants.TENANT_ADMIN,
+                    RoleInfo.builder()
+                    .tenant(TenantConstants.SUPER_TENANT_NAME)
+                    .name(AccountTypeConstants.TENANT_ADMIN)
+                    .description(AccountTypeConstants.TENANT_ADMIN)
                     .permissions(apiPermissionRepository.findAll())
                     .allowedTools(Arrays.asList(application))
                     .build());
         }
 
         //Check super user existence
-        Account superUser = accountService.findByDomainAndUserName(DomainConstants.SUPER_DOMAIN_NAME, "root");
+        Account superUser = accountService.findByTenantAndUserName(TenantConstants.SUPER_TENANT_NAME, "root");
         if (superUser == null) {
-            superUser = accountService.create(Account.builder()
-                    .domain(DomainConstants.SUPER_DOMAIN_NAME)
+            superUser = accountService.create(TenantConstants.SUPER_TENANT_NAME,
+                    Account.builder()
+                    .tenant(TenantConstants.SUPER_TENANT_NAME)
                     .code("root")
                     .email("s.mbarki@isygoit.eu")
                     .language(IEnumLanguage.Types.EN)

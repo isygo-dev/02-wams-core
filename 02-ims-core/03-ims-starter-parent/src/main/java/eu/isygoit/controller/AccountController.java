@@ -1,11 +1,12 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.api.AccountControllerApi;
 import eu.isygoit.api.StatisticControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
 import eu.isygoit.dto.data.AccountDto;
@@ -45,9 +46,9 @@ import java.util.List;
 @Slf4j
 @Validated
 @RestController
-@CtrlDef(handler = ImsExceptionHandler.class, mapper = AccountMapper.class, minMapper = MinAccountMapper.class, service = AccountService.class)
+@InjectMapperAndService(handler = ImsExceptionHandler.class, mapper = AccountMapper.class, minMapper = MinAccountMapper.class, service = AccountService.class)
 @RequestMapping(path = "/api/v1/private/account")
-public class AccountController extends MappedCrudController<Long, Account, MinAccountDto, AccountDto, AccountService>
+public class AccountController extends MappedCrudTenantController<Long, Account, MinAccountDto, AccountDto, AccountService>
         implements AccountControllerApi, StatisticControllerApi {
 
     @Autowired
@@ -55,7 +56,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     @Autowired
     private IAccountService accountService;
     @Autowired
-    private IDomainService domainService;
+    private IDomainService tenantService;
     @Autowired
     private JwtService jwtService;
     @Autowired
@@ -71,7 +72,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
             ResponseEntity<Boolean> result = kmsPasswordService.updateAccount(//RequestContextDto.builder().build(),
                     UpdateAccountRequestDto.builder()
                             .code(account.getCode())
-                            .domain(account.getDomain())
+                            .tenant(account.getTenant())
                             .email(account.getEmail())
                             .fullName(account.getFullName())
                             .build());
@@ -91,8 +92,8 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
             ResponseEntity<Integer> result = kmsPasswordService.generate(//RequestContextDto.builder().build(),
                     IEnumAuth.Types.PWD,
                     GeneratePwdRequestDto.builder()
-                            .domain(account.getDomain())
-                            .domainUrl(domainService.findByName(account.getDomain()).getUrl())
+                            .tenant(account.getTenant())
+                            .tenantUrl(tenantService.findByName(account.getTenant()).getUrl())
                             .email(account.getEmail())
                             .userName(account.getCode())
                             .fullName(account.getFullName())
@@ -108,10 +109,10 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     }
 
     @Override
-    public ResponseEntity<List<String>> getEmailsByDomain(RequestContextDto requestContext) {
-        log.info("get accounts email by domain");
+    public ResponseEntity<List<String>> getEmailsByTenant(RequestContextDto requestContext) {
+        log.info("get accounts email by tenant");
         try {
-            return ResponseFactory.responseOk(accountService.findEmailsByDomain(requestContext.getSenderDomain()));
+            return ResponseFactory.responseOk(accountService.findEmailsByTenant(requestContext.getSenderTenant()));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -123,7 +124,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     public ResponseEntity<List<MinAccountDto>> getAccounts(RequestContextDto requestContext) {
         log.info("get accounts mini data");
         try {
-            return ResponseFactory.responseOk(accountService.getMinInfoByDomain(requestContext.getSenderDomain()));
+            return ResponseFactory.responseOk(accountService.getMinInfoByTenant(requestContext.getSenderTenant()));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -144,10 +145,10 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     }
 
     @Override
-    public ResponseEntity<AccountDto> createDomainAdmin(RequestContextDto requestContext, String domain, DomainAdminDto admin) {
-        log.info("create domain admin");
+    public ResponseEntity<AccountDto> createDomainAdmin(RequestContextDto requestContext, String tenant, DomainAdminDto admin) {
+        log.info("create tenant admin");
         try {
-            return ResponseFactory.responseOk(mapper().entityToDto(accountService.createDomainAdmin(domain, admin)));
+            return ResponseFactory.responseOk(mapper().entityToDto(accountService.createDomainAdmin(tenant, admin)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -184,9 +185,9 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     @Override
     public ResponseEntity<UserDataResponseDto> connectedUser(RequestContextDto requestContext) {
         try {
-            Account account = accountService.findByDomainAndUserName(requestContext.getSenderDomain(), requestContext.getSenderUser());
-            Domain domain = domainService.findByName(requestContext.getSenderDomain());
-            //ThemeDto theme = themeMapper.entityToDto(themeService.findThemeByAccountCodeAndDomainCode(account.getCode(), domain.getCode()));
+            Account account = accountService.findByTenantAndUserName(requestContext.getSenderTenant(), requestContext.getSenderUser());
+            Domain tenant = tenantService.findByName(requestContext.getSenderTenant());
+            //ThemeDto theme = themeMapper.entityToDto(themeService.findThemeByAccountCodeAndDomainCode(account.getCode(), tenant.getCode()));
             UserDataResponseDto userDataResponseDto = UserDataResponseDto.builder()
                     .id(account.getId())
                     .userName(account.getCode())
@@ -194,8 +195,8 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
                     .lastName(account.getAccountDetails().getLastName())
                     //.applications(accountService.buildAllowedTools(account, authenticate.getAccessToken()))
                     .email(account.getEmail())
-                    .domainId(domain.getId())
-                    .domainImagePath(domain.getImagePath())
+                    .tenantId(tenant.getId())
+                    .tenantImagePath(tenant.getImagePath())
                     .language(account.getLanguage())
                     .role(account.getFunctionRole())
                     .build();
@@ -225,7 +226,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     @Override
     public ResponseEntity<AccountDto> connectedUserFullData(RequestContextDto requestContext) {
         try {
-            return ResponseFactory.responseOk(mapper().entityToDto(accountService.findByDomainAndUserName(requestContext.getSenderDomain(),
+            return ResponseFactory.responseOk(mapper().entityToDto(accountService.findByTenantAndUserName(requestContext.getSenderTenant(),
                     requestContext.getSenderUser())));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -237,10 +238,11 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     public ResponseEntity<AccountDto> updateConnectedUserAccountData(RequestContextDto requestContext,
                                                                      AccountDto accountDto) {
         try {
-            Account account = accountService.findByDomainAndUserName(requestContext.getSenderDomain(), requestContext.getSenderUser());
+            Account account = accountService.findByTenantAndUserName(requestContext.getSenderTenant(), requestContext.getSenderUser());
             accountDto.setId(account.getId());
             this.beforeUpdate(accountDto.getId(), accountDto);
-            return ResponseFactory.responseOk(mapper().entityToDto(accountService.update(mapper().dtoToEntity(accountDto))));
+            return ResponseFactory.responseOk(mapper().entityToDto(accountService.update(requestContext.getSenderTenant(),
+                    mapper().dtoToEntity(accountDto))));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -254,7 +256,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
         try {
             accountDto.setId(id);
             this.beforeUpdate(accountDto.getId(), accountDto);
-            return ResponseFactory.responseOk(mapper().entityToDto(accountService.update(mapper().dtoToEntity(accountDto))));
+            return ResponseFactory.responseOk(mapper().entityToDto(accountService.update(requestContext.getSenderTenant(),mapper().dtoToEntity(accountDto))));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -274,10 +276,10 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     }
 
     @Override
-    public ResponseEntity<List<MinAccountDto>> accountsByDomain(RequestContextDto requestContext) {
-        log.info("get accounts by sender domain");
+    public ResponseEntity<List<MinAccountDto>> accountsByTenant(RequestContextDto requestContext) {
+        log.info("get accounts by sender tenant");
         try {
-            List<MinAccountDto> list = minAccountMapper.listEntityToDto(accountService.getByDomain(requestContext.getSenderDomain()));
+            List<MinAccountDto> list = minAccountMapper.listEntityToDto(accountService.getByTenant(requestContext.getSenderTenant()));
             if (CollectionUtils.isEmpty(list)) {
                 return ResponseFactory.responseNoContent();
             }
@@ -289,10 +291,10 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     }
 
     @Override
-    public ResponseEntity<List<MinAccountDto>> userAccountsByDomain(RequestContextDto requestContext, String domain) {
-        log.info("get accounts by domain");
+    public ResponseEntity<List<MinAccountDto>> userAccountsByTenant(RequestContextDto requestContext, String tenant) {
+        log.info("get accounts by tenant");
         try {
-            List<MinAccountDto> list = minAccountMapper.listEntityToDto(accountService.getByDomain(domain));
+            List<MinAccountDto> list = minAccountMapper.listEntityToDto(accountService.getByTenant(tenant));
             if (CollectionUtils.isEmpty(list)) {
                 return ResponseFactory.responseNoContent();
             }
@@ -304,10 +306,10 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     }
 
     @Override
-    public ResponseEntity<List<MinAccountDto>> chatAccountsByDomain(RequestContextDto requestContext) {
-        log.info("get chat accounts by domain");
+    public ResponseEntity<List<MinAccountDto>> chatAccountsByTenant(RequestContextDto requestContext) {
+        log.info("get chat accounts by tenant");
         try {
-            List<MinAccountDto> list = minAccountMapper.listEntityToDto(accountService.chatAccountsByDomain(requestContext.getSenderDomain()));
+            List<MinAccountDto> list = minAccountMapper.listEntityToDto(accountService.chatAccountsByTenant(requestContext.getSenderTenant()));
             if (CollectionUtils.isEmpty(list)) {
                 return ResponseFactory.responseNoContent();
             }
@@ -321,7 +323,7 @@ public class AccountController extends MappedCrudController<Long, Account, MinAc
     @Override
     public ResponseEntity<?> resendCreationEmail(RequestContextDto requestContext, Long id) {
         try {
-            accountService.resendCreationEmail(id);
+            accountService.resendCreationEmail(requestContext.getSenderTenant(), id);
             return ResponseFactory.responseOk();
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);

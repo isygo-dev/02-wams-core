@@ -23,7 +23,7 @@ import org.hibernate.annotations.ColumnDefault;
 @AllArgsConstructor
 @Entity
 @Table(name = SchemaTableConstantName.T_THEME, uniqueConstraints = {
-        @UniqueConstraint(name = SchemaUcConstantName.UC_ACCOUNT_AND_DOMAIN, columnNames = {SchemaColumnConstantName.C_CODE_ACCOUNT, SchemaColumnConstantName.C_CODE_DOMAIN})
+        @UniqueConstraint(name = SchemaUcConstantName.UC_ACCOUNT_AND_TENANT, columnNames = {SchemaColumnConstantName.C_CODE_ACCOUNT, SchemaColumnConstantName.C_CODE_TENANT})
 })
 public class Theme extends AuditableEntity<Long> {
 
@@ -33,8 +33,8 @@ public class Theme extends AuditableEntity<Long> {
     @Column(name = SchemaColumnConstantName.C_ID, updatable = false, nullable = false)
     private Long id;
 
-    @Column(name = SchemaColumnConstantName.C_CODE_DOMAIN, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
-    private String domainCode;
+    @Column(name = SchemaColumnConstantName.C_CODE_TENANT, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
+    private String tenantCode;
     @Column(name = SchemaColumnConstantName.C_CODE_ACCOUNT, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String accountCode;
     @Column(name = SchemaColumnConstantName.C_COLOR)

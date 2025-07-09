@@ -1,5 +1,9 @@
 package eu.isygoit.repository;
 
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAssignableRepository;
+
 import eu.isygoit.model.Annex;
 
 import java.util.List;
@@ -7,7 +11,7 @@ import java.util.List;
 /**
  * The interface Annex repository.
  */
-public interface AnnexRepository extends JpaPagingAndSortingDomainAssignableRepository<Annex, Long> {
+public interface AnnexRepository extends JpaPagingAndSortingTenantAssignableRepository<Annex, Long> {
     /**
      * Find by table code list.
      *

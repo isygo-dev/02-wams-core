@@ -1,7 +1,8 @@
 package eu.isygoit.controller;
 
-import eu.isygoit.annotation.CtrlDef;
+import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
+import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.exception.handler.MmsExceptionHandler;
 import eu.isygoit.factory.SenderFactory;
@@ -23,15 +24,15 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequestMapping(path = "/api/v1/private/config/mail")
-@CtrlDef(handler = MmsExceptionHandler.class, mapper = SenderConfigMapper.class, minMapper = SenderConfigMapper.class, service = SenderConfigService.class)
-public class SenderConfigController extends MappedCrudController<Long, SenderConfig, SenderConfigDto, SenderConfigDto, SenderConfigService> {
+@InjectMapperAndService(handler = MmsExceptionHandler.class, mapper = SenderConfigMapper.class, minMapper = SenderConfigMapper.class, service = SenderConfigService.class)
+public class SenderConfigController extends MappedCrudTenantController<Long, SenderConfig, SenderConfigDto, SenderConfigDto, SenderConfigService> {
 
     @Autowired
     private SenderFactory senderFactory;
 
     @Override
     public SenderConfig afterUpdate(SenderConfig senderConfig) {
-        senderFactory.removeSender(senderConfig.getDomain());
+        senderFactory.removeSender(senderConfig.getTenant());
         return super.afterUpdate(senderConfig);
     }
 }

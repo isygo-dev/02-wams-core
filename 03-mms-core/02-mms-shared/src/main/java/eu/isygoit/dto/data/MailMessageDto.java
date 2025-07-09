@@ -32,7 +32,7 @@ public class MailMessageDto extends AbstractAuditableDto<UUID> {
     @JsonDeserialize(using = UuidDeserializer.class)
     private UUID id;
 
-    private String domain;
+    private String tenant;
     private IEnumEmailTemplate.Types templateName;
     private boolean returnDelivered;
     private boolean returnRead;

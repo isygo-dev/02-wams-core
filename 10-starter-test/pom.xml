@@ -10,7 +10,7 @@
 
     <groupId>eu.isygo-it.services</groupId>
     <artifactId>starter-test-core</artifactId>
-    <version>WC-1.0.250516-T0922</version>
+    <version>WC-1.0.250707-T0839</version>
 
     <name>starter-test-core</name>
     <description>starter-test-core</description>
@@ -20,7 +20,7 @@
     <parent>
         <groupId>eu.isygo-it.services</groupId>
         <artifactId>service-core</artifactId>
-        <version>WC-1.0.250516-T0922</version>
+        <version>WC-1.0.250707-T0839</version>
     </parent>
 
     <properties>
