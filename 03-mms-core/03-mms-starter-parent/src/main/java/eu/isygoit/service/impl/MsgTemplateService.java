@@ -1,11 +1,8 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.InjectCodeGenKms;
 import eu.isygoit.annotation.InjectCodeGen;
+import eu.isygoit.annotation.InjectCodeGenKms;
 import eu.isygoit.annotation.InjectRepository;
-import eu.isygoit.com.rest.service.CodeAssignableService;
-import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
-import eu.isygoit.com.rest.service.FileService;
 import eu.isygoit.com.rest.service.tenancy.FileTenantService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.TenantConstants;
@@ -111,12 +108,12 @@ public class MsgTemplateService extends FileTenantService<Long, MsgTemplate, Msg
                     .resolve(MsgTemplate.class.getSimpleName().toLowerCase());
             template = this.create(tenant,
                     MsgTemplate.builder()
-                    .tenant(tenant)
-                    .name(templateName)
-                    .description(templateName.meaning())
-                    .path(filePath.toString())
-                    .language(IEnumLanguage.Types.EN)
-                    .build());
+                            .tenant(tenant)
+                            .name(templateName)
+                            .description(templateName.meaning())
+                            .path(filePath.toString())
+                            .language(IEnumLanguage.Types.EN)
+                            .build());
             log.info(Path.of(MsgTemplate.class.getSimpleName().toLowerCase(), templateName.name().toLowerCase() + ".ftl").toUri().getPath());
             Resource resource = new UrlResource(Path.of(MsgTemplate.class.getSimpleName().toLowerCase(), templateName.name().toLowerCase() + ".ftl").toUri());
             if (resource.exists()) {

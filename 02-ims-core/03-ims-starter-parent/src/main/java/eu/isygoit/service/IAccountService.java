@@ -1,9 +1,7 @@
 package eu.isygoit.service;
 
 import eu.isygoit.com.rest.controller.impl.tenancy.IImageTenantServiceMethods;
-import eu.isygoit.com.rest.service.ICrudServiceMethods;
 import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
-import eu.isygoit.com.rest.service.IImageServiceMethods;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.*;
 import eu.isygoit.dto.request.AccountAuthTypeRequest;

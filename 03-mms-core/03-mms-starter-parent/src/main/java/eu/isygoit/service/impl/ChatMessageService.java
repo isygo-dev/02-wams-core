@@ -1,8 +1,6 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.InjectRepository;
-import eu.isygoit.com.rest.service.CodeAssignableService;
-import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.com.rest.service.cassandra.CassandraCrudService;
 import eu.isygoit.config.WsChannelInterceptor;
 import eu.isygoit.dto.data.ChatAccountDto;

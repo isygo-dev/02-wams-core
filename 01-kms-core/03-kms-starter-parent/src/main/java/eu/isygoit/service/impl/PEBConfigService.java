@@ -2,9 +2,6 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.InjectCodeGen;
 import eu.isygoit.annotation.InjectRepository;
-import eu.isygoit.com.rest.service.CodeAssignableService;
-import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
-import eu.isygoit.com.rest.service.CodeAssignableService;
 import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.AppNextCode;

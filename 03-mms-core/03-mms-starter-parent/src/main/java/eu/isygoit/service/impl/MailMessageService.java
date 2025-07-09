@@ -2,10 +2,7 @@ package eu.isygoit.service.impl;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
 import eu.isygoit.annotation.InjectRepository;
-import eu.isygoit.com.rest.service.CodeAssignableService;
-import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
-import eu.isygoit.com.rest.service.cassandra.CassandraCrudService;
 import eu.isygoit.com.rest.service.cassandra.CassandraCrudTenantService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.dto.data.MailOptionsDto;

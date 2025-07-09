@@ -1,10 +1,7 @@
 package eu.isygoit.repository;
 
-import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
-import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
-import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAssignableRepository;
-
 import eu.isygoit.model.RoleInfo;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
 
 import java.util.Optional;
 

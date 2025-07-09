@@ -5,7 +5,6 @@ import eu.isygoit.api.AccountControllerApi;
 import eu.isygoit.api.StatisticControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
-import eu.isygoit.com.rest.controller.impl.MappedCrudController;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
@@ -256,7 +255,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
         try {
             accountDto.setId(id);
             this.beforeUpdate(accountDto.getId(), accountDto);
-            return ResponseFactory.responseOk(mapper().entityToDto(accountService.update(requestContext.getSenderTenant(),mapper().dtoToEntity(accountDto))));
+            return ResponseFactory.responseOk(mapper().entityToDto(accountService.update(requestContext.getSenderTenant(), mapper().dtoToEntity(accountDto))));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

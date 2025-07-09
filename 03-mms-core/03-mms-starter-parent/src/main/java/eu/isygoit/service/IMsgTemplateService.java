@@ -1,8 +1,6 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.ICrudServiceMethods;
 import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
-import eu.isygoit.com.rest.service.IFileServiceMethods;
 import eu.isygoit.com.rest.service.tenancy.IFileTenantServiceMethods;
 import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.model.MsgTemplate;

@@ -1,10 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.InjectRepository;
-import eu.isygoit.com.rest.service.CodeAssignableService;
-import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.com.rest.service.CrudService;
-import eu.isygoit.com.rest.service.tenancy.CrudTenantService;
 import eu.isygoit.model.Theme;
 import eu.isygoit.repository.ThemeRepository;
 import eu.isygoit.service.IThemeService;

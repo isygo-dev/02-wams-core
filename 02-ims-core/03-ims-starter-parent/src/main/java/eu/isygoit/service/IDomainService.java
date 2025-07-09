@@ -1,9 +1,7 @@
 package eu.isygoit.service;
 
 import eu.isygoit.com.rest.controller.impl.tenancy.IImageTenantServiceMethods;
-import eu.isygoit.com.rest.service.ICrudServiceMethods;
 import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
-import eu.isygoit.com.rest.service.IImageServiceMethods;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Domain;
 
@@ -67,9 +65,9 @@ public interface IDomainService extends ICrudTenantServiceMethods<Long, Domain>,
      * Update social link tenant.
      *
      * @param tenant the sender tenant
-     * @param id           the id
-     * @param social       the social
-     * @param link         the link
+     * @param id     the id
+     * @param social the social
+     * @param link   the link
      * @return the tenant
      */
     Domain updateSocialLink(String tenant, Long id, String social, String link);

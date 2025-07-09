@@ -1,11 +1,8 @@
 package eu.isygoit.repository;
 
-import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
-import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
-import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAssignableRepository;
-
 import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.model.MsgTemplate;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
 
 import java.util.Optional;
 

@@ -50,11 +50,11 @@ public class InitSuperUserService extends AbstractJobService {
         if (defaultDomain == null) {
             defaultDomain = tenantService.create(TenantConstants.SUPER_TENANT_NAME,
                     Domain.builder()
-                    .tenant(TenantConstants.SUPER_TENANT_NAME)
-                    .name(TenantConstants.DEFAULT_TENANT_NAME)
-                    .description(TenantConstants.DEFAULT_TENANT_NAME)
-                    .adminStatus(IEnumEnabledBinaryStatus.Types.ENABLED)
-                    .build());
+                            .tenant(TenantConstants.SUPER_TENANT_NAME)
+                            .name(TenantConstants.DEFAULT_TENANT_NAME)
+                            .description(TenantConstants.DEFAULT_TENANT_NAME)
+                            .adminStatus(IEnumEnabledBinaryStatus.Types.ENABLED)
+                            .build());
         }
 
         //Check super tenant existence
@@ -62,11 +62,11 @@ public class InitSuperUserService extends AbstractJobService {
         if (superDomain == null) {
             superDomain = tenantService.create(TenantConstants.SUPER_TENANT_NAME,
                     Domain.builder()
-                    .tenant(TenantConstants.SUPER_TENANT_NAME)
-                    .name(TenantConstants.SUPER_TENANT_NAME)
-                    .description(TenantConstants.SUPER_TENANT_NAME)
-                    .adminStatus(IEnumEnabledBinaryStatus.Types.ENABLED)
-                    .build());
+                            .tenant(TenantConstants.SUPER_TENANT_NAME)
+                            .name(TenantConstants.SUPER_TENANT_NAME)
+                            .description(TenantConstants.SUPER_TENANT_NAME)
+                            .adminStatus(IEnumEnabledBinaryStatus.Types.ENABLED)
+                            .build());
         }
 
         //Check sysadmin application existence
@@ -74,14 +74,14 @@ public class InitSuperUserService extends AbstractJobService {
         if (application == null) {
             application = applicationService.create(TenantConstants.SUPER_TENANT_NAME,
                     Application.builder()
-                    .tenant(TenantConstants.SUPER_TENANT_NAME)
-                    .title("System administration")
-                    .category("PRM Store")
-                    .name("webapp-sysadmin")
-                    .description("System administration tool")
-                    .url("https://fe-sysadmin.dev.prm.easygoit.eu")
-                    .order(1)
-                    .build());
+                            .tenant(TenantConstants.SUPER_TENANT_NAME)
+                            .title("System administration")
+                            .category("PRM Store")
+                            .name("webapp-sysadmin")
+                            .description("System administration tool")
+                            .url("https://fe-sysadmin.dev.prm.easygoit.eu")
+                            .order(1)
+                            .build());
         }
 
         //Check super role existence
@@ -89,12 +89,12 @@ public class InitSuperUserService extends AbstractJobService {
         if (superAdmin == null) {
             superAdmin = roleInfoService.create(AccountTypeConstants.SUPER_ADMIN,
                     RoleInfo.builder()
-                    .tenant(TenantConstants.SUPER_TENANT_NAME)
-                    .name(AccountTypeConstants.SUPER_ADMIN)
-                    .description(AccountTypeConstants.SUPER_ADMIN)
-                    .permissions(apiPermissionRepository.findAll())
-                    .allowedTools(Arrays.asList(application))
-                    .build());
+                            .tenant(TenantConstants.SUPER_TENANT_NAME)
+                            .name(AccountTypeConstants.SUPER_ADMIN)
+                            .description(AccountTypeConstants.SUPER_ADMIN)
+                            .permissions(apiPermissionRepository.findAll())
+                            .allowedTools(Arrays.asList(application))
+                            .build());
         }
 
         //Check tenant admin role existence
@@ -102,12 +102,12 @@ public class InitSuperUserService extends AbstractJobService {
         if (superAdmin == null) {
             superAdmin = roleInfoService.create(AccountTypeConstants.TENANT_ADMIN,
                     RoleInfo.builder()
-                    .tenant(TenantConstants.SUPER_TENANT_NAME)
-                    .name(AccountTypeConstants.TENANT_ADMIN)
-                    .description(AccountTypeConstants.TENANT_ADMIN)
-                    .permissions(apiPermissionRepository.findAll())
-                    .allowedTools(Arrays.asList(application))
-                    .build());
+                            .tenant(TenantConstants.SUPER_TENANT_NAME)
+                            .name(AccountTypeConstants.TENANT_ADMIN)
+                            .description(AccountTypeConstants.TENANT_ADMIN)
+                            .permissions(apiPermissionRepository.findAll())
+                            .allowedTools(Arrays.asList(application))
+                            .build());
         }
 
         //Check super user existence
@@ -115,23 +115,23 @@ public class InitSuperUserService extends AbstractJobService {
         if (superUser == null) {
             superUser = accountService.create(TenantConstants.SUPER_TENANT_NAME,
                     Account.builder()
-                    .tenant(TenantConstants.SUPER_TENANT_NAME)
-                    .code("root")
-                    .email("s.mbarki@isygoit.eu")
-                    .language(IEnumLanguage.Types.EN)
-                    .phoneNumber("0021653579452")
-                    .systemStatus(IEnumAccountSystemStatus.Types.IDLE)
-                    .adminStatus(IEnumEnabledBinaryStatus.Types.ENABLED)
-                    .authType(IEnumAuth.Types.OTP)
-                    .accountType(AccountTypeConstants.SUPER_ADMIN)
-                    .functionRole(AccountTypeConstants.SUPER_ADMIN)
-                    .isAdmin(true)
-                    .accountDetails(AccountDetails.builder()
-                            .firstName("Root")
-                            .lastName("@SuperDomain")
-                            .build())
-                    .roleInfo(Arrays.asList(superAdmin))
-                    .build());
+                            .tenant(TenantConstants.SUPER_TENANT_NAME)
+                            .code("root")
+                            .email("s.mbarki@isygoit.eu")
+                            .language(IEnumLanguage.Types.EN)
+                            .phoneNumber("0021653579452")
+                            .systemStatus(IEnumAccountSystemStatus.Types.IDLE)
+                            .adminStatus(IEnumEnabledBinaryStatus.Types.ENABLED)
+                            .authType(IEnumAuth.Types.OTP)
+                            .accountType(AccountTypeConstants.SUPER_ADMIN)
+                            .functionRole(AccountTypeConstants.SUPER_ADMIN)
+                            .isAdmin(true)
+                            .accountDetails(AccountDetails.builder()
+                                    .firstName("Root")
+                                    .lastName("@SuperDomain")
+                                    .build())
+                            .roleInfo(Arrays.asList(superAdmin))
+                            .build());
         }
     }
 }

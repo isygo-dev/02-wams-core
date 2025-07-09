@@ -1,9 +1,6 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.InjectRepository;
-import eu.isygoit.com.rest.service.CodeAssignableService;
-import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
-import eu.isygoit.com.rest.service.CrudService;
 import eu.isygoit.com.rest.service.tenancy.CrudTenantService;
 import eu.isygoit.constants.AppParameterConstants;
 import eu.isygoit.constants.TenantConstants;

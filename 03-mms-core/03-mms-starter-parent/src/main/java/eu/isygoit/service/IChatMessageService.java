@@ -1,7 +1,6 @@
 package eu.isygoit.service;
 
 import eu.isygoit.com.rest.service.ICrudServiceMethods;
-import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
 import eu.isygoit.dto.data.ChatAccountDto;
 import eu.isygoit.dto.wsocket.WsConnectDto;
 import eu.isygoit.model.ChatMessage;

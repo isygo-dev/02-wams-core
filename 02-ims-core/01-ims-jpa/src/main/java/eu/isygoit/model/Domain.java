@@ -1,8 +1,8 @@
 package eu.isygoit.model;
 
 import eu.isygoit.constants.TenantConstants;
-import eu.isygoit.model.tenancy.TenantModel;
 import eu.isygoit.model.schema.*;
+import eu.isygoit.model.tenancy.TenantModel;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;

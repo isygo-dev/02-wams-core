@@ -1,11 +1,8 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.annotation.InjectCodeGenKms;
 import eu.isygoit.annotation.InjectCodeGen;
+import eu.isygoit.annotation.InjectCodeGenKms;
 import eu.isygoit.annotation.InjectRepository;
-import eu.isygoit.com.rest.service.CodeAssignableService;
-import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
-import eu.isygoit.com.rest.service.CodeAssignableService;
 import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.common.RequestContextDto;
@@ -74,7 +71,7 @@ public class RoleInfoService extends CodeAssignableTenantService<Long, RoleInfo,
                 roleInfo.setNumberOfUsers(assoRoleInfoAccountRepository.countAllById_RoleInfoCode(roleInfo.getCode()));
             });
         }
-        return super.afterFindAll(tenant,list);
+        return super.afterFindAll(tenant, list);
     }
 
     @Override

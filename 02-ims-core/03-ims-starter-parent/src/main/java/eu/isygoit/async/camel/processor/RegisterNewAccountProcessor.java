@@ -54,17 +54,17 @@ public class RegisterNewAccountProcessor extends AbstractStringProcessor {
 
         Account account = accountService.create(newAccount.getTenant(),
                 Account.builder()
-                .origin(newAccount.getOrigin())
-                .tenant(newAccount.getTenant())
-                .email(newAccount.getEmail())
-                .phoneNumber(newAccount.getPhoneNumber())
-                .roleInfo(roleInfo != null ? Arrays.asList(roleInfo) : null)
-                .functionRole(newAccount.getFunctionRole())
-                .accountDetails(AccountDetails.builder()
-                        .firstName(newAccount.getFirstName())
-                        .lastName(newAccount.getLastName())
-                        .build())
-                .build());
+                        .origin(newAccount.getOrigin())
+                        .tenant(newAccount.getTenant())
+                        .email(newAccount.getEmail())
+                        .phoneNumber(newAccount.getPhoneNumber())
+                        .roleInfo(roleInfo != null ? Arrays.asList(roleInfo) : null)
+                        .functionRole(newAccount.getFunctionRole())
+                        .accountDetails(AccountDetails.builder()
+                                .firstName(newAccount.getFirstName())
+                                .lastName(newAccount.getLastName())
+                                .build())
+                        .build());
 
         exchange.getIn().setBody(JsonHelper.toJson(AssoAccountDto.builder()
                 .code(account.getCode())

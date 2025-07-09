@@ -1,7 +1,6 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectMapperAndService;
-import eu.isygoit.com.rest.controller.impl.MappedFileController;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedFileTenantController;
 import eu.isygoit.dto.data.MsgTemplateDto;
 import eu.isygoit.exception.handler.MmsExceptionHandler;

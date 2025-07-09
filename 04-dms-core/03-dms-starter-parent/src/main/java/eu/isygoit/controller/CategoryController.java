@@ -2,7 +2,6 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
-import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.dto.data.CategoryDto;
 import eu.isygoit.exception.handler.DmsExceptionHandler;
 import eu.isygoit.mapper.CategoryMapper;

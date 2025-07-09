@@ -2,8 +2,6 @@ package eu.isygoit.service.impl;
 
 
 import eu.isygoit.annotation.InjectRepository;
-import eu.isygoit.com.rest.service.CodeAssignableService;
-import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.com.rest.service.CrudServiceUtils;
 import eu.isygoit.exception.AccountNotFoundException;
 import eu.isygoit.exception.PropertyNotFoundException;

@@ -4,7 +4,6 @@ import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.api.CalendarEventControllerAPI;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
-import eu.isygoit.com.rest.controller.impl.MappedCrudController;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.common.RequestContextDto;

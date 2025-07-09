@@ -1,9 +1,5 @@
 package eu.isygoit.repository;
 
-import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
-import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
-import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAssignableRepository;
-
 import eu.isygoit.annotation.IgnoreRepository;
 import eu.isygoit.model.MailMessage;
 import org.springframework.data.cassandra.repository.AllowFiltering;

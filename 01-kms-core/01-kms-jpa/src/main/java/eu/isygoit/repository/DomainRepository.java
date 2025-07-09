@@ -1,9 +1,5 @@
 package eu.isygoit.repository;
 
-import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
-import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
-import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAssignableRepository;
-
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.KmsDomain;
 import org.springframework.data.jpa.repository.Modifying;
