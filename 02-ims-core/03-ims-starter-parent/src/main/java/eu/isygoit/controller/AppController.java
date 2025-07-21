@@ -70,40 +70,11 @@ public class AppController extends MappedCrudTenantController<Long, Application,
         }
     }
 
-    @Override
-    public ResponseEntity<List<ApplicationDto>> subFindAll(RequestContextDto requestContext) {
-        if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
-            return super.subFindAll(requestContext);
-        } else {
-            return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByTenantAndUserName(requestContext.getSenderTenant(),
-                    requestContext.getSenderUser())));
-        }
-    }
-
-    @Override
-    public ResponseEntity<List<ApplicationDto>> subFindAllDefault(RequestContextDto requestContext) {
-        if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
-            return super.subFindAllDefault(requestContext);
-        } else {
-            return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByTenantAndUserName(requestContext.getSenderTenant(),
-                    requestContext.getSenderUser())));
-        }
-    }
 
     @Override
     public ResponseEntity<List<ApplicationDto>> subFindAll(RequestContextDto requestContext, Integer page, Integer size) {
         if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return super.subFindAll(requestContext, page, size);
-        } else {
-            return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByTenantAndUserName(requestContext.getSenderTenant(),
-                    requestContext.getSenderUser())));
-        }
-    }
-
-    @Override
-    public ResponseEntity<List<ApplicationDto>> subFindAllFull(RequestContextDto requestContext) {
-        if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
-            return super.subFindAllFull(requestContext);
         } else {
             return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByTenantAndUserName(requestContext.getSenderTenant(),
                     requestContext.getSenderUser())));

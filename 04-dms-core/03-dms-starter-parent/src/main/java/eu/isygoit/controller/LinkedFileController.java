@@ -115,7 +115,7 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
     }
 
     @Override
-    public ResponseEntity<LinkedFileResponseDto> upload(//RequestContextDto requestContext,
+    public ResponseEntity<LinkedFileResponseDto> upload(RequestContextDto requestContext,
                                                         LinkedFileRequestDto linkedFile) throws IOException {
         log.info("Uploading file from tenant {} : {}", linkedFile.getTenant(), linkedFile.getFile().getOriginalFilename());
         if (linkedFile.getFile() == null) {

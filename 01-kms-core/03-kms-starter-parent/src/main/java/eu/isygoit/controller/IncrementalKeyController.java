@@ -45,7 +45,7 @@ public class IncrementalKeyController extends ControllerExceptionHandler impleme
     }
 
     @Override
-    public ResponseEntity<String> subscribeNextCode(//RequestContextDto requestContext,
+    public ResponseEntity<String> subscribeNextCode(RequestContextDto requestContext,
                                                     String tenant, NextCodeDto incrementalConfig) {
         log.info("Call subscribe next code generator for: {}/{}", tenant, incrementalConfig);
         try {

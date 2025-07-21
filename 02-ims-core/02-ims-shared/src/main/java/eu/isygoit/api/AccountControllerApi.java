@@ -95,7 +95,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
     @PostMapping(path = "/admin")
     ResponseEntity<AccountDto> createDomainAdmin(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
                                                  @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
-                                                 @RequestBody DomainAdminDto admin);
+                                                 @Valid @RequestBody DomainAdminDto admin);
 
     /**
      * Update account is admin response entity.
