@@ -24,8 +24,8 @@ import java.util.List;
 public class MsgTemplateFile extends FileEntity<Long> implements IFileEntity {
 
     @Id
-    @SequenceGenerator(name = "msg_template_file_sequence_generator", sequenceName = "post_file_sequence", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "post_file_sequence_generator")
+    @SequenceGenerator(name = "msg_template_file_sequence_generator", sequenceName = "msg_template_file_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "msg_template_file_sequence_generator")
     @Column(name = SchemaColumnConstantName.C_ID, updatable = false, nullable = false)
     private Long id;
 
