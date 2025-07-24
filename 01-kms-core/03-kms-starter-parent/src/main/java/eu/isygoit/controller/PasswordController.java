@@ -53,7 +53,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     private ITokenConfigService tokenConfigService;
 
     @Override
-    public ResponseEntity<Integer> generate(//RequestContextDto requestContext,
+    public ResponseEntity<Integer> generate(RequestContextDto requestContext,
                                             IEnumAuth.Types authType,
                                             GeneratePwdRequestDto generatePwdRequest) {
         log.info("Call generate password for tenant {}", generatePwdRequest);
@@ -75,7 +75,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     }
 
     @Override
-    public ResponseEntity<String> resetPasswordViaToken(//RequestContextDto requestContext,
+    public ResponseEntity<String> resetPasswordViaToken(RequestContextDto requestContext,
                                                         ResetPwdViaTokenRequestDto resetPwdViaTokenRequestDto) {
         try {
             passwordService.resetPasswordViaToken(resetPwdViaTokenRequestDto);
@@ -101,7 +101,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     }
 
     @Override
-    public ResponseEntity<Boolean> patternCheck(//RequestContextDto requestContext,
+    public ResponseEntity<Boolean> patternCheck(RequestContextDto requestContext,
                                                 CheckPwdRequestDto checkPwdRequest) {
         log.info("Call check password for tenant {}", checkPwdRequest);
         try {
@@ -114,7 +114,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     }
 
     @Override
-    public ResponseEntity<AccessTokenResponseDto> getAccess(//RequestContextDto requestContext,
+    public ResponseEntity<AccessTokenResponseDto> getAccess(RequestContextDto requestContext,
                                                             AccessRequestDto accessRequest) {
         log.info("Call access for tenant {}", accessRequest);
         try {
@@ -183,7 +183,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     }
 
     @Override
-    public ResponseEntity<IEnumPasswordStatus.Types> matches(//RequestContextDto requestContext,
+    public ResponseEntity<IEnumPasswordStatus.Types> matches(RequestContextDto requestContext,
                                                              MatchesRequestDto matchesRequest) {
         log.info("Call match password for tenant {}", matchesRequest);
         try {
@@ -198,7 +198,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     }
 
     @Override
-    public ResponseEntity<Boolean> isPasswordExpired(//RequestContextDto requestContext,
+    public ResponseEntity<Boolean> isPasswordExpired(RequestContextDto requestContext,
                                                      IsPwdExpiredRequestDto isPwdExpiredRequestDto) {
         log.info("Call isPasswordExpired {}", isPwdExpiredRequestDto);
         try {
@@ -213,7 +213,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     }
 
     @Override
-    public ResponseEntity<Boolean> updateAccount(//RequestContextDto requestContext,
+    public ResponseEntity<Boolean> updateAccount(RequestContextDto requestContext,
                                                  UpdateAccountRequestDto account) {
         log.info("Call update account " + account.toString());
         try {

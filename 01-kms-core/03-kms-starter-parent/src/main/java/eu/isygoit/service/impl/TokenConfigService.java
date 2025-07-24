@@ -72,7 +72,7 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("TKN")
                 .valueLength(6L)
-                .value(1L)
+                .codeValue(1L)
                 .increment(1)
                 .build();
     }

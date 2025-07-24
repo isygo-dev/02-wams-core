@@ -41,7 +41,7 @@ public class DomainController extends MappedCrudTenantController<Long, Domain, D
     @Override
     public Domain afterUpdate(Domain tenant) {
         try {
-            ResponseEntity<Boolean> result = kmsDomainService.updateDomain(//RequestContextDto.builder().build(),
+            ResponseEntity<Boolean> result = kmsDomainService.updateDomain(RequestContextDto.builder().build(),
                     KmsDomainDto.builder()
                             .name(tenant.getName())
                             .description(tenant.getDescription())

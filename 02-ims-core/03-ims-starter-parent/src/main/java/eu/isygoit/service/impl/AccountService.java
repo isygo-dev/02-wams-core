@@ -93,7 +93,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("ACT")
                 .valueLength(6L)
-                .value(1L)
+                .codeValue(1L)
                 .increment(1)
                 .build();
     }
@@ -228,7 +228,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
         if (account != null) {
             if (IEnumAuth.Types.OTP == account.getAuthType()) {
                 try {
-                    ResponseEntity<Integer> result = kmsPasswordService.generate(//RequestContextDto.builder().build(),
+                    ResponseEntity<Integer> result = kmsPasswordService.generate(RequestContextDto.builder().build(),
                             IEnumAuth.Types.OTP,
                             GeneratePwdRequestDto.builder()
                                     .tenant(account.getTenant())
@@ -404,7 +404,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
             Optional<Account> optional = this.findById(tenant, id);
             if (optional.isPresent()) {
                 Account account = optional.get();
-                ResponseEntity<Integer> result = kmsPasswordService.generate(//RequestContextDto.builder().build(),
+                ResponseEntity<Integer> result = kmsPasswordService.generate(RequestContextDto.builder().build(),
                         IEnumAuth.Types.PWD,
                         GeneratePwdRequestDto.builder()
                                 .tenant(account.getTenant())

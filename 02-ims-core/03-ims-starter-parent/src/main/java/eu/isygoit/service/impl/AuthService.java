@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.constants.AppParameterConstants;
+import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.request.AccessRequestDto;
 import eu.isygoit.dto.request.RequestTrackingDto;
 import eu.isygoit.dto.response.AccessTokenResponseDto;
@@ -77,7 +78,7 @@ public class AuthService implements IAuthService {
                             new ArrayList<>()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
             try {
-                ResponseEntity<AccessTokenResponseDto> result = kmsPasswordService.getAccess(//RequestContextDto.builder().build(),
+                ResponseEntity<AccessTokenResponseDto> result = kmsPasswordService.getAccess(RequestContextDto.builder().build(),
                         AccessRequestDto.builder()
                                 .tenant(tenant)
                                 .userName(userName)

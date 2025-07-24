@@ -124,7 +124,7 @@ public class DomainService extends ImageTenantService<Long, Domain, DomainReposi
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("DOM")
                 .valueLength(6L)
-                .value(1L)
+                .codeValue(1L)
                 .increment(1)
                 .build();
     }

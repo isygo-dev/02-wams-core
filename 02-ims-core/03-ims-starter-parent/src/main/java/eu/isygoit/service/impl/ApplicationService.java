@@ -46,7 +46,7 @@ public class ApplicationService extends ImageTenantService<Long, Application, Ap
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("APP")
                 .valueLength(6L)
-                .value(1L)
+                .codeValue(1L)
                 .increment(1)
                 .build();
     }

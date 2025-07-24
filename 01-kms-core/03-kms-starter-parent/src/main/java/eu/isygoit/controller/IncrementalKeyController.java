@@ -56,7 +56,7 @@ public class IncrementalKeyController extends ControllerExceptionHandler impleme
                     .prefix(incrementalConfig.getPrefix())
                     .suffix(incrementalConfig.getSuffix())
                     .valueLength(incrementalConfig.getValueLength())
-                    .value(incrementalConfig.getValue())
+                    .codeValue(incrementalConfig.getCodeValue())
                     .increment(incrementalConfig.getIncrement())
                     .build());
 

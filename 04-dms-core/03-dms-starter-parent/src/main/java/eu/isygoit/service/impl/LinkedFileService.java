@@ -285,7 +285,7 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("FLE")
                 .valueLength(6L)
-                .value(1L)
+                .codeValue(1L)
                 .increment(1)
                 .build();
     }

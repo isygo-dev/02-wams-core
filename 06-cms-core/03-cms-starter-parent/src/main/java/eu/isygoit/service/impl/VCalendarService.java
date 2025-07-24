@@ -144,7 +144,7 @@ public class VCalendarService extends CodeAssignableTenantService<Long, VCalenda
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("CAL")
                 .valueLength(6L)
-                .value(1L)
+                .codeValue(1L)
                 .increment(1)
                 .build();
     }

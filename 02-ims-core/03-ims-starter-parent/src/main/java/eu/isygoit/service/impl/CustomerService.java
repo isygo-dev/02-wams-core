@@ -57,7 +57,7 @@ public class CustomerService extends ImageTenantService<Long, Customer, Customer
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("CUS")
                 .valueLength(6L)
-                .value(1L)
+                .codeValue(1L)
                 .build();
     }
 

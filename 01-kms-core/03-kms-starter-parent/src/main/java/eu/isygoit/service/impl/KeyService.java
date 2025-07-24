@@ -65,7 +65,7 @@ public class KeyService implements IKeyService {
                 appNextCode = defaultOptional.get();
                 appNextCode.setId(null);
                 appNextCode.setTenant(tenant);
-                appNextCode.setValue(0L);
+                appNextCode.setCodeValue(0L);
                 appNextCode = appNextCodeRepository.save(appNextCode);
             } else {
                 throw new IncrementalConfigNotFoundException("with tenant/entity/attribute " + tenant + "/" + entityName + "/" + attribute);

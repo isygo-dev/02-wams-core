@@ -2,6 +2,7 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedImageTenantController;
+import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.request.UpdateAccountRequestDto;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
@@ -32,7 +33,7 @@ public class AccountImageController extends MappedImageTenantController<Long, Ac
     @Override
     public AccountDto beforeUpdate(AccountDto account) throws Exception {
         try {
-            ResponseEntity<Boolean> result = kmsPasswordService.updateAccount(//RequestContextDto.builder().build(),
+            ResponseEntity<Boolean> result = kmsPasswordService.updateAccount(RequestContextDto.builder().build(),
                     UpdateAccountRequestDto.builder()
                             .code(account.getCode())
                             .tenant(account.getTenant())

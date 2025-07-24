@@ -29,7 +29,7 @@ public class PasswordConfigService extends CodeAssignableTenantService<Long, Pas
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("PWD")
                 .valueLength(6L)
-                .value(1L)
+                .codeValue(1L)
                 .increment(1)
                 .build();
     }

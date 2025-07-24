@@ -43,7 +43,7 @@ public class KmsDomainController extends MappedCrudController<Long, KmsDomain, K
     }
 
     @Override
-    public ResponseEntity<Boolean> updateDomain(//RequestContextDto requestContext,
+    public ResponseEntity<Boolean> updateDomain(RequestContextDto requestContext,
                                                 KmsDomainDto tenant) {
         log.info("Call update tenant " + tenant.toString());
         try {

@@ -128,7 +128,7 @@ public class VEventService extends CodeAssignableTenantService<Long, VCalendarEv
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("EVT")
                 .valueLength(6L)
-                .value(1L)
+                .codeValue(1L)
                 .increment(1)
                 .build();
     }

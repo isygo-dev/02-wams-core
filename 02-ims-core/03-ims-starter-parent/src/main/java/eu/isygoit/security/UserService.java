@@ -1,5 +1,6 @@
 package eu.isygoit.security;
 
+import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.request.IsPwdExpiredRequestDto;
 import eu.isygoit.enums.IEnumAccountSystemStatus;
 import eu.isygoit.enums.IEnumAuth;
@@ -41,7 +42,7 @@ public class UserService implements UserDetailsService {
                     .username(account.getCode())
                     .isAdmin(account.getIsAdmin())
                     .password(username)
-                    .passwordExpired(kmsPasswordService.isPasswordExpired(//RequestContextDto.builder().build(),
+                    .passwordExpired(kmsPasswordService.isPasswordExpired(RequestContextDto.builder().build(),
                             IsPwdExpiredRequestDto.builder()
                                     .tenant(account.getTenant())
                                     .email(account.getEmail())

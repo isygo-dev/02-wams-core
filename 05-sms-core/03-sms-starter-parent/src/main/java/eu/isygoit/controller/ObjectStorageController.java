@@ -161,7 +161,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Object> updateTags(//RequestContextDto requestContext,
+    public ResponseEntity<Object> updateTags(RequestContextDto requestContext,
                                              FileTagsDto fileTags) {
         log.info("updateTags request received");
         try {

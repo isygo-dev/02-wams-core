@@ -29,7 +29,7 @@ public class PEBConfigService extends CodeAssignableTenantService<Long, PEBConfi
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("PEB")
                 .valueLength(6L)
-                .value(1L)
+                .codeValue(1L)
                 .increment(1)
                 .build();
     }

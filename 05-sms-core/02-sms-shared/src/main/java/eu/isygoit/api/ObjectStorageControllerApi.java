@@ -171,7 +171,7 @@ public interface ObjectStorageControllerApi {
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @PutMapping(path = "/updateTags")
-    ResponseEntity<Object> updateTags(//@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<Object> updateTags(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
                                       @Valid @RequestBody FileTagsDto fileTags);
 
     /**

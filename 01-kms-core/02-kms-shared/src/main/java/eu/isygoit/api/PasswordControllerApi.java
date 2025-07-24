@@ -38,9 +38,9 @@ public interface PasswordControllerApi {
                             schema = @Schema(implementation = Boolean.class))})
     })
     @PostMapping(path = "/generate/{type}")
-    ResponseEntity<Integer> generate(//@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<Integer> generate(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
                                      @Valid @PathVariable(name = RestApiConstants.type) IEnumAuth.Types authType,
-                                     @Valid @RequestBody GeneratePwdRequestDto generatePwdRequest);
+                                     @Valid @RequestPart GeneratePwdRequestDto generatePwdRequest);
 
     /**
      * Reset password via token response entity.
@@ -57,8 +57,8 @@ public interface PasswordControllerApi {
                             schema = @Schema(implementation = String.class))})
     })
     @PostMapping(path = "/reset-password")
-    ResponseEntity<String> resetPasswordViaToken(//@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                                 @Valid @RequestBody ResetPwdViaTokenRequestDto resetPwdViaTokenRequestDto);
+    ResponseEntity<String> resetPasswordViaToken(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+                                                 @Valid @RequestPart ResetPwdViaTokenRequestDto resetPwdViaTokenRequestDto);
 
     /**
      * Change password response entity.
@@ -96,8 +96,8 @@ public interface PasswordControllerApi {
                             schema = @Schema(implementation = Boolean.class))})
     })
     @PostMapping(path = "/pattern/check")
-    ResponseEntity<Boolean> patternCheck(//@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                         @Valid @RequestBody CheckPwdRequestDto checkPwdRequest);
+    ResponseEntity<Boolean> patternCheck(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+                                         @Valid @RequestPart CheckPwdRequestDto checkPwdRequest);
 
     /**
      * Gets access.
@@ -114,8 +114,8 @@ public interface PasswordControllerApi {
                             schema = @Schema(implementation = AccessTokenResponseDto.class))})
     })
     @PostMapping(path = "/access")
-    ResponseEntity<AccessTokenResponseDto> getAccess(//@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                                     @Valid @RequestBody AccessRequestDto matchPwdRequest);
+    ResponseEntity<AccessTokenResponseDto> getAccess(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+                                                     @Valid @RequestPart AccessRequestDto matchPwdRequest);
 
     /**
      * Matches response entity.
@@ -132,8 +132,8 @@ public interface PasswordControllerApi {
                             schema = @Schema(implementation = IEnumPasswordStatus.Types.class))})
     })
     @PostMapping(path = "/matches")
-    ResponseEntity<IEnumPasswordStatus.Types> matches(//@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                                      @Valid @RequestBody MatchesRequestDto matchesRequest);
+    ResponseEntity<IEnumPasswordStatus.Types> matches(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+                                                      @Valid @RequestPart MatchesRequestDto matchesRequest);
 
     /**
      * Is password expired response entity.
@@ -150,8 +150,8 @@ public interface PasswordControllerApi {
                             schema = @Schema(implementation = Boolean.class))})
     })
     @PostMapping(path = "/isExpired")
-    ResponseEntity<Boolean> isPasswordExpired(//@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                              @Valid @RequestBody IsPwdExpiredRequestDto isPwdExpiredRequestDto);
+    ResponseEntity<Boolean> isPasswordExpired(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+                                              @Valid @RequestPart IsPwdExpiredRequestDto isPwdExpiredRequestDto);
 
     /**
      * Update account response entity.
@@ -168,6 +168,6 @@ public interface PasswordControllerApi {
                             schema = @Schema(implementation = Boolean.class))})
     })
     @PostMapping(path = "/account")
-    ResponseEntity<Boolean> updateAccount(//@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
-                                          @Valid @RequestBody UpdateAccountRequestDto account);
+    ResponseEntity<Boolean> updateAccount(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+                                          @Valid @RequestPart UpdateAccountRequestDto account);
 }

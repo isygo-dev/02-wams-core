@@ -68,7 +68,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     @Override
     public AccountDto beforeUpdate(Long id, AccountDto account) {
         try {
-            ResponseEntity<Boolean> result = kmsPasswordService.updateAccount(//RequestContextDto.builder().build(),
+            ResponseEntity<Boolean> result = kmsPasswordService.updateAccount(RequestContextDto.builder().build(),
                     UpdateAccountRequestDto.builder()
                             .code(account.getCode())
                             .tenant(account.getTenant())
@@ -88,7 +88,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     @Override
     public Account afterCreate(Account account) {
         try {
-            ResponseEntity<Integer> result = kmsPasswordService.generate(//RequestContextDto.builder().build(),
+            ResponseEntity<Integer> result = kmsPasswordService.generate(RequestContextDto.builder().build(),
                     IEnumAuth.Types.PWD,
                     GeneratePwdRequestDto.builder()
                             .tenant(account.getTenant())
@@ -266,7 +266,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     public ResponseEntity<String> resetPasswordViaToken(RequestContextDto requestContext,
                                                         ResetPwdViaTokenRequestDto resetPasswordViaTokenRequest) {
         try {
-            return kmsPasswordService.resetPasswordViaToken(//RequestContextDto.builder().build(),
+            return kmsPasswordService.resetPasswordViaToken(RequestContextDto.builder().build(),
                     resetPasswordViaTokenRequest);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);

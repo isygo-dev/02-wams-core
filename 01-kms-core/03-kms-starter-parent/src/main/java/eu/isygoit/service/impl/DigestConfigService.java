@@ -29,7 +29,7 @@ public class DigestConfigService extends CodeAssignableTenantService<Long, Diges
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("DIG")
                 .valueLength(6L)
-                .value(1L)
+                .codeValue(1L)
                 .increment(1)
                 .build();
     }

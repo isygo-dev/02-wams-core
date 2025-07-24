@@ -1,6 +1,8 @@
 package eu.isygoit.api;
 
+import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
+import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.enums.IEnumFile;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,6 +14,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,7 +41,7 @@ public interface FileConverterApi {
                             schema = @Schema(implementation = Resource.class))})
     })
     @PostMapping(path = "/pdf", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    ResponseEntity<Resource> convertPdf(//@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<Resource> convertPdf(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
                                         @RequestParam(name = RestApiConstants.TARGET) IEnumFile.Types targetFormat,
                                         @Valid @RequestBody MultipartFile file);
 
@@ -58,7 +61,7 @@ public interface FileConverterApi {
                             schema = @Schema(implementation = Resource.class))})
     })
     @PostMapping(path = "/html", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    ResponseEntity<Resource> convertHtml(//@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<Resource> convertHtml(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
                                          @RequestParam(name = RestApiConstants.TARGET) IEnumFile.Types targetFormat,
                                          @Valid @RequestBody MultipartFile file);
 }

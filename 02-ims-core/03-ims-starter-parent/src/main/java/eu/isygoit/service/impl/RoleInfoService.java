@@ -49,7 +49,7 @@ public class RoleInfoService extends CodeAssignableTenantService<Long, RoleInfo,
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("RLE")
                 .valueLength(6L)
-                .value(1L)
+                .codeValue(1L)
                 .increment(1)
                 .build();
     }
