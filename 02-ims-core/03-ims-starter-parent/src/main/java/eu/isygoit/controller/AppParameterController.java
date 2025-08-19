@@ -4,7 +4,7 @@ import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.api.AppParameterControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.AppParameterDto;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.mapper.AppParameterMapper;
@@ -28,7 +28,7 @@ public class AppParameterController extends MappedCrudTenantController<Long, App
         implements AppParameterControllerApi {
 
     @Override
-    public ResponseEntity<String> getValueByTenantAndName(RequestContextDto requestContext,
+    public ResponseEntity<String> getValueByTenantAndName(ContextRequestDto requestContext,
                                                           String tenant, String name, Boolean allowDefault, String defaultValue) {
         log.info("Call api getPropertyByAccount {} /{}", tenant, name);
         try {

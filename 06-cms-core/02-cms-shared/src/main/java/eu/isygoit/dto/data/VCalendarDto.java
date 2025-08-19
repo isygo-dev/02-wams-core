@@ -18,6 +18,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class VCalendarDto extends AbstractAuditableDto<Long> {
 
+    private Long id;
     @NotEmpty
     private String tenant;
     private String code;

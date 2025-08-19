@@ -1,6 +1,5 @@
 package eu.isygoit.dto.request;
 
-import eu.isygoit.dto.extendable.AbstractAuditableDto;
 import eu.isygoit.enums.IEnumAuth;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
@@ -15,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class AccountAuthTypeRequest extends AbstractAuditableDto<Long> {
+public class AccountAuthTypeRequest {
 
     @NotEmpty
     private String tenant;

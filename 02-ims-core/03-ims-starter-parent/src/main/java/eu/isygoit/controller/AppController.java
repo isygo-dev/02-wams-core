@@ -7,7 +7,7 @@ import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.constants.TenantConstants;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.ApplicationDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
@@ -58,7 +58,7 @@ public class AppController extends MappedCrudTenantController<Long, Application,
                             schema = @Schema(implementation = ApplicationDto.class))})
     })
     @PutMapping(path = "/update-status")
-    public ResponseEntity<ApplicationDto> updateStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) RequestContextDto requestContext,
+    public ResponseEntity<ApplicationDto> updateStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) ContextRequestDto requestContext,
                                                        @RequestParam(name = RestApiConstants.ID) Long id,
                                                        @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus) {
         log.info("in update status");
@@ -72,7 +72,7 @@ public class AppController extends MappedCrudTenantController<Long, Application,
 
 
     @Override
-    public ResponseEntity<List<ApplicationDto>> subFindAll(RequestContextDto requestContext, Integer page, Integer size) {
+    public ResponseEntity<List<ApplicationDto>> subFindAll(ContextRequestDto requestContext, Integer page, Integer size) {
         if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return super.subFindAll(requestContext, page, size);
         } else {
@@ -82,7 +82,7 @@ public class AppController extends MappedCrudTenantController<Long, Application,
     }
 
     @Override
-    public ResponseEntity<List<ApplicationDto>> subFindAllFull(RequestContextDto requestContext, Integer page, Integer size) {
+    public ResponseEntity<List<ApplicationDto>> subFindAllFull(ContextRequestDto requestContext, Integer page, Integer size) {
         if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return super.subFindAllFull(requestContext, page, size);
         } else {

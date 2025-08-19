@@ -3,7 +3,7 @@ package eu.isygoit.api;
 import eu.isygoit.com.rest.api.IMappedCrudApi;
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.AnnexDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -38,7 +38,7 @@ public interface AnnexControllerApi extends IMappedCrudApi<Long, AnnexDto, Annex
                             schema = @Schema(implementation = AnnexDto.class))})
     })
     @GetMapping(path = "/byCode")
-    ResponseEntity<List<AnnexDto>> getAnnexByTableCode(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<List<AnnexDto>> getAnnexByTableCode(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                        @RequestParam(name = RestApiConstants.CODE) String code);
 
     @Operation(summary = "Get Annex by code and reference Api",
@@ -50,7 +50,7 @@ public interface AnnexControllerApi extends IMappedCrudApi<Long, AnnexDto, Annex
                             schema = @Schema(implementation = AnnexDto.class))})
     })
     @GetMapping(path = "/byCodeAndRef")
-    ResponseEntity<List<AnnexDto>> getAnnexByTableCodeAndReference(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<List<AnnexDto>> getAnnexByTableCodeAndReference(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                                    @RequestParam(name = RestApiConstants.CODE) String code,
                                                                    @RequestParam(name = RestApiConstants.REFERENCE) String reference);
 }

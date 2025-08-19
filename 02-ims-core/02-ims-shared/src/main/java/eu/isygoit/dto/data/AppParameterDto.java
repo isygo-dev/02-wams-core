@@ -16,6 +16,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class AppParameterDto extends AbstractAuditableDto<Long> {
 
+    private Long id;
     private String name;
     private String value;
     private String tenant;

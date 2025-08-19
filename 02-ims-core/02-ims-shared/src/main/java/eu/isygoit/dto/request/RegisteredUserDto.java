@@ -19,6 +19,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class RegisteredUserDto extends AbstractAuditableDto<Long> {
 
+    private Long id;
     @Builder.Default
     private String tenant = TenantConstants.DEFAULT_TENANT_NAME;
     @Builder.Default

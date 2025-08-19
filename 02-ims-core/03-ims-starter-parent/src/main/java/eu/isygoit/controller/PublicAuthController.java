@@ -7,9 +7,9 @@ import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.config.JwtProperties;
-import eu.isygoit.dto.common.RequestContextDto;
-import eu.isygoit.dto.common.SystemInfoDto;
-import eu.isygoit.dto.common.UserContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
+import eu.isygoit.dto.common.SystemInfoResponseDto;
+import eu.isygoit.dto.common.UserContextRequestDto;
 import eu.isygoit.dto.data.DomainDto;
 import eu.isygoit.dto.data.ThemeDto;
 import eu.isygoit.dto.request.AccountAuthTypeRequest;
@@ -135,7 +135,7 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
                     .authorityToken(authenticate.getAuthorityToken())
                     .userDataResponseDto(userDataResponseDto)
                     .theme(theme)
-                    .systemInfo(SystemInfoDto
+                    .systemInfo(SystemInfoResponseDto
                             .builder()
                             .name(appProperties.getApplicationName())
                             .version(appProperties.getApplicationVersion())
@@ -148,7 +148,7 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     }
 
     @Override
-    public ResponseEntity<Boolean> generateForgotPWDToken(UserContextDto userContextDto) {
+    public ResponseEntity<Boolean> generateForgotPWDToken(UserContextRequestDto userContextDto) {
         try {
             kmsPublicPasswordService.generateForgotPasswordAccessToken(userContextDto);
             return ResponseFactory.responseOk(true);
@@ -209,7 +209,7 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     }
 
     @Override
-    public ResponseEntity<Boolean> switchAuthType(RequestContextDto requestContext,
+    public ResponseEntity<Boolean> switchAuthType(ContextRequestDto requestContext,
                                                   AccountAuthTypeRequest accountAuthTypeRequest) {
         try {
             return ResponseFactory.responseOk(accountService.switchAuthType(requestContext.getSenderTenant(), accountAuthTypeRequest));

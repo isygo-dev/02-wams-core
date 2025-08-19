@@ -5,7 +5,7 @@ import eu.isygoit.api.IndexationApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.exception.handler.DmsExceptionHandler;
 import eu.isygoit.service.IConverterService;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +35,7 @@ public class IndexationController extends ControllerExceptionHandler implements 
 
     //https://www.baeldung.com/apache-tika
     @Override
-    public ResponseEntity<Map<String, Integer>> calcKeysOccurrences(RequestContextDto requestContext,
+    public ResponseEntity<Map<String, Integer>> calcKeysOccurrences(ContextRequestDto requestContext,
                                                                     String[] keys, MultipartFile file) {
         try {
             File txtFile = converterService.doConvertPdfToText(file.getInputStream());

@@ -2,7 +2,7 @@ package eu.isygoit.api;
 
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.BucketDto;
 import eu.isygoit.dto.data.FileTagsDto;
 import eu.isygoit.dto.extendable.IdAssignableDto;
@@ -48,7 +48,7 @@ public interface ObjectStorageControllerApi {
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    ResponseEntity<Object> upload(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<Object> upload(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                   @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                   @RequestParam(name = RestApiConstants.BUCKET_NAME) String bucketName,
                                   @RequestParam(name = RestApiConstants.PATH) String path,
@@ -76,7 +76,7 @@ public interface ObjectStorageControllerApi {
                             schema = @Schema(implementation = Resource.class))})
     })
     @GetMapping(path = "/download")
-    ResponseEntity<Resource> download(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<Resource> download(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                       @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                       @RequestParam(name = RestApiConstants.BUCKET_NAME) String bucketName,
                                       @RequestParam(name = RestApiConstants.PATH) String path,
@@ -102,7 +102,7 @@ public interface ObjectStorageControllerApi {
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @DeleteMapping(path = "/delete")
-    ResponseEntity<Object> delete(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<Object> delete(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                   @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                   @RequestParam(name = RestApiConstants.BUCKET_NAME) String bucketName,
                                   @RequestParam(name = RestApiConstants.PATH) String path,
@@ -126,7 +126,7 @@ public interface ObjectStorageControllerApi {
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @GetMapping(path = "/getObjects")
-    ResponseEntity<Object> getObjects(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<Object> getObjects(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                       @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                       @RequestParam(name = RestApiConstants.BUCKET_NAME) String bucketName);
 
@@ -150,7 +150,7 @@ public interface ObjectStorageControllerApi {
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @GetMapping(path = "/filterObjects")
-    ResponseEntity<Object> filterObjects(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<Object> filterObjects(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                          @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                          @RequestParam(name = RestApiConstants.BUCKET_NAME) String bucketName,
                                          @RequestParam(name = RestApiConstants.TAGS) String tags,
@@ -171,7 +171,7 @@ public interface ObjectStorageControllerApi {
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @PutMapping(path = "/updateTags")
-    ResponseEntity<Object> updateTags(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<Object> updateTags(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                       @Valid @RequestBody FileTagsDto fileTags);
 
     /**
@@ -192,7 +192,7 @@ public interface ObjectStorageControllerApi {
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @DeleteMapping(path = "/deleteObjects")
-    ResponseEntity<Object> deleteObjects(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<Object> deleteObjects(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                          @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                          @RequestParam(name = RestApiConstants.BUCKET_NAME) String bucketName,
                                          @RequestParam(name = RestApiConstants.FILES) String files);
@@ -214,7 +214,7 @@ public interface ObjectStorageControllerApi {
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @PostMapping(path = "/saveBucket")
-    ResponseEntity<Object> saveBucket(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<Object> saveBucket(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                       @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                       @RequestParam(name = RestApiConstants.BUCKET_NAME) String bucketName);
 
@@ -236,7 +236,7 @@ public interface ObjectStorageControllerApi {
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @PostMapping(path = "/setVersioningBucket")
-    ResponseEntity<Object> setVersioningBucket(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<Object> setVersioningBucket(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                                @RequestParam(name = RestApiConstants.BUCKET_NAME) String bucketName,
                                                @RequestParam(name = RestApiConstants.STATUS) boolean status);
@@ -258,7 +258,7 @@ public interface ObjectStorageControllerApi {
                             schema = @Schema(implementation = BucketDto.class))})
     })
     @GetMapping(path = "/getBuckets")
-    ResponseEntity<List<BucketDto>> getBuckets(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<List<BucketDto>> getBuckets(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant);
 
 
@@ -279,7 +279,7 @@ public interface ObjectStorageControllerApi {
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @DeleteMapping(path = "/deleteBucket")
-    ResponseEntity<Object> deleteBucket(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<Object> deleteBucket(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                         @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                         @RequestParam(name = RestApiConstants.BUCKET_NAME) String bucketName);
 }

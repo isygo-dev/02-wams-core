@@ -1,7 +1,6 @@
 package eu.isygoit.dto.request;
 
 import eu.isygoit.constants.TenantConstants;
-import eu.isygoit.dto.extendable.AbstractAuditableDto;
 import eu.isygoit.enums.IEnumAccountOrigin;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
@@ -17,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class NewAccountDto extends AbstractAuditableDto<Long> {
+public class NewAccountDto {
 
     @Builder.Default
     private String tenant = TenantConstants.DEFAULT_TENANT_NAME;

@@ -2,7 +2,7 @@ package eu.isygoit.api;
 
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.extendable.IdAssignableDto;
 import eu.isygoit.dto.wsocket.WsMessageWrapperDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,7 +39,7 @@ public interface WebSocketControllerApi {
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @PostMapping("/user/send")
-    ResponseEntity<?> sendMessageToUser(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<?> sendMessageToUser(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                         @RequestParam(name = RestApiConstants.RECEIVER_ID) Long recieverId,
                                         @Valid @RequestBody WsMessageWrapperDto message);
 
@@ -60,7 +60,7 @@ public interface WebSocketControllerApi {
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @PostMapping("/group/send")
-    ResponseEntity<?> sendMessageToGroup(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<?> sendMessageToGroup(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                          @RequestParam(name = RestApiConstants.GROUP_ID) Long groupId,
                                          @Valid @RequestBody WsMessageWrapperDto message);
 
@@ -80,6 +80,6 @@ public interface WebSocketControllerApi {
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @PostMapping("/all/send")
-    ResponseEntity<?> sendMessageToAll(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<?> sendMessageToAll(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                        @Valid @RequestBody WsMessageWrapperDto message);
 }

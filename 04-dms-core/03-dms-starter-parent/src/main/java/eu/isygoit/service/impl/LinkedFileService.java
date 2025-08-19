@@ -6,8 +6,8 @@ import eu.isygoit.annotation.InjectRepository;
 import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.TenantConstants;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.common.LinkedFileRequestDto;
-import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.exception.*;
 import eu.isygoit.helper.CRC16Helper;
 import eu.isygoit.helper.CRC32Helper;
@@ -160,7 +160,7 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
     private void storeInRemoteHostedStorageSystem(LinkedFileRequestDto dto, MultipartFile file) {
         try {
             ResponseEntity<Object> response = smsStorageLinkedFileService.upload(
-                    RequestContextDto.builder().build(),
+                    ContextRequestDto.builder().build(),
                     dto.getTenant(), dto.getTenant(),
                     dto.getPath().replace(File.separator, "#"),
                     file.getOriginalFilename(),
@@ -198,7 +198,7 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
             return resolveLocalFile(tenant, file);
         } else {
             ResponseEntity<Resource> response = smsStorageLinkedFileService.download(
-                    RequestContextDto.builder().build(),
+                    ContextRequestDto.builder().build(),
                     file.getTenant(), file.getTenant(),
                     file.getPath().replace(File.separator, "#"),
                     file.getOriginalFileName(), "");

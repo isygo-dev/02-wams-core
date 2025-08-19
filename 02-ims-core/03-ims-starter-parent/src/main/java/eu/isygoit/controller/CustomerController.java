@@ -6,7 +6,7 @@ import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.CustomerDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
@@ -57,7 +57,7 @@ public class CustomerController extends MappedCrudTenantController<Long, Custome
                             schema = @Schema(implementation = CustomerDto.class))})
     })
     @PutMapping(path = "/update-status")
-    public ResponseEntity<CustomerDto> updateCustomerStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) RequestContextDto requestContext,
+    public ResponseEntity<CustomerDto> updateCustomerStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) ContextRequestDto requestContext,
                                                             @RequestParam(name = RestApiConstants.ID) Long id,
                                                             @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus) {
         log.info("in update status");
@@ -86,7 +86,7 @@ public class CustomerController extends MappedCrudTenantController<Long, Custome
                             schema = @Schema(implementation = CustomerDto.class))})
     })
     @PutMapping(path = "/link-account")
-    public ResponseEntity<CustomerDto> LinkToExistingAccount(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) RequestContextDto requestContext,
+    public ResponseEntity<CustomerDto> LinkToExistingAccount(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) ContextRequestDto requestContext,
                                                              @RequestParam(name = RestApiConstants.ID) Long id,
                                                              @RequestParam(name = RestApiConstants.ACCOUNT_CODE) String accountCode) {
         log.info("Link to existing account");
@@ -113,7 +113,7 @@ public class CustomerController extends MappedCrudTenantController<Long, Custome
                             schema = @Schema(implementation = String.class))})
     })
     @GetMapping(path = "/names")
-    public ResponseEntity<List<String>> getCustomersNames(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) RequestContextDto requestContext) {
+    public ResponseEntity<List<String>> getCustomersNames(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) ContextRequestDto requestContext) {
         try {
             return ResponseFactory.responseOk(customerService.getNames());
         } catch (Throwable e) {

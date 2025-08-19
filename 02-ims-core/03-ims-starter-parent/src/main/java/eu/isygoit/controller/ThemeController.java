@@ -5,7 +5,7 @@ import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.ThemeDto;
 import eu.isygoit.dto.extendable.IdAssignableDto;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
@@ -58,7 +58,7 @@ public class ThemeController extends MappedCrudController<Long, Theme, ThemeDto,
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @GetMapping(path = "/find/{tenantCode}/{accountCode}")
-    public ResponseEntity<ThemeDto> findThemeByAccountCodeAndDomainCode(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) RequestContextDto requestContext,
+    public ResponseEntity<ThemeDto> findThemeByAccountCodeAndDomainCode(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) ContextRequestDto requestContext,
                                                                         @PathVariable(name = RestApiConstants.TENANT_CODE) String tenantCode,
                                                                         @PathVariable(name = RestApiConstants.ACCOUNT_CODE) String accountCode) {
         try {
@@ -92,7 +92,7 @@ public class ThemeController extends MappedCrudController<Long, Theme, ThemeDto,
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @PutMapping
-    public ResponseEntity<ThemeDto> updateTheme(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) RequestContextDto requestContext,
+    public ResponseEntity<ThemeDto> updateTheme(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) ContextRequestDto requestContext,
                                                 @Valid @RequestBody ThemeDto theme) {
         try {
             Theme themeResult = themeService.updateTheme(themeMapper.dtoToEntity(theme));

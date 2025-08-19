@@ -15,6 +15,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class CategoryDto extends AbstractAuditableDto<Long> {
 
+    private Long id;
     private String name;
     private String description;
 }

@@ -6,7 +6,7 @@ import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.AccountGlobalStatDto;
 import eu.isygoit.dto.data.AccountStatDto;
 import eu.isygoit.enums.IEnumSharedStatType;
@@ -53,7 +53,7 @@ public class AccountStatisticsController extends ControllerExceptionHandler {
                             schema = @Schema(implementation = AccountGlobalStatDto.class))})
     })
     @GetMapping(path = "/global")
-    ResponseEntity<AccountGlobalStatDto> getGlobalStatistics(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) RequestContextDto requestContext,
+    ResponseEntity<AccountGlobalStatDto> getGlobalStatistics(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) ContextRequestDto requestContext,
                                                              @RequestParam(name = RestApiConstants.STAT_TYPE) IEnumSharedStatType.Types statType) {
         log.info("Get global statistics");
         try {
@@ -80,7 +80,7 @@ public class AccountStatisticsController extends ControllerExceptionHandler {
                             schema = @Schema(implementation = AccountStatDto.class))})
     })
     @GetMapping(path = "/object")
-    ResponseEntity<AccountStatDto> getObjectStatistics(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) RequestContextDto requestContext,
+    ResponseEntity<AccountStatDto> getObjectStatistics(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) ContextRequestDto requestContext,
                                                        @RequestParam(name = RestApiConstants.CODE) String code) {
         log.info("Get object statistics with code: ", code);
         try {

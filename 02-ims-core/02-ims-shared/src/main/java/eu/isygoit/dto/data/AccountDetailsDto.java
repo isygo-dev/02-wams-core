@@ -19,6 +19,7 @@ import java.util.List;
 @SuperBuilder
 public class AccountDetailsDto extends AbstractAuditableDto<Long> {
 
+    private Long id;
     private String firstName;
     private String lastName;
     private String country;

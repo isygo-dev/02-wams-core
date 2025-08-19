@@ -17,6 +17,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class PropertyDto extends AbstractAuditableDto<Long> {
 
+    private Long id;
     private String guiName;
     @NotEmpty
     private String name;

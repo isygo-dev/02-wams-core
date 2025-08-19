@@ -1,6 +1,6 @@
 package eu.isygoit.api;
 
-import eu.isygoit.dto.common.UserContextDto;
+import eu.isygoit.dto.common.UserContextRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,6 +31,6 @@ public interface PublicPasswordControllerApi {
                             schema = @Schema(implementation = Boolean.class))})
     })
     @PostMapping(path = "/access-token")
-    ResponseEntity<Boolean> generateForgotPasswordAccessToken(@Valid @RequestBody UserContextDto userContextDto);
+    ResponseEntity<Boolean> generateForgotPasswordAccessToken(@Valid @RequestBody UserContextRequestDto userContextDto);
 
 }

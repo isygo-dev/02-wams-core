@@ -2,7 +2,7 @@ package eu.isygoit.api;
 
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.ChatAccountDto;
 import eu.isygoit.dto.data.ChatMessageDto;
 import eu.isygoit.dto.wsocket.WsConnectDto;
@@ -41,7 +41,7 @@ public interface ChatMessageControllerApi {
                             schema = @Schema(implementation = ChatMessageDto.class))})
     })
     @GetMapping(path = "/user")
-    ResponseEntity<List<ChatMessageDto>> findByReceiverId(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<List<ChatMessageDto>> findByReceiverId(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                           @RequestParam(name = RestApiConstants.USER_ID) Long userId,
                                                           @RequestParam(name = RestApiConstants.PAGE) Integer page,
                                                           @RequestParam(name = RestApiConstants.SIZE) Integer size);
@@ -65,7 +65,7 @@ public interface ChatMessageControllerApi {
                             schema = @Schema(implementation = ChatMessageDto.class))})
     })
     @GetMapping(path = "/from")
-    ResponseEntity<List<ChatMessageDto>> findByReceiverIdAndSenderId(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<List<ChatMessageDto>> findByReceiverIdAndSenderId(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                                      @RequestParam(name = RestApiConstants.USER_ID) Long userId,
                                                                      @RequestParam(name = RestApiConstants.SENDER_ID) Long senderId,
                                                                      @RequestParam(name = RestApiConstants.PAGE) Integer page,
@@ -89,7 +89,7 @@ public interface ChatMessageControllerApi {
                             schema = @Schema(implementation = ChatAccountDto.class))})
     })
     @GetMapping(path = "/account")
-    ResponseEntity<List<ChatAccountDto>> getChatAccounts(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<List<ChatAccountDto>> getChatAccounts(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                          @RequestParam(name = RestApiConstants.USER_ID) Long userId,
                                                          @RequestParam(name = RestApiConstants.PAGE) Integer page,
                                                          @RequestParam(name = RestApiConstants.SIZE) Integer size);
@@ -110,6 +110,6 @@ public interface ChatMessageControllerApi {
                             schema = @Schema(implementation = WsConnectDto.class))})
     })
     @GetMapping(path = "/status/tenant")
-    ResponseEntity<List<WsConnectDto>> getChatStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<List<WsConnectDto>> getChatStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                      @RequestParam(name = RestApiConstants.TENANT_ID) Long tenantId);
 }

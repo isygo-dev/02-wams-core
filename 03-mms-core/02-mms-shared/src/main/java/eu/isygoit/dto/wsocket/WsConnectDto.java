@@ -1,6 +1,6 @@
 package eu.isygoit.dto.wsocket;
 
-import eu.isygoit.dto.extendable.AbstractAuditableDto;
+import eu.isygoit.dto.IExchangeObjectDto;
 import eu.isygoit.enums.IEnumWSStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class WsConnectDto extends AbstractAuditableDto<Long> {
+public class WsConnectDto implements IExchangeObjectDto {
 
     /**
      * The Status.

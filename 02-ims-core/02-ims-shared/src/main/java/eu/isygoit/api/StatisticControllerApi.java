@@ -1,7 +1,7 @@
 package eu.isygoit.api;
 
 import eu.isygoit.constants.JwtConstants;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,7 +25,7 @@ public interface StatisticControllerApi {
                             schema = @Schema(implementation = Long.class))})
     })
     @GetMapping(path = "/connected/resumes")
-    ResponseEntity<Long> getConfirmedResumeAccountsCount(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext);
+    ResponseEntity<Long> getConfirmedResumeAccountsCount(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 
     @Operation(summary = "Count Confirmed employe account",
             description = "Count Confirmed employee account")
@@ -36,5 +36,5 @@ public interface StatisticControllerApi {
                             schema = @Schema(implementation = Long.class))})
     })
     @GetMapping(path = "/connected/employee")
-    ResponseEntity<Long> getConfirmedAccountNumberByEmployee(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext);
+    ResponseEntity<Long> getConfirmedAccountNumberByEmployee(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 }

@@ -4,7 +4,7 @@ import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.api.AnnexControllerApi;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.AnnexDto;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.mapper.AnnexMapper;
@@ -38,7 +38,7 @@ public class AnnexController extends MappedCrudTenantController<Long, Annex, Ann
     private IAnnexService annexService;
 
     @Override
-    public ResponseEntity<List<AnnexDto>> getAnnexByTableCode(RequestContextDto requestContext,
+    public ResponseEntity<List<AnnexDto>> getAnnexByTableCode(ContextRequestDto requestContext,
                                                               String code) {
         try {
             List<AnnexDto> list = mapper().listEntityToDto(annexService.findAnnexByTableCode(code));
@@ -54,7 +54,7 @@ public class AnnexController extends MappedCrudTenantController<Long, Annex, Ann
     }
 
     @Override
-    public ResponseEntity<List<AnnexDto>> getAnnexByTableCodeAndReference(RequestContextDto requestContext, String code, String reference) {
+    public ResponseEntity<List<AnnexDto>> getAnnexByTableCodeAndReference(ContextRequestDto requestContext, String code, String reference) {
         try {
             List<AnnexDto> list = mapper().listEntityToDto(annexService.findAnnexByTableCodeAndRef(code, reference));
             if (!CollectionUtils.isEmpty(list)) {

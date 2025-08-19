@@ -1,7 +1,6 @@
 package eu.isygoit.dto.response;
 
 
-import eu.isygoit.dto.extendable.AbstractAuditableDto;
 import eu.isygoit.enums.IEnumPasswordStatus;
 import eu.isygoit.enums.IEnumWebToken;
 import jakarta.validation.constraints.NotEmpty;
@@ -18,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class AccessTokenResponseDto extends AbstractAuditableDto<Long> {
+public class AccessTokenResponseDto {
 
     @NotNull
     private IEnumPasswordStatus.Types status;

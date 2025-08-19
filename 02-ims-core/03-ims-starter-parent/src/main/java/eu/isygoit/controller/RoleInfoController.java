@@ -2,7 +2,7 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.ApiPermissionDto;
 import eu.isygoit.dto.data.RoleInfoDto;
 import eu.isygoit.dto.data.RolePermissionDto;
@@ -138,7 +138,7 @@ public class RoleInfoController extends MappedCrudTenantController<Long, RoleInf
     }
 
     @Override
-    public List<RoleInfoDto> afterFindAllFull(RequestContextDto requestContext, List<RoleInfoDto> list) {
+    public List<RoleInfoDto> afterFindAllFull(ContextRequestDto requestContext, List<RoleInfoDto> list) {
         if (!CollectionUtils.isEmpty(list)) {
             //filter roles
             list = crudService().filterNotAllowedRoles(requestContext, list);
@@ -147,7 +147,7 @@ public class RoleInfoController extends MappedCrudTenantController<Long, RoleInf
     }
 
     @Override
-    public List<RoleInfoDto> afterFindAll(RequestContextDto requestContext, List<RoleInfoDto> list) {
+    public List<RoleInfoDto> afterFindAll(ContextRequestDto requestContext, List<RoleInfoDto> list) {
         if (!CollectionUtils.isEmpty(list)) {
             //filter roles
             list = crudService().filterNotAllowedRoles(requestContext, list);

@@ -18,6 +18,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class PasswordConfigDto extends AbstractAuditableDto<Long> {
 
+    private Long id;
     private String code;
     private String tenant;
     private IEnumAuth.Types type;

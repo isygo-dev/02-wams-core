@@ -1,7 +1,7 @@
 package eu.isygoit.dto.wsocket;
 
 
-import eu.isygoit.dto.extendable.AbstractAuditableDto;
+import eu.isygoit.dto.IExchangeObjectDto;
 import eu.isygoit.enums.IEnumWSBroker;
 import eu.isygoit.enums.IEnumWSEndpoint;
 import lombok.AllArgsConstructor;
@@ -16,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class WsMessageWrapperDto extends AbstractAuditableDto<Long> {
+public class WsMessageWrapperDto implements IExchangeObjectDto {
 
     private IEnumWSEndpoint.Types endPoint;
     private String freeEndoint; //used only if type is FREE

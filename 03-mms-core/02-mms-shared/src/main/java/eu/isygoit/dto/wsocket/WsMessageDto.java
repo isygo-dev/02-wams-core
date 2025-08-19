@@ -1,7 +1,6 @@
 package eu.isygoit.dto.wsocket;
 
 
-import eu.isygoit.dto.extendable.AbstractAuditableDto;
 import eu.isygoit.enums.IEnumWSMessage;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class WsMessageDto extends AbstractAuditableDto<Long> {
+public class WsMessageDto {
 
     private IEnumWSMessage.Types type;
     private Long senderId; //userId

@@ -5,7 +5,7 @@ import eu.isygoit.api.DomainControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.DomainDto;
 import eu.isygoit.dto.data.KmsDomainDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
@@ -41,7 +41,7 @@ public class DomainController extends MappedCrudTenantController<Long, Domain, D
     @Override
     public Domain afterUpdate(Domain tenant) {
         try {
-            ResponseEntity<Boolean> result = kmsDomainService.updateDomain(RequestContextDto.builder().build(),
+            ResponseEntity<Boolean> result = kmsDomainService.updateDomain(ContextRequestDto.builder().build(),
                     KmsDomainDto.builder()
                             .name(tenant.getName())
                             .description(tenant.getDescription())
@@ -60,14 +60,14 @@ public class DomainController extends MappedCrudTenantController<Long, Domain, D
     }
 
     @Override
-    public ResponseEntity<DomainDto> updateAdminStatus(RequestContextDto requestContext,
+    public ResponseEntity<DomainDto> updateAdminStatus(ContextRequestDto requestContext,
                                                        Long id,
                                                        IEnumEnabledBinaryStatus.Types newStatus) {
         log.info("in update status");
         try {
             DomainDto tenant = mapper().entityToDto(crudService().updateAdminStatus(id, newStatus));
             try {
-                ResponseEntity<KmsDomainDto> result = kmsDomainService.updateAdminStatus(RequestContextDto.builder().build(),
+                ResponseEntity<KmsDomainDto> result = kmsDomainService.updateAdminStatus(ContextRequestDto.builder().build(),
                         tenant.getName(), newStatus);
                 if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
                     return ResponseFactory.responseOk(tenant);
@@ -86,7 +86,7 @@ public class DomainController extends MappedCrudTenantController<Long, Domain, D
     }
 
     @Override
-    public ResponseEntity<List<String>> getAllDomainNames(RequestContextDto requestContext) {
+    public ResponseEntity<List<String>> getAllDomainNames(ContextRequestDto requestContext) {
         log.info("getAllDomainNames {}", requestContext.getSenderTenant());
         try {
             return ResponseFactory.responseOk(crudService().getAllDomainNames(requestContext.getSenderTenant()));
@@ -97,7 +97,7 @@ public class DomainController extends MappedCrudTenantController<Long, Domain, D
     }
 
     @Override
-    public ResponseEntity<DomainDto> getByName(RequestContextDto requestContext) {
+    public ResponseEntity<DomainDto> getByName(ContextRequestDto requestContext) {
         log.info("get by name {}", requestContext.getSenderTenant());
         try {
             return ResponseFactory.responseOk(mapper().entityToDto(crudService().findByName(requestContext.getSenderTenant())));
@@ -108,7 +108,7 @@ public class DomainController extends MappedCrudTenantController<Long, Domain, D
     }
 
     @Override
-    public ResponseEntity<DomainDto> updateSocialLink(RequestContextDto requestContext, Long id, String social, String link) {
+    public ResponseEntity<DomainDto> updateSocialLink(ContextRequestDto requestContext, Long id, String social, String link) {
         log.info("update Social Link ");
         try {
             return ResponseFactory.responseOk(mapper().entityToDto(crudService().updateSocialLink(requestContext.getSenderTenant(), id, social, link)));

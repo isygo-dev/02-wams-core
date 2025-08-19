@@ -5,7 +5,7 @@ import eu.isygoit.annotation.InjectCodeGenKms;
 import eu.isygoit.annotation.InjectRepository;
 import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.constants.TenantConstants;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.RoleInfoDto;
 import eu.isygoit.exception.AccountNotFoundException;
 import eu.isygoit.model.Account;
@@ -87,7 +87,7 @@ public class RoleInfoService extends CodeAssignableTenantService<Long, RoleInfo,
      * @param list           the list
      * @return the list
      */
-    public List<RoleInfoDto> filterNotAllowedRoles(RequestContextDto requestContext, List<RoleInfoDto> list) {
+    public List<RoleInfoDto> filterNotAllowedRoles(ContextRequestDto requestContext, List<RoleInfoDto> list) {
         Optional<Account> optional = accountRepository.findByTenantIgnoreCaseAndCodeIgnoreCase(requestContext.getSenderTenant(), requestContext.getSenderUser());
         if (optional.isPresent()) {
             RoleInfo senderRole = optional.get().getRoleInfo().parallelStream()

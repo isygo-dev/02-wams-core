@@ -5,7 +5,7 @@ import eu.isygoit.api.KmsDomainControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.KmsDomainDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
@@ -30,7 +30,7 @@ public class KmsDomainController extends MappedCrudController<Long, KmsDomain, K
         implements KmsDomainControllerApi {
 
     @Override
-    public ResponseEntity<KmsDomainDto> updateAdminStatus(RequestContextDto requestContext,
+    public ResponseEntity<KmsDomainDto> updateAdminStatus(ContextRequestDto requestContext,
                                                           String tenant,
                                                           IEnumEnabledBinaryStatus.Types newStatus) {
         log.info("in update status");
@@ -43,7 +43,7 @@ public class KmsDomainController extends MappedCrudController<Long, KmsDomain, K
     }
 
     @Override
-    public ResponseEntity<Boolean> updateDomain(RequestContextDto requestContext,
+    public ResponseEntity<Boolean> updateDomain(ContextRequestDto requestContext,
                                                 KmsDomainDto tenant) {
         log.info("Call update tenant " + tenant.toString());
         try {

@@ -5,7 +5,7 @@ import eu.isygoit.api.ChatMessageControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.CrudControllerUtils;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.ChatAccountDto;
 import eu.isygoit.dto.data.ChatMessageDto;
 import eu.isygoit.dto.wsocket.WsConnectDto;
@@ -37,7 +37,7 @@ public class ChatMessageController extends CrudControllerUtils<UUID, ChatMessage
         implements ChatMessageControllerApi {
 
     @Override
-    public ResponseEntity<List<ChatMessageDto>> findByReceiverId(RequestContextDto requestContext,
+    public ResponseEntity<List<ChatMessageDto>> findByReceiverId(ContextRequestDto requestContext,
                                                                  Long userId,
                                                                  Integer page,
                                                                  Integer size) {
@@ -54,7 +54,7 @@ public class ChatMessageController extends CrudControllerUtils<UUID, ChatMessage
     }
 
     @Override
-    public ResponseEntity<List<ChatMessageDto>> findByReceiverIdAndSenderId(RequestContextDto requestContext,
+    public ResponseEntity<List<ChatMessageDto>> findByReceiverIdAndSenderId(ContextRequestDto requestContext,
                                                                             Long userId,
                                                                             Long senderId,
                                                                             Integer page,
@@ -72,7 +72,7 @@ public class ChatMessageController extends CrudControllerUtils<UUID, ChatMessage
     }
 
     @Override
-    public ResponseEntity<List<ChatAccountDto>> getChatAccounts(RequestContextDto requestContext,
+    public ResponseEntity<List<ChatAccountDto>> getChatAccounts(ContextRequestDto requestContext,
                                                                 Long userId,
                                                                 Integer page,
                                                                 Integer size) {
@@ -89,7 +89,7 @@ public class ChatMessageController extends CrudControllerUtils<UUID, ChatMessage
     }
 
     @Override
-    public ResponseEntity<List<WsConnectDto>> getChatStatus(RequestContextDto requestContext,
+    public ResponseEntity<List<WsConnectDto>> getChatStatus(ContextRequestDto requestContext,
                                                             Long tenantId) {
         try {
             List<WsConnectDto> list = crudService().getConnectionsByTenant(tenantId);

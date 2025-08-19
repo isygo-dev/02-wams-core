@@ -21,6 +21,7 @@ import java.util.List;
 @SuperBuilder
 public class RoleInfoDto extends AbstractAuditableDto<Long> {
 
+    private Long id;
     @NotEmpty
     private String tenant;
     private String templateCode;

@@ -4,7 +4,7 @@ import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.api.WebSocketControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.wsocket.WsMessageWrapperDto;
 import eu.isygoit.exception.handler.MmsExceptionHandler;
 import eu.isygoit.service.IWebSocketService;
@@ -29,7 +29,7 @@ public class WebSocketController extends ControllerExceptionHandler implements W
     private IWebSocketService webSocketService;
 
     @Override
-    public ResponseEntity<?> sendMessageToUser(RequestContextDto requestContext,
+    public ResponseEntity<?> sendMessageToUser(ContextRequestDto requestContext,
                                                Long recieverId, WsMessageWrapperDto message) {
         try {
             webSocketService.saveAndSendToUser(recieverId, message);
@@ -40,7 +40,7 @@ public class WebSocketController extends ControllerExceptionHandler implements W
     }
 
     @Override
-    public ResponseEntity<?> sendMessageToGroup(RequestContextDto requestContext,
+    public ResponseEntity<?> sendMessageToGroup(ContextRequestDto requestContext,
                                                 Long groupId, WsMessageWrapperDto message) {
         try {
             webSocketService.saveAndSendToGroup(groupId, message);
@@ -51,7 +51,7 @@ public class WebSocketController extends ControllerExceptionHandler implements W
     }
 
     @Override
-    public ResponseEntity<?> sendMessageToAll(RequestContextDto requestContext,
+    public ResponseEntity<?> sendMessageToAll(ContextRequestDto requestContext,
                                               WsMessageWrapperDto message) {
         try {
             webSocketService.saveAndSendToAll(message);

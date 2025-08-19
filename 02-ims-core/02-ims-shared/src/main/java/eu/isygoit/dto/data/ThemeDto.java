@@ -17,6 +17,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class ThemeDto extends AbstractAuditableDto<Long> {
 
+    private Long id;
     private String tenantCode;
     private String accountCode;
     private String themeColor;

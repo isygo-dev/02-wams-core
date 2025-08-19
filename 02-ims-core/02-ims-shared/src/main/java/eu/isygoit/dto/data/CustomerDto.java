@@ -17,6 +17,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class CustomerDto extends CustomerModelDto<Long> {
 
+    private Long id;
     private AddressDto address;
     private String accountCode;
 }

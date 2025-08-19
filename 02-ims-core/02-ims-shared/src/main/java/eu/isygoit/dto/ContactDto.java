@@ -16,6 +16,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class ContactDto extends AbstractAuditableDto<Long> {
 
+    private Long id;
     private IEnumContact.Types type;
     private String value;
 }

@@ -2,7 +2,7 @@ package eu.isygoit.api;
 
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.PropertyDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -39,7 +39,7 @@ public interface PropertyControllerApi {
                             schema = @Schema(implementation = PropertyDto.class))})
     })
     @GetMapping(path = "/account")
-    ResponseEntity<PropertyDto> getPropertyByAccount(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<PropertyDto> getPropertyByAccount(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                      @RequestParam(name = RestApiConstants.ACCOUNT_CODE) String accountCode,
                                                      @RequestParam(name = RestApiConstants.GUI_NAME) String guiName,
                                                      @RequestParam(name = RestApiConstants.NAME) String name);
@@ -61,7 +61,7 @@ public interface PropertyControllerApi {
                             schema = @Schema(implementation = PropertyDto.class))})
     })
     @GetMapping(path = "/account/all")
-    ResponseEntity<List<PropertyDto>> getPropertyByAccountAndGui(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<List<PropertyDto>> getPropertyByAccountAndGui(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                                  @RequestParam(name = RestApiConstants.ACCOUNT_CODE) String accountCode,
                                                                  @RequestParam(name = RestApiConstants.GUI_NAME) String guiName);
 
@@ -82,7 +82,7 @@ public interface PropertyControllerApi {
                             schema = @Schema(implementation = PropertyDto.class))})
     })
     @PutMapping(path = "/account")
-    ResponseEntity<PropertyDto> updatePropertyAccount(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<PropertyDto> updatePropertyAccount(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                       @RequestParam(name = RestApiConstants.CODE) String accountCode,
                                                       @Valid @RequestBody PropertyDto property);
 }

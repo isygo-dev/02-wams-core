@@ -5,9 +5,9 @@ import eu.isygoit.api.LinkedFileApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.common.LinkedFileRequestDto;
 import eu.isygoit.dto.common.LinkedFileResponseDto;
-import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.exception.handler.DmsExceptionHandler;
 import eu.isygoit.mapper.LinkedFileMapper;
 import eu.isygoit.service.ILinkedFileService;
@@ -41,7 +41,7 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
     private LinkedFileMapper linkedFileMapper;
 
     @Override
-    public ResponseEntity<List<LinkedFileRequestDto>> searchByTags(RequestContextDto requestContext,
+    public ResponseEntity<List<LinkedFileRequestDto>> searchByTags(ContextRequestDto requestContext,
                                                                    String tenant, String tags) {
         log.info("Search file by tags from tenant: {} / tags:{}", tenant, tags);
         try {
@@ -53,7 +53,7 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
     }
 
     @Override
-    public ResponseEntity<Boolean> deleteFile(RequestContextDto requestContext,
+    public ResponseEntity<Boolean> deleteFile(ContextRequestDto requestContext,
                                               String tenant,
                                               String code) {
         log.info("Delete file by tenant: {} / code: {}", tenant, code);
@@ -67,7 +67,7 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
     }
 
     @Override
-    public ResponseEntity<LinkedFileRequestDto> searchByOriginalName(RequestContextDto requestContext,
+    public ResponseEntity<LinkedFileRequestDto> searchByOriginalName(ContextRequestDto requestContext,
                                                                      String tenant,
                                                                      String originalFileName) {
         log.info("Search file by original name from tenant {} : {}", tenant, originalFileName);
@@ -80,7 +80,7 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
     }
 
     @Override
-    public ResponseEntity<LinkedFileRequestDto> renameFile(RequestContextDto requestContext,
+    public ResponseEntity<LinkedFileRequestDto> renameFile(ContextRequestDto requestContext,
                                                            String tenant,
                                                            String code,
                                                            String newName) {
@@ -94,7 +94,7 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
     }
 
     @Override
-    public ResponseEntity<List<LinkedFileRequestDto>> searchByCategories(RequestContextDto requestContext,
+    public ResponseEntity<List<LinkedFileRequestDto>> searchByCategories(ContextRequestDto requestContext,
                                                                          String tenant,
                                                                          String categories) {
         log.info("Search files by categories from tenant {} : {}", tenant, categories);
@@ -115,7 +115,7 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
     }
 
     @Override
-    public ResponseEntity<LinkedFileResponseDto> upload(RequestContextDto requestContext,
+    public ResponseEntity<LinkedFileResponseDto> upload(ContextRequestDto requestContext,
                                                         LinkedFileRequestDto linkedFile) throws IOException {
         log.info("Uploading file from tenant {} : {}", linkedFile.getTenant(), linkedFile.getFile().getOriginalFilename());
         if (linkedFile.getFile() == null) {
@@ -132,7 +132,7 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
     }
 
     @Override
-    public ResponseEntity<Resource> download(RequestContextDto requestContext,
+    public ResponseEntity<Resource> download(ContextRequestDto requestContext,
                                              String tenant,
                                              String code) throws IOException {
         log.info("Downloading file from tenant {} : {}", tenant, code);

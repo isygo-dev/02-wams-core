@@ -10,7 +10,7 @@
 
     <groupId>eu.isygo-it.services</groupId>
     <artifactId>ims-core</artifactId>
-    <version>WC-1.0.250722-T0122</version>
+    <version>WC-1.0.250819-T1115</version>
 
     <name>ims-core</name>
     <description>ims-core</description>
@@ -20,7 +20,7 @@
     <parent>
         <groupId>eu.isygo-it.services</groupId>
         <artifactId>service-core</artifactId>
-        <version>WC-1.0.250722-T0122</version>
+        <version>WC-1.0.250819-T1115</version>
     </parent>
 
     <properties>

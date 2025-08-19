@@ -16,6 +16,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class WorkflowStateDto extends AbstractAuditableDto<Long> {
 
+    private Long id;
     private String name;
     private String code;
     private String wbCode;

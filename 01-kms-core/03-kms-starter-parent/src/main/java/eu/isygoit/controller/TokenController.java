@@ -3,8 +3,8 @@ package eu.isygoit.controller;
 import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
-import eu.isygoit.dto.common.RequestContextDto;
-import eu.isygoit.dto.common.TokenDto;
+import eu.isygoit.dto.common.ContextRequestDto;
+import eu.isygoit.dto.common.TokenResponseDto;
 import eu.isygoit.dto.data.TokenRequestDto;
 import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
@@ -32,7 +32,7 @@ public class TokenController extends ControllerExceptionHandler implements Token
     private ITokenService tokenService;
 
     @Override
-    public ResponseEntity<TokenDto> buildTokenByTenant(RequestContextDto requestContext,
+    public ResponseEntity<TokenResponseDto> buildTokenByTenant(ContextRequestDto requestContext,
                                                        String tenant,
                                                        String application,
                                                        IEnumToken.Types tokenType,
@@ -47,7 +47,7 @@ public class TokenController extends ControllerExceptionHandler implements Token
     }
 
     @Override
-    public ResponseEntity<Boolean> isTokenValid(RequestContextDto requestContext,
+    public ResponseEntity<Boolean> isTokenValid(ContextRequestDto requestContext,
                                                 String tenant,
                                                 String application,
                                                 IEnumToken.Types tokenType,

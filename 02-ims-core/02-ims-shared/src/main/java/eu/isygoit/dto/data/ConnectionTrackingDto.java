@@ -17,6 +17,7 @@ import java.util.Date;
 @SuperBuilder
 public class ConnectionTrackingDto extends AbstractAuditableDto<Long> {
 
+    private Long id;
     private String browser;
     private Date loginDate;
     private String device;

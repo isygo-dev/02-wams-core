@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.AppParameterConstants;
 import eu.isygoit.constants.JwtConstants;
-import eu.isygoit.dto.common.RequestContextDto;
-import eu.isygoit.dto.common.TokenDto;
+import eu.isygoit.dto.common.ContextRequestDto;
+import eu.isygoit.dto.common.TokenResponseDto;
 import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.enums.IEnumToken;
@@ -61,11 +61,11 @@ public class TokenService extends JwtService implements ITokenService {
         this.appProperties = appProperties;
     }
 
-    public TokenDto buildTokenAndSave(String tenant, String application, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
+    public TokenResponseDto buildTokenAndSave(String tenant, String application, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
         //Get Token config configured by tenant and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
-            TokenDto token = super.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(tenant).toString(),
+            TokenResponseDto token = super.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(tenant).toString(),
                     claims,
                     tokenConfig.getIssuer(),
                     tokenConfig.getAudience(),
@@ -88,11 +88,11 @@ public class TokenService extends JwtService implements ITokenService {
         }
     }
 
-    public TokenDto buildToken(String tenant, String application, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
+    public TokenResponseDto buildToken(String tenant, String application, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
         //Get Token config configured by tenant and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
-            TokenDto token = super.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(tenant).toString(),
+            TokenResponseDto token = super.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(tenant).toString(),
                     claims,
                     tokenConfig.getIssuer(),
                     tokenConfig.getAudience(),
@@ -138,7 +138,7 @@ public class TokenService extends JwtService implements ITokenService {
         }
 
         //Generate reset password token
-        TokenDto token = this.buildTokenAndSave(tenant, application, IEnumToken.Types.RSTPWD, accountCode,
+        TokenResponseDto token = this.buildTokenAndSave(tenant, application, IEnumToken.Types.RSTPWD, accountCode,
                 Map.of(JwtConstants.JWT_SENDER_TENANT, tenant,
                         JwtConstants.JWT_SENDER_USER, accountCode,
                         JwtConstants.JWT_LOG_APP, application));
@@ -147,11 +147,11 @@ public class TokenService extends JwtService implements ITokenService {
         sendForgotPasswordEmail(tenant, application, account, token);
     }
 
-    private void sendForgotPasswordEmail(String tenant, String application, Account account, TokenDto token) throws JsonProcessingException {
+    private void sendForgotPasswordEmail(String tenant, String application, Account account, TokenResponseDto token) throws JsonProcessingException {
         //Build Email template data
         String resetPwdUrl = "http://localhost:4000/reset-password/";
         try {
-            ResponseEntity<String> result = imsAppParameterService.getValueByTenantAndName(RequestContextDto.builder().build(),
+            ResponseEntity<String> result = imsAppParameterService.getValueByTenantAndName(ContextRequestDto.builder().build(),
                     tenant, AppParameterConstants.APPURL + "." + application.toUpperCase(), true, "http://localhost:4000/reset-password/");
             if (result.getStatusCode().is2xxSuccessful() && result.hasBody() && StringUtils.hasText(result.getBody())) {
                 resetPwdUrl = result.getBody();
@@ -180,8 +180,8 @@ public class TokenService extends JwtService implements ITokenService {
     }
 
     @Override
-    public TokenDto createAccessToken(String tenant, String application, String userName, Boolean isAdmin) {
-        TokenDto token = this.buildTokenAndSave(tenant, application, IEnumToken.Types.ACCESS, userName,
+    public TokenResponseDto createAccessToken(String tenant, String application, String userName, Boolean isAdmin) {
+        TokenResponseDto token = this.buildTokenAndSave(tenant, application, IEnumToken.Types.ACCESS, userName,
                 Map.of(JwtConstants.JWT_SENDER_TENANT, tenant,
                         JwtConstants.JWT_SENDER_USER, userName,
                         JwtConstants.JWT_LOG_APP, application,
@@ -191,8 +191,8 @@ public class TokenService extends JwtService implements ITokenService {
     }
 
     @Override
-    public TokenDto createRefreshToken(String tenant, String application, String userName) {
-        TokenDto token = this.buildTokenAndSave(tenant, application, IEnumToken.Types.REFRESH, userName,
+    public TokenResponseDto createRefreshToken(String tenant, String application, String userName) {
+        TokenResponseDto token = this.buildTokenAndSave(tenant, application, IEnumToken.Types.REFRESH, userName,
                 Map.of(JwtConstants.JWT_SENDER_TENANT, tenant,
                         JwtConstants.JWT_SENDER_USER, userName,
                         JwtConstants.JWT_LOG_APP, application)
@@ -201,8 +201,8 @@ public class TokenService extends JwtService implements ITokenService {
     }
 
     @Override
-    public TokenDto createAuthorityToken(String tenant, String application, String userName, List<String> authorities) {
-        TokenDto token = this.buildToken(tenant, application, IEnumToken.Types.AUTHORITY, userName,
+    public TokenResponseDto createAuthorityToken(String tenant, String application, String userName, List<String> authorities) {
+        TokenResponseDto token = this.buildToken(tenant, application, IEnumToken.Types.AUTHORITY, userName,
                 Map.of(JwtConstants.JWT_SENDER_TENANT, tenant,
                         JwtConstants.JWT_SENDER_USER, userName,
                         JwtConstants.JWT_LOG_APP, application,

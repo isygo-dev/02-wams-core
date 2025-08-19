@@ -3,7 +3,7 @@ package eu.isygoit.api;
 import eu.isygoit.com.rest.api.IMappedCrudApi;
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.data.DomainAdminDto;
@@ -44,7 +44,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = String.class))})
     })
     @GetMapping(path = "/emails")
-    ResponseEntity<List<String>> getEmailsByTenant(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext);
+    ResponseEntity<List<String>> getEmailsByTenant(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 
     /**
      * Gets accounts.
@@ -61,7 +61,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = MinAccountDto.class))})
     })
     @GetMapping(path = "/accounts-info")
-    ResponseEntity<List<MinAccountDto>> getAccounts(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext);
+    ResponseEntity<List<MinAccountDto>> getAccounts(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 
     /**
      * Update account admin status response entity.
@@ -80,7 +80,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = AccountDto.class))})
     })
     @PutMapping(path = "/updateStatusAccount")
-    ResponseEntity<AccountDto> updateAccountAdminStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<AccountDto> updateAccountAdminStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                         @RequestParam(name = RestApiConstants.ID) Long id,
                                                         @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus);
 
@@ -93,7 +93,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = AccountDto.class))})
     })
     @PostMapping(path = "/admin")
-    ResponseEntity<AccountDto> createDomainAdmin(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<AccountDto> createDomainAdmin(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                  @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                                  @Valid @RequestBody DomainAdminDto admin);
 
@@ -114,7 +114,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = AccountDto.class))})
     })
     @PutMapping(path = "/updateIsAdmin")
-    ResponseEntity<AccountDto> updateAccountIsAdmin(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<AccountDto> updateAccountIsAdmin(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                     @RequestParam(name = RestApiConstants.ID) Long id,
                                                     @RequestParam(name = RestApiConstants.NEW_STATUS) boolean newStatus);
 
@@ -135,7 +135,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = AccountDto.class))})
     })
     @PutMapping(path = "/updateLanguage")
-    ResponseEntity<AccountDto> updateLanguage(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<AccountDto> updateLanguage(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                               @RequestParam(name = RestApiConstants.ID) Long id,
                                               @RequestParam(name = RestApiConstants.LANGUAGE) IEnumLanguage.Types language);
 
@@ -154,7 +154,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = UserDataResponseDto.class))})
     })
     @GetMapping(path = "/me")
-    ResponseEntity<UserDataResponseDto> connectedUser(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext);
+    ResponseEntity<UserDataResponseDto> connectedUser(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 
     /**
      * Connected user full data response entity.
@@ -171,7 +171,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = AccountDto.class))})
     })
     @GetMapping(path = "/profile")
-    ResponseEntity<AccountDto> connectedUserFullData(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext);
+    ResponseEntity<AccountDto> connectedUserFullData(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 
     /**
      * Update connected user profile response entity.
@@ -189,7 +189,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = AccountDto.class))})
     })
     @PutMapping(path = "/profile")
-    ResponseEntity<AccountDto> updateConnectedUserAccountData(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<AccountDto> updateConnectedUserAccountData(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                               @Valid @RequestBody AccountDto accountDto);
 
     /**
@@ -209,7 +209,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = AccountDto.class))})
     })
     @PutMapping(path = "/update-account")
-    ResponseEntity<AccountDto> updateUserAccountData(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<AccountDto> updateUserAccountData(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                      @RequestParam(name = RestApiConstants.ID) Long id,
                                                      @Valid @RequestBody AccountDto accountDto);
 
@@ -229,7 +229,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = String.class))})
     })
     @PostMapping(path = "/password/reset/token")
-    ResponseEntity<String> resetPasswordViaToken(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<String> resetPasswordViaToken(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                  @Valid @RequestBody ResetPwdViaTokenRequestDto resetPasswordViaTokenRequest);
 
 
@@ -248,7 +248,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = MinAccountDto.class))})
     })
     @GetMapping(path = "/tenant/sender")
-    ResponseEntity<List<MinAccountDto>> accountsByTenant(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext);
+    ResponseEntity<List<MinAccountDto>> accountsByTenant(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 
     /**
      * Accounts by tenant response entity.
@@ -265,7 +265,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = MinAccountDto.class))})
     })
     @GetMapping(path = "/tenant")
-    ResponseEntity<List<MinAccountDto>> userAccountsByTenant(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<List<MinAccountDto>> userAccountsByTenant(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                              @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant);
 
 
@@ -284,7 +284,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = MinAccountDto.class))})
     })
     @GetMapping(path = "/chat/tenant")
-    ResponseEntity<List<MinAccountDto>> chatAccountsByTenant(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext);
+    ResponseEntity<List<MinAccountDto>> chatAccountsByTenant(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 
     /**
      * Resend email creation response entity.
@@ -302,6 +302,6 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @GetMapping(path = "/resend/email/creation/{id}")
-    ResponseEntity<?> resendCreationEmail(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<?> resendCreationEmail(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                           @PathVariable(name = RestApiConstants.ID) Long id);
 }

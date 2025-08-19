@@ -1,7 +1,6 @@
 package eu.isygoit.dto.request;
 
 
-import eu.isygoit.dto.extendable.AbstractAuditableDto;
 import eu.isygoit.helper.UrlHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -16,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class RequestTrackingDto extends AbstractAuditableDto<Long> {
+public class RequestTrackingDto {
 
     private String device;
     private String browser;

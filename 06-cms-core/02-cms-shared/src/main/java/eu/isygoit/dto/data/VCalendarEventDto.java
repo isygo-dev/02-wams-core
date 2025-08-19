@@ -19,6 +19,7 @@ import java.util.Date;
 @SuperBuilder
 public class VCalendarEventDto extends AbstractAuditableDto<Long> {
 
+    private Long id;
     @NotNull
     @NotEmpty
     private String tenant;

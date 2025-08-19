@@ -2,7 +2,7 @@ package eu.isygoit.api;
 
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.VCalendarEventDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -38,7 +38,7 @@ public interface CalendarEventControllerAPI {
                             schema = @Schema(implementation = VCalendarEventDto.class))})
     })
     @GetMapping(path = "/byDomainAndCalendarAndCode/{tenant}/{calendar}/{code}")
-    ResponseEntity<VCalendarEventDto> eventByTenantAndCalendarAndCode(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<VCalendarEventDto> eventByTenantAndCalendarAndCode(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                                       @PathVariable(name = RestApiConstants.TENANT_NAME) String tenant,
                                                                       @PathVariable(name = RestApiConstants.CALENDAR) String calendar,
                                                                       @PathVariable(name = RestApiConstants.CODE) String code);
@@ -60,7 +60,7 @@ public interface CalendarEventControllerAPI {
                             schema = @Schema(implementation = VCalendarEventDto.class))})
     })
     @GetMapping(path = "/byDomainAndCalendarName/{tenant}/{calendar}")
-    ResponseEntity<List<VCalendarEventDto>> getAllByTenantAndCalendarName(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<List<VCalendarEventDto>> getAllByTenantAndCalendarName(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                                           @PathVariable(name = RestApiConstants.TENANT_NAME) String tenant,
                                                                           @PathVariable(name = RestApiConstants.CALENDAR) String calendar);
 
@@ -79,7 +79,7 @@ public interface CalendarEventControllerAPI {
                             schema = @Schema(implementation = VCalendarEventDto.class))})
     })
     @PostMapping()
-    ResponseEntity<VCalendarEventDto> saveEvent(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<VCalendarEventDto> saveEvent(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                 @Valid @RequestBody VCalendarEventDto event);
 
     /**
@@ -98,7 +98,7 @@ public interface CalendarEventControllerAPI {
                             schema = @Schema(implementation = VCalendarEventDto.class))})
     })
     @PutMapping(path = "/{id}")
-    ResponseEntity<VCalendarEventDto> updateEvent(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<VCalendarEventDto> updateEvent(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                   @PathVariable(name = RestApiConstants.ID) Long id,
                                                   @Valid @RequestBody VCalendarEventDto event);
 }

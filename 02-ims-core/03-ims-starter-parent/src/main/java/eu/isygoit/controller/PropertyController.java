@@ -6,7 +6,7 @@ import eu.isygoit.api.PropertyControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.PropertyDto;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.mapper.PropertyMapper;
@@ -38,7 +38,7 @@ public class PropertyController extends ControllerExceptionHandler implements Pr
     private PropertyMapper propertyMapper;
 
     @Override
-    public ResponseEntity<PropertyDto> updatePropertyAccount(RequestContextDto requestContext,
+    public ResponseEntity<PropertyDto> updatePropertyAccount(ContextRequestDto requestContext,
                                                              String accountCode, PropertyDto property) {
         try {
             return ResponseFactory.responseOk(propertyMapper.entityToDto(propertyService.updateProperty(accountCode, propertyMapper.dtoToEntity(property))));
@@ -49,7 +49,7 @@ public class PropertyController extends ControllerExceptionHandler implements Pr
     }
 
     @Override
-    public ResponseEntity<PropertyDto> getPropertyByAccount(RequestContextDto requestContext,
+    public ResponseEntity<PropertyDto> getPropertyByAccount(ContextRequestDto requestContext,
                                                             String accountCode, String guiName, String name) {
         try {
             return ResponseFactory.responseOk(propertyMapper.entityToDto(propertyService.getPropertyByAccount(accountCode, guiName, name)));
@@ -60,7 +60,7 @@ public class PropertyController extends ControllerExceptionHandler implements Pr
     }
 
     @Override
-    public ResponseEntity<List<PropertyDto>> getPropertyByAccountAndGui(RequestContextDto requestContext,
+    public ResponseEntity<List<PropertyDto>> getPropertyByAccountAndGui(ContextRequestDto requestContext,
                                                                         String accountCode, String guiName) {
         try {
             return ResponseFactory.responseOk(propertyMapper.listEntityToDto(propertyService.getPropertyByAccountAndGui(accountCode, guiName)));

@@ -2,8 +2,8 @@ package eu.isygoit.api;
 
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.RequestContextDto;
-import eu.isygoit.dto.common.UserContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
+import eu.isygoit.dto.common.UserContextRequestDto;
 import eu.isygoit.dto.data.DomainDto;
 import eu.isygoit.dto.request.AccountAuthTypeRequest;
 import eu.isygoit.dto.request.AuthenticationRequestDto;
@@ -65,7 +65,7 @@ public interface PublicAuthControllerApi {
                             schema = @Schema(implementation = Boolean.class))})
     })
     @PostMapping(path = "/password/forgotten")
-    ResponseEntity<Boolean> generateForgotPWDToken(@Valid @RequestBody UserContextDto userContextDto);
+    ResponseEntity<Boolean> generateForgotPWDToken(@Valid @RequestBody UserContextRequestDto userContextDto);
 
     /**
      * Gets authentication type.
@@ -110,7 +110,7 @@ public interface PublicAuthControllerApi {
                             schema = @Schema(implementation = Boolean.class))})
     })
     @PostMapping(path = "/updateAuthType")
-    ResponseEntity<Boolean> switchAuthType(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<Boolean> switchAuthType(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                            @Valid @RequestBody AccountAuthTypeRequest accountAuthTypeRequest);
 
     /**

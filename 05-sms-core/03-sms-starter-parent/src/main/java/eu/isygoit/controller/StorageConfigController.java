@@ -5,7 +5,7 @@ import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.StorageConfigDto;
 import eu.isygoit.dto.extendable.IdAssignableDto;
 import eu.isygoit.exception.handler.SmsExceptionHandler;
@@ -49,7 +49,7 @@ public class StorageConfigController extends MappedCrudTenantController<Long, St
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @GetMapping(path = "/tenant/{tenant}")
-    public ResponseEntity<StorageConfigDto> findByTenantIgnoreCase(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) RequestContextDto requestContext,
+    public ResponseEntity<StorageConfigDto> findByTenantIgnoreCase(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) ContextRequestDto requestContext,
                                                                    @PathVariable(name = RestApiConstants.TENANT_NAME) String tenant) {
         try {
             return ResponseFactory.responseOk(this.mapper().entityToDto(crudService().findByTenantIgnoreCase(tenant)));

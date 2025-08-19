@@ -18,6 +18,8 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 public class AnnexDto extends AbstractAuditableDto<Long> {
+
+    private Long id;
     private String tenant;
     @NotEmpty
     private String tableCode;

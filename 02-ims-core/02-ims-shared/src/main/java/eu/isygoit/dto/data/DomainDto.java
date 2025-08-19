@@ -19,6 +19,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class DomainDto extends TenantModelDto<Long> implements ITenantAssignable, IImageUploadDto {
 
+    private Long id;
     private String tenant;
     private String code;
     private String email;

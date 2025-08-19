@@ -17,6 +17,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class TokenConfigDto extends AbstractAuditableDto<Long> {
 
+    private Long id;
     private String tenant;
     private String code;
     private IEnumToken.Types tokenType;

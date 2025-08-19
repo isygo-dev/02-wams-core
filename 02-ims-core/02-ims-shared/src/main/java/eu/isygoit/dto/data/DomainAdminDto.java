@@ -1,7 +1,6 @@
 package eu.isygoit.dto.data;
 
 
-import eu.isygoit.dto.extendable.IdAssignableDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +13,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class DomainAdminDto extends IdAssignableDto<Long> {
+public class DomainAdminDto {
 
     private String email;
     private String phone;

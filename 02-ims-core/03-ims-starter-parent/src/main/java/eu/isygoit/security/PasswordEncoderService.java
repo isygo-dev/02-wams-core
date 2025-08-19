@@ -1,6 +1,6 @@
 package eu.isygoit.security;
 
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.request.MatchesRequestDto;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.enums.IEnumPasswordStatus;
@@ -35,7 +35,7 @@ public class PasswordEncoderService implements PasswordEncoder {
         String[] encodedPasswordArray = encodedPassword.split("@");
         if (encodedPasswordArray.length == 3) {
             return !Arrays.asList(IEnumPasswordStatus.Types.BAD, IEnumPasswordStatus.Types.BROKEN).contains(
-                    kmsPasswordService.matches(RequestContextDto.builder().build(),
+                    kmsPasswordService.matches(ContextRequestDto.builder().build(),
                             MatchesRequestDto.builder()
                                     .tenant(encodedPasswordArray[1])
                                     .userName(encodedPasswordArray[0])

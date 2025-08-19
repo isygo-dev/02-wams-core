@@ -1,7 +1,6 @@
 package eu.isygoit.dto.request;
 
 
-import eu.isygoit.dto.extendable.AbstractAuditableDto;
 import eu.isygoit.enums.IEnumAuth;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -19,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class AccessRequestDto extends AbstractAuditableDto<Long> {
+public class AccessRequestDto {
 
     @NotEmpty
     private String tenant;

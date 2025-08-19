@@ -1,7 +1,6 @@
 package eu.isygoit.dto.response;
 
 
-import eu.isygoit.dto.extendable.AbstractAuditableDto;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class AccessKeyResponseDto extends AbstractAuditableDto<Long> {
+public class AccessKeyResponseDto {
 
     @NotNull
     private String key;

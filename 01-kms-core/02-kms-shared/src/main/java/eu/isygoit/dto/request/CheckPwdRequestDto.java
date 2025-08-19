@@ -1,7 +1,6 @@
 package eu.isygoit.dto.request;
 
 
-import eu.isygoit.dto.extendable.AbstractAuditableDto;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class CheckPwdRequestDto extends AbstractAuditableDto<Long> {
+public class CheckPwdRequestDto {
 
     @NotEmpty
     private String tenant;

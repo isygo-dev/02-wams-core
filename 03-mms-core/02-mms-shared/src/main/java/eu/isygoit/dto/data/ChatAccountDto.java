@@ -1,6 +1,5 @@
 package eu.isygoit.dto.data;
 
-import eu.isygoit.dto.extendable.AbstractAuditableDto;
 import eu.isygoit.enums.IEnumWSStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +17,7 @@ import java.util.Date;
 @NoArgsConstructor
 @SuperBuilder
 
-public class ChatAccountDto extends AbstractAuditableDto<Long> {
+public class ChatAccountDto {
 
     private Long receiverId;
     private Long senderId;

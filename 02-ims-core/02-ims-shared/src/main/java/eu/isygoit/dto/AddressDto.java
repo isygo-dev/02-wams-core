@@ -13,4 +13,5 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class AddressDto extends AddressModelDto<Long> {
 
+    private Long id;
 }

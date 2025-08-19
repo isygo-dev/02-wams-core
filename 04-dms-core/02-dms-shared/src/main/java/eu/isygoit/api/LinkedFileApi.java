@@ -3,8 +3,8 @@ package eu.isygoit.api;
 import eu.isygoit.com.rest.api.ILinkedFileApi;
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.common.LinkedFileRequestDto;
-import eu.isygoit.dto.common.RequestContextDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -40,7 +40,7 @@ public interface LinkedFileApi extends ILinkedFileApi<LinkedFileRequestDto> {
                             schema = @Schema(implementation = LinkedFileRequestDto.class))})
     })
     @GetMapping(path = "/searchByTags")
-    ResponseEntity<List<LinkedFileRequestDto>> searchByTags(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<List<LinkedFileRequestDto>> searchByTags(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                             @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                                             @RequestParam(name = RestApiConstants.TAGS) String tags);
 
@@ -62,7 +62,7 @@ public interface LinkedFileApi extends ILinkedFileApi<LinkedFileRequestDto> {
                             schema = @Schema(implementation = LinkedFileRequestDto.class))})
     })
     @GetMapping(path = "/searchByOriginalName")
-    ResponseEntity<LinkedFileRequestDto> searchByOriginalName(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<LinkedFileRequestDto> searchByOriginalName(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                               @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                                               @RequestParam(name = RestApiConstants.ORIGINAL_FILE_NAME) String originalFileName);
 
@@ -84,7 +84,7 @@ public interface LinkedFileApi extends ILinkedFileApi<LinkedFileRequestDto> {
                             schema = @Schema(implementation = LinkedFileRequestDto.class))})
     })
     @GetMapping(path = "/renameFile")
-    ResponseEntity<LinkedFileRequestDto> renameFile(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<LinkedFileRequestDto> renameFile(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                     @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                                     @RequestParam(name = RestApiConstants.CODE) String code,
                                                     @RequestParam(name = RestApiConstants.NEW_NAME) String newName);
@@ -106,7 +106,7 @@ public interface LinkedFileApi extends ILinkedFileApi<LinkedFileRequestDto> {
                             schema = @Schema(implementation = LinkedFileRequestDto.class))})
     })
     @GetMapping(path = "/searchByCategories")
-    ResponseEntity<List<LinkedFileRequestDto>> searchByCategories(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<List<LinkedFileRequestDto>> searchByCategories(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                                   @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                                                   @RequestParam(name = RestApiConstants.CATEGORIES) String categories);
 }

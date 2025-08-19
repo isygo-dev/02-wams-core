@@ -19,6 +19,7 @@ import java.util.List;
 @SuperBuilder
 public class WorkflowDto extends AbstractAuditableDto<Long> {
 
+    private Long id;
     private String tenant;
     private String code;
     private String name;

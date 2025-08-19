@@ -16,6 +16,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class VariableDto extends AbstractAuditableDto<Long> {
 
+    private Long id;
     private String key;
     private String value;
 }

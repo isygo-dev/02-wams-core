@@ -20,6 +20,7 @@ import java.util.List;
 @SuperBuilder
 public class RolePermissionDto extends AbstractAuditableDto<Long> {
 
+    private Long id;
     private String serviceName;
     private String objectName;
     private Boolean read;

@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 @SuperBuilder
 public class MsgTemplateDto extends AbstractAuditableDto<Long> implements IFileUploadDto {
 
+    private Long id;
     private String tenant;
     private String name;
     private String code;

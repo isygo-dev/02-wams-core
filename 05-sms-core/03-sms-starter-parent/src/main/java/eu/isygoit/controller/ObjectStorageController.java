@@ -5,7 +5,7 @@ import eu.isygoit.api.ObjectStorageControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.BucketDto;
 import eu.isygoit.dto.data.FileTagsDto;
 import eu.isygoit.dto.exception.MinIoObjectException;
@@ -48,7 +48,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     private IStorageConfigService storageConfigService;
 
     @Override
-    public ResponseEntity<Object> upload(RequestContextDto requestContext,
+    public ResponseEntity<Object> upload(ContextRequestDto requestContext,
                                          String tenant,
                                          String bucketName,
                                          String path,
@@ -74,7 +74,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Resource> download(RequestContextDto requestContext,
+    public ResponseEntity<Resource> download(ContextRequestDto requestContext,
                                              String tenant,
                                              String bucketName,
                                              String path,
@@ -96,7 +96,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Object> delete(RequestContextDto requestContext,
+    public ResponseEntity<Object> delete(ContextRequestDto requestContext,
                                          String tenant,
                                          String bucketName,
                                          String path,
@@ -117,7 +117,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Object> getObjects(RequestContextDto requestContext,
+    public ResponseEntity<Object> getObjects(ContextRequestDto requestContext,
                                              String tenant, String bucketName) {
         log.info("get objects request received");
         try {
@@ -132,7 +132,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Object> filterObjects(RequestContextDto requestContext,
+    public ResponseEntity<Object> filterObjects(ContextRequestDto requestContext,
                                                 String tenant,
                                                 String bucketName,
                                                 String tags,
@@ -161,7 +161,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Object> updateTags(RequestContextDto requestContext,
+    public ResponseEntity<Object> updateTags(ContextRequestDto requestContext,
                                              FileTagsDto fileTags) {
         log.info("updateTags request received");
         try {
@@ -182,7 +182,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Object> deleteObjects(RequestContextDto requestContext,
+    public ResponseEntity<Object> deleteObjects(ContextRequestDto requestContext,
                                                 String tenant,
                                                 String bucketName,
                                                 String files) {
@@ -207,7 +207,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Object> saveBucket(RequestContextDto requestContext,
+    public ResponseEntity<Object> saveBucket(ContextRequestDto requestContext,
                                              String tenant,
                                              String bucketName) {
         log.info("getBucketList request received");
@@ -223,7 +223,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Object> setVersioningBucket(RequestContextDto requestContext,
+    public ResponseEntity<Object> setVersioningBucket(ContextRequestDto requestContext,
                                                       String tenant,
                                                       String bucketName,
                                                       boolean status) {
@@ -241,7 +241,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<List<BucketDto>> getBuckets(RequestContextDto requestContext,
+    public ResponseEntity<List<BucketDto>> getBuckets(ContextRequestDto requestContext,
                                                       String tenant) {
         log.info("getBucketList request received");
         try {
@@ -254,7 +254,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Object> deleteBucket(RequestContextDto requestContext,
+    public ResponseEntity<Object> deleteBucket(ContextRequestDto requestContext,
                                                String tenant,
                                                String bucketName) {
         log.info("deleteBucket request received");

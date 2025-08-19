@@ -6,7 +6,7 @@ import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.constants.TenantConstants;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.VCalendarEventDto;
 import eu.isygoit.exception.CalendarNotFoundException;
 import eu.isygoit.exception.handler.CmsExceptionHandler;
@@ -110,7 +110,7 @@ public class VEventController extends MappedCrudTenantController<Long, VCalendar
     }
 
     @Override
-    public ResponseEntity<VCalendarEventDto> eventByTenantAndCalendarAndCode(RequestContextDto requestContext,
+    public ResponseEntity<VCalendarEventDto> eventByTenantAndCalendarAndCode(ContextRequestDto requestContext,
                                                                              String tenant, String calendar,
                                                                              String code) {
         try {
@@ -126,7 +126,7 @@ public class VEventController extends MappedCrudTenantController<Long, VCalendar
     }
 
     @Override
-    public ResponseEntity<List<VCalendarEventDto>> getAllByTenantAndCalendarName(RequestContextDto requestContext,
+    public ResponseEntity<List<VCalendarEventDto>> getAllByTenantAndCalendarName(ContextRequestDto requestContext,
                                                                                  String tenant, String calendar) {
         try {
             List<VCalendarEventDto> listEvent =
@@ -142,7 +142,7 @@ public class VEventController extends MappedCrudTenantController<Long, VCalendar
     }
 
     @Override
-    public ResponseEntity<VCalendarEventDto> saveEvent(RequestContextDto requestContext,
+    public ResponseEntity<VCalendarEventDto> saveEvent(ContextRequestDto requestContext,
                                                        VCalendarEventDto event) {
         try {
             return ResponseFactory.responseOk(this.mapper().entityToDto(this.crudService().create(requestContext.getSenderTenant(),
@@ -153,7 +153,7 @@ public class VEventController extends MappedCrudTenantController<Long, VCalendar
     }
 
     @Override
-    public ResponseEntity<VCalendarEventDto> updateEvent(RequestContextDto requestContext,
+    public ResponseEntity<VCalendarEventDto> updateEvent(ContextRequestDto requestContext,
                                                          Long id,
                                                          VCalendarEventDto event) {
         try {

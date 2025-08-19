@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import eu.isygoit.deserializer.UuidDeserializer;
+import eu.isygoit.dto.IExchangeObjectDto;
 import eu.isygoit.dto.extendable.AbstractAuditableDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
 import lombok.AllArgsConstructor;
@@ -27,7 +28,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class MailMessageDto extends AbstractAuditableDto<UUID> {
+public class MailMessageDto extends AbstractAuditableDto<UUID> implements IExchangeObjectDto {
 
     @JsonDeserialize(using = UuidDeserializer.class)
     private UUID id;

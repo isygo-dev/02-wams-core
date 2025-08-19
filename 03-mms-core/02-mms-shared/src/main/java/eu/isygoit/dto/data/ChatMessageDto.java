@@ -19,6 +19,7 @@ import java.util.UUID;
 
 public class ChatMessageDto extends AbstractAuditableDto<UUID> {
 
+    private UUID id;
     private Long receiverId;
     private Long senderId;
     private String senderName;

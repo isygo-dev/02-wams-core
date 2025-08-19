@@ -3,7 +3,7 @@ package eu.isygoit.api;
 import eu.isygoit.com.rest.api.IMappedCrudApi;
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.KmsDomainDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,7 +38,7 @@ public interface KmsDomainControllerApi extends IMappedCrudApi<Long, KmsDomainDt
                             schema = @Schema(implementation = KmsDomainDto.class))})
     })
     @PutMapping(path = "/update-status")
-    ResponseEntity<KmsDomainDto> updateAdminStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<KmsDomainDto> updateAdminStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                    @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                                    @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus);
 
@@ -57,6 +57,6 @@ public interface KmsDomainControllerApi extends IMappedCrudApi<Long, KmsDomainDt
                             schema = @Schema(implementation = Boolean.class))})
     })
     @PostMapping(path = "/update")
-    ResponseEntity<Boolean> updateDomain(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<Boolean> updateDomain(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                          @Valid @RequestBody KmsDomainDto tenant);
 }

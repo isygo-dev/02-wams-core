@@ -6,7 +6,7 @@ import eu.isygoit.api.StatisticControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.data.DomainAdminDto;
@@ -68,7 +68,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     @Override
     public AccountDto beforeUpdate(Long id, AccountDto account) {
         try {
-            ResponseEntity<Boolean> result = kmsPasswordService.updateAccount(RequestContextDto.builder().build(),
+            ResponseEntity<Boolean> result = kmsPasswordService.updateAccount(ContextRequestDto.builder().build(),
                     UpdateAccountRequestDto.builder()
                             .code(account.getCode())
                             .tenant(account.getTenant())
@@ -88,7 +88,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     @Override
     public Account afterCreate(Account account) {
         try {
-            ResponseEntity<Integer> result = kmsPasswordService.generate(RequestContextDto.builder().build(),
+            ResponseEntity<Integer> result = kmsPasswordService.generate(ContextRequestDto.builder().build(),
                     IEnumAuth.Types.PWD,
                     GeneratePwdRequestDto.builder()
                             .tenant(account.getTenant())
@@ -108,7 +108,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     }
 
     @Override
-    public ResponseEntity<List<String>> getEmailsByTenant(RequestContextDto requestContext) {
+    public ResponseEntity<List<String>> getEmailsByTenant(ContextRequestDto requestContext) {
         log.info("get accounts email by tenant");
         try {
             return ResponseFactory.responseOk(accountService.findEmailsByTenant(requestContext.getSenderTenant()));
@@ -120,7 +120,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
 
     @Override
     //TODO use new Controller struct wit MinDto/FullDto
-    public ResponseEntity<List<MinAccountDto>> getAccounts(RequestContextDto requestContext) {
+    public ResponseEntity<List<MinAccountDto>> getAccounts(ContextRequestDto requestContext) {
         log.info("get accounts mini data");
         try {
             return ResponseFactory.responseOk(accountService.getMinInfoByTenant(requestContext.getSenderTenant()));
@@ -131,7 +131,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     }
 
     @Override
-    public ResponseEntity<AccountDto> updateAccountAdminStatus(RequestContextDto requestContext,
+    public ResponseEntity<AccountDto> updateAccountAdminStatus(ContextRequestDto requestContext,
                                                                Long id,
                                                                IEnumEnabledBinaryStatus.Types newStatus) {
         log.info("update account admin status");
@@ -144,7 +144,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     }
 
     @Override
-    public ResponseEntity<AccountDto> createDomainAdmin(RequestContextDto requestContext, String tenant, DomainAdminDto admin) {
+    public ResponseEntity<AccountDto> createDomainAdmin(ContextRequestDto requestContext, String tenant, DomainAdminDto admin) {
         log.info("create tenant admin");
         try {
             return ResponseFactory.responseOk(mapper().entityToDto(accountService.createDomainAdmin(tenant, admin)));
@@ -155,7 +155,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     }
 
     @Override
-    public ResponseEntity<AccountDto> updateAccountIsAdmin(RequestContextDto requestContext,
+    public ResponseEntity<AccountDto> updateAccountIsAdmin(ContextRequestDto requestContext,
                                                            Long id,
                                                            boolean newStatus) {
         log.info("update account isAdmin");
@@ -168,7 +168,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     }
 
     @Override
-    public ResponseEntity<AccountDto> updateLanguage(RequestContextDto requestContext,
+    public ResponseEntity<AccountDto> updateLanguage(ContextRequestDto requestContext,
                                                      Long id,
                                                      IEnumLanguage.Types language) {
         log.info("update account language");
@@ -182,7 +182,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
 
     //TODO Refactor this API to return AuthResponseDto/SystemInfo
     @Override
-    public ResponseEntity<UserDataResponseDto> connectedUser(RequestContextDto requestContext) {
+    public ResponseEntity<UserDataResponseDto> connectedUser(ContextRequestDto requestContext) {
         try {
             Account account = accountService.findByTenantAndUserName(requestContext.getSenderTenant(), requestContext.getSenderUser());
             Domain tenant = tenantService.findByName(requestContext.getSenderTenant());
@@ -207,7 +207,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
                     .refreshToken(authenticate.getRefreshToken())
                     .userDataResponseDto(userDataResponseDto)
                     .theme(theme)
-                    .systemInfo(SystemInfoDto
+                    .systemInfo(SystemInfoResponseDto
                             .builder()
                             .name(appProperties.getApplicationName())
                             .version(appProperties.getApplicationVersion())
@@ -223,7 +223,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     }
 
     @Override
-    public ResponseEntity<AccountDto> connectedUserFullData(RequestContextDto requestContext) {
+    public ResponseEntity<AccountDto> connectedUserFullData(ContextRequestDto requestContext) {
         try {
             return ResponseFactory.responseOk(mapper().entityToDto(accountService.findByTenantAndUserName(requestContext.getSenderTenant(),
                     requestContext.getSenderUser())));
@@ -234,7 +234,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     }
 
     @Override
-    public ResponseEntity<AccountDto> updateConnectedUserAccountData(RequestContextDto requestContext,
+    public ResponseEntity<AccountDto> updateConnectedUserAccountData(ContextRequestDto requestContext,
                                                                      AccountDto accountDto) {
         try {
             Account account = accountService.findByTenantAndUserName(requestContext.getSenderTenant(), requestContext.getSenderUser());
@@ -249,7 +249,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     }
 
     @Override
-    public ResponseEntity<AccountDto> updateUserAccountData(RequestContextDto requestContext,
+    public ResponseEntity<AccountDto> updateUserAccountData(ContextRequestDto requestContext,
                                                             Long id,
                                                             AccountDto accountDto) {
         try {
@@ -263,10 +263,10 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     }
 
     @Override
-    public ResponseEntity<String> resetPasswordViaToken(RequestContextDto requestContext,
+    public ResponseEntity<String> resetPasswordViaToken(ContextRequestDto requestContext,
                                                         ResetPwdViaTokenRequestDto resetPasswordViaTokenRequest) {
         try {
-            return kmsPasswordService.resetPasswordViaToken(RequestContextDto.builder().build(),
+            return kmsPasswordService.resetPasswordViaToken(ContextRequestDto.builder().build(),
                     resetPasswordViaTokenRequest);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -275,7 +275,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     }
 
     @Override
-    public ResponseEntity<List<MinAccountDto>> accountsByTenant(RequestContextDto requestContext) {
+    public ResponseEntity<List<MinAccountDto>> accountsByTenant(ContextRequestDto requestContext) {
         log.info("get accounts by sender tenant");
         try {
             List<MinAccountDto> list = minAccountMapper.listEntityToDto(accountService.getByTenant(requestContext.getSenderTenant()));
@@ -290,7 +290,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     }
 
     @Override
-    public ResponseEntity<List<MinAccountDto>> userAccountsByTenant(RequestContextDto requestContext, String tenant) {
+    public ResponseEntity<List<MinAccountDto>> userAccountsByTenant(ContextRequestDto requestContext, String tenant) {
         log.info("get accounts by tenant");
         try {
             List<MinAccountDto> list = minAccountMapper.listEntityToDto(accountService.getByTenant(tenant));
@@ -305,7 +305,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     }
 
     @Override
-    public ResponseEntity<List<MinAccountDto>> chatAccountsByTenant(RequestContextDto requestContext) {
+    public ResponseEntity<List<MinAccountDto>> chatAccountsByTenant(ContextRequestDto requestContext) {
         log.info("get chat accounts by tenant");
         try {
             List<MinAccountDto> list = minAccountMapper.listEntityToDto(accountService.chatAccountsByTenant(requestContext.getSenderTenant()));
@@ -320,7 +320,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     }
 
     @Override
-    public ResponseEntity<?> resendCreationEmail(RequestContextDto requestContext, Long id) {
+    public ResponseEntity<?> resendCreationEmail(ContextRequestDto requestContext, Long id) {
         try {
             accountService.resendCreationEmail(requestContext.getSenderTenant(), id);
             return ResponseFactory.responseOk();
@@ -331,7 +331,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     }
 
     @Override
-    public ResponseEntity<Long> getConfirmedResumeAccountsCount(RequestContextDto requestContext) {
+    public ResponseEntity<Long> getConfirmedResumeAccountsCount(ContextRequestDto requestContext) {
         try {
             return ResponseFactory.responseOk(accountService.stat_GetConfirmedResumeAccountsCount(requestContext));
         } catch (Throwable e) {
@@ -341,7 +341,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     }
 
     @Override
-    public ResponseEntity<Long> getConfirmedAccountNumberByEmployee(RequestContextDto requestContext) {
+    public ResponseEntity<Long> getConfirmedAccountNumberByEmployee(ContextRequestDto requestContext) {
         try {
             return ResponseFactory.responseOk(accountService.stat_GetConfirmedEmployeeAccountsCount(requestContext));
         } catch (Throwable e) {

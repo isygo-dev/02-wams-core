@@ -5,7 +5,7 @@ import eu.isygoit.api.PublicPasswordControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
-import eu.isygoit.dto.common.UserContextDto;
+import eu.isygoit.dto.common.UserContextRequestDto;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.service.ITokenService;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ public class PublicPasswordController extends ControllerExceptionHandler impleme
     private ITokenService tokenService;
 
     @Override
-    public ResponseEntity<Boolean> generateForgotPasswordAccessToken(UserContextDto userContextDto) {
+    public ResponseEntity<Boolean> generateForgotPasswordAccessToken(UserContextRequestDto userContextDto) {
         log.info("Call generateForgotPasswordAccessToken " + userContextDto.toString());
         try {
             tokenService.createForgotPasswordAccessToken(userContextDto.getTenant(),

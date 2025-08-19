@@ -12,4 +12,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 public class ApiPermissionDto extends ApiPermissionModelDto<Long> {
+
+    private Long id;
 }

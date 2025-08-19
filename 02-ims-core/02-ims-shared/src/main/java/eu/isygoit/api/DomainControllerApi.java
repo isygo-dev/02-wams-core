@@ -3,7 +3,7 @@ package eu.isygoit.api;
 import eu.isygoit.com.rest.api.IMappedCrudApi;
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.DomainDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,7 +42,7 @@ public interface DomainControllerApi extends IMappedCrudApi<Long, DomainDto, Dom
                             schema = @Schema(implementation = DomainDto.class))})
     })
     @PutMapping(path = "/update-status")
-    ResponseEntity<DomainDto> updateAdminStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<DomainDto> updateAdminStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                 @RequestParam(name = RestApiConstants.ID) Long id,
                                                 @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus);
 
@@ -61,7 +61,7 @@ public interface DomainControllerApi extends IMappedCrudApi<Long, DomainDto, Dom
                             schema = @Schema(implementation = String.class))})
     })
     @GetMapping(path = "/names")
-    ResponseEntity<List<String>> getAllDomainNames(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext);
+    ResponseEntity<List<String>> getAllDomainNames(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 
     /**
      * Gets by name.
@@ -78,7 +78,7 @@ public interface DomainControllerApi extends IMappedCrudApi<Long, DomainDto, Dom
                             schema = @Schema(implementation = DomainDto.class))})
     })
     @GetMapping(path = "/name")
-    ResponseEntity<DomainDto> getByName(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext);
+    ResponseEntity<DomainDto> getByName(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 
     @Operation(summary = "Update tenant social link Api",
             description = "Update tenant social link")
@@ -89,7 +89,7 @@ public interface DomainControllerApi extends IMappedCrudApi<Long, DomainDto, Dom
                             schema = @Schema(implementation = DomainDto.class))})
     })
     @PutMapping(path = "/social")
-    ResponseEntity<DomainDto> updateSocialLink(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) RequestContextDto requestContext,
+    ResponseEntity<DomainDto> updateSocialLink(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                @RequestParam(name = RestApiConstants.ID) Long id,
                                                @RequestParam(name = RestApiConstants.SOCIAL) String social,
                                                @RequestParam(name = RestApiConstants.LINK) String link);

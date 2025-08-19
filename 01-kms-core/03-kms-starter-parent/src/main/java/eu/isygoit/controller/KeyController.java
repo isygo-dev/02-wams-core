@@ -4,7 +4,7 @@ import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
-import eu.isygoit.dto.common.RequestContextDto;
+import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.service.IKeyService;
@@ -31,7 +31,7 @@ public class KeyController extends ControllerExceptionHandler implements KeyServ
     private IKeyService keyService;
 
     @Override
-    public ResponseEntity<String> newRandomKey(RequestContextDto requestContext,
+    public ResponseEntity<String> newRandomKey(ContextRequestDto requestContext,
                                                Integer length, IEnumCharSet.Types charSetType) {
         log.info("Call generateRandomKey");
         try {
@@ -43,7 +43,7 @@ public class KeyController extends ControllerExceptionHandler implements KeyServ
     }
 
     @Override
-    public ResponseEntity<String> renewRandomKey(RequestContextDto requestContext,
+    public ResponseEntity<String> renewRandomKey(ContextRequestDto requestContext,
                                                  String tenant, String keyName, Integer length, IEnumCharSet.Types charSetType) {
         log.info("Call generateRandomKeyName");
         try {
@@ -57,7 +57,7 @@ public class KeyController extends ControllerExceptionHandler implements KeyServ
     }
 
     @Override
-    public ResponseEntity<String> getRandomKey(RequestContextDto requestContext,
+    public ResponseEntity<String> getRandomKey(ContextRequestDto requestContext,
                                                String tenant, String keyName) {
         log.info("Call getRandomKeyName");
         try {
