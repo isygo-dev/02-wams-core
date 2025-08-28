@@ -3,14 +3,14 @@ package eu.isygoit.service;
 import eu.isygoit.com.rest.controller.impl.tenancy.IImageTenantServiceMethods;
 import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
-import eu.isygoit.model.Domain;
+import eu.isygoit.model.Tenant;
 
 import java.util.List;
 
 /**
  * The interface Domain service.
  */
-public interface IDomainService extends ICrudTenantServiceMethods<Long, Domain>, IImageTenantServiceMethods<Long, Domain> {
+public interface ITenantService extends ICrudTenantServiceMethods<Long, Tenant>, IImageTenantServiceMethods<Long, Tenant> {
 
     /**
      * Gets all tenant names.
@@ -27,7 +27,7 @@ public interface IDomainService extends ICrudTenantServiceMethods<Long, Domain>,
      * @param newStatus the new status
      * @return the tenant
      */
-    Domain updateAdminStatus(Long id, IEnumEnabledBinaryStatus.Types newStatus);
+    Tenant updateAdminStatus(Long id, IEnumEnabledBinaryStatus.Types newStatus);
 
     /**
      * Gets image.
@@ -51,7 +51,7 @@ public interface IDomainService extends ICrudTenantServiceMethods<Long, Domain>,
      * @param name the name
      * @return the tenant
      */
-    Domain findByName(String name);
+    Tenant findByName(String name);
 
     /**
      * Is enabled boolean.
@@ -70,5 +70,5 @@ public interface IDomainService extends ICrudTenantServiceMethods<Long, Domain>,
      * @param link   the link
      * @return the tenant
      */
-    Domain updateSocialLink(String tenant, Long id, String social, String link);
+    Tenant updateSocialLink(String tenant, Long id, String social, String link);
 }

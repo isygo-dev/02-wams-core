@@ -7,7 +7,7 @@ import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.AppParameter;
 import eu.isygoit.repository.AppParameterRepository;
 import eu.isygoit.service.IAppParameterService;
-import eu.isygoit.service.IDomainService;
+import eu.isygoit.service.ITenantService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@ import java.util.Optional;
 public class AppParameterService extends CrudTenantService<Long, AppParameter, AppParameterRepository> implements IAppParameterService {
 
     @Autowired
-    private IDomainService tenantService;
+    private ITenantService tenantService;
 
     @Override
     public String getValueByTenantAndName(String tenant, String name, boolean allowDefault, String defaultValue) {

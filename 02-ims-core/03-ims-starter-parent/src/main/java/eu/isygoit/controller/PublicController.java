@@ -5,10 +5,10 @@ import eu.isygoit.api.PublicControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.config.AppProperties;
-import eu.isygoit.dto.data.DomainDto;
+import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
-import eu.isygoit.mapper.DomainMapper;
-import eu.isygoit.service.IDomainService;
+import eu.isygoit.mapper.TenantMapper;
+import eu.isygoit.service.ITenantService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,9 +29,9 @@ public class PublicController extends ControllerExceptionHandler implements Publ
     private final AppProperties appProperties;
 
     @Autowired
-    private IDomainService tenantService;
+    private ITenantService tenantService;
     @Autowired
-    private DomainMapper tenantMapper;
+    private TenantMapper tenantMapper;
 
     /**
      * Instantiates a new Public controller.
@@ -43,7 +43,7 @@ public class PublicController extends ControllerExceptionHandler implements Publ
     }
 
     @Override
-    public ResponseEntity<DomainDto> getTenantByName(String tenant) {
+    public ResponseEntity<TenantDto> getTenantByName(String tenant) {
         log.info("get tenant by name {}", tenant);
         try {
             return ResponseFactory.responseOk(tenantMapper.entityToDto(tenantService.findByName(tenant)));

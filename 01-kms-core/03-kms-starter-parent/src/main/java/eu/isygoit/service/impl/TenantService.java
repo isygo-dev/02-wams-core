@@ -5,10 +5,10 @@ import eu.isygoit.annotation.InjectRepository;
 import eu.isygoit.com.rest.service.CrudService;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Account;
-import eu.isygoit.model.KmsDomain;
+import eu.isygoit.model.Tenant;
 import eu.isygoit.repository.AccountRepository;
-import eu.isygoit.repository.DomainRepository;
-import eu.isygoit.service.IDomainService;
+import eu.isygoit.repository.TenantRepository;
+import eu.isygoit.service.ITenantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,20 +22,20 @@ import java.util.Optional;
 @Service
 @Transactional
 @InjectCodeGen(value = NextCodeService.class)
-@InjectRepository(value = DomainRepository.class)
-public class DomainService extends CrudService<Long, KmsDomain, DomainRepository> implements IDomainService {
+@InjectRepository(value = TenantRepository.class)
+public class TenantService extends CrudService<Long, Tenant, TenantRepository> implements ITenantService {
 
     @Autowired
     private AccountRepository accountRepository;
 
     @Override
-    public KmsDomain checkDomainIfExists(String tenantName, String tenantUrl, boolean createIfNotExists) {
-        Optional<KmsDomain> optional = repository().findByNameIgnoreCase(tenantName);
+    public Tenant checkDomainIfExists(String tenantName, String tenantUrl, boolean createIfNotExists) {
+        Optional<Tenant> optional = repository().findByNameIgnoreCase(tenantName);
         if (optional.isPresent()) {
             return optional.get();
         } else if (createIfNotExists) {
             //Create the tenant if not exists
-            return this.create(KmsDomain.builder()
+            return this.create(Tenant.builder()
                     .name(tenantName)
                     .url(tenantUrl)
                     .description(tenantName)
@@ -46,8 +46,8 @@ public class DomainService extends CrudService<Long, KmsDomain, DomainRepository
     }
 
     @Override
-    public KmsDomain findByNameIgnoreCase(String tenantName) {
-        Optional<KmsDomain> optional = repository().findByNameIgnoreCase(tenantName);
+    public Tenant findByNameIgnoreCase(String tenantName) {
+        Optional<Tenant> optional = repository().findByNameIgnoreCase(tenantName);
         if (optional.isPresent()) {
             return optional.get();
         }
@@ -58,7 +58,7 @@ public class DomainService extends CrudService<Long, KmsDomain, DomainRepository
     @Override
     public Account checkAccountIfExists(String tenantName, String tenantUrl, String email, String userName, String fullName, boolean createIfNotExists) {
         //Check tenant if exists
-        KmsDomain kmsDomain = this.checkDomainIfExists(tenantName, tenantUrl, createIfNotExists);
+        Tenant kmsDomain = this.checkDomainIfExists(tenantName, tenantUrl, createIfNotExists);
         if (kmsDomain == null) {
             return null;
         }
@@ -88,8 +88,8 @@ public class DomainService extends CrudService<Long, KmsDomain, DomainRepository
     }
 
     @Override
-    public boolean checkIfExists(KmsDomain kmsDomain, boolean createIfNotExists) {
-        Optional<KmsDomain> optional = repository().findByNameIgnoreCase(kmsDomain.getName());
+    public boolean checkIfExists(Tenant kmsDomain, boolean createIfNotExists) {
+        Optional<Tenant> optional = repository().findByNameIgnoreCase(kmsDomain.getName());
         if (optional.isPresent()) {
             //Update the tenant if not exists
             kmsDomain.setId(optional.get().getId());
@@ -105,7 +105,7 @@ public class DomainService extends CrudService<Long, KmsDomain, DomainRepository
     }
 
     @Override
-    public KmsDomain updateAdminStatus(String tenant, IEnumEnabledBinaryStatus.Types newStatus) {
+    public Tenant updateAdminStatus(String tenant, IEnumEnabledBinaryStatus.Types newStatus) {
         repository().updateAdminStatus(tenant, newStatus);
         return repository().findByNameIgnoreCase(tenant).orElse(null);
     }

@@ -48,7 +48,7 @@ public class PasswordService implements IPasswordService {
     @Autowired
     private PasswordConfigRepository passwordConfigRepository;
     @Autowired
-    private IDomainService tenantService;
+    private ITenantService tenantService;
     @Autowired
     private PasswordInfoRepository passwordInfoRepository;
     @Autowired

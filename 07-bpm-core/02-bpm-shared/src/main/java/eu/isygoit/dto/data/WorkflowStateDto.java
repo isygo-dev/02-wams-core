@@ -1,6 +1,6 @@
 package eu.isygoit.dto.data;
 
-import eu.isygoit.dto.extendable.AbstractAuditableDto;
+import eu.isygoit.dto.extendable.AuditableDto;
 import eu.isygoit.enums.IEnumPositionType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class WorkflowStateDto extends AbstractAuditableDto<Long> {
+public class WorkflowStateDto extends AuditableDto<Long> {
 
     private Long id;
     private String name;

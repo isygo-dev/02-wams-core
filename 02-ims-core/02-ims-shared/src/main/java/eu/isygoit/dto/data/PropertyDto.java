@@ -1,6 +1,6 @@
 package eu.isygoit.dto.data;
 
-import eu.isygoit.dto.extendable.AbstractAuditableDto;
+import eu.isygoit.dto.extendable.AuditableDto;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class PropertyDto extends AbstractAuditableDto<Long> {
+public class PropertyDto extends AuditableDto<Long> {
 
     private Long id;
     private String guiName;

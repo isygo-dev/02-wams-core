@@ -4,7 +4,7 @@ import eu.isygoit.com.rest.api.IMappedCrudApi;
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.common.ContextRequestDto;
-import eu.isygoit.dto.data.DomainDto;
+import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * The interface Domain controller api.
  */
-public interface DomainControllerApi extends IMappedCrudApi<Long, DomainDto, DomainDto> {
+public interface TenantControllerApi extends IMappedCrudApi<Long, TenantDto, TenantDto> {
 
     /**
      * Update admin status response entity.
@@ -39,10 +39,10 @@ public interface DomainControllerApi extends IMappedCrudApi<Long, DomainDto, Dom
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = DomainDto.class))})
+                            schema = @Schema(implementation = TenantDto.class))})
     })
     @PutMapping(path = "/update-status")
-    ResponseEntity<DomainDto> updateAdminStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
+    ResponseEntity<TenantDto> updateAdminStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                 @RequestParam(name = RestApiConstants.ID) Long id,
                                                 @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus);
 
@@ -75,10 +75,10 @@ public interface DomainControllerApi extends IMappedCrudApi<Long, DomainDto, Dom
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = DomainDto.class))})
+                            schema = @Schema(implementation = TenantDto.class))})
     })
     @GetMapping(path = "/name")
-    ResponseEntity<DomainDto> getByName(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
+    ResponseEntity<TenantDto> getByName(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 
     @Operation(summary = "Update tenant social link Api",
             description = "Update tenant social link")
@@ -86,10 +86,10 @@ public interface DomainControllerApi extends IMappedCrudApi<Long, DomainDto, Dom
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = DomainDto.class))})
+                            schema = @Schema(implementation = TenantDto.class))})
     })
     @PutMapping(path = "/social")
-    ResponseEntity<DomainDto> updateSocialLink(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
+    ResponseEntity<TenantDto> updateSocialLink(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                @RequestParam(name = RestApiConstants.ID) Long id,
                                                @RequestParam(name = RestApiConstants.SOCIAL) String social,
                                                @RequestParam(name = RestApiConstants.LINK) String link);

@@ -4,7 +4,7 @@ import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.common.UserContextRequestDto;
-import eu.isygoit.dto.data.DomainDto;
+import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.dto.request.AccountAuthTypeRequest;
 import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.dto.request.RegisteredUserDto;
@@ -143,8 +143,8 @@ public interface PublicAuthControllerApi {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = DomainDto.class))})
+                            schema = @Schema(implementation = TenantDto.class))})
     })
     @GetMapping(path = "/tenant")
-    ResponseEntity<DomainDto> getTenantByName(@RequestParam(name = RestApiConstants.TENANT_NAME) String tenant);
+    ResponseEntity<TenantDto> getTenantByName(@RequestParam(name = RestApiConstants.TENANT_NAME) String tenant);
 }

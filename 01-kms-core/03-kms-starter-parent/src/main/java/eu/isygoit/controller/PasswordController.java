@@ -40,7 +40,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     @Autowired
     private IAccountService accountService;
     @Autowired
-    private IDomainService tenantService;
+    private ITenantService tenantService;
     @Autowired
     private AccountMapper accountMapper;
     @Autowired

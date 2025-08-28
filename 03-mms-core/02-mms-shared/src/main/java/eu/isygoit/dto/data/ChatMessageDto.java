@@ -1,6 +1,6 @@
 package eu.isygoit.dto.data;
 
-import eu.isygoit.dto.extendable.AbstractAuditableDto;
+import eu.isygoit.dto.extendable.AuditableDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @SuperBuilder
 
-public class ChatMessageDto extends AbstractAuditableDto<UUID> {
+public class ChatMessageDto extends AuditableDto<UUID> {
 
     private UUID id;
     private Long receiverId;

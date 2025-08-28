@@ -44,7 +44,7 @@ public class TokenService extends JwtService implements ITokenService {
     @Autowired
     private ITokenConfigService tokenConfigService;
     @Autowired
-    private IDomainService tenantService;
+    private ITenantService tenantService;
     @Autowired
     private IMsgService msgService;
     @Autowired

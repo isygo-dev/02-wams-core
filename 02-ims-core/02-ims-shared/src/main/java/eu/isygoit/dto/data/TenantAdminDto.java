@@ -13,7 +13,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class DomainAdminDto {
+public class TenantAdminDto {
 
     private String email;
     private String phone;

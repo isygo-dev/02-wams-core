@@ -1,6 +1,6 @@
 package eu.isygoit.dto;
 
-import eu.isygoit.dto.extendable.AbstractAuditableDto;
+import eu.isygoit.dto.extendable.AuditableDto;
 import eu.isygoit.enums.IEnumContact;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class ContactDto extends AbstractAuditableDto<Long> {
+public class ContactDto extends AuditableDto<Long> {
 
     private Long id;
     private IEnumContact.Types type;

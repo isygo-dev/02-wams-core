@@ -6,7 +6,7 @@ import eu.isygoit.annotation.InjectRepository;
 import eu.isygoit.com.rest.service.tenancy.FileTenantService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.TenantConstants;
-import eu.isygoit.dto.data.DomainDto;
+import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.helper.FileHelper;
@@ -135,9 +135,9 @@ public class MsgTemplateService extends FileTenantService<Long, MsgTemplate, Msg
         freemarkerConfig.getConfiguration().setTemplateLoader(templateLoader);
 
         try {
-            ResponseEntity<DomainDto> result = imsPublicService.getTenantByName(tenant);
+            ResponseEntity<TenantDto> result = imsPublicService.getTenantByName(tenant);
             if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
-                DomainDto domain = result.getBody();
+                TenantDto domain = result.getBody();
                 variables.put(MsgTemplateVariables.V_TENANT_URL, domain.getUrl() != null ? domain.getUrl() : "Missed");
                 variables.put(MsgTemplateVariables.V_TENANT_PHONE, domain.getPhone() != null ? domain.getPhone() : "Missed");
                 variables.put(MsgTemplateVariables.V_TENANT_EMAIL, domain.getEmail() != null ? domain.getEmail() : "Missed");

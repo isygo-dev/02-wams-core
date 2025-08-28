@@ -1,7 +1,7 @@
 package eu.isygoit.dto.data;
 
 import eu.isygoit.dto.IFileUploadDto;
-import eu.isygoit.dto.extendable.AbstractAuditableDto;
+import eu.isygoit.dto.extendable.AuditableDto;
 import eu.isygoit.enums.IEnumLanguage;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class MsgTemplateDto extends AbstractAuditableDto<Long> implements IFileUploadDto {
+public class MsgTemplateDto extends AuditableDto<Long> implements IFileUploadDto {
 
     private Long id;
     private String tenant;

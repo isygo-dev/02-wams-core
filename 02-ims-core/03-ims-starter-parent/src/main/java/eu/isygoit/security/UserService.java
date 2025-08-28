@@ -6,10 +6,10 @@ import eu.isygoit.enums.IEnumAccountSystemStatus;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Account;
-import eu.isygoit.model.Domain;
+import eu.isygoit.model.Tenant;
 import eu.isygoit.remote.kms.KmsPasswordService;
 import eu.isygoit.repository.AccountRepository;
-import eu.isygoit.repository.DomainRepository;
+import eu.isygoit.repository.TenantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,13 +30,13 @@ public class UserService implements UserDetailsService {
     @Autowired
     private KmsPasswordService kmsPasswordService;
     @Autowired
-    private DomainRepository tenantRepository;
+    private TenantRepository tenantRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         String[] userNameArray = username.split("@");
         if (userNameArray.length >= 2) {
-            Domain tenant = tenantRepository.findByNameIgnoreCase(userNameArray[1]).orElseThrow(() -> new UsernameNotFoundException("User Not Found!"));
+            Tenant tenant = tenantRepository.findByNameIgnoreCase(userNameArray[1]).orElseThrow(() -> new UsernameNotFoundException("User Not Found!"));
             Account account = accountRepository.findByTenantIgnoreCaseAndCodeIgnoreCase(userNameArray[1], userNameArray[0]).orElseThrow(() -> new UsernameNotFoundException("User Not Found!"));
             return CustomUserDetails.builder()
                     .username(account.getCode())

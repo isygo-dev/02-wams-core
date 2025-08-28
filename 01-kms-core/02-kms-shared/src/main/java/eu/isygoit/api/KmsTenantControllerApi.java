@@ -4,7 +4,7 @@ import eu.isygoit.com.rest.api.IMappedCrudApi;
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.common.ContextRequestDto;
-import eu.isygoit.dto.data.KmsDomainDto;
+import eu.isygoit.dto.data.KmsTenantDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 /**
  * The interface Kms tenant controller api.
  */
-public interface KmsDomainControllerApi extends IMappedCrudApi<Long, KmsDomainDto, KmsDomainDto> {
+public interface KmsTenantControllerApi extends IMappedCrudApi<Long, KmsTenantDto, KmsTenantDto> {
 
     /**
      * Update admin status response entity.
@@ -35,10 +35,10 @@ public interface KmsDomainControllerApi extends IMappedCrudApi<Long, KmsDomainDt
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = KmsDomainDto.class))})
+                            schema = @Schema(implementation = KmsTenantDto.class))})
     })
     @PutMapping(path = "/update-status")
-    ResponseEntity<KmsDomainDto> updateAdminStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
+    ResponseEntity<KmsTenantDto> updateAdminStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                    @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                                    @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus);
 
@@ -58,5 +58,5 @@ public interface KmsDomainControllerApi extends IMappedCrudApi<Long, KmsDomainDt
     })
     @PostMapping(path = "/update")
     ResponseEntity<Boolean> updateDomain(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                         @Valid @RequestBody KmsDomainDto tenant);
+                                         @Valid @RequestBody KmsTenantDto tenant);
 }

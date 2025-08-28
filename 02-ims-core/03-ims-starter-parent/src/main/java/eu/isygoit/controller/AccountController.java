@@ -9,8 +9,8 @@ import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
 import eu.isygoit.dto.data.AccountDto;
-import eu.isygoit.dto.data.DomainAdminDto;
 import eu.isygoit.dto.data.MinAccountDto;
+import eu.isygoit.dto.data.TenantAdminDto;
 import eu.isygoit.dto.request.GeneratePwdRequestDto;
 import eu.isygoit.dto.request.UpdateAccountRequestDto;
 import eu.isygoit.dto.response.UserDataResponseDto;
@@ -23,10 +23,10 @@ import eu.isygoit.mapper.AccountMapper;
 import eu.isygoit.mapper.MinAccountMapper;
 import eu.isygoit.mapper.ThemeMapper;
 import eu.isygoit.model.Account;
-import eu.isygoit.model.Domain;
+import eu.isygoit.model.Tenant;
 import eu.isygoit.remote.kms.KmsPasswordService;
 import eu.isygoit.service.IAccountService;
-import eu.isygoit.service.IDomainService;
+import eu.isygoit.service.ITenantService;
 import eu.isygoit.service.IThemeService;
 import eu.isygoit.service.impl.AccountService;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +55,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     @Autowired
     private IAccountService accountService;
     @Autowired
-    private IDomainService tenantService;
+    private ITenantService tenantService;
     @Autowired
     private JwtService jwtService;
     @Autowired
@@ -144,7 +144,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     }
 
     @Override
-    public ResponseEntity<AccountDto> createDomainAdmin(ContextRequestDto requestContext, String tenant, DomainAdminDto admin) {
+    public ResponseEntity<AccountDto> createDomainAdmin(ContextRequestDto requestContext, String tenant, TenantAdminDto admin) {
         log.info("create tenant admin");
         try {
             return ResponseFactory.responseOk(mapper().entityToDto(accountService.createDomainAdmin(tenant, admin)));
@@ -185,7 +185,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     public ResponseEntity<UserDataResponseDto> connectedUser(ContextRequestDto requestContext) {
         try {
             Account account = accountService.findByTenantAndUserName(requestContext.getSenderTenant(), requestContext.getSenderUser());
-            Domain tenant = tenantService.findByName(requestContext.getSenderTenant());
+            Tenant tenant = tenantService.findByName(requestContext.getSenderTenant());
             //ThemeDto theme = themeMapper.entityToDto(themeService.findThemeByAccountCodeAndDomainCode(account.getCode(), tenant.getCode()));
             UserDataResponseDto userDataResponseDto = UserDataResponseDto.builder()
                     .id(account.getId())

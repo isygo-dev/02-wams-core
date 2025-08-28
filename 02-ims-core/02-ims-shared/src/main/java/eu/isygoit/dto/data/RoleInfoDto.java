@@ -1,7 +1,7 @@
 package eu.isygoit.dto.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import eu.isygoit.dto.extendable.AbstractAuditableDto;
+import eu.isygoit.dto.extendable.AuditableDto;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -19,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class RoleInfoDto extends AbstractAuditableDto<Long> {
+public class RoleInfoDto extends AuditableDto<Long> {
 
     private Long id;
     @NotEmpty

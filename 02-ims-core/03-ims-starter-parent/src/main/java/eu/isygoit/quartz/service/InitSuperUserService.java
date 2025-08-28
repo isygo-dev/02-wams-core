@@ -11,8 +11,8 @@ import eu.isygoit.model.*;
 import eu.isygoit.repository.ApiPermissionRepository;
 import eu.isygoit.service.IAccountService;
 import eu.isygoit.service.IApplicationService;
-import eu.isygoit.service.IDomainService;
 import eu.isygoit.service.IRoleInfoService;
+import eu.isygoit.service.ITenantService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobExecutionContext;
@@ -34,7 +34,7 @@ public class InitSuperUserService extends AbstractJobService {
     @Autowired
     private IAccountService accountService;
     @Autowired
-    private IDomainService tenantService;
+    private ITenantService tenantService;
     @Autowired
     private IRoleInfoService roleInfoService;
     @Autowired
@@ -46,10 +46,10 @@ public class InitSuperUserService extends AbstractJobService {
     public void performJob(JobExecutionContext jobExecutionContext) {
 
         //Check default tenant existence
-        Domain defaultDomain = tenantService.findByName(TenantConstants.DEFAULT_TENANT_NAME);
-        if (defaultDomain == null) {
-            defaultDomain = tenantService.create(TenantConstants.SUPER_TENANT_NAME,
-                    Domain.builder()
+        Tenant defaultTenant = tenantService.findByName(TenantConstants.DEFAULT_TENANT_NAME);
+        if (defaultTenant == null) {
+            defaultTenant = tenantService.create(TenantConstants.SUPER_TENANT_NAME,
+                    Tenant.builder()
                             .tenant(TenantConstants.SUPER_TENANT_NAME)
                             .name(TenantConstants.DEFAULT_TENANT_NAME)
                             .description(TenantConstants.DEFAULT_TENANT_NAME)
@@ -58,10 +58,10 @@ public class InitSuperUserService extends AbstractJobService {
         }
 
         //Check super tenant existence
-        Domain superDomain = tenantService.findByName(TenantConstants.SUPER_TENANT_NAME);
-        if (superDomain == null) {
-            superDomain = tenantService.create(TenantConstants.SUPER_TENANT_NAME,
-                    Domain.builder()
+        Tenant superTenant = tenantService.findByName(TenantConstants.SUPER_TENANT_NAME);
+        if (superTenant == null) {
+            superTenant = tenantService.create(TenantConstants.SUPER_TENANT_NAME,
+                    Tenant.builder()
                             .tenant(TenantConstants.SUPER_TENANT_NAME)
                             .name(TenantConstants.SUPER_TENANT_NAME)
                             .description(TenantConstants.SUPER_TENANT_NAME)

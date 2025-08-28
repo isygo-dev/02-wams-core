@@ -3,13 +3,13 @@ package eu.isygoit.controller;
 import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedImageTenantController;
 import eu.isygoit.dto.common.ContextRequestDto;
-import eu.isygoit.dto.data.DomainDto;
-import eu.isygoit.dto.data.KmsDomainDto;
+import eu.isygoit.dto.data.KmsTenantDto;
+import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
-import eu.isygoit.mapper.DomainMapper;
-import eu.isygoit.model.Domain;
-import eu.isygoit.remote.kms.KmsDomainService;
-import eu.isygoit.service.impl.DomainService;
+import eu.isygoit.mapper.TenantMapper;
+import eu.isygoit.model.Tenant;
+import eu.isygoit.remote.kms.KmsTenantService;
+import eu.isygoit.service.impl.TenantService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,18 +25,18 @@ import javax.security.auth.login.AccountException;
 @Slf4j
 @Validated
 @RestController
-@InjectMapperAndService(handler = ImsExceptionHandler.class, mapper = DomainMapper.class, minMapper = DomainMapper.class, service = DomainService.class)
+@InjectMapperAndService(handler = ImsExceptionHandler.class, mapper = TenantMapper.class, minMapper = TenantMapper.class, service = TenantService.class)
 @RequestMapping(path = "/api/v1/private/tenant")
-public class DomainImageController extends MappedImageTenantController<Long, Domain, DomainDto, DomainDto, DomainService> {
+public class TenantImageController extends MappedImageTenantController<Long, Tenant, TenantDto, TenantDto, TenantService> {
 
     @Autowired
-    private KmsDomainService kmsDomainService;
+    private KmsTenantService kmsDomainService;
 
     @Override
-    public Domain afterUpdate(Domain tenant) throws Exception {
+    public Tenant afterUpdate(Tenant tenant) throws Exception {
         try {
             ResponseEntity<Boolean> result = kmsDomainService.updateDomain(ContextRequestDto.builder().build(),
-                    KmsDomainDto.builder()
+                    KmsTenantDto.builder()
                             .name(tenant.getName())
                             .description(tenant.getDescription())
                             .url(tenant.getUrl())

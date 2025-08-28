@@ -17,7 +17,7 @@ import eu.isygoit.security.CustomUserDetails;
 import eu.isygoit.service.IAccountService;
 import eu.isygoit.service.IAppParameterService;
 import eu.isygoit.service.IAuthService;
-import eu.isygoit.service.IDomainService;
+import eu.isygoit.service.ITenantService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -47,7 +47,7 @@ public class AuthService implements IAuthService {
     @Autowired
     private IAccountService accountService;
     @Autowired
-    private IDomainService tenantService;
+    private ITenantService tenantService;
     @Autowired
     private IAppParameterService parameterService;
     @Autowired

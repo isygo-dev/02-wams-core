@@ -26,7 +26,7 @@ import org.hibernate.annotations.Where;
 })
 @SQLDelete(sql = "update " + SchemaTableConstantName.T_TENANT + " set " + SchemaColumnConstantName.C_CHECK_CANCEL + "= true , " + SchemaColumnConstantName.C_CANCEL_DATE + " = current_timestamp WHERE id = ?")
 @Where(clause = SchemaColumnConstantName.C_CHECK_CANCEL + "=false")
-public class Domain extends TenantModel<Long> implements ITenantAssignable, IImageEntity, ICodeAssignable {
+public class Tenant extends TenantModel<Long> implements ITenantAssignable, IImageEntity, ICodeAssignable {
 
     @Id
     @SequenceGenerator(name = "tenant_sequence_generator", sequenceName = "tenant_sequence", allocationSize = 1)
@@ -53,5 +53,5 @@ public class Domain extends TenantModel<Long> implements ITenantAssignable, IIma
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL /* Cascade only for OneToMany*/)
     @JoinColumn(name = SchemaColumnConstantName.C_ADDRESS_ID, referencedColumnName = SchemaColumnConstantName.C_ID
             , foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_TENANT_REF_ADDRESS))
-    private DomainAddress address;
+    private TenantAddress address;
 }

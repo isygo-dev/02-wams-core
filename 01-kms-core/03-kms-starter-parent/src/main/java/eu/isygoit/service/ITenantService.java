@@ -3,12 +3,12 @@ package eu.isygoit.service;
 import eu.isygoit.com.rest.service.ICrudServiceMethods;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Account;
-import eu.isygoit.model.KmsDomain;
+import eu.isygoit.model.Tenant;
 
 /**
  * The interface Domain service.
  */
-public interface IDomainService extends ICrudServiceMethods<Long, KmsDomain> {
+public interface ITenantService extends ICrudServiceMethods<Long, Tenant> {
 
     /**
      * Check tenant if exists kms tenant.
@@ -18,7 +18,7 @@ public interface IDomainService extends ICrudServiceMethods<Long, KmsDomain> {
      * @param createIfNotExists the create if not exists
      * @return the kms tenant
      */
-    KmsDomain checkDomainIfExists(String tenantName, String tenantUrl, boolean createIfNotExists);
+    Tenant checkDomainIfExists(String tenantName, String tenantUrl, boolean createIfNotExists);
 
     /**
      * Find by name ignore case kms tenant.
@@ -26,7 +26,7 @@ public interface IDomainService extends ICrudServiceMethods<Long, KmsDomain> {
      * @param tenantName the tenant name
      * @return the kms tenant
      */
-    KmsDomain findByNameIgnoreCase(String tenantName);
+    Tenant findByNameIgnoreCase(String tenantName);
 
     /**
      * Check account if exists account.
@@ -48,7 +48,7 @@ public interface IDomainService extends ICrudServiceMethods<Long, KmsDomain> {
      * @param createIfNotExists the create if not exists
      * @return the boolean
      */
-    boolean checkIfExists(KmsDomain kmsDomain, boolean createIfNotExists);
+    boolean checkIfExists(Tenant kmsDomain, boolean createIfNotExists);
 
     /**
      * Update admin status kms tenant.
@@ -57,7 +57,7 @@ public interface IDomainService extends ICrudServiceMethods<Long, KmsDomain> {
      * @param newStatus the new status
      * @return the kms tenant
      */
-    KmsDomain updateAdminStatus(String tenant, IEnumEnabledBinaryStatus.Types newStatus);
+    Tenant updateAdminStatus(String tenant, IEnumEnabledBinaryStatus.Types newStatus);
 
     /**
      * Is enabled boolean.

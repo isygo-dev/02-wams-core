@@ -197,7 +197,7 @@ public interface IAccountService extends ICrudTenantServiceMethods<Long, Account
      * @param admin  the admin
      * @return the account
      */
-    Account createDomainAdmin(String tenant, DomainAdminDto admin);
+    Account createDomainAdmin(String tenant, TenantAdminDto admin);
 
     /**
      * Gets authentication data.

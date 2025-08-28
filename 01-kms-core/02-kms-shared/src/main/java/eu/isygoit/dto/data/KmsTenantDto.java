@@ -12,7 +12,7 @@ import lombok.experimental.SuperBuilder;
 @Data
 @AllArgsConstructor
 @SuperBuilder
-public class KmsDomainDto extends TenantModelDto<Long> {
+public class KmsTenantDto extends TenantModelDto<Long> {
 
     private Long id;
 }

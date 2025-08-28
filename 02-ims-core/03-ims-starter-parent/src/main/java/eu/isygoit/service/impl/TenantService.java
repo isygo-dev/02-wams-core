@@ -7,13 +7,13 @@ import eu.isygoit.com.rest.service.tenancy.ImageTenantService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
-import eu.isygoit.exception.DomainNotFoundException;
+import eu.isygoit.exception.TenantNotFoundException;
 import eu.isygoit.model.AppNextCode;
-import eu.isygoit.model.Domain;
+import eu.isygoit.model.Tenant;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.remote.kms.KmsIncrementalKeyService;
-import eu.isygoit.repository.DomainRepository;
-import eu.isygoit.service.IDomainService;
+import eu.isygoit.repository.TenantRepository;
+import eu.isygoit.service.ITenantService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,8 +28,8 @@ import java.util.Optional;
 @Transactional
 @InjectCodeGen(value = NextCodeService.class)
 @InjectCodeGenKms(value = KmsIncrementalKeyService.class)
-@InjectRepository(value = DomainRepository.class)
-public class DomainService extends ImageTenantService<Long, Domain, DomainRepository> implements IDomainService {
+@InjectRepository(value = TenantRepository.class)
+public class TenantService extends ImageTenantService<Long, Tenant, TenantRepository> implements ITenantService {
 
     private final AppProperties appProperties;
 
@@ -39,7 +39,7 @@ public class DomainService extends ImageTenantService<Long, Domain, DomainReposi
      *
      * @param appProperties the app properties
      */
-    public DomainService(AppProperties appProperties) {
+    public TenantService(AppProperties appProperties) {
         this.appProperties = appProperties;
     }
 
@@ -53,14 +53,14 @@ public class DomainService extends ImageTenantService<Long, Domain, DomainReposi
     }
 
     @Override
-    public Domain updateAdminStatus(Long id, IEnumEnabledBinaryStatus.Types newStatus) {
+    public Tenant updateAdminStatus(Long id, IEnumEnabledBinaryStatus.Types newStatus) {
         repository().updateAdminStatusById(id, newStatus);
         return repository().findById(id).orElse(null);
     }
 
     @Override
     public String getImage(String tenantName) {
-        Optional<Domain> tenantOptional = repository().findByNameIgnoreCase(tenantName);
+        Optional<Tenant> tenantOptional = repository().findByNameIgnoreCase(tenantName);
         if (tenantOptional.isPresent()) {
             return tenantOptional.get().getImagePath();
         }
@@ -69,7 +69,7 @@ public class DomainService extends ImageTenantService<Long, Domain, DomainReposi
 
     @Override
     public Long findDomainIdbyDomainName(String name) {
-        Optional<Domain> tenant = repository().findByNameIgnoreCase(name);
+        Optional<Tenant> tenant = repository().findByNameIgnoreCase(name);
         if (tenant.isPresent()) {
             return tenant.get().getId();
         }
@@ -77,8 +77,8 @@ public class DomainService extends ImageTenantService<Long, Domain, DomainReposi
     }
 
     @Override
-    public Domain findByName(String name) {
-        Optional<Domain> optional = repository().findByNameIgnoreCase(name);
+    public Tenant findByName(String name) {
+        Optional<Tenant> optional = repository().findByNameIgnoreCase(name);
         if (optional.isPresent()) {
             return optional.get();
         }
@@ -91,13 +91,13 @@ public class DomainService extends ImageTenantService<Long, Domain, DomainReposi
     }
 
     @Override
-    public Domain updateSocialLink(String tenant, Long id, String social, String link) {
-        Optional<Domain> optional = repository().findById(id);
+    public Tenant updateSocialLink(String tenant, Long id, String social, String link) {
+        Optional<Tenant> optional = repository().findById(id);
         if (!optional.isPresent()) {
-            throw new DomainNotFoundException("with id " + id);
+            throw new TenantNotFoundException("with id " + id);
         }
 
-        Domain domain = optional.get();
+        Tenant domain = optional.get();
         switch (social) {
             case "lnk_facebook": {
                 domain.setLnk_facebook(link);
@@ -120,7 +120,7 @@ public class DomainService extends ImageTenantService<Long, Domain, DomainReposi
     public AppNextCode initCodeGenerator() {
         return AppNextCode.builder()
                 .tenant(TenantConstants.DEFAULT_TENANT_NAME)
-                .entity(Domain.class.getSimpleName())
+                .entity(Tenant.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("DOM")
                 .valueLength(6L)

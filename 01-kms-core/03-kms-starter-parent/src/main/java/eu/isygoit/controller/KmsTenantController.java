@@ -1,17 +1,17 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectMapperAndService;
-import eu.isygoit.api.KmsDomainControllerApi;
+import eu.isygoit.api.KmsTenantControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
 import eu.isygoit.dto.common.ContextRequestDto;
-import eu.isygoit.dto.data.KmsDomainDto;
+import eu.isygoit.dto.data.KmsTenantDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
-import eu.isygoit.mapper.DomainMapper;
-import eu.isygoit.model.KmsDomain;
-import eu.isygoit.service.impl.DomainService;
+import eu.isygoit.mapper.TenantMapper;
+import eu.isygoit.model.Tenant;
+import eu.isygoit.service.impl.TenantService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -24,13 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@InjectMapperAndService(handler = KmsExceptionHandler.class, mapper = DomainMapper.class, minMapper = DomainMapper.class, service = DomainService.class)
+@InjectMapperAndService(handler = KmsExceptionHandler.class, mapper = TenantMapper.class, minMapper = TenantMapper.class, service = TenantService.class)
 @RequestMapping(path = "/api/v1/private/tenant")
-public class KmsDomainController extends MappedCrudController<Long, KmsDomain, KmsDomainDto, KmsDomainDto, DomainService>
-        implements KmsDomainControllerApi {
+public class KmsTenantController extends MappedCrudController<Long, Tenant, KmsTenantDto, KmsTenantDto, TenantService>
+        implements KmsTenantControllerApi {
 
     @Override
-    public ResponseEntity<KmsDomainDto> updateAdminStatus(ContextRequestDto requestContext,
+    public ResponseEntity<KmsTenantDto> updateAdminStatus(ContextRequestDto requestContext,
                                                           String tenant,
                                                           IEnumEnabledBinaryStatus.Types newStatus) {
         log.info("in update status");
@@ -44,7 +44,7 @@ public class KmsDomainController extends MappedCrudController<Long, KmsDomain, K
 
     @Override
     public ResponseEntity<Boolean> updateDomain(ContextRequestDto requestContext,
-                                                KmsDomainDto tenant) {
+                                                KmsTenantDto tenant) {
         log.info("Call update tenant " + tenant.toString());
         try {
             return ResponseFactory.responseOk(crudService().checkIfExists(mapper().dtoToEntity(tenant),

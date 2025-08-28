@@ -1,7 +1,7 @@
 package eu.isygoit.api;
 
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.data.DomainDto;
+import eu.isygoit.dto.data.TenantDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -28,8 +28,8 @@ public interface PublicControllerApi {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = DomainDto.class))})
+                            schema = @Schema(implementation = TenantDto.class))})
     })
     @GetMapping(path = "/tenant/{name}")
-    ResponseEntity<DomainDto> getTenantByName(@RequestParam(name = RestApiConstants.NAME) String tenant);
+    ResponseEntity<TenantDto> getTenantByName(@RequestParam(name = RestApiConstants.NAME) String tenant);
 }

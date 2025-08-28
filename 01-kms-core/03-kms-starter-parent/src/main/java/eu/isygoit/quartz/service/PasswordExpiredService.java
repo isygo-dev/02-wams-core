@@ -10,8 +10,8 @@ import eu.isygoit.model.Account;
 import eu.isygoit.model.PasswordInfo;
 import eu.isygoit.repository.AccountRepository;
 import eu.isygoit.repository.PasswordInfoRepository;
-import eu.isygoit.service.IDomainService;
 import eu.isygoit.service.IMsgService;
+import eu.isygoit.service.ITenantService;
 import eu.isygoit.types.EmailSubjects;
 import eu.isygoit.types.MsgTemplateVariables;
 import lombok.Data;
@@ -40,7 +40,7 @@ public class PasswordExpiredService extends AbstractJobService {
     @Autowired
     private AccountRepository accountRepository;
     @Autowired
-    private IDomainService tenantService;
+    private ITenantService tenantService;
     @Autowired
     private IMsgService msgService;
 

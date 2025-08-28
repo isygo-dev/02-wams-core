@@ -6,8 +6,8 @@ import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
 import eu.isygoit.dto.data.AccountDto;
-import eu.isygoit.dto.data.DomainAdminDto;
 import eu.isygoit.dto.data.MinAccountDto;
+import eu.isygoit.dto.data.TenantAdminDto;
 import eu.isygoit.dto.extendable.IdAssignableDto;
 import eu.isygoit.dto.response.UserDataResponseDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
@@ -95,7 +95,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
     @PostMapping(path = "/admin")
     ResponseEntity<AccountDto> createDomainAdmin(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
                                                  @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
-                                                 @Valid @RequestBody DomainAdminDto admin);
+                                                 @Valid @RequestBody TenantAdminDto admin);
 
     /**
      * Update account is admin response entity.

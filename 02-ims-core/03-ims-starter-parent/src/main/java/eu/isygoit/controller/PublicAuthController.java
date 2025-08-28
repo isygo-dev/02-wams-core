@@ -10,7 +10,7 @@ import eu.isygoit.config.JwtProperties;
 import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.common.SystemInfoResponseDto;
 import eu.isygoit.dto.common.UserContextRequestDto;
-import eu.isygoit.dto.data.DomainDto;
+import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.dto.data.ThemeDto;
 import eu.isygoit.dto.request.AccountAuthTypeRequest;
 import eu.isygoit.dto.request.AuthenticationRequestDto;
@@ -23,15 +23,15 @@ import eu.isygoit.dto.response.UserDataResponseDto;
 import eu.isygoit.enums.IEnumJwtStorage;
 import eu.isygoit.enums.IEnumWebToken;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
-import eu.isygoit.mapper.DomainMapper;
 import eu.isygoit.mapper.RegistredUserMapper;
+import eu.isygoit.mapper.TenantMapper;
 import eu.isygoit.mapper.ThemeMapper;
 import eu.isygoit.model.Account;
-import eu.isygoit.model.Domain;
+import eu.isygoit.model.Tenant;
 import eu.isygoit.remote.kms.KmsPublicPasswordService;
 import eu.isygoit.service.IAccountService;
 import eu.isygoit.service.IAuthService;
-import eu.isygoit.service.IDomainService;
+import eu.isygoit.service.ITenantService;
 import eu.isygoit.service.IThemeService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -72,11 +72,11 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     @Autowired
     private IAuthService authService;
     @Autowired
-    private IDomainService tenantService;
+    private ITenantService tenantService;
     @Autowired
     private ThemeMapper themeMapper;
     @Autowired
-    private DomainMapper tenantMapper;
+    private TenantMapper tenantMapper;
 
     /**
      * Instantiates a new Public auth controller.
@@ -113,7 +113,7 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
             }
 
             Account account = accountService.findByTenantAndUserName(authRequestDto.getTenant(), authRequestDto.getUserName());
-            Domain tenant = tenantService.findByName(authRequestDto.getTenant());
+            Tenant tenant = tenantService.findByName(authRequestDto.getTenant());
             ThemeDto theme = themeMapper.entityToDto(themeService.findThemeByAccountCodeAndDomainCode(account.getCode(), tenant.getCode()));
             UserDataResponseDto userDataResponseDto = UserDataResponseDto.builder()
                     .id(account.getId())
@@ -178,7 +178,7 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     }
 
     @Override
-    public ResponseEntity<DomainDto> getTenantByName(String tenant) {
+    public ResponseEntity<TenantDto> getTenantByName(String tenant) {
         log.info("get tenant by name {}", tenant);
         try {
             return ResponseFactory.responseOk(tenantMapper.entityToDto(tenantService.findByName(tenant)));

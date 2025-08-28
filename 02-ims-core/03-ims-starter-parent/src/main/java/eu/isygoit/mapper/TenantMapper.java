@@ -1,7 +1,7 @@
 package eu.isygoit.mapper;
 
-import eu.isygoit.dto.data.DomainDto;
-import eu.isygoit.model.Domain;
+import eu.isygoit.dto.data.TenantDto;
+import eu.isygoit.model.Tenant;
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValueCheckStrategy;
 
@@ -9,6 +9,6 @@ import org.mapstruct.NullValueCheckStrategy;
  * The interface Domain mapper.
  */
 @Mapper(nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS, componentModel = "spring")
-public interface DomainMapper extends EntityMapper<Domain, DomainDto> {
+public interface TenantMapper extends EntityMapper<Tenant, TenantDto> {
 }
 

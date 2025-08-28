@@ -1,6 +1,6 @@
 package eu.isygoit.dto.response;
 
-import eu.isygoit.dto.extendable.AbstractAuditableDto;
+import eu.isygoit.dto.extendable.AuditableDto;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -15,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class UserAccountDto extends AbstractAuditableDto<Long> {
+public class UserAccountDto extends AuditableDto<Long> {
 
     private Long id;
     @NotEmpty

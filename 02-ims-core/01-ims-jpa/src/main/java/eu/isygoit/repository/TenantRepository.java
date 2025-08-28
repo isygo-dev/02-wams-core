@@ -1,7 +1,7 @@
 package eu.isygoit.repository;
 
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
-import eu.isygoit.model.Domain;
+import eu.isygoit.model.Tenant;
 import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -13,7 +13,7 @@ import java.util.Optional;
 /**
  * The interface Domain repository.
  */
-public interface DomainRepository extends JpaPagingAndSortingTenantAndCodeAssignableRepository<Domain, Long> {
+public interface TenantRepository extends JpaPagingAndSortingTenantAndCodeAssignableRepository<Tenant, Long> {
 
     /**
      * Update admin status by id int.
@@ -23,7 +23,7 @@ public interface DomainRepository extends JpaPagingAndSortingTenantAndCodeAssign
      * @return the int
      */
     @Modifying
-    @Query("UPDATE Domain d SET d.adminStatus = :newStatus WHERE d.id = :id")
+    @Query("UPDATE Tenant d SET d.adminStatus = :newStatus WHERE d.id = :id")
     int updateAdminStatusById(@Param("id") Long id,
                               @Param("newStatus") IEnumEnabledBinaryStatus.Types newStatus);
 
@@ -33,14 +33,14 @@ public interface DomainRepository extends JpaPagingAndSortingTenantAndCodeAssign
      * @param name the name
      * @return the optional
      */
-    Optional<Domain> findByNameIgnoreCase(String name);
+    Optional<Tenant> findByNameIgnoreCase(String name);
 
     /**
      * Gets all names.
      *
      * @return the all names
      */
-    @Query("select d.name from Domain d")
+    @Query("select d.name from Tenant d")
     List<String> getAllNames();
 
     /**
@@ -48,6 +48,6 @@ public interface DomainRepository extends JpaPagingAndSortingTenantAndCodeAssign
      *
      * @return the admin status
      */
-    @Query("select d.adminStatus from Domain d where d.name = :tenant")
+    @Query("select d.adminStatus from Tenant d where d.name = :tenant")
     IEnumEnabledBinaryStatus.Types getAdminStatus(@Param("tenant") String tenant);
 }

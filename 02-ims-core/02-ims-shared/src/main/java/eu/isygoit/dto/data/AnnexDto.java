@@ -1,7 +1,7 @@
 package eu.isygoit.dto.data;
 
 
-import eu.isygoit.dto.extendable.AbstractAuditableDto;
+import eu.isygoit.dto.extendable.AuditableDto;
 import eu.isygoit.enums.IEnumLanguage;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -17,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class AnnexDto extends AbstractAuditableDto<Long> {
+public class AnnexDto extends AuditableDto<Long> {
 
     private Long id;
     private String tenant;

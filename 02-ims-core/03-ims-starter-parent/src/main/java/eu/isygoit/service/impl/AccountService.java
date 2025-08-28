@@ -31,8 +31,8 @@ import eu.isygoit.repository.AccountRepository;
 import eu.isygoit.repository.RegistredUserRepository;
 import eu.isygoit.service.IAccountService;
 import eu.isygoit.service.IAppParameterService;
-import eu.isygoit.service.IDomainService;
 import eu.isygoit.service.IRoleInfoService;
+import eu.isygoit.service.ITenantService;
 import jakarta.transaction.NotSupportedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +67,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     @Autowired
     private MinAccountMapper minAccountMapper;
     @Autowired
-    private IDomainService tenantService;
+    private ITenantService tenantService;
     @Autowired
     private IAppParameterService parameterService;
     @Autowired
@@ -501,7 +501,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     }
 
     @Override
-    public Account createDomainAdmin(String tenant, DomainAdminDto admin) {
+    public Account createDomainAdmin(String tenant, TenantAdminDto admin) {
         RoleInfo tenantAdmin = roleInfoService.findByName(AccountTypeConstants.TENANT_ADMIN);
 
         return this.create(tenant, Account.builder()

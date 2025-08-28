@@ -18,7 +18,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Entity
 @Table(name = SchemaTableConstantName.T_TENANT_ADDRESS)
-public class DomainAddress extends AddressModel<Long> {
+public class TenantAddress extends AddressModel<Long> {
 
     @Id
     @SequenceGenerator(name = "tenant_address_sequence_generator", sequenceName = "tenant_address_sequence", allocationSize = 1)
