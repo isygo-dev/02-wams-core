@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.Optional;
 
 /**
@@ -47,8 +46,8 @@ public class ApiExtractorService extends AbstractApiExtractor<ApiPermission> {
         }
 
         try {
-            kafkaRegisterApisProducer.sendMessage(apiPermissionMapper.entityToDto(api));
-        } catch (IOException e) {
+            kafkaRegisterApisProducer.send(apiPermissionMapper.entityToDto(api));
+        } catch (RuntimeException e) {
             log.error("<Error>: Register api permission via kafka topic failed with error: {} ", e);
         }
 

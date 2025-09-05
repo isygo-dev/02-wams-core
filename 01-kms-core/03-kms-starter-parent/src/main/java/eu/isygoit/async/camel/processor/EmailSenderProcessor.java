@@ -33,7 +33,7 @@ public class EmailSenderProcessor extends AbstractCamelProcessor<MailMessageDto>
         exchange.getIn().setHeader("toEmail", mailMessageDto.getToAddr());
         exchange.getIn().setHeader("subject", mailMessageDto.getSubject());
         if ("kafka".equals(throughBroker)) {
-            kafkaEmailSenderProducer.sendMessage(mailMessageDto);
+            kafkaEmailSenderProducer.send(mailMessageDto);
         } else if ("rest".equals(throughBroker)) {
             this.messageService.sendMail(
                     mailMessageDto.getTenant(), mailMessageDto.getTemplateName(), mailMessageDto);

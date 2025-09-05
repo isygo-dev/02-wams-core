@@ -9,13 +9,13 @@
 
     <groupId>eu.isygo-it.services</groupId>
     <artifactId>identity-management</artifactId>
-    <version>WC-1.0.250819-T1115</version>
+    <version>WC-1.0.250603-T1554</version>
     <packaging>pom</packaging>
 
     <parent>
         <groupId>eu.isygo-it.services</groupId>
         <artifactId>starter-test-core</artifactId>
-        <version>WC-1.0.250819-T1115</version>
+        <version>WC-1.0.250603-T1554</version>
     </parent>
 
     <modules>
