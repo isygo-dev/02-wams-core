@@ -6,6 +6,7 @@ import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaConstantSize;
 import eu.isygoit.model.schema.SchemaTableConstantName;
 import eu.isygoit.model.schema.SchemaUcConstantName;
+import org.hibernate.annotations.DynamicUpdate;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +22,7 @@ import org.hibernate.annotations.ColumnDefault;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@DynamicUpdate
 @Entity
 @Table(name = SchemaTableConstantName.T_THEME, uniqueConstraints = {
         @UniqueConstraint(name = SchemaUcConstantName.UC_ACCOUNT_AND_TENANT, columnNames = {SchemaColumnConstantName.C_CODE_ACCOUNT, SchemaColumnConstantName.C_CODE_TENANT})

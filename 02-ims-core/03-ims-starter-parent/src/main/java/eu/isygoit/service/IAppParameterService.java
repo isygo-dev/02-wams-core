@@ -1,13 +1,13 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceOperations;
 import eu.isygoit.model.AppParameter;
 
 
 /**
  * The interface App parameter service.
  */
-public interface IAppParameterService extends ICrudTenantServiceMethods<Long, AppParameter> {
+public interface IAppParameterService extends ICrudTenantServiceOperations<Long, AppParameter> {
 
     /**
      * Gets value by tenant and name.

@@ -4,6 +4,7 @@ import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaFkConstantName;
 import eu.isygoit.model.schema.SchemaTableConstantName;
+import org.hibernate.annotations.DynamicUpdate;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,6 +20,7 @@ import java.util.List;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@DynamicUpdate
 @Entity
 @Table(name = SchemaTableConstantName.T_ACCOUNT_PROPS)
 public class AccountProps extends AuditableEntity<Long> {

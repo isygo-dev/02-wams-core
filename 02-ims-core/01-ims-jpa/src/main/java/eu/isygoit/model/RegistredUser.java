@@ -5,6 +5,7 @@ import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaConstantSize;
 import eu.isygoit.model.schema.SchemaTableConstantName;
+import org.hibernate.annotations.DynamicUpdate;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +19,7 @@ import lombok.experimental.SuperBuilder;
 @Data
 @SuperBuilder
 @NoArgsConstructor
+@DynamicUpdate
 @Entity
 @Table(name = SchemaTableConstantName.T_REGISTRED_USER, uniqueConstraints = {
         @UniqueConstraint(columnNames = {SchemaColumnConstantName.C_EMAIL})

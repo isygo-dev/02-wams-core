@@ -17,13 +17,12 @@ import eu.isygoit.model.AccessToken;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.TokenConfig;
 import eu.isygoit.remote.ims.ImsAppParameterService;
-import eu.isygoit.service.IAccessTokenService;
-import eu.isygoit.service.IMsgService;
-import eu.isygoit.service.ITenantService;
-import eu.isygoit.service.ITokenConfigService;
+import eu.isygoit.service.*;
 import eu.isygoit.types.EmailSubjects;
 import eu.isygoit.types.MsgTemplateVariables;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.MacAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -68,11 +67,20 @@ public class TokenService extends JwtService implements ITokenService {
         //Get Token config configured by tenant and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
+            // Convert string algorithm to MacAlgorithm safely
+            MacAlgorithm macAlgorithm = switch (tokenConfig.getSignatureAlgorithm().toUpperCase()) {
+                case "HS256" -> Jwts.SIG.HS256;
+                case "HS384" -> Jwts.SIG.HS384;
+                case "HS512" -> Jwts.SIG.HS512;
+                default -> throw new IllegalArgumentException("Unsupported signature algorithm: "
+                        + tokenConfig.getSignatureAlgorithm());
+            };
+
             TokenResponseDto token = super.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(tenant).toString(),
                     claims,
                     tokenConfig.getIssuer(),
                     tokenConfig.getAudience(),
-                    SignatureAlgorithm.valueOf(tokenConfig.getSignatureAlgorithm()),
+                    macAlgorithm,
                     tokenConfig.getSecretKey(),
                     tokenConfig.getLifeTimeInMs());
             //Save generated token
@@ -95,11 +103,20 @@ public class TokenService extends JwtService implements ITokenService {
         //Get Token config configured by tenant and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
+            // Convert string algorithm to MacAlgorithm safely
+            MacAlgorithm macAlgorithm = switch (tokenConfig.getSignatureAlgorithm().toUpperCase()) {
+                case "HS256" -> Jwts.SIG.HS256;
+                case "HS384" -> Jwts.SIG.HS384;
+                case "HS512" -> Jwts.SIG.HS512;
+                default -> throw new IllegalArgumentException("Unsupported signature algorithm: "
+                        + tokenConfig.getSignatureAlgorithm());
+            };
+
             TokenResponseDto token = super.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(tenant).toString(),
                     claims,
                     tokenConfig.getIssuer(),
                     tokenConfig.getAudience(),
-                    SignatureAlgorithm.valueOf(tokenConfig.getSignatureAlgorithm()),
+                    macAlgorithm,
                     tokenConfig.getSecretKey(),
                     tokenConfig.getLifeTimeInMs());
             return token;

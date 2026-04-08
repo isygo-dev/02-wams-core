@@ -1,6 +1,6 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.ICrudServiceMethods;
+import eu.isygoit.com.rest.service.ICrudServiceOperations;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.Tenant;
@@ -8,7 +8,7 @@ import eu.isygoit.model.Tenant;
 /**
  * The interface Domain service.
  */
-public interface ITenantService extends ICrudServiceMethods<Long, Tenant> {
+public interface ITenantService extends ICrudServiceOperations<Long, Tenant> {
 
     /**
      * Check tenant if exists kms tenant.

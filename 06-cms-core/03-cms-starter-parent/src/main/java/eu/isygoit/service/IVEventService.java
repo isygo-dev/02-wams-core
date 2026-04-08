@@ -1,6 +1,6 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceOperations;
 import eu.isygoit.model.VCalendarEvent;
 
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * The interface Iv event service.
  */
-public interface IVEventService extends ICrudTenantServiceMethods<Long, VCalendarEvent> {
+public interface IVEventService extends ICrudTenantServiceOperations<Long, VCalendarEvent> {
 
     /**
      * Find by tenant and calendar list.

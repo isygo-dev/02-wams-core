@@ -1,6 +1,6 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceOperations;
 import eu.isygoit.model.Annex;
 
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * The interface Annex service.
  */
-public interface IAnnexService extends ICrudTenantServiceMethods<Long, Annex> {
+public interface IAnnexService extends ICrudTenantServiceOperations<Long, Annex> {
 
     /**
      * Find annex by code list.

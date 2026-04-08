@@ -1,6 +1,6 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.ICrudServiceMethods;
+import eu.isygoit.com.rest.service.ICrudServiceOperations;
 import eu.isygoit.dto.data.ChatAccountDto;
 import eu.isygoit.dto.wsocket.WsConnectDto;
 import eu.isygoit.model.ChatMessage;
@@ -13,7 +13,7 @@ import java.util.UUID;
 /**
  * The interface Chat message service.
  */
-public interface IChatMessageService extends ICrudServiceMethods<UUID, ChatMessage> {
+public interface IChatMessageService extends ICrudServiceOperations<UUID, ChatMessage> {
 
     /**
      * Find by receiver id list.

@@ -1,6 +1,6 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceOperations;
 import eu.isygoit.model.VCalendar;
 import org.springframework.core.io.Resource;
 
@@ -9,7 +9,7 @@ import java.io.IOException;
 /**
  * The interface Iv calendar service.
  */
-public interface IVCalendarService extends ICrudTenantServiceMethods<Long, VCalendar> {
+public interface IVCalendarService extends ICrudTenantServiceOperations<Long, VCalendar> {
 
     /**
      * Find by tenant and name v calendar.

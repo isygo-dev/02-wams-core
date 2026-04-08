@@ -1,14 +1,14 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.controller.impl.tenancy.IImageTenantServiceMethods;
-import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
+import eu.isygoit.com.rest.controller.impl.tenancy.IImageTenantServiceOperations;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceOperations;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Application;
 
 /**
  * The interface Application service.
  */
-public interface IApplicationService extends ICrudTenantServiceMethods<Long, Application>, IImageTenantServiceMethods<Long, Application> {
+public interface IApplicationService extends ICrudTenantServiceOperations<Long, Application>, IImageTenantServiceOperations<Long, Application> {
 
     /**
      * Update status application.

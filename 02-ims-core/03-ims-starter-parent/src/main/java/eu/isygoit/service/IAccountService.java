@@ -1,7 +1,7 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.controller.impl.tenancy.IImageTenantServiceMethods;
-import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
+import eu.isygoit.com.rest.controller.impl.tenancy.IImageTenantServiceOperations;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceOperations;
 import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.*;
 import eu.isygoit.dto.request.AccountAuthTypeRequest;
@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * The interface Account service.
  */
-public interface IAccountService extends ICrudTenantServiceMethods<Long, Account>, IImageTenantServiceMethods<Long, Account> {
+public interface IAccountService extends ICrudTenantServiceOperations<Long, Account>, IImageTenantServiceOperations<Long, Account> {
 
     /**
      * Find by tenant and user name account.

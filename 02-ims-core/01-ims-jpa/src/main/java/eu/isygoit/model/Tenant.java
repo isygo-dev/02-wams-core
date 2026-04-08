@@ -3,6 +3,7 @@ package eu.isygoit.model;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.schema.*;
 import eu.isygoit.model.tenancy.TenantModel;
+import org.hibernate.annotations.DynamicUpdate;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,7 @@ import org.hibernate.annotations.Where;
 @Data
 @SuperBuilder
 @NoArgsConstructor
+@DynamicUpdate
 @Entity
 @Table(name = SchemaTableConstantName.T_TENANT
         , uniqueConstraints = {

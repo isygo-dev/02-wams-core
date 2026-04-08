@@ -1,6 +1,6 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceOperations;
 import eu.isygoit.dto.common.LinkedFileRequestDto;
 import eu.isygoit.model.LinkedFile;
 import org.springframework.core.io.Resource;
@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * The interface Linked file service.
  */
-public interface ILinkedFileService extends ICrudTenantServiceMethods<Long, LinkedFile> {
+public interface ILinkedFileService extends ICrudTenantServiceOperations<Long, LinkedFile> {
     /**
      * Upload string.
      *

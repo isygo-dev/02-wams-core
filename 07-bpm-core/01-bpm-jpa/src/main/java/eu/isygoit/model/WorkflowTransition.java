@@ -2,6 +2,7 @@ package eu.isygoit.model;
 
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.*;
+import org.hibernate.annotations.DynamicUpdate;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,6 +20,7 @@ import java.util.List;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@DynamicUpdate
 @Entity
 @Table(name = SchemaTableConstantName.T_WORKFLOW_STATE_TRANSITION, uniqueConstraints = {
         @UniqueConstraint(name = SchemaUcConstantName.UC_WORKFLOW_TRANSITION,

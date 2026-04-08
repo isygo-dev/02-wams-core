@@ -32,6 +32,18 @@
             <artifactId>service-stack-shared</artifactId>
             <version>WS-1.0.260408-T1636</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.44</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>1.6.3</version>
+        </dependency>
     </dependencies>
 
     <distributionManagement>

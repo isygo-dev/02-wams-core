@@ -72,9 +72,9 @@ public class AppController extends MappedCrudTenantController<Long, Application,
 
 
     @Override
-    public ResponseEntity<List<ApplicationDto>> subFindAll(ContextRequestDto requestContext, Integer page, Integer size) {
+    public ResponseEntity<List<ApplicationDto>> performFindAll(ContextRequestDto requestContext, Integer page, Integer size) {
         if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
-            return super.subFindAll(requestContext, page, size);
+            return super.performFindAll(requestContext, page, size);
         } else {
             return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByTenantAndUserName(requestContext.getSenderTenant(),
                     requestContext.getSenderUser())));
@@ -82,9 +82,9 @@ public class AppController extends MappedCrudTenantController<Long, Application,
     }
 
     @Override
-    public ResponseEntity<List<ApplicationDto>> subFindAllFull(ContextRequestDto requestContext, Integer page, Integer size) {
+    public ResponseEntity<List<ApplicationDto>> performFindAllFull(ContextRequestDto requestContext, Integer page, Integer size) {
         if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
-            return super.subFindAllFull(requestContext, page, size);
+            return super.performFindAllFull(requestContext, page, size);
         } else {
             return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByTenantAndUserName(requestContext.getSenderTenant(),
                     requestContext.getSenderUser())));

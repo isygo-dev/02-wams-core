@@ -1,7 +1,7 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
-import eu.isygoit.com.rest.service.tenancy.IFileTenantServiceMethods;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceOperations;
+import eu.isygoit.com.rest.service.tenancy.IFileTenantServiceOperations;
 import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.model.MsgTemplate;
 import freemarker.template.TemplateException;
@@ -13,8 +13,8 @@ import java.util.Map;
 /**
  * The interface Template service.
  */
-public interface IMsgTemplateService extends ICrudTenantServiceMethods<Long, MsgTemplate>,
-        IFileTenantServiceMethods<Long, MsgTemplate> {
+public interface IMsgTemplateService extends ICrudTenantServiceOperations<Long, MsgTemplate>,
+        IFileTenantServiceOperations<Long, MsgTemplate> {
 
     /**
      * Compose message body string.

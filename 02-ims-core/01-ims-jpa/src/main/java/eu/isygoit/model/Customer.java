@@ -2,6 +2,7 @@ package eu.isygoit.model;
 
 import eu.isygoit.model.extendable.CustomerModel;
 import eu.isygoit.model.schema.*;
+import org.hibernate.annotations.DynamicUpdate;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ import lombok.experimental.SuperBuilder;
 @Data
 @SuperBuilder
 @NoArgsConstructor
+@DynamicUpdate
 @Entity
 @Table(name = SchemaTableConstantName.T_CUSTOMER, uniqueConstraints = {
         @UniqueConstraint(name = SchemaUcConstantName.UC_CUSTOMER, columnNames = {SchemaColumnConstantName.C_NAME})

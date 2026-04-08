@@ -5,6 +5,7 @@ import eu.isygoit.enums.IEnumWorkflow;
 import eu.isygoit.enums.IEnumWorkflowCategory;
 import eu.isygoit.model.jakarta.AuditableCancelableEntity;
 import eu.isygoit.model.schema.*;
+import org.hibernate.annotations.DynamicUpdate;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +25,7 @@ import java.util.List;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@DynamicUpdate
 @Entity
 @Table(name = SchemaTableConstantName.T_WORKFLOW, uniqueConstraints = {
         @UniqueConstraint(name = SchemaUcConstantName.UC_WORKFLOW_CODE,

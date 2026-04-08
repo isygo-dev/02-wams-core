@@ -1,7 +1,7 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.controller.impl.tenancy.IImageTenantServiceMethods;
-import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceMethods;
+import eu.isygoit.com.rest.controller.impl.tenancy.IImageTenantServiceOperations;
+import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceOperations;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Customer;
 
@@ -10,8 +10,8 @@ import java.util.List;
 /**
  * The interface Customer service.
  */
-public interface ICustomerService extends ICrudTenantServiceMethods<Long, Customer>,
-        IImageTenantServiceMethods<Long, Customer> {
+public interface ICustomerService extends ICrudTenantServiceOperations<Long, Customer>,
+        IImageTenantServiceOperations<Long, Customer> {
 
     /**
      * Gets names.

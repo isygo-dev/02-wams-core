@@ -1,13 +1,13 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.ICrudServiceMethods;
+import eu.isygoit.com.rest.service.ICrudServiceOperations;
 import eu.isygoit.model.Theme;
 
 
 /**
  * The interface Theme service.
  */
-public interface IThemeService extends ICrudServiceMethods<Long, Theme> {
+public interface IThemeService extends ICrudServiceOperations<Long, Theme> {
 
     /**
      * Find theme by account code and tenant code theme.

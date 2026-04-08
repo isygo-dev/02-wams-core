@@ -7,6 +7,7 @@ import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.enums.IEnumWSStatus;
 import eu.isygoit.model.extendable.AccountModel;
 import eu.isygoit.model.schema.*;
+import org.hibernate.annotations.DynamicUpdate;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,6 +40,7 @@ import java.util.List;
     'DD/MM/YYYY HH24:MI:SS'
   )
 */
+@DynamicUpdate
 @Entity
 @Table(name = SchemaTableConstantName.T_ACCOUNT
         , uniqueConstraints = {
