@@ -10,7 +10,7 @@
 
     <groupId>eu.isygo-it.services</groupId>
     <artifactId>service-core</artifactId>
-    <version>WC-1.0.250603-T1554</version>
+    <version>WC-1.0.260408-T1636</version>
 
     <name>service-core</name>
     <description>service-core</description>

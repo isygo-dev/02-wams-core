@@ -9,13 +9,13 @@
 
     <groupId>eu.isygo-it.services</groupId>
     <artifactId>storage-management</artifactId>
-    <version>WC-1.0.250603-T1554</version>
+    <version>WC-1.0.260408-T1636</version>
     <packaging>pom</packaging>
 
     <parent>
         <groupId>eu.isygo-it.services</groupId>
         <artifactId>starter-test-core</artifactId>
-        <version>WC-1.0.250603-T1554</version>
+        <version>WC-1.0.260408-T1636</version>
     </parent>
 
     <modules>
