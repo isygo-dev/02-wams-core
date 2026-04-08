@@ -8,7 +8,7 @@ import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.common.LinkedFileRequestDto;
-import eu.isygoit.exception.*;
+import eu.isygoit.exception.LinkedFileNotFoundException;
 import eu.isygoit.helper.CRC16Helper;
 import eu.isygoit.helper.CRC32Helper;
 import eu.isygoit.helper.FileHelper;
