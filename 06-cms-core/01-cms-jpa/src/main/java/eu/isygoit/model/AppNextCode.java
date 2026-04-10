@@ -4,13 +4,13 @@ import eu.isygoit.model.extendable.NextCodeModel;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaTableConstantName;
 import eu.isygoit.model.schema.SchemaUcConstantName;
-import org.hibernate.annotations.DynamicUpdate;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.DynamicUpdate;
 
 /**
  * The type App next code.

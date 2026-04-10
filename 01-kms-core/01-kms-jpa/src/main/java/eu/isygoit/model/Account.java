@@ -2,7 +2,6 @@ package eu.isygoit.model;
 
 import eu.isygoit.model.extendable.AccountModel;
 import eu.isygoit.model.schema.*;
-import org.hibernate.annotations.DynamicUpdate;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -4,12 +4,12 @@ import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaFkConstantName;
 import eu.isygoit.model.schema.SchemaTableConstantName;
-import org.hibernate.annotations.DynamicUpdate;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.List;
 

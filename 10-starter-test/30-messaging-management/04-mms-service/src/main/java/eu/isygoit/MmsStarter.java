@@ -23,7 +23,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableFeignClients
 @EnableConfigurationProperties
 @ConfigurationPropertiesScan
-@DynamicUpdate
 @EntityScan(basePackages = {"eu.isygoit.model"})
 @EnableJpaRepositories(basePackages = {"eu.isygoit.repository"}
         , excludeFilters = {@ComponentScan.Filter(IgnoreRepository.class)})

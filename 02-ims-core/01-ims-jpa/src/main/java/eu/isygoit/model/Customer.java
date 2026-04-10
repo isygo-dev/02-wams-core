@@ -2,11 +2,11 @@ package eu.isygoit.model;
 
 import eu.isygoit.model.extendable.CustomerModel;
 import eu.isygoit.model.schema.*;
-import org.hibernate.annotations.DynamicUpdate;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.DynamicUpdate;
 
 
 /**

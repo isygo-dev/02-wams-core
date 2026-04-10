@@ -2,7 +2,6 @@ package eu.isygoit.model;
 
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaConstantSize;
-import org.hibernate.annotations.DynamicUpdate;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;

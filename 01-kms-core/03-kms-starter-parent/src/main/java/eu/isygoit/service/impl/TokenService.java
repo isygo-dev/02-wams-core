@@ -21,7 +21,6 @@ import eu.isygoit.service.*;
 import eu.isygoit.types.EmailSubjects;
 import eu.isygoit.types.MsgTemplateVariables;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.MacAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

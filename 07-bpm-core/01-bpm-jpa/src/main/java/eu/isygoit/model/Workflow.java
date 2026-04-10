@@ -5,7 +5,6 @@ import eu.isygoit.enums.IEnumWorkflow;
 import eu.isygoit.enums.IEnumWorkflowCategory;
 import eu.isygoit.model.jakarta.AuditableCancelableEntity;
 import eu.isygoit.model.schema.*;
-import org.hibernate.annotations.DynamicUpdate;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 

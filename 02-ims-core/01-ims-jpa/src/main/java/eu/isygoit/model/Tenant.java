@@ -3,12 +3,12 @@ package eu.isygoit.model;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.schema.*;
 import eu.isygoit.model.tenancy.TenantModel;
-import org.hibernate.annotations.DynamicUpdate;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
