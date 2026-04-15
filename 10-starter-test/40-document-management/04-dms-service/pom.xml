@@ -148,7 +148,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.5.13</version>
                 <configuration>
                     <mainClass>eu.isygoit.DmsStarter</mainClass>
                     <executable>true</executable>
@@ -158,22 +158,7 @@
         </plugins>
     </build>
 
-    <repositories>
-        <repository>
-            <id>isygo-it-github-01</id>
-            <name>GitHub isygo-it Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/your-org/01-wams-stack</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>isygo-it-github-02</id>
-            <name>GitHub isygo-it Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/your-org/02-wams-core</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
+
 </project>
+
+

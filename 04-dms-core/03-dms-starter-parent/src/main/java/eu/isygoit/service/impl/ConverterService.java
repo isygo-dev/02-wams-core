@@ -8,6 +8,8 @@ import eu.isygoit.config.AppProperties;
 import eu.isygoit.service.IConverterService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.io.RandomAccessReadBuffer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.fit.pdfdom.PDFDomTree;
@@ -65,12 +67,19 @@ public class ConverterService implements IConverterService {
     @Override
     public File doConvertPdfToHtml(final InputStream inputFile) throws IOException {
         log.info("Converting PDF to HTML...");
+
         return withGeneratedTempPath(".html", htmlPath -> {
-            try (PDDocument pdDocument = PDDocument.load(inputFile);
+            try (PDDocument pdDocument = Loader.loadPDF(new RandomAccessReadBuffer(inputFile));
                  Writer writer = Files.newBufferedWriter(htmlPath, StandardCharsets.UTF_8)) {
+
                 new PDFDomTree().writeText(pdDocument, writer);
+
                 log.info("PDF successfully converted to HTML at {}", htmlPath);
                 return htmlPath.toFile();
+
+            } catch (IOException e) {
+                log.error("Error converting PDF to HTML", e);
+                throw e;
             }
         });
     }
@@ -117,22 +126,22 @@ public class ConverterService implements IConverterService {
     public File doConvertPdfToText(InputStream inputStream) throws IOException {
         log.info("Converting PDF to Text...");
 
-        // Save PDF to temp file first
-        return withGeneratedTempPath(".pdf", pdfPath -> {
-            FileUtils.copyInputStreamToFile(inputStream, pdfPath.toFile());
+        return withGeneratedTempPath(".txt", textPath -> {
+            try (PDDocument document = Loader.loadPDF(new RandomAccessReadBuffer(inputStream));
+                 Writer writer = Files.newBufferedWriter(textPath, StandardCharsets.UTF_8)) {
 
-            return withGeneratedTempPath(".txt", textPath -> {
-                try (PDDocument document = PDDocument.load(pdfPath.toFile());
-                     Writer writer = Files.newBufferedWriter(textPath, StandardCharsets.UTF_8)) {
-                    PDFTextStripper stripper = new PDFTextStripper();
-                    writer.write(stripper.getText(document));
-                    log.info("PDF successfully converted to Text at {}", textPath);
-                    return textPath.toFile();
-                } catch (IOException e) {
-                    log.error("Error converting PDF to text", e);
-                    throw e;
-                }
-            });
+                PDFTextStripper stripper = new PDFTextStripper();
+                String text = stripper.getText(document);
+
+                writer.write(text);
+                log.info("PDF successfully converted to Text at {}", textPath);
+
+                return textPath.toFile();
+
+            } catch (IOException e) {
+                log.error("Error converting PDF to text", e);
+                throw e;
+            }
         });
     }
 
