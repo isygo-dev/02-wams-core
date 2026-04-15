@@ -3,19 +3,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <organization>
-        <name>isygo-it-services</name>
-        <url>https://isygo-it.eu</url>
-    </organization>
-
-    <groupId>eu.isygo-it.services</groupId>
     <artifactId>bpm-core</artifactId>
-    <version>WC-1.0.260408-T1636</version>
-
-    <name>bpm-core</name>
-    <description>bpm-core</description>
-
     <packaging>pom</packaging>
+
+    <name>BPM Core</name>
+    <description>BPM Core Service Modules</description>
 
     <parent>
         <groupId>eu.isygo-it.services</groupId>
@@ -24,8 +16,6 @@
     </parent>
 
     <properties>
-        <java.source.version>17</java.source.version>
-        <java.target.version>17</java.target.version>
     </properties>
 
     <modules>
@@ -34,45 +24,7 @@
     </modules>
 
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>${java.source.version}</source>
-                    <target>${java.target.version}</target>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.1.1</version>
-                <executions>
-                    <execution>
-                        <id>default-deploy</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>deploy</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
     </build>
-
-    <distributionManagement>
-        <repository>
-            <id>isygo-it-github-02</id>
-            <name>GitHub isygo-it Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/your-org/02-wams-core</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </distributionManagement>
-
-
 </project>
 
 

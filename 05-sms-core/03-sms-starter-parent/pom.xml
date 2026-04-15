@@ -2,21 +2,29 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <organization>
-        <name>isygo-it-services</name>
-        <url>https://isygo-it.eu</url>
-    </organization>
-
-    <groupId>eu.isygo-it.services</groupId>
     <artifactId>storage-management-starter-parent</artifactId>
-    <version>WC-1.0.260408-T1636</version>
     <packaging>jar</packaging>
+
+    <name>Storage Management Starter</name>
+    <description>Storage Management Spring Boot Starter</description>
 
     <parent>
         <groupId>eu.isygo-it.services</groupId>
         <artifactId>service-stack-parent</artifactId>
         <version>WS-1.0.260408-T1636</version>
     </parent>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>eu.isygo-it.services</groupId>
+                <artifactId>service-core</artifactId>
+                <version>WC-1.0.260408-T1636</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <profiles>
         <profile>
@@ -75,12 +83,14 @@
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>messaging-management-shared</artifactId>
             <version>WC-1.0.260408-T1636</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>service-stack-web</artifactId>
-            <version>WS-1.0.260408-T1636</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -96,11 +106,9 @@
             <artifactId>identity-management-shared</artifactId>
             <version>WC-1.0.260408-T1636</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/io.minio/minio -->
         <dependency>
             <groupId>io.minio</groupId>
             <artifactId>minio</artifactId>
-            <version>8.3.7</version>
         </dependency>
     </dependencies>
 
@@ -114,23 +122,7 @@
                 </excludes>
             </resource>
         </resources>
-
-        <plugins>
-        </plugins>
     </build>
-
-    <distributionManagement>
-        <repository>
-            <id>isygo-it-github-02</id>
-            <name>GitHub isygo-it Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/your-org/02-wams-core</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </distributionManagement>
-
-
 </project>
 
 

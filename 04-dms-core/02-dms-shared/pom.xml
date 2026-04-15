@@ -4,17 +4,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <organization>
-        <name>isygo-it-services</name>
-        <url>https://isygo-it.eu</url>
-    </organization>
-
-    <groupId>eu.isygo-it.services</groupId>
     <artifactId>document-management-shared</artifactId>
-    <version>WC-1.0.260408-T1636</version>
     <packaging>jar</packaging>
-    <name>document-management-shared</name>
-    <description>document-management-shared</description>
+
+    <name>Document Management Shared</name>
+    <description>Document Management Shared Components</description>
 
     <parent>
         <groupId>eu.isygo-it.services</groupId>
@@ -30,47 +24,25 @@
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>service-stack-shared</artifactId>
-            <version>WS-1.0.260408-T1636</version>
         </dependency>
-
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.44</version>
         </dependency>
-
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct-processor</artifactId>
-            <version>1.6.3</version>
         </dependency>
-
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20230227</version>
         </dependency>
-
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
-            <version>6.0.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
-
-    <distributionManagement>
-        <repository>
-            <id>isygo-it-github-02</id>
-            <name>GitHub isygo-it Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/your-org/02-wams-core</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </distributionManagement>
-
-
 </project>
 
 

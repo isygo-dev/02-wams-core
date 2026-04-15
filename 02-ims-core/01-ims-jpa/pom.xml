@@ -4,17 +4,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <organization>
-        <name>isygo-it-services</name>
-        <url>https://isygo-it.eu</url>
-    </organization>
-
-    <groupId>eu.isygo-it.services</groupId>
     <artifactId>identity-management-jpa</artifactId>
-    <version>WC-1.0.260408-T1636</version>
     <packaging>jar</packaging>
-    <name>identity-management-jpa</name>
-    <description>identity-management-jpa</description>
+
+    <name>Identity Management JPA</name>
+    <description>Identity Management JPA Implementation</description>
 
     <parent>
         <groupId>eu.isygo-it.services</groupId>
@@ -30,38 +24,21 @@
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>service-stack-jpa</artifactId>
-            <version>WS-1.0.260408-T1636</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.26</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.4.2</version>
         </dependency>
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>identity-management-shared</artifactId>
             <version>WC-1.0.260408-T1636</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
-
-    <distributionManagement>
-        <repository>
-            <id>isygo-it-github-02</id>
-            <name>GitHub isygo-it Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/your-org/02-wams-core</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </distributionManagement>
-
-
 </project>
 
 
