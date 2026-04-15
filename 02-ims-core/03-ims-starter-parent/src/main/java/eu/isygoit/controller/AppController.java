@@ -8,6 +8,7 @@ import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.common.ContextRequestDto;
+import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.ApplicationDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
@@ -26,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -72,22 +74,48 @@ public class AppController extends MappedCrudTenantController<Long, Application,
 
 
     @Override
-    public ResponseEntity<List<ApplicationDto>> performFindAll(ContextRequestDto requestContext, Integer page, Integer size) {
+    public ResponseEntity<PaginatedResponseDto<ApplicationDto>> performFindAll(ContextRequestDto requestContext, Integer page, Integer size) {
         if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return super.performFindAll(requestContext, page, size);
         } else {
-            return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByTenantAndUserName(requestContext.getSenderTenant(),
-                    requestContext.getSenderUser())));
+            // For regular tenants: return distinct allowed tools (non-paginated)
+            List<Application> applications = accountService.findDistinctAllowedToolsByTenantAndUserName(
+                    requestContext.getSenderTenant(),
+                    requestContext.getSenderUser());
+
+            // Convert List to PaginatedResponseDto (single page with all results)
+            PaginatedResponseDto<ApplicationDto> paginatedResponse = PaginatedResponseDto.<ApplicationDto>builder()
+                    .content(mapper().listEntityToDto(applications))
+                    .totalElements(applications != null ? (long) applications.size() : 0L)
+                    .totalPages(1)
+                    .pageNumber(0)
+                    .pageSize(applications != null ? applications.size() : 0)
+                    .build();
+
+            return ResponseFactory.responseOk(paginatedResponse);
         }
     }
 
     @Override
-    public ResponseEntity<List<ApplicationDto>> performFindAllFull(ContextRequestDto requestContext, Integer page, Integer size) {
+    public ResponseEntity<PaginatedResponseDto<ApplicationDto>> performFindAllFull(ContextRequestDto requestContext, Integer page, Integer size) {
         if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return super.performFindAllFull(requestContext, page, size);
         } else {
-            return ResponseFactory.responseOk(mapper().listEntityToDto(accountService.findDistinctAllowedToolsByTenantAndUserName(requestContext.getSenderTenant(),
-                    requestContext.getSenderUser())));
+            // Non-super tenant: return distinct allowed tools (not paginated)
+            List<Application> applications = accountService.findDistinctAllowedToolsByTenantAndUserName(
+                    requestContext.getSenderTenant(),
+                    requestContext.getSenderUser());
+
+            // Wrap the list into PaginatedResponseDto (with pagination metadata as empty/single page)
+            PaginatedResponseDto<ApplicationDto> paginatedResponse = PaginatedResponseDto.<ApplicationDto>builder()
+                    .content(mapper().listEntityToDto(applications))
+                    .totalElements(applications != null ? (long) applications.size() : 0L)
+                    .totalPages(1)
+                    .pageNumber(0)
+                    .pageSize(applications != null ? applications.size() : 0)
+                    .build();
+
+            return ResponseFactory.responseOk(paginatedResponse);
         }
     }
 }
