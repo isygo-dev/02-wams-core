@@ -10,6 +10,11 @@ import eu.isygoit.dto.common.NextCodeDto;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.service.IKeyService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +37,14 @@ public class IncrementalKeyController extends ControllerExceptionHandler impleme
     private IKeyService keyService;
 
 
+    @Operation(summary = "Generate next code Api",
+            description = "Generate next code")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Api executed successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = String.class))})
+    })
     @Override
     public ResponseEntity<String> generateNextCode(ContextRequestDto requestContext,
                                                    String tenant, String entity, String attribute) {
@@ -44,6 +57,14 @@ public class IncrementalKeyController extends ControllerExceptionHandler impleme
         }
     }
 
+    @Operation(summary = "Subscribe next code Api",
+            description = "Subscribe next code")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Api executed successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = String.class))})
+    })
     @Override
     public ResponseEntity<String> subscribeNextCode(ContextRequestDto requestContext,
                                                     String tenant, NextCodeDto incrementalConfig) {

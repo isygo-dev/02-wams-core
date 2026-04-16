@@ -9,6 +9,11 @@ import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.service.IKeyService;
 import eu.isygoit.service.KeyServiceApi;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +35,14 @@ public class KeyController extends ControllerExceptionHandler implements KeyServ
     @Autowired
     private IKeyService keyService;
 
+    @Operation(summary = "New random key Api",
+            description = "New random key")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Api executed successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = String.class))})
+    })
     @Override
     public ResponseEntity<String> newRandomKey(ContextRequestDto requestContext,
                                                Integer length, IEnumCharSet.Types charSetType) {
@@ -42,6 +55,14 @@ public class KeyController extends ControllerExceptionHandler implements KeyServ
         }
     }
 
+    @Operation(summary = "Renew random key Api",
+            description = "Renew random key")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Api executed successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = String.class))})
+    })
     @Override
     public ResponseEntity<String> renewRandomKey(ContextRequestDto requestContext,
                                                  String tenant, String keyName, Integer length, IEnumCharSet.Types charSetType) {
@@ -56,6 +77,14 @@ public class KeyController extends ControllerExceptionHandler implements KeyServ
         }
     }
 
+    @Operation(summary = "Get random key Api",
+            description = "Get random key")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Api executed successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = String.class))})
+    })
     @Override
     public ResponseEntity<String> getRandomKey(ContextRequestDto requestContext,
                                                String tenant, String keyName) {

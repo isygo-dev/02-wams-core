@@ -12,6 +12,12 @@ import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.mapper.TenantMapper;
 import eu.isygoit.model.Tenant;
 import eu.isygoit.service.impl.TenantService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -23,12 +29,21 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Slf4j
 @Validated
+@Tag(name = "KMS Tenant", description = "Endpoints for managing KMS tenants")
 @RestController
 @InjectMapperAndService(handler = KmsExceptionHandler.class, mapper = TenantMapper.class, minMapper = TenantMapper.class, service = TenantService.class)
 @RequestMapping(path = "/api/v1/private/tenant")
 public class KmsTenantController extends MappedCrudController<Long, Tenant, KmsTenantDto, KmsTenantDto, TenantService>
         implements KmsTenantControllerApi {
 
+    @Operation(summary = "Update admin status Api",
+            description = "Update admin status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Api executed successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = KmsTenantDto.class))})
+    })
     @Override
     public ResponseEntity<KmsTenantDto> updateAdminStatus(ContextRequestDto requestContext,
                                                           String tenant,

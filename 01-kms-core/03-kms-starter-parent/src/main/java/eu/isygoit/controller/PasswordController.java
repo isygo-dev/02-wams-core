@@ -20,6 +20,12 @@ import eu.isygoit.jwt.IJwtService;
 import eu.isygoit.mapper.AccountMapper;
 import eu.isygoit.model.TokenConfig;
 import eu.isygoit.service.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Slf4j
 @Validated
+@Tag(name = "Password", description = "Endpoints for managing passwords")
 @RestController
 @InjectExceptionHandler(KmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/password")
@@ -52,6 +59,14 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     @Autowired
     private ITokenConfigService tokenConfigService;
 
+    @Operation(summary = "Generate password Api",
+            description = "Generate password")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Api executed successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Integer.class))})
+    })
     @Override
     public ResponseEntity<Integer> generate(ContextRequestDto requestContext,
                                             IEnumAuth.Types authType,
@@ -74,6 +89,14 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
         }
     }
 
+    @Operation(summary = "Reset password via token Api",
+            description = "Reset password via token")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Api executed successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = String.class))})
+    })
     @Override
     public ResponseEntity<String> resetPasswordViaToken(ContextRequestDto requestContext,
                                                         ResetPwdViaTokenRequestDto resetPwdViaTokenRequestDto) {
@@ -86,6 +109,14 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
         }
     }
 
+    @Operation(summary = "Change password Api",
+            description = "Change password")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Api executed successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = String.class))})
+    })
     @Override
     public ResponseEntity<String> changePassword(ContextRequestDto requestContext,
                                                  String oldPassword,
@@ -100,6 +131,14 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
         }
     }
 
+    @Operation(summary = "Pattern check Api",
+            description = "Pattern check")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Api executed successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Boolean.class))})
+    })
     @Override
     public ResponseEntity<Boolean> patternCheck(ContextRequestDto requestContext,
                                                 CheckPwdRequestDto checkPwdRequest) {
@@ -113,6 +152,14 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
         }
     }
 
+    @Operation(summary = "Get access Api",
+            description = "Get access")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Api executed successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = AccessTokenResponseDto.class))})
+    })
     @Override
     public ResponseEntity<AccessTokenResponseDto> getAccess(ContextRequestDto requestContext,
                                                             AccessRequestDto accessRequest) {
@@ -182,6 +229,14 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
         }
     }
 
+    @Operation(summary = "Matches Api",
+            description = "Matches")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Api executed successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = IEnumPasswordStatus.Types.class))})
+    })
     @Override
     public ResponseEntity<IEnumPasswordStatus.Types> matches(ContextRequestDto requestContext,
                                                              MatchesRequestDto matchesRequest) {
@@ -197,6 +252,14 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
         }
     }
 
+    @Operation(summary = "Is password expired Api",
+            description = "Is password expired")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Api executed successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Boolean.class))})
+    })
     @Override
     public ResponseEntity<Boolean> isPasswordExpired(ContextRequestDto requestContext,
                                                      IsPwdExpiredRequestDto isPwdExpiredRequestDto) {
@@ -212,6 +275,14 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
         }
     }
 
+    @Operation(summary = "Update account Api",
+            description = "Update account")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Api executed successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Boolean.class))})
+    })
     @Override
     public ResponseEntity<Boolean> updateAccount(ContextRequestDto requestContext,
                                                  UpdateAccountRequestDto account) {
