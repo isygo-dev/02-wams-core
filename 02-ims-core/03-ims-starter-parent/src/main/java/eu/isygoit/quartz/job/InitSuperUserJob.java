@@ -82,6 +82,6 @@ public class InitSuperUserJob extends AbstractQuartzJob {
                 , triggerName
                 , InitSuperUserJob.groupName
                 , scheduleBuilder
-                , DateHelper.toDate(LocalDateTime.now().plusMinutes(JobSchedulePovider.getStartDelay())));
+                , DateHelper.toLegacyDate(LocalDateTime.now().plusMinutes(JobSchedulePovider.getStartDelay())));
     }
 }
