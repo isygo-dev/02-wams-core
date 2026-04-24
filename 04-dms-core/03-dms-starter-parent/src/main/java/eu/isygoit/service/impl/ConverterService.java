@@ -7,7 +7,6 @@ import com.itextpdf.tool.xml.XMLWorkerHelper;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.service.IConverterService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.io.RandomAccessReadBuffer;
 import org.apache.pdfbox.pdmodel.PDDocument;
