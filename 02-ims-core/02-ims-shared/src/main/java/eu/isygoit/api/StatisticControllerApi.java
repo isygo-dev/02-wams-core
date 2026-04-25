@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestPart;
 
 /**
  * The interface Public controller api.
@@ -25,7 +25,7 @@ public interface StatisticControllerApi {
                             schema = @Schema(implementation = Long.class))})
     })
     @GetMapping(path = "/connected/resumes")
-    ResponseEntity<Long> getConfirmedResumeAccountsCount(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
+    ResponseEntity<Long> getConfirmedResumeAccountsCount(@RequestPart(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 
     @Operation(summary = "Count Confirmed employe account",
             description = "Count Confirmed employee account")
@@ -36,5 +36,5 @@ public interface StatisticControllerApi {
                             schema = @Schema(implementation = Long.class))})
     })
     @GetMapping(path = "/connected/employee")
-    ResponseEntity<Long> getConfirmedAccountNumberByEmployee(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
+    ResponseEntity<Long> getConfirmedAccountNumberByEmployee(@RequestPart(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 }

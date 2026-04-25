@@ -11,9 +11,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 
 
 /**
@@ -40,5 +40,5 @@ public interface MailMessageControllerApi {
     @PostMapping(path = "/send/{senderDomainName}/{template}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     ResponseEntity<?> sendMail(@PathVariable(name = RestApiConstants.SENDER_TENANT_NAME) String senderDomainName,
                                @PathVariable(name = RestApiConstants.TEMPLATE) IEnumEmailTemplate.Types template,
-                               @ModelAttribute(name = RestApiConstants.mailMessage) MailMessageDto mailMessage);
+                               @RequestPart(name = RestApiConstants.mailMessage) MailMessageDto mailMessage);
 }

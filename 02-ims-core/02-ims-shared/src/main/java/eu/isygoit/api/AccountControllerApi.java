@@ -44,7 +44,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = String.class))})
     })
     @GetMapping(path = "/emails")
-    ResponseEntity<List<String>> getEmailsByTenant(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
+    ResponseEntity<List<String>> getEmailsByTenant(@RequestPart(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 
     /**
      * Gets accounts.
@@ -61,7 +61,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = MinAccountDto.class))})
     })
     @GetMapping(path = "/accounts-info")
-    ResponseEntity<List<MinAccountDto>> getAccounts(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
+    ResponseEntity<List<MinAccountDto>> getAccounts(@RequestPart(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 
     /**
      * Update account admin status response entity.
@@ -154,7 +154,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = UserDataResponseDto.class))})
     })
     @GetMapping(path = "/me")
-    ResponseEntity<UserDataResponseDto> connectedUser(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
+    ResponseEntity<UserDataResponseDto> connectedUser(@RequestPart(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 
     /**
      * Connected user full data response entity.
@@ -171,7 +171,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = AccountDto.class))})
     })
     @GetMapping(path = "/profile")
-    ResponseEntity<AccountDto> connectedUserFullData(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
+    ResponseEntity<AccountDto> connectedUserFullData(@RequestPart(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 
     /**
      * Update connected user profile response entity.
@@ -248,7 +248,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = MinAccountDto.class))})
     })
     @GetMapping(path = "/tenant/sender")
-    ResponseEntity<List<MinAccountDto>> accountsByTenant(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
+    ResponseEntity<List<MinAccountDto>> accountsByTenant(@RequestPart(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 
     /**
      * Accounts by tenant response entity.
@@ -284,7 +284,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = MinAccountDto.class))})
     })
     @GetMapping(path = "/chat/tenant")
-    ResponseEntity<List<MinAccountDto>> chatAccountsByTenant(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
+    ResponseEntity<List<MinAccountDto>> chatAccountsByTenant(@RequestPart(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 
     /**
      * Resend email creation response entity.

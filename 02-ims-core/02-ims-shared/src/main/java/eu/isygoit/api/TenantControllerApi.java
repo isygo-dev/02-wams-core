@@ -12,10 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -61,7 +58,7 @@ public interface TenantControllerApi extends IMappedCrudApi<Long, TenantDto, Ten
                             schema = @Schema(implementation = String.class))})
     })
     @GetMapping(path = "/names")
-    ResponseEntity<List<String>> getAllDomainNames(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
+    ResponseEntity<List<String>> getAllDomainNames(@RequestPart(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 
     /**
      * Gets by name.
@@ -78,7 +75,7 @@ public interface TenantControllerApi extends IMappedCrudApi<Long, TenantDto, Ten
                             schema = @Schema(implementation = TenantDto.class))})
     })
     @GetMapping(path = "/name")
-    ResponseEntity<TenantDto> getByName(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
+    ResponseEntity<TenantDto> getByName(@RequestPart(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
 
     @Operation(summary = "Update tenant social link Api",
             description = "Update tenant social link")
