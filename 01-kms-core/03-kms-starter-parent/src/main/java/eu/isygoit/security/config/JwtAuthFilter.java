@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-@NoArgsConstructor
 public class JwtAuthFilter extends JwtKmsAuthFilter {
 
     public JwtAuthFilter(IJwtService jwtService, RequestContextService requestContextService, ITokenService tokenService) {
