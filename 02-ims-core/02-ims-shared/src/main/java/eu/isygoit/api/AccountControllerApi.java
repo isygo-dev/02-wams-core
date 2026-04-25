@@ -1,9 +1,7 @@
 package eu.isygoit.api;
 
 import eu.isygoit.com.rest.api.IMappedCrudApi;
-import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.data.MinAccountDto;
@@ -32,7 +30,6 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
     /**
      * Gets emails by tenant.
      *
-     * @param requestContext the request context
      * @return the emails by tenant
      */
     @Operation(summary = "get Emails By Domain Api",
@@ -44,12 +41,11 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = String.class))})
     })
     @GetMapping(path = "/emails")
-    ResponseEntity<List<String>> getEmailsByTenant(@RequestPart(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
+    ResponseEntity<List<String>> getEmailsByTenant();
 
     /**
      * Gets accounts.
      *
-     * @param requestContext the request context
      * @return the accounts
      */
     @Operation(summary = "Get Accounts Api",
@@ -61,14 +57,13 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = MinAccountDto.class))})
     })
     @GetMapping(path = "/accounts-info")
-    ResponseEntity<List<MinAccountDto>> getAccounts(@RequestPart(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
+    ResponseEntity<List<MinAccountDto>> getAccounts();
 
     /**
      * Update account admin status response entity.
      *
-     * @param requestContext the request context
-     * @param id             the id
-     * @param newStatus      the new status
+     * @param id        the id
+     * @param newStatus the new status
      * @return the response entity
      */
     @Operation(summary = "Update Account Admin Status Api",
@@ -80,9 +75,9 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = AccountDto.class))})
     })
     @PutMapping(path = "/updateStatusAccount")
-    ResponseEntity<AccountDto> updateAccountAdminStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                                        @RequestParam(name = RestApiConstants.ID) Long id,
-                                                        @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus);
+    ResponseEntity<AccountDto> updateAccountAdminStatus(
+            @RequestParam(name = RestApiConstants.ID) Long id,
+            @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus);
 
     @Operation(summary = "Create Domain Admin Api",
             description = "Create Domain Admin")
@@ -93,16 +88,15 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = AccountDto.class))})
     })
     @PostMapping(path = "/admin")
-    ResponseEntity<AccountDto> createDomainAdmin(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                                 @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
-                                                 @Valid @RequestBody TenantAdminDto admin);
+    ResponseEntity<AccountDto> createDomainAdmin(
+            @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
+            @Valid @RequestBody TenantAdminDto admin);
 
     /**
      * Update account is admin response entity.
      *
-     * @param requestContext the request context
-     * @param id             the id
-     * @param newStatus      the new status
+     * @param id        the id
+     * @param newStatus the new status
      * @return the response entity
      */
     @Operation(summary = "Update Account IsAdmin Api",
@@ -114,16 +108,15 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = AccountDto.class))})
     })
     @PutMapping(path = "/updateIsAdmin")
-    ResponseEntity<AccountDto> updateAccountIsAdmin(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                                    @RequestParam(name = RestApiConstants.ID) Long id,
-                                                    @RequestParam(name = RestApiConstants.NEW_STATUS) boolean newStatus);
+    ResponseEntity<AccountDto> updateAccountIsAdmin(
+            @RequestParam(name = RestApiConstants.ID) Long id,
+            @RequestParam(name = RestApiConstants.NEW_STATUS) boolean newStatus);
 
     /**
      * Update language response entity.
      *
-     * @param requestContext the request context
-     * @param id             the id
-     * @param language       the language
+     * @param id       the id
+     * @param language the language
      * @return the response entity
      */
     @Operation(summary = "Update Account Language Api",
@@ -135,14 +128,13 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = AccountDto.class))})
     })
     @PutMapping(path = "/updateLanguage")
-    ResponseEntity<AccountDto> updateLanguage(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                              @RequestParam(name = RestApiConstants.ID) Long id,
-                                              @RequestParam(name = RestApiConstants.LANGUAGE) IEnumLanguage.Types language);
+    ResponseEntity<AccountDto> updateLanguage(
+            @RequestParam(name = RestApiConstants.ID) Long id,
+            @RequestParam(name = RestApiConstants.LANGUAGE) IEnumLanguage.Types language);
 
     /**
      * Connected user response entity.
      *
-     * @param requestContext the request context
      * @return the response entity
      */
     @Operation(summary = "Get Connected User/Account data info Api",
@@ -154,12 +146,11 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = UserDataResponseDto.class))})
     })
     @GetMapping(path = "/me")
-    ResponseEntity<UserDataResponseDto> connectedUser(@RequestPart(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
+    ResponseEntity<UserDataResponseDto> connectedUser();
 
     /**
      * Connected user full data response entity.
      *
-     * @param requestContext the request context
      * @return the response entity
      */
     @Operation(summary = "Get Connected User/Account full data info  Api",
@@ -171,13 +162,12 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = AccountDto.class))})
     })
     @GetMapping(path = "/profile")
-    ResponseEntity<AccountDto> connectedUserFullData(@RequestPart(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
+    ResponseEntity<AccountDto> connectedUserFullData();
 
     /**
      * Update connected user profile response entity.
      *
-     * @param requestContext the request context
-     * @param accountDto     the account dto
+     * @param accountDto the account dto
      * @return the response entity
      */
     @Operation(summary = "Update connected user data Api",
@@ -189,15 +179,14 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = AccountDto.class))})
     })
     @PutMapping(path = "/profile")
-    ResponseEntity<AccountDto> updateConnectedUserAccountData(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                                              @Valid @RequestBody AccountDto accountDto);
+    ResponseEntity<AccountDto> updateConnectedUserAccountData(
+            @Valid @RequestBody AccountDto accountDto);
 
     /**
      * Connected user update account response entity.
      *
-     * @param requestContext the request context
-     * @param id             the id
-     * @param accountDto     the account dto
+     * @param id         the id
+     * @param accountDto the account dto
      * @return the response entity
      */
     @Operation(summary = "Update Connected User Account Api",
@@ -209,9 +198,9 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = AccountDto.class))})
     })
     @PutMapping(path = "/update-account")
-    ResponseEntity<AccountDto> updateUserAccountData(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                                     @RequestParam(name = RestApiConstants.ID) Long id,
-                                                     @Valid @RequestBody AccountDto accountDto);
+    ResponseEntity<AccountDto> updateUserAccountData(
+            @RequestParam(name = RestApiConstants.ID) Long id,
+            @Valid @RequestBody AccountDto accountDto);
 
     /**
      * Reset password via token response entity.
@@ -229,14 +218,13 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = String.class))})
     })
     @PostMapping(path = "/password/reset/token")
-    ResponseEntity<String> resetPasswordViaToken(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                                 @Valid @RequestBody ResetPwdViaTokenRequestDto resetPasswordViaTokenRequest);
+    ResponseEntity<String> resetPasswordViaToken(
+            @Valid @RequestBody ResetPwdViaTokenRequestDto resetPasswordViaTokenRequest);
 
 
     /**
      * Accounts by tenant response entity.
      *
-     * @param requestContext the request context
      * @return the response entity
      */
     @Operation(summary = "Get Accounts By Sender Domain Api",
@@ -248,12 +236,11 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = MinAccountDto.class))})
     })
     @GetMapping(path = "/tenant/sender")
-    ResponseEntity<List<MinAccountDto>> accountsByTenant(@RequestPart(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
+    ResponseEntity<List<MinAccountDto>> accountsByTenant();
 
     /**
      * Accounts by tenant response entity.
      *
-     * @param requestContext the request context
      * @return the response entity
      */
     @Operation(summary = "Get Accounts By Domain Api",
@@ -265,14 +252,13 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = MinAccountDto.class))})
     })
     @GetMapping(path = "/tenant")
-    ResponseEntity<List<MinAccountDto>> userAccountsByTenant(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                                             @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant);
+    ResponseEntity<List<MinAccountDto>> userAccountsByTenant(
+            @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant);
 
 
     /**
      * Chat accounts by tenant response entity.
      *
-     * @param requestContext the request context
      * @return the response entity
      */
     @Operation(summary = "Get Chat Accounts By Domain Api",
@@ -284,13 +270,12 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = MinAccountDto.class))})
     })
     @GetMapping(path = "/chat/tenant")
-    ResponseEntity<List<MinAccountDto>> chatAccountsByTenant(@RequestPart(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
+    ResponseEntity<List<MinAccountDto>> chatAccountsByTenant();
 
     /**
      * Resend email creation response entity.
      *
-     * @param requestContext the request context
-     * @param id             the id
+     * @param id the id
      * @return the response entity
      */
     @Operation(summary = "Resend Creation Email Api",
@@ -302,6 +287,6 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @GetMapping(path = "/resend/email/creation/{id}")
-    ResponseEntity<?> resendCreationEmail(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                          @PathVariable(name = RestApiConstants.ID) Long id);
+    ResponseEntity<?> resendCreationEmail(
+            @PathVariable(name = RestApiConstants.ID) Long id);
 }

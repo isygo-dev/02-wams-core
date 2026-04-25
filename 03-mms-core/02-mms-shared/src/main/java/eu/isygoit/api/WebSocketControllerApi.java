@@ -1,8 +1,6 @@
 package eu.isygoit.api;
 
-import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.extendable.IdAssignableDto;
 import eu.isygoit.dto.wsocket.WsMessageWrapperDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -25,9 +22,8 @@ public interface WebSocketControllerApi {
     /**
      * Send message to user response entity.
      *
-     * @param requestContext the request context
-     * @param recieverId     the reciever id
-     * @param message        the message
+     * @param recieverId the reciever id
+     * @param message    the message
      * @return the response entity
      */
     @Operation(summary = "sendMessageToUser Api",
@@ -39,16 +35,15 @@ public interface WebSocketControllerApi {
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @PostMapping("/user/send")
-    ResponseEntity<?> sendMessageToUser(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                        @RequestParam(name = RestApiConstants.RECEIVER_ID) Long recieverId,
-                                        @Valid @RequestBody WsMessageWrapperDto message);
+    ResponseEntity<?> sendMessageToUser(
+            @RequestParam(name = RestApiConstants.RECEIVER_ID) Long recieverId,
+            @Valid @RequestBody WsMessageWrapperDto message);
 
     /**
      * Send message to group response entity.
      *
-     * @param requestContext the request context
-     * @param groupId        the group id
-     * @param message        the message
+     * @param groupId the group id
+     * @param message the message
      * @return the response entity
      */
     @Operation(summary = "sendMessageToGroup Api",
@@ -60,15 +55,14 @@ public interface WebSocketControllerApi {
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @PostMapping("/group/send")
-    ResponseEntity<?> sendMessageToGroup(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                         @RequestParam(name = RestApiConstants.GROUP_ID) Long groupId,
-                                         @Valid @RequestBody WsMessageWrapperDto message);
+    ResponseEntity<?> sendMessageToGroup(
+            @RequestParam(name = RestApiConstants.GROUP_ID) Long groupId,
+            @Valid @RequestBody WsMessageWrapperDto message);
 
     /**
      * Send message to all response entity.
      *
-     * @param requestContext the request context
-     * @param message        the message
+     * @param message the message
      * @return the response entity
      */
     @Operation(summary = "Send Message to all accounts Api",
@@ -80,6 +74,6 @@ public interface WebSocketControllerApi {
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @PostMapping("/all/send")
-    ResponseEntity<?> sendMessageToAll(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                       @Valid @RequestBody WsMessageWrapperDto message);
+    ResponseEntity<?> sendMessageToAll(
+            @Valid @RequestBody WsMessageWrapperDto message);
 }

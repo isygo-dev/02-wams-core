@@ -5,7 +5,6 @@ import eu.isygoit.api.ChatMessageControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.CrudControllerUtils;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.ChatAccountDto;
 import eu.isygoit.dto.data.ChatMessageDto;
 import eu.isygoit.dto.wsocket.WsConnectDto;
@@ -37,10 +36,10 @@ public class ChatMessageController extends CrudControllerUtils<UUID, ChatMessage
         implements ChatMessageControllerApi {
 
     @Override
-    public ResponseEntity<List<ChatMessageDto>> findByReceiverId(ContextRequestDto requestContext,
-                                                                 Long userId,
-                                                                 Integer page,
-                                                                 Integer size) {
+    public ResponseEntity<List<ChatMessageDto>> findByReceiverId(
+            Long userId,
+            Integer page,
+            Integer size) {
         try {
             List<ChatMessage> list = crudService().findByReceiverId(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createDate")));
             if (CollectionUtils.isEmpty(list)) {
@@ -54,11 +53,11 @@ public class ChatMessageController extends CrudControllerUtils<UUID, ChatMessage
     }
 
     @Override
-    public ResponseEntity<List<ChatMessageDto>> findByReceiverIdAndSenderId(ContextRequestDto requestContext,
-                                                                            Long userId,
-                                                                            Long senderId,
-                                                                            Integer page,
-                                                                            Integer size) {
+    public ResponseEntity<List<ChatMessageDto>> findByReceiverIdAndSenderId(
+            Long userId,
+            Long senderId,
+            Integer page,
+            Integer size) {
         try {
             List<ChatMessage> list = crudService().findByReceiverIdAndSenderId(userId, senderId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createDate")));
             if (CollectionUtils.isEmpty(list)) {
@@ -72,10 +71,10 @@ public class ChatMessageController extends CrudControllerUtils<UUID, ChatMessage
     }
 
     @Override
-    public ResponseEntity<List<ChatAccountDto>> getChatAccounts(ContextRequestDto requestContext,
-                                                                Long userId,
-                                                                Integer page,
-                                                                Integer size) {
+    public ResponseEntity<List<ChatAccountDto>> getChatAccounts(
+            Long userId,
+            Integer page,
+            Integer size) {
         try {
             List<ChatAccountDto> list = crudService().getChatAccounts(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createDate")));
             if (CollectionUtils.isEmpty(list)) {
@@ -89,8 +88,8 @@ public class ChatMessageController extends CrudControllerUtils<UUID, ChatMessage
     }
 
     @Override
-    public ResponseEntity<List<WsConnectDto>> getChatStatus(ContextRequestDto requestContext,
-                                                            Long tenantId) {
+    public ResponseEntity<List<WsConnectDto>> getChatStatus(
+            Long tenantId) {
         try {
             List<WsConnectDto> list = crudService().getConnectionsByTenant(tenantId);
             if (CollectionUtils.isEmpty(list)) {

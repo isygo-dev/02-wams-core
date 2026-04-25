@@ -7,6 +7,7 @@ import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.service.IAppParameterService;
 import eu.isygoit.service.IMsgService;
+import eu.isygoit.service.RequestContextService;
 import eu.isygoit.types.EmailSubjects;
 import eu.isygoit.types.MsgTemplateVariables;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,8 @@ public class ImsExceptionHandler extends ControllerExceptionHandler {
     private IMsgService msgService;
     @Autowired
     private IAppParameterService appParameterService;
+    @Autowired
+    private RequestContextService requestContextService;
 
     /**
      * Instantiates a new Ims exception handler.

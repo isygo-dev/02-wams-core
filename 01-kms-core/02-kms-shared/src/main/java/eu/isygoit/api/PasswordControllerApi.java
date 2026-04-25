@@ -1,8 +1,6 @@
 package eu.isygoit.api;
 
-import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
 import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.response.AccessTokenResponseDto;
@@ -15,7 +13,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 
 /**
  * The interface Password controller api.
@@ -38,9 +39,9 @@ public interface PasswordControllerApi {
                             schema = @Schema(implementation = Boolean.class))})
     })
     @PostMapping(path = "/generate/{type}")
-    ResponseEntity<Integer> generate(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                     @Valid @PathVariable(name = RestApiConstants.type) IEnumAuth.Types authType,
-                                     @Valid @RequestPart GeneratePwdRequestDto generatePwdRequest);
+    ResponseEntity<Integer> generate(
+            @Valid @PathVariable(name = RestApiConstants.type) IEnumAuth.Types authType,
+            @Valid @RequestPart GeneratePwdRequestDto generatePwdRequest);
 
     /**
      * Reset password via token response entity.
@@ -57,15 +58,14 @@ public interface PasswordControllerApi {
                             schema = @Schema(implementation = String.class))})
     })
     @PostMapping(path = "/reset-password")
-    ResponseEntity<String> resetPasswordViaToken(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                                 @Valid @RequestPart ResetPwdViaTokenRequestDto resetPwdViaTokenRequestDto);
+    ResponseEntity<String> resetPasswordViaToken(
+            @Valid @RequestPart ResetPwdViaTokenRequestDto resetPwdViaTokenRequestDto);
 
     /**
      * Change password response entity.
      *
-     * @param requestContext the request context
-     * @param oldPassword    the old password
-     * @param newPassword    the new password
+     * @param oldPassword the old password
+     * @param newPassword the new password
      * @return the response entity
      */
     @Operation(summary = "changePassword Api",
@@ -77,9 +77,9 @@ public interface PasswordControllerApi {
                             schema = @Schema(implementation = String.class))})
     })
     @PostMapping(path = "/change-password")
-    ResponseEntity<String> changePassword(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                          @RequestParam(name = RestApiConstants.OLD_PASSWORD) String oldPassword,
-                                          @RequestParam(name = RestApiConstants.NEW_PASSWORD) String newPassword);
+    ResponseEntity<String> changePassword(
+            @RequestParam(name = RestApiConstants.OLD_PASSWORD) String oldPassword,
+            @RequestParam(name = RestApiConstants.NEW_PASSWORD) String newPassword);
 
     /**
      * Pattern check response entity.
@@ -96,8 +96,8 @@ public interface PasswordControllerApi {
                             schema = @Schema(implementation = Boolean.class))})
     })
     @PostMapping(path = "/pattern/check")
-    ResponseEntity<Boolean> patternCheck(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                         @Valid @RequestPart CheckPwdRequestDto checkPwdRequest);
+    ResponseEntity<Boolean> patternCheck(
+            @Valid @RequestPart CheckPwdRequestDto checkPwdRequest);
 
     /**
      * Gets access.
@@ -114,8 +114,8 @@ public interface PasswordControllerApi {
                             schema = @Schema(implementation = AccessTokenResponseDto.class))})
     })
     @PostMapping(path = "/access")
-    ResponseEntity<AccessTokenResponseDto> getAccess(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                                     @Valid @RequestPart AccessRequestDto matchPwdRequest);
+    ResponseEntity<AccessTokenResponseDto> getAccess(
+            @Valid @RequestPart AccessRequestDto matchPwdRequest);
 
     /**
      * Matches response entity.
@@ -132,8 +132,8 @@ public interface PasswordControllerApi {
                             schema = @Schema(implementation = IEnumPasswordStatus.Types.class))})
     })
     @PostMapping(path = "/matches")
-    ResponseEntity<IEnumPasswordStatus.Types> matches(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                                      @Valid @RequestPart MatchesRequestDto matchesRequest);
+    ResponseEntity<IEnumPasswordStatus.Types> matches(
+            @Valid @RequestPart MatchesRequestDto matchesRequest);
 
     /**
      * Is password expired response entity.
@@ -150,8 +150,8 @@ public interface PasswordControllerApi {
                             schema = @Schema(implementation = Boolean.class))})
     })
     @PostMapping(path = "/isExpired")
-    ResponseEntity<Boolean> isPasswordExpired(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                              @Valid @RequestPart IsPwdExpiredRequestDto isPwdExpiredRequestDto);
+    ResponseEntity<Boolean> isPasswordExpired(
+            @Valid @RequestPart IsPwdExpiredRequestDto isPwdExpiredRequestDto);
 
     /**
      * Update account response entity.
@@ -168,6 +168,6 @@ public interface PasswordControllerApi {
                             schema = @Schema(implementation = Boolean.class))})
     })
     @PostMapping(path = "/account")
-    ResponseEntity<Boolean> updateAccount(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                          @Valid @RequestPart UpdateAccountRequestDto account);
+    ResponseEntity<Boolean> updateAccount(
+            @Valid @RequestPart UpdateAccountRequestDto account);
 }

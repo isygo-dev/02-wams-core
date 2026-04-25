@@ -1,6 +1,5 @@
 package eu.isygoit.security.config;
 
-import eu.isygoit.filter.jwt.JwtKmsAuthFilter;
 import eu.isygoit.repository.ApiPermissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -17,13 +16,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /**
  * The type Security config.
  */
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private final JwtKmsAuthFilter jwtAuthFilter;
+    private final JwtAuthFilter jwtAuthFilter;
     private final ApiPermissionRepository apiPermissionRepository;
 
     /**

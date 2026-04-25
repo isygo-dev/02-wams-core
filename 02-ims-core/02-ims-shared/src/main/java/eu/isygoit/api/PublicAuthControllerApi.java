@@ -1,8 +1,6 @@
 package eu.isygoit.api;
 
-import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.common.UserContextRequestDto;
 import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.dto.request.AccountAuthTypeRequest;
@@ -20,7 +18,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -110,8 +111,8 @@ public interface PublicAuthControllerApi {
                             schema = @Schema(implementation = Boolean.class))})
     })
     @PostMapping(path = "/updateAuthType")
-    ResponseEntity<Boolean> switchAuthType(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                           @Valid @RequestBody AccountAuthTypeRequest accountAuthTypeRequest);
+    ResponseEntity<Boolean> switchAuthType(
+            @Valid @RequestBody AccountAuthTypeRequest accountAuthTypeRequest);
 
     /**
      * Register new account response entity.

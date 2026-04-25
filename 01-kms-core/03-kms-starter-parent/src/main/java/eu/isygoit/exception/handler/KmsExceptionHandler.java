@@ -7,6 +7,7 @@ import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.service.IMsgService;
+import eu.isygoit.service.RequestContextService;
 import eu.isygoit.types.EmailSubjects;
 import eu.isygoit.types.MsgTemplateVariables;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,8 @@ public class KmsExceptionHandler extends ControllerExceptionHandler {
     private IMsgService msgService;
     @Autowired
     private AppParameterControllerApi appParameterService;
+    @Autowired
+    private RequestContextService requestContextService;
 
     /**
      * Instantiates a new Kms exception handler.

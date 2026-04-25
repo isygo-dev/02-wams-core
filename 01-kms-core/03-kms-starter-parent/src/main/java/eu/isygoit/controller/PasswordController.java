@@ -5,7 +5,6 @@ import eu.isygoit.api.PasswordControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
 import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.response.AccessKeyResponseDto;
@@ -58,6 +57,8 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     private IJwtService jwtService;
     @Autowired
     private ITokenConfigService tokenConfigService;
+    @Autowired
+    private RequestContextService requestContextService;
 
     @Operation(summary = "Generate password Api",
             description = "Generate password")
@@ -68,9 +69,9 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                             schema = @Schema(implementation = Integer.class))})
     })
     @Override
-    public ResponseEntity<Integer> generate(ContextRequestDto requestContext,
-                                            IEnumAuth.Types authType,
-                                            GeneratePwdRequestDto generatePwdRequest) {
+    public ResponseEntity<Integer> generate(
+            IEnumAuth.Types authType,
+            GeneratePwdRequestDto generatePwdRequest) {
         log.info("Call generate password for tenant {}", generatePwdRequest);
         try {
             AccessKeyResponseDto accessKeyResponse = passwordService.generateRandomPassword(
@@ -98,8 +99,8 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                             schema = @Schema(implementation = String.class))})
     })
     @Override
-    public ResponseEntity<String> resetPasswordViaToken(ContextRequestDto requestContext,
-                                                        ResetPwdViaTokenRequestDto resetPwdViaTokenRequestDto) {
+    public ResponseEntity<String> resetPasswordViaToken(
+            ResetPwdViaTokenRequestDto resetPwdViaTokenRequestDto) {
         try {
             passwordService.resetPasswordViaToken(resetPwdViaTokenRequestDto);
             return ResponseFactory.responseOk("password changed successfully");
@@ -118,11 +119,12 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                             schema = @Schema(implementation = String.class))})
     })
     @Override
-    public ResponseEntity<String> changePassword(ContextRequestDto requestContext,
-                                                 String oldPassword,
-                                                 String newPassword) {
+    public ResponseEntity<String> changePassword(
+            String oldPassword,
+            String newPassword) {
         try {
-            passwordService.changePassword(requestContext.getSenderTenant(), requestContext.getSenderUser(),
+            passwordService.changePassword(requestContextService.getCurrentContext().getSenderTenant(),
+                    requestContextService.getCurrentContext().getSenderUser(),
                     oldPassword, newPassword);
             return ResponseFactory.responseOk("password changed successfully");
         } catch (Throwable e) {
@@ -140,8 +142,8 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                             schema = @Schema(implementation = Boolean.class))})
     })
     @Override
-    public ResponseEntity<Boolean> patternCheck(ContextRequestDto requestContext,
-                                                CheckPwdRequestDto checkPwdRequest) {
+    public ResponseEntity<Boolean> patternCheck(
+            CheckPwdRequestDto checkPwdRequest) {
         log.info("Call check password for tenant {}", checkPwdRequest);
         try {
             return ResponseFactory.responseOk(passwordService.checkForPattern(checkPwdRequest.getTenant()
@@ -161,8 +163,8 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                             schema = @Schema(implementation = AccessTokenResponseDto.class))})
     })
     @Override
-    public ResponseEntity<AccessTokenResponseDto> getAccess(ContextRequestDto requestContext,
-                                                            AccessRequestDto accessRequest) {
+    public ResponseEntity<AccessTokenResponseDto> getAccess(
+            AccessRequestDto accessRequest) {
         log.info("Call access for tenant {}", accessRequest);
         try {
             if (!tenantService.isEnabled(accessRequest.getTenant().trim().toLowerCase())) {
@@ -238,8 +240,8 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                             schema = @Schema(implementation = IEnumPasswordStatus.Types.class))})
     })
     @Override
-    public ResponseEntity<IEnumPasswordStatus.Types> matches(ContextRequestDto requestContext,
-                                                             MatchesRequestDto matchesRequest) {
+    public ResponseEntity<IEnumPasswordStatus.Types> matches(
+            MatchesRequestDto matchesRequest) {
         log.info("Call match password for tenant {}", matchesRequest);
         try {
             return ResponseFactory.responseOk(passwordService.matches(matchesRequest.getTenant()
@@ -261,8 +263,8 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                             schema = @Schema(implementation = Boolean.class))})
     })
     @Override
-    public ResponseEntity<Boolean> isPasswordExpired(ContextRequestDto requestContext,
-                                                     IsPwdExpiredRequestDto isPwdExpiredRequestDto) {
+    public ResponseEntity<Boolean> isPasswordExpired(
+            IsPwdExpiredRequestDto isPwdExpiredRequestDto) {
         log.info("Call isPasswordExpired {}", isPwdExpiredRequestDto);
         try {
             return ResponseFactory.responseOk(passwordService.isExpired(isPwdExpiredRequestDto.getTenant().trim().toLowerCase()
@@ -284,8 +286,8 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                             schema = @Schema(implementation = Boolean.class))})
     })
     @Override
-    public ResponseEntity<Boolean> updateAccount(ContextRequestDto requestContext,
-                                                 UpdateAccountRequestDto account) {
+    public ResponseEntity<Boolean> updateAccount(
+            UpdateAccountRequestDto account) {
         log.info("Call update account " + account.toString());
         try {
             return ResponseFactory.responseOk(accountService.checkIfExists(accountMapper.dtoToEntity(account),

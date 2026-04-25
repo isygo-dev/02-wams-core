@@ -4,7 +4,6 @@ import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
-import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.common.ContextRequestDto;
@@ -25,7 +24,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -45,9 +47,8 @@ public class AppController extends MappedCrudTenantController<Long, Application,
     /**
      * Update status response entity.
      *
-     * @param requestContext the request context
-     * @param id             the id
-     * @param newStatus      the new status
+     * @param id        the id
+     * @param newStatus the new status
      * @return the response entity
      */
     @Operation(summary = "Update application status Api",
@@ -59,9 +60,9 @@ public class AppController extends MappedCrudTenantController<Long, Application,
                             schema = @Schema(implementation = ApplicationDto.class))})
     })
     @PutMapping(path = "/update-status")
-    public ResponseEntity<ApplicationDto> updateStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) ContextRequestDto requestContext,
-                                                       @RequestParam(name = RestApiConstants.ID) Long id,
-                                                       @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus) {
+    public ResponseEntity<ApplicationDto> updateStatus(
+            @RequestParam(name = RestApiConstants.ID) Long id,
+            @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus) {
         log.info("in update status");
         try {
             return ResponseFactory.responseOk(mapper().entityToDto(crudService().updateStatus(id, newStatus)));

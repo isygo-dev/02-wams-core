@@ -3,7 +3,6 @@ package eu.isygoit.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.AppParameterConstants;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
 import eu.isygoit.dto.common.UserContextRequestDto;
 import eu.isygoit.dto.data.MailMessageDto;
@@ -92,7 +91,7 @@ public class PasswordService implements IPasswordService {
                 //Get gateway url
                 String gatewayUrl = "http://localhost:4001";
                 try {
-                    ResponseEntity<String> result = imsAppParameterService.getValueByTenantAndName(ContextRequestDto.builder().build(),
+                    ResponseEntity<String> result = imsAppParameterService.getValueByTenantAndName(
                             tenant, AppParameterConstants.GATEWAY_URL, true, gatewayUrl);
                     if (result.getStatusCode().is2xxSuccessful() && result.hasBody() && StringUtils.hasText(result.getBody())) {
                         gatewayUrl = result.getBody();

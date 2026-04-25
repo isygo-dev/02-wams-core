@@ -4,14 +4,13 @@ import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
-import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.AccountGlobalStatDto;
 import eu.isygoit.dto.data.AccountStatDto;
 import eu.isygoit.enums.IEnumSharedStatType;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.service.IAccountService;
+import eu.isygoit.service.RequestContextService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,7 +20,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 
 /**
@@ -36,12 +38,13 @@ public class AccountStatisticsController extends ControllerExceptionHandler {
 
     @Autowired
     private IAccountService accountService;
+    @Autowired
+    private RequestContextService requestContextService;
 
     /**
      * Gets global statistics.
      *
-     * @param requestContext the request context
-     * @param statType       the stat type
+     * @param statType the stat type
      * @return the global statistics
      */
     @Operation(summary = "Get Global Statistics Api",
@@ -53,11 +56,11 @@ public class AccountStatisticsController extends ControllerExceptionHandler {
                             schema = @Schema(implementation = AccountGlobalStatDto.class))})
     })
     @GetMapping(path = "/global")
-    ResponseEntity<AccountGlobalStatDto> getGlobalStatistics(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) ContextRequestDto requestContext,
-                                                             @RequestParam(name = RestApiConstants.STAT_TYPE) IEnumSharedStatType.Types statType) {
+    ResponseEntity<AccountGlobalStatDto> getGlobalStatistics(
+            @RequestParam(name = RestApiConstants.STAT_TYPE) IEnumSharedStatType.Types statType) {
         log.info("Get global statistics");
         try {
-            return ResponseFactory.responseOk(accountService.getGlobalStatistics(statType, requestContext));
+            return ResponseFactory.responseOk(accountService.getGlobalStatistics(statType, requestContextService.getCurrentContext()));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -67,8 +70,7 @@ public class AccountStatisticsController extends ControllerExceptionHandler {
     /**
      * Gets object statistics.
      *
-     * @param requestContext the request context
-     * @param code           the code
+     * @param code the code
      * @return the object statistics
      */
     @Operation(summary = "Get Object Statistics Api",
@@ -80,8 +82,8 @@ public class AccountStatisticsController extends ControllerExceptionHandler {
                             schema = @Schema(implementation = AccountStatDto.class))})
     })
     @GetMapping(path = "/object")
-    ResponseEntity<AccountStatDto> getObjectStatistics(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) ContextRequestDto requestContext,
-                                                       @RequestParam(name = RestApiConstants.CODE) String code) {
+    ResponseEntity<AccountStatDto> getObjectStatistics(
+            @RequestParam(name = RestApiConstants.CODE) String code) {
         log.info("Get object statistics with code: ", code);
         try {
             return ResponseFactory.responseOk(accountService.getObjectStatistics(code));

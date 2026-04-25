@@ -6,7 +6,6 @@ import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.constants.TenantConstants;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.VCalendarEventDto;
 import eu.isygoit.exception.CalendarNotFoundException;
 import eu.isygoit.exception.handler.CmsExceptionHandler;
@@ -110,9 +109,9 @@ public class VEventController extends MappedCrudTenantController<Long, VCalendar
     }
 
     @Override
-    public ResponseEntity<VCalendarEventDto> eventByTenantAndCalendarAndCode(ContextRequestDto requestContext,
-                                                                             String tenant, String calendar,
-                                                                             String code) {
+    public ResponseEntity<VCalendarEventDto> eventByTenantAndCalendarAndCode(
+            String tenant, String calendar,
+            String code) {
         try {
             Optional<VCalendarEvent> event = this.crudService().findByTenantAndCalendarAndCode(tenant, calendar, code);
             if (event.isPresent()) {
@@ -126,8 +125,8 @@ public class VEventController extends MappedCrudTenantController<Long, VCalendar
     }
 
     @Override
-    public ResponseEntity<List<VCalendarEventDto>> getAllByTenantAndCalendarName(ContextRequestDto requestContext,
-                                                                                 String tenant, String calendar) {
+    public ResponseEntity<List<VCalendarEventDto>> getAllByTenantAndCalendarName(
+            String tenant, String calendar) {
         try {
             List<VCalendarEventDto> listEvent =
                     this.mapper().listEntityToDto(this.crudService().findByTenantAndCalendar(tenant, calendar));
@@ -142,10 +141,9 @@ public class VEventController extends MappedCrudTenantController<Long, VCalendar
     }
 
     @Override
-    public ResponseEntity<VCalendarEventDto> saveEvent(ContextRequestDto requestContext,
-                                                       VCalendarEventDto event) {
+    public ResponseEntity<VCalendarEventDto> saveEvent(VCalendarEventDto event) {
         try {
-            return ResponseFactory.responseOk(this.mapper().entityToDto(this.crudService().create(requestContext.getSenderTenant(),
+            return ResponseFactory.responseOk(this.mapper().entityToDto(this.crudService().create(getRequestContextService().getCurrentContext().getSenderTenant(),
                     this.mapper().dtoToEntity(event))));
         } catch (Exception ex) {
             return getBackExceptionResponse(ex);
@@ -153,12 +151,12 @@ public class VEventController extends MappedCrudTenantController<Long, VCalendar
     }
 
     @Override
-    public ResponseEntity<VCalendarEventDto> updateEvent(ContextRequestDto requestContext,
-                                                         Long id,
-                                                         VCalendarEventDto event) {
+    public ResponseEntity<VCalendarEventDto> updateEvent(
+            Long id,
+            VCalendarEventDto event) {
         try {
-            this.crudService().findById(requestContext.getSenderTenant(), id);
-            return ResponseFactory.responseOk(this.mapper().entityToDto(this.crudService().update(requestContext.getSenderTenant(),
+            this.crudService().findById(getRequestContextService().getCurrentContext().getSenderTenant(), id);
+            return ResponseFactory.responseOk(this.mapper().entityToDto(this.crudService().update(getRequestContextService().getCurrentContext().getSenderTenant(),
                     this.mapper().dtoToEntity(event))));
         } catch (Exception ex) {
             return getBackExceptionResponse(ex);

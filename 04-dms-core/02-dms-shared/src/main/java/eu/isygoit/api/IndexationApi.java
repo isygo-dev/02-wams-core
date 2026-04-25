@@ -1,7 +1,5 @@
 package eu.isygoit.api;
 
-import eu.isygoit.constants.JwtConstants;
-import eu.isygoit.dto.common.ContextRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,9 +24,8 @@ public interface IndexationApi {
     /**
      * Calc keys occurrences response entity.
      *
-     * @param requestContext the request context
-     * @param keys           the keys
-     * @param file           the file
+     * @param keys the keys
+     * @param file the file
      * @return the response entity
      */
     @Operation(summary = "calcKeysOccurrences Api",
@@ -40,7 +37,7 @@ public interface IndexationApi {
                             schema = @Schema(implementation = Map.class))})
     })
     @PostMapping(path = "/keys/occurrences", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    ResponseEntity<Map<String, Integer>> calcKeysOccurrences(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                                             @RequestAttribute("keys") String[] keys,
-                                                             @Valid @RequestBody MultipartFile file);
+    ResponseEntity<Map<String, Integer>> calcKeysOccurrences(
+            @RequestAttribute("keys") String[] keys,
+            @Valid @RequestBody MultipartFile file);
 }

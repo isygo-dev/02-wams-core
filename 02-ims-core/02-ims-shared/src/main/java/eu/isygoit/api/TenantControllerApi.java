@@ -1,9 +1,7 @@
 package eu.isygoit.api;
 
 import eu.isygoit.com.rest.api.IMappedCrudApi;
-import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,7 +10,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -25,9 +25,8 @@ public interface TenantControllerApi extends IMappedCrudApi<Long, TenantDto, Ten
     /**
      * Update admin status response entity.
      *
-     * @param requestContext the request context
-     * @param id             the id
-     * @param newStatus      the new status
+     * @param id        the id
+     * @param newStatus the new status
      * @return the response entity
      */
     @Operation(summary = "Update tenant status Api",
@@ -39,14 +38,13 @@ public interface TenantControllerApi extends IMappedCrudApi<Long, TenantDto, Ten
                             schema = @Schema(implementation = TenantDto.class))})
     })
     @PutMapping(path = "/update-status")
-    ResponseEntity<TenantDto> updateAdminStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                                @RequestParam(name = RestApiConstants.ID) Long id,
-                                                @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus);
+    ResponseEntity<TenantDto> updateAdminStatus(
+            @RequestParam(name = RestApiConstants.ID) Long id,
+            @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus);
 
     /**
      * Gets all tenant names.
      *
-     * @param requestContext the request context
      * @return the all tenant names
      */
     @Operation(summary = "Get all tenant names Api",
@@ -58,12 +56,11 @@ public interface TenantControllerApi extends IMappedCrudApi<Long, TenantDto, Ten
                             schema = @Schema(implementation = String.class))})
     })
     @GetMapping(path = "/names")
-    ResponseEntity<List<String>> getAllDomainNames(@RequestPart(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
+    ResponseEntity<List<String>> getAllDomainNames();
 
     /**
      * Gets by name.
      *
-     * @param requestContext the request context
      * @return the by name
      */
     @Operation(summary = "Get tenant by name Api",
@@ -75,7 +72,7 @@ public interface TenantControllerApi extends IMappedCrudApi<Long, TenantDto, Ten
                             schema = @Schema(implementation = TenantDto.class))})
     })
     @GetMapping(path = "/name")
-    ResponseEntity<TenantDto> getByName(@RequestPart(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext);
+    ResponseEntity<TenantDto> getByName();
 
     @Operation(summary = "Update tenant social link Api",
             description = "Update tenant social link")
@@ -86,8 +83,8 @@ public interface TenantControllerApi extends IMappedCrudApi<Long, TenantDto, Ten
                             schema = @Schema(implementation = TenantDto.class))})
     })
     @PutMapping(path = "/social")
-    ResponseEntity<TenantDto> updateSocialLink(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                               @RequestParam(name = RestApiConstants.ID) Long id,
-                                               @RequestParam(name = RestApiConstants.SOCIAL) String social,
-                                               @RequestParam(name = RestApiConstants.LINK) String link);
+    ResponseEntity<TenantDto> updateSocialLink(
+            @RequestParam(name = RestApiConstants.ID) Long id,
+            @RequestParam(name = RestApiConstants.SOCIAL) String social,
+            @RequestParam(name = RestApiConstants.LINK) String link);
 }

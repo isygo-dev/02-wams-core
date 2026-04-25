@@ -162,7 +162,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
                     .distinct()
                     .map(application -> {
                         ApplicationDto app = applicationMapper.entityToDto(application);
-                        app.setToken(kmsTokenService.buildTokenByTenant(ContextRequestDto.builder().build(),
+                        app.setToken(kmsTokenService.buildTokenByTenant(
                                 account.getTenant(),
                                 application.getName(),
                                 IEnumToken.Types.ACCESS,
@@ -180,7 +180,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
                     .distinct().
                     map(application -> {
                         ApplicationDto app = applicationMapper.entityToDto(application);
-                        app.setToken(kmsTokenService.buildTokenByTenant(ContextRequestDto.builder().build(),
+                        app.setToken(kmsTokenService.buildTokenByTenant(
                                 account.getTenant(),
                                 application.getName(),
                                 IEnumToken.Types.ACCESS,
@@ -228,7 +228,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
         if (account != null) {
             if (IEnumAuth.Types.OTP == account.getAuthType()) {
                 try {
-                    ResponseEntity<Integer> result = kmsPasswordService.generate(ContextRequestDto.builder().build(),
+                    ResponseEntity<Integer> result = kmsPasswordService.generate(
                             IEnumAuth.Types.OTP,
                             GeneratePwdRequestDto.builder()
                                     .tenant(account.getTenant())
@@ -251,7 +251,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
 
             } else if (IEnumAuth.Types.QRC == account.getAuthType()) {
                 try {
-                    ResponseEntity<TokenResponseDto> result = kmsTokenService.buildTokenByTenant(ContextRequestDto.builder().build(),
+                    ResponseEntity<TokenResponseDto> result = kmsTokenService.buildTokenByTenant(
                             account.getTenant(),
                             IEnumAuth.Types.QRC.meaning(),
                             IEnumToken.Types.QRC,
@@ -375,7 +375,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
             return Collections.EMPTY_LIST;
         }
         try {
-            ResponseEntity<List<WsConnectDto>> result = mmsChatMessageService.getChatStatus(ContextRequestDto.builder().build(),
+            ResponseEntity<List<WsConnectDto>> result = mmsChatMessageService.getChatStatus(
                     tenantService.findByName(tenant).getId());
             if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
                 List<WsConnectDto> connections = result.getBody();
@@ -404,7 +404,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
             Optional<Account> optional = this.findById(tenant, id);
             if (optional.isPresent()) {
                 Account account = optional.get();
-                ResponseEntity<Integer> result = kmsPasswordService.generate(ContextRequestDto.builder().build(),
+                ResponseEntity<Integer> result = kmsPasswordService.generate(
                         IEnumAuth.Types.PWD,
                         GeneratePwdRequestDto.builder()
                                 .tenant(account.getTenant())

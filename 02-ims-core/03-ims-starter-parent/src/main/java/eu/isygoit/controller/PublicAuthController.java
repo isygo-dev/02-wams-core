@@ -7,7 +7,6 @@ import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.config.JwtProperties;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.common.SystemInfoResponseDto;
 import eu.isygoit.dto.common.UserContextRequestDto;
 import eu.isygoit.dto.data.TenantDto;
@@ -29,10 +28,7 @@ import eu.isygoit.mapper.ThemeMapper;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.Tenant;
 import eu.isygoit.remote.kms.KmsPublicPasswordService;
-import eu.isygoit.service.IAccountService;
-import eu.isygoit.service.IAuthService;
-import eu.isygoit.service.ITenantService;
-import eu.isygoit.service.IThemeService;
+import eu.isygoit.service.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -77,6 +73,8 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     private ThemeMapper themeMapper;
     @Autowired
     private TenantMapper tenantMapper;
+    @Autowired
+    private RequestContextService requestContextService;
 
     /**
      * Instantiates a new Public auth controller.
@@ -209,10 +207,10 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     }
 
     @Override
-    public ResponseEntity<Boolean> switchAuthType(ContextRequestDto requestContext,
-                                                  AccountAuthTypeRequest accountAuthTypeRequest) {
+    public ResponseEntity<Boolean> switchAuthType(
+            AccountAuthTypeRequest accountAuthTypeRequest) {
         try {
-            return ResponseFactory.responseOk(accountService.switchAuthType(requestContext.getSenderTenant(), accountAuthTypeRequest));
+            return ResponseFactory.responseOk(accountService.switchAuthType(requestContextService.getCurrentContext().getSenderTenant(), accountAuthTypeRequest));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

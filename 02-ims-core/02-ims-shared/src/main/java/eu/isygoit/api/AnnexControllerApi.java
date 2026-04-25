@@ -1,9 +1,7 @@
 package eu.isygoit.api;
 
 import eu.isygoit.com.rest.api.IMappedCrudApi;
-import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.AnnexDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,7 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -25,8 +22,7 @@ public interface AnnexControllerApi extends IMappedCrudApi<Long, AnnexDto, Annex
     /**
      * Gets annex by code.
      *
-     * @param requestContext the request context
-     * @param code           the code
+     * @param code the code
      * @return the annex by code
      */
     @Operation(summary = "Get Annex by code Api",
@@ -38,8 +34,8 @@ public interface AnnexControllerApi extends IMappedCrudApi<Long, AnnexDto, Annex
                             schema = @Schema(implementation = AnnexDto.class))})
     })
     @GetMapping(path = "/byCode")
-    ResponseEntity<List<AnnexDto>> getAnnexByTableCode(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                                       @RequestParam(name = RestApiConstants.CODE) String code);
+    ResponseEntity<List<AnnexDto>> getAnnexByTableCode(
+            @RequestParam(name = RestApiConstants.CODE) String code);
 
     @Operation(summary = "Get Annex by code and reference Api",
             description = "Get Annex by code and reference")
@@ -50,7 +46,7 @@ public interface AnnexControllerApi extends IMappedCrudApi<Long, AnnexDto, Annex
                             schema = @Schema(implementation = AnnexDto.class))})
     })
     @GetMapping(path = "/byCodeAndRef")
-    ResponseEntity<List<AnnexDto>> getAnnexByTableCodeAndReference(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                                                   @RequestParam(name = RestApiConstants.CODE) String code,
-                                                                   @RequestParam(name = RestApiConstants.REFERENCE) String reference);
+    ResponseEntity<List<AnnexDto>> getAnnexByTableCodeAndReference(
+            @RequestParam(name = RestApiConstants.CODE) String code,
+            @RequestParam(name = RestApiConstants.REFERENCE) String reference);
 }

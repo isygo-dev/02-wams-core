@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.AppParameterConstants;
 import eu.isygoit.constants.JwtConstants;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.common.TokenResponseDto;
 import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
@@ -170,7 +169,7 @@ public class TokenService extends JwtService implements ITokenService {
         //Build Email template data
         String resetPwdUrl = "http://localhost:4000/reset-password/";
         try {
-            ResponseEntity<String> result = imsAppParameterService.getValueByTenantAndName(ContextRequestDto.builder().build(),
+            ResponseEntity<String> result = imsAppParameterService.getValueByTenantAndName(
                     tenant, AppParameterConstants.APPURL + "." + application.toUpperCase(), true, "http://localhost:4000/reset-password/");
             if (result.getStatusCode().is2xxSuccessful() && result.hasBody() && StringUtils.hasText(result.getBody())) {
                 resetPwdUrl = result.getBody();

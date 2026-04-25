@@ -1,9 +1,7 @@
 package eu.isygoit.api;
 
 import eu.isygoit.com.rest.api.IMappedCrudApi;
-import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.KmsTenantDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,7 +11,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 /**
@@ -24,9 +25,8 @@ public interface KmsTenantControllerApi extends IMappedCrudApi<Long, KmsTenantDt
     /**
      * Update admin status response entity.
      *
-     * @param requestContext the request context
-     * @param tenant         the tenant
-     * @param newStatus      the new status
+     * @param tenant    the tenant
+     * @param newStatus the new status
      * @return the response entity
      */
     @Operation(summary = "updateAdminStatus Api",
@@ -38,9 +38,9 @@ public interface KmsTenantControllerApi extends IMappedCrudApi<Long, KmsTenantDt
                             schema = @Schema(implementation = KmsTenantDto.class))})
     })
     @PutMapping(path = "/update-status")
-    ResponseEntity<KmsTenantDto> updateAdminStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                                   @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
-                                                   @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus);
+    ResponseEntity<KmsTenantDto> updateAdminStatus(
+            @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
+            @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus);
 
     /**
      * Update tenant response entity.
@@ -57,6 +57,5 @@ public interface KmsTenantControllerApi extends IMappedCrudApi<Long, KmsTenantDt
                             schema = @Schema(implementation = Boolean.class))})
     })
     @PostMapping(path = "/update")
-    ResponseEntity<Boolean> updateDomain(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT, required = false) ContextRequestDto requestContext,
-                                         @Valid @RequestBody KmsTenantDto tenant);
+    ResponseEntity<Boolean> updateDomain(@Valid @RequestBody KmsTenantDto tenant);
 }

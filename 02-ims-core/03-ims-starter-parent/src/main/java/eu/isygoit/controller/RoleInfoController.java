@@ -141,17 +141,17 @@ public class RoleInfoController extends MappedCrudTenantController<Long, RoleInf
     public List<RoleInfoDto> afterFindAllFull(ContextRequestDto requestContext, List<RoleInfoDto> list) {
         if (!CollectionUtils.isEmpty(list)) {
             //filter roles
-            list = crudService().filterNotAllowedRoles(requestContext, list);
+            list = crudService().filterNotAllowedRoles(getRequestContextService().getCurrentContext(), list);
         }
-        return super.afterFindAllFull(requestContext, list);
+        return super.afterFindAllFull(getRequestContextService().getCurrentContext(), list);
     }
 
     @Override
     public List<RoleInfoDto> afterFindAll(ContextRequestDto requestContext, List<RoleInfoDto> list) {
         if (!CollectionUtils.isEmpty(list)) {
             //filter roles
-            list = crudService().filterNotAllowedRoles(requestContext, list);
+            list = crudService().filterNotAllowedRoles(getRequestContextService().getCurrentContext(), list);
         }
-        return super.afterFindAll(requestContext, list);
+        return super.afterFindAll(getRequestContextService().getCurrentContext(), list);
     }
 }

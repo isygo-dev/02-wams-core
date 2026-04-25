@@ -5,7 +5,6 @@ import eu.isygoit.api.KmsTenantControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.KmsTenantDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
@@ -45,9 +44,9 @@ public class KmsTenantController extends MappedCrudController<Long, Tenant, KmsT
                             schema = @Schema(implementation = KmsTenantDto.class))})
     })
     @Override
-    public ResponseEntity<KmsTenantDto> updateAdminStatus(ContextRequestDto requestContext,
-                                                          String tenant,
-                                                          IEnumEnabledBinaryStatus.Types newStatus) {
+    public ResponseEntity<KmsTenantDto> updateAdminStatus(
+            String tenant,
+            IEnumEnabledBinaryStatus.Types newStatus) {
         log.info("in update status");
         try {
             return ResponseFactory.responseOk(mapper().entityToDto(crudService().updateAdminStatus(tenant, newStatus)));
@@ -58,8 +57,8 @@ public class KmsTenantController extends MappedCrudController<Long, Tenant, KmsT
     }
 
     @Override
-    public ResponseEntity<Boolean> updateDomain(ContextRequestDto requestContext,
-                                                KmsTenantDto tenant) {
+    public ResponseEntity<Boolean> updateDomain(
+            KmsTenantDto tenant) {
         log.info("Call update tenant " + tenant.toString());
         try {
             return ResponseFactory.responseOk(crudService().checkIfExists(mapper().dtoToEntity(tenant),

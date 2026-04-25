@@ -5,7 +5,6 @@ import eu.isygoit.api.IncrementalKeyControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.common.NextCodeDto;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.model.AppNextCode;
@@ -46,8 +45,8 @@ public class IncrementalKeyController extends ControllerExceptionHandler impleme
                             schema = @Schema(implementation = String.class))})
     })
     @Override
-    public ResponseEntity<String> generateNextCode(ContextRequestDto requestContext,
-                                                   String tenant, String entity, String attribute) {
+    public ResponseEntity<String> generateNextCode(
+            String tenant, String entity, String attribute) {
         log.info("Call generate next code for: {}/{}/{}", tenant, entity, attribute);
         try {
             return ResponseFactory.responseOk(keyService.getIncrementalKey(tenant, entity, attribute));
@@ -66,8 +65,8 @@ public class IncrementalKeyController extends ControllerExceptionHandler impleme
                             schema = @Schema(implementation = String.class))})
     })
     @Override
-    public ResponseEntity<String> subscribeNextCode(ContextRequestDto requestContext,
-                                                    String tenant, NextCodeDto incrementalConfig) {
+    public ResponseEntity<String> subscribeNextCode(
+            String tenant, NextCodeDto incrementalConfig) {
         log.info("Call subscribe next code generator for: {}/{}", tenant, incrementalConfig);
         try {
             keyService.subscribeIncrementalKeyGenerator(AppNextCode.builder()

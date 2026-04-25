@@ -4,7 +4,6 @@ import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.api.WebSocketControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.wsocket.WsMessageWrapperDto;
 import eu.isygoit.exception.handler.MmsExceptionHandler;
 import eu.isygoit.service.IWebSocketService;
@@ -29,8 +28,8 @@ public class WebSocketController extends ControllerExceptionHandler implements W
     private IWebSocketService webSocketService;
 
     @Override
-    public ResponseEntity<?> sendMessageToUser(ContextRequestDto requestContext,
-                                               Long recieverId, WsMessageWrapperDto message) {
+    public ResponseEntity<?> sendMessageToUser(
+            Long recieverId, WsMessageWrapperDto message) {
         try {
             webSocketService.saveAndSendToUser(recieverId, message);
             return ResponseFactory.responseOk();
@@ -40,8 +39,8 @@ public class WebSocketController extends ControllerExceptionHandler implements W
     }
 
     @Override
-    public ResponseEntity<?> sendMessageToGroup(ContextRequestDto requestContext,
-                                                Long groupId, WsMessageWrapperDto message) {
+    public ResponseEntity<?> sendMessageToGroup(
+            Long groupId, WsMessageWrapperDto message) {
         try {
             webSocketService.saveAndSendToGroup(groupId, message);
             return ResponseFactory.responseOk();
@@ -51,8 +50,8 @@ public class WebSocketController extends ControllerExceptionHandler implements W
     }
 
     @Override
-    public ResponseEntity<?> sendMessageToAll(ContextRequestDto requestContext,
-                                              WsMessageWrapperDto message) {
+    public ResponseEntity<?> sendMessageToAll(
+            WsMessageWrapperDto message) {
         try {
             webSocketService.saveAndSendToAll(message);
             return ResponseFactory.responseOk();

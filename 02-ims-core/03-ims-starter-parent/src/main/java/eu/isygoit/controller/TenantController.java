@@ -5,7 +5,6 @@ import eu.isygoit.api.TenantControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.KmsTenantDto;
 import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
@@ -41,7 +40,7 @@ public class TenantController extends MappedCrudTenantController<Long, Tenant, T
     @Override
     public Tenant afterUpdate(Tenant tenant) {
         try {
-            ResponseEntity<Boolean> result = kmsDomainService.updateDomain(ContextRequestDto.builder().build(),
+            ResponseEntity<Boolean> result = kmsDomainService.updateDomain(
                     KmsTenantDto.builder()
                             .name(tenant.getName())
                             .description(tenant.getDescription())
@@ -60,14 +59,14 @@ public class TenantController extends MappedCrudTenantController<Long, Tenant, T
     }
 
     @Override
-    public ResponseEntity<TenantDto> updateAdminStatus(ContextRequestDto requestContext,
-                                                       Long id,
-                                                       IEnumEnabledBinaryStatus.Types newStatus) {
+    public ResponseEntity<TenantDto> updateAdminStatus(
+            Long id,
+            IEnumEnabledBinaryStatus.Types newStatus) {
         log.info("in update status");
         try {
             TenantDto tenant = mapper().entityToDto(crudService().updateAdminStatus(id, newStatus));
             try {
-                ResponseEntity<KmsTenantDto> result = kmsDomainService.updateAdminStatus(ContextRequestDto.builder().build(),
+                ResponseEntity<KmsTenantDto> result = kmsDomainService.updateAdminStatus(
                         tenant.getName(), newStatus);
                 if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
                     return ResponseFactory.responseOk(tenant);
@@ -86,10 +85,10 @@ public class TenantController extends MappedCrudTenantController<Long, Tenant, T
     }
 
     @Override
-    public ResponseEntity<List<String>> getAllDomainNames(ContextRequestDto requestContext) {
-        log.info("getAllDomainNames {}", requestContext.getSenderTenant());
+    public ResponseEntity<List<String>> getAllDomainNames() {
+        log.info("getAllDomainNames {}", getRequestContextService().getCurrentContext().getSenderTenant());
         try {
-            return ResponseFactory.responseOk(crudService().getAllDomainNames(requestContext.getSenderTenant()));
+            return ResponseFactory.responseOk(crudService().getAllDomainNames(getRequestContextService().getCurrentContext().getSenderTenant()));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -97,10 +96,10 @@ public class TenantController extends MappedCrudTenantController<Long, Tenant, T
     }
 
     @Override
-    public ResponseEntity<TenantDto> getByName(ContextRequestDto requestContext) {
-        log.info("get by name {}", requestContext.getSenderTenant());
+    public ResponseEntity<TenantDto> getByName() {
+        log.info("get by name {}", getRequestContextService().getCurrentContext().getSenderTenant());
         try {
-            return ResponseFactory.responseOk(mapper().entityToDto(crudService().findByName(requestContext.getSenderTenant())));
+            return ResponseFactory.responseOk(mapper().entityToDto(crudService().findByName(getRequestContextService().getCurrentContext().getSenderTenant())));
         } catch (Throwable e) {
             log.error("<Error>: get by name : {} ", e);
             return getBackExceptionResponse(e);
@@ -108,10 +107,10 @@ public class TenantController extends MappedCrudTenantController<Long, Tenant, T
     }
 
     @Override
-    public ResponseEntity<TenantDto> updateSocialLink(ContextRequestDto requestContext, Long id, String social, String link) {
+    public ResponseEntity<TenantDto> updateSocialLink(Long id, String social, String link) {
         log.info("update Social Link ");
         try {
-            return ResponseFactory.responseOk(mapper().entityToDto(crudService().updateSocialLink(requestContext.getSenderTenant(), id, social, link)));
+            return ResponseFactory.responseOk(mapper().entityToDto(crudService().updateSocialLink(getRequestContextService().getCurrentContext().getSenderTenant(), id, social, link)));
         } catch (Throwable e) {
             log.error("<Error>: update Social Link : {} ", e);
             return getBackExceptionResponse(e);

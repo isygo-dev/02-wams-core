@@ -4,9 +4,7 @@ import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
-import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.VCalendarDto;
 import eu.isygoit.exception.handler.CmsExceptionHandler;
 import eu.isygoit.mapper.VCalendarMapper;
@@ -46,9 +44,8 @@ public class VCalendarController extends MappedCrudTenantController<Long, VCalen
     /**
      * Download response entity.
      *
-     * @param requestContext the request context
-     * @param tenant         the tenant
-     * @param name           the name
+     * @param tenant the tenant
+     * @param name   the name
      * @return the response entity
      * @throws IOException the io exception
      */
@@ -61,9 +58,9 @@ public class VCalendarController extends MappedCrudTenantController<Long, VCalen
                             schema = @Schema(implementation = Resource.class))})
     })
     @GetMapping(path = "/ics/download", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Resource> download(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) ContextRequestDto requestContext,
-                                             @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
-                                             @RequestParam(name = RestApiConstants.NAME) String name) throws IOException {
+    public ResponseEntity<Resource> download(
+            @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
+            @RequestParam(name = RestApiConstants.NAME) String name) throws IOException {
         try {
             Resource resource = vCalendarService.download(tenant, name);
             Path path = resource.getFile().toPath();
@@ -87,9 +84,9 @@ public class VCalendarController extends MappedCrudTenantController<Long, VCalen
                             schema = @Schema(implementation = VCalendarDto.class))})
     })
     @PutMapping(path = "/locked-status")
-    public ResponseEntity<VCalendarDto> updateLockedCalendarStatus(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) ContextRequestDto requestContext,
-                                                                   @RequestParam(name = RestApiConstants.ID) Long id,
-                                                                   @RequestParam(name = RestApiConstants.IS_LOCKED) Boolean locked) {
+    public ResponseEntity<VCalendarDto> updateLockedCalendarStatus(
+            @RequestParam(name = RestApiConstants.ID) Long id,
+            @RequestParam(name = RestApiConstants.IS_LOCKED) Boolean locked) {
         try {
             return ResponseFactory.responseOk(mapper().entityToDto(crudService().updateLockedStatus(id, locked)));
         } catch (Throwable e) {

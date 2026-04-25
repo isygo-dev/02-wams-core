@@ -3,9 +3,7 @@ package eu.isygoit.controller;
 import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
-import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.RestApiConstants;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.StorageConfigDto;
 import eu.isygoit.dto.extendable.IdAssignableDto;
 import eu.isygoit.exception.handler.SmsExceptionHandler;
@@ -20,7 +18,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * The type Storage config controller.
@@ -36,8 +37,7 @@ public class StorageConfigController extends MappedCrudTenantController<Long, St
     /**
      * Find by tenant ignore case response entity.
      *
-     * @param requestContext the request context
-     * @param tenant         the tenant
+     * @param tenant the tenant
      * @return the response entity
      */
     @Operation(summary = "findByTenantIgnoreCase Api",
@@ -49,8 +49,8 @@ public class StorageConfigController extends MappedCrudTenantController<Long, St
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @GetMapping(path = "/tenant/{tenant}")
-    public ResponseEntity<StorageConfigDto> findByTenantIgnoreCase(@RequestAttribute(value = JwtConstants.JWT_USER_CONTEXT) ContextRequestDto requestContext,
-                                                                   @PathVariable(name = RestApiConstants.TENANT_NAME) String tenant) {
+    public ResponseEntity<StorageConfigDto> findByTenantIgnoreCase(
+            @PathVariable(name = RestApiConstants.TENANT_NAME) String tenant) {
         try {
             return ResponseFactory.responseOk(this.mapper().entityToDto(crudService().findByTenantIgnoreCase(tenant)));
         } catch (Throwable e) {

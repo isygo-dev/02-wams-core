@@ -2,7 +2,6 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedImageTenantController;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.KmsTenantDto;
 import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
@@ -35,7 +34,7 @@ public class TenantImageController extends MappedImageTenantController<Long, Ten
     @Override
     public Tenant afterUpdate(Tenant tenant) throws Exception {
         try {
-            ResponseEntity<Boolean> result = kmsDomainService.updateDomain(ContextRequestDto.builder().build(),
+            ResponseEntity<Boolean> result = kmsDomainService.updateDomain(
                     KmsTenantDto.builder()
                             .name(tenant.getName())
                             .description(tenant.getDescription())

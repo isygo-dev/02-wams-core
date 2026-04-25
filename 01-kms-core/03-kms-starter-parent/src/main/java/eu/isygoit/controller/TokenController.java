@@ -3,7 +3,6 @@ package eu.isygoit.controller;
 import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.common.TokenResponseDto;
 import eu.isygoit.dto.data.TokenRequestDto;
 import eu.isygoit.enums.IEnumToken;
@@ -47,11 +46,11 @@ public class TokenController extends ControllerExceptionHandler implements Token
                             schema = @Schema(implementation = TokenResponseDto.class))})
     })
     @Override
-    public ResponseEntity<TokenResponseDto> buildTokenByTenant(ContextRequestDto requestContext,
-                                                               String tenant,
-                                                               String application,
-                                                               IEnumToken.Types tokenType,
-                                                               TokenRequestDto tokenRequestDto) {
+    public ResponseEntity<TokenResponseDto> buildTokenByTenant(
+            String tenant,
+            String application,
+            IEnumToken.Types tokenType,
+            TokenRequestDto tokenRequestDto) {
         log.info("Call create Token By Domain");
         try {
             return ResponseFactory.responseOk(tokenService.buildTokenAndSave(tenant, application, tokenType, tokenRequestDto.getSubject(), tokenRequestDto.getClaims()));
@@ -70,12 +69,12 @@ public class TokenController extends ControllerExceptionHandler implements Token
                             schema = @Schema(implementation = Boolean.class))})
     })
     @Override
-    public ResponseEntity<Boolean> isTokenValid(ContextRequestDto requestContext,
-                                                String tenant,
-                                                String application,
-                                                IEnumToken.Types tokenType,
-                                                String token,
-                                                String subject) {
+    public ResponseEntity<Boolean> isTokenValid(
+            String tenant,
+            String application,
+            IEnumToken.Types tokenType,
+            String token,
+            String subject) {
         log.info("Call is Token Valid");
         try {
             return ResponseFactory.responseOk(tokenService.isTokenValid(tenant, application, tokenType, token, subject));

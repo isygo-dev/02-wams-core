@@ -5,7 +5,6 @@ import eu.isygoit.api.ObjectStorageControllerApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
-import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.dto.data.BucketDto;
 import eu.isygoit.dto.data.FileTagsDto;
 import eu.isygoit.dto.exception.MinIoObjectException;
@@ -48,13 +47,13 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     private IStorageConfigService storageConfigService;
 
     @Override
-    public ResponseEntity<Object> upload(ContextRequestDto requestContext,
-                                         String tenant,
-                                         String bucketName,
-                                         String path,
-                                         String fileName,
-                                         List<String> tags,
-                                         MultipartFile file) {
+    public ResponseEntity<Object> upload(
+            String tenant,
+            String bucketName,
+            String path,
+            String fileName,
+            List<String> tags,
+            MultipartFile file) {
         try {
             Map<String, String> tagMap = null;
             if (!CollectionUtils.isEmpty(tags)) {
@@ -74,12 +73,12 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Resource> download(ContextRequestDto requestContext,
-                                             String tenant,
-                                             String bucketName,
-                                             String path,
-                                             String fileName,
-                                             String versionID) {
+    public ResponseEntity<Resource> download(
+            String tenant,
+            String bucketName,
+            String path,
+            String fileName,
+            String versionID) {
         try {
             StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);
             byte[] data = storageFactoryService
@@ -96,11 +95,11 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Object> delete(ContextRequestDto requestContext,
-                                         String tenant,
-                                         String bucketName,
-                                         String path,
-                                         String fileName) {
+    public ResponseEntity<Object> delete(
+            String tenant,
+            String bucketName,
+            String path,
+            String fileName) {
         log.info("delete request received");
         try {
             StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);
@@ -117,8 +116,8 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Object> getObjects(ContextRequestDto requestContext,
-                                             String tenant, String bucketName) {
+    public ResponseEntity<Object> getObjects(
+            String tenant, String bucketName) {
         log.info("get objects request received");
         try {
             StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);
@@ -132,11 +131,11 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Object> filterObjects(ContextRequestDto requestContext,
-                                                String tenant,
-                                                String bucketName,
-                                                String tags,
-                                                IEnumLogicalOperator.Types condition) {
+    public ResponseEntity<Object> filterObjects(
+            String tenant,
+            String bucketName,
+            String tags,
+            IEnumLogicalOperator.Types condition) {
         log.info("getObjectByTags request received");
         try {
             Map<String, String> tagMap = null;
@@ -161,8 +160,8 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Object> updateTags(ContextRequestDto requestContext,
-                                             FileTagsDto fileTags) {
+    public ResponseEntity<Object> updateTags(
+            FileTagsDto fileTags) {
         log.info("updateTags request received");
         try {
             Map<String, String> tagMap = null;
@@ -182,10 +181,10 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Object> deleteObjects(ContextRequestDto requestContext,
-                                                String tenant,
-                                                String bucketName,
-                                                String files) {
+    public ResponseEntity<Object> deleteObjects(
+            String tenant,
+            String bucketName,
+            String files) {
         log.info("deleteObjects request received");
         try {
             List<DeleteObject> objectsMap = new LinkedList<>();
@@ -207,9 +206,9 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Object> saveBucket(ContextRequestDto requestContext,
-                                             String tenant,
-                                             String bucketName) {
+    public ResponseEntity<Object> saveBucket(
+            String tenant,
+            String bucketName) {
         log.info("getBucketList request received");
         try {
             StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);
@@ -223,10 +222,10 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Object> setVersioningBucket(ContextRequestDto requestContext,
-                                                      String tenant,
-                                                      String bucketName,
-                                                      boolean status) {
+    public ResponseEntity<Object> setVersioningBucket(
+            String tenant,
+            String bucketName,
+            boolean status) {
         log.info("getBucketList request received");
         try {
             StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);
@@ -241,8 +240,8 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<List<BucketDto>> getBuckets(ContextRequestDto requestContext,
-                                                      String tenant) {
+    public ResponseEntity<List<BucketDto>> getBuckets(
+            String tenant) {
         log.info("getBucketList request received");
         try {
             StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);
@@ -254,9 +253,9 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Object> deleteBucket(ContextRequestDto requestContext,
-                                               String tenant,
-                                               String bucketName) {
+    public ResponseEntity<Object> deleteBucket(
+            String tenant,
+            String bucketName) {
         log.info("deleteBucket request received");
         try {
             StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);

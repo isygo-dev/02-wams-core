@@ -1,6 +1,10 @@
 package eu.isygoit.security.config;
 
 import eu.isygoit.filter.jwt.JwtKmsAuthFilter;
+import eu.isygoit.jwt.IJwtService;
+import eu.isygoit.service.ITokenService;
+import eu.isygoit.service.RequestContextService;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -9,6 +13,10 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
+@NoArgsConstructor
 public class JwtAuthFilter extends JwtKmsAuthFilter {
 
+    public JwtAuthFilter(IJwtService jwtService, RequestContextService requestContextService, ITokenService tokenService) {
+        super(jwtService, requestContextService, tokenService);
+    }
 }
