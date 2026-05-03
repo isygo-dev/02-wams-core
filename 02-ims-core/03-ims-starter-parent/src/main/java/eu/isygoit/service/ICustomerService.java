@@ -36,5 +36,5 @@ public interface ICustomerService extends ICrudTenantServiceOperations<Long, Cus
      * @param accountCode the account code
      * @return the customer
      */
-    Customer linkToAccount(String tenant, Long id, String accountCode);
+    Customer linkToAccount(String tenant /*senderTenant*/, Long id, String accountCode);
 }

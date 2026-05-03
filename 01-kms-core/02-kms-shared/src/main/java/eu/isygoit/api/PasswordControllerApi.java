@@ -13,10 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * The interface Password controller api.
@@ -40,7 +37,7 @@ public interface PasswordControllerApi {
     @PostMapping(path = "/generate/{type}")
     ResponseEntity<Integer> generate(
             @Valid @PathVariable(name = RestApiConstants.type) IEnumAuth.Types authType,
-            @Valid @RequestPart("generatePwdRequest") GeneratePwdRequestDto generatePwdRequest);
+            @Valid @RequestBody GeneratePwdRequestDto generatePwdRequest);
 
     /**
      * Reset password via token response entity.
@@ -58,7 +55,7 @@ public interface PasswordControllerApi {
     })
     @PostMapping(path = "/reset-password")
     ResponseEntity<String> resetPasswordViaToken(
-            @Valid @RequestPart("resetPwdViaTokenRequestDto") ResetPwdViaTokenRequestDto resetPwdViaTokenRequestDto);
+            @Valid @RequestBody ResetPwdViaTokenRequestDto resetPwdViaTokenRequestDto);
 
     /**
      * Change password response entity.
@@ -96,7 +93,7 @@ public interface PasswordControllerApi {
     })
     @PostMapping(path = "/pattern/check")
     ResponseEntity<Boolean> patternCheck(
-            @Valid @RequestPart("checkPwdRequest") CheckPwdRequestDto checkPwdRequest);
+            @Valid @RequestBody CheckPwdRequestDto checkPwdRequest);
 
     /**
      * Gets access.
@@ -114,7 +111,7 @@ public interface PasswordControllerApi {
     })
     @PostMapping(path = "/access")
     ResponseEntity<AccessTokenResponseDto> getAccess(
-            @Valid @RequestPart("matchPwdRequest") AccessRequestDto matchPwdRequest);
+            @Valid @RequestBody AccessRequestDto matchPwdRequest);
 
     /**
      * Matches response entity.
@@ -132,7 +129,7 @@ public interface PasswordControllerApi {
     })
     @PostMapping(path = "/matches")
     ResponseEntity<IEnumPasswordStatus.Types> matches(
-            @Valid @RequestPart("matchesRequest") MatchesRequestDto matchesRequest);
+            @Valid @RequestBody MatchesRequestDto matchesRequest);
 
     /**
      * Is password expired response entity.
@@ -150,7 +147,7 @@ public interface PasswordControllerApi {
     })
     @PostMapping(path = "/isExpired")
     ResponseEntity<Boolean> isPasswordExpired(
-            @Valid @RequestPart("isPwdExpiredRequestDto") IsPwdExpiredRequestDto isPwdExpiredRequestDto);
+            @Valid @RequestBody IsPwdExpiredRequestDto isPwdExpiredRequestDto);
 
     /**
      * Update account response entity.
@@ -168,5 +165,5 @@ public interface PasswordControllerApi {
     })
     @PostMapping(path = "/account")
     ResponseEntity<Boolean> updateAccount(
-            @Valid @RequestPart("account") UpdateAccountRequestDto account);
+            @Valid @RequestBody UpdateAccountRequestDto account);
 }

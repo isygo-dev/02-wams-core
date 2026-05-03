@@ -54,7 +54,7 @@ public class KeyService implements IKeyService {
     }
 
     @Override
-    public String getIncrementalKey(String tenant, String entityName, String attribute) throws IncrementalConfigNotFoundException {
+    public String getIncrementalKey(String tenant /*senderTenant*/, String entityName, String attribute) throws IncrementalConfigNotFoundException {
         AppNextCode appNextCode = null;
         Optional<AppNextCode> optional = appNextCodeRepository.findByTenantIgnoreCaseAndEntityAndAttribute(tenant, entityName, attribute);
         if (optional.isPresent()) {
@@ -76,7 +76,7 @@ public class KeyService implements IKeyService {
     }
 
     @Override
-    public RandomKey createOrUpdateKeyByName(String tenant, String name, String value) {
+    public RandomKey createOrUpdateKeyByName(String tenant /*senderTenant*/, String name, String value) {
         Optional<RandomKey> optional = randomKeyRepository.findByTenantIgnoreCaseAndName(tenant, name);
         if (optional.isPresent()) {
             optional.get().setValue(value);
@@ -91,7 +91,7 @@ public class KeyService implements IKeyService {
     }
 
     @Override
-    public RandomKey getKeyByName(String tenant, String name) {
+    public RandomKey getKeyByName(String tenant /*senderTenant*/, String name) {
         Optional<RandomKey> optional = randomKeyRepository.findByTenantIgnoreCaseAndName(tenant, name);
         if (optional.isPresent()) {
             return optional.get();

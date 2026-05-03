@@ -20,7 +20,7 @@ public interface VCalendarRepository extends JpaPagingAndSortingTenantAndCodeAss
      * @param name   the name
      * @return the optional
      */
-    Optional<VCalendar> findByTenantIgnoreCaseAndName(String tenant, String name);
+    Optional<VCalendar> findByTenantIgnoreCaseAndName(String tenant /*senderTenant*/, String name);
 
     @Modifying
     @Query("update VCalendar u set u.locked = :locked  where u.id = :id")

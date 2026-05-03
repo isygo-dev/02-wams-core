@@ -64,7 +64,7 @@ public class TokenService implements ITokenBuilderService {
     }
 
     @Override
-    public TokenResponseDto buildTokenAndSave(String tenant, String application, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
+    public TokenResponseDto buildTokenAndSave(String tenant /*senderTenant*/, String application, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
         //Get Token config configured by tenant and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
@@ -101,7 +101,7 @@ public class TokenService implements ITokenBuilderService {
     }
 
     @Override
-    public TokenResponseDto buildToken(String tenant, String application, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
+    public TokenResponseDto buildToken(String tenant /*senderTenant*/, String application, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
         //Get Token config configured by tenant and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
@@ -128,7 +128,7 @@ public class TokenService implements ITokenBuilderService {
     }
 
     @Override
-    public boolean isTokenValid(String tenant, String application, IEnumToken.Types tokenType, String token, String subject) {
+    public boolean isTokenValid(String tenant /*senderTenant*/, String application, IEnumToken.Types tokenType, String token, String subject) {
         //Get Token config configured by tenant and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
@@ -151,7 +151,7 @@ public class TokenService implements ITokenBuilderService {
     }
 
     @Override
-    public void buildForgotPasswordAccessToken(String tenant, String application, String accountCode) throws JsonProcessingException {
+    public void buildForgotPasswordAccessToken(String tenant /*senderTenant*/, String application, String accountCode) throws JsonProcessingException {
         //Get the account
         Account account = tenantService.checkAccountIfExists(tenant, null, null, accountCode, null, false);
         if (account == null) {
@@ -169,7 +169,7 @@ public class TokenService implements ITokenBuilderService {
         sendForgotPasswordEmail(tenant, application, account, token);
     }
 
-    private void sendForgotPasswordEmail(String tenant, String application, Account account, TokenResponseDto token) throws JsonProcessingException {
+    private void sendForgotPasswordEmail(String tenant /*senderTenant*/, String application, Account account, TokenResponseDto token) throws JsonProcessingException {
         //Build Email template data
         String resetPwdUrl = "http://localhost:4000/reset-password/";
         try {
@@ -202,7 +202,7 @@ public class TokenService implements ITokenBuilderService {
     }
 
     @Override
-    public TokenResponseDto buildAccessToken(String tenant, String application, String userName, Boolean isAdmin) {
+    public TokenResponseDto buildAccessToken(String tenant /*senderTenant*/, String application, String userName, Boolean isAdmin) {
         TokenResponseDto token = this.buildTokenAndSave(tenant, application, IEnumToken.Types.ACCESS, userName,
                 Map.of(JwtConstants.JWT_SENDER_TENANT, tenant,
                         JwtConstants.JWT_SENDER_USER, userName,
@@ -213,7 +213,7 @@ public class TokenService implements ITokenBuilderService {
     }
 
     @Override
-    public TokenResponseDto buildRefreshToken(String tenant, String application, String userName) {
+    public TokenResponseDto buildRefreshToken(String tenant /*senderTenant*/, String application, String userName) {
         TokenResponseDto token = this.buildTokenAndSave(tenant, application, IEnumToken.Types.REFRESH, userName,
                 Map.of(JwtConstants.JWT_SENDER_TENANT, tenant,
                         JwtConstants.JWT_SENDER_USER, userName,
@@ -223,7 +223,7 @@ public class TokenService implements ITokenBuilderService {
     }
 
     @Override
-    public TokenResponseDto buildAuthorityToken(String tenant, String application, String userName, List<String> authorities) {
+    public TokenResponseDto buildAuthorityToken(String tenant /*senderTenant*/, String application, String userName, List<String> authorities) {
         TokenResponseDto token = this.buildToken(tenant, application, IEnumToken.Types.AUTHORITY, userName,
                 Map.of(JwtConstants.JWT_SENDER_TENANT, tenant,
                         JwtConstants.JWT_SENDER_USER, userName,

@@ -14,7 +14,7 @@ import org.hibernate.annotations.Where;
 
 
 /**
- * The type Domain.
+ * The type Tenant.
  */
 @Data
 @SuperBuilder

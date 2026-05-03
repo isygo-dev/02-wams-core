@@ -26,7 +26,7 @@ public interface VEventRepository extends JpaPagingAndSortingTenantAndCodeAssign
      * @param calendar the calendar
      * @return the list
      */
-    List<VCalendarEvent> findByTenantIgnoreCaseAndCalendar(String tenant, String calendar);
+    List<VCalendarEvent> findByTenantIgnoreCaseAndCalendar(String tenant /*senderTenant*/, String calendar);
 
     /**
      * Find by tenant ignore case and calendar and code ignore case optional.
@@ -36,5 +36,5 @@ public interface VEventRepository extends JpaPagingAndSortingTenantAndCodeAssign
      * @param Code     the code
      * @return the optional
      */
-    Optional<VCalendarEvent> findByTenantIgnoreCaseAndCalendarAndCodeIgnoreCase(String tenant, String calendar, String Code);
+    Optional<VCalendarEvent> findByTenantIgnoreCaseAndCalendarAndCodeIgnoreCase(String tenant /*senderTenant*/, String calendar, String Code);
 }

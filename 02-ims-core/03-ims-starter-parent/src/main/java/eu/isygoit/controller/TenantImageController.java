@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.security.auth.login.AccountException;
 
 /**
- * The type Domain image controller.
+ * The type Tenant image controller.
  */
 @Slf4j
 @Validated
@@ -29,12 +29,12 @@ import javax.security.auth.login.AccountException;
 public class TenantImageController extends MappedImageTenantController<Long, Tenant, TenantDto, TenantDto, TenantService> {
 
     @Autowired
-    private KmsTenantService kmsDomainService;
+    private KmsTenantService kmsTenantService;
 
     @Override
     public Tenant afterUpdate(Tenant tenant) throws Exception {
         try {
-            ResponseEntity<Boolean> result = kmsDomainService.updateDomain(
+            ResponseEntity<Boolean> result = kmsTenantService.updateTenant(
                     KmsTenantDto.builder()
                             .name(tenant.getName())
                             .description(tenant.getDescription())

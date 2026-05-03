@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * The type Domain controller.
+ * The type Tenant controller.
  */
 @Slf4j
 @Validated
@@ -35,12 +35,12 @@ public class TenantController extends MappedCrudTenantController<Long, Tenant, T
         implements TenantControllerApi {
 
     @Autowired
-    private KmsTenantService kmsDomainService;
+    private KmsTenantService kmsTenantService;
 
     @Override
     public Tenant afterUpdate(Tenant tenant) {
         try {
-            ResponseEntity<Boolean> result = kmsDomainService.updateDomain(
+            ResponseEntity<Boolean> result = kmsTenantService.updateTenant(
                     KmsTenantDto.builder()
                             .name(tenant.getName())
                             .description(tenant.getDescription())
@@ -66,7 +66,7 @@ public class TenantController extends MappedCrudTenantController<Long, Tenant, T
         try {
             TenantDto tenant = mapper().entityToDto(crudService().updateAdminStatus(id, newStatus));
             try {
-                ResponseEntity<KmsTenantDto> result = kmsDomainService.updateAdminStatus(
+                ResponseEntity<KmsTenantDto> result = kmsTenantService.updateAdminStatus(
                         tenant.getName(), newStatus);
                 if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
                     return ResponseFactory.responseOk(tenant);
@@ -79,16 +79,16 @@ public class TenantController extends MappedCrudTenantController<Long, Tenant, T
             }
             return ResponseFactory.responseOk(tenant);
         } catch (Throwable e) {
-            log.error("<Error>: update Domain Status : {} ", e);
+            log.error("<Error>: update Tenant Status : {} ", e);
             return getBackExceptionResponse(e);
         }
     }
 
     @Override
-    public ResponseEntity<List<String>> getAllDomainNames() {
-        log.info("getAllDomainNames {}", getRequestContextService().getCurrentContext().getSenderTenant());
+    public ResponseEntity<List<String>> getAllTenantNames() {
+        log.info("getAllTenantNames {}", getRequestContextService().getCurrentContext().getSenderTenant());
         try {
-            return ResponseFactory.responseOk(crudService().getAllDomainNames(getRequestContextService().getCurrentContext().getSenderTenant()));
+            return ResponseFactory.responseOk(crudService().getAllTenantNames(getRequestContextService().getCurrentContext().getSenderTenant()));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

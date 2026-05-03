@@ -28,7 +28,7 @@ public class StorageConfigService extends CrudTenantService<Long, StorageConfig,
     private IMinIOApiService minIOApiService;
 
     @Override
-    public StorageConfig findByTenantIgnoreCase(String tenant) {
+    public StorageConfig findByTenantIgnoreCase(String tenant /*senderTenant*/) {
         Optional<StorageConfig> optional = storageConfigRepository.findFirstByTenantIgnoreCase(tenant);
         if (!optional.isPresent()) {
             optional = storageConfigRepository.findFirstByTenantIgnoreCase(TenantConstants.DEFAULT_TENANT_NAME);
@@ -42,7 +42,7 @@ public class StorageConfigService extends CrudTenantService<Long, StorageConfig,
     }
 
     @Override
-    public StorageConfig afterUpdate(String tenant, StorageConfig storageConfig) {
+    public StorageConfig afterUpdate(String tenant /*senderTenant*/, StorageConfig storageConfig) {
         switch (storageConfig.getType()) {
             case MINIO_STORAGE: {
                 minIOApiService.updateConnection(storageConfig);

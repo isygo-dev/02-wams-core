@@ -18,7 +18,7 @@ import java.util.List;
 
 
 /**
- * The interface Domain controller api.
+ * The interface Tenant controller api.
  */
 public interface TenantControllerApi extends IMappedCrudApi<Long, TenantDto, TenantDto> {
 
@@ -56,7 +56,7 @@ public interface TenantControllerApi extends IMappedCrudApi<Long, TenantDto, Ten
                             schema = @Schema(implementation = String.class))})
     })
     @GetMapping(path = "/names")
-    ResponseEntity<List<String>> getAllDomainNames();
+    ResponseEntity<List<String>> getAllTenantNames();
 
     /**
      * Gets by name.

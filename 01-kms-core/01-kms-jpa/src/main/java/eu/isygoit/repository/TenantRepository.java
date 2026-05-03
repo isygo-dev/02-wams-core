@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 /**
- * The interface Domain repository.
+ * The interface Tenant repository.
  */
 public interface TenantRepository extends JpaPagingAndSortingRepository<Tenant, Long> {
 

@@ -73,7 +73,7 @@ public class CustomerService extends ImageTenantService<Long, Customer, Customer
     }
 
     @Override
-    public Customer linkToAccount(String tenant, Long id, String accountCode) {
+    public Customer linkToAccount(String tenant /*senderTenant*/, Long id, String accountCode) {
         Optional<Customer> optional = this.findById(tenant, id);
         if (optional.isPresent()) {
             Customer customer = optional.get();

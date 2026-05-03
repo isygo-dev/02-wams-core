@@ -76,11 +76,11 @@ public interface AccountRepository extends JpaPagingAndSortingTenantAndCodeAssig
             "where a.origin like :origin", nativeQuery = true)
     Long countByOrigin(@Param("origin") String origin);
 
-    Long countByTenantIgnoreCaseAndAdminStatus(String tenant, IEnumEnabledBinaryStatus.Types status);
+    Long countByTenantIgnoreCaseAndAdminStatus(String tenant /*senderTenant*/, IEnumEnabledBinaryStatus.Types status);
 
     Long countByAdminStatus(IEnumEnabledBinaryStatus.Types status);
 
-    Long countByTenantIgnoreCaseAndIsAdminTrue(String tenant);
+    Long countByTenantIgnoreCaseAndIsAdminTrue(String tenant /*senderTenant*/);
 
     Long countByIsAdminTrue();
 

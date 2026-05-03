@@ -143,10 +143,10 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     }
 
     @Override
-    public ResponseEntity<AccountDto> createDomainAdmin(String tenant, TenantAdminDto admin) {
+    public ResponseEntity<AccountDto> createTenantAdmin(String tenant /*senderTenant*/, TenantAdminDto admin) {
         log.info("create tenant admin");
         try {
-            return ResponseFactory.responseOk(mapper().entityToDto(accountService.createDomainAdmin(tenant, admin)));
+            return ResponseFactory.responseOk(mapper().entityToDto(accountService.createTenantAdmin(tenant, admin)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -289,7 +289,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     }
 
     @Override
-    public ResponseEntity<List<MinAccountDto>> userAccountsByTenant(String tenant) {
+    public ResponseEntity<List<MinAccountDto>> userAccountsByTenant(String tenant /*senderTenant*/) {
         log.info("get accounts by tenant");
         try {
             List<MinAccountDto> list = minAccountMapper.listEntityToDto(accountService.getByTenant(tenant));

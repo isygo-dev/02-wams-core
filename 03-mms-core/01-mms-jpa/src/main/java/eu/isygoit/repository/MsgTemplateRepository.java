@@ -19,5 +19,5 @@ public interface MsgTemplateRepository extends JpaPagingAndSortingTenantAndCodeA
      * @param name   the name
      * @return the optional
      */
-    Optional<MsgTemplate> findByTenantIgnoreCaseAndName(String tenant, IEnumEmailTemplate.Types name);
+    Optional<MsgTemplate> findByTenantIgnoreCaseAndName(String tenant /*senderTenant*/, IEnumEmailTemplate.Types name);
 }

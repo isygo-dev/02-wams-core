@@ -32,8 +32,8 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
      *
      * @return the emails by tenant
      */
-    @Operation(summary = "get Emails By Domain Api",
-            description = "get Emails By Domain")
+    @Operation(summary = "get Emails By Tenant Api",
+            description = "get Emails By Tenant")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
@@ -79,8 +79,8 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
             @RequestParam(name = RestApiConstants.ID) Long id,
             @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus);
 
-    @Operation(summary = "Create Domain Admin Api",
-            description = "Create Domain Admin")
+    @Operation(summary = "Create Tenant Admin Api",
+            description = "Create Tenant Admin")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
@@ -88,7 +88,7 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
                             schema = @Schema(implementation = AccountDto.class))})
     })
     @PostMapping(path = "/admin")
-    ResponseEntity<AccountDto> createDomainAdmin(
+    ResponseEntity<AccountDto> createTenantAdmin(
             @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
             @Valid @RequestBody TenantAdminDto admin);
 
@@ -227,8 +227,8 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
      *
      * @return the response entity
      */
-    @Operation(summary = "Get Accounts By Sender Domain Api",
-            description = "Get Accounts By Sender Domain")
+    @Operation(summary = "Get Accounts By Sender Tenant Api",
+            description = "Get Accounts By Sender Tenant")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
@@ -243,8 +243,8 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
      *
      * @return the response entity
      */
-    @Operation(summary = "Get Accounts By Domain Api",
-            description = "Get Accounts By Domain")
+    @Operation(summary = "Get Accounts By Tenant Api",
+            description = "Get Accounts By Tenant")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
@@ -261,8 +261,8 @@ public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto
      *
      * @return the response entity
      */
-    @Operation(summary = "Get Chat Accounts By Domain Api",
-            description = "Get Chat Accounts By Domain")
+    @Operation(summary = "Get Chat Accounts By Tenant Api",
+            description = "Get Chat Accounts By Tenant")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",

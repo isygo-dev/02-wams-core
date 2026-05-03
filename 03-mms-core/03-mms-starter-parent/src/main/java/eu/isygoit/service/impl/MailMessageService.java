@@ -139,8 +139,8 @@ public class MailMessageService extends CassandraCrudTenantService<UUID, MailMes
     }
 
     @Override
-    public boolean sendMail(String senderDomainName, MailMessage mailMessageData, MailOptionsDto options, Map<String, File> resources) {
-        JavaMailSenderImpl mailSender = senderFactory.getSender(senderDomainName);
+    public boolean sendMail(String senderTenantName, MailMessage mailMessageData, MailOptionsDto options, Map<String, File> resources) {
+        JavaMailSenderImpl mailSender = senderFactory.getSender(senderTenantName);
         boolean result = this.sendMail(mailSender,
                 mailMessageData
                 , options.isReturnDelivered()
@@ -152,14 +152,14 @@ public class MailMessageService extends CassandraCrudTenantService<UUID, MailMes
     }
 
     @Override
-    public Map<String, File> multiPartFileToResource(String senderDomainName, List<MultipartFile> resources) {
+    public Map<String, File> multiPartFileToResource(String senderTenantName, List<MultipartFile> resources) {
         if (CollectionUtils.isEmpty(resources)) {
             return null;
         }
 
         return resources.stream().map(multipartFile -> {
             File file = new File(Path.of(appProperties.getUploadDirectory())
-                    .resolve(senderDomainName)
+                    .resolve(senderTenantName)
                     .resolve("resources")
                     .resolve(multipartFile.getOriginalFilename()).toUri());
             try {
@@ -170,7 +170,7 @@ public class MailMessageService extends CassandraCrudTenantService<UUID, MailMes
             }
         }).collect(Collectors.toMap(multipartFile -> multipartFile.getOriginalFilename(), multipartFile
                 -> new File(Path.of(appProperties.getUploadDirectory())
-                .resolve(senderDomainName)
+                .resolve(senderTenantName)
                 .resolve("resources")
                 .resolve(multipartFile.getOriginalFilename()).toUri())));
     }

@@ -193,7 +193,7 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
      * Downloads a file (either locally or remotely) using tenant and code.
      */
     @Override
-    public Resource download(String tenant, String code) throws IOException {
+    public Resource download(String tenant /*senderTenant*/, String code) throws IOException {
         LinkedFile file = linkedFileRepository.findByTenantIgnoreCaseAndCodeIgnoreCase(tenant, code)
                 .orElseThrow(() -> new LinkedFileNotFoundException("with tenant: " + tenant + "/code:" + code));
 
@@ -216,7 +216,7 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
     /**
      * Resolves a local file path and loads it as a Resource.
      */
-    private Resource resolveLocalFile(String tenant, LinkedFile file) throws IOException {
+    private Resource resolveLocalFile(String tenant /*senderTenant*/, LinkedFile file) throws IOException {
         Path basePath = Path.of(appProperties.getUploadDirectory(), tenant);
         Path filePath = StringUtils.hasText(file.getPath()) ?
                 basePath.resolve(file.getPath()) : basePath;
@@ -233,7 +233,7 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
      * Deletes a file using its tenant and code.
      */
     @Override
-    public void deleteFile(String tenant, String code) throws IOException {
+    public void deleteFile(String tenant /*senderTenant*/, String code) throws IOException {
         LinkedFile file = linkedFileRepository.findByTenantIgnoreCaseAndCodeIgnoreCase(tenant, code)
                 .orElseThrow(() -> new FileNotFoundException("File not found with tenant:" + tenant + " code:" + code));
         this.delete(tenant, file.getId());
@@ -243,7 +243,7 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
      * Finds the most recent uploaded file with the same original file name.
      */
     @Override
-    public LinkedFile searchByOriginalFileName(String tenant, String originalFileName) throws IOException {
+    public LinkedFile searchByOriginalFileName(String tenant /*senderTenant*/, String originalFileName) throws IOException {
         return linkedFileRepository.findByTenantIgnoreCaseAndOriginalFileNameOrderByCreateDateDesc(tenant, originalFileName)
                 .stream()
                 .reduce((first, second) -> second) // Get last (most recent)
@@ -254,7 +254,7 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
      * Updates the original filename of a stored file.
      */
     @Override
-    public LinkedFile renameFile(String tenant, String code, String newName) throws IOException {
+    public LinkedFile renameFile(String tenant /*senderTenant*/, String code, String newName) throws IOException {
         LinkedFile file = linkedFileRepository.findByTenantIgnoreCaseAndCodeIgnoreCase(tenant, code)
                 .orElseThrow(() -> new FileNotFoundException("with tenant:" + tenant + "/code:" + code));
         file.setOriginalFileName(newName);
@@ -265,7 +265,7 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
      * Searches files by matching tags.
      */
     @Override
-    public List<LinkedFile> searchByTags(String tenant, String tags) {
+    public List<LinkedFile> searchByTags(String tenant /*senderTenant*/, String tags) {
         return linkedFileRepository.findByTenantIgnoreCaseAndTagsContaining(tenant, tags);
     }
 
@@ -273,7 +273,7 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
      * Searches files by matching categories.
      */
     @Override
-    public List<LinkedFile> searchByCategories(String tenant, List<String> categories) {
+    public List<LinkedFile> searchByCategories(String tenant /*senderTenant*/, List<String> categories) {
         return linkedFileRepository.findByTenantIgnoreCaseAndCategoriesIn(tenant, categories);
     }
 

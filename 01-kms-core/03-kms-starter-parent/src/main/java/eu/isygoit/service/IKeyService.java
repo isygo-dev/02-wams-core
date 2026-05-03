@@ -45,7 +45,7 @@ public interface IKeyService {
      * @return the incremental key
      * @throws IncrementalConfigNotFoundException the incremental config not found exception
      */
-    String getIncrementalKey(String tenant, String entityName, String attribute) throws IncrementalConfigNotFoundException;
+    String getIncrementalKey(String tenant /*senderTenant*/, String entityName, String attribute) throws IncrementalConfigNotFoundException;
 
     /**
      * Create or update key by name random key.
@@ -55,7 +55,7 @@ public interface IKeyService {
      * @param value  the value
      * @return the random key
      */
-    RandomKey createOrUpdateKeyByName(String tenant, String name, String value);
+    RandomKey createOrUpdateKeyByName(String tenant /*senderTenant*/, String name, String value);
 
     /**
      * Gets key by name.
@@ -64,5 +64,5 @@ public interface IKeyService {
      * @param name   the name
      * @return the key by name
      */
-    RandomKey getKeyByName(String tenant, String name);
+    RandomKey getKeyByName(String tenant /*senderTenant*/, String name);
 }

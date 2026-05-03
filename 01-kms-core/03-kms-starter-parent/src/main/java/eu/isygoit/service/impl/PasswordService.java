@@ -75,7 +75,7 @@ public class PasswordService implements IPasswordService {
     }
 
     @Override
-    public AccessKeyResponseDto generateRandomPassword(String tenant, String tenantUrl, String email, String userName, String fullName, IEnumAuth.Types authType) throws JsonProcessingException {
+    public AccessKeyResponseDto generateRandomPassword(String tenant /*senderTenant*/, String tenantUrl, String email, String userName, String fullName, IEnumAuth.Types authType) throws JsonProcessingException {
         //Verify the account
         Account account = tenantService.checkAccountIfExists(tenant, tenantUrl, email, userName, fullName, true);
         if (account == null) {
@@ -156,7 +156,7 @@ public class PasswordService implements IPasswordService {
     }
 
     @Override
-    public void forceChangePassword(String tenant, String userName, String newPassword) {
+    public void forceChangePassword(String tenant /*senderTenant*/, String userName, String newPassword) {
         Account account = tenantService.checkAccountIfExists(tenant, null, null, userName, null, false);
         if (account == null) {
             throw new UserNotFoundException("tenant/username: " + tenant + "/" + userName);
@@ -166,7 +166,7 @@ public class PasswordService implements IPasswordService {
     }
 
     @Override
-    public void changePassword(String tenant, String userName, String oldPassword, String newPassword) {
+    public void changePassword(String tenant /*senderTenant*/, String userName, String oldPassword, String newPassword) {
         IEnumPasswordStatus.Types passwordMatches = matches(tenant, userName, oldPassword, IEnumAuth.Types.PWD);
         if (passwordMatches == IEnumPasswordStatus.Types.VALID) {
             forceChangePassword(tenant, userName, newPassword);
@@ -176,7 +176,7 @@ public class PasswordService implements IPasswordService {
     }
 
     @Override
-    public AccessKeyResponseDto registerNewPassword(String tenant, Account account, String newPassword, IEnumAuth.Types authType)
+    public AccessKeyResponseDto registerNewPassword(String tenant /*senderTenant*/, Account account, String newPassword, IEnumAuth.Types authType)
             throws UnsuportedAuthTypeException {
         LocalDateTime expiryDate = null;
         Integer length = null;
@@ -256,7 +256,7 @@ public class PasswordService implements IPasswordService {
     }
 
     @Override
-    public boolean checkForPattern(String tenant, String plainPassword) {
+    public boolean checkForPattern(String tenant /*senderTenant*/, String plainPassword) {
         Optional<PasswordConfig> passwordConfigOptional = passwordConfigRepository.findByTenantIgnoreCaseAndType(tenant, IEnumAuth.Types.PWD);
         if (passwordConfigOptional.isPresent() && StringUtils.hasText(passwordConfigOptional.get().getPattern())) {
             return plainPassword.matches(passwordConfigOptional.get().getPattern());
@@ -267,7 +267,7 @@ public class PasswordService implements IPasswordService {
     }
 
     @Override
-    public IEnumPasswordStatus.Types matches(String tenant, String userName, String plainPassword, IEnumAuth.Types authType)
+    public IEnumPasswordStatus.Types matches(String tenant /*senderTenant*/, String userName, String plainPassword, IEnumAuth.Types authType)
             throws UserPasswordNotFoundException, UserNotFoundException {
         Account account = tenantService.checkAccountIfExists(tenant, null, null, userName, null, false);
         if (account != null) {
@@ -317,7 +317,7 @@ public class PasswordService implements IPasswordService {
     }
 
     @Override
-    public Boolean isExpired(String tenant, String email, String userName, IEnumAuth.Types authType)
+    public Boolean isExpired(String tenant /*senderTenant*/, String email, String userName, IEnumAuth.Types authType)
             throws UserPasswordNotFoundException, UserNotFoundException {
         Account account = tenantService.checkAccountIfExists(tenant, null, null, userName, null, false);
         if (account != null) {

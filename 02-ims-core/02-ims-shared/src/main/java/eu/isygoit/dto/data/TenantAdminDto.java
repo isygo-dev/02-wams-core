@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 /**
- * The type Domain dto.
+ * The type Tenant dto.
  */
 @Data
 @NoArgsConstructor

@@ -6,7 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.NullValueCheckStrategy;
 
 /**
- * The interface Domain mapper.
+ * The interface Tenant mapper.
  */
 @Mapper(nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS, componentModel = "spring")
 public interface TenantMapper extends EntityMapper<Tenant, TenantDto> {

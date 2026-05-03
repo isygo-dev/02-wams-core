@@ -21,5 +21,5 @@ public interface MailMessageRepository extends CassandraRepository<MailMessage, 
      * @return the list
      */
     @AllowFiltering
-    List<MailMessage> findAllByTenantIgnoreCase(String tenant);
+    List<MailMessage> findAllByTenantIgnoreCase(String tenant /*senderTenant*/);
 }

@@ -28,7 +28,7 @@ public interface IPasswordService {
      * @return the access key response dto
      * @throws JsonProcessingException the json processing exception
      */
-    AccessKeyResponseDto generateRandomPassword(String tenant, String tenantUrl, String email, String userName, String fullName, IEnumAuth.Types authType) throws JsonProcessingException;
+    AccessKeyResponseDto generateRandomPassword(String tenant /*senderTenant*/, String tenantUrl, String email, String userName, String fullName, IEnumAuth.Types authType) throws JsonProcessingException;
 
 
     /**
@@ -38,7 +38,7 @@ public interface IPasswordService {
      * @param userName   the user name
      * @param newPasswor the new passwor
      */
-    void forceChangePassword(String tenant, String userName, String newPasswor);
+    void forceChangePassword(String tenant /*senderTenant*/, String userName, String newPasswor);
 
 
     /**
@@ -49,7 +49,7 @@ public interface IPasswordService {
      * @param oldPassword the old password
      * @param newPassword the new password
      */
-    void changePassword(String tenant, String userName, String oldPassword, String newPassword);
+    void changePassword(String tenant /*senderTenant*/, String userName, String oldPassword, String newPassword);
 
 
     /**
@@ -59,7 +59,7 @@ public interface IPasswordService {
      * @param plainPassword the plain password
      * @return the boolean
      */
-    boolean checkForPattern(String tenant, String plainPassword);
+    boolean checkForPattern(String tenant /*senderTenant*/, String plainPassword);
 
     /**
      * Matches enum password status . types.
@@ -72,7 +72,7 @@ public interface IPasswordService {
      * @throws UserPasswordNotFoundException the user password not found exception
      * @throws UserNotFoundException         the user not found exception
      */
-    IEnumPasswordStatus.Types matches(String tenant, String userName, String plainPassword, IEnumAuth.Types authType) throws UserPasswordNotFoundException, UserNotFoundException;
+    IEnumPasswordStatus.Types matches(String tenant /*senderTenant*/, String userName, String plainPassword, IEnumAuth.Types authType) throws UserPasswordNotFoundException, UserNotFoundException;
 
 
     /**
@@ -94,7 +94,7 @@ public interface IPasswordService {
      * @throws UserPasswordNotFoundException the user password not found exception
      * @throws UserNotFoundException         the user not found exception
      */
-    Boolean isExpired(String tenant, String email, String userName, IEnumAuth.Types authType) throws UserPasswordNotFoundException, UserNotFoundException;
+    Boolean isExpired(String tenant /*senderTenant*/, String email, String userName, IEnumAuth.Types authType) throws UserPasswordNotFoundException, UserNotFoundException;
 
     /**
      * Reset password via token.
@@ -114,5 +114,5 @@ public interface IPasswordService {
      * @return the access key response dto
      * @throws UnsuportedAuthTypeException the unsuported auth type exception
      */
-    AccessKeyResponseDto registerNewPassword(String tenant, Account account, String newPassword, IEnumAuth.Types authType) throws UnsuportedAuthTypeException;
+    AccessKeyResponseDto registerNewPassword(String tenant /*senderTenant*/, Account account, String newPassword, IEnumAuth.Types authType) throws UnsuportedAuthTypeException;
 }

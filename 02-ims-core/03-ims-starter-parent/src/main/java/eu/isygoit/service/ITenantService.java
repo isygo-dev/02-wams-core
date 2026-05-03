@@ -8,7 +8,7 @@ import eu.isygoit.model.Tenant;
 import java.util.List;
 
 /**
- * The interface Domain service.
+ * The interface Tenant service.
  */
 public interface ITenantService extends ICrudTenantServiceOperations<Long, Tenant>, IImageTenantServiceOperations<Long, Tenant> {
 
@@ -18,7 +18,7 @@ public interface ITenantService extends ICrudTenantServiceOperations<Long, Tenan
      * @param tenant the tenant
      * @return the all tenant names
      */
-    List<String> getAllDomainNames(String tenant);
+    List<String> getAllTenantNames(String tenant /*senderTenant*/);
 
     /**
      * Update admin status tenant.
@@ -43,7 +43,7 @@ public interface ITenantService extends ICrudTenantServiceOperations<Long, Tenan
      * @param name the name
      * @return the long
      */
-    Long findDomainIdbyDomainName(String name);
+    Long findTenantIdbyTenantName(String name);
 
     /**
      * Find by name tenant.
@@ -59,7 +59,7 @@ public interface ITenantService extends ICrudTenantServiceOperations<Long, Tenan
      * @param tenant the tenant
      * @return the boolean
      */
-    boolean isEnabled(String tenant);
+    boolean isEnabled(String tenant /*senderTenant*/);
 
     /**
      * Update social link tenant.
@@ -70,5 +70,5 @@ public interface ITenantService extends ICrudTenantServiceOperations<Long, Tenan
      * @param link   the link
      * @return the tenant
      */
-    Tenant updateSocialLink(String tenant, Long id, String social, String link);
+    Tenant updateSocialLink(String tenant /*senderTenant*/, Long id, String social, String link);
 }

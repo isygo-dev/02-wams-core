@@ -73,7 +73,7 @@ public class MsgTemplateService extends FileTenantService<Long, MsgTemplate, Msg
     }
 
     @Override
-    public void beforeDelete(String tenant, Long id) {
+    public void beforeDelete(String tenant /*senderTenant*/, Long id) {
         Optional<MsgTemplate> optional = templateRepository.findById(id);
         if (optional.isPresent()) {
             deleteFile(Path.of(optional.get().getPath())
@@ -93,7 +93,7 @@ public class MsgTemplateService extends FileTenantService<Long, MsgTemplate, Msg
 
     @Transactional
     @Override
-    public String composeMessageBody(String tenant,
+    public String composeMessageBody(String tenant /*senderTenant*/,
                                      IEnumEmailTemplate.Types templateName,
                                      Map<String, String> variables)
             throws IOException, TemplateException {
@@ -137,14 +137,14 @@ public class MsgTemplateService extends FileTenantService<Long, MsgTemplate, Msg
         try {
             ResponseEntity<TenantDto> result = imsPublicService.getTenantByName(tenant);
             if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
-                TenantDto domain = result.getBody();
-                variables.put(MsgTemplateVariables.V_TENANT_URL, domain.getUrl() != null ? domain.getUrl() : "Missed");
-                variables.put(MsgTemplateVariables.V_TENANT_PHONE, domain.getPhone() != null ? domain.getPhone() : "Missed");
-                variables.put(MsgTemplateVariables.V_TENANT_EMAIL, domain.getEmail() != null ? domain.getEmail() : "Missed");
-                variables.put(MsgTemplateVariables.V_TENANT_ADDRESS, domain.getAddress() != null ? domain.getAddress().format() : "Missed");
-                variables.put(MsgTemplateVariables.V_TENANT_FACEBOOK, domain.getLnk_facebook() != null ? domain.getLnk_facebook() : "Missed");
-                variables.put(MsgTemplateVariables.V_TENANT_LINKEDIN, domain.getLnk_linkedin() != null ? domain.getLnk_linkedin() : "Missed");
-                variables.put(MsgTemplateVariables.V_TENANT_XING, domain.getLnk_xing() != null ? domain.getLnk_xing() : "Missed");
+                TenantDto tenantDto = result.getBody();
+                variables.put(MsgTemplateVariables.V_TENANT_URL, tenantDto.getUrl() != null ? tenantDto.getUrl() : "Missed");
+                variables.put(MsgTemplateVariables.V_TENANT_PHONE, tenantDto.getPhone() != null ? tenantDto.getPhone() : "Missed");
+                variables.put(MsgTemplateVariables.V_TENANT_EMAIL, tenantDto.getEmail() != null ? tenantDto.getEmail() : "Missed");
+                variables.put(MsgTemplateVariables.V_TENANT_ADDRESS, tenantDto.getAddress() != null ? tenantDto.getAddress().format() : "Missed");
+                variables.put(MsgTemplateVariables.V_TENANT_FACEBOOK, tenantDto.getLnk_facebook() != null ? tenantDto.getLnk_facebook() : "Missed");
+                variables.put(MsgTemplateVariables.V_TENANT_LINKEDIN, tenantDto.getLnk_linkedin() != null ? tenantDto.getLnk_linkedin() : "Missed");
+                variables.put(MsgTemplateVariables.V_TENANT_XING, tenantDto.getLnk_xing() != null ? tenantDto.getLnk_xing() : "Missed");
             } else {
                 variables.put(MsgTemplateVariables.V_TENANT_URL, "Missed");
                 variables.put(MsgTemplateVariables.V_TENANT_PHONE, "Missed");

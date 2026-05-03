@@ -43,7 +43,7 @@ public class PublicController extends ControllerExceptionHandler implements Publ
     }
 
     @Override
-    public ResponseEntity<TenantDto> getTenantByName(String tenant) {
+    public ResponseEntity<TenantDto> getTenantByName(String tenant /*senderTenant*/) {
         log.info("get tenant by name {}", tenant);
         try {
             return ResponseFactory.responseOk(tenantMapper.entityToDto(tenantService.findByName(tenant)));

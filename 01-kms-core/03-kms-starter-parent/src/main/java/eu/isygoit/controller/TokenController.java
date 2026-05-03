@@ -51,11 +51,11 @@ public class TokenController extends ControllerExceptionHandler implements Token
             String application,
             IEnumToken.Types tokenType,
             TokenRequestDto tokenRequestDto) {
-        log.info("Call create Token By Domain");
+        log.info("Call create Token By Tenant");
         try {
             return ResponseFactory.responseOk(tokenService.buildTokenAndSave(tenant, application, tokenType, tokenRequestDto.getSubject(), tokenRequestDto.getClaims()));
         } catch (Throwable e) {
-            log.error("<Error>: create Token By Domain: {} ", e);
+            log.error("<Error>: create Token By Tenant: {} ", e);
             return getBackExceptionResponse(e);
         }
     }

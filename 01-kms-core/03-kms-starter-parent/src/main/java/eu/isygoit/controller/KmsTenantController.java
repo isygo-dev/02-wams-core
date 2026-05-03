@@ -51,13 +51,13 @@ public class KmsTenantController extends MappedCrudController<Long, Tenant, KmsT
         try {
             return ResponseFactory.responseOk(mapper().entityToDto(crudService().updateAdminStatus(tenant, newStatus)));
         } catch (Throwable e) {
-            log.error("<Error>: update Domain Status : {} ", e);
+            log.error("<Error>: update Tenant Status : {} ", e);
             return getBackExceptionResponse(e);
         }
     }
 
     @Override
-    public ResponseEntity<Boolean> updateDomain(
+    public ResponseEntity<Boolean> updateTenant(
             KmsTenantDto tenant) {
         log.info("Call update tenant " + tenant.toString());
         try {

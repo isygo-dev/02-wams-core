@@ -176,7 +176,7 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     }
 
     @Override
-    public ResponseEntity<TenantDto> getTenantByName(String tenant) {
+    public ResponseEntity<TenantDto> getTenantByName(String tenant /*senderTenant*/) {
         log.info("get tenant by name {}", tenant);
         try {
             return ResponseFactory.responseOk(tenantMapper.entityToDto(tenantService.findByName(tenant)));

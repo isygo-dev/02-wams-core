@@ -17,7 +17,7 @@ import org.springframework.util.StringUtils;
 import java.util.Optional;
 
 /**
- * The type Domain service.
+ * The type Tenant service.
  */
 @Service
 @Transactional
@@ -29,7 +29,7 @@ public class TenantService extends CrudService<Long, Tenant, TenantRepository> i
     private AccountRepository accountRepository;
 
     @Override
-    public Tenant checkDomainIfExists(String tenantName, String tenantUrl, boolean createIfNotExists) {
+    public Tenant checkTenantIfExists(String tenantName, String tenantUrl, boolean createIfNotExists) {
         Optional<Tenant> optional = repository().findByNameIgnoreCase(tenantName);
         if (optional.isPresent()) {
             return optional.get();
@@ -58,8 +58,8 @@ public class TenantService extends CrudService<Long, Tenant, TenantRepository> i
     @Override
     public Account checkAccountIfExists(String tenantName, String tenantUrl, String email, String userName, String fullName, boolean createIfNotExists) {
         //Check tenant if exists
-        Tenant kmsDomain = this.checkDomainIfExists(tenantName, tenantUrl, createIfNotExists);
-        if (kmsDomain == null) {
+        Tenant kmsTenant = this.checkTenantIfExists(tenantName, tenantUrl, createIfNotExists);
+        if (kmsTenant == null) {
             return null;
         }
 
@@ -88,16 +88,16 @@ public class TenantService extends CrudService<Long, Tenant, TenantRepository> i
     }
 
     @Override
-    public boolean checkIfExists(Tenant kmsDomain, boolean createIfNotExists) {
-        Optional<Tenant> optional = repository().findByNameIgnoreCase(kmsDomain.getName());
+    public boolean checkIfExists(Tenant kmsTenant, boolean createIfNotExists) {
+        Optional<Tenant> optional = repository().findByNameIgnoreCase(kmsTenant.getName());
         if (optional.isPresent()) {
             //Update the tenant if not exists
-            kmsDomain.setId(optional.get().getId());
-            this.update(kmsDomain);
+            kmsTenant.setId(optional.get().getId());
+            this.update(kmsTenant);
             return true;
         } else if (createIfNotExists) {
             //Create the tenant if not exists
-            this.create(kmsDomain);
+            this.create(kmsTenant);
             return true;
         }
 
@@ -105,13 +105,13 @@ public class TenantService extends CrudService<Long, Tenant, TenantRepository> i
     }
 
     @Override
-    public Tenant updateAdminStatus(String tenant, IEnumEnabledBinaryStatus.Types newStatus) {
+    public Tenant updateAdminStatus(String tenant /*senderTenant*/, IEnumEnabledBinaryStatus.Types newStatus) {
         repository().updateAdminStatus(tenant, newStatus);
         return repository().findByNameIgnoreCase(tenant).orElse(null);
     }
 
     @Override
-    public boolean isEnabled(String tenant) {
+    public boolean isEnabled(String tenant /*senderTenant*/) {
         return repository().getAdminStatus(tenant) == IEnumEnabledBinaryStatus.Types.ENABLED;
     }
 }

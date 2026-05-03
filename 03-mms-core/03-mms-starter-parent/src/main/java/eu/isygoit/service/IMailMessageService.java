@@ -35,20 +35,20 @@ public interface IMailMessageService extends ICrudTenantServiceOperations<UUID, 
     /**
      * Send mail boolean.
      *
-     * @param senderDomainName the sender tenant name
+     * @param senderTenantName the sender tenant name
      * @param mailMessageData  the mail message data
      * @param options          the options
      * @param resources        the resources
      * @return the boolean
      */
-    boolean sendMail(String senderDomainName, MailMessage mailMessageData, MailOptionsDto options, Map<String, File> resources);
+    boolean sendMail(String senderTenantName, MailMessage mailMessageData, MailOptionsDto options, Map<String, File> resources);
 
     /**
      * Multi part file to resource map.
      *
-     * @param senderDomainName the sender tenant name
+     * @param senderTenantName the sender tenant name
      * @param resources        the resources
      * @return the map
      */
-    Map<String, File> multiPartFileToResource(String senderDomainName, List<MultipartFile> resources);
+    Map<String, File> multiPartFileToResource(String senderTenantName, List<MultipartFile> resources);
 }

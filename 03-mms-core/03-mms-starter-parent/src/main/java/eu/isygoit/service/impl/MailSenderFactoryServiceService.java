@@ -36,7 +36,7 @@ public class MailSenderFactoryServiceService implements IMailSenderFactoryServic
      * @param tenant the tenant
      * @return the mail sender
      */
-    public MailSender senderFromConfig(String tenant) {
+    public MailSender senderFromConfig(String tenant /*senderTenant*/) {
         Optional<SenderConfig> optional = senderConfigRepository.findFirstByTenantIgnoreCase(tenant);
         if (!optional.isPresent()) {
             optional = senderConfigRepository.findFirstByTenantIgnoreCase(TenantConstants.DEFAULT_TENANT_NAME);
@@ -68,7 +68,7 @@ public class MailSenderFactoryServiceService implements IMailSenderFactoryServic
      * @param tenant the tenant
      * @return the sender
      */
-    public MailSender getSender(String tenant) {
+    public MailSender getSender(String tenant /*senderTenant*/) {
         if (mailSenders.containsKey(tenant)) {
             return mailSenders.get(tenant);
         }

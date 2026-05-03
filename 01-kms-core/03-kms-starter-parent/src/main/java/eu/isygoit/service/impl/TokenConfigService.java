@@ -42,7 +42,7 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
 
 
     @Override
-    public TokenConfig buildTokenConfig(String tenant, IEnumToken.Types tokenType) {
+    public TokenConfig buildTokenConfig(String tenant /*senderTenant*/, IEnumToken.Types tokenType) {
         //Serach for token config configured for the domein by type
         Optional<TokenConfig> optional = tokenConfigRepository.findByTenantIgnoreCaseAndTokenType(tenant, tokenType);
         if (!optional.isPresent()) {

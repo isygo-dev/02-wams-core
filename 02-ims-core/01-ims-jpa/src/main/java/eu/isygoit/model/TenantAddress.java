@@ -11,7 +11,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
 
 /**
- * The type Domain address.
+ * The type Tenant address.
  */
 @Data
 @SuperBuilder

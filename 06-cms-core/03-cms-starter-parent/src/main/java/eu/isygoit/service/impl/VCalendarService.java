@@ -60,7 +60,7 @@ public class VCalendarService extends CodeAssignableTenantService<Long, VCalenda
     }
 
     @Override
-    public VCalendar findByTenantAndName(String tenant, String name) {
+    public VCalendar findByTenantAndName(String tenant /*senderTenant*/, String name) {
         Optional<VCalendar> optional = vCalendarRepository.findByTenantIgnoreCaseAndName(tenant, name);
         if (optional.isPresent()) {
             return optional.get();
@@ -76,7 +76,7 @@ public class VCalendarService extends CodeAssignableTenantService<Long, VCalenda
     }
 
     @Override
-    public Resource download(String tenant, String name) throws IOException {
+    public Resource download(String tenant /*senderTenant*/, String name) throws IOException {
         Optional<VCalendar> vCalendar = vCalendarRepository.findByTenantIgnoreCaseAndName(tenant, name);
         if (!vCalendar.isPresent()) {
             throw new RuntimeException("Could not read the file!");
@@ -94,7 +94,7 @@ public class VCalendarService extends CodeAssignableTenantService<Long, VCalenda
     }
 
     @Override
-    public VCalendar beforeCreate(String tenant, VCalendar vCalendar) {
+    public VCalendar beforeCreate(String tenant /*senderTenant*/, VCalendar vCalendar) {
         VCalendar find = this.findByTenantAndName(vCalendar.getTenant(), vCalendar.getName());
         if (find != null) {
             throw new CalendarAlreadyExistsException("with tenant/name : " + vCalendar.getTenant() + "/" + vCalendar.getName());
@@ -115,7 +115,7 @@ public class VCalendarService extends CodeAssignableTenantService<Long, VCalenda
     }
 
     @Override
-    public VCalendar afterCreate(String tenant, VCalendar vCalendar) {
+    public VCalendar afterCreate(String tenant /*senderTenant*/, VCalendar vCalendar) {
         try {
             ICalendarBuilder.builder()
                     .uid(new Uid(vCalendar.getId().toString()))

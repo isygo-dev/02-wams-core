@@ -15,7 +15,7 @@ public interface ICryptoService {
      * @param tenant the tenant
      * @return the peb encryptor
      */
-    StringEncryptor getPebEncryptor(String tenant);
+    StringEncryptor getPebEncryptor(String tenant /*senderTenant*/);
 
     /**
      * Gets digest encryptor.
@@ -23,7 +23,7 @@ public interface ICryptoService {
      * @param tenant the tenant
      * @return the digest encryptor
      */
-    StringDigester getDigestEncryptor(String tenant);
+    StringDigester getDigestEncryptor(String tenant /*senderTenant*/);
 
     /**
      * Gets password encryptor.
@@ -31,5 +31,5 @@ public interface ICryptoService {
      * @param tenant the tenant
      * @return the password encryptor
      */
-    PasswordEncryptor getPasswordEncryptor(String tenant);
+    PasswordEncryptor getPasswordEncryptor(String tenant /*senderTenant*/);
 }

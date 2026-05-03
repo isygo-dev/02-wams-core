@@ -20,5 +20,5 @@ public interface AppParameterRepository extends JpaPagingAndSortingTenantAssigna
      * @param name   the name
      * @return the optional
      */
-    Optional<AppParameter> findByTenantIgnoreCaseAndNameIgnoreCase(String tenant, String name);
+    Optional<AppParameter> findByTenantIgnoreCaseAndNameIgnoreCase(String tenant /*senderTenant*/, String name);
 }

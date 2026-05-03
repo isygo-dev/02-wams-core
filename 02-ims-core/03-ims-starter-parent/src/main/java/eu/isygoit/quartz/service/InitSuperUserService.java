@@ -128,7 +128,7 @@ public class InitSuperUserService extends AbstractJobService {
                             .isAdmin(true)
                             .accountDetails(AccountDetails.builder()
                                     .firstName("Root")
-                                    .lastName("@SuperDomain")
+                                    .lastName("@SuperTenant")
                                     .build())
                             .roleInfo(Arrays.asList(superAdmin))
                             .build());

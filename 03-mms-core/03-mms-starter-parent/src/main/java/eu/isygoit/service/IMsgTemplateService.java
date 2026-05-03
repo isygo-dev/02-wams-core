@@ -19,14 +19,14 @@ public interface IMsgTemplateService extends ICrudTenantServiceOperations<Long, 
     /**
      * Compose message body string.
      *
-     * @param senderDomainName the sender tenant name
+     * @param senderTenantName the sender tenant name
      * @param templateName     the template name
      * @param variables        the variables
      * @return the string
      * @throws IOException       the io exception
      * @throws TemplateException the template exception
      */
-    String composeMessageBody(String senderDomainName,
+    String composeMessageBody(String senderTenantName,
                               IEnumEmailTemplate.Types templateName,
                               Map<String, String> variables) throws IOException, TemplateException;
 }
