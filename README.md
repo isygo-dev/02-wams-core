@@ -35,9 +35,12 @@
 ### Docker image
 
 - Run Docker desktop
-- Run: docker build -f .\09-docker\core-kms.Dockerfile -t core/kms-serv .
-- Run: docker build -f .\09-docker\core-mms.Dockerfile -t core/mms-serv .
-- Run: docker build -f .\09-docker\core-ims.Dockerfile -t core/ims-serv .
-- Run: docker build -f .\09-docker\core-dms.Dockerfile -t core/dms-serv .
-- Run: docker build -f .\09-docker\core-sms.Dockerfile -t core/sms-serv .
-- Run: docker build -f .\09-docker\core-cms.Dockerfile -t core/cms-serv .
+- Build docker images
+```bash
+docker build -f .\09-docker\core-kms.Dockerfile -t core/kms-serv .
+docker build -f .\09-docker\core-mms.Dockerfile -t core/mms-serv .
+docker build -f .\09-docker\core-ims.Dockerfile -t core/ims-serv .
+docker build -f .\09-docker\core-dms.Dockerfile -t core/dms-serv .
+docker build -f .\09-docker\core-sms.Dockerfile -t core/sms-serv .
+docker build -f .\09-docker\core-cms.Dockerfile -t core/cms-serv .
+```

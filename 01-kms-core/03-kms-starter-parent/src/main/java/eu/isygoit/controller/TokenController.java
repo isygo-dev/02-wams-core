@@ -7,7 +7,7 @@ import eu.isygoit.dto.common.TokenResponseDto;
 import eu.isygoit.dto.data.TokenRequestDto;
 import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
-import eu.isygoit.service.ITokenService;
+import eu.isygoit.service.ITokenBuilderService;
 import eu.isygoit.service.TokenServiceApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TokenController extends ControllerExceptionHandler implements TokenServiceApi {
 
     @Autowired
-    private ITokenService tokenService;
+    private ITokenBuilderService tokenService;
 
     @Operation(summary = "Build token by tenant Api",
             description = "Build token by tenant")

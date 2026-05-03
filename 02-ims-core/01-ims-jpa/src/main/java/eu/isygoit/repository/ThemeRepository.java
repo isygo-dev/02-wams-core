@@ -18,5 +18,5 @@ public interface ThemeRepository extends JpaPagingAndSortingRepository<Theme, Lo
      * @param tenantCode  the tenant code
      * @return the optional
      */
-    Optional<Theme> findByAccountCodeIgnoreCaseAndDomainCodeIgnoreCase(String accountCode, String tenantCode);
+    Optional<Theme> findByAccountCodeIgnoreCaseAndTenantCodeIgnoreCase(String accountCode, String tenantCode);
 }

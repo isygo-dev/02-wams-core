@@ -112,7 +112,7 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
 
             Account account = accountService.findByTenantAndUserName(authRequestDto.getTenant(), authRequestDto.getUserName());
             Tenant tenant = tenantService.findByName(authRequestDto.getTenant());
-            ThemeDto theme = themeMapper.entityToDto(themeService.findThemeByAccountCodeAndDomainCode(account.getCode(), tenant.getCode()));
+            ThemeDto theme = themeMapper.entityToDto(themeService.findThemeByAccountCodeAndTenantCode(account.getCode(), tenant.getCode()));
             UserDataResponseDto userDataResponseDto = UserDataResponseDto.builder()
                     .id(account.getId())
                     .userName(account.getCode())

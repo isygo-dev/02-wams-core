@@ -25,8 +25,8 @@ public class ThemeService extends CrudService<Long, Theme, ThemeRepository> impl
     private ThemeRepository themeRepository;
 
     @Override
-    public Theme findThemeByAccountCodeAndDomainCode(String accountCode, String tenantCode) {
-        Optional<Theme> theme = themeRepository.findByAccountCodeIgnoreCaseAndDomainCodeIgnoreCase(accountCode, tenantCode);
+    public Theme findThemeByAccountCodeAndTenantCode(String accountCode, String tenantCode) {
+        Optional<Theme> theme = themeRepository.findByAccountCodeIgnoreCaseAndTenantCodeIgnoreCase(accountCode, tenantCode);
         if (theme.isPresent()) {
             return theme.get();
         }
@@ -35,7 +35,7 @@ public class ThemeService extends CrudService<Long, Theme, ThemeRepository> impl
 
     @Override
     public Theme updateTheme(Theme theme) {
-        Theme oldTheme = this.findThemeByAccountCodeAndDomainCode(theme.getAccountCode(), theme.getTenantCode());
+        Theme oldTheme = this.findThemeByAccountCodeAndTenantCode(theme.getAccountCode(), theme.getTenantCode());
         if (oldTheme != null) {
             theme.setId(oldTheme.getId());
         }

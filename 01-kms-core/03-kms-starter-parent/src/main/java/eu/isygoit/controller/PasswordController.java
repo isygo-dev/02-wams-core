@@ -52,7 +52,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     @Autowired
     private IPasswordService passwordService;
     @Autowired
-    private ITokenService tokenService;
+    private ITokenBuilderService tokenService;
     @Autowired
     private IJwtService jwtService;
     @Autowired
@@ -190,16 +190,16 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                 return ResponseFactory.responseOk(AccessTokenResponseDto.builder()
                         .status(IEnumPasswordStatus.Types.VALID)
                         .tokenType(IEnumWebToken.Types.Bearer)
-                        .accessToken(tokenService.createAccessToken(accessRequest.getTenant().trim().toLowerCase(),
+                        .accessToken(tokenService.buildAccessToken(accessRequest.getTenant().trim().toLowerCase(),
                                         accessRequest.getApplication(),
                                         accessRequest.getUserName().trim().toLowerCase(),
                                         accessRequest.getIsAdmin())
                                 .getToken())
-                        .refreshToken(tokenService.createRefreshToken(accessRequest.getTenant().trim().toLowerCase(),
+                        .refreshToken(tokenService.buildRefreshToken(accessRequest.getTenant().trim().toLowerCase(),
                                         accessRequest.getApplication(),
                                         accessRequest.getUserName().trim().toLowerCase())
                                 .getToken())
-                        .authorityToken(tokenService.createAuthorityToken(accessRequest.getTenant().trim().toLowerCase(),
+                        .authorityToken(tokenService.buildAuthorityToken(accessRequest.getTenant().trim().toLowerCase(),
                                         accessRequest.getApplication(),
                                         accessRequest.getUserName().trim().toLowerCase(),
                                         accessRequest.getAuthorities())
@@ -212,14 +212,14 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                                 , accessRequest.getPassword()
                                 , accessRequest.getAuthType()))
                         .tokenType(IEnumWebToken.Types.Bearer)
-                        .accessToken(tokenService.createAccessToken(accessRequest.getTenant().trim().toLowerCase(),
+                        .accessToken(tokenService.buildAccessToken(accessRequest.getTenant().trim().toLowerCase(),
                                 accessRequest.getApplication(),
                                 accessRequest.getUserName().trim().toLowerCase(),
                                 accessRequest.getIsAdmin()).getToken())
-                        .refreshToken(tokenService.createRefreshToken(accessRequest.getTenant().trim().toLowerCase(),
+                        .refreshToken(tokenService.buildRefreshToken(accessRequest.getTenant().trim().toLowerCase(),
                                 accessRequest.getApplication(),
                                 accessRequest.getUserName().trim().toLowerCase()).getToken())
-                        .authorityToken(tokenService.createAuthorityToken(accessRequest.getTenant().trim().toLowerCase(),
+                        .authorityToken(tokenService.buildAuthorityToken(accessRequest.getTenant().trim().toLowerCase(),
                                 accessRequest.getApplication(),
                                 accessRequest.getUserName().trim().toLowerCase(),
                                 accessRequest.getAuthorities()).getToken())

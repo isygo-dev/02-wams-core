@@ -37,10 +37,12 @@ import java.util.Map;
 @Slf4j
 @Service
 @Transactional
-public class TokenService extends JwtService implements ITokenService {
+public class TokenService implements ITokenBuilderService {
 
     private final AppProperties appProperties;
 
+    @Autowired
+    private JwtService jwtService;
     @Autowired
     private ITokenConfigService tokenConfigService;
     @Autowired
@@ -61,6 +63,7 @@ public class TokenService extends JwtService implements ITokenService {
         this.appProperties = appProperties;
     }
 
+    @Override
     public TokenResponseDto buildTokenAndSave(String tenant, String application, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
         //Get Token config configured by tenant and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
@@ -74,7 +77,7 @@ public class TokenService extends JwtService implements ITokenService {
                         + tokenConfig.getSignatureAlgorithm());
             };
 
-            TokenResponseDto token = super.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(tenant).toString(),
+            TokenResponseDto token = jwtService.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(tenant).toString(),
                     claims,
                     tokenConfig.getIssuer(),
                     tokenConfig.getAudience(),
@@ -97,6 +100,7 @@ public class TokenService extends JwtService implements ITokenService {
         }
     }
 
+    @Override
     public TokenResponseDto buildToken(String tenant, String application, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
         //Get Token config configured by tenant and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
@@ -110,7 +114,7 @@ public class TokenService extends JwtService implements ITokenService {
                         + tokenConfig.getSignatureAlgorithm());
             };
 
-            TokenResponseDto token = super.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(tenant).toString(),
+            TokenResponseDto token = jwtService.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(tenant).toString(),
                     claims,
                     tokenConfig.getIssuer(),
                     tokenConfig.getAudience(),
@@ -129,7 +133,7 @@ public class TokenService extends JwtService implements ITokenService {
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
             //Validate token content
-            super.validateToken(token, subject, tokenConfig.getSecretKey());
+            jwtService.validateToken(token, subject, tokenConfig.getSecretKey());
         } else {
             log.error("Token config not found for tenant: " + tenant + "/" + tokenType.name());
             throw new TokenConfigNotFoundException("for tenant: " + tenant + "/" + tokenType.name());
@@ -147,7 +151,7 @@ public class TokenService extends JwtService implements ITokenService {
     }
 
     @Override
-    public void createForgotPasswordAccessToken(String tenant, String application, String accountCode) throws JsonProcessingException {
+    public void buildForgotPasswordAccessToken(String tenant, String application, String accountCode) throws JsonProcessingException {
         //Get the account
         Account account = tenantService.checkAccountIfExists(tenant, null, null, accountCode, null, false);
         if (account == null) {
@@ -198,7 +202,7 @@ public class TokenService extends JwtService implements ITokenService {
     }
 
     @Override
-    public TokenResponseDto createAccessToken(String tenant, String application, String userName, Boolean isAdmin) {
+    public TokenResponseDto buildAccessToken(String tenant, String application, String userName, Boolean isAdmin) {
         TokenResponseDto token = this.buildTokenAndSave(tenant, application, IEnumToken.Types.ACCESS, userName,
                 Map.of(JwtConstants.JWT_SENDER_TENANT, tenant,
                         JwtConstants.JWT_SENDER_USER, userName,
@@ -209,7 +213,7 @@ public class TokenService extends JwtService implements ITokenService {
     }
 
     @Override
-    public TokenResponseDto createRefreshToken(String tenant, String application, String userName) {
+    public TokenResponseDto buildRefreshToken(String tenant, String application, String userName) {
         TokenResponseDto token = this.buildTokenAndSave(tenant, application, IEnumToken.Types.REFRESH, userName,
                 Map.of(JwtConstants.JWT_SENDER_TENANT, tenant,
                         JwtConstants.JWT_SENDER_USER, userName,
@@ -219,7 +223,7 @@ public class TokenService extends JwtService implements ITokenService {
     }
 
     @Override
-    public TokenResponseDto createAuthorityToken(String tenant, String application, String userName, List<String> authorities) {
+    public TokenResponseDto buildAuthorityToken(String tenant, String application, String userName, List<String> authorities) {
         TokenResponseDto token = this.buildToken(tenant, application, IEnumToken.Types.AUTHORITY, userName,
                 Map.of(JwtConstants.JWT_SENDER_TENANT, tenant,
                         JwtConstants.JWT_SENDER_USER, userName,

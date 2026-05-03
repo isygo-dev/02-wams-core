@@ -185,7 +185,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
         try {
             Account account = accountService.findByTenantAndUserName(getRequestContextService().getCurrentContext().getSenderTenant(), getRequestContextService().getCurrentContext().getSenderUser());
             Tenant tenant = tenantService.findByName(getRequestContextService().getCurrentContext().getSenderTenant());
-            //ThemeDto theme = themeMapper.entityToDto(themeService.findThemeByAccountCodeAndDomainCode(account.getCode(), tenant.getCode()));
+            //ThemeDto theme = themeMapper.entityToDto(themeService.findThemeByAccountCodeAndTenantCode(account.getCode(), tenant.getCode()));
             UserDataResponseDto userDataResponseDto = UserDataResponseDto.builder()
                     .id(account.getId())
                     .userName(account.getCode())
