@@ -7,7 +7,7 @@ import eu.isygoit.dto.common.TokenResponseDto;
 import eu.isygoit.dto.data.TokenRequestDto;
 import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
-import eu.isygoit.service.ITokenService;
+import eu.isygoit.service.ITokenBuilderService;
 import eu.isygoit.service.TokenServiceApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TokenController extends ControllerExceptionHandler implements TokenServiceApi {
 
     @Autowired
-    private ITokenService tokenService;
+    private ITokenBuilderService tokenService;
 
     @Operation(summary = "Build token by tenant Api",
             description = "Build token by tenant")
@@ -51,11 +51,11 @@ public class TokenController extends ControllerExceptionHandler implements Token
             String application,
             IEnumToken.Types tokenType,
             TokenRequestDto tokenRequestDto) {
-        log.info("Call create Token By Domain");
+        log.info("Call create Token By Tenant");
         try {
             return ResponseFactory.responseOk(tokenService.buildTokenAndSave(tenant, application, tokenType, tokenRequestDto.getSubject(), tokenRequestDto.getClaims()));
         } catch (Throwable e) {
-            log.error("<Error>: create Token By Domain: {} ", e);
+            log.error("<Error>: create Token By Tenant: {} ", e);
             return getBackExceptionResponse(e);
         }
     }

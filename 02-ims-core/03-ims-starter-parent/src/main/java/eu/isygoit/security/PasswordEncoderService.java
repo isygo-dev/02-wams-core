@@ -30,7 +30,7 @@ public class PasswordEncoderService implements PasswordEncoder {
     }
 
     @Override
-    public boolean matches(CharSequence rawPassword, String encodedPassword /*userName@Domain*/) {
+    public boolean matches(CharSequence rawPassword, String encodedPassword /*userName@Tenant*/) {
         String[] encodedPasswordArray = encodedPassword.split("@");
         if (encodedPasswordArray.length == 3) {
             return !Arrays.asList(IEnumPasswordStatus.Types.BAD, IEnumPasswordStatus.Types.BROKEN).contains(

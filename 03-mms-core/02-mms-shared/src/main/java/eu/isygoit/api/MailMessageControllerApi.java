@@ -24,7 +24,7 @@ public interface MailMessageControllerApi {
     /**
      * Send mail response entity.
      *
-     * @param senderDomainName the sender tenant name
+     * @param senderTenantName the sender tenant name
      * @param template         the template
      * @param mailMessage      the mail message
      * @return the response entity
@@ -37,8 +37,8 @@ public interface MailMessageControllerApi {
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
-    @PostMapping(path = "/send/{senderDomainName}/{template}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    ResponseEntity<?> sendMail(@PathVariable(name = RestApiConstants.SENDER_TENANT_NAME) String senderDomainName,
+    @PostMapping(path = "/send/{senderTenantName}/{template}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    ResponseEntity<?> sendMail(@PathVariable(name = RestApiConstants.SENDER_TENANT_NAME) String senderTenantName,
                                @PathVariable(name = RestApiConstants.TEMPLATE) IEnumEmailTemplate.Types template,
                                @RequestPart(name = RestApiConstants.mailMessage) MailMessageDto mailMessage);
 }

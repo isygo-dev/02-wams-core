@@ -33,7 +33,7 @@ public interface AppParameterControllerApi extends IMappedCrudApi<Long, AppParam
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = String.class))})
     })
-    @GetMapping(path = "/value/byDomainAndName")
+    @GetMapping(path = "/value/byTenantAndName")
     ResponseEntity<String> getValueByTenantAndName(@RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
                                                    @RequestParam(name = RestApiConstants.NAME) String name,
                                                    @RequestParam(name = RestApiConstants.ALLOW_DEFAULT) Boolean allowDefault,

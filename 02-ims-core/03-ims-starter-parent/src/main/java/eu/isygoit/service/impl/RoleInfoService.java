@@ -65,7 +65,7 @@ public class RoleInfoService extends CodeAssignableTenantService<Long, RoleInfo,
     }
 
     @Override
-    public List<RoleInfo> afterFindAll(String tenant, List<RoleInfo> list) {
+    public List<RoleInfo> afterFindAll(String tenant /*senderTenant*/, List<RoleInfo> list) {
         if (!CollectionUtils.isEmpty(list)) {
             list.stream().forEach(roleInfo -> {
                 roleInfo.setNumberOfUsers(assoRoleInfoAccountRepository.countAllById_RoleInfoCode(roleInfo.getCode()));
@@ -75,7 +75,7 @@ public class RoleInfoService extends CodeAssignableTenantService<Long, RoleInfo,
     }
 
     @Override
-    public RoleInfo afterFindById(String tenant, RoleInfo roleInfo) {
+    public RoleInfo afterFindById(String tenant /*senderTenant*/, RoleInfo roleInfo) {
         roleInfo.setNumberOfUsers(assoRoleInfoAccountRepository.countAllById_RoleInfoCode(roleInfo.getCode()));
         return super.afterFindById(tenant, roleInfo);
     }

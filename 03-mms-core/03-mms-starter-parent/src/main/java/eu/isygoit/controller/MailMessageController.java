@@ -46,22 +46,22 @@ public class MailMessageController extends MappedCrudTenantController<UUID, Mail
     @Autowired
     private IMsgTemplateService templateService;
 
-    public ResponseEntity<?> sendMail(String senderDomainName, IEnumEmailTemplate.Types template, MailMessageDto mailMessage) {
+    public ResponseEntity<?> sendMail(String senderTenantName, IEnumEmailTemplate.Types template, MailMessageDto mailMessage) {
         try {
             if (template != null) {
-                String body = templateService.composeMessageBody(senderDomainName, template,
+                String body = templateService.composeMessageBody(senderTenantName, template,
                         mailMessage.getVariablesAsMap(mailMessage.getVariables()));
                 mailMessage.setBody(body);
             } else if (!StringUtils.hasText(mailMessage.getBody())) {
                 mailMessage.setBody(mailMessage.getVariables());
             }
-            mailMessageService.sendMail(senderDomainName,
+            mailMessageService.sendMail(senderTenantName,
                     mailMessageMapper.dtoToEntity(mailMessage)
                     , MailOptionsDto.builder()
                             .returnDelivered(mailMessage.isReturnDelivered())
                             .returnRead(mailMessage.isReturnRead())
                             .build()
-                    , mailMessageService.multiPartFileToResource(senderDomainName, mailMessage.getResources())); //convert multipart file list to resources
+                    , mailMessageService.multiPartFileToResource(senderTenantName, mailMessage.getResources())); //convert multipart file list to resources
             return ResponseFactory.responseOk();
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);

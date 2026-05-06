@@ -14,5 +14,5 @@ public interface IStorageConfigService extends ICrudTenantServiceOperations<Long
      * @param tenant the tenant
      * @return the storage config
      */
-    StorageConfig findByTenantIgnoreCase(String tenant);
+    StorageConfig findByTenantIgnoreCase(String tenant /*senderTenant*/);
 }

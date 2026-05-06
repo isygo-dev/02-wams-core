@@ -22,11 +22,11 @@ public class MsgServiceImpl implements IMsgService {
     private ICamelRepository camelRepository;
 
     @Override
-    public void sendMessage(String senderDomainName, MailMessageDto mailMessage, boolean async) {
+    public void sendMessage(String senderTenantName, MailMessageDto mailMessage, boolean async) {
         if (async) {
             camelRepository.asyncSendBody(ICamelRepository.send_email_queue, mailMessage);
         } else {
-            this.messageService.sendMail(senderDomainName, mailMessage.getTemplateName(), mailMessage);
+            this.messageService.sendMail(senderTenantName, mailMessage.getTemplateName(), mailMessage);
         }
     }
 }

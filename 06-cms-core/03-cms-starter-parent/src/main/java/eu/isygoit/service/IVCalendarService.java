@@ -18,7 +18,7 @@ public interface IVCalendarService extends ICrudTenantServiceOperations<Long, VC
      * @param name   the name
      * @return the v calendar
      */
-    VCalendar findByTenantAndName(String tenant, String name);
+    VCalendar findByTenantAndName(String tenant /*senderTenant*/, String name);
 
     /**
      * Download resource.
@@ -28,7 +28,7 @@ public interface IVCalendarService extends ICrudTenantServiceOperations<Long, VC
      * @return the resource
      * @throws IOException the io exception
      */
-    Resource download(String tenant, String name) throws IOException;
+    Resource download(String tenant /*senderTenant*/, String name) throws IOException;
 
     VCalendar updateLockedStatus(Long id, Boolean locked) throws IOException;
 }

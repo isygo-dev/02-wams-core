@@ -18,7 +18,7 @@ public interface IAppParameterService extends ICrudTenantServiceOperations<Long,
      * @param defaultValue the default value
      * @return the value by tenant and name
      */
-    String getValueByTenantAndName(String tenant, String name, boolean allowDefault, String defaultValue);
+    String getValueByTenantAndName(String tenant /*senderTenant*/, String name, boolean allowDefault, String defaultValue);
 
     /**
      * Gets technical admin email.

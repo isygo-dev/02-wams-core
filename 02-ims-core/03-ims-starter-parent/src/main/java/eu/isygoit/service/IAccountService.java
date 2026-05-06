@@ -30,7 +30,7 @@ public interface IAccountService extends ICrudTenantServiceOperations<Long, Acco
      * @param userName the user name
      * @return the account
      */
-    Account findByTenantAndUserName(String tenant, String userName);
+    Account findByTenantAndUserName(String tenant /*senderTenant*/, String userName);
 
     /**
      * Find distinct allowed tools by tenant and username list.
@@ -39,7 +39,7 @@ public interface IAccountService extends ICrudTenantServiceOperations<Long, Acco
      * @param userName the username
      * @return the list
      */
-    List<Application> findDistinctAllowedToolsByTenantAndUserName(String tenant, String userName);
+    List<Application> findDistinctAllowedToolsByTenantAndUserName(String tenant /*senderTenant*/, String userName);
 
     /**
      * Update account admin status account.
@@ -65,7 +65,7 @@ public interface IAccountService extends ICrudTenantServiceOperations<Long, Acco
      * @param tenant the tenant
      * @return the list
      */
-    List<String> findEmailsByTenant(String tenant);
+    List<String> findEmailsByTenant(String tenant /*senderTenant*/);
 
     /**
      * Build allowed tools list.
@@ -84,7 +84,7 @@ public interface IAccountService extends ICrudTenantServiceOperations<Long, Acco
      * @return the min info by tenant
      * @throws NotSupportedException the not supported exception
      */
-    List<MinAccountDto> getMinInfoByTenant(String tenant) throws NotSupportedException;
+    List<MinAccountDto> getMinInfoByTenant(String tenant /*senderTenant*/) throws NotSupportedException;
 
 
     /**
@@ -103,7 +103,7 @@ public interface IAccountService extends ICrudTenantServiceOperations<Long, Acco
      * @return the boolean
      * @throws AccountNotFoundException the account not found exception
      */
-    boolean switchAuthType(String tenant, AccountAuthTypeRequest accountAuthTypeRequest) throws AccountNotFoundException;
+    boolean switchAuthType(String tenant /*senderTenant*/, AccountAuthTypeRequest accountAuthTypeRequest) throws AccountNotFoundException;
 
     /**
      * Update language account.
@@ -120,7 +120,7 @@ public interface IAccountService extends ICrudTenantServiceOperations<Long, Acco
      * @param tenant the tenant
      * @return the by tenant
      */
-    List<Account> getByTenant(String tenant);
+    List<Account> getByTenant(String tenant /*senderTenant*/);
 
     /**
      * Check if application allowed boolean.
@@ -130,7 +130,7 @@ public interface IAccountService extends ICrudTenantServiceOperations<Long, Acco
      * @param application the application
      * @return the boolean
      */
-    boolean checkIfApplicationAllowed(String tenant, String userName, String application);
+    boolean checkIfApplicationAllowed(String tenant /*senderTenant*/, String userName, String application);
 
     /**
      * Track user connections.
@@ -139,7 +139,7 @@ public interface IAccountService extends ICrudTenantServiceOperations<Long, Acco
      * @param userName           the user name
      * @param connectionTracking the connection tracking
      */
-    void trackUserConnections(String tenant, String userName, ConnectionTracking connectionTracking);
+    void trackUserConnections(String tenant /*senderTenant*/, String userName, ConnectionTracking connectionTracking);
 
     /**
      * Chat accounts by tenant list.
@@ -147,7 +147,7 @@ public interface IAccountService extends ICrudTenantServiceOperations<Long, Acco
      * @param tenant the tenant
      * @return the list
      */
-    List<Account> chatAccountsByTenant(String tenant);
+    List<Account> chatAccountsByTenant(String tenant /*senderTenant*/);
 
     /**
      * Resend creation email boolean.
@@ -155,7 +155,7 @@ public interface IAccountService extends ICrudTenantServiceOperations<Long, Acco
      * @param id the id
      * @return the boolean
      */
-    boolean resendCreationEmail(String tenant, Long id);
+    boolean resendCreationEmail(String tenant /*senderTenant*/, Long id);
 
     /**
      * Gets global statistics.
@@ -197,7 +197,7 @@ public interface IAccountService extends ICrudTenantServiceOperations<Long, Acco
      * @param admin  the admin
      * @return the account
      */
-    Account createDomainAdmin(String tenant, TenantAdminDto admin);
+    Account createTenantAdmin(String tenant /*senderTenant*/, TenantAdminDto admin);
 
     /**
      * Gets authentication data.

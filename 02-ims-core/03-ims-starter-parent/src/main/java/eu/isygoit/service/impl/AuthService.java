@@ -130,7 +130,7 @@ public class AuthService implements IAuthService {
         }
     }
 
-    private void trackUserConnections(String tenant, String userName, String application, RequestTrackingDto requestTracking) {
+    private void trackUserConnections(String tenant /*senderTenant*/, String userName, String application, RequestTrackingDto requestTracking) {
         accountService.trackUserConnections(tenant, userName, ConnectionTracking.builder()
                 .device(requestTracking.getDevice())
                 .browser(requestTracking.getBrowser())

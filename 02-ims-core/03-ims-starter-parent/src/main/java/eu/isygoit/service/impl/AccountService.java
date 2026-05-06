@@ -99,7 +99,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     }
 
     @Override
-    public Account findByTenantAndUserName(String tenant, String userName) {
+    public Account findByTenantAndUserName(String tenant /*senderTenant*/, String userName) {
         Optional<Account> optional = repository().findByTenantIgnoreCaseAndCodeIgnoreCase(tenant, userName);
         if (optional.isPresent()) {
             return optional.get();
@@ -108,7 +108,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     }
 
     @Override
-    public List<String> findEmailsByTenant(String tenant) {
+    public List<String> findEmailsByTenant(String tenant /*senderTenant*/) {
         if (TenantConstants.SUPER_TENANT_NAME.equals(tenant)) {
             return repository().findDistinctEmails();
         } else {
@@ -117,7 +117,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     }
 
     @Override
-    public List<Application> findDistinctAllowedToolsByTenantAndUserName(String tenant, String userName) {
+    public List<Application> findDistinctAllowedToolsByTenantAndUserName(String tenant /*senderTenant*/, String userName) {
         Account account = findByTenantAndUserName(tenant, userName);
         if (account != null) {
             List<Application> applications = new ArrayList<>();
@@ -197,7 +197,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     }
 
     @Override
-    public List<Account> getByTenant(String tenant) {
+    public List<Account> getByTenant(String tenant /*senderTenant*/) {
         if (TenantConstants.SUPER_TENANT_NAME.equals(tenant)) {
             return repository().findAll();
         } else {
@@ -206,7 +206,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     }
 
     @Override
-    public List<MinAccountDto> getMinInfoByTenant(String tenant) throws NotSupportedException {
+    public List<MinAccountDto> getMinInfoByTenant(String tenant /*senderTenant*/) throws NotSupportedException {
         if (TenantConstants.SUPER_TENANT_NAME.equals(tenant)) {
             return minAccountMapper.listEntityToDto(findAll(tenant));
         } else {
@@ -310,7 +310,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     }
 
     @Override
-    public boolean switchAuthType(String tenant, AccountAuthTypeRequest accountAuthTypeRequest) throws AccountNotFoundException {
+    public boolean switchAuthType(String tenant /*senderTenant*/, AccountAuthTypeRequest accountAuthTypeRequest) throws AccountNotFoundException {
         Account account = findByTenantAndUserName(accountAuthTypeRequest.getTenant(), accountAuthTypeRequest.getUserName());
         if (account != null) {
             if (accountAuthTypeRequest.getAuthType() == null) {
@@ -335,7 +335,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     }
 
     @Override
-    public boolean checkIfApplicationAllowed(String tenant, String userName, String application) {
+    public boolean checkIfApplicationAllowed(String tenant /*senderTenant*/, String userName, String application) {
         //allow webapp-gw/gateway for all users
         if ("webapp-gw".equals(application)) {
             return true;
@@ -356,7 +356,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     }
 
     @Override
-    public void trackUserConnections(String tenant, String userName, ConnectionTracking connectionTracking) {
+    public void trackUserConnections(String tenant /*senderTenant*/, String userName, ConnectionTracking connectionTracking) {
         Account account = this.findByTenantAndUserName(tenant, userName);
         if (account != null) {
             if (CollectionUtils.isEmpty(account.getConnectionTracking())) {
@@ -369,7 +369,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     }
 
     @Override
-    public List<Account> chatAccountsByTenant(String tenant) {
+    public List<Account> chatAccountsByTenant(String tenant /*senderTenant*/) {
         List<Account> list = repository().findByTenantIgnoreCaseIn(Arrays.asList(tenant, TenantConstants.SUPER_TENANT_NAME));
         if (CollectionUtils.isEmpty(list)) {
             return Collections.EMPTY_LIST;
@@ -399,7 +399,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     }
 
     @Override
-    public boolean resendCreationEmail(String tenant, Long id) {
+    public boolean resendCreationEmail(String tenant /*senderTenant*/, Long id) {
         try {
             Optional<Account> optional = this.findById(tenant, id);
             if (optional.isPresent()) {
@@ -501,7 +501,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     }
 
     @Override
-    public Account createDomainAdmin(String tenant, TenantAdminDto admin) {
+    public Account createTenantAdmin(String tenant /*senderTenant*/, TenantAdminDto admin) {
         RoleInfo tenantAdmin = roleInfoService.findByName(AccountTypeConstants.TENANT_ADMIN);
 
         return this.create(tenant, Account.builder()
@@ -513,7 +513,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
                         .firstName(admin.getFirstName())
                         .lastName(admin.getLastName())
                         .build())
-                .functionRole("Domain administrator")
+                .functionRole("Tenant administrator")
                 .roleInfo(Arrays.asList(tenantAdmin))
                 .build());
     }
@@ -529,7 +529,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
      * @return the all accounts min
      */
     //@Cacheable(cacheNames = SchemaTableConstantName.T_ACCOUNT)
-    public List<MinAccountDto> getAllAccountsMin(String tenant) {
+    public List<MinAccountDto> getAllAccountsMin(String tenant /*senderTenant*/) {
         return minAccountMapper.listEntityToDto(this.findAll(tenant));
     }
 }

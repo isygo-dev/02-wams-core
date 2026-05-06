@@ -46,8 +46,8 @@ public class ThemeController extends MappedCrudController<Long, Theme, ThemeDto,
      * @param accountCode the account code
      * @return the response entity
      */
-    @Operation(summary = "findThemeByAccountCodeAndDomainCode Api",
-            description = "findThemeByAccountCodeAndDomainCode")
+    @Operation(summary = "findThemeByAccountCodeAndTenantCode Api",
+            description = "findThemeByAccountCodeAndTenantCode")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
@@ -55,11 +55,11 @@ public class ThemeController extends MappedCrudController<Long, Theme, ThemeDto,
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @GetMapping(path = "/find/{tenantCode}/{accountCode}")
-    public ResponseEntity<ThemeDto> findThemeByAccountCodeAndDomainCode(
+    public ResponseEntity<ThemeDto> findThemeByAccountCodeAndTenantCode(
             @PathVariable(name = RestApiConstants.TENANT_CODE) String tenantCode,
             @PathVariable(name = RestApiConstants.ACCOUNT_CODE) String accountCode) {
         try {
-            Theme theme = themeService.findThemeByAccountCodeAndDomainCode(accountCode, tenantCode);
+            Theme theme = themeService.findThemeByAccountCodeAndTenantCode(accountCode, tenantCode);
 
             if (theme != null) {
                 ThemeDto themeDto = themeMapper.entityToDto(theme);

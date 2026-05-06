@@ -34,7 +34,7 @@ public interface CalendarEventControllerAPI {
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = VCalendarEventDto.class))})
     })
-    @GetMapping(path = "/byDomainAndCalendarAndCode/{tenant}/{calendar}/{code}")
+    @GetMapping(path = "/byTenantAndCalendarAndCode/{tenant}/{calendar}/{code}")
     ResponseEntity<VCalendarEventDto> eventByTenantAndCalendarAndCode(
             @PathVariable(name = RestApiConstants.TENANT_NAME) String tenant,
             @PathVariable(name = RestApiConstants.CALENDAR) String calendar,
@@ -55,7 +55,7 @@ public interface CalendarEventControllerAPI {
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = VCalendarEventDto.class))})
     })
-    @GetMapping(path = "/byDomainAndCalendarName/{tenant}/{calendar}")
+    @GetMapping(path = "/byTenantAndCalendarName/{tenant}/{calendar}")
     ResponseEntity<List<VCalendarEventDto>> getAllByTenantAndCalendarName(
             @PathVariable(name = RestApiConstants.TENANT_NAME) String tenant,
             @PathVariable(name = RestApiConstants.CALENDAR) String calendar);

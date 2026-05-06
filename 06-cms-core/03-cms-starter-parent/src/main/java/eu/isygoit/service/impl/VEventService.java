@@ -55,7 +55,7 @@ public class VEventService extends CodeAssignableTenantService<Long, VCalendarEv
     }
 
     @Override
-    public List<VCalendarEvent> findByTenantAndCalendar(String tenant, String calendar) {
+    public List<VCalendarEvent> findByTenantAndCalendar(String tenant /*senderTenant*/, String calendar) {
         return repository().findByTenantIgnoreCaseAndCalendar(tenant, calendar);
     }
 
@@ -67,12 +67,12 @@ public class VEventService extends CodeAssignableTenantService<Long, VCalendarEv
      * @param code     the code
      * @return the optional
      */
-    public Optional<VCalendarEvent> findByTenantAndCalendarAndCode(String tenant, String calendar, String code) {
+    public Optional<VCalendarEvent> findByTenantAndCalendarAndCode(String tenant /*senderTenant*/, String calendar, String code) {
         return repository().findByTenantIgnoreCaseAndCalendarAndCodeIgnoreCase(tenant, calendar, code);
     }
 
     @Override
-    public VCalendarEvent beforeCreate(String tenant, VCalendarEvent vCalendarEvent) {
+    public VCalendarEvent beforeCreate(String tenant /*senderTenant*/, VCalendarEvent vCalendarEvent) {
         VCalendar vCalendar = calendarService.findByTenantAndName(vCalendarEvent.getTenant(), vCalendarEvent.getCalendar());
         if (vCalendar == null) {
             if (appProperties.getCreateCalendarIfNotExists()) {
@@ -90,7 +90,7 @@ public class VEventService extends CodeAssignableTenantService<Long, VCalendarEv
     }
 
     @Override
-    public VCalendarEvent afterCreate(String tenant, VCalendarEvent vCalendarEvent) {
+    public VCalendarEvent afterCreate(String tenant /*senderTenant*/, VCalendarEvent vCalendarEvent) {
         VCalendar vCalendar = calendarService.findByTenantAndName(vCalendarEvent.getTenant(), vCalendarEvent.getCalendar());
         if (vCalendar == null) {
             throw new CalendarNotFoundException("with tenant/name : " + vCalendarEvent.getTenant() + "/" + vCalendarEvent.getCalendar());

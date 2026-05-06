@@ -18,5 +18,5 @@ public interface PasswordConfigRepository extends JpaPagingAndSortingTenantAndCo
      * @param type   the type
      * @return the optional
      */
-    Optional<PasswordConfig> findByTenantIgnoreCaseAndType(String tenant, IEnumAuth.Types type);
+    Optional<PasswordConfig> findByTenantIgnoreCaseAndType(String tenant /*senderTenant*/, IEnumAuth.Types type);
 }

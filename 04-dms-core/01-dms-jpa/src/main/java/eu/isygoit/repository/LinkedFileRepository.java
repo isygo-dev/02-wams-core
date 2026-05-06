@@ -21,7 +21,7 @@ public interface LinkedFileRepository extends JpaPagingAndSortingTenantAndCodeAs
      * @param originalFileName the origin file name
      * @return the list
      */
-    List<LinkedFile> findByTenantIgnoreCaseAndOriginalFileNameOrderByCreateDateDesc(String tenant, String originalFileName);
+    List<LinkedFile> findByTenantIgnoreCaseAndOriginalFileNameOrderByCreateDateDesc(String tenant /*senderTenant*/, String originalFileName);
 
     /**
      * Find by tenant ignore case and original file name and check cancel false and version optional.
@@ -31,7 +31,7 @@ public interface LinkedFileRepository extends JpaPagingAndSortingTenantAndCodeAs
      * @param version          the version
      * @return the optional
      */
-    Optional<LinkedFile> findByTenantIgnoreCaseAndOriginalFileNameAndVersionOrderByCreateDateDesc(String tenant, String originalFileName, Long version);
+    Optional<LinkedFile> findByTenantIgnoreCaseAndOriginalFileNameAndVersionOrderByCreateDateDesc(String tenant /*senderTenant*/, String originalFileName, Long version);
 
     /**
      * Find by tenant ignore case and tags containing and check cancel false list.
@@ -40,7 +40,7 @@ public interface LinkedFileRepository extends JpaPagingAndSortingTenantAndCodeAs
      * @param tags   the tags
      * @return the list
      */
-    List<LinkedFile> findByTenantIgnoreCaseAndTagsContaining(String tenant, String tags);
+    List<LinkedFile> findByTenantIgnoreCaseAndTagsContaining(String tenant /*senderTenant*/, String tags);
 
     /**
      * Find by tenant ignore case and categories in and check cancel false list.
@@ -49,5 +49,5 @@ public interface LinkedFileRepository extends JpaPagingAndSortingTenantAndCodeAs
      * @param categories the categories
      * @return the list
      */
-    List<LinkedFile> findByTenantIgnoreCaseAndCategoriesIn(String tenant, List<String> categories);
+    List<LinkedFile> findByTenantIgnoreCaseAndCategoriesIn(String tenant /*senderTenant*/, List<String> categories);
 }

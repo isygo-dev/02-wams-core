@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * The interface Domain repository.
+ * The interface Tenant repository.
  */
 public interface TenantRepository extends JpaPagingAndSortingTenantAndCodeAssignableRepository<Tenant, Long> {
 

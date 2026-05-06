@@ -16,7 +16,7 @@ public interface IThemeService extends ICrudServiceOperations<Long, Theme> {
      * @param tenantCode  the tenant code
      * @return the theme
      */
-    Theme findThemeByAccountCodeAndDomainCode(String accountCode, String tenantCode);
+    Theme findThemeByAccountCodeAndTenantCode(String accountCode, String tenantCode);
 
     /**
      * Update theme theme.

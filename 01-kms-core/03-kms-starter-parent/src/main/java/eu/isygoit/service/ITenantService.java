@@ -6,7 +6,7 @@ import eu.isygoit.model.Account;
 import eu.isygoit.model.Tenant;
 
 /**
- * The interface Domain service.
+ * The interface Tenant service.
  */
 public interface ITenantService extends ICrudServiceOperations<Long, Tenant> {
 
@@ -18,7 +18,7 @@ public interface ITenantService extends ICrudServiceOperations<Long, Tenant> {
      * @param createIfNotExists the create if not exists
      * @return the kms tenant
      */
-    Tenant checkDomainIfExists(String tenantName, String tenantUrl, boolean createIfNotExists);
+    Tenant checkTenantIfExists(String tenantName, String tenantUrl, boolean createIfNotExists);
 
     /**
      * Find by name ignore case kms tenant.
@@ -44,11 +44,11 @@ public interface ITenantService extends ICrudServiceOperations<Long, Tenant> {
     /**
      * Check if exists boolean.
      *
-     * @param kmsDomain         the kms tenant
+     * @param kmsTenant         the kms tenant
      * @param createIfNotExists the create if not exists
      * @return the boolean
      */
-    boolean checkIfExists(Tenant kmsDomain, boolean createIfNotExists);
+    boolean checkIfExists(Tenant kmsTenant, boolean createIfNotExists);
 
     /**
      * Update admin status kms tenant.
@@ -57,7 +57,7 @@ public interface ITenantService extends ICrudServiceOperations<Long, Tenant> {
      * @param newStatus the new status
      * @return the kms tenant
      */
-    Tenant updateAdminStatus(String tenant, IEnumEnabledBinaryStatus.Types newStatus);
+    Tenant updateAdminStatus(String tenant /*senderTenant*/, IEnumEnabledBinaryStatus.Types newStatus);
 
     /**
      * Is enabled boolean.
@@ -65,5 +65,5 @@ public interface ITenantService extends ICrudServiceOperations<Long, Tenant> {
      * @param tenant the tenant
      * @return the boolean
      */
-    boolean isEnabled(String tenant);
+    boolean isEnabled(String tenant /*senderTenant*/);
 }

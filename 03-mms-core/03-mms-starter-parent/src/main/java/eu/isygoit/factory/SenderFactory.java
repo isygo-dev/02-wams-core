@@ -35,7 +35,7 @@ public class SenderFactory {
      *
      * @param tenant the tenant
      */
-    public void removeSender(String tenant) {
+    public void removeSender(String tenant /*senderTenant*/) {
         senderMap.remove(tenant);
     }
 
@@ -45,7 +45,7 @@ public class SenderFactory {
      * @param tenant the tenant
      * @return the sender
      */
-    public JavaMailSenderImpl getSender(String tenant) {
+    public JavaMailSenderImpl getSender(String tenant /*senderTenant*/) {
         // get data from table config
         if (senderMap.containsKey(tenant)) {
             return senderMap.get(tenant);

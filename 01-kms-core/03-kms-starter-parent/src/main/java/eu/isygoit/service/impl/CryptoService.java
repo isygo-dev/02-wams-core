@@ -88,7 +88,7 @@ public class CryptoService implements ICryptoService {
     }
 
     @Override
-    public StringEncryptor getPebEncryptor(String tenant) {
+    public StringEncryptor getPebEncryptor(String tenant /*senderTenant*/) {
         Optional<PEBConfig> optional = pebConfigRepository.findFirstByTenantIgnoreCase(tenant);
         if (!optional.isPresent()) {
             optional = pebConfigRepository.findFirstByTenantIgnoreCase(TenantConstants.DEFAULT_TENANT_NAME);
@@ -103,7 +103,7 @@ public class CryptoService implements ICryptoService {
     }
 
     @Override
-    public StringDigester getDigestEncryptor(String tenant) {
+    public StringDigester getDigestEncryptor(String tenant /*senderTenant*/) {
         Optional<DigestConfig> optional = digesterConfigRepository.findFirstByTenantIgnoreCase(tenant);
         if (!optional.isPresent()) {
             optional = digesterConfigRepository.findFirstByTenantIgnoreCase(TenantConstants.DEFAULT_TENANT_NAME);
@@ -118,7 +118,7 @@ public class CryptoService implements ICryptoService {
     }
 
     @Override
-    public PasswordEncryptor getPasswordEncryptor(String tenant) {
+    public PasswordEncryptor getPasswordEncryptor(String tenant /*senderTenant*/) {
         Optional<DigestConfig> optional = digesterConfigRepository.findFirstByTenantIgnoreCase(tenant);
         if (!optional.isPresent()) {
             optional = digesterConfigRepository.findFirstByTenantIgnoreCase(TenantConstants.DEFAULT_TENANT_NAME);

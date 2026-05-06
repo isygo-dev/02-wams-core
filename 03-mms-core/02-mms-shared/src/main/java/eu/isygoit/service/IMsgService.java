@@ -10,9 +10,9 @@ public interface IMsgService {
     /**
      * Send message.
      *
-     * @param senderDomainName the sender tenant name
+     * @param senderTenantName the sender tenant name
      * @param mailMessage      the mail message
      * @param async            the async
      */
-    void sendMessage(String senderDomainName, MailMessageDto mailMessage, boolean async);
+    void sendMessage(String senderTenantName, MailMessageDto mailMessage, boolean async);
 }

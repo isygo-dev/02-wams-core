@@ -57,5 +57,5 @@ public interface KmsTenantControllerApi extends IMappedCrudApi<Long, KmsTenantDt
                             schema = @Schema(implementation = Boolean.class))})
     })
     @PostMapping(path = "/update")
-    ResponseEntity<Boolean> updateDomain(@Valid @RequestBody KmsTenantDto tenant);
+    ResponseEntity<Boolean> updateTenant(@Valid @RequestBody KmsTenantDto tenant);
 }

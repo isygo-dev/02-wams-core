@@ -17,5 +17,5 @@ public interface IVEventService extends ICrudTenantServiceOperations<Long, VCale
      * @param calendar the calendar
      * @return the list
      */
-    List<VCalendarEvent> findByTenantAndCalendar(String tenant, String calendar);
+    List<VCalendarEvent> findByTenantAndCalendar(String tenant /*senderTenant*/, String calendar);
 }

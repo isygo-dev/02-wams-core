@@ -18,5 +18,5 @@ public interface TokenConfigRepository extends JpaPagingAndSortingTenantAndCodeA
      * @param tokenType the token type
      * @return the optional
      */
-    Optional<TokenConfig> findByTenantIgnoreCaseAndTokenType(String tenant, IEnumToken.Types tokenType);
+    Optional<TokenConfig> findByTenantIgnoreCaseAndTokenType(String tenant /*senderTenant*/, IEnumToken.Types tokenType);
 }

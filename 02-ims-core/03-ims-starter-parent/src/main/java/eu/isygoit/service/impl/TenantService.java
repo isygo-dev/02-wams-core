@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * The type Domain service.
+ * The type Tenant service.
  */
 @Service
 @Transactional
@@ -35,7 +35,7 @@ public class TenantService extends ImageTenantService<Long, Tenant, TenantReposi
 
 
     /**
-     * Instantiates a new Domain service.
+     * Instantiates a new Tenant service.
      *
      * @param appProperties the app properties
      */
@@ -44,7 +44,7 @@ public class TenantService extends ImageTenantService<Long, Tenant, TenantReposi
     }
 
     @Override
-    public List<String> getAllDomainNames(String tenant) {
+    public List<String> getAllTenantNames(String tenant /*senderTenant*/) {
         if (TenantConstants.SUPER_TENANT_NAME.equals(tenant)) {
             return repository().getAllNames(); //.findAll().stream().map(tenant -> tenant.getName()).toList();
         }
@@ -68,7 +68,7 @@ public class TenantService extends ImageTenantService<Long, Tenant, TenantReposi
     }
 
     @Override
-    public Long findDomainIdbyDomainName(String name) {
+    public Long findTenantIdbyTenantName(String name) {
         Optional<Tenant> tenant = repository().findByNameIgnoreCase(name);
         if (tenant.isPresent()) {
             return tenant.get().getId();
@@ -86,34 +86,34 @@ public class TenantService extends ImageTenantService<Long, Tenant, TenantReposi
     }
 
     @Override
-    public boolean isEnabled(String tenant) {
+    public boolean isEnabled(String tenant /*senderTenant*/) {
         return repository().getAdminStatus(tenant) == IEnumEnabledBinaryStatus.Types.ENABLED;
     }
 
     @Override
-    public Tenant updateSocialLink(String tenant, Long id, String social, String link) {
+    public Tenant updateSocialLink(String tenant /*senderTenant*/, Long id, String social, String link) {
         Optional<Tenant> optional = repository().findById(id);
         if (!optional.isPresent()) {
             throw new TenantNotFoundException("with id " + id);
         }
 
-        Tenant domain = optional.get();
+        Tenant tenantToUpdate = optional.get();
         switch (social) {
             case "lnk_facebook": {
-                domain.setLnk_facebook(link);
+                tenantToUpdate.setLnk_facebook(link);
             }
             break;
             case "lnk_linkedin": {
-                domain.setLnk_linkedin(link);
+                tenantToUpdate.setLnk_linkedin(link);
             }
             break;
             case "lnk_xing": {
-                domain.setLnk_xing(link);
+                tenantToUpdate.setLnk_xing(link);
             }
             break;
         }
 
-        return this.update(tenant, domain);
+        return this.update(tenant, tenantToUpdate);
     }
 
     @Override

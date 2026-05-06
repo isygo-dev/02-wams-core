@@ -17,5 +17,5 @@ public interface RandomKeyRepository extends JpaPagingAndSortingTenantAssignable
      * @param name   the name
      * @return the optional
      */
-    Optional<RandomKey> findByTenantIgnoreCaseAndName(String tenant, String name);
+    Optional<RandomKey> findByTenantIgnoreCaseAndName(String tenant /*senderTenant*/, String name);
 }
