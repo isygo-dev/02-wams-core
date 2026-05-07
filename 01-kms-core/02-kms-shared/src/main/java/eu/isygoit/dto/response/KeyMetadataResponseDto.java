@@ -26,7 +26,7 @@ public class KeyMetadataResponseDto {
 
     private IEnumKeySpec.Types keySpec;
 
-    private IEnumKeyPurpose.Types purpose;
+    private IEnumKeyPurpose.Types keyPurpose;
 
     private String currentVersion;
 

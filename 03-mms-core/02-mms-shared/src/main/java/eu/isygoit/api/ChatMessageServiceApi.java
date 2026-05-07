@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * The interface Chat message controller api.
  */
-public interface ChatMessageControllerApi {
+public interface ChatMessageServiceApi {
 
     /**
      * Find by receiver id response entity.

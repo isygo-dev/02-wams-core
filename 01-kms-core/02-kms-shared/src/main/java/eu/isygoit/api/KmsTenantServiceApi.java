@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * The interface Kms tenant controller api.
  */
-public interface KmsTenantControllerApi extends IMappedCrudApi<Long, KmsTenantDto, KmsTenantDto> {
+public interface KmsTenantServiceApi extends IMappedCrudApi<Long, KmsTenantDto, KmsTenantDto> {
 
     /**
      * Update admin status response entity.

@@ -1,5 +1,6 @@
 package eu.isygoit.dto.response;
 
+import eu.isygoit.enums.IEnumKeyStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,7 +31,7 @@ public class ListKeysResponseDto {
     public static class KeySummaryDto {
         private String keyId;
         private String alias;
-        private String status;
+        private IEnumKeyStatus.Types status;
     }
 }
 

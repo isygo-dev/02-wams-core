@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * The interface Web socket controller api.
  */
-public interface WebSocketControllerApi {
+public interface WebSocketServiceApi {
 
     /**
      * Send message to user response entity.

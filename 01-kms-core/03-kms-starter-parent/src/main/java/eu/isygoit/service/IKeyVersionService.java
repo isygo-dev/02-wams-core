@@ -1,7 +1,7 @@
 package eu.isygoit.service;
 
-import eu.isygoit.dto.response.KeyVersionListResponseDto;
 import eu.isygoit.dto.response.ActiveVersionResponseDto;
+import eu.isygoit.dto.response.KeyVersionListResponseDto;
 
 /**
  * The interface Key version service.

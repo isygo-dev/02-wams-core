@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * The interface Password controller api.
  */
-public interface PasswordControllerApi {
+public interface PasswordServiceApi {
 
     /**
      * Generate response entity.

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 /**
  * The interface Mail message controller api.
  */
-public interface MailMessageControllerApi {
+public interface MailMessageServiceApi {
 
     /**
      * Send mail response entity.

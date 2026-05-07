@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * The interface Public auth controller api.
  */
-public interface PublicAuthControllerApi {
+public interface PublicAuthServiceApi {
 
     /**
      * Authenticate response entity.

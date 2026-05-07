@@ -1,7 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectMapperAndService;
-import eu.isygoit.api.KmsTenantControllerApi;
+import eu.isygoit.api.KmsTenantServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @InjectMapperAndService(handler = KmsExceptionHandler.class, mapper = TenantMapper.class, minMapper = TenantMapper.class, service = TenantService.class)
 @RequestMapping(path = "/api/v1/private/tenant")
 public class KmsTenantController extends MappedCrudController<Long, Tenant, KmsTenantDto, KmsTenantDto, TenantService>
-        implements KmsTenantControllerApi {
+        implements KmsTenantServiceApi {
 
     @Operation(summary = "Update admin status Api",
             description = "Update admin status")

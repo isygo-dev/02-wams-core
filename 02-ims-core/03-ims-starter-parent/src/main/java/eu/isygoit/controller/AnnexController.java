@@ -1,7 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectMapperAndService;
-import eu.isygoit.api.AnnexControllerApi;
+import eu.isygoit.api.AnnexServiceApi;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.dto.data.AnnexDto;
@@ -31,7 +31,7 @@ import java.util.List;
 @InjectMapperAndService(handler = ImsExceptionHandler.class, mapper = AnnexMapper.class, minMapper = AnnexMapper.class, service = AnnexService.class)
 @RequestMapping(path = "/api/v1/private/annex")
 public class AnnexController extends MappedCrudTenantController<Long, Annex, AnnexDto, AnnexDto, AnnexService>
-        implements AnnexControllerApi {
+        implements AnnexServiceApi {
 
     @Autowired
     private IAnnexService annexService;

@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * The interface Tenant controller api.
  */
-public interface TenantControllerApi extends IMappedCrudApi<Long, TenantDto, TenantDto> {
+public interface TenantServiceApi extends IMappedCrudApi<Long, TenantDto, TenantDto> {
 
     /**
      * Update admin status response entity.

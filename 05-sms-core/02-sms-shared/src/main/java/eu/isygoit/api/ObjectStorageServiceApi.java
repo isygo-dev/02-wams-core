@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * The interface Object storage controller api.
  */
-public interface ObjectStorageControllerApi {
+public interface ObjectStorageServiceApi {
 
     /**
      * Upload response entity.

@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * The interface Account controller api.
  */
-public interface AccountControllerApi extends IMappedCrudApi<Long, MinAccountDto, AccountDto> {
+public interface AccountServiceApi extends IMappedCrudApi<Long, MinAccountDto, AccountDto> {
 
 
     /**

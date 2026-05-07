@@ -1,8 +1,8 @@
 package eu.isygoit.exception.handler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import eu.isygoit.api.AppParameterControllerApi;
-import eu.isygoit.api.MailMessageControllerApi;
+import eu.isygoit.api.AppParameterServiceApi;
+import eu.isygoit.api.MailMessageServiceApi;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.data.MailMessageDto;
@@ -28,9 +28,9 @@ public class MmsExceptionHandler extends ControllerExceptionHandler {
     private final AppProperties appProperties;
 
     @Autowired
-    private MailMessageControllerApi msgService;
+    private MailMessageServiceApi msgService;
     @Autowired
-    private AppParameterControllerApi appParameterService;
+    private AppParameterServiceApi appParameterService;
     @Autowired
     private RequestContextService requestContextService;
 

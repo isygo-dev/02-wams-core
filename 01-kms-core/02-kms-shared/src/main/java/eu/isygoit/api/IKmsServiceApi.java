@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public interface IKmsServiceApi {
 
     // Key Management APIs
+
     /**
      * Create key response entity.
      *
@@ -132,6 +133,7 @@ public interface IKmsServiceApi {
     ResponseEntity<RotateKeyResponseDto> rotateKey(@PathVariable String keyId);
 
     // Cryptographic Operations
+
     /**
      * Encrypt response entity.
      *
@@ -181,6 +183,7 @@ public interface IKmsServiceApi {
     ResponseEntity<EncryptResponseDto> reencrypt(@RequestBody ReencryptRequestDto request);
 
     // Signing APIs
+
     /**
      * Sign response entity.
      *
@@ -214,6 +217,7 @@ public interface IKmsServiceApi {
     ResponseEntity<VerifyResponseDto> verify(@RequestBody VerifyRequestDto request);
 
     // Key Policy & Access Control
+
     /**
      * Set key policy response entity.
      *
@@ -279,6 +283,7 @@ public interface IKmsServiceApi {
     ResponseEntity<?> revokeGrant(@PathVariable String keyId, @PathVariable String grantId);
 
     // Key Versioning APIs
+
     /**
      * List key versions response entity.
      *
@@ -312,6 +317,7 @@ public interface IKmsServiceApi {
     ResponseEntity<ActiveVersionResponseDto> getActiveVersion(@PathVariable String keyId);
 
     // Data Key API
+
     /**
      * Generate data key response entity.
      *
@@ -329,6 +335,7 @@ public interface IKmsServiceApi {
     ResponseEntity<DataKeyResponseDto> generateDataKey(@RequestBody GenerateDataKeyRequestDto request);
 
     // Audit APIs
+
     /**
      * Get audit logs response entity.
      *

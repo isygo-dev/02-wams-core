@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 /**
  * The interface Public controller api.
  */
-public interface StatisticControllerApi {
+public interface StatisticServiceApi {
 
     @Operation(summary = "Count Confirmed resumes account",
             description = "Count Confirmed resumes account")

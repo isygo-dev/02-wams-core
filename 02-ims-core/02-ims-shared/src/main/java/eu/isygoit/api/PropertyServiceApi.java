@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * The interface Property controller api.
  */
-public interface PropertyControllerApi {
+public interface PropertyServiceApi {
 
     /**
      * Gets property by account.

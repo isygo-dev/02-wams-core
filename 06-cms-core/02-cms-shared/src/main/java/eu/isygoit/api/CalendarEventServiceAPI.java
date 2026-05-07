@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * The interface Calendar event controller api.
  */
-public interface CalendarEventControllerAPI {
+public interface CalendarEventServiceAPI {
 
     /**
      * Event by tenant and calendar and code response entity.

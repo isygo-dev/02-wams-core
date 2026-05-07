@@ -1,7 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectExceptionHandler;
-import eu.isygoit.api.PasswordControllerApi;
+import eu.isygoit.api.PasswordServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @InjectExceptionHandler(KmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/password")
-public class PasswordController extends ControllerExceptionHandler implements PasswordControllerApi {
+public class PasswordController extends ControllerExceptionHandler implements PasswordServiceApi {
 
     @Autowired
     private IAccountService accountService;

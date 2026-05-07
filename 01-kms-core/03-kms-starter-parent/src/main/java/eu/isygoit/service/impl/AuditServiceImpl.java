@@ -1,18 +1,13 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.dto.request.GenerateDataKeyRequestDto;
 import eu.isygoit.dto.response.AuditLogResponseDto;
-import eu.isygoit.dto.response.DataKeyResponseDto;
 import eu.isygoit.service.IAuditService;
-import eu.isygoit.service.IDataKeyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Base64;
-import java.util.UUID;
 
 /**
  * The type Audit service.

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 /**
  * The interface Public password controller api.
  */
-public interface PublicPasswordControllerApi {
+public interface PublicPasswordServiceApi {
 
     /**
      * Generate forgot password access token response entity.

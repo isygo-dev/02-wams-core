@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * The interface Annex controller api.
  */
-public interface AnnexControllerApi extends IMappedCrudApi<Long, AnnexDto, AnnexDto> {
+public interface AnnexServiceApi extends IMappedCrudApi<Long, AnnexDto, AnnexDto> {
 
     /**
      * Gets annex by code.

@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.constants.TenantConstants;
+import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.model.DigestConfig;
 import eu.isygoit.model.PEBConfig;
 import eu.isygoit.repository.DigesterConfigRepository;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -130,6 +132,36 @@ public class CryptoService implements ICryptoService {
 
         log.warn("password config not found with tenant {}", tenant);
         return passwordEncryptorDefault();
+    }
+
+    @Override
+    public byte[] generateKeyMaterial(IEnumKeySpec.Types keySpec) {
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] encryptData(byte[] plaintext, byte[] keyMaterial, Map<String, String> encryptionContext) {
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] decryptData(byte[] ciphertext, byte[] keyMaterial, Map<String, String> encryptionContext) {
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] signData(byte[] message, byte[] keyMaterial, String algorithm) {
+        return new byte[0];
+    }
+
+    @Override
+    public boolean verifySignature(byte[] message, byte[] signature, byte[] keyMaterial, String algorithm) {
+        return false;
+    }
+
+    @Override
+    public Map<String, byte[]> generateDataKey(byte[] keyMaterial, Integer keySize) {
+        return Map.of();
     }
 
     private StringEncryptor stringEncryptorDefault() {

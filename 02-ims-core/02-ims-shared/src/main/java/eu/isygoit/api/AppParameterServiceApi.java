@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * The interface App parameter controller api.
  */
-public interface AppParameterControllerApi extends IMappedCrudApi<Long, AppParameterDto, AppParameterDto> {
+public interface AppParameterServiceApi extends IMappedCrudApi<Long, AppParameterDto, AppParameterDto> {
 
     /**
      * Gets value by tenant and name.

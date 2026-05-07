@@ -6,6 +6,6 @@ import eu.isygoit.service.IRemoteNextCodeService;
 /**
  * The interface Incremental key controller api.
  */
-public interface IncrementalKeyControllerApi extends IRemoteNextCodeService {
+public interface IncrementalKeyServiceApi extends IRemoteNextCodeService {
 
 }

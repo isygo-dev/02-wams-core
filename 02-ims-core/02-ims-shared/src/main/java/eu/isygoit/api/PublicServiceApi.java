@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * The interface Public controller api.
  */
-public interface PublicControllerApi {
+public interface PublicServiceApi {
 
     /**
      * Gets tenant by name.

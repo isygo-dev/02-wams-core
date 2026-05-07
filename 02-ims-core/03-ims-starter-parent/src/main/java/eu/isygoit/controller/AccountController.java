@@ -1,8 +1,8 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectMapperAndService;
-import eu.isygoit.api.AccountControllerApi;
-import eu.isygoit.api.StatisticControllerApi;
+import eu.isygoit.api.AccountServiceApi;
+import eu.isygoit.api.StatisticServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
@@ -47,7 +47,7 @@ import java.util.List;
 @InjectMapperAndService(handler = ImsExceptionHandler.class, mapper = AccountMapper.class, minMapper = MinAccountMapper.class, service = AccountService.class)
 @RequestMapping(path = "/api/v1/private/account")
 public class AccountController extends MappedCrudTenantController<Long, Account, MinAccountDto, AccountDto, AccountService>
-        implements AccountControllerApi, StatisticControllerApi {
+        implements AccountServiceApi, StatisticServiceApi {
 
     @Autowired
     private KmsPasswordService kmsPasswordService;

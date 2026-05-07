@@ -36,6 +36,7 @@
 
 - Run Docker desktop
 - Build docker images
+
 ```bash
 docker build -f .\09-docker\core-kms.Dockerfile -t core/kms-serv .
 docker build -f .\09-docker\core-mms.Dockerfile -t core/mms-serv .
