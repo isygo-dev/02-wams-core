@@ -50,7 +50,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
     public CreateKeyResponseDto createKey(String tenant, CreateKeyRequestDto request) {
         log.info("Creating key for tenant: {} with spec: {}", tenant, request.getKeySpec());
 
-        String keyId = "key-" + UUID.randomUUID().toString();
+        Long keyId = "key-" + UUID.randomUUID().toString();
         String arn = String.format("arn:kms:service:%s:key/%s", tenant, keyId);
         String versionId = "v-" + UUID.randomUUID().toString();
         LocalDateTime now = LocalDateTime.now();
@@ -106,7 +106,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
     }
 
     @Override
-    public KeyMetadataResponseDto getKeyMetadata(String tenant, String keyId) {
+    public KeyMetadataResponseDto getKeyMetadata(String tenant, Long keyId) {
         log.info("Getting key metadata for tenant: {} keyId: {}", tenant, keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
@@ -145,7 +145,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
     }
 
     @Override
-    public KeyMetadataResponseDto enableKey(String tenant, String keyId) {
+    public KeyMetadataResponseDto enableKey(String tenant, Long keyId) {
         log.info("Enabling key: {} for tenant: {}", keyId, tenant);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
@@ -165,7 +165,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
     }
 
     @Override
-    public KeyMetadataResponseDto disableKey(String tenant, String keyId) {
+    public KeyMetadataResponseDto disableKey(String tenant, Long keyId) {
         log.info("Disabling key: {} for tenant: {}", keyId, tenant);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
@@ -185,7 +185,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
     }
 
     @Override
-    public KeyMetadataResponseDto scheduleKeyDeletion(String tenant, String keyId, Integer pendingWindowInDays) {
+    public KeyMetadataResponseDto scheduleKeyDeletion(String tenant, Long keyId, Integer pendingWindowInDays) {
         log.info("Scheduling deletion for key: {} for tenant: {} with pending window: {} days",
                 keyId, tenant, pendingWindowInDays);
 
@@ -210,7 +210,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
     }
 
     @Override
-    public RotateKeyResponseDto rotateKey(String tenant, String keyId) {
+    public RotateKeyResponseDto rotateKey(String tenant, Long keyId) {
         log.info("Rotating key: {} for tenant: {}", keyId, tenant);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)

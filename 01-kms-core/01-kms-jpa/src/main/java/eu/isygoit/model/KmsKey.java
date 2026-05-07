@@ -47,7 +47,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     private String tenant;
 
     @Column(name = "KEY_ID", length = 255, updatable = false, nullable = false)
-    private String keyId; // UUID format
+    private Long keyId; // UUID format
 
     @Column(name = "KEY_ARN", length = 255, nullable = false)
     private String keyArn; // Amazon Resource Name

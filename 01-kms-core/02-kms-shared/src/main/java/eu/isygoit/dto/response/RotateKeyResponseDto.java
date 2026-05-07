@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @SuperBuilder
 public class RotateKeyResponseDto {
 
-    private String keyId;
+    private Long keyId;
 
     private String newVersion;
 

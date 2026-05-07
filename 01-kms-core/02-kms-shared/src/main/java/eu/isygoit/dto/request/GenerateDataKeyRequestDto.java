@@ -17,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 public class GenerateDataKeyRequestDto {
 
     @NotBlank(message = "keyId cannot be blank")
-    private String keyId;
+    private Long keyId;
 
     @Positive(message = "keySize must be positive")
     private Integer keySize;

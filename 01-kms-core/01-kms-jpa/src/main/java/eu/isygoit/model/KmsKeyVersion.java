@@ -43,7 +43,7 @@ public class KmsKeyVersion extends AuditableEntity<Long> implements ITenantAssig
     private String tenant;
 
     @Column(name = "KEY_ID", length = 255, updatable = false, nullable = false)
-    private String keyId;
+    private Long keyId;
 
     @Column(name = "VERSION_ID", length = 255, updatable = false, nullable = false)
     private String versionId;

@@ -385,7 +385,9 @@ Récupère la politique actuelle d'une clé.
 ```json
 {
   "Version": "2023-01-01",
-  "Statement": [ ... ]
+  "Statement": [
+    ...
+  ]
 }
 ```
 
@@ -406,7 +408,11 @@ Délègue un accès limité à une clé.
 ```json
 {
   "principal": "arn:aws:iam::123456789012:user/bob",
-  "operations": ["encrypt", "decrypt", "sign"]
+  "operations": [
+    "encrypt",
+    "decrypt",
+    "sign"
+  ]
 }
 ```
 

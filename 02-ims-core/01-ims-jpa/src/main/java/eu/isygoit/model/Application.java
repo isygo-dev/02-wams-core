@@ -52,7 +52,7 @@ public class Application extends AuditableEntity<Long> implements ITenantAssigna
     @Builder.Default
     @ColumnDefault("'PRM Store'")
     @Column(name = SchemaColumnConstantName.C_CATEGORY, length = SchemaConstantSize.S_NAME, nullable = false)
-    private String category = "PRM Store";
+    private String category = "PRM Store" ;
     @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = SchemaConstantSize.DESCRIPTION)
     private String description;
     @Column(name = SchemaColumnConstantName.C_PHOTO)

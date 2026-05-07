@@ -1,8 +1,11 @@
 package eu.isygoit.service;
 
 import eu.isygoit.dto.request.CreateGrantRequestDto;
+import eu.isygoit.dto.request.RetireGrantRequestDto;
 import eu.isygoit.dto.request.SetKeyPolicyRequestDto;
 import eu.isygoit.dto.response.GrantResponseDto;
+import eu.isygoit.dto.response.ListGrantsResponseDto;
+import jakarta.validation.Valid;
 
 import java.util.Map;
 
@@ -19,7 +22,7 @@ public interface IKeyPolicyService {
      * @param request the request
      * @return the map
      */
-    Map<String, Object> setKeyPolicy(String tenant, String keyId, SetKeyPolicyRequestDto request);
+    Map<String, Object> setKeyPolicy(String tenant, Long keyId, SetKeyPolicyRequestDto request);
 
     /**
      * Get key policy.
@@ -28,7 +31,7 @@ public interface IKeyPolicyService {
      * @param keyId  the key id
      * @return the map
      */
-    Map<String, Object> getKeyPolicy(String tenant, String keyId);
+    Map<String, Object> getKeyPolicy(String tenant, Long keyId);
 
     /**
      * Create grant.
@@ -38,7 +41,7 @@ public interface IKeyPolicyService {
      * @param request the request
      * @return the grant response dto
      */
-    GrantResponseDto createGrant(String tenant, String keyId, CreateGrantRequestDto request);
+    GrantResponseDto createGrant(String tenant, Long keyId, CreateGrantRequestDto request);
 
     /**
      * Revoke grant.
@@ -48,6 +51,10 @@ public interface IKeyPolicyService {
      * @param grantId the grant id
      * @return the string
      */
-    String revokeGrant(String tenant, String keyId, String grantId);
+    String revokeGrant(String tenant, Long keyId, String grantId);
+
+    ListGrantsResponseDto listGrants(String tenant, Long keyId, Integer limit, String nextToken);
+
+    Object retireGrant(String tenant, String grantId, @Valid RetireGrantRequestDto request);
 }
 

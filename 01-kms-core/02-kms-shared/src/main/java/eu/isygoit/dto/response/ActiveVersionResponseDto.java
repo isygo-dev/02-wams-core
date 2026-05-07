@@ -11,13 +11,13 @@ public class ActiveVersionResponseDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String keyId;
+    private Long keyId;
     private String versionId;
 
     public ActiveVersionResponseDto() {
     }
 
-    public ActiveVersionResponseDto(String keyId, String versionId) {
+    public ActiveVersionResponseDto(Long keyId, String versionId) {
         this.keyId = keyId;
         this.versionId = versionId;
     }
@@ -26,7 +26,7 @@ public class ActiveVersionResponseDto implements Serializable {
         return keyId;
     }
 
-    public void setKeyId(String keyId) {
+    public void setKeyId(Long keyId) {
         this.keyId = keyId;
     }
 

@@ -16,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 public class VerifyRequestDto {
 
     @NotBlank(message = "keyId cannot be blank")
-    private String keyId;
+    private Long keyId;
 
     @NotBlank(message = "message cannot be blank")
     private String message;

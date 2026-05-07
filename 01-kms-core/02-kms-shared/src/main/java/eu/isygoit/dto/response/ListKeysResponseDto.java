@@ -29,7 +29,7 @@ public class ListKeysResponseDto {
     @NoArgsConstructor
     @SuperBuilder
     public static class KeySummaryDto {
-        private String keyId;
+        private Long keyId;
         private String alias;
         private IEnumKeyStatus.Types status;
     }

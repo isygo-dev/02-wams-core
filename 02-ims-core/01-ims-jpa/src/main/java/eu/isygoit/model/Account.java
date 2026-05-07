@@ -145,7 +145,7 @@ public class Account extends AccountModel<Long> implements IImageEntity {
 
     public String getImagePath() {
         if (!StringUtils.hasText(this.imagePath)) {
-            return "defaultPhoto.jpg";
+            return "defaultPhoto.jpg" ;
         }
         return this.imagePath;
     }

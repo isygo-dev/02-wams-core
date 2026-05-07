@@ -64,7 +64,7 @@ public class TenantService extends ImageTenantService<Long, Tenant, TenantReposi
         if (tenantOptional.isPresent()) {
             return tenantOptional.get().getImagePath();
         }
-        return "";
+        return "" ;
     }
 
     @Override

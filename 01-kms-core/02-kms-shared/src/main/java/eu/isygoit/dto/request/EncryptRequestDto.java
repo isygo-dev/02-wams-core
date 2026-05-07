@@ -18,7 +18,7 @@ import java.util.Map;
 public class EncryptRequestDto {
 
     @NotBlank(message = "keyId cannot be blank")
-    private String keyId;
+    private Long keyId;
 
     @NotBlank(message = "plaintext cannot be blank")
     private String plaintext;

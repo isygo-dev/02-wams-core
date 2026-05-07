@@ -21,14 +21,14 @@ import java.util.UUID;
 public class KeyPolicyServiceImpl implements IKeyPolicyService {
 
     @Override
-    public Map<String, Object> setKeyPolicy(String tenant, String keyId, SetKeyPolicyRequestDto request) {
+    public Map<String, Object> setKeyPolicy(String tenant, Long keyId, SetKeyPolicyRequestDto request) {
         log.info("Setting key policy for tenant: {} keyId: {}", tenant, keyId);
 
         return request.getPolicy();
     }
 
     @Override
-    public Map<String, Object> getKeyPolicy(String tenant, String keyId) {
+    public Map<String, Object> getKeyPolicy(String tenant, Long keyId) {
         log.info("Getting key policy for tenant: {} keyId: {}", tenant, keyId);
 
         Map<String, Object> policy = new HashMap<>();
@@ -39,7 +39,7 @@ public class KeyPolicyServiceImpl implements IKeyPolicyService {
     }
 
     @Override
-    public GrantResponseDto createGrant(String tenant, String keyId, CreateGrantRequestDto request) {
+    public GrantResponseDto createGrant(String tenant, Long keyId, CreateGrantRequestDto request) {
         log.info("Creating grant for tenant: {} keyId: {} principal: {}", tenant, keyId, request.getPrincipal());
 
         String grantId = "grant-" + UUID.randomUUID().toString();
@@ -51,10 +51,10 @@ public class KeyPolicyServiceImpl implements IKeyPolicyService {
     }
 
     @Override
-    public String revokeGrant(String tenant, String keyId, String grantId) {
+    public String revokeGrant(String tenant, Long keyId, String grantId) {
         log.info("Revoking grant: {} for tenant: {} keyId: {}", grantId, tenant, keyId);
 
-        return "REVOKED";
+        return "REVOKED" ;
     }
 }
 

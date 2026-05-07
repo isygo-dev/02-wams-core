@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 @SuperBuilder
 public class KeyMetadataResponseDto {
 
-    private String keyId;
+    private Long keyId;
 
     private IEnumKeyStatus.Types status;
 

@@ -1,10 +1,10 @@
 package eu.isygoit.service;
 
-import eu.isygoit.dto.request.CreateKeyRequestDto;
-import eu.isygoit.dto.response.CreateKeyResponseDto;
-import eu.isygoit.dto.response.KeyMetadataResponseDto;
-import eu.isygoit.dto.response.ListKeysResponseDto;
-import eu.isygoit.dto.response.RotateKeyResponseDto;
+import eu.isygoit.dto.request.*;
+import eu.isygoit.dto.response.*;
+import eu.isygoit.dto.response.ImportParametersResponseDto;
+import eu.isygoit.dto.response.KeyRotationStatusDto;
+import jakarta.validation.Valid;
 
 /**
  * The interface Key management service.
@@ -27,7 +27,7 @@ public interface IKeyManagementService {
      * @param keyId  the key id
      * @return the key metadata response dto
      */
-    KeyMetadataResponseDto getKeyMetadata(String tenant, String keyId);
+    KeyMetadataResponseDto getKeyMetadata(String tenant, Long keyId);
 
     /**
      * List keys.
@@ -46,7 +46,7 @@ public interface IKeyManagementService {
      * @param keyId  the key id
      * @return the key metadata response dto
      */
-    KeyMetadataResponseDto enableKey(String tenant, String keyId);
+    KeyMetadataResponseDto enableKey(String tenant, Long keyId);
 
     /**
      * Disable key.
@@ -55,7 +55,7 @@ public interface IKeyManagementService {
      * @param keyId  the key id
      * @return the key metadata response dto
      */
-    KeyMetadataResponseDto disableKey(String tenant, String keyId);
+    KeyMetadataResponseDto disableKey(String tenant, Long keyId);
 
     /**
      * Schedule key deletion.
@@ -65,7 +65,7 @@ public interface IKeyManagementService {
      * @param pendingWindowInDays the pending window in days
      * @return the key metadata response dto
      */
-    KeyMetadataResponseDto scheduleKeyDeletion(String tenant, String keyId, Integer pendingWindowInDays);
+    KeyMetadataResponseDto scheduleKeyDeletion(String tenant, Long keyId, Integer pendingWindowInDays);
 
     /**
      * Rotate key.
@@ -74,6 +74,48 @@ public interface IKeyManagementService {
      * @param keyId  the key id
      * @return the rotate key response dto
      */
-    RotateKeyResponseDto rotateKey(String tenant, String keyId);
+    RotateKeyResponseDto rotateKey(String tenant, Long keyId);
+
+    KeyMetadataResponseDto updateKeyMetadata(String tenant, Long keyId, @Valid UpdateKeyMetadataRequestDto request);
+
+    KeyMetadataResponseDto cancelKeyDeletion(String tenant, Long keyId);
+
+    KeyRotationStatusDto updateKeyRotation(String tenant, Long keyId, @Valid UpdateKeyRotationRequestDto request);
+
+    KeyRotationStatusDto getKeyRotationStatus(String tenant, Long keyId);
+
+    PublicKeyResponseDto getPublicKey(String tenant, Long keyId);
+
+    AliasResponseDto createAlias(String tenant, @Valid CreateAliasRequestDto request);
+
+    AliasResponseDto updateAlias(String tenant, String aliasName, @Valid UpdateAliasRequestDto request);
+
+    void deleteAlias(String tenant, String aliasName);
+
+    ListAliasesResponseDto listAliases(String tenant, Integer limit, String nextToken);
+
+    ListAliasesResponseDto listAliasesForKey(String tenant, Long keyId);
+
+    Object tagResource(String tenant, Long keyId, @Valid TagResourceRequestDto request);
+
+    Object untagResource(String tenant, Long keyId, @Valid UntagResourceRequestDto request);
+
+    ListTagsResponseDto listResourceTags(String tenant, Long keyId);
+
+    ImportParametersResponseDto getParametersForImport(String tenant, Long keyId);
+
+    KeyMetadataResponseDto importKeyMaterial(String tenant, Long keyId, @Valid ImportKeyMaterialRequestDto request);
+
+    KeyMetadataResponseDto deleteImportedKeyMaterial(String tenant, Long keyId);
+
+    void validateKey(String tenant, Long keyId);
+
+    void deleteKey(String tenant, Long keyId);
+
+    ListKeyRotationsResponseDto listKeyRotations(String tenant, Long keyId, Integer limit, String nextToken);
+
+    KeyUsageStatsDto getKeyUsageStats(String tenant, Long keyId);
+
+    int countKeysInCustomKeyStore(String tenant, String keyStoreId);
 }
 

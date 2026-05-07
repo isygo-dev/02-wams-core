@@ -1,8 +1,11 @@
 package eu.isygoit.exception;
 
+import eu.isygoit.annotation.MsgLocale;
+
 /**
  * The type Key not found exception.
  */
+@MsgLocale("tbd.exception")
 public class KeyNotFoundException extends RuntimeException {
 
     /**
@@ -10,7 +13,7 @@ public class KeyNotFoundException extends RuntimeException {
      *
      * @param keyId the key id
      */
-    public KeyNotFoundException(String keyId) {
+    public KeyNotFoundException(Long keyId) {
         super("Key not found: " + keyId);
     }
 

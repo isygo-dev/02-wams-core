@@ -18,7 +18,7 @@ public interface IMailMessageService extends ICrudTenantServiceOperations<UUID, 
     /**
      * The constant encodingOptions.
      */
-    String encodingOptions = "text/html; charset=UTF-8";
+    String encodingOptions = "text/html; charset=UTF-8" ;
 
     /**
      * Send mail boolean.

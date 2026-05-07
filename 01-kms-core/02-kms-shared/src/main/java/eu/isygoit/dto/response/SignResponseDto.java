@@ -16,6 +16,6 @@ public class SignResponseDto {
 
     private String signature;
 
-    private String keyId;
+    private Long keyId;
 }
 

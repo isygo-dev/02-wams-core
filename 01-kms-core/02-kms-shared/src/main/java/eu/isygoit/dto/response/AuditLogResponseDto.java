@@ -29,7 +29,7 @@ public class AuditLogResponseDto {
     @SuperBuilder
     public static class AuditLogEntryDto {
         private String action;
-        private String keyId;
+        private Long keyId;
 
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         private LocalDateTime timestamp;

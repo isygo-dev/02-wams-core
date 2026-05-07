@@ -24,7 +24,7 @@
 - [x] CreateKeyRequestDto.java
 - [x] EncryptRequestDto.java
 - [x] DecryptRequestDto.java
-- [x] ReencryptRequestDto.java
+- [x] ReEncryptResponseDto.java
 - [x] SignRequestDto.java
 - [x] VerifyRequestDto.java
 - [x] SetKeyPolicyRequestDto.java

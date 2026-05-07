@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.response.AuditLogResponseDto;
+import eu.isygoit.enums.IKmsActionType;
 import eu.isygoit.service.IAuditService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class AuditServiceImpl implements IAuditService {
     }
 
     @Override
-    public void logAction(String tenant, String action, String keyId, String principal, String ip) {
+    public void logAction(String tenant, IKmsActionType.Types action, String keyId, String principal, String ip) {
         log.info("Logging action: {} for tenant: {} keyId: {} principal: {} ip: {}",
                 action, tenant, keyId, principal, ip);
     }

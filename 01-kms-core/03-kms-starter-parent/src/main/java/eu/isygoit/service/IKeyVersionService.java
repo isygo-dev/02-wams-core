@@ -15,7 +15,7 @@ public interface IKeyVersionService {
      * @param keyId  the key id
      * @return the key version list response dto
      */
-    KeyVersionListResponseDto listKeyVersions(String tenant, String keyId);
+    KeyVersionListResponseDto listKeyVersions(String tenant, Long keyId);
 
     /**
      * Get active version.
@@ -24,6 +24,6 @@ public interface IKeyVersionService {
      * @param keyId  the key id
      * @return the active version response dto
      */
-    ActiveVersionResponseDto getActiveVersion(String tenant, String keyId);
+    ActiveVersionResponseDto getActiveVersion(String tenant, Long keyId);
 }
 

@@ -18,6 +18,6 @@ public class DataKeyResponseDto {
 
     private String encryptedKey;
 
-    private String keyId;
+    private Long keyId;
 }
 

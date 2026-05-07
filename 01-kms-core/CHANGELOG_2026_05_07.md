@@ -215,32 +215,47 @@ CREATE SEQUENCE kms_key_policy_sequence;
 CREATE SEQUENCE kms_audit_log_sequence;
 
 -- 5 new tables with ~60 columns total
-CREATE TABLE T_KMS_KEY (44 columns)
-  - Primary key: ID
+CREATE TABLE T_KMS_KEY
+(
+    44
+    columns
+) - Primary key: ID
   - Unique constraints: (TENANT, KEY_ID), (TENANT, KEY_ALIAS)
   - Foreign keys: None
   - Indexes: 2
 
-CREATE TABLE T_KMS_KEY_VERSION (11 columns)
-  - Primary key: ID
+CREATE TABLE T_KMS_KEY_VERSION
+(
+    11
+    columns
+) - Primary key: ID
   - Unique constraints: (TENANT, KEY_ID, VERSION_ID)
   - Foreign keys: FK to T_KMS_KEY (implicit via keyId)
   - Indexes: 2
 
-CREATE TABLE T_KMS_KEY_GRANT (15 columns)
-  - Primary key: ID
+CREATE TABLE T_KMS_KEY_GRANT
+(
+    15
+    columns
+) - Primary key: ID
   - Unique constraint: (TENANT, GRANT_ID)
   - Foreign keys: FK to T_KMS_KEY (implicit via keyId)
   - Indexes: 3
 
-CREATE TABLE T_KMS_KEY_POLICY (10 columns)
-  - Primary key: ID
+CREATE TABLE T_KMS_KEY_POLICY
+(
+    10
+    columns
+) - Primary key: ID
   - Unique constraint: (TENANT, KEY_ID)
   - Foreign keys: 1:1 with T_KMS_KEY
   - Indexes: 1
 
-CREATE TABLE T_KMS_AUDIT_LOG (16 columns)
-  - Primary key: ID
+CREATE TABLE T_KMS_AUDIT_LOG
+(
+    16
+    columns
+) - Primary key: ID
   - No unique constraints
   - Foreign keys: None (audit only)
   - Indexes: 4
@@ -295,43 +310,43 @@ Estimated schema size: ~500KB
 <!-- In 01-kms-jpa/pom.xml -->
 <!-- Flyway for database migrations -->
 <dependency>
-  <groupId>org.flywaydb</groupId>
-  <artifactId>flyway-core</artifactId>
-  <version>9.15.0</version>
+    <groupId>org.flywaydb</groupId>
+    <artifactId>flyway-core</artifactId>
+    <version>9.15.0</version>
 </dependency>
 
-<!-- In 03-kms-starter-parent/pom.xml -->
-<!-- Cryptography - BouncyCastle -->
+        <!-- In 03-kms-starter-parent/pom.xml -->
+        <!-- Cryptography - BouncyCastle -->
 <dependency>
-  <groupId>org.bouncycastle</groupId>
-  <artifactId>bcprov-jdk15on</artifactId>
-  <version>1.70</version>
+<groupId>org.bouncycastle</groupId>
+<artifactId>bcprov-jdk15on</artifactId>
+<version>1.70</version>
 </dependency>
 <dependency>
-  <groupId>org.bouncycastle</groupId>
-  <artifactId>bcpkix-jdk15on</artifactId>
-  <version>1.70</version>
-</dependency>
-
-<!-- MapStruct for entity mappers -->
-<dependency>
-  <groupId>org.mapstruct</groupId>
-  <artifactId>mapstruct</artifactId>
-  <version>1.5.3.Final</version>
+<groupId>org.bouncycastle</groupId>
+<artifactId>bcpkix-jdk15on</artifactId>
+<version>1.70</version>
 </dependency>
 
-<!-- For testing: TestContainers -->
+        <!-- MapStruct for entity mappers -->
 <dependency>
-  <groupId>org.testcontainers</groupId>
-  <artifactId>testcontainers</artifactId>
-  <version>1.17.0</version>
-  <scope>test</scope>
+<groupId>org.mapstruct</groupId>
+<artifactId>mapstruct</artifactId>
+<version>1.5.3.Final</version>
+</dependency>
+
+        <!-- For testing: TestContainers -->
+<dependency>
+<groupId>org.testcontainers</groupId>
+<artifactId>testcontainers</artifactId>
+<version>1.17.0</version>
+<scope>test</scope>
 </dependency>
 <dependency>
-  <groupId>org.testcontainers</groupId>
-  <artifactId>postgresql</artifactId>
-  <version>1.17.0</version>
-  <scope>test</scope>
+<groupId>org.testcontainers</groupId>
+<artifactId>postgresql</artifactId>
+<version>1.17.0</version>
+<scope>test</scope>
 </dependency>
 ```
 

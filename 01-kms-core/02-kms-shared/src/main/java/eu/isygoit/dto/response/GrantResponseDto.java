@@ -16,6 +16,6 @@ public class GrantResponseDto {
 
     private String grantId;
 
-    private String keyId;
+    private Long keyId;
 }
 

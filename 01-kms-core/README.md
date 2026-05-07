@@ -354,11 +354,14 @@ http://localhost:8080/swagger-ui.html
 ### Unit Tests
 
 ```java
+
 @SpringBootTest
 public class EncryptionServiceTest {
-    @Autowired private IEncryptionService encryptionService;
-    
-    @Test public void testEncryptDecrypt() { ... }
+    @Autowired
+    private IEncryptionService encryptionService;
+
+    @Test
+    public void testEncryptDecrypt() { ...}
 }
 ```
 

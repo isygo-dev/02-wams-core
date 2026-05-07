@@ -37,7 +37,7 @@ Located in `02-kms-shared/src/main/java/eu/isygoit/dto/request/`
 - CreateKeyRequestDto
 - EncryptRequestDto
 - DecryptRequestDto
-- ReencryptRequestDto
+- ReEncryptResponseDto
 - SignRequestDto
 - VerifyRequestDto
 - SetKeyPolicyRequestDto
@@ -279,7 +279,7 @@ KMS Service Architecture
     │       │   │   ├── CreateKeyRequestDto.java ✅
     │       │   │   ├── EncryptRequestDto.java ✅
     │       │   │   ├── DecryptRequestDto.java ✅
-    │       │   │   ├── ReencryptRequestDto.java ✅
+    │       │   │   ├── ReEncryptResponseDto.java ✅
     │       │   │   ├── SignRequestDto.java ✅
     │       │   │   ├── VerifyRequestDto.java ✅
     │       │   │   ├── SetKeyPolicyRequestDto.java ✅

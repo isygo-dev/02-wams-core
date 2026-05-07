@@ -16,7 +16,7 @@ public class EncryptResponseDto {
 
     private String ciphertext;
 
-    private String keyId;
+    private Long keyId;
 
     private String keyVersion;
 }

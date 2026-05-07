@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
  * The interface Key service api.
  * Legacy interface for random key generation APIs.
  */
-public interface KeyServiceApi {
+public interface IKmsServiceApi {
 
     /**
      * New random key response entity.

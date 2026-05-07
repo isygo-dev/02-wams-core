@@ -2,9 +2,10 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.request.DecryptRequestDto;
 import eu.isygoit.dto.request.EncryptRequestDto;
-import eu.isygoit.dto.request.ReencryptRequestDto;
+import eu.isygoit.dto.request.ReEncryptRequestDto;
 import eu.isygoit.dto.response.DecryptResponseDto;
 import eu.isygoit.dto.response.EncryptResponseDto;
+import eu.isygoit.dto.response.ReEncryptResponseDto;
 import eu.isygoit.service.IEncryptionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -53,19 +54,19 @@ public class EncryptionServiceImpl implements IEncryptionService {
     }
 
     @Override
-    public EncryptResponseDto reencrypt(String tenant, ReencryptRequestDto request) {
+    public ReEncryptResponseDto reencrypt(String tenant, ReEncryptRequestDto request) {
         log.info("Re-encrypting data for tenant: {} from source to destination key: {}",
                 tenant, request.getDestinationKeyId());
 
         // Mock re-encryption
         String ciphertext = Base64.getEncoder().encodeToString(
-                request.getCiphertext().getBytes()
+                request.getCiphertextBlob().getBytes()
         );
 
-        return EncryptResponseDto.builder()
+        return ReEncryptResponseDto.builder()
                 .ciphertext(ciphertext)
-                .keyId(request.getDestinationKeyId())
-                .keyVersion("v-1")
+                .destinationKeyId(request.getDestinationKeyId())
+                .destinationKeyVersion("v-1")
                 .build();
     }
 }

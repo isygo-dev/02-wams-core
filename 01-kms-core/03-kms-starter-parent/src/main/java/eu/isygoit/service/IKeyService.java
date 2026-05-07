@@ -1,9 +1,11 @@
 package eu.isygoit.service;
 
+import eu.isygoit.dto.request.CreateRandomKeyRequestDto;
 import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.exception.IncrementalConfigNotFoundException;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.model.RandomKey;
+import jakarta.validation.Valid;
 
 /**
  * The interface Key service.
@@ -65,4 +67,8 @@ public interface IKeyService {
      * @return the key by name
      */
     RandomKey getKeyByName(String tenant /*senderTenant*/, String name);
+
+    String generateRandomData(String tenant, Integer length, IEnumCharSet.Types charSetType);
+
+    String createRandomKey(String tenant, @Valid CreateRandomKeyRequestDto request);
 }

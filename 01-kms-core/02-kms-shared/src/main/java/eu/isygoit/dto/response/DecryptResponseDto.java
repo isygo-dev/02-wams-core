@@ -16,7 +16,7 @@ public class DecryptResponseDto {
 
     private String plaintext;
 
-    private String keyId;
+    private Long keyId;
 
     private String keyVersion;
 }

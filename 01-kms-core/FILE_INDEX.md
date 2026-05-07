@@ -24,7 +24,7 @@ Complete listing of all files created for the KMS implementation.
 ├── CreateKeyRequestDto.java                          ✅
 ├── EncryptRequestDto.java                            ✅
 ├── DecryptRequestDto.java                            ✅
-├── ReencryptRequestDto.java                          ✅
+├── ReEncryptResponseDto.java                          ✅
 ├── SignRequestDto.java                               ✅
 ├── VerifyRequestDto.java                             ✅
 ├── SetKeyPolicyRequestDto.java                       ✅
@@ -158,7 +158,7 @@ correct implementations. Fix by renaming if needed.
 - [x] CreateKeyRequestDto.java
 - [x] EncryptRequestDto.java
 - [x] DecryptRequestDto.java
-- [x] ReencryptRequestDto.java
+- [x] ReEncryptResponseDto.java
 - [x] SignRequestDto.java
 - [x] VerifyRequestDto.java
 - [x] SetKeyPolicyRequestDto.java
@@ -362,7 +362,7 @@ Exceptions
 ### In KeyController
 
 ```java
-import eu.isygoit.api.IKmsServiceApi;
+import eu.isygoit.api.KmsServiceApi;
 import eu.isygoit.service.*;
 import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.response.*;

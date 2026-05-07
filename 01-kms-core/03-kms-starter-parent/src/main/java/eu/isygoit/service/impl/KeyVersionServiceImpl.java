@@ -18,7 +18,7 @@ import java.util.ArrayList;
 public class KeyVersionServiceImpl implements IKeyVersionService {
 
     @Override
-    public KeyVersionListResponseDto listKeyVersions(String tenant, String keyId) {
+    public KeyVersionListResponseDto listKeyVersions(String tenant, Long keyId) {
         log.info("Listing key versions for tenant: {} keyId: {}", tenant, keyId);
 
         return KeyVersionListResponseDto.builder()
@@ -27,7 +27,7 @@ public class KeyVersionServiceImpl implements IKeyVersionService {
     }
 
     @Override
-    public ActiveVersionResponseDto getActiveVersion(String tenant, String keyId) {
+    public ActiveVersionResponseDto getActiveVersion(String tenant, Long keyId) {
         log.info("Getting active version for tenant: {} keyId: {}", tenant, keyId);
 
         return ActiveVersionResponseDto.builder()

@@ -1,5 +1,6 @@
 package eu.isygoit.model;
 
+import eu.isygoit.enums.IKmsActionType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,10 +41,11 @@ public class KmsAuditLog {
     private String tenant;
 
     @Column(name = "KEY_ID", length = 255)
-    private String keyId;
+    private Long keyId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "ACTION", length = 100, nullable = false)
-    private String action; // ENCRYPT, DECRYPT, SIGN, VERIFY, CREATE_KEY, ROTATE_KEY, etc.
+    private IKmsActionType.Types action;
 
     @Column(name = "PRINCIPAL", length = 255)
     private String principal; // User/Service that performed the action
@@ -68,6 +70,5 @@ public class KmsAuditLog {
 
     @Column(name = "EXECUTION_TIME_MS")
     private Long executionTimeMs; // Time taken in milliseconds
-
 }
 

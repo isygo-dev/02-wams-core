@@ -75,7 +75,7 @@ You need to implement JPA entities for persistence:
 @Entity
 @Table(name = "kms_keys")
 public class Key extends AuditableEntity<Long> implements ITenantAssignable {
-    private String keyId;
+    private Long keyId;
     private String alias;
     private String description;
     private IEnumKeySpec.Types keySpec;
@@ -122,7 +122,7 @@ public class KeyPolicy extends AuditableEntity<Long> {
 @Table(name = "kms_audit_logs")
 public class AuditLog extends AuditableEntity<Long> {
     private String action;
-    private String keyId;
+    private Long keyId;
     private String principal;
     private String ip;
     private LocalDateTime timestamp;
@@ -138,18 +138,22 @@ Create repositories for data access:
 // Create in 01-kms-jpa/src/main/java/eu/isygoit/repository/
 
 public interface KeyRepository extends JpaRepository<Key, Long>, JpaSpecificationExecutor<Key> {
-    Optional<Key> findByKeyId(String keyId);
+    Optional<Key> findByKeyId(Long keyId);
+
     Optional<Key> findByAlias(String alias);
+
     List<Key> findByTenant(String tenant);
 }
 
 public interface KeyVersionRepository extends JpaRepository<KeyVersion, Long> {
     List<KeyVersion> findByKeyId(Long keyId);
+
     Optional<KeyVersion> findByVersionId(String versionId);
 }
 
 public interface KeyGrantRepository extends JpaRepository<KeyGrant, Long> {
     List<KeyGrant> findByKeyId(Long keyId);
+
     Optional<KeyGrant> findByGrantId(String grantId);
 }
 
@@ -158,7 +162,8 @@ public interface KeyPolicyRepository extends JpaRepository<KeyPolicy, Long> {
 }
 
 public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
-    List<AuditLog> findByKeyIdAndTimestampBetween(String keyId, LocalDateTime from, LocalDateTime to);
+    List<AuditLog> findByKeyIdAndTimestampBetween(Long keyId, LocalDateTime from, LocalDateTime to);
+
     List<AuditLog> findByTenantAndTimestampBetween(String tenant, LocalDateTime from, LocalDateTime to);
 }
 ```
@@ -254,7 +259,7 @@ spring:
     url: jdbc:mysql://localhost:3306/kms_db
     username: kms_user
     password: kms_password
-    
+
 kms:
   encryption:
     algorithm: AES/GCM/NoPadding
@@ -275,30 +280,31 @@ kms:
 Connect audit logging to external systems:
 
 ```java
+
 @Service
 public class AuditServiceImpl implements IAuditService {
-    
+
     @Autowired
     private AuditLogRepository auditLogRepository;
-    
+
     @Autowired(required = false)
     private ExternalAuditService externalAuditService;  // e.g., Splunk, datadog
-    
+
     @Override
-    public void logAction(String tenant, String action, String keyId, 
-                         String principal, String ip) {
+    public void logAction(String tenant, String action, Long keyId,
+                          String principal, String ip) {
         // Save to database
         AuditLog auditLog = AuditLog.builder()
-            .tenant(tenant)
-            .action(action)
-            .keyId(keyId)
-            .principal(principal)
-            .ip(ip)
-            .timestamp(LocalDateTime.now())
-            .build();
-        
+                .tenant(tenant)
+                .action(action)
+                .keyId(keyId)
+                .principal(principal)
+                .ip(ip)
+                .timestamp(LocalDateTime.now())
+                .build();
+
         auditLogRepository.save(auditLog);
-        
+
         // TODO: Stream to external audit systems if configured
         if (externalAuditService != null) {
             externalAuditService.log(auditLog);
@@ -330,29 +336,30 @@ public class AuditServiceImpl implements IAuditService {
 ### Unit Tests Example
 
 ```java
+
 @SpringBootTest
 public class EncryptionServiceTest {
-    
+
     @Autowired
     private IEncryptionService encryptionService;
-    
+
     @Test
     public void testEncryptDecryptRoundTrip() {
         // Given
         EncryptRequestDto encryptRequest = EncryptRequestDto.builder()
-            .keyId("key-123")
-            .plaintext(Base64.getEncoder().encodeToString("secret data".getBytes()))
-            .build();
-        
+                .keyId("key-123")
+                .plaintext(Base64.getEncoder().encodeToString("secret data".getBytes()))
+                .build();
+
         // When
         EncryptResponseDto encryptResponse = encryptionService.encrypt("tenant-1", encryptRequest);
-        
+
         DecryptRequestDto decryptRequest = DecryptRequestDto.builder()
-            .ciphertext(encryptResponse.getCiphertext())
-            .build();
-        
+                .ciphertext(encryptResponse.getCiphertext())
+                .build();
+
         DecryptResponseDto decryptResponse = encryptionService.decrypt("tenant-1", decryptRequest);
-        
+
         // Then
         String decrypted = new String(Base64.getDecoder().decode(decryptResponse.getPlaintext()));
         assertEquals("secret data", decrypted);

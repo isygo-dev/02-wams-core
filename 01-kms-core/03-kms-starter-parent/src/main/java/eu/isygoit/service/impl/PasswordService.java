@@ -89,7 +89,7 @@ public class PasswordService implements IPasswordService {
         switch (authType) {
             case PWD -> {
                 //Get gateway url
-                String gatewayUrl = "http://localhost:4001";
+                String gatewayUrl = "http://localhost:4001" ;
                 try {
                     ResponseEntity<String> result = imsAppParameterService.getValueByTenantAndName(
                             tenant, AppParameterConstants.GATEWAY_URL, true, gatewayUrl);

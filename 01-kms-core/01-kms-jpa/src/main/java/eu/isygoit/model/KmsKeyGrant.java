@@ -44,7 +44,7 @@ public class KmsKeyGrant extends AuditableEntity<Long> implements ITenantAssigna
     private String tenant;
 
     @Column(name = "KEY_ID", length = 255, updatable = false, nullable = false)
-    private String keyId;
+    private Long keyId;
 
     @Column(name = "GRANT_ID", length = 255, updatable = false, nullable = false)
     private String grantId;

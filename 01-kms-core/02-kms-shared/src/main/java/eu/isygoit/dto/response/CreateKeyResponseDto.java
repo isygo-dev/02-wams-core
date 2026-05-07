@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @SuperBuilder
 public class CreateKeyResponseDto {
 
-    private String keyId;
+    private Long keyId;
 
     private String arn;
 

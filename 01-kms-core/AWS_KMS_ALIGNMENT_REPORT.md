@@ -180,7 +180,7 @@ public interface ICryptoService {
 
 ```java
 createKey() {
-  String keyId = "key-" + UUID.randomUUID();
+  Long keyId = "key-" + UUID.randomUUID();
   return CreateKeyResponseDto.builder()
     .keyId(keyId)
     .status("ENABLED")

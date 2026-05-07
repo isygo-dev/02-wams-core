@@ -64,10 +64,10 @@ public class TokenConfig extends AuditableEntity<Long> implements ITenantAssigna
 
     @Builder.Default
     @Column(name = SchemaColumnConstantName.C_SIGNATURE_ALGORITHM, length = IEnumCharSet.STR_ENUM_SIZE, nullable = false)
-    private String signatureAlgorithm = "RS256";
+    private String signatureAlgorithm = "RS256" ;
 
     @Column(name = SchemaColumnConstantName.C_SECRET_KEY, nullable = false)
-    private String secretKey = "sEcReTkEy";
+    private String secretKey = "sEcReTkEy" ;
 
     @Builder.Default
     @Column(name = SchemaColumnConstantName.C_LIFE_TIME_MS, nullable = false)

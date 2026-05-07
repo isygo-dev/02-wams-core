@@ -507,7 +507,10 @@ curl -X GET http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d3
       "Principal": {
         "AWS": "arn:aws:iam::123456789012:user/alice"
       },
-      "Action": ["kms:Decrypt", "kms:Encrypt"],
+      "Action": [
+        "kms:Decrypt",
+        "kms:Encrypt"
+      ],
       "Resource": "*"
     }
   ]
@@ -531,7 +534,7 @@ curl -X GET "http://localhost:8080/api/v1/private/key/audit/logs?keyId=key-123e4
 {
   "logs": [
     {
-      "action": "CREATE_KEY",
+      "action": IKmsActionType.Types.CREATE_KEY,
       "keyId": "key-123e4567-e89b-12d3-a456-426614174000",
       "timestamp": "2024-05-06T10:30:00",
       "principal": "admin@example.com",

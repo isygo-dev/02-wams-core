@@ -32,7 +32,7 @@ public class AppParameterService extends CrudTenantService<Long, AppParameter, A
     public String getValueByTenantAndName(String tenant /*senderTenant*/, String name, boolean allowDefault, String defaultValue) {
         Optional<AppParameter> optional = repository().findByTenantIgnoreCaseAndNameIgnoreCase(tenant, name);
         if (!StringUtils.hasText(defaultValue)) {
-            defaultValue = "NA";
+            defaultValue = "NA" ;
         }
         if (optional.isPresent() && StringUtils.hasText(optional.get().getValue())) {
             return optional.get().getValue();
