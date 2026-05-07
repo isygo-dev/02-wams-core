@@ -15,21 +15,23 @@
 ## ✅ What Has Been Implemented
 
 ### 1. Enums (4 files)
+
 Located in `02-kms-shared/src/main/java/eu/isygoit/enums/`
 
 1. **IEnumKeySpec.java**
-   - AES_256, RSA_2048, EC_P256
+    - AES_256, RSA_2048, EC_P256
 
 2. **IEnumKeyPurpose.java**
-   - ENCRYPT_DECRYPT, SIGN_VERIFY
+    - ENCRYPT_DECRYPT, SIGN_VERIFY
 
 3. **IEnumKeyStatus.java**
-   - ENABLED, DISABLED, PENDING_DELETION
+    - ENABLED, DISABLED, PENDING_DELETION
 
 4. **IEnumSigningAlgorithm.java**
-   - RSASSA_PSS_SHA256, ECDSA_SHA256
+    - RSASSA_PSS_SHA256, ECDSA_SHA256
 
 ### 2. Request DTOs (9 files)
+
 Located in `02-kms-shared/src/main/java/eu/isygoit/dto/request/`
 
 - CreateKeyRequestDto
@@ -43,11 +45,13 @@ Located in `02-kms-shared/src/main/java/eu/isygoit/dto/request/`
 - GenerateDataKeyRequestDto
 
 **Features:**
+
 - ✅ Lombok annotations (@Data, @SuperBuilder, @NoArgsConstructor, @AllArgsConstructor)
 - ✅ Jakarta validation annotations (@NotNull, @NotBlank, @Size, @Positive, etc.)
 - ✅ Proper error messages
 
 ### 3. Response DTOs (10 files)
+
 Located in `02-kms-shared/src/main/java/eu/isygoit/dto/response/`
 
 - KeyMetadataResponseDto
@@ -65,6 +69,7 @@ Located in `02-kms-shared/src/main/java/eu/isygoit/dto/response/`
 - AuditLogResponseDto (with AuditLogEntryDto)
 
 **Features:**
+
 - ✅ JSON serialization with @JsonFormat for dates
 - ✅ Nested DTOs for complex structures
 - ✅ Proper formatting for all fields
@@ -72,61 +77,67 @@ Located in `02-kms-shared/src/main/java/eu/isygoit/dto/response/`
 ### 4. Service Layer (14 files)
 
 #### A. Service Interfaces (7 files)
+
 Located in `03-kms-starter-parent/src/main/java/eu/isygoit/service/`
 
 1. **IKeyManagementService** - CRUD operations for keys
-   - createKey()
-   - getKeyMetadata()
-   - listKeys()
-   - enableKey()
-   - disableKey()
-   - scheduleKeyDeletion()
-   - rotateKey()
+    - createKey()
+    - getKeyMetadata()
+    - listKeys()
+    - enableKey()
+    - disableKey()
+    - scheduleKeyDeletion()
+    - rotateKey()
 
 2. **IEncryptionService** - Cryptographic operations
-   - encrypt()
-   - decrypt()
-   - reencrypt()
+    - encrypt()
+    - decrypt()
+    - reencrypt()
 
 3. **ISigningService** - Digital signatures
-   - sign()
-   - verify()
+    - sign()
+    - verify()
 
 4. **IKeyPolicyService** - Access control
-   - setKeyPolicy()
-   - getKeyPolicy()
-   - createGrant()
-   - revokeGrant()
+    - setKeyPolicy()
+    - getKeyPolicy()
+    - createGrant()
+    - revokeGrant()
 
 5. **IKeyVersionService** - Version management
-   - listKeyVersions()
-   - getActiveVersion()
+    - listKeyVersions()
+    - getActiveVersion()
 
 6. **IDataKeyService** - Data key generation
-   - generateDataKey()
+    - generateDataKey()
 
 7. **IAuditService** - Logging and compliance
-   - getAuditLogs()
-   - logAction()
+    - getAuditLogs()
+    - logAction()
 
 #### B. Service Implementations (7 files)
+
 Located in `03-kms-starter-parent/src/main/java/eu/isygoit/service/impl/`
 
 All services include:
+
 - ✅ @Service annotation
 - ✅ @Transactional for transaction management
 - ✅ @Slf4j for logging
 - ✅ Mock implementations (ready to be extended)
 - ✅ Proper error handling patterns
 
-**Note:** Implementations use mock/stub patterns with Base64 encoding for demonstration. They need to be replaced with actual cryptographic libraries.
+**Note:** Implementations use mock/stub patterns with Base64 encoding for demonstration. They need to be replaced with
+actual cryptographic libraries.
 
 ### 5. REST API Controller (1 file)
+
 **KeyController.java** - `/api/v1/private/key`
 
 **All 20 Endpoints Implemented:**
 
 #### Key Management (7 endpoints)
+
 1. ✅ POST `/keys` - Create key
 2. ✅ GET `/keys/{keyId}` - Get key metadata
 3. ✅ GET `/keys` - List keys
@@ -136,31 +147,38 @@ All services include:
 7. ✅ POST `/keys/{keyId}/rotate` - Rotate key
 
 #### Cryptographic Operations (3 endpoints)
+
 8. ✅ POST `/encrypt` - Encrypt data
 9. ✅ POST `/decrypt` - Decrypt data
 10. ✅ POST `/reencrypt` - Re-encrypt data
 
 #### Signing APIs (2 endpoints)
+
 11. ✅ POST `/sign` - Sign message
 12. ✅ POST `/verify` - Verify signature
 
 #### Key Policy & Access Control (4 endpoints)
+
 13. ✅ PUT `/keys/{keyId}/policy` - Set key policy
 14. ✅ GET `/keys/{keyId}/policy` - Get key policy
 15. ✅ POST `/keys/{keyId}/grants` - Create grant
 16. ✅ DELETE `/keys/{keyId}/grants/{grantId}` - Revoke grant
 
 #### Key Versioning (2 endpoints)
+
 17. ✅ GET `/keys/{keyId}/versions` - List versions
 18. ✅ GET `/keys/{keyId}/active-version` - Get active version
 
 #### Data Keys (1 endpoint)
+
 19. ✅ POST `/datakey/generate` - Generate data key
 
 #### Audit APIs (1 endpoint)
+
 20. ✅ GET `/audit/logs` - Get audit logs
 
 **Features:**
+
 - ✅ OpenAPI/Swagger annotations on all endpoints
 - ✅ Request validation with @Valid
 - ✅ Proper exception handling with getBackExceptionResponse()
@@ -171,14 +189,15 @@ All services include:
 ### 6. API Infrastructure (2 files)
 
 1. **IKmsServiceApi.java** - API contract interface
-   - Defines all 20 endpoints with Swagger annotations
-   - Serves as the API specification
+    - Defines all 20 endpoints with Swagger annotations
+    - Serves as the API specification
 
 2. **KeyServiceApi.java** - Legacy interface
-   - Maintains backward compatibility
-   - Supports legacy random key APIs
+    - Maintains backward compatibility
+    - Supports legacy random key APIs
 
 ### 7. Constants (1 file)
+
 **KmsConstants.java** - All constants used throughout the application
 
 - API paths
@@ -189,19 +208,19 @@ All services include:
 ### 8. Documentation (2 files)
 
 1. **KMS_API_DOCUMENTATION.md** - Comprehensive API guide
-   - All 20 endpoints documented
-   - Request/response examples for each endpoint
-   - Error handling documentation
-   - Best practices
-   - Usage examples
+    - All 20 endpoints documented
+    - Request/response examples for each endpoint
+    - Error handling documentation
+    - Best practices
+    - Usage examples
 
 2. **IMPLEMENTATION_GUIDE.md** - Developer guide
-   - What's been implemented
-   - What needs to be done
-   - Database schema examples
-   - Integration checklist
-   - Security considerations
-   - Testing examples
+    - What's been implemented
+    - What needs to be done
+    - Database schema examples
+    - Integration checklist
+    - Security considerations
+    - Testing examples
 
 ---
 
@@ -317,9 +336,11 @@ KMS Service Architecture
 ## 🚀 Quick Start
 
 ### 1. Access the API
+
 All endpoints are available at: `http://localhost:PORT/api/v1/private/key`
 
 ### 2. Create a Key
+
 ```bash
 POST /api/v1/private/key/keys
 Content-Type: application/json
@@ -333,6 +354,7 @@ Content-Type: application/json
 ```
 
 ### 3. Encrypt Data
+
 ```bash
 POST /api/v1/private/key/encrypt
 Content-Type: application/json
@@ -344,6 +366,7 @@ Content-Type: application/json
 ```
 
 ### 4. View Swagger Documentation
+
 Navigate to: `http://localhost:PORT/swagger-ui.html`
 
 All KMS endpoints will be visible under the "KMS Keys" tag.
@@ -353,6 +376,7 @@ All KMS endpoints will be visible under the "KMS Keys" tag.
 ## 📝 What Still Needs Implementation (TODO)
 
 ### Critical (Must Do Before Production)
+
 - [ ] **JPA Entities & Repositories** - Database persistence layer
 - [ ] **Actual Cryptographic Implementation** - Replace mock implementations with real crypto
 - [ ] **Security Context Integration** - Extract tenant, principal, IP from security context
@@ -362,6 +386,7 @@ All KMS endpoints will be visible under the "KMS Keys" tag.
 - [ ] **Error Handling** - Custom exceptions (KeyNotFoundException, EncryptionException, etc.)
 
 ### Important (Should Do)
+
 - [ ] **Configuration Management** - application.yml settings
 - [ ] **Caching** - Redis cache for frequently accessed keys
 - [ ] **Performance Tuning** - Batch operations, connection pooling
@@ -371,6 +396,7 @@ All KMS endpoints will be visible under the "KMS Keys" tag.
 - [ ] **API Versioning** - Support multiple API versions
 
 ### Nice to Have (Polish)
+
 - [ ] **Advanced Features** - Key aliases, automatic rotation policies
 - [ ] **UI Dashboard** - Key management dashboard
 - [ ] **CLI Tool** - Command-line interface
@@ -395,11 +421,13 @@ All KMS endpoints will be visible under the "KMS Keys" tag.
 ## 📈 Performance Considerations
 
 Current implementation is suitable for:
+
 - ✅ Development & Testing
 - ✅ POC & Proof of Concept
 - ⚠️ Small-scale production (requires optimization)
 
 Before production deployment, implement:
+
 - Database connection pooling
 - Caching layer (Redis)
 - Async audit logging
@@ -447,6 +475,7 @@ Before production deployment, implement:
 ## 📞 Support
 
 For questions or clarifications:
+
 - Check `KMS_API_DOCUMENTATION.md` for API details
 - Check `IMPLEMENTATION_GUIDE.md` for code integration
 - Review inline code comments

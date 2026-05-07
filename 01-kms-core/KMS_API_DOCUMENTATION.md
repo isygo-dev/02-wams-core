@@ -2,7 +2,8 @@
 
 ## Overview
 
-Ce document décrit todas les endpoints de gestion de clés disponibles dans le service KMS. Les APIs sont organisées en 7 catégories de fonctionnalités principales.
+Ce document décrit todas les endpoints de gestion de clés disponibles dans le service KMS. Les APIs sont organisées en 7
+catégories de fonctionnalités principales.
 
 **Base URL:** `/api/v1/private/key`
 
@@ -11,11 +12,13 @@ Ce document décrit todas les endpoints de gestion de clés disponibles dans le 
 ## 1. Key Management APIs
 
 ### 1.1 Create Key
+
 **Endpoint:** `POST /keys`
 
 Crée une nouvelle clé cryptographique avec métadonnées et version initiale active.
 
 **Request Body:**
+
 ```json
 {
   "keySpec": "AES_256 | RSA_2048 | EC_P256",
@@ -26,6 +29,7 @@ Crée une nouvelle clé cryptographique avec métadonnées et version initiale a
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "keyId": "key-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -38,14 +42,17 @@ Crée une nouvelle clé cryptographique avec métadonnées et version initiale a
 ---
 
 ### 1.2 Get Key Metadata
+
 **Endpoint:** `GET /keys/{keyId}`
 
 Récupère les métadonnées d'une clé spécifique.
 
 **Path Parameters:**
+
 - `keyId` (string, required): L'identifiant unique de la clé
 
 **Response (200 OK):**
+
 ```json
 {
   "keyId": "key-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -62,15 +69,18 @@ Récupère les métadonnées d'une clé spécifique.
 ---
 
 ### 1.3 List Keys
+
 **Endpoint:** `GET /keys`
 
 Retourne une liste paginée des clés.
 
 **Query Parameters:**
+
 - `limit` (integer, optional): Nombre maximum de clés à retourner (defaut: 100, max: 1000)
 - `nextToken` (string, optional): Token pour pagination
 
 **Response (200 OK):**
+
 ```json
 {
   "keys": [
@@ -87,14 +97,17 @@ Retourne une liste paginée des clés.
 ---
 
 ### 1.4 Enable Key
+
 **Endpoint:** `PATCH /keys/{keyId}/enable`
 
 Active une clé désactivée pour les opérations cryptographiques.
 
 **Path Parameters:**
+
 - `keyId` (string, required): L'identifiant de la clé
 
 **Response (200 OK):**
+
 ```json
 {
   "keyId": "key-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -105,14 +118,17 @@ Active une clé désactivée pour les opérations cryptographiques.
 ---
 
 ### 1.5 Disable Key
+
 **Endpoint:** `PATCH /keys/{keyId}/disable`
 
 Désactive immédiatement l'utilisation d'une clé.
 
 **Path Parameters:**
+
 - `keyId` (string, required): L'identifiant de la clé
 
 **Response (200 OK):**
+
 ```json
 {
   "keyId": "key-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -123,17 +139,21 @@ Désactive immédiatement l'utilisation d'une clé.
 ---
 
 ### 1.6 Schedule Key Deletion
+
 **Endpoint:** `DELETE /keys/{keyId}`
 
 Programme la suppression d'une clé (soft delete avec période de grâce).
 
 **Path Parameters:**
+
 - `keyId` (string, required): L'identifiant de la clé
 
 **Query Parameters:**
+
 - `pendingWindowInDays` (integer, optional): Nombre de jours avant suppression (7-30, défaut: 7)
 
 **Response (200 OK):**
+
 ```json
 {
   "keyId": "key-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -145,14 +165,17 @@ Programme la suppression d'une clé (soft delete avec période de grâce).
 ---
 
 ### 1.7 Rotate Key
+
 **Endpoint:** `POST /keys/{keyId}/rotate`
 
 Crée une nouvelle version cryptographique de la clé.
 
 **Path Parameters:**
+
 - `keyId` (string, required): L'identifiant de la clé
 
 **Response (200 OK):**
+
 ```json
 {
   "keyId": "key-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -166,11 +189,13 @@ Crée une nouvelle version cryptographique de la clé.
 ## 2. Cryptographic Operations
 
 ### 2.1 Encrypt
+
 **Endpoint:** `POST /encrypt`
 
 Chiffre du texte brut avec une clé gérée par KMS.
 
 **Request Body:**
+
 ```json
 {
   "keyId": "key-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -183,6 +208,7 @@ Chiffre du texte brut avec une clé gérée par KMS.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "ciphertext": "base64-encoded-ciphertext",
@@ -194,11 +220,13 @@ Chiffre du texte brut avec une clé gérée par KMS.
 ---
 
 ### 2.2 Decrypt
+
 **Endpoint:** `POST /decrypt`
 
 Déchiffre le texte chiffré avec la version de clé correcte automatiquement.
 
 **Request Body:**
+
 ```json
 {
   "ciphertext": "base64-encoded-ciphertext"
@@ -206,6 +234,7 @@ Déchiffre le texte chiffré avec la version de clé correcte automatiquement.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "plaintext": "base64-encoded-plaintext",
@@ -217,11 +246,13 @@ Déchiffre le texte chiffré avec la version de clé correcte automatiquement.
 ---
 
 ### 2.3 Re-encrypt
+
 **Endpoint:** `POST /reencrypt`
 
 Rewrappe le texte chiffré d'une clé à une autre sans exposer le texte brut.
 
 **Request Body:**
+
 ```json
 {
   "ciphertext": "base64-encoded-ciphertext",
@@ -230,6 +261,7 @@ Rewrappe le texte chiffré d'une clé à une autre sans exposer le texte brut.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "ciphertext": "new-base64-encoded-ciphertext",
@@ -243,11 +275,13 @@ Rewrappe le texte chiffré d'une clé à une autre sans exposer le texte brut.
 ## 3. Signing APIs (Asymmetric Keys)
 
 ### 3.1 Sign
+
 **Endpoint:** `POST /sign`
 
 Génère une signature numérique pour un message.
 
 **Request Body:**
+
 ```json
 {
   "keyId": "key-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -257,6 +291,7 @@ Génère une signature numérique pour un message.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "signature": "base64-encoded-signature",
@@ -267,11 +302,13 @@ Génère une signature numérique pour un message.
 ---
 
 ### 3.2 Verify
+
 **Endpoint:** `POST /verify`
 
 Vérifie une signature numérique.
 
 **Request Body:**
+
 ```json
 {
   "keyId": "key-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -281,6 +318,7 @@ Vérifie une signature numérique.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "valid": true
@@ -292,14 +330,17 @@ Vérifie une signature numérique.
 ## 4. Key Policy & Access Control
 
 ### 4.1 Set Key Policy
+
 **Endpoint:** `PUT /keys/{keyId}/policy`
 
 Définit des règles d'accès de type IAM pour l'utilisation des clés.
 
 **Path Parameters:**
+
 - `keyId` (string, required): L'identifiant de la clé
 
 **Request Body:**
+
 ```json
 {
   "policy": {
@@ -319,6 +360,7 @@ Définit des règles d'accès de type IAM pour l'utilisation des clés.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "keyId": "key-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -329,14 +371,17 @@ Définit des règles d'accès de type IAM pour l'utilisation des clés.
 ---
 
 ### 4.2 Get Key Policy
+
 **Endpoint:** `GET /keys/{keyId}/policy`
 
 Récupère la politique actuelle d'une clé.
 
 **Path Parameters:**
+
 - `keyId` (string, required): L'identifiant de la clé
 
 **Response (200 OK):**
+
 ```json
 {
   "Version": "2023-01-01",
@@ -347,14 +392,17 @@ Récupère la politique actuelle d'une clé.
 ---
 
 ### 4.3 Create Grant
+
 **Endpoint:** `POST /keys/{keyId}/grants`
 
 Délègue un accès limité à une clé.
 
 **Path Parameters:**
+
 - `keyId` (string, required): L'identifiant de la clé
 
 **Request Body:**
+
 ```json
 {
   "principal": "arn:aws:iam::123456789012:user/bob",
@@ -363,6 +411,7 @@ Délègue un accès limité à une clé.
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "grantId": "grant-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -373,15 +422,18 @@ Délègue un accès limité à une clé.
 ---
 
 ### 4.4 Revoke Grant
+
 **Endpoint:** `DELETE /keys/{keyId}/grants/{grantId}`
 
 Supprime les permissions accordées précédemment.
 
 **Path Parameters:**
+
 - `keyId` (string, required): L'identifiant de la clé
 - `grantId` (string, required): L'identifiant du grant
 
 **Response (200 OK):**
+
 ```json
 {
   "status": "REVOKED"
@@ -393,14 +445,17 @@ Supprime les permissions accordées précédemment.
 ## 5. Key Versioning APIs
 
 ### 5.1 List Key Versions
+
 **Endpoint:** `GET /keys/{keyId}/versions`
 
 Liste toutes les versions d'une clé.
 
 **Path Parameters:**
+
 - `keyId` (string, required): L'identifiant de la clé
 
 **Response (200 OK):**
+
 ```json
 {
   "versions": [
@@ -421,14 +476,17 @@ Liste toutes les versions d'une clé.
 ---
 
 ### 5.2 Get Active Version
+
 **Endpoint:** `GET /keys/{keyId}/active-version`
 
 Retourne la version actuellement active d'une clé.
 
 **Path Parameters:**
+
 - `keyId` (string, required): L'identifiant de la clé
 
 **Response (200 OK):**
+
 ```json
 {
   "versionId": "v-2"
@@ -440,11 +498,13 @@ Retourne la version actuellement active d'une clé.
 ## 6. Data Key API (Envelope Encryption)
 
 ### 6.1 Generate Data Key
+
 **Endpoint:** `POST /datakey/generate`
 
 Génère une clé de chiffrement de données (DEK) pour le chiffrement côté client.
 
 **Request Body:**
+
 ```json
 {
   "keyId": "key-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -453,6 +513,7 @@ Génère une clé de chiffrement de données (DEK) pour le chiffrement côté cl
 ```
 
 **Response (200 OK):**
+
 ```json
 {
   "plaintextKey": "base64-encoded-plaintext-key",
@@ -466,17 +527,20 @@ Génère une clé de chiffrement de données (DEK) pour le chiffrement côté cl
 ## 7. Audit APIs
 
 ### 7.1 Get Audit Logs
+
 **Endpoint:** `GET /audit/logs`
 
 Retourne l'historique d'utilisation cryptographique pour la conformité et la surveillance.
 
 **Query Parameters:**
+
 - `keyId` (string, optional): Filtrer par identifiant de clé
 - `fromDate` (string, optional): Date de début (format ISO 8601: YYYY-MM-DDTHH:mm:ss)
 - `toDate` (string, optional): Date de fin (format ISO 8601: YYYY-MM-DDTHH:mm:ss)
 - `limit` (integer, optional): Nombre maximum de logs à retourner (défaut: 100)
 
 **Response (200 OK):**
+
 ```json
 {
   "logs": [
@@ -504,15 +568,16 @@ Retourne l'historique d'utilisation cryptographique pour la conformité et la su
 
 Tous les endpoints retournent les codes HTTP standards :
 
-| Code | Meaning | Description |
-|------|---------|-------------|
-| 200 | OK | Requête traitée avec succès |
-| 400 | Bad Request | Paramètres invalides ou malformés |
-| 404 | Not Found | Ressource non trouvée (clé, grant, etc.) |
-| 409 | Conflict | Conflit (ex: clé déjà existe) |
-| 500 | Internal Server Error | Erreur du serveur |
+| Code | Meaning               | Description                              |
+|------|-----------------------|------------------------------------------|
+| 200  | OK                    | Requête traitée avec succès              |
+| 400  | Bad Request           | Paramètres invalides ou malformés        |
+| 404  | Not Found             | Ressource non trouvée (clé, grant, etc.) |
+| 409  | Conflict              | Conflit (ex: clé déjà existe)            |
+| 500  | Internal Server Error | Erreur du serveur                        |
 
 ### Error Response Format
+
 ```json
 {
   "error": "ERROR_CODE",
@@ -526,9 +591,11 @@ Tous les endpoints retournent les codes HTTP standards :
 ## Authentication & Authorization
 
 Tous les endpoints requièrent une authentification :
+
 - **Header:** `Authorization: Bearer {token}`
 
 L'autorisation est basée sur :
+
 - Tenant (isolement multi-locataires)
 - Permissions utilisateur
 - Politiques de clé et grants
@@ -556,6 +623,7 @@ L'autorisation est basée sur :
 ## Examples
 
 ### Example 1: Chiffrement de données sensibles
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/private/key/encrypt \
   -H "Content-Type: application/json" \
@@ -571,6 +639,7 @@ curl -X POST http://localhost:8080/api/v1/private/key/encrypt \
 ```
 
 ### Example 2: Génération de signature numérique
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/private/key/sign \
   -H "Content-Type: application/json" \
@@ -583,6 +652,7 @@ curl -X POST http://localhost:8080/api/v1/private/key/sign \
 ```
 
 ### Example 3: Génération de clé de données
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/private/key/datakey/generate \
   -H "Content-Type: application/json" \
@@ -598,6 +668,7 @@ curl -X POST http://localhost:8080/api/v1/private/key/datakey/generate \
 ## Versions API
 
 **Version actuelle:** v1
+
 - Release Date: 2024-05-06
 - Support: Long-term support
 

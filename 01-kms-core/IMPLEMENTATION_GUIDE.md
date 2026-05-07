@@ -24,17 +24,23 @@ This guide explains what's been implemented and what needs to be customized for 
 ## 2. What's Already Been Done ✅
 
 ### A. DTOs & Data Models
-- ✅ Request DTOs: CreateKeyRequest, EncryptRequest, DecryptRequest, ReencryptRequest, SignRequest, VerifyRequest, SetKeyPolicyRequest, CreateGrantRequest, GenerateDataKeyRequest
-- ✅ Response DTOs: KeyMetadataResponse, CreateKeyResponse, EncryptResponse, DecryptResponse, ListKeysResponse, RotateKeyResponse, SignResponse, VerifyResponse, GrantResponse, DataKeyResponse, KeyVersionListResponse, ActiveVersionResponse, AuditLogResponse
+
+- ✅ Request DTOs: CreateKeyRequest, EncryptRequest, DecryptRequest, ReencryptRequest, SignRequest, VerifyRequest,
+  SetKeyPolicyRequest, CreateGrantRequest, GenerateDataKeyRequest
+- ✅ Response DTOs: KeyMetadataResponse, CreateKeyResponse, EncryptResponse, DecryptResponse, ListKeysResponse,
+  RotateKeyResponse, SignResponse, VerifyResponse, GrantResponse, DataKeyResponse, KeyVersionListResponse,
+  ActiveVersionResponse, AuditLogResponse
 - ✅ Validation annotations on all DTOs
 
 ### B. Enums
+
 - ✅ IEnumKeySpec: AES_256, RSA_2048, EC_P256
 - ✅ IEnumKeyPurpose: ENCRYPT_DECRYPT, SIGN_VERIFY
 - ✅ IEnumKeyStatus: ENABLED, DISABLED, PENDING_DELETION
 - ✅ IEnumSigningAlgorithm: RSASSA_PSS_SHA256, ECDSA_SHA256
 
 ### C. Service Layer (Mock Implementations)
+
 - ✅ IKeyManagementService + KeyManagementServiceImpl
 - ✅ IEncryptionService + EncryptionServiceImpl
 - ✅ ISigningService + SigningServiceImpl
@@ -44,12 +50,14 @@ This guide explains what's been implemented and what needs to be customized for 
 - ✅ IAuditService + AuditServiceImpl
 
 ### D. REST Controller
+
 - ✅ KeyController with all 20 endpoints
 - ✅ Swagger/OpenAPI annotations
 - ✅ Exception handling
 - ✅ Request validation
 
 ### E. Documentation
+
 - ✅ Complete API documentation
 - ✅ KMS constants
 - ✅ Code examples
@@ -57,6 +65,7 @@ This guide explains what's been implemented and what needs to be customized for 
 ## 3. What Needs to Be Implemented (TODO)
 
 ### A. Database Layer (01-kms-jpa)
+
 You need to implement JPA entities for persistence:
 
 ```java
@@ -122,6 +131,7 @@ public class AuditLog extends AuditableEntity<Long> {
 ```
 
 ### B. Repository Layer (01-kms-jpa)
+
 Create repositories for data access:
 
 ```java
@@ -154,6 +164,7 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
 ```
 
 ### C. Implement Actual Cryptographic Operations
+
 Replace mock implementations in service layer:
 
 ```java
@@ -170,6 +181,7 @@ Replace mock implementations in service layer:
 ```
 
 ### D. Tenant Context Extraction
+
 Update helper methods in KeyController:
 
 ```java
@@ -195,41 +207,45 @@ private String getClientIp() {
 ```
 
 ### E. Database Schema Creation
+
 Create migration scripts or Liquibase changesets:
 
 ```sql
 -- src/main/resources/db/changelog/kms-schema.sql
 
-CREATE TABLE kms_keys (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    key_id VARCHAR(255) UNIQUE NOT NULL,
-    alias VARCHAR(255),
-    description VARCHAR(1024),
-    key_spec VARCHAR(50) NOT NULL,
-    purpose VARCHAR(50) NOT NULL,
-    status VARCHAR(50) NOT NULL,
-    current_version VARCHAR(50),
+CREATE TABLE kms_keys
+(
+    id                      BIGINT PRIMARY KEY AUTO_INCREMENT,
+    key_id                  VARCHAR(255) UNIQUE NOT NULL,
+    alias                   VARCHAR(255),
+    description             VARCHAR(1024),
+    key_spec                VARCHAR(50)         NOT NULL,
+    purpose                 VARCHAR(50)         NOT NULL,
+    status                  VARCHAR(50)         NOT NULL,
+    current_version         VARCHAR(50),
     scheduled_deletion_date TIMESTAMP,
-    tenant VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP,
-    created_by VARCHAR(255),
-    updated_by VARCHAR(255)
+    tenant                  VARCHAR(255)        NOT NULL,
+    created_at              TIMESTAMP           NOT NULL,
+    updated_at              TIMESTAMP,
+    created_by              VARCHAR(255),
+    updated_by              VARCHAR(255)
 );
 
-CREATE TABLE kms_key_versions (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    version_id VARCHAR(255) UNIQUE NOT NULL,
-    key_id BIGINT NOT NULL REFERENCES kms_keys(id),
-    key_material LONGTEXT NOT NULL,
-    status VARCHAR(50) NOT NULL,
-    created_at TIMESTAMP NOT NULL
+CREATE TABLE kms_key_versions
+(
+    id           BIGINT PRIMARY KEY AUTO_INCREMENT,
+    version_id   VARCHAR(255) UNIQUE NOT NULL,
+    key_id       BIGINT              NOT NULL REFERENCES kms_keys (id),
+    key_material LONGTEXT            NOT NULL,
+    status       VARCHAR(50)         NOT NULL,
+    created_at   TIMESTAMP           NOT NULL
 );
 
 -- Other tables follow similar pattern...
 ```
 
 ### F. Configuration Properties
+
 Add to `application.yml`:
 
 ```yaml
@@ -255,6 +271,7 @@ kms:
 ```
 
 ### G. Logging & Monitoring Integration
+
 Connect audit logging to external systems:
 
 ```java
@@ -311,6 +328,7 @@ public class AuditServiceImpl implements IAuditService {
 ## 5. Testing
 
 ### Unit Tests Example
+
 ```java
 @SpringBootTest
 public class EncryptionServiceTest {
@@ -371,6 +389,7 @@ public class EncryptionServiceTest {
 ---
 
 **Next Steps:**
+
 1. Implement JPA entities and repositories
 2. Replace mock cryptographic operations with real implementations
 3. Configure database and security

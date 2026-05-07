@@ -3,12 +3,14 @@
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Java 11+
 - Spring Boot 2.7+
 - Maven 3.6+
 - Postman or cURL
 
 ### Base URL
+
 ```
 http://localhost:8080/api/v1/private/key
 ```
@@ -20,6 +22,7 @@ http://localhost:8080/api/v1/private/key
 ### 1. Create a Key
 
 **Request:**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/private/key/keys \
   -H "Content-Type: application/json" \
@@ -33,6 +36,7 @@ curl -X POST http://localhost:8080/api/v1/private/key/keys \
 ```
 
 **Response:**
+
 ```json
 {
   "keyId": "key-123e4567-e89b-12d3-a456-426614174000",
@@ -49,12 +53,14 @@ curl -X POST http://localhost:8080/api/v1/private/key/keys \
 ### 2. Get Key Metadata
 
 **Request:**
+
 ```bash
 curl -X GET http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d3-a456-426614174000 \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 **Response:**
+
 ```json
 {
   "keyId": "key-123e4567-e89b-12d3-a456-426614174000",
@@ -73,12 +79,14 @@ curl -X GET http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d3
 ### 3. List All Keys
 
 **Request:**
+
 ```bash
 curl -X GET "http://localhost:8080/api/v1/private/key/keys?limit=10" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 **Response:**
+
 ```json
 {
   "keys": [
@@ -102,6 +110,7 @@ curl -X GET "http://localhost:8080/api/v1/private/key/keys?limit=10" \
 ### 4. Encrypt Data
 
 **Request:**
+
 ```bash
 # First, encode your data in base64
 # Example: "Hello World" = "SGVsbG8gV29ybGQ="
@@ -120,6 +129,7 @@ curl -X POST http://localhost:8080/api/v1/private/key/encrypt \
 ```
 
 **Response:**
+
 ```json
 {
   "ciphertext": "AQIDBAUG...encrypted-data...XYZDQ==",
@@ -135,6 +145,7 @@ curl -X POST http://localhost:8080/api/v1/private/key/encrypt \
 ### 5. Decrypt Data
 
 **Request:**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/private/key/decrypt \
   -H "Content-Type: application/json" \
@@ -145,6 +156,7 @@ curl -X POST http://localhost:8080/api/v1/private/key/decrypt \
 ```
 
 **Response:**
+
 ```json
 {
   "plaintext": "SGVsbG8gV29ybGQ=",
@@ -160,6 +172,7 @@ curl -X POST http://localhost:8080/api/v1/private/key/decrypt \
 ### 6. Re-encrypt Data
 
 **Request:**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/private/key/reencrypt \
   -H "Content-Type: application/json" \
@@ -171,6 +184,7 @@ curl -X POST http://localhost:8080/api/v1/private/key/reencrypt \
 ```
 
 **Response:**
+
 ```json
 {
   "ciphertext": "XYZCBA...new-encrypted-data...ZYXWVU==",
@@ -184,6 +198,7 @@ curl -X POST http://localhost:8080/api/v1/private/key/reencrypt \
 ### 7. Sign a Message
 
 **Request:**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/private/key/sign \
   -H "Content-Type: application/json" \
@@ -196,6 +211,7 @@ curl -X POST http://localhost:8080/api/v1/private/key/sign \
 ```
 
 **Response:**
+
 ```json
 {
   "signature": "SIGNATURE_BASE64_ENCODED...",
@@ -210,6 +226,7 @@ curl -X POST http://localhost:8080/api/v1/private/key/sign \
 ### 8. Verify Signature
 
 **Request:**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/private/key/verify \
   -H "Content-Type: application/json" \
@@ -222,6 +239,7 @@ curl -X POST http://localhost:8080/api/v1/private/key/verify \
 ```
 
 **Response:**
+
 ```json
 {
   "valid": true
@@ -233,12 +251,14 @@ curl -X POST http://localhost:8080/api/v1/private/key/verify \
 ### 9. Enable Key
 
 **Request:**
+
 ```bash
 curl -X PATCH http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d3-a456-426614174000/enable \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 **Response:**
+
 ```json
 {
   "keyId": "key-123e4567-e89b-12d3-a456-426614174000",
@@ -251,12 +271,14 @@ curl -X PATCH http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12
 ### 10. Disable Key
 
 **Request:**
+
 ```bash
 curl -X PATCH http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d3-a456-426614174000/disable \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 **Response:**
+
 ```json
 {
   "keyId": "key-123e4567-e89b-12d3-a456-426614174000",
@@ -269,12 +291,14 @@ curl -X PATCH http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12
 ### 11. Rotate Key
 
 **Request:**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d3-a456-426614174000/rotate \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 **Response:**
+
 ```json
 {
   "keyId": "key-123e4567-e89b-12d3-a456-426614174000",
@@ -288,12 +312,14 @@ curl -X POST http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d
 ### 12. Schedule Key Deletion
 
 **Request:**
+
 ```bash
 curl -X DELETE "http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d3-a456-426614174000?pendingWindowInDays=7" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 **Response:**
+
 ```json
 {
   "keyId": "key-123e4567-e89b-12d3-a456-426614174000",
@@ -307,6 +333,7 @@ curl -X DELETE "http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-
 ### 13. Generate Data Key
 
 **Request:**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/private/key/datakey/generate \
   -H "Content-Type: application/json" \
@@ -318,6 +345,7 @@ curl -X POST http://localhost:8080/api/v1/private/key/datakey/generate \
 ```
 
 **Response:**
+
 ```json
 {
   "plaintextKey": "base64-encoded-256-bit-key",
@@ -333,6 +361,7 @@ curl -X POST http://localhost:8080/api/v1/private/key/datakey/generate \
 ### 14. Create Grant
 
 **Request:**
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d3-a456-426614174000/grants \
   -H "Content-Type: application/json" \
@@ -344,6 +373,7 @@ curl -X POST http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d
 ```
 
 **Response:**
+
 ```json
 {
   "grantId": "grant-87654321-dcba-98765-fedcba-987654321000",
@@ -356,12 +386,14 @@ curl -X POST http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d
 ### 15. Revoke Grant
 
 **Request:**
+
 ```bash
 curl -X DELETE http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d3-a456-426614174000/grants/grant-87654321-dcba-98765-fedcba-987654321000 \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 **Response:**
+
 ```json
 {
   "status": "REVOKED"
@@ -373,12 +405,14 @@ curl -X DELETE http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-1
 ### 16. List Key Versions
 
 **Request:**
+
 ```bash
 curl -X GET http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d3-a456-426614174000/versions \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 **Response:**
+
 ```json
 {
   "versions": [
@@ -401,12 +435,14 @@ curl -X GET http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d3
 ### 17. Get Active Version
 
 **Request:**
+
 ```bash
 curl -X GET http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d3-a456-426614174000/active-version \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 **Response:**
+
 ```json
 {
   "versionId": "v-2"
@@ -418,6 +454,7 @@ curl -X GET http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d3
 ### 18. Set Key Policy
 
 **Request:**
+
 ```bash
 curl -X PUT http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d3-a456-426614174000/policy \
   -H "Content-Type: application/json" \
@@ -440,6 +477,7 @@ curl -X PUT http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d3
 ```
 
 **Response:**
+
 ```json
 {
   "keyId": "key-123e4567-e89b-12d3-a456-426614174000",
@@ -452,12 +490,14 @@ curl -X PUT http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d3
 ### 19. Get Key Policy
 
 **Request:**
+
 ```bash
 curl -X GET http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d3-a456-426614174000/policy \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 **Response:**
+
 ```json
 {
   "Version": "2023-01-01",
@@ -479,12 +519,14 @@ curl -X GET http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d3
 ### 20. Get Audit Logs
 
 **Request:**
+
 ```bash
 curl -X GET "http://localhost:8080/api/v1/private/key/audit/logs?keyId=key-123e4567-e89b-12d3-a456-426614174000&limit=50&fromDate=2024-05-01T00:00:00&toDate=2024-05-06T23:59:59" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 **Response:**
+
 ```json
 {
   "logs": [
@@ -518,11 +560,13 @@ curl -X GET "http://localhost:8080/api/v1/private/key/audit/logs?keyId=key-123e4
 ## 🧪 Testing with Postman
 
 ### 1. Import Collection
+
 - Create new Collection "KMS API"
 - Create folder "Key Management"
 - Add requests for each endpoint above
 
 ### 2. Set Variables
+
 ```
 {{baseUrl}} = http://localhost:8080/api/v1/private/key
 {{token}} = YOUR_BEARER_TOKEN
@@ -530,6 +574,7 @@ curl -X GET "http://localhost:8080/api/v1/private/key/audit/logs?keyId=key-123e4
 ```
 
 ### 3. Use in Requests
+
 ```
 URL: {{baseUrl}}/keys/{{keyId}}
 Header: Authorization: Bearer {{token}}
@@ -540,6 +585,7 @@ Header: Authorization: Bearer {{token}}
 ## 🔧 Base64 Encoding Examples
 
 ### Encode String to Base64
+
 ```bash
 # Linux/Mac
 echo -n "Hello World" | base64
@@ -551,6 +597,7 @@ echo -n "Hello World" | base64
 ```
 
 ### Decode Base64 to String
+
 ```bash
 # Linux/Mac
 echo "SGVsbG8gV29ybGQ=" | base64 -d
@@ -566,6 +613,7 @@ echo "SGVsbG8gV29ybGQ=" | base64 -d
 ## 📊 API Testing Workflow
 
 ### Complete Encryption Workflow
+
 ```
 1. Create Key
    ↓
@@ -583,6 +631,7 @@ echo "SGVsbG8gV29ybGQ=" | base64 -d
 ```
 
 ### Complete Signing Workflow
+
 ```
 1. Create RSA Key (purpose: SIGN_VERIFY)
    ↓
@@ -594,6 +643,7 @@ echo "SGVsbG8gV29ybGQ=" | base64 -d
 ```
 
 ### Access Control Workflow
+
 ```
 1. Create Key
    ↓
@@ -630,24 +680,28 @@ echo "SGVsbG8gV29ybGQ=" | base64 -d
 ## 🐛 Troubleshooting
 
 ### Error: 404 Key Not Found
+
 ```
 Cause: KeyId doesn't exist
 Solution: Create the key first or use correct keyId
 ```
 
 ### Error: 400 Bad Request
+
 ```
 Cause: Invalid request format or missing required fields
 Solution: Check request body matches specification
 ```
 
 ### Error: 401 Unauthorized
+
 ```
 Cause: Missing or invalid authentication token
 Solution: Add Authorization header with valid token
 ```
 
 ### Error: 500 Internal Server Error
+
 ```
 Cause: Server error (usually in mock implementation or database)
 Solution: Check server logs and implementation

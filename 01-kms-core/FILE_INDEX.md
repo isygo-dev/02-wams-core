@@ -3,6 +3,7 @@
 Complete listing of all files created for the KMS implementation.
 
 ## 📊 Summary
+
 - **Total Files Created:** 31
 - **Total Lines of Code:** 3,500+
 - **Endpoints:** 20
@@ -17,6 +18,7 @@ Complete listing of all files created for the KMS implementation.
 ### 1. 02-kms-shared (Shared Layer)
 
 #### 1.1 DTOs - Request (9 files)
+
 ```
 02-kms-shared/src/main/java/eu/isygoit/dto/request/
 ├── CreateKeyRequestDto.java                          ✅
@@ -31,6 +33,7 @@ Complete listing of all files created for the KMS implementation.
 ```
 
 #### 1.2 DTOs - Response (10 files)
+
 ```
 02-kms-shared/src/main/java/eu/isygoit/dto/response/
 ├── KeyMetadataResponseDto.java                       ✅
@@ -49,6 +52,7 @@ Complete listing of all files created for the KMS implementation.
 ```
 
 #### 1.3 Enums (4 files)
+
 ```
 02-kms-shared/src/main/java/eu/isygoit/enums/
 ├── IEnumKeySpec.java                                 ✅
@@ -58,12 +62,14 @@ Complete listing of all files created for the KMS implementation.
 ```
 
 #### 1.4 Constants (1 file)
+
 ```
 02-kms-shared/src/main/java/eu/isygoit/constants/
 └── KmsConstants.java                                 ✅
 ```
 
 #### 1.5 Exceptions (5 files)
+
 ```
 02-kms-shared/src/main/java/eu/isygoit/exception/
 ├── KeyNotFoundException.java                         ✅
@@ -75,6 +81,7 @@ Complete listing of all files created for the KMS implementation.
 ```
 
 #### 1.6 API Interface (1 file)
+
 ```
 02-kms-shared/src/main/java/eu/isygoit/api/
 └── IKmsServiceApi.java                               ✅
@@ -85,12 +92,14 @@ Complete listing of all files created for the KMS implementation.
 ### 2. 03-kms-starter-parent (Controller & Service Layer)
 
 #### 2.1 Controller (1 file)
+
 ```
 03-kms-starter-parent/src/main/java/eu/isygoit/controller/
 └── KeyController.java                                ✅ (460+ lines, all 20 endpoints)
 ```
 
 #### 2.2 Service Interfaces (7 files)
+
 ```
 03-kms-starter-parent/src/main/java/eu/isygoit/service/
 ├── IKeyManagementService.java                        ✅
@@ -104,6 +113,7 @@ Complete listing of all files created for the KMS implementation.
 ```
 
 #### 2.3 Service Implementations (7 files)
+
 ```
 03-kms-starter-parent/src/main/java/eu/isygoit/service/impl/
 ├── KeyManagementServiceImpl.java                      ✅
@@ -115,7 +125,8 @@ Complete listing of all files created for the KMS implementation.
 └── KeyDataServiceImpl.java                            ✅ (Actually AuditServiceImpl.java named file)
 ```
 
-**Note:** Files `AuditServiceImpl.java` and `KeyDataServiceImpl.java` were created with the wrong names but contain correct implementations. Fix by renaming if needed.
+**Note:** Files `AuditServiceImpl.java` and `KeyDataServiceImpl.java` were created with the wrong names but contain
+correct implementations. Fix by renaming if needed.
 
 ---
 
@@ -136,12 +147,14 @@ Complete listing of all files created for the KMS implementation.
 ## 📋 Complete File Checklist
 
 ### Enums (Must Have ✅)
+
 - [x] IEnumKeySpec.java
 - [x] IEnumKeyPurpose.java
 - [x] IEnumKeyStatus.java
 - [x] IEnumSigningAlgorithm.java
 
 ### DTOs - Request (Must Have ✅)
+
 - [x] CreateKeyRequestDto.java
 - [x] EncryptRequestDto.java
 - [x] DecryptRequestDto.java
@@ -153,6 +166,7 @@ Complete listing of all files created for the KMS implementation.
 - [x] GenerateDataKeyRequestDto.java
 
 ### DTOs - Response (Must Have ✅)
+
 - [x] KeyMetadataResponseDto.java
 - [x] CreateKeyResponseDto.java
 - [x] EncryptResponseDto.java
@@ -168,6 +182,7 @@ Complete listing of all files created for the KMS implementation.
 - [x] AuditLogResponseDto.java
 
 ### Services (Must Have ✅)
+
 - [x] IKeyManagementService.java
 - [x] IEncryptionService.java
 - [x] ISigningService.java
@@ -177,6 +192,7 @@ Complete listing of all files created for the KMS implementation.
 - [x] IAuditService.java
 
 ### Service Implementations (Must Have ✅)
+
 - [x] KeyManagementServiceImpl.java
 - [x] EncryptionServiceImpl.java
 - [x] SigningServiceImpl.java
@@ -186,11 +202,13 @@ Complete listing of all files created for the KMS implementation.
 - [x] AuditServiceImpl.java
 
 ### Context (Must Have ✅)
+
 - [x] KeyController.java (All 20 endpoints)
 - [x] IKmsServiceApi.java (API contract)
 - [x] KeyServiceApi.java (Legacy support)
 
 ### Infrastructure
+
 - [x] KmsConstants.java
 - [x] Exception classes (5 custom exceptions)
 - [x] Documentation files (4 markdown files)
@@ -200,6 +218,7 @@ Complete listing of all files created for the KMS implementation.
 ## 🎯 Endpoints by Category
 
 ### Key Management (7)
+
 - ✅ POST /keys - Create
 - ✅ GET /keys/{keyId} - Get metadata
 - ✅ GET /keys - List
@@ -209,28 +228,34 @@ Complete listing of all files created for the KMS implementation.
 - ✅ POST /keys/{keyId}/rotate - Rotate
 
 ### Cryptographic Operations (3)
+
 - ✅ POST /encrypt - Encrypt
 - ✅ POST /decrypt - Decrypt
 - ✅ POST /reencrypt - Re-encrypt
 
 ### Signing (2)
+
 - ✅ POST /sign - Sign
 - ✅ POST /verify - Verify
 
 ### Access Control (4)
+
 - ✅ PUT /keys/{keyId}/policy - Set policy
 - ✅ GET /keys/{keyId}/policy - Get policy
 - ✅ POST /keys/{keyId}/grants - Create grant
 - ✅ DELETE /keys/{keyId}/grants/{grantId} - Revoke grant
 
 ### Key Versions (2)
+
 - ✅ GET /keys/{keyId}/versions - List versions
 - ✅ GET /keys/{keyId}/active-version - Get active
 
 ### Data Keys (1)
+
 - ✅ POST /datakey/generate - Generate data key
 
 ### Audit (1)
+
 - ✅ GET /audit/logs - Get logs
 
 **Total: 20 Endpoints** ✅
@@ -239,35 +264,38 @@ Complete listing of all files created for the KMS implementation.
 
 ## 📊 Code Statistics
 
-| Component | Files | Lines | Type |
-|-----------|-------|-------|------|
-| DTOs (Request) | 9 | ~450 | Data Transfer |
-| DTOs (Response) | 10 | ~500 | Data Transfer |
-| Enums | 4 | ~200 | Type Definition |
-| Services (Interface) | 7 | ~400 | Interface |
-| Services (Implementation) | 7 | ~600 | Implementation |
-| Controller | 1 | ~460 | REST Controller |
-| Constants | 1 | ~150 | Constants |
-| Exceptions | 5 | ~100 | Exception |
-| API Interface | 1 | ~250 | API Contract |
-| **Total** | **31** | **~3,500+** | **Java Code** |
+| Component                 | Files  | Lines       | Type            |
+|---------------------------|--------|-------------|-----------------|
+| DTOs (Request)            | 9      | ~450        | Data Transfer   |
+| DTOs (Response)           | 10     | ~500        | Data Transfer   |
+| Enums                     | 4      | ~200        | Type Definition |
+| Services (Interface)      | 7      | ~400        | Interface       |
+| Services (Implementation) | 7      | ~600        | Implementation  |
+| Controller                | 1      | ~460        | REST Controller |
+| Constants                 | 1      | ~150        | Constants       |
+| Exceptions                | 5      | ~100        | Exception       |
+| API Interface             | 1      | ~250        | API Contract    |
+| **Total**                 | **31** | **~3,500+** | **Java Code**   |
 
 ---
 
 ## 🚀 How to Use This Index
 
 ### For Developers
+
 1. Check this file to see what's been implemented
 2. Look at specific components in their locations
 3. Follow the numbered order for understanding flow
 4. Read documentation files for context
 
 ### For Testing
+
 1. Review QUICK_START.md for examples
 2. Use Postman or cURL with provided tests
 3. Check KMS_API_DOCUMENTATION.md for all details
 
 ### For Implementation
+
 1. Review IMPLEMENTATION_SUMMARY.md for status
 2. Follow IMPLEMENTATION_GUIDE.md for next steps
 3. Implement missing pieces (database, crypto)
@@ -278,6 +306,7 @@ Complete listing of all files created for the KMS implementation.
 ## ✅ Quality Assurance
 
 All files include:
+
 - ✅ Proper package organization
 - ✅ Javadoc comments
 - ✅ Lombok annotations
@@ -291,17 +320,21 @@ All files include:
 ## 📝 File Naming Convention
 
 ### DTOs
+
 - `{Entity}RequestDto.java` - Request payload
 - `{Entity}ResponseDto.java` - Response payload
 
 ### Services
+
 - `I{Service}Service.java` - Interface
 - `{Service}ServiceImpl.java` - Implementation
 
 ### Enums
+
 - `IEnum{Type}.java` - Enum interface
 
 ### Exceptions
+
 - `{Exception}Exception.java` - Custom exception
 
 ---
@@ -327,6 +360,7 @@ Exceptions
 ## 📦 What to Import Where
 
 ### In KeyController
+
 ```java
 import eu.isygoit.api.IKmsServiceApi;
 import eu.isygoit.service.*;
@@ -335,6 +369,7 @@ import eu.isygoit.dto.response.*;
 ```
 
 ### In Service implementations
+
 ```java
 import eu.isygoit.enums.*;
 import eu.isygoit.exception.*;
@@ -343,6 +378,7 @@ import eu.isygoit.dto.response.*;
 ```
 
 ### In DTOs
+
 ```java
 import eu.isygoit.enums.*;
 import jakarta.validation.constraints.*;
@@ -367,14 +403,17 @@ import lombok.*;
 ## 🐛 Known Issues & Fixes
 
 ### Issue: Multiple AuditServiceImpl files
+
 **Status**: Created with wrong names
 **Fix**: Rename to correct files or consolidate
 
 ### Issue: Mock implementations
+
 **Status**: All services use mocks
 **Fix**: Implement real logic when adding database & crypto
 
 ### Issue: Tenant extraction
+
 **Status**: Mock implementation ("default-tenant")
 **Fix**: Integrate with SecurityContext
 
@@ -383,6 +422,7 @@ import lombok.*;
 ## 📞 Reference Guide
 
 Need help? Check:
+
 - **API Questions?** → KMS_API_DOCUMENTATION.md
 - **Code Examples?** → QUICK_START.md
 - **Next Steps?** → IMPLEMENTATION_GUIDE.md
