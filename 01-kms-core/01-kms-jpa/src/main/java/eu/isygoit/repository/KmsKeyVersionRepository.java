@@ -44,5 +44,8 @@ public interface KmsKeyVersionRepository extends JpaRepository<KmsKeyVersion, Lo
      */
     long countByKeyId(Long keyId);
 
+    Page<KmsKeyVersion> findByTenantAndKeyIdAndRotationDateIsNotNull(String tenant, Long keyId, Pageable pageable);
+
+    void deleteByTenantAndKeyId(String tenant, Long keyId);
 }
 

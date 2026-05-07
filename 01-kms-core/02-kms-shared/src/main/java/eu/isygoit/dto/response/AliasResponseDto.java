@@ -1,4 +1,4 @@
-package eu.isygoit.dto.request;
+package eu.isygoit.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AliasResponseDto {
     private String aliasName;
-    private String targetKeyId;
+    private Long targetKeyId;
     private String targetKeyArn;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

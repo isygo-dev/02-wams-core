@@ -1,8 +1,10 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.request.CreateGrantRequestDto;
+import eu.isygoit.dto.request.RetireGrantRequestDto;
 import eu.isygoit.dto.request.SetKeyPolicyRequestDto;
 import eu.isygoit.dto.response.GrantResponseDto;
+import eu.isygoit.dto.response.ListGrantsResponseDto;
 import eu.isygoit.service.IKeyPolicyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -55,6 +57,16 @@ public class KeyPolicyServiceImpl implements IKeyPolicyService {
         log.info("Revoking grant: {} for tenant: {} keyId: {}", grantId, tenant, keyId);
 
         return "REVOKED" ;
+    }
+
+    @Override
+    public ListGrantsResponseDto listGrants(String tenant, Long keyId, Integer limit, String nextToken) {
+        return null;
+    }
+
+    @Override
+    public Object retireGrant(String tenant, String grantId, RetireGrantRequestDto request) {
+        return null;
     }
 }
 

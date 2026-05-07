@@ -7,12 +7,6 @@ import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.response.*;
-import eu.isygoit.dto.response.DataKeyPairResponseDto;
-import eu.isygoit.dto.response.GenerateMacResponseDto;
-import eu.isygoit.dto.response.ImportParametersResponseDto;
-import eu.isygoit.dto.response.KeyRotationStatusDto;
-import eu.isygoit.dto.response.ListGrantsResponseDto;
-import eu.isygoit.dto.response.ReEncryptResponseDto;
 import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.enums.IKmsActionType;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
@@ -250,12 +244,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     // ============================================================================
 
     @Override
-    public ResponseEntity<KeyRotationStatusDto> updateKeyRotation(@PathVariable Long keyId,
-                                                                  @Valid @RequestBody UpdateKeyRotationRequestDto request) {
+    public ResponseEntity<KeyRotationStatusResponseDto> updateKeyRotation(@PathVariable Long keyId,
+                                                                          @Valid @RequestBody UpdateKeyRotationRequestDto request) {
         log.info("Updating rotation for key: {}", keyId);
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
-            KeyRotationStatusDto response = keyManagementService.updateKeyRotation(tenant, keyId, request);
+            KeyRotationStatusResponseDto response = keyManagementService.updateKeyRotation(tenant, keyId, request);
             auditService.logAction(tenant, IKmsActionType.Types.UPDATE_KEY_ROTATION, String.valueOf(keyId),
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());
@@ -283,11 +277,11 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<KeyRotationStatusDto> getKeyRotationStatus(@PathVariable Long keyId) {
+    public ResponseEntity<KeyRotationStatusResponseDto> getKeyRotationStatus(@PathVariable Long keyId) {
         log.info("Getting rotation status for key: {}", keyId);
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
-            KeyRotationStatusDto response = keyManagementService.getKeyRotationStatus(tenant, keyId);
+            KeyRotationStatusResponseDto response = keyManagementService.getKeyRotationStatus(tenant, keyId);
             auditService.logAction(tenant, IKmsActionType.Types.GET_KEY_ROTATION_STATUS, String.valueOf(keyId),
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());
@@ -1039,11 +1033,11 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<KeyUsageStatsDto> getKeyUsageStats(@PathVariable Long keyId) {
+    public ResponseEntity<KeyUsageStatsResponseDto> getKeyUsageStats(@PathVariable Long keyId) {
         log.info("Getting usage stats for key: {}", keyId);
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
-            KeyUsageStatsDto response = keyManagementService.getKeyUsageStats(tenant, keyId);
+            KeyUsageStatsResponseDto response = keyManagementService.getKeyUsageStats(tenant, keyId);
             auditService.logAction(tenant, IKmsActionType.Types.GET_KEY_USAGE_STATS, String.valueOf(keyId),
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());
@@ -1060,7 +1054,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Generating random data of length: {} with charset: {}", length, charSetType);
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
-            String response = keyService.generateRandomData(tenant, length, charSetType);
+            String response = keyService.generateRandomKey(tenant, length, charSetType);
             auditService.logAction(tenant, IKmsActionType.Types.GENERATE_RANDOM_DATA, "-",
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());

@@ -1,4 +1,4 @@
-package eu.isygoit.dto.request;
+package eu.isygoit.dto.response;
 
 import eu.isygoit.enums.IEnumCustomKeyStoreStatus;
 import eu.isygoit.enums.IEnumCustomKeyStoreType;

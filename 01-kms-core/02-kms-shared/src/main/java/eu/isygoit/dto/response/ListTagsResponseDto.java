@@ -1,5 +1,6 @@
-package eu.isygoit.dto.request;
+package eu.isygoit.dto.response;
 
+import eu.isygoit.dto.data.TagDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +12,6 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ListAliasesResponseDto {
-    private List<AliasResponseDto> aliases;
-    private String nextToken;
+public class ListTagsResponseDto {
+    private List<TagDto> tags;
 }

@@ -2,12 +2,6 @@ package eu.isygoit.api;
 
 import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.response.*;
-import eu.isygoit.dto.response.DataKeyPairResponseDto;
-import eu.isygoit.dto.response.GenerateMacResponseDto;
-import eu.isygoit.dto.response.ImportParametersResponseDto;
-import eu.isygoit.dto.response.KeyRotationStatusDto;
-import eu.isygoit.dto.response.ListGrantsResponseDto;
-import eu.isygoit.dto.response.ReEncryptResponseDto;
 import eu.isygoit.enums.IEnumCharSet;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -389,7 +383,7 @@ public interface KmsServiceApi {
             @ApiResponse(responseCode = "400", description = "Automatic rotation not supported for asymmetric keys"),
             @ApiResponse(responseCode = "403", description = "Access denied")
     })
-    ResponseEntity<KeyRotationStatusDto> updateKeyRotation(
+    ResponseEntity<KeyRotationStatusResponseDto> updateKeyRotation(
             @PathVariable Long keyId,
             @RequestBody UpdateKeyRotationRequestDto request);
 
@@ -446,7 +440,7 @@ public interface KmsServiceApi {
             @ApiResponse(responseCode = "404", description = "Key not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    ResponseEntity<KeyRotationStatusDto> getKeyRotationStatus(@PathVariable Long keyId);
+    ResponseEntity<KeyRotationStatusResponseDto> getKeyRotationStatus(@PathVariable Long keyId);
 
     /**
      * Lists the complete history of all key rotations for the specified key.
@@ -1294,7 +1288,7 @@ public interface KmsServiceApi {
                     "optimizing performance, and capacity planning.",
             operationId = "getKeyUsageStats"
     )
-    ResponseEntity<KeyUsageStatsDto> getKeyUsageStats(@PathVariable Long keyId);
+    ResponseEntity<KeyUsageStatsResponseDto> getKeyUsageStats(@PathVariable Long keyId);
 
     /**
      * Generates cryptographically secure random data.

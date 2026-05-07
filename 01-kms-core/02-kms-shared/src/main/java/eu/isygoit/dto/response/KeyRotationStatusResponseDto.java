@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
         title = "Key Rotation Status",
         description = "Contains key rotation configuration and status information"
 )
-public class KeyRotationStatusDto {
+public class KeyRotationStatusResponseDto {
 
     /**
      * The ID of the key.

@@ -2,8 +2,6 @@ package eu.isygoit.service;
 
 import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.response.*;
-import eu.isygoit.dto.response.ImportParametersResponseDto;
-import eu.isygoit.dto.response.KeyRotationStatusDto;
 import jakarta.validation.Valid;
 
 /**
@@ -80,9 +78,9 @@ public interface IKeyManagementService {
 
     KeyMetadataResponseDto cancelKeyDeletion(String tenant, Long keyId);
 
-    KeyRotationStatusDto updateKeyRotation(String tenant, Long keyId, @Valid UpdateKeyRotationRequestDto request);
+    KeyRotationStatusResponseDto updateKeyRotation(String tenant, Long keyId, @Valid UpdateKeyRotationRequestDto request);
 
-    KeyRotationStatusDto getKeyRotationStatus(String tenant, Long keyId);
+    KeyRotationStatusResponseDto getKeyRotationStatus(String tenant, Long keyId);
 
     PublicKeyResponseDto getPublicKey(String tenant, Long keyId);
 
@@ -114,7 +112,7 @@ public interface IKeyManagementService {
 
     ListKeyRotationsResponseDto listKeyRotations(String tenant, Long keyId, Integer limit, String nextToken);
 
-    KeyUsageStatsDto getKeyUsageStats(String tenant, Long keyId);
+    KeyUsageStatsResponseDto getKeyUsageStats(String tenant, Long keyId);
 
     int countKeysInCustomKeyStore(String tenant, String keyStoreId);
 }

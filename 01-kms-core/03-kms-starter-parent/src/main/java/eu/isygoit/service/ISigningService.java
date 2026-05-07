@@ -1,8 +1,12 @@
 package eu.isygoit.service;
 
-import eu.isygoit.dto.request.*;
+import eu.isygoit.dto.request.GenerateMacRequestDto;
+import eu.isygoit.dto.request.SignRequestDto;
+import eu.isygoit.dto.request.VerifyMacRequestDto;
+import eu.isygoit.dto.request.VerifyRequestDto;
 import eu.isygoit.dto.response.GenerateMacResponseDto;
 import eu.isygoit.dto.response.SignResponseDto;
+import eu.isygoit.dto.response.VerifyMacResponseDto;
 import eu.isygoit.dto.response.VerifyResponseDto;
 import jakarta.validation.Valid;
 

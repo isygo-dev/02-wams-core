@@ -1,6 +1,8 @@
 package eu.isygoit.service.impl;
 
+import eu.isygoit.dto.request.GenerateDataKeyPairRequestDto;
 import eu.isygoit.dto.request.GenerateDataKeyRequestDto;
+import eu.isygoit.dto.response.DataKeyPairResponseDto;
 import eu.isygoit.dto.response.DataKeyResponseDto;
 import eu.isygoit.service.IDataKeyService;
 import lombok.extern.slf4j.Slf4j;
@@ -37,5 +39,20 @@ public class DataKeyServiceImpl implements IDataKeyService {
                 .encryptedKey(encryptedKey)
                 .keyId(request.getKeyId())
                 .build();
+    }
+
+    @Override
+    public DataKeyResponseDto generateDataKeyWithoutPlaintext(String tenant, GenerateDataKeyRequestDto request) {
+        return null;
+    }
+
+    @Override
+    public DataKeyPairResponseDto generateDataKeyPair(String tenant, GenerateDataKeyPairRequestDto request) {
+        return null;
+    }
+
+    @Override
+    public DataKeyPairResponseDto generateDataKeyPairWithoutPlaintext(String tenant, GenerateDataKeyPairRequestDto request) {
+        return null;
     }
 }

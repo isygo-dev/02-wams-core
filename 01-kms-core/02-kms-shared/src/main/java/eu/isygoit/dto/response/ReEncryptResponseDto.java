@@ -45,7 +45,7 @@ public class ReEncryptResponseDto {
             example = "550e8400-e29b-41d4-a716-446655440000",
             required = true
     )
-    private String destinationKeyId;
+    private Long destinationKeyId;
 
     /**
      * The ARN of the destination key.

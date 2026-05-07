@@ -7,6 +7,7 @@ import eu.isygoit.model.PEBConfig;
 import eu.isygoit.repository.DigesterConfigRepository;
 import eu.isygoit.repository.PEBConfigRepository;
 import eu.isygoit.service.ICryptoService;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.jasypt.digest.PooledStringDigester;
 import org.jasypt.digest.StringDigester;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 
@@ -162,6 +164,46 @@ public class CryptoService implements ICryptoService {
     @Override
     public Map<String, byte[]> generateDataKey(byte[] keyMaterial, Integer keySize) {
         return Map.of();
+    }
+
+    @Override
+    public byte[] extractPublicKey(byte[] keyMaterial, IEnumKeySpec.Types keySpec) {
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] generateWrappingKey() {
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] generateImportToken() {
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] decryptKeyMaterial(@NotNull(message = "Encrypted key material is required") byte[] encryptedKeyMaterial, @NotNull(message = "Import token is required") byte[] importToken) {
+        return new byte[0];
+    }
+
+    @Override
+    public long getEncryptCount(Long keyId) {
+        return 0;
+    }
+
+    @Override
+    public long getDecryptCount(Long keyId) {
+        return 0;
+    }
+
+    @Override
+    public LocalDateTime getLastUsedDate(Long keyId) {
+        return null;
+    }
+
+    @Override
+    public boolean validateKeyIntegrity(byte[] keyMaterial, IEnumKeySpec.Types keySpec) {
+        return false;
     }
 
     private StringEncryptor stringEncryptorDefault() {

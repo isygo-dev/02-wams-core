@@ -285,7 +285,7 @@ public class GenerateMacResponseDto {
         if (macAlgorithm == null || macAlgorithm.isEmpty()) {
             throw new IllegalStateException("MAC algorithm is missing");
         }
-        if (keyId == null || keyId.isEmpty()) {
+        if (keyId == null) {
             throw new IllegalStateException("Key ID is missing");
         }
         if (macLength == null || macLength <= 0) {

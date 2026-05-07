@@ -20,7 +20,7 @@ public interface IAuditService {
      * @param limit    the limit
      * @return the audit log response dto
      */
-    AuditLogResponseDto getAuditLogs(String tenant, String  keyId, LocalDateTime fromDate, LocalDateTime toDate, Integer limit);
+    AuditLogResponseDto getAuditLogs(String tenant, String keyId, LocalDateTime fromDate, LocalDateTime toDate, Integer limit);
 
     /**
      * Log action.

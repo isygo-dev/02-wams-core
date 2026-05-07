@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateAliasRequestDto {
     @NotBlank
-    private String targetKeyId;
+    private Long targetKeyId;
 }

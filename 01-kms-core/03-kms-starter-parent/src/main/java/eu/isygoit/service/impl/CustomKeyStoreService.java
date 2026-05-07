@@ -1,9 +1,9 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.request.CreateCustomKeyStoreRequestDto;
-import eu.isygoit.dto.request.CustomKeyStoreResponseDto;
-import eu.isygoit.dto.request.ListCustomKeyStoresResponseDto;
 import eu.isygoit.dto.request.UpdateCustomKeyStoreRequestDto;
+import eu.isygoit.dto.response.CustomKeyStoreResponseDto;
+import eu.isygoit.dto.response.ListCustomKeyStoresResponseDto;
 import eu.isygoit.enums.IEnumCustomKeyStoreStatus;
 import eu.isygoit.enums.IEnumCustomKeyStoreType;
 import eu.isygoit.exception.*;
@@ -141,13 +141,13 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         }
 
         // Update name if provided
-        if (request.getNewKeyStoreName() != null && !request.getNewKeyStoreName().isEmpty()) {
-            if (customKeyStoreRepository.existsByTenantAndName(tenant, request.getNewKeyStoreName())) {
+        if (request.getNewCustomKeyStoreName() != null && !request.getNewCustomKeyStoreName().isEmpty()) {
+            if (customKeyStoreRepository.existsByTenantAndName(tenant, request.getNewCustomKeyStoreName())) {
                 throw new DuplicateCustomKeyStoreNameException(
-                        String.format("Custom key store name '%s' already exists", request.getNewKeyStoreName())
+                        String.format("Custom key store name '%s' already exists", request.getNewCustomKeyStoreName())
                 );
             }
-            customKeyStore.setName(request.getNewKeyStoreName());
+            customKeyStore.setName(request.getNewCustomKeyStoreName());
         }
 
         // Update type-specific configuration
@@ -484,7 +484,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
     // ============================================================================
 
     private CustomKeyStore findCustomKeyStore(String tenant, String keyStoreId) {
-        return customKeyStoreRepository.findByTenantAndCustomKeyStoreId(tenant, keyStoreId)
+        return (CustomKeyStore) customKeyStoreRepository.findByTenantAndCustomKeyStoreId(tenant, keyStoreId)
                 .orElseThrow(() -> new CustomKeyStoreNotFoundException(
                         String.format("Custom key store not found: %s", keyStoreId)
                 ));

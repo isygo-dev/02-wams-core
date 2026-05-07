@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * The type Key service.
@@ -33,13 +34,47 @@ public class KeyService implements IKeyService {
     private RandomKeyRepository randomKeyRepository;
 
     @Override
-    public String getRandomKey(int length, IEnumCharSet.Types charSetType) {
+    public String generateRandomKey(int length, IEnumCharSet.Types charSetType) {
         return randomKeyGenerator.nextGuid(length, charSetType);
     }
 
     @Override
-    public String getRandomKey(int length, IEnumCharSet.Types charSetType, String pattern) {
+    public String generateRandomKey(int length, IEnumCharSet.Types charSetType, String pattern) {
         return randomKeyGenerator.nextGuid(length, charSetType);
+    }
+
+    @Override
+    public String generateRandomKey(String tenant, Integer length, IEnumCharSet.Types charSetType) {
+        return this.createOrUpdateKeyByName(tenant, UUID.randomUUID().toString(), randomKeyGenerator.nextGuid(length, charSetType));
+    }
+
+    @Override
+    public String createRandomKey(String tenant, String keyName, Integer length, IEnumCharSet.Types charSetType) {
+        return this.createOrUpdateKeyByName(tenant, keyName, randomKeyGenerator.nextGuid(length, charSetType));
+    }
+
+    @Override
+    public String createOrUpdateKeyByName(String senderTenant, String name, String value) {
+        Optional<RandomKey> optional = randomKeyRepository.findByTenantIgnoreCaseAndName(senderTenant, name);
+        if (optional.isPresent()) {
+            optional.get().setValue(value);
+            return randomKeyRepository.save(optional.get()).getValue();
+        } else {
+            return randomKeyRepository.save(RandomKey.builder()
+                    .tenant(senderTenant)
+                    .name(name)
+                    .value(value)
+                    .build()).getValue();
+        }
+    }
+
+    @Override
+    public String getKeyByName(String senderTenant, String name) {
+        Optional<RandomKey> optional = randomKeyRepository.findByTenantIgnoreCaseAndName(senderTenant, name);
+        if (optional.isPresent()) {
+            return optional.get().getValue();
+        }
+        return null;
     }
 
     @Override
@@ -54,9 +89,9 @@ public class KeyService implements IKeyService {
     }
 
     @Override
-    public String getIncrementalKey(String tenant /*senderTenant*/, String entityName, String attribute) throws IncrementalConfigNotFoundException {
+    public String getIncrementalKey(String senderTenant, String entityName, String attribute) throws IncrementalConfigNotFoundException {
         AppNextCode appNextCode = null;
-        Optional<AppNextCode> optional = appNextCodeRepository.findByTenantIgnoreCaseAndEntityAndAttribute(tenant, entityName, attribute);
+        Optional<AppNextCode> optional = appNextCodeRepository.findByTenantIgnoreCaseAndEntityAndAttribute(senderTenant, entityName, attribute);
         if (optional.isPresent()) {
             appNextCode = optional.get();
         } else {
@@ -64,38 +99,14 @@ public class KeyService implements IKeyService {
             if (defaultOptional.isPresent()) {
                 appNextCode = defaultOptional.get();
                 appNextCode.setId(null);
-                appNextCode.setTenant(tenant);
+                appNextCode.setTenant(senderTenant);
                 appNextCode.setCodeValue(0L);
                 appNextCode = appNextCodeRepository.save(appNextCode);
             } else {
-                throw new IncrementalConfigNotFoundException("with tenant/entity/attribute " + tenant + "/" + entityName + "/" + attribute);
+                throw new IncrementalConfigNotFoundException("with tenant/entity/attribute " + senderTenant + "/" + entityName + "/" + attribute);
             }
         }
-        appNextCodeRepository.increment(tenant, entityName, appNextCode.getIncrement());
+        appNextCodeRepository.increment(senderTenant, entityName, appNextCode.getIncrement());
         return appNextCode.getCode();
-    }
-
-    @Override
-    public RandomKey createOrUpdateKeyByName(String tenant /*senderTenant*/, String name, String value) {
-        Optional<RandomKey> optional = randomKeyRepository.findByTenantIgnoreCaseAndName(tenant, name);
-        if (optional.isPresent()) {
-            optional.get().setValue(value);
-            return randomKeyRepository.save(optional.get());
-        } else {
-            return randomKeyRepository.save(RandomKey.builder()
-                    .tenant(tenant)
-                    .name(name)
-                    .value(value)
-                    .build());
-        }
-    }
-
-    @Override
-    public RandomKey getKeyByName(String tenant /*senderTenant*/, String name) {
-        Optional<RandomKey> optional = randomKeyRepository.findByTenantIgnoreCaseAndName(tenant, name);
-        if (optional.isPresent()) {
-            return optional.get();
-        }
-        return null;
     }
 }

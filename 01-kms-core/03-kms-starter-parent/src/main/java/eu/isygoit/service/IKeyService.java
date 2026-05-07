@@ -1,11 +1,8 @@
 package eu.isygoit.service;
 
-import eu.isygoit.dto.request.CreateRandomKeyRequestDto;
 import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.exception.IncrementalConfigNotFoundException;
 import eu.isygoit.model.AppNextCode;
-import eu.isygoit.model.RandomKey;
-import jakarta.validation.Valid;
 
 /**
  * The interface Key service.
@@ -19,7 +16,7 @@ public interface IKeyService {
      * @param charSetType the char set type
      * @return the random key
      */
-    String getRandomKey(int length, IEnumCharSet.Types charSetType);
+    String generateRandomKey(int length, IEnumCharSet.Types charSetType);
 
     /**
      * Gets random key.
@@ -29,7 +26,30 @@ public interface IKeyService {
      * @param pattern     the pattern
      * @return the random key
      */
-    String getRandomKey(int length, IEnumCharSet.Types charSetType, String pattern);
+    String generateRandomKey(int length, IEnumCharSet.Types charSetType, String pattern);
+
+    String generateRandomKey(String tenant, Integer length, IEnumCharSet.Types charSetType);
+
+    String createRandomKey(String tenant, String keyName, Integer length, IEnumCharSet.Types charSetType);
+
+    /**
+     * Create or update key by name random key.
+     *
+     * @param tenant the tenant
+     * @param name   the name
+     * @param value  the value
+     * @return the random key
+     */
+    String createOrUpdateKeyByName(String tenant /*senderTenant*/, String name, String value);
+
+    /**
+     * Gets key by name.
+     *
+     * @param tenant the tenant
+     * @param name   the name
+     * @return the key by name
+     */
+    String getKeyByName(String tenant /*senderTenant*/, String name);
 
     /**
      * Subscribe incremental key generator.
@@ -48,27 +68,4 @@ public interface IKeyService {
      * @throws IncrementalConfigNotFoundException the incremental config not found exception
      */
     String getIncrementalKey(String tenant /*senderTenant*/, String entityName, String attribute) throws IncrementalConfigNotFoundException;
-
-    /**
-     * Create or update key by name random key.
-     *
-     * @param tenant the tenant
-     * @param name   the name
-     * @param value  the value
-     * @return the random key
-     */
-    RandomKey createOrUpdateKeyByName(String tenant /*senderTenant*/, String name, String value);
-
-    /**
-     * Gets key by name.
-     *
-     * @param tenant the tenant
-     * @param name   the name
-     * @return the key by name
-     */
-    RandomKey getKeyByName(String tenant /*senderTenant*/, String name);
-
-    String generateRandomData(String tenant, Integer length, IEnumCharSet.Types charSetType);
-
-    String createRandomKey(String tenant, @Valid CreateRandomKeyRequestDto request);
 }

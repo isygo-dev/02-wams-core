@@ -1,4 +1,4 @@
-package eu.isygoit.dto.request;
+package eu.isygoit.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,18 +7,11 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/**
- * Response DTO for listing key rotation history
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ListKeyRotationsResponseDto {
-
-    private List<KeyRotationEntryDto> rotations;
-
+public class ListAliasesResponseDto {
+    private List<AliasResponseDto> aliases;
     private String nextToken;
-
-    private Integer totalCount;
 }

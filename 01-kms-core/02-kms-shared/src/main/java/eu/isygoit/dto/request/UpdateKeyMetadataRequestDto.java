@@ -34,6 +34,8 @@ public class UpdateKeyMetadataRequestDto {
     )
     private String description;
 
+    private String alias;
+
     /**
      * Display name for the key.
      * User-friendly name for identifying the key in UI and logs.

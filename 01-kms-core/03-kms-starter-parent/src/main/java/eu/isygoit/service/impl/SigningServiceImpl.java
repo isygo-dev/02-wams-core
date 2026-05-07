@@ -1,8 +1,12 @@
 package eu.isygoit.service.impl;
 
+import eu.isygoit.dto.request.GenerateMacRequestDto;
 import eu.isygoit.dto.request.SignRequestDto;
+import eu.isygoit.dto.request.VerifyMacRequestDto;
 import eu.isygoit.dto.request.VerifyRequestDto;
+import eu.isygoit.dto.response.GenerateMacResponseDto;
 import eu.isygoit.dto.response.SignResponseDto;
+import eu.isygoit.dto.response.VerifyMacResponseDto;
 import eu.isygoit.dto.response.VerifyResponseDto;
 import eu.isygoit.service.ISigningService;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +50,16 @@ public class SigningServiceImpl implements ISigningService {
         return VerifyResponseDto.builder()
                 .valid(valid)
                 .build();
+    }
+
+    @Override
+    public GenerateMacResponseDto generateMac(String tenant, GenerateMacRequestDto request) {
+        return null;
+    }
+
+    @Override
+    public VerifyMacResponseDto verifyMac(String tenant, VerifyMacRequestDto request) {
+        return null;
     }
 }
 

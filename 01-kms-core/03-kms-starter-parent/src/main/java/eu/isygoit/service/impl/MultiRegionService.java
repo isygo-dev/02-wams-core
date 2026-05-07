@@ -1,9 +1,9 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.request.ReplicateKeyRequestDto;
-import eu.isygoit.dto.request.ReplicateKeyResponseDto;
 import eu.isygoit.dto.request.UpdatePrimaryRegionRequestDto;
 import eu.isygoit.dto.response.KeyMetadataResponseDto;
+import eu.isygoit.dto.response.ReplicateKeyResponseDto;
 import eu.isygoit.service.IMultiRegionService;
 import org.springframework.stereotype.Service;
 

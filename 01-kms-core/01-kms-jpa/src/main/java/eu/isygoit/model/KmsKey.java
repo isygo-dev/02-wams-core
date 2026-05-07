@@ -32,7 +32,10 @@ import java.time.LocalDateTime;
         },
         indexes = {
                 @Index(name = "IDX_KMS_KEY_TENANT_STATUS", columnList = "TENANT,STATUS"),
-                @Index(name = "IDX_KMS_KEY_ALIAS", columnList = "TENANT,ALIAS")
+                @Index(name = "IDX_KMS_KEY_ALIAS", columnList = "TENANT,ALIAS"),
+                @Index(name = "IDX_KMS_KEY_IMPORTED", columnList = "IMPORTED"),
+                @Index(name = "IDX_KMS_KEY_EXPIRATION", columnList = "EXPIRATION_DATE"),
+                @Index(name = "IDX_KMS_KEY_KEY_STORE", columnList = "TENANT,KEY_STORE_ID")
         })
 public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
 
@@ -46,11 +49,14 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     @Column(name = "TENANT", length = 100, updatable = false, nullable = false)
     private String tenant;
 
-    @Column(name = "KEY_ID", length = 255, updatable = false, nullable = false)
+    @Column(name = "KEY_ID", updatable = false, nullable = false)
     private Long keyId; // UUID format
 
     @Column(name = "KEY_ARN", length = 255, nullable = false)
     private String keyArn; // Amazon Resource Name
+
+    @Column(name = "KEY_STORE_ID", length = 255)
+    private String keyStoreId; // Custom key store ID
 
     @Enumerated(EnumType.STRING)
     @Column(name = "KEY_SPEC", length = 50, nullable = false)
@@ -97,11 +103,54 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     @ColumnDefault("true")
     private Boolean keyMaterialEncrypted = true;
 
+    @Column(name = "IMPORTED", nullable = false)
+    @ColumnDefault("false")
+    private Boolean imported = false; // Whether key material was imported
+
+    @Column(name = "IMPORT_DATE")
+    private LocalDateTime importDate; // Date when key material was imported
+
+    @Column(name = "EXPIRATION_DATE")
+    private LocalDateTime expirationDate; // Expiration date for imported key material
+
     @Column(name = "CREATION_DATE", nullable = false, updatable = false)
     private LocalDateTime creationDate;
+
+    @Column(name = "ORIGIN", length = 50)
+    @ColumnDefault("'AWS_KMS'")
+    private String origin; // AWS_KMS, EXTERNAL, CLOUDHSM
 
     @Column(name = "TAGS")
     private String tags; // JSON format for metadata tags
 
-}
+    @Column(name = "ENABLED", nullable = false)
+    @ColumnDefault("false")
+    private Boolean enabled = false; // Whether the key is enabled for use
 
+    @Column(name = "MULTI_REGION", nullable = false)
+    @ColumnDefault("false")
+    private Boolean multiRegion = false; // Whether this is a multi-region key
+
+    @Column(name = "PRIMARY_REGION", length = 100)
+    private String primaryRegion; // Primary region for multi-region key
+
+    @Column(name = "REPLICA_REGIONS", length = 500)
+    private String replicaRegions; // Comma-separated list of replica regions (JSON format)
+
+    // Helper methods
+    public boolean isExpired() {
+        return expirationDate != null && expirationDate.isBefore(LocalDateTime.now());
+    }
+
+    public boolean isPendingDeletion() {
+        return IEnumKeyStatus.Types.PENDING_DELETION.equals(status);
+    }
+
+    public boolean isEnabled() {
+        return IEnumKeyStatus.Types.ENABLED.equals(status);
+    }
+
+    public boolean isDisabled() {
+        return IEnumKeyStatus.Types.DISABLED.equals(status);
+    }
+}

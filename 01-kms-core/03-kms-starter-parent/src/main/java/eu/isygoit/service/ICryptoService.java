@@ -1,10 +1,12 @@
 package eu.isygoit.service;
 
 import eu.isygoit.enums.IEnumKeySpec;
+import jakarta.validation.constraints.NotNull;
 import org.jasypt.digest.StringDigester;
 import org.jasypt.encryption.StringEncryptor;
 import org.jasypt.util.password.PasswordEncryptor;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 /**
@@ -96,4 +98,19 @@ public interface ICryptoService {
      */
     Map<String, byte[]> generateDataKey(byte[] keyMaterial, Integer keySize);
 
+    byte[] extractPublicKey(byte[] keyMaterial, IEnumKeySpec.Types keySpec);
+
+    byte[] generateWrappingKey();
+
+    byte[] generateImportToken();
+
+    byte[] decryptKeyMaterial(@NotNull(message = "Encrypted key material is required") byte[] encryptedKeyMaterial, @NotNull(message = "Import token is required") byte[] importToken);
+
+    long getEncryptCount(Long keyId);
+
+    long getDecryptCount(Long keyId);
+
+    LocalDateTime getLastUsedDate(Long keyId);
+
+    boolean validateKeyIntegrity(byte[] keyMaterial, IEnumKeySpec.Types keySpec);
 }

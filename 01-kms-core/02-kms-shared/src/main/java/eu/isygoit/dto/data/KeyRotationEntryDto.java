@@ -1,4 +1,4 @@
-package eu.isygoit.dto.request;
+package eu.isygoit.dto.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-class KeyRotationEntryDto {
+public class KeyRotationEntryDto {
 
     private Long keyId;
 

@@ -197,17 +197,17 @@ private String getTenant() {
     // return SecurityContextHolder.getContext()
     //     .getAuthentication()
     //     .getPrincipal().getTenant();
-    return "default-tenant";  // Current mock implementation
+    return "default-tenant" ;  // Current mock implementation
 }
 
 private String getPrincipal() {
     // TODO: Extract from SecurityContext
-    return "system";
+    return "system" ;
 }
 
 private String getClientIp() {
     // TODO: Extract from HttpServletRequest
-    return "127.0.0.1";
+    return "127.0.0.1" ;
 }
 ```
 

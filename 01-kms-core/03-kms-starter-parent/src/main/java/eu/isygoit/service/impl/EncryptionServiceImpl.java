@@ -48,7 +48,7 @@ public class EncryptionServiceImpl implements IEncryptionService {
 
         return DecryptResponseDto.builder()
                 .plaintext(plaintext)
-                .keyId("key-id")
+                //.keyId("key-id")
                 .keyVersion("v-1")
                 .build();
     }

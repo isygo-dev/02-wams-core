@@ -103,41 +103,41 @@ Indexes: KEY_ID, TENANT_ACTION, TIMESTAMP, PRINCIPAL
 
 ```java
 KmsKeyRepository {
-  - findByTenantAndKeyId()
-  - findByTenantAndKeyAlias()
-  - findByTenantAndKeyArn()
-  - findByTenant(pageable)
-  - findByTenantAndStatus(pageable)
-  - findActiveKeysByTenant()
+    -findByTenantAndKeyId()
+            - findByTenantAndKeyAlias()
+            - findByTenantAndKeyArn()
+            - findByTenant(pageable)
+            - findByTenantAndStatus(pageable)
+            - findActiveKeysByTenant()
 }
 
 KmsKeyVersionRepository {
-  - findByTenantAndKeyIdAndVersionId()
-  - findVersionsByKeyId() [List all versions]
-  - findActiveVersionByKeyId() [Get current active]
-  - findByTenantAndKeyId(pageable)
-  - countByKeyId()
+    -findByTenantAndKeyIdAndVersionId()
+            - findVersionsByKeyId()[List all versions]
+    -findActiveVersionByKeyId()[Get current active]
+    -findByTenantAndKeyId(pageable)
+            - countByKeyId()
 }
 
 KmsKeyGrantRepository {
-  - findByTenantAndGrantId()
-  - findByKeyIdAndStatus()
-  - findGrantsByKeyId()
-  - findGrantsByPrincipal()
-  - findGrantByKeyIdAndPrincipal()
-  - countByKeyIdAndStatus()
+    -findByTenantAndGrantId()
+            - findByKeyIdAndStatus()
+            - findGrantsByKeyId()
+            - findGrantsByPrincipal()
+            - findGrantByKeyIdAndPrincipal()
+            - countByKeyIdAndStatus()
 }
 
 KmsKeyPolicyRepository {
-  - findByTenantAndKeyId()
-  - findByKeyId()
+    -findByTenantAndKeyId()
+            - findByKeyId()
 }
 
 KmsAuditLogRepository {
-  - findByTenantAndKeyId(pageable)
-  - findByTenantAndAction(pageable)
-  - findByDateRange(pageable)
-  - findByMultipleCriteria() [Complex filtered query]
+    -findByTenantAndKeyId(pageable)
+            - findByTenantAndAction(pageable)
+            - findByDateRange(pageable)
+            - findByMultipleCriteria()[Complex filtered query]
 }
 ```
 
@@ -180,11 +180,11 @@ public interface ICryptoService {
 
 ```java
 createKey() {
-  Long keyId = "key-" + UUID.randomUUID();
-  return CreateKeyResponseDto.builder()
-    .keyId(keyId)
-    .status("ENABLED")
-    .build();  // No database persistence
+    Long keyId = "key-" + UUID.randomUUID();
+    return CreateKeyResponseDto.builder()
+            .keyId(keyId)
+            .status("ENABLED")
+            .build();  // No database persistence
 }
 ```
 
@@ -192,11 +192,11 @@ createKey() {
 
 ```java
 createKey() {
-  1. Generate key material via cryptoService.generateKeyMaterial()
-  2. Create KmsKey entity with encrypted material
-  3. Save to database via kmsKeyRepository.save()
-  4. Create initial KmsKeyVersion
-  5. Return complete response with ARN and timestamps
+    1. Generate key material via cryptoService.generateKeyMaterial()
+    2. Create KmsKey entity with encrypted material
+    3. Save to database via kmsKeyRepository.save()
+    4. Create initial KmsKeyVersion
+    5. Return complete response with ARN and timestamps
 }
 ```
 
@@ -329,29 +329,29 @@ All 27 REST endpoints in KeyController already properly defined:
 ```xml
 <!-- Cryptography -->
 <dependency>
-  <groupId>org.bouncycastle</groupId>
-  <artifactId>bcprov-jdk15on</artifactId>
-  <version>1.70</version>
+    <groupId>org.bouncycastle</groupId>
+    <artifactId>bcprov-jdk15on</artifactId>
+    <version>1.70</version>
 </dependency>
 <dependency>
-  <groupId>org.bouncycastle</groupId>
-  <artifactId>bcpkix-jdk15on</artifactId>
-  <version>1.70</version>
-</dependency>
-
-<!-- Database Migration -->
-<dependency>
-  <groupId>org.flywaydb</groupId>
-  <artifactId>flyway-core</artifactId>
-  <version>9.15.0</version>
+<groupId>org.bouncycastle</groupId>
+<artifactId>bcpkix-jdk15on</artifactId>
+<version>1.70</version>
 </dependency>
 
-<!-- Testing -->
+        <!-- Database Migration -->
 <dependency>
-  <groupId>org.testcontainers</groupId>
-  <artifactId>testcontainers</artifactId>
-  <version>1.17.0</version>
-  <scope>test</scope>
+<groupId>org.flywaydb</groupId>
+<artifactId>flyway-core</artifactId>
+<version>9.15.0</version>
+</dependency>
+
+        <!-- Testing -->
+<dependency>
+<groupId>org.testcontainers</groupId>
+<artifactId>testcontainers</artifactId>
+<version>1.17.0</version>
+<scope>test</scope>
 </dependency>
 ```
 

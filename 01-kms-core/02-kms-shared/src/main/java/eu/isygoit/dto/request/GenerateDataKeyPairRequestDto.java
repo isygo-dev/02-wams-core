@@ -161,7 +161,7 @@ public class GenerateDataKeyPairRequestDto {
      * @throws IllegalArgumentException if validation fails
      */
     public void validate() {
-        if (keyId == null || keyId.trim().isEmpty()) {
+        if (keyId == null) {
             throw new IllegalArgumentException("keyId is required");
         }
 

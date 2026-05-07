@@ -1,9 +1,9 @@
 package eu.isygoit.service;
 
 import eu.isygoit.dto.request.ReplicateKeyRequestDto;
-import eu.isygoit.dto.request.ReplicateKeyResponseDto;
 import eu.isygoit.dto.request.UpdatePrimaryRegionRequestDto;
 import eu.isygoit.dto.response.KeyMetadataResponseDto;
+import eu.isygoit.dto.response.ReplicateKeyResponseDto;
 import jakarta.validation.Valid;
 
 public interface IMultiRegionService {

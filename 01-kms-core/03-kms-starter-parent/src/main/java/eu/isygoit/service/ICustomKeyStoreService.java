@@ -1,9 +1,9 @@
 package eu.isygoit.service;
 
 import eu.isygoit.dto.request.CreateCustomKeyStoreRequestDto;
-import eu.isygoit.dto.request.CustomKeyStoreResponseDto;
-import eu.isygoit.dto.request.ListCustomKeyStoresResponseDto;
 import eu.isygoit.dto.request.UpdateCustomKeyStoreRequestDto;
+import eu.isygoit.dto.response.CustomKeyStoreResponseDto;
+import eu.isygoit.dto.response.ListCustomKeyStoresResponseDto;
 import jakarta.validation.Valid;
 
 public interface ICustomKeyStoreService {

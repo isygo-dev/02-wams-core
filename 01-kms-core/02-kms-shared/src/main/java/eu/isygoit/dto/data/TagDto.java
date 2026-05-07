@@ -1,4 +1,4 @@
-package eu.isygoit.dto.request;
+package eu.isygoit.dto.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
