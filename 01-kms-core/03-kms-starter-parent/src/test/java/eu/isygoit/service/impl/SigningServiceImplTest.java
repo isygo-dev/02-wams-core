@@ -32,18 +32,15 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class SigningServiceImplTest {
 
+    private final String tenant = "test-tenant" ;
+    private final Long keyId = 1L;
     @Mock
     private KmsKeyRepository kmsKeyRepository;
-
     @Mock
     private ICryptoService cryptoService;
-
     @InjectMocks
     private SigningServiceImpl signingService;
-
     private KmsKey testKey;
-    private final String tenant = "test-tenant";
-    private final Long keyId = 1L;
 
     @BeforeEach
     void setUp() {
@@ -119,9 +116,9 @@ public class SigningServiceImplTest {
     @Test
     void testVerifyMac_Success() {
         String message = Base64.getEncoder().encodeToString("hello".getBytes());
-        String algo = "HmacSHA256";
+        String algo = "HmacSHA256" ;
         testKey.setKeyMaterial(new byte[32]);
-        
+
         when(kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)).thenReturn(Optional.of(testKey));
 
         // First generate a MAC to verify it

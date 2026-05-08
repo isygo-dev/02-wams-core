@@ -351,7 +351,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Re-encrypting to destination key: {}", request.getDestinationKeyId());
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
-            ReEncryptResponseDto response = encryptionService.reencrypt(tenant, request);
+            ReEncryptResponseDto response = encryptionService.reEncrypt(tenant, request);
             auditService.logAction(tenant, IKmsActionType.Types.REENCRYPT, String.valueOf(request.getDestinationKeyId()),
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());

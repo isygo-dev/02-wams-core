@@ -74,7 +74,7 @@ public class DataKeyServiceImpl implements IDataKeyService {
 
         // AWS KMS logic for generating asymmetric data key pair
         try {
-            String keyAlgo = request.getKeySpec().startsWith("RSA") ? "RSA" : "EC";
+            String keyAlgo = request.getKeySpec().startsWith("RSA") ? "RSA" : "EC" ;
             java.security.KeyPairGenerator keyGen = java.security.KeyPairGenerator.getInstance(keyAlgo);
 
             if (keyAlgo.equals("RSA")) {
@@ -84,9 +84,9 @@ public class DataKeyServiceImpl implements IDataKeyService {
                 keyGen.initialize(size);
             } else {
                 // EC
-                String curve = "secp256r1"; // default for P256
-                if (request.getKeySpec().contains("P384")) curve = "secp384r1";
-                else if (request.getKeySpec().contains("P521")) curve = "secp521r1";
+                String curve = "secp256r1" ; // default for P256
+                if (request.getKeySpec().contains("P384")) curve = "secp384r1" ;
+                else if (request.getKeySpec().contains("P521")) curve = "secp521r1" ;
                 keyGen.initialize(new java.security.spec.ECGenParameterSpec(curve));
             }
 

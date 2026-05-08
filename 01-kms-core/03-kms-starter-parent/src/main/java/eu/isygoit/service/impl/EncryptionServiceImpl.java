@@ -7,7 +7,6 @@ import eu.isygoit.dto.response.DecryptResponseDto;
 import eu.isygoit.dto.response.EncryptResponseDto;
 import eu.isygoit.dto.response.ReEncryptResponseDto;
 import eu.isygoit.enums.IEnumKeyPurpose;
-import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.model.KmsKey;
 import eu.isygoit.repository.KmsKeyRepository;
 import eu.isygoit.service.ICryptoService;
@@ -75,7 +74,7 @@ public class EncryptionServiceImpl implements IEncryptionService {
         }
 
         byte[] ciphertext = Base64.getDecoder().decode(request.getCiphertext());
-        byte[] plaintext = cryptoService.decryptData(ciphertext, kmsKey.getKeyMaterial(), request.getEncryptionContext());
+        byte[] plaintext = cryptoService.decryptData(tenant, ciphertext, kmsKey.getKeyMaterial(), request.getEncryptionContext());
 
         return DecryptResponseDto.builder()
                 .plaintext(Base64.getEncoder().encodeToString(plaintext))
@@ -85,7 +84,7 @@ public class EncryptionServiceImpl implements IEncryptionService {
     }
 
     @Override
-    public ReEncryptResponseDto reencrypt(String tenant, ReEncryptRequestDto request) {
+    public ReEncryptResponseDto reEncrypt(String tenant, ReEncryptRequestDto request) {
         log.info("Re-encrypting data for tenant: {} to destination key: {}",
                 tenant, request.getDestinationKeyId());
 

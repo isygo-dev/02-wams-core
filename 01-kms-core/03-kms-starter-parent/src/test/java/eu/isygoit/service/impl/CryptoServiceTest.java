@@ -49,7 +49,7 @@ public class CryptoServiceTest {
         assertNotNull(encrypted);
         assertTrue(encrypted.length > 12); // IV (12) + Ciphertext
 
-        byte[] decrypted = cryptoService.decryptData(encrypted, keyMaterial, context);
+        byte[] decrypted = cryptoService.decryptData("default", encrypted, keyMaterial, context);
         assertNotNull(decrypted);
         assertArrayEquals(plaintext, decrypted);
     }

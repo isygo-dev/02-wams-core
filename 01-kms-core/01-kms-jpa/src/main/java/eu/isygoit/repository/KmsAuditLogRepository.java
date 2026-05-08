@@ -1,5 +1,6 @@
 package eu.isygoit.repository;
 
+import eu.isygoit.enums.IKmsActionType;
 import eu.isygoit.model.KmsAuditLog;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 /**
  * Repository for KMS Audit Log entity
@@ -21,6 +23,16 @@ public interface KmsAuditLogRepository extends JpaRepository<KmsAuditLog, Long> 
      */
     @Query("SELECT al FROM KmsAuditLog al WHERE al.tenant = :tenant AND al.keyId = :keyId ORDER BY al.timestamp DESC")
     Page<KmsAuditLog> findByTenantAndKeyId(@Param("tenant") String tenant, @Param("keyId") Long keyId, Pageable pageable);
+
+    /**
+     * Count by action and keyId
+     */
+    long countByActionAndKeyId(IKmsActionType.Types action, Long keyId);
+
+    /**
+     * Find first by keyId order by timestamp desc
+     */
+    Optional<KmsAuditLog> findFirstByKeyIdOrderByTimestampDesc(Long keyId);
 
     /**
      * Find audit logs by tenant and action

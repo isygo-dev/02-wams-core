@@ -3,9 +3,9 @@ package eu.isygoit.service.impl;
 import eu.isygoit.dto.request.CreateKeyRequestDto;
 import eu.isygoit.dto.response.CreateKeyResponseDto;
 import eu.isygoit.dto.response.KeyMetadataResponseDto;
-import eu.isygoit.enums.IEnumKeyStatus;
-import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyPurpose;
+import eu.isygoit.enums.IEnumKeySpec;
+import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.model.KmsKey;
 import eu.isygoit.model.KmsKeyVersion;
 import eu.isygoit.repository.KmsAliasRepository;
@@ -13,7 +13,6 @@ import eu.isygoit.repository.KmsKeyRepository;
 import eu.isygoit.repository.KmsKeyVersionRepository;
 import eu.isygoit.repository.KmsTagRepository;
 import eu.isygoit.service.ICryptoService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,13 +21,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class KeyManagementServiceImplTest {
 
+    private final String tenant = "test-tenant" ;
+    private final Long keyId = 1L;
     @Mock
     private KmsKeyRepository kmsKeyRepository;
     @Mock
@@ -39,12 +41,8 @@ public class KeyManagementServiceImplTest {
     private KmsAliasRepository kmsAliasRepository;
     @Mock
     private KmsTagRepository kmsTagRepository;
-
     @InjectMocks
     private KeyManagementServiceImpl keyManagementService;
-
-    private final String tenant = "test-tenant";
-    private final Long keyId = 1L;
 
     @Test
     void testCreateKey_Success() {

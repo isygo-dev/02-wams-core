@@ -1,6 +1,7 @@
 package eu.isygoit.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +23,7 @@ public class ReEncryptRequestDto {
 
     private Long sourceKeyId;
 
-    @NotBlank(message = "Destination key ID is required")
+    @NotNull(message = "Destination key ID is required")
     private Long destinationKeyId;
 
     private Map<String, String> sourceEncryptionContext;

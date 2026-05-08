@@ -61,12 +61,13 @@ public interface ICryptoService {
     /**
      * Decrypt ciphertext using specified key material
      *
+     * @param tenant            the tenant
      * @param ciphertext        ciphertext bytes to decrypt
      * @param keyMaterial       the key material (must be decrypted first)
      * @param encryptionContext optional encryption context
      * @return plaintext bytes
      */
-    byte[] decryptData(byte[] ciphertext, byte[] keyMaterial, Map<String, String> encryptionContext);
+    byte[] decryptData(String tenant, byte[] ciphertext, byte[] keyMaterial, Map<String, String> encryptionContext);
 
     /**
      * Sign data using asymmetric key
@@ -104,7 +105,15 @@ public interface ICryptoService {
 
     byte[] generateImportToken();
 
-    byte[] decryptKeyMaterial(@NotNull(message = "Encrypted key material is required") byte[] encryptedKeyMaterial, @NotNull(message = "Import token is required") byte[] importToken);
+    /**
+     * Decrypt key material
+     *
+     * @param tenant               the tenant
+     * @param encryptedKeyMaterial encrypted key material bytes
+     * @param importToken          import token bytes
+     * @return decrypted key material bytes
+     */
+    byte[] decryptKeyMaterial(String tenant, @NotNull(message = "Encrypted key material is required") byte[] encryptedKeyMaterial, @NotNull(message = "Import token is required") byte[] importToken);
 
     long getEncryptCount(Long keyId);
 

@@ -537,6 +537,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
 
         // Decrypt the imported key material
         byte[] decryptedMaterial = cryptoService.decryptKeyMaterial(
+                tenant,
                 request.getEncryptedKeyMaterial(),
                 request.getImportToken()
         );

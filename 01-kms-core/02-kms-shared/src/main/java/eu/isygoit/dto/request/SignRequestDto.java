@@ -17,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class SignRequestDto {
 
-    @NotBlank(message = "keyId cannot be blank")
+    @NotNull(message = "keyId cannot be blank")
     private Long keyId;
 
     @NotBlank(message = "message cannot be blank")

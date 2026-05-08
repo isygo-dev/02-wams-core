@@ -27,18 +27,15 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class DataKeyServiceImplTest {
 
+    private final String tenant = "test-tenant" ;
+    private final Long keyId = 1L;
     @Mock
     private KmsKeyRepository kmsKeyRepository;
-
     @Mock
     private ICryptoService cryptoService;
-
     @InjectMocks
     private DataKeyServiceImpl dataKeyService;
-
     private KmsKey testKey;
-    private final String tenant = "test-tenant";
-    private final Long keyId = 1L;
 
     @BeforeEach
     void setUp() {

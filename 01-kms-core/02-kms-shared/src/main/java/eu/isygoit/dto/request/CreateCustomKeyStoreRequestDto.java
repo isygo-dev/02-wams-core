@@ -3,6 +3,7 @@ package eu.isygoit.dto.request;
 import eu.isygoit.annotation.ValidCreateCustomKeyStoreRequest;
 import eu.isygoit.enums.IEnumCustomKeyStoreType;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -59,7 +60,7 @@ public class CreateCustomKeyStoreRequestDto {
      * This field determines which other fields are required.
      * Applicable to: ALL types
      */
-    @NotBlank(message = "Key store type cannot be blank")
+    @NotNull(message = "Key store type cannot be null")
     private IEnumCustomKeyStoreType.Types type;
 
     // ============================================================================

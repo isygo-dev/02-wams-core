@@ -8,19 +8,17 @@ import eu.isygoit.dto.response.GenerateMacResponseDto;
 import eu.isygoit.dto.response.SignResponseDto;
 import eu.isygoit.dto.response.VerifyMacResponseDto;
 import eu.isygoit.dto.response.VerifyResponseDto;
+import eu.isygoit.enums.IEnumKeyPurpose;
+import eu.isygoit.model.KmsKey;
+import eu.isygoit.repository.KmsKeyRepository;
+import eu.isygoit.service.ICryptoService;
 import eu.isygoit.service.ISigningService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Base64;
-import java.util.UUID;
-
-import eu.isygoit.enums.IEnumKeyPurpose;
-import eu.isygoit.model.KmsKey;
-import eu.isygoit.repository.KmsKeyRepository;
-import eu.isygoit.service.ICryptoService;
-import lombok.RequiredArgsConstructor;
 
 /**
  * The type Signing service.

@@ -28,18 +28,15 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class EncryptionServiceImplTest {
 
+    private final String tenant = "test-tenant" ;
+    private final Long keyId = 1L;
     @Mock
     private KmsKeyRepository kmsKeyRepository;
-
     @Mock
     private ICryptoService cryptoService;
-
     @InjectMocks
     private EncryptionServiceImpl encryptionService;
-
     private KmsKey testKey;
-    private final String tenant = "test-tenant";
-    private final Long keyId = 1L;
 
     @BeforeEach
     void setUp() {
@@ -96,7 +93,7 @@ public class EncryptionServiceImplTest {
                 .build();
 
         when(kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)).thenReturn(Optional.of(testKey));
-        when(cryptoService.decryptData(any(), any(), any())).thenReturn("hello".getBytes());
+        when(cryptoService.decryptData(anyString(), any(), any(), any())).thenReturn("hello".getBytes());
 
         DecryptResponseDto response = encryptionService.decrypt(tenant, request);
 
@@ -106,7 +103,7 @@ public class EncryptionServiceImplTest {
     }
 
     @Test
-    void testReencrypt_Success() {
+    void testReEncrypt_Success() {
         ReEncryptRequestDto request = ReEncryptRequestDto.builder()
                 .sourceKeyId(keyId)
                 .destinationKeyId(2L)
@@ -124,11 +121,11 @@ public class EncryptionServiceImplTest {
 
         when(kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)).thenReturn(Optional.of(testKey));
         when(kmsKeyRepository.findByTenantAndKeyId(tenant, 2L)).thenReturn(Optional.of(destKey));
-        
-        when(cryptoService.decryptData(any(), eq(testKey.getKeyMaterial()), any())).thenReturn("hello".getBytes());
+
+        when(cryptoService.decryptData(anyString(), any(), eq(testKey.getKeyMaterial()), any())).thenReturn("hello".getBytes());
         when(cryptoService.encryptData(any(), eq(destKey.getKeyMaterial()), any())).thenReturn("re-encrypted".getBytes());
 
-        ReEncryptResponseDto response = encryptionService.reencrypt(tenant, request);
+        ReEncryptResponseDto response = encryptionService.reEncrypt(tenant, request);
 
         assertNotNull(response);
         assertEquals(Base64.getEncoder().encodeToString("re-encrypted".getBytes()), response.getCiphertext());

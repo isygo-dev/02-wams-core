@@ -2,9 +2,12 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumKeySpec;
+import eu.isygoit.enums.IKmsActionType;
 import eu.isygoit.model.DigestConfig;
+import eu.isygoit.model.KmsAuditLog;
 import eu.isygoit.model.PEBConfig;
 import eu.isygoit.repository.DigesterConfigRepository;
+import eu.isygoit.repository.KmsAuditLogRepository;
 import eu.isygoit.repository.PEBConfigRepository;
 import eu.isygoit.service.ICryptoService;
 import jakarta.validation.constraints.NotNull;
@@ -47,6 +50,9 @@ public class CryptoService implements ICryptoService {
 
     @Autowired
     private DigesterConfigRepository digesterConfigRepository;
+
+    @Autowired
+    private KmsAuditLogRepository kmsAuditLogRepository;
 
     // ====================== Existing Jasypt Helpers ======================
 
@@ -215,7 +221,7 @@ public class CryptoService implements ICryptoService {
      * Decrypts byte array data using JCA (AES for symmetric).
      */
     @Override
-    public byte[] decryptData(byte[] ciphertext, byte[] keyMaterial, Map<String, String> encryptionContext) {
+    public byte[] decryptData(String tenant, byte[] ciphertext, byte[] keyMaterial, Map<String, String> encryptionContext) {
         if (ciphertext == null || ciphertext.length == 0) return new byte[0];
 
         try {
@@ -239,9 +245,9 @@ public class CryptoService implements ICryptoService {
     @Override
     public byte[] signData(byte[] message, byte[] keyMaterial, String algorithm) {
         try {
-            String sigAlgo = algorithm != null ? algorithm : "SHA256withRSA";
+            String sigAlgo = algorithm != null ? algorithm : "SHA256withRSA" ;
             java.security.Signature signature = java.security.Signature.getInstance(sigAlgo);
-            String keyAlgo = sigAlgo.contains("ECDSA") ? "EC" : "RSA";
+            String keyAlgo = sigAlgo.contains("ECDSA") ? "EC" : "RSA" ;
             java.security.PrivateKey privateKey = java.security.KeyFactory.getInstance(keyAlgo)
                     .generatePrivate(new java.security.spec.PKCS8EncodedKeySpec(keyMaterial));
             signature.initSign(privateKey);
@@ -259,9 +265,9 @@ public class CryptoService implements ICryptoService {
     @Override
     public boolean verifySignature(byte[] message, byte[] signature, byte[] keyMaterial, String algorithm) {
         try {
-            String sigAlgo = algorithm != null ? algorithm : "SHA256withRSA";
+            String sigAlgo = algorithm != null ? algorithm : "SHA256withRSA" ;
             java.security.Signature sig = java.security.Signature.getInstance(sigAlgo);
-            String keyAlgo = sigAlgo.contains("ECDSA") ? "EC" : "RSA";
+            String keyAlgo = sigAlgo.contains("ECDSA") ? "EC" : "RSA" ;
             java.security.PublicKey publicKey = java.security.KeyFactory.getInstance(keyAlgo)
                     .generatePublic(new java.security.spec.X509EncodedKeySpec(keyMaterial));
             sig.initVerify(publicKey);
@@ -311,15 +317,22 @@ public class CryptoService implements ICryptoService {
     }
 
     @Override
-    public byte[] decryptKeyMaterial(@NotNull byte[] encryptedKeyMaterial, @NotNull byte[] importToken) {
+    public byte[] decryptKeyMaterial(String tenant, @NotNull byte[] encryptedKeyMaterial, @NotNull byte[] importToken) {
         // Simple implementation using Jasypt-style PBE
         try {
             PooledPBEByteEncryptor encryptor = new PooledPBEByteEncryptor();
-            SimpleStringPBEConfig config = new SimpleStringPBEConfig();
-            config.setPassword(new String(importToken));
-            config.setAlgorithm("PBEWithHmacSHA256AndAES_256");
-            config.setKeyObtentionIterations(1000);
-            encryptor.setConfig(config);
+            PEBConfig pebConfig = pebConfigRepository.findFirstByTenantIgnoreCase(tenant)
+                    .orElseGet(this::getDefaultPebConfig);
+
+            if (pebConfig != null) {
+                encryptor.setConfig(createPBEConfig(pebConfig));
+            } else {
+                SimpleStringPBEConfig config = new SimpleStringPBEConfig();
+                config.setPassword(new String(importToken));
+                config.setAlgorithm("PBEWithHmacSHA256AndAES_256");
+                config.setKeyObtentionIterations(1000);
+                encryptor.setConfig(config);
+            }
             return encryptor.decrypt(encryptedKeyMaterial);
         } catch (Exception e) {
             log.error("Failed to decrypt key material", e);
@@ -329,17 +342,19 @@ public class CryptoService implements ICryptoService {
 
     @Override
     public long getEncryptCount(Long keyId) {
-        return 0L;
+        return kmsAuditLogRepository.countByActionAndKeyId(IKmsActionType.Types.ENCRYPT, keyId);
     }
 
     @Override
     public long getDecryptCount(Long keyId) {
-        return 0L;
+        return kmsAuditLogRepository.countByActionAndKeyId(IKmsActionType.Types.DECRYPT, keyId);
     }
 
     @Override
     public LocalDateTime getLastUsedDate(Long keyId) {
-        return null;
+        return kmsAuditLogRepository.findFirstByKeyIdOrderByTimestampDesc(keyId)
+                .map(KmsAuditLog::getTimestamp)
+                .orElse(null);
     }
 
     @Override

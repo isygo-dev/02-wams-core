@@ -37,6 +37,6 @@ public interface IEncryptionService {
      * @param request the request
      * @return the encrypt response dto
      */
-    ReEncryptResponseDto reencrypt(String tenant, ReEncryptRequestDto request);
+    ReEncryptResponseDto reEncrypt(String tenant, ReEncryptRequestDto request);
 }
 
