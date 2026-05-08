@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.util.Map;
+
 /**
  * The type Decrypt request dto.
  */
@@ -15,7 +17,11 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class DecryptRequestDto {
 
+    private Long keyId;
+
     @NotBlank(message = "ciphertext cannot be blank")
     private String ciphertext;
+
+    private Map<String, String> encryptionContext;
 }
 

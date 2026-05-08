@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Map;
+
 /**
  * Request DTO for Re-Encrypt operation
  */
@@ -18,14 +20,14 @@ public class ReEncryptRequestDto {
     @NotBlank(message = "Source ciphertext is required")
     private String ciphertextBlob;
 
-    private String sourceKeyId;
+    private Long sourceKeyId;
 
     @NotBlank(message = "Destination key ID is required")
     private Long destinationKeyId;
 
-    private String sourceEncryptionContext;
+    private Map<String, String> sourceEncryptionContext;
 
-    private String destinationEncryptionContext;
+    private Map<String, String> destinationEncryptionContext;
 
     // Optional: Specify algorithm if needed
     private String encryptionAlgorithm;

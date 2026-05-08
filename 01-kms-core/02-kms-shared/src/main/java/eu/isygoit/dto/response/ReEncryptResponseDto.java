@@ -78,7 +78,7 @@ public class ReEncryptResponseDto {
             example = "a1b2c3d4-e5f6-4a8b-9c0d-e1f2a3b4c5d6",
             required = true
     )
-    private String sourceKeyId;
+    private Long sourceKeyId;
 
     /**
      * The ARN of the source key.

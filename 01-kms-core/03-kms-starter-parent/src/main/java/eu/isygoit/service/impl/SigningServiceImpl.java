@@ -16,27 +16,46 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Base64;
 import java.util.UUID;
 
+import eu.isygoit.enums.IEnumKeyPurpose;
+import eu.isygoit.model.KmsKey;
+import eu.isygoit.repository.KmsKeyRepository;
+import eu.isygoit.service.ICryptoService;
+import lombok.RequiredArgsConstructor;
+
 /**
  * The type Signing service.
  */
 @Slf4j
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class SigningServiceImpl implements ISigningService {
+
+    private final KmsKeyRepository kmsKeyRepository;
+    private final ICryptoService cryptoService;
 
     @Override
     public SignResponseDto sign(String tenant, SignRequestDto request) {
         log.info("Signing message for tenant: {} with keyId: {} using algorithm: {}",
                 tenant, request.getKeyId(), request.getAlgorithm());
 
-        // Mock signature generation - in production, use actual signing algorithms
-        String signature = Base64.getEncoder().encodeToString(
-                ("signature-" + UUID.randomUUID()).getBytes()
-        );
+        KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(tenant, request.getKeyId())
+                .orElseThrow(() -> new RuntimeException("KMS Key not found"));
+
+        if (!kmsKey.isEnabled()) {
+            throw new RuntimeException("KMS Key is not enabled");
+        }
+
+        if (kmsKey.getKeyPurpose() != IEnumKeyPurpose.Types.SIGN_VERIFY) {
+            throw new RuntimeException("KMS Key is not authorized for signing");
+        }
+
+        byte[] message = Base64.getDecoder().decode(request.getMessage());
+        byte[] signature = cryptoService.signData(message, kmsKey.getKeyMaterial(), request.getAlgorithm().meaning());
 
         return SignResponseDto.builder()
-                .signature(signature)
-                .keyId(request.getKeyId())
+                .signature(Base64.getEncoder().encodeToString(signature))
+                .keyId(kmsKey.getKeyId())
                 .build();
     }
 
@@ -44,8 +63,16 @@ public class SigningServiceImpl implements ISigningService {
     public VerifyResponseDto verify(String tenant, VerifyRequestDto request) {
         log.info("Verifying signature for tenant: {} with keyId: {}", tenant, request.getKeyId());
 
-        // Mock signature verification - in production, use actual verification algorithms
-        boolean valid = request.getSignature() != null && !request.getSignature().isEmpty();
+        KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(tenant, request.getKeyId())
+                .orElseThrow(() -> new RuntimeException("KMS Key not found"));
+
+        if (!kmsKey.isEnabled()) {
+            throw new RuntimeException("KMS Key is not enabled");
+        }
+
+        byte[] message = Base64.getDecoder().decode(request.getMessage());
+        byte[] signature = Base64.getDecoder().decode(request.getSignature());
+        boolean valid = cryptoService.verifySignature(message, signature, kmsKey.getKeyMaterial(), request.getAlgorithm().meaning());
 
         return VerifyResponseDto.builder()
                 .valid(valid)
@@ -54,12 +81,47 @@ public class SigningServiceImpl implements ISigningService {
 
     @Override
     public GenerateMacResponseDto generateMac(String tenant, GenerateMacRequestDto request) {
-        return null;
+        log.info("Generating MAC for tenant: {} with keyId: {}", tenant, request.getKeyId());
+
+        KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(tenant, request.getKeyId())
+                .orElseThrow(() -> new RuntimeException("KMS Key not found"));
+
+        if (!kmsKey.isEnabled()) {
+            throw new RuntimeException("KMS Key is not enabled");
+        }
+
+        try {
+            javax.crypto.Mac mac = javax.crypto.Mac.getInstance(request.getMacAlgorithm());
+            javax.crypto.spec.SecretKeySpec keySpec = new javax.crypto.spec.SecretKeySpec(kmsKey.getKeyMaterial(), request.getMacAlgorithm());
+            mac.init(keySpec);
+            byte[] message = Base64.getDecoder().decode(request.getMessage());
+            byte[] macBytes = mac.doFinal(message);
+
+            return GenerateMacResponseDto.builder()
+                    .mac(Base64.getEncoder().encodeToString(macBytes))
+                    .keyId(kmsKey.getKeyId())
+                    .build();
+        } catch (Exception e) {
+            log.error("MAC generation failed", e);
+            throw new RuntimeException("MAC generation failed", e);
+        }
     }
 
     @Override
     public VerifyMacResponseDto verifyMac(String tenant, VerifyMacRequestDto request) {
-        return null;
+        log.info("Verifying MAC for tenant: {} with keyId: {}", tenant, request.getKeyId());
+
+        GenerateMacResponseDto response = generateMac(tenant, GenerateMacRequestDto.builder()
+                .keyId(request.getKeyId())
+                .message(request.getMessage())
+                .macAlgorithm(request.getMacAlgorithm())
+                .build());
+
+        boolean valid = response.getMac().equals(request.getMac());
+
+        return VerifyMacResponseDto.builder()
+                .macValid(valid)
+                .build();
     }
 }
 

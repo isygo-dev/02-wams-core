@@ -1,6 +1,8 @@
 package eu.isygoit.dto.request;
 
+import eu.isygoit.enums.IEnumSigningAlgorithm;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,5 +25,8 @@ public class VerifyRequestDto {
 
     @NotBlank(message = "signature cannot be blank")
     private String signature;
+
+    @NotNull(message = "algorithm cannot be null")
+    private IEnumSigningAlgorithm.Types algorithm;
 }
 
