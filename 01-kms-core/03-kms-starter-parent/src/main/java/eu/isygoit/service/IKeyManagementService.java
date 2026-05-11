@@ -120,7 +120,7 @@ public interface IKeyManagementService {
 
     KeyDescriptionResponseDto deleteImportedKeyMaterial(String tenant, String keyId);
 
-    void validateKey(String tenant, String keyId);
+    boolean isValidKey(String tenant, String keyId);
 
     void deleteKey(String tenant, String keyId);
 

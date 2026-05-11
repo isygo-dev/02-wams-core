@@ -1515,7 +1515,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<ValidateKeyResponse> validateKey(@PathVariable("keyId") String keyId) {
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            keyManagementService.validateKey(tenant, keyId);
+            keyManagementService.isValidKey(tenant, keyId);
             ValidateKeyResponse response = ValidateKeyResponse.builder().valid(true).build();
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {

@@ -682,7 +682,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
     }
 
     @Override
-    public void validateKey(String tenant, String keyId) {
+    public boolean isValidKey(String tenant, String keyId) {
         log.info("Validating key for tenant: {} keyId: {}", tenant, keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
@@ -701,6 +701,8 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
         if (!isValid) {
             throw new InvalidKeyStateException("Key integrity validation failed: " + keyId);
         }
+
+        return true;
     }
 
     @Override

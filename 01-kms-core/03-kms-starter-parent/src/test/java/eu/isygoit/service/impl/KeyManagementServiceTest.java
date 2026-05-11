@@ -548,7 +548,7 @@ class KeyManagementServiceTest {
         when(cryptoService.validateKeyIntegrity(any(), any()))
                 .thenReturn(true);
 
-        assertDoesNotThrow(() -> service.validateKey(TENANT, KEY_ID));
+        assertDoesNotThrow(() -> service.isValidKey(TENANT, KEY_ID));
     }
 
     @Test
@@ -559,7 +559,7 @@ class KeyManagementServiceTest {
                 .thenReturn(Optional.of(key));
 
         assertThrows(InvalidKeyStateException.class,
-                () -> service.validateKey(TENANT, KEY_ID));
+                () -> service.isValidKey(TENANT, KEY_ID));
     }
 
     @Test
@@ -570,7 +570,7 @@ class KeyManagementServiceTest {
                 .thenReturn(Optional.of(key));
 
         assertThrows(InvalidKeyStateException.class,
-                () -> service.validateKey(TENANT, KEY_ID));
+                () -> service.isValidKey(TENANT, KEY_ID));
     }
 
     @Test
@@ -582,7 +582,7 @@ class KeyManagementServiceTest {
                 .thenReturn(false);
 
         assertThrows(InvalidKeyStateException.class,
-                () -> service.validateKey(TENANT, KEY_ID));
+                () -> service.isValidKey(TENANT, KEY_ID));
     }
 
     @Test
