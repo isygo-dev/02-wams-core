@@ -7,7 +7,6 @@ import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.dto.KmsDtos.*;
-import eu.isygoit.dto.data.TagDto;
 import eu.isygoit.enums.IKmsActionType;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.service.*;
@@ -15,10 +14,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -32,7 +31,7 @@ import java.util.stream.Collectors;
 /**
  * Full KMS Controller - Implements all methods from KmsServiceApi
  *
- * <p>This controller provides a complete WAMS KMS-compatible REST API for:
+ * <p>This controller provides a complete AWS KMS-compatible REST API for:
  * <ul>
  *   <li>Key management (create, describe, list, enable, disable, delete)</li>
  *   <li>Cryptographic operations (encrypt, decrypt, re-encrypt)</li>
@@ -97,7 +96,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     // ============================================================================
 
     @Override
-    public ResponseEntity<CreateKeyResponse> createKey(CreateKeyRequest request) {
+    public ResponseEntity<CreateKeyResponse> createKey(@Valid @RequestBody CreateKeyRequest request) {
         log.info("Creating key with spec: {} and purpose: {}",
                 request.getKeySpec(),
                 request.getKeyUsage());
@@ -124,20 +123,18 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<DescribeKeyResponse> describeKey(DescribeKeyRequest request) {
-
-        log.info("Describing key: {}", request.getKeyId());
+    public ResponseEntity<DescribeKeyResponse> describeKey(@PathVariable("keyId") String keyId) {
+        log.info("Describing key: {}", keyId);
 
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
-            DescribeKeyResponse response =
-                    keyManagementService.describeKey(tenant, request.getKeyId(), request.getGrantTokens());
+            DescribeKeyResponse response = keyManagementService.describeKey(tenant, keyId, null);
 
             auditService.logAction(
                     tenant,
                     IKmsActionType.Types.DESCRIBE_KEY,
-                    request.getKeyId(),
+                    keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp()
             );
@@ -151,15 +148,16 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<ListKeysResponse> listKeys(ListKeysRequest request) {
+    public ResponseEntity<ListKeysResponse> listKeys(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "marker", required = false) String marker) {
 
-        log.info("Listing keys with limit: {}", request.getLimit());
+        log.info("Listing keys with limit: {}", limit);
 
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
-            ListKeysResponse response =
-                    keyManagementService.listKeys(tenant, request.getLimit(), request.getMarker());
+            ListKeysResponse response = keyManagementService.listKeys(tenant, limit, marker);
 
             auditService.logAction(
                     tenant,
@@ -178,20 +176,23 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<UpdateKeyDescriptionResponse> updateKeyDescription(@Valid UpdateKeyDescriptionRequest request) {
+    public ResponseEntity<UpdateKeyDescriptionResponse> updateKeyDescription(
+            @PathVariable("keyId") String keyId,
+            @Valid @RequestBody UpdateKeyDescriptionRequest request) {
 
-        log.info("Updating key description for key: {}", request.getKeyId());
+        log.info("Updating key description for key: {}", keyId);
+        request.setKeyId(keyId); // ensure consistency
 
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
             UpdateKeyDescriptionResponse response =
-                    keyManagementService.updateKeyDescription(tenant, request.getKeyId(), request);
+                    keyManagementService.updateKeyDescription(tenant, keyId, request);
 
             auditService.logAction(
                     tenant,
                     IKmsActionType.Types.UPDATE_KEY_METADATA,
-                    request.getKeyId(),
+                    keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp()
             );
@@ -205,20 +206,18 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<EnableKeyResponse> enableKey(EnableKeyRequest request) {
-
-        log.info("Enabling key: {}", request.getKeyId());
+    public ResponseEntity<EnableKeyResponse> enableKey(@PathVariable("keyId") String keyId) {
+        log.info("Enabling key: {}", keyId);
 
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
-            EnableKeyResponse response =
-                    keyManagementService.enableKey(tenant, request.getKeyId());
+            EnableKeyResponse response = keyManagementService.enableKey(tenant, keyId);
 
             auditService.logAction(
                     tenant,
                     IKmsActionType.Types.ENABLE_KEY,
-                    request.getKeyId(),
+                    keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp()
             );
@@ -232,20 +231,18 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<DisableKeyResponse> disableKey(DisableKeyRequest request) {
-
-        log.info("Disabling key: {}", request.getKeyId());
+    public ResponseEntity<DisableKeyResponse> disableKey(@PathVariable("keyId") String keyId) {
+        log.info("Disabling key: {}", keyId);
 
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
-            DisableKeyResponse response =
-                    keyManagementService.disableKey(tenant, request.getKeyId());
+            DisableKeyResponse response = keyManagementService.disableKey(tenant, keyId);
 
             auditService.logAction(
                     tenant,
                     IKmsActionType.Types.DISABLE_KEY,
-                    request.getKeyId(),
+                    keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp()
             );
@@ -259,26 +256,22 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<ScheduleKeyDeletionResponse> scheduleKeyDeletion(ScheduleKeyDeletionRequest request) {
+    public ResponseEntity<ScheduleKeyDeletionResponse> scheduleKeyDeletion(
+            @PathVariable("keyId") String keyId,
+            @RequestParam(value = "pendingWindowInDays", defaultValue = "30") Integer pendingWindowInDays) {
 
-        log.info("Scheduling deletion for key: {} with window: {} days",
-                request.getKeyId(),
-                request);
+        log.info("Scheduling deletion for key: {} with window: {} days", keyId, pendingWindowInDays);
 
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
             ScheduleKeyDeletionResponse response =
-                    keyManagementService.scheduleKeyDeletion(
-                            tenant,
-                            request.getKeyId(),
-                            request.getPendingWindowInDays()
-                    );
+                    keyManagementService.scheduleKeyDeletion(tenant, keyId, pendingWindowInDays);
 
             auditService.logAction(
                     tenant,
                     IKmsActionType.Types.SCHEDULE_KEY_DELETION,
-                    request.getKeyId(),
+                    keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp()
             );
@@ -292,20 +285,18 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<CancelKeyDeletionResponse> cancelKeyDeletion(CancelKeyDeletionRequest request) {
-
-        log.info("Cancelling deletion for key: {}", request.getKeyId());
+    public ResponseEntity<CancelKeyDeletionResponse> cancelKeyDeletion(@PathVariable("keyId") String keyId) {
+        log.info("Cancelling deletion for key: {}", keyId);
 
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
-            CancelKeyDeletionResponse response =
-                    keyManagementService.cancelKeyDeletion(tenant, request.getKeyId());
+            CancelKeyDeletionResponse response = keyManagementService.cancelKeyDeletion(tenant, keyId);
 
             auditService.logAction(
                     tenant,
                     IKmsActionType.Types.CANCEL_KEY_DELETION,
-                    request.getKeyId(),
+                    keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp()
             );
@@ -319,19 +310,18 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<DeleteKeyResponse> deleteKey(DeleteKeyRequest request) {
-
-        log.info("Permanently deleting key: {}", request.getKeyId());
+    public ResponseEntity<DeleteKeyResponse> deleteKey(@PathVariable("keyId") String keyId) {
+        log.info("Permanently deleting key: {}", keyId);
 
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
-            keyManagementService.deleteKey(tenant, request.getKeyId());
+            keyManagementService.deleteKey(tenant, keyId);
 
             auditService.logAction(
                     tenant,
                     IKmsActionType.Types.DELETE_KEY,
-                    request.getKeyId(),
+                    keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp()
             );
@@ -349,24 +339,23 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     // ============================================================================
 
     @Override
-    public ResponseEntity<KeyRotationStatusResponseDto> updateKeyRotation(@Valid UpdateKeyRotationRequestDto request) {
+    public ResponseEntity<KeyRotationStatusResponseDto> updateKeyRotation(
+            @PathVariable("keyId") String keyId,
+            @Valid @RequestBody UpdateKeyRotationRequestDto request) {
 
-        log.info("Updating rotation for key: {}", request.getKeyId());
+        log.info("Updating rotation for key: {}", keyId);
+        request.setKeyId(keyId);
 
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
             KeyRotationStatusResponseDto response =
-                    keyManagementService.updateKeyRotation(
-                            tenant,
-                            request.getKeyId(),
-                            request
-                    );
+                    keyManagementService.updateKeyRotation(tenant, keyId, request);
 
             auditService.logAction(
                     tenant,
                     IKmsActionType.Types.UPDATE_KEY_ROTATION,
-                    request.getKeyId(),
+                    keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp()
             );
@@ -380,20 +369,18 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<RotateKeyResponse> rotateKey(RotateKeyRequest request) {
-
-        log.info("Rotating key: {}", request.getKeyId());
+    public ResponseEntity<RotateKeyResponse> rotateKey(@PathVariable("keyId") String keyId) {
+        log.info("Rotating key: {}", keyId);
 
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
-            RotateKeyResponse response =
-                    keyManagementService.rotateKey(tenant, request.getKeyId());
+            RotateKeyResponse response = keyManagementService.rotateKey(tenant, keyId);
 
             auditService.logAction(
                     tenant,
                     IKmsActionType.Types.ROTATE_KEY,
-                    request.getKeyId(),
+                    keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp()
             );
@@ -407,20 +394,18 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<GetKeyRotationStatusResponse> getKeyRotationStatus(GetKeyRotationStatusRequest request) {
-
-        log.info("Getting rotation status for key: {}", request.getKeyId());
+    public ResponseEntity<GetKeyRotationStatusResponse> getKeyRotationStatus(@PathVariable("keyId") String keyId) {
+        log.info("Getting rotation status for key: {}", keyId);
 
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
-            GetKeyRotationStatusResponse response =
-                    keyManagementService.getKeyRotationStatus(tenant, request.getKeyId());
+            GetKeyRotationStatusResponse response = keyManagementService.getKeyRotationStatus(tenant, keyId);
 
             auditService.logAction(
                     tenant,
                     IKmsActionType.Types.GET_KEY_ROTATION_STATUS,
-                    request.getKeyId(),
+                    keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp()
             );
@@ -434,25 +419,23 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<ListKeyRotationsResponseDto> listKeyRotations(ListKeyRotationsRequestDto request) {
+    public ResponseEntity<ListKeyRotationsResponseDto> listKeyRotations(
+            @PathVariable("keyId") String keyId,
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "nextToken", required = false) String nextToken) {
 
-        log.info("Listing key rotations for: {}", request.getKeyId());
+        log.info("Listing key rotations for: {}", keyId);
 
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
             ListKeyRotationsResponseDto response =
-                    keyManagementService.listKeyRotations(
-                            tenant,
-                            request.getKeyId(),
-                            request.getLimit(),
-                            request.getNextToken()
-                    );
+                    keyManagementService.listKeyRotations(tenant, keyId, limit, nextToken);
 
             auditService.logAction(
                     tenant,
                     IKmsActionType.Types.LIST_KEY_ROTATIONS,
-                    request.getKeyId(),
+                    keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp()
             );
@@ -461,6 +444,43 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
+            return getBackExceptionResponse(e);
+        }
+    }
+
+    @Override
+    public ResponseEntity<EnableKeyRotationResponse> enableKeyRotation(@PathVariable("keyId") String keyId) {
+        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        try {
+            UpdateKeyRotationRequestDto internalRequest = UpdateKeyRotationRequestDto.builder()
+                    .enableRotation(true)
+                    .rotationPeriodDays(365)
+                    .applyImmediately(true)
+                    .build();
+            keyManagementService.updateKeyRotation(tenant, keyId, internalRequest);
+            auditService.logAction(tenant, IKmsActionType.Types.UPDATE_KEY_ROTATION, keyId,
+                    requestContextService.getCurrentContext().getSenderUser(),
+                    requestContextService.getCurrentContext().getClientIp());
+            return ResponseFactory.responseOk(new EnableKeyRotationResponse());
+        } catch (Throwable e) {
+            return getBackExceptionResponse(e);
+        }
+    }
+
+    @Override
+    public ResponseEntity<DisableKeyRotationResponse> disableKeyRotation(@PathVariable("keyId") String keyId) {
+        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        try {
+            UpdateKeyRotationRequestDto internalRequest = UpdateKeyRotationRequestDto.builder()
+                    .enableRotation(false)
+                    .applyImmediately(true)
+                    .build();
+            keyManagementService.updateKeyRotation(tenant, keyId, internalRequest);
+            auditService.logAction(tenant, IKmsActionType.Types.UPDATE_KEY_ROTATION, keyId,
+                    requestContextService.getCurrentContext().getSenderUser(),
+                    requestContextService.getCurrentContext().getClientIp());
+            return ResponseFactory.responseOk(new DisableKeyRotationResponse());
+        } catch (Throwable e) {
             return getBackExceptionResponse(e);
         }
     }
@@ -470,16 +490,13 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     // ============================================================================
 
     @Override
-    public ResponseEntity<EncryptResponse> encrypt(
-            @Valid EncryptRequest request) {
-
-        log.info("Encrypting with request.getKeyId(): {}", request.getKeyId());
+    public ResponseEntity<EncryptResponse> encrypt(@Valid @RequestBody EncryptRequest request) {
+        log.info("Encrypting with keyId: {}", request.getKeyId());
 
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
-            EncryptResponse response =
-                    encryptionService.encrypt(tenant, request);
+            EncryptResponse response = encryptionService.encrypt(tenant, request);
 
             auditService.logAction(
                     tenant,
@@ -498,16 +515,13 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<DecryptResponse> decrypt(
-            @Valid DecryptRequest request) {
-
+    public ResponseEntity<DecryptResponse> decrypt(@Valid @RequestBody DecryptRequest request) {
         log.info("Decrypting data");
 
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
-            DecryptResponse response =
-                    encryptionService.decrypt(tenant, request);
+            DecryptResponse response = encryptionService.decrypt(tenant, request);
 
             auditService.logAction(
                     tenant,
@@ -526,17 +540,13 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<ReEncryptResponse> reEncrypt(
-            @Valid ReEncryptRequest request) {
-
-        log.info("Re-encrypting to destination key: {}",
-                request.getDestinationKeyId());
+    public ResponseEntity<ReEncryptResponse> reEncrypt(@Valid @RequestBody ReEncryptRequest request) {
+        log.info("Re-encrypting to destination key: {}", request.getDestinationKeyId());
 
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
-            ReEncryptResponse response =
-                    encryptionService.reEncrypt(tenant, request);
+            ReEncryptResponse response = encryptionService.reEncrypt(tenant, request);
 
             auditService.logAction(
                     tenant,
@@ -555,16 +565,13 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<GenerateDataKeyResponse> generateDataKey(
-            @Valid GenerateDataKeyRequest request) {
-
-        log.info("Generating data key with request.getKeyId(): {}", request.getKeyId());
+    public ResponseEntity<GenerateDataKeyResponse> generateDataKey(@Valid @RequestBody GenerateDataKeyRequest request) {
+        log.info("Generating data key with keyId: {}", request.getKeyId());
 
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
-            GenerateDataKeyResponse response =
-                    dataKeyService.generateDataKey(tenant, request);
+            GenerateDataKeyResponse response = dataKeyService.generateDataKey(tenant, request);
 
             auditService.logAction(
                     tenant,
@@ -584,8 +591,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
     @Override
     public ResponseEntity<GenerateDataKeyWithoutPlaintextResponse> generateDataKeyWithoutPlaintext(
-            @Valid GenerateDataKeyWithoutPlaintextRequest request) {
-
+            @Valid @RequestBody GenerateDataKeyWithoutPlaintextRequest request) {
         log.info("Generating data key without plaintext");
 
         try {
@@ -612,15 +618,13 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
     @Override
     public ResponseEntity<GenerateDataKeyPairResponse> generateDataKeyPair(
-            @Valid GenerateDataKeyPairRequest request) {
-
+            @Valid @RequestBody GenerateDataKeyPairRequest request) {
         log.info("Generating data key pair");
 
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
-            GenerateDataKeyPairResponse response =
-                    dataKeyService.generateDataKeyPair(tenant, request);
+            GenerateDataKeyPairResponse response = dataKeyService.generateDataKeyPair(tenant, request);
 
             auditService.logAction(
                     tenant,
@@ -640,8 +644,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
     @Override
     public ResponseEntity<GenerateDataKeyPairWithoutPlaintextResponse> generateDataKeyPairWithoutPlaintext(
-            @Valid GenerateDataKeyPairWithoutPlaintextRequest request) {
-
+            @Valid @RequestBody GenerateDataKeyPairWithoutPlaintextRequest request) {
         log.info("Generating data key pair without plaintext");
 
         try {
@@ -667,16 +670,13 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<SignResponse> sign(
-            @Valid SignRequest request) {
-
-        log.info("Signing with request.getKeyId(): {}", request.getKeyId());
+    public ResponseEntity<SignResponse> sign(@Valid @RequestBody SignRequest request) {
+        log.info("Signing with keyId: {}", request.getKeyId());
 
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
-            SignResponse response =
-                    signingService.sign(tenant, request);
+            SignResponse response = signingService.sign(tenant, request);
 
             auditService.logAction(
                     tenant,
@@ -695,8 +695,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<VerifyResponse> verify(@Valid VerifyRequest request) {
-        log.info("Verifying signature with request.getKeyId(): {}", request.getKeyId());
+    public ResponseEntity<VerifyResponse> verify(@Valid @RequestBody VerifyRequest request) {
+        log.info("Verifying signature with keyId: {}", request.getKeyId());
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
             VerifyResponse response = signingService.verify(tenant, request);
@@ -711,8 +711,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<GenerateMacResponse> generateMac(@Valid GenerateMacRequest request) {
-        log.info("Generating MAC with request.getKeyId(): {}", request.getKeyId());
+    public ResponseEntity<GenerateMacResponse> generateMac(@Valid @RequestBody GenerateMacRequest request) {
+        log.info("Generating MAC with keyId: {}", request.getKeyId());
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
             GenerateMacResponse response = signingService.generateMac(tenant, request);
@@ -727,8 +727,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<VerifyMacResponse> verifyMac(@Valid VerifyMacRequest request) {
-        log.info("Verifying MAC with request.getKeyId(): {}", request.getKeyId());
+    public ResponseEntity<VerifyMacResponse> verifyMac(@Valid @RequestBody VerifyMacRequest request) {
+        log.info("Verifying MAC with keyId: {}", request.getKeyId());
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
             VerifyMacResponse response = signingService.verifyMac(tenant, request);
@@ -743,12 +743,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<GetPublicKeyResponse> getPublicKey(GetPublicKeyRequest request) {
-        log.info("Getting public key for: {}", request.getKeyId());
+    public ResponseEntity<GetPublicKeyResponse> getPublicKey(@PathVariable("keyId") String keyId) {
+        log.info("Getting public key for: {}", keyId);
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
-            GetPublicKeyResponse response = keyManagementService.getPublicKey(tenant, request.getKeyId());
-            auditService.logAction(tenant, IKmsActionType.Types.GET_PUBLIC_KEY, request.getKeyId(),
+            GetPublicKeyResponse response = keyManagementService.getPublicKey(tenant, keyId);
+            auditService.logAction(tenant, IKmsActionType.Types.GET_PUBLIC_KEY, keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());
             return ResponseFactory.responseOk(response);
@@ -763,20 +763,23 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     // ============================================================================
 
     @Override
-    public ResponseEntity<ListKeyVersionsResponse> listKeyVersions(ListKeyVersionsRequest request) {
+    public ResponseEntity<ListKeyVersionsResponse> listKeyVersions(
+            @PathVariable("keyId") String keyId,
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "marker", required = false) String marker) {
 
-        log.info("Listing key versions for: {}", request.getKeyId());
+        log.info("Listing key versions for: {}", keyId);
 
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
             ListKeyVersionsResponse response =
-                    keyVersionService.listKeyVersions(tenant, request.getKeyId(), request.getLimit(), request.getMarker());
+                    keyVersionService.listKeyVersions(tenant, keyId, limit, marker);
 
             auditService.logAction(
                     tenant,
                     IKmsActionType.Types.LIST_KEY_VERSIONS,
-                    request.getKeyId(),
+                    keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp()
             );
@@ -790,12 +793,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<ActiveVersionResponseDto> getActiveVersion(ActiveVersionRequestDto request) {
-        log.info("Getting active version for: {}", request.getKeyId());
+    public ResponseEntity<ActiveVersionResponseDto> getActiveVersion(@PathVariable("keyId") String keyId) {
+        log.info("Getting active version for: {}", keyId);
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
-            ActiveVersionResponseDto response = keyVersionService.getActiveVersion(tenant, request.getKeyId());
-            auditService.logAction(tenant, IKmsActionType.Types.GET_ACTIVE_VERSION, request.getKeyId(),
+            ActiveVersionResponseDto response = keyVersionService.getActiveVersion(tenant, keyId);
+            auditService.logAction(tenant, IKmsActionType.Types.GET_ACTIVE_VERSION, keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());
             return ResponseFactory.responseOk(response);
@@ -806,12 +809,15 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<UpdatePrimaryRegionResponse> updatePrimaryRegion(UpdatePrimaryRegionRequestDto request) {
-        log.info("Updating primary region for key: {} to region: {}", request.getKeyId(), request.getPrimaryRegion());
+    public ResponseEntity<UpdatePrimaryRegionResponse> updatePrimaryRegion(
+            @PathVariable("keyId") String keyId,
+            @Valid @RequestBody UpdatePrimaryRegionRequestDto request) {
+
+        log.info("Updating primary region for key: {} to region: {}", keyId, request.getPrimaryRegion());
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
-            UpdatePrimaryRegionResponse response = multiRegionService.updatePrimaryRegion(tenant, request.getKeyId(), request);
-            auditService.logAction(tenant, IKmsActionType.Types.UPDATE_PRIMARY_REGION, request.getKeyId(),
+            UpdatePrimaryRegionResponse response = multiRegionService.updatePrimaryRegion(tenant, keyId, request);
+            auditService.logAction(tenant, IKmsActionType.Types.UPDATE_PRIMARY_REGION, keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());
             return ResponseFactory.responseOk(response);
@@ -822,12 +828,15 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<ReplicateKeyResponse> replicateKey(ReplicateKeyRequestDto request) {
-        log.info("Replicating key: {} to region: {}", request.getKeyId(), request.getReplicaRegion());
+    public ResponseEntity<ReplicateKeyResponse> replicateKey(
+            @PathVariable("keyId") String keyId,
+            @Valid @RequestBody ReplicateKeyRequestDto request) {
+
+        log.info("Replicating key: {} to region: {}", keyId, request.getReplicaRegion());
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
-            ReplicateKeyResponse response = multiRegionService.replicateKey(tenant, request.getKeyId(), request);
-            auditService.logAction(tenant, IKmsActionType.Types.REPLICATE_KEY, request.getKeyId(),
+            ReplicateKeyResponse response = multiRegionService.replicateKey(tenant, keyId, request);
+            auditService.logAction(tenant, IKmsActionType.Types.REPLICATE_KEY, keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());
             return ResponseFactory.responseOk(response);
@@ -838,12 +847,14 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<SynchronizeMultiRegionKeyResponse> synchronizeMultiRegionKey(SynchronizeMultiRegionKeyRequest request) {
-        log.info("Synchronizing multi-region key: {}", request.getKeyId());
+    public ResponseEntity<SynchronizeMultiRegionKeyResponse> synchronizeMultiRegionKey(
+            @PathVariable("keyId") String keyId) {
+
+        log.info("Synchronizing multi-region key: {}", keyId);
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
-            SynchronizeMultiRegionKeyResponse response = multiRegionService.synchronizeMultiRegionKey(tenant, request.getKeyId());
-            auditService.logAction(tenant, IKmsActionType.Types.SYNCHRONIZE_MULTI_REGION_KEY, request.getKeyId(),
+            SynchronizeMultiRegionKeyResponse response = multiRegionService.synchronizeMultiRegionKey(tenant, keyId);
+            auditService.logAction(tenant, IKmsActionType.Types.SYNCHRONIZE_MULTI_REGION_KEY, keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());
             return ResponseFactory.responseOk(response);
@@ -853,12 +864,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         }
     }
 
-// =========================================================================
-// Aliases
-// =========================================================================
+    // =========================================================================
+    // Aliases
+    // =========================================================================
 
     @Override
-    public ResponseEntity<CreateAliasResponse> createAlias(CreateAliasRequest request) {
+    public ResponseEntity<CreateAliasResponse> createAlias(@Valid @RequestBody CreateAliasRequest request) {
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
             CreateAliasRequestDto internalReq = CreateAliasRequestDto.builder()
@@ -867,7 +878,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     .build();
             keyManagementService.createAlias(tenant, internalReq);
             auditService.logAction(tenant, IKmsActionType.Types.CREATE_ALIAS, request.getTargetKeyId(),
-                    requestContextService.getCurrentContext().getSenderUser(), requestContextService.getCurrentContext().getClientIp());
+                    requestContextService.getCurrentContext().getSenderUser(),
+                    requestContextService.getCurrentContext().getClientIp());
             return ResponseFactory.responseOk(new CreateAliasResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -875,15 +887,19 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<UpdateAliasResponse> updateAlias(UpdateAliasRequest request) {
+    public ResponseEntity<UpdateAliasResponse> updateAlias(
+            @PathVariable("aliasName") String aliasName,
+            @Valid @RequestBody UpdateAliasRequest request) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
             UpdateAliasRequestDto internalReq = UpdateAliasRequestDto.builder()
                     .targetKeyId(request.getTargetKeyId())
                     .build();
-            keyManagementService.updateAlias(tenant, request.getAliasName(), internalReq);
-            auditService.logAction(tenant, IKmsActionType.Types.UPDATE_ALIAS, request.getAliasName(),
-                    requestContextService.getCurrentContext().getSenderUser(), requestContextService.getCurrentContext().getClientIp());
+            keyManagementService.updateAlias(tenant, aliasName, internalReq);
+            auditService.logAction(tenant, IKmsActionType.Types.UPDATE_ALIAS, aliasName,
+                    requestContextService.getCurrentContext().getSenderUser(),
+                    requestContextService.getCurrentContext().getClientIp());
             return ResponseFactory.responseOk(new UpdateAliasResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -891,40 +907,32 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<DeleteAliasResponse> deleteAlias(DeleteAliasRequest request) {
+    public ResponseEntity<DeleteAliasResponse> deleteAlias(@PathVariable("aliasName") String aliasName) {
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            keyManagementService.deleteAlias(tenant, request.getAliasName());
-            auditService.logAction(tenant, IKmsActionType.Types.DELETE_ALIAS, request.getAliasName(), requestContextService.getCurrentContext().getSenderUser(), requestContextService.getCurrentContext().getClientIp());
+            keyManagementService.deleteAlias(tenant, aliasName);
+            auditService.logAction(tenant, IKmsActionType.Types.DELETE_ALIAS, aliasName,
+                    requestContextService.getCurrentContext().getSenderUser(),
+                    requestContextService.getCurrentContext().getClientIp());
             return ResponseFactory.responseOk(new DeleteAliasResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
         }
     }
 
-    private String buildAliasArn(String aliasName) {
-        // You need to get the current AWS account ID and region dynamically.
-        // For now, use placeholders or fetch from configuration.
-        String accountId = "123456789012"; // replace with real account ID
-        String region = "us-east-1";       // replace with actual region
-        return String.format("arn:aws:kms:%s:%s:alias/%s", region, accountId, aliasName);
-    }
-
-    private String formatDate(LocalDateTime date) {
-        return date != null ? date.format(DateTimeFormatter.ISO_DATE_TIME) : null;
-    }
-
     @Override
-    public ResponseEntity<ListAliasesResponse> listAliases(ListAliasesRequest request) {
+    public ResponseEntity<ListAliasesResponse> listAliases(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "marker", required = false) String marker) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            ListAliasesResponseDto internal = keyManagementService.listAliases(tenant, request.getLimit(), request.getMarker());
-
+            ListAliasesResponseDto internal = keyManagementService.listAliases(tenant, limit, marker);
             ListAliasesResponse response = ListAliasesResponse.builder()
                     .aliases(internal.getAliases().stream()
                             .map(a -> ListAliasesResponse.AliasEntry.builder()
                                     .aliasName(a.getAliasName())
-                                    .aliasArn(buildAliasArn(a.getAliasName()))   // compute ARN
+                                    .aliasArn(buildAliasArn(a.getAliasName()))
                                     .targetKeyId(a.getTargetKeyId())
                                     .creationDate(formatDate(a.getCreatedAt()))
                                     .lastUpdatedDate(formatDate(a.getUpdatedAt()))
@@ -940,21 +948,26 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<ListAliasesResponse> listAliasesForKey(ListAliasesForKeyRequest request) {
+    public ResponseEntity<ListAliasesResponse> listAliasesForKey(
+            @PathVariable("keyId") String keyId,
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "marker", required = false) String marker) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            ListAliasesResponseDto internal = keyManagementService.listAliasesForKey(tenant, request.getKeyId(), request.getLimit(), request.getMarker());
-
+            ListAliasesResponseDto internal = keyManagementService.listAliasesForKey(tenant, keyId, limit, marker);
             ListAliasesResponse response = ListAliasesResponse.builder()
                     .aliases(internal.getAliases().stream()
                             .map(a -> ListAliasesResponse.AliasEntry.builder()
                                     .aliasName(a.getAliasName())
-                                    .aliasArn(buildAliasArn(a.getAliasName()))   // compute ARN
+                                    .aliasArn(buildAliasArn(a.getAliasName()))
                                     .targetKeyId(a.getTargetKeyId())
                                     .creationDate(formatDate(a.getCreatedAt()))
                                     .lastUpdatedDate(formatDate(a.getUpdatedAt()))
                                     .build())
                             .collect(Collectors.toList()))
+                    .nextMarker(internal.getNextMarker())
+                    .truncated(internal.getTruncated())
                     .build();
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {
@@ -962,12 +975,25 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         }
     }
 
-// =========================================================================
-// Key Policies
-// =========================================================================
+    private String buildAliasArn(String aliasName) {
+        String accountId = "123456789012"; // replace with real account ID
+        String region = "us-east-1";
+        return String.format("arn:aws:kms:%s:%s:alias/%s", region, accountId, aliasName);
+    }
+
+    private String formatDate(LocalDateTime date) {
+        return date != null ? date.format(DateTimeFormatter.ISO_DATE_TIME) : null;
+    }
+
+    // =========================================================================
+    // Key Policies
+    // =========================================================================
 
     @Override
-    public ResponseEntity<PutKeyPolicyResponse> putKeyPolicy(PutKeyPolicyRequest request) {
+    public ResponseEntity<PutKeyPolicyResponse> putKeyPolicy(
+            @PathVariable("keyId") String keyId,
+            @Valid @RequestBody PutKeyPolicyRequest request) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
             SetKeyPolicyRequestDto internal = SetKeyPolicyRequestDto.builder()
@@ -975,8 +1001,10 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     .policyName(request.getPolicyName())
                     .bypassPolicyLockoutSafetyCheck(request.getBypassPolicyLockoutSafetyCheck())
                     .build();
-            keyPolicyService.setKeyPolicy(tenant, request.getKeyId(), internal);
-            auditService.logAction(tenant, IKmsActionType.Types.SET_KEY_POLICY, request.getKeyId(), requestContextService.getCurrentContext().getSenderUser(), requestContextService.getCurrentContext().getClientIp());
+            keyPolicyService.setKeyPolicy(tenant, keyId, internal);
+            auditService.logAction(tenant, IKmsActionType.Types.SET_KEY_POLICY, keyId,
+                    requestContextService.getCurrentContext().getSenderUser(),
+                    requestContextService.getCurrentContext().getClientIp());
             return ResponseFactory.responseOk(new PutKeyPolicyResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -984,10 +1012,13 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<GetKeyPolicyResponse> getKeyPolicy(GetKeyPolicyRequest request) {
+    public ResponseEntity<GetKeyPolicyResponse> getKeyPolicy(
+            @PathVariable("keyId") String keyId,
+            @RequestParam(value = "policyName", defaultValue = "default") String policyName) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            Map<String, Object> policyMap = keyPolicyService.getKeyPolicy(tenant, request.getKeyId());
+            Map<String, Object> policyMap = keyPolicyService.getKeyPolicy(tenant, keyId);
             String policyJson = new ObjectMapper().writeValueAsString(policyMap);
             GetKeyPolicyResponse response = GetKeyPolicyResponse.builder().policy(policyJson).build();
             return ResponseFactory.responseOk(response);
@@ -996,25 +1027,42 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         }
     }
 
-// =========================================================================
-// Grants
-// =========================================================================
+    @Override
+    public ResponseEntity<ListKeyPoliciesResponse> listKeyPolicies(
+            @PathVariable("keyId") String keyId,
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "marker", required = false) String marker) {
+
+        ListKeyPoliciesResponse response = ListKeyPoliciesResponse.builder()
+                .policyNames(List.of("default"))
+                .nextMarker(null)
+                .truncated(false)
+                .build();
+        return ResponseFactory.responseOk(response);
+    }
+
+    // =========================================================================
+    // Grants
+    // =========================================================================
 
     @Override
-    public ResponseEntity<CreateGrantResponse> createGrant(CreateGrantRequest request) {
+    public ResponseEntity<CreateGrantResponse> createGrant(
+            @PathVariable("keyId") String keyId,
+            @Valid @RequestBody CreateGrantRequest request) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            // Map AWS request to internal DTO
             CreateGrantRequestDto internal = CreateGrantRequestDto.builder()
-                    .principal(request.getGranteePrincipal())          // map granteePrincipal to principal
-                    .granteePrincipal(request.getGranteePrincipal())  // also set granteePrincipal
+                    .principal(request.getGranteePrincipal())
+                    .granteePrincipal(request.getGranteePrincipal())
                     .operations(request.getOperations())
                     .build();
 
-            GrantResponseDto internalRes = keyPolicyService.createGrant(tenant, request.getKeyId(), internal);
+            GrantResponseDto internalRes = keyPolicyService.createGrant(tenant, keyId, internal);
 
-            auditService.logAction(tenant, IKmsActionType.Types.CREATE_GRANT, request.getKeyId(),
-                    requestContextService.getCurrentContext().getSenderUser(), requestContextService.getCurrentContext().getClientIp());
+            auditService.logAction(tenant, IKmsActionType.Types.CREATE_GRANT, keyId,
+                    requestContextService.getCurrentContext().getSenderUser(),
+                    requestContextService.getCurrentContext().getClientIp());
 
             CreateGrantResponse response = CreateGrantResponse.builder()
                     .grantId(internalRes.getGrantId())
@@ -1028,10 +1076,16 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<ListGrantsResponse> listGrants(ListGrantsRequest request) {
+    public ResponseEntity<ListGrantsResponse> listGrants(
+            @PathVariable("keyId") String keyId,
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "marker", required = false) String marker,
+            @RequestParam(value = "grantId", required = false) String grantId,
+            @RequestParam(value = "granteePrincipal", required = false) String granteePrincipal) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            ListGrantsResponseDto internal = keyPolicyService.listGrants(tenant, request.getKeyId(), request.getLimit(), request.getMarker());
+            ListGrantsResponseDto internal = keyPolicyService.listGrants(tenant, keyId, limit, marker);
 
             ListGrantsResponse response = ListGrantsResponse.builder()
                     .grants(internal.getGrants().stream()
@@ -1040,15 +1094,15 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                                     .granteePrincipal(g.getGranteePrincipal())
                                     .retiringPrincipal(g.getRetiringPrincipal())
                                     .operations(g.getOperations())
-                                    .constraints(null) // No structured constraints from internal DTO
+                                    .constraints(null)
                                     .creationDate(formatDate(g.getCreatedAt()))
-                                    .lastUpdatedDate(formatDate(g.getCreatedAt())) // same as creation
-                                    .keyId(request.getKeyId()) // from path
-                                    .name(null) // not available
+                                    .lastUpdatedDate(formatDate(g.getCreatedAt()))
+                                    .keyId(keyId)
+                                    .name(null)
                                     .build())
                             .collect(Collectors.toList()))
-                    .nextMarker(internal.getNextToken()) // note: internal uses nextToken, not nextMarker
-                    .truncated(internal.getGrants().size() < (request.getLimit() != null ? request.getLimit() : Integer.MAX_VALUE)) // approximate
+                    .nextMarker(internal.getNextToken())
+                    .truncated(internal.getGrants().size() < (limit != null ? limit : Integer.MAX_VALUE))
                     .build();
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {
@@ -1057,11 +1111,16 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<RevokeGrantResponse> revokeGrant(RevokeGrantRequest request) {
+    public ResponseEntity<RevokeGrantResponse> revokeGrant(
+            @PathVariable("keyId") String keyId,
+            @PathVariable("grantId") String grantId) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            keyPolicyService.revokeGrant(tenant, request.getKeyId(), request.getGrantId());
-            auditService.logAction(tenant, IKmsActionType.Types.REVOKE_GRANT, request.getKeyId(), requestContextService.getCurrentContext().getSenderUser(), requestContextService.getCurrentContext().getClientIp());
+            keyPolicyService.revokeGrant(tenant, keyId, grantId);
+            auditService.logAction(tenant, IKmsActionType.Types.REVOKE_GRANT, keyId,
+                    requestContextService.getCurrentContext().getSenderUser(),
+                    requestContextService.getCurrentContext().getClientIp());
             return ResponseFactory.responseOk(new RevokeGrantResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -1069,14 +1128,16 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<RetireGrantResponse> retireGrant(RetireGrantRequest request) {
+    public ResponseEntity<RetireGrantResponse> retireGrant(@Valid @RequestBody RetireGrantRequest request) {
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
             RetireGrantRequestDto internal = RetireGrantRequestDto.builder()
                     .grantToken(request != null ? request.getGrantToken() : null)
                     .build();
             keyPolicyService.retireGrant(tenant, request.getGrantId(), internal);
-            auditService.logAction(tenant, IKmsActionType.Types.RETIRE_GRANT, request.getGrantId(), requestContextService.getCurrentContext().getSenderUser(), requestContextService.getCurrentContext().getClientIp());
+            auditService.logAction(tenant, IKmsActionType.Types.RETIRE_GRANT, request.getGrantId(),
+                    requestContextService.getCurrentContext().getSenderUser(),
+                    requestContextService.getCurrentContext().getClientIp());
             return ResponseFactory.responseOk(new RetireGrantResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -1084,60 +1145,11 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<EnableKeyRotationResponse> enableKeyRotation(EnableKeyRotationRequest request) {
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
-        try {
-            // Create internal request with enabled = true, default period 365
-            UpdateKeyRotationRequestDto internalRequest = UpdateKeyRotationRequestDto.builder()
-                    .enableRotation(true)
-                    .rotationPeriodDays(365)
-                    .applyImmediately(true)
-                    .build();
-            keyManagementService.updateKeyRotation(tenant, request.getKeyId(), internalRequest);
-            auditService.logAction(tenant, IKmsActionType.Types.UPDATE_KEY_ROTATION, request.getKeyId(),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getClientIp());
-            // AWS returns an empty response
-            return ResponseFactory.responseOk(new EnableKeyRotationResponse());
-        } catch (Throwable e) {
-            return getBackExceptionResponse(e);
-        }
-    }
+    public ResponseEntity<ListRetirableGrantsResponse> listRetirableGrants(
+            @RequestParam("retiringPrincipal") String retiringPrincipal,
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "marker", required = false) String marker) {
 
-    @Override
-    public ResponseEntity<DisableKeyRotationResponse> disableKeyRotation(DisableKeyRotationRequest request) {
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
-        try {
-            UpdateKeyRotationRequestDto internalRequest = UpdateKeyRotationRequestDto.builder()
-                    .enableRotation(false)
-                    .applyImmediately(true)
-                    .build();
-            keyManagementService.updateKeyRotation(tenant, request.getKeyId(), internalRequest);
-            auditService.logAction(tenant, IKmsActionType.Types.UPDATE_KEY_ROTATION, request.getKeyId(),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getClientIp());
-            return ResponseFactory.responseOk(new DisableKeyRotationResponse());
-        } catch (Throwable e) {
-            return getBackExceptionResponse(e);
-        }
-    }
-
-    @Override
-    public ResponseEntity<ListKeyPoliciesResponse> listKeyPolicies(ListKeyPoliciesRequest request) {
-        // AWS KMS typically returns only the default policy name.
-        // Our internal service doesn't have a dedicated method, so we return a minimal response.
-        ListKeyPoliciesResponse response = ListKeyPoliciesResponse.builder()
-                .policyNames(List.of("default"))
-                .nextMarker(null)
-                .truncated(false)
-                .build();
-        return ResponseFactory.responseOk(response);
-    }
-
-    @Override
-    public ResponseEntity<ListRetirableGrantsResponse> listRetirableGrants(ListRetirableGrantsRequest request) {
-        // Our internal IKeyPolicyService does not have a method to list retirable grants.
-        // Return an empty list as a safe default.
         ListRetirableGrantsResponse response = ListRetirableGrantsResponse.builder()
                 .grants(List.of())
                 .nextMarker(null)
@@ -1146,21 +1158,27 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         return ResponseFactory.responseOk(response);
     }
 
-// =========================================================================
-// Tags
-// =========================================================================
+    // =========================================================================
+    // Tags
+    // =========================================================================
 
     @Override
-    public ResponseEntity<TagResourceResponse> tagResource(TagResourceRequest request) {
+    public ResponseEntity<TagResourceResponse> tagResource(
+            @PathVariable("keyId") String keyId,
+            @Valid @RequestBody TagResourceRequest request) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
             TagResourceRequestDto internal = TagResourceRequestDto.builder()
                     .tags(request.getTags().stream()
-                            .map(t -> new TagDto(t.getTagKey(), t.getTagValue()))
-                            .collect(Collectors.toMap(TagDto::getTagKey, TagDto::getTagValue)))
+                            .collect(Collectors.toMap(
+                                    ListResourceTagsResponse.Tag::getTagKey,
+                                    ListResourceTagsResponse.Tag::getTagValue)))
                     .build();
-            keyManagementService.tagResource(tenant, request.getKeyId(), internal);
-            auditService.logAction(tenant, IKmsActionType.Types.TAG_RESOURCE, request.getKeyId(), requestContextService.getCurrentContext().getSenderUser(), requestContextService.getCurrentContext().getClientIp());
+            keyManagementService.tagResource(tenant, keyId, internal);
+            auditService.logAction(tenant, IKmsActionType.Types.TAG_RESOURCE, keyId,
+                    requestContextService.getCurrentContext().getSenderUser(),
+                    requestContextService.getCurrentContext().getClientIp());
             return ResponseFactory.responseOk(new TagResourceResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -1168,14 +1186,19 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<UntagResourceResponse> untagResource(UntagResourceRequest request) {
+    public ResponseEntity<UntagResourceResponse> untagResource(
+            @PathVariable("keyId") String keyId,
+            @Valid @RequestBody UntagResourceRequest request) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
             UntagResourceRequestDto internal = UntagResourceRequestDto.builder()
                     .tagKeys(request.getTagKeys())
                     .build();
-            keyManagementService.untagResource(tenant, request.getKeyId(), internal);
-            auditService.logAction(tenant, IKmsActionType.Types.UNTAG_RESOURCE, request.getKeyId(), requestContextService.getCurrentContext().getSenderUser(), requestContextService.getCurrentContext().getClientIp());
+            keyManagementService.untagResource(tenant, keyId, internal);
+            auditService.logAction(tenant, IKmsActionType.Types.UNTAG_RESOURCE, keyId,
+                    requestContextService.getCurrentContext().getSenderUser(),
+                    requestContextService.getCurrentContext().getClientIp());
             return ResponseFactory.responseOk(new UntagResourceResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -1183,10 +1206,14 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<ListResourceTagsResponse> listResourceTags(ListResourceTagsRequest request) {
+    public ResponseEntity<ListResourceTagsResponse> listResourceTags(
+            @PathVariable("keyId") String keyId,
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "marker", required = false) String marker) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            ListTagsResponseDto internal = keyManagementService.listResourceTags(tenant, request.getKeyId());
+            ListTagsResponseDto internal = keyManagementService.listResourceTags(tenant, keyId);
             ListResourceTagsResponse response = ListResourceTagsResponse.builder()
                     .tags(internal.getTags().stream()
                             .map(t -> ListResourceTagsResponse.Tag.builder()
@@ -1201,15 +1228,18 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         }
     }
 
-// =========================================================================
-// BYOK
-// =========================================================================
+    // =========================================================================
+    // BYOK
+    // =========================================================================
 
     @Override
-    public ResponseEntity<GetParametersForImportResponse> getParametersForImport(GetParametersForImportRequest request) {
+    public ResponseEntity<GetParametersForImportResponse> getParametersForImport(
+            @PathVariable("keyId") String keyId,
+            @Valid @RequestBody GetParametersForImportRequest request) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            ImportParametersResponseDto internal = keyManagementService.getParametersForImport(tenant, request.getKeyId());
+            ImportParametersResponseDto internal = keyManagementService.getParametersForImport(tenant, keyId);
             GetParametersForImportResponse response = GetParametersForImportResponse.builder()
                     .keyId(internal.getKeyId())
                     .importToken(Arrays.toString(internal.getImportToken()))
@@ -1223,7 +1253,10 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<ImportKeyMaterialResponse> importKeyMaterial(ImportKeyMaterialRequest request) {
+    public ResponseEntity<ImportKeyMaterialResponse> importKeyMaterial(
+            @PathVariable("keyId") String keyId,
+            @Valid @RequestBody ImportKeyMaterialRequest request) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
             ImportKeyMaterialRequestDto internal = ImportKeyMaterialRequestDto.builder()
@@ -1232,8 +1265,10 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     .validTo(request.getValidTo())
                     .expirationModel(request.getExpirationModel())
                     .build();
-            keyManagementService.importKeyMaterial(tenant, request.getKeyId(), internal);
-            auditService.logAction(tenant, IKmsActionType.Types.IMPORT_KEY_MATERIAL, request.getKeyId(), requestContextService.getCurrentContext().getSenderUser(), requestContextService.getCurrentContext().getClientIp());
+            keyManagementService.importKeyMaterial(tenant, keyId, internal);
+            auditService.logAction(tenant, IKmsActionType.Types.IMPORT_KEY_MATERIAL, keyId,
+                    requestContextService.getCurrentContext().getSenderUser(),
+                    requestContextService.getCurrentContext().getClientIp());
             return ResponseFactory.responseOk(new ImportKeyMaterialResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -1241,23 +1276,29 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<DeleteImportedKeyMaterialResponse> deleteImportedKeyMaterial(DeleteImportedKeyMaterialRequest request) {
+    public ResponseEntity<DeleteImportedKeyMaterialResponse> deleteImportedKeyMaterial(
+            @PathVariable("keyId") String keyId) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            keyManagementService.deleteImportedKeyMaterial(tenant, request.getKeyId());
-            auditService.logAction(tenant, IKmsActionType.Types.DELETE_IMPORTED_KEY_MATERIAL, request.getKeyId(), requestContextService.getCurrentContext().getSenderUser(), requestContextService.getCurrentContext().getClientIp());
+            keyManagementService.deleteImportedKeyMaterial(tenant, keyId);
+            auditService.logAction(tenant, IKmsActionType.Types.DELETE_IMPORTED_KEY_MATERIAL, keyId,
+                    requestContextService.getCurrentContext().getSenderUser(),
+                    requestContextService.getCurrentContext().getClientIp());
             return ResponseFactory.responseOk(new DeleteImportedKeyMaterialResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
         }
     }
 
-// =========================================================================
-// Custom Key Stores
-// =========================================================================
+    // =========================================================================
+    // Custom Key Stores
+    // =========================================================================
 
     @Override
-    public ResponseEntity<CreateCustomKeyStoreResponse> createCustomKeyStore(CreateCustomKeyStoreRequest request) {
+    public ResponseEntity<CreateCustomKeyStoreResponse> createCustomKeyStore(
+            @Valid @RequestBody CreateCustomKeyStoreRequest request) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
             CreateCustomKeyStoreRequestDto internal = CreateCustomKeyStoreRequestDto.builder()
@@ -1281,30 +1322,13 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         }
     }
 
-    private DescribeCustomKeyStoreResponse toAwsResponse(CustomKeyStoreResponseDto internal) {
-
-        DescribeCustomKeyStoreResponse.CustomKeyStore store =
-                DescribeCustomKeyStoreResponse.CustomKeyStore.builder()
-                        .customKeyStoreId(internal.getKeyStoreId())
-                        .customKeyStoreName(internal.getKeyStoreName())
-                        .creationDate(internal.getCreatedAt())
-                        .connectionState(internal.getStatus() != null ? internal.getStatus().name() : null)
-                        .cloudHsmClusterId(internal.getCloudHsmClusterId())
-                        .customKeyStoreType(internal.getType() != null ? internal.getType().name() : null)
-                        .xksProxyUriEndpoint(internal.getXksProxyUriEndpoint())
-                        .xksProxyUriPath(internal.getXksProxyUriPath())
-                        .xksProxyAuthenticationCredential(null) // do not expose credential in response
-                        .xksProxyConnectivity(null)
-                        .build();
-
-        return DescribeCustomKeyStoreResponse.builder().customKeyStore(store).build();
-    }
-
     @Override
-    public ResponseEntity<DescribeCustomKeyStoreResponse> describeCustomKeyStore(DescribeCustomKeyStoreRequest request) {
+    public ResponseEntity<DescribeCustomKeyStoreResponse> describeCustomKeyStore(
+            @PathVariable("customKeyStoreId") Long customKeyStoreId) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            CustomKeyStoreResponseDto internal = customKeyStoreService.describeCustomKeyStore(tenant, request.getCustomKeyStoreId());
+            CustomKeyStoreResponseDto internal = customKeyStoreService.describeCustomKeyStore(tenant, customKeyStoreId);
             DescribeCustomKeyStoreResponse response = toAwsResponse(internal);
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {
@@ -1313,7 +1337,10 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<UpdateCustomKeyStoreResponse> updateCustomKeyStore(UpdateCustomKeyStoreRequest request) {
+    public ResponseEntity<UpdateCustomKeyStoreResponse> updateCustomKeyStore(
+            @PathVariable("customKeyStoreId") Long customKeyStoreId,
+            @Valid @RequestBody UpdateCustomKeyStoreRequest request) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
             UpdateCustomKeyStoreRequestDto internal = UpdateCustomKeyStoreRequestDto.builder()
@@ -1325,7 +1352,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     .xksProxyAuthenticationCredential(request.getXksProxyAuthenticationCredential())
                     .xksProxyConnectivity(request.getXksProxyConnectivity())
                     .build();
-            customKeyStoreService.updateCustomKeyStore(tenant, request.getCustomKeyStoreId(), internal);
+            customKeyStoreService.updateCustomKeyStore(tenant, customKeyStoreId, internal);
             return ResponseFactory.responseOk(new UpdateCustomKeyStoreResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -1333,10 +1360,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<DeleteCustomKeyStoreResponse> deleteCustomKeyStore(DeleteCustomKeyStoreRequest request) {
+    public ResponseEntity<DeleteCustomKeyStoreResponse> deleteCustomKeyStore(
+            @PathVariable("customKeyStoreId") Long customKeyStoreId) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            customKeyStoreService.deleteCustomKeyStore(tenant, request.getCustomKeyStoreId());
+            customKeyStoreService.deleteCustomKeyStore(tenant, customKeyStoreId);
             return ResponseFactory.responseOk(new DeleteCustomKeyStoreResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -1344,10 +1373,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<ConnectCustomKeyStoreResponse> connectCustomKeyStore(ConnectCustomKeyStoreRequest request) {
+    public ResponseEntity<ConnectCustomKeyStoreResponse> connectCustomKeyStore(
+            @PathVariable("customKeyStoreId") Long customKeyStoreId) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            customKeyStoreService.connectCustomKeyStore(tenant, request.getCustomKeyStoreId());
+            customKeyStoreService.connectCustomKeyStore(tenant, customKeyStoreId);
             return ResponseFactory.responseOk(new ConnectCustomKeyStoreResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -1355,10 +1386,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<DisconnectCustomKeyStoreResponse> disconnectCustomKeyStore(DisconnectCustomKeyStoreRequest request) {
+    public ResponseEntity<DisconnectCustomKeyStoreResponse> disconnectCustomKeyStore(
+            @PathVariable("customKeyStoreId") Long customKeyStoreId) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            customKeyStoreService.disconnectCustomKeyStore(tenant, request.getCustomKeyStoreId());
+            customKeyStoreService.disconnectCustomKeyStore(tenant, customKeyStoreId);
             return ResponseFactory.responseOk(new DisconnectCustomKeyStoreResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -1366,10 +1399,15 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<ListCustomKeyStoresResponse> listCustomKeyStores(ListCustomKeyStoresRequest request) {
+    public ResponseEntity<ListCustomKeyStoresResponse> listCustomKeyStores(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "marker", required = false) String marker,
+            @RequestParam(value = "customKeyStoreId", required = false) Long customKeyStoreId,
+            @RequestParam(value = "customKeyStoreName", required = false) String customKeyStoreName) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            ListCustomKeyStoresResponseDto internal = customKeyStoreService.listCustomKeyStores(tenant, request.getLimit(), request.getMarker());
+            ListCustomKeyStoresResponseDto internal = customKeyStoreService.listCustomKeyStores(tenant, limit, marker);
             ListCustomKeyStoresResponse response = ListCustomKeyStoresResponse.builder()
                     .customKeyStores(internal.getCustomKeyStores().stream()
                             .map(s -> DescribeCustomKeyStoreResponse.CustomKeyStore.builder()
@@ -1388,17 +1426,38 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         }
     }
 
-// =========================================================================
-// Audit & Utility
-// =========================================================================
+    private DescribeCustomKeyStoreResponse toAwsResponse(CustomKeyStoreResponseDto internal) {
+        DescribeCustomKeyStoreResponse.CustomKeyStore store =
+                DescribeCustomKeyStoreResponse.CustomKeyStore.builder()
+                        .customKeyStoreId(internal.getKeyStoreId())
+                        .customKeyStoreName(internal.getKeyStoreName())
+                        .creationDate(internal.getCreatedAt())
+                        .connectionState(internal.getStatus() != null ? internal.getStatus().name() : null)
+                        .cloudHsmClusterId(internal.getCloudHsmClusterId())
+                        .customKeyStoreType(internal.getType() != null ? internal.getType().name() : null)
+                        .xksProxyUriEndpoint(internal.getXksProxyUriEndpoint())
+                        .xksProxyUriPath(internal.getXksProxyUriPath())
+                        .xksProxyAuthenticationCredential(null)
+                        .xksProxyConnectivity(null)
+                        .build();
+
+        return DescribeCustomKeyStoreResponse.builder().customKeyStore(store).build();
+    }
+
+    // =========================================================================
+    // Audit & Utility
+    // =========================================================================
 
     @Override
-    public ResponseEntity<AuditLogResponse> getAuditLogs(AuditLogRequest request) {
+    public ResponseEntity<AuditLogResponse> getAuditLogs(
+            @PathVariable("keyId") String keyId,
+            @RequestParam(value = "fromDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate,
+            @RequestParam(value = "toDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate,
+            @RequestParam(value = "limit", required = false) Integer limit) {
+
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            LocalDateTime from = request.getFromDate() != null ? LocalDateTime.parse(request.getFromDate(), DateTimeFormatter.ISO_DATE_TIME) : null;
-            LocalDateTime to = request.getToDate() != null ? LocalDateTime.parse(request.getToDate(), DateTimeFormatter.ISO_DATE_TIME) : null;
-            AuditLogResponseDto internal = auditService.getAuditLogs(tenant, request.getKeyId(), from, to, request.getLimit());
+            AuditLogResponseDto internal = auditService.getAuditLogs(tenant, keyId, fromDate, toDate, limit);
             AuditLogResponse response = AuditLogResponse.builder()
                     .logs(internal.getLogs().stream()
                             .map(l -> AuditLogResponse.LogEntry.builder()
@@ -1417,10 +1476,10 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<KeyUsageStatsResponse> getKeyUsageStats(KeyUsageStatsRequest request) {
+    public ResponseEntity<KeyUsageStatsResponse> getKeyUsageStats(@PathVariable("keyId") String keyId) {
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            KeyUsageStatsResponseDto internal = keyManagementService.getKeyUsageStats(tenant, request.getKeyId());
+            KeyUsageStatsResponseDto internal = keyManagementService.getKeyUsageStats(tenant, keyId);
             KeyUsageStatsResponse response = KeyUsageStatsResponse.builder()
                     .keyId(internal.getKeyId())
                     .encryptCount(internal.getEncryptCount())
@@ -1436,14 +1495,16 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<GenerateRandomResponse> generateRandom(GenerateRandomRequest request) {
+    public ResponseEntity<GenerateRandomResponse> generateRandom(@Valid @RequestBody GenerateRandomRequest request) {
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
             byte[] randomBytes = new byte[request.getNumberOfBytes()];
             new SecureRandom().nextBytes(randomBytes);
             String plaintext = Base64.getEncoder().encodeToString(randomBytes);
             GenerateRandomResponse response = GenerateRandomResponse.builder().plaintext(plaintext).build();
-            auditService.logAction(tenant, IKmsActionType.Types.GENERATE_RANDOM_DATA, null, requestContextService.getCurrentContext().getSenderUser(), requestContextService.getCurrentContext().getClientIp());
+            auditService.logAction(tenant, IKmsActionType.Types.GENERATE_RANDOM_DATA, null,
+                    requestContextService.getCurrentContext().getSenderUser(),
+                    requestContextService.getCurrentContext().getClientIp());
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -1451,10 +1512,10 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<ValidateKeyResponse> validateKey(ValidateKeyRequest request) {
+    public ResponseEntity<ValidateKeyResponse> validateKey(@PathVariable("keyId") String keyId) {
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            keyManagementService.validateKey(tenant, request.getKeyId());
+            keyManagementService.validateKey(tenant, keyId);
             ValidateKeyResponse response = ValidateKeyResponse.builder().valid(true).build();
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {
