@@ -1,0 +1,658 @@
+package eu.isygoit.service.impl;
+
+import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.enums.IEnumKeySpec;
+import eu.isygoit.enums.IEnumKeyStatus;
+import eu.isygoit.enums.IEnumKeyUsage;
+import eu.isygoit.exception.InvalidKeyStateException;
+import eu.isygoit.exception.KeyNotFoundException;
+import eu.isygoit.model.KmsAlias;
+import eu.isygoit.model.KmsKey;
+import eu.isygoit.model.KmsKeyVersion;
+import eu.isygoit.model.KmsTag;
+import eu.isygoit.repository.KmsAliasRepository;
+import eu.isygoit.repository.KmsKeyRepository;
+import eu.isygoit.repository.KmsKeyVersionRepository;
+import eu.isygoit.repository.KmsTagRepository;
+import eu.isygoit.service.ICryptoService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class KeyManagementServiceTest {
+
+    private static final String TENANT = "tenant-1";
+    private static final String KEY_ID = "key-1";
+
+    @Mock
+    private KmsKeyRepository kmsKeyRepository;
+
+    @Mock
+    private KmsKeyVersionRepository kmsKeyVersionRepository;
+
+    @Mock
+    private ICryptoService cryptoService;
+
+    @Mock
+    private KmsAliasRepository kmsAliasRepository;
+
+    @Mock
+    private KmsTagRepository kmsTagRepository;
+
+    @InjectMocks
+    private KeyManagementServiceImpl service;
+
+    private KmsKey key;
+
+    @BeforeEach
+    void setUp() {
+        key = KmsKey.builder()
+                .keyId(KEY_ID)
+                .tenant(TENANT)
+                .keyArn("arn:test")
+                .keySpec(IEnumKeySpec.Types.AES_256)
+                .keyUsage(IEnumKeyUsage.Types.ENCRYPT_DECRYPT)
+                .keyStatus(IEnumKeyStatus.Types.ENABLED)
+                .currentVersionId("v1")
+                .rotationEnabled(false)
+                .keyAlias("alias/test")
+                .description("desc")
+                .creationDate(LocalDateTime.now())
+                .keyMaterial(new byte[]{1, 2, 3})
+                .build();
+    }
+
+    @Test
+    void shouldCreateKey() {
+        CreateKeyRequest request = CreateKeyRequest.builder()
+                .keySpec(IEnumKeySpec.Types.AES_256)
+                .keyUsage(IEnumKeyUsage.Types.ENCRYPT_DECRYPT)
+                .alias("alias/test")
+                .description("description")
+                .build();
+
+        when(cryptoService.generateKeyMaterial(any())).thenReturn(new byte[]{1, 2, 3});
+        when(kmsKeyRepository.save(any())).thenAnswer(invocation -> {
+            KmsKey saved = invocation.getArgument(0);
+            saved.setKeyId(KEY_ID);
+            return saved;
+        });
+
+        CreateKeyResponse response = service.createKey(TENANT, request);
+
+        assertNotNull(response);
+        assertNotNull(response.getKeyMetadata());
+        assertEquals(KEY_ID, response.getKeyMetadata().getKeyId());
+        assertEquals(IEnumKeyStatus.Types.ENABLED, response.getKeyMetadata().getStatus());
+
+        verify(cryptoService).generateKeyMaterial(any());
+        verify(kmsKeyRepository).save(any(KmsKey.class));
+        verify(kmsKeyVersionRepository).save(any(KmsKeyVersion.class));
+    }
+
+    @Test
+    void shouldThrowRuntimeExceptionWhenCreateKeyFails() {
+        CreateKeyRequest request = CreateKeyRequest.builder()
+                .keySpec(IEnumKeySpec.Types.AES_256)
+                .build();
+
+        when(cryptoService.generateKeyMaterial(any()))
+                .thenThrow(new RuntimeException("boom"));
+
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> service.createKey(TENANT, request));
+
+        assertTrue(exception.getMessage().contains("Failed to create key"));
+    }
+
+    @Test
+    void shouldDescribeKey() {
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        DescribeKeyResponse response = service.describeKey(TENANT, KEY_ID, List.of());
+
+        assertNotNull(response);
+        assertEquals(KEY_ID, response.getKeyMetadata().getKeyId());
+        assertEquals(key.getKeyArn(), response.getKeyMetadata().getArn());
+    }
+
+    @Test
+    void shouldThrowWhenDescribeKeyNotFound() {
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.empty());
+
+        assertThrows(KeyNotFoundException.class,
+                () -> service.describeKey(TENANT, KEY_ID, List.of()));
+    }
+
+    @Test
+    void shouldListKeys() {
+        Page<KmsKey> page = new PageImpl<>(List.of(key));
+
+        when(kmsKeyRepository.findByTenant(eq(TENANT), any(Pageable.class)))
+                .thenReturn(page);
+
+        ListKeysResponse response = service.listKeys(TENANT, 10, "0");
+
+        assertEquals(1, response.getKeys().size());
+        assertEquals(KEY_ID, response.getKeys().get(0).getKeyId());
+    }
+
+    @Test
+    void shouldEnableKey() {
+        key.setKeyStatus(IEnumKeyStatus.Types.DISABLED);
+
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        EnableKeyResponse response = service.enableKey(TENANT, KEY_ID);
+
+        assertEquals(IEnumKeyStatus.Types.ENABLED, response.getKeyStatus());
+        verify(kmsKeyRepository).save(key);
+    }
+
+    @Test
+    void shouldDisableKey() {
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        DisableKeyResponse response = service.disableKey(TENANT, KEY_ID);
+
+        assertEquals(IEnumKeyStatus.Types.DISABLED, response.getStatus());
+        verify(kmsKeyRepository).save(key);
+    }
+
+    @Test
+    void shouldThrowWhenDisablePendingDeletionKey() {
+        key.setKeyStatus(IEnumKeyStatus.Types.PENDING_DELETION);
+
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        assertThrows(InvalidKeyStateException.class,
+                () -> service.disableKey(TENANT, KEY_ID));
+    }
+
+    @Test
+    void shouldScheduleKeyDeletion() {
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        ScheduleKeyDeletionResponse response =
+                service.scheduleKeyDeletion(TENANT, KEY_ID, 10);
+
+        assertEquals(IEnumKeyStatus.Types.PENDING_DELETION, response.getKeyStatus());
+        assertEquals(10, response.getPendingWindowInDays());
+        assertNotNull(response.getDeletionDate());
+    }
+
+    @Test
+    void shouldThrowForInvalidDeletionWindow() {
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.scheduleKeyDeletion(TENANT, KEY_ID, 2));
+    }
+
+    @Test
+    void shouldRotateKey() {
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        when(cryptoService.generateKeyMaterial(any()))
+                .thenReturn(new byte[]{4, 5, 6});
+
+        RotateKeyResponse response = service.rotateKey(TENANT, KEY_ID);
+
+        assertEquals(KEY_ID, response.getKeyId());
+        assertNotNull(response.getNewVersionId());
+
+        verify(kmsKeyVersionRepository).save(any(KmsKeyVersion.class));
+        verify(kmsKeyRepository).save(key);
+    }
+
+    @Test
+    void shouldThrowWhenRotateDisabledKey() {
+        key.setKeyStatus(IEnumKeyStatus.Types.DISABLED);
+
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        assertThrows(InvalidKeyStateException.class,
+                () -> service.rotateKey(TENANT, KEY_ID));
+    }
+
+    @Test
+    void shouldUpdateDescriptionAndAlias() {
+        UpdateKeyDescriptionRequest request = UpdateKeyDescriptionRequest.builder()
+                .alias("new-alias")
+                .description("new-description")
+                .build();
+
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        when(kmsKeyRepository.save(any())).thenReturn(key);
+
+        UpdateKeyDescriptionResponse response =
+                service.updateKeyDescription(TENANT, KEY_ID, request);
+
+        assertEquals("new-alias", response.getKeyMetadata().getAlias());
+        assertEquals("new-description", response.getKeyMetadata().getDescription());
+    }
+
+    @Test
+    void shouldCancelKeyDeletion() {
+        key.setKeyStatus(IEnumKeyStatus.Types.PENDING_DELETION);
+
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        CancelKeyDeletionResponse response =
+                service.cancelKeyDeletion(TENANT, KEY_ID);
+
+        assertEquals(IEnumKeyStatus.Types.DISABLED, response.getKeyStatus());
+    }
+
+    @Test
+    void shouldThrowWhenCancelDeletionForNonPendingKey() {
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        assertThrows(InvalidKeyStateException.class,
+                () -> service.cancelKeyDeletion(TENANT, KEY_ID));
+    }
+
+    @Test
+    void shouldUpdateKeyRotation() {
+        UpdateKeyRotationRequestDto request = UpdateKeyRotationRequestDto.builder()
+                .enableRotation(true)
+                .rotationPeriodDays(30)
+                .build();
+
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        KeyRotationStatusResponseDto response =
+                service.updateKeyRotation(TENANT, KEY_ID, request);
+
+        assertTrue(response.getRotationEnabled());
+        assertEquals(30, response.getRotationPeriodDays());
+    }
+
+    @Test
+    void shouldGetRotationStatus() {
+        key.setRotationEnabled(true);
+
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        GetKeyRotationStatusResponse response =
+                service.getKeyRotationStatus(TENANT, KEY_ID);
+
+        assertTrue(response.getRotationEnabled());
+    }
+
+    @Test
+    void shouldGetPublicKey() {
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        when(cryptoService.extractPublicKey(any(), any()))
+                .thenReturn(new byte[]{9, 8, 7});
+
+        GetPublicKeyResponse response = service.getPublicKey(TENANT, KEY_ID);
+
+        assertEquals(KEY_ID, response.getKeyId());
+        assertNotNull(response.getPublicKey());
+    }
+
+    @Test
+    void shouldCreateAlias() {
+        CreateAliasRequestDto request = CreateAliasRequestDto.builder()
+                .aliasName("alias/test")
+                .targetKeyId(KEY_ID)
+                .build();
+
+        when(kmsAliasRepository.findByTenantAndAliasName(TENANT, "alias/test"))
+                .thenReturn(Optional.empty());
+
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        when(kmsAliasRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        AliasResponseDto response = service.createAlias(TENANT, request);
+
+        assertEquals("alias/test", response.getAliasName());
+        assertEquals(KEY_ID, response.getTargetKeyId());
+    }
+
+    @Test
+    void shouldThrowWhenAliasAlreadyExists() {
+        CreateAliasRequestDto request = CreateAliasRequestDto.builder()
+                .aliasName("alias/test")
+                .targetKeyId(KEY_ID)
+                .build();
+
+        when(kmsAliasRepository.findByTenantAndAliasName(TENANT, "alias/test"))
+                .thenReturn(Optional.of(KmsAlias.builder().build()));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.createAlias(TENANT, request));
+    }
+
+    @Test
+    void shouldUpdateAlias() {
+        KmsAlias alias = KmsAlias.builder()
+                .aliasName("alias/test")
+                .keyId(KEY_ID)
+                .build();
+
+        UpdateAliasRequestDto request = UpdateAliasRequestDto.builder()
+                .targetKeyId(KEY_ID)
+                .build();
+
+        when(kmsAliasRepository.findByTenantAndAliasName(TENANT, "alias/test"))
+                .thenReturn(Optional.of(alias));
+
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        AliasResponseDto response =
+                service.updateAlias(TENANT, "alias/test", request);
+
+        assertEquals(KEY_ID, response.getTargetKeyId());
+    }
+
+    @Test
+    void shouldDeleteAlias() {
+        KmsAlias alias = KmsAlias.builder().aliasName("alias/test").build();
+
+        when(kmsAliasRepository.findByTenantAndAliasName(TENANT, "alias/test"))
+                .thenReturn(Optional.of(alias));
+
+        service.deleteAlias(TENANT, "alias/test");
+
+        verify(kmsAliasRepository).delete(alias);
+    }
+
+    @Test
+    void shouldListAliases() {
+        KmsAlias alias = KmsAlias.builder()
+                .aliasName("alias/test")
+                .keyId(KEY_ID)
+                .build();
+
+        Page<KmsAlias> page = new PageImpl<>(List.of(alias));
+
+        when(kmsAliasRepository.findByTenant(eq(TENANT), any(Pageable.class)))
+                .thenReturn(page);
+
+        ListAliasesResponseDto response = service.listAliases(TENANT, 10, "0");
+
+        assertEquals(1, response.getAliases().size());
+    }
+
+    @Test
+    void shouldListAliasesForKey() {
+        KmsAlias alias = KmsAlias.builder()
+                .aliasName("alias/test")
+                .keyId(KEY_ID)
+                .build();
+
+        when(kmsAliasRepository.findByTenantAndKeyId(eq(TENANT), eq(KEY_ID), any(Pageable.class)))
+                .thenReturn(List.of(alias));
+
+        ListAliasesResponseDto response =
+                service.listAliasesForKey(TENANT, KEY_ID, 10, "0");
+
+        assertEquals(1, response.getAliases().size());
+    }
+
+    @Test
+    void shouldTagResource() {
+        Map<String, String> tags = new HashMap<>();
+        tags.put("env", "prod");
+        tags.put("team", "security");
+
+        TagResourceRequestDto request = TagResourceRequestDto.builder()
+                .tags(tags)
+                .build();
+
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        Object response = service.tagResource(TENANT, KEY_ID, request);
+
+        assertNotNull(response);
+        verify(kmsTagRepository, times(2)).save(any(KmsTag.class));
+    }
+
+    @Test
+    void shouldUntagResource() {
+        UntagResourceRequestDto request = UntagResourceRequestDto.builder()
+                .tagKeys(List.of("env"))
+                .build();
+
+        Object response = service.untagResource(TENANT, KEY_ID, request);
+
+        assertNotNull(response);
+
+        verify(kmsTagRepository)
+                .deleteByTenantAndKeyIdAndTagKeyIn(TENANT, KEY_ID, List.of("env"));
+    }
+
+    @Test
+    void shouldListResourceTags() {
+        KmsTag tag = KmsTag.builder()
+                .tagKey("env")
+                .tagValue("prod")
+                .build();
+
+        when(kmsTagRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(List.of(tag));
+
+        ListTagsResponseDto response = service.listResourceTags(TENANT, KEY_ID);
+
+        assertEquals(1, response.getTags().size());
+        assertEquals("env", response.getTags().get(0).getTagKey());
+    }
+
+    @Test
+    void shouldGetImportParameters() {
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        when(cryptoService.generateWrappingKey())
+                .thenReturn(new byte[]{1});
+
+        when(cryptoService.generateImportToken())
+                .thenReturn(new byte[]{2});
+
+        ImportParametersResponseDto response =
+                service.getParametersForImport(TENANT, KEY_ID);
+
+        assertEquals(KEY_ID, response.getKeyId());
+        assertEquals(24, response.getValidityPeriodHours());
+    }
+
+    @Test
+    void shouldImportKeyMaterial() {
+        ImportKeyMaterialRequestDto request = ImportKeyMaterialRequestDto.builder()
+                .encryptedKeyMaterial(new byte[]{1})
+                .importToken(new byte[]{2})
+                .expirationDate(LocalDateTime.now().plusDays(1))
+                .build();
+
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        when(cryptoService.decryptKeyMaterial(any(), any(), any()))
+                .thenReturn(new byte[]{9});
+
+        KeyDescriptionResponseDto response =
+                service.importKeyMaterial(TENANT, KEY_ID, request);
+
+        assertEquals(KEY_ID, response.getKeyId());
+        assertTrue(key.getImported());
+    }
+
+    @Test
+    void shouldDeleteImportedKeyMaterial() {
+        key.setImported(true);
+
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        KeyDescriptionResponseDto response =
+                service.deleteImportedKeyMaterial(TENANT, KEY_ID);
+
+        assertEquals(KEY_ID, response.getKeyId());
+        assertNull(key.getKeyMaterial());
+    }
+
+    @Test
+    void shouldThrowWhenDeleteNonImportedMaterial() {
+        key.setImported(false);
+
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        assertThrows(InvalidKeyStateException.class,
+                () -> service.deleteImportedKeyMaterial(TENANT, KEY_ID));
+    }
+
+    @Test
+    void shouldValidateKey() {
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        when(cryptoService.validateKeyIntegrity(any(), any()))
+                .thenReturn(true);
+
+        assertDoesNotThrow(() -> service.validateKey(TENANT, KEY_ID));
+    }
+
+    @Test
+    void shouldThrowWhenKeyPendingDeletionDuringValidation() {
+        key.setKeyStatus(IEnumKeyStatus.Types.PENDING_DELETION);
+
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        assertThrows(InvalidKeyStateException.class,
+                () -> service.validateKey(TENANT, KEY_ID));
+    }
+
+    @Test
+    void shouldThrowWhenKeyMaterialMissing() {
+        key.setKeyMaterial(null);
+
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        assertThrows(InvalidKeyStateException.class,
+                () -> service.validateKey(TENANT, KEY_ID));
+    }
+
+    @Test
+    void shouldThrowWhenKeyIntegrityFails() {
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        when(cryptoService.validateKeyIntegrity(any(), any()))
+                .thenReturn(false);
+
+        assertThrows(InvalidKeyStateException.class,
+                () -> service.validateKey(TENANT, KEY_ID));
+    }
+
+    @Test
+    void shouldDeleteKey() {
+        key.setKeyStatus(IEnumKeyStatus.Types.PENDING_DELETION);
+
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        service.deleteKey(TENANT, KEY_ID);
+
+        verify(kmsKeyVersionRepository).deleteByTenantAndKeyId(TENANT, KEY_ID);
+        verify(kmsAliasRepository).deleteByTenantAndKeyId(TENANT, KEY_ID);
+        verify(kmsTagRepository).deleteByTenantAndKeyId(TENANT, KEY_ID);
+        verify(kmsKeyRepository).delete(key);
+    }
+
+    @Test
+    void shouldThrowWhenDeleteKeyNotPendingDeletion() {
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        assertThrows(InvalidKeyStateException.class,
+                () -> service.deleteKey(TENANT, KEY_ID));
+    }
+
+    @Test
+    void shouldListKeyRotations() {
+        KmsKeyVersion version = KmsKeyVersion.builder()
+                .versionId("v2")
+                .rotationDate(LocalDateTime.now())
+                .build();
+
+        Page<KmsKeyVersion> page = new PageImpl<>(List.of(version));
+
+        when(kmsKeyVersionRepository.findByTenantAndKeyIdAndRotationDateIsNotNull(
+                eq(TENANT), eq(KEY_ID), any(Pageable.class)))
+                .thenReturn(page);
+
+        ListKeyRotationsResponseDto response =
+                service.listKeyRotations(TENANT, KEY_ID, 10, "0");
+
+        assertEquals(1, response.getRotations().size());
+        assertEquals("v2", response.getRotations().get(0).getVersionId());
+    }
+
+    @Test
+    void shouldGetKeyUsageStats() {
+        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(key));
+
+        when(cryptoService.getEncryptCount(KEY_ID)).thenReturn(100L);
+        when(cryptoService.getDecryptCount(KEY_ID)).thenReturn(50L);
+        when(cryptoService.getLastUsedDate(KEY_ID)).thenReturn(LocalDateTime.now());
+
+        KeyUsageStatsResponseDto response =
+                service.getKeyUsageStats(TENANT, KEY_ID);
+
+        assertEquals(100L, response.getEncryptCount());
+        assertEquals(50L, response.getDecryptCount());
+        assertNotNull(response.getLastUsedDate());
+    }
+
+    @Test
+    void shouldCountKeysInCustomStore() {
+        when(kmsKeyRepository.countByTenantAndKeyStoreId(TENANT, 1L))
+                .thenReturn(5);
+
+        int count = service.countKeysInCustomKeyStore(TENANT, 1L);
+
+        assertEquals(5, count);
+    }
+}

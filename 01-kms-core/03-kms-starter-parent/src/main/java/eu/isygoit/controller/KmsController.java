@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
 @Validated
 @RestController
 @InjectExceptionHandler(KmsExceptionHandler.class)
-@RequestMapping(path = "/api/v1/private/key")
+@RequestMapping(path = "/api/v1/private/kms")
 @Tag(name = "KMS Keys", description = "Key Management Service - All cryptographic operations and key management endpoints")
 public class KmsController extends ControllerExceptionHandler implements KmsServiceApi {
 

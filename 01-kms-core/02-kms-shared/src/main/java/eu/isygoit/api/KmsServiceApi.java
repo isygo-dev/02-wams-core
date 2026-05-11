@@ -38,7 +38,6 @@ import java.time.LocalDateTime;
  * @see <a href="https://docs.aws.amazon.com/kms/latest/APIReference/Welcome.html">AWS KMS API Reference</a>
  */
 @Tag(name = "KMS Service", description = "Key Management Service – manage keys and perform cryptographic operations")
-@RequestMapping("/api/v1/kms")
 public interface KmsServiceApi {
 
     // =========================================================================
