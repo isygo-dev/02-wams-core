@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
                 title = "WAMS Key Management Service (KMS) API",
                 version = "1.0.0",
                 description = """
-                        Comprehensive AWS KMS-compatible Key Management Service for enterprise-grade cryptographic operations.
+                        Comprehensive WAMS KMS-compatible Key Management Service for enterprise-grade cryptographic operations.
                         
                         ## Features
                         - **Symmetric & Asymmetric Encryption:** AES-256, RSA-2048/4096, Elliptic Curve cryptography
@@ -40,9 +40,9 @@ import org.springframework.context.annotation.Configuration;
                         - **Comprehensive Audit Trail:** All operations logged for compliance and security auditing
                         - **Multi-Tenant:** Complete tenant isolation at database, application, and audit levels
                         
-                        ## AWS KMS Alignment
-                        This service implements AWS KMS API specifications for seamless migration from cloud-native KMS.
-                        Endpoints, request/response formats, error codes, and operational semantics align with AWS KMS.
+                        ## WAMS KMS Alignment
+                        This service implements WAMS KMS API specifications for seamless migration from cloud-native KMS.
+                        Endpoints, request/response formats, error codes, and operational semantics align with WAMS KMS.
                         
                         ## Use Cases
                         1. **Data at Rest Protection:** Encrypt databases, files, and backups

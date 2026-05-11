@@ -15,7 +15,7 @@
 ### 1. Enums ✅ (4/4)
 
 - [x] IEnumKeySpec.java - AES_256, RSA_2048, EC_P256
-- [x] IEnumKeyPurpose.java - ENCRYPT_DECRYPT, SIGN_VERIFY
+- [x] IEnumKeyUsage.java - ENCRYPT_DECRYPT, SIGN_VERIFY
 - [x] IEnumKeyStatus.java - ENABLED, DISABLED, PENDING_DELETION
 - [x] IEnumSigningAlgorithm.java - RSASSA_PSS_SHA256, ECDSA_SHA256
 

@@ -1,13 +1,6 @@
 package eu.isygoit.service;
 
-import eu.isygoit.dto.request.GenerateMacRequestDto;
-import eu.isygoit.dto.request.SignRequestDto;
-import eu.isygoit.dto.request.VerifyMacRequestDto;
-import eu.isygoit.dto.request.VerifyRequestDto;
-import eu.isygoit.dto.response.GenerateMacResponseDto;
-import eu.isygoit.dto.response.SignResponseDto;
-import eu.isygoit.dto.response.VerifyMacResponseDto;
-import eu.isygoit.dto.response.VerifyResponseDto;
+import eu.isygoit.dto.KmsDtos.*;
 import jakarta.validation.Valid;
 
 /**
@@ -22,7 +15,7 @@ public interface ISigningService {
      * @param request the request
      * @return the sign response dto
      */
-    SignResponseDto sign(String tenant, SignRequestDto request);
+    SignResponse sign(String tenant, SignRequest request);
 
     /**
      * Verify.
@@ -31,10 +24,10 @@ public interface ISigningService {
      * @param request the request
      * @return the verify response dto
      */
-    VerifyResponseDto verify(String tenant, VerifyRequestDto request);
+    VerifyResponse verify(String tenant, VerifyRequest request);
 
-    GenerateMacResponseDto generateMac(String tenant, @Valid GenerateMacRequestDto request);
+    GenerateMacResponse generateMac(String tenant, @Valid GenerateMacRequest request);
 
-    VerifyMacResponseDto verifyMac(String tenant, @Valid VerifyMacRequestDto request);
+    VerifyMacResponse verifyMac(String tenant, @Valid VerifyMacRequest request);
 }
 

@@ -3,7 +3,7 @@ package eu.isygoit.enums;
 /**
  * The interface Enum key purpose.
  */
-public interface IEnumKeyPurpose {
+public interface IEnumKeyUsage {
     /**
      * The constant STR_ENUM_SIZE.
      */

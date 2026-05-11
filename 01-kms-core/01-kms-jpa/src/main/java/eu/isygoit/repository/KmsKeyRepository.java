@@ -1,6 +1,7 @@
 package eu.isygoit.repository;
 
 import eu.isygoit.model.KmsKey;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,7 +21,7 @@ public interface KmsKeyRepository extends JpaRepository<KmsKey, Long> {
     /**
      * Find key by tenant and keyId
      */
-    Optional<KmsKey> findByTenantAndKeyId(String tenant, Long keyId);
+    Optional<KmsKey> findByTenantAndKeyId(String tenant, String keyId);
 
     /**
      * Find key by tenant and keyAlias
@@ -45,9 +46,11 @@ public interface KmsKeyRepository extends JpaRepository<KmsKey, Long> {
     /**
      * Find active keys for a tenant
      */
-    @Query("SELECT k FROM KmsKey k WHERE k.tenant = :tenant AND k.status = 'ENABLED'")
+    @Query("SELECT k FROM KmsKey k WHERE k.tenant = :tenant AND k.keyStatus = 'ENABLED'")
     List<KmsKey> findActiveKeysByTenant(@Param("tenant") String tenant);
 
-    int countByTenantAndKeyStoreId(String tenant, String keyStoreId);
+    int countByTenantAndKeyStoreId(String tenant, Long keyStoreId);
+
+    boolean existsByTenantAndPrimaryKeyIdAndRegion(String tenant, String keyId, @NotBlank String replicaRegion);
 }
 

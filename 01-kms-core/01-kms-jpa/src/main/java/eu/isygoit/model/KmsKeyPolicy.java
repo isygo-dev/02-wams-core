@@ -40,7 +40,7 @@ public class KmsKeyPolicy extends AuditableEntity<Long> implements ITenantAssign
     private String tenant;
 
     @Column(name = "KEY_ID", length = 255, updatable = false, nullable = false)
-    private Long keyId;
+    private String keyId;
 
     @Lob
     @Column(name = "POLICY_DOCUMENT", nullable = false)

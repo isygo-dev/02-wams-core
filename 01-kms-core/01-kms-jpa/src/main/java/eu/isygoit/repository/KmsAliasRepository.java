@@ -52,7 +52,7 @@ public interface KmsAliasRepository extends JpaRepository<KmsAlias, Long> {
      * @param keyId  the key ID
      * @return List of aliases
      */
-    List<KmsAlias> findByTenantAndKeyId(String tenant, Long keyId);
+    List<KmsAlias> findByTenantAndKeyId(String tenant, String keyId, Pageable pageable);
 
     /**
      * Find alias by alias name (case-insensitive)
@@ -90,7 +90,7 @@ public interface KmsAliasRepository extends JpaRepository<KmsAlias, Long> {
      */
     @Modifying
     @Transactional
-    void deleteByTenantAndKeyId(String tenant, Long keyId);
+    void deleteByTenantAndKeyId(String tenant, String keyId);
 
     /**
      * Count aliases for a specific key
@@ -99,7 +99,7 @@ public interface KmsAliasRepository extends JpaRepository<KmsAlias, Long> {
      * @param keyId  the key ID
      * @return count of aliases
      */
-    long countByTenantAndKeyId(String tenant, Long keyId);
+    long countByTenantAndKeyId(String tenant, String keyId);
 
     /**
      * Find aliases by alias name pattern (starts with)

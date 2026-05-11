@@ -35,7 +35,7 @@ This guide explains what's been implemented and what needs to be customized for 
 ### B. Enums
 
 - ✅ IEnumKeySpec: AES_256, RSA_2048, EC_P256
-- ✅ IEnumKeyPurpose: ENCRYPT_DECRYPT, SIGN_VERIFY
+- ✅ IEnumKeyUsage: ENCRYPT_DECRYPT, SIGN_VERIFY
 - ✅ IEnumKeyStatus: ENABLED, DISABLED, PENDING_DELETION
 - ✅ IEnumSigningAlgorithm: RSASSA_PSS_SHA256, ECDSA_SHA256
 
@@ -75,11 +75,11 @@ You need to implement JPA entities for persistence:
 @Entity
 @Table(name = "kms_keys")
 public class Key extends AuditableEntity<Long> implements ITenantAssignable {
-    private Long keyId;
+    private String keyId;
     private String alias;
     private String description;
     private IEnumKeySpec.Types keySpec;
-    private IEnumKeyPurpose.Types purpose;
+    private IEnumKeyUsage.Types purpose;
     private IEnumKeyStatus.Types status;
     private String currentVersion;
     private LocalDateTime scheduledDeletionDate;
@@ -91,7 +91,7 @@ public class Key extends AuditableEntity<Long> implements ITenantAssignable {
 @Table(name = "kms_key_versions")
 public class KeyVersion extends AuditableEntity<Long> {
     private String versionId;
-    private Long keyId;      // FK to Key
+    private String keyId;      // FK to Key
     private String keyMaterial; // Encrypted key material
     private String status;   // ACTIVE, INACTIVE
     // ... getters, setters
@@ -102,7 +102,7 @@ public class KeyVersion extends AuditableEntity<Long> {
 @Table(name = "kms_key_grants")
 public class KeyGrant extends AuditableEntity<Long> {
     private String grantId;
-    private Long keyId;      // FK to Key
+    private String keyId;      // FK to Key
     private String principal;
     private List<String> operations;
     // ... getters, setters
@@ -112,7 +112,7 @@ public class KeyGrant extends AuditableEntity<Long> {
 @Entity
 @Table(name = "kms_key_policies")
 public class KeyPolicy extends AuditableEntity<Long> {
-    private Long keyId;      // FK to Key
+    private String keyId;      // FK to Key
     private String policy;   // JSON stored as string or JSONB
     // ... getters, setters
 }
@@ -122,7 +122,7 @@ public class KeyPolicy extends AuditableEntity<Long> {
 @Table(name = "kms_audit_logs")
 public class AuditLog extends AuditableEntity<Long> {
     private String action;
-    private Long keyId;
+    private String keyId;
     private String principal;
     private String ip;
     private LocalDateTime timestamp;
@@ -138,7 +138,7 @@ Create repositories for data access:
 // Create in 01-kms-jpa/src/main/java/eu/isygoit/repository/
 
 public interface KeyRepository extends JpaRepository<Key, Long>, JpaSpecificationExecutor<Key> {
-    Optional<Key> findByKeyId(Long keyId);
+    Optional<Key> findByKeyId(String keyId);
 
     Optional<Key> findByAlias(String alias);
 
@@ -146,23 +146,23 @@ public interface KeyRepository extends JpaRepository<Key, Long>, JpaSpecificatio
 }
 
 public interface KeyVersionRepository extends JpaRepository<KeyVersion, Long> {
-    List<KeyVersion> findByKeyId(Long keyId);
+    List<KeyVersion> findByKeyId(String keyId);
 
     Optional<KeyVersion> findByVersionId(String versionId);
 }
 
 public interface KeyGrantRepository extends JpaRepository<KeyGrant, Long> {
-    List<KeyGrant> findByKeyId(Long keyId);
+    List<KeyGrant> findByKeyId(String keyId);
 
     Optional<KeyGrant> findByGrantId(String grantId);
 }
 
 public interface KeyPolicyRepository extends JpaRepository<KeyPolicy, Long> {
-    Optional<KeyPolicy> findByKeyId(Long keyId);
+    Optional<KeyPolicy> findByKeyId(String keyId);
 }
 
 public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
-    List<AuditLog> findByKeyIdAndTimestampBetween(Long keyId, LocalDateTime from, LocalDateTime to);
+    List<AuditLog> findByKeyIdAndTimestampBetween(String keyId, LocalDateTime from, LocalDateTime to);
 
     List<AuditLog> findByTenantAndTimestampBetween(String tenant, LocalDateTime from, LocalDateTime to);
 }
@@ -291,7 +291,7 @@ public class AuditServiceImpl implements IAuditService {
     private ExternalAuditService externalAuditService;  // e.g., Splunk, datadog
 
     @Override
-    public void logAction(String tenant, String action, Long keyId,
+    public void logAction(String tenant, String action, String keyId,
                           String principal, String ip) {
         // Save to database
         AuditLog auditLog = AuditLog.builder()
@@ -389,7 +389,7 @@ public class EncryptionServiceTest {
 
 - [ ] HSM (Hardware Security Module) integration
 - [ ] External PKI integration
-- [ ] Cloud provider KMS integration (AWS KMS, Azure Key Vault, etc.)
+- [ ] Cloud provider KMS integration (WAMS KMS, Azure Key Vault, etc.)
 - [ ] Certificate authority integration
 - [ ] LDAP/Active Directory for principals
 

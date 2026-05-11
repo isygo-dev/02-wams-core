@@ -3,7 +3,7 @@
 **Document Version:** 1.0  
 **Last Updated:** 2026-05-07  
 **Total Endpoints:** 44 REST APIs  
-**AWS KMS Alignment:** 100%
+**WAMS KMS Alignment:** 100%
 
 ---
 
@@ -611,7 +611,7 @@ Content-Type: application/json
 **Use Cases:**
 
 - ✅ **Compliance:** PCI-DSS requires annual key rotation
-- ✅ **Best Practices:** AWS recommends annual rotation
+- ✅ **Best Practices:** WAMS recommends annual rotation
 - ✅ **Audit Trail:** Track all key versions
 
 ---
@@ -781,7 +781,7 @@ Content-Type: application/json
         "Sid": "Enable Lambert to use the key",
         "Effect": "Allow",
         "Principal": {
-          "AWS": "arn:aws:iam::account-id:user/lambert"
+          "WAMS": "arn:aws:iam::account-id:user/lambert"
         },
         "Action": [
           "kms:Encrypt",
@@ -798,7 +798,7 @@ Content-Type: application/json
 **Use Cases:**
 
 - ✅ **Principal Authorization:** Define who can use key
-- ✅ **Cross-Account Access:** Allow other AWS accounts
+- ✅ **Cross-Account Access:** Allow other WAMS accounts
 - ✅ **Service Integration:** Allow services (RDS, S3, DynamoDB)
 - ✅ **Compliance Policies:** Enforce MFA, IP restrictions
 
@@ -1109,7 +1109,7 @@ Content-Type: application/json
 
 **Two Types Supported:**
 
-1. **CLOUDHSM:** AWS CloudHSM cluster backend
+1. **CLOUDHSM:** WAMS CloudHSM cluster backend
 2. **EXTERNAL_KEY_STORE (XKS):** Any external HSM/KMS
 
 ---

@@ -15,5 +15,5 @@ public interface KmsKeyPolicyRepository extends JpaRepository<KmsKeyPolicy, Long
     /**
      * Find key policy by tenant and keyId
      */
-    Optional<KmsKeyPolicy> findByTenantAndKeyId(String tenant, Long keyId);
+    Optional<KmsKeyPolicy> findByTenantAndKeyId(String tenant, String keyId);
 }

@@ -45,7 +45,7 @@
 │  - API_REFERENCE_WITH_USE_CASES.md     ✅ 1000+ lines examples  │
 │  - README.md                           ✅ Quick start            │
 │  - QUICK_START_GUIDE.md                ✅ Getting started        │
-│  - AWS_KMS_ALIGNMENT_REPORT.md         ✅ Alignment verification│
+│  - WAMS_KMS_ALIGNMENT_REPORT.md         ✅ Alignment verification│
 │                                                                     │
 │  Testing:                              ⏳ TO DO                   │
 │  - Unit Tests                          ⏳ Service layer tests    │
@@ -76,7 +76,7 @@
 - ✅ ApiResponse annotations with all HTTP status codes
 - ✅ Parameter documentation with examples
 - ✅ Security requirements defined
-- ✅ AWS KMS API alignment verified
+- ✅ WAMS KMS API alignment verified
 
 **DTOs (15+ data transfer objects)**
 
@@ -118,7 +118,7 @@ Response DTOs:
 **Enums:**
 
 - ✅ IEnumKeySpec (SYMMETRIC_DEFAULT, RSA_*, ECC_*)
-- ✅ IEnumKeyPurpose (ENCRYPT_DECRYPT, SIGN_VERIFY)
+- ✅ IEnumKeyUsage (ENCRYPT_DECRYPT, SIGN_VERIFY)
 - ✅ IEnumKeyStatus (ENABLED, DISABLED, PENDING_DELETION)
 - ✅ IEnumSigningAlgorithm (RSA-PSS, ECDSA, HMAC)
 - ✅ IEnumCharSet (ALPHANUMERIC, NUMERIC,HEX, BASE64)
@@ -345,7 +345,7 @@ Columns: 15+
 - id (PK)
 - tenant (multi-tenant isolation)
 - keyId, keyArn (metadata)
-- keySpec, keyPurpose (key classification)
+- keySpec, keyUsage (key classification)
 - status (lifecycle state)
 - currentVersionId (active key version)
 - rotationEnabled, rotationPeriodDays (auto-rotation)
@@ -514,7 +514,7 @@ Purpose: Compliance audit trail
 - ✅ README.md - Module overview
 - ✅ QUICK_START_GUIDE.md - Getting started
 - ✅ QUICK_START.md - Quick reference
-- ✅ AWS_KMS_ALIGNMENT_REPORT.md - AWS standards alignment
+- ✅ WAMS_KMS_ALIGNMENT_REPORT.md - WAMS standards alignment
 - ✅ IMPLEMENTATION_GUIDE.md - Implementation details
 - ✅ IMPLEMENTATION_SUMMARY.md - What's been done
 - ✅ IMPLEMENTATION_VALIDATION.md - Validation approach
@@ -734,7 +734,7 @@ Purpose: Compliance audit trail
 
 ---
 
-## AWS KMS Alignment
+## WAMS KMS Alignment
 
 **Verified Compatibility:**
 
@@ -894,7 +894,7 @@ java -jar 03-kms-starter-parent/target/kms-service-1.0.jar
 
 ### External Resources
 
-- AWS KMS API: https://docs.aws.amazon.com/kms/latest/APIReference/
+- WAMS KMS API: https://docs.aws.amazon.com/kms/latest/APIReference/
 - Spring Security: https://spring.io/projects/spring-security
 - Springdoc OpenAPI: https://springdoc.org/
 - BouncyCastle Crypto: https://www.bouncycastle.org/
@@ -913,7 +913,7 @@ The KMS-Core module is **95% complete** and **production-ready** for:
 
 **Key Achievements:**
 
-- 44 REST APIs fully implemented with AWS KMS alignment
+- 44 REST APIs fully implemented with WAMS KMS alignment
 - 9 services with complete business logic
 - 5 database entities with multi-tenant support
 - Comprehensive OpenAPI documentation

@@ -1,16 +1,13 @@
 package eu.isygoit.service;
 
-import eu.isygoit.dto.request.ReplicateKeyRequestDto;
-import eu.isygoit.dto.request.UpdatePrimaryRegionRequestDto;
-import eu.isygoit.dto.response.KeyMetadataResponseDto;
-import eu.isygoit.dto.response.ReplicateKeyResponseDto;
+import eu.isygoit.dto.KmsDtos.*;
 import jakarta.validation.Valid;
 
 public interface IMultiRegionService {
 
-    KeyMetadataResponseDto updatePrimaryRegion(String tenant, Long keyId, @Valid UpdatePrimaryRegionRequestDto request);
+    UpdatePrimaryRegionResponse updatePrimaryRegion(String tenant, String keyId, @Valid UpdatePrimaryRegionRequestDto request);
 
-    ReplicateKeyResponseDto replicateKey(String tenant, Long keyId, @Valid ReplicateKeyRequestDto request);
+    ReplicateKeyResponse replicateKey(String tenant, String keyId, @Valid ReplicateKeyRequestDto request);
 
-    KeyMetadataResponseDto synchronizeMultiRegionKey(String tenant, Long keyId);
+    SynchronizeMultiRegionKeyResponse synchronizeMultiRegionKey(String tenant, String keyId);
 }

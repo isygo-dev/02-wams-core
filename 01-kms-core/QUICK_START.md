@@ -466,7 +466,7 @@ curl -X PUT http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d3
         {
           "Effect": "Allow",
           "Principal": {
-            "AWS": "arn:aws:iam::123456789012:user/alice"
+            "WAMS": "arn:aws:iam::123456789012:user/alice"
           },
           "Action": ["kms:Decrypt", "kms:Encrypt"],
           "Resource": "*"
@@ -505,7 +505,7 @@ curl -X GET http://localhost:8080/api/v1/private/key/keys/key-123e4567-e89b-12d3
     {
       "Effect": "Allow",
       "Principal": {
-        "AWS": "arn:aws:iam::123456789012:user/alice"
+        "WAMS": "arn:aws:iam::123456789012:user/alice"
       },
       "Action": [
         "kms:Decrypt",

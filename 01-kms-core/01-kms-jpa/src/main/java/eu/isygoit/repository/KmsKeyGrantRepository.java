@@ -22,10 +22,10 @@ public interface KmsKeyGrantRepository extends JpaRepository<KmsKeyGrant, Long> 
     /**
      * List grants for a key
      */
-    Page<KmsKeyGrant> findByTenantAndKeyId(String tenant, Long keyId, Pageable pageable);
+    Page<KmsKeyGrant> findByTenantAndKeyId(String tenant, String keyId, Pageable pageable);
 
     /**
      * List active grants for a key
      */
-    Page<KmsKeyGrant> findByTenantAndKeyIdAndStatus(String tenant, Long keyId, String status, Pageable pageable);
+    Page<KmsKeyGrant> findByTenantAndKeyIdAndStatus(String tenant, String keyId, String status, Pageable pageable);
 }

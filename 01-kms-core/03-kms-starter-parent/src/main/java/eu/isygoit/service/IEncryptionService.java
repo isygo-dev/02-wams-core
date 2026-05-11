@@ -1,11 +1,6 @@
 package eu.isygoit.service;
 
-import eu.isygoit.dto.request.DecryptRequestDto;
-import eu.isygoit.dto.request.EncryptRequestDto;
-import eu.isygoit.dto.request.ReEncryptRequestDto;
-import eu.isygoit.dto.response.DecryptResponseDto;
-import eu.isygoit.dto.response.EncryptResponseDto;
-import eu.isygoit.dto.response.ReEncryptResponseDto;
+import eu.isygoit.dto.KmsDtos;
 
 /**
  * The interface Encryption service.
@@ -19,7 +14,9 @@ public interface IEncryptionService {
      * @param request the request
      * @return the encrypt response dto
      */
-    EncryptResponseDto encrypt(String tenant, EncryptRequestDto request);
+    KmsDtos.EncryptResponse encrypt(
+            String tenant,
+            KmsDtos.EncryptRequest request);
 
     /**
      * Decrypt.
@@ -28,7 +25,9 @@ public interface IEncryptionService {
      * @param request the request
      * @return the decrypt response dto
      */
-    DecryptResponseDto decrypt(String tenant, DecryptRequestDto request);
+    public KmsDtos.DecryptResponse decrypt(
+            String tenant,
+            KmsDtos.DecryptRequest request);
 
     /**
      * Re-encrypt.
@@ -37,6 +36,8 @@ public interface IEncryptionService {
      * @param request the request
      * @return the encrypt response dto
      */
-    ReEncryptResponseDto reEncrypt(String tenant, ReEncryptRequestDto request);
+    KmsDtos.ReEncryptResponse reEncrypt(
+            String tenant,
+            KmsDtos.ReEncryptRequest request);
 }
 

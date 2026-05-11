@@ -1,4 +1,4 @@
-# KMS-Core AWS KMS Alignment - Implementation Report
+# KMS-Core WAMS KMS Alignment - Implementation Report
 
 **Date:** 2026-05-07
 **Phase:** 1 & 2 Complete - Database & API Layer Foundation
@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-Successfully aligned kms-core module with AWS KMS architecture by implementing:
+Successfully aligned kms-core module with WAMS KMS architecture by implementing:
 
 1. **5 New JPA Entities** for KMS operations (KmsKey, KmsKeyVersion, KmsKeyGrant, KmsKeyPolicy, KmsAuditLog)
 2. **5 Spring Data Repositories** with comprehensive query support
@@ -29,9 +29,9 @@ Successfully aligned kms-core module with AWS KMS architecture by implementing:
 Table: T_KMS_KEY
 Attributes:
   - keyId (UUID format)
-  - keyArn (AWS-style ARN)
+  - keyArn (WAMS-style ARN)
   - keySpec (AES_256, RSA_2048, EC_P256)
-  - keyPurpose (ENCRYPT_DECRYPT, SIGN_VERIFY)
+  - keyUsage (ENCRYPT_DECRYPT, SIGN_VERIFY)
   - status (ENABLED, DISABLED, PENDING_DELETION)
   - currentVersionId (reference to active version)
   - rotationEnabled, rotationPeriodDays, lastRotationDate
@@ -147,7 +147,7 @@ KmsAuditLogRepository {
 
 ### Extended ICryptoService Interface
 
-Added 6 new methods for AWS KMS cryptographic operations:
+Added 6 new methods for WAMS KMS cryptographic operations:
 
 ```java
 public interface ICryptoService {
@@ -159,7 +159,7 @@ public interface ICryptoService {
 
     PasswordEncryptor getPasswordEncryptor(String tenant);
 
-    // New AWS KMS methods
+    // New WAMS KMS methods
     byte[] generateKeyMaterial(String keySpec); // AES_256, RSA_2048, EC_P256
 
     byte[] encryptData(byte[] plaintext, byte[] keyMaterial, Map encryptContext);
@@ -180,7 +180,7 @@ public interface ICryptoService {
 
 ```java
 createKey() {
-    Long keyId = "key-" + UUID.randomUUID();
+    String keyId = "key-" + UUID.randomUUID();
     return CreateKeyResponseDto.builder()
             .keyId(keyId)
             .status("ENABLED")
@@ -312,7 +312,7 @@ All 27 REST endpoints in KeyController already properly defined:
 
 - [ ] Unit tests (>90% coverage)
 - [ ] Integration tests with TestContainers
-- [ ] AWS KMS API test vectors
+- [ ] WAMS KMS API test vectors
 - [ ] Security regression tests
 - [ ] Load testing
 

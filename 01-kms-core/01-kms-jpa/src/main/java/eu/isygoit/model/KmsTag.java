@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 /**
  * The type Kms tag.
- * Represents a tag for a KMS key (AWS KMS-compliant)
+ * Represents a tag for a KMS key (WAMS KMS-compliant)
  */
 @Data
 @Builder
@@ -40,7 +40,7 @@ public class KmsTag {
     private String tenant;
 
     @Column(name = "KEY_ID", nullable = false)
-    private Long keyId;
+    private String keyId;
 
     @Column(name = "TAG_KEY", nullable = false, length = 128)
     private String tagKey;

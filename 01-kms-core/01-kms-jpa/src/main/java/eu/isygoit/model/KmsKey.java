@@ -1,9 +1,7 @@
 package eu.isygoit.model;
 
 import eu.isygoit.constants.TenantConstants;
-import eu.isygoit.enums.IEnumKeyPurpose;
-import eu.isygoit.enums.IEnumKeySpec;
-import eu.isygoit.enums.IEnumKeyStatus;
+import eu.isygoit.enums.*;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -15,10 +13,6 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
 
-/**
- * The type Kms Key.
- * Represents a cryptographic key in the KMS system (AWS KMS compliant)
- */
 @Data
 @SuperBuilder
 @NoArgsConstructor
@@ -35,7 +29,9 @@ import java.time.LocalDateTime;
                 @Index(name = "IDX_KMS_KEY_ALIAS", columnList = "TENANT,ALIAS"),
                 @Index(name = "IDX_KMS_KEY_IMPORTED", columnList = "IMPORTED"),
                 @Index(name = "IDX_KMS_KEY_EXPIRATION", columnList = "EXPIRATION_DATE"),
-                @Index(name = "IDX_KMS_KEY_KEY_STORE", columnList = "TENANT,KEY_STORE_ID")
+                @Index(name = "IDX_KMS_KEY_KEY_STORE", columnList = "TENANT,KEY_STORE_ID"),
+                @Index(name = "IDX_KMS_KEY_PRIMARY_KEY_ID", columnList = "PRIMARY_KEY_ID"),
+                @Index(name = "IDX_KMS_KEY_REGION", columnList = "REGION")
         })
 public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
 
@@ -49,14 +45,17 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     @Column(name = "TENANT", length = 100, updatable = false, nullable = false)
     private String tenant;
 
-    @Column(name = "KEY_ID", updatable = false, nullable = false)
-    private Long keyId; // UUID format
+    @Column(name = "KEY_ID", updatable = false, nullable = false, length = 255)
+    private String keyId; // UUID format
 
     @Column(name = "KEY_ARN", length = 255, nullable = false)
     private String keyArn; // Amazon Resource Name
 
+    @Column(name = "REGION", length = 100)
+    private String region; // WAMS region where this key resides
+
     @Column(name = "KEY_STORE_ID", length = 255)
-    private String keyStoreId; // Custom key store ID
+    private Long keyStoreId; // Custom key store ID
 
     @Enumerated(EnumType.STRING)
     @Column(name = "KEY_SPEC", length = 50, nullable = false)
@@ -64,7 +63,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "KEY_PURPOSE", length = 50, nullable = false)
-    private IEnumKeyPurpose.Types keyPurpose; // ENCRYPT_DECRYPT, SIGN_VERIFY
+    private IEnumKeyUsage.Types keyUsage; // ENCRYPT_DECRYPT, SIGN_VERIFY
 
     @Column(name = "KEY_ALIAS", length = 255)
     private String keyAlias;
@@ -74,7 +73,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS", length = 50, nullable = false)
-    private IEnumKeyStatus.Types status; // ENABLED, DISABLED, PENDING_DELETION
+    private IEnumKeyStatus.Types keyStatus; // ENABLED, DISABLED, PENDING_DELETION
 
     @Column(name = "CURRENT_VERSION_ID", length = 255)
     private String currentVersionId;
@@ -116,11 +115,12 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     @Column(name = "CREATION_DATE", nullable = false, updatable = false)
     private LocalDateTime creationDate;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "ORIGIN", length = 50)
-    @ColumnDefault("'AWS_KMS'")
-    private String origin; // AWS_KMS, EXTERNAL, CLOUDHSM
+    @ColumnDefault("'WAMS_KMS'")
+    private IEnumKeyOrigin.Types origin; // WAMS_KMS, EXTERNAL, CLOUDHSM
 
-    @Column(name = "TAGS")
+    @Column(name = "TAGS", columnDefinition = "TEXT")
     private String tags; // JSON format for metadata tags
 
     @Column(name = "ENABLED", nullable = false)
@@ -129,13 +129,20 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
 
     @Column(name = "MULTI_REGION", nullable = false)
     @ColumnDefault("false")
-    private Boolean multiRegion = false; // Whether this is a multi-region key
+    private Boolean multiRegion = false; // Whether this key is part of a multi‑region setup
+
+    @Column(name = "PRIMARY_KEY_ID", length = 255)
+    private String primaryKeyId; // For replica keys – points to the primary key's KEY_ID
 
     @Column(name = "PRIMARY_REGION", length = 100)
-    private String primaryRegion; // Primary region for multi-region key
+    private String primaryRegion; // Primary region (only for the primary key)
 
     @Column(name = "REPLICA_REGIONS", length = 500)
-    private String replicaRegions; // Comma-separated list of replica regions (JSON format)
+    private String replicaRegions; // Comma‑separated list of replica regions (only for the primary key)
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "EXPIRATION_MODEL", length = 50)
+    private IEnumKeyExpirationModel.Types expirationModel;
 
     // Helper methods
     public boolean isExpired() {
@@ -143,14 +150,22 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     }
 
     public boolean isPendingDeletion() {
-        return IEnumKeyStatus.Types.PENDING_DELETION.equals(status);
+        return IEnumKeyStatus.Types.PENDING_DELETION.equals(keyStatus);
     }
 
     public boolean isEnabled() {
-        return IEnumKeyStatus.Types.ENABLED.equals(status);
+        return IEnumKeyStatus.Types.ENABLED.equals(keyStatus);
     }
 
     public boolean isDisabled() {
-        return IEnumKeyStatus.Types.DISABLED.equals(status);
+        return IEnumKeyStatus.Types.DISABLED.equals(keyStatus);
+    }
+
+    public boolean isPrimaryKey() {
+        return Boolean.TRUE.equals(multiRegion) && primaryKeyId == null;
+    }
+
+    public boolean isReplicaKey() {
+        return Boolean.TRUE.equals(multiRegion) && primaryKeyId != null;
     }
 }

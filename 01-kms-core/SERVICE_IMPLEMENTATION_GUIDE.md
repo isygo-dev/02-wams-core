@@ -142,7 +142,7 @@
 │  ┌──────────────────────────────────────────────────────┐   │
 │  │ KmsKey (T_KMS_KEY)                                   │   │
 │  │ - Master key metadata                                │   │
-│  │ - Columns: keyId, keyArn, keySpec, keyPurpose,      │   │
+│  │ - Columns: keyId, keyArn, keySpec, keyUsage,      │   │
 │  │           status, currentVersionId, rotation config  │   │
 │  │ - Indexes: (TENANT, KEY_ID), (TENANT, STATUS)       │   │
 │  ├──────────────────────────────────────────────────────┤   │
@@ -213,9 +213,9 @@ public CreateKeyResponseDto createKey(String tenant, CreateKeyRequestDto request
 **Flow:**
 
 1. Validate keySpec against supported algorithms
-2. Validate keyPurpose (ENCRYPT_DECRYPT or SIGN_VERIFY)
+2. Validate keyUsage (ENCRYPT_DECRYPT or SIGN_VERIFY)
 3. Generate new key material or prepare for import
-4. Create ARN in AWS format: `arn:wams:kms:region:account:key/uuid`
+4. Create ARN in WAMS format: `arn:wams:kms:region:account:key/uuid`
 5. Persist to KmsKey entity
 6. Create initial version in KmsKeyVersion
 7. Return CreateKeyResponseDto with metadata
@@ -305,7 +305,7 @@ public EncryptResponseDto encrypt(String tenant, EncryptRequestDto request)
 
 - `KeyNotFoundException` - key doesn't exist
 - `KeyDisabledException` - key is disabled
-- `InvalidKeyPurposeException` - key cannot be used for encryption
+- `InvalidKeyUsageException` - key cannot be used for encryption
 - `EncryptionFailedException` - crypto operation failed
 - `PlaintextTooLargeException` - > 4KB for direct encryption
 
@@ -629,7 +629,7 @@ KmsServiceException (root)
 ├── KeyNotFoundException
 ├── KeyDisabledException
 ├── InvalidKeyStateException
-├── InvalidKeyPurposeException
+├── InvalidKeyUsageException
 ├── EncryptionException
 ├── DecryptionException
 ├── SigningException
@@ -642,14 +642,14 @@ KmsServiceException (root)
 
 ### HTTP Status Mapping
 
-| Scenario                | HTTP Code | Exception                  |
-|-------------------------|-----------|----------------------------|
-| Key not found           | 404       | KeyNotFoundException       |
-| Key disabled            | 409       | KeyDisabledException       |
-| Prohibited key purpose  | 400       | InvalidKeyPurposeException |
-| Crypto operation failed | 500       | EncryptionException        |
-| Access denied           | 403       | ForbiddenException         |
-| Validation failed       | 400       | ValidationException        |
+| Scenario                | HTTP Code | Exception                |
+|-------------------------|-----------|--------------------------|
+| Key not found           | 404       | KeyNotFoundException     |
+| Key disabled            | 409       | KeyDisabledException     |
+| Prohibited key purpose  | 400       | InvalidKeyUsageException |
+| Crypto operation failed | 500       | EncryptionException      |
+| Access denied           | 403       | ForbiddenException       |
+| Validation failed       | 400       | ValidationException      |
 
 ### KmsExceptionHandler
 

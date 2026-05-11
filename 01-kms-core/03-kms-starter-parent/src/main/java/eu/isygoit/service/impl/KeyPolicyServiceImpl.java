@@ -3,11 +3,7 @@ package eu.isygoit.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.isygoit.dto.request.CreateGrantRequestDto;
-import eu.isygoit.dto.request.RetireGrantRequestDto;
-import eu.isygoit.dto.request.SetKeyPolicyRequestDto;
-import eu.isygoit.dto.response.GrantResponseDto;
-import eu.isygoit.dto.response.ListGrantsResponseDto;
+import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.exception.GrantNotFoundException;
 import eu.isygoit.model.KmsKeyGrant;
 import eu.isygoit.model.KmsKeyPolicy;
@@ -42,7 +38,7 @@ public class KeyPolicyServiceImpl implements IKeyPolicyService {
     private final ObjectMapper objectMapper;
 
     @Override
-    public Map<String, Object> setKeyPolicy(String tenant, Long keyId, SetKeyPolicyRequestDto request) {
+    public Map<String, Object> setKeyPolicy(String tenant, String keyId, SetKeyPolicyRequestDto request) {
         log.info("Setting key policy for tenant: {} keyId: {}", tenant, keyId);
 
         try {
@@ -54,7 +50,7 @@ public class KeyPolicyServiceImpl implements IKeyPolicyService {
                             .build());
 
             policy.setPolicyDocument(policyJson);
-            policy.setPolicyVersion("2012-10-17"); // Default AWS policy version
+            policy.setPolicyVersion("2012-10-17"); // Default WAMS policy version
             kmsKeyPolicyRepository.save(policy);
 
             return request.getPolicy();
@@ -65,7 +61,7 @@ public class KeyPolicyServiceImpl implements IKeyPolicyService {
     }
 
     @Override
-    public Map<String, Object> getKeyPolicy(String tenant, Long keyId) {
+    public Map<String, Object> getKeyPolicy(String tenant, String keyId) {
         log.info("Getting key policy for tenant: {} keyId: {}", tenant, keyId);
 
         return kmsKeyPolicyRepository.findByTenantAndKeyId(tenant, keyId)
@@ -87,7 +83,7 @@ public class KeyPolicyServiceImpl implements IKeyPolicyService {
     }
 
     @Override
-    public GrantResponseDto createGrant(String tenant, Long keyId, CreateGrantRequestDto request) {
+    public GrantResponseDto createGrant(String tenant, String keyId, CreateGrantRequestDto request) {
         log.info("Creating grant for tenant: {} keyId: {} principal: {}", tenant, keyId, request.getPrincipal());
 
         String grantId = "grant-" + UUID.randomUUID().toString();
@@ -110,7 +106,7 @@ public class KeyPolicyServiceImpl implements IKeyPolicyService {
     }
 
     @Override
-    public String revokeGrant(String tenant, Long keyId, String grantId) {
+    public String revokeGrant(String tenant, String keyId, String grantId) {
         log.info("Revoking grant: {} for tenant: {} keyId: {}", grantId, tenant, keyId);
 
         KmsKeyGrant grant = kmsKeyGrantRepository.findByTenantAndGrantId(tenant, grantId)
@@ -124,7 +120,7 @@ public class KeyPolicyServiceImpl implements IKeyPolicyService {
     }
 
     @Override
-    public ListGrantsResponseDto listGrants(String tenant, Long keyId, Integer limit, String nextToken) {
+    public ListGrantsResponseDto listGrants(String tenant, String keyId, Integer limit, String nextToken) {
         log.info("Listing grants for tenant: {} keyId: {}", tenant, keyId);
         int page = 0;
         int size = (limit != null) ? limit : 100;

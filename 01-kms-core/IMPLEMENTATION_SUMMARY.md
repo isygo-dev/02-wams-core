@@ -21,7 +21,7 @@ Located in `02-kms-shared/src/main/java/eu/isygoit/enums/`
 1. **IEnumKeySpec.java**
     - AES_256, RSA_2048, EC_P256
 
-2. **IEnumKeyPurpose.java**
+2. **IEnumKeyUsage.java**
     - ENCRYPT_DECRYPT, SIGN_VERIFY
 
 3. **IEnumKeyStatus.java**
@@ -251,7 +251,7 @@ KMS Service Architecture
 │
 ├── Enum Layer
 │   ├── IEnumKeySpec
-│   ├── IEnumKeyPurpose
+│   ├── IEnumKeyUsage
 │   ├── IEnumKeyStatus
 │   └── IEnumSigningAlgorithm
 │
@@ -301,7 +301,7 @@ KMS Service Architecture
     │       │       └── AuditLogResponseDto.java ✅
     │       └── enums/
     │           ├── IEnumKeySpec.java ✅
-    │           ├── IEnumKeyPurpose.java ✅
+    │           ├── IEnumKeyUsage.java ✅
     │           ├── IEnumKeyStatus.java ✅
     │           └── IEnumSigningAlgorithm.java ✅
     │

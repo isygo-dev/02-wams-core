@@ -1,10 +1,13 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.dto.request.ReplicateKeyRequestDto;
-import eu.isygoit.dto.request.UpdatePrimaryRegionRequestDto;
-import eu.isygoit.dto.response.KeyMetadataResponseDto;
-import eu.isygoit.dto.response.ReplicateKeyResponseDto;
+import eu.isygoit.dto.KmsDtos.ReplicateKeyResponse;
+import eu.isygoit.dto.KmsDtos.SynchronizeMultiRegionKeyResponse;
+import eu.isygoit.dto.KmsDtos.UpdatePrimaryRegionResponse;
+import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.enums.IEnumKeyOrigin;
+import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.exception.KeyNotFoundException;
+import eu.isygoit.exception.KmsException;
 import eu.isygoit.mapper.KmsKeyMapper;
 import eu.isygoit.model.KmsKey;
 import eu.isygoit.repository.KmsKeyRepository;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -26,7 +30,7 @@ public class MultiRegionService implements IMultiRegionService {
     private final KmsKeyMapper kmsKeyMapper;
 
     @Override
-    public KeyMetadataResponseDto updatePrimaryRegion(String tenant, Long keyId, UpdatePrimaryRegionRequestDto request) {
+    public UpdatePrimaryRegionResponse updatePrimaryRegion(String tenant, String keyId, UpdatePrimaryRegionRequestDto request) {
         log.info("Updating primary region for key: {} to: {}", keyId, request.getPrimaryRegion());
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
@@ -38,48 +42,129 @@ public class MultiRegionService implements IMultiRegionService {
         key.setPrimaryRegion(request.getPrimaryRegion());
         kmsKeyRepository.save(key);
 
-        return kmsKeyMapper.toKeyMetadataResponseDto(key);
+        return UpdatePrimaryRegionResponse.builder().build();
     }
 
     @Override
-    public ReplicateKeyResponseDto replicateKey(String tenant, Long keyId, ReplicateKeyRequestDto request) {
+    public ReplicateKeyResponse replicateKey(String tenant, String keyId, ReplicateKeyRequestDto request) {
         log.info("Replicating key: {} to region: {}", keyId, request.getReplicaRegion());
-        KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
+
+        // Find the primary multi-region key
+        KmsKey primaryKey = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
-        if (Boolean.FALSE.equals(key.getMultiRegion())) {
-            throw new RuntimeException("Key is not a multi-region key");
+        if (Boolean.FALSE.equals(primaryKey.getMultiRegion())) {
+            throw new KmsException("Key is not a multi-region key");
         }
 
-        // Simulating replication by adding to replicaRegions
-        String currentReplicas = key.getReplicaRegions();
-        if (currentReplicas == null || currentReplicas.isEmpty()) {
-            key.setReplicaRegions(request.getReplicaRegion());
-        } else if (!currentReplicas.contains(request.getReplicaRegion())) {
-            key.setReplicaRegions(currentReplicas + "," + request.getReplicaRegion());
+        // Check if replica already exists in the target region
+        boolean replicaExists = kmsKeyRepository.existsByTenantAndPrimaryKeyIdAndRegion(tenant, primaryKey.getKeyId(), request.getReplicaRegion());
+        if (replicaExists) {
+            throw new KmsException("Replica already exists in region: " + request.getReplicaRegion());
         }
 
-        kmsKeyRepository.save(key);
+        // Create a new key entity for the replica
+        KmsKey replicaKey = new KmsKey();
+        replicaKey.setTenant(tenant);
+        replicaKey.setKeyId(UUID.randomUUID().toString());
+        replicaKey.setKeyArn(generateArn(replicaKey.getKeyId(), request.getReplicaRegion()));
+        replicaKey.setRegion(request.getReplicaRegion());
+        replicaKey.setCreationDate(LocalDateTime.now());
+        replicaKey.setEnabled(true);
+        replicaKey.setKeyStatus(IEnumKeyStatus.Types.ENABLED);
+        replicaKey.setDescription(primaryKey.getDescription());
+        replicaKey.setKeySpec(primaryKey.getKeySpec());
+        replicaKey.setKeyUsage(primaryKey.getKeyUsage());
+        replicaKey.setOrigin(primaryKey.getOrigin());
+        replicaKey.setMultiRegion(true);
+        replicaKey.setPrimaryKeyId(primaryKey.getKeyId());
+        replicaKey.setKeyMaterial(primaryKey.getKeyMaterial());
+        replicaKey.setKeyMaterialEncrypted(true);
+        replicaKey.setImported(primaryKey.getImported());
+        replicaKey.setImportDate(primaryKey.getImportDate());
+        replicaKey.setExpirationDate(primaryKey.getExpirationDate());
+        replicaKey.setExpirationModel(primaryKey.getExpirationModel());
+        replicaKey.setRotationEnabled(false);
+        replicaKey.setTags(primaryKey.getTags());
+        replicaKey.setKeyStoreId(primaryKey.getKeyStoreId());
 
-        return ReplicateKeyResponseDto.builder()
-                .primaryKeyId(key.getKeyId().toString())
-                .replicaKeyId(key.getKeyId().toString()) // In real AWS, it's the same ID but in different region
-                .primaryRegion(key.getPrimaryRegion())
+        kmsKeyRepository.save(replicaKey);
+
+        ReplicateKeyResponse.KeyMetadata replicaMetadata = ReplicateKeyResponse.KeyMetadata.builder()
+                .awsAccountId(tenant)
+                .keyId(replicaKey.getKeyId())
+                .arn(replicaKey.getKeyArn())
+                .creationDate(replicaKey.getCreationDate())
+                .enabled(replicaKey.getEnabled())
+                .description(replicaKey.getDescription())
+                .keySpec(replicaKey.getKeySpec())
+                .keyUsage(replicaKey.getKeyUsage())
+                .keyStatus(replicaKey.getKeyStatus())
+                .origin(replicaKey.getOrigin())
+                .multiRegion(replicaKey.getMultiRegion())
+                .multiRegionConfiguration(replicaKey.isPrimaryKey() ? "PRIMARY" : "REPLICA")
+                .build();
+
+        return ReplicateKeyResponse.builder()
+                .replicaKeyMetadata(replicaMetadata)
                 .replicaRegion(request.getReplicaRegion())
-                .status("COMPLETED")
-                .replicatedAt(LocalDateTime.now())
                 .build();
     }
 
     @Override
-    public KeyMetadataResponseDto synchronizeMultiRegionKey(String tenant, Long keyId) {
+    public SynchronizeMultiRegionKeyResponse synchronizeMultiRegionKey(String tenant, String keyId) {
         log.info("Synchronizing multi-region key: {}", keyId);
-        KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
+
+        // Fetch the replica key
+        KmsKey replicaKey = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
-        // Logic to sync metadata across regions would go here
-        // For now, we just return the current state
+        // Validate it's a replica
+        if (replicaKey.getPrimaryKeyId() == null) {
+            throw new KmsException("Key is not a multi-region replica. You can only synchronize replica keys.");
+        }
 
-        return kmsKeyMapper.toKeyMetadataResponseDto(key);
+        // Fetch the primary key
+        KmsKey primaryKey = kmsKeyRepository.findByTenantAndKeyId(tenant, replicaKey.getPrimaryKeyId())
+                .orElseThrow(() -> new KeyNotFoundException(replicaKey.getPrimaryKeyId()));
+
+        // Synchronize shared properties based on WAMS KMS specification
+        // 1. Key material (if origin is WAMS_KMS, copy the entire material)
+        if (IEnumKeyOrigin.Types.WAMS_KMS.equals(primaryKey.getOrigin())) {
+            replicaKey.setKeyMaterial(primaryKey.getKeyMaterial());
+            replicaKey.setKeyMaterialEncrypted(primaryKey.getKeyMaterialEncrypted());
+        }
+
+        // 2. Key spec and encryption algorithms
+        replicaKey.setKeySpec(primaryKey.getKeySpec());
+        replicaKey.setKeyUsage(primaryKey.getKeyUsage());
+
+        // 3. Automatic key rotation settings (only meaningful for primary, but replica inherits)
+        replicaKey.setRotationEnabled(primaryKey.getRotationEnabled());
+        replicaKey.setRotationPeriodDays(primaryKey.getRotationPeriodDays());
+
+        // 4. For imported keys (EXTERNAL origin), sync key material identifier and description
+        if (IEnumKeyOrigin.Types.EXTERNAL.equals(primaryKey.getOrigin())) {
+            replicaKey.setImported(primaryKey.getImported());
+            replicaKey.setImportDate(primaryKey.getImportDate());
+            replicaKey.setExpirationDate(primaryKey.getExpirationDate());
+            replicaKey.setExpirationModel(primaryKey.getExpirationModel());
+            // Note: actual key material must be imported separately per WAMS requirements
+        }
+
+        // 5. Optional: synchronize description? WAMS says it's independent, but many implementations sync it
+        // replicaKey.setDescription(primaryKey.getDescription()); // Uncomment if needed
+
+        // Save the updated replica key
+        kmsKeyRepository.save(replicaKey);
+
+        log.info("Successfully synchronized replica key {} with primary key {}", keyId, primaryKey.getKeyId());
+
+        // Return empty response (WAMS KMS does not return any data)
+        return SynchronizeMultiRegionKeyResponse.builder().build();
+    }
+
+    private String generateArn(String keyId, String region) {
+        return String.format("arn:aws:kms:%s:123456789012:key/%s", region, keyId);
     }
 }

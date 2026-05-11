@@ -1,8 +1,7 @@
 package eu.isygoit.service.impl;
 
+import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.dto.data.TagDto;
-import eu.isygoit.dto.request.*;
-import eu.isygoit.dto.response.*;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.exception.InvalidKeyStateException;
 import eu.isygoit.exception.KeyNotFoundException;
@@ -33,7 +32,7 @@ import java.util.stream.Collectors;
 
 /**
  * The type Key management service.
- * Implements AWS KMS-compliant key management operations
+ * Implements WAMS KMS-compliant key management operations
  */
 @Slf4j
 @Service
@@ -57,11 +56,18 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
     private KmsTagRepository kmsTagRepository;
 
     @Override
-    public CreateKeyResponseDto createKey(String tenant, CreateKeyRequestDto request) {
-        log.info("Creating key for tenant: {} with spec: {}", tenant, request.getKeySpec());
+    public CreateKeyResponse createKey(String tenant, CreateKeyRequest request) {
+        log.info("Creating key for tenant: {} with spec: {}",
+                tenant,
+                request.getKeySpec());
 
-        String arn = String.format("arn:kms:service:%s:key/%s", tenant, UUID.randomUUID().toString());
-        String versionId = "v-" + UUID.randomUUID().toString();
+        String arn = String.format(
+                "arn:kms:service:%s:key/%s",
+                tenant,
+                UUID.randomUUID()
+        );
+
+        String versionId = "v-" + UUID.randomUUID();
         LocalDateTime now = LocalDateTime.now();
 
         try {
@@ -73,10 +79,10 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
                     .tenant(tenant)
                     .keyArn(arn)
                     .keySpec(request.getKeySpec())
-                    .keyPurpose(request.getPurpose())
+                    .keyUsage(request.getKeyUsage())
                     .keyAlias(request.getAlias())
                     .description(request.getDescription())
-                    .status(IEnumKeyStatus.Types.ENABLED)
+                    .keyStatus(IEnumKeyStatus.Types.ENABLED)
                     .currentVersionId(versionId)
                     .rotationEnabled(false)
                     .keyMaterial(keyMaterial)
@@ -91,7 +97,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
                     .tenant(tenant)
                     .keyId(savedKey.getKeyId())
                     .versionId(versionId)
-                    .status("ACTIVE")
+                    .keyStatus(IEnumKeyStatus.Types.ENABLED)
                     .keyMaterial(keyMaterial)
                     .creationDate(now)
                     .activationDate(now)
@@ -99,148 +105,210 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
 
             kmsKeyVersionRepository.save(keyVersion);
 
-            log.info("Key created successfully: keyId={}, arn={}", keyVersion.getKeyId(), arn);
+            log.info("Key created successfully: keyId={}, arn={}",
+                    keyVersion.getKeyId(),
+                    arn);
 
-            return CreateKeyResponseDto.builder()
-                    .arn(arn)
-                    .keyId(keyVersion.getKeyId())
-                    .status(IEnumKeyStatus.Types.ENABLED)
-                    .createdAt(now)
+            return CreateKeyResponse.builder().keyMetadata(CreateKeyResponse.KeyMetadata.builder()
+                            .arn(arn)
+                            .keyId(keyVersion.getKeyId())
+                            .status(IEnumKeyStatus.Types.ENABLED)
+                            .createdAt(now)
+                            .build())
                     .build();
+
         } catch (Exception e) {
             log.error("Error creating key for tenant: {}", tenant, e);
-            throw new RuntimeException("Failed to create key: " + e.getMessage(), e);
+            throw new RuntimeException(
+                    "Failed to create key: " + e.getMessage(),
+                    e
+            );
         }
     }
 
     @Override
-    public KeyMetadataResponseDto getKeyMetadata(String tenant, Long keyId) {
-        log.info("Getting key metadata for tenant: {} keyId: {}", tenant, keyId);
+    public DescribeKeyResponse describeKey(
+            String tenant,
+            String keyId,
+            List<String> grantTokens) {
+
+        log.info("Getting key metadata for tenant: {} keyId: {}",
+                tenant,
+                keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
-        return KeyMetadataResponseDto.builder()
-                .keyId(key.getKeyId())
-                .status(key.getStatus())
-                .keySpec(key.getKeySpec())
-                .keyPurpose(key.getKeyPurpose())
-                .currentVersion(key.getCurrentVersionId())
-                .createdAt(key.getCreationDate())
+        return DescribeKeyResponse.builder().keyMetadata(CreateKeyResponse.KeyMetadata.builder()
+                        .keyId(key.getKeyId())
+                        .arn(key.getKeyArn())
+                        .status(key.getKeyStatus())
+                        .keySpec(key.getKeySpec())
+                        .keyUsage(key.getKeyUsage())
+                        .currentVersion(key.getCurrentVersionId())
+                        .createdAt(key.getCreationDate())
+                        .alias(key.getKeyAlias())
+                        .description(key.getDescription())
+                        .rotationEnabled(key.getRotationEnabled()).build())
                 .build();
     }
 
     @Override
-    public ListKeysResponseDto listKeys(String tenant, Integer limit, String nextToken) {
-        log.info("Listing keys for tenant: {} with limit: {}", tenant, limit);
+    public ListKeysResponse listKeys(
+            String tenant,
+            Integer limit,
+            String marker) {
 
-        int pageSize = (limit != null && limit > 0) ? Math.min(limit, DEFAULT_PAGE_SIZE) : DEFAULT_PAGE_SIZE;
-        int pageNum = (nextToken != null) ? Integer.parseInt(nextToken) : 0;
+        log.info("Listing keys for tenant: {} with limit: {}",
+                tenant,
+                limit);
 
-        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by("creationDate").descending());
+        int pageSize = (limit != null && limit > 0)
+                ? Math.min(limit, DEFAULT_PAGE_SIZE)
+                : DEFAULT_PAGE_SIZE;
+
+        int pageNum = (marker != null)
+                ? Integer.parseInt(marker)
+                : 0;
+
+        Pageable pageable = PageRequest.of(
+                pageNum,
+                pageSize,
+                Sort.by("creationDate").descending()
+        );
+
         Page<KmsKey> keyPage = kmsKeyRepository.findByTenant(tenant, pageable);
 
-        return ListKeysResponseDto.builder()
-                .keys((List<ListKeysResponseDto.KeySummaryDto>) keyPage.getContent().stream()
-                        .map(key -> ListKeysResponseDto.KeySummaryDto.builder()
+        return ListKeysResponse.builder()
+                .keys(keyPage.getContent().stream()
+                        .map(key -> ListKeysResponse.KeyEntry.builder()
                                 .keyId(key.getKeyId())
-                                .alias(key.getKeyAlias())
-                                .status(key.getStatus())
+                                .keyArn(key.getKeyArn())
                                 .build())
                         .toList())
-                .nextToken(keyPage.hasNext() ? String.valueOf(pageNum + 1) : null)
+                .nextMarker(keyPage.hasNext()
+                        ? String.valueOf(pageNum + 1)
+                        : null)
+                .truncated(keyPage.hasNext())
                 .build();
     }
 
     @Override
-    public KeyMetadataResponseDto enableKey(String tenant, Long keyId) {
+    public EnableKeyResponse enableKey(String tenant, String keyId) {
+
         log.info("Enabling key: {} for tenant: {}", keyId, tenant);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
-        if (IEnumKeyStatus.Types.ENABLED.equals(key.getStatus())) {
+        if (IEnumKeyStatus.Types.ENABLED.equals(key.getKeyStatus())) {
             log.warn("Key {} is already enabled", keyId);
         } else {
-            key.setStatus(IEnumKeyStatus.Types.ENABLED);
+            key.setKeyStatus(IEnumKeyStatus.Types.ENABLED);
             kmsKeyRepository.save(key);
         }
 
-        return KeyMetadataResponseDto.builder()
+        return EnableKeyResponse.builder()
                 .keyId(key.getKeyId())
-                .status(key.getStatus())
+                .keyStatus(key.getKeyStatus())
                 .build();
     }
 
     @Override
-    public KeyMetadataResponseDto disableKey(String tenant, Long keyId) {
+    public DisableKeyResponse disableKey(String tenant, String keyId) {
+
         log.info("Disabling key: {} for tenant: {}", keyId, tenant);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
-        if (IEnumKeyStatus.Types.PENDING_DELETION.equals(key.getStatus())) {
-            throw new InvalidKeyStateException("Cannot disable key scheduled for deletion: " + keyId);
+        if (IEnumKeyStatus.Types.PENDING_DELETION.equals(key.getKeyStatus())) {
+            throw new InvalidKeyStateException(
+                    "Cannot disable key scheduled for deletion: " + keyId
+            );
         }
 
-        key.setStatus(IEnumKeyStatus.Types.DISABLED);
+        key.setKeyStatus(IEnumKeyStatus.Types.DISABLED);
         kmsKeyRepository.save(key);
 
-        return KeyMetadataResponseDto.builder()
-                .keyId(key.getKeyId())
-                .status(key.getStatus())
+        return DisableKeyResponse.builder()
+                .keyId(String.valueOf(key.getKeyId()))
+                .status(key.getKeyStatus())
                 .build();
     }
 
     @Override
-    public KeyMetadataResponseDto scheduleKeyDeletion(String tenant, Long keyId, Integer pendingWindowInDays) {
-        log.info("Scheduling deletion for key: {} for tenant: {} with pending window: {} days",
-                keyId, tenant, pendingWindowInDays);
+    public ScheduleKeyDeletionResponse scheduleKeyDeletion(
+            String tenant,
+            String keyId,
+            Integer pendingWindowInDays) {
+
+        log.info("Scheduling deletion for key: {} for tenant: {} with window: {} days",
+                keyId,
+                tenant,
+                pendingWindowInDays);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
-        int windowDays = (pendingWindowInDays != null) ? pendingWindowInDays : MIN_DELETION_WINDOW_DAYS;
+        int windowDays = (pendingWindowInDays != null)
+                ? pendingWindowInDays
+                : MIN_DELETION_WINDOW_DAYS;
+
         if (windowDays < MIN_DELETION_WINDOW_DAYS || windowDays > MAX_DELETION_WINDOW_DAYS) {
-            throw new IllegalArgumentException(String.format("Pending window must be between %d and %d days",
-                    MIN_DELETION_WINDOW_DAYS, MAX_DELETION_WINDOW_DAYS));
+            throw new IllegalArgumentException(
+                    String.format(
+                            "Pending window must be between %d and %d days",
+                            MIN_DELETION_WINDOW_DAYS,
+                            MAX_DELETION_WINDOW_DAYS
+                    )
+            );
         }
 
-        key.setStatus(IEnumKeyStatus.Types.PENDING_DELETION);
+        key.setKeyStatus(IEnumKeyStatus.Types.PENDING_DELETION);
         key.setPendingDeletionWindowDays(windowDays);
         key.setDeletionDate(LocalDateTime.now().plusDays(windowDays));
+
         kmsKeyRepository.save(key);
 
-        return KeyMetadataResponseDto.builder()
-                .keyId(key.getKeyId())
-                .status(key.getStatus())
+        return ScheduleKeyDeletionResponse.builder()
+                .keyId(String.valueOf(key.getKeyId()))
+                .keyStatus(key.getKeyStatus())
+                .pendingWindowInDays(windowDays)
+                .deletionDate(key.getDeletionDate())
                 .build();
     }
 
     @Override
-    public RotateKeyResponseDto rotateKey(String tenant, Long keyId) {
+    public RotateKeyResponse rotateKey(
+            String tenant,
+            String keyId) {
+
         log.info("Rotating key: {} for tenant: {}", keyId, tenant);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
-        if (!IEnumKeyStatus.Types.ENABLED.equals(key.getStatus())) {
-            throw new InvalidKeyStateException("Cannot rotate key with status: " + key.getStatus());
+        if (!IEnumKeyStatus.Types.ENABLED.equals(key.getKeyStatus())) {
+            throw new InvalidKeyStateException(
+                    "Cannot rotate key with status: " + key.getKeyStatus()
+            );
         }
 
-        String newVersionId = "v-" + UUID.randomUUID().toString();
+        String newVersionId = "v-" + UUID.randomUUID();
         LocalDateTime now = LocalDateTime.now();
 
         try {
-            // Generate new key material for rotation
-            byte[] newKeyMaterial = cryptoService.generateKeyMaterial(key.getKeySpec());
+            // Generate new key material
+            byte[] newKeyMaterial =
+                    cryptoService.generateKeyMaterial(key.getKeySpec());
 
-            // Create new version
+            // Create new key version
             KmsKeyVersion newVersion = KmsKeyVersion.builder()
                     .tenant(tenant)
                     .keyId(keyId)
                     .versionId(newVersionId)
-                    .status("ACTIVE")
+                    .keyStatus(IEnumKeyStatus.Types.ENABLED)
                     .keyMaterial(newKeyMaterial)
                     .creationDate(now)
                     .activationDate(now)
@@ -249,27 +317,39 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
 
             kmsKeyVersionRepository.save(newVersion);
 
-            // Update key with new version
+            // Update main key metadata
             key.setCurrentVersionId(newVersionId);
             key.setLastRotationDate(now);
+
             kmsKeyRepository.save(key);
 
-            log.info("Key {} rotated successfully with new version {}", keyId, newVersionId);
+            log.info("Key {} rotated successfully with new version {}",
+                    keyId,
+                    newVersionId);
 
-            return RotateKeyResponseDto.builder()
+            return RotateKeyResponse.builder()
                     .keyId(keyId)
-                    .newVersion(newVersionId)
+                    .newVersionId(newVersionId)
                     .rotationDate(now)
                     .build();
+
         } catch (Exception e) {
             log.error("Error rotating key: {}", keyId, e);
-            throw new RuntimeException("Failed to rotate key: " + e.getMessage(), e);
+
+            throw new RuntimeException(
+                    "Failed to rotate key: " + e.getMessage(),
+                    e
+            );
         }
     }
 
     @Override
-    public KeyMetadataResponseDto updateKeyMetadata(String tenant, Long keyId, UpdateKeyMetadataRequestDto request) {
-        log.info("Updating key metadata for tenant: {} keyId: {}", tenant, keyId);
+    public UpdateKeyDescriptionResponse updateKeyDescription(
+            String tenant,
+            String keyId,
+            UpdateKeyDescriptionRequest request) {
+
+        log.info("Updating key description for tenant: {} keyId: {}", tenant, keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
@@ -277,53 +357,69 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
         if (request.getAlias() != null) {
             key.setKeyAlias(request.getAlias());
         }
+
         if (request.getDescription() != null) {
             key.setDescription(request.getDescription());
         }
 
-        kmsKeyRepository.save(key);
+        KmsKey updated = kmsKeyRepository.save(key);
 
-        return KeyMetadataResponseDto.builder()
-                .keyId(key.getKeyId())
-                .status(key.getStatus())
-                .keySpec(key.getKeySpec())
-                .keyPurpose(key.getKeyPurpose())
-                .currentVersion(key.getCurrentVersionId())
-                .createdAt(key.getCreationDate())
+        return UpdateKeyDescriptionResponse.builder().keyMetadata(CreateKeyResponse.KeyMetadata.builder()
+                        .keyId(String.valueOf(updated.getKeyId()))
+                        .alias(updated.getKeyAlias())
+                        .description(updated.getDescription())
+                        .status(updated.getKeyStatus())
+                        .updatedAt(LocalDateTime.now())
+                        .build())
                 .build();
     }
 
     @Override
-    public KeyMetadataResponseDto cancelKeyDeletion(String tenant, Long keyId) {
-        log.info("Cancelling deletion for key: {} for tenant: {}", keyId, tenant);
+    public CancelKeyDeletionResponse cancelKeyDeletion(
+            String tenant,
+            String keyId) {
+
+        log.info("Cancelling deletion for key: {} for tenant: {}",
+                keyId,
+                tenant);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
-        if (!IEnumKeyStatus.Types.PENDING_DELETION.equals(key.getStatus())) {
-            throw new InvalidKeyStateException("Key is not pending deletion: " + keyId);
+        if (!IEnumKeyStatus.Types.PENDING_DELETION.equals(key.getKeyStatus())) {
+            throw new InvalidKeyStateException(
+                    "Key is not pending deletion: " + keyId
+            );
         }
 
-        key.setStatus(IEnumKeyStatus.Types.DISABLED);
+        key.setKeyStatus(IEnumKeyStatus.Types.DISABLED);
         key.setPendingDeletionWindowDays(null);
         key.setDeletionDate(null);
+
         kmsKeyRepository.save(key);
 
-        return KeyMetadataResponseDto.builder()
-                .keyId(key.getKeyId())
-                .status(key.getStatus())
+        return CancelKeyDeletionResponse.builder()
+                .keyId(String.valueOf(key.getKeyId()))
+                .keyStatus(key.getKeyStatus())
                 .build();
     }
 
     @Override
-    public KeyRotationStatusResponseDto updateKeyRotation(String tenant, Long keyId, UpdateKeyRotationRequestDto request) {
+    public KeyRotationStatusResponseDto updateKeyRotation(
+            String tenant,
+            String keyId,
+            UpdateKeyRotationRequestDto request) {
+
         log.info("Updating key rotation for tenant: {} keyId: {} autoRotate: {}",
-                tenant, keyId, request.getEnableRotation());
+                tenant,
+                keyId,
+                request.getEnableRotation());
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
         key.setRotationEnabled(request.getEnableRotation());
+
         if (request.getRotationPeriodDays() != null) {
             key.setRotationPeriodDays(request.getRotationPeriodDays());
         }
@@ -331,7 +427,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
         kmsKeyRepository.save(key);
 
         return KeyRotationStatusResponseDto.builder()
-                .keyId(keyId)
+                .keyId(String.valueOf(key.getKeyId()))
                 .rotationEnabled(key.getRotationEnabled())
                 .rotationPeriodDays(key.getRotationPeriodDays())
                 .lastRotationDate(key.getLastRotationDate())
@@ -339,14 +435,19 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
     }
 
     @Override
-    public KeyRotationStatusResponseDto getKeyRotationStatus(String tenant, Long keyId) {
-        log.info("Getting key rotation status for tenant: {} keyId: {}", tenant, keyId);
+    public GetKeyRotationStatusResponse getKeyRotationStatus(
+            String tenant,
+            String keyId) {
+
+        log.info("Getting key rotation status for tenant: {} keyId: {}",
+                tenant,
+                keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
-        return KeyRotationStatusResponseDto.builder()
-                .keyId(keyId)
+        return GetKeyRotationStatusResponse.builder()
+                .keyId(String.valueOf(key.getKeyId()))
                 .rotationEnabled(key.getRotationEnabled())
                 .rotationPeriodDays(key.getRotationPeriodDays())
                 .lastRotationDate(key.getLastRotationDate())
@@ -354,7 +455,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
     }
 
     @Override
-    public PublicKeyResponseDto getPublicKey(String tenant, Long keyId) {
+    public GetPublicKeyResponse getPublicKey(String tenant, String keyId) {
         log.info("Getting public key for tenant: {} keyId: {}", tenant, keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
@@ -363,10 +464,10 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
         // Extract public key from key material (implementation depends on key spec)
         byte[] publicKey = cryptoService.extractPublicKey(key.getKeyMaterial(), key.getKeySpec());
 
-        return PublicKeyResponseDto.builder()
+        return GetPublicKeyResponse.builder()
                 .keyId(keyId)
                 .publicKey(Arrays.toString(publicKey))
-                .keySpec(key.getKeySpec())
+                .customerMasterKeySpec(key.getKeySpec())
                 .build();
     }
 
@@ -393,7 +494,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
 
         return AliasResponseDto.builder()
                 .aliasName(savedAlias.getAliasName())
-                .targetKeyId(savedAlias.getId())
+                .targetKeyId(savedAlias.getKeyId())
                 .build();
     }
 
@@ -448,10 +549,14 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
     }
 
     @Override
-    public ListAliasesResponseDto listAliasesForKey(String tenant, Long keyId) {
+    public ListAliasesResponseDto listAliasesForKey(String tenant, String keyId, Integer limit, String nextToken) {
         log.info("Listing aliases for key: {} tenant: {}", keyId, tenant);
 
-        List<KmsAlias> aliases = kmsAliasRepository.findByTenantAndKeyId(tenant, keyId);
+        int pageSize = (limit != null && limit > 0) ? Math.min(limit, DEFAULT_PAGE_SIZE) : DEFAULT_PAGE_SIZE;
+        int pageNum = (nextToken != null) ? Integer.parseInt(nextToken) : 0;
+
+        Pageable pageable = PageRequest.of(pageNum, pageSize);
+        List<KmsAlias> aliases = kmsAliasRepository.findByTenantAndKeyId(tenant, keyId, pageable);
 
         return ListAliasesResponseDto.builder()
                 .aliases(aliases.stream()
@@ -465,7 +570,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
     }
 
     @Override
-    public Object tagResource(String tenant, Long keyId, TagResourceRequestDto request) {
+    public Object tagResource(String tenant, String keyId, TagResourceRequestDto request) {
         log.info("Tagging resource for tenant: {} keyId: {}", tenant, keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
@@ -485,7 +590,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
     }
 
     @Override
-    public Object untagResource(String tenant, Long keyId, UntagResourceRequestDto request) {
+    public Object untagResource(String tenant, String keyId, UntagResourceRequestDto request) {
         log.info("Untagging resource for tenant: {} keyId: {} tags: {}", tenant, keyId, request.getTagKeys());
 
         kmsTagRepository.deleteByTenantAndKeyIdAndTagKeyIn(tenant, keyId, request.getTagKeys());
@@ -494,7 +599,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
     }
 
     @Override
-    public ListTagsResponseDto listResourceTags(String tenant, Long keyId) {
+    public ListTagsResponseDto listResourceTags(String tenant, String keyId) {
         log.info("Listing resource tags for tenant: {} keyId: {}", tenant, keyId);
 
         List<KmsTag> tags = kmsTagRepository.findByTenantAndKeyId(tenant, keyId);
@@ -510,7 +615,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
     }
 
     @Override
-    public ImportParametersResponseDto getParametersForImport(String tenant, Long keyId) {
+    public ImportParametersResponseDto getParametersForImport(String tenant, String keyId) {
         log.info("Getting import parameters for tenant: {} keyId: {}", tenant, keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
@@ -529,7 +634,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
     }
 
     @Override
-    public KeyMetadataResponseDto importKeyMaterial(String tenant, Long keyId, ImportKeyMaterialRequestDto request) {
+    public KeyDescriptionResponseDto importKeyMaterial(String tenant, String keyId, ImportKeyMaterialRequestDto request) {
         log.info("Importing key material for tenant: {} keyId: {}", tenant, keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
@@ -549,14 +654,14 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
         key.setExpirationDate(request.getExpirationDate());
         kmsKeyRepository.save(key);
 
-        return KeyMetadataResponseDto.builder()
+        return KeyDescriptionResponseDto.builder()
                 .keyId(key.getKeyId())
-                .status(key.getStatus())
+                .status(key.getKeyStatus())
                 .build();
     }
 
     @Override
-    public KeyMetadataResponseDto deleteImportedKeyMaterial(String tenant, Long keyId) {
+    public KeyDescriptionResponseDto deleteImportedKeyMaterial(String tenant, String keyId) {
         log.info("Deleting imported key material for tenant: {} keyId: {}", tenant, keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
@@ -570,20 +675,20 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
         key.setKeyMaterialEncrypted(false);
         kmsKeyRepository.save(key);
 
-        return KeyMetadataResponseDto.builder()
+        return KeyDescriptionResponseDto.builder()
                 .keyId(key.getKeyId())
-                .status(key.getStatus())
+                .status(key.getKeyStatus())
                 .build();
     }
 
     @Override
-    public void validateKey(String tenant, Long keyId) {
+    public void validateKey(String tenant, String keyId) {
         log.info("Validating key for tenant: {} keyId: {}", tenant, keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
-        if (IEnumKeyStatus.Types.PENDING_DELETION.equals(key.getStatus())) {
+        if (IEnumKeyStatus.Types.PENDING_DELETION.equals(key.getKeyStatus())) {
             throw new InvalidKeyStateException("Key is pending deletion: " + keyId);
         }
 
@@ -599,32 +704,63 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
     }
 
     @Override
-    public void deleteKey(String tenant, Long keyId) {
+    public void deleteKey(String tenant, String keyId) {
+
         log.info("Deleting key for tenant: {} keyId: {}", tenant, keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
-        // Delete associated versions, aliases, and tags
+        // Optional safety guard (recommended in KMS-like systems)
+        if (!IEnumKeyStatus.Types.PENDING_DELETION.equals(key.getKeyStatus())) {
+            throw new InvalidKeyStateException(
+                    "Key must be in PENDING_DELETION state before permanent deletion: " + keyId
+            );
+        }
+
+        // Delete associated resources
         kmsKeyVersionRepository.deleteByTenantAndKeyId(tenant, keyId);
         kmsAliasRepository.deleteByTenantAndKeyId(tenant, keyId);
         kmsTagRepository.deleteByTenantAndKeyId(tenant, keyId);
 
-        // Delete the key itself
+        // Delete key
         kmsKeyRepository.delete(key);
 
         log.info("Key {} deleted successfully", keyId);
     }
 
     @Override
-    public ListKeyRotationsResponseDto listKeyRotations(String tenant, Long keyId, Integer limit, String nextToken) {
-        log.info("Listing key rotations for tenant: {} keyId: {} with limit: {}", tenant, keyId, limit);
+    public ListKeyRotationsResponseDto listKeyRotations(
+            String tenant,
+            String keyId,
+            Integer limit,
+            String nextToken) {
 
-        int pageSize = (limit != null && limit > 0) ? Math.min(limit, DEFAULT_PAGE_SIZE) : DEFAULT_PAGE_SIZE;
-        int pageNum = (nextToken != null) ? Integer.parseInt(nextToken) : 0;
+        log.info("Listing key rotations for tenant: {} keyId: {} with limit: {}",
+                tenant,
+                keyId,
+                limit);
 
-        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by("rotationDate").descending());
-        Page<KmsKeyVersion> versionPage = kmsKeyVersionRepository.findByTenantAndKeyIdAndRotationDateIsNotNull(tenant, keyId, pageable);
+        int pageSize = (limit != null && limit > 0)
+                ? Math.min(limit, DEFAULT_PAGE_SIZE)
+                : DEFAULT_PAGE_SIZE;
+
+        int pageNum = (nextToken != null)
+                ? Integer.parseInt(nextToken)
+                : 0;
+
+        Pageable pageable = PageRequest.of(
+                pageNum,
+                pageSize,
+                Sort.by("rotationDate").descending()
+        );
+
+        Page<KmsKeyVersion> versionPage =
+                kmsKeyVersionRepository.findByTenantAndKeyIdAndRotationDateIsNotNull(
+                        tenant,
+                        keyId,
+                        pageable
+                );
 
         return ListKeyRotationsResponseDto.builder()
                 .rotations(versionPage.getContent().stream()
@@ -633,12 +769,14 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
                                 .rotationDate(version.getRotationDate())
                                 .build())
                         .collect(Collectors.toList()))
-                .nextToken(versionPage.hasNext() ? String.valueOf(pageNum + 1) : null)
+                .nextToken(versionPage.hasNext()
+                        ? String.valueOf(pageNum + 1)
+                        : null)
                 .build();
     }
 
     @Override
-    public KeyUsageStatsResponseDto getKeyUsageStats(String tenant, Long keyId) {
+    public KeyUsageStatsResponseDto getKeyUsageStats(String tenant, String keyId) {
         log.info("Getting key usage stats for tenant: {} keyId: {}", tenant, keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
@@ -658,7 +796,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
     }
 
     @Override
-    public int countKeysInCustomKeyStore(String tenant, String keyStoreId) {
+    public int countKeysInCustomKeyStore(String tenant, Long keyStoreId) {
         log.info("Counting keys in custom key store: {} for tenant: {}", keyStoreId, tenant);
 
         return kmsKeyRepository.countByTenantAndKeyStoreId(tenant, keyStoreId);

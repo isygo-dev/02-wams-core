@@ -56,7 +56,7 @@ Complete listing of all files created for the KMS implementation.
 ```
 02-kms-shared/src/main/java/eu/isygoit/enums/
 ├── IEnumKeySpec.java                                 ✅
-├── IEnumKeyPurpose.java                              ✅
+├── IEnumKeyUsage.java                              ✅
 ├── IEnumKeyStatus.java                               ✅
 └── IEnumSigningAlgorithm.java                        ✅
 ```
@@ -149,7 +149,7 @@ correct implementations. Fix by renaming if needed.
 ### Enums (Must Have ✅)
 
 - [x] IEnumKeySpec.java
-- [x] IEnumKeyPurpose.java
+- [x] IEnumKeyUsage.java
 - [x] IEnumKeyStatus.java
 - [x] IEnumSigningAlgorithm.java
 

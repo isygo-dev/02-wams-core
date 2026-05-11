@@ -38,7 +38,7 @@ public interface ICryptoService {
      */
     PasswordEncryptor getPasswordEncryptor(String tenant /*senderTenant*/);
 
-    // ===== AWS KMS Specific Cryptographic Operations =====
+    // ===== WAMS KMS Specific Cryptographic Operations =====
 
     /**
      * Generate key material for specified key spec
@@ -115,11 +115,11 @@ public interface ICryptoService {
      */
     byte[] decryptKeyMaterial(String tenant, @NotNull(message = "Encrypted key material is required") byte[] encryptedKeyMaterial, @NotNull(message = "Import token is required") byte[] importToken);
 
-    long getEncryptCount(Long keyId);
+    long getEncryptCount(String keyId);
 
-    long getDecryptCount(Long keyId);
+    long getDecryptCount(String keyId);
 
-    LocalDateTime getLastUsedDate(Long keyId);
+    LocalDateTime getLastUsedDate(String keyId);
 
     boolean validateKeyIntegrity(byte[] keyMaterial, IEnumKeySpec.Types keySpec);
 }

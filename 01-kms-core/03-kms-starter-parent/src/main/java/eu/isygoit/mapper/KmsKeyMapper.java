@@ -1,7 +1,6 @@
 package eu.isygoit.mapper;
 
-import eu.isygoit.dto.response.KeyMetadataResponseDto;
-import eu.isygoit.dto.response.ListKeysResponseDto;
+import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.model.KmsKey;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
@@ -20,7 +19,7 @@ public interface KmsKeyMapper {
     /**
      * Convert KmsKey entity to KeyMetadataResponseDto
      */
-    KeyMetadataResponseDto toKeyMetadataResponseDto(KmsKey kmsKey);
+    KeyDescriptionResponseDto toKeyMetadataResponseDto(KmsKey kmsKey);
 
     /**
      * Convert Page of KmsKey entities to ListKeysResponseDto
@@ -30,7 +29,7 @@ public interface KmsKeyMapper {
                 .map(key -> ListKeysResponseDto.KeySummaryDto.builder()
                         .keyId(key.getKeyId())
                         .alias(key.getKeyAlias())
-                        .status(key.getStatus())
+                        .status(key.getKeyStatus())
                         .build())
                 .toList();
 

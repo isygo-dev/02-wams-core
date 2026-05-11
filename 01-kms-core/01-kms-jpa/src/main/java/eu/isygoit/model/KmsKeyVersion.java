@@ -1,6 +1,9 @@
 package eu.isygoit.model;
 
 import eu.isygoit.constants.TenantConstants;
+import eu.isygoit.enums.IEnumKeyExpirationModel;
+import eu.isygoit.enums.IEnumKeyOrigin;
+import eu.isygoit.enums.IEnumKeyStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -42,7 +45,7 @@ public class KmsKeyVersion {
     private String tenant;
 
     @Column(name = "KEY_ID", nullable = false)
-    private Long keyId;
+    private String keyId;
 
     @Column(name = "VERSION_ID", length = 255, nullable = false)
     private String versionId;
@@ -51,7 +54,7 @@ public class KmsKeyVersion {
     private Integer versionNumber;
 
     @Column(name = "STATUS", length = 50, nullable = false)
-    private String status; // ACTIVE, DEPRECATED, PENDING_DELETION
+    private IEnumKeyStatus.Types keyStatus; // ACTIVE, DEPRECATED, PENDING_DELETION
 
     @Lob
     @Column(name = "KEY_MATERIAL", nullable = false)
@@ -80,4 +83,12 @@ public class KmsKeyVersion {
 
     @Column(name = "HASH_ALGORITHM", length = 50)
     private String hashAlgorithm;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "EXPIRATION_MODEL", length = 50)
+    private IEnumKeyExpirationModel.Types expirationModel;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ORIGIN", length = 50)
+    private IEnumKeyOrigin.Types origin;
 }

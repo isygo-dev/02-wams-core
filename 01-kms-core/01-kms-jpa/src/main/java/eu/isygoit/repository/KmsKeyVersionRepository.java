@@ -20,32 +20,32 @@ public interface KmsKeyVersionRepository extends JpaRepository<KmsKeyVersion, Lo
     /**
      * Find key version by tenant, keyId and versionId
      */
-    Optional<KmsKeyVersion> findByTenantAndKeyIdAndVersionId(String tenant, Long keyId, String versionId);
+    Optional<KmsKeyVersion> findByTenantAndKeyIdAndVersionId(String tenant, String keyId, String versionId);
 
     /**
      * List all versions of a key
      */
     @Query("SELECT kv FROM KmsKeyVersion kv WHERE kv.tenant = :tenant AND kv.keyId = :keyId ORDER BY kv.creationDate DESC")
-    List<KmsKeyVersion> findVersionsByKeyId(@Param("tenant") String tenant, @Param("keyId") Long keyId);
+    List<KmsKeyVersion> findVersionsByKeyId(@Param("tenant") String tenant, @Param("keyId") String keyId);
 
     /**
      * List active versions of a key
      */
-    @Query("SELECT kv FROM KmsKeyVersion kv WHERE kv.tenant = :tenant AND kv.keyId = :keyId AND kv.status = 'ACTIVE' ORDER BY kv.creationDate DESC LIMIT 1")
-    Optional<KmsKeyVersion> findActiveVersionByKeyId(@Param("tenant") String tenant, @Param("keyId") Long keyId);
+    @Query("SELECT kv FROM KmsKeyVersion kv WHERE kv.tenant = :tenant AND kv.keyId = :keyId AND kv.keyStatus = 'ACTIVE' ORDER BY kv.creationDate DESC LIMIT 1")
+    Optional<KmsKeyVersion> findActiveVersionByKeyId(@Param("tenant") String tenant, @Param("keyId") String keyId);
 
     /**
      * List all versions for a key with pagination
      */
-    Page<KmsKeyVersion> findByTenantAndKeyId(String tenant, Long keyId, Pageable pageable);
+    Page<KmsKeyVersion> findByTenantAndKeyId(String tenant, String keyId, Pageable pageable);
 
     /**
      * Count versions for a key
      */
-    long countByKeyId(Long keyId);
+    long countByKeyId(String keyId);
 
-    Page<KmsKeyVersion> findByTenantAndKeyIdAndRotationDateIsNotNull(String tenant, Long keyId, Pageable pageable);
+    Page<KmsKeyVersion> findByTenantAndKeyIdAndRotationDateIsNotNull(String tenant, String keyId, Pageable pageable);
 
-    void deleteByTenantAndKeyId(String tenant, Long keyId);
+    void deleteByTenantAndKeyId(String tenant, String keyId);
 }
 

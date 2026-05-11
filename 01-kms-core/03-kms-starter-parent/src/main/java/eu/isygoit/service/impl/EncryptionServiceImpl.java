@@ -1,12 +1,8 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.dto.request.DecryptRequestDto;
-import eu.isygoit.dto.request.EncryptRequestDto;
-import eu.isygoit.dto.request.ReEncryptRequestDto;
-import eu.isygoit.dto.response.DecryptResponseDto;
-import eu.isygoit.dto.response.EncryptResponseDto;
-import eu.isygoit.dto.response.ReEncryptResponseDto;
-import eu.isygoit.enums.IEnumKeyPurpose;
+import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.enums.IEnumKeyUsage;
+import eu.isygoit.exception.KeyNotFoundException;
 import eu.isygoit.model.KmsKey;
 import eu.isygoit.repository.KmsKeyRepository;
 import eu.isygoit.service.ICryptoService;
@@ -31,82 +27,143 @@ public class EncryptionServiceImpl implements IEncryptionService {
     private final ICryptoService cryptoService;
 
     @Override
-    public EncryptResponseDto encrypt(String tenant, EncryptRequestDto request) {
-        log.info("Encrypting data for tenant: {} with keyId: {}", tenant, request.getKeyId());
+    public EncryptResponse encrypt(
+            String tenant,
+            EncryptRequest request) {
 
-        KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(tenant, request.getKeyId())
+        log.info("Encrypting data for tenant: {} with keyId: {}",
+                tenant,
+                request.getKeyId());
+
+        KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(
+                        tenant,
+                        request.getKeyId()
+                )
                 .orElseThrow(() -> new RuntimeException("KMS Key not found"));
 
         if (!kmsKey.isEnabled()) {
             throw new RuntimeException("KMS Key is not enabled");
         }
 
-        if (kmsKey.getKeyPurpose() != IEnumKeyPurpose.Types.ENCRYPT_DECRYPT) {
-            throw new RuntimeException("KMS Key is not authorized for encryption");
+        if (kmsKey.getKeyUsage() != IEnumKeyUsage.Types.ENCRYPT_DECRYPT) {
+            throw new RuntimeException(
+                    "KMS Key is not authorized for encryption"
+            );
         }
 
-        byte[] plaintext = Base64.getDecoder().decode(request.getPlaintext());
-        byte[] ciphertext = cryptoService.encryptData(plaintext, kmsKey.getKeyMaterial(), request.getEncryptionContext());
+        byte[] plaintext =
+                Base64.getDecoder().decode(request.getPlaintext());
 
-        return EncryptResponseDto.builder()
-                .ciphertext(Base64.getEncoder().encodeToString(ciphertext))
-                .keyId(kmsKey.getKeyId())
-                .keyVersion(kmsKey.getCurrentVersionId())
+        byte[] ciphertext = cryptoService.encryptData(
+                plaintext,
+                kmsKey.getKeyMaterial(),
+                request.getEncryptionContext()
+        );
+
+        return EncryptResponse.builder()
+                .ciphertextBlob(Base64.getEncoder().encodeToString(ciphertext))
+                .keyId(String.valueOf(kmsKey.getKeyId()))
+                .keyVersionId(kmsKey.getCurrentVersionId())
                 .build();
     }
 
     @Override
-    public DecryptResponseDto decrypt(String tenant, DecryptRequestDto request) {
+    public DecryptResponse decrypt(
+            String tenant,
+            DecryptRequest request) {
+
         log.info("Decrypting data for tenant: {}", tenant);
 
-        Long keyId = request.getKeyId();
-        // In AWS KMS, if keyId is not provided, it should be inferable from the ciphertext
-        // For our implementation, we'll assume it's provided for now or we could store it in the blob.
+        String keyId = request.getKeyId();
+
         if (keyId == null) {
-            throw new RuntimeException("keyId is required for decryption in this implementation");
+            throw new RuntimeException(
+                    "keyId is required for decryption in this implementation"
+            );
         }
 
-        KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
+        KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(
+                        tenant,
+                        keyId
+                )
                 .orElseThrow(() -> new RuntimeException("KMS Key not found"));
 
         if (!kmsKey.isEnabled()) {
             throw new RuntimeException("KMS Key is not enabled");
         }
 
-        byte[] ciphertext = Base64.getDecoder().decode(request.getCiphertext());
-        byte[] plaintext = cryptoService.decryptData(tenant, ciphertext, kmsKey.getKeyMaterial(), request.getEncryptionContext());
+        byte[] ciphertext =
+                Base64.getDecoder().decode(request.getCiphertextBlob());
 
-        return DecryptResponseDto.builder()
+        byte[] plaintext = cryptoService.decryptData(
+                tenant,
+                ciphertext,
+                kmsKey.getKeyMaterial(),
+                request.getEncryptionContext()
+        );
+
+        return DecryptResponse.builder()
                 .plaintext(Base64.getEncoder().encodeToString(plaintext))
-                .keyId(kmsKey.getKeyId())
-                .keyVersion(kmsKey.getCurrentVersionId())
+                .keyId(String.valueOf(kmsKey.getKeyId()))
+                .keyVersionId(kmsKey.getCurrentVersionId())
                 .build();
     }
 
     @Override
-    public ReEncryptResponseDto reEncrypt(String tenant, ReEncryptRequestDto request) {
-        log.info("Re-encrypting data for tenant: {} to destination key: {}",
-                tenant, request.getDestinationKeyId());
+    public ReEncryptResponse reEncrypt(
+            String tenant,
+            ReEncryptRequest request) {
 
-        // Decrypt with source key (if provided or implicit)
-        DecryptResponseDto decryptResponse = decrypt(tenant, DecryptRequestDto.builder()
-                .keyId(request.getSourceKeyId())
-                .ciphertext(request.getCiphertextBlob())
-                .encryptionContext(request.getSourceEncryptionContext())
-                .build());
+        log.info("Re-encrypting data for tenant: {} from key: {} to key: {}",
+                tenant,
+                request.getSourceKeyId(),
+                request.getDestinationKeyId());
 
-        // Encrypt with destination key
-        EncryptResponseDto encryptResponse = encrypt(tenant, EncryptRequestDto.builder()
-                .keyId(request.getDestinationKeyId())
-                .plaintext(decryptResponse.getPlaintext())
-                .encryptionContext(request.getDestinationEncryptionContext())
-                .build());
+        // 1. Validate source key
+        KmsKey sourceKey = kmsKeyRepository.findByTenantAndKeyId(
+                        tenant,
+                        request.getSourceKeyId()
+                )
+                .orElseThrow(() -> new KeyNotFoundException(request.getSourceKeyId()));
 
-        return ReEncryptResponseDto.builder()
-                .ciphertext(encryptResponse.getCiphertext())
+        if (!sourceKey.isEnabled()) {
+            throw new RuntimeException("Source key is not enabled");
+        }
+
+        // 2. Decrypt
+        byte[] ciphertext = Base64.getDecoder().decode(request.getCiphertextBlob());
+
+        byte[] plaintext = cryptoService.decryptData(
+                tenant,
+                ciphertext,
+                sourceKey.getKeyMaterial(),
+                request.getSourceEncryptionContext()
+        );
+
+        // 3. Validate destination key
+        KmsKey destinationKey = kmsKeyRepository.findByTenantAndKeyId(
+                        tenant,
+                        request.getDestinationKeyId()
+                )
+                .orElseThrow(() -> new KeyNotFoundException(request.getDestinationKeyId()));
+
+        if (!destinationKey.isEnabled()) {
+            throw new RuntimeException("Destination key is not enabled");
+        }
+
+        // 4. Encrypt with destination key
+        byte[] newCiphertext = cryptoService.encryptData(
+                plaintext,
+                destinationKey.getKeyMaterial(),
+                request.getDestinationEncryptionContext()
+        );
+
+        // 5. Build response
+        return ReEncryptResponse.builder()
+                .ciphertextBlob(Base64.getEncoder().encodeToString(newCiphertext))
                 .sourceKeyId(request.getSourceKeyId())
                 .destinationKeyId(request.getDestinationKeyId())
-                .destinationKeyVersion(encryptResponse.getKeyVersion())
+                .destinationKeyVersionId(destinationKey.getCurrentVersionId())
                 .build();
     }
 }

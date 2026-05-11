@@ -41,7 +41,7 @@ public class KmsAuditLog {
     private String tenant;
 
     @Column(name = "KEY_ID", length = 255)
-    private Long keyId;
+    private String keyId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ACTION", length = 100, nullable = false)

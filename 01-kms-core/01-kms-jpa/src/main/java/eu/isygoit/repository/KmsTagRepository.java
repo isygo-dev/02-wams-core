@@ -26,7 +26,7 @@ public interface KmsTagRepository extends JpaRepository<KmsTag, Long> {
      * @param keyId  the key ID
      * @return List of tags
      */
-    List<KmsTag> findByTenantAndKeyId(String tenant, Long keyId);
+    List<KmsTag> findByTenantAndKeyId(String tenant, String keyId);
 
     /**
      * Find all tags for a specific key with pagination
@@ -36,7 +36,7 @@ public interface KmsTagRepository extends JpaRepository<KmsTag, Long> {
      * @param pageable pagination information
      * @return Page of tags
      */
-    Page<KmsTag> findByTenantAndKeyId(String tenant, Long keyId, Pageable pageable);
+    Page<KmsTag> findByTenantAndKeyId(String tenant, String keyId, Pageable pageable);
 
     /**
      * Find specific tag by tenant, key ID, and tag key
@@ -46,7 +46,7 @@ public interface KmsTagRepository extends JpaRepository<KmsTag, Long> {
      * @param tagKey the tag key
      * @return Optional containing the tag if found
      */
-    Optional<KmsTag> findByTenantAndKeyIdAndTagKey(String tenant, Long keyId, String tagKey);
+    Optional<KmsTag> findByTenantAndKeyIdAndTagKey(String tenant, String keyId, String tagKey);
 
     /**
      * Check if a specific tag exists for a key
@@ -56,7 +56,7 @@ public interface KmsTagRepository extends JpaRepository<KmsTag, Long> {
      * @param tagKey the tag key
      * @return true if exists, false otherwise
      */
-    boolean existsByTenantAndKeyIdAndTagKey(String tenant, Long keyId, String tagKey);
+    boolean existsByTenantAndKeyIdAndTagKey(String tenant, String keyId, String tagKey);
 
     /**
      * Delete all tags for a specific key
@@ -66,7 +66,7 @@ public interface KmsTagRepository extends JpaRepository<KmsTag, Long> {
      */
     @Modifying
     @Transactional
-    void deleteByTenantAndKeyId(String tenant, Long keyId);
+    void deleteByTenantAndKeyId(String tenant, String keyId);
 
     /**
      * Delete specific tags for a key
@@ -77,7 +77,7 @@ public interface KmsTagRepository extends JpaRepository<KmsTag, Long> {
      */
     @Modifying
     @Transactional
-    void deleteByTenantAndKeyIdAndTagKeyIn(String tenant, Long keyId, List<String> tagKeys);
+    void deleteByTenantAndKeyIdAndTagKeyIn(String tenant, String keyId, List<String> tagKeys);
 
     /**
      * Delete specific tag for a key
@@ -88,7 +88,7 @@ public interface KmsTagRepository extends JpaRepository<KmsTag, Long> {
      */
     @Modifying
     @Transactional
-    void deleteByTenantAndKeyIdAndTagKey(String tenant, Long keyId, String tagKey);
+    void deleteByTenantAndKeyIdAndTagKey(String tenant, String keyId, String tagKey);
 
     /**
      * Find keys by tag
@@ -120,7 +120,7 @@ public interface KmsTagRepository extends JpaRepository<KmsTag, Long> {
      * @param keyId  the key ID
      * @return count of tags
      */
-    long countByTenantAndKeyId(String tenant, Long keyId);
+    long countByTenantAndKeyId(String tenant, String keyId);
 
     /**
      * Find tags by tag key pattern
@@ -147,7 +147,7 @@ public interface KmsTagRepository extends JpaRepository<KmsTag, Long> {
     @Query("UPDATE KmsTag t SET t.tagValue = :newTagValue, t.lastUpdatedDate = CURRENT_TIMESTAMP " +
             "WHERE t.tenant = :tenant AND t.keyId = :keyId AND t.tagKey = :tagKey")
     int updateTagValue(@Param("tenant") String tenant,
-                       @Param("keyId") Long keyId,
+                       @Param("keyId") String keyId,
                        @Param("tagKey") String tagKey,
                        @Param("newTagValue") String newTagValue);
 
@@ -169,7 +169,7 @@ public interface KmsTagRepository extends JpaRepository<KmsTag, Long> {
      */
     @Query("SELECT DISTINCT t.tagKey FROM KmsTag t WHERE t.tenant = :tenant AND t.keyId = :keyId")
     List<String> findDistinctTagKeysByTenantAndKeyId(@Param("tenant") String tenant,
-                                                     @Param("keyId") Long keyId);
+                                                     @Param("keyId") String keyId);
 
     /**
      * Batch insert tags (for performance optimization)
@@ -183,7 +183,7 @@ public interface KmsTagRepository extends JpaRepository<KmsTag, Long> {
             "VALUES (:tenant, :keyId, :tagKey, :tagValue, CURRENT_TIMESTAMP)",
             nativeQuery = true)
     int batchInsertTag(@Param("tenant") String tenant,
-                       @Param("keyId") Long keyId,
+                       @Param("keyId") String keyId,
                        @Param("tagKey") String tagKey,
                        @Param("tagValue") String tagValue);
 

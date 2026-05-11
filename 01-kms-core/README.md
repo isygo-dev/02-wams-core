@@ -1,6 +1,6 @@
 # 🔐 KMS (Key Management Service) - Complete Implementation
 
-Complete implementation of a Key Management Service (KMS) with **20 REST API endpoints** following AWS KMS design
+Complete implementation of a Key Management Service (KMS) with **20 REST API endpoints** following WAMS KMS design
 patterns.
 
 ## 📋 Table of Contents
@@ -87,7 +87,7 @@ integration testing.
 │       │   └── response/ (10 DTOs)          ✅ All response types
 │       └── enums/
 │           ├── IEnumKeySpec.java            ✅ AES_256, RSA_2048, EC_P256
-│           ├── IEnumKeyPurpose.java         ✅ ENCRYPT_DECRYPT, SIGN_VERIFY
+│           ├── IEnumKeyUsage.java         ✅ ENCRYPT_DECRYPT, SIGN_VERIFY
 │           ├── IEnumKeyStatus.java          ✅ ENABLED, DISABLED, PENDING_DELETION
 │           └── IEnumSigningAlgorithm.java   ✅ RSASSA_PSS_SHA256, ECDSA_SHA256
 │

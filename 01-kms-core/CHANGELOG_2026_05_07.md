@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-07
 **Module:** eu.isygoit.kms-core
-**Version:** WC-1.0.260407-AWS-ALIGNED
+**Version:** WC-1.0.260407-WAMS-ALIGNED
 
 ---
 
@@ -13,14 +13,14 @@
 #### 1. KmsKey.java
 
 - **Location:** `01-kms-jpa/src/main/java/eu/isygoit/model/KmsKey.java`
-- **Purpose:** Represents a cryptographic key in AWS KMS style
+- **Purpose:** Represents a cryptographic key in WAMS KMS style
 - **Extends:** AuditableEntity<Long>
 - **Implements:** ITenantAssignable
 - **Key Fields:**
     - keyId (UUID format)
     - keyArn (Amazon Resource Name)
     - keySpec (AES_256, RSA_2048, EC_P256)
-    - keyPurpose (ENCRYPT_DECRYPT, SIGN_VERIFY)
+  - keyUsage (ENCRYPT_DECRYPT, SIGN_VERIFY)
     - status (ENABLED, DISABLED, PENDING_DELETION)
     - keyMaterial (encrypted byte array)
     - rotationEnabled, rotationPeriodDays, lastRotationDate
@@ -162,7 +162,7 @@
 
 - **Location:** `03-kms-starter-parent/src/main/java/eu/isygoit/service/ICryptoService.java`
 - **Changes:**
-    - Added 6 new method signatures for AWS KMS cryptographic operations:
+    - Added 6 new method signatures for WAMS KMS cryptographic operations:
       ```java
       byte[] generateKeyMaterial(String keySpec);
       byte[] encryptData(byte[], byte[], Map<String,String>);
@@ -374,14 +374,14 @@ Estimated schema size: ~500KB
 
 ### Files That Need Updates
 
-1. README.md - Add AWS KMS alignment status
+1. README.md - Add WAMS KMS alignment status
 2. IMPLEMENTATION_GUIDE.md - Document new architecture
 3. KMS_API_DOCUMENTATION.md - Add database schema reference
 4. QUICK_START.md - Update with new setup steps
 
 ### New Files Created
 
-1. AWS_KMS_ALIGNMENT_REPORT.md - This comprehensive report
+1. WAMS_KMS_ALIGNMENT_REPORT.md - This comprehensive report
 2. CHANGELOG.md - This detailed changelog
 3. Database migration scripts - In db/migration/
 

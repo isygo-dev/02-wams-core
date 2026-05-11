@@ -17,5 +17,5 @@ public interface CustomKeyStoreRepository extends JpaPagingAndSortingTenantAssig
 
     long countByTenant(String tenant);
 
-    Optional<Object> findByTenantAndCustomKeyStoreId(String tenant, String keyStoreId);
+    Optional<Object> findByTenantAndCustomKeyStoreId(String tenant, Long keyStoreId);
 }

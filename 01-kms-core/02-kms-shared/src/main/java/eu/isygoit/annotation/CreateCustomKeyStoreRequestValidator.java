@@ -1,6 +1,6 @@
 package eu.isygoit.annotation;
 
-import eu.isygoit.dto.request.CreateCustomKeyStoreRequestDto;
+import eu.isygoit.dto.KmsDtos.CreateCustomKeyStoreRequestDto;
 import eu.isygoit.enums.IEnumCustomKeyStoreType;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

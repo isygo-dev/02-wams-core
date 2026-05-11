@@ -64,7 +64,7 @@
 ├── SERVICE_IMPLEMENTATION_GUIDE.md
 ├── API_REFERENCE_WITH_USE_CASES.md
 ├── COMPLETION_ANALYSIS.md
-├── AWS_KMS_ALIGNMENT_REPORT.md
+├── WAMS_KMS_ALIGNMENT_REPORT.md
 ├── README.md
 └── QUICK_START_GUIDE.md
 ```
@@ -600,7 +600,7 @@ springdoc:
 KeyNotFoundException -404
 Not Found
 KeyDisabledException -409Conflict
-InvalidKeyPurposeException -400
+InvalidKeyUsageException -400
 Bad Request
 InvalidKeyStateException -409Conflict
 EncryptionException -500
@@ -679,7 +679,7 @@ public class KmsControllerIntegrationTest {
 1. **Enable Query caching for key metadata**
    ```java
    @Cacheable(value = "keys", key = "#keyId")
-   public Key getKey(String tenant, Long keyId) { ... }
+   public Key getKey(String tenant, String keyId) { ... }
    ```
 
 2. **Batch encrypt/decrypt operations**
@@ -765,7 +765,7 @@ docker run -p 8080:8080 -e DB_URL=jdbc:mysql://db:3306/kms kms-service:1.0
 | IMPLEMENTATION_STATUS_SUMMARY.md | Complete status overview       | Everyone       |
 | SERVICE_IMPLEMENTATION_GUIDE.md  | Service implementation details | Developers     |
 | API_REFERENCE_WITH_USE_CASES.md  | API usage examples             | API consumers  |
-| AWS_KMS_ALIGNMENT_REPORT.md      | AWS KMS compatibility          | Architects     |
+| WAMS_KMS_ALIGNMENT_REPORT.md     | WAMS KMS compatibility         | Architects     |
 | QUICK_START_GUIDE.md             | 5-minute quick start           | New developers |
 | README.md                        | Module overview                | All            |
 

@@ -349,7 +349,7 @@ Définit des règles d'accès de type IAM pour l'utilisation des clés.
       {
         "Effect": "Allow",
         "Principal": {
-          "AWS": "arn:aws:iam::123456789012:user/alice"
+          "WAMS": "arn:aws:iam::123456789012:user/alice"
         },
         "Action": "kms:Decrypt",
         "Resource": "*"

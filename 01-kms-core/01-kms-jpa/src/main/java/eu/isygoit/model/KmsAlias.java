@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 /**
  * The type Kms alias.
- * Represents an alias for a KMS key (AWS KMS-compliant)
+ * Represents an alias for a KMS key (WAMS KMS-compliant)
  */
 @Data
 @Builder
@@ -42,7 +42,7 @@ public class KmsAlias {
     private String aliasName;
 
     @Column(name = "KEY_ID", nullable = false)
-    private Long keyId;
+    private String keyId;
 
     @Column(name = "DESCRIPTION", length = 1024)
     private String description;

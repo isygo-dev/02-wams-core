@@ -25,7 +25,7 @@ The main gaps are:
 
 - **KmsServiceApi Interface** - Fully documented with comprehensive OpenAPI annotations
 - **DTOs** - Request/Response DTOs with validation annotations
-- **Enums** - IEnumKeySpec, IEnumKeyPurpose, IEnumKeyStatus, IEnumSigningAlgorithm
+- **Enums** - IEnumKeySpec, IEnumKeyUsage, IEnumKeyStatus, IEnumSigningAlgorithm
 - **Constants** - KMS operation type constants and configuration values
 
 #### 2. Controller Layer (03-kms-starter-parent)
@@ -67,7 +67,7 @@ The main gaps are:
 **Entities:**
 
 - **KmsKey** - Master key metadata (T_KMS_KEY table)
-    - Columns: keyId, keyArn, keySpec, keyPurpose, status, currentVersionId, rotation config
+    - Columns: keyId, keyArn, keySpec, keyUsage, status, currentVersionId, rotation config
     - Indexes: (TENANT, KEY_ID), (TENANT, STATUS), (TENANT, ALIAS)
     - Relationships: OneToMany with KmsKeyVersion, OneToMany with KmsKeyGrant
 
