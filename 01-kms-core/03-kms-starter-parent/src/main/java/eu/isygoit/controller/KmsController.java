@@ -1498,10 +1498,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<GenerateRandomResponse> generateRandom(@Valid @RequestBody GenerateRandomRequest request) {
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            byte[] randomBytes = new byte[request.getNumberOfBytes()];
-            new SecureRandom().nextBytes(randomBytes);
-            String plaintext = Base64.getEncoder().encodeToString(randomBytes);
-            GenerateRandomResponse response = GenerateRandomResponse.builder().plaintext(plaintext).build();
+            GenerateRandomResponse response = dataKeyService.generateRandom(request);
             auditService.logAction(tenant, IKmsActionType.Types.GENERATE_RANDOM_DATA, null,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());

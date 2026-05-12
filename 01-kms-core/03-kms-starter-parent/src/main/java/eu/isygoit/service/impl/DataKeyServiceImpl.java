@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.SecureRandom;
 import java.security.spec.ECGenParameterSpec;
 import java.util.Base64;
 import java.util.Map;
@@ -163,6 +164,14 @@ public class DataKeyServiceImpl implements IDataKeyService {
                 .keyPairSpec(base.getKeyPairSpec())
                 .encryptionAlgorithm(base.getEncryptionAlgorithm())
                 .build();
+    }
+
+    @Override
+    public GenerateRandomResponse generateRandom(GenerateRandomRequest request) {
+        byte[] randomBytes = new byte[request.getNumberOfBytes()];
+        new SecureRandom().nextBytes(randomBytes);
+        String plaintext = Base64.getEncoder().encodeToString(randomBytes);
+        return GenerateRandomResponse.builder().plaintext(plaintext).build();
     }
 
     private GenerateDataKeyPairRequest mapToBaseRequest(

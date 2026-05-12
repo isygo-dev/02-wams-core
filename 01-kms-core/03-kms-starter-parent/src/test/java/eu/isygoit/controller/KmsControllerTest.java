@@ -48,7 +48,7 @@ class KmsControllerTest {
     private static final String USER = "test-user";
     private static final String IP = "127.0.0.1";
     private static final String KEY_ID = "1234abcd-12ab-34cd-56ef-1234567890ab";
-    private static final String ALIAS_NAME = "alias/test-key";
+    private static final String ALIAS_NAME = "alias-test-key";
     private static final String GRANT_ID = "grant-123";
     private static final Long CUSTOM_KEY_STORE_ID = 1L;
 
@@ -239,7 +239,7 @@ class KmsControllerTest {
     void listKeyRotations_Success() throws Exception {
         ListKeyRotationsResponseDto response = ListKeyRotationsResponseDto.builder()
                 .rotations(List.of()).build();
-        when(keyManagementService.listKeyRotations(anyString(), eq(KEY_ID), anyInt(), anyString()))
+        when(keyManagementService.listKeyRotations(anyString(), eq(KEY_ID), isNull(), isNull()))
                 .thenReturn(response);
 
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/rotations", KEY_ID))
@@ -654,7 +654,7 @@ class KmsControllerTest {
                         .granteePrincipal("test")
                         .build()))
                 .build();
-        when(keyPolicyService.listGrants(eq(TENANT), eq(KEY_ID), anyInt(), anyString())).thenReturn(dto);
+        when(keyPolicyService.listGrants(eq(TENANT), eq(KEY_ID), isNull(), isNull())).thenReturn(dto);
 
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/grants", KEY_ID))
                 .andExpect(status().isOk())

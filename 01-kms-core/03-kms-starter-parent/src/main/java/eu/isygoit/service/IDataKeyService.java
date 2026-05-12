@@ -29,5 +29,7 @@ public interface IDataKeyService {
     GenerateDataKeyPairWithoutPlaintextResponse generateDataKeyPairWithoutPlaintext(
             String tenant,
             GenerateDataKeyPairWithoutPlaintextRequest request);
+
+    GenerateRandomResponse generateRandom(GenerateRandomRequest request);
 }
 
