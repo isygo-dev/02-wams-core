@@ -1,6 +1,6 @@
 package eu.isygoit.service;
 
-import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.dto.KmsDtos.ActiveVersionResponseDto;
 import eu.isygoit.dto.KmsDtos.ListKeyVersionsResponse;
 
 /**

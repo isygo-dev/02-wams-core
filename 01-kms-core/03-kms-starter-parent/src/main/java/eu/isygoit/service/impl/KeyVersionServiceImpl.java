@@ -1,6 +1,6 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.dto.KmsDtos.ActiveVersionResponseDto;
 import eu.isygoit.dto.KmsDtos.ListKeyVersionsResponse;
 import eu.isygoit.model.KmsKeyVersion;
 import eu.isygoit.repository.KmsKeyVersionRepository;

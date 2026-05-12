@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class StorageFactoryService {
 
-    private static final String SERVICE_NAME_SUFFIX = "StorageService" ;
+    private static final String SERVICE_NAME_SUFFIX = "StorageService";
     private final BeanFactory beanFactory;
 
     /**

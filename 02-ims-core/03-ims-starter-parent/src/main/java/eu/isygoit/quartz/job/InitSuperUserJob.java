@@ -29,11 +29,11 @@ public class InitSuperUserJob extends AbstractQuartzJob {
     /**
      * The constant groupName.
      */
-    public static final String groupName = "um_default" ;
+    public static final String groupName = "um_default";
     /**
      * The constant triggerName.
      */
-    public static final String triggerName = "init_super_user_job_trigger" ;
+    public static final String triggerName = "init_super_user_job_trigger";
 
     private final AppProperties appProperties;
 

@@ -1,11 +1,6 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.dto.KmsDtos.DecryptRequest;
-import eu.isygoit.dto.KmsDtos.DecryptResponse;
-import eu.isygoit.dto.KmsDtos.EncryptRequest;
-import eu.isygoit.dto.KmsDtos.EncryptResponse;
-import eu.isygoit.dto.KmsDtos.ReEncryptRequest;
-import eu.isygoit.dto.KmsDtos.ReEncryptResponse;
+import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.exception.KeyNotFoundException;
@@ -24,8 +19,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class EncryptionServiceTest {

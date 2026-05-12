@@ -1,6 +1,9 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.dto.KmsDtos.CreateCustomKeyStoreRequestDto;
+import eu.isygoit.dto.KmsDtos.CustomKeyStoreResponseDto;
+import eu.isygoit.dto.KmsDtos.ListCustomKeyStoresResponseDto;
+import eu.isygoit.dto.KmsDtos.UpdateCustomKeyStoreRequestDto;
 import eu.isygoit.enums.IEnumCustomKeyStoreStatus;
 import eu.isygoit.enums.IEnumCustomKeyStoreType;
 import eu.isygoit.exception.*;
@@ -71,8 +74,8 @@ import java.util.stream.Collectors;
  *
  * @author Isygoit Team
  * @version 2.0
- * @since 1.0
  * @apiNote This service manages custom key stores for cryptographic operations
+ * @since 1.0
  */
 @Slf4j
 @Service
@@ -191,12 +194,12 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
      * is still active by checking the heartbeat timer. If the heartbeat has expired,
      * the status is updated to FAILED.</p>
      *
-     * @param tenant the tenant identifier (required, non-empty)
+     * @param tenant     the tenant identifier (required, non-empty)
      * @param keyStoreId the ID of the key store to describe (required, must exist)
      * @return a {@link CustomKeyStoreResponseDto} containing complete key store metadata
      * @throws CustomKeyStoreNotFoundException if the key store does not exist for the tenant
-     * @see CustomKeyStoreResponseDto
      * @apiNote Sensitive data (passwords, credentials) is masked in the response with format: {first4}***{last4}
+     * @see CustomKeyStoreResponseDto
      * @since 1.0
      */
     @Override
@@ -227,16 +230,16 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
      *   <li><b>External Key Store:</b> Can update endpoint, path, and authentication credential</li>
      * </ul>
      *
-     * @param tenant the tenant identifier (required, non-empty)
+     * @param tenant     the tenant identifier (required, non-empty)
      * @param keyStoreId the ID of the key store to update (required, must exist)
-     * @param request the update request containing modified configuration
+     * @param request    the update request containing modified configuration
      * @return a {@link CustomKeyStoreResponseDto} with updated metadata
-     * @throws CustomKeyStoreNotFoundException if the key store does not exist for the tenant
-     * @throws CustomKeyStoreConnectedException if the key store is currently CONNECTED
+     * @throws CustomKeyStoreNotFoundException      if the key store does not exist for the tenant
+     * @throws CustomKeyStoreConnectedException     if the key store is currently CONNECTED
      * @throws DuplicateCustomKeyStoreNameException if the new name is already in use
+     * @apiNote All timestamp fields are automatically updated
      * @see UpdateCustomKeyStoreRequestDto
      * @see CustomKeyStoreResponseDto
-     * @apiNote All timestamp fields are automatically updated
      */
     @Override
     public CustomKeyStoreResponseDto updateCustomKeyStore(String tenant, Long keyStoreId,
@@ -300,10 +303,10 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
      *   <li>Ensure keys are rotated or re-encrypted elsewhere before deletion</li>
      * </ul>
      *
-     * @param tenant the tenant identifier (required, non-empty)
+     * @param tenant     the tenant identifier (required, non-empty)
      * @param keyStoreId the ID of the key store to delete (required, must exist)
-     * @throws CustomKeyStoreNotFoundException if the key store does not exist for the tenant
-     * @throws CustomKeyStoreHasKeysException if the key store still contains KMS keys
+     * @throws CustomKeyStoreNotFoundException  if the key store does not exist for the tenant
+     * @throws CustomKeyStoreHasKeysException   if the key store still contains KMS keys
      * @throws CustomKeyStoreConnectedException if the key store is not in DISCONNECTED state
      * @apiNote Audit events are logged for compliance and forensics
      */
@@ -355,13 +358,13 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
      * }
      * </pre>
      *
-     * @param tenant the tenant identifier (required, non-empty)
-     * @param limit the maximum number of key stores to return (1-1000, default 100, nullable)
+     * @param tenant    the tenant identifier (required, non-empty)
+     * @param limit     the maximum number of key stores to return (1-1000, default 100, nullable)
      * @param nextToken pagination token to retrieve next page (nullable for first page)
      * @return a {@link ListCustomKeyStoresResponseDto} containing paginated results
      * @throws InvalidPaginationTokenException if the pagination token is malformed
-     * @see ListCustomKeyStoresResponseDto
      * @apiNote All key stores are returned in ascending order by ID
+     * @see ListCustomKeyStoresResponseDto
      */
     @Override
     public ListCustomKeyStoresResponseDto listCustomKeyStores(String tenant, Integer limit, String nextToken) {
@@ -420,12 +423,12 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
      *   <li>Expired connections are automatically marked as FAILED</li>
      * </ul>
      *
-     * @param tenant the tenant identifier (required, non-empty)
+     * @param tenant     the tenant identifier (required, non-empty)
      * @param keyStoreId the ID of the key store to connect (required, must exist)
-     * @throws CustomKeyStoreNotFoundException if the key store does not exist for the tenant
+     * @throws CustomKeyStoreNotFoundException         if the key store does not exist for the tenant
      * @throws CustomKeyStoreAlreadyConnectedException if the key store is already CONNECTED
-     * @throws CustomKeyStoreConnectingException if connection attempt is already in progress
-     * @throws CustomKeyStoreConnectionException if connection fails
+     * @throws CustomKeyStoreConnectingException       if connection attempt is already in progress
+     * @throws CustomKeyStoreConnectionException       if connection fails
      * @apiNote This operation is asynchronous in real deployments; here it's synchronous
      * @since 1.0
      */
@@ -500,10 +503,10 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
      *   <li>Connection state is preserved for audit trails</li>
      * </ul>
      *
-     * @param tenant the tenant identifier (required, non-empty)
+     * @param tenant     the tenant identifier (required, non-empty)
      * @param keyStoreId the ID of the key store to disconnect (required, must exist)
-     * @throws CustomKeyStoreNotFoundException if the key store does not exist for the tenant
-     * @throws CustomKeyStoreNotConnectedException if the key store is not currently CONNECTED
+     * @throws CustomKeyStoreNotFoundException      if the key store does not exist for the tenant
+     * @throws CustomKeyStoreNotConnectedException  if the key store is not currently CONNECTED
      * @throws CustomKeyStoreDisconnectionException if the disconnection process fails
      * @apiNote Disconnecting does not delete keys stored in the key store
      */
@@ -554,7 +557,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
      */
     private void initializeCustomKeyStore(CustomKeyStore customKeyStore) {
         Objects.requireNonNull(customKeyStore, "CustomKeyStore cannot be null");
-        
+
         if (customKeyStore.getType() == IEnumCustomKeyStoreType.Types.CLOUDHSM) {
             // Create a simulated HSM instance
             SoftwareHsmInstance hsm = new SoftwareHsmInstance(
@@ -589,7 +592,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
      */
     private void cleanupCustomKeyStore(CustomKeyStore customKeyStore) {
         Objects.requireNonNull(customKeyStore, "CustomKeyStore cannot be null");
-        
+
         if (customKeyStore.getType() == IEnumCustomKeyStoreType.Types.CLOUDHSM) {
             hsmInstances.remove(customKeyStore.getId());
         } else if (customKeyStore.getType() == IEnumCustomKeyStoreType.Types.EXTERNAL_KEY_STORE) {
@@ -607,7 +610,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
      */
     private boolean establishInternalConnection(CustomKeyStore customKeyStore) {
         Objects.requireNonNull(customKeyStore, "CustomKeyStore cannot be null");
-        
+
         if (customKeyStore.getType() == IEnumCustomKeyStoreType.Types.CLOUDHSM) {
             SoftwareHsmInstance hsm = hsmInstances.get(customKeyStore.getId());
             if (hsm != null) {
@@ -629,7 +632,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
      */
     private void closeInternalConnection(CustomKeyStore customKeyStore) {
         Objects.requireNonNull(customKeyStore, "CustomKeyStore cannot be null");
-        
+
         if (customKeyStore.getType() == IEnumCustomKeyStoreType.Types.CLOUDHSM) {
             SoftwareHsmInstance hsm = hsmInstances.get(customKeyStore.getId());
             if (hsm != null) {
@@ -653,7 +656,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
      */
     private void updateConnectionStatus(CustomKeyStore customKeyStore) {
         Objects.requireNonNull(customKeyStore, "CustomKeyStore cannot be null");
-        
+
         if (customKeyStore.getStatus() == IEnumCustomKeyStoreStatus.Types.CONNECTED) {
             CustomKeyStoreConnection connection = activeConnections.get(customKeyStore.getId());
             if (connection != null && connection.isExpired()) {
@@ -705,8 +708,8 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
      * Validates that an external key store request contains all required fields.
      *
      * @param request the creation request to validate (non-null)
-     * @throws MissingXksProxyEndpointException if required fields are missing
-     * @throws MissingXksProxyPathException if required fields are missing
+     * @throws MissingXksProxyEndpointException       if required fields are missing
+     * @throws MissingXksProxyPathException           if required fields are missing
      * @throws MissingXksProxyAuthCredentialException if required fields are missing
      */
     private void validateExternalKeyStoreRequest(CreateCustomKeyStoreRequestDto request) {
@@ -732,7 +735,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
      * <p>Stores hashed passwords and certificates for secure storage.</p>
      *
      * @param customKeyStore the entity to configure (non-null)
-     * @param request the creation request with configuration data (non-null)
+     * @param request        the creation request with configuration data (non-null)
      */
     private void configureInternalCloudHsmStore(CustomKeyStore customKeyStore, CreateCustomKeyStoreRequestDto request) {
         Objects.requireNonNull(customKeyStore, "CustomKeyStore cannot be null");
@@ -760,7 +763,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
      * <p>Stores authentication credentials securely as hashed values.</p>
      *
      * @param customKeyStore the entity to configure (non-null)
-     * @param request the creation request with configuration data (non-null)
+     * @param request        the creation request with configuration data (non-null)
      */
     private void configureInternalExternalKeyStore(CustomKeyStore customKeyStore, CreateCustomKeyStoreRequestDto request) {
         Objects.requireNonNull(customKeyStore, "CustomKeyStore cannot be null");
@@ -786,7 +789,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
      * Updates the configuration of an internal CloudHSM custom key store.
      *
      * @param customKeyStore the entity to update (non-null)
-     * @param request the update request with new configuration (non-null)
+     * @param request        the update request with new configuration (non-null)
      */
     private void updateInternalCloudHsmStore(CustomKeyStore customKeyStore, UpdateCustomKeyStoreRequestDto request) {
         Objects.requireNonNull(customKeyStore, "CustomKeyStore cannot be null");
@@ -804,7 +807,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
      * Updates the configuration of an internal External Key Store (XKS) custom key store.
      *
      * @param customKeyStore the entity to update (non-null)
-     * @param request the update request with new configuration (non-null)
+     * @param request        the update request with new configuration (non-null)
      */
     private void updateInternalExternalKeyStore(CustomKeyStore customKeyStore, UpdateCustomKeyStoreRequestDto request) {
         Objects.requireNonNull(customKeyStore, "CustomKeyStore cannot be null");
@@ -1024,10 +1027,10 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
          * Generates a cryptographic key using the specified algorithm.
          *
          * @param algorithm the key algorithm (e.g., "AES", "RSA")
-         * @param keySize the key size in bits
+         * @param keySize   the key size in bits
          * @return the generated SecretKey
          * @throws IllegalStateException if HSM is not connected
-         * @throws Exception if key generation fails
+         * @throws Exception             if key generation fails
          */
         public SecretKey generateKey(String algorithm, int keySize) throws Exception {
             if (!connected) {

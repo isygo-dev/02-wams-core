@@ -27,7 +27,7 @@ public @interface ValidCreateCustomKeyStoreRequest {
     /**
      * Default violation message
      */
-    String message() default "Invalid key store configuration for the specified type" ;
+    String message() default "Invalid key store configuration for the specified type";
 
     /**
      * Validation groups (advanced feature)

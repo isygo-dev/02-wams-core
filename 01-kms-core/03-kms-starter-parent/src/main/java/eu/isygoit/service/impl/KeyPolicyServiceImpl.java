@@ -113,7 +113,7 @@ public class KeyPolicyServiceImpl implements IKeyPolicyService {
         grant.setRevocationDate(LocalDateTime.now());
         kmsKeyGrantRepository.save(grant);
 
-        return "REVOKED" ;
+        return "REVOKED";
     }
 
     @Override
@@ -150,13 +150,13 @@ public class KeyPolicyServiceImpl implements IKeyPolicyService {
         grant.setRevocationDate(LocalDateTime.now());
         kmsKeyGrantRepository.save(grant);
 
-        return new RetireGrantResponse(grant.getKeyId()) ;
+        return new RetireGrantResponse(grant.getKeyId());
     }
 
     @Override
     public ListRetirableGrantsResponse listRetirableGrants(String tenant, String retiringPrincipal, Integer limit, String marker) {
         log.info("Listing retirable grants for tenant: {} retiringPrincipal: {}", tenant, retiringPrincipal);
-        
+
         int page = marker != null ? Integer.parseInt(marker) : 0;
         int size = (limit != null) ? limit : 100;
 
@@ -190,7 +190,7 @@ public class KeyPolicyServiceImpl implements IKeyPolicyService {
 
         // Check if a policy exists for this key
         boolean policyExists = kmsKeyPolicyRepository.findByTenantAndKeyId(tenant, keyId).isPresent();
-        
+
         List<String> policyNames = new ArrayList<>();
         if (policyExists) {
             // By default, WAMS KMS has a "default" policy for each key

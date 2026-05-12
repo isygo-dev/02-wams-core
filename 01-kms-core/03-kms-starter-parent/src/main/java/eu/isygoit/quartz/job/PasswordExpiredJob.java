@@ -29,11 +29,11 @@ public class PasswordExpiredJob extends AbstractQuartzJob {
     /**
      * The constant groupName.
      */
-    public static final String groupName = "um_default" ;
+    public static final String groupName = "um_default";
     /**
      * The constant triggerName.
      */
-    public static final String triggerName = "password_expired_job_trigger" ;
+    public static final String triggerName = "password_expired_job_trigger";
 
     private final AppProperties appProperties;
 

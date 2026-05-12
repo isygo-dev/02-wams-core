@@ -1,6 +1,6 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.dto.KmsDtos.AuditLogResponseDto;
 import eu.isygoit.enums.IKmsActionType;
 import eu.isygoit.service.IAuditService;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ public class AuditServiceImpl implements IAuditService {
 
     @Override
     public AuditLogResponseDto getAuditLogs(String tenant, String keyId,
-                                                    LocalDateTime fromDate, LocalDateTime toDate, Integer limit) {
+                                            LocalDateTime fromDate, LocalDateTime toDate, Integer limit) {
         log.info("Getting audit logs for tenant: {} keyId: {} from: {} to: {}",
                 tenant, keyId, fromDate, toDate);
 

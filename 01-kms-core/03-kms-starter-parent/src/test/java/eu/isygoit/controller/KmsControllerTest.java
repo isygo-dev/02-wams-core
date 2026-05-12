@@ -17,33 +17,18 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 class KmsControllerTest {
-
-    private MockMvc mockMvc;
-
-    @Mock private IKeyManagementService keyManagementService;
-    @Mock private IEncryptionService encryptionService;
-    @Mock private ISigningService signingService;
-    @Mock private IKeyPolicyService keyPolicyService;
-    @Mock private IKeyVersionService keyVersionService;
-    @Mock private IDataKeyService dataKeyService;
-    @Mock private IAuditService auditService;
-    @Mock private RequestContextService requestContextService;
-    @Mock private IMultiRegionService multiRegionService;
-    @Mock private ICustomKeyStoreService customKeyStoreService;
-
-    @InjectMocks
-    private KmsController kmsController;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final String TENANT = "test-tenant";
     private static final String USER = "test-user";
@@ -52,6 +37,30 @@ class KmsControllerTest {
     private static final String ALIAS_NAME = "alias-test-key";
     private static final String GRANT_ID = "grant-123";
     private static final Long CUSTOM_KEY_STORE_ID = 1L;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private MockMvc mockMvc;
+    @Mock
+    private IKeyManagementService keyManagementService;
+    @Mock
+    private IEncryptionService encryptionService;
+    @Mock
+    private ISigningService signingService;
+    @Mock
+    private IKeyPolicyService keyPolicyService;
+    @Mock
+    private IKeyVersionService keyVersionService;
+    @Mock
+    private IDataKeyService dataKeyService;
+    @Mock
+    private IAuditService auditService;
+    @Mock
+    private RequestContextService requestContextService;
+    @Mock
+    private IMultiRegionService multiRegionService;
+    @Mock
+    private ICustomKeyStoreService customKeyStoreService;
+    @InjectMocks
+    private KmsController kmsController;
 
     @BeforeEach
     void setUp() {
@@ -721,8 +730,8 @@ class KmsControllerTest {
 
         ImportParametersResponseDto internal = ImportParametersResponseDto.builder()
                 .keyId(KEY_ID)
-                .importToken(new byte[]{1,2,3})
-                .wrappingKey(new byte[]{4,5,6})
+                .importToken(new byte[]{1, 2, 3})
+                .wrappingKey(new byte[]{4, 5, 6})
                 .validTo(LocalDateTime.now().plusDays(1))
                 .build();
         when(keyManagementService.getParametersForImport(eq(TENANT), eq(KEY_ID))).thenReturn(internal);
@@ -820,7 +829,7 @@ class KmsControllerTest {
                 .nextMarker(null)
                 .truncated(false)
                 .build();
-        when(customKeyStoreService.listCustomKeyStores(eq(TENANT),isNull(), isNull())).thenReturn(dto);
+        when(customKeyStoreService.listCustomKeyStores(eq(TENANT), isNull(), isNull())).thenReturn(dto);
 
         mockMvc.perform(get("/api/v1/private/kms/custom-key-stores"))
                 .andExpect(status().isOk());

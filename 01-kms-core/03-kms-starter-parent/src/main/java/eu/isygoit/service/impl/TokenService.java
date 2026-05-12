@@ -171,7 +171,7 @@ public class TokenService implements ITokenBuilderService {
 
     private void sendForgotPasswordEmail(String tenant /*senderTenant*/, String application, Account account, TokenResponseDto token) throws JsonProcessingException {
         //Build Email template data
-        String resetPwdUrl = "http://localhost:4000/reset-password/" ;
+        String resetPwdUrl = "http://localhost:4000/reset-password/";
         try {
             ResponseEntity<String> result = imsAppParameterService.getValueByTenantAndName(
                     tenant, AppParameterConstants.APPURL + "." + application.toUpperCase(), true, "http://localhost:4000/reset-password/");

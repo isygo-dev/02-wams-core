@@ -245,9 +245,9 @@ public class CryptoService implements ICryptoService {
     @Override
     public byte[] signData(byte[] message, byte[] keyMaterial, String algorithm) {
         try {
-            String sigAlgo = algorithm != null ? algorithm : "SHA256withRSA" ;
+            String sigAlgo = algorithm != null ? algorithm : "SHA256withRSA";
             java.security.Signature signature = java.security.Signature.getInstance(sigAlgo);
-            String keyAlgo = sigAlgo.contains("ECDSA") ? "EC" : "RSA" ;
+            String keyAlgo = sigAlgo.contains("ECDSA") ? "EC" : "RSA";
             java.security.PrivateKey privateKey = java.security.KeyFactory.getInstance(keyAlgo)
                     .generatePrivate(new java.security.spec.PKCS8EncodedKeySpec(keyMaterial));
             signature.initSign(privateKey);
@@ -265,9 +265,9 @@ public class CryptoService implements ICryptoService {
     @Override
     public boolean verifySignature(byte[] message, byte[] signature, byte[] keyMaterial, String algorithm) {
         try {
-            String sigAlgo = algorithm != null ? algorithm : "SHA256withRSA" ;
+            String sigAlgo = algorithm != null ? algorithm : "SHA256withRSA";
             java.security.Signature sig = java.security.Signature.getInstance(sigAlgo);
-            String keyAlgo = sigAlgo.contains("ECDSA") ? "EC" : "RSA" ;
+            String keyAlgo = sigAlgo.contains("ECDSA") ? "EC" : "RSA";
             java.security.PublicKey publicKey = java.security.KeyFactory.getInstance(keyAlgo)
                     .generatePublic(new java.security.spec.X509EncodedKeySpec(keyMaterial));
             sig.initVerify(publicKey);
@@ -402,8 +402,8 @@ public class CryptoService implements ICryptoService {
 
     private String extractAlgorithm(IEnumKeySpec.Types keySpec) {
         String name = keySpec.name();
-        if (name.startsWith("RSA")) return "RSA" ;
-        if (name.startsWith("EC")) return "EC" ;
-        return "AES" ;
+        if (name.startsWith("RSA")) return "RSA";
+        if (name.startsWith("EC")) return "EC";
+        return "AES";
     }
 }

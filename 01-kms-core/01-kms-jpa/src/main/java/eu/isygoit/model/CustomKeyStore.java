@@ -297,13 +297,13 @@ public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssi
      */
     public void updateHealthStatus() {
         if (status == IEnumCustomKeyStoreStatus.Types.CONNECTED) {
-            this.healthStatus = "HEALTHY" ;
+            this.healthStatus = "HEALTHY";
         } else if (status == IEnumCustomKeyStoreStatus.Types.FAILED) {
-            this.healthStatus = "UNHEALTHY" ;
+            this.healthStatus = "UNHEALTHY";
         } else if (status == IEnumCustomKeyStoreStatus.Types.DISCONNECTED) {
-            this.healthStatus = "DEGRADED" ;
+            this.healthStatus = "DEGRADED";
         } else {
-            this.healthStatus = "UNKNOWN" ;
+            this.healthStatus = "UNKNOWN";
         }
     }
 }

@@ -8,23 +8,23 @@ public interface SchemaUcConstantName extends ComSchemaUcConstantName {
     /**
      * The constant UC_ACCOUNT_CODE.
      */
-    String UC_ACCOUNT_CODE = "UC_ACCOUNT_CODE" ;
+    String UC_ACCOUNT_CODE = "UC_ACCOUNT_CODE";
     /**
      * The constant UC_ACCOUNT_LOGIN.
      */
-    String UC_ACCOUNT_LOGIN = "UC_ACCOUNT_LOGIN" ;
+    String UC_ACCOUNT_LOGIN = "UC_ACCOUNT_LOGIN";
     /**
      * The constant UC_ACCESS_TOKEN.
      */
-    String UC_ACCESS_TOKEN = "UC_ACCESS_TOKEN" ;
+    String UC_ACCESS_TOKEN = "UC_ACCESS_TOKEN";
     /**
      * The constant UC_ROLE_INFO_CODE.
      */
-    String UC_ROLE_INFO_CODE = "UC_ROLE_INFO_CODE" ;
+    String UC_ROLE_INFO_CODE = "UC_ROLE_INFO_CODE";
     /**
      * The constant UC_STORAGE_CONFIG_TENANT.
      */
-    String UC_STORAGE_CONFIG_TENANT = "UC_STORAGE_CONFIG_TENANT" ;
+    String UC_STORAGE_CONFIG_TENANT = "UC_STORAGE_CONFIG_TENANT";
     //public static final String UC_XXX = "UC_XXX";
     //public static final String UC_XXX = "UC_XXX";
     //public static final String UC_XXX = "UC_XXX";

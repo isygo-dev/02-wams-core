@@ -30,7 +30,7 @@ public class ApplicationDto extends AuditableDto<Long> implements IImageUploadDt
     private String description;
     @NotEmpty
     @Builder.Default
-    private String category = "PRM Store" ;
+    private String category = "PRM Store";
     @NotEmpty
     private String url;
     private Integer order;

@@ -4,11 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.isygoit.dto.KmsDtos;
-import eu.isygoit.dto.KmsDtos.CreateGrantRequestDto;
-import eu.isygoit.dto.KmsDtos.GrantResponseDto;
-import eu.isygoit.dto.KmsDtos.ListGrantsResponseDto;
-import eu.isygoit.dto.KmsDtos.RetireGrantRequestDto;
-import eu.isygoit.dto.KmsDtos.SetKeyPolicyRequestDto;
+import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.exception.GrantNotFoundException;
 import eu.isygoit.model.KmsKeyGrant;
 import eu.isygoit.model.KmsKeyPolicy;
@@ -32,7 +28,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class KeyPolicyServiceTest {

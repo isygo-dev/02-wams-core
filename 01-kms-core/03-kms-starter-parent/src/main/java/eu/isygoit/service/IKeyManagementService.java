@@ -31,8 +31,8 @@ public interface IKeyManagementService {
     /**
      * List keys.
      *
-     * @param tenant    the tenant
-     * @param limit     the limit
+     * @param tenant the tenant
+     * @param limit  the limit
      * @param marker the next token
      * @return the list keys response dto
      */

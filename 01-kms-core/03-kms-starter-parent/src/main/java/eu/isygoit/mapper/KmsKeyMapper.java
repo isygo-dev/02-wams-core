@@ -1,6 +1,7 @@
 package eu.isygoit.mapper;
 
-import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.dto.KmsDtos.KeyDescriptionResponseDto;
+import eu.isygoit.dto.KmsDtos.ListKeysResponseDto;
 import eu.isygoit.model.KmsKey;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
