@@ -3,7 +3,6 @@ package eu.isygoit.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.exception.GrantNotFoundException;
 import eu.isygoit.model.KmsKeyGrant;
@@ -84,7 +83,7 @@ public class KeyPolicyServiceImpl implements IKeyPolicyService {
     public GrantResponseDto createGrant(String tenant, String keyId, CreateGrantRequestDto request) {
         log.info("Creating grant for tenant: {} keyId: {} principal: {}", tenant, keyId, request.getPrincipal());
 
-        String grantId = "grant-" + UUID.randomUUID().toString();
+        String grantId = "grant-" + UUID.randomUUID();
         KmsKeyGrant grant = KmsKeyGrant.builder()
                 .tenant(tenant)
                 .keyId(keyId)
@@ -156,22 +155,53 @@ public class KeyPolicyServiceImpl implements IKeyPolicyService {
 
     @Override
     public ListRetirableGrantsResponse listRetirableGrants(String tenant, String retiringPrincipal, Integer limit, String marker) {
-        ListRetirableGrantsResponse response = ListRetirableGrantsResponse.builder()
-                .grants(List.of())
-                .nextMarker(null)
-                .truncated(false)
+        log.info("Listing retirable grants for tenant: {} retiringPrincipal: {}", tenant, retiringPrincipal);
+        
+        int page = marker != null ? Integer.parseInt(marker) : 0;
+        int size = (limit != null) ? limit : 100;
+
+        // Find active grants that the principal can retire
+        Page<KmsKeyGrant> grantPage = kmsKeyGrantRepository.findByTenantAndPrincipalAndStatus(
+                tenant, retiringPrincipal, "ACTIVE", PageRequest.of(page, size));
+
+        List<ListGrantsResponse.Grant> grants = grantPage.getContent().stream()
+                .map(g -> eu.isygoit.dto.KmsDtos.ListGrantsResponse.Grant.builder()
+                        .grantId(g.getGrantId())
+                        .granteePrincipal(g.getPrincipal())
+                        .retiringPrincipal(retiringPrincipal)
+                        .operations(Arrays.asList(g.getOperations().split(",")))
+                        .constraints(null) // TODO: parse constraints if stored as JSON
+                        .creationDate(g.getCreationDate().toString())
+                        .keyId(g.getKeyId())
+                        .name(g.getName())
+                        .build())
+                .collect(Collectors.toList());
+
+        return ListRetirableGrantsResponse.builder()
+                .grants(grants)
+                .nextMarker(grantPage.hasNext() ? String.valueOf(page + 1) : null)
+                .truncated(grantPage.hasNext())
                 .build();
-        return response;
     }
 
     @Override
     public ListKeyPoliciesResponse listKeyPolicies(String tenant, String keyId, Integer limit, String marker) {
-        ListKeyPoliciesResponse response = ListKeyPoliciesResponse.builder()
-                .policyNames(List.of("default"))
+        log.info("Listing key policies for tenant: {} keyId: {}", tenant, keyId);
+
+        // Check if a policy exists for this key
+        boolean policyExists = kmsKeyPolicyRepository.findByTenantAndKeyId(tenant, keyId).isPresent();
+        
+        List<String> policyNames = new ArrayList<>();
+        if (policyExists) {
+            // By default, WAMS KMS has a "default" policy for each key
+            policyNames.add("default");
+        }
+
+        return ListKeyPoliciesResponse.builder()
+                .policyNames(policyNames)
                 .nextMarker(null)
                 .truncated(false)
                 .build();
-        return response;
     }
 }
 

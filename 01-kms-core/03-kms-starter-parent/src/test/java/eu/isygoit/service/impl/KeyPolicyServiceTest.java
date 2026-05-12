@@ -3,6 +3,7 @@ package eu.isygoit.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.dto.KmsDtos.CreateGrantRequestDto;
 import eu.isygoit.dto.KmsDtos.GrantResponseDto;
 import eu.isygoit.dto.KmsDtos.ListGrantsResponseDto;
@@ -306,10 +307,9 @@ class KeyPolicyServiceTest {
         when(kmsKeyGrantRepository.findByTenantAndGrantId(TENANT, GRANT_ID))
                 .thenReturn(Optional.of(grant));
 
-        Object response =
-                service.retireGrant(TENANT, GRANT_ID, request);
+        KmsDtos.RetireGrantResponse response = service.retireGrant(TENANT, GRANT_ID, request);
 
-        assertEquals("RETIRED", response);
+        assertEquals(KEY_ID, response.getKeyId());
         assertEquals("RETIRED", grant.getStatus());
         assertNotNull(grant.getRevocationDate());
 
