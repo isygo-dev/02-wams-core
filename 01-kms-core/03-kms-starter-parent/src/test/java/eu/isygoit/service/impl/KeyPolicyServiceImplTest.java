@@ -455,7 +455,7 @@ class KeyPolicyServiceImplTest {
         assertNotNull(result);
         assertEquals(2, result.getGrants().size());
         assertFalse(result.getTruncated());
-        assertNull(result.getNextMarker());
+        assertNull(result.getNextToken());
     }
 
     @Test
@@ -499,7 +499,7 @@ class KeyPolicyServiceImplTest {
         assertNotNull(result);
         assertEquals(2, result.getGrants().size());
         assertTrue(result.getTruncated());
-        assertEquals("1", result.getNextMarker());
+        assertEquals("1", result.getNextToken());
     }
 
     // =========================================================================
@@ -528,7 +528,7 @@ class KeyPolicyServiceImplTest {
         assertEquals(1, result.getPolicyNames().size());
         assertEquals("default", result.getPolicyNames().get(0));
         assertFalse(result.getTruncated());
-        assertNull(result.getNextMarker());
+        assertNull(result.getNextToken());
     }
 
     @Test
@@ -545,7 +545,7 @@ class KeyPolicyServiceImplTest {
         assertNotNull(result);
         assertEquals(0, result.getPolicyNames().size());
         assertFalse(result.getTruncated());
-        assertNull(result.getNextMarker());
+        assertNull(result.getNextToken());
     }
 
     // =========================================================================

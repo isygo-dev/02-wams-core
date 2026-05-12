@@ -53,8 +53,8 @@ public interface IKeyPolicyService {
 
     RetireGrantResponse retireGrant(String tenant, String grantId, @Valid RetireGrantRequestDto request);
 
-    ListRetirableGrantsResponse listRetirableGrants(String tenant, String retiringPrincipal, Integer limit, String marker);
+    ListRetirableGrantsResponse listRetirableGrants(String tenant, String retiringPrincipal, Integer limit, String nextToken);
 
-    ListKeyPoliciesResponse listKeyPolicies(String tenant, String keyId, Integer limit, String marker);
+    ListKeyPoliciesResponse listKeyPolicies(String tenant, String keyId, Integer limit, String nextToken);
 }
 

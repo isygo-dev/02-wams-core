@@ -32,7 +32,7 @@ public class KeyVersionServiceImpl implements IKeyVersionService {
             String tenant,
             String keyId,
             Integer limit,
-            String marker) {
+            String nextToken) {
 
         log.info("Listing key versions for tenant: {} keyId: {}", tenant, keyId);
 
@@ -40,7 +40,7 @@ public class KeyVersionServiceImpl implements IKeyVersionService {
                 ? Math.min(limit, 1000)
                 : 100;
 
-        int page = (marker != null) ? Integer.parseInt(marker) : 0;
+        int page = (nextToken != null) ? Integer.parseInt(nextToken) : 0;
 
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by("creationDate").descending());
 
@@ -67,7 +67,7 @@ public class KeyVersionServiceImpl implements IKeyVersionService {
 
         return ListKeyVersionsResponse.builder()
                 .versions(versions)
-                .nextMarker(versionPage.hasNext() ? String.valueOf(page + 1) : null)
+                .nextToken(versionPage.hasNext() ? String.valueOf(page + 1) : null)
                 .truncated(versionPage.hasNext())
                 .build();
     }

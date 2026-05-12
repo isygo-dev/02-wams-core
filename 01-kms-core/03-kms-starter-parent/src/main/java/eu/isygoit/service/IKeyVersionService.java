@@ -19,7 +19,7 @@ public interface IKeyVersionService {
             String tenant,
             String keyId,
             Integer limit,
-            String marker);
+            String nextToken);
 
     /**
      * Get active version.

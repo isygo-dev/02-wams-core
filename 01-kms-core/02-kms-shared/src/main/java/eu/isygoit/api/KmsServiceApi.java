@@ -90,8 +90,8 @@ public interface KmsServiceApi {
     ResponseEntity<ListKeysResponse> listKeys(
             @Parameter(description = "Maximum number of keys to return (1..1000)", example = "50")
             @RequestParam(value = "limit", required = false) Integer limit,
-            @Parameter(description = "Pagination marker from previous response")
-            @RequestParam(value = "marker", required = false) String marker);
+            @Parameter(description = "Pagination nextToken from previous response")
+            @RequestParam(value = "nextToken", required = false) String nextToken);
 
     @DeleteMapping("/keys/{keyId}/schedule-deletion")
     @Operation(
@@ -250,7 +250,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Unique identifier of the KMS key", required = true)
             @PathVariable("keyId") String keyId,
             @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "marker", required = false) String marker);
+            @RequestParam(value = "nextToken", required = false) String nextToken);
 
     @GetMapping(value = "/keys/{keyId}/active-version", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
@@ -449,8 +449,8 @@ public interface KmsServiceApi {
     ResponseEntity<ListAliasesResponse> listAliases(
             @Parameter(description = "Maximum number of aliases to return (1..1000)", example = "50")
             @RequestParam(value = "limit", required = false) Integer limit,
-            @Parameter(description = "Pagination marker from previous response")
-            @RequestParam(value = "marker", required = false) String marker);
+            @Parameter(description = "Pagination nextToken from previous response")
+            @RequestParam(value = "nextToken", required = false) String nextToken);
 
     @GetMapping(value = "/keys/{keyId}/aliases", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
@@ -462,7 +462,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Unique identifier of the KMS key", required = true)
             @PathVariable("keyId") String keyId,
             @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "marker", required = false) String marker);
+            @RequestParam(value = "nextToken", required = false) String nextToken);
 
     @PostMapping(value = "/aliases", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
@@ -507,7 +507,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Unique identifier of the KMS key", required = true)
             @PathVariable("keyId") String keyId,
             @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "marker", required = false) String marker);
+            @RequestParam(value = "nextToken", required = false) String nextToken);
 
     @PostMapping(value = "/keys/{keyId}/tags", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
@@ -568,7 +568,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Unique identifier of the KMS key", required = true)
             @PathVariable("keyId") String keyId,
             @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "marker", required = false) String marker);
+            @RequestParam(value = "nextToken", required = false) String nextToken);
 
     @PostMapping(value = "/keys/{keyId}/grants", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
@@ -591,7 +591,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Unique identifier of the KMS key", required = true)
             @PathVariable("keyId") String keyId,
             @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "marker", required = false) String marker,
+            @RequestParam(value = "nextToken", required = false) String nextToken,
             @RequestParam(value = "grantId", required = false) String grantId,
             @RequestParam(value = "granteePrincipal", required = false) String granteePrincipal);
 
@@ -625,7 +625,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Principal that can retire the grants (ARN or account ID)", required = true)
             @RequestParam("retiringPrincipal") String retiringPrincipal,
             @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "marker", required = false) String marker);
+            @RequestParam(value = "nextToken", required = false) String nextToken);
 
     // =========================================================================
     // BYOK (Import Key Material)
@@ -736,8 +736,8 @@ public interface KmsServiceApi {
     ResponseEntity<ListCustomKeyStoresResponse> listCustomKeyStores(
             @Parameter(description = "Maximum number of stores to return (1..1000)", example = "50")
             @RequestParam(value = "limit", required = false) Integer limit,
-            @Parameter(description = "Pagination marker from previous response")
-            @RequestParam(value = "marker", required = false) String marker,
+            @Parameter(description = "Pagination nextToken from previous response")
+            @RequestParam(value = "nextToken", required = false) String nextToken,
             @Parameter(description = "Filter by custom key store ID")
             @RequestParam(value = "customKeyStoreId", required = false) Long customKeyStoreId,
             @Parameter(description = "Filter by custom key store name (exact match)")

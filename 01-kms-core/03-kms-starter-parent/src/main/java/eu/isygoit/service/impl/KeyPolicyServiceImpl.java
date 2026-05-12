@@ -154,10 +154,10 @@ public class KeyPolicyServiceImpl implements IKeyPolicyService {
     }
 
     @Override
-    public ListRetirableGrantsResponse listRetirableGrants(String tenant, String retiringPrincipal, Integer limit, String marker) {
+    public ListRetirableGrantsResponse listRetirableGrants(String tenant, String retiringPrincipal, Integer limit, String nextToken) {
         log.info("Listing retirable grants for tenant: {} retiringPrincipal: {}", tenant, retiringPrincipal);
 
-        int page = marker != null ? Integer.parseInt(marker) : 0;
+        int page = nextToken != null ? Integer.parseInt(nextToken) : 0;
         int size = (limit != null) ? limit : 100;
 
         // Find active grants that the principal can retire
@@ -179,13 +179,13 @@ public class KeyPolicyServiceImpl implements IKeyPolicyService {
 
         return ListRetirableGrantsResponse.builder()
                 .grants(grants)
-                .nextMarker(grantPage.hasNext() ? String.valueOf(page + 1) : null)
+                .nextToken(grantPage.hasNext() ? String.valueOf(page + 1) : null)
                 .truncated(grantPage.hasNext())
                 .build();
     }
 
     @Override
-    public ListKeyPoliciesResponse listKeyPolicies(String tenant, String keyId, Integer limit, String marker) {
+    public ListKeyPoliciesResponse listKeyPolicies(String tenant, String keyId, Integer limit, String nextToken) {
         log.info("Listing key policies for tenant: {} keyId: {}", tenant, keyId);
 
         // Check if a policy exists for this key
@@ -199,7 +199,7 @@ public class KeyPolicyServiceImpl implements IKeyPolicyService {
 
         return ListKeyPoliciesResponse.builder()
                 .policyNames(policyNames)
-                .nextMarker(null)
+                .nextToken(null)
                 .truncated(false)
                 .build();
     }

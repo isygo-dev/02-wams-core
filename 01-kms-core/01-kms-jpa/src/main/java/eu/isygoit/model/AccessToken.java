@@ -4,7 +4,7 @@ import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaConstantSize;
-import eu.isygoit.model.schema.SchemaTableConstantName;
+import eu.isygoit.model.schema.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -48,7 +48,7 @@ class KeyVersionServiceTest {
                 .creationDate(LocalDateTime.now().minusDays(1))
                 .keyStatus(IEnumKeyStatus.Types.ENABLED)
                 .signingAlgorithm("RSA_SHA_256")
-                .expirationModel(IEnumKeyExpirationModel.Types.NEVER_EXPIRES)
+                .expirationModel(IEnumKeyExpirationModel.Types.INDEFINITE_LIFECYCLE)
                 .origin(IEnumKeyOrigin.Types.EXTERNAL)
                 .build();
 
@@ -58,7 +58,7 @@ class KeyVersionServiceTest {
                 .creationDate(LocalDateTime.now())
                 .keyStatus(IEnumKeyStatus.Types.ENABLED)
                 .signingAlgorithm("RSA_SHA_512")
-                .expirationModel(IEnumKeyExpirationModel.Types.ROTATION_BASED)
+                .expirationModel(IEnumKeyExpirationModel.Types.ROTATION_GOVERNED)
                 .origin(IEnumKeyOrigin.Types.WAMS_KMS)
                 .build();
     }
@@ -81,7 +81,7 @@ class KeyVersionServiceTest {
         assertNotNull(response);
         assertEquals(2, response.getVersions().size());
         assertFalse(response.getTruncated());
-        assertNull(response.getNextMarker());
+        assertNull(response.getNextToken());
 
         ListKeyVersionsResponse.KeyVersion v1 =
                 response.getVersions().get(0);
@@ -90,12 +90,12 @@ class KeyVersionServiceTest {
         assertEquals("v1", v1.getVersionId());
         assertEquals(IEnumKeyStatus.Types.ENABLED, v1.getStatus());
         assertEquals("RSA_SHA_256", v1.getSigningAlgorithm());
-        assertEquals(IEnumKeyExpirationModel.Types.NEVER_EXPIRES, v1.getExpirationModel());
+        assertEquals(IEnumKeyExpirationModel.Types.INDEFINITE_LIFECYCLE, v1.getExpirationModel());
         assertEquals(IEnumKeyOrigin.Types.EXTERNAL, v1.getOrigin());
     }
 
     @Test
-    void shouldReturnNextMarkerWhenPageHasNext() {
+    void shouldReturnNextTokenWhenPageHasNext() {
 
         Page<KmsKeyVersion> page =
                 new PageImpl<>(
@@ -114,7 +114,7 @@ class KeyVersionServiceTest {
                 service.listKeyVersions(TENANT, KEY_ID, 1, null);
 
         assertTrue(response.getTruncated());
-        assertEquals("1", response.getNextMarker());
+        assertEquals("1", response.getNextToken());
     }
 
     @Test
@@ -225,7 +225,7 @@ class KeyVersionServiceTest {
         assertNotNull(response);
         assertTrue(response.getVersions().isEmpty());
         assertFalse(response.getTruncated());
-        assertNull(response.getNextMarker());
+        assertNull(response.getNextToken());
     }
 
     @Test

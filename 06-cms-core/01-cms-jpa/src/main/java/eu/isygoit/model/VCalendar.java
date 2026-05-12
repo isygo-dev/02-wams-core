@@ -4,7 +4,7 @@ import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.jakarta.AuditableCancelableEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaConstantSize;
-import eu.isygoit.model.schema.SchemaTableConstantName;
+import eu.isygoit.model.schema.*;
 import eu.isygoit.model.schema.SchemaUcConstantName;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

@@ -62,7 +62,7 @@ import java.util.stream.Collectors;
  * // Create a CloudHSM custom key store
  * CreateCustomKeyStoreRequestDto cloudHsmRequest = new CreateCustomKeyStoreRequestDto();
  * cloudHsmRequest.setKeyStoreName("my-hsm-store");
- * cloudHsmRequest.setType(IEnumCustomKeyStoreType.Types.CLOUDHSM);
+ * cloudHsmRequest.setType(IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM);
  * CustomKeyStoreResponseDto response = service.createCustomKeyStore(tenant, cloudHsmRequest);
  *
  * // Connect the key store
@@ -160,7 +160,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         customKeyStore.setUpdatedAt(LocalDateTime.now());
 
         // Configure based on type
-        if (request.getType() == IEnumCustomKeyStoreType.Types.CLOUDHSM) {
+        if (request.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
             validateCloudHsmRequest(request);
             configureInternalCloudHsmStore(customKeyStore, request);
         } else if (request.getType() == IEnumCustomKeyStoreType.Types.EXTERNAL_KEY_STORE) {
@@ -266,7 +266,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         }
 
         // Update type-specific configuration
-        if (customKeyStore.getType() == IEnumCustomKeyStoreType.Types.CLOUDHSM) {
+        if (customKeyStore.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
             updateInternalCloudHsmStore(customKeyStore, request);
         } else if (customKeyStore.getType() == IEnumCustomKeyStoreType.Types.EXTERNAL_KEY_STORE) {
             updateInternalExternalKeyStore(customKeyStore, request);
@@ -558,7 +558,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
     private void initializeCustomKeyStore(CustomKeyStore customKeyStore) {
         Objects.requireNonNull(customKeyStore, "CustomKeyStore cannot be null");
 
-        if (customKeyStore.getType() == IEnumCustomKeyStoreType.Types.CLOUDHSM) {
+        if (customKeyStore.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
             // Create a simulated HSM instance
             SoftwareHsmInstance hsm = new SoftwareHsmInstance(
                     customKeyStore.getId(),
@@ -593,7 +593,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
     private void cleanupCustomKeyStore(CustomKeyStore customKeyStore) {
         Objects.requireNonNull(customKeyStore, "CustomKeyStore cannot be null");
 
-        if (customKeyStore.getType() == IEnumCustomKeyStoreType.Types.CLOUDHSM) {
+        if (customKeyStore.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
             hsmInstances.remove(customKeyStore.getId());
         } else if (customKeyStore.getType() == IEnumCustomKeyStoreType.Types.EXTERNAL_KEY_STORE) {
             externalProxies.remove(customKeyStore.getId());
@@ -611,7 +611,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
     private boolean establishInternalConnection(CustomKeyStore customKeyStore) {
         Objects.requireNonNull(customKeyStore, "CustomKeyStore cannot be null");
 
-        if (customKeyStore.getType() == IEnumCustomKeyStoreType.Types.CLOUDHSM) {
+        if (customKeyStore.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
             SoftwareHsmInstance hsm = hsmInstances.get(customKeyStore.getId());
             if (hsm != null) {
                 return hsm.connect(customKeyStore.getKeyStorePassword());
@@ -633,7 +633,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
     private void closeInternalConnection(CustomKeyStore customKeyStore) {
         Objects.requireNonNull(customKeyStore, "CustomKeyStore cannot be null");
 
-        if (customKeyStore.getType() == IEnumCustomKeyStoreType.Types.CLOUDHSM) {
+        if (customKeyStore.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
             SoftwareHsmInstance hsm = hsmInstances.get(customKeyStore.getId());
             if (hsm != null) {
                 hsm.disconnect();

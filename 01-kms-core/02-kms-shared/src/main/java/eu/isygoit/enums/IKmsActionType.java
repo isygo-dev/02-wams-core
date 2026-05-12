@@ -131,7 +131,13 @@ public interface IKmsActionType {
 
         LIST_KEY_ROTATIONS("ListKeyRotations"),
         LIST_KEYS("ListKeys"),
-        DESCRIBE_CUSTOM_KEY_STORE("DescribeCustomKeyStore");
+        DESCRIBE_CUSTOM_KEY_STORE("DescribeCustomKeyStore"),
+        SYNCHRONIZE_MULTI_REGION_KEY("SynchronizeMultiRegionKey"),
+        GET_ACTIVE_VERSION("GetActiveVersion"),
+        UPDATE_KEY_ROTATION("UpdateKeyRotation"),
+        LIST_KEY_VERSIONS("ListKeyVersions"),
+        GET_KEY_VERSION("GetKeyVersion"),
+        DELETE_KEY("DeleteKey");
 
         private final String meaning;
 

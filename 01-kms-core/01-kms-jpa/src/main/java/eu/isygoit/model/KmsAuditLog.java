@@ -1,6 +1,9 @@
 package eu.isygoit.model;
 
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IKmsActionType;
+import eu.isygoit.model.jakarta.AuditableEntity;
+import eu.isygoit.model.schema.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,14 +24,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @DynamicUpdate
 @Entity
-@Table(name = "T_KMS_AUDIT_LOG",
+@Table(name = SchemaTableConstantName.T_KMS_AUDIT_LOG,
         indexes = {
                 @Index(name = "IDX_KMS_AUDIT_LOG_KEY_ID", columnList = "KEY_ID"),
                 @Index(name = "IDX_KMS_AUDIT_LOG_TENANT_ACTION", columnList = "TENANT,ACTION"),
                 @Index(name = "IDX_KMS_AUDIT_LOG_TIMESTAMP", columnList = "TIMESTAMP"),
                 @Index(name = "IDX_KMS_AUDIT_LOG_PRINCIPAL", columnList = "PRINCIPAL")
         })
-public class KmsAuditLog {
+public class KmsAuditLog extends AuditableEntity<Long> implements ITenantAssignable {
 
     @Id
     @SequenceGenerator(name = "kms_audit_log_seq", sequenceName = "kms_audit_log_sequence", allocationSize = 1)
@@ -36,8 +39,9 @@ public class KmsAuditLog {
     @Column(name = "ID", updatable = false, nullable = false)
     private Long id;
 
-    @Column(name = "TENANT", length = 100, updatable = false, nullable = false)
-    @ColumnDefault("'DEFAULT'")
+    //@Convert(converter = LowerCaseConverter.class)
+    @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
+    @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
 
     @Column(name = "KEY_ID", length = 255)

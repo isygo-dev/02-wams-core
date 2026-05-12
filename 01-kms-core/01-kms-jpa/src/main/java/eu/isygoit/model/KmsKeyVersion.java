@@ -4,6 +4,8 @@ import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumKeyExpirationModel;
 import eu.isygoit.enums.IEnumKeyOrigin;
 import eu.isygoit.enums.IEnumKeyStatus;
+import eu.isygoit.model.jakarta.AuditableEntity;
+import eu.isygoit.model.schema.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,7 +24,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "T_KMS_KEY_VERSION",
+@Table(name = SchemaTableConstantName.T_KMS_KEY_VERSION,
         uniqueConstraints = {
                 @UniqueConstraint(name = "UC_KMS_KEY_VERSION_ID", columnNames = {"TENANT", "VERSION_ID"}),
                 @UniqueConstraint(name = "UC_KMS_KEY_VERSION_NUMBER", columnNames = {"TENANT", "KEY_ID", "VERSION_NUMBER"})
@@ -32,7 +34,7 @@ import java.time.LocalDateTime;
                 @Index(name = "IDX_KMS_KEY_VERSION_STATUS", columnList = "STATUS"),
                 @Index(name = "IDX_KMS_KEY_VERSION_ROTATION_DATE", columnList = "ROTATION_DATE")
         })
-public class KmsKeyVersion {
+public class KmsKeyVersion extends AuditableEntity<Long> implements ITenantAssignable {
 
     @Id
     @SequenceGenerator(name = "kms_key_version_seq", sequenceName = "kms_key_version_sequence", allocationSize = 1)
@@ -40,8 +42,9 @@ public class KmsKeyVersion {
     @Column(name = "ID", updatable = false, nullable = false)
     private Long id;
 
+    //@Convert(converter = LowerCaseConverter.class)
     @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
-    @Column(name = "TENANT", length = 100, updatable = false, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
 
     @Column(name = "KEY_ID", nullable = false)

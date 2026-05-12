@@ -68,7 +68,7 @@ class KeyManagementServiceTest {
                 .keyId(KEY_ID)
                 .tenant(TENANT)
                 .keyArn("arn:test")
-                .keySpec(IEnumKeySpec.Types.AES_256)
+                .keySpec(IEnumKeySpec.Types.RSA_2048)
                 .keyUsage(IEnumKeyUsage.Types.ENCRYPT_DECRYPT)
                 .keyStatus(IEnumKeyStatus.Types.ENABLED)
                 .currentVersionId("v1")
@@ -83,7 +83,7 @@ class KeyManagementServiceTest {
     @Test
     void shouldCreateKey() {
         CreateKeyRequest request = CreateKeyRequest.builder()
-                .keySpec(IEnumKeySpec.Types.AES_256)
+                .keySpec(IEnumKeySpec.Types.RSA_2048)
                 .keyUsage(IEnumKeyUsage.Types.ENCRYPT_DECRYPT)
                 .alias("alias/test")
                 .description("description")
@@ -111,7 +111,7 @@ class KeyManagementServiceTest {
     @Test
     void shouldThrowRuntimeExceptionWhenCreateKeyFails() {
         CreateKeyRequest request = CreateKeyRequest.builder()
-                .keySpec(IEnumKeySpec.Types.AES_256)
+                .keySpec(IEnumKeySpec.Types.RSA_2048)
                 .build();
 
         when(cryptoService.generateKeyMaterial(any()))

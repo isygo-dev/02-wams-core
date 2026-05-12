@@ -1,6 +1,8 @@
 package eu.isygoit.model;
 
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.jakarta.AuditableEntity;
+import eu.isygoit.model.schema.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,7 +23,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @DynamicUpdate
 @Entity
-@Table(name = "T_KMS_KEY_GRANT",
+@Table(name = SchemaTableConstantName.T_KMS_KEY_GRANT,
         uniqueConstraints = {
                 @UniqueConstraint(name = "UC_KMS_KEY_GRANT_ID",
                         columnNames = {"TENANT", "GRANT_ID"})
@@ -39,8 +41,9 @@ public class KmsKeyGrant extends AuditableEntity<Long> implements ITenantAssigna
     @Column(name = "ID", updatable = false, nullable = false)
     private Long id;
 
-    @Column(name = "TENANT", length = 100, updatable = false, nullable = false)
-    @ColumnDefault("'DEFAULT'")
+    //@Convert(converter = LowerCaseConverter.class)
+    @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
+    @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
 
     @Column(name = "KEY_ID", length = 255, updatable = false, nullable = false)

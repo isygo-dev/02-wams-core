@@ -88,7 +88,7 @@ public final class KmsDtos {
             private String alias;
             private IEnumKeyExpirationModel.Types expirationModel;
             private String customerMasterKeySpec; // alias for keySpec
-            private List<String> encryptionAlgorithms;
+            private List<String> encryptionAlgorithmSpecs;
             private List<String> signingAlgorithms;
             private String keyManager;   // WAMS, CUSTOMER
             private Boolean multiRegion;
@@ -119,7 +119,7 @@ public final class KmsDtos {
     @AllArgsConstructor
     public static class ListKeysRequest {
         private Integer limit;
-        private String marker;
+        private String nextToken;
     }
 
     @Data
@@ -128,7 +128,7 @@ public final class KmsDtos {
     @AllArgsConstructor
     public static class ListKeysResponse {
         private List<KeyEntry> keys;
-        private String nextMarker;
+        private String nextToken;
         private Boolean truncated;
 
         @Data
@@ -328,7 +328,7 @@ public final class KmsDtos {
     public static class ListKeyVersionsRequest {
         private String keyId;
         private Integer limit;
-        private String marker;
+        private String nextToken;
     }
 
     @Data
@@ -337,7 +337,7 @@ public final class KmsDtos {
     @AllArgsConstructor
     public static class ListKeyVersionsResponse {
         private List<KeyVersion> versions;
-        private String nextMarker;
+        private String nextToken;
         private Boolean truncated;
 
         @Data
@@ -368,7 +368,7 @@ public final class KmsDtos {
         private String plaintext;      // base64-encoded
         private Map<String, String> encryptionContext;
         private List<String> grantTokens;
-        private String encryptionAlgorithm; // SYMMETRIC_DEFAULT, RSAES_OAEP_SHA_256, etc.
+        private String encryptionAlgorithmSpec; // SYMMETRIC_DEFAULT, RSAES_OAEP_SHA_256, etc.
     }
 
     @Data
@@ -379,7 +379,7 @@ public final class KmsDtos {
         private String ciphertextBlob; // base64-encoded
         private String keyId;
         private String keyVersionId;
-        private String encryptionAlgorithm;
+        private String encryptionAlgorithmSpec;
     }
 
     @Data
@@ -391,7 +391,7 @@ public final class KmsDtos {
         private Map<String, String> encryptionContext;
         private List<String> grantTokens;
         private String keyId; // optional, can be derived from ciphertext
-        private String encryptionAlgorithm;
+        private String encryptionAlgorithmSpec;
     }
 
     @Data
@@ -402,7 +402,7 @@ public final class KmsDtos {
         private String keyId;
         private String keyVersionId;
         private String plaintext;      // base64-encoded
-        private String encryptionAlgorithm;
+        private String encryptionAlgorithmSpec;
     }
 
     @Data
@@ -429,10 +429,10 @@ public final class KmsDtos {
         private List<String> grantTokens;
 
         // Optional: algorithm used for source decryption
-        private String sourceEncryptionAlgorithm;
+        private String sourceEncryptionAlgorithmSpec;
 
         // Optional: algorithm used for destination encryption
-        private String destinationEncryptionAlgorithm;
+        private String destinationEncryptionAlgorithmSpec;
     }
 
     @Data
@@ -444,7 +444,7 @@ public final class KmsDtos {
         private String sourceKeyId;
         private String destinationKeyId;
         private String destinationKeyVersionId;
-        private String destinationEncryptionAlgorithm;
+        private String destinationEncryptionAlgorithmSpec;
     }
 
     @Data
@@ -467,7 +467,7 @@ public final class KmsDtos {
         private String ciphertextBlob;
         private String plaintext;      // base64-encoded
         private String keyId;
-        private String encryptionAlgorithm;
+        private String encryptionAlgorithmSpec;
     }
 
     @Data
@@ -489,7 +489,7 @@ public final class KmsDtos {
     public static class GenerateDataKeyWithoutPlaintextResponse {
         private String ciphertextBlob;
         private String keyId;
-        private String encryptionAlgorithm;
+        private String encryptionAlgorithmSpec;
     }
 
     @Data
@@ -498,7 +498,7 @@ public final class KmsDtos {
     @AllArgsConstructor
     public static class GenerateDataKeyPairRequest {
         private String keyId;
-        private String keyPairSpec;    // RSA_2048, ECC_NIST_P256, etc.
+        private IEnumKeySpec.Types keyPairSpec;   
         private Map<String, String> encryptionContext;
         private List<String> grantTokens;
     }
@@ -516,8 +516,8 @@ public final class KmsDtos {
 
         // Key metadata
         private String keyId;
-        private String keyPairSpec;
-        private String encryptionAlgorithm;
+        private IEnumKeySpec.Types keyPairSpec;
+        private String encryptionAlgorithmSpec;
 
         // Optional: versioning (useful for rotation / audit / tracing)
         private String keyVersionId;
@@ -529,7 +529,7 @@ public final class KmsDtos {
     @AllArgsConstructor
     public static class GenerateDataKeyPairWithoutPlaintextRequest {
         private String keyId;
-        private String keyPairSpec;
+        private IEnumKeySpec.Types keyPairSpec;
         private Map<String, String> encryptionContext;
         private List<String> grantTokens;
     }
@@ -552,8 +552,8 @@ public final class KmsDtos {
         private String keyVersionId;
 
         // Metadata
-        private String keyPairSpec;
-        private String encryptionAlgorithm;
+        private IEnumKeySpec.Types keyPairSpec;
+        private String encryptionAlgorithmSpec;
     }
 
     @Data
@@ -663,8 +663,8 @@ public final class KmsDtos {
         private String keyId;
         private String publicKey;      // base64-encoded DER or PEM
         private IEnumKeySpec.Types customerMasterKeySpec;
-        private String keyUsage;
-        private List<String> encryptionAlgorithms;
+        private IEnumKeyUsage.Types keyUsage;
+        private List<String> encryptionAlgorithmSpecs;
         private List<String> signingAlgorithms;
     }
 
@@ -1663,7 +1663,6 @@ public final class KmsDtos {
     public static class ListAliasesResponseDto {
         private List<AliasResponseDto> aliases;
         private String nextToken;
-        private String nextMarker;
         private Boolean truncated;
     }
 
@@ -1675,7 +1674,6 @@ public final class KmsDtos {
         private List<CustomKeyStoreResponseDto> customKeyStores;
         private String nextToken;
         private boolean truncated;
-        private String nextMarker;
     }
 
     @Data
@@ -1851,7 +1849,7 @@ public final class KmsDtos {
     @AllArgsConstructor
     public static class ListAliasesRequest {
         private Integer limit;
-        private String marker;
+        private String nextToken;
     }
 
     @Data
@@ -1861,7 +1859,7 @@ public final class KmsDtos {
     public static class ListAliasesForKeyRequest {
         private String keyId;
         private Integer limit;
-        private String marker;
+        private String nextToken;
     }
 
     @Data
@@ -1870,7 +1868,7 @@ public final class KmsDtos {
     @AllArgsConstructor
     public static class ListAliasesResponse {
         private List<AliasEntry> aliases;
-        private String nextMarker;
+        private String nextToken;
         private Boolean truncated;
 
         @Data
@@ -1947,7 +1945,7 @@ public final class KmsDtos {
     public static class ListResourceTagsRequest {
         private String keyId;
         private Integer limit;
-        private String marker;
+        private String nextToken;
     }
 
     @Data
@@ -1956,7 +1954,7 @@ public final class KmsDtos {
     @AllArgsConstructor
     public static class ListResourceTagsResponse {
         private List<Tag> tags;
-        private String nextMarker;
+        private String nextToken;
         private Boolean truncated;
 
         @Data
@@ -2051,7 +2049,7 @@ public final class KmsDtos {
     public static class ListKeyPoliciesRequest {
         private String keyId;
         private Integer limit;
-        private String marker;
+        private String nextToken;
     }
 
     @Data
@@ -2060,7 +2058,7 @@ public final class KmsDtos {
     @AllArgsConstructor
     public static class ListKeyPoliciesResponse {
         private List<String> policyNames;
-        private String nextMarker;
+        private String nextToken;
         private Boolean truncated;
     }
 
@@ -2103,7 +2101,7 @@ public final class KmsDtos {
     public static class ListGrantsRequest {
         private String keyId;
         private Integer limit;
-        private String marker;
+        private String nextToken;
         private String grantId;
         private String granteePrincipal;
     }
@@ -2114,7 +2112,7 @@ public final class KmsDtos {
     @AllArgsConstructor
     public static class ListGrantsResponse {
         private List<Grant> grants;
-        private String nextMarker;
+        private String nextToken;
         private Boolean truncated;
 
         @Data
@@ -2176,7 +2174,7 @@ public final class KmsDtos {
     public static class ListRetirableGrantsRequest {
         private String retiringPrincipal;
         private Integer limit;
-        private String marker;
+        private String nextToken;
     }
 
     @Data
@@ -2185,7 +2183,7 @@ public final class KmsDtos {
     @AllArgsConstructor
     public static class ListRetirableGrantsResponse {
         private List<ListGrantsResponse.Grant> grants;
-        private String nextMarker;
+        private String nextToken;
         private Boolean truncated;
     }
 
@@ -2391,7 +2389,7 @@ public final class KmsDtos {
     @AllArgsConstructor
     public static class ListCustomKeyStoresRequest {
         private Integer limit;
-        private String marker;
+        private String nextToken;
         private Long customKeyStoreId;
         private String customKeyStoreName;
     }
@@ -2402,7 +2400,7 @@ public final class KmsDtos {
     @AllArgsConstructor
     public static class ListCustomKeyStoresResponse {
         private List<DescribeCustomKeyStoreResponse.CustomKeyStore> customKeyStores;
-        private String nextMarker;
+        private String nextToken;
         private Boolean truncated;
     }
 

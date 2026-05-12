@@ -147,14 +147,14 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     @Override
     public ResponseEntity<ListKeysResponse> listKeys(
             @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "marker", required = false) String marker) {
+            @RequestParam(value = "nextToken", required = false) String nextToken) {
 
         log.info("Listing keys with limit: {}", limit);
 
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
-            ListKeysResponse response = keyManagementService.listKeys(tenant, limit, marker);
+            ListKeysResponse response = keyManagementService.listKeys(tenant, limit, nextToken);
 
             auditService.logAction(
                     tenant,
@@ -188,7 +188,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
             auditService.logAction(
                     tenant,
-                    IKmsActionType.Types.UPDATE_KEY_METADATA,
+                    IKmsActionType.Types.UPDATE_KEY_DESCRIPTION,
                     keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp()
@@ -376,7 +376,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
             auditService.logAction(
                     tenant,
-                    IKmsActionType.Types.ROTATE_KEY,
+                    IKmsActionType.Types.ROTATE_KEY_ON_DEMAND,
                     keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp()
@@ -547,7 +547,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
             auditService.logAction(
                     tenant,
-                    IKmsActionType.Types.REENCRYPT,
+                    IKmsActionType.Types.RE_ENCRYPT,
                     request.getDestinationKeyId(),
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp()
@@ -763,7 +763,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<ListKeyVersionsResponse> listKeyVersions(
             @PathVariable("keyId") String keyId,
             @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "marker", required = false) String marker) {
+            @RequestParam(value = "nextToken", required = false) String nextToken) {
 
         log.info("Listing key versions for: {}", keyId);
 
@@ -771,7 +771,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
             ListKeyVersionsResponse response =
-                    keyVersionService.listKeyVersions(tenant, keyId, limit, marker);
+                    keyVersionService.listKeyVersions(tenant, keyId, limit, nextToken);
 
             auditService.logAction(
                     tenant,
@@ -920,11 +920,11 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     @Override
     public ResponseEntity<ListAliasesResponse> listAliases(
             @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "marker", required = false) String marker) {
+            @RequestParam(value = "nextToken", required = false) String nextToken) {
 
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            ListAliasesResponseDto internal = keyManagementService.listAliases(tenant, limit, marker);
+            ListAliasesResponseDto internal = keyManagementService.listAliases(tenant, limit, nextToken);
             ListAliasesResponse response = ListAliasesResponse.builder()
                     .aliases(internal.getAliases().stream()
                             .map(a -> ListAliasesResponse.AliasEntry.builder()
@@ -935,7 +935,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                                     .lastUpdatedDate(formatDate(a.getUpdatedAt()))
                                     .build())
                             .collect(Collectors.toList()))
-                    .nextMarker(internal.getNextMarker())
+                    .nextToken(internal.getNextToken())
                     .truncated(internal.getTruncated())
                     .build();
             return ResponseFactory.responseOk(response);
@@ -948,11 +948,11 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<ListAliasesResponse> listAliasesForKey(
             @PathVariable("keyId") String keyId,
             @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "marker", required = false) String marker) {
+            @RequestParam(value = "nextToken", required = false) String nextToken) {
 
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            ListAliasesResponseDto internal = keyManagementService.listAliasesForKey(tenant, keyId, limit, marker);
+            ListAliasesResponseDto internal = keyManagementService.listAliasesForKey(tenant, keyId, limit, nextToken);
             ListAliasesResponse response = ListAliasesResponse.builder()
                     .aliases(internal.getAliases().stream()
                             .map(a -> ListAliasesResponse.AliasEntry.builder()
@@ -963,7 +963,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                                     .lastUpdatedDate(formatDate(a.getUpdatedAt()))
                                     .build())
                             .collect(Collectors.toList()))
-                    .nextMarker(internal.getNextMarker())
+                    .nextToken(internal.getNextToken())
                     .truncated(internal.getTruncated())
                     .build();
             return ResponseFactory.responseOk(response);
@@ -999,7 +999,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     .bypassPolicyLockoutSafetyCheck(request.getBypassPolicyLockoutSafetyCheck())
                     .build();
             keyPolicyService.setKeyPolicy(tenant, keyId, internal);
-            auditService.logAction(tenant, IKmsActionType.Types.SET_KEY_POLICY, keyId,
+            auditService.logAction(tenant, IKmsActionType.Types.PUT_KEY_POLICY, keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());
             return ResponseFactory.responseOk(new PutKeyPolicyResponse());
@@ -1028,9 +1028,9 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<ListKeyPoliciesResponse> listKeyPolicies(
             @PathVariable("keyId") String keyId,
             @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "marker", required = false) String marker) {
+            @RequestParam(value = "nextToken", required = false) String nextToken) {
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
-        ListKeyPoliciesResponse response = keyPolicyService.listKeyPolicies(tenant, keyId, limit, marker);
+        ListKeyPoliciesResponse response = keyPolicyService.listKeyPolicies(tenant, keyId, limit, nextToken);
         return ResponseFactory.responseOk(response);
     }
 
@@ -1072,13 +1072,13 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<ListGrantsResponse> listGrants(
             @PathVariable("keyId") String keyId,
             @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "marker", required = false) String marker,
+            @RequestParam(value = "nextToken", required = false) String nextToken,
             @RequestParam(value = "grantId", required = false) String grantId,
             @RequestParam(value = "granteePrincipal", required = false) String granteePrincipal) {
 
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            ListGrantsResponseDto internal = keyPolicyService.listGrants(tenant, keyId, limit, marker);
+            ListGrantsResponseDto internal = keyPolicyService.listGrants(tenant, keyId, limit, nextToken);
 
             ListGrantsResponse response = ListGrantsResponse.builder()
                     .grants(internal.getGrants().stream()
@@ -1094,7 +1094,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                                     .name(null)
                                     .build())
                             .collect(Collectors.toList()))
-                    .nextMarker(internal.getNextToken())
+                    .nextToken(internal.getNextToken())
                     .truncated(internal.getGrants().size() < (limit != null ? limit : Integer.MAX_VALUE))
                     .build();
             return ResponseFactory.responseOk(response);
@@ -1141,9 +1141,9 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<ListRetirableGrantsResponse> listRetirableGrants(
             @RequestParam("retiringPrincipal") String retiringPrincipal,
             @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "marker", required = false) String marker) {
+            @RequestParam(value = "nextToken", required = false) String nextToken) {
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
-        ListRetirableGrantsResponse response = keyPolicyService.listRetirableGrants(tenant, retiringPrincipal, limit, marker);
+        ListRetirableGrantsResponse response = keyPolicyService.listRetirableGrants(tenant, retiringPrincipal, limit, nextToken);
 
         return ResponseFactory.responseOk(response);
     }
@@ -1199,7 +1199,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<ListResourceTagsResponse> listResourceTags(
             @PathVariable("keyId") String keyId,
             @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "marker", required = false) String marker) {
+            @RequestParam(value = "nextToken", required = false) String nextToken) {
 
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
@@ -1391,13 +1391,13 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     @Override
     public ResponseEntity<ListCustomKeyStoresResponse> listCustomKeyStores(
             @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "marker", required = false) String marker,
+            @RequestParam(value = "nextToken", required = false) String nextToken,
             @RequestParam(value = "customKeyStoreId", required = false) Long customKeyStoreId,
             @RequestParam(value = "customKeyStoreName", required = false) String customKeyStoreName) {
 
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            ListCustomKeyStoresResponseDto internal = customKeyStoreService.listCustomKeyStores(tenant, limit, marker);
+            ListCustomKeyStoresResponseDto internal = customKeyStoreService.listCustomKeyStores(tenant, limit, nextToken);
             ListCustomKeyStoresResponse response = ListCustomKeyStoresResponse.builder()
                     .customKeyStores(internal.getCustomKeyStores().stream()
                             .map(s -> DescribeCustomKeyStoreResponse.CustomKeyStore.builder()
@@ -1407,7 +1407,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                                     .connectionState(s.getConnectionState())
                                     .build())
                             .collect(Collectors.toList()))
-                    .nextMarker(internal.getNextMarker())
+                    .nextToken(internal.getNextToken())
                     .truncated(internal.isTruncated())
                     .build();
             return ResponseFactory.responseOk(response);
@@ -1489,7 +1489,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
             GenerateRandomResponse response = dataKeyService.generateRandom(request);
-            auditService.logAction(tenant, IKmsActionType.Types.GENERATE_RANDOM_DATA, null,
+            auditService.logAction(tenant, IKmsActionType.Types.GENERATE_RANDOM, null,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());
             return ResponseFactory.responseOk(response);

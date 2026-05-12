@@ -306,7 +306,7 @@ public class CryptoService implements ICryptoService {
 
     @Override
     public byte[] generateWrappingKey() {
-        return generateKeyMaterial(IEnumKeySpec.Types.AES_256); // Reuse existing logic
+        return generateKeyMaterial(IEnumKeySpec.Types.RSA_2048); // Reuse existing logic
     }
 
     @Override

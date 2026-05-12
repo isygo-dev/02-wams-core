@@ -33,10 +33,10 @@ public interface IKeyManagementService {
      *
      * @param tenant the tenant
      * @param limit  the limit
-     * @param marker the next token
+     * @param nextToken the next token
      * @return the list keys response dto
      */
-    ListKeysResponse listKeys(String tenant, Integer limit, String marker);
+    ListKeysResponse listKeys(String tenant, Integer limit, String nextToken);
 
     /**
      * Enable key.

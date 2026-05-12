@@ -2,7 +2,7 @@ package eu.isygoit.model;
 
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
-import eu.isygoit.model.schema.SchemaTableConstantName;
+import eu.isygoit.model.schema.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

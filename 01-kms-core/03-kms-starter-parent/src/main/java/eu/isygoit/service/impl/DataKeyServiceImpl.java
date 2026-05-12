@@ -100,19 +100,19 @@ public class DataKeyServiceImpl implements IDataKeyService {
 
         try {
             // 1. Select algorithm
-            String algorithm = request.getKeyPairSpec().startsWith("RSA") ? "RSA" : "EC";
+            String algorithm = request.getKeyPairSpec().name().startsWith("RSA") ? "RSA" : "ECC";
 
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algorithm);
 
             if ("RSA".equals(algorithm)) {
                 int size = 2048;
-                if (request.getKeyPairSpec().contains("3072")) size = 3072;
-                else if (request.getKeyPairSpec().contains("4096")) size = 4096;
+                if (request.getKeyPairSpec().name().contains("3072")) size = 3072;
+                else if (request.getKeyPairSpec().name().contains("4096")) size = 4096;
                 keyGen.initialize(size);
             } else {
                 String curve = "secp256r1";
-                if (request.getKeyPairSpec().contains("P384")) curve = "secp384r1";
-                else if (request.getKeyPairSpec().contains("P521")) curve = "secp521r1";
+                if (request.getKeyPairSpec().name().contains("P384")) curve = "secp384r1";
+                else if (request.getKeyPairSpec().name().contains("P521")) curve = "secp521r1";
                 keyGen.initialize(new ECGenParameterSpec(curve));
             }
 
@@ -135,7 +135,7 @@ public class DataKeyServiceImpl implements IDataKeyService {
                     .privateKeyCiphertextBlob(Base64.getEncoder().encodeToString(encryptedPrivateKey))
                     .keyId(String.valueOf(kmsKey.getKeyId()))
                     .keyPairSpec(request.getKeyPairSpec())
-                    .encryptionAlgorithm(algorithm)
+                    .encryptionAlgorithmSpec(algorithm)
                     .keyVersionId(kmsKey.getCurrentVersionId())
                     .build();
 
@@ -162,7 +162,7 @@ public class DataKeyServiceImpl implements IDataKeyService {
                 .keyId(base.getKeyId())
                 .keyVersionId(base.getKeyVersionId())
                 .keyPairSpec(base.getKeyPairSpec())
-                .encryptionAlgorithm(base.getEncryptionAlgorithm())
+                .encryptionAlgorithmSpec(base.getEncryptionAlgorithmSpec())
                 .build();
     }
 

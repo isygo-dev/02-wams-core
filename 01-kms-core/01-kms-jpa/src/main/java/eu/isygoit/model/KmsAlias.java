@@ -1,10 +1,14 @@
 package eu.isygoit.model;
 
+import eu.isygoit.constants.TenantConstants;
+import eu.isygoit.model.jakarta.AuditableEntity;
+import eu.isygoit.model.schema.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -19,7 +23,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "KMS_ALIAS",
+@Table(name = SchemaTableConstantName.KMS_ALIAS,
         uniqueConstraints = {
                 @UniqueConstraint(name = "UK_ALIAS_NAME_TENANT", columnNames = {"TENANT", "ALIAS_NAME"})
         },
@@ -28,14 +32,16 @@ import java.time.LocalDateTime;
                 @Index(name = "IDX_ALIAS_KEY_ID", columnList = "KEY_ID"),
                 @Index(name = "IDX_ALIAS_NAME", columnList = "ALIAS_NAME")
         })
-public class KmsAlias {
+public class KmsAlias extends AuditableEntity<Long> implements ITenantAssignable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID")
+    @Column(name = SchemaColumnConstantName.C_ID, updatable = false, nullable = false)
     private Long id;
 
-    @Column(name = "TENANT", nullable = false, length = 100)
+    //@Convert(converter = LowerCaseConverter.class)
+    @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
+    @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
 
     @Column(name = "ALIAS_NAME", nullable = false, length = 256)

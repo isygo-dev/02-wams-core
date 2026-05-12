@@ -157,7 +157,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
     public ListKeysResponse listKeys(
             String tenant,
             Integer limit,
-            String marker) {
+            String nextToken) {
 
         log.info("Listing keys for tenant: {} with limit: {}",
                 tenant,
@@ -167,8 +167,8 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
                 ? Math.min(limit, DEFAULT_PAGE_SIZE)
                 : DEFAULT_PAGE_SIZE;
 
-        int pageNum = (marker != null)
-                ? Integer.parseInt(marker)
+        int pageNum = (nextToken != null)
+                ? Integer.parseInt(nextToken)
                 : 0;
 
         Pageable pageable = PageRequest.of(
@@ -186,7 +186,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
                                 .keyArn(key.getKeyArn())
                                 .build())
                         .toList())
-                .nextMarker(keyPage.hasNext()
+                .nextToken(keyPage.hasNext()
                         ? String.valueOf(pageNum + 1)
                         : null)
                 .truncated(keyPage.hasNext())

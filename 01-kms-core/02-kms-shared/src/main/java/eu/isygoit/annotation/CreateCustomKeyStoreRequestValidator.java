@@ -37,7 +37,7 @@ public class CreateCustomKeyStoreRequestValidator
 
         boolean isValid = true;
 
-        if (request.getType() == IEnumCustomKeyStoreType.Types.CLOUDHSM) {
+        if (request.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
             isValid = validateCloudHsmRequest(request, context);
         } else if (request.getType() == IEnumCustomKeyStoreType.Types.EXTERNAL_KEY_STORE) {
             isValid = validateExternalKeyStoreRequest(request, context);

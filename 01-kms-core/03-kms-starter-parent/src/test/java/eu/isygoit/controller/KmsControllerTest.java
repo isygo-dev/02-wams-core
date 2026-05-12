@@ -83,7 +83,7 @@ class KmsControllerTest {
     @Test
     void createKey_Success() throws Exception {
         CreateKeyRequest request = CreateKeyRequest.builder()
-                .keySpec(IEnumKeySpec.Types.AES_256)
+                .keySpec(IEnumKeySpec.Types.RSA_2048)
                 .keyUsage(IEnumKeyUsage.Types.ENCRYPT_DECRYPT)
                 .build();
 
@@ -140,7 +140,7 @@ class KmsControllerTest {
     void listKeys_Success() throws Exception {
         ListKeysResponse response = ListKeysResponse.builder()
                 .keys(List.of(new ListKeysResponse.KeyEntry(KEY_ID, "arn:aws:kms:...")))
-                .nextMarker(null)
+                .nextToken(null)
                 .truncated(false)
                 .build();
         when(keyManagementService.listKeys(eq(TENANT), anyInt(), isNull())).thenReturn(response);
@@ -407,7 +407,7 @@ class KmsControllerTest {
     void generateDataKeyPair_Success() throws Exception {
         GenerateDataKeyPairRequest request = GenerateDataKeyPairRequest.builder()
                 .keyId(KEY_ID)
-                .keyPairSpec("RSA_2048")
+                .keyPairSpec(IEnumKeySpec.Types.RSA_2048)
                 .build();
         when(dataKeyService.generateDataKeyPair(eq(TENANT), any())).thenReturn(new GenerateDataKeyPairResponse());
 
@@ -552,7 +552,7 @@ class KmsControllerTest {
     void listAliases_Success() throws Exception {
         ListAliasesResponseDto dto = ListAliasesResponseDto.builder()
                 .aliases(List.of(AliasResponseDto.builder().aliasName(ALIAS_NAME).targetKeyId(KEY_ID).build()))
-                .nextMarker(null)
+                .nextToken(null)
                 .truncated(false)
                 .build();
         when(keyManagementService.listAliases(eq(TENANT), isNull(), isNull())).thenReturn(dto);
@@ -639,7 +639,7 @@ class KmsControllerTest {
     void listKeyPolicies_Success() throws Exception {
         ListKeyPoliciesResponse response = ListKeyPoliciesResponse.builder()
                 .policyNames(List.of("default"))
-                .nextMarker(null)
+                .nextToken(null)
                 .truncated(false)
                 .build();
 
@@ -707,7 +707,7 @@ class KmsControllerTest {
     void listRetirableGrants_Success() throws Exception {
         ListRetirableGrantsResponse response = ListRetirableGrantsResponse.builder()
                 .grants(List.of())
-                .nextMarker(null)
+                .nextToken(null)
                 .truncated(false)
                 .build();
 
@@ -768,7 +768,7 @@ class KmsControllerTest {
     void createCustomKeyStore_Success() throws Exception {
         CreateCustomKeyStoreRequest request = new CreateCustomKeyStoreRequest();
         request.setCustomKeyStoreName("test-store");
-        request.setCustomKeyStoreType(IEnumCustomKeyStoreType.Types.CLOUDHSM);
+        request.setCustomKeyStoreType(IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM);
 
         when(customKeyStoreService.createCustomKeyStore(eq(TENANT), any()))
                 .thenReturn(CustomKeyStoreResponseDto.builder().keyStoreId(CUSTOM_KEY_STORE_ID).build());
@@ -826,7 +826,7 @@ class KmsControllerTest {
     void listCustomKeyStores_Success() throws Exception {
         ListCustomKeyStoresResponseDto dto = ListCustomKeyStoresResponseDto.builder()
                 .customKeyStores(List.of(CustomKeyStoreResponseDto.builder().keyStoreId(CUSTOM_KEY_STORE_ID).build()))
-                .nextMarker(null)
+                .nextToken(null)
                 .truncated(false)
                 .build();
         when(customKeyStoreService.listCustomKeyStores(eq(TENANT), isNull(), isNull())).thenReturn(dto);

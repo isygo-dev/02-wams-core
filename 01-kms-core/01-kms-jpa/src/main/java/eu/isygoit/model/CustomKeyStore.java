@@ -1,14 +1,17 @@
 package eu.isygoit.model;
 
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumCustomKeyStoreStatus;
 import eu.isygoit.enums.IEnumCustomKeyStoreType;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
+import eu.isygoit.model.schema.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -36,7 +39,7 @@ import java.time.LocalDateTime;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CUSTOM_KEY_STORE",
+@Table(name = SchemaTableConstantName.CUSTOM_KEY_STORE,
         uniqueConstraints = {
                 @UniqueConstraint(name = "UK_CUSTOM_KEY_STORE_NAME_TENANT",
                         columnNames = {"STORE_NAME", "TENANT"}),
@@ -62,7 +65,9 @@ public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssi
     /**
      * Tenant that owns this custom key store
      */
-    @Column(name = "TENANT", nullable = false, length = 100)
+    //@Convert(converter = LowerCaseConverter.class)
+    @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
+    @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
 
     /**
@@ -263,7 +268,7 @@ public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssi
      * Check if this is a CloudHSM type store
      */
     public boolean isCloudHsmType() {
-        return type == IEnumCustomKeyStoreType.Types.CLOUDHSM;
+        return type == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM;
     }
 
     /**
