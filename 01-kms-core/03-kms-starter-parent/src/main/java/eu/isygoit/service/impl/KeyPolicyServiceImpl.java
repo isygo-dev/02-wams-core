@@ -3,6 +3,7 @@ package eu.isygoit.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.exception.GrantNotFoundException;
 import eu.isygoit.model.KmsKeyGrant;
@@ -18,10 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -143,7 +141,7 @@ public class KeyPolicyServiceImpl implements IKeyPolicyService {
     }
 
     @Override
-    public Object retireGrant(String tenant, String grantId, RetireGrantRequestDto request) {
+    public RetireGrantResponse retireGrant(String tenant, String grantId, RetireGrantRequestDto request) {
         log.info("Retiring grant: {} for tenant: {}", grantId, tenant);
 
         KmsKeyGrant grant = kmsKeyGrantRepository.findByTenantAndGrantId(tenant, grantId)
@@ -153,7 +151,27 @@ public class KeyPolicyServiceImpl implements IKeyPolicyService {
         grant.setRevocationDate(LocalDateTime.now());
         kmsKeyGrantRepository.save(grant);
 
-        return "RETIRED" ;
+        return new RetireGrantResponse(grant.getKeyId()) ;
+    }
+
+    @Override
+    public ListRetirableGrantsResponse listRetirableGrants(String tenant, String retiringPrincipal, Integer limit, String marker) {
+        ListRetirableGrantsResponse response = ListRetirableGrantsResponse.builder()
+                .grants(List.of())
+                .nextMarker(null)
+                .truncated(false)
+                .build();
+        return response;
+    }
+
+    @Override
+    public ListKeyPoliciesResponse listKeyPolicies(String tenant, String keyId, Integer limit, String marker) {
+        ListKeyPoliciesResponse response = ListKeyPoliciesResponse.builder()
+                .policyNames(List.of("default"))
+                .nextMarker(null)
+                .truncated(false)
+                .build();
+        return response;
     }
 }
 

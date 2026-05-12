@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.dto.common.ContextRequestDto;
 import eu.isygoit.enums.*;
@@ -62,7 +63,7 @@ class KmsControllerTest {
         when(requestContextService.getCurrentContext()).thenReturn(context);
 
         mockMvc = MockMvcBuilders.standaloneSetup(kmsController)
-                .setControllerAdvice(new eu.isygoit.com.rest.controller.ResponseFactory()) // if needed
+                .setControllerAdvice(new ResponseFactory()) // if needed
                 .build();
     }
 
@@ -133,7 +134,7 @@ class KmsControllerTest {
                 .nextMarker(null)
                 .truncated(false)
                 .build();
-        when(keyManagementService.listKeys(eq(TENANT), anyInt(), anyString())).thenReturn(response);
+        when(keyManagementService.listKeys(eq(TENANT), anyInt(), isNull())).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/private/kms/keys").param("limit", "10"))
                 .andExpect(status().isOk())
@@ -266,7 +267,7 @@ class KmsControllerTest {
     void listKeyVersions_Success() throws Exception {
         ListKeyVersionsResponse response = ListKeyVersionsResponse.builder()
                 .versions(List.of()).build();
-        when(keyVersionService.listKeyVersions(eq(TENANT), eq(KEY_ID), anyInt(), anyString()))
+        when(keyVersionService.listKeyVersions(eq(TENANT), eq(KEY_ID), isNull(), isNull()))
                 .thenReturn(response);
 
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/versions", KEY_ID))
@@ -491,13 +492,18 @@ class KmsControllerTest {
     @Test
     void generateRandom_Success() throws Exception {
         GenerateRandomRequest request = new GenerateRandomRequest();
-        request.setNumberOfBytes(32);
+        request.setNumberOfBytes(10);
+
+        GenerateRandomResponse response = new GenerateRandomResponse();
+        response.setPlaintext("ABCDEFGHIJ");
+        when(dataKeyService.generateRandom(request)).thenReturn(response);
 
         mockMvc.perform(post("/api/v1/private/kms/random")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.plaintext").exists());
+                .andExpect(jsonPath("$.plaintext").exists())
+                .andExpect(jsonPath("$.plaintext").value("ABCDEFGHIJ"));
     }
 
     // =========================================================================
@@ -540,7 +546,7 @@ class KmsControllerTest {
                 .nextMarker(null)
                 .truncated(false)
                 .build();
-        when(keyManagementService.listAliases(eq(TENANT), anyInt(), anyString())).thenReturn(dto);
+        when(keyManagementService.listAliases(eq(TENANT), isNull(), isNull())).thenReturn(dto);
 
         mockMvc.perform(get("/api/v1/private/kms/aliases"))
                 .andExpect(status().isOk())
@@ -551,7 +557,7 @@ class KmsControllerTest {
     void listAliasesForKey_Success() throws Exception {
         ListAliasesResponseDto dto = ListAliasesResponseDto.builder()
                 .aliases(List.of()).build();
-        when(keyManagementService.listAliasesForKey(eq(TENANT), eq(KEY_ID), anyInt(), anyString())).thenReturn(dto);
+        when(keyManagementService.listAliasesForKey(eq(TENANT), eq(KEY_ID), isNull(), isNull())).thenReturn(dto);
 
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/aliases", KEY_ID))
                 .andExpect(status().isOk());
@@ -622,6 +628,15 @@ class KmsControllerTest {
 
     @Test
     void listKeyPolicies_Success() throws Exception {
+        ListKeyPoliciesResponse response = ListKeyPoliciesResponse.builder()
+                .policyNames(List.of("default"))
+                .nextMarker(null)
+                .truncated(false)
+                .build();
+
+        when(keyPolicyService.listKeyPolicies(anyString(), anyString(), isNull(), isNull()))
+                .thenReturn(response);
+
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/policies", KEY_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.policyNames[0]").value("default"));
@@ -681,6 +696,15 @@ class KmsControllerTest {
 
     @Test
     void listRetirableGrants_Success() throws Exception {
+        ListRetirableGrantsResponse response = ListRetirableGrantsResponse.builder()
+                .grants(List.of())
+                .nextMarker(null)
+                .truncated(false)
+                .build();
+
+        when(keyPolicyService.listRetirableGrants(anyString(), anyString(), isNull(), isNull()))
+                .thenReturn(response);
+
         mockMvc.perform(get("/api/v1/private/kms/grants/retirable")
                         .param("retiringPrincipal", "arn:aws:iam::123:user/admin"))
                 .andExpect(status().isOk());
@@ -796,7 +820,7 @@ class KmsControllerTest {
                 .nextMarker(null)
                 .truncated(false)
                 .build();
-        when(customKeyStoreService.listCustomKeyStores(eq(TENANT), anyInt(), anyString())).thenReturn(dto);
+        when(customKeyStoreService.listCustomKeyStores(eq(TENANT),isNull(), isNull())).thenReturn(dto);
 
         mockMvc.perform(get("/api/v1/private/kms/custom-key-stores"))
                 .andExpect(status().isOk());
@@ -863,6 +887,11 @@ class KmsControllerTest {
     void generateRandom_ZeroBytes_ShouldSucceed() throws Exception {
         GenerateRandomRequest request = new GenerateRandomRequest();
         request.setNumberOfBytes(0);
+
+        GenerateRandomResponse response = new GenerateRandomResponse();
+        response.setPlaintext("");
+        when(dataKeyService.generateRandom(request)).thenReturn(response);
+
         mockMvc.perform(post("/api/v1/private/kms/random")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -884,7 +913,7 @@ class KmsControllerTest {
         ListKeysResponse response = ListKeysResponse.builder()
                 .keys(Collections.emptyList())
                 .build();
-        when(keyManagementService.listKeys(eq(TENANT), anyInt(), anyString())).thenReturn(response);
+        when(keyManagementService.listKeys(eq(TENANT), isNull(), isNull())).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/private/kms/keys"))
                 .andExpect(status().isOk())

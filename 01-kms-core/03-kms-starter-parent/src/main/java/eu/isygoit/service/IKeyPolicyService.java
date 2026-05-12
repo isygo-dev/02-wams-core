@@ -2,6 +2,8 @@ package eu.isygoit.service;
 
 import eu.isygoit.dto.KmsDtos.*;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
@@ -51,6 +53,10 @@ public interface IKeyPolicyService {
 
     ListGrantsResponseDto listGrants(String tenant, String keyId, Integer limit, String nextToken);
 
-    Object retireGrant(String tenant, String grantId, @Valid RetireGrantRequestDto request);
+    RetireGrantResponse retireGrant(String tenant, String grantId, @Valid RetireGrantRequestDto request);
+
+    ListRetirableGrantsResponse listRetirableGrants(String tenant, String retiringPrincipal, Integer limit, String marker);
+
+    ListKeyPoliciesResponse listKeyPolicies(String tenant, String keyId, Integer limit, String marker);
 }
 

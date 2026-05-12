@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,7 +45,7 @@ public interface KmsServiceApi {
     // Key Management
     // =========================================================================
 
-    @PostMapping("/keys")
+    @PostMapping(value = "/keys", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Create Key",
             description = "Creates a new customer managed key (CMK). Supports symmetric (AES‑256) and asymmetric (RSA, ECC) keys. " +
@@ -61,7 +62,7 @@ public interface KmsServiceApi {
     })
     ResponseEntity<CreateKeyResponse> createKey(@Valid @RequestBody CreateKeyRequest request);
 
-    @GetMapping("/keys/{keyId}")
+    @GetMapping(value = "/keys/{keyId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Describe Key",
             description = "Returns detailed metadata about a KMS key, including its ARN, state, creation date, rotation status, and multi‑region configuration.",
@@ -76,7 +77,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Unique identifier of the KMS key (KeyId or ARN)", required = true, example = "1234abcd-12ab-34cd-56ef-1234567890ab")
             @PathVariable("keyId") String keyId);
 
-    @GetMapping("/keys")
+    @GetMapping(value = "/keys", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "List Keys",
             description = "Returns a paginated list of all KMS keys in the account. Includes basic metadata (KeyId, Arn).",
@@ -110,7 +111,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Waiting period in days (7-30)", example = "30")
             @RequestParam(value = "pendingWindowInDays", defaultValue = "30") Integer pendingWindowInDays);
 
-    @PostMapping("/keys/{keyId}/cancel-deletion")
+    @PostMapping(value = "/keys/{keyId}/cancel-deletion", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Cancel Key Deletion",
             description = "Cancels a previously scheduled key deletion, restoring the key to its previous state (Enabled or Disabled).",
@@ -132,7 +133,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Unique identifier of the KMS key", required = true)
             @PathVariable("keyId") String keyId);
 
-    @PatchMapping("/keys/{keyId}/rotation")
+    @PatchMapping(value = "/keys/{keyId}/rotation", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Update Key Rotation",
             description = "Enables/disables automatic key rotation with optional custom period (90-3650 days).",
@@ -143,7 +144,7 @@ public interface KmsServiceApi {
             @PathVariable("keyId") String keyId,
             @Valid @RequestBody UpdateKeyRotationRequestDto request);
 
-    @PostMapping("/keys/{keyId}/enable")
+    @PostMapping(value = "/keys/{keyId}/enable", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Enable Key",
             description = "Enables a disabled KMS key, making it available for cryptographic operations.",
@@ -153,7 +154,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Unique identifier of the KMS key", required = true)
             @PathVariable("keyId") String keyId);
 
-    @PostMapping("/keys/{keyId}/disable")
+    @PostMapping(value = "/keys/{keyId}/disable", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Disable Key",
             description = "Disables a KMS key, preventing all cryptographic operations.",
@@ -163,7 +164,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Unique identifier of the KMS key", required = true)
             @PathVariable("keyId") String keyId);
 
-    @PatchMapping("/keys/{keyId}/description")
+    @PatchMapping(value = "/keys/{keyId}/description", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Update Key Description",
             description = "Updates the description of a KMS key.",
@@ -178,7 +179,7 @@ public interface KmsServiceApi {
     // Key Rotation
     // =========================================================================
 
-    @GetMapping("/keys/{keyId}/rotation-status")
+    @GetMapping(value = "/keys/{keyId}/rotation-status", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Get Key Rotation Status",
             description = "Returns whether automatic key rotation is enabled for the key, along with rotation period and last rotation date.",
@@ -188,7 +189,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Unique identifier of the KMS key", required = true)
             @PathVariable("keyId") String keyId);
 
-    @GetMapping("/keys/{keyId}/rotations")
+    @GetMapping(value = "/keys/{keyId}/rotations", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "List Key Rotations",
             description = "Returns a paginated list of all key rotations (both automatic and manual) " +
@@ -209,7 +210,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Pagination token from previous response")
             @RequestParam(value = "nextToken", required = false) String nextToken);
 
-    @PostMapping("/keys/{keyId}/rotate/enable")
+    @PostMapping(value = "/keys/{keyId}/rotate/enable", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Enable Key Rotation",
             description = "Enables automatic annual rotation of the key material (symmetric keys only).",
@@ -219,7 +220,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Unique identifier of the KMS key", required = true)
             @PathVariable("keyId") String keyId);
 
-    @PostMapping("/keys/{keyId}/rotate/disable")
+    @PostMapping(value = "/keys/{keyId}/rotate/disable", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Disable Key Rotation",
             description = "Disables automatic key rotation.",
@@ -229,7 +230,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Unique identifier of the KMS key", required = true)
             @PathVariable("keyId") String keyId);
 
-    @PostMapping("/keys/{keyId}/rotate")
+    @PostMapping(value = "/keys/{keyId}/rotate", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Rotate Key (On‑Demand)",
             description = "Immediately rotates a KMS key, creating a new key version.",
@@ -239,7 +240,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Unique identifier of the KMS key", required = true)
             @PathVariable("keyId") String keyId);
 
-    @GetMapping("/keys/{keyId}/versions")
+    @GetMapping(value = "/keys/{keyId}/versions", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "List Key Versions",
             description = "Lists all versions of a KMS key (created by rotation or replication).",
@@ -251,7 +252,7 @@ public interface KmsServiceApi {
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "marker", required = false) String marker);
 
-    @GetMapping("/keys/{keyId}/active-version")
+    @GetMapping(value = "/keys/{keyId}/active-version", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Get Active Key Version",
             description = "Returns the current active version ID of the specified KMS key.",
@@ -262,7 +263,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Unique identifier of the KMS key", required = true)
             @PathVariable("keyId") String keyId);
 
-    @PostMapping("/keys/{keyId}/primary-region")
+    @PostMapping(value = "/keys/{keyId}/primary-region", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Update Primary Region",
             description = "Updates the primary region of a multi‑region key. This operation is part of the AWS KMS API " +
@@ -279,7 +280,7 @@ public interface KmsServiceApi {
             @PathVariable("keyId") String keyId,
             @Valid @RequestBody UpdatePrimaryRegionRequestDto request);
 
-    @PostMapping("/keys/{keyId}/replicate")
+    @PostMapping(value = "/keys/{keyId}/replicate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Replicate Key",
             description = "Replicates a multi‑region key to another region. Returns the replica key metadata.",
@@ -296,7 +297,7 @@ public interface KmsServiceApi {
             @PathVariable("keyId") String keyId,
             @Valid @RequestBody ReplicateKeyRequestDto request);
 
-    @PostMapping("/keys/{keyId}/synchronize")
+    @PostMapping(value = "/keys/{keyId}/synchronize", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Synchronize Multi-Region Key",
             description = "Synchronizes a multi‑region key replica with its primary region. " +
@@ -317,7 +318,7 @@ public interface KmsServiceApi {
     // Cryptographic Operations
     // =========================================================================
 
-    @PostMapping("/encrypt")
+    @PostMapping(value = "/encrypt", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Encrypt",
             description = "Encrypts plaintext using a symmetric or asymmetric KMS key. Maximum 4096 bytes. " +
@@ -325,77 +326,77 @@ public interface KmsServiceApi {
     )
     ResponseEntity<EncryptResponse> encrypt(@Valid @RequestBody EncryptRequest request);
 
-    @PostMapping("/decrypt")
+    @PostMapping(value = "/decrypt", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Decrypt",
             description = "Decrypts ciphertext that was encrypted under a KMS key. Ciphertext must be base64-encoded."
     )
     ResponseEntity<DecryptResponse> decrypt(@Valid @RequestBody DecryptRequest request);
 
-    @PostMapping("/reencrypt")
+    @PostMapping(value = "/reencrypt", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Re‑Encrypt",
             description = "Decrypts ciphertext under one KMS key and re‑encrypts under another, without exposing plaintext."
     )
     ResponseEntity<ReEncryptResponse> reEncrypt(@Valid @RequestBody ReEncryptRequest request);
 
-    @PostMapping("/datakey/generate")
+    @PostMapping(value = "/datakey/generate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Generate Data Key",
             description = "Generates a symmetric data key for envelope encryption. Returns plaintext and encrypted copies."
     )
     ResponseEntity<GenerateDataKeyResponse> generateDataKey(@Valid @RequestBody GenerateDataKeyRequest request);
 
-    @PostMapping("/datakey/generate-without-plaintext")
+    @PostMapping(value = "/datakey/generate-without-plaintext", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Generate Data Key (No Plaintext)",
             description = "Generates a data key and returns only the encrypted copy (plaintext never leaves KMS)."
     )
     ResponseEntity<GenerateDataKeyWithoutPlaintextResponse> generateDataKeyWithoutPlaintext(@Valid @RequestBody GenerateDataKeyWithoutPlaintextRequest request);
 
-    @PostMapping("/datakey/generate-pair")
+    @PostMapping(value = "/datakey/generate-pair", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Generate Data Key Pair",
             description = "Generates an asymmetric data key pair (public + encrypted private key)."
     )
     ResponseEntity<GenerateDataKeyPairResponse> generateDataKeyPair(@Valid @RequestBody GenerateDataKeyPairRequest request);
 
-    @PostMapping("/datakey/generate-pair-without-plaintext")
+    @PostMapping(value = "/datakey/generate-pair-without-plaintext", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Generate Data Key Pair (No Plaintext)",
             description = "Generates an asymmetric key pair and returns only the public key and encrypted private key."
     )
     ResponseEntity<GenerateDataKeyPairWithoutPlaintextResponse> generateDataKeyPairWithoutPlaintext(@Valid @RequestBody GenerateDataKeyPairWithoutPlaintextRequest request);
 
-    @PostMapping("/sign")
+    @PostMapping(value = "/sign", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Sign",
             description = "Generates a digital signature using an asymmetric KMS key. Message must be base64-encoded."
     )
     ResponseEntity<SignResponse> sign(@Valid @RequestBody SignRequest request);
 
-    @PostMapping("/verify")
+    @PostMapping(value = "/verify", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Verify Signature",
             description = "Verifies a digital signature using an asymmetric KMS key."
     )
     ResponseEntity<VerifyResponse> verify(@Valid @RequestBody VerifyRequest request);
 
-    @PostMapping("/mac/generate")
+    @PostMapping(value = "/mac/generate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Generate MAC",
             description = "Generates a Message Authentication Code (MAC) using a symmetric HMAC KMS key."
     )
     ResponseEntity<GenerateMacResponse> generateMac(@Valid @RequestBody GenerateMacRequest request);
 
-    @PostMapping("/mac/verify")
+    @PostMapping(value = "/mac/verify", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Verify MAC",
             description = "Verifies a Message Authentication Code (MAC)."
     )
     ResponseEntity<VerifyMacResponse> verifyMac(@Valid @RequestBody VerifyMacRequest request);
 
-    @GetMapping("/keys/{keyId}/public-key")
+    @GetMapping(value = "/keys/{keyId}/public-key", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Get Public Key",
             description = "Returns the public key of an asymmetric KMS key (RSA or ECC) in base64-encoded DER format."
@@ -404,7 +405,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Unique identifier of the asymmetric KMS key", required = true)
             @PathVariable("keyId") String keyId);
 
-    @GetMapping("/keys/{keyId}/audit-logs")
+    @GetMapping(value = "/keys/{keyId}/audit-logs", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Get Audit Logs",
             description = "Returns audit logs (key usage events) for the specified key, optionally filtered by date range."
@@ -419,7 +420,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Maximum number of log entries to return", example = "100")
             @RequestParam(value = "limit", required = false) Integer limit);
 
-    @GetMapping("/keys/{keyId}/usage-stats")
+    @GetMapping(value = "/keys/{keyId}/usage-stats", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Get Key Usage Statistics",
             description = "Returns aggregated usage statistics for a KMS key, including operation counts and last used date."
@@ -428,7 +429,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Unique identifier of the KMS key", required = true)
             @PathVariable("keyId") String keyId);
 
-    @PostMapping("/random")
+    @PostMapping(value = "/random", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Generate Random",
             description = "Generates cryptographically secure random bytes (up to 1024). Returns base64-encoded result."
@@ -439,7 +440,7 @@ public interface KmsServiceApi {
     // Aliases
     // =========================================================================
 
-    @GetMapping("/aliases")
+    @GetMapping(value = "/aliases", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "List Aliases",
             description = "Lists all aliases in the account, including those for AWS managed keys.",
@@ -451,7 +452,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Pagination marker from previous response")
             @RequestParam(value = "marker", required = false) String marker);
 
-    @GetMapping("/keys/{keyId}/aliases")
+    @GetMapping(value = "/keys/{keyId}/aliases", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "List Aliases for Key",
             description = "Lists all aliases associated with a specific KMS key.",
@@ -463,7 +464,7 @@ public interface KmsServiceApi {
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "marker", required = false) String marker);
 
-    @PostMapping("/aliases")
+    @PostMapping(value = "/aliases", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Create Alias",
             description = "Creates a friendly name alias for a KMS key (must start with 'alias/').",
@@ -471,7 +472,7 @@ public interface KmsServiceApi {
     )
     ResponseEntity<CreateAliasResponse> createAlias(@Valid @RequestBody CreateAliasRequest request);
 
-    @PatchMapping("/aliases/{aliasName}")
+    @PatchMapping(value = "/aliases/{aliasName}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Update Alias",
             description = "Associates an existing alias with a different KMS key.",
@@ -496,7 +497,7 @@ public interface KmsServiceApi {
     // Tags
     // =========================================================================
 
-    @GetMapping("/keys/{keyId}/tags")
+    @GetMapping(value = "/keys/{keyId}/tags", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "List Resource Tags",
             description = "Lists all tags attached to a KMS key.",
@@ -508,7 +509,7 @@ public interface KmsServiceApi {
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "marker", required = false) String marker);
 
-    @PostMapping("/keys/{keyId}/tags")
+    @PostMapping(value = "/keys/{keyId}/tags", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Tag Resource",
             description = "Adds or updates tags on a KMS key (max 50 tags per key).",
@@ -534,7 +535,7 @@ public interface KmsServiceApi {
     // Key Policies & Grants
     // =========================================================================
 
-    @PutMapping("/keys/{keyId}/policy")
+    @PutMapping(value = "/keys/{keyId}/policy", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Put Key Policy",
             description = "Attaches or updates a key policy document to a KMS key. The policy is a JSON object.",
@@ -545,7 +546,7 @@ public interface KmsServiceApi {
             @PathVariable("keyId") String keyId,
             @Valid @RequestBody PutKeyPolicyRequest request);
 
-    @GetMapping("/keys/{keyId}/policy")
+    @GetMapping(value = "/keys/{keyId}/policy", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Get Key Policy",
             description = "Returns the key policy document attached to a KMS key. Default policy name is 'default'.",
@@ -557,7 +558,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Name of the policy (usually 'default')", example = "default")
             @RequestParam(value = "policyName", defaultValue = "default") String policyName);
 
-    @GetMapping("/keys/{keyId}/policies")
+    @GetMapping(value = "/keys/{keyId}/policies", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "List Key Policies",
             description = "Lists the names of all key policies attached to a KMS key.",
@@ -569,7 +570,7 @@ public interface KmsServiceApi {
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "marker", required = false) String marker);
 
-    @PostMapping("/keys/{keyId}/grants")
+    @PostMapping(value = "/keys/{keyId}/grants", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Create Grant",
             description = "Creates a grant that allows a principal to perform specific operations on a key.",
@@ -580,7 +581,7 @@ public interface KmsServiceApi {
             @PathVariable("keyId") String keyId,
             @Valid @RequestBody CreateGrantRequest request);
 
-    @GetMapping("/keys/{keyId}/grants")
+    @GetMapping(value = "/keys/{keyId}/grants", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "List Grants",
             description = "Lists all grants for a KMS key.",
@@ -606,7 +607,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Unique identifier of the grant", required = true)
             @PathVariable("grantId") String grantId);
 
-    @PostMapping("/grants/retire")
+    @PostMapping(value = "/grants/retire", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Retire Grant",
             description = "Retires a grant (can be called by grantee or key administrator).",
@@ -614,7 +615,7 @@ public interface KmsServiceApi {
     )
     ResponseEntity<RetireGrantResponse> retireGrant(@Valid @RequestBody RetireGrantRequest request);
 
-    @GetMapping("/grants/retirable")
+    @GetMapping(value = "/grants/retirable", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "List Retirable Grants",
             description = "Lists grants that can be retired by a given principal.",
@@ -630,7 +631,7 @@ public interface KmsServiceApi {
     // BYOK (Import Key Material)
     // =========================================================================
 
-    @PostMapping("/keys/{keyId}/import-parameters")
+    @PostMapping(value = "/keys/{keyId}/import-parameters", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Get Parameters for Import",
             description = "Returns a public key and import token needed to import your own key material (BYOK). " +
@@ -642,7 +643,7 @@ public interface KmsServiceApi {
             @PathVariable("keyId") String keyId,
             @Valid @RequestBody GetParametersForImportRequest request);
 
-    @PostMapping("/keys/{keyId}/import")
+    @PostMapping(value = "/keys/{keyId}/import", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Import Key Material",
             description = "Imports your own key material into a KMS key created with origin = EXTERNAL.",
@@ -667,7 +668,7 @@ public interface KmsServiceApi {
     // Custom Key Stores
     // =========================================================================
 
-    @PostMapping("/custom-key-stores")
+    @PostMapping(value = "/custom-key-stores", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Create Custom Key Store",
             description = "Creates a custom key store backed by a CloudHSM cluster or external proxy (XKS).",
@@ -675,7 +676,7 @@ public interface KmsServiceApi {
     )
     ResponseEntity<CreateCustomKeyStoreResponse> createCustomKeyStore(@Valid @RequestBody CreateCustomKeyStoreRequest request);
 
-    @GetMapping("/custom-key-stores/{customKeyStoreId}")
+    @GetMapping(value = "/custom-key-stores/{customKeyStoreId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Describe Custom Key Store",
             description = "Returns metadata about a custom key store, including connection status and configuration.",
@@ -685,7 +686,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Numeric ID of the custom key store", required = true)
             @PathVariable("customKeyStoreId") Long customKeyStoreId);
 
-    @PatchMapping("/custom-key-stores/{customKeyStoreId}")
+    @PatchMapping(value = "/custom-key-stores/{customKeyStoreId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Update Custom Key Store",
             description = "Updates configuration properties of a custom key store (e.g., name, connection parameters).",
@@ -706,7 +707,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Numeric ID of the custom key store", required = true)
             @PathVariable("customKeyStoreId") Long customKeyStoreId);
 
-    @PostMapping("/custom-key-stores/{customKeyStoreId}/connect")
+    @PostMapping(value = "/custom-key-stores/{customKeyStoreId}/connect", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Connect Custom Key Store",
             description = "Connects a custom key store to its underlying hardware (CloudHSM or external proxy).",
@@ -716,7 +717,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Numeric ID of the custom key store", required = true)
             @PathVariable("customKeyStoreId") Long customKeyStoreId);
 
-    @PostMapping("/custom-key-stores/{customKeyStoreId}/disconnect")
+    @PostMapping(value = "/custom-key-stores/{customKeyStoreId}/disconnect", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Disconnect Custom Key Store",
             description = "Disconnects a custom key store from its underlying hardware.",
@@ -726,7 +727,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Numeric ID of the custom key store", required = true)
             @PathVariable("customKeyStoreId") Long customKeyStoreId);
 
-    @GetMapping("/custom-key-stores")
+    @GetMapping(value = "/custom-key-stores", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "List Custom Key Stores",
             description = "Lists all custom key stores in the account (paginated).",
@@ -742,7 +743,7 @@ public interface KmsServiceApi {
             @Parameter(description = "Filter by custom key store name (exact match)")
             @RequestParam(value = "customKeyStoreName", required = false) String customKeyStoreName);
 
-    @PostMapping("/keys/{keyId}/validate")
+    @PostMapping(value = "/keys/{keyId}/validate", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Validate Key",
             description = "Validates the specified key (checks key material integrity, state, and permissions).",

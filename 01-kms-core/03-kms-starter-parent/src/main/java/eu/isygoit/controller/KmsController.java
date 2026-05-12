@@ -1032,12 +1032,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             @PathVariable("keyId") String keyId,
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "marker", required = false) String marker) {
-
-        ListKeyPoliciesResponse response = ListKeyPoliciesResponse.builder()
-                .policyNames(List.of("default"))
-                .nextMarker(null)
-                .truncated(false)
-                .build();
+        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        ListKeyPoliciesResponse response = keyPolicyService.listKeyPolicies(tenant, keyId, limit, marker);
         return ResponseFactory.responseOk(response);
     }
 
@@ -1149,12 +1145,9 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             @RequestParam("retiringPrincipal") String retiringPrincipal,
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "marker", required = false) String marker) {
+        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        ListRetirableGrantsResponse response = keyPolicyService.listRetirableGrants(tenant, retiringPrincipal, limit, marker);
 
-        ListRetirableGrantsResponse response = ListRetirableGrantsResponse.builder()
-                .grants(List.of())
-                .nextMarker(null)
-                .truncated(false)
-                .build();
         return ResponseFactory.responseOk(response);
     }
 
