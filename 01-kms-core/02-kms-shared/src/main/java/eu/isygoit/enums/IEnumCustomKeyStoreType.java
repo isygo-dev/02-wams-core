@@ -1,23 +1,23 @@
 package eu.isygoit.enums;
 
 /**
- * Custom Key Store Type Enumeration
- * <p>
- * Defines the types of custom key stores supported by the KMS
+ * WAMS KMS Custom Key Store types.
  *
- * @author Isygoit Team
- * @version 1.0
+ * Aligns with WAMS KMS:
+ * - WAMS CloudHSM key store
+ * - External Key Store (XKS)
  */
 public interface IEnumCustomKeyStoreType {
 
     enum Types implements IEnum {
-        /**
-         * CloudHSM-based custom key store using software-simulated HSM
-         */
-        CLOUDHSM("CLOUDHSM"),
 
         /**
-         * External Key Store (XKS) for integration with external KMS
+         * WAMS CloudHSM-backed custom key store.
+         */
+        WAMS_CLOUDHSM("WAMS_CLOUDHSM"),
+
+        /**
+         * External Key Store (XKS) integration via external proxy.
          */
         EXTERNAL_KEY_STORE("EXTERNAL_KEY_STORE");
 
@@ -28,7 +28,7 @@ public interface IEnumCustomKeyStoreType {
         }
 
         public static Types fromValue(String value) {
-            for (Types type : Types.values()) {
+            for (Types type : values()) {
                 if (type.meaning.equalsIgnoreCase(value)) {
                     return type;
                 }
@@ -41,8 +41,8 @@ public interface IEnumCustomKeyStoreType {
             return meaning;
         }
 
-        public boolean isCloudHsm() {
-            return this == CLOUDHSM;
+        public boolean isAwsCloudHsm() {
+            return this == WAMS_CLOUDHSM;
         }
 
         public boolean isExternalKeyStore() {

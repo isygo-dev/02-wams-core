@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 /**
  * Full KMS Controller - Implements all methods from KmsServiceApi
  *
- * <p>This controller provides a complete AWS KMS-compatible REST API for:
+ * <p>This controller provides a complete WAMS KMS-compatible REST API for:
  * <ul>
  *   <li>Key management (create, describe, list, enable, disable, delete)</li>
  *   <li>Cryptographic operations (encrypt, decrypt, re-encrypt)</li>

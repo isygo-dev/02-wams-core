@@ -1,50 +1,48 @@
 package eu.isygoit.enums;
 
 /**
- * Custom Key Store Status Enumeration
- * <p>
- * Defines the possible states of a custom key store
+ * WAMS KMS Custom Key Store Status alignment.
  *
- * @author Isygoit Team
- * @version 1.0
+ * Represents lifecycle states of CloudHSM / XKS custom key stores.
  */
 public interface IEnumCustomKeyStoreStatus {
 
     enum Types implements IEnum {
-        /**
-         * Store is created but not connected
-         */
-        DISCONNECTED("DISCONNECTED"),
 
         /**
-         * Store is currently establishing connection
+         * The custom key store is being created.
+         */
+        CREATING("CREATING"),
+
+        /**
+         * Connection is being established.
          */
         CONNECTING("CONNECTING"),
 
         /**
-         * Store is successfully connected and operational
+         * The custom key store is fully connected and operational.
          */
         CONNECTED("CONNECTED"),
 
         /**
-         * Store is in the process of disconnecting
+         * The custom key store is disconnected but still exists.
+         */
+        DISCONNECTED("DISCONNECTED"),
+
+        /**
+         * Connection is being torn down.
          */
         DISCONNECTING("DISCONNECTING"),
 
         /**
-         * Store connection failed or is unavailable
+         * The custom key store operation failed.
          */
         FAILED("FAILED"),
 
         /**
-         * Store is pending deletion
+         * The custom key store is being deleted.
          */
-        PENDING_DELETION("PENDING_DELETION"),
-
-        /**
-         * Store is being updated
-         */
-        UPDATING("UPDATING");
+        DELETING("DELETING");
 
         private final String meaning;
 
@@ -53,7 +51,7 @@ public interface IEnumCustomKeyStoreStatus {
         }
 
         public static Types fromValue(String value) {
-            for (Types status : Types.values()) {
+            for (Types status : values()) {
                 if (status.meaning.equalsIgnoreCase(value)) {
                     return status;
                 }
@@ -61,20 +59,28 @@ public interface IEnumCustomKeyStoreStatus {
             throw new IllegalArgumentException("Unknown custom key store status: " + value);
         }
 
+        @Override
         public String meaning() {
             return meaning;
         }
+
+        // =========================================================================
+        // State classification helpers (kept from your design - good abstraction)
+        // =========================================================================
 
         public boolean isOperational() {
             return this == CONNECTED;
         }
 
         public boolean isTransitional() {
-            return this == CONNECTING || this == DISCONNECTING || this == UPDATING;
+            return this == CREATING
+                    || this == CONNECTING
+                    || this == DISCONNECTING;
         }
 
         public boolean isTerminal() {
-            return this == FAILED || this == PENDING_DELETION;
+            return this == FAILED
+                    || this == DELETING;
         }
     }
 }

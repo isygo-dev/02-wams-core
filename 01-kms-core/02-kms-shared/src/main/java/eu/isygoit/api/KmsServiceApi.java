@@ -36,7 +36,7 @@ import java.time.LocalDateTime;
  * </p>
  *
  * @author Isygoit Team
- * @see <a href="https://docs.aws.amazon.com/kms/latest/APIReference/Welcome.html">AWS KMS API Reference</a>
+ * @see <a href="https://docs.aws.amazon.com/kms/latest/APIReference/Welcome.html">WAMS KMS API Reference</a>
  */
 @Tag(name = "KMS Service", description = "Key Management Service – manage keys and perform cryptographic operations")
 public interface KmsServiceApi {
@@ -126,7 +126,7 @@ public interface KmsServiceApi {
             summary = "Delete Key (Permanent)",
             description = "Permanently deletes a KMS key. This operation is irreversible and should only be used " +
                     "after the key has been scheduled for deletion and the waiting period has expired. " +
-                    "This is an extension beyond the AWS KMS API.",
+                    "This is an extension beyond the WAMS KMS API.",
             operationId = "deleteKey"
     )
     ResponseEntity<DeleteKeyResponse> deleteKey(
@@ -266,7 +266,7 @@ public interface KmsServiceApi {
     @PostMapping(value = "/keys/{keyId}/primary-region", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Update Primary Region",
-            description = "Updates the primary region of a multi‑region key. This operation is part of the AWS KMS API " +
+            description = "Updates the primary region of a multi‑region key. This operation is part of the WAMS KMS API " +
                     "and returns an empty response on success.",
             operationId = "updatePrimaryRegion"
     )
@@ -443,7 +443,7 @@ public interface KmsServiceApi {
     @GetMapping(value = "/aliases", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "List Aliases",
-            description = "Lists all aliases in the account, including those for AWS managed keys.",
+            description = "Lists all aliases in the account, including those for WAMS managed keys.",
             operationId = "listAliases"
     )
     ResponseEntity<ListAliasesResponse> listAliases(

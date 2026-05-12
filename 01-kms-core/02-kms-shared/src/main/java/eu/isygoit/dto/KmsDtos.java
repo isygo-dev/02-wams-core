@@ -2306,7 +2306,7 @@ public final class KmsDtos {
             private String connectionErrorCode;
             private String cloudHsmClusterId;     // for CloudHSM type
             private String trustAnchorCertificate;
-            private String customKeyStoreType;     // AWS_CLOUDHSM, EXTERNAL_KEY_STORE
+            private String customKeyStoreType;     // WAMS_CLOUDHSM, EXTERNAL_KEY_STORE
             private String xksProxyUriEndpoint;    // for external key store
             private String xksProxyUriPath;
             private String xksProxyAuthenticationCredential;

@@ -1,31 +1,53 @@
 package eu.isygoit.enums;
 
 /**
- * The interface Enum key status.
+ * WAMS KMS Key Status alignment.
+ *
+ * Represents lifecycle states of a KMS Key as defined by WAMS KMS API.
  */
 public interface IEnumKeyStatus {
-    /**
-     * The constant STR_ENUM_SIZE.
-     */
-    int STR_ENUM_SIZE = 3;
+
+    int STR_ENUM_SIZE = 7;
 
     /**
-     * The enum Types.
+     * WAMS KMS key states.
      */
     enum Types implements IEnum {
 
         /**
-         * Enabled types.
+         * The key is active and can be used.
          */
-        ENABLED("ENABLED"),
+        ENABLED("Enabled"),
+
         /**
-         * Disabled types.
+         * The key is disabled and cannot be used.
          */
-        DISABLED("DISABLED"),
+        DISABLED("Disabled"),
+
         /**
-         * Pending deletion types.
+         * The key is scheduled for deletion.
          */
-        PENDING_DELETION("PENDING_DELETION");
+        PENDING_DELETION("PendingDeletion"),
+
+        /**
+         * The key is being created.
+         */
+        CREATING("Creating"),
+
+        /**
+         * The key is being updated.
+         */
+        UPDATING("Updating"),
+
+        /**
+         * The key material is pending import.
+         */
+        PENDING_IMPORT("PendingImport"),
+
+        /**
+         * Replica key is pending deletion (multi-region keys).
+         */
+        PENDING_REPLICA_DELETION("PendingReplicaDeletion");
 
         private final String meaning;
 
@@ -33,9 +55,9 @@ public interface IEnumKeyStatus {
             this.meaning = meaning;
         }
 
+        @Override
         public String meaning() {
             return meaning;
         }
     }
 }
-

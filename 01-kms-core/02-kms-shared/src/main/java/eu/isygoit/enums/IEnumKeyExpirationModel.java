@@ -1,26 +1,32 @@
 package eu.isygoit.enums;
 
 /**
- * The interface Enum key expiration model.
+ * WAMS KMS does not define explicit expiration models.
+ * This enum represents a DOMAIN ABSTRACTION over WAMS lifecycle behaviors.
  */
 public interface IEnumKeyExpirationModel {
 
     int STR_ENUM_SIZE = 3;
 
+    /**
+     * Domain-level key lifecycle model mapped to WAMS behaviors.
+     */
     enum Types implements IEnum {
 
         /**
-         * Key never expires (standard KMS behavior).
+         * Key has no scheduled deletion and remains valid indefinitely
+         * unless explicitly disabled or scheduled for deletion.
          */
-        NEVER_EXPIRES("NEVER_EXPIRES"),
+        INDEFINITE_LIFECYCLE("INDEFINITE_LIFECYCLE"),
 
         /**
-         * Key expires based on rotation policy.
+         * Key is governed by automatic rotation policy
+         * (EnableKeyRotation in WAMS KMS).
          */
-        ROTATION_BASED("ROTATION_BASED"),
+        ROTATION_GOVERNED("ROTATION_GOVERNED"),
 
         /**
-         * Key is scheduled for deletion after a retention window.
+         * Key is scheduled for deletion using ScheduleKeyDeletion API.
          */
         SCHEDULED_DELETION("SCHEDULED_DELETION");
 
@@ -30,6 +36,7 @@ public interface IEnumKeyExpirationModel {
             this.meaning = meaning;
         }
 
+        @Override
         public String meaning() {
             return meaning;
         }

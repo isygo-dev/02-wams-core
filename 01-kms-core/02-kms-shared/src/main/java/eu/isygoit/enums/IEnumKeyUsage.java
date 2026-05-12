@@ -1,27 +1,32 @@
 package eu.isygoit.enums;
 
 /**
- * The interface Enum key purpose.
+ * WAMS KMS Key Usage alignment.
+ *
+ * Maps to WAMS KMS KeyUsageType:
+ * - ENCRYPT_DECRYPT (SYMMETRIC_DEFAULT)
+ * - SIGN_VERIFY (ASYMMETRIC_SIGNING)
  */
 public interface IEnumKeyUsage {
-    /**
-     * The constant STR_ENUM_SIZE.
-     */
+
     int STR_ENUM_SIZE = 2;
 
     /**
-     * The enum Types.
+     * WAMS KMS Key Usage types.
      */
     enum Types implements IEnum {
 
         /**
-         * Encrypt decrypt types.
+         * Symmetric encryption / decryption (AES-256 keys, KMS-managed).
+         * WAMS equivalent: SYMMETRIC_DEFAULT
          */
-        ENCRYPT_DECRYPT("ENCRYPT_DECRYPT"),
+        ENCRYPT_DECRYPT("SYMMETRIC_ENCRYPTION"),
+
         /**
-         * Sign verify types.
+         * Asymmetric signing and verification (RSA / ECC keys).
+         * WAMS equivalent: ASYMMETRIC_SIGNING
          */
-        SIGN_VERIFY("SIGN_VERIFY");
+        SIGN_VERIFY("ASYMMETRIC_SIGNING");
 
         private final String meaning;
 
@@ -29,9 +34,9 @@ public interface IEnumKeyUsage {
             this.meaning = meaning;
         }
 
+        @Override
         public String meaning() {
             return meaning;
         }
     }
 }
-

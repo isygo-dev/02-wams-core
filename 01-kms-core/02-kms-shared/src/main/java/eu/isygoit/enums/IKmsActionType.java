@@ -1,81 +1,137 @@
 package eu.isygoit.enums;
 
 /**
- * The interface Enum string output type.
+ * WAMS KMS action types aligned with WAMS KMS API operations.
+ *
+ * Reference:
+ * https://docs.aws.amazon.com/kms/latest/APIReference/Welcome.html
  */
 public interface IKmsActionType {
+
     /**
      * The constant STR_ENUM_SIZE.
      */
-    int STR_ENUM_SIZE = 11;
+    int STR_ENUM_SIZE = 64;
 
     /**
-     * The enum Types.
+     * WAMS KMS action types.
      */
     enum Types implements IEnum {
 
-        ENCRYPT("ENCRYPT"),
-        DECRYPT("DECRYPT"),
-        SIGN("SIGN"),
-        VERIFY("VERIFY"),
-        CREATE_KEY("CREATE_KEY"),
-        ROTATE_KEY("ROTATE_KEY"),
-        DESCRIBE_KEY("DESCRIBE_KEY"),
-        LIST_KEYS("LIST_KEYS"),
-        ENABLE_KEY("ENABLE_KEY"),
-        UPDATE_KEY_METADATA("UPDATE_KEY_METADATA"),
-        DISABLE_KEY("DISABLE_KEY"),
-        DELETE_KEY("DELETE_KEY"),
-        SCHEDULE_KEY_DELETION("SCHEDULE_KEY_DELETION"),
-        CANCEL_KEY_DELETION("CANCEL_KEY_DELETION"),
-        UPDATE_KEY_ROTATION("UPDATE_KEY_ROTATION"),
-        GET_KEY_ROTATION_STATUS("GET_KEY_ROTATION_STATUS"),
-        LIST_KEY_ROTATIONS("LIST_KEY_ROTATIONS"),
-        GENERATE_DATA_KEY_PAIR("GENERATE_DATA_KEY_PAIR"),
-        GENERATE_DATA_KEY_PAIR_WITHOUT_PLAINTEXT("GENERATE_DATA_KEY_PAIR_WITHOUT_PLAINTEXT"),
-        REENCRYPT("REENCRYPT"),
-        GENERATE_RANDOM("GENERATE_RANDOM"),
-        GET_PUBLIC_KEY("GET_PUBLIC_KEY"), GENERATE_DATA_KEY("GENERATE_DATA_KEY"),
-        GENERATE_DATA_KEY_WITHOUT_PLAINTEXT("GENERATE_DATA_KEY_WITHOUT_PLAINTEXT"),
-        GENERATE_MAC("GENERATE_MAC"), VERIFY_MAC("VERIFY_MAC"),
-        LIST_KEY_VERSIONS("LIST_KEY_VERSIONS"),
-        GET_KEY_POLICY("GET_KEY_POLICY"),
-        SET_KEY_POLICY("SET_KEY_POLICY"),
-        CREATE_GRANT("CREATE_GRANT"),
-        LIST_GRANTS("LIST_GRANTS"),
-        REVOKE_GRANT("REVOKE_GRANT"),
-        RETIRE_GRANT("RETIRE_GRANT"),
-        LIST_KEY_POLICIES("LIST_KEY_POLICIES"),
-        GET_ACTIVE_VERSION("GET_ACTIVE_VERSION"),
-        UPDATE_PRIMARY_REGION("UPDATE_PRIMARY_REGION"),
-        REPLICATE_KEY("REPLICATE_KEY"),
-        SYNCHRONIZE_MULTI_REGION_KEY("REPLICATE_KEY"),
-        GET_KEY_REPLICATION_STATUS("GET_KEY_REPLICATION_STATUS"),
-        CREATE_ALIAS("CREATE_ALIAS"),
-        DELETE_ALIAS("DELETE_ALIAS"),
-        LIST_ALIASES("LIST_ALIASES"),
-        GET_ALIAS("GET_ALIAS"),
-        UPDATE_ALIAS("UPDATE_ALIAS"),
-        GET_ALIAS_KEY("GET_ALIAS_KEY"),
-        GET_KEY_ALIAS("GET_KEY_ALIAS"),
-        LIST_ALIASES_FOR_KEY("LIST_ALIASES_FOR_KEY"),
-        TAG_RESOURCE("TAG_RESOURCE"),
-        UNTAG_RESOURCE("UNTAG_RESOURCE"),
-        LIST_TAGS("LIST_TAGS"),
-        LIST_RESOURCE_TAGS("LIST_RESOURCE_TAGS"),
-        GET_PARAMETERS_FOR_IMPORT("GET_PARAMETERS_FOR_IMPORT"),
-        IMPORT_KEY_MATERIAL("IMPORT_KEY_MATERIAL"),
-        DELETE_IMPORTED_KEY_MATERIAL("DELETE_IMPORTED_KEY_MATERIAL"),
-        CREATE_CUSTOM_KEY_STORE("CREATE_CUSTOM_KEY_STORE"),
-        CONNECT_CUSTOM_KEY_STORE("CONNECT_CUSTOM_KEY_STORE"),
-        DISCONNECT_CUSTOM_KEY_STORE("DISCONNECT_CUSTOM_KEY_STORE"),
-        DELETE_CUSTOM_KEY_STORE("DELETE_CUSTOM_KEY_STORE"),
-        DESCRIBE_CUSTOM_KEY_STORE("DESCRIBE_CUSTOM_KEY_STORE"),
-        VALIDATE_KEY("VALIDATE_KEY"),
-        GENERATE_RANDOM_DATA("GENERATE_RANDOM_DATA"),
-        GET_KEY_USAGE_STATS("GET_KEY_USAGE_STATS"),
-        UPDATE_CUSTOM_KEY_STORE("UPDATE_CUSTOM_KEY_STORE"),
-        LIST_CUSTOM_KEY_STORES("LIST_CUSTOM_KEY_STORES");
+        // =========================================================================
+        // Cryptographic operations
+        // =========================================================================
+
+        ENCRYPT("Encrypt"),
+        DECRYPT("Decrypt"),
+        RE_ENCRYPT("ReEncrypt"),
+        SIGN("Sign"),
+        VERIFY("Verify"),
+        GENERATE_MAC("GenerateMac"),
+        VERIFY_MAC("VerifyMac"),
+
+        GENERATE_DATA_KEY("GenerateDataKey"),
+        GENERATE_DATA_KEY_WITHOUT_PLAINTEXT("GenerateDataKeyWithoutPlaintext"),
+        GENERATE_DATA_KEY_PAIR("GenerateDataKeyPair"),
+        GENERATE_DATA_KEY_PAIR_WITHOUT_PLAINTEXT("GenerateDataKeyPairWithoutPlaintext"),
+        GENERATE_RANDOM("GenerateRandom"),
+
+        // =========================================================================
+        // Key management
+        // =========================================================================
+
+        CREATE_KEY("CreateKey"),
+        DESCRIBE_KEY("DescribeKey"),
+
+        ENABLE_KEY("EnableKey"),
+        DISABLE_KEY("DisableKey"),
+
+        ENABLE_KEY_ROTATION("EnableKeyRotation"),
+        DISABLE_KEY_ROTATION("DisableKeyRotation"),
+        GET_KEY_ROTATION_STATUS("GetKeyRotationStatus"),
+        ROTATE_KEY_ON_DEMAND("RotateKeyOnDemand"),
+
+        SCHEDULE_KEY_DELETION("ScheduleKeyDeletion"),
+        CANCEL_KEY_DELETION("CancelKeyDeletion"),
+
+        UPDATE_KEY_DESCRIPTION("UpdateKeyDescription"),
+
+        // =========================================================================
+        // Aliases
+        // =========================================================================
+
+        CREATE_ALIAS("CreateAlias"),
+        UPDATE_ALIAS("UpdateAlias"),
+        DELETE_ALIAS("DeleteAlias"),
+        LIST_ALIASES("ListAliases"),
+
+        // =========================================================================
+        // Tags
+        // =========================================================================
+
+        TAG_RESOURCE("TagResource"),
+        UNTAG_RESOURCE("UntagResource"),
+        LIST_RESOURCE_TAGS("ListResourceTags"),
+
+        // =========================================================================
+        // Policies
+        // =========================================================================
+
+        GET_KEY_POLICY("GetKeyPolicy"),
+        PUT_KEY_POLICY("PutKeyPolicy"),
+        LIST_KEY_POLICIES("ListKeyPolicies"),
+
+        // =========================================================================
+        // Grants
+        // =========================================================================
+
+        CREATE_GRANT("CreateGrant"),
+        LIST_GRANTS("ListGrants"),
+        LIST_RETIRED_GRANTS("ListRetiredGrants"),
+        REVOKE_GRANT("RevokeGrant"),
+        RETIRE_GRANT("RetireGrant"),
+
+        // =========================================================================
+        // Public keys
+        // =========================================================================
+
+        GET_PUBLIC_KEY("GetPublicKey"),
+
+        // =========================================================================
+        // Key material import
+        // =========================================================================
+
+        GET_PARAMETERS_FOR_IMPORT("GetParametersForImport"),
+        IMPORT_KEY_MATERIAL("ImportKeyMaterial"),
+        DELETE_IMPORTED_KEY_MATERIAL("DeleteImportedKeyMaterial"),
+
+        // =========================================================================
+        // Custom key stores
+        // =========================================================================
+
+        CREATE_CUSTOM_KEY_STORE("CreateCustomKeyStore"),
+        UPDATE_CUSTOM_KEY_STORE("UpdateCustomKeyStore"),
+        DELETE_CUSTOM_KEY_STORE("DeleteCustomKeyStore"),
+
+        CONNECT_CUSTOM_KEY_STORE("ConnectCustomKeyStore"),
+        DISCONNECT_CUSTOM_KEY_STORE("DisconnectCustomKeyStore"),
+
+        DESCRIBE_CUSTOM_KEY_STORES("DescribeCustomKeyStores"),
+
+        // =========================================================================
+        // Multi-region keys
+        // =========================================================================
+
+        REPLICATE_KEY("ReplicateKey"),
+        UPDATE_PRIMARY_REGION("UpdatePrimaryRegion"),
+
+        // =========================================================================
+        // Key discovery / metadata
+        // =========================================================================
+
+        LIST_KEY_ROTATIONS("ListKeyRotations"),
+        LIST_KEYS("ListKeys"),
+        DESCRIBE_CUSTOM_KEY_STORE("DescribeCustomKeyStore");
 
         private final String meaning;
 
@@ -83,6 +139,7 @@ public interface IKmsActionType {
             this.meaning = meaning;
         }
 
+        @Override
         public String meaning() {
             return meaning;
         }
