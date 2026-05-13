@@ -23,7 +23,7 @@ import java.util.Base64;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class SigningServiceImpl implements ISigningService {
+public class SigningService implements ISigningService {
 
     private final KmsKeyRepository kmsKeyRepository;
     private final ICryptoService cryptoService;

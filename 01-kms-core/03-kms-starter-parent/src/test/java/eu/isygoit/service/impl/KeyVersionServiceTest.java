@@ -34,7 +34,7 @@ class KeyVersionServiceTest {
     private KmsKeyVersionRepository kmsKeyVersionRepository;
 
     @InjectMocks
-    private KeyVersionServiceImpl service;
+    private KeyVersionService service;
 
     private KmsKeyVersion version1;
     private KmsKeyVersion version2;

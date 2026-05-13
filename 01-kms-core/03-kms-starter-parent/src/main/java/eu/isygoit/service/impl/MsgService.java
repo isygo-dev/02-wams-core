@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class MsgServiceImpl implements IMsgService {
+public class MsgService implements IMsgService {
 
     @Autowired
     private MailMessageServiceApi messageService;

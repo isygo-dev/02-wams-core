@@ -38,7 +38,7 @@ class EncryptionServiceTest {
     private ICryptoService cryptoService;
 
     @InjectMocks
-    private EncryptionServiceImpl service;
+    private EncryptionService service;
 
     private KmsKey kmsKey;
 

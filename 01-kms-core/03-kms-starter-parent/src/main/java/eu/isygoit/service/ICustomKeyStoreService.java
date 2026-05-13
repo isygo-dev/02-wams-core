@@ -6,6 +6,8 @@ import eu.isygoit.dto.KmsDtos.ListCustomKeyStoresResponseDto;
 import eu.isygoit.dto.KmsDtos.UpdateCustomKeyStoreRequestDto;
 import jakarta.validation.Valid;
 
+import java.util.Map;
+
 public interface ICustomKeyStoreService {
 
     CustomKeyStoreResponseDto createCustomKeyStore(String tenant, @Valid CreateCustomKeyStoreRequestDto request);
@@ -21,4 +23,15 @@ public interface ICustomKeyStoreService {
     void connectCustomKeyStore(String tenant, Long keyStoreId);
 
     void disconnectCustomKeyStore(String tenant, Long keyStoreId);
+
+    byte[] encrypt(String tenant, Long keyStoreId, String keyId, byte[] plaintext,
+                   Map<String, String> encryptionContext) throws Exception;
+
+    byte[] decrypt(String tenant, Long keyStoreId, String keyId, byte[] ciphertext,
+                   Map<String, String> encryptionContext) throws Exception;
+
+    byte[] sign(String tenant, Long keyStoreId, String keyId, byte[] message, String algorithm) throws Exception;
+
+    boolean verify(String tenant, Long keyStoreId, String keyId, byte[] message, byte[] signature, String algorithm)
+            throws Exception;
 }

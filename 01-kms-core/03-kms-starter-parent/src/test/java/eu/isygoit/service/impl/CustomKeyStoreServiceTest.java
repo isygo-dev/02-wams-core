@@ -103,7 +103,7 @@ class CustomKeyStoreServiceTest {
         store.setStatus(IEnumCustomKeyStoreStatus.Types.DISCONNECTED);
         store.setKeyStorePassword("secretHash");
 
-        when(customKeyStoreRepository.findByTenantAndCustomKeyStoreId(TENANT, 2L)).thenReturn(Optional.of(store));
+        when(customKeyStoreRepository.findByTenantAndId(TENANT, 2L)).thenReturn(Optional.of(store));
         when(customKeyStoreRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         // Connect
@@ -123,7 +123,7 @@ class CustomKeyStoreServiceTest {
         store.setName("store3");
         store.setStatus(IEnumCustomKeyStoreStatus.Types.DISCONNECTED);
 
-        when(customKeyStoreRepository.findByTenantAndCustomKeyStoreId(TENANT, 3L)).thenReturn(Optional.of(store));
+        when(customKeyStoreRepository.findByTenantAndId(TENANT, 3L)).thenReturn(Optional.of(store));
         when(keyManagementService.countKeysInCustomKeyStore(TENANT, 3L)).thenReturn(1);
 
         assertThrows(CustomKeyStoreHasKeysException.class, () -> service.deleteCustomKeyStore(TENANT, 3L));

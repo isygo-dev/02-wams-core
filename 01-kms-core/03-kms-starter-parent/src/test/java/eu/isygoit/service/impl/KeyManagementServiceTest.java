@@ -58,7 +58,7 @@ class KeyManagementServiceTest {
     private KmsTagRepository kmsTagRepository;
 
     @InjectMocks
-    private KeyManagementServiceImpl service;
+    private KeyManagementService keyManagementService;
 
     private KmsKey key;
 
@@ -96,7 +96,7 @@ class KeyManagementServiceTest {
             return saved;
         });
 
-        CreateKeyResponse response = service.createKey(TENANT, request);
+        CreateKeyResponse response = keyManagementService.createKey(TENANT, request);
 
         assertNotNull(response);
         assertNotNull(response.getKeyMetadata());
@@ -118,7 +118,7 @@ class KeyManagementServiceTest {
                 .thenThrow(new RuntimeException("boom"));
 
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> service.createKey(TENANT, request));
+                () -> keyManagementService.createKey(TENANT, request));
 
         assertTrue(exception.getMessage().contains("Failed to create key"));
     }
@@ -128,7 +128,7 @@ class KeyManagementServiceTest {
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.of(key));
 
-        DescribeKeyResponse response = service.describeKey(TENANT, KEY_ID, List.of());
+        DescribeKeyResponse response = keyManagementService.describeKey(TENANT, KEY_ID, List.of());
 
         assertNotNull(response);
         assertEquals(KEY_ID, response.getKeyMetadata().getKeyId());
@@ -141,7 +141,7 @@ class KeyManagementServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThrows(KeyNotFoundException.class,
-                () -> service.describeKey(TENANT, KEY_ID, List.of()));
+                () -> keyManagementService.describeKey(TENANT, KEY_ID, List.of()));
     }
 
     @Test
@@ -151,7 +151,7 @@ class KeyManagementServiceTest {
         when(kmsKeyRepository.findByTenant(eq(TENANT), any(Pageable.class)))
                 .thenReturn(page);
 
-        ListKeysResponse response = service.listKeys(TENANT, 10, "0");
+        ListKeysResponse response = keyManagementService.listKeys(TENANT, 10, "0");
 
         assertEquals(1, response.getKeys().size());
         assertEquals(KEY_ID, response.getKeys().get(0).getKeyId());
@@ -164,7 +164,7 @@ class KeyManagementServiceTest {
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.of(key));
 
-        EnableKeyResponse response = service.enableKey(TENANT, KEY_ID);
+        EnableKeyResponse response = keyManagementService.enableKey(TENANT, KEY_ID);
 
         assertEquals(IEnumKeyStatus.Types.ENABLED, response.getKeyStatus());
         verify(kmsKeyRepository).save(key);
@@ -175,7 +175,7 @@ class KeyManagementServiceTest {
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.of(key));
 
-        DisableKeyResponse response = service.disableKey(TENANT, KEY_ID);
+        DisableKeyResponse response = keyManagementService.disableKey(TENANT, KEY_ID);
 
         assertEquals(IEnumKeyStatus.Types.DISABLED, response.getStatus());
         verify(kmsKeyRepository).save(key);
@@ -189,7 +189,7 @@ class KeyManagementServiceTest {
                 .thenReturn(Optional.of(key));
 
         assertThrows(InvalidKeyStateException.class,
-                () -> service.disableKey(TENANT, KEY_ID));
+                () -> keyManagementService.disableKey(TENANT, KEY_ID));
     }
 
     @Test
@@ -198,7 +198,7 @@ class KeyManagementServiceTest {
                 .thenReturn(Optional.of(key));
 
         ScheduleKeyDeletionResponse response =
-                service.scheduleKeyDeletion(TENANT, KEY_ID, 10);
+                keyManagementService.scheduleKeyDeletion(TENANT, KEY_ID, 10);
 
         assertEquals(IEnumKeyStatus.Types.PENDING_DELETION, response.getKeyStatus());
         assertEquals(10, response.getPendingWindowInDays());
@@ -211,7 +211,7 @@ class KeyManagementServiceTest {
                 .thenReturn(Optional.of(key));
 
         assertThrows(IllegalArgumentException.class,
-                () -> service.scheduleKeyDeletion(TENANT, KEY_ID, 2));
+                () -> keyManagementService.scheduleKeyDeletion(TENANT, KEY_ID, 2));
     }
 
     @Test
@@ -222,7 +222,7 @@ class KeyManagementServiceTest {
         when(cryptoService.generateKeyMaterial(any()))
                 .thenReturn(new byte[]{4, 5, 6});
 
-        RotateKeyResponse response = service.rotateKey(TENANT, KEY_ID);
+        RotateKeyResponse response = keyManagementService.rotateKey(TENANT, KEY_ID);
 
         assertEquals(KEY_ID, response.getKeyId());
         assertNotNull(response.getNewVersionId());
@@ -239,7 +239,7 @@ class KeyManagementServiceTest {
                 .thenReturn(Optional.of(key));
 
         assertThrows(InvalidKeyStateException.class,
-                () -> service.rotateKey(TENANT, KEY_ID));
+                () -> keyManagementService.rotateKey(TENANT, KEY_ID));
     }
 
     @Test
@@ -255,7 +255,7 @@ class KeyManagementServiceTest {
         when(kmsKeyRepository.save(any())).thenReturn(key);
 
         UpdateKeyDescriptionResponse response =
-                service.updateKeyDescription(TENANT, KEY_ID, request);
+                keyManagementService.updateKeyDescription(TENANT, KEY_ID, request);
 
         assertEquals("new-alias", response.getKeyMetadata().getAlias());
         assertEquals("new-description", response.getKeyMetadata().getDescription());
@@ -269,7 +269,7 @@ class KeyManagementServiceTest {
                 .thenReturn(Optional.of(key));
 
         CancelKeyDeletionResponse response =
-                service.cancelKeyDeletion(TENANT, KEY_ID);
+                keyManagementService.cancelKeyDeletion(TENANT, KEY_ID);
 
         assertEquals(IEnumKeyStatus.Types.DISABLED, response.getKeyStatus());
     }
@@ -280,7 +280,7 @@ class KeyManagementServiceTest {
                 .thenReturn(Optional.of(key));
 
         assertThrows(InvalidKeyStateException.class,
-                () -> service.cancelKeyDeletion(TENANT, KEY_ID));
+                () -> keyManagementService.cancelKeyDeletion(TENANT, KEY_ID));
     }
 
     @Test
@@ -294,7 +294,7 @@ class KeyManagementServiceTest {
                 .thenReturn(Optional.of(key));
 
         KeyRotationStatusResponseDto response =
-                service.updateKeyRotation(TENANT, KEY_ID, request);
+                keyManagementService.updateKeyRotation(TENANT, KEY_ID, request);
 
         assertTrue(response.getRotationEnabled());
         assertEquals(30, response.getRotationPeriodDays());
@@ -308,7 +308,7 @@ class KeyManagementServiceTest {
                 .thenReturn(Optional.of(key));
 
         GetKeyRotationStatusResponse response =
-                service.getKeyRotationStatus(TENANT, KEY_ID);
+                keyManagementService.getKeyRotationStatus(TENANT, KEY_ID);
 
         assertTrue(response.getRotationEnabled());
     }
@@ -321,7 +321,7 @@ class KeyManagementServiceTest {
         when(cryptoService.extractPublicKey(any(), any()))
                 .thenReturn(new byte[]{9, 8, 7});
 
-        GetPublicKeyResponse response = service.getPublicKey(TENANT, KEY_ID);
+        GetPublicKeyResponse response = keyManagementService.getPublicKey(TENANT, KEY_ID);
 
         assertEquals(KEY_ID, response.getKeyId());
         assertNotNull(response.getPublicKey());
@@ -342,7 +342,7 @@ class KeyManagementServiceTest {
 
         when(kmsAliasRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        AliasResponseDto response = service.createAlias(TENANT, request);
+        AliasResponseDto response = keyManagementService.createAlias(TENANT, request);
 
         assertEquals("alias/test", response.getAliasName());
         assertEquals(KEY_ID, response.getTargetKeyId());
@@ -359,7 +359,7 @@ class KeyManagementServiceTest {
                 .thenReturn(Optional.of(KmsAlias.builder().build()));
 
         assertThrows(IllegalArgumentException.class,
-                () -> service.createAlias(TENANT, request));
+                () -> keyManagementService.createAlias(TENANT, request));
     }
 
     @Test
@@ -380,7 +380,7 @@ class KeyManagementServiceTest {
                 .thenReturn(Optional.of(key));
 
         AliasResponseDto response =
-                service.updateAlias(TENANT, "alias/test", request);
+                keyManagementService.updateAlias(TENANT, "alias/test", request);
 
         assertEquals(KEY_ID, response.getTargetKeyId());
     }
@@ -392,7 +392,7 @@ class KeyManagementServiceTest {
         when(kmsAliasRepository.findByTenantAndAliasName(TENANT, "alias/test"))
                 .thenReturn(Optional.of(alias));
 
-        service.deleteAlias(TENANT, "alias/test");
+        keyManagementService.deleteAlias(TENANT, "alias/test");
 
         verify(kmsAliasRepository).delete(alias);
     }
@@ -409,7 +409,7 @@ class KeyManagementServiceTest {
         when(kmsAliasRepository.findByTenant(eq(TENANT), any(Pageable.class)))
                 .thenReturn(page);
 
-        ListAliasesResponseDto response = service.listAliases(TENANT, 10, "0");
+        ListAliasesResponseDto response = keyManagementService.listAliases(TENANT, 10, "0");
 
         assertEquals(1, response.getAliases().size());
     }
@@ -425,7 +425,7 @@ class KeyManagementServiceTest {
                 .thenReturn(List.of(alias));
 
         ListAliasesResponseDto response =
-                service.listAliasesForKey(TENANT, KEY_ID, 10, "0");
+                keyManagementService.listAliasesForKey(TENANT, KEY_ID, 10, "0");
 
         assertEquals(1, response.getAliases().size());
     }
@@ -443,7 +443,7 @@ class KeyManagementServiceTest {
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.of(key));
 
-        Object response = service.tagResource(TENANT, KEY_ID, request);
+        Object response = keyManagementService.tagResource(TENANT, KEY_ID, request);
 
         assertNotNull(response);
         verify(kmsTagRepository, times(2)).save(any(KmsTag.class));
@@ -455,7 +455,7 @@ class KeyManagementServiceTest {
                 .tagKeys(List.of("env"))
                 .build();
 
-        Object response = service.untagResource(TENANT, KEY_ID, request);
+        Object response = keyManagementService.untagResource(TENANT, KEY_ID, request);
 
         assertNotNull(response);
 
@@ -473,7 +473,7 @@ class KeyManagementServiceTest {
         when(kmsTagRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(List.of(tag));
 
-        ListTagsResponseDto response = service.listResourceTags(TENANT, KEY_ID);
+        ListTagsResponseDto response = keyManagementService.listResourceTags(TENANT, KEY_ID);
 
         assertEquals(1, response.getTags().size());
         assertEquals("env", response.getTags().get(0).getTagKey());
@@ -491,7 +491,7 @@ class KeyManagementServiceTest {
                 .thenReturn(new byte[]{2});
 
         ImportParametersResponseDto response =
-                service.getParametersForImport(TENANT, KEY_ID);
+                keyManagementService.getParametersForImport(TENANT, KEY_ID);
 
         assertEquals(KEY_ID, response.getKeyId());
         assertEquals(24, response.getValidityPeriodHours());
@@ -512,7 +512,7 @@ class KeyManagementServiceTest {
                 .thenReturn(new byte[]{9});
 
         KeyDescriptionResponseDto response =
-                service.importKeyMaterial(TENANT, KEY_ID, request);
+                keyManagementService.importKeyMaterial(TENANT, KEY_ID, request);
 
         assertEquals(KEY_ID, response.getKeyId());
         assertTrue(key.getImported());
@@ -526,7 +526,7 @@ class KeyManagementServiceTest {
                 .thenReturn(Optional.of(key));
 
         KeyDescriptionResponseDto response =
-                service.deleteImportedKeyMaterial(TENANT, KEY_ID);
+                keyManagementService.deleteImportedKeyMaterial(TENANT, KEY_ID);
 
         assertEquals(KEY_ID, response.getKeyId());
         assertNull(key.getKeyMaterial());
@@ -540,7 +540,7 @@ class KeyManagementServiceTest {
                 .thenReturn(Optional.of(key));
 
         assertThrows(InvalidKeyStateException.class,
-                () -> service.deleteImportedKeyMaterial(TENANT, KEY_ID));
+                () -> keyManagementService.deleteImportedKeyMaterial(TENANT, KEY_ID));
     }
 
     @Test
@@ -551,7 +551,7 @@ class KeyManagementServiceTest {
         when(cryptoService.validateKeyIntegrity(any(), any()))
                 .thenReturn(true);
 
-        assertDoesNotThrow(() -> service.isValidKey(TENANT, KEY_ID));
+        assertDoesNotThrow(() -> keyManagementService.isValidKey(TENANT, KEY_ID));
     }
 
     @Test
@@ -562,7 +562,7 @@ class KeyManagementServiceTest {
                 .thenReturn(Optional.of(key));
 
         assertThrows(InvalidKeyStateException.class,
-                () -> service.isValidKey(TENANT, KEY_ID));
+                () -> keyManagementService.isValidKey(TENANT, KEY_ID));
     }
 
     @Test
@@ -573,7 +573,7 @@ class KeyManagementServiceTest {
                 .thenReturn(Optional.of(key));
 
         assertThrows(InvalidKeyStateException.class,
-                () -> service.isValidKey(TENANT, KEY_ID));
+                () -> keyManagementService.isValidKey(TENANT, KEY_ID));
     }
 
     @Test
@@ -585,7 +585,7 @@ class KeyManagementServiceTest {
                 .thenReturn(false);
 
         assertThrows(InvalidKeyStateException.class,
-                () -> service.isValidKey(TENANT, KEY_ID));
+                () -> keyManagementService.isValidKey(TENANT, KEY_ID));
     }
 
     @Test
@@ -595,7 +595,7 @@ class KeyManagementServiceTest {
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.of(key));
 
-        service.deleteKey(TENANT, KEY_ID);
+        keyManagementService.deleteKey(TENANT, KEY_ID);
 
         verify(kmsKeyVersionRepository).deleteByTenantAndKeyId(TENANT, KEY_ID);
         verify(kmsAliasRepository).deleteByTenantAndKeyId(TENANT, KEY_ID);
@@ -609,7 +609,7 @@ class KeyManagementServiceTest {
                 .thenReturn(Optional.of(key));
 
         assertThrows(InvalidKeyStateException.class,
-                () -> service.deleteKey(TENANT, KEY_ID));
+                () -> keyManagementService.deleteKey(TENANT, KEY_ID));
     }
 
     @Test
@@ -626,7 +626,7 @@ class KeyManagementServiceTest {
                 .thenReturn(page);
 
         ListKeyRotationsResponseDto response =
-                service.listKeyRotations(TENANT, KEY_ID, 10, "0");
+                keyManagementService.listKeyRotations(TENANT, KEY_ID, 10, "0");
 
         assertEquals(1, response.getRotations().size());
         assertEquals("v2", response.getRotations().get(0).getVersionId());
@@ -642,7 +642,7 @@ class KeyManagementServiceTest {
         when(cryptoService.getLastUsedDate(KEY_ID)).thenReturn(LocalDateTime.now());
 
         KeyUsageStatsResponseDto response =
-                service.getKeyUsageStats(TENANT, KEY_ID);
+                keyManagementService.getKeyUsageStats(TENANT, KEY_ID);
 
         assertEquals(100L, response.getEncryptCount());
         assertEquals(50L, response.getDecryptCount());
@@ -654,8 +654,96 @@ class KeyManagementServiceTest {
         when(kmsKeyRepository.countByTenantAndKeyStoreId(TENANT, 1L))
                 .thenReturn(5);
 
-        int count = service.countKeysInCustomKeyStore(TENANT, 1L);
+        int count = keyManagementService.countKeysInCustomKeyStore(TENANT, 1L);
 
         assertEquals(5, count);
+    }
+
+    @Test
+    void createKey_Success() {
+        CreateKeyRequest request = CreateKeyRequest.builder()
+                .keySpec(IEnumKeySpec.Types.RSA_2048)
+                .keyUsage(null)
+                .build();
+
+        byte[] material = new byte[]{1,2,3};
+        when(cryptoService.generateKeyMaterial(any())).thenReturn(material);
+
+        KmsKey savedKey = KmsKey.builder()
+                .keyId("key-1")
+                .keyArn("arn:aws:kms:::key/key-1")
+                .keySpec(IEnumKeySpec.Types.RSA_2048)
+                .keyStatus(IEnumKeyStatus.Types.ENABLED)
+                .creationDate(LocalDateTime.now())
+                .currentVersionId("v-1")
+                .keyMaterial(material)
+                .build();
+
+        when(kmsKeyRepository.save(any(KmsKey.class))).thenReturn(savedKey);
+
+        KmsKeyVersion savedVersion = KmsKeyVersion.builder()
+                .keyId("key-1")
+                .versionId("v-1")
+                .creationDate(LocalDateTime.now())
+                .activationDate(LocalDateTime.now())
+                .keyMaterial(material)
+                .build();
+
+        when(kmsKeyVersionRepository.save(any(KmsKeyVersion.class))).thenReturn(savedVersion);
+
+        CreateKeyResponse resp = keyManagementService.createKey(TENANT, request);
+
+        assertNotNull(resp);
+        assertNotNull(resp.getKeyMetadata());
+        assertEquals("key-1", resp.getKeyMetadata().getKeyId());
+        verify(kmsKeyRepository).save(any(KmsKey.class));
+        verify(kmsKeyVersionRepository).save(any(KmsKeyVersion.class));
+    }
+
+    @Test
+    void describeKey_Found() {
+        KmsKey key = KmsKey.builder()
+                .keyId("k1")
+                .keyArn("arn:aws:kms:::key/k1")
+                .keySpec(IEnumKeySpec.Types.RSA_2048)
+                .keyUsage(null)
+                .keyStatus(IEnumKeyStatus.Types.ENABLED)
+                .currentVersionId("v-1")
+                .creationDate(LocalDateTime.now())
+                .build();
+
+        when(kmsKeyRepository.findByTenantAndKeyId(eq(TENANT), eq("k1"))).thenReturn(Optional.of(key));
+
+        DescribeKeyResponse resp = keyManagementService.describeKey(TENANT, "k1", null);
+
+        assertNotNull(resp);
+        assertNotNull(resp.getKeyMetadata());
+        assertEquals("k1", resp.getKeyMetadata().getKeyId());
+        assertEquals(IEnumKeyStatus.Types.ENABLED, resp.getKeyMetadata().getStatus());
+    }
+
+    @Test
+    void describeKey_NotFound_ShouldThrow() {
+        when(kmsKeyRepository.findByTenantAndKeyId(anyString(), anyString())).thenReturn(Optional.empty());
+        assertThrows(RuntimeException.class, () -> keyManagementService.describeKey(TENANT, "no", null));
+    }
+
+    @Test
+    void listKeys_ReturnsPage() {
+        KmsKey key = KmsKey.builder()
+                .keyId("k1")
+                .keyArn("arn:aws:kms:::key/k1")
+                .creationDate(LocalDateTime.now())
+                .build();
+
+        when(kmsKeyRepository.findByTenant(eq(TENANT), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(key)));
+
+        ListKeysResponse resp = keyManagementService.listKeys(TENANT, 10, null);
+
+        assertNotNull(resp);
+        assertNotNull(resp.getKeys());
+        assertEquals(1, resp.getKeys().size());
+        assertEquals("k1", resp.getKeys().get(0).getKeyId());
     }
 }

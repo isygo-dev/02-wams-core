@@ -3,16 +3,12 @@ package eu.isygoit.service.impl;
 import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.dto.data.TagDto;
 import eu.isygoit.enums.IEnumKeyStatus;
+import eu.isygoit.exception.CustomKeyStoreNotFoundException;
 import eu.isygoit.exception.InvalidKeyStateException;
 import eu.isygoit.exception.KeyNotFoundException;
-import eu.isygoit.model.KmsAlias;
-import eu.isygoit.model.KmsKey;
-import eu.isygoit.model.KmsKeyVersion;
-import eu.isygoit.model.KmsTag;
-import eu.isygoit.repository.KmsAliasRepository;
-import eu.isygoit.repository.KmsKeyRepository;
-import eu.isygoit.repository.KmsKeyVersionRepository;
-import eu.isygoit.repository.KmsTagRepository;
+import eu.isygoit.exception.KmsKeyNotFoundException;
+import eu.isygoit.model.*;
+import eu.isygoit.repository.*;
 import eu.isygoit.service.ICryptoService;
 import eu.isygoit.service.IKeyManagementService;
 import lombok.extern.slf4j.Slf4j;
@@ -37,11 +33,14 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @Transactional
-public class KeyManagementServiceImpl implements IKeyManagementService {
+public class KeyManagementService implements IKeyManagementService {
 
     private static final int DEFAULT_PAGE_SIZE = 100;
     private static final int MIN_DELETION_WINDOW_DAYS = 7;
     private static final int MAX_DELETION_WINDOW_DAYS = 30;
+
+    @Autowired
+    private CustomKeyStoreRepository customKeyStoreRepository;
     @Autowired
     private KmsKeyRepository kmsKeyRepository;
     @Autowired
@@ -797,11 +796,73 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
                 .build();
     }
 
-    @Override
-    public int countKeysInCustomKeyStore(String tenant, Long keyStoreId) {
-        log.info("Counting keys in custom key store: {} for tenant: {}", keyStoreId, tenant);
 
-        return kmsKeyRepository.countByTenantAndKeyStoreId(tenant, keyStoreId);
-    }
+
+
+
+
+        @Override
+        public void registerKeyInCustomStore(String tenant, Long keyStoreId, String keyId) {
+            log.debug("Registering key {} in custom store {}/{}", keyId, tenant, keyStoreId);
+
+            // Fetch the CustomKeyStore (ensure tenant isolation)
+            CustomKeyStore store = customKeyStoreRepository
+                    .findByTenantAndId(tenant, keyStoreId)
+                    .orElseThrow(() -> new CustomKeyStoreNotFoundException(
+                            "Custom key store not found: " + keyStoreId));
+
+            // Fetch the KmsKey (ensure tenant isolation)
+            KmsKey key = kmsKeyRepository
+                    .findByTenantAndKeyId(tenant, keyId)
+                    .orElseThrow(() -> new KmsKeyNotFoundException(
+                            "KMS key not found: " + keyId));
+
+            // Set the bidirectional relationship
+            store.addKey(key);  // updates keyCount and the in‑memory list
+
+            // Persist both sides (cascade is not configured, so save both)
+            kmsKeyRepository.save(key);
+            customKeyStoreRepository.save(store);
+
+            log.info("Registered key {} in custom store {}/{}", keyId, tenant, keyStoreId);
+        }
+
+        @Override
+        public void unregisterKeyFromCustomStore(String tenant, Long keyStoreId, String keyId) {
+            log.debug("Unregistering key {} from custom store {}/{}", keyId, tenant, keyStoreId);
+
+            CustomKeyStore store = customKeyStoreRepository
+                    .findByTenantAndId(tenant, keyStoreId)
+                    .orElse(null);
+            if (store == null) {
+                log.warn("Custom store {} not found – cannot unregister key {}", keyStoreId, keyId);
+                return;
+            }
+
+            KmsKey key = kmsKeyRepository
+                    .findByTenantAndKeyId(tenant, keyId)
+                    .orElse(null);
+            if (key == null) {
+                log.warn("KMS key {} not found – cannot unregister from store {}", keyId, keyStoreId);
+                return;
+            }
+
+            store.removeKey(key);
+
+            // Save changes
+            kmsKeyRepository.save(key);
+            customKeyStoreRepository.save(store);
+
+            log.info("Unregistered key {} from custom store {}/{}", keyId, tenant, keyStoreId);
+        }
+
+        @Override
+        public int countKeysInCustomKeyStore(String tenant, Long keyStoreId) {
+            // Fast path: read the cached keyCount column directly
+            return customKeyStoreRepository
+                    .findByTenantAndId(tenant, keyStoreId)
+                    .map(CustomKeyStore::getKeyCount)
+                    .orElse(0);
+        }
 }
 

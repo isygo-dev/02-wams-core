@@ -21,7 +21,7 @@ import java.util.Base64;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class EncryptionServiceImpl implements IEncryptionService {
+public class EncryptionService implements IEncryptionService {
 
     private final KmsKeyRepository kmsKeyRepository;
     private final ICryptoService cryptoService;

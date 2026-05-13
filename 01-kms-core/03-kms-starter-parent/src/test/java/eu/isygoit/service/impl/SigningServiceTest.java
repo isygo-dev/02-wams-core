@@ -35,7 +35,7 @@ class SigningServiceTest {
     private ICryptoService cryptoService;
 
     @InjectMocks
-    private SigningServiceImpl service;
+    private SigningService service;
 
     private KmsKey kmsKey;
 

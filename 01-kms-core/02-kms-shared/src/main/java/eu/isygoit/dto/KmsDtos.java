@@ -706,7 +706,7 @@ public final class KmsDtos {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    @ValidCreateCustomKeyStoreRequest // Type-specific validation
+    @ValidCreateCustomKeyStoreRequest // Type-specific validation (CloudHSM vs XKS)
     public static class CreateCustomKeyStoreRequestDto {
 
         /**
@@ -714,149 +714,113 @@ public final class KmsDtos {
          * <p>
          * Constraints:
          * - Not blank
-         * - Max length typically 255 characters
-         * <p>
-         * Applicable to: ALL types
+         * - Max length 255 characters
          */
         @NotBlank(message = "Key store name cannot be blank")
+        @Size(max = 255, message = "Key store name max length 255")
         private String keyStoreName;
 
         /**
          * Type of custom key store.
          * <p>
-         * Allowed values:
-         * - CLOUDHSM: Software-based HSM simulation
-         * - EXTERNAL_KEY_STORE: External KMS proxy (WAMS XKS compatible)
-         * <p>
-         * This field determines which other fields are required.
-         * Applicable to: ALL types
+         * Allowed values: WAMS_CLOUDHSM, EXTERNAL_KEY_STORE
          */
         @NotNull(message = "Key store type cannot be null")
         private IEnumCustomKeyStoreType.Types type;
 
         // ============================================================================
-        // CLOUDHSM TYPE SPECIFIC FIELDS
-        // Applicable when: type == IEnumCustomKeyStoreType.Types.CLOUDHSM
+        // CLOUDHSM TYPE SPECIFIC FIELDS (required when type = WAMS_CLOUDHSM)
         // ============================================================================
 
         /**
-         * The CloudHSM cluster ID for CLOUDHSM type key stores.
-         * <p>
-         * REQUIRED when type = CLOUDHSM
-         * IGNORED when type = EXTERNAL_KEY_STORE
-         * <p>
-         * Example value: "cluster-abcdef123456"
-         * <p>
-         * Constraints (via @ValidCreateCustomKeyStoreRequest):
-         * - Not null and not blank (when type is CLOUDHSM)
+         * CloudHSM cluster ID – required for CLOUDHSM type.
+         * Example: "cluster-abcdef123456"
          */
         private String cloudHsmClusterId;
 
         /**
-         * The key store password for CloudHSM cluster authentication.
-         * <p>
-         * REQUIRED when type = CLOUDHSM
-         * IGNORED when type = EXTERNAL_KEY_STORE
-         * <p>
-         * This password is hashed before storage using SHA-256.
-         * Used in: validateCloudHsmRequest() (line 414), configureInternalCloudHsmStore() (line 441)
-         * <p>
-         * Constraints (via @ValidCreateCustomKeyStoreRequest):
-         * - Not null and not blank (when type is CLOUDHSM)
-         * - Minimum length: 8 characters (recommended)
-         * - Special characters recommended for security
+         * Password for CloudHSM cluster authentication – required for CLOUDHSM type.
+         * Will be hashed (SHA-256) before storage.
          */
         private String keyStorePassword;
 
         /**
-         * The trust anchor certificate for CloudHSM.
-         * <p>
-         * REQUIRED when type = CLOUDHSM
-         * IGNORED when type = EXTERNAL_KEY_STORE
-         * <p>
-         * This is the public certificate used to establish trust with the CloudHSM cluster.
-         * Format: PEM-encoded X.509 certificate
-         * Used in: validateCloudHsmRequest() (line 417), configureInternalCloudHsmStore() (line 445)
-         * <p>
-         * Example:
-         * -----BEGIN CERTIFICATE-----
-         * MIIDXTCCAkWgAwIBAgIJAJC1/iNAZwqDMA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNV
-         * BAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRlcm5ldCBX
-         * ...
-         * -----END CERTIFICATE-----
-         * <p>
-         * Constraints (via @ValidCreateCustomKeyStoreRequest):
-         * - Not null and not blank (when type is CLOUDHSM)
-         * - Must be a valid PEM-encoded certificate
+         * Trust anchor certificate (PEM format) – required for CLOUDHSM type.
          */
         private String trustAnchorCertificate;
 
         // ============================================================================
-        // EXTERNAL KEY STORE (XKS) TYPE SPECIFIC FIELDS
-        // Applicable when: type == IEnumCustomKeyStoreType.Types.EXTERNAL_KEY_STORE
+        // EXTERNAL KEY STORE (XKS) TYPE SPECIFIC FIELDS (required when type = EXTERNAL_KEY_STORE)
         // ============================================================================
 
         /**
-         * The URI endpoint for the XKS proxy service.
-         * <p>
-         * REQUIRED when type = EXTERNAL_KEY_STORE
-         * IGNORED when type = CLOUDHSM
-         * <p>
-         * Example values:
-         * - https://xks-proxy.example.com
-         * - https://192.168.1.100:8080
-         * <p>
-         * Constraints (via @ValidCreateCustomKeyStoreRequest):
-         * - Not null and not blank (when type is EXTERNAL_KEY_STORE)
-         * - Must be a valid URI (starts with http:// or https://)
-         * - HTTPS recommended for production
+         * XKS proxy URI endpoint – required for EXTERNAL_KEY_STORE type.
+         * Must be a valid HTTP/HTTPS URL.
          */
+        @Pattern(regexp = "^(http|https)://[^\\s]+$", message = "Invalid URI endpoint format")
         private String xksProxyUriEndpoint;
 
         /**
-         * The URI path for the XKS proxy service operations.
-         * <p>
-         * OPTIONAL when type = EXTERNAL_KEY_STORE
-         * IGNORED when type = CLOUDHSM
-         * <p>
-         * This is the path component appended to the endpoint URI for operations.
-         * <p>
-         * Example values:
-         * - /v1/kms
-         * - /xks/api/v1
-         * - (empty string for root-level operations)
-         * <p>
-         * Constraints:
-         * - May be null or blank (truly optional)
-         * - If provided, should be a valid URL path
+         * XKS proxy URI path – optional, appended to the endpoint.
+         * Example: "/v1/kms"
          */
         private String xksProxyUriPath;
 
         /**
-         * The authentication credential for XKS proxy.
-         * <p>
-         * REQUIRED when type = EXTERNAL_KEY_STORE
-         * IGNORED when type = CLOUDHSM
-         * <p>
-         * This credential is used to authenticate requests to the XKS proxy service.
-         * It is hashed before storage using SHA-256.
-         * <p>
-         * Typical format:
-         * - Bearer token (JWT or opaque)
-         * - API key
-         * - Any token-based authentication credential
-         * <p>
-         * Example values:
-         * - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ
-         * - sk-1234567890abcdefghij
-         * <p>
-         * Constraints (via @ValidCreateCustomKeyStoreRequest):
-         * - Not null and not blank (when type is EXTERNAL_KEY_STORE)
-         * - Recommended minimum length: 20 characters
+         * Authentication credential for XKS proxy – required for EXTERNAL_KEY_STORE type.
+         * Will be hashed (SHA-256) before storage.
          */
         private String xksProxyAuthenticationCredential;
 
+        /**
+         * XKS proxy connectivity type – optional, e.g., "PUBLIC_ENDPOINT", "VPC_ENDPOINT_SERVICE".
+         */
         private String xksProxyConnectivity;
+
+        // ============================================================================
+        // COMMON CONFIGURATION FIELDS (applicable to both types)
+        // ============================================================================
+
+        /**
+         * Maximum number of keys allowed in this custom key store.
+         * If not provided, a default value (e.g., 1000) is used.
+         */
+        @Min(value = 1, message = "maxKeys must be at least 1")
+        @Max(value = 10000, message = "maxKeys cannot exceed 10000")
+        private Integer maxKeys;
+
+        /**
+         * Custom metadata as key‑value pairs (stored as JSON).
+         * Example: {"environment": "production", "team": "security"}
+         */
+        private Map<String, String> metadata;
+
+        /**
+         * Tags for cost allocation and organization (stored as JSON).
+         * Example: {"Project": "PCI", "CostCenter": "12345"}
+         */
+        private Map<String, String> tags;
+
+        // ============================================================================
+        // OPTIONAL CONNECTION SETTINGS (used at creation time)
+        // ============================================================================
+
+        /**
+         * Connection timeout in seconds (default may be set globally).
+         */
+        @Min(1)
+        private Integer connectionTimeoutSeconds;
+
+        /**
+         * Health check interval in seconds (default may be set globally).
+         */
+        @Min(10)
+        private Integer healthCheckIntervalSeconds;
+
+        /**
+         * Whether to auto‑reconnect on failure.
+         */
+        private Boolean autoReconnect;
     }
 
     @Data

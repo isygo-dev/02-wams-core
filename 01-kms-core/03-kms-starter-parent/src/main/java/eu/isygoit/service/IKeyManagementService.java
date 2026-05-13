@@ -128,6 +128,33 @@ public interface IKeyManagementService {
 
     KeyUsageStatsResponseDto getKeyUsageStats(String tenant, String keyId);
 
+    /**
+     * Registers a key as belonging to a specific custom key store.
+     * Used when a key is generated inside a custom key store.
+     *
+     * @param tenant      the tenant identifier
+     * @param keyStoreId  the custom key store ID
+     * @param keyId       the KMS key ID
+     */
+    void registerKeyInCustomStore(String tenant, Long keyStoreId, String keyId);
+
+    /**
+     * Unregisters a key from a custom key store (e.g., when key is deleted).
+     *
+     * @param tenant      the tenant identifier
+     * @param keyStoreId  the custom key store ID
+     * @param keyId       the KMS key ID
+     */
+    void unregisterKeyFromCustomStore(String tenant, Long keyStoreId, String keyId);
+
+    /**
+     * Counts how many keys are currently hosted in a given custom key store.
+     *
+     * @param tenant     the tenant identifier
+     * @param keyStoreId the custom key store ID
+     * @return number of keys in that store
+     */
     int countKeysInCustomKeyStore(String tenant, Long keyStoreId);
+
 }
 

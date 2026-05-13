@@ -37,7 +37,7 @@ class DataKeyServiceTest {
     private ICryptoService cryptoService;
 
     @InjectMocks
-    private DataKeyServiceImpl service;
+    private DataKeyService service;
 
     private KmsKey kmsKey;
 

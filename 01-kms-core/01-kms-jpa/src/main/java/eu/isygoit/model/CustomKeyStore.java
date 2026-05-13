@@ -16,6 +16,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Custom Key Store Entity
@@ -23,15 +25,16 @@ import java.time.LocalDateTime;
  * <p>Represents a custom key store that can host KMS keys.
  * Supports two types of custom key stores:</p>
  * <ul>
- *   <li><b>CLOUDHSM:</b> Software-based HSM simulation for key storage</li>
+ *   <li><b>WAMS_CLOUDHSM:</b> Software-based HSM simulation for key storage</li>
  *   <li><b>EXTERNAL_KEY_STORE:</b> External KMS proxy simulation</li>
  * </ul>
  *
  * <p>This entity manages the lifecycle and configuration of custom key stores,
- * including connection state, health monitoring, and store-specific properties.</p>
+ * including connection state, health monitoring, store-specific properties,
+ * and the list of keys hosted in the store.</p>
  *
  * @author Isygoit Team
- * @version 1.0
+ * @version 2.0
  * @since 1.0
  */
 @Data
@@ -65,7 +68,6 @@ public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssi
     /**
      * Tenant that owns this custom key store
      */
-    //@Convert(converter = LowerCaseConverter.class)
     @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
     @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
@@ -77,7 +79,7 @@ public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssi
     private String name;
 
     /**
-     * Type of custom key store (CLOUDHSM or EXTERNAL_KEY_STORE)
+     * Type of custom key store (WAMS_CLOUDHSM or EXTERNAL_KEY_STORE)
      */
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_STORE_TYPE, nullable = false, length = 50)
@@ -189,7 +191,7 @@ public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssi
     private String customKeyStoreTypeSpecificData;
 
     /**
-     * Number of KMS keys hosted in this custom key store
+     * Number of KMS keys hosted in this custom key store (cached for performance)
      */
     @Column(name = SchemaColumnConstantName.C_KEY_COUNT)
     private Integer keyCount;
@@ -217,6 +219,39 @@ public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssi
      */
     @Column(name = SchemaColumnConstantName.C_TAGS, columnDefinition = "TEXT")
     private String tags;
+
+    // ============================================================================
+    // CONNECTION SETTINGS (per‑store overrides)
+    // ============================================================================
+
+    /**
+     * Connection timeout in seconds (overrides global default if set)
+     */
+    @Column(name = "CONNECTION_TIMEOUT_SECONDS")
+    private Integer connectionTimeoutSeconds;
+
+    /**
+     * Health check interval in seconds (overrides global default if set)
+     */
+    @Column(name = "HEALTH_CHECK_INTERVAL_SECONDS")
+    private Integer healthCheckIntervalSeconds;
+
+    /**
+     * Whether to auto‑reconnect on failure (overrides global default if set)
+     */
+    @Column(name = "AUTO_RECONNECT")
+    private Boolean autoReconnect;
+
+    // ============================================================================
+    // RELATIONSHIP TO KMS KEYS
+    // ============================================================================
+
+    /**
+     * The list of KMS keys hosted in this custom key store.
+     * This is a bidirectional OneToMany mapping; the owning side is KmsKey.customKeyStore.
+     */
+    @OneToMany(mappedBy = "customKeyStore", fetch = FetchType.LAZY, cascade = {})
+    private List<KmsKey> keys = new ArrayList<>();
 
     // ============================================================================
     // BUSINESS METHODS
@@ -279,7 +314,35 @@ public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssi
     }
 
     /**
-     * Increment the key count
+     * Add a KMS key to this store, updating both sides of the relationship
+     * and the cached key count.
+     *
+     * @param key the KmsKey entity to add
+     */
+    public void addKey(KmsKey key) {
+        keys.add(key);
+        if (keyCount == null) {
+            keyCount = 0;
+        }
+        keyCount++;
+    }
+
+    /**
+     * Remove a KMS key from this store, updating both sides of the relationship
+     * and the cached key count.
+     *
+     * @param key the KmsKey entity to remove
+     */
+    public void removeKey(KmsKey key) {
+        keys.remove(key);
+        if (keyCount != null && keyCount > 0) {
+            keyCount--;
+        }
+    }
+
+    /**
+     * Increment the key count (used when a key is added via direct ID mapping
+     * without a full KmsKey object).
      */
     public void incrementKeyCount() {
         if (keyCount == null) {
@@ -289,7 +352,7 @@ public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssi
     }
 
     /**
-     * Decrement the key count
+     * Decrement the key count (used when a key is removed via direct ID mapping).
      */
     public void decrementKeyCount() {
         if (keyCount != null && keyCount > 0) {

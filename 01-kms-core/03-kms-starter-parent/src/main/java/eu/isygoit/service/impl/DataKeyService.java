@@ -25,7 +25,7 @@ import java.util.Map;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class DataKeyServiceImpl implements IDataKeyService {
+public class DataKeyService implements IDataKeyService {
 
     private final KmsKeyRepository kmsKeyRepository;
     private final ICryptoService cryptoService;

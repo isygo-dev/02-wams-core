@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class KeyPolicyServiceImpl implements IKeyPolicyService {
+public class KeyPolicyService implements IKeyPolicyService {
 
     private final KmsKeyPolicyRepository kmsKeyPolicyRepository;
     private final KmsKeyGrantRepository kmsKeyGrantRepository;

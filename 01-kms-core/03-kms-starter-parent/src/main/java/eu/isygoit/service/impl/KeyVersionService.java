@@ -23,7 +23,7 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class KeyVersionServiceImpl implements IKeyVersionService {
+public class KeyVersionService implements IKeyVersionService {
 
     private final KmsKeyVersionRepository kmsKeyVersionRepository;
 
