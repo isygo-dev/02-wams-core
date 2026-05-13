@@ -29,10 +29,10 @@ import java.time.LocalDateTime;
                         columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_KEY_ID, SchemaColumnConstantName.C_TAG_KEY})
         },
         indexes = {
-                @Index(name = "IDX_TAG_TENANT", columnList = SchemaColumnConstantName.C_TENANT),
-                @Index(name = "IDX_TAG_KEY_ID", columnList = SchemaColumnConstantName.C_KEY_ID),
-                @Index(name = "IDX_TAG_TAG_KEY", columnList = SchemaColumnConstantName.C_TAG_KEY),
-                @Index(name = "IDX_TAG_TENANT_KEY", columnList = SchemaColumnConstantName.C_TENANT + "," + SchemaColumnConstantName.C_KEY_ID)
+                @Index(name = SchemaIndexConstantName.IDX_TAG_TENANT, columnList = SchemaColumnConstantName.C_TENANT),
+                @Index(name = SchemaIndexConstantName.IDX_TAG_KEY_ID, columnList = SchemaColumnConstantName.C_KEY_ID),
+                @Index(name = SchemaIndexConstantName.IDX_TAG_TAG_KEY, columnList = SchemaColumnConstantName.C_TAG_KEY),
+                @Index(name = SchemaIndexConstantName.IDX_TAG_TENANT_KEY, columnList = SchemaColumnConstantName.C_TENANT + "," + SchemaColumnConstantName.C_KEY_ID)
         })
 public class KmsTag extends AuditableEntity<Long> implements ITenantAssignable {
 

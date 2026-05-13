@@ -32,9 +32,9 @@ import java.time.LocalDateTime;
                         columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_KEY_ID, SchemaColumnConstantName.C_VERSION_NUMBER})
         },
         indexes = {
-                @Index(name = "IDX_KMS_KEY_VERSION_TENANT_KEY", columnList = SchemaColumnConstantName.C_TENANT + "," + SchemaColumnConstantName.C_KEY_ID),
-                @Index(name = "IDX_KMS_KEY_VERSION_STATUS", columnList = SchemaColumnConstantName.C_STATUS),
-                @Index(name = "IDX_KMS_KEY_VERSION_ROTATION_DATE", columnList = SchemaColumnConstantName.C_ROTATION_DATE)
+                @Index(name = SchemaIndexConstantName.IDX_KMS_KEY_VERSION_TENANT_KEY, columnList = SchemaColumnConstantName.C_TENANT + "," + SchemaColumnConstantName.C_KEY_ID),
+                @Index(name = SchemaIndexConstantName.IDX_KMS_KEY_VERSION_STATUS, columnList = SchemaColumnConstantName.C_STATUS),
+                @Index(name = SchemaIndexConstantName.IDX_KMS_KEY_VERSION_ROTATION_DATE, columnList = SchemaColumnConstantName.C_ROTATION_DATE)
         })
 public class KmsKeyVersion extends AuditableEntity<Long> implements ITenantAssignable {
 
@@ -59,7 +59,7 @@ public class KmsKeyVersion extends AuditableEntity<Long> implements ITenantAssig
     private Integer versionNumber;
 
     @Column(name = SchemaColumnConstantName.C_STATUS, length = 50, nullable = false)
-    private IEnumKeyStatus.Types keyStatus; // ACTIVE, DEPRECATED, PENDING_DELETION
+    private IEnumKeyStatus.Types keyStatus;
 
     @Lob
     @Column(name = SchemaColumnConstantName.C_KEY_MATERIAL, nullable = false)

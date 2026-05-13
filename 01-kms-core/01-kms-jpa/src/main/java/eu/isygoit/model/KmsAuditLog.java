@@ -26,10 +26,10 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = SchemaTableConstantName.T_KMS_AUDIT_LOG,
         indexes = {
-                @Index(name = "IDX_KMS_AUDIT_LOG_KEY_ID", columnList = SchemaColumnConstantName.C_KEY_ID),
-                @Index(name = "IDX_KMS_AUDIT_LOG_TENANT_ACTION", columnList = SchemaColumnConstantName.C_TENANT + "," + SchemaColumnConstantName.C_ACTION),
-                @Index(name = "IDX_KMS_AUDIT_LOG_TIMESTAMP", columnList = SchemaColumnConstantName.C_TIMESTAMP),
-                @Index(name = "IDX_KMS_AUDIT_LOG_PRINCIPAL", columnList = SchemaColumnConstantName.C_PRINCIPAL)
+                @Index(name = SchemaIndexConstantName.IDX_KMS_AUDIT_LOG_KEY_ID, columnList = SchemaColumnConstantName.C_KEY_ID),
+                @Index(name = SchemaIndexConstantName.IDX_KMS_AUDIT_LOG_TENANT_ACTION, columnList = SchemaColumnConstantName.C_TENANT + "," + SchemaColumnConstantName.C_ACTION),
+                @Index(name = SchemaIndexConstantName.IDX_KMS_AUDIT_LOG_TIMESTAMP, columnList = SchemaColumnConstantName.C_TIMESTAMP),
+                @Index(name = SchemaIndexConstantName.IDX_KMS_AUDIT_LOG_PRINCIPAL, columnList = SchemaColumnConstantName.C_PRINCIPAL)
         })
 public class KmsAuditLog extends AuditableEntity<Long> implements ITenantAssignable {
 

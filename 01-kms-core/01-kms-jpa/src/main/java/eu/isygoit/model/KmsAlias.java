@@ -29,9 +29,9 @@ import java.time.LocalDateTime;
                         columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_ALIAS_NAME})
         },
         indexes = {
-                @Index(name = "IDX_ALIAS_TENANT", columnList = SchemaColumnConstantName.C_TENANT),
-                @Index(name = "IDX_ALIAS_KEY_ID", columnList = SchemaColumnConstantName.C_KEY_ID),
-                @Index(name = "IDX_ALIAS_NAME", columnList = SchemaColumnConstantName.C_ALIAS_NAME)
+                @Index(name = SchemaIndexConstantName.IDX_ALIAS_TENANT, columnList = SchemaColumnConstantName.C_TENANT),
+                @Index(name = SchemaIndexConstantName.IDX_ALIAS_KEY_ID, columnList = SchemaColumnConstantName.C_KEY_ID),
+                @Index(name = SchemaIndexConstantName.IDX_ALIAS_NAME, columnList = SchemaColumnConstantName.C_ALIAS_NAME)
         })
 public class KmsAlias extends AuditableEntity<Long> implements ITenantAssignable {
 

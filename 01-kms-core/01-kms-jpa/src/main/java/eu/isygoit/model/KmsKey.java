@@ -26,13 +26,13 @@ import java.time.LocalDateTime;
                         columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_KEY_ID})
         },
         indexes = {
-                @Index(name = "IDX_KMS_KEY_TENANT_STATUS", columnList = SchemaColumnConstantName.C_TENANT + "," + SchemaColumnConstantName.C_STATUS),
-                @Index(name = "IDX_KMS_KEY_ALIAS", columnList = SchemaColumnConstantName.C_TENANT + "," + SchemaColumnConstantName.C_KEY_ALIAS),
-                @Index(name = "IDX_KMS_KEY_IMPORTED", columnList = SchemaColumnConstantName.C_IMPORTED),
-                @Index(name = "IDX_KMS_KEY_EXPIRATION", columnList = SchemaColumnConstantName.C_EXPIRATION_DATE),
-                @Index(name = "IDX_KMS_KEY_KEY_STORE", columnList = SchemaColumnConstantName.C_TENANT + "," + SchemaColumnConstantName.C_KEY_STORE_ID),
-                @Index(name = "IDX_KMS_KEY_PRIMARY_KEY_ID", columnList = SchemaColumnConstantName.C_PRIMARY_KEY_ID),
-                @Index(name = "IDX_KMS_KEY_REGION", columnList = SchemaColumnConstantName.C_REGION)
+                @Index(name = SchemaIndexConstantName.IDX_KMS_KEY_TENANT_STATUS, columnList = SchemaColumnConstantName.C_TENANT + "," + SchemaColumnConstantName.C_STATUS),
+                @Index(name = SchemaIndexConstantName.IDX_KMS_KEY_ALIAS, columnList = SchemaColumnConstantName.C_TENANT + "," + SchemaColumnConstantName.C_KEY_ALIAS),
+                @Index(name = SchemaIndexConstantName.IDX_KMS_KEY_IMPORTED, columnList = SchemaColumnConstantName.C_IMPORTED),
+                @Index(name = SchemaIndexConstantName.IDX_KMS_KEY_EXPIRATION, columnList = SchemaColumnConstantName.C_EXPIRATION_DATE),
+                @Index(name = SchemaIndexConstantName.IDX_KMS_KEY_KEY_STORE, columnList = SchemaColumnConstantName.C_TENANT + "," + SchemaColumnConstantName.C_KEY_STORE_ID),
+                @Index(name = SchemaIndexConstantName.IDX_KMS_KEY_PRIMARY_KEY_ID, columnList = SchemaColumnConstantName.C_PRIMARY_KEY_ID),
+                @Index(name = SchemaIndexConstantName.IDX_KMS_KEY_REGION, columnList = SchemaColumnConstantName.C_REGION)
         })
 public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
 

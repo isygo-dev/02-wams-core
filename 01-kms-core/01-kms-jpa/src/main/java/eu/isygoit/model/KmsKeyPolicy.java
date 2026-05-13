@@ -27,7 +27,7 @@ import org.hibernate.annotations.DynamicUpdate;
                         columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_KEY_ID})
         },
         indexes = {
-                @Index(name = "IDX_KMS_KEY_POLICY_KEY_ID", columnList = SchemaColumnConstantName.C_KEY_ID)
+                @Index(name = SchemaIndexConstantName.IDX_KMS_KEY_POLICY_KEY_ID, columnList = SchemaColumnConstantName.C_KEY_ID)
         })
 public class KmsKeyPolicy extends AuditableEntity<Long> implements ITenantAssignable {
 

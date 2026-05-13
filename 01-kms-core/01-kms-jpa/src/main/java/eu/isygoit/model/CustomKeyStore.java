@@ -47,9 +47,9 @@ import java.time.LocalDateTime;
                         columnNames = {SchemaColumnConstantName.C_STORE_ID})
         },
         indexes = {
-                @Index(name = "IDX_CUSTOM_KEY_STORE_TENANT", columnList = SchemaColumnConstantName.C_TENANT),
-                @Index(name = "IDX_CUSTOM_KEY_STORE_STATUS", columnList = SchemaColumnConstantName.C_STATUS),
-                @Index(name = "IDX_CUSTOM_KEY_STORE_TYPE", columnList = SchemaColumnConstantName.C_STORE_TYPE)
+                @Index(name = SchemaIndexConstantName.IDX_CUSTOM_KEY_STORE_TENANT, columnList = SchemaColumnConstantName.C_TENANT),
+                @Index(name = SchemaIndexConstantName.IDX_CUSTOM_KEY_STORE_STATUS, columnList = SchemaColumnConstantName.C_STATUS),
+                @Index(name = SchemaIndexConstantName.IDX_CUSTOM_KEY_STORE_TYPE, columnList = SchemaColumnConstantName.C_STORE_TYPE)
         })
 public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssignable {
 
