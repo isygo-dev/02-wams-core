@@ -211,7 +211,7 @@ public interface SchemaColumnConstantName extends ComSchemaColumnConstantName {
     String C_REQUEST_DETAILS = "REQUEST_DETAILS";
     String C_RESPONSE_DETAILS = "RESPONSE_DETAILS";
     String C_EXECUTION_TIME_MS = "EXECUTION_TIME_MS";
-    String C_KEY_ARN = "KEY_ARN";
+    String C_KEY_WRN = "KEY_WRN";
     String C_KEY_PURPOSE = "KEY_PURPOSE";
     String C_KEY_STATUS = "KEY_STATUS";
     String C_CURRENT_VERSION_ID = "CURRENT_VERSION_ID";

@@ -50,8 +50,8 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     @Column(name = SchemaColumnConstantName.C_KEY_ID, updatable = false, nullable = false, length = 255)
     private String keyId; // UUID format
 
-    @Column(name = SchemaColumnConstantName.C_KEY_ARN, length = 255, nullable = false)
-    private String keyArn; // Amazon Resource Name
+    @Column(name = SchemaColumnConstantName.C_KEY_WRN, length = 255, nullable = false)
+    private String keyWrn; // Amazon Resource Name
 
     @Column(name = SchemaColumnConstantName.C_REGION, length = 100)
     private String region; // WAMS region where this key resides

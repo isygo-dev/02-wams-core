@@ -4,6 +4,7 @@ import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.exception.KeyNotFoundException;
 import eu.isygoit.model.KmsKey;
+import eu.isygoit.repository.KmsAliasRepository;
 import eu.isygoit.repository.KmsKeyRepository;
 import eu.isygoit.service.ICryptoService;
 import eu.isygoit.service.IEncryptionService;
@@ -25,6 +26,7 @@ public class EncryptionService implements IEncryptionService {
 
     private final KmsKeyRepository kmsKeyRepository;
     private final ICryptoService cryptoService;
+    private final KmsAliasRepository kmsAliasRepository;
 
     @Override
     public EncryptResponse encrypt(

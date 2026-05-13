@@ -376,7 +376,7 @@ curl -X POST http://localhost:8080/api/v1/private/key/keys \
 
 ---
 
-## 📖 Learning Path
+## 📖 Lewrning Path
 
 1. **Understand the API** → Read [QUICK_START.md](QUICK_START.md)
 2. **See all endpoints** → Open [KMS_API_DOCUMENTATION.md](KMS_API_DOCUMENTATION.md)

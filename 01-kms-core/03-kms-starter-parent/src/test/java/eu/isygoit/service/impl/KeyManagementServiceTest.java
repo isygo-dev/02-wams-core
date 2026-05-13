@@ -64,7 +64,7 @@ class KeyManagementServiceTest {
         key = KmsKey.builder()
                 .keyId(KEY_ID)
                 .tenant(TENANT)
-                .keyArn("arn:test")
+                .keyWrn("wrn:test")
                 .keySpec(IEnumKeySpec.Types.RSA_2048)
                 .keyUsage(IEnumKeyUsage.Types.ENCRYPT_DECRYPT)
                 .keyStatus(IEnumKeyStatus.Types.ENABLED)
@@ -129,7 +129,7 @@ class KeyManagementServiceTest {
 
         assertNotNull(response);
         assertEquals(KEY_ID, response.getKeyMetadata().getKeyId());
-        assertEquals(key.getKeyArn(), response.getKeyMetadata().getArn());
+        assertEquals(key.getKeyWrn(), response.getKeyMetadata().getWrn());
     }
 
     @Test
@@ -678,7 +678,7 @@ class KeyManagementServiceTest {
 
         KmsKey savedKey = KmsKey.builder()
                 .keyId("key-1")
-                .keyArn("arn:aws:kms:::key/key-1")
+                .keyWrn("wrn:wams:kms:::key/key-1")
                 .keySpec(IEnumKeySpec.Types.RSA_2048)
                 .keyStatus(IEnumKeyStatus.Types.ENABLED)
                 .creationDate(LocalDateTime.now())
@@ -711,7 +711,7 @@ class KeyManagementServiceTest {
     void describeKey_Found() {
         KmsKey key = KmsKey.builder()
                 .keyId("k1")
-                .keyArn("arn:aws:kms:::key/k1")
+                .keyWrn("wrn:wams:kms:::key/k1")
                 .keySpec(IEnumKeySpec.Types.RSA_2048)
                 .keyUsage(null)
                 .keyStatus(IEnumKeyStatus.Types.ENABLED)
@@ -739,7 +739,7 @@ class KeyManagementServiceTest {
     void listKeys_ReturnsPage() {
         KmsKey key = KmsKey.builder()
                 .keyId("k1")
-                .keyArn("arn:aws:kms:::key/k1")
+                .keyWrn("wrn:wams:kms:::key/k1")
                 .creationDate(LocalDateTime.now())
                 .build();
 

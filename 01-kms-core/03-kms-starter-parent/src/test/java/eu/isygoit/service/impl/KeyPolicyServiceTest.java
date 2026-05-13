@@ -28,7 +28,6 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class KeyPolicyServiceTest {
@@ -79,7 +78,7 @@ class KeyPolicyServiceTest {
         testTenant = "test-tenant";
         testKeyId = "test-key-id";
         testGrantId = "grant-12345";
-        testPrincipal = "arn:aws:iam::123456789012:role/test-role";
+        testPrincipal = "wrn:wams:iam::123456789012:role/test-role";
     }
 
     @Test
@@ -498,12 +497,12 @@ class KeyPolicyServiceTest {
     void testCreateMultipleGrants() {
         // Arrange
         CreateGrantRequestDto request1 = CreateGrantRequestDto.builder()
-                .principal("arn:aws:iam::123456789012:role/role1")
+                .principal("wrn:wams:iam::123456789012:role/role1")
                 .operations(Arrays.asList("Encrypt"))
                 .build();
 
         CreateGrantRequestDto request2 = CreateGrantRequestDto.builder()
-                .principal("arn:aws:iam::123456789012:role/role2")
+                .principal("wrn:wams:iam::123456789012:role/role2")
                 .operations(Arrays.asList("Decrypt"))
                 .build();
 
@@ -578,7 +577,7 @@ class KeyPolicyServiceTest {
                 .tenant(testTenant)
                 .keyId(testKeyId)
                 .grantId("grant-1")
-                .principal("arn:aws:iam::123456789012:role/role1")
+                .principal("wrn:wams:iam::123456789012:role/role1")
                 .operations("Encrypt,Decrypt")
                 .creationDate(LocalDateTime.now())
                 .build();
@@ -588,7 +587,7 @@ class KeyPolicyServiceTest {
                 .tenant(testTenant)
                 .keyId(testKeyId)
                 .grantId("grant-2")
-                .principal("arn:aws:iam::123456789012:role/role2")
+                .principal("wrn:wams:iam::123456789012:role/role2")
                 .operations("Sign")
                 .creationDate(LocalDateTime.now())
                 .build();

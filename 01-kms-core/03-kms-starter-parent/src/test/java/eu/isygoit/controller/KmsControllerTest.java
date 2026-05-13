@@ -119,7 +119,7 @@ class KmsControllerTest {
                 .keyMetadata(CreateKeyResponse.KeyMetadata.builder().keyId(KEY_ID).build())
                 .build();
         when(keyManagementService.describeKey(eq(TENANT), eq(KEY_ID), isNull())).thenReturn(response);
-
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}", KEY_ID))
                 .andExpect(status().isOk());
 
@@ -139,7 +139,7 @@ class KmsControllerTest {
     @Test
     void listKeys_Success() throws Exception {
         ListKeysResponse response = ListKeysResponse.builder()
-                .keys(List.of(new ListKeysResponse.KeyEntry(KEY_ID, "arn:aws:kms:...")))
+                .keys(List.of(new ListKeysResponse.KeyEntry(KEY_ID, "wrn:wams:kms:...")))
                 .nextToken(null)
                 .truncated(false)
                 .build();
@@ -167,7 +167,7 @@ class KmsControllerTest {
     @Test
     void enableKey_Success() throws Exception {
         when(keyManagementService.enableKey(eq(TENANT), eq(KEY_ID))).thenReturn(new EnableKeyResponse());
-
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(post("/api/v1/private/kms/keys/{keyId}/enable", KEY_ID))
                 .andExpect(status().isOk());
     }
@@ -175,7 +175,7 @@ class KmsControllerTest {
     @Test
     void disableKey_Success() throws Exception {
         when(keyManagementService.disableKey(eq(TENANT), eq(KEY_ID))).thenReturn(new DisableKeyResponse());
-
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(post("/api/v1/private/kms/keys/{keyId}/disable", KEY_ID))
                 .andExpect(status().isOk());
     }
@@ -184,7 +184,7 @@ class KmsControllerTest {
     void scheduleKeyDeletion_Success() throws Exception {
         when(keyManagementService.scheduleKeyDeletion(eq(TENANT), eq(KEY_ID), eq(30)))
                 .thenReturn(new ScheduleKeyDeletionResponse());
-
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(delete("/api/v1/private/kms/keys/{keyId}/schedule-deletion", KEY_ID)
                         .param("pendingWindowInDays", "30"))
                 .andExpect(status().isOk());
@@ -194,6 +194,7 @@ class KmsControllerTest {
     void cancelKeyDeletion_Success() throws Exception {
         when(keyManagementService.cancelKeyDeletion(eq(TENANT), eq(KEY_ID)))
                 .thenReturn(new CancelKeyDeletionResponse());
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
 
         mockMvc.perform(post("/api/v1/private/kms/keys/{keyId}/cancel-deletion", KEY_ID))
                 .andExpect(status().isOk());
@@ -202,7 +203,7 @@ class KmsControllerTest {
     @Test
     void deleteKey_Success() throws Exception {
         doNothing().when(keyManagementService).deleteKey(eq(TENANT), eq(KEY_ID));
-
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(delete("/api/v1/private/kms/keys/{keyId}", KEY_ID))
                 .andExpect(status().isOk());
     }
@@ -230,7 +231,7 @@ class KmsControllerTest {
     @Test
     void rotateKey_Success() throws Exception {
         when(keyManagementService.rotateKey(eq(TENANT), eq(KEY_ID))).thenReturn(new RotateKeyResponse());
-
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(post("/api/v1/private/kms/keys/{keyId}/rotate", KEY_ID))
                 .andExpect(status().isOk());
     }
@@ -240,7 +241,7 @@ class KmsControllerTest {
         GetKeyRotationStatusResponse response = GetKeyRotationStatusResponse.builder()
                 .keyId(KEY_ID).rotationEnabled(true).build();
         when(keyManagementService.getKeyRotationStatus(eq(TENANT), eq(KEY_ID))).thenReturn(response);
-
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/rotation-status", KEY_ID))
                 .andExpect(status().isOk());
     }
@@ -278,7 +279,7 @@ class KmsControllerTest {
                 .versions(List.of()).build();
         when(keyVersionService.listKeyVersions(eq(TENANT), eq(KEY_ID), isNull(), isNull()))
                 .thenReturn(response);
-
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/versions", KEY_ID))
                 .andExpect(status().isOk());
     }
@@ -287,6 +288,7 @@ class KmsControllerTest {
     void getActiveVersion_Success() throws Exception {
         when(keyVersionService.getActiveVersion(eq(TENANT), eq(KEY_ID)))
                 .thenReturn(new ActiveVersionResponseDto());
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
 
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/active-version", KEY_ID))
                 .andExpect(status().isOk());
@@ -309,11 +311,12 @@ class KmsControllerTest {
     @Test
     void replicateKey_Success() throws Exception {
         ReplicateKeyRequestDto request = new ReplicateKeyRequestDto();
+        request.setKeyId(KEY_ID);
         request.setReplicaRegion("eu-west-1");
 
         when(multiRegionService.replicateKey(eq(TENANT), eq(KEY_ID), any()))
                 .thenReturn(new ReplicateKeyResponse());
-
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(post("/api/v1/private/kms/keys/{keyId}/replicate", KEY_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -324,7 +327,7 @@ class KmsControllerTest {
     void synchronizeMultiRegionKey_Success() throws Exception {
         when(multiRegionService.synchronizeMultiRegionKey(eq(TENANT), eq(KEY_ID)))
                 .thenReturn(new SynchronizeMultiRegionKeyResponse());
-
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(post("/api/v1/private/kms/keys/{keyId}/synchronize", KEY_ID))
                 .andExpect(status().isOk());
     }
@@ -493,7 +496,7 @@ class KmsControllerTest {
     void getPublicKey_Success() throws Exception {
         when(keyManagementService.getPublicKey(eq(TENANT), eq(KEY_ID)))
                 .thenReturn(new GetPublicKeyResponse());
-
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/public-key", KEY_ID))
                 .andExpect(status().isOk());
     }
@@ -567,7 +570,7 @@ class KmsControllerTest {
         ListAliasesResponseDto dto = ListAliasesResponseDto.builder()
                 .aliases(List.of()).build();
         when(keyManagementService.listAliasesForKey(eq(TENANT), eq(KEY_ID), isNull(), isNull())).thenReturn(dto);
-
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/aliases", KEY_ID))
                 .andExpect(status().isOk());
     }
@@ -604,7 +607,7 @@ class KmsControllerTest {
                 .tags(List.of(new eu.isygoit.dto.data.TagDto("env", "test")))
                 .build();
         when(keyManagementService.listResourceTags(eq(TENANT), eq(KEY_ID))).thenReturn(dto);
-
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/tags", KEY_ID))
                 .andExpect(status().isOk());
     }
@@ -629,7 +632,7 @@ class KmsControllerTest {
     void getKeyPolicy_Success() throws Exception {
         Map<String, Object> policy = Map.of("Version", "2012-10-17");
         when(keyPolicyService.getKeyPolicy(eq(TENANT), eq(KEY_ID))).thenReturn(policy);
-
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/policy", KEY_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.policy").isString());
@@ -645,7 +648,7 @@ class KmsControllerTest {
 
         when(keyPolicyService.listKeyPolicies(anyString(), anyString(), isNull(), isNull()))
                 .thenReturn(response);
-
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/policies", KEY_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.policyNames[0]").value("default"));
@@ -654,7 +657,7 @@ class KmsControllerTest {
     @Test
     void createGrant_Success() throws Exception {
         CreateGrantRequest request = new CreateGrantRequest();
-        request.setGranteePrincipal("arn:aws:iam::123:role/test");
+        request.setGranteePrincipal("wrn:wams:iam::123:role/test");
         request.setOperations(List.of("Encrypt", "Decrypt"));
 
         GrantResponseDto grantRes = GrantResponseDto.builder()
@@ -679,6 +682,7 @@ class KmsControllerTest {
                         .build()))
                 .build();
         when(keyPolicyService.listGrants(eq(TENANT), eq(KEY_ID), isNull(), isNull())).thenReturn(dto);
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
 
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/grants", KEY_ID))
                 .andExpect(status().isOk())
@@ -715,7 +719,7 @@ class KmsControllerTest {
                 .thenReturn(response);
 
         mockMvc.perform(get("/api/v1/private/kms/grants/retirable")
-                        .param("retiringPrincipal", "arn:aws:iam::123:user/admin"))
+                        .param("retiringPrincipal", "wrn:wams:iam::123:user/admin"))
                 .andExpect(status().isOk());
     }
 
@@ -845,7 +849,7 @@ class KmsControllerTest {
                 .logs(List.of(new AuditLogResponseDto.AuditLogEntryDto()))
                 .build();
         when(auditService.getAuditLogs(eq(TENANT), eq(KEY_ID), any(), any(), anyInt())).thenReturn(dto);
-
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/audit-logs", KEY_ID)
                         .param("limit", "50"))
                 .andExpect(status().isOk());
@@ -858,7 +862,7 @@ class KmsControllerTest {
                 .encryptCount(100L)
                 .build();
         when(keyManagementService.getKeyUsageStats(eq(TENANT), eq(KEY_ID))).thenReturn(dto);
-
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/usage-stats", KEY_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.encryptCount").value(100));
@@ -867,7 +871,7 @@ class KmsControllerTest {
     @Test
     void validateKey_Success() throws Exception {
         when(keyManagementService.isValidKey(eq(TENANT), eq(KEY_ID))).thenReturn(true);
-
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(post("/api/v1/private/kms/keys/{keyId}/validate", KEY_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.valid").value(true));
@@ -912,7 +916,7 @@ class KmsControllerTest {
     void describeKey_HandlesNullMetadata() throws Exception {
         DescribeKeyResponse response = DescribeKeyResponse.builder().keyMetadata(null).build();
         when(keyManagementService.describeKey(eq(TENANT), eq(KEY_ID), isNull())).thenReturn(response);
-
+        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}", KEY_ID))
                 .andExpect(status().isOk());
     }

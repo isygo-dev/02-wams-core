@@ -29,9 +29,9 @@ public interface KmsKeyRepository extends JpaRepository<KmsKey, Long> {
     Optional<KmsKey> findByTenantAndKeyAlias(String tenant, String keyAlias);
 
     /**
-     * Find key by tenant and keyArn
+     * Find key by tenant and keyWrn
      */
-    Optional<KmsKey> findByTenantAndKeyArn(String tenant, String keyArn);
+    Optional<KmsKey> findByTenantAndKeyWrn(String tenant, String keyWrn);
 
     /**
      * List all keys for a tenant with pagination

@@ -60,8 +60,8 @@ public class KeyManagementService implements IKeyManagementService {
                 tenant,
                 request.getKeySpec());
 
-        String arn = String.format(
-                "arn:kms:service:%s:key/%s",
+        String wrn = String.format(
+                "wrn:kms:service:%s:key/%s",
                 tenant,
                 UUID.randomUUID()
         );
@@ -76,7 +76,7 @@ public class KeyManagementService implements IKeyManagementService {
             // Create and save KMS Key
             KmsKey key = KmsKey.builder()
                     .tenant(tenant)
-                    .keyArn(arn)
+                    .keyWrn(wrn)
                     .keySpec(request.getKeySpec())
                     .keyUsage(request.getKeyUsage())
                     .keyAlias(request.getAlias())
@@ -104,12 +104,12 @@ public class KeyManagementService implements IKeyManagementService {
 
             kmsKeyVersionRepository.save(keyVersion);
 
-            log.info("Key created successfully: keyId={}, arn={}",
+            log.info("Key created successfully: keyId={}, wrn={}",
                     keyVersion.getKeyId(),
-                    arn);
+                    wrn);
 
             return CreateKeyResponse.builder().keyMetadata(CreateKeyResponse.KeyMetadata.builder()
-                            .arn(arn)
+                            .wrn(wrn)
                             .keyId(keyVersion.getKeyId())
                             .status(IEnumKeyStatus.Types.ENABLED)
                             .createdAt(now)
@@ -140,7 +140,7 @@ public class KeyManagementService implements IKeyManagementService {
 
         return DescribeKeyResponse.builder().keyMetadata(CreateKeyResponse.KeyMetadata.builder()
                         .keyId(key.getKeyId())
-                        .arn(key.getKeyArn())
+                        .wrn(key.getKeyWrn())
                         .status(key.getKeyStatus())
                         .keySpec(key.getKeySpec())
                         .keyUsage(key.getKeyUsage())
@@ -182,7 +182,7 @@ public class KeyManagementService implements IKeyManagementService {
                 .keys(keyPage.getContent().stream()
                         .map(key -> ListKeysResponse.KeyEntry.builder()
                                 .keyId(key.getKeyId())
-                                .keyArn(key.getKeyArn())
+                                .keyWrn(key.getKeyWrn())
                                 .build())
                         .toList())
                 .nextToken(keyPage.hasNext()

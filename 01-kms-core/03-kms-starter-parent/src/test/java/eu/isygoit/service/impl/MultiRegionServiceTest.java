@@ -22,7 +22,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -56,7 +55,7 @@ public class MultiRegionServiceTest {
         primaryKey = KmsKey.builder()
                 .keyId(KEY_ID)
                 .tenant(TENANT)
-                .keyArn("arn:aws:kms:us-east-1:123456789012:key/" + KEY_ID)
+                .keyWrn("wrn:wams:kms:us-east-1:123456789012:key/" + KEY_ID)
                 .region("us-east-1")
                 .keySpec(IEnumKeySpec.Types.RSA_2048)
                 .keyUsage(IEnumKeyUsage.Types.ENCRYPT_DECRYPT)
@@ -75,7 +74,7 @@ public class MultiRegionServiceTest {
         replicaKey = KmsKey.builder()
                 .keyId(UUID.randomUUID().toString())
                 .tenant(TENANT)
-                .keyArn("arn:aws:kms:us-west-2:123456789012:key/replica-key")
+                .keyWrn("wrn:wams:kms:us-west-2:123456789012:key/replica-key")
                 .region(REPLICA_REGION)
                 .keySpec(IEnumKeySpec.Types.RSA_2048)
                 .keyUsage(IEnumKeyUsage.Types.ENCRYPT_DECRYPT)
@@ -384,7 +383,7 @@ public class MultiRegionServiceTest {
         when(kmsKeyRepository.save(any(KmsKey.class)))
                 .thenAnswer(invocation -> {
                     KmsKey saved = invocation.getArgument(0);
-                    assertNotNull(saved.getKeyArn());
+                    assertNotNull(saved.getKeyWrn());
                     assertEquals(IEnumKeyStatus.Types.ENABLED, saved.getKeyStatus());
                     return saved;
                 });

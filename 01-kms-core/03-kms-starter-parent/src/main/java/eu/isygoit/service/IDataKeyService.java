@@ -31,5 +31,7 @@ public interface IDataKeyService {
             GenerateDataKeyPairWithoutPlaintextRequest request);
 
     GenerateRandomResponse generateRandom(GenerateRandomRequest request);
+
+    public String resolveKeyId(String tenant, String keyIdOrAlias);
 }
 

@@ -120,7 +120,7 @@ public class CreateCustomKeyStoreRequestValidator
         }
 
         // xksProxyUriPath is optional - no validation needed
-        // But we can warn if it's not set (it's likely needed for operations)
+        // But we can wwrn if it's not set (it's likely needed for operations)
 
         return isValid;
     }

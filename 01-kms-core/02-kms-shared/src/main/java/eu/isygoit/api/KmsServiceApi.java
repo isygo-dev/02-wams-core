@@ -36,7 +36,7 @@ import java.time.LocalDateTime;
  * </p>
  *
  * @author Isygoit Team
- * @see <a href="https://docs.aws.amazon.com/kms/latest/APIReference/Welcome.html">WAMS KMS API Reference</a>
+ * @see <a href="https://docs.wams.amazon.com/kms/latest/APIReference/Welcome.html">WAMS KMS API Reference</a>
  */
 @Tag(name = "KMS Service", description = "Key Management Service – manage keys and perform cryptographic operations")
 public interface KmsServiceApi {
@@ -55,7 +55,7 @@ public interface KmsServiceApi {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Key created successfully",
                     content = @Content(schema = @Schema(implementation = CreateKeyResponse.class),
-                            examples = @ExampleObject(value = "{\"KeyMetadata\":{\"KeyId\":\"1234abcd-...\",\"Arn\":\"arn:...\",\"Enabled\":true}}"))),
+                            examples = @ExampleObject(value = "{\"KeyMetadata\":{\"KeyId\":\"1234abcd-...\",\"Wrn\":\"wrn:...\",\"Enabled\":true}}"))),
             @ApiResponse(responseCode = "400", description = "Invalid request – unsupported key spec or missing required field"),
             @ApiResponse(responseCode = "403", description = "Access denied – insufficient permissions"),
             @ApiResponse(responseCode = "409", description = "Conflict – alias already exists")
@@ -65,7 +65,7 @@ public interface KmsServiceApi {
     @GetMapping(value = "/keys/{keyId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Describe Key",
-            description = "Returns detailed metadata about a KMS key, including its ARN, state, creation date, rotation status, and multi‑region configuration.",
+            description = "Returns detailed metadata about a KMS key, including its WRN, state, creation date, rotation status, and multi‑region configuration.",
             operationId = "describeKey"
     )
     @ApiResponses({
@@ -74,13 +74,13 @@ public interface KmsServiceApi {
             @ApiResponse(responseCode = "404", description = "Key not found")
     })
     ResponseEntity<DescribeKeyResponse> describeKey(
-            @Parameter(description = "Unique identifier of the KMS key (KeyId or ARN)", required = true, example = "1234abcd-12ab-34cd-56ef-1234567890ab")
+            @Parameter(description = "Unique identifier of the KMS key (KeyId or WRN)", required = true, example = "1234abcd-12ab-34cd-56ef-1234567890ab")
             @PathVariable("keyId") String keyId);
 
     @GetMapping(value = "/keys", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "List Keys",
-            description = "Returns a paginated list of all KMS keys in the account. Includes basic metadata (KeyId, Arn).",
+            description = "Returns a paginated list of all KMS keys in the account. Includes basic metadata (KeyId, Wrn).",
             operationId = "listKeys"
     )
     @ApiResponses({
@@ -622,7 +622,7 @@ public interface KmsServiceApi {
             operationId = "listRetirableGrants"
     )
     ResponseEntity<ListRetirableGrantsResponse> listRetirableGrants(
-            @Parameter(description = "Principal that can retire the grants (ARN or account ID)", required = true)
+            @Parameter(description = "Principal that can retire the grants (WRN or account ID)", required = true)
             @RequestParam("retiringPrincipal") String retiringPrincipal,
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "nextToken", required = false) String nextToken);

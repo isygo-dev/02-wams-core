@@ -53,7 +53,7 @@ public class KmsKeyGrant extends AuditableEntity<Long> implements ITenantAssigna
     private String grantId;
 
     @Column(name = SchemaColumnConstantName.C_PRINCIPAL, length = 255, nullable = false)
-    private String principal; // ARN or account ID
+    private String principal; // WRN or account ID
 
     @Column(name = SchemaColumnConstantName.C_OPERATIONS, length = 1000, nullable = false)
     private String operations; // JSON array of allowed operations: encrypt, decrypt, sign, verify, etc.

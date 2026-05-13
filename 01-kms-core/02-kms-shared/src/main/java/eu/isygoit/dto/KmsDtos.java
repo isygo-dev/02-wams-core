@@ -68,9 +68,9 @@ public final class KmsDtos {
         @NoArgsConstructor
         @AllArgsConstructor
         public static class KeyMetadata {
-            private String awsAccountId;
+            private String wamsAccountId;
             private String keyId;
-            private String arn;
+            private String wrn;
             private LocalDateTime creationDate;
             private Boolean enabled;
             private String description;
@@ -137,7 +137,7 @@ public final class KmsDtos {
         @AllArgsConstructor
         public static class KeyEntry {
             private String keyId;
-            private String keyArn;
+            private String keyWrn;
         }
     }
 
@@ -900,7 +900,7 @@ public final class KmsDtos {
         // ============================================================================
 
         @Schema(description = "CloudHSM cluster endpoint (for CLOUDHSM type)",
-                example = "cloudhsm.cluster-12345678.us-east-1.amazonaws.com")
+                example = "cloudhsm.cluster-12345678.us-east-1.amazonwams.com")
         private String cloudHsmClusterEndpoint;
 
         @Schema(description = "Password for the CloudHSM cluster (will be encrypted)",
@@ -928,7 +928,7 @@ public final class KmsDtos {
         private String xksProxyUriPath;
 
         @Schema(description = "Authentication credential for XKS proxy",
-                example = "arn:aws:secretsmanager:region:account:secret:xks-auth-key",
+                example = "wrn:wams:secretsmanager:region:account:secret:xks-auth-key",
                 format = "password")
         private String xksProxyAuthenticationCredential;
 
@@ -1218,15 +1218,15 @@ public final class KmsDtos {
         private String keyId;
 
         /**
-         * The ARN of the key.
+         * The WRN of the key.
          */
-        @JsonProperty("keyArn")
+        @JsonProperty("keyWrn")
         @Schema(
-                description = "The Amazon Resource Name (ARN) of the key",
-                example = "arn:aws:kms:us-east-1:123456789012:key/550e8400-e29b-41d4-a716-446655440000",
+                description = "The Amazon Resource Name (WRN) of the key",
+                example = "wrn:wams:kms:us-east-1:123456789012:key/550e8400-e29b-41d4-a716-446655440000",
                 required = true
         )
-        private String keyArn;
+        private String keyWrn;
 
         /**
          * Whether automatic key rotation is enabled.
@@ -1348,7 +1348,7 @@ public final class KmsDtos {
         @JsonProperty("lastRotationInitiatedBy")
         @Schema(
                 description = "The principal (user/role/service) that last initiated key rotation",
-                example = "arn:aws:iam::123456789012:user/admin",
+                example = "wrn:wams:iam::123456789012:user/admin",
                 nullable = true
         )
         private String lastRotationInitiatedBy;
@@ -1402,9 +1402,9 @@ public final class KmsDtos {
         private String keyId;
 
         /**
-         * The ARN of the key
+         * The WRN of the key
          */
-        private String keyArn;
+        private String keyWrn;
 
         /**
          * Total number of encrypt operations performed with this key
@@ -1579,9 +1579,9 @@ public final class KmsDtos {
         private String keyId;
 
         /**
-         * The ARN of the key
+         * The WRN of the key
          */
-        private String keyArn;
+        private String keyWrn;
 
         /**
          * The wrapping key (public key) used to encrypt the key material
@@ -1732,7 +1732,7 @@ public final class KmsDtos {
     public static class AliasResponseDto {
         private String aliasName;
         private String targetKeyId;
-        private String targetKeyArn;
+        private String targetKeyWrn;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
     }
@@ -1844,7 +1844,7 @@ public final class KmsDtos {
         @AllArgsConstructor
         public static class AliasEntry {
             private String aliasName;
-            private String aliasArn;
+            private String aliasWrn;
             private String targetKeyId;
             private String creationDate;
             private String lastUpdatedDate;
@@ -2393,9 +2393,9 @@ public final class KmsDtos {
         @NoArgsConstructor
         @AllArgsConstructor
         public static class KeyMetadata {
-            private String awsAccountId;
+            private String wamsAccountId;
             private String keyId;
-            private String arn;
+            private String wrn;
             private LocalDateTime creationDate;
             private Boolean enabled;
             private String description;

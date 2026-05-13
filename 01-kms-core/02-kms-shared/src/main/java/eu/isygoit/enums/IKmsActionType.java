@@ -4,7 +4,7 @@ package eu.isygoit.enums;
  * WAMS KMS action types aligned with WAMS KMS API operations.
  *
  * Reference:
- * https://docs.aws.amazon.com/kms/latest/APIReference/Welcome.html
+ * https://docs.wams.amazon.com/kms/latest/APIReference/Welcome.html
  */
 public interface IKmsActionType {
 

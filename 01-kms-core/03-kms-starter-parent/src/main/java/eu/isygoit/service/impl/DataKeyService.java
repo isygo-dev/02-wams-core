@@ -2,7 +2,10 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.enums.IEnumKeyUsage;
+import eu.isygoit.exception.AliasNotFoundException;
+import eu.isygoit.model.KmsAlias;
 import eu.isygoit.model.KmsKey;
+import eu.isygoit.repository.KmsAliasRepository;
 import eu.isygoit.repository.KmsKeyRepository;
 import eu.isygoit.service.ICryptoService;
 import eu.isygoit.service.IDataKeyService;
@@ -11,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.InvalidParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
@@ -27,6 +31,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DataKeyService implements IDataKeyService {
 
+    private final KmsAliasRepository kmsAliasRepository;
     private final KmsKeyRepository kmsKeyRepository;
     private final ICryptoService cryptoService;
 
@@ -60,6 +65,34 @@ public class DataKeyService implements IDataKeyService {
                 .ciphertextBlob(Base64.getEncoder().encodeToString(result.get("encryptedKey")))
                 .keyId(kmsKey.getKeyId())
                 .build();
+    }
+
+    public String resolveKeyId(String tenant, String keyIdOrAlias) {
+        if (keyIdOrAlias == null || keyIdOrAlias.isBlank()) {
+            throw new InvalidParameterException("KeyId is required");
+        }
+
+        // 1. If it's an AWS-style ARN (e.g., arn:aws:kms:region:account:key:1234abcd-...)
+        if (keyIdOrAlias.startsWith("arn:")) {
+            // Extract the key ID from the ARN (last part after "key:")
+            String[] parts = keyIdOrAlias.split(":");
+            if (parts.length < 2) {
+                throw new InvalidParameterException("Invalid ARN format");
+            }
+            return parts[parts.length - 1]; // returns the key ID
+        }
+
+        // 2. If it's an alias (starts with "alias/")
+        if (keyIdOrAlias.startsWith("alias:")) {
+            String aliasName = keyIdOrAlias.substring("alias:".length()); // remove "alias:" prefixx
+            return kmsAliasRepository.findByTenantAndAliasName(tenant, aliasName)
+                    .map(KmsAlias::getKeyId)  // assuming AliasEntity has getTargetKeyId()
+                    .orElseThrow(() -> new AliasNotFoundException("Alias not found: " + keyIdOrAlias));
+        }
+
+        // 3. Otherwise treat as a raw key ID (UUID format)
+        // Optionally validate UUID format here if required
+        return keyIdOrAlias;
     }
 
     @Override

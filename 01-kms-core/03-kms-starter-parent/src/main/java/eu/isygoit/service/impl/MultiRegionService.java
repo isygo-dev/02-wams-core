@@ -5,11 +5,9 @@ import eu.isygoit.enums.IEnumKeyOrigin;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.exception.KeyNotFoundException;
 import eu.isygoit.exception.KmsException;
-import eu.isygoit.mapper.KmsKeyMapper;
 import eu.isygoit.model.KmsKey;
 import eu.isygoit.repository.KmsKeyRepository;
 import eu.isygoit.service.IMultiRegionService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -67,7 +65,7 @@ public class MultiRegionService implements IMultiRegionService {
         KmsKey replicaKey = new KmsKey();
         replicaKey.setTenant(tenant);
         replicaKey.setKeyId(UUID.randomUUID().toString());
-        replicaKey.setKeyArn(generateArn(replicaKey.getKeyId(), request.getReplicaRegion()));
+        replicaKey.setKeyWrn(generateWrn(replicaKey.getKeyId(), request.getReplicaRegion()));
         replicaKey.setRegion(request.getReplicaRegion());
         replicaKey.setCreationDate(LocalDateTime.now());
         replicaKey.setKeyStatus(IEnumKeyStatus.Types.ENABLED);
@@ -90,9 +88,9 @@ public class MultiRegionService implements IMultiRegionService {
         kmsKeyRepository.save(replicaKey);
 
         ReplicateKeyResponse.KeyMetadata replicaMetadata = ReplicateKeyResponse.KeyMetadata.builder()
-                .awsAccountId(tenant)
+                .wamsAccountId(tenant)
                 .keyId(replicaKey.getKeyId())
-                .arn(replicaKey.getKeyArn())
+                .wrn(replicaKey.getKeyWrn())
                 .creationDate(replicaKey.getCreationDate())
                 .description(replicaKey.getDescription())
                 .keySpec(replicaKey.getKeySpec())
@@ -162,7 +160,7 @@ public class MultiRegionService implements IMultiRegionService {
         return SynchronizeMultiRegionKeyResponse.builder().build();
     }
 
-    private String generateArn(String keyId, String region) {
-        return String.format("arn:aws:kms:%s:123456789012:key/%s", region, keyId);
+    private String generateWrn(String keyId, String region) {
+        return String.format("wrn:wams:kms:%s:123456789012:key/%s", region, keyId);
     }
 }

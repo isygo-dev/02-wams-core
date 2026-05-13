@@ -27,6 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
@@ -197,13 +200,13 @@ public class CryptoService implements ICryptoService {
 
         try {
             // Simple AES/GCM implementation for KMS-style encryption
-            javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance("AES/GCM/NoPadding");
+            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
             byte[] iv = new byte[12];
             new SecureRandom().nextBytes(iv);
-            javax.crypto.spec.GCMParameterSpec spec = new javax.crypto.spec.GCMParameterSpec(128, iv);
-            javax.crypto.spec.SecretKeySpec keySpec = new javax.crypto.spec.SecretKeySpec(keyMaterial, "AES");
+            GCMParameterSpec spec = new GCMParameterSpec(128, iv);
+            SecretKeySpec keySpec = new SecretKeySpec(keyMaterial, "AES");
 
-            cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, keySpec, spec);
+            cipher.init(Cipher.ENCRYPT_MODE, keySpec, spec);
             byte[] encrypted = cipher.doFinal(plaintext);
 
             // Return IV + Ciphertext
