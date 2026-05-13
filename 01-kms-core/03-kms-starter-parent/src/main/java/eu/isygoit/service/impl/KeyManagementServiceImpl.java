@@ -232,7 +232,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
         kmsKeyRepository.save(key);
 
         return DisableKeyResponse.builder()
-                .keyId(String.valueOf(key.getKeyId()))
+                .keyId(key.getKeyId())
                 .status(key.getKeyStatus())
                 .build();
     }
@@ -272,7 +272,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
         kmsKeyRepository.save(key);
 
         return ScheduleKeyDeletionResponse.builder()
-                .keyId(String.valueOf(key.getKeyId()))
+                .keyId(key.getKeyId())
                 .keyStatus(key.getKeyStatus())
                 .pendingWindowInDays(windowDays)
                 .deletionDate(key.getDeletionDate())
@@ -399,7 +399,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
         kmsKeyRepository.save(key);
 
         return CancelKeyDeletionResponse.builder()
-                .keyId(String.valueOf(key.getKeyId()))
+                .keyId(key.getKeyId())
                 .keyStatus(key.getKeyStatus())
                 .build();
     }
@@ -427,7 +427,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
         kmsKeyRepository.save(key);
 
         return KeyRotationStatusResponseDto.builder()
-                .keyId(String.valueOf(key.getKeyId()))
+                .keyId(key.getKeyId())
                 .rotationEnabled(key.getRotationEnabled())
                 .rotationPeriodDays(key.getRotationPeriodDays())
                 .lastRotationDate(key.getLastRotationDate())
@@ -447,7 +447,7 @@ public class KeyManagementServiceImpl implements IKeyManagementService {
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
         return GetKeyRotationStatusResponse.builder()
-                .keyId(String.valueOf(key.getKeyId()))
+                .keyId(key.getKeyId())
                 .rotationEnabled(key.getRotationEnabled())
                 .rotationPeriodDays(key.getRotationPeriodDays())
                 .lastRotationDate(key.getLastRotationDate())

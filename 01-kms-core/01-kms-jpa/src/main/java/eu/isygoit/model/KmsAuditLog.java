@@ -26,17 +26,17 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = SchemaTableConstantName.T_KMS_AUDIT_LOG,
         indexes = {
-                @Index(name = "IDX_KMS_AUDIT_LOG_KEY_ID", columnList = "KEY_ID"),
-                @Index(name = "IDX_KMS_AUDIT_LOG_TENANT_ACTION", columnList = "TENANT,ACTION"),
-                @Index(name = "IDX_KMS_AUDIT_LOG_TIMESTAMP", columnList = "TIMESTAMP"),
-                @Index(name = "IDX_KMS_AUDIT_LOG_PRINCIPAL", columnList = "PRINCIPAL")
+                @Index(name = "IDX_KMS_AUDIT_LOG_KEY_ID", columnList = SchemaColumnConstantName.C_KEY_ID),
+                @Index(name = "IDX_KMS_AUDIT_LOG_TENANT_ACTION", columnList = SchemaColumnConstantName.C_TENANT + "," + SchemaColumnConstantName.C_ACTION),
+                @Index(name = "IDX_KMS_AUDIT_LOG_TIMESTAMP", columnList = SchemaColumnConstantName.C_TIMESTAMP),
+                @Index(name = "IDX_KMS_AUDIT_LOG_PRINCIPAL", columnList = SchemaColumnConstantName.C_PRINCIPAL)
         })
 public class KmsAuditLog extends AuditableEntity<Long> implements ITenantAssignable {
 
     @Id
     @SequenceGenerator(name = "kms_audit_log_seq", sequenceName = "kms_audit_log_sequence", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "kms_audit_log_seq")
-    @Column(name = "ID", updatable = false, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_ID, updatable = false, nullable = false)
     private Long id;
 
     //@Convert(converter = LowerCaseConverter.class)
@@ -44,35 +44,35 @@ public class KmsAuditLog extends AuditableEntity<Long> implements ITenantAssigna
     @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
 
-    @Column(name = "KEY_ID", length = 255)
+    @Column(name = SchemaColumnConstantName.C_KEY_ID, length = 255)
     private String keyId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "ACTION", length = 100, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_ACTION, length = 100, nullable = false)
     private IKmsActionType.Types action;
 
-    @Column(name = "PRINCIPAL", length = 255)
+    @Column(name = SchemaColumnConstantName.C_PRINCIPAL, length = 255)
     private String principal; // User/Service that performed the action
 
-    @Column(name = "IP_ADDRESS", length = 50)
+    @Column(name = SchemaColumnConstantName.C_IP_ADDRESS, length = 50)
     private String ipAddress; // Client IP address
 
-    @Column(name = "TIMESTAMP", nullable = false, updatable = false)
+    @Column(name = SchemaColumnConstantName.C_TIMESTAMP, nullable = false, updatable = false)
     private LocalDateTime timestamp;
 
-    @Column(name = "STATUS", length = 50)
+    @Column(name = SchemaColumnConstantName.C_STATUS, length = 50)
     private String status; // SUCCESS, FAILURE
 
-    @Column(name = "ERROR_MESSAGE", length = 1024)
+    @Column(name = SchemaColumnConstantName.C_ERROR_MESSAGE, length = 1024)
     private String errorMessage;
 
-    @Column(name = "REQUEST_DETAILS", length = 2000)
+    @Column(name = SchemaColumnConstantName.C_REQUEST_DETAILS, length = 2000)
     private String requestDetails; // JSON format request metadata
 
-    @Column(name = "RESPONSE_DETAILS", length = 2000)
+    @Column(name = SchemaColumnConstantName.C_RESPONSE_DETAILS, length = 2000)
     private String responseDetails; // JSON format response metadata
 
-    @Column(name = "EXECUTION_TIME_MS")
+    @Column(name = SchemaColumnConstantName.C_EXECUTION_TIME_MS)
     private Long executionTimeMs; // Time taken in milliseconds
 }
 

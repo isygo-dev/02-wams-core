@@ -64,7 +64,7 @@ public class SigningServiceImpl implements ISigningService {
 
         return SignResponse.builder()
                 .signature(Base64.getEncoder().encodeToString(signature))
-                .keyId(String.valueOf(kmsKey.getKeyId()))
+                .keyId(kmsKey.getKeyId())
                 .keyVersionId(kmsKey.getCurrentVersionId())
                 .build();
     }

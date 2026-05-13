@@ -62,7 +62,7 @@ public class EncryptionServiceImpl implements IEncryptionService {
 
         return EncryptResponse.builder()
                 .ciphertextBlob(Base64.getEncoder().encodeToString(ciphertext))
-                .keyId(String.valueOf(kmsKey.getKeyId()))
+                .keyId(kmsKey.getKeyId())
                 .keyVersionId(kmsKey.getCurrentVersionId())
                 .build();
     }
@@ -104,7 +104,7 @@ public class EncryptionServiceImpl implements IEncryptionService {
 
         return DecryptResponse.builder()
                 .plaintext(Base64.getEncoder().encodeToString(plaintext))
-                .keyId(String.valueOf(kmsKey.getKeyId()))
+                .keyId(kmsKey.getKeyId())
                 .keyVersionId(kmsKey.getCurrentVersionId())
                 .build();
     }

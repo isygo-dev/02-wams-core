@@ -25,18 +25,20 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = SchemaTableConstantName.KMS_TAG,
         uniqueConstraints = {
-                @UniqueConstraint(name = "UK_TAG_KEY_TENANT_KEY", columnNames = {"TENANT", "KEY_ID", "TAG_KEY"})
+                @UniqueConstraint(name = SchemaUcConstantName.UC_UK_TAG_KEY_TENANT_KEY, 
+                        columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_KEY_ID, SchemaColumnConstantName.C_TAG_KEY})
         },
         indexes = {
-                @Index(name = "IDX_TAG_TENANT", columnList = "TENANT"),
-                @Index(name = "IDX_TAG_KEY_ID", columnList = "KEY_ID"),
-                @Index(name = "IDX_TAG_TAG_KEY", columnList = "TAG_KEY"),
-                @Index(name = "IDX_TAG_TENANT_KEY", columnList = "TENANT, KEY_ID")
+                @Index(name = "IDX_TAG_TENANT", columnList = SchemaColumnConstantName.C_TENANT),
+                @Index(name = "IDX_TAG_KEY_ID", columnList = SchemaColumnConstantName.C_KEY_ID),
+                @Index(name = "IDX_TAG_TAG_KEY", columnList = SchemaColumnConstantName.C_TAG_KEY),
+                @Index(name = "IDX_TAG_TENANT_KEY", columnList = SchemaColumnConstantName.C_TENANT + "," + SchemaColumnConstantName.C_KEY_ID)
         })
 public class KmsTag extends AuditableEntity<Long> implements ITenantAssignable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "kms_tag_seq", sequenceName = "kms_tag_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "kms_tag_seq")
     @Column(name = SchemaColumnConstantName.C_ID, updatable = false, nullable = false)
     private Long id;
 
@@ -45,24 +47,24 @@ public class KmsTag extends AuditableEntity<Long> implements ITenantAssignable {
     @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
 
-    @Column(name = "KEY_ID", nullable = false)
+    @Column(name = SchemaColumnConstantName.C_KEY_ID, nullable = false)
     private String keyId;
 
-    @Column(name = "TAG_KEY", nullable = false, length = 128)
+    @Column(name = SchemaColumnConstantName.C_TAG_KEY, nullable = false, length = 128)
     private String tagKey;
 
-    @Column(name = "TAG_VALUE", length = 256)
+    @Column(name = SchemaColumnConstantName.C_TAG_VALUE, length = 256)
     private String tagValue;
 
     @CreationTimestamp
-    @Column(name = "CREATION_DATE", nullable = false, updatable = false)
+    @Column(name = SchemaColumnConstantName.C_CREATION_DATE, nullable = false, updatable = false)
     private LocalDateTime creationDate;
 
     @UpdateTimestamp
-    @Column(name = "LAST_UPDATED_DATE")
+    @Column(name = SchemaColumnConstantName.C_LAST_UPDATED_DATE)
     private LocalDateTime lastUpdatedDate;
 
     @Version
-    @Column(name = "VERSION")
+    @Column(name = SchemaColumnConstantName.C_VERSION)
     private Long version;
 }

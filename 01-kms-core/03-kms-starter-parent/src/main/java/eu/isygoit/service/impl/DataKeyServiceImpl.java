@@ -58,7 +58,7 @@ public class DataKeyServiceImpl implements IDataKeyService {
         return GenerateDataKeyResponse.builder()
                 .plaintext(Base64.getEncoder().encodeToString(result.get("plaintextKey")))
                 .ciphertextBlob(Base64.getEncoder().encodeToString(result.get("encryptedKey")))
-                .keyId(String.valueOf(kmsKey.getKeyId()))
+                .keyId(kmsKey.getKeyId())
                 .build();
     }
 
@@ -133,7 +133,7 @@ public class DataKeyServiceImpl implements IDataKeyService {
             return GenerateDataKeyPairResponse.builder()
                     .publicKey(Base64.getEncoder().encodeToString(publicKeyBytes))
                     .privateKeyCiphertextBlob(Base64.getEncoder().encodeToString(encryptedPrivateKey))
-                    .keyId(String.valueOf(kmsKey.getKeyId()))
+                    .keyId(kmsKey.getKeyId())
                     .keyPairSpec(request.getKeyPairSpec())
                     .encryptionAlgorithmSpec(algorithm)
                     .keyVersionId(kmsKey.getCurrentVersionId())

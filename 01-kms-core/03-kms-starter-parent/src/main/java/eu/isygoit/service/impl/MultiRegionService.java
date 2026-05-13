@@ -24,7 +24,6 @@ import java.util.UUID;
 public class MultiRegionService implements IMultiRegionService {
 
     private final KmsKeyRepository kmsKeyRepository;
-    private final KmsKeyMapper kmsKeyMapper;
 
     @Override
     public UpdatePrimaryRegionResponse updatePrimaryRegion(String tenant, String keyId, UpdatePrimaryRegionRequestDto request) {

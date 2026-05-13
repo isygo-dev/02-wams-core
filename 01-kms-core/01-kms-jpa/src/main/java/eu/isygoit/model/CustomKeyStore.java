@@ -41,15 +41,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Table(name = SchemaTableConstantName.CUSTOM_KEY_STORE,
         uniqueConstraints = {
-                @UniqueConstraint(name = "UK_CUSTOM_KEY_STORE_NAME_TENANT",
-                        columnNames = {"STORE_NAME", "TENANT"}),
-                @UniqueConstraint(name = "UK_CUSTOM_KEY_STORE_ID",
-                        columnNames = {"STORE_ID"})
+                @UniqueConstraint(name = SchemaUcConstantName.UC_UK_CUSTOM_KEY_STORE_NAME_TENANT,
+                        columnNames = {SchemaColumnConstantName.C_STORE_NAME, SchemaColumnConstantName.C_TENANT}),
+                @UniqueConstraint(name = SchemaUcConstantName.UC_UK_CUSTOM_KEY_STORE_ID,
+                        columnNames = {SchemaColumnConstantName.C_STORE_ID})
         },
         indexes = {
-                @Index(name = "IDX_CUSTOM_KEY_STORE_TENANT", columnList = "TENANT"),
-                @Index(name = "IDX_CUSTOM_KEY_STORE_STATUS", columnList = "STATUS"),
-                @Index(name = "IDX_CUSTOM_KEY_STORE_TYPE", columnList = "STORE_TYPE")
+                @Index(name = "IDX_CUSTOM_KEY_STORE_TENANT", columnList = SchemaColumnConstantName.C_TENANT),
+                @Index(name = "IDX_CUSTOM_KEY_STORE_STATUS", columnList = SchemaColumnConstantName.C_STATUS),
+                @Index(name = "IDX_CUSTOM_KEY_STORE_TYPE", columnList = SchemaColumnConstantName.C_STORE_TYPE)
         })
 public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssignable {
 
@@ -73,65 +73,65 @@ public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssi
     /**
      * Display name of the custom key store
      */
-    @Column(name = "STORE_NAME", nullable = false, length = 255)
+    @Column(name = SchemaColumnConstantName.C_STORE_NAME, nullable = false, length = 255)
     private String name;
 
     /**
      * Type of custom key store (CLOUDHSM or EXTERNAL_KEY_STORE)
      */
     @Enumerated(EnumType.STRING)
-    @Column(name = "STORE_TYPE", nullable = false, length = 50)
+    @Column(name = SchemaColumnConstantName.C_STORE_TYPE, nullable = false, length = 50)
     private IEnumCustomKeyStoreType.Types type;
 
     /**
      * Current connection status of the custom key store
      */
     @Enumerated(EnumType.STRING)
-    @Column(name = "STATUS", nullable = false, length = 50)
+    @Column(name = SchemaColumnConstantName.C_STATUS, nullable = false, length = 50)
     private IEnumCustomKeyStoreStatus.Types status;
 
     /**
      * Timestamp when the custom key store was created
      */
     @CreationTimestamp
-    @Column(name = "CREATED_AT", nullable = false, updatable = false)
+    @Column(name = SchemaColumnConstantName.C_CREATED_AT, nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     /**
      * Timestamp when the custom key store was last updated
      */
     @UpdateTimestamp
-    @Column(name = "UPDATED_AT", nullable = false)
+    @Column(name = SchemaColumnConstantName.C_UPDATED_AT, nullable = false)
     private LocalDateTime updatedAt;
 
     /**
      * Timestamp of the last successful connection to the underlying store
      */
-    @Column(name = "LAST_SUCCESSFUL_CONNECTION")
+    @Column(name = SchemaColumnConstantName.C_LAST_SUCCESSFUL_CONNECTION)
     private LocalDateTime lastSuccessfulConnection;
 
     /**
      * Timestamp of the last connection attempt
      */
-    @Column(name = "LAST_CONNECTION_ATTEMPT")
+    @Column(name = SchemaColumnConstantName.C_LAST_CONNECTION_ATTEMPT)
     private LocalDateTime lastConnectionAttempt;
 
     /**
      * Timestamp of the last health check
      */
-    @Column(name = "LAST_HEALTH_CHECK")
+    @Column(name = SchemaColumnConstantName.C_LAST_HEALTH_CHECK)
     private LocalDateTime lastHealthCheck;
 
     /**
      * Error message from the last failed connection attempt
      */
-    @Column(name = "CONNECTION_ERROR", length = 1000)
+    @Column(name = SchemaColumnConstantName.C_CONNECTION_ERROR, length = 1000)
     private String connectionError;
 
     /**
      * Active connection ID (when connected)
      */
-    @Column(name = "CONNECTION_ID", length = 255)
+    @Column(name = SchemaColumnConstantName.C_CONNECTION_ID, length = 255)
     private String connectionId;
 
     // ============================================================================
@@ -141,19 +141,19 @@ public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssi
     /**
      * CloudHSM cluster identifier (for CLOUDHSM type)
      */
-    @Column(name = "CLOUDHSM_CLUSTER_ID", length = 255)
+    @Column(name = SchemaColumnConstantName.C_CLOUDHSM_CLUSTER_ID, length = 255)
     private String cloudHsmClusterId;
 
     /**
      * Encrypted password for accessing the CloudHSM cluster
      */
-    @Column(name = "KEY_STORE_PASSWORD", length = 512)
+    @Column(name = SchemaColumnConstantName.C_KEY_STORE_PASSWORD, length = 512)
     private String keyStorePassword;
 
     /**
      * Trust anchor certificate for validating the CloudHSM cluster
      */
-    @Column(name = "TRUST_ANCHOR_CERTIFICATE", columnDefinition = "TEXT")
+    @Column(name = SchemaColumnConstantName.C_TRUST_ANCHOR_CERTIFICATE, columnDefinition = "TEXT")
     private String trustAnchorCertificate;
 
     // ============================================================================
@@ -163,19 +163,19 @@ public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssi
     /**
      * XKS proxy URI endpoint (e.g., https://xks.example.com:8080)
      */
-    @Column(name = "XKS_PROXY_URI_ENDPOINT", length = 500)
+    @Column(name = SchemaColumnConstantName.C_XKS_PROXY_URI_ENDPOINT, length = 500)
     private String xksProxyUriEndpoint;
 
     /**
      * XKS proxy URI path (e.g., /api/v1/kms)
      */
-    @Column(name = "XKS_PROXY_URI_PATH", length = 255)
+    @Column(name = SchemaColumnConstantName.C_XKS_PROXY_URI_PATH, length = 255)
     private String xksProxyUriPath;
 
     /**
      * Authentication credential for the XKS proxy (encrypted)
      */
-    @Column(name = "XKS_PROXY_AUTH_CREDENTIAL", length = 512)
+    @Column(name = SchemaColumnConstantName.C_XKS_PROXY_AUTH_CREDENTIAL, length = 512)
     private String xksProxyAuthenticationCredential;
 
     // ============================================================================
@@ -185,37 +185,37 @@ public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssi
     /**
      * Store-specific configuration data in JSON format
      */
-    @Column(name = "STORE_SPECIFIC_DATA", columnDefinition = "TEXT")
+    @Column(name = SchemaColumnConstantName.C_STORE_SPECIFIC_DATA, columnDefinition = "TEXT")
     private String customKeyStoreTypeSpecificData;
 
     /**
      * Number of KMS keys hosted in this custom key store
      */
-    @Column(name = "KEY_COUNT")
+    @Column(name = SchemaColumnConstantName.C_KEY_COUNT)
     private Integer keyCount;
 
     /**
      * Maximum number of keys allowed in this custom key store
      */
-    @Column(name = "MAX_KEYS")
+    @Column(name = SchemaColumnConstantName.C_MAX_KEYS)
     private Integer maxKeys;
 
     /**
      * Store health status (HEALTHY, DEGRADED, UNHEALTHY)
      */
-    @Column(name = "HEALTH_STATUS", length = 50)
+    @Column(name = SchemaColumnConstantName.C_HEALTH_STATUS, length = 50)
     private String healthStatus;
 
     /**
      * Additional metadata as JSON
      */
-    @Column(name = "METADATA", columnDefinition = "TEXT")
+    @Column(name = SchemaColumnConstantName.C_METADATA, columnDefinition = "TEXT")
     private String metadata;
 
     /**
      * Tags associated with this custom key store (JSON format)
      */
-    @Column(name = "TAGS", columnDefinition = "TEXT")
+    @Column(name = SchemaColumnConstantName.C_TAGS, columnDefinition = "TEXT")
     private String tags;
 
     // ============================================================================
