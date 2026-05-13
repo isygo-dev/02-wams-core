@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.*;
 class CustomKeyStoreServiceTest {
 
     private static final String TENANT = "tenant-1";
+
 
     @Mock
     private CustomKeyStoreRepository customKeyStoreRepository;

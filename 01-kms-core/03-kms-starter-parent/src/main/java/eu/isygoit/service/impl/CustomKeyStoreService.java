@@ -79,7 +79,6 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         store.setStatus(IEnumCustomKeyStoreStatus.Types.DISCONNECTED);
         store.setCreatedAt(LocalDateTime.now());
         store.setUpdatedAt(LocalDateTime.now());
-        store.setKeyCount(0);
         store.setMaxKeys(request.getMaxKeys() != null ? request.getMaxKeys() : defaultMaxKeys);
         store.setHealthStatus("UNKNOWN");
         store.setMetadata(request.getMetadata() != null ? convertMapToJson(request.getMetadata()) : null);
@@ -97,9 +96,12 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         }
 
         // Initialize underlying simulation
-        initializeStoreSimulation(store);
         CustomKeyStore saved = customKeyStoreRepository.save(store);
         log.info("Custom key store created with id: {}", saved.getId());
+
+        initializeStoreSimulation(saved);
+        log.info("Custom key store simulation initialized: {}", saved.getId());
+
         return convertToResponseDto(saved);
     }
 
@@ -334,8 +336,8 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         }
     }
 
+    // Modified performHealthCheck:
     private boolean performHealthCheck(CustomKeyStore store) {
-        // Simple ping operation
         if (store.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
             SoftwareHsmInstance hsm = hsmInstances.get(store.getId());
             return hsm != null && hsm.isConnected();
@@ -431,16 +433,20 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         activeConnections.remove(store.getId());
     }
 
+    // Modified establishInternalConnection:
     private boolean establishInternalConnection(CustomKeyStore store) {
         if (store.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
-            SoftwareHsmInstance hsm = hsmInstances.get(store.getId());
-            return hsm != null && hsm.connect(store.getKeyStorePassword());
+            SoftwareHsmInstance hsm = hsmInstances.computeIfAbsent(store.getId(),
+                    id -> new SoftwareHsmInstance(store.getId(), store.getName()));
+            return hsm.connect(store.getKeyStorePassword());
         } else {
-            ExternalKeyProxyInstance proxy = externalProxies.get(store.getId());
-            return proxy != null && proxy.connect(store.getXksProxyAuthenticationCredential());
+            ExternalKeyProxyInstance proxy = externalProxies.computeIfAbsent(store.getId(),
+                    id -> new ExternalKeyProxyInstance(store.getId(), store.getXksProxyUriEndpoint(), store.getXksProxyUriPath()));
+            return proxy.connect(store.getXksProxyAuthenticationCredential());
         }
     }
 
+    // Modified closeInternalConnection:
     private void closeInternalConnection(CustomKeyStore store) {
         if (store.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
             SoftwareHsmInstance hsm = hsmInstances.get(store.getId());

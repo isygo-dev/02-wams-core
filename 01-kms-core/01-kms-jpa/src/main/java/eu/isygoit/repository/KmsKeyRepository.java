@@ -49,8 +49,6 @@ public interface KmsKeyRepository extends JpaRepository<KmsKey, Long> {
     @Query("SELECT k FROM KmsKey k WHERE k.tenant = :tenant AND k.keyStatus = 'ENABLED'")
     List<KmsKey> findActiveKeysByTenant(@Param("tenant") String tenant);
 
-    int countByTenantAndKeyStoreId(String tenant, Long keyStoreId);
-
     boolean existsByTenantAndPrimaryKeyIdAndRegion(String tenant, String keyId, @NotBlank String replicaRegion);
 }
 

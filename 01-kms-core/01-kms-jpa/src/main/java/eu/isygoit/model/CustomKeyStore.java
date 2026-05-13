@@ -191,12 +191,6 @@ public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssi
     private String customKeyStoreTypeSpecificData;
 
     /**
-     * Number of KMS keys hosted in this custom key store (cached for performance)
-     */
-    @Column(name = SchemaColumnConstantName.C_KEY_COUNT)
-    private Integer keyCount;
-
-    /**
      * Maximum number of keys allowed in this custom key store
      */
     @Column(name = SchemaColumnConstantName.C_MAX_KEYS)
@@ -293,13 +287,6 @@ public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssi
     }
 
     /**
-     * Check if the custom key store has reached its maximum key limit
-     */
-    public boolean isAtMaxKeyLimit() {
-        return maxKeys != null && keyCount != null && keyCount >= maxKeys;
-    }
-
-    /**
      * Check if this is a CloudHSM type store
      */
     public boolean isCloudHsmType() {
@@ -321,10 +308,6 @@ public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssi
      */
     public void addKey(KmsKey key) {
         keys.add(key);
-        if (keyCount == null) {
-            keyCount = 0;
-        }
-        keyCount++;
     }
 
     /**
@@ -335,29 +318,6 @@ public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssi
      */
     public void removeKey(KmsKey key) {
         keys.remove(key);
-        if (keyCount != null && keyCount > 0) {
-            keyCount--;
-        }
-    }
-
-    /**
-     * Increment the key count (used when a key is added via direct ID mapping
-     * without a full KmsKey object).
-     */
-    public void incrementKeyCount() {
-        if (keyCount == null) {
-            keyCount = 0;
-        }
-        keyCount++;
-    }
-
-    /**
-     * Decrement the key count (used when a key is removed via direct ID mapping).
-     */
-    public void decrementKeyCount() {
-        if (keyCount != null && keyCount > 0) {
-            keyCount--;
-        }
     }
 
     /**

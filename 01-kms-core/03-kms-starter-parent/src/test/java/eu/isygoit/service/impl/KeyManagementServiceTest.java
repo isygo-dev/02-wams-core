@@ -6,14 +6,8 @@ import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.exception.InvalidKeyStateException;
 import eu.isygoit.exception.KeyNotFoundException;
-import eu.isygoit.model.KmsAlias;
-import eu.isygoit.model.KmsKey;
-import eu.isygoit.model.KmsKeyVersion;
-import eu.isygoit.model.KmsTag;
-import eu.isygoit.repository.KmsAliasRepository;
-import eu.isygoit.repository.KmsKeyRepository;
-import eu.isygoit.repository.KmsKeyVersionRepository;
-import eu.isygoit.repository.KmsTagRepository;
+import eu.isygoit.model.*;
+import eu.isygoit.repository.*;
 import eu.isygoit.service.ICryptoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +35,9 @@ class KeyManagementServiceTest {
 
     private static final String TENANT = "tenant-1";
     private static final String KEY_ID = "key-1";
+
+    @Mock
+    private CustomKeyStoreRepository customKeyStoreRepository;
 
     @Mock
     private KmsKeyRepository kmsKeyRepository;
@@ -651,8 +648,18 @@ class KeyManagementServiceTest {
 
     @Test
     void shouldCountKeysInCustomStore() {
-        when(kmsKeyRepository.countByTenantAndKeyStoreId(TENANT, 1L))
-                .thenReturn(5);
+        List<KmsKey> keys = List.of(
+                KmsKey.builder().keyId("k1").build(),
+                KmsKey.builder().keyId("k2").build(),
+                KmsKey.builder().keyId("k3").build(),
+                KmsKey.builder().keyId("k4").build(),
+                KmsKey.builder().keyId("k5").build()
+        );
+        when(customKeyStoreRepository.findByTenantAndId(TENANT, 1L))
+                .thenReturn(Optional.of(CustomKeyStore.builder()
+                        .id(1L)
+                        .keys(keys)
+                        .build()));
 
         int count = keyManagementService.countKeysInCustomKeyStore(TENANT, 1L);
 

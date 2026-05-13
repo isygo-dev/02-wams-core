@@ -856,13 +856,12 @@ public class KeyManagementService implements IKeyManagementService {
             log.info("Unregistered key {} from custom store {}/{}", keyId, tenant, keyStoreId);
         }
 
-        @Override
-        public int countKeysInCustomKeyStore(String tenant, Long keyStoreId) {
-            // Fast path: read the cached keyCount column directly
-            return customKeyStoreRepository
-                    .findByTenantAndId(tenant, keyStoreId)
-                    .map(CustomKeyStore::getKeyCount)
-                    .orElse(0);
-        }
+    @Override
+    public int countKeysInCustomKeyStore(String tenant, Long keyStoreId) {
+        return customKeyStoreRepository
+                .findByTenantAndId(tenant, keyStoreId)
+                .map(store -> store.getKeys().size())
+                .orElse(0);
+    }
 }
 
