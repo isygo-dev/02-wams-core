@@ -61,7 +61,6 @@ public class MultiRegionServiceTest {
                 .keySpec(IEnumKeySpec.Types.RSA_2048)
                 .keyUsage(IEnumKeyUsage.Types.ENCRYPT_DECRYPT)
                 .keyStatus(IEnumKeyStatus.Types.ENABLED)
-                .enabled(true)
                 .multiRegion(true)
                 .primaryRegion("us-east-1")
                 .replicaRegions("us-west-1,eu-west-1")
@@ -81,7 +80,6 @@ public class MultiRegionServiceTest {
                 .keySpec(IEnumKeySpec.Types.RSA_2048)
                 .keyUsage(IEnumKeyUsage.Types.ENCRYPT_DECRYPT)
                 .keyStatus(IEnumKeyStatus.Types.ENABLED)
-                .enabled(true)
                 .multiRegion(true)
                 .primaryKeyId(primaryKey.getKeyId())
                 .keyMaterial(primaryKey.getKeyMaterial())
@@ -377,8 +375,6 @@ public class MultiRegionServiceTest {
 
     @Test
     void shouldValidateReplicaKeyProperties() {
-        ReplicateKeyResponse response = (ReplicateKeyResponse) multiRegionService.replicateKey(TENANT, KEY_ID,
-                ReplicateKeyRequestDto.builder().replicaRegion(REPLICA_REGION).build());
 
         // Mock setup
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
@@ -389,7 +385,6 @@ public class MultiRegionServiceTest {
                 .thenAnswer(invocation -> {
                     KmsKey saved = invocation.getArgument(0);
                     assertNotNull(saved.getKeyArn());
-                    assertTrue(saved.getEnabled());
                     assertEquals(IEnumKeyStatus.Types.ENABLED, saved.getKeyStatus());
                     return saved;
                 });
@@ -421,12 +416,13 @@ public class MultiRegionServiceTest {
                 .replicaRegion(null)
                 .build();
 
-        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
-                .thenReturn(Optional.of(primaryKey));
-
-        assertThrows(Exception.class, () ->
+        KmsException exception = assertThrows(KmsException.class, () ->
                 multiRegionService.replicateKey(TENANT, KEY_ID, request)
         );
+
+        assertEquals("Replica region must be specified", exception.getMessage());
+
+        verifyNoInteractions(kmsKeyRepository);
     }
 }
 

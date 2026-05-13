@@ -497,7 +497,9 @@ public final class KmsDtos {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class GenerateDataKeyPairRequest {
+        @NotNull(message = "Key ID cannot be null")
         private String keyId;
+        @NotNull(message = "Key pair spec cannot be null")
         private IEnumKeySpec.Types keyPairSpec;   
         private Map<String, String> encryptionContext;
         private List<String> grantTokens;
@@ -1821,6 +1823,7 @@ public final class KmsDtos {
     @AllArgsConstructor
     public static class ReplicateKeyRequestDto {
 
+        @NotBlank
         private String keyId;
         @NotBlank
         private String replicaRegion;

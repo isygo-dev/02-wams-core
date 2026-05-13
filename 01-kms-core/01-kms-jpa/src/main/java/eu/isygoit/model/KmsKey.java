@@ -125,10 +125,6 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     @Column(name = SchemaColumnConstantName.C_TAGS, columnDefinition = "TEXT")
     private String tags; // JSON format for metadata tags
 
-    @Column(name = SchemaColumnConstantName.C_ENABLED, nullable = false)
-    @ColumnDefault("false")
-    private Boolean enabled = false; // Whether the key is enabled for use
-
     @Column(name = SchemaColumnConstantName.C_MULTI_REGION, nullable = false)
     @ColumnDefault("false")
     private Boolean multiRegion = false; // Whether this key is part of a multi‑region setup

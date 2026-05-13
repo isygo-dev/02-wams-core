@@ -9,10 +9,12 @@ import eu.isygoit.mapper.KmsKeyMapper;
 import eu.isygoit.model.KmsKey;
 import eu.isygoit.repository.KmsKeyRepository;
 import eu.isygoit.service.IMultiRegionService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -44,7 +46,9 @@ public class MultiRegionService implements IMultiRegionService {
     @Override
     public ReplicateKeyResponse replicateKey(String tenant, String keyId, ReplicateKeyRequestDto request) {
         log.info("Replicating key: {} to region: {}", keyId, request.getReplicaRegion());
-
+        if (!StringUtils.hasText(request.getReplicaRegion())) {
+            throw new KmsException("Replica region must be specified");
+        }
         // Find the primary multi-region key
         KmsKey primaryKey = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
@@ -66,7 +70,6 @@ public class MultiRegionService implements IMultiRegionService {
         replicaKey.setKeyArn(generateArn(replicaKey.getKeyId(), request.getReplicaRegion()));
         replicaKey.setRegion(request.getReplicaRegion());
         replicaKey.setCreationDate(LocalDateTime.now());
-        replicaKey.setEnabled(true);
         replicaKey.setKeyStatus(IEnumKeyStatus.Types.ENABLED);
         replicaKey.setDescription(primaryKey.getDescription());
         replicaKey.setKeySpec(primaryKey.getKeySpec());
@@ -91,7 +94,6 @@ public class MultiRegionService implements IMultiRegionService {
                 .keyId(replicaKey.getKeyId())
                 .arn(replicaKey.getKeyArn())
                 .creationDate(replicaKey.getCreationDate())
-                .enabled(replicaKey.getEnabled())
                 .description(replicaKey.getDescription())
                 .keySpec(replicaKey.getKeySpec())
                 .keyUsage(replicaKey.getKeyUsage())
