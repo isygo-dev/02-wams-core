@@ -17,10 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -91,6 +88,7 @@ class KeyPolicyServiceTest {
 
         SetKeyPolicyRequestDto request =
                 SetKeyPolicyRequestDto.builder()
+                        .policyName(POLICY_NAME)
                         .policy(map)
                         .build();
 
@@ -117,6 +115,7 @@ class KeyPolicyServiceTest {
 
         SetKeyPolicyRequestDto request =
                 SetKeyPolicyRequestDto.builder()
+                        .policyName(POLICY_NAME)
                         .policy(map)
                         .build();
 
@@ -351,7 +350,7 @@ class KeyPolicyServiceTest {
         policy.put("Statement", new ArrayList<>());
 
         SetKeyPolicyRequestDto request = SetKeyPolicyRequestDto.builder()
-                .policyName("default")
+                .policyName(POLICY_NAME)
                 .policy(policy)
                 .bypassPolicyLockoutSafetyCheck(false)
                 .build();
@@ -363,6 +362,7 @@ class KeyPolicyServiceTest {
 
         KmsKeyPolicy savedPolicy = KmsKeyPolicy.builder()
                 .id(1L)
+                .policyName(POLICY_NAME)
                 .tenant(testTenant)
                 .keyId(testKeyId)
                 .policyDocument("{\"Version\":\"2012-10-17\"}")
@@ -391,12 +391,14 @@ class KeyPolicyServiceTest {
 
         SetKeyPolicyRequestDto request = SetKeyPolicyRequestDto.builder()
                 .policy(policy)
+                .policyName(POLICY_NAME)
                 .build();
 
         KmsKeyPolicy existingPolicy = KmsKeyPolicy.builder()
                 .id(1L)
                 .tenant(testTenant)
                 .keyId(testKeyId)
+                .policyName(POLICY_NAME)
                 .policyDocument("{\"old\":\"policy\"}")
                 .build();
 
@@ -790,13 +792,34 @@ class KeyPolicyServiceTest {
         // Arrange
         KmsKeyPolicy policy = KmsKeyPolicy.builder()
                 .id(1L)
+                .policyName(POLICY_NAME)
                 .tenant(testTenant)
                 .keyId(testKeyId)
                 .policyDocument("{}")
                 .build();
 
-        when(kmsKeyPolicyRepository.findByTenantAndKeyIdAndPolicyName(testTenant, testKeyId, POLICY_NAME))
-                .thenReturn(Optional.of(policy));
+        when(kmsKeyPolicyRepository.findByTenantAndKeyId(testTenant,
+                testKeyId,
+                PageRequest.of(0, 100, Sort.by("creationDate").descending())))
+                .thenReturn(List.of(policy));
+
+        // Act
+        ListKeyPoliciesResponse result = keyPolicyService.listKeyPolicies(testTenant, testKeyId, 100, null);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getPolicyNames().size());
+        assertEquals(POLICY_NAME, result.getPolicyNames().get(0));
+        assertFalse(result.getTruncated());
+        assertNull(result.getNextToken());
+    }
+
+    @Test
+    @DisplayName("Should return empty list when no policy exists")
+    void testListKeyPoliciesNotFoundShoudfindDefaultPolicy() {
+        // Arrange
+        when(kmsKeyPolicyRepository.findByTenantAndKeyId(testTenant, testKeyId, PageRequest.of(0, 100, Sort.by("creationDate").descending())))
+                .thenReturn(List.of());
 
         // Act
         ListKeyPoliciesResponse result = keyPolicyService.listKeyPolicies(testTenant, testKeyId, 100, null);
@@ -805,23 +828,6 @@ class KeyPolicyServiceTest {
         assertNotNull(result);
         assertEquals(1, result.getPolicyNames().size());
         assertEquals("default", result.getPolicyNames().get(0));
-        assertFalse(result.getTruncated());
-        assertNull(result.getNextToken());
-    }
-
-    @Test
-    @DisplayName("Should return empty list when no policy exists")
-    void testListKeyPoliciesNotFound() {
-        // Arrange
-        when(kmsKeyPolicyRepository.findByTenantAndKeyIdAndPolicyName(testTenant, testKeyId, POLICY_NAME))
-                .thenReturn(Optional.empty());
-
-        // Act
-        ListKeyPoliciesResponse result = keyPolicyService.listKeyPolicies(testTenant, testKeyId, 100, null);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(0, result.getPolicyNames().size());
         assertFalse(result.getTruncated());
         assertNull(result.getNextToken());
     }

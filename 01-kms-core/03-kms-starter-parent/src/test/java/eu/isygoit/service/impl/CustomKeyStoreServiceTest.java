@@ -17,6 +17,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
@@ -136,7 +140,9 @@ class CustomKeyStoreServiceTest {
         CustomKeyStore s1 = new CustomKeyStore(); s1.setId(10L); s1.setName("a");
         CustomKeyStore s2 = new CustomKeyStore(); s2.setId(11L); s2.setName("b");
 
-        when(customKeyStoreRepository.findByTenantOrderByIdAsc(TENANT, 2)).thenReturn(List.of(s1, s2));
+        when(customKeyStoreRepository.findByTenantOrderByIdAsc(TENANT,
+                        PageRequest.of(0, 2, Sort.by("creationDate").descending())))
+                .thenReturn(List.of(s1, s2));
         ListCustomKeyStoresResponseDto resp = service.listCustomKeyStores(TENANT, 2, null);
         assertNotNull(resp);
         assertEquals(2, resp.getCustomKeyStores().size());
