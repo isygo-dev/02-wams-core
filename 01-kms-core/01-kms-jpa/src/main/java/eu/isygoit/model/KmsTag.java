@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = SchemaTableConstantName.KMS_TAG,
+@Table(name = SchemaTableConstantName.T_KMS_TAG,
         uniqueConstraints = {
                 @UniqueConstraint(name = SchemaUcConstantName.UC_UK_TAG_KEY_TENANT_KEY, 
                         columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_KEY_ID, SchemaColumnConstantName.C_TAG_KEY})

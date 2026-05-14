@@ -42,12 +42,10 @@ import java.util.List;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = SchemaTableConstantName.CUSTOM_KEY_STORE,
+@Table(name = SchemaTableConstantName.T_KMS_CUSTOM_KEY_STORE,
         uniqueConstraints = {
                 @UniqueConstraint(name = SchemaUcConstantName.UC_UK_CUSTOM_KEY_STORE_NAME_TENANT,
-                        columnNames = {SchemaColumnConstantName.C_STORE_NAME, SchemaColumnConstantName.C_TENANT}),
-                @UniqueConstraint(name = SchemaUcConstantName.UC_UK_CUSTOM_KEY_STORE_ID,
-                        columnNames = {SchemaColumnConstantName.C_STORE_ID})
+                        columnNames = {SchemaColumnConstantName.C_STORE_NAME, SchemaColumnConstantName.C_TENANT})
         },
         indexes = {
                 @Index(name = SchemaIndexConstantName.IDX_CUSTOM_KEY_STORE_TENANT, columnList = SchemaColumnConstantName.C_TENANT),

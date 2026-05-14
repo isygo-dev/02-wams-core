@@ -1,5 +1,6 @@
 package eu.isygoit.repository;
 
+import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.model.KmsKey;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.domain.Page;
@@ -41,7 +42,7 @@ public interface KmsKeyRepository extends JpaRepository<KmsKey, Long> {
     /**
      * List all keys for a tenant with specific status
      */
-    Page<KmsKey> findByTenantAndStatus(String tenant, String status, Pageable pageable);
+    Page<KmsKey> findByTenantAndKeyStatus(String tenant, IEnumKeyStatus.Types status, Pageable pageable);
 
     /**
      * Find active keys for a tenant

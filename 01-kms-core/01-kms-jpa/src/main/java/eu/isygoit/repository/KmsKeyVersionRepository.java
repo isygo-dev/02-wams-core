@@ -1,5 +1,6 @@
 package eu.isygoit.repository;
 
+import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.model.KmsKeyVersion;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,15 +26,18 @@ public interface KmsKeyVersionRepository extends JpaRepository<KmsKeyVersion, Lo
     /**
      * List all versions of a key
      */
-    @Query("SELECT kv FROM KmsKeyVersion kv WHERE kv.tenant = :tenant AND kv.keyId = :keyId ORDER BY kv.creationDate DESC")
-    List<KmsKeyVersion> findVersionsByKeyId(@Param("tenant") String tenant, @Param("keyId") String keyId);
-
+    List<KmsKeyVersion> findByTenantAndKeyIdOrderByCreationDateDesc(
+            String tenant,
+            String keyId
+    );
     /**
      * List active versions of a key
      */
-    @Query("SELECT kv FROM KmsKeyVersion kv WHERE kv.tenant = :tenant AND kv.keyId = :keyId AND kv.keyStatus = 'ACTIVE' ORDER BY kv.creationDate DESC LIMIT 1")
-    Optional<KmsKeyVersion> findActiveVersionByKeyId(@Param("tenant") String tenant, @Param("keyId") String keyId);
-
+    Optional<KmsKeyVersion> findFirstByTenantAndKeyIdAndKeyStatusOrderByCreationDateDesc(
+            String tenant,
+            String keyId,
+            IEnumKeyStatus.Types keyStatus
+    );
     /**
      * List all versions for a key with pagination
      */

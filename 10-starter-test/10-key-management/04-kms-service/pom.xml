@@ -78,11 +78,6 @@
             <version>WC-1.0.260408-T1636</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>com.hazelcast</groupId>
-            <artifactId>hazelcast-spring</artifactId>
-            <version>5.3.6</version>
-        </dependency>
     </dependencies>
 
     <build>

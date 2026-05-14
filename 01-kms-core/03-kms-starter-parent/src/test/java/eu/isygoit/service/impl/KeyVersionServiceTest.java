@@ -231,9 +231,10 @@ class KeyVersionServiceTest {
     @Test
     void shouldGetActiveVersionSuccessfully() {
 
-        when(kmsKeyVersionRepository.findActiveVersionByKeyId(
+        when(kmsKeyVersionRepository.findFirstByTenantAndKeyIdAndKeyStatusOrderByCreationDateDesc(
                 TENANT,
-                KEY_ID
+                KEY_ID,
+                IEnumKeyStatus.Types.ENABLED
         )).thenReturn(Optional.of(version2));
 
         ActiveVersionResponseDto response =
@@ -247,9 +248,10 @@ class KeyVersionServiceTest {
     @Test
     void shouldThrowWhenNoActiveVersionFound() {
 
-        when(kmsKeyVersionRepository.findActiveVersionByKeyId(
+        when(kmsKeyVersionRepository.findFirstByTenantAndKeyIdAndKeyStatusOrderByCreationDateDesc(
                 TENANT,
-                KEY_ID
+                KEY_ID,
+                IEnumKeyStatus.Types.ENABLED
         )).thenReturn(Optional.empty());
 
         RuntimeException exception = assertThrows(
