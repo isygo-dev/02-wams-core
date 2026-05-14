@@ -27,7 +27,7 @@ public interface IKeyPolicyService {
      * @param keyId  the key id
      * @return the map
      */
-    Map<String, Object> getKeyPolicy(String tenant, String keyId);
+    Map<String, Object> getKeyPolicy(String tenant, String keyId, String policyName);
 
     /**
      * Create grant.

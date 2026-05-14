@@ -6,6 +6,7 @@ import eu.isygoit.enums.IEnumCustomKeyStoreType;
 import eu.isygoit.exception.*;
 import eu.isygoit.model.CustomKeyStore;
 import eu.isygoit.repository.CustomKeyStoreRepository;
+import eu.isygoit.repository.RepoHelper;
 import eu.isygoit.service.ICustomKeyStoreService;
 import eu.isygoit.service.IKeyManagementService;
 import eu.isygoit.simulation.CustomKeyStoreConnection;
@@ -14,6 +15,9 @@ import eu.isygoit.simulation.SoftwareHsmInstance;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -169,18 +173,20 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
 
     @Override
     public ListCustomKeyStoresResponseDto listCustomKeyStores(String tenant, Integer limit, String nextToken) {
-        int pageSize = (limit != null && limit > 0 && limit <= 1000) ? limit : 100;
+
+        Pageable pageable = RepoHelper.resolvePageable(limit, nextToken, "creationDate");
+
         List<CustomKeyStore> stores;
         String newNextToken = null;
 
         if (nextToken != null && !nextToken.isEmpty()) {
             Long lastId = decodeNextToken(nextToken);
-            stores = customKeyStoreRepository.findByTenantAndIdGreaterThanOrderByIdAsc(tenant, lastId, pageSize);
+            stores = customKeyStoreRepository.findByTenantAndIdGreaterThanOrderByIdAsc(tenant, lastId, pageable);
         } else {
-            stores = customKeyStoreRepository.findByTenantOrderByIdAsc(tenant, pageSize);
+            stores = customKeyStoreRepository.findByTenantOrderByIdAsc(tenant, pageable);
         }
 
-        if (stores.size() == pageSize) {
+        if (stores.size() == pageable.getPageSize()) {
             newNextToken = encodeNextToken(stores.get(stores.size() - 1).getId());
         }
 

@@ -1223,7 +1223,7 @@ public final class KmsDtos {
         @JsonProperty("keyWrn")
         @Schema(
                 description = "The Amazon Resource Name (WRN) of the key",
-                example = "wrn:wams:kms:us-east-1:123456789012:key/550e8400-e29b-41d4-a716-446655440000",
+                example = "wrn:wams:kms:us-east-1:123456789012:key:550e8400-e29b-41d4-a716-446655440000",
                 required = true
         )
         private String keyWrn;

@@ -1,9 +1,11 @@
 package eu.isygoit.repository;
 
 import eu.isygoit.model.KmsKeyPolicy;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -15,5 +17,7 @@ public interface KmsKeyPolicyRepository extends JpaRepository<KmsKeyPolicy, Long
     /**
      * Find key policy by tenant and keyId
      */
-    Optional<KmsKeyPolicy> findByTenantAndKeyId(String tenant, String keyId);
+    List<KmsKeyPolicy> findByTenantAndKeyId(String tenant, String keyId, Pageable pageable);
+
+    Optional<KmsKeyPolicy> findByTenantAndKeyIdAndPolicyName(String tenant, String keyId, String policyName);
 }

@@ -23,8 +23,8 @@ import org.hibernate.annotations.DynamicUpdate;
 @Entity
 @Table(name = SchemaTableConstantName.T_KMS_KEY_POLICY,
         uniqueConstraints = {
-                @UniqueConstraint(name = SchemaUcConstantName.UC_UC_KMS_KEY_POLICY_KEY_ID,
-                        columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_KEY_ID})
+                @UniqueConstraint(name = SchemaUcConstantName.UC_KMS_KEY_POLICY_KEY_ID_NAME,
+                        columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_KEY_ID, SchemaColumnConstantName.C_POLICY_NAME}),
         },
         indexes = {
                 @Index(name = SchemaIndexConstantName.IDX_KMS_KEY_POLICY_KEY_ID, columnList = SchemaColumnConstantName.C_KEY_ID)
@@ -45,6 +45,9 @@ public class KmsKeyPolicy extends AuditableEntity<Long> implements ITenantAssign
     @Column(name = SchemaColumnConstantName.C_KEY_ID, length = 255, updatable = false, nullable = false)
     private String keyId;
 
+    @Column(name = SchemaColumnConstantName.C_POLICY_NAME, nullable = false)
+    private String policyName; 
+    
     @Lob
     @Column(name = SchemaColumnConstantName.C_POLICY_DOCUMENT, nullable = false)
     private String policyDocument; // JSON format IAM policy
@@ -54,6 +57,5 @@ public class KmsKeyPolicy extends AuditableEntity<Long> implements ITenantAssign
 
     @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = 1024)
     private String description;
-
 }
 

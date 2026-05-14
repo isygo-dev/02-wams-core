@@ -1,7 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectMapperAndService;
-import eu.isygoit.api.CalendarEventServiceAPI;
+import eu.isygoit.api.CalendarEventServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
@@ -39,7 +39,7 @@ import java.util.Optional;
 @RestController
 @InjectMapperAndService(handler = CmsExceptionHandler.class, mapper = VCalendarEventMapper.class, minMapper = VCalendarEventMapper.class, service = VEventService.class)
 @RequestMapping(path = "/api/v1/private/calendar/event")
-public class VEventController extends MappedCrudTenantController<Long, VCalendarEvent, VCalendarEventDto, VCalendarEventDto, VEventService> implements CalendarEventServiceAPI {
+public class VEventController extends MappedCrudTenantController<Long, VCalendarEvent, VCalendarEventDto, VCalendarEventDto, VEventService> implements CalendarEventServiceApi {
 
     @Autowired
     private VCalendarService calendarService;

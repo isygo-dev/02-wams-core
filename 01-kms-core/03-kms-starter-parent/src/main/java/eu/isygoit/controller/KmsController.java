@@ -1049,7 +1049,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
-            Map<String, Object> policyMap = keyPolicyService.getKeyPolicy(tenant, keyId);
+            Map<String, Object> policyMap = keyPolicyService.getKeyPolicy(tenant, keyId, policyName);
             String policyJson = new ObjectMapper().writeValueAsString(policyMap);
             GetKeyPolicyResponse response = GetKeyPolicyResponse.builder().policy(policyJson).build();
             return ResponseFactory.responseOk(response);

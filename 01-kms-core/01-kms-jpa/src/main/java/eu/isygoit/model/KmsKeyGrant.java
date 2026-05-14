@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = SchemaTableConstantName.T_KMS_KEY_GRANT,
         uniqueConstraints = {
-                @UniqueConstraint(name = SchemaUcConstantName.UC_UC_KMS_KEY_GRANT_ID,
+                @UniqueConstraint(name = SchemaUcConstantName.UC_KMS_KEY_GRANT_ID,
                         columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_GRANT_ID})
         },
         indexes = {

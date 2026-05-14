@@ -631,7 +631,7 @@ class KmsControllerTest {
     @Test
     void getKeyPolicy_Success() throws Exception {
         Map<String, Object> policy = Map.of("Version", "2012-10-17");
-        when(keyPolicyService.getKeyPolicy(eq(TENANT), eq(KEY_ID))).thenReturn(policy);
+        when(keyPolicyService.getKeyPolicy(eq(TENANT), eq(KEY_ID), anyString())).thenReturn(policy);
         when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/policy", KEY_ID))
                 .andExpect(status().isOk())

@@ -161,6 +161,6 @@ public class MultiRegionService implements IMultiRegionService {
     }
 
     private String generateWrn(String keyId, String region) {
-        return String.format("wrn:wams:kms:%s:123456789012:key/%s", region, keyId);
+        return String.format("wrn:wams:kms:%s:123456789012:key:%s", region, keyId);
     }
 }

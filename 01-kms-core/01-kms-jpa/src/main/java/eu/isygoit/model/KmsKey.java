@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = SchemaTableConstantName.T_KMS_KEY,
         uniqueConstraints = {
-                @UniqueConstraint(name = SchemaUcConstantName.UC_UC_KMS_KEY_TENANT_ID,
+                @UniqueConstraint(name = SchemaUcConstantName.UC_KMS_KEY_TENANT_ID,
                         columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_KEY_ID})
         },
         indexes = {
@@ -55,9 +55,6 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
 
     @Column(name = SchemaColumnConstantName.C_REGION, length = 100)
     private String region; // WAMS region where this key resides
-
-    @Column(name = SchemaColumnConstantName.C_KEY_STORE_ID, length = 255)
-    private Long keyStoreId; // Custom key store ID
 
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_KEY_SPEC, length = 50, nullable = false)
@@ -141,6 +138,15 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_EXPIRATION_MODEL, length = 50)
     private IEnumKeyExpirationModel.Types expirationModel;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = SchemaColumnConstantName.C_KEY_STORE_ID,
+            referencedColumnName = SchemaColumnConstantName.C_ID)
+    private CustomKeyStore customKeyStore;
+
+    @Column(name = SchemaColumnConstantName.C_KEY_STORE_ID,
+            insertable = false, updatable = false, length = 255)
+    private Long keyStoreId;
 
     // Helper methods
     public boolean isExpired() {

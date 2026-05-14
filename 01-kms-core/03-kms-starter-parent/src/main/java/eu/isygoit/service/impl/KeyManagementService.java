@@ -60,10 +60,12 @@ public class KeyManagementService implements IKeyManagementService {
                 tenant,
                 request.getKeySpec());
 
+        UUID keyId = UUID.randomUUID();
+
         String wrn = String.format(
-                "wrn:kms:service:%s:key/%s",
+                "wrn:kms:service:%s:key:%s",
                 tenant,
-                UUID.randomUUID()
+                keyId
         );
 
         String versionId = "v-" + UUID.randomUUID();
@@ -76,6 +78,7 @@ public class KeyManagementService implements IKeyManagementService {
             // Create and save KMS Key
             KmsKey key = KmsKey.builder()
                     .tenant(tenant)
+                    .keyId(keyId.toString())
                     .keyWrn(wrn)
                     .keySpec(request.getKeySpec())
                     .keyUsage(request.getKeyUsage())
@@ -551,10 +554,8 @@ public class KeyManagementService implements IKeyManagementService {
     public ListAliasesResponseDto listAliasesForKey(String tenant, String keyId, Integer limit, String nextToken) {
         log.info("Listing aliases for key: {} tenant: {}", keyId, tenant);
 
-        int pageSize = (limit != null && limit > 0) ? Math.min(limit, DEFAULT_PAGE_SIZE) : DEFAULT_PAGE_SIZE;
-        int pageNum = (nextToken != null) ? Integer.parseInt(nextToken) : 0;
+        Pageable pageable = RepoHelper.resolvePageable(limit, nextToken, "creationDate");
 
-        Pageable pageable = PageRequest.of(pageNum, pageSize);
         List<KmsAlias> aliases = kmsAliasRepository.findByTenantAndKeyId(tenant, keyId, pageable);
 
         return ListAliasesResponseDto.builder()

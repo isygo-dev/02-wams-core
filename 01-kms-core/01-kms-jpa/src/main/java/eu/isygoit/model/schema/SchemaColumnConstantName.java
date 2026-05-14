@@ -254,4 +254,5 @@ public interface SchemaColumnConstantName extends ComSchemaColumnConstantName {
     String C_HASH_ALGORITHM = "HASH_ALGORITHM";
     String C_TAG_KEY = "TAG_KEY";
     String C_TAG_VALUE = "TAG_VALUE";
+    String C_POLICY_NAME = "POLICY_NAME";
 }

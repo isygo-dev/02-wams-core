@@ -72,8 +72,8 @@ public class DataKeyService implements IDataKeyService {
             throw new InvalidParameterException("KeyId is required");
         }
 
-        // 1. If it's an AWS-style ARN (e.g., arn:aws:kms:region:account:key:1234abcd-...)
-        if (keyIdOrAlias.startsWith("arn:")) {
+        // 1. If it's an AWS-style ARN (e.g., wrn:aws:kms:region:account:key:1234abcd-...)
+        if (keyIdOrAlias.startsWith("wrn:")) {
             // Extract the key ID from the ARN (last part after "key:")
             String[] parts = keyIdOrAlias.split(":");
             if (parts.length < 2) {

@@ -3,6 +3,7 @@ package eu.isygoit.repository;
 import eu.isygoit.model.CustomKeyStore;
 import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAssignableRepository;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,9 +12,9 @@ public interface CustomKeyStoreRepository extends JpaPagingAndSortingTenantAssig
 
     boolean existsByTenantAndName(String tenant, @NotBlank String keyStoreName);
 
-    List<CustomKeyStore> findByTenantAndIdGreaterThanOrderByIdAsc(String tenant, Long lastId, int pageSize);
+    List<CustomKeyStore> findByTenantAndIdGreaterThanOrderByIdAsc(String tenant, Long lastId, Pageable pageable);
 
-    List<CustomKeyStore> findByTenantOrderByIdAsc(String tenant, int pageSize);
+    List<CustomKeyStore> findByTenantOrderByIdAsc(String tenant, Pageable pageable);
 
     long countByTenant(String tenant);
 
