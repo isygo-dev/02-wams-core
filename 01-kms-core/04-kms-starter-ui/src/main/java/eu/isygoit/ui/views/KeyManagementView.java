@@ -32,6 +32,7 @@ import eu.isygoit.ui.MainLayout;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +53,7 @@ public class KeyManagementView extends VerticalLayout {
     private List<KeyCard> allCards = new ArrayList<>();
     private String currentSearch = "";
     private String currentStatus = "All";
+    private List<String> existingAliases = new ArrayList<>();
 
     @Autowired
     public KeyManagementView(KmsApiService kmsApiService) {
@@ -80,7 +82,10 @@ public class KeyManagementView extends VerticalLayout {
         add(loadingBar);
 
         createButton.addClickListener(e -> openCreateKeyDialog());
-        refreshButton.addClickListener(e -> loadKeys());
+        refreshButton.addClickListener(e -> {
+            loadAliases();
+            loadKeys();
+        });
         searchField.setPlaceholder("Search by alias or key ID");
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
@@ -96,7 +101,26 @@ public class KeyManagementView extends VerticalLayout {
             filterCards();
         });
 
+        loadAliases();
         loadKeys();
+    }
+
+    private void loadAliases() {
+        try {
+            ResponseEntity<ListAliasesResponse> response = kmsApiService.listAliases(100, null);
+            ListAliasesResponse aliasesResponse = response.getBody();
+            if (aliasesResponse != null && aliasesResponse.getAliases() != null) {
+                existingAliases = aliasesResponse.getAliases().stream()
+                        .map(ListAliasesResponse.AliasEntry::getAliasName)
+                        .collect(Collectors.toList());
+            } else {
+                existingAliases = new ArrayList<>();
+            }
+        } catch (Exception e) {
+            Notification.show("Failed to load aliases: " + e.getMessage(), 3000, Notification.Position.TOP_CENTER)
+                    .addThemeVariants(NotificationVariant.LUMO_WARNING);
+            existingAliases = new ArrayList<>();
+        }
     }
 
     private HorizontalLayout buildToolbar() {
@@ -104,7 +128,7 @@ public class KeyManagementView extends VerticalLayout {
         toolbar.setWidthFull();
         toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
-        toolbar.getStyle().set("flex-wrap", "wrap"); // fixed: use style instead of setFlexWrap
+        toolbar.getStyle().set("flex-wrap", "wrap");
         toolbar.addClassName(LumoUtility.Padding.Bottom.MEDIUM);
 
         HorizontalLayout leftGroup = new HorizontalLayout();
@@ -206,8 +230,28 @@ public class KeyManagementView extends VerticalLayout {
         dialog.setWidth("560px");
 
         FormLayout form = new FormLayout();
-        TextField aliasField = new TextField("Alias (optional)");
-        aliasField.setPlaceholder("alias/my-key");
+
+        ComboBox<String> aliasCombo = new ComboBox<>("Alias (optional)");
+        aliasCombo.setItems(existingAliases);
+        aliasCombo.setPlaceholder("Select existing or type new");
+        aliasCombo.setAllowCustomValue(true);
+        TextField newAliasField = new TextField("New alias name");
+        newAliasField.setVisible(false);
+        newAliasField.setPlaceholder("alias/my-new-alias");
+
+        aliasCombo.addCustomValueSetListener(e -> {
+            newAliasField.setVisible(true);
+            newAliasField.setValue(e.getDetail());
+        });
+        aliasCombo.addValueChangeListener(e -> {
+            if (e.getValue() != null && !e.getValue().isEmpty() && !existingAliases.contains(e.getValue())) {
+                newAliasField.setVisible(true);
+                newAliasField.setValue(e.getValue());
+            } else {
+                newAliasField.setVisible(false);
+                newAliasField.clear();
+            }
+        });
 
         TextArea descriptionField = new TextArea("Description");
         descriptionField.setMaxLength(500);
@@ -227,28 +271,76 @@ public class KeyManagementView extends VerticalLayout {
         originCombo.setValue(IEnumKeyOrigin.Types.WAMS_KMS);
         originCombo.setRequiredIndicatorVisible(true);
 
-        form.add(aliasField, descriptionField, keySpecCombo, keyUsageCombo, originCombo);
+        form.add(aliasCombo, newAliasField, descriptionField, keySpecCombo, keyUsageCombo, originCombo);
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
         Button createBtn = new Button("Create", e -> {
             dialog.close();
+
+            String newAlias = null;
+            String existingSelectedAlias = null;
+
+            if (newAliasField.isVisible() && !newAliasField.getValue().isBlank()) {
+                newAlias = newAliasField.getValue();
+            } else if (aliasCombo.getValue() != null && !aliasCombo.getValue().isBlank()) {
+                existingSelectedAlias = aliasCombo.getValue();
+            }
+
             try {
+                // Step 1: Create the KMS key without alias
                 CreateKeyRequest request = CreateKeyRequest.builder()
-                        .alias(aliasField.getValue())
+                        .alias(StringUtils.hasText(newAlias)?newAlias:existingSelectedAlias)  // do not set alias here; we'll create it separately
                         .description(descriptionField.getValue())
                         .keySpec(keySpecCombo.getValue())
                         .keyUsage(keyUsageCombo.getValue())
                         .origin(originCombo.getValue())
                         .build();
                 ResponseEntity<CreateKeyResponse> response = kmsApiService.createKey(request);
-                if (response.getStatusCode().is2xxSuccessful()) {
+                if (!response.getStatusCode().is2xxSuccessful()) {
+                    Notification.show("Key creation failed", 3000, Notification.Position.TOP_CENTER)
+                            .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                    return;
+                }
+                CreateKeyResponse created = response.getBody();
+                String newKeyId = created.getKeyMetadata().getKeyId();
+
+                // Step 2: Handle alias (if any)
+                if (newAlias != null && !newAlias.isBlank()) {
+                    // Create a brand new alias pointing to the new key
+                    CreateAliasRequest aliasRequest = CreateAliasRequest.builder()
+                            .aliasName(newAlias)
+                            .targetKeyId(newKeyId)
+                            .build();
+                    ResponseEntity<CreateAliasResponse> aliasResponse = kmsApiService.createAlias(aliasRequest);
+                    if (aliasResponse.getStatusCode().is2xxSuccessful()) {
+                        Notification.show("Key created and alias '" + newAlias + "' added", 3000, Notification.Position.TOP_CENTER)
+                                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                    } else {
+                        Notification.show("Key created but alias creation failed", 3000, Notification.Position.TOP_CENTER)
+                                .addThemeVariants(NotificationVariant.LUMO_WARNING);
+                    }
+                } else if (existingSelectedAlias != null && !existingSelectedAlias.isBlank()) {
+                    // Reassign an existing alias to the new key
+                    UpdateAliasRequest aliasRequest = UpdateAliasRequest.builder()
+                            .aliasName(existingSelectedAlias)
+                            .targetKeyId(newKeyId)
+                            .build();
+                    ResponseEntity<UpdateAliasResponse> aliasResponse = kmsApiService.updateAlias(existingSelectedAlias, aliasRequest);
+                    if (aliasResponse.getStatusCode().is2xxSuccessful()) {
+                        Notification.show("Key created and alias '" + existingSelectedAlias + "' reassigned", 3000, Notification.Position.TOP_CENTER)
+                                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                    } else {
+                        Notification.show("Key created but alias reassignment failed", 3000, Notification.Position.TOP_CENTER)
+                                .addThemeVariants(NotificationVariant.LUMO_WARNING);
+                    }
+                } else {
                     Notification.show("Key created successfully", 3000, Notification.Position.TOP_CENTER)
                             .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                    loadKeys();
-                } else {
-                    Notification.show("Creation failed", 3000, Notification.Position.TOP_CENTER)
-                            .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
+
+                // Refresh data
+                loadAliases();
+                loadKeys();
             } catch (Exception ex) {
                 Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_CENTER)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
@@ -262,7 +354,7 @@ public class KeyManagementView extends VerticalLayout {
     }
 
     // -------------------------------------------------------------------------
-    // Professional Key Card (Jira style)
+    // Key Card with edit alias & description
     // -------------------------------------------------------------------------
     private class KeyCard extends VerticalLayout {
         private final String keyId;
@@ -331,6 +423,9 @@ public class KeyManagementView extends VerticalLayout {
             buttonBar.setSpacing(true);
             buttonBar.setPadding(false);
 
+            Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit alias & description");
+            editBtn.addClickListener(e -> openUpdateDialog());
+
             Button describeBtn = createIconButton(VaadinIcon.INFO_CIRCLE, "View details");
             describeBtn.addClickListener(e -> showKeyDetails());
 
@@ -345,7 +440,7 @@ public class KeyManagementView extends VerticalLayout {
             deleteBtn.addThemeVariants(ButtonVariant.LUMO_ERROR);
             deleteBtn.addClickListener(e -> confirmPermanentDelete());
 
-            buttonBar.add(describeBtn, scheduleDeleteBtn, cancelDeleteBtn, deleteBtn);
+            buttonBar.add(editBtn, describeBtn, scheduleDeleteBtn, cancelDeleteBtn, deleteBtn);
             headerRow.add(titleRow, buttonBar);
             headerRow.expand(titleRow);
             add(headerRow);
@@ -383,6 +478,103 @@ public class KeyManagementView extends VerticalLayout {
             btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
             btn.setTooltipText(tooltip);
             return btn;
+        }
+
+        private void openUpdateDialog() {
+            Dialog dialog = new Dialog();
+            dialog.setHeaderTitle("Edit key alias & description");
+            dialog.setWidth("550px");
+
+            FormLayout form = new FormLayout();
+
+            ComboBox<String> aliasCombo = new ComboBox<>("Alias");
+            aliasCombo.setItems(existingAliases);
+            aliasCombo.setPlaceholder("Select existing alias");
+            aliasCombo.setAllowCustomValue(true);
+            TextField newAliasField = new TextField("New alias name");
+            newAliasField.setVisible(false);
+            newAliasField.setPlaceholder("alias/my-new-alias");
+
+            String currentAlias = (metadata != null && metadata.getAlias() != null) ? metadata.getAlias() : "";
+            aliasCombo.setValue(currentAlias.isEmpty() ? null : currentAlias);
+
+            aliasCombo.addCustomValueSetListener(e -> {
+                newAliasField.setVisible(true);
+                newAliasField.setValue(e.getDetail());
+            });
+            aliasCombo.addValueChangeListener(e -> {
+                if (e.getValue() != null && !e.getValue().isEmpty() && !existingAliases.contains(e.getValue())) {
+                    newAliasField.setVisible(true);
+                    newAliasField.setValue(e.getValue());
+                } else {
+                    newAliasField.setVisible(false);
+                    newAliasField.clear();
+                }
+            });
+
+            TextArea descriptionField = new TextArea("Description");
+            descriptionField.setWidthFull();
+            descriptionField.setMaxLength(500);
+            String currentDesc = (metadata != null && metadata.getDescription() != null) ? metadata.getDescription() : "";
+            descriptionField.setValue(currentDesc);
+
+            form.add(aliasCombo, newAliasField, descriptionField);
+            form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
+
+            Button saveBtn = new Button("Save", e -> {
+                dialog.close();
+                String newAlias = null;
+                if (newAliasField.isVisible() && !newAliasField.getValue().isBlank()) {
+                    newAlias = newAliasField.getValue();
+                } else if (aliasCombo.getValue() != null && !aliasCombo.getValue().isBlank()) {
+                    newAlias = aliasCombo.getValue();
+                }
+                String newDescription = descriptionField.getValue();
+
+                try {
+                    // Update description if changed
+                    if (!newDescription.equals(currentDesc)) {
+                        UpdateKeyDescriptionRequest descRequest = UpdateKeyDescriptionRequest.builder()
+                                .keyId(keyId)
+                                .alias(aliasOrId)
+                                .description(newDescription)
+                                .build();
+                        kmsApiService.updateKeyDescription(keyId, descRequest);
+                    }
+
+                    // Handle alias change
+                    if (newAlias != null && !newAlias.equals(currentAlias)) {
+                        if (existingAliases.contains(newAlias)) {
+                            // Reassign existing alias to this key
+                            UpdateAliasRequest aliasRequest = UpdateAliasRequest.builder()
+                                    .aliasName(newAlias)
+                                    .targetKeyId(keyId)
+                                    .build();
+                            kmsApiService.updateAlias(newAlias, aliasRequest);
+                        } else {
+                            // Create new alias and assign to this key
+                            CreateAliasRequest createAliasRequest = CreateAliasRequest.builder()
+                                    .aliasName(newAlias)
+                                    .targetKeyId(keyId)
+                                    .build();
+                            kmsApiService.createAlias(createAliasRequest);
+                        }
+                    }
+
+                    Notification.show("Key updated successfully", 3000, Notification.Position.TOP_CENTER)
+                            .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                    loadAliases();
+                    loadKeys();
+                } catch (Exception ex) {
+                    Notification.show("Update failed: " + ex.getMessage(), 5000, Notification.Position.TOP_CENTER)
+                            .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                }
+            });
+            saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            Button cancelBtn = new Button("Cancel", e -> dialog.close());
+            dialog.getFooter().add(cancelBtn, saveBtn);
+            dialog.add(form);
+            dialog.open();
         }
 
         private void showKeyDetails() {

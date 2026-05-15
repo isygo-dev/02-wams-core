@@ -44,13 +44,6 @@ public class MainLayout extends AppLayout {
                 VaadinIcon.KEY.create()
         );
 
-        // ================= CRYPTO =================
-        SideNavItem crypto = new SideNavItem(
-                "Cryptographic Operations",
-                CryptoOperationsView.class,
-                VaadinIcon.LOCK.create()
-        );
-
         // ================= ALIASES =================
         SideNavItem aliases = new SideNavItem(
                 "Key Aliases",
@@ -93,16 +86,23 @@ public class MainLayout extends AppLayout {
                 VaadinIcon.DATABASE.create()
         );
 
+        // ================= CRYPTO =================
+        SideNavItem crypto = new SideNavItem(
+                "Cryptographic Operations",
+                CryptoOperationsView.class,
+                VaadinIcon.LOCK.create()
+        );
+
         nav.addItem(
                 home,
                 keyMgmt,
-                crypto,
                 aliases,
                 tags,
                 policies,
                 grants,
                 byok,
-                stores
+                stores,
+                crypto
         );
 
         Scroller scroller = new Scroller(nav);
