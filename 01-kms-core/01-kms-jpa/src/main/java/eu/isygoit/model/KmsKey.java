@@ -6,6 +6,7 @@ import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -43,9 +44,10 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     private Long id;
 
     //@Convert(converter = LowerCaseConverter.class)
+    @Builder.Default
     @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
     @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
-    private String tenant;
+    private String tenant = TenantConstants.DEFAULT_TENANT_NAME;
 
     @Column(name = SchemaColumnConstantName.C_KEY_ID, updatable = false, nullable = false, length = 255)
     private String keyId; // UUID format
@@ -70,13 +72,15 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = 1024)
     private String description;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_STATUS, length = 50, nullable = false)
-    private IEnumKeyStatus.Types keyStatus; // ENABLED, DISABLED, PENDING_DELETION
+    private IEnumKeyStatus.Types keyStatus = IEnumKeyStatus.Types.ENABLED; // ENABLED, DISABLED, PENDING_DELETION
 
     @Column(name = SchemaColumnConstantName.C_CURRENT_VERSION_ID, length = 255)
     private String currentVersionId;
 
+    @Builder.Default
     @Column(name = SchemaColumnConstantName.C_ROTATION_ENABLED, nullable = false)
     @ColumnDefault("false")
     private Boolean rotationEnabled = false;
@@ -97,10 +101,12 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     @Column(name = SchemaColumnConstantName.C_KEY_MATERIAL, nullable = false)
     private byte[] keyMaterial; // Encrypted key material
 
+    @Builder.Default
     @Column(name = SchemaColumnConstantName.C_KEY_MATERIAL_ENCRYPTED, nullable = false)
     @ColumnDefault("true")
     private Boolean keyMaterialEncrypted = true;
 
+    @Builder.Default
     @Column(name = SchemaColumnConstantName.C_IMPORTED, nullable = false)
     @ColumnDefault("false")
     private Boolean imported = false; // Whether key material was imported
@@ -111,8 +117,9 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     @Column(name = SchemaColumnConstantName.C_EXPIRATION_DATE)
     private LocalDateTime expirationDate; // Expiration date for imported key material
 
+    @Builder.Default
     @Column(name = SchemaColumnConstantName.C_CREATION_DATE, nullable = false, updatable = false)
-    private LocalDateTime creationDate;
+    private LocalDateTime creationDate = LocalDateTime.now();
 
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_ORIGIN, length = 50)
@@ -122,6 +129,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     @Column(name = SchemaColumnConstantName.C_TAGS, columnDefinition = "TEXT")
     private String tags; // JSON format for metadata tags
 
+    @Builder.Default
     @Column(name = SchemaColumnConstantName.C_MULTI_REGION, nullable = false)
     @ColumnDefault("false")
     private Boolean multiRegion = false; // Whether this key is part of a multi‑region setup
