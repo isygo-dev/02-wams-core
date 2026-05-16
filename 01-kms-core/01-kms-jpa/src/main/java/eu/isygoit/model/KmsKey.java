@@ -126,9 +126,6 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     @ColumnDefault("'WAMS_KMS'")
     private IEnumKeyOrigin.Types origin; // WAMS_KMS, EXTERNAL, CLOUDHSM
 
-    @Column(name = SchemaColumnConstantName.C_TAGS, columnDefinition = "TEXT")
-    private String tags; // JSON format for metadata tags
-
     @Builder.Default
     @Column(name = SchemaColumnConstantName.C_MULTI_REGION, nullable = false)
     @ColumnDefault("false")

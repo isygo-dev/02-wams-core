@@ -23,6 +23,7 @@ import org.hibernate.annotations.DynamicUpdate;
 @Entity
 @Table(name = SchemaTableConstantName.T_KMS_KEY_POLICY,
         uniqueConstraints = {
+        //TODO KMS key cannot have multiple key policies. According to the official AWS documentation, every KMS key must have exactly one key policy
                 @UniqueConstraint(name = SchemaUcConstantName.UC_KMS_KEY_POLICY_KEY_ID_NAME,
                         columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_KEY_ID, SchemaColumnConstantName.C_POLICY_NAME}),
         },

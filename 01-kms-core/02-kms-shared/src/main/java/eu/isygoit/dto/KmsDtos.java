@@ -38,7 +38,7 @@ public final class KmsDtos {
         private String description;
         private IEnumKeySpec.Types keySpec;          // SYMMETRIC_DEFAULT, RSA_2048, ECC_NIST_P256, etc.
         private IEnumKeyUsage.Types keyUsage;         // ENCRYPT_DECRYPT, SIGN_VERIFY, GENERATE_VERIFY_MAC
-        private String alias;
+        private String keyAlias;
         private IEnumKeyOrigin.Types origin;           // WAMS_KMS, EXTERNAL
         private List<Tag> tags;
         private Boolean multiRegion;
@@ -77,15 +77,16 @@ public final class KmsDtos {
             private Boolean rotationEnabled;
             private IEnumKeySpec.Types keySpec;
             private IEnumKeyUsage.Types keyUsage;
+            private String policy;
+            private List<CreateKeyRequest.Tag> tags;
             private String currentVersion;
-            private String keyState;
             private IEnumKeyOrigin.Types origin;
-            private IEnumKeyStatus.Types status;
+            private IEnumKeyStatus.Types keyStatus;
             @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
             private LocalDateTime createdAt;
             @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
             private LocalDateTime updatedAt;
-            private String alias;
+            private String keyAlias;
             private IEnumKeyExpirationModel.Types expirationModel;
             private String customerMasterKeySpec; // alias for keySpec
             private List<String> encryptionAlgorithmSpecs;

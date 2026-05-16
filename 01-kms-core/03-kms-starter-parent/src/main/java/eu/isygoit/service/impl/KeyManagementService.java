@@ -2,6 +2,7 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.dto.data.TagDto;
+import eu.isygoit.enums.IEnumKeyOrigin;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.exception.CustomKeyStoreNotFoundException;
 import eu.isygoit.exception.InvalidKeyStateException;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -54,6 +56,9 @@ public class KeyManagementService implements IKeyManagementService {
     @Autowired
     private KmsTagRepository kmsTagRepository;
 
+    @Autowired
+    private KmsKeyPolicyRepository kmsKeyPolicyRepository;
+
     @Override
     public CreateKeyResponse createKey(String tenant, CreateKeyRequest request) {
         log.info("Creating key for tenant: {} with spec: {}",
@@ -82,7 +87,7 @@ public class KeyManagementService implements IKeyManagementService {
                     .keyWrn(wrn)
                     .keySpec(request.getKeySpec())
                     .keyUsage(request.getKeyUsage())
-                    .keyAlias(request.getAlias())
+                    .keyAlias(request.getKeyAlias())
                     .description(request.getDescription())
                     .keyStatus(IEnumKeyStatus.Types.ENABLED)
                     .currentVersionId(versionId)
@@ -111,14 +116,50 @@ public class KeyManagementService implements IKeyManagementService {
                     keyVersion.getKeyId(),
                     wrn);
 
-            return CreateKeyResponse.builder().keyMetadata(CreateKeyResponse.KeyMetadata.builder()
-                            .wrn(wrn)
-                            .keyId(keyVersion.getKeyId())
-                            .status(IEnumKeyStatus.Types.ENABLED)
-                            .createdAt(now)
+            return CreateKeyResponse.builder()
+                    .keyMetadata(CreateKeyResponse.KeyMetadata.builder()
+                            .wamsAccountId(savedKey.getTenant())
+                            .keyId(savedKey.getKeyId())
+                            .wrn(savedKey.getKeyWrn())
+                            .creationDate(savedKey.getCreationDate())
+                            .enabled(savedKey.isEnabled())
+                            .description(savedKey.getDescription())
+                            .rotationEnabled(savedKey.getRotationEnabled())
+                            .keySpec(savedKey.getKeySpec())
+                            .keyUsage(savedKey.getKeyUsage())
+                            //.policy(...) // map if available
+                            //.tags(savedKey.getTags())   // deserialize JSON if needed
+                            .currentVersion(savedKey.getCurrentVersionId())
+                            .origin(savedKey.getOrigin())
+                            .keyStatus(savedKey.getKeyStatus())
+                            .createdAt(savedKey.getCreationDate())
+                            .updatedAt(savedKey.getUpdateDate())
+                            .keyAlias(savedKey.getKeyAlias())
+                            .expirationModel(savedKey.getExpirationModel())
+                            .customerMasterKeySpec(
+                                    savedKey.getKeySpec() != null
+                                            ? savedKey.getKeySpec().name()
+                                            : null
+                            )
+                            //.encryptionAlgorithmSpecs(...)
+                            //.signingAlgorithms(...)
+                            .keyManager(
+                                    IEnumKeyOrigin.Types.EXTERNAL.equals(savedKey.getOrigin())
+                                            ? "CUSTOMER"
+                                            : "WAMS"
+                            )
+                            .multiRegion(savedKey.getMultiRegion())
+                            .multiRegionConfiguration(
+                                    savedKey.getMultiRegion() != null && savedKey.getMultiRegion()
+                                            ? Map.of(
+                                            "primaryKeyId", savedKey.getPrimaryKeyId(),
+                                            "primaryRegion", savedKey.getPrimaryRegion(),
+                                            "replicaRegions", savedKey.getReplicaRegions()
+                                    )
+                                            : null
+                            )
                             .build())
                     .build();
-
         } catch (Exception e) {
             log.error("Error creating key for tenant: {}", tenant, e);
             throw new RuntimeException(
@@ -129,30 +170,51 @@ public class KeyManagementService implements IKeyManagementService {
     }
 
     @Override
-    public DescribeKeyResponse describeKey(
-            String tenant,
-            String keyId,
-            List<String> grantTokens) {
-
-        log.info("Getting key metadata for tenant: {} keyId: {}",
-                tenant,
-                keyId);
+    public DescribeKeyResponse describeKey(String tenant, String keyId, List<String> grantTokens) {
+        log.info("Getting key metadata for tenant: {} keyId: {}", tenant, keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
-        return DescribeKeyResponse.builder().keyMetadata(CreateKeyResponse.KeyMetadata.builder()
-                        .keyId(key.getKeyId())
-                        .wrn(key.getKeyWrn())
-                        .status(key.getKeyStatus())
-                        .keySpec(key.getKeySpec())
-                        .keyUsage(key.getKeyUsage())
-                        .currentVersion(key.getCurrentVersionId())
-                        .createdAt(key.getCreationDate())
-                        .alias(key.getKeyAlias())
-                        .description(key.getDescription())
-                        .rotationEnabled(key.getRotationEnabled()).build())
+        // Fetch tags associated with this key
+        List<CreateKeyRequest.Tag> tags = kmsTagRepository.findByTenantAndKeyId(tenant, key.getKeyId())
+                .stream()
+                .map(t -> CreateKeyRequest.Tag.builder()
+                        .tagKey(t.getTagKey())
+                        .tagValue(t.getTagValue())
+                        .build())
+                .collect(Collectors.toList());
+
+        // Fetch key policy (if any)
+        KmsKeyPolicy policy = kmsKeyPolicyRepository.findByTenantAndKeyId(tenant, key.getKeyId());
+
+        CreateKeyResponse.KeyMetadata metadata = CreateKeyResponse.KeyMetadata.builder()
+                .keyId(key.getKeyId())
+                .wrn(key.getKeyWrn())
+                .keyStatus(key.getKeyStatus())
+                .keySpec(key.getKeySpec())
+                .keyUsage(key.getKeyUsage())
+                .currentVersion(key.getCurrentVersionId())
+                .creationDate(key.getCreationDate())
+                .createdAt(key.getCreationDate())
+                //.updatedAt(key.getLastModifiedDate())
+                .keyAlias(key.getKeyAlias())
+                .description(key.getDescription())
+                .rotationEnabled(key.getRotationEnabled())
+                .origin(key.getOrigin())
+                .expirationModel(key.getExpirationModel())
+                .multiRegion(key.getMultiRegion())
+                //.bypassPolicyLockoutSafetyCheck(key.getBypassPolicyLockoutSafetyCheck())
+                .policy(policy!=null?policy.getPolicyDocument():"")
+                .tags(tags)
+                .enabled(IEnumKeyStatus.Types.ENABLED.equals(key.getKeyStatus()))
+                //.encryptionAlgorithmSpecs(key.getEncryptionAlgorithmSpecs())   // if stored
+                //.signingAlgorithms(key.getSigningAlgorithms())                 // if stored
+                //.keyManager(key.getKeyManager())
+                //.multiRegionConfiguration(key.getMultiRegionConfiguration())
                 .build();
+
+        return DescribeKeyResponse.builder().keyMetadata(metadata).build();
     }
 
     @Override
@@ -368,9 +430,9 @@ public class KeyManagementService implements IKeyManagementService {
 
         return UpdateKeyDescriptionResponse.builder().keyMetadata(CreateKeyResponse.KeyMetadata.builder()
                         .keyId(String.valueOf(updated.getKeyId()))
-                        .alias(updated.getKeyAlias())
+                        .keyAlias(updated.getKeyAlias())
                         .description(updated.getDescription())
-                        .status(updated.getKeyStatus())
+                        .keyStatus(updated.getKeyStatus())
                         .updatedAt(LocalDateTime.now())
                         .build())
                 .build();

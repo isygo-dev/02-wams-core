@@ -82,7 +82,6 @@ public class MultiRegionService implements IMultiRegionService {
         replicaKey.setExpirationDate(primaryKey.getExpirationDate());
         replicaKey.setExpirationModel(primaryKey.getExpirationModel());
         replicaKey.setRotationEnabled(false);
-        replicaKey.setTags(primaryKey.getTags());
         replicaKey.setKeyStoreId(primaryKey.getKeyStoreId());
 
         kmsKeyRepository.save(replicaKey);

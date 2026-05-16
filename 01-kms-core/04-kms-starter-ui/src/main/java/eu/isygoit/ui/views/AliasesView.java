@@ -1,6 +1,5 @@
 package eu.isygoit.ui.views;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -191,7 +190,7 @@ public class AliasesView extends VerticalLayout {
                 ResponseEntity<DescribeKeyResponse> desc = kmsApiService.describeKey(keyId);
                 DescribeKeyResponse descBody = desc.getBody();
                 if (descBody != null && descBody.getKeyMetadata() != null) {
-                    String alias = descBody.getKeyMetadata().getAlias();
+                    String alias = descBody.getKeyMetadata().getKeyAlias();
                     if (alias != null && !alias.isEmpty()) return alias + " (" + keyId + ")";
                 }
             } catch (Exception ignored) {}
@@ -381,7 +380,7 @@ public class AliasesView extends VerticalLayout {
                     ResponseEntity<DescribeKeyResponse> desc = kmsApiService.describeKey(keyId);
                     DescribeKeyResponse descBody = desc.getBody();
                     if (descBody != null && descBody.getKeyMetadata() != null) {
-                        String alias = descBody.getKeyMetadata().getAlias();
+                        String alias = descBody.getKeyMetadata().getKeyAlias();
                         if (alias != null && !alias.isEmpty()) return alias + " (" + keyId + ")";
                     }
                 } catch (Exception ignored) {}

@@ -1,8 +1,8 @@
 package eu.isygoit.ui.views;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -34,8 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Route(value = "keys", layout = MainLayout.class)
@@ -224,13 +223,17 @@ public class KeyManagementView extends VerticalLayout {
         createButton.setEnabled(!show);
     }
 
+    // =========================================================================
+    // Create Key Dialog
+    // =========================================================================
     private void openCreateKeyDialog() {
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Create new KMS key");
-        dialog.setWidth("560px");
+        dialog.setWidth("700px");
 
         FormLayout form = new FormLayout();
 
+        // Alias section
         ComboBox<String> aliasCombo = new ComboBox<>("Alias (optional)");
         aliasCombo.setItems(existingAliases);
         aliasCombo.setPlaceholder("Select existing or type new");
@@ -238,7 +241,6 @@ public class KeyManagementView extends VerticalLayout {
         TextField newAliasField = new TextField("New alias name");
         newAliasField.setVisible(false);
         newAliasField.setPlaceholder("alias/my-new-alias");
-
         aliasCombo.addCustomValueSetListener(e -> {
             newAliasField.setVisible(true);
             newAliasField.setValue(e.getDetail());
@@ -271,7 +273,26 @@ public class KeyManagementView extends VerticalLayout {
         originCombo.setValue(IEnumKeyOrigin.Types.WAMS_KMS);
         originCombo.setRequiredIndicatorVisible(true);
 
-        form.add(aliasCombo, newAliasField, descriptionField, keySpecCombo, keyUsageCombo, originCombo);
+        Checkbox multiRegionCheckbox = new Checkbox("Multi-region key");
+        Checkbox bypassPolicyCheckbox = new Checkbox("Bypass policy lockout safety check");
+        TextArea policyField = new TextArea("Policy (JSON)");
+        policyField.setPlaceholder("{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [...]\n}");
+        policyField.setWidthFull();
+        policyField.setHeight("150px");
+
+        // Tag editor
+        VerticalLayout tagsContainer = new VerticalLayout();
+        tagsContainer.setSpacing(true);
+        tagsContainer.setPadding(false);
+        List<HorizontalLayout> tagRows = new ArrayList<>();
+        Button addTagButton = new Button("Add tag", new Icon(VaadinIcon.PLUS));
+        addTagButton.addClickListener(e -> addTagRow(tagsContainer, tagRows, null, null));
+        HorizontalLayout tagsHeader = new HorizontalLayout(new Span("Tags (random key + value)"), addTagButton);
+        tagsHeader.setAlignItems(FlexComponent.Alignment.BASELINE);
+        tagsHeader.setSpacing(true);
+
+        form.add(aliasCombo, newAliasField, descriptionField, keySpecCombo, keyUsageCombo, originCombo,
+                multiRegionCheckbox, bypassPolicyCheckbox, policyField, tagsHeader, tagsContainer);
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
         Button createBtn = new Button("Create", e -> {
@@ -279,21 +300,35 @@ public class KeyManagementView extends VerticalLayout {
 
             String newAlias = null;
             String existingSelectedAlias = null;
-
             if (newAliasField.isVisible() && !newAliasField.getValue().isBlank()) {
                 newAlias = newAliasField.getValue();
             } else if (aliasCombo.getValue() != null && !aliasCombo.getValue().isBlank()) {
                 existingSelectedAlias = aliasCombo.getValue();
             }
 
+            List<CreateKeyRequest.Tag> tags = new ArrayList<>();
+            for (HorizontalLayout row : tagRows) {
+                TextField keyField = (TextField) row.getComponentAt(0);
+                TextField valueField = (TextField) row.getComponentAt(1);
+                if (!valueField.getValue().isBlank()) {
+                    tags.add(CreateKeyRequest.Tag.builder()
+                            .tagKey(keyField.getValue())
+                            .tagValue(valueField.getValue())
+                            .build());
+                }
+            }
+
             try {
-                // Step 1: Create the KMS key without alias
                 CreateKeyRequest request = CreateKeyRequest.builder()
-                        .alias(StringUtils.hasText(newAlias)?newAlias:existingSelectedAlias)  // do not set alias here; we'll create it separately
+                        .keyAlias(StringUtils.hasText(newAlias)?newAlias:existingSelectedAlias)  // do not set alias here; we'll create it separately
                         .description(descriptionField.getValue())
                         .keySpec(keySpecCombo.getValue())
                         .keyUsage(keyUsageCombo.getValue())
                         .origin(originCombo.getValue())
+                        .multiRegion(multiRegionCheckbox.getValue())
+                        .bypassPolicyLockoutSafetyCheck(bypassPolicyCheckbox.getValue())
+                        .policy(policyField.getValue().isBlank() ? null : policyField.getValue())
+                        .tags(tags.isEmpty() ? null : tags)
                         .build();
                 ResponseEntity<CreateKeyResponse> response = kmsApiService.createKey(request);
                 if (!response.getStatusCode().is2xxSuccessful()) {
@@ -304,41 +339,22 @@ public class KeyManagementView extends VerticalLayout {
                 CreateKeyResponse created = response.getBody();
                 String newKeyId = created.getKeyMetadata().getKeyId();
 
-                // Step 2: Handle alias (if any)
                 if (newAlias != null && !newAlias.isBlank()) {
-                    // Create a brand new alias pointing to the new key
                     CreateAliasRequest aliasRequest = CreateAliasRequest.builder()
                             .aliasName(newAlias)
                             .targetKeyId(newKeyId)
                             .build();
-                    ResponseEntity<CreateAliasResponse> aliasResponse = kmsApiService.createAlias(aliasRequest);
-                    if (aliasResponse.getStatusCode().is2xxSuccessful()) {
-                        Notification.show("Key created and alias '" + newAlias + "' added", 3000, Notification.Position.TOP_CENTER)
-                                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                    } else {
-                        Notification.show("Key created but alias creation failed", 3000, Notification.Position.TOP_CENTER)
-                                .addThemeVariants(NotificationVariant.LUMO_WARNING);
-                    }
+                    kmsApiService.createAlias(aliasRequest);
                 } else if (existingSelectedAlias != null && !existingSelectedAlias.isBlank()) {
-                    // Reassign an existing alias to the new key
                     UpdateAliasRequest aliasRequest = UpdateAliasRequest.builder()
                             .aliasName(existingSelectedAlias)
                             .targetKeyId(newKeyId)
                             .build();
-                    ResponseEntity<UpdateAliasResponse> aliasResponse = kmsApiService.updateAlias(existingSelectedAlias, aliasRequest);
-                    if (aliasResponse.getStatusCode().is2xxSuccessful()) {
-                        Notification.show("Key created and alias '" + existingSelectedAlias + "' reassigned", 3000, Notification.Position.TOP_CENTER)
-                                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                    } else {
-                        Notification.show("Key created but alias reassignment failed", 3000, Notification.Position.TOP_CENTER)
-                                .addThemeVariants(NotificationVariant.LUMO_WARNING);
-                    }
-                } else {
-                    Notification.show("Key created successfully", 3000, Notification.Position.TOP_CENTER)
-                            .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                    kmsApiService.updateAlias(existingSelectedAlias, aliasRequest);
                 }
 
-                // Refresh data
+                Notification.show("Key created successfully", 3000, Notification.Position.TOP_CENTER)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 loadAliases();
                 loadKeys();
             } catch (Exception ex) {
@@ -353,9 +369,32 @@ public class KeyManagementView extends VerticalLayout {
         dialog.open();
     }
 
-    // -------------------------------------------------------------------------
-    // Key Card with edit alias & description
-    // -------------------------------------------------------------------------
+    private void addTagRow(VerticalLayout container, List<HorizontalLayout> rows, String existingKey, String existingValue) {
+        String randomKey = (existingKey != null) ? existingKey : "tag-" + UUID.randomUUID().toString().substring(0, 8);
+        TextField keyField = new TextField();
+        keyField.setValue(randomKey);
+        keyField.setReadOnly(true);
+        keyField.setWidth("150px");
+        TextField valueField = new TextField();
+        valueField.setValue(existingValue != null ? existingValue : "");
+        valueField.setPlaceholder("Tag value");
+        valueField.setWidth("250px");
+        Button removeBtn = new Button(new Icon(VaadinIcon.TRASH));
+        removeBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR);
+        HorizontalLayout row = new HorizontalLayout(keyField, valueField, removeBtn);
+        row.setAlignItems(FlexComponent.Alignment.CENTER);
+        row.setSpacing(true);
+        rows.add(row);
+        container.add(row);
+        removeBtn.addClickListener(e -> {
+            container.remove(row);
+            rows.remove(row);
+        });
+    }
+
+    // =========================================================================
+    // Key Card
+    // =========================================================================
     private class KeyCard extends VerticalLayout {
         private final String keyId;
         private final CreateKeyResponse.KeyMetadata metadata;
@@ -365,10 +404,10 @@ public class KeyManagementView extends VerticalLayout {
         public KeyCard(String keyId, CreateKeyResponse.KeyMetadata metadata) {
             this.keyId = keyId;
             this.metadata = metadata;
-            this.aliasOrId = (metadata != null && metadata.getAlias() != null && !metadata.getAlias().isEmpty())
-                    ? metadata.getAlias() : keyId;
-            this.statusText = (metadata != null && metadata.getStatus() != null)
-                    ? metadata.getStatus().name() : "UNKNOWN";
+            this.aliasOrId = (metadata != null && metadata.getKeyAlias() != null && !metadata.getKeyAlias().isEmpty())
+                    ? metadata.getKeyAlias() : keyId;
+            this.statusText = (metadata != null && metadata.getKeyStatus() != null)
+                    ? metadata.getKeyStatus().name() : "UNKNOWN";
             buildCard();
         }
 
@@ -423,7 +462,7 @@ public class KeyManagementView extends VerticalLayout {
             buttonBar.setSpacing(true);
             buttonBar.setPadding(false);
 
-            Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit alias & description");
+            Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit alias & description & tags");
             editBtn.addClickListener(e -> openUpdateDialog());
 
             Button describeBtn = createIconButton(VaadinIcon.INFO_CIRCLE, "View details");
@@ -464,12 +503,16 @@ public class KeyManagementView extends VerticalLayout {
             String keyUsage = (metadata != null && metadata.getKeyUsage() != null) ? metadata.getKeyUsage().name() : "N/A";
             String created = (metadata != null && metadata.getCreationDate() != null) ?
                     metadata.getCreationDate().toLocalDate().toString() : "Unknown";
+            String multiRegion = (metadata != null && metadata.getMultiRegion() != null && metadata.getMultiRegion())
+                    ? "🌍 Multi-region" : "📍 Single-region";
 
             metaRow.add(new Span("Spec: " + keySpec));
             metaRow.add(new Span("•"));
             metaRow.add(new Span("Usage: " + keyUsage));
             metaRow.add(new Span("•"));
             metaRow.add(new Span("Created: " + created));
+            metaRow.add(new Span("•"));
+            metaRow.add(new Span(multiRegion));
             add(metaRow);
         }
 
@@ -480,10 +523,13 @@ public class KeyManagementView extends VerticalLayout {
             return btn;
         }
 
+        // ---------------------------------------------------------------------
+        // Edit dialog (alias, description, tags)
+        // ---------------------------------------------------------------------
         private void openUpdateDialog() {
             Dialog dialog = new Dialog();
-            dialog.setHeaderTitle("Edit key alias & description");
-            dialog.setWidth("550px");
+            dialog.setHeaderTitle("Edit key alias, description & tags");
+            dialog.setWidth("650px");
 
             FormLayout form = new FormLayout();
 
@@ -495,7 +541,7 @@ public class KeyManagementView extends VerticalLayout {
             newAliasField.setVisible(false);
             newAliasField.setPlaceholder("alias/my-new-alias");
 
-            String currentAlias = (metadata != null && metadata.getAlias() != null) ? metadata.getAlias() : "";
+            String currentAlias = (metadata != null && metadata.getKeyAlias() != null) ? metadata.getKeyAlias() : "";
             aliasCombo.setValue(currentAlias.isEmpty() ? null : currentAlias);
 
             aliasCombo.addCustomValueSetListener(e -> {
@@ -518,7 +564,20 @@ public class KeyManagementView extends VerticalLayout {
             String currentDesc = (metadata != null && metadata.getDescription() != null) ? metadata.getDescription() : "";
             descriptionField.setValue(currentDesc);
 
-            form.add(aliasCombo, newAliasField, descriptionField);
+            VerticalLayout tagsContainer = new VerticalLayout();
+            tagsContainer.setSpacing(true);
+            tagsContainer.setPadding(false);
+            List<HorizontalLayout> tagRows = new ArrayList<>();
+            List<ListResourceTagsResponse.Tag> currentTags = fetchKeyTags(keyId);
+            for (ListResourceTagsResponse.Tag tag : currentTags) {
+                addTagRow(tagsContainer, tagRows, tag.getTagKey(), tag.getTagValue());
+            }
+            Button addTagButton = new Button("Add tag", new Icon(VaadinIcon.PLUS));
+            addTagButton.addClickListener(e -> addTagRow(tagsContainer, tagRows, null, null));
+            HorizontalLayout tagsHeader = new HorizontalLayout(new Span("Tags"), addTagButton);
+            tagsHeader.setAlignItems(FlexComponent.Alignment.BASELINE);
+
+            form.add(aliasCombo, newAliasField, descriptionField, tagsHeader, tagsContainer);
             form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
             Button saveBtn = new Button("Save", e -> {
@@ -531,8 +590,19 @@ public class KeyManagementView extends VerticalLayout {
                 }
                 String newDescription = descriptionField.getValue();
 
+                List<CreateKeyRequest.Tag> newTags = new ArrayList<>();
+                for (HorizontalLayout row : tagRows) {
+                    TextField keyField = (TextField) row.getComponentAt(0);
+                    TextField valueField = (TextField) row.getComponentAt(1);
+                    if (!valueField.getValue().isBlank()) {
+                        newTags.add(CreateKeyRequest.Tag.builder()
+                                .tagKey(keyField.getValue())
+                                .tagValue(valueField.getValue())
+                                .build());
+                    }
+                }
+
                 try {
-                    // Update description if changed
                     if (!newDescription.equals(currentDesc)) {
                         UpdateKeyDescriptionRequest descRequest = UpdateKeyDescriptionRequest.builder()
                                 .keyId(keyId)
@@ -542,23 +612,47 @@ public class KeyManagementView extends VerticalLayout {
                         kmsApiService.updateKeyDescription(keyId, descRequest);
                     }
 
-                    // Handle alias change
                     if (newAlias != null && !newAlias.equals(currentAlias)) {
                         if (existingAliases.contains(newAlias)) {
-                            // Reassign existing alias to this key
                             UpdateAliasRequest aliasRequest = UpdateAliasRequest.builder()
                                     .aliasName(newAlias)
                                     .targetKeyId(keyId)
                                     .build();
                             kmsApiService.updateAlias(newAlias, aliasRequest);
                         } else {
-                            // Create new alias and assign to this key
                             CreateAliasRequest createAliasRequest = CreateAliasRequest.builder()
                                     .aliasName(newAlias)
                                     .targetKeyId(keyId)
                                     .build();
                             kmsApiService.createAlias(createAliasRequest);
                         }
+                    }
+
+                    // Remove all existing tags
+                    if (!currentTags.isEmpty()) {
+                        List<String> keysToRemove = currentTags.stream()
+                                .map(ListResourceTagsResponse.Tag::getTagKey)
+                                .collect(Collectors.toList());
+                        UntagResourceRequest untagRequest = UntagResourceRequest.builder()
+                                .keyId(keyId)
+                                .tagKeys(keysToRemove)
+                                .build();
+                        kmsApiService.untagResource(keyId, untagRequest);
+                    }
+
+                    // Add new tags
+                    if (!newTags.isEmpty()) {
+                        List<ListResourceTagsResponse.Tag> tagList = newTags.stream()
+                                .map(t -> ListResourceTagsResponse.Tag.builder()
+                                        .tagKey(t.getTagKey())
+                                        .tagValue(t.getTagValue())
+                                        .build())
+                                .collect(Collectors.toList());
+                        TagResourceRequest tagRequest = TagResourceRequest.builder()
+                                .keyId(keyId)
+                                .tags(tagList)
+                                .build();
+                        kmsApiService.tagResource(keyId, tagRequest);
                     }
 
                     Notification.show("Key updated successfully", 3000, Notification.Position.TOP_CENTER)
@@ -577,6 +671,20 @@ public class KeyManagementView extends VerticalLayout {
             dialog.open();
         }
 
+        private List<ListResourceTagsResponse.Tag> fetchKeyTags(String keyId) {
+            try {
+                ResponseEntity<ListResourceTagsResponse> response = kmsApiService.listResourceTags(keyId, 100, null);
+                ListResourceTagsResponse tagsResponse = response.getBody();
+                if (tagsResponse != null && tagsResponse.getTags() != null) {
+                    return tagsResponse.getTags();
+                }
+            } catch (Exception e) { /* ignore */ }
+            return new ArrayList<>();
+        }
+
+        // ---------------------------------------------------------------------
+        // Key Details Dialog (includes tags and policy)
+        // ---------------------------------------------------------------------
         private void showKeyDetails() {
             try {
                 ResponseEntity<DescribeKeyResponse> response = kmsApiService.describeKey(keyId);
@@ -591,15 +699,51 @@ public class KeyManagementView extends VerticalLayout {
                     content.setSpacing(true);
                     content.add(detailRow("Key ID", meta.getKeyId()),
                             detailRow("WRN", meta.getWrn()),
-                            detailRow("Alias", meta.getAlias()),
+                            detailRow("Alias", meta.getKeyAlias()),
                             detailRow("Description", meta.getDescription()),
-                            detailRow("Status", meta.getStatus() != null ? meta.getStatus().name() : "N/A"),
+                            detailRow("Status", meta.getKeyStatus() != null ? meta.getKeyStatus().name() : "N/A"),
                             detailRow("Key spec", meta.getKeySpec() != null ? meta.getKeySpec().name() : "N/A"),
                             detailRow("Key usage", meta.getKeyUsage() != null ? meta.getKeyUsage().name() : "N/A"),
                             detailRow("Origin", meta.getOrigin() != null ? meta.getOrigin().name() : "N/A"),
                             detailRow("Creation date", meta.getCreationDate() != null ? meta.getCreationDate().toString() : "N/A"),
                             detailRow("Rotation enabled", meta.getRotationEnabled() != null ? meta.getRotationEnabled().toString() : "N/A"),
                             detailRow("Multi-region", meta.getMultiRegion() != null ? meta.getMultiRegion().toString() : "N/A"));
+
+                    // Fetch tags and display as chips
+                    List<ListResourceTagsResponse.Tag> tags = fetchKeyTags(keyId);
+                    if (!tags.isEmpty()) {
+                        HorizontalLayout tagsLayout = new HorizontalLayout();
+                        tagsLayout.setSpacing(true);
+                        tagsLayout.setWidthFull();
+                        Span tagsLabel = new Span("Tags:");
+                        tagsLabel.addClassName(LumoUtility.FontWeight.BOLD);
+                        tagsLayout.add(tagsLabel);
+                        for (ListResourceTagsResponse.Tag tag : tags) {
+                            Span chip = new Span(tag.getTagKey() + "=" + tag.getTagValue());
+                            chip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
+                            chip.addClassName(LumoUtility.Padding.Vertical.XSMALL);
+                            chip.addClassName(LumoUtility.BorderRadius.LARGE);
+                            chip.getStyle().set("background-color", "#E9ECEF");
+                            chip.getStyle().set("color", "#495057");
+                            tagsLayout.add(chip);
+                        }
+                        content.add(tagsLayout);
+                    }
+
+                    // Fetch policy
+                    try {
+                        ResponseEntity<GetKeyPolicyResponse> policyResponse =
+                                kmsApiService.getKeyPolicy(keyId, "default");
+                        if (policyResponse.getStatusCode().is2xxSuccessful() && policyResponse.getBody() != null) {
+                            String policy = policyResponse.getBody().getPolicy();
+                            if (policy != null && !policy.isBlank()) {
+                                content.add(detailRow("Policy", policy));
+                            }
+                        }
+                    } catch (Exception e) {
+                        // Policy may not exist – ignore
+                    }
+
                     detailsDialog.add(content);
                     Button closeBtn = new Button("Close", e -> detailsDialog.close());
                     closeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);

@@ -82,7 +82,7 @@ class KeyManagementServiceTest {
         CreateKeyRequest request = CreateKeyRequest.builder()
                 .keySpec(IEnumKeySpec.Types.RSA_2048)
                 .keyUsage(IEnumKeyUsage.Types.ENCRYPT_DECRYPT)
-                .alias("alias/test")
+                .keyAlias("alias/test")
                 .description("description")
                 .build();
 
@@ -98,7 +98,7 @@ class KeyManagementServiceTest {
         assertNotNull(response);
         assertNotNull(response.getKeyMetadata());
         assertEquals(KEY_ID, response.getKeyMetadata().getKeyId());
-        assertEquals(IEnumKeyStatus.Types.ENABLED, response.getKeyMetadata().getStatus());
+        assertEquals(IEnumKeyStatus.Types.ENABLED, response.getKeyMetadata().getKeyStatus());
 
         verify(cryptoService).generateKeyMaterial(any());
         verify(kmsKeyRepository).save(any(KmsKey.class));
@@ -254,7 +254,7 @@ class KeyManagementServiceTest {
         UpdateKeyDescriptionResponse response =
                 keyManagementService.updateKeyDescription(TENANT, KEY_ID, request);
 
-        assertEquals("new-alias", response.getKeyMetadata().getAlias());
+        assertEquals("new-alias", response.getKeyMetadata().getKeyAlias());
         assertEquals("new-description", response.getKeyMetadata().getDescription());
     }
 
@@ -726,7 +726,7 @@ class KeyManagementServiceTest {
         assertNotNull(resp);
         assertNotNull(resp.getKeyMetadata());
         assertEquals("k1", resp.getKeyMetadata().getKeyId());
-        assertEquals(IEnumKeyStatus.Types.ENABLED, resp.getKeyMetadata().getStatus());
+        assertEquals(IEnumKeyStatus.Types.ENABLED, resp.getKeyMetadata().getKeyStatus());
     }
 
     @Test
