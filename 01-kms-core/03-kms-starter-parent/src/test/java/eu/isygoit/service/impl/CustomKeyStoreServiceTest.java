@@ -1,10 +1,10 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.dto.KmsDtos.CreateCustomKeyStoreRequestDto;
+import eu.isygoit.dto.KmsDtos.CreateCustomKeyStoreRequest;
 import eu.isygoit.dto.KmsDtos.CustomKeyStoreResponseDto;
 import eu.isygoit.dto.KmsDtos.ListCustomKeyStoresResponseDto;
-import eu.isygoit.enums.IEnumCustomKeyStoreType;
 import eu.isygoit.enums.IEnumCustomKeyStoreStatus;
+import eu.isygoit.enums.IEnumCustomKeyStoreType;
 import eu.isygoit.exception.CustomKeyStoreHasKeysException;
 import eu.isygoit.exception.DuplicateCustomKeyStoreNameException;
 import eu.isygoit.model.CustomKeyStore;
@@ -16,10 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.lang.reflect.Field;
@@ -29,7 +26,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CustomKeyStoreServiceTest {
@@ -60,9 +57,9 @@ class CustomKeyStoreServiceTest {
 
     @Test
     void shouldCreateCloudHsmStoreSuccessfully() {
-        CreateCustomKeyStoreRequestDto req = new CreateCustomKeyStoreRequestDto();
-        req.setKeyStoreName("store1");
-        req.setType(IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM);
+        CreateCustomKeyStoreRequest req = new CreateCustomKeyStoreRequest();
+        req.setCustomKeyStoreName("store1");
+        req.setCustomKeyStoreType(IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM);
         req.setCloudHsmClusterId("cluster-1");
         req.setKeyStorePassword("secret");
         req.setTrustAnchorCertificate("cert");
@@ -85,9 +82,9 @@ class CustomKeyStoreServiceTest {
 
     @Test
     void shouldThrowOnDuplicateName() {
-        CreateCustomKeyStoreRequestDto req = new CreateCustomKeyStoreRequestDto();
-        req.setKeyStoreName("store1");
-        req.setType(IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM);
+        CreateCustomKeyStoreRequest req = new CreateCustomKeyStoreRequest();
+        req.setCustomKeyStoreName("store1");
+        req.setCustomKeyStoreType(IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM);
         req.setCloudHsmClusterId("cluster-1");
         req.setKeyStorePassword("secret");
         req.setTrustAnchorCertificate("cert");
@@ -141,7 +138,7 @@ class CustomKeyStoreServiceTest {
         CustomKeyStore s2 = new CustomKeyStore(); s2.setId(11L); s2.setName("b");
 
         when(customKeyStoreRepository.findByTenantOrderByIdAsc(TENANT,
-                        PageRequest.of(0, 2, Sort.by("creationDate").descending())))
+                        PageRequest.of(0, 2, Sort.by("createDate").descending())))
                 .thenReturn(List.of(s1, s2));
         ListCustomKeyStoresResponseDto resp = service.listCustomKeyStores(TENANT, 2, null);
         assertNotNull(resp);

@@ -1,34 +1,31 @@
 package eu.isygoit.enums;
 
 /**
- * WAMS KMS does not define explicit expiration models.
- * This enum represents a DOMAIN ABSTRACTION over WAMS lifecycle behaviors.
+ * AWS KMS Key Expiration Model alignment.
+ * <p>
+ * Represents the expiration behavior for imported key material (BYOK).
+ * </p>
+ * @see <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_GetParametersForImport.html#KMS-GetParametersForImport-request-ExpirationModel">AWS ExpirationModel</a>
  */
 public interface IEnumKeyExpirationModel {
 
-    int STR_ENUM_SIZE = 3;
+    int STR_ENUM_SIZE = 2;
 
     /**
-     * Domain-level key lifecycle model mapped to WAMS behaviors.
+     * AWS KMS expiration model types for imported key material.
      */
     enum Types implements IEnum {
 
         /**
-         * Key has no scheduled deletion and remains valid indefinitely
-         * unless explicitly disabled or scheduled for deletion.
+         * The imported key material expires at the specified validTo date.
+         * After that date, the key becomes unusable.
          */
-        INDEFINITE_LIFECYCLE("INDEFINITE_LIFECYCLE"),
+        KEY_MATERIAL_EXPIRES("KEY_MATERIAL_EXPIRES"),
 
         /**
-         * Key is governed by automatic rotation policy
-         * (EnableKeyRotation in WAMS KMS).
+         * The imported key material does not expire and remains valid indefinitely.
          */
-        ROTATION_GOVERNED("ROTATION_GOVERNED"),
-
-        /**
-         * Key is scheduled for deletion using ScheduleKeyDeletion API.
-         */
-        SCHEDULED_DELETION("SCHEDULED_DELETION");
+        KEY_MATERIAL_DOES_NOT_EXPIRE("KEY_MATERIAL_DOES_NOT_EXPIRE");
 
         private final String meaning;
 

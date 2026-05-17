@@ -1,6 +1,6 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.dto.KmsDtos.ActiveVersionResponseDto;
+import eu.isygoit.dto.KmsDtos.ActiveVersionResponse;
 import eu.isygoit.dto.KmsDtos.ListKeyVersionsResponse;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.model.KmsKeyVersion;
@@ -43,7 +43,7 @@ public class KeyVersionService implements IKeyVersionService {
 
         int page = (nextToken != null) ? Integer.parseInt(nextToken) : 0;
 
-        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("creationDate").descending());
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("createDate").descending());
 
         Page<KmsKeyVersion> versionPage =
                 kmsKeyVersionRepository.findByTenantAndKeyId(
@@ -57,7 +57,7 @@ public class KeyVersionService implements IKeyVersionService {
                         .map(v -> ListKeyVersionsResponse.KeyVersion.builder()
                                 .keyId(String.valueOf(v.getKeyId()))
                                 .versionId(v.getVersionId())
-                                .creationDate(v.getCreationDate())
+                                .createDate(v.getCreateDate())
                                 .status(v.getKeyStatus())
                                 .signingAlgorithm(v.getSigningAlgorithm())
                                 .expirationModel(v.getExpirationModel())
@@ -74,14 +74,14 @@ public class KeyVersionService implements IKeyVersionService {
     }
 
     @Override
-    public ActiveVersionResponseDto getActiveVersion(String tenant, String keyId) {
+    public ActiveVersionResponse getActiveVersion(String tenant, String keyId) {
         log.info("Getting active version for tenant: {} keyId: {}", tenant, keyId);
 
         KmsKeyVersion activeVersion = kmsKeyVersionRepository
-                .findFirstByTenantAndKeyIdAndKeyStatusOrderByCreationDateDesc(tenant, keyId, IEnumKeyStatus.Types.ENABLED)
+                .findFirstByTenantAndKeyIdAndKeyStatusOrderByCreateDateDesc(tenant, keyId, IEnumKeyStatus.Types.ENABLED)
                 .orElseThrow(() -> new RuntimeException("No active version found for key: " + keyId));
 
-        return ActiveVersionResponseDto.builder()
+        return ActiveVersionResponse.builder()
                 .keyId(activeVersion.getKeyId())
                 .versionId(activeVersion.getVersionId())
                 .build();

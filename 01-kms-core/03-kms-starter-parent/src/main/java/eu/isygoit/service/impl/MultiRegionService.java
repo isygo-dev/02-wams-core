@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Slf4j
@@ -26,7 +25,7 @@ public class MultiRegionService implements IMultiRegionService {
     private final KmsKeyRepository kmsKeyRepository;
 
     @Override
-    public UpdatePrimaryRegionResponse updatePrimaryRegion(String tenant, String keyId, UpdatePrimaryRegionRequestDto request) {
+    public UpdatePrimaryRegionResponse updatePrimaryRegion(String tenant, String keyId, UpdatePrimaryRegionRequest request) {
         log.info("Updating primary region for key: {} to: {}", keyId, request.getPrimaryRegion());
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
@@ -42,7 +41,7 @@ public class MultiRegionService implements IMultiRegionService {
     }
 
     @Override
-    public ReplicateKeyResponse replicateKey(String tenant, String keyId, ReplicateKeyRequestDto request) {
+    public ReplicateKeyResponse replicateKey(String tenant, String keyId, ReplicateKeyRequest request) {
         log.info("Replicating key: {} to region: {}", keyId, request.getReplicaRegion());
         if (!StringUtils.hasText(request.getReplicaRegion())) {
             throw new KmsException("Replica region must be specified");
@@ -67,7 +66,6 @@ public class MultiRegionService implements IMultiRegionService {
         replicaKey.setKeyId(UUID.randomUUID().toString());
         replicaKey.setKeyWrn(generateWrn(replicaKey.getKeyId(), request.getReplicaRegion()));
         replicaKey.setRegion(request.getReplicaRegion());
-        replicaKey.setCreationDate(LocalDateTime.now());
         replicaKey.setKeyStatus(IEnumKeyStatus.Types.ENABLED);
         replicaKey.setDescription(primaryKey.getDescription());
         replicaKey.setKeySpec(primaryKey.getKeySpec());
@@ -76,21 +74,19 @@ public class MultiRegionService implements IMultiRegionService {
         replicaKey.setMultiRegion(true);
         replicaKey.setPrimaryKeyId(primaryKey.getKeyId());
         replicaKey.setKeyMaterial(primaryKey.getKeyMaterial());
-        replicaKey.setKeyMaterialEncrypted(true);
-        replicaKey.setImported(primaryKey.getImported());
         replicaKey.setImportDate(primaryKey.getImportDate());
-        replicaKey.setExpirationDate(primaryKey.getExpirationDate());
+        replicaKey.setValidTo(primaryKey.getValidTo());
         replicaKey.setExpirationModel(primaryKey.getExpirationModel());
         replicaKey.setRotationEnabled(false);
         replicaKey.setKeyStoreId(primaryKey.getKeyStoreId());
 
         kmsKeyRepository.save(replicaKey);
 
-        ReplicateKeyResponse.KeyMetadata replicaMetadata = ReplicateKeyResponse.KeyMetadata.builder()
-                .wamsAccountId(tenant)
+        CreateKeyResponse.KeyMetadata replicaMetadata = CreateKeyResponse.KeyMetadata.builder()
+                .tenant(tenant)
                 .keyId(replicaKey.getKeyId())
                 .wrn(replicaKey.getKeyWrn())
-                .creationDate(replicaKey.getCreationDate())
+                .createDate(replicaKey.getCreateDate())
                 .description(replicaKey.getDescription())
                 .keySpec(replicaKey.getKeySpec())
                 .keyUsage(replicaKey.getKeyUsage())
@@ -127,7 +123,6 @@ public class MultiRegionService implements IMultiRegionService {
         // 1. Key material (if origin is WAMS_KMS, copy the entire material)
         if (IEnumKeyOrigin.Types.WAMS_KMS.equals(primaryKey.getOrigin())) {
             replicaKey.setKeyMaterial(primaryKey.getKeyMaterial());
-            replicaKey.setKeyMaterialEncrypted(primaryKey.getKeyMaterialEncrypted());
         }
 
         // 2. Key spec and encryption algorithms
@@ -136,13 +131,12 @@ public class MultiRegionService implements IMultiRegionService {
 
         // 3. Automatic key rotation settings (only meaningful for primary, but replica inherits)
         replicaKey.setRotationEnabled(primaryKey.getRotationEnabled());
-        replicaKey.setRotationPeriodDays(primaryKey.getRotationPeriodDays());
+        replicaKey.setRotationPeriodInDays(primaryKey.getRotationPeriodInDays());
 
         // 4. For imported keys (EXTERNAL origin), sync key material identifier and description
         if (IEnumKeyOrigin.Types.EXTERNAL.equals(primaryKey.getOrigin())) {
-            replicaKey.setImported(primaryKey.getImported());
             replicaKey.setImportDate(primaryKey.getImportDate());
-            replicaKey.setExpirationDate(primaryKey.getExpirationDate());
+            replicaKey.setValidTo(primaryKey.getValidTo());
             replicaKey.setExpirationModel(primaryKey.getExpirationModel());
             // Note: actual key material must be imported separately per WAMS requirements
         }

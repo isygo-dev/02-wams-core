@@ -115,11 +115,11 @@ public interface ICryptoService {
      */
     byte[] decryptKeyMaterial(String tenant, @NotNull(message = "Encrypted key material is required") byte[] encryptedKeyMaterial, @NotNull(message = "Import token is required") byte[] importToken);
 
-    long getEncryptCount(String keyId);
+    long getEncryptCount(String tenant, String keyId);
 
-    long getDecryptCount(String keyId);
+    long getDecryptCount(String tenant, String keyId);
 
-    LocalDateTime getLastUsedDate(String keyId);
+    LocalDateTime getLastUsedDate(String tenant, String keyId);
 
     boolean validateKeyIntegrity(byte[] keyMaterial, IEnumKeySpec.Types keySpec);
 }

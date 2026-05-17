@@ -4,15 +4,12 @@ import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.*;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
 
 /**
  * The type Kms alias.
@@ -46,24 +43,27 @@ public class KmsAlias extends AuditableEntity<Long> implements ITenantAssignable
     @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
 
+    @Pattern(regexp = "^alias:.*", message = "Alias name must start with 'alias:'")
     @Column(name = SchemaColumnConstantName.C_ALIAS_NAME, nullable = false, length = 256)
     private String aliasName;
 
     @Column(name = SchemaColumnConstantName.C_KEY_ID, nullable = false)
-    private String keyId;
+    private String targetKeyId;
 
-    @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = 1024)
-    private String description;
-
-    @CreationTimestamp
-    @Column(name = SchemaColumnConstantName.C_CREATION_DATE, nullable = false, updatable = false)
-    private LocalDateTime creationDate;
-
-    @UpdateTimestamp
-    @Column(name = SchemaColumnConstantName.C_LAST_UPDATED_DATE)
-    private LocalDateTime lastUpdatedDate;
-
-    @Version
-    @Column(name = SchemaColumnConstantName.C_VERSION)
-    private Long version;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+            @JoinColumn(
+                    name = SchemaColumnConstantName.C_TENANT,
+                    referencedColumnName = SchemaColumnConstantName.C_TENANT,
+                    insertable = false,
+                    updatable = false
+            ),
+            @JoinColumn(
+                    name = SchemaColumnConstantName.C_KEY_ID,
+                    referencedColumnName = SchemaColumnConstantName.C_KEY_ID,
+                    insertable = false,
+                    updatable = false
+            )
+    })
+    private KmsKey key;
 }

@@ -72,7 +72,6 @@ class KeyManagementServiceTest {
                 .rotationEnabled(false)
                 .keyAlias("alias/test")
                 .description("desc")
-                .creationDate(LocalDateTime.now())
                 .keyMaterial(new byte[]{1, 2, 3})
                 .build();
     }
@@ -242,7 +241,6 @@ class KeyManagementServiceTest {
     @Test
     void shouldUpdateDescriptionAndAlias() {
         UpdateKeyDescriptionRequest request = UpdateKeyDescriptionRequest.builder()
-                .alias("new-alias")
                 .description("new-description")
                 .build();
 
@@ -282,19 +280,19 @@ class KeyManagementServiceTest {
 
     @Test
     void shouldUpdateKeyRotation() {
-        UpdateKeyRotationRequestDto request = UpdateKeyRotationRequestDto.builder()
+        UpdateKeyRotationRequest request = UpdateKeyRotationRequest.builder()
                 .enableRotation(true)
-                .rotationPeriodDays(30)
+                .rotationPeriodInDays(30)
                 .build();
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.of(key));
 
-        KeyRotationStatusResponseDto response =
+        UpdateKeyRotationResponse response =
                 keyManagementService.updateKeyRotation(TENANT, KEY_ID, request);
 
         assertTrue(response.getRotationEnabled());
-        assertEquals(30, response.getRotationPeriodDays());
+        assertEquals(30, response.getRotationPeriodInDays());
     }
 
     @Test
@@ -326,7 +324,7 @@ class KeyManagementServiceTest {
 
     @Test
     void shouldCreateAlias() {
-        CreateAliasRequestDto request = CreateAliasRequestDto.builder()
+        CreateAliasRequest request = CreateAliasRequest.builder()
                 .aliasName("alias/test")
                 .targetKeyId(KEY_ID)
                 .build();
@@ -347,7 +345,7 @@ class KeyManagementServiceTest {
 
     @Test
     void shouldThrowWhenAliasAlreadyExists() {
-        CreateAliasRequestDto request = CreateAliasRequestDto.builder()
+        CreateAliasRequest request = CreateAliasRequest.builder()
                 .aliasName("alias/test")
                 .targetKeyId(KEY_ID)
                 .build();
@@ -363,10 +361,10 @@ class KeyManagementServiceTest {
     void shouldUpdateAlias() {
         KmsAlias alias = KmsAlias.builder()
                 .aliasName("alias/test")
-                .keyId(KEY_ID)
+                .targetKeyId(KEY_ID)
                 .build();
 
-        UpdateAliasRequestDto request = UpdateAliasRequestDto.builder()
+        UpdateAliasRequest request = UpdateAliasRequest.builder()
                 .targetKeyId(KEY_ID)
                 .build();
 
@@ -398,7 +396,7 @@ class KeyManagementServiceTest {
     void shouldListAliases() {
         KmsAlias alias = KmsAlias.builder()
                 .aliasName("alias/test")
-                .keyId(KEY_ID)
+                .targetKeyId(KEY_ID)
                 .build();
 
         Page<KmsAlias> page = new PageImpl<>(List.of(alias));
@@ -415,7 +413,7 @@ class KeyManagementServiceTest {
     void shouldListAliasesForKey() {
         KmsAlias alias = KmsAlias.builder()
                 .aliasName("alias/test")
-                .keyId(KEY_ID)
+                .targetKeyId(KEY_ID)
                 .build();
 
         when(kmsAliasRepository.findByTenantAndKeyId(eq(TENANT), eq(KEY_ID), any(Pageable.class)))
@@ -496,10 +494,10 @@ class KeyManagementServiceTest {
 
     @Test
     void shouldImportKeyMaterial() {
-        ImportKeyMaterialRequestDto request = ImportKeyMaterialRequestDto.builder()
-                .encryptedKeyMaterial(new byte[]{1})
-                .importToken(new byte[]{2})
-                .expirationDate(LocalDateTime.now().plusDays(1))
+        ImportKeyMaterialRequest request = ImportKeyMaterialRequest.builder()
+                .encryptedKeyMaterial("1")
+                .importToken("2")
+                .validTo(LocalDateTime.now().plusDays(1))
                 .build();
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
@@ -517,8 +515,6 @@ class KeyManagementServiceTest {
 
     @Test
     void shouldDeleteImportedKeyMaterial() {
-        key.setImported(true);
-
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.of(key));
 
@@ -531,8 +527,6 @@ class KeyManagementServiceTest {
 
     @Test
     void shouldThrowWhenDeleteNonImportedMaterial() {
-        key.setImported(false);
-
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.of(key));
 
@@ -595,7 +589,7 @@ class KeyManagementServiceTest {
         keyManagementService.deleteKey(TENANT, KEY_ID);
 
         verify(kmsKeyVersionRepository).deleteByTenantAndKeyId(TENANT, KEY_ID);
-        verify(kmsAliasRepository).deleteByTenantAndKeyId(TENANT, KEY_ID);
+        verify(kmsAliasRepository).deleteByTenantAndTargetKeyId(TENANT, KEY_ID);
         verify(kmsTagRepository).deleteByTenantAndKeyId(TENANT, KEY_ID);
         verify(kmsKeyRepository).delete(key);
     }
@@ -613,16 +607,15 @@ class KeyManagementServiceTest {
     void shouldListKeyRotations() {
         KmsKeyVersion version = KmsKeyVersion.builder()
                 .versionId("v2")
-                .rotationDate(LocalDateTime.now())
                 .build();
 
         Page<KmsKeyVersion> page = new PageImpl<>(List.of(version));
 
-        when(kmsKeyVersionRepository.findByTenantAndKeyIdAndRotationDateIsNotNull(
+        when(kmsKeyVersionRepository.findByTenantAndKeyIdAndCreateDateIsNotNull(
                 eq(TENANT), eq(KEY_ID), any(Pageable.class)))
                 .thenReturn(page);
 
-        ListKeyRotationsResponseDto response =
+        ListKeyRotationsResponse response =
                 keyManagementService.listKeyRotations(TENANT, KEY_ID, 10, "0");
 
         assertEquals(1, response.getRotations().size());
@@ -634,9 +627,9 @@ class KeyManagementServiceTest {
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.of(key));
 
-        when(cryptoService.getEncryptCount(KEY_ID)).thenReturn(100L);
-        when(cryptoService.getDecryptCount(KEY_ID)).thenReturn(50L);
-        when(cryptoService.getLastUsedDate(KEY_ID)).thenReturn(LocalDateTime.now());
+        when(cryptoService.getEncryptCount(TENANT, KEY_ID)).thenReturn(100L);
+        when(cryptoService.getDecryptCount(TENANT, KEY_ID)).thenReturn(50L);
+        when(cryptoService.getLastUsedDate(TENANT, KEY_ID)).thenReturn(LocalDateTime.now());
 
         KeyUsageStatsResponseDto response =
                 keyManagementService.getKeyUsageStats(TENANT, KEY_ID);
@@ -681,7 +674,6 @@ class KeyManagementServiceTest {
                 .keyWrn("wrn:wams:kms:::key:key-1")
                 .keySpec(IEnumKeySpec.Types.RSA_2048)
                 .keyStatus(IEnumKeyStatus.Types.ENABLED)
-                .creationDate(LocalDateTime.now())
                 .currentVersionId("v-1")
                 .keyMaterial(material)
                 .build();
@@ -691,8 +683,6 @@ class KeyManagementServiceTest {
         KmsKeyVersion savedVersion = KmsKeyVersion.builder()
                 .keyId("key-1")
                 .versionId("v-1")
-                .creationDate(LocalDateTime.now())
-                .activationDate(LocalDateTime.now())
                 .keyMaterial(material)
                 .build();
 
@@ -716,7 +706,6 @@ class KeyManagementServiceTest {
                 .keyUsage(null)
                 .keyStatus(IEnumKeyStatus.Types.ENABLED)
                 .currentVersionId("v-1")
-                .creationDate(LocalDateTime.now())
                 .build();
 
         when(kmsKeyRepository.findByTenantAndKeyId(eq(TENANT), eq("k1"))).thenReturn(Optional.of(key));
@@ -740,7 +729,6 @@ class KeyManagementServiceTest {
         KmsKey key = KmsKey.builder()
                 .keyId("k1")
                 .keyWrn("wrn:wams:kms:::key:k1")
-                .creationDate(LocalDateTime.now())
                 .build();
 
         when(kmsKeyRepository.findByTenant(eq(TENANT), any(Pageable.class)))

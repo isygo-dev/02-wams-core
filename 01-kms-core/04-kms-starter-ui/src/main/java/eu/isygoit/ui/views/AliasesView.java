@@ -264,13 +264,13 @@ public class AliasesView extends VerticalLayout {
         private final String aliasName;
         private final String targetKeyId;
         private final String aliasWrn;
-        private final String creationDate;
+        private final String createDate;
 
         public AliasCard(ListAliasesResponse.AliasEntry entry) {
             this.aliasName = entry.getAliasName();
             this.targetKeyId = entry.getTargetKeyId();
             this.aliasWrn = entry.getAliasWrn();
-            this.creationDate = entry.getCreationDate();
+            this.createDate = entry.getCreateDate();
             buildCard();
         }
 
@@ -322,8 +322,8 @@ public class AliasesView extends VerticalLayout {
             add(targetSpan);
 
             // Optional: creation date
-            if (creationDate != null && !creationDate.isEmpty()) {
-                Span dateSpan = new Span("Created: " + creationDate);
+            if (createDate != null && !createDate.isEmpty()) {
+                Span dateSpan = new Span("Created: " + createDate);
                 dateSpan.addClassName(LumoUtility.FontSize.XSMALL);
                 dateSpan.addClassName(LumoUtility.TextColor.TERTIARY);
                 add(dateSpan);

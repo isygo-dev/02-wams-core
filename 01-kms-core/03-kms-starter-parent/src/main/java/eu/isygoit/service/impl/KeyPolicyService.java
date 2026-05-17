@@ -14,11 +14,9 @@ import eu.isygoit.service.IKeyPolicyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -43,14 +41,13 @@ public class KeyPolicyService implements IKeyPolicyService {
 
         try {
             String policyJson = objectMapper.writeValueAsString(request.getPolicy());
-            KmsKeyPolicy policy = kmsKeyPolicyRepository.findByTenantAndKeyIdAndPolicyName(tenant, keyId, request.getPolicyName())
+            KmsKeyPolicy policy = kmsKeyPolicyRepository.findByTenantAndKeyId(tenant, keyId)
                     .orElse(KmsKeyPolicy.builder()
                             .tenant(tenant)
                             .keyId(keyId)
                             .build());
 
             policy.setPolicyDocument(policyJson);
-            policy.setPolicyVersion("2012-10-17"); // Default WAMS policy version
             kmsKeyPolicyRepository.save(policy);
 
             return request.getPolicy();
@@ -61,10 +58,10 @@ public class KeyPolicyService implements IKeyPolicyService {
     }
 
     @Override
-    public Map<String, Object> getKeyPolicy(String tenant, String keyId, String policyName) {
+    public Map<String, Object> getKeyPolicy(String tenant, String keyId) {
         log.info("Getting key policy for tenant: {} keyId: {}", tenant, keyId);
 
-        return kmsKeyPolicyRepository.findByTenantAndKeyIdAndPolicyName(tenant, keyId, policyName)
+        return kmsKeyPolicyRepository.findByTenantAndKeyId(tenant, keyId)
                 .map(p -> {
                     try {
                         return objectMapper.readValue(p.getPolicyDocument(), new TypeReference<Map<String, Object>>() {
@@ -91,10 +88,8 @@ public class KeyPolicyService implements IKeyPolicyService {
                 .tenant(tenant)
                 .keyId(keyId)
                 .grantId(grantId)
-                .principal(request.getPrincipal())
+                .granteePrincipal(request.getPrincipal())
                 .operations(String.join(",", request.getOperations()))
-                .status("ACTIVE")
-                .creationDate(LocalDateTime.now())
                 .build();
 
         kmsKeyGrantRepository.save(grant);
@@ -112,7 +107,6 @@ public class KeyPolicyService implements IKeyPolicyService {
         KmsKeyGrant grant = kmsKeyGrantRepository.findByTenantAndGrantId(tenant, grantId)
                 .orElseThrow(() -> new GrantNotFoundException("Grant not found with id: " + grantId));
 
-        grant.setStatus("REVOKED");
         grant.setRevocationDate(LocalDateTime.now());
         kmsKeyGrantRepository.save(grant);
 
@@ -120,36 +114,12 @@ public class KeyPolicyService implements IKeyPolicyService {
     }
 
     @Override
-    public ListGrantsResponseDto listGrants(String tenant, String keyId, Integer limit, String nextToken) {
-        log.info("Listing grants for tenant: {} keyId: {}", tenant, keyId);
-
-        Pageable pageable = RepoHelper.resolvePageable(limit, nextToken, "creationDate");
-
-        Page<KmsKeyGrant> grantPage = kmsKeyGrantRepository.findByTenantAndKeyId(tenant, keyId, pageable);
-
-        return ListGrantsResponseDto.builder()
-                .grants(grantPage.getContent().stream()
-                        .map(g -> ListGrantsResponseDto.GrantDto.builder()
-                                .grantId(g.getGrantId())
-                                .granteePrincipal(g.getPrincipal())
-                                // retiringPrincipal field in DTO might not map directly to entity
-                                .operations(Arrays.asList(g.getOperations().split(",")))
-                                .constraints(g.getConstraints())
-                                .createdAt(g.getCreationDate())
-                                .build())
-                        .collect(Collectors.toList()))
-                .nextToken(grantPage.hasNext() ? String.valueOf(pageable.getPageNumber() + 1) : null)
-                .build();
-    }
-
-    @Override
-    public RetireGrantResponse retireGrant(String tenant, String grantId, RetireGrantRequestDto request) {
+    public RetireGrantResponse retireGrant(String tenant, String grantId, RetireGrantRequest request) {
         log.info("Retiring grant: {} for tenant: {}", grantId, tenant);
 
         KmsKeyGrant grant = kmsKeyGrantRepository.findByTenantAndGrantId(tenant, grantId)
                 .orElseThrow(() -> new GrantNotFoundException("Grant not found with id: " + grantId));
 
-        grant.setStatus("RETIRED");
         grant.setRevocationDate(LocalDateTime.now());
         kmsKeyGrantRepository.save(grant);
 
@@ -157,23 +127,46 @@ public class KeyPolicyService implements IKeyPolicyService {
     }
 
     @Override
+    public ListGrantsResponseDto listGrants(String tenant, String keyId, Integer limit, String nextToken) {
+        log.info("Listing grants for tenant: {} keyId: {}", tenant, keyId);
+
+        Pageable pageable = RepoHelper.resolvePageable(limit, nextToken, "createDate");
+
+        Page<KmsKeyGrant> grantPage = kmsKeyGrantRepository.findByTenantAndKeyId(tenant, keyId, pageable);
+
+        return ListGrantsResponseDto.builder()
+                .grants(grantPage.getContent().stream()
+                        .map(g -> ListGrantsResponseDto.GrantDto.builder()
+                                .grantId(g.getGrantId())
+                                .granteePrincipal(g.getGranteePrincipal())
+                                // retiringPrincipal field in DTO might not map directly to entity
+                                .operations(Arrays.asList(g.getOperations().split(",")))
+                                .constraints(g.getConstraints())
+                                .createDate(g.getCreateDate())
+                                .build())
+                        .collect(Collectors.toList()))
+                .nextToken(grantPage.hasNext() ? String.valueOf(pageable.getPageNumber() + 1) : null)
+                .build();
+    }
+
+    @Override
     public ListRetirableGrantsResponse listRetirableGrants(String tenant, String retiringPrincipal, Integer limit, String nextToken) {
         log.info("Listing retirable grants for tenant: {} retiringPrincipal: {}", tenant, retiringPrincipal);
 
-        Pageable pageable = RepoHelper.resolvePageable(limit, nextToken, "creationDate");
+        Pageable pageable = RepoHelper.resolvePageable(limit, nextToken, "createDate");
 
         // Find active grants that the principal can retire
-        Page<KmsKeyGrant> grantPage = kmsKeyGrantRepository.findByTenantAndPrincipalAndStatus(
-                tenant, retiringPrincipal, "ACTIVE", pageable);
+        Page<KmsKeyGrant> grantPage = kmsKeyGrantRepository.findByTenantAndRetiringPrincipalAndRevocationDateIsNullAndRetirementDateIsNull(
+                tenant, retiringPrincipal, pageable);
 
         List<ListGrantsResponse.Grant> grants = grantPage.getContent().stream()
                 .map(g -> eu.isygoit.dto.KmsDtos.ListGrantsResponse.Grant.builder()
                         .grantId(g.getGrantId())
-                        .granteePrincipal(g.getPrincipal())
+                        .granteePrincipal(g.getGranteePrincipal())
                         .retiringPrincipal(retiringPrincipal)
                         .operations(Arrays.asList(g.getOperations().split(",")))
                         .constraints(null) // TODO: parse constraints if stored as JSON
-                        .creationDate(g.getCreationDate().toString())
+                        .createDate(g.getCreateDate())
                         .keyId(g.getKeyId())
                         .name(g.getName())
                         .build())
@@ -183,34 +176,6 @@ public class KeyPolicyService implements IKeyPolicyService {
                 .grants(grants)
                 .nextToken(grantPage.hasNext() ? String.valueOf(pageable.getPageNumber() + 1) : null)
                 .truncated(grantPage.hasNext())
-                .build();
-    }
-
-    @Override
-    public ListKeyPoliciesResponse listKeyPolicies(
-            String tenant,
-            String keyId,
-            Integer limit,
-            String nextToken) {
-
-        log.info("Listing key policies for tenant={} keyId={}", tenant, keyId);
-
-        final Pageable pageable =
-                RepoHelper.resolvePageable(limit, nextToken, "creationDate");
-
-        final List<String> policyNames = kmsKeyPolicyRepository
-                .findByTenantAndKeyId(tenant, keyId, pageable)
-                .stream()
-                .map(KmsKeyPolicy::getPolicyName)
-                .toList();
-
-        return ListKeyPoliciesResponse.builder()
-                .policyNames(
-                        policyNames.isEmpty()
-                                ? List.of("default")
-                                : policyNames)
-                .nextToken(nextToken) // replace when real pagination token is implemented
-                .truncated(false)
                 .build();
     }
 }

@@ -1,5 +1,6 @@
 package eu.isygoit.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.api.KmsServiceApi;
@@ -87,6 +88,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
     @Autowired
     private ICustomKeyStoreService customKeyStoreService;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     // ============================================================================
     // KEY MANAGEMENT APIs
@@ -343,9 +346,9 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     // ============================================================================
 
     @Override
-    public ResponseEntity<KeyRotationStatusResponseDto> updateKeyRotation(
+    public ResponseEntity<UpdateKeyRotationResponse> updateKeyRotation(
             String keyId,
-            UpdateKeyRotationRequestDto request) {
+            UpdateKeyRotationRequest request) {
 
         log.info("Updating rotation for key: {}", keyId);
         request.setKeyId(keyId);
@@ -354,7 +357,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
             request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
 
-            KeyRotationStatusResponseDto response =
+            UpdateKeyRotationResponse response =
                     keyManagementService.updateKeyRotation(tenant, keyId, request);
 
             auditService.logAction(
@@ -426,7 +429,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<ListKeyRotationsResponseDto> listKeyRotations(
+    public ResponseEntity<ListKeyRotationsResponse> listKeyRotations(
             String keyId,
             Integer limit,
             String nextToken) {
@@ -436,7 +439,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
-            ListKeyRotationsResponseDto response =
+            ListKeyRotationsResponse response =
                     keyManagementService.listKeyRotations(tenant, keyId, limit, nextToken);
 
             auditService.logAction(
@@ -460,9 +463,9 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
-            UpdateKeyRotationRequestDto internalRequest = UpdateKeyRotationRequestDto.builder()
+            UpdateKeyRotationRequest internalRequest = UpdateKeyRotationRequest.builder()
                     .enableRotation(true)
-                    .rotationPeriodDays(365)
+                    .rotationPeriodInDays(365)
                     .applyImmediately(true)
                     .build();
             keyManagementService.updateKeyRotation(tenant, keyId, internalRequest);
@@ -480,7 +483,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
-            UpdateKeyRotationRequestDto internalRequest = UpdateKeyRotationRequestDto.builder()
+            UpdateKeyRotationRequest internalRequest = UpdateKeyRotationRequest.builder()
                     .enableRotation(false)
                     .applyImmediately(true)
                     .build();
@@ -816,12 +819,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
-    public ResponseEntity<ActiveVersionResponseDto> getActiveVersion(String keyId) {
+    public ResponseEntity<ActiveVersionResponse> getActiveVersion(String keyId) {
         log.info("Getting active version for: {}", keyId);
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
             keyId = dataKeyService.resolveKeyId(tenant, keyId);
-            ActiveVersionResponseDto response = keyVersionService.getActiveVersion(tenant, keyId);
+            ActiveVersionResponse response = keyVersionService.getActiveVersion(tenant, keyId);
             auditService.logAction(tenant, IKmsActionType.Types.GET_ACTIVE_VERSION, keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());
@@ -835,12 +838,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     @Override
     public ResponseEntity<UpdatePrimaryRegionResponse> updatePrimaryRegion(
             String keyId,
-            UpdatePrimaryRegionRequestDto request) {
+            UpdatePrimaryRegionRequest request) {
 
         log.info("Updating primary region for key: {} to region: {}", keyId, request.getPrimaryRegion());
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
-            request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
+            keyId = dataKeyService.resolveKeyId(tenant, keyId);
             UpdatePrimaryRegionResponse response = multiRegionService.updatePrimaryRegion(tenant, keyId, request);
             auditService.logAction(tenant, IKmsActionType.Types.UPDATE_PRIMARY_REGION, keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
@@ -855,12 +858,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     @Override
     public ResponseEntity<ReplicateKeyResponse> replicateKey(
             String keyId,
-            ReplicateKeyRequestDto request) {
+            ReplicateKeyRequest request) {
 
         log.info("Replicating key: {} to region: {}", keyId, request.getReplicaRegion());
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
-            request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
+            keyId = dataKeyService.resolveKeyId(tenant, keyId);
             ReplicateKeyResponse response = multiRegionService.replicateKey(tenant, keyId, request);
             auditService.logAction(tenant, IKmsActionType.Types.REPLICATE_KEY, keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
@@ -899,7 +902,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<CreateAliasResponse> createAlias(CreateAliasRequest request) {
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            CreateAliasRequestDto internalReq = CreateAliasRequestDto.builder()
+            CreateAliasRequest internalReq = CreateAliasRequest.builder()
                     .aliasName(request.getAliasName())
                     .targetKeyId(request.getTargetKeyId())
                     .build();
@@ -920,7 +923,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            UpdateAliasRequestDto internalReq = UpdateAliasRequestDto.builder()
+            UpdateAliasRequest internalReq = UpdateAliasRequest.builder()
                     .targetKeyId(request.getTargetKeyId())
                     .build();
             keyManagementService.updateAlias(tenant, aliasName, internalReq);
@@ -962,8 +965,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                                     .aliasName(a.getAliasName())
                                     .aliasWrn(buildAliasWrn(a.getAliasName()))
                                     .targetKeyId(a.getTargetKeyId())
-                                    .creationDate(formatDate(a.getCreatedAt()))
-                                    .lastUpdatedDate(formatDate(a.getUpdatedAt()))
+                                    .createDate(formatDate(a.getCreateDate()))
+                                    .lastUpdatedDate(formatDate(a.getUpdateDate()))
                                     .build())
                             .collect(Collectors.toList()))
                     .nextToken(internal.getNextToken())
@@ -991,8 +994,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                                     .aliasName(a.getAliasName())
                                     .aliasWrn(buildAliasWrn(a.getAliasName()))
                                     .targetKeyId(a.getTargetKeyId())
-                                    .creationDate(formatDate(a.getCreatedAt()))
-                                    .lastUpdatedDate(formatDate(a.getUpdatedAt()))
+                                    .createDate(formatDate(a.getCreateDate()))
+                                    .lastUpdatedDate(formatDate(a.getUpdateDate()))
                                     .build())
                             .collect(Collectors.toList()))
                     .nextToken(internal.getNextToken())
@@ -1028,7 +1031,6 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         try {
             SetKeyPolicyRequestDto internal = SetKeyPolicyRequestDto.builder()
                     .policy(request.getPolicy())
-                    .policyName(request.getPolicyName())
                     .bypassPolicyLockoutSafetyCheck(request.getBypassPolicyLockoutSafetyCheck())
                     .build();
             keyPolicyService.setKeyPolicy(tenant, keyId, internal);
@@ -1043,30 +1045,22 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
     @Override
     public ResponseEntity<GetKeyPolicyResponse> getKeyPolicy(
-            String keyId,
-            String policyName) {
+            String keyId) {
 
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
-            Map<String, Object> policyMap = keyPolicyService.getKeyPolicy(tenant, keyId, policyName);
+            Map<String, Object> policyMap = keyPolicyService.getKeyPolicy(tenant, keyId);
             String policyJson = new ObjectMapper().writeValueAsString(policyMap);
-            GetKeyPolicyResponse response = GetKeyPolicyResponse.builder().policy(policyJson).build();
+            GetKeyPolicyResponse response = GetKeyPolicyResponse.builder().policy(objectMapper.readValue(
+                    policyJson,
+                    new TypeReference<Map<String, Object>>() {
+                    }
+            )).build();
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
         }
-    }
-
-    @Override
-    public ResponseEntity<ListKeyPoliciesResponse> listKeyPolicies(
-            String keyId,
-            Integer limit,
-            String nextToken) {
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
-        keyId = dataKeyService.resolveKeyId(tenant, keyId);
-        ListKeyPoliciesResponse response = keyPolicyService.listKeyPolicies(tenant, keyId, limit, nextToken);
-        return ResponseFactory.responseOk(response);
     }
 
     // =========================================================================
@@ -1126,8 +1120,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                                     .retiringPrincipal(g.getRetiringPrincipal())
                                     .operations(g.getOperations())
                                     .constraints(null)
-                                    .creationDate(formatDate(g.getCreatedAt()))
-                                    .lastUpdatedDate(formatDate(g.getCreatedAt()))
+                                    .createDate(g.getCreateDate())
+                                    .lastUpdatedDate(formatDate(g.getCreateDate()))
                                     .keyId(finalKeyId)
                                     .name(null)
                                     .build())
@@ -1164,7 +1158,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
         try {
-            RetireGrantRequestDto internal = RetireGrantRequestDto.builder()
+            RetireGrantRequest internal = RetireGrantRequest.builder()
                     .grantToken(request != null ? request.getGrantToken() : null)
                     .build();
             keyPolicyService.retireGrant(tenant, request.getGrantId(), internal);
@@ -1271,7 +1265,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             GetParametersForImportRequest request) {
 
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
-        request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
+        keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
             ImportParametersResponseDto internal = keyManagementService.getParametersForImport(tenant, keyId);
             GetParametersForImportResponse response = GetParametersForImportResponse.builder()
@@ -1294,9 +1288,9 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
         try {
-            ImportKeyMaterialRequestDto internal = ImportKeyMaterialRequestDto.builder()
-                    .importToken(request.getImportToken().getBytes())
-                    .encryptedKeyMaterial(request.getEncryptedKeyMaterial().getBytes())
+            ImportKeyMaterialRequest internal = ImportKeyMaterialRequest.builder()
+                    .importToken(request.getImportToken())
+                    .encryptedKeyMaterial(request.getEncryptedKeyMaterial())
                     .validTo(request.getValidTo())
                     .expirationModel(request.getExpirationModel())
                     .build();
@@ -1337,12 +1331,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            CreateCustomKeyStoreRequestDto internal = CreateCustomKeyStoreRequestDto.builder()
-                    .keyStoreName(request.getCustomKeyStoreName())
+            CreateCustomKeyStoreRequest internal = CreateCustomKeyStoreRequest.builder()
+                    .customKeyStoreName(request.getCustomKeyStoreName())
                     .cloudHsmClusterId(request.getCloudHsmClusterId())
                     .keyStorePassword(request.getKeyStorePassword())
                     .trustAnchorCertificate(request.getTrustAnchorCertificate())
-                    .type(request.getCustomKeyStoreType())
+                    .customKeyStoreType(request.getCustomKeyStoreType())
                     .xksProxyUriEndpoint(request.getXksProxyUriEndpoint())
                     .xksProxyUriPath(request.getXksProxyUriPath())
                     .xksProxyAuthenticationCredential(request.getXksProxyAuthenticationCredential())
@@ -1379,7 +1373,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            UpdateCustomKeyStoreRequestDto internal = UpdateCustomKeyStoreRequestDto.builder()
+            UpdateCustomKeyStoreRequest internal = UpdateCustomKeyStoreRequest.builder()
                     .newCustomKeyStoreName(request.getNewCustomKeyStoreName())
                     .keyStorePassword(request.getKeyStorePassword())
                     .cloudHsmClusterId(request.getCloudHsmClusterId())
@@ -1448,8 +1442,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     .customKeyStores(internal.getCustomKeyStores().stream()
                             .map(s -> DescribeCustomKeyStoreResponse.CustomKeyStore.builder()
                                     .customKeyStoreId(s.getKeyStoreId())
-                                    .customKeyStoreName(s.getKeyStoreName())
-                                    .creationDate(s.getCreatedAt())
+                                    .customKeyStoreName(s.getCustomKeyStoreName())
+                                    .createDate(s.getCreatedAt())
                                     .connectionState(s.getConnectionState())
                                     .build())
                             .collect(Collectors.toList()))
@@ -1466,8 +1460,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         DescribeCustomKeyStoreResponse.CustomKeyStore store =
                 DescribeCustomKeyStoreResponse.CustomKeyStore.builder()
                         .customKeyStoreId(internal.getKeyStoreId())
-                        .customKeyStoreName(internal.getKeyStoreName())
-                        .creationDate(internal.getCreatedAt())
+                        .customKeyStoreName(internal.getCustomKeyStoreName())
+                        .createDate(internal.getCreatedAt())
                         .connectionState(internal.getStatus() != null ? internal.getStatus().name() : null)
                         .cloudHsmClusterId(internal.getCloudHsmClusterId())
                         .customKeyStoreType(internal.getType() != null ? internal.getType().name() : null)

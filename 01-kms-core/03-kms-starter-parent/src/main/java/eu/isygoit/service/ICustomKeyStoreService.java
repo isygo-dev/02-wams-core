@@ -1,20 +1,20 @@
 package eu.isygoit.service;
 
-import eu.isygoit.dto.KmsDtos.CreateCustomKeyStoreRequestDto;
+import eu.isygoit.dto.KmsDtos.CreateCustomKeyStoreRequest;
 import eu.isygoit.dto.KmsDtos.CustomKeyStoreResponseDto;
 import eu.isygoit.dto.KmsDtos.ListCustomKeyStoresResponseDto;
-import eu.isygoit.dto.KmsDtos.UpdateCustomKeyStoreRequestDto;
+import eu.isygoit.dto.KmsDtos.UpdateCustomKeyStoreRequest;
 import jakarta.validation.Valid;
 
 import java.util.Map;
 
 public interface ICustomKeyStoreService {
 
-    CustomKeyStoreResponseDto createCustomKeyStore(String tenant, @Valid CreateCustomKeyStoreRequestDto request);
+    CustomKeyStoreResponseDto createCustomKeyStore(String tenant, @Valid CreateCustomKeyStoreRequest request);
 
     CustomKeyStoreResponseDto describeCustomKeyStore(String tenant, Long keyStoreId);
 
-    CustomKeyStoreResponseDto updateCustomKeyStore(String tenant, Long keyStoreId, @Valid UpdateCustomKeyStoreRequestDto request);
+    CustomKeyStoreResponseDto updateCustomKeyStore(String tenant, Long keyStoreId, @Valid UpdateCustomKeyStoreRequest request);
 
     void deleteCustomKeyStore(String tenant, Long keyStoreId);
 

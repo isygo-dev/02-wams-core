@@ -9,10 +9,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
 
 /**
  * The type Kms tag.
@@ -55,16 +51,4 @@ public class KmsTag extends AuditableEntity<Long> implements ITenantAssignable {
 
     @Column(name = SchemaColumnConstantName.C_TAG_VALUE, length = 256)
     private String tagValue;
-
-    @CreationTimestamp
-    @Column(name = SchemaColumnConstantName.C_CREATION_DATE, nullable = false, updatable = false)
-    private LocalDateTime creationDate;
-
-    @UpdateTimestamp
-    @Column(name = SchemaColumnConstantName.C_LAST_UPDATED_DATE)
-    private LocalDateTime lastUpdatedDate;
-
-    @Version
-    @Column(name = SchemaColumnConstantName.C_VERSION)
-    private Long version;
 }

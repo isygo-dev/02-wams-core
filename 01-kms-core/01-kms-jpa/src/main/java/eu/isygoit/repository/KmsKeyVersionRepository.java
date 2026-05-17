@@ -5,11 +5,8 @@ import eu.isygoit.model.KmsKeyVersion;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -19,21 +16,9 @@ import java.util.Optional;
 public interface KmsKeyVersionRepository extends JpaRepository<KmsKeyVersion, Long> {
 
     /**
-     * Find key version by tenant, keyId and versionId
-     */
-    Optional<KmsKeyVersion> findByTenantAndKeyIdAndVersionId(String tenant, String keyId, String versionId);
-
-    /**
-     * List all versions of a key
-     */
-    List<KmsKeyVersion> findByTenantAndKeyIdOrderByCreationDateDesc(
-            String tenant,
-            String keyId
-    );
-    /**
      * List active versions of a key
      */
-    Optional<KmsKeyVersion> findFirstByTenantAndKeyIdAndKeyStatusOrderByCreationDateDesc(
+    Optional<KmsKeyVersion> findFirstByTenantAndKeyIdAndKeyStatusOrderByCreateDateDesc(
             String tenant,
             String keyId,
             IEnumKeyStatus.Types keyStatus
@@ -43,12 +28,7 @@ public interface KmsKeyVersionRepository extends JpaRepository<KmsKeyVersion, Lo
      */
     Page<KmsKeyVersion> findByTenantAndKeyId(String tenant, String keyId, Pageable pageable);
 
-    /**
-     * Count versions for a key
-     */
-    long countByKeyId(String keyId);
-
-    Page<KmsKeyVersion> findByTenantAndKeyIdAndRotationDateIsNotNull(String tenant, String keyId, Pageable pageable);
+    Page<KmsKeyVersion> findByTenantAndKeyIdAndCreateDateIsNotNull(String tenant, String keyId, Pageable pageable);
 
     void deleteByTenantAndKeyId(String tenant, String keyId);
 }

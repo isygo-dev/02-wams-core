@@ -141,7 +141,7 @@ curl -X GET "http://localhost:8080/keys/wrn:wams:kms:us-east-1:123456789012:key:
     "CreationDate": "2024-05-10T10:30:00Z",
     "Enabled": true,
     "RotationEnabled": true,
-    "RotationPeriodDays": 365,
+    "RotationPeriodInDays": 365,
     "LastRotationDate": "2024-05-10T10:30:00Z",
     "KeySpec": "SYMMETRIC_DEFAULT",
     "KeyUsage": "ENCRYPT_DECRYPT",
@@ -388,7 +388,7 @@ curl -X PATCH "http://localhost:8080/keys/1234abcd-12ab-34cd-56ef-1234567890ab/r
   -H "Content-Type: application/json" \
   -d '{
     "EnableRotation": true,
-    "RotationPeriodDays": 365,
+    "RotationPeriodInDays": 365,
     "Reason": "Compliance requirement for PCI-DSS"
   }'
 
@@ -397,7 +397,7 @@ curl -X PATCH "http://localhost:8080/keys/alias:production-db-key/rotation" \
   -H "Content-Type: application/json" \
   -d '{
     "EnableRotation": true,
-    "RotationPeriodDays": 365
+    "RotationPeriodInDays": 365
   }'
 ```
 
@@ -407,7 +407,7 @@ curl -X PATCH "http://localhost:8080/keys/alias:production-db-key/rotation" \
 {
   "KeyId": "1234abcd-12ab-34cd-56ef-1234567890ab",
   "RotationEnabled": true,
-  "RotationPeriodDays": 365,
+  "RotationPeriodInDays": 365,
   "NextRotationDate": "2025-05-10T10:30:00Z"
 }
 ```
@@ -421,7 +421,7 @@ A healthcare organization adopts a policy requiring all encryption keys to rotat
 - Checks kms:UpdateKeyRotation permission
 - If enabling, schedules a cron job for next rotation date
 - If disabling, cancels any scheduled rotation tasks
-- Updates RotationEnabled flag and RotationPeriodDays in metadata
+- Updates RotationEnabled flag and RotationPeriodInDays in metadata
 - Rotation does NOT affect existing encrypted data (old versions remain decryptable)
 - New rotation creates a new key version; old versions retained for decryption
 

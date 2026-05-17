@@ -1,5 +1,7 @@
 package eu.isygoit.ui.views;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -30,13 +32,18 @@ import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainLayout;
 import jakarta.annotation.security.PermitAll;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Route(value = "keys", layout = MainLayout.class)
 @PageTitle("Key Management")
 @PermitAll
@@ -53,10 +60,12 @@ public class KeyManagementView extends VerticalLayout {
     private String currentSearch = "";
     private String currentStatus = "All";
     private List<String> existingAliases = new ArrayList<>();
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public KeyManagementView(KmsApiService kmsApiService) {
+    public KeyManagementView(KmsApiService kmsApiService, ObjectMapper objectMapper) {
         this.kmsApiService = kmsApiService;
+        this.objectMapper = objectMapper;
         setSizeFull();
         setPadding(true);
         setSpacing(true);
@@ -327,9 +336,15 @@ public class KeyManagementView extends VerticalLayout {
                         .origin(originCombo.getValue())
                         .multiRegion(multiRegionCheckbox.getValue())
                         .bypassPolicyLockoutSafetyCheck(bypassPolicyCheckbox.getValue())
-                        .policy(policyField.getValue().isBlank() ? null : policyField.getValue())
+                        .policy(policyField.getValue().isBlank() ? null : objectMapper.readValue(
+                                policyField.getValue(),
+                                new TypeReference<Map<String, Object>>() {
+                                }
+                        ))
                         .tags(tags.isEmpty() ? null : tags)
                         .build();
+
+
                 ResponseEntity<CreateKeyResponse> response = kmsApiService.createKey(request);
                 if (!response.getStatusCode().is2xxSuccessful()) {
                     Notification.show("Key creation failed", 3000, Notification.Position.TOP_CENTER)
@@ -501,8 +516,8 @@ public class KeyManagementView extends VerticalLayout {
 
             String keySpec = (metadata != null && metadata.getKeySpec() != null) ? metadata.getKeySpec().name() : "N/A";
             String keyUsage = (metadata != null && metadata.getKeyUsage() != null) ? metadata.getKeyUsage().name() : "N/A";
-            String created = (metadata != null && metadata.getCreationDate() != null) ?
-                    metadata.getCreationDate().toLocalDate().toString() : "Unknown";
+            String created = (metadata != null && metadata.getCreateDate() != null) ?
+                    metadata.getCreateDate().toLocalDate().toString() : "Unknown";
             String multiRegion = (metadata != null && metadata.getMultiRegion() != null && metadata.getMultiRegion())
                     ? "🌍 Multi-region" : "📍 Single-region";
 
@@ -606,7 +621,6 @@ public class KeyManagementView extends VerticalLayout {
                     if (!newDescription.equals(currentDesc)) {
                         UpdateKeyDescriptionRequest descRequest = UpdateKeyDescriptionRequest.builder()
                                 .keyId(keyId)
-                                .alias(aliasOrId)
                                 .description(newDescription)
                                 .build();
                         kmsApiService.updateKeyDescription(keyId, descRequest);
@@ -693,7 +707,7 @@ public class KeyManagementView extends VerticalLayout {
                     CreateKeyResponse.KeyMetadata meta = desc.getKeyMetadata();
                     Dialog detailsDialog = new Dialog();
                     detailsDialog.setHeaderTitle("Key details");
-                    detailsDialog.setWidth("640px");
+                    detailsDialog.setWidth("700px");
 
                     VerticalLayout content = new VerticalLayout();
                     content.setSpacing(true);
@@ -705,43 +719,71 @@ public class KeyManagementView extends VerticalLayout {
                             detailRow("Key spec", meta.getKeySpec() != null ? meta.getKeySpec().name() : "N/A"),
                             detailRow("Key usage", meta.getKeyUsage() != null ? meta.getKeyUsage().name() : "N/A"),
                             detailRow("Origin", meta.getOrigin() != null ? meta.getOrigin().name() : "N/A"),
-                            detailRow("Creation date", meta.getCreationDate() != null ? meta.getCreationDate().toString() : "N/A"),
+                            detailRow("Creation date", meta.getCreateDate() != null ? meta.getCreateDate().toString() : "N/A"),
                             detailRow("Rotation enabled", meta.getRotationEnabled() != null ? meta.getRotationEnabled().toString() : "N/A"),
                             detailRow("Multi-region", meta.getMultiRegion() != null ? meta.getMultiRegion().toString() : "N/A"));
 
-                    // Fetch tags and display as chips
+                    // ========== TAGS (show as chips with key=value) ==========
                     List<ListResourceTagsResponse.Tag> tags = fetchKeyTags(keyId);
                     if (!tags.isEmpty()) {
-                        HorizontalLayout tagsLayout = new HorizontalLayout();
-                        tagsLayout.setSpacing(true);
-                        tagsLayout.setWidthFull();
-                        Span tagsLabel = new Span("Tags:");
-                        tagsLabel.addClassName(LumoUtility.FontWeight.BOLD);
-                        tagsLayout.add(tagsLabel);
+                        Div tagsContainer = new Div();
+                        tagsContainer.getStyle()
+                                .set("display", "flex")
+                                .set("flex-wrap", "wrap")
+                                .set("gap", "var(--lumo-space-xs)")
+                                .set("margin-top", "var(--lumo-space-s)");
+
+                        Span label = new Span("Tags: ");
+                        label.addClassName(LumoUtility.FontWeight.BOLD);
+                        tagsContainer.add(label);
+
                         for (ListResourceTagsResponse.Tag tag : tags) {
                             Span chip = new Span(tag.getTagKey() + "=" + tag.getTagValue());
                             chip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
                             chip.addClassName(LumoUtility.Padding.Vertical.XSMALL);
                             chip.addClassName(LumoUtility.BorderRadius.LARGE);
-                            chip.getStyle().set("background-color", "#E9ECEF");
-                            chip.getStyle().set("color", "#495057");
-                            tagsLayout.add(chip);
+                            chip.getStyle()
+                                    .set("background-color", "#E9ECEF")
+                                    .set("color", "#495057")
+                                    .set("white-space", "nowrap");
+                            tagsContainer.add(chip);
                         }
-                        content.add(tagsLayout);
+                        content.add(tagsContainer);
                     }
 
-                    // Fetch policy
+                    // ========== POLICY (pretty‑printed JSON) ==========
                     try {
                         ResponseEntity<GetKeyPolicyResponse> policyResponse =
-                                kmsApiService.getKeyPolicy(keyId, "default");
+                                kmsApiService.getKeyPolicy(keyId);
                         if (policyResponse.getStatusCode().is2xxSuccessful() && policyResponse.getBody() != null) {
-                            String policy = policyResponse.getBody().getPolicy();
-                            if (policy != null && !policy.isBlank()) {
-                                content.add(detailRow("Policy", policy));
+                            Object policyObj = policyResponse.getBody().getPolicy();
+                            String prettyPolicy = null;
+                            if (policyObj instanceof String) {
+                                // Already a JSON string – pretty‑print it
+                                Object json = objectMapper.readValue((String) policyObj, Object.class);
+                                prettyPolicy = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+                            } else if (policyObj instanceof Map) {
+                                // It's a Map (Jackson already parsed it)
+                                prettyPolicy = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(policyObj);
+                            }
+                            if (prettyPolicy != null && !prettyPolicy.isBlank()) {
+                                Span label = new Span("Policy: ");
+                                label.addClassName(LumoUtility.FontWeight.BOLD);
+                                content.add(label);
+                                // Use a TextArea to display the formatted JSON
+                                TextArea policyArea = new TextArea();
+                                policyArea.addClassName(LumoUtility.FontWeight.BOLD);
+                                policyArea.setValue(prettyPolicy);
+                                policyArea.setWidthFull();
+                                policyArea.setHeight("300px");
+                                policyArea.setReadOnly(true);
+                                policyArea.getStyle().set("font-family", "monospace");
+                                content.add(policyArea);
                             }
                         }
                     } catch (Exception e) {
                         // Policy may not exist – ignore
+                        log.warn("Could not fetch or format policy for key {}", keyId, e);
                     }
 
                     detailsDialog.add(content);

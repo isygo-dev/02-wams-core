@@ -27,12 +27,12 @@ public interface KmsAuditLogRepository extends JpaRepository<KmsAuditLog, Long> 
     /**
      * Count by action and keyId
      */
-    long countByActionAndKeyId(IKmsActionType.Types action, String keyId);
+    long countByTenantAndActionAndKeyId(String tenant, IKmsActionType.Types action, String keyId);
 
     /**
      * Find first by keyId order by timestamp desc
      */
-    Optional<KmsAuditLog> findFirstByKeyIdOrderByTimestampDesc(String keyId);
+    Optional<KmsAuditLog> findFirstByTenantAndKeyIdOrderByTimestampDesc(String tenant, String keyId);
 
     /**
      * Find audit logs by tenant and action
@@ -43,7 +43,7 @@ public interface KmsAuditLogRepository extends JpaRepository<KmsAuditLog, Long> 
      * Find audit logs between dates
      */
     @Query("SELECT al FROM KmsAuditLog al WHERE al.tenant = :tenant AND al.timestamp BETWEEN :fromDate AND :toDate ORDER BY al.timestamp DESC")
-    Page<KmsAuditLog> findByDateRange(@Param("tenant") String tenant, @Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate, Pageable pageable);
+    Page<KmsAuditLog> findByTenantAndDateRange(@Param("tenant") String tenant, @Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate, Pageable pageable);
 
     /**
      * Complex query for audit logs

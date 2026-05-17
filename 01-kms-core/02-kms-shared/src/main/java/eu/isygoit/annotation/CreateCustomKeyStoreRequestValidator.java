@@ -1,13 +1,13 @@
 package eu.isygoit.annotation;
 
-import eu.isygoit.dto.KmsDtos.CreateCustomKeyStoreRequestDto;
+import eu.isygoit.dto.KmsDtos.CreateCustomKeyStoreRequest;
 import eu.isygoit.enums.IEnumCustomKeyStoreType;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Validator for CreateCustomKeyStoreRequestDto that enforces type-specific field requirements.
+ * Validator for CreateCustomKeyStoreRequest that enforces type-specific field requirements.
  * <p>
  * Validation Rules:
  * <p>
@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class CreateCustomKeyStoreRequestValidator
-        implements ConstraintValidator<ValidCreateCustomKeyStoreRequest, CreateCustomKeyStoreRequestDto> {
+        implements ConstraintValidator<ValidCreateCustomKeyStoreRequest, CreateCustomKeyStoreRequest> {
 
     @Override
     public void initialize(ValidCreateCustomKeyStoreRequest constraintAnnotation) {
@@ -30,16 +30,16 @@ public class CreateCustomKeyStoreRequestValidator
     }
 
     @Override
-    public boolean isValid(CreateCustomKeyStoreRequestDto request, ConstraintValidatorContext context) {
+    public boolean isValid(CreateCustomKeyStoreRequest request, ConstraintValidatorContext context) {
         if (request == null) {
             return true; // Null values handled by @NotNull
         }
 
         boolean isValid = true;
 
-        if (request.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
+        if (request.getCustomKeyStoreType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
             isValid = validateCloudHsmRequest(request, context);
-        } else if (request.getType() == IEnumCustomKeyStoreType.Types.EXTERNAL_KEY_STORE) {
+        } else if (request.getCustomKeyStoreType() == IEnumCustomKeyStoreType.Types.EXTERNAL_KEY_STORE) {
             isValid = validateExternalKeyStoreRequest(request, context);
         }
 
@@ -49,7 +49,7 @@ public class CreateCustomKeyStoreRequestValidator
     /**
      * Validates CloudHSM-specific fields
      */
-    private boolean validateCloudHsmRequest(CreateCustomKeyStoreRequestDto request,
+    private boolean validateCloudHsmRequest(CreateCustomKeyStoreRequest request,
                                             ConstraintValidatorContext context) {
         boolean isValid = true;
 
@@ -93,7 +93,7 @@ public class CreateCustomKeyStoreRequestValidator
     /**
      * Validates External Key Store (XKS) specific fields
      */
-    private boolean validateExternalKeyStoreRequest(CreateCustomKeyStoreRequestDto request,
+    private boolean validateExternalKeyStoreRequest(CreateCustomKeyStoreRequest request,
                                                     ConstraintValidatorContext context) {
         boolean isValid = true;
 

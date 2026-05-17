@@ -86,7 +86,7 @@ public class DataKeyService implements IDataKeyService {
         if (keyIdOrAlias.startsWith("alias:")) {
             String aliasName = keyIdOrAlias.substring("alias:".length()); // remove "alias:" prefixx
             return kmsAliasRepository.findByTenantAndAliasName(tenant, aliasName)
-                    .map(KmsAlias::getKeyId)  // assuming AliasEntity has getTargetKeyId()
+                    .map(KmsAlias::getTargetKeyId)  // assuming AliasEntity has getTargetKeyId()
                     .orElseThrow(() -> new AliasNotFoundException("Alias not found: " + keyIdOrAlias));
         }
 

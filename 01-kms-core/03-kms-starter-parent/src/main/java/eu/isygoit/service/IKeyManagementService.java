@@ -87,10 +87,10 @@ public interface IKeyManagementService {
             String tenant,
             String keyId);
 
-    KeyRotationStatusResponseDto updateKeyRotation(
+    UpdateKeyRotationResponse updateKeyRotation(
             String tenant,
             String keyId,
-            UpdateKeyRotationRequestDto request);
+            UpdateKeyRotationRequest request);
 
     GetKeyRotationStatusResponse getKeyRotationStatus(
             String tenant,
@@ -98,9 +98,9 @@ public interface IKeyManagementService {
 
     GetPublicKeyResponse getPublicKey(String tenant, String keyId);
 
-    AliasResponseDto createAlias(String tenant, @Valid CreateAliasRequestDto request);
+    AliasResponseDto createAlias(String tenant, @Valid CreateAliasRequest request);
 
-    AliasResponseDto updateAlias(String tenant, String aliasName, @Valid UpdateAliasRequestDto request);
+    AliasResponseDto updateAlias(String tenant, String aliasName, @Valid UpdateAliasRequest request);
 
     void deleteAlias(String tenant, String aliasName);
 
@@ -116,7 +116,7 @@ public interface IKeyManagementService {
 
     ImportParametersResponseDto getParametersForImport(String tenant, String keyId);
 
-    KeyDescriptionResponseDto importKeyMaterial(String tenant, String keyId, @Valid ImportKeyMaterialRequestDto request);
+    KeyDescriptionResponseDto importKeyMaterial(String tenant, String keyId, @Valid ImportKeyMaterialRequest request);
 
     KeyDescriptionResponseDto deleteImportedKeyMaterial(String tenant, String keyId);
 
@@ -124,7 +124,7 @@ public interface IKeyManagementService {
 
     void deleteKey(String tenant, String keyId);
 
-    ListKeyRotationsResponseDto listKeyRotations(String tenant, String keyId, Integer limit, String nextToken);
+    ListKeyRotationsResponse listKeyRotations(String tenant, String keyId, Integer limit, String nextToken);
 
     KeyUsageStatsResponseDto getKeyUsageStats(String tenant, String keyId);
 

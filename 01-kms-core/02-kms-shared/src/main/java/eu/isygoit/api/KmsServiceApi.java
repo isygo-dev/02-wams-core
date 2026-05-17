@@ -139,10 +139,10 @@ public interface KmsServiceApi {
             description = "Enables/disables automatic key rotation with optional custom period (90-3650 days).",
             operationId = "updateKeyRotation"
     )
-    ResponseEntity<KeyRotationStatusResponseDto> updateKeyRotation(
+    ResponseEntity<UpdateKeyRotationResponse> updateKeyRotation(
             @Parameter(description = "Unique identifier of the KMS key", required = true)
             @PathVariable("keyId") String keyId,
-            @Valid @RequestBody UpdateKeyRotationRequestDto request);
+            @Valid @RequestBody UpdateKeyRotationRequest request);
 
     @PostMapping(value = "/keys/{keyId}/enable", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
@@ -198,11 +198,11 @@ public interface KmsServiceApi {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Rotations listed successfully",
-                    content = @Content(schema = @Schema(implementation = ListKeyRotationsResponseDto.class))),
+                    content = @Content(schema = @Schema(implementation = ListKeyRotationsResponse.class))),
             @ApiResponse(responseCode = "404", description = "Key not found"),
             @ApiResponse(responseCode = "400", description = "Invalid pagination parameters")
     })
-    ResponseEntity<ListKeyRotationsResponseDto> listKeyRotations(
+    ResponseEntity<ListKeyRotationsResponse> listKeyRotations(
             @Parameter(description = "Unique identifier of the KMS key", required = true)
             @PathVariable("keyId") String keyId,
             @Parameter(description = "Maximum number of rotations to return (1..1000)", example = "50")
@@ -259,7 +259,7 @@ public interface KmsServiceApi {
             operationId = "getActiveVersion",
             hidden = true
     )
-    ResponseEntity<ActiveVersionResponseDto> getActiveVersion(
+    ResponseEntity<ActiveVersionResponse> getActiveVersion(
             @Parameter(description = "Unique identifier of the KMS key", required = true)
             @PathVariable("keyId") String keyId);
 
@@ -278,7 +278,7 @@ public interface KmsServiceApi {
     ResponseEntity<UpdatePrimaryRegionResponse> updatePrimaryRegion(
             @Parameter(description = "Unique identifier of the multi-region primary key", required = true)
             @PathVariable("keyId") String keyId,
-            @Valid @RequestBody UpdatePrimaryRegionRequestDto request);
+            @Valid @RequestBody UpdatePrimaryRegionRequest request);
 
     @PostMapping(value = "/keys/{keyId}/replicate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
@@ -295,7 +295,7 @@ public interface KmsServiceApi {
     ResponseEntity<ReplicateKeyResponse> replicateKey(
             @Parameter(description = "Unique identifier of the multi-region primary key", required = true)
             @PathVariable("keyId") String keyId,
-            @Valid @RequestBody ReplicateKeyRequestDto request);
+            @Valid @RequestBody ReplicateKeyRequest request);
 
     @PostMapping(value = "/keys/{keyId}/synchronize", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
@@ -554,21 +554,7 @@ public interface KmsServiceApi {
     )
     ResponseEntity<GetKeyPolicyResponse> getKeyPolicy(
             @Parameter(description = "Unique identifier of the KMS key", required = true)
-            @PathVariable("keyId") String keyId,
-            @Parameter(description = "Name of the policy (usually 'default')", example = "default")
-            @RequestParam(value = "policyName", defaultValue = "default") String policyName);
-
-    @GetMapping(value = "/keys/{keyId}/policies", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(
-            summary = "List Key Policies",
-            description = "Lists the names of all key policies attached to a KMS key.",
-            operationId = "listKeyPolicies"
-    )
-    ResponseEntity<ListKeyPoliciesResponse> listKeyPolicies(
-            @Parameter(description = "Unique identifier of the KMS key", required = true)
-            @PathVariable("keyId") String keyId,
-            @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "nextToken", required = false) String nextToken);
+            @PathVariable("keyId") String keyId);
 
     @PostMapping(value = "/keys/{keyId}/grants", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(

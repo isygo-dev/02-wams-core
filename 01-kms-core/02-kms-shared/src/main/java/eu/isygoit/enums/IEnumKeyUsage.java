@@ -1,32 +1,38 @@
 package eu.isygoit.enums;
 
 /**
- * WAMS KMS Key Usage alignment.
- *
- * Maps to WAMS KMS KeyUsageType:
- * - ENCRYPT_DECRYPT (SYMMETRIC_DEFAULT)
- * - SIGN_VERIFY (ASYMMETRIC_SIGNING)
+ * AWS KMS Key Usage alignment.
+ * <p>
+ * Represents the intended use of the key material.
+ * </p>
+ * @see <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_KeyMetadata.html#KMS-Type-KeyMetadata-KeyUsage">AWS KeyUsage</a>
  */
 public interface IEnumKeyUsage {
 
-    int STR_ENUM_SIZE = 2;
+    int STR_ENUM_SIZE = 3;
 
     /**
-     * WAMS KMS Key Usage types.
+     * AWS KMS Key Usage types.
      */
     enum Types implements IEnum {
 
         /**
-         * Symmetric encryption / decryption (AES-256 keys, KMS-managed).
-         * WAMS equivalent: SYMMETRIC_DEFAULT
+         * The key can be used for encryption and decryption.
+         * Applicable to symmetric keys and asymmetric RSA keys.
          */
-        ENCRYPT_DECRYPT("SYMMETRIC_ENCRYPTION"),
+        ENCRYPT_DECRYPT("ENCRYPT_DECRYPT"),
 
         /**
-         * Asymmetric signing and verification (RSA / ECC keys).
-         * WAMS equivalent: ASYMMETRIC_SIGNING
+         * The key can be used for signing and verification of messages/digests.
+         * Applicable to asymmetric RSA, ECC, and SM2 keys.
          */
-        SIGN_VERIFY("ASYMMETRIC_SIGNING");
+        SIGN_VERIFY("SIGN_VERIFY"),
+
+        /**
+         * The key can be used to generate and verify MAC (Message Authentication Code) tags.
+         * Applicable to HMAC keys.
+         */
+        GENERATE_VERIFY_MAC("GENERATE_VERIFY_MAC");
 
         private final String meaning;
 

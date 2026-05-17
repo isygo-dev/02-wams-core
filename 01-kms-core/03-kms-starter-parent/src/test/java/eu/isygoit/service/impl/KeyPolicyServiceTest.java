@@ -17,9 +17,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -59,19 +61,15 @@ class KeyPolicyServiceTest {
         policy = KmsKeyPolicy.builder()
                 .tenant(TENANT)
                 .keyId(KEY_ID)
-                .policyName(POLICY_NAME)
                 .policyDocument("{\"Version\":\"2012-10-17\"}")
-                .policyVersion("2012-10-17")
                 .build();
 
         grant = KmsKeyGrant.builder()
                 .tenant(TENANT)
                 .keyId(KEY_ID)
                 .grantId(GRANT_ID)
-                .principal("user-1")
+                .granteePrincipal("user-1")
                 .operations("Encrypt,Decrypt")
-                .status("ACTIVE")
-                .creationDate(LocalDateTime.now())
                 .build();
 
         testTenant = "test-tenant";
@@ -88,14 +86,13 @@ class KeyPolicyServiceTest {
 
         SetKeyPolicyRequestDto request =
                 SetKeyPolicyRequestDto.builder()
-                        .policyName(POLICY_NAME)
                         .policy(map)
                         .build();
 
         when(objectMapper.writeValueAsString(map))
                 .thenReturn("{\"Version\":\"2012-10-17\"}");
 
-        when(kmsKeyPolicyRepository.findByTenantAndKeyIdAndPolicyName(TENANT, KEY_ID, POLICY_NAME))
+        when(kmsKeyPolicyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.of(policy));
 
         Map<String, Object> response =
@@ -115,14 +112,13 @@ class KeyPolicyServiceTest {
 
         SetKeyPolicyRequestDto request =
                 SetKeyPolicyRequestDto.builder()
-                        .policyName(POLICY_NAME)
                         .policy(map)
                         .build();
 
         when(objectMapper.writeValueAsString(any()))
                 .thenReturn("{\"Version\":\"2012-10-17\"}");
 
-        when(kmsKeyPolicyRepository.findByTenantAndKeyIdAndPolicyName(TENANT, KEY_ID, POLICY_NAME))
+        when(kmsKeyPolicyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.empty());
 
         Map<String, Object> response =
@@ -159,7 +155,7 @@ class KeyPolicyServiceTest {
         Map<String, Object> expected = new HashMap<>();
         expected.put("Version", "2012-10-17");
 
-        when(kmsKeyPolicyRepository.findByTenantAndKeyIdAndPolicyName(TENANT, KEY_ID, POLICY_NAME))
+        when(kmsKeyPolicyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.of(policy));
 
         when(objectMapper.readValue(
@@ -168,7 +164,7 @@ class KeyPolicyServiceTest {
                 .thenReturn(expected);
 
         Map<String, Object> response =
-                keyPolicyService.getKeyPolicy(TENANT, KEY_ID, POLICY_NAME);
+                keyPolicyService.getKeyPolicy(TENANT, KEY_ID);
 
         assertNotNull(response);
         assertEquals("2012-10-17", response.get("Version"));
@@ -177,11 +173,11 @@ class KeyPolicyServiceTest {
     @Test
     void shouldReturnEmptyPolicyWhenPolicyNotFound() {
 
-        when(kmsKeyPolicyRepository.findByTenantAndKeyIdAndPolicyName(TENANT, KEY_ID, POLICY_NAME))
+        when(kmsKeyPolicyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.empty());
 
         Map<String, Object> response =
-                keyPolicyService.getKeyPolicy(TENANT, KEY_ID, POLICY_NAME);
+                keyPolicyService.getKeyPolicy(TENANT, KEY_ID);
 
         assertNotNull(response);
         assertEquals("2012-10-17", response.get("Version"));
@@ -191,7 +187,7 @@ class KeyPolicyServiceTest {
     @Test
     void shouldReturnEmptyMapWhenDeserializationFails() throws Exception {
 
-        when(kmsKeyPolicyRepository.findByTenantAndKeyIdAndPolicyName(TENANT, KEY_ID, POLICY_NAME))
+        when(kmsKeyPolicyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.of(policy));
 
         when(objectMapper.readValue(
@@ -201,7 +197,7 @@ class KeyPolicyServiceTest {
                 });
 
         Map<String, Object> response =
-                keyPolicyService.getKeyPolicy(TENANT, KEY_ID, POLICY_NAME);
+                keyPolicyService.getKeyPolicy(TENANT, KEY_ID);
 
         assertNotNull(response);
         assertTrue(response.isEmpty());
@@ -236,7 +232,6 @@ class KeyPolicyServiceTest {
                 keyPolicyService.revokeGrant(TENANT, KEY_ID, GRANT_ID);
 
         assertEquals("REVOKED", response);
-        assertEquals("REVOKED", grant.getStatus());
         assertNotNull(grant.getRevocationDate());
 
         verify(kmsKeyGrantRepository).save(grant);
@@ -305,8 +300,8 @@ class KeyPolicyServiceTest {
     @Test
     void shouldRetireGrantSuccessfully() {
 
-        RetireGrantRequestDto request =
-                RetireGrantRequestDto.builder()
+        RetireGrantRequest request =
+                RetireGrantRequest.builder()
                         .build();
 
         when(kmsKeyGrantRepository.findByTenantAndGrantId(TENANT, GRANT_ID))
@@ -315,7 +310,6 @@ class KeyPolicyServiceTest {
         KmsDtos.RetireGrantResponse response = keyPolicyService.retireGrant(TENANT, GRANT_ID, request);
 
         assertEquals(KEY_ID, response.getKeyId());
-        assertEquals("RETIRED", grant.getStatus());
         assertNotNull(grant.getRevocationDate());
 
         verify(kmsKeyGrantRepository).save(grant);
@@ -324,8 +318,8 @@ class KeyPolicyServiceTest {
     @Test
     void shouldThrowWhenRetireGrantNotFound() {
 
-        RetireGrantRequestDto request =
-                RetireGrantRequestDto.builder()
+        RetireGrantRequest request =
+                RetireGrantRequest.builder()
                         .build();
 
         when(kmsKeyGrantRepository.findByTenantAndGrantId(TENANT, GRANT_ID))
@@ -350,23 +344,20 @@ class KeyPolicyServiceTest {
         policy.put("Statement", new ArrayList<>());
 
         SetKeyPolicyRequestDto request = SetKeyPolicyRequestDto.builder()
-                .policyName(POLICY_NAME)
                 .policy(policy)
                 .bypassPolicyLockoutSafetyCheck(false)
                 .build();
 
-        when(kmsKeyPolicyRepository.findByTenantAndKeyIdAndPolicyName(testTenant, testKeyId, POLICY_NAME))
+        when(kmsKeyPolicyRepository.findByTenantAndKeyId(testTenant, testKeyId))
                 .thenReturn(Optional.empty());
         when(objectMapper.writeValueAsString(policy))
                 .thenReturn("{\"Version\":\"2012-10-17\"}");
 
         KmsKeyPolicy savedPolicy = KmsKeyPolicy.builder()
                 .id(1L)
-                .policyName(POLICY_NAME)
                 .tenant(testTenant)
                 .keyId(testKeyId)
                 .policyDocument("{\"Version\":\"2012-10-17\"}")
-                .policyVersion("2012-10-17")
                 .build();
 
         when(kmsKeyPolicyRepository.save(any(KmsKeyPolicy.class))).thenReturn(savedPolicy);
@@ -377,7 +368,7 @@ class KeyPolicyServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(policy, result);
-        verify(kmsKeyPolicyRepository, times(1)).findByTenantAndKeyIdAndPolicyName(testTenant, testKeyId, POLICY_NAME);
+        verify(kmsKeyPolicyRepository, times(1)).findByTenantAndKeyId(testTenant, testKeyId);
         verify(kmsKeyPolicyRepository, times(1)).save(any(KmsKeyPolicy.class));
         verify(objectMapper, times(1)).writeValueAsString(policy);
     }
@@ -391,18 +382,16 @@ class KeyPolicyServiceTest {
 
         SetKeyPolicyRequestDto request = SetKeyPolicyRequestDto.builder()
                 .policy(policy)
-                .policyName(POLICY_NAME)
                 .build();
 
         KmsKeyPolicy existingPolicy = KmsKeyPolicy.builder()
                 .id(1L)
                 .tenant(testTenant)
                 .keyId(testKeyId)
-                .policyName(POLICY_NAME)
                 .policyDocument("{\"old\":\"policy\"}")
                 .build();
 
-        when(kmsKeyPolicyRepository.findByTenantAndKeyIdAndPolicyName(testTenant, testKeyId, POLICY_NAME))
+        when(kmsKeyPolicyRepository.findByTenantAndKeyId(testTenant, testKeyId))
                 .thenReturn(Optional.of(existingPolicy));
         when(objectMapper.writeValueAsString(policy))
                 .thenReturn("{\"Version\":\"2012-10-17\"}");
@@ -437,29 +426,29 @@ class KeyPolicyServiceTest {
                 .policyDocument(policyJson)
                 .build();
 
-        when(kmsKeyPolicyRepository.findByTenantAndKeyIdAndPolicyName(testTenant, testKeyId, POLICY_NAME))
+        when(kmsKeyPolicyRepository.findByTenantAndKeyId(testTenant, testKeyId))
                 .thenReturn(Optional.of(policy));
         when(objectMapper.readValue(eq(policyJson), any(com.fasterxml.jackson.core.type.TypeReference.class)))
                 .thenReturn(expectedPolicy);
 
         // Act
-        Map<String, Object> result = keyPolicyService.getKeyPolicy(testTenant, testKeyId, POLICY_NAME);
+        Map<String, Object> result = keyPolicyService.getKeyPolicy(testTenant, testKeyId);
 
         // Assert
         assertNotNull(result);
         assertEquals(expectedPolicy, result);
-        verify(kmsKeyPolicyRepository, times(1)).findByTenantAndKeyIdAndPolicyName(testTenant, testKeyId, POLICY_NAME);
+        verify(kmsKeyPolicyRepository, times(1)).findByTenantAndKeyId(testTenant, testKeyId);
     }
 
     @Test
     @DisplayName("Should return default policy when key policy not found")
     void testGetKeyPolicyNotFound() {
         // Arrange
-        when(kmsKeyPolicyRepository.findByTenantAndKeyIdAndPolicyName(testTenant, testKeyId, POLICY_NAME))
+        when(kmsKeyPolicyRepository.findByTenantAndKeyId(testTenant, testKeyId))
                 .thenReturn(Optional.empty());
 
         // Act
-        Map<String, Object> result = keyPolicyService.getKeyPolicy(testTenant, testKeyId, POLICY_NAME);
+        Map<String, Object> result = keyPolicyService.getKeyPolicy(testTenant, testKeyId);
 
         // Assert
         assertNotNull(result);
@@ -537,8 +526,7 @@ class KeyPolicyServiceTest {
                 .tenant(testTenant)
                 .keyId(testKeyId)
                 .grantId(testGrantId)
-                .principal(testPrincipal)
-                .status("ACTIVE")
+                .granteePrincipal(testPrincipal)
                 .operations("Encrypt,Decrypt")
                 .build();
 
@@ -581,9 +569,8 @@ class KeyPolicyServiceTest {
                 .tenant(testTenant)
                 .keyId(testKeyId)
                 .grantId("grant-1")
-                .principal("wrn:wams:iam::123456789012:role/role1")
+                .granteePrincipal("wrn:wams:iam::123456789012:role/role1")
                 .operations("Encrypt,Decrypt")
-                .creationDate(LocalDateTime.now())
                 .build();
 
         KmsKeyGrant grant2 = KmsKeyGrant.builder()
@@ -591,9 +578,8 @@ class KeyPolicyServiceTest {
                 .tenant(testTenant)
                 .keyId(testKeyId)
                 .grantId("grant-2")
-                .principal("wrn:wams:iam::123456789012:role/role2")
+                .granteePrincipal("wrn:wams:iam::123456789012:role/role2")
                 .operations("Sign")
-                .creationDate(LocalDateTime.now())
                 .build();
 
         Page<KmsKeyGrant> page = new PageImpl<>(Arrays.asList(grant1, grant2));
@@ -667,14 +653,12 @@ class KeyPolicyServiceTest {
                 .tenant(testTenant)
                 .keyId(testKeyId)
                 .grantId(testGrantId)
-                .principal(testPrincipal)
-                .status("ACTIVE")
+                .granteePrincipal(testPrincipal)
                 .operations("Encrypt,Decrypt")
                 .build();
 
-        RetireGrantRequestDto request = RetireGrantRequestDto.builder()
+        RetireGrantRequest request = RetireGrantRequest.builder()
                 .grantToken(testGrantId)
-                .retiringPrincipal(testPrincipal)
                 .build();
 
         when(kmsKeyGrantRepository.findByTenantAndGrantId(testTenant, testGrantId))
@@ -696,7 +680,7 @@ class KeyPolicyServiceTest {
     @DisplayName("Should throw exception when retiring non-existent grant")
     void testRetireGrantNotFound() {
         // Arrange
-        RetireGrantRequestDto request = RetireGrantRequestDto.builder()
+        RetireGrantRequest request = RetireGrantRequest.builder()
                 .grantToken(testGrantId)
                 .build();
 
@@ -717,15 +701,13 @@ class KeyPolicyServiceTest {
     void testListRetirableGrantsSuccess() {
         // Arrange
         KmsKeyGrant grant1 = createMockGrant(1, "grant-1");
-        grant1.setStatus("ACTIVE");
 
         KmsKeyGrant grant2 = createMockGrant(2, "grant-2");
-        grant2.setStatus("ACTIVE");
 
         Page<KmsKeyGrant> page = new PageImpl<>(Arrays.asList(grant1, grant2));
 
-        when(kmsKeyGrantRepository.findByTenantAndPrincipalAndStatus(
-                eq(testTenant), eq(testPrincipal), eq("ACTIVE"), any(Pageable.class)))
+        when(kmsKeyGrantRepository.findByTenantAndRetiringPrincipalAndRevocationDateIsNullAndRetirementDateIsNull(
+                eq(testTenant), eq(testPrincipal), any(Pageable.class)))
                 .thenReturn(page);
 
         // Act
@@ -744,8 +726,8 @@ class KeyPolicyServiceTest {
         // Arrange
         Page<KmsKeyGrant> page = new PageImpl<>(new ArrayList<>());
 
-        when(kmsKeyGrantRepository.findByTenantAndPrincipalAndStatus(
-                eq(testTenant), eq(testPrincipal), eq("ACTIVE"), any(Pageable.class)))
+        when(kmsKeyGrantRepository.findByTenantAndRetiringPrincipalAndRevocationDateIsNullAndRetirementDateIsNull(
+                eq(testTenant), eq(testPrincipal), any(Pageable.class)))
                 .thenReturn(page);
 
         // Act
@@ -768,8 +750,8 @@ class KeyPolicyServiceTest {
 
         Page<KmsKeyGrant> firstPage = new PageImpl<>(firstPageGrants, PageRequest.of(0, 2), 10);
 
-        when(kmsKeyGrantRepository.findByTenantAndPrincipalAndStatus(
-                eq(testTenant), eq(testPrincipal), eq("ACTIVE"), any(Pageable.class)))
+        when(kmsKeyGrantRepository.findByTenantAndRetiringPrincipalAndRevocationDateIsNullAndRetirementDateIsNull(
+                eq(testTenant), eq(testPrincipal), any(Pageable.class)))
                 .thenReturn(firstPage);
 
         // Act
@@ -783,56 +765,6 @@ class KeyPolicyServiceTest {
     }
 
     // =========================================================================
-    // ListKeyPolicies Tests
-    // =========================================================================
-
-    @Test
-    @DisplayName("Should list key policies when policy exists")
-    void testListKeyPoliciesExists() {
-        // Arrange
-        KmsKeyPolicy policy = KmsKeyPolicy.builder()
-                .id(1L)
-                .policyName(POLICY_NAME)
-                .tenant(testTenant)
-                .keyId(testKeyId)
-                .policyDocument("{}")
-                .build();
-
-        when(kmsKeyPolicyRepository.findByTenantAndKeyId(testTenant,
-                testKeyId,
-                PageRequest.of(0, 100, Sort.by("creationDate").descending())))
-                .thenReturn(List.of(policy));
-
-        // Act
-        ListKeyPoliciesResponse result = keyPolicyService.listKeyPolicies(testTenant, testKeyId, 100, null);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(1, result.getPolicyNames().size());
-        assertEquals(POLICY_NAME, result.getPolicyNames().get(0));
-        assertFalse(result.getTruncated());
-        assertNull(result.getNextToken());
-    }
-
-    @Test
-    @DisplayName("Should return empty list when no policy exists")
-    void testListKeyPoliciesNotFoundShoudfindDefaultPolicy() {
-        // Arrange
-        when(kmsKeyPolicyRepository.findByTenantAndKeyId(testTenant, testKeyId, PageRequest.of(0, 100, Sort.by("creationDate").descending())))
-                .thenReturn(List.of());
-
-        // Act
-        ListKeyPoliciesResponse result = keyPolicyService.listKeyPolicies(testTenant, testKeyId, 100, null);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(1, result.getPolicyNames().size());
-        assertEquals("default", result.getPolicyNames().get(0));
-        assertFalse(result.getTruncated());
-        assertNull(result.getNextToken());
-    }
-
-    // =========================================================================
     // Helper Methods
     // =========================================================================
 
@@ -842,10 +774,8 @@ class KeyPolicyServiceTest {
                 .tenant(testTenant)
                 .keyId(testKeyId)
                 .grantId(grantId)
-                .principal(testPrincipal)
+                .granteePrincipal(testPrincipal)
                 .operations("Encrypt,Decrypt")
-                .status("ACTIVE")
-                .creationDate(LocalDateTime.now())
                 .build();
     }
 }

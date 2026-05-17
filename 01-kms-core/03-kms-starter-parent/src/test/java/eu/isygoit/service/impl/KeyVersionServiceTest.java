@@ -1,6 +1,6 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.dto.KmsDtos.ActiveVersionResponseDto;
+import eu.isygoit.dto.KmsDtos.ActiveVersionResponse;
 import eu.isygoit.dto.KmsDtos.ListKeyVersionsResponse;
 import eu.isygoit.enums.IEnumKeyExpirationModel;
 import eu.isygoit.enums.IEnumKeyOrigin;
@@ -15,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,20 +44,18 @@ class KeyVersionServiceTest {
         version1 = KmsKeyVersion.builder()
                 .keyId(KEY_ID)
                 .versionId("v1")
-                .creationDate(LocalDateTime.now().minusDays(1))
                 .keyStatus(IEnumKeyStatus.Types.ENABLED)
                 .signingAlgorithm("RSA_SHA_256")
-                .expirationModel(IEnumKeyExpirationModel.Types.INDEFINITE_LIFECYCLE)
+                .expirationModel(IEnumKeyExpirationModel.Types.KEY_MATERIAL_DOES_NOT_EXPIRE)
                 .origin(IEnumKeyOrigin.Types.EXTERNAL)
                 .build();
 
         version2 = KmsKeyVersion.builder()
                 .keyId(KEY_ID)
                 .versionId("v2")
-                .creationDate(LocalDateTime.now())
                 .keyStatus(IEnumKeyStatus.Types.ENABLED)
                 .signingAlgorithm("RSA_SHA_512")
-                .expirationModel(IEnumKeyExpirationModel.Types.ROTATION_GOVERNED)
+                .expirationModel(IEnumKeyExpirationModel.Types.KEY_MATERIAL_EXPIRES)
                 .origin(IEnumKeyOrigin.Types.WAMS_KMS)
                 .build();
     }
@@ -90,7 +87,7 @@ class KeyVersionServiceTest {
         assertEquals("v1", v1.getVersionId());
         assertEquals(IEnumKeyStatus.Types.ENABLED, v1.getStatus());
         assertEquals("RSA_SHA_256", v1.getSigningAlgorithm());
-        assertEquals(IEnumKeyExpirationModel.Types.INDEFINITE_LIFECYCLE, v1.getExpirationModel());
+        assertEquals(IEnumKeyExpirationModel.Types.KEY_MATERIAL_DOES_NOT_EXPIRE, v1.getExpirationModel());
         assertEquals(IEnumKeyOrigin.Types.EXTERNAL, v1.getOrigin());
     }
 
@@ -181,7 +178,7 @@ class KeyVersionServiceTest {
     }
 
     @Test
-    void shouldUseDescendingSortByCreationDate() {
+    void shouldUseDescendingSortByCreateDate() {
 
         Page<KmsKeyVersion> page =
                 new PageImpl<>(List.of(version1));
@@ -199,7 +196,7 @@ class KeyVersionServiceTest {
                 eq(KEY_ID),
                 argThat(pageable -> {
                     Sort.Order order =
-                            pageable.getSort().getOrderFor("creationDate");
+                            pageable.getSort().getOrderFor("createDate");
 
                     return order != null
                             && order.getDirection() == Sort.Direction.DESC;
@@ -231,13 +228,13 @@ class KeyVersionServiceTest {
     @Test
     void shouldGetActiveVersionSuccessfully() {
 
-        when(kmsKeyVersionRepository.findFirstByTenantAndKeyIdAndKeyStatusOrderByCreationDateDesc(
+        when(kmsKeyVersionRepository.findFirstByTenantAndKeyIdAndKeyStatusOrderByCreateDateDesc(
                 TENANT,
                 KEY_ID,
                 IEnumKeyStatus.Types.ENABLED
         )).thenReturn(Optional.of(version2));
 
-        ActiveVersionResponseDto response =
+        ActiveVersionResponse response =
                 service.getActiveVersion(TENANT, KEY_ID);
 
         assertNotNull(response);
@@ -248,7 +245,7 @@ class KeyVersionServiceTest {
     @Test
     void shouldThrowWhenNoActiveVersionFound() {
 
-        when(kmsKeyVersionRepository.findFirstByTenantAndKeyIdAndKeyStatusOrderByCreationDateDesc(
+        when(kmsKeyVersionRepository.findFirstByTenantAndKeyIdAndKeyStatusOrderByCreateDateDesc(
                 TENANT,
                 KEY_ID,
                 IEnumKeyStatus.Types.ENABLED

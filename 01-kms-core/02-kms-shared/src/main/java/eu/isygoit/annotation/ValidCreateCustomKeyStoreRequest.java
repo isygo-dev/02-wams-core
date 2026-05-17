@@ -9,7 +9,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Custom validation annotation for CreateCustomKeyStoreRequestDto.
+ * Custom validation annotation for CreateCustomKeyStoreRequest.
  * <p>
  * Ensures that type-specific required fields are populated based on the key store type:
  * - CLOUDHSM: cloudHsmClusterId, cloudHsmPassword
@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
  * <p>
  * Usage:
  *
- * @ValidCreateCustomKeyStoreRequest public class CreateCustomKeyStoreRequestDto { ... }
+ * @ValidCreateCustomKeyStoreRequest public class CreateCustomKeyStoreRequest { ... }
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

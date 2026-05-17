@@ -1,6 +1,6 @@
 package eu.isygoit.service;
 
-import eu.isygoit.dto.KmsDtos.ActiveVersionResponseDto;
+import eu.isygoit.dto.KmsDtos.ActiveVersionResponse;
 import eu.isygoit.dto.KmsDtos.ListKeyVersionsResponse;
 
 /**
@@ -28,6 +28,6 @@ public interface IKeyVersionService {
      * @param keyId  the key id
      * @return the active version response dto
      */
-    ActiveVersionResponseDto getActiveVersion(String tenant, String keyId);
+    ActiveVersionResponse getActiveVersion(String tenant, String keyId);
 }
 

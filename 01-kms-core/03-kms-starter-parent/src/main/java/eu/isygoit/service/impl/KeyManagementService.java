@@ -1,7 +1,6 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.KmsDtos.*;
-import eu.isygoit.dto.data.TagDto;
 import eu.isygoit.enums.IEnumKeyOrigin;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.exception.CustomKeyStoreNotFoundException;
@@ -22,10 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -93,8 +89,6 @@ public class KeyManagementService implements IKeyManagementService {
                     .currentVersionId(versionId)
                     .rotationEnabled(false)
                     .keyMaterial(keyMaterial)
-                    .keyMaterialEncrypted(true)
-                    .creationDate(now)
                     .build();
 
             KmsKey savedKey = kmsKeyRepository.save(key);
@@ -106,11 +100,31 @@ public class KeyManagementService implements IKeyManagementService {
                     .versionId(versionId)
                     .keyStatus(IEnumKeyStatus.Types.ENABLED)
                     .keyMaterial(keyMaterial)
-                    .creationDate(now)
-                    .activationDate(now)
                     .build();
 
             kmsKeyVersionRepository.save(keyVersion);
+
+            if (request.getPolicy() != null && !request.getPolicy().isEmpty()) {
+                KmsKeyPolicy keyPolicy = KmsKeyPolicy.builder()
+                        .tenant(tenant)
+                        .keyId(savedKey.getKeyId())
+                        .policyDocument(KmsKeyPolicy.serializePolicy(request.getPolicy()))
+                        .description("Default key policy")
+                        .build();
+                kmsKeyPolicyRepository.save(keyPolicy);
+            }
+
+            if (request.getTags() != null && !request.getTags().isEmpty()) {
+                List<KmsTag> tags = request.getTags().stream()
+                        .map(tag -> KmsTag.builder()
+                                .tenant(tenant)
+                                .keyId(savedKey.getKeyId())
+                                .tagKey(tag.getTagKey())
+                                .tagValue(tag.getTagValue())
+                                .build())
+                        .collect(Collectors.toList());
+                kmsTagRepository.saveAll(tags);
+            }
 
             log.info("Key created successfully: keyId={}, wrn={}",
                     keyVersion.getKeyId(),
@@ -118,10 +132,10 @@ public class KeyManagementService implements IKeyManagementService {
 
             return CreateKeyResponse.builder()
                     .keyMetadata(CreateKeyResponse.KeyMetadata.builder()
-                            .wamsAccountId(savedKey.getTenant())
+                            .tenant(savedKey.getTenant())
                             .keyId(savedKey.getKeyId())
                             .wrn(savedKey.getKeyWrn())
-                            .creationDate(savedKey.getCreationDate())
+                            .createDate(savedKey.getCreateDate())
                             .enabled(savedKey.isEnabled())
                             .description(savedKey.getDescription())
                             .rotationEnabled(savedKey.getRotationEnabled())
@@ -132,7 +146,7 @@ public class KeyManagementService implements IKeyManagementService {
                             .currentVersion(savedKey.getCurrentVersionId())
                             .origin(savedKey.getOrigin())
                             .keyStatus(savedKey.getKeyStatus())
-                            .createdAt(savedKey.getCreationDate())
+                            .createdAt(savedKey.getCreateDate())
                             .updatedAt(savedKey.getUpdateDate())
                             .keyAlias(savedKey.getKeyAlias())
                             .expirationModel(savedKey.getExpirationModel())
@@ -186,7 +200,7 @@ public class KeyManagementService implements IKeyManagementService {
                 .collect(Collectors.toList());
 
         // Fetch key policy (if any)
-        KmsKeyPolicy policy = kmsKeyPolicyRepository.findByTenantAndKeyId(tenant, key.getKeyId());
+        Optional<KmsKeyPolicy> policy = kmsKeyPolicyRepository.findByTenantAndKeyId(tenant, key.getKeyId());
 
         CreateKeyResponse.KeyMetadata metadata = CreateKeyResponse.KeyMetadata.builder()
                 .keyId(key.getKeyId())
@@ -195,23 +209,15 @@ public class KeyManagementService implements IKeyManagementService {
                 .keySpec(key.getKeySpec())
                 .keyUsage(key.getKeyUsage())
                 .currentVersion(key.getCurrentVersionId())
-                .creationDate(key.getCreationDate())
-                .createdAt(key.getCreationDate())
-                //.updatedAt(key.getLastModifiedDate())
+                .createDate(key.getCreateDate())
+                .createdAt(key.getCreateDate())
                 .keyAlias(key.getKeyAlias())
                 .description(key.getDescription())
                 .rotationEnabled(key.getRotationEnabled())
                 .origin(key.getOrigin())
                 .expirationModel(key.getExpirationModel())
                 .multiRegion(key.getMultiRegion())
-                //.bypassPolicyLockoutSafetyCheck(key.getBypassPolicyLockoutSafetyCheck())
-                .policy(policy!=null?policy.getPolicyDocument():"")
-                .tags(tags)
                 .enabled(IEnumKeyStatus.Types.ENABLED.equals(key.getKeyStatus()))
-                //.encryptionAlgorithmSpecs(key.getEncryptionAlgorithmSpecs())   // if stored
-                //.signingAlgorithms(key.getSigningAlgorithms())                 // if stored
-                //.keyManager(key.getKeyManager())
-                //.multiRegionConfiguration(key.getMultiRegionConfiguration())
                 .build();
 
         return DescribeKeyResponse.builder().keyMetadata(metadata).build();
@@ -238,7 +244,7 @@ public class KeyManagementService implements IKeyManagementService {
         Pageable pageable = PageRequest.of(
                 pageNum,
                 pageSize,
-                Sort.by("creationDate").descending()
+                Sort.by("createDate").descending()
         );
 
         Page<KmsKey> keyPage = kmsKeyRepository.findByTenant(tenant, pageable);
@@ -374,9 +380,6 @@ public class KeyManagementService implements IKeyManagementService {
                     .versionId(newVersionId)
                     .keyStatus(IEnumKeyStatus.Types.ENABLED)
                     .keyMaterial(newKeyMaterial)
-                    .creationDate(now)
-                    .activationDate(now)
-                    .rotationDate(now)
                     .build();
 
             kmsKeyVersionRepository.save(newVersion);
@@ -418,9 +421,6 @@ public class KeyManagementService implements IKeyManagementService {
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
-        if (request.getAlias() != null) {
-            key.setKeyAlias(request.getAlias());
-        }
 
         if (request.getDescription() != null) {
             key.setDescription(request.getDescription());
@@ -469,10 +469,10 @@ public class KeyManagementService implements IKeyManagementService {
     }
 
     @Override
-    public KeyRotationStatusResponseDto updateKeyRotation(
+    public UpdateKeyRotationResponse updateKeyRotation(
             String tenant,
             String keyId,
-            UpdateKeyRotationRequestDto request) {
+            UpdateKeyRotationRequest request) {
 
         log.info("Updating key rotation for tenant: {} keyId: {} autoRotate: {}",
                 tenant,
@@ -484,16 +484,16 @@ public class KeyManagementService implements IKeyManagementService {
 
         key.setRotationEnabled(request.getEnableRotation());
 
-        if (request.getRotationPeriodDays() != null) {
-            key.setRotationPeriodDays(request.getRotationPeriodDays());
+        if (request.getRotationPeriodInDays() != null) {
+            key.setRotationPeriodInDays(request.getRotationPeriodInDays());
         }
 
         kmsKeyRepository.save(key);
 
-        return KeyRotationStatusResponseDto.builder()
+        return UpdateKeyRotationResponse.builder()
                 .keyId(key.getKeyId())
                 .rotationEnabled(key.getRotationEnabled())
-                .rotationPeriodDays(key.getRotationPeriodDays())
+                .rotationPeriodInDays(key.getRotationPeriodInDays())
                 .lastRotationDate(key.getLastRotationDate())
                 .build();
     }
@@ -513,7 +513,7 @@ public class KeyManagementService implements IKeyManagementService {
         return GetKeyRotationStatusResponse.builder()
                 .keyId(key.getKeyId())
                 .rotationEnabled(key.getRotationEnabled())
-                .rotationPeriodDays(key.getRotationPeriodDays())
+                .rotationPeriodInDays(key.getRotationPeriodInDays())
                 .lastRotationDate(key.getLastRotationDate())
                 .build();
     }
@@ -536,7 +536,7 @@ public class KeyManagementService implements IKeyManagementService {
     }
 
     @Override
-    public AliasResponseDto createAlias(String tenant, CreateAliasRequestDto request) {
+    public AliasResponseDto createAlias(String tenant, CreateAliasRequest request) {
         log.info("Creating alias: {} for tenant: {} keyId: {}",
                 request.getAliasName(), tenant, request.getTargetKeyId());
 
@@ -551,19 +551,19 @@ public class KeyManagementService implements IKeyManagementService {
         KmsAlias alias = KmsAlias.builder()
                 .tenant(tenant)
                 .aliasName(request.getAliasName())
-                .keyId(key.getKeyId())
+                .targetKeyId(key.getKeyId())
                 .build();
 
         KmsAlias savedAlias = kmsAliasRepository.save(alias);
 
         return AliasResponseDto.builder()
                 .aliasName(savedAlias.getAliasName())
-                .targetKeyId(savedAlias.getKeyId())
+                .targetKeyId(savedAlias.getTargetKeyId())
                 .build();
     }
 
     @Override
-    public AliasResponseDto updateAlias(String tenant, String aliasName, UpdateAliasRequestDto request) {
+    public AliasResponseDto updateAlias(String tenant, String aliasName, UpdateAliasRequest request) {
         log.info("Updating alias: {} for tenant: {} to keyId: {}", aliasName, tenant, request.getTargetKeyId());
 
         KmsAlias alias = kmsAliasRepository.findByTenantAndAliasName(tenant, aliasName)
@@ -572,12 +572,12 @@ public class KeyManagementService implements IKeyManagementService {
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, request.getTargetKeyId())
                 .orElseThrow(() -> new KeyNotFoundException(request.getTargetKeyId()));
 
-        alias.setKeyId(key.getKeyId());
+        alias.setTargetKeyId(key.getKeyId());
         kmsAliasRepository.save(alias);
 
         return AliasResponseDto.builder()
                 .aliasName(alias.getAliasName())
-                .targetKeyId(alias.getKeyId())
+                .targetKeyId(alias.getTargetKeyId())
                 .build();
     }
 
@@ -605,7 +605,7 @@ public class KeyManagementService implements IKeyManagementService {
                 .aliases(aliasPage.getContent().stream()
                         .map(alias -> AliasResponseDto.builder()
                                 .aliasName(alias.getAliasName())
-                                .targetKeyId(alias.getKeyId())
+                                .targetKeyId(alias.getTargetKeyId())
                                 .build())
                         .collect(Collectors.toList()))
                 .nextToken(aliasPage.hasNext() ? String.valueOf(pageNum + 1) : null)
@@ -616,7 +616,7 @@ public class KeyManagementService implements IKeyManagementService {
     public ListAliasesResponseDto listAliasesForKey(String tenant, String keyId, Integer limit, String nextToken) {
         log.info("Listing aliases for key: {} tenant: {}", keyId, tenant);
 
-        Pageable pageable = RepoHelper.resolvePageable(limit, nextToken, "creationDate");
+        Pageable pageable = RepoHelper.resolvePageable(limit, nextToken, "createDate");
 
         List<KmsAlias> aliases = kmsAliasRepository.findByTenantAndKeyId(tenant, keyId, pageable);
 
@@ -624,7 +624,7 @@ public class KeyManagementService implements IKeyManagementService {
                 .aliases(aliases.stream()
                         .map(alias -> AliasResponseDto.builder()
                                 .aliasName(alias.getAliasName())
-                                .targetKeyId(alias.getKeyId())
+                                .targetKeyId(alias.getTargetKeyId())
                                 .build())
                         .collect(Collectors.toList()))
                 .nextToken(null)
@@ -696,7 +696,7 @@ public class KeyManagementService implements IKeyManagementService {
     }
 
     @Override
-    public KeyDescriptionResponseDto importKeyMaterial(String tenant, String keyId, ImportKeyMaterialRequestDto request) {
+    public KeyDescriptionResponseDto importKeyMaterial(String tenant, String keyId, ImportKeyMaterialRequest request) {
         log.info("Importing key material for tenant: {} keyId: {}", tenant, keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
@@ -705,15 +705,13 @@ public class KeyManagementService implements IKeyManagementService {
         // Decrypt the imported key material
         byte[] decryptedMaterial = cryptoService.decryptKeyMaterial(
                 tenant,
-                request.getEncryptedKeyMaterial(),
-                request.getImportToken()
+                request.getEncryptedKeyMaterial().getBytes(),
+                request.getImportToken().getBytes()
         );
 
         key.setKeyMaterial(decryptedMaterial);
-        key.setKeyMaterialEncrypted(true);
-        key.setImported(true);
         key.setImportDate(LocalDateTime.now());
-        key.setExpirationDate(request.getExpirationDate());
+        key.setValidTo(request.getValidTo());
         kmsKeyRepository.save(key);
 
         return KeyDescriptionResponseDto.builder()
@@ -734,7 +732,6 @@ public class KeyManagementService implements IKeyManagementService {
         }
 
         key.setKeyMaterial(null);
-        key.setKeyMaterialEncrypted(false);
         kmsKeyRepository.save(key);
 
         return KeyDescriptionResponseDto.builder()
@@ -784,7 +781,7 @@ public class KeyManagementService implements IKeyManagementService {
 
         // Delete associated resources
         kmsKeyVersionRepository.deleteByTenantAndKeyId(tenant, keyId);
-        kmsAliasRepository.deleteByTenantAndKeyId(tenant, keyId);
+        kmsAliasRepository.deleteByTenantAndTargetKeyId(tenant, keyId);
         kmsTagRepository.deleteByTenantAndKeyId(tenant, keyId);
 
         // Delete key
@@ -794,7 +791,7 @@ public class KeyManagementService implements IKeyManagementService {
     }
 
     @Override
-    public ListKeyRotationsResponseDto listKeyRotations(
+    public ListKeyRotationsResponse listKeyRotations(
             String tenant,
             String keyId,
             Integer limit,
@@ -820,17 +817,17 @@ public class KeyManagementService implements IKeyManagementService {
         );
 
         Page<KmsKeyVersion> versionPage =
-                kmsKeyVersionRepository.findByTenantAndKeyIdAndRotationDateIsNotNull(
+                kmsKeyVersionRepository.findByTenantAndKeyIdAndCreateDateIsNotNull(
                         tenant,
                         keyId,
                         pageable
                 );
 
-        return ListKeyRotationsResponseDto.builder()
+        return ListKeyRotationsResponse.builder()
                 .rotations(versionPage.getContent().stream()
-                        .map(version -> ListKeyRotationsResponseDto.RotationDto.builder()
+                        .map(version -> ListKeyRotationsResponse.RotationDto.builder()
                                 .versionId(version.getVersionId())
-                                .rotationDate(version.getRotationDate())
+                                .rotationDate(version.getCreateDate())
                                 .build())
                         .collect(Collectors.toList()))
                 .nextToken(versionPage.hasNext()
@@ -847,9 +844,9 @@ public class KeyManagementService implements IKeyManagementService {
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
         // Get usage statistics (these would typically come from a usage tracking service)
-        long encryptCount = cryptoService.getEncryptCount(keyId);
-        long decryptCount = cryptoService.getDecryptCount(keyId);
-        LocalDateTime lastUsed = cryptoService.getLastUsedDate(keyId);
+        long encryptCount = cryptoService.getEncryptCount(tenant, keyId);
+        long decryptCount = cryptoService.getDecryptCount(tenant, keyId);
+        LocalDateTime lastUsed = cryptoService.getLastUsedDate(tenant, keyId);
 
         return KeyUsageStatsResponseDto.builder()
                 .keyId(keyId)

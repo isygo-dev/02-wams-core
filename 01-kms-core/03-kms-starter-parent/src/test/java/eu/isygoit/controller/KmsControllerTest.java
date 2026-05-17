@@ -214,13 +214,13 @@ class KmsControllerTest {
 
     @Test
     void updateKeyRotation_Success() throws Exception {
-        UpdateKeyRotationRequestDto request = UpdateKeyRotationRequestDto.builder()
+        UpdateKeyRotationRequest request = UpdateKeyRotationRequest.builder()
                 .enableRotation(true)
-                .rotationPeriodDays(365)
+                .rotationPeriodInDays(365)
                 .build();
 
         when(keyManagementService.updateKeyRotation(eq(TENANT), eq(KEY_ID), any()))
-                .thenReturn(KeyRotationStatusResponseDto.builder().keyId(KEY_ID).rotationEnabled(true).build());
+                .thenReturn(UpdateKeyRotationResponse.builder().keyId(KEY_ID).rotationEnabled(true).build());
 
         mockMvc.perform(patch("/api/v1/private/kms/keys/{keyId}/rotation", KEY_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -248,7 +248,7 @@ class KmsControllerTest {
 
     @Test
     void listKeyRotations_Success() throws Exception {
-        ListKeyRotationsResponseDto response = ListKeyRotationsResponseDto.builder()
+        ListKeyRotationsResponse response = ListKeyRotationsResponse.builder()
                 .rotations(List.of()).build();
         when(keyManagementService.listKeyRotations(anyString(), eq(KEY_ID), isNull(), isNull()))
                 .thenReturn(response);
@@ -287,7 +287,7 @@ class KmsControllerTest {
     @Test
     void getActiveVersion_Success() throws Exception {
         when(keyVersionService.getActiveVersion(eq(TENANT), eq(KEY_ID)))
-                .thenReturn(new ActiveVersionResponseDto());
+                .thenReturn(new ActiveVersionResponse());
         when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
 
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/active-version", KEY_ID))
@@ -296,7 +296,7 @@ class KmsControllerTest {
 
     @Test
     void updatePrimaryRegion_Success() throws Exception {
-        UpdatePrimaryRegionRequestDto request = new UpdatePrimaryRegionRequestDto();
+        UpdatePrimaryRegionRequest request = new UpdatePrimaryRegionRequest();
         request.setPrimaryRegion("us-west-2");
 
         when(multiRegionService.updatePrimaryRegion(eq(TENANT), eq(KEY_ID), any()))
@@ -310,8 +310,7 @@ class KmsControllerTest {
 
     @Test
     void replicateKey_Success() throws Exception {
-        ReplicateKeyRequestDto request = new ReplicateKeyRequestDto();
-        request.setKeyId(KEY_ID);
+        ReplicateKeyRequest request = new ReplicateKeyRequest();
         request.setReplicaRegion("eu-west-1");
 
         when(multiRegionService.replicateKey(eq(TENANT), eq(KEY_ID), any()))
@@ -604,7 +603,7 @@ class KmsControllerTest {
     @Test
     void listResourceTags_Success() throws Exception {
         ListTagsResponseDto dto = ListTagsResponseDto.builder()
-                .tags(List.of(new eu.isygoit.dto.data.TagDto("env", "test")))
+                .tags(List.of(new TagDto("env", "test")))
                 .build();
         when(keyManagementService.listResourceTags(eq(TENANT), eq(KEY_ID))).thenReturn(dto);
         when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
@@ -620,7 +619,6 @@ class KmsControllerTest {
     void putKeyPolicy_Success() throws Exception {
         PutKeyPolicyRequest request = new PutKeyPolicyRequest();
         request.setPolicy(Map.of("Version", "2012-10-17"));
-        request.setPolicyName("default");
 
         mockMvc.perform(put("/api/v1/private/kms/keys/{keyId}/policy", KEY_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -631,27 +629,11 @@ class KmsControllerTest {
     @Test
     void getKeyPolicy_Success() throws Exception {
         Map<String, Object> policy = Map.of("Version", "2012-10-17");
-        when(keyPolicyService.getKeyPolicy(eq(TENANT), eq(KEY_ID), anyString())).thenReturn(policy);
+        when(keyPolicyService.getKeyPolicy(eq(TENANT), eq(KEY_ID))).thenReturn(policy);
         when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/policy", KEY_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.policy").isString());
-    }
-
-    @Test
-    void listKeyPolicies_Success() throws Exception {
-        ListKeyPoliciesResponse response = ListKeyPoliciesResponse.builder()
-                .policyNames(List.of("default"))
-                .nextToken(null)
-                .truncated(false)
-                .build();
-
-        when(keyPolicyService.listKeyPolicies(anyString(), anyString(), isNull(), isNull()))
-                .thenReturn(response);
-        when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
-        mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/policies", KEY_ID))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.policyNames[0]").value("default"));
     }
 
     @Test
@@ -788,7 +770,7 @@ class KmsControllerTest {
     void describeCustomKeyStore_Success() throws Exception {
         CustomKeyStoreResponseDto dto = CustomKeyStoreResponseDto.builder()
                 .keyStoreId(CUSTOM_KEY_STORE_ID)
-                .keyStoreName("test-store")
+                .customKeyStoreName("test-store")
                 .status(IEnumCustomKeyStoreStatus.Types.CONNECTED)
                 .build();
         when(customKeyStoreService.describeCustomKeyStore(eq(TENANT), eq(CUSTOM_KEY_STORE_ID))).thenReturn(dto);

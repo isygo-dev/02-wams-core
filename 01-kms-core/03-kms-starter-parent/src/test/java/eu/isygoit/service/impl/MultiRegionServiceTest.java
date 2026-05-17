@@ -63,12 +63,10 @@ public class MultiRegionServiceTest {
                 .multiRegion(true)
                 .primaryRegion("us-east-1")
                 .replicaRegions("us-west-1,eu-west-1")
-                .creationDate(LocalDateTime.now())
                 .keyMaterial(new byte[]{1, 2, 3, 4, 5})
                 .origin(IEnumKeyOrigin.Types.WAMS_KMS)
                 .rotationEnabled(false)
                 .description("Primary multi-region key")
-                .imported(false)
                 .build();
 
         replicaKey = KmsKey.builder()
@@ -82,11 +80,9 @@ public class MultiRegionServiceTest {
                 .multiRegion(true)
                 .primaryKeyId(primaryKey.getKeyId())
                 .keyMaterial(primaryKey.getKeyMaterial())
-                .creationDate(LocalDateTime.now())
                 .origin(IEnumKeyOrigin.Types.WAMS_KMS)
                 .rotationEnabled(false)
                 .description("Replica key")
-                .imported(false)
                 .build();
     }
 
@@ -96,7 +92,7 @@ public class MultiRegionServiceTest {
 
     @Test
     void shouldUpdatePrimaryRegionSuccessfully() {
-        UpdatePrimaryRegionRequestDto request = UpdatePrimaryRegionRequestDto.builder()
+        UpdatePrimaryRegionRequest request = UpdatePrimaryRegionRequest.builder()
                 .primaryRegion(NEW_PRIMARY_REGION)
                 .build();
 
@@ -114,7 +110,7 @@ public class MultiRegionServiceTest {
 
     @Test
     void shouldThrowExceptionWhenKeyNotFoundForUpdatePrimaryRegion() {
-        UpdatePrimaryRegionRequestDto request = UpdatePrimaryRegionRequestDto.builder()
+        UpdatePrimaryRegionRequest request = UpdatePrimaryRegionRequest.builder()
                 .primaryRegion(NEW_PRIMARY_REGION)
                 .build();
 
@@ -128,7 +124,7 @@ public class MultiRegionServiceTest {
 
     @Test
     void shouldThrowExceptionWhenKeyIsNotMultiRegion() {
-        UpdatePrimaryRegionRequestDto request = UpdatePrimaryRegionRequestDto.builder()
+        UpdatePrimaryRegionRequest request = UpdatePrimaryRegionRequest.builder()
                 .primaryRegion(NEW_PRIMARY_REGION)
                 .build();
 
@@ -147,7 +143,7 @@ public class MultiRegionServiceTest {
 
     @Test
     void shouldReplicateKeySuccessfully() {
-        ReplicateKeyRequestDto request = ReplicateKeyRequestDto.builder()
+        ReplicateKeyRequest request = ReplicateKeyRequest.builder()
                 .replicaRegion(REPLICA_REGION)
                 .build();
 
@@ -170,7 +166,7 @@ public class MultiRegionServiceTest {
 
     @Test
     void shouldThrowExceptionWhenPrimaryKeyNotFound() {
-        ReplicateKeyRequestDto request = ReplicateKeyRequestDto.builder()
+        ReplicateKeyRequest request = ReplicateKeyRequest.builder()
                 .replicaRegion(REPLICA_REGION)
                 .build();
 
@@ -184,7 +180,7 @@ public class MultiRegionServiceTest {
 
     @Test
     void shouldThrowExceptionWhenKeyIsNotMultiRegionForReplication() {
-        ReplicateKeyRequestDto request = ReplicateKeyRequestDto.builder()
+        ReplicateKeyRequest request = ReplicateKeyRequest.builder()
                 .replicaRegion(REPLICA_REGION)
                 .build();
 
@@ -199,7 +195,7 @@ public class MultiRegionServiceTest {
 
     @Test
     void shouldThrowExceptionWhenReplicaAlreadyExists() {
-        ReplicateKeyRequestDto request = ReplicateKeyRequestDto.builder()
+        ReplicateKeyRequest request = ReplicateKeyRequest.builder()
                 .replicaRegion(REPLICA_REGION)
                 .build();
 
@@ -217,7 +213,7 @@ public class MultiRegionServiceTest {
     void shouldReplicateKeyToMultipleRegions() {
         String[] regions = {"us-west-1", "eu-west-1", "ap-southeast-1"};
         for (String region : regions) {
-            ReplicateKeyRequestDto request = ReplicateKeyRequestDto.builder()
+            ReplicateKeyRequest request = ReplicateKeyRequest.builder()
                     .replicaRegion(region)
                     .build();
 
@@ -292,7 +288,7 @@ public class MultiRegionServiceTest {
     void shouldSynchronizeKeyMaterialWhenOriginIsWamsKms() {
         primaryKey.setOrigin(IEnumKeyOrigin.Types.WAMS_KMS);
         replicaKey.setKeyMaterial(new byte[]{9, 8, 7});
-        replicaKey.setKeyMaterialEncrypted(false);
+
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, replicaKey.getKeyId()))
                 .thenReturn(Optional.of(replicaKey));
@@ -310,9 +306,8 @@ public class MultiRegionServiceTest {
     @Test
     void shouldSynchronizeExternalKeyProperties() {
         primaryKey.setOrigin(IEnumKeyOrigin.Types.EXTERNAL);
-        primaryKey.setImported(true);
         primaryKey.setImportDate(LocalDateTime.now());
-        primaryKey.setExpirationDate(LocalDateTime.now().plusYears(1));
+        primaryKey.setValidTo(LocalDateTime.now().plusYears(1));
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, replicaKey.getKeyId()))
                 .thenReturn(Optional.of(replicaKey));
@@ -330,7 +325,7 @@ public class MultiRegionServiceTest {
     @Test
     void shouldSyncRotationSettings() {
         primaryKey.setRotationEnabled(true);
-        primaryKey.setRotationPeriodDays(90);
+        primaryKey.setRotationPeriodInDays(90);
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, replicaKey.getKeyId()))
                 .thenReturn(Optional.of(replicaKey));
@@ -343,7 +338,7 @@ public class MultiRegionServiceTest {
 
         assertNotNull(response);
         assertTrue(replicaKey.getRotationEnabled());
-        assertEquals(90, replicaKey.getRotationPeriodDays());
+        assertEquals(90, replicaKey.getRotationPeriodInDays());
     }
 
     @Test
@@ -389,14 +384,14 @@ public class MultiRegionServiceTest {
                 });
 
         ReplicateKeyResponse finalResponse = multiRegionService.replicateKey(TENANT, KEY_ID,
-                ReplicateKeyRequestDto.builder().replicaRegion(REPLICA_REGION).build());
+                ReplicateKeyRequest.builder().replicaRegion(REPLICA_REGION).build());
         
         assertNotNull(finalResponse);
     }
 
     @Test
     void shouldHandleUpdatePrimaryRegionWithNullRegion() {
-        UpdatePrimaryRegionRequestDto request = UpdatePrimaryRegionRequestDto.builder()
+        UpdatePrimaryRegionRequest request = UpdatePrimaryRegionRequest.builder()
                 .primaryRegion(null)
                 .build();
 
@@ -411,7 +406,7 @@ public class MultiRegionServiceTest {
 
     @Test
     void shouldHandleReplicateKeyWithNullRegion() {
-        ReplicateKeyRequestDto request = ReplicateKeyRequestDto.builder()
+        ReplicateKeyRequest request = ReplicateKeyRequest.builder()
                 .replicaRegion(null)
                 .build();
 

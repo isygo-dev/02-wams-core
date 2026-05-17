@@ -27,7 +27,7 @@ public interface IKeyPolicyService {
      * @param keyId  the key id
      * @return the map
      */
-    Map<String, Object> getKeyPolicy(String tenant, String keyId, String policyName);
+    Map<String, Object> getKeyPolicy(String tenant, String keyId);
 
     /**
      * Create grant.
@@ -49,12 +49,10 @@ public interface IKeyPolicyService {
      */
     String revokeGrant(String tenant, String keyId, String grantId);
 
+    RetireGrantResponse retireGrant(String tenant, String grantId, @Valid RetireGrantRequest request);
+
     ListGrantsResponseDto listGrants(String tenant, String keyId, Integer limit, String nextToken);
 
-    RetireGrantResponse retireGrant(String tenant, String grantId, @Valid RetireGrantRequestDto request);
-
     ListRetirableGrantsResponse listRetirableGrants(String tenant, String retiringPrincipal, Integer limit, String nextToken);
-
-    ListKeyPoliciesResponse listKeyPolicies(String tenant, String keyId, Integer limit, String nextToken);
 }
 

@@ -1,5 +1,7 @@
 package eu.isygoit.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.*;
@@ -10,6 +12,10 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.util.Map;
 
 /**
  * The type Kms Key Policy.
@@ -23,9 +29,8 @@ import org.hibernate.annotations.DynamicUpdate;
 @Entity
 @Table(name = SchemaTableConstantName.T_KMS_KEY_POLICY,
         uniqueConstraints = {
-        //TODO KMS key cannot have multiple key policies. According to the official AWS documentation, every KMS key must have exactly one key policy
                 @UniqueConstraint(name = SchemaUcConstantName.UC_KMS_KEY_POLICY_KEY_ID_NAME,
-                        columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_KEY_ID, SchemaColumnConstantName.C_POLICY_NAME}),
+                        columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_KEY_ID}),
         },
         indexes = {
                 @Index(name = SchemaIndexConstantName.IDX_KMS_KEY_POLICY_KEY_ID, columnList = SchemaColumnConstantName.C_KEY_ID)
@@ -46,17 +51,21 @@ public class KmsKeyPolicy extends AuditableEntity<Long> implements ITenantAssign
     @Column(name = SchemaColumnConstantName.C_KEY_ID, length = 255, updatable = false, nullable = false)
     private String keyId;
 
-    @Column(name = SchemaColumnConstantName.C_POLICY_NAME, nullable = false)
-    private String policyName; 
-    
-    @Lob
-    @Column(name = SchemaColumnConstantName.C_POLICY_DOCUMENT, nullable = false)
-    private String policyDocument; // JSON format IAM policy
-
-    @Column(name = SchemaColumnConstantName.C_POLICY_VERSION, length = 50)
-    private String policyVersion; // Version of policy format (2012-10-17, etc.)
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = SchemaColumnConstantName.C_POLICY_DOCUMENT, nullable = false, columnDefinition = "jsonb")
+    private String policyDocument;
 
     @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = 1024)
     private String description;
+
+    public static String serializePolicy(Map<String, Object> policy) {
+        if (policy == null || policy.isEmpty()) return null;
+        ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+        try {
+            return OBJECT_MAPPER.writeValueAsString(policy);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Invalid policy format", e);
+        }
+    }
 }
 

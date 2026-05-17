@@ -344,18 +344,18 @@ public class CryptoService implements ICryptoService {
     }
 
     @Override
-    public long getEncryptCount(String keyId) {
-        return kmsAuditLogRepository.countByActionAndKeyId(IKmsActionType.Types.ENCRYPT, keyId);
+    public long getEncryptCount(String tenant, String keyId) {
+        return kmsAuditLogRepository.countByTenantAndActionAndKeyId(tenant, IKmsActionType.Types.ENCRYPT, keyId);
     }
 
     @Override
-    public long getDecryptCount(String keyId) {
-        return kmsAuditLogRepository.countByActionAndKeyId(IKmsActionType.Types.DECRYPT, keyId);
+    public long getDecryptCount(String tenant, String keyId) {
+        return kmsAuditLogRepository.countByTenantAndActionAndKeyId(tenant, IKmsActionType.Types.DECRYPT, keyId);
     }
 
     @Override
-    public LocalDateTime getLastUsedDate(String keyId) {
-        return kmsAuditLogRepository.findFirstByKeyIdOrderByTimestampDesc(keyId)
+    public LocalDateTime getLastUsedDate(String tenant, String keyId) {
+        return kmsAuditLogRepository.findFirstByTenantAndKeyIdOrderByTimestampDesc(tenant, keyId)
                 .map(KmsAuditLog::getTimestamp)
                 .orElse(null);
     }
