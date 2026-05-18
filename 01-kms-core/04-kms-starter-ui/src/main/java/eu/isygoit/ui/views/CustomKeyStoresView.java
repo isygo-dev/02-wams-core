@@ -185,9 +185,23 @@ public class CustomKeyStoresView extends VerticalLayout {
             xksProxyConnectivity.setVisible(!isCloudHsm);
         });
 
+        // Common updatable fields (create also allows these)
+        IntegerField maxKeysField = new IntegerField("Max Keys (optional)");
+        maxKeysField.setMin(1);
+        maxKeysField.setMax(10000);
+
+        IntegerField timeoutField = new IntegerField("Connection Timeout (seconds)");
+        timeoutField.setMin(1);
+
+        IntegerField healthIntervalField = new IntegerField("Health Check Interval (seconds)");
+        healthIntervalField.setMin(10);
+
+        Checkbox autoReconnectCheck = new Checkbox("Auto‑reconnect");
+
         form.add(nameField, typeCombo,
                 cloudHsmClusterId, keyStorePassword, trustAnchorCert,
-                xksProxyUriEndpoint, xksProxyUriPath, xksProxyAuth, xksProxyConnectivity);
+                xksProxyUriEndpoint, xksProxyUriPath, xksProxyAuth, xksProxyConnectivity,
+                maxKeysField, timeoutField, healthIntervalField, autoReconnectCheck);
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
         Button saveBtn = new Button("Create", e -> {
@@ -201,6 +215,10 @@ public class CustomKeyStoresView extends VerticalLayout {
             CreateCustomKeyStoreRequest request = CreateCustomKeyStoreRequest.builder()
                     .customKeyStoreName(name)
                     .customKeyStoreType(type)
+                    .maxKeys(maxKeysField.getValue())
+                    .connectionTimeoutSeconds(timeoutField.getValue())
+                    .healthCheckIntervalSeconds(healthIntervalField.getValue())
+                    .autoReconnect(autoReconnectCheck.getValue())
                     .build();
             if (type == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
                 request.setCloudHsmClusterId(cloudHsmClusterId.getValue());
@@ -244,6 +262,7 @@ public class CustomKeyStoresView extends VerticalLayout {
         private final Long storeId;
         private final String storeName;
         private final String storeType;
+        private final String storeStatus;
         private final String connectionState;
         private final String creationDate;
         private final String errorCode;
@@ -253,6 +272,7 @@ public class CustomKeyStoresView extends VerticalLayout {
             this.storeId = store.getCustomKeyStoreId();
             this.storeName = store.getName();
             this.storeType = store.getCustomKeyStoreType();
+            this.storeStatus = store.getStatus() != null ? store.getStatus().name() : "UNKNOWN";
             this.connectionState = store.getConnectionState();
             this.creationDate = store.getCreateDate() != null ?
                     store.getCreateDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : "-";
@@ -270,26 +290,16 @@ public class CustomKeyStoresView extends VerticalLayout {
             getStyle().set("transition", "all 0.2s ease-in-out");
             addClassName("hover:shadow-m");
 
-            // Header row: store name + type (left) and action buttons (right)
+            // Header row: store name (left) and action buttons (right)
             HorizontalLayout headerRow = new HorizontalLayout();
             headerRow.setWidthFull();
             headerRow.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
             headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
 
-            // Left side: name and type chip
-            HorizontalLayout leftHeader = new HorizontalLayout();
-            leftHeader.setAlignItems(FlexComponent.Alignment.CENTER);
-            leftHeader.setSpacing(true);
+            // Left side: name only (type+status will be below)
             Span nameSpan = new Span(storeName);
             nameSpan.addClassName(LumoUtility.FontWeight.BOLD);
             nameSpan.addClassName(LumoUtility.FontSize.MEDIUM);
-            Span typeChip = new Span(storeType);
-            typeChip.addClassName(LumoUtility.FontSize.XSMALL);
-            typeChip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
-            typeChip.addClassName(LumoUtility.Padding.Vertical.XSMALL);
-            typeChip.addClassName(LumoUtility.BorderRadius.LARGE);
-            typeChip.getStyle().set("background-color", "#E9ECEF").set("color", "#495057");
-            leftHeader.add(nameSpan, typeChip);
 
             // Right side: action buttons
             HorizontalLayout buttonBar = new HorizontalLayout();
@@ -318,33 +328,42 @@ public class CustomKeyStoresView extends VerticalLayout {
             deleteBtn.addClickListener(e -> confirmDelete());
 
             buttonBar.add(connectBtn, disconnectBtn, updateBtn, deleteBtn);
-            headerRow.add(leftHeader, buttonBar);
-            headerRow.expand(leftHeader);
+            headerRow.add(nameSpan, buttonBar);
+            headerRow.expand(nameSpan);
             add(headerRow);
 
-            // Connection state chip (full width below header)
-            Span stateChip = new Span(connectionState);
-            stateChip.addClassName(LumoUtility.FontSize.XSMALL);
-            stateChip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
-            stateChip.addClassName(LumoUtility.Padding.Vertical.XSMALL);
-            stateChip.addClassName(LumoUtility.BorderRadius.LARGE);
-            if ("CONNECTED".equalsIgnoreCase(connectionState)) {
-                stateChip.getStyle().set("background-color", "#E3F7E5").set("color", "#1E7B2E");
-            } else if ("DISCONNECTED".equalsIgnoreCase(connectionState)) {
-                stateChip.getStyle().set("background-color", "#F2F4F8").set("color", "#5E6C84");
-            } else {
-                stateChip.getStyle().set("background-color", "#FEF3F2").set("color", "#C73A2B");
-            }
-            add(stateChip);
+            // Type and status chips (same line)
+            HorizontalLayout typeStatusRow = new HorizontalLayout();
+            typeStatusRow.setSpacing(true);
+            typeStatusRow.setAlignItems(FlexComponent.Alignment.CENTER);
+            Span typeChip = new Span(storeType);
+            typeChip.addClassName(LumoUtility.FontSize.XSMALL);
+            typeChip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
+            typeChip.addClassName(LumoUtility.Padding.Vertical.XSMALL);
+            typeChip.addClassName(LumoUtility.BorderRadius.LARGE);
+            typeChip.getStyle().set("background-color", "#E9ECEF").set("color", "#495057");
 
-            // Metadata row 1: creation date, error code, store ID, update date
+            Span statusChip = new Span(storeStatus);
+            statusChip.addClassName(LumoUtility.FontSize.XSMALL);
+            statusChip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
+            statusChip.addClassName(LumoUtility.Padding.Vertical.XSMALL);
+            statusChip.addClassName(LumoUtility.BorderRadius.LARGE);
+            if ("CONNECTED".equalsIgnoreCase(storeStatus)) {
+                statusChip.getStyle().set("background-color", "#E3F7E5").set("color", "#1E7B2E");
+            } else if ("DISCONNECTED".equalsIgnoreCase(storeStatus)) {
+                statusChip.getStyle().set("background-color", "#F2F4F8").set("color", "#5E6C84");
+            } else {
+                statusChip.getStyle().set("background-color", "#FEF3F2").set("color", "#C73A2B");
+            }
+            typeStatusRow.add(typeChip, statusChip);
+            add(typeStatusRow);
+
+            // Metadata row 1: creation date, error code, update date
             HorizontalLayout metaRow1 = new HorizontalLayout();
             metaRow1.setSpacing(true);
             metaRow1.addClassName(LumoUtility.FontSize.XSMALL);
             metaRow1.addClassName(LumoUtility.TextColor.TERTIARY);
             metaRow1.getStyle().set("margin-top", "var(--lumo-space-xs)");
-            metaRow1.add(new Span("ID: " + storeId));
-            metaRow1.add(new Span("•"));
             metaRow1.add(new Span("Created: " + creationDate));
             if (store.getUpdateDate() != null) {
                 metaRow1.add(new Span("•"));
@@ -356,19 +375,13 @@ public class CustomKeyStoresView extends VerticalLayout {
             }
             add(metaRow1);
 
-            // Metadata row 2: CloudHSM or XKS specific details
+            // Metadata row 2: CloudHSM or XKS specific details (ID and trust anchor NOT shown)
             if (store.getCloudHsmClusterId() != null && !store.getCloudHsmClusterId().isEmpty()) {
                 HorizontalLayout hsmRow = new HorizontalLayout();
                 hsmRow.setSpacing(true);
                 hsmRow.addClassName(LumoUtility.FontSize.XSMALL);
                 hsmRow.addClassName(LumoUtility.TextColor.TERTIARY);
                 hsmRow.add(new Span("CloudHSM: " + store.getCloudHsmClusterId()));
-                if (store.getTrustAnchorCertificate() != null && !store.getTrustAnchorCertificate().isEmpty()) {
-                    String certPreview = store.getTrustAnchorCertificate().length() > 50 ?
-                            store.getTrustAnchorCertificate().substring(0, 50) + "…" : store.getTrustAnchorCertificate();
-                    hsmRow.add(new Span("•"));
-                    hsmRow.add(new Span("Trust Anchor: " + certPreview));
-                }
                 add(hsmRow);
             } else if (store.getXksProxyUriEndpoint() != null && !store.getXksProxyUriEndpoint().isEmpty()) {
                 HorizontalLayout xksRow = new HorizontalLayout();
