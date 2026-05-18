@@ -22,89 +22,89 @@ import './contextMenuConnector.js';
  * @param {string} appId
  */
 function initLazy(menubar, appId) {
-    if (menubar.$connector) {
-        return;
-    }
+  if (menubar.$connector) {
+    return;
+  }
 
-    const observer = new MutationObserver((records) => {
-        const hasChangedAttributes = records.some((entry) => {
-            const oldValue = entry.oldValue;
-            const newValue = entry.target.getAttribute(entry.attributeName);
-            return oldValue !== newValue;
-        });
-
-        if (hasChangedAttributes) {
-            menubar.$connector.generateItems();
-        }
+  const observer = new MutationObserver((records) => {
+    const hasChangedAttributes = records.some((entry) => {
+      const oldValue = entry.oldValue;
+      const newValue = entry.target.getAttribute(entry.attributeName);
+      return oldValue !== newValue;
     });
 
-    menubar.$connector = {
-        /**
-         * Generates and assigns the items to the menu bar.
-         *
-         * When the method is called without providing a node id,
-         * the previously generated items tree will be used.
-         * That can be useful if you only want to sync the disabled and hidden properties of root items.
-         *
-         * @param {number | undefined} nodeId
-         */
-        generateItems(nodeId) {
-            if (!menubar.shadowRoot) {
-                // workaround for https://github.com/vaadin/flow/issues/5722
-                setTimeout(() => menubar.$connector.generateItems(nodeId));
-                return;
-            }
+    if (hasChangedAttributes) {
+      menubar.$connector.generateItems();
+    }
+  });
 
-            if (!menubar._container) {
-                // Menu-bar defers first buttons render to avoid re-layout
-                // See https://github.com/vaadin/web-components/issues/7271
-                queueMicrotask(() => menubar.$connector.generateItems(nodeId));
-                return;
-            }
+  menubar.$connector = {
+    /**
+     * Generates and assigns the items to the menu bar.
+     *
+     * When the method is called without providing a node id,
+     * the previously generated items tree will be used.
+     * That can be useful if you only want to sync the disabled and hidden properties of root items.
+     *
+     * @param {number | undefined} nodeId
+     */
+    generateItems(nodeId) {
+      if (!menubar.shadowRoot) {
+        // workaround for https://github.com/vaadin/flow/issues/5722
+        setTimeout(() => menubar.$connector.generateItems(nodeId));
+        return;
+      }
 
-            if (nodeId) {
-                menubar.__generatedItems = window.Vaadin.Flow.contextMenuConnector.generateItemsTree(appId, nodeId);
-            }
+      if (!menubar._container) {
+        // Menu-bar defers first buttons render to avoid re-layout
+        // See https://github.com/vaadin/web-components/issues/7271
+        queueMicrotask(() => menubar.$connector.generateItems(nodeId));
+        return;
+      }
 
-            let items = menubar.__generatedItems || [];
+      if (nodeId) {
+        menubar.__generatedItems = window.Vaadin.Flow.contextMenuConnector.generateItemsTree(appId, nodeId);
+      }
 
-            items.forEach((item) => {
-                // Propagate disabled state from items to parent buttons
-                item.disabled = item.component.disabled;
+      let items = menubar.__generatedItems || [];
 
-                // Saving item to component because `_item` can be reassigned to a new value
-                // when the component goes to the overflow menu
-                item.component._rootItem = item;
-            });
+      items.forEach((item) => {
+        // Propagate disabled state from items to parent buttons
+        item.disabled = item.component.disabled;
 
-            // Observe for hidden and disabled attributes in case they are changed by Flow.
-            // When a change occurs, the observer will re-generate items on top of the existing tree
-            // to sync the new attribute values with the corresponding properties in the items array.
-            items.forEach((item) => {
-                observer.observe(item.component, {
-                    attributeFilter: ['hidden', 'disabled'],
-                    attributeOldValue: true
-                });
-            });
+        // Saving item to component because `_item` can be reassigned to a new value
+        // when the component goes to the overflow menu
+        item.component._rootItem = item;
+      });
 
-            // Remove hidden items entirely from the array. Just hiding them
-            // could cause the overflow button to be rendered without items.
-            //
-            // The items-prop needs to be set even when all items are visible
-            // to update the disabled state and re-render buttons.
-            items = items.filter((item) => !item.component.hidden);
+      // Observe for hidden and disabled attributes in case they are changed by Flow.
+      // When a change occurs, the observer will re-generate items on top of the existing tree
+      // to sync the new attribute values with the corresponding properties in the items array.
+      items.forEach((item) => {
+        observer.observe(item.component, {
+          attributeFilter: ['hidden', 'disabled'],
+          attributeOldValue: true
+        });
+      });
 
-            menubar.items = items;
-        }
-    };
+      // Remove hidden items entirely from the array. Just hiding them
+      // could cause the overflow button to be rendered without items.
+      //
+      // The items-prop needs to be set even when all items are visible
+      // to update the disabled state and re-render buttons.
+      items = items.filter((item) => !item.component.hidden);
+
+      menubar.items = items;
+    }
+  };
 }
 
 function setClassName(component) {
-    const item = component._rootItem || component._item;
+  const item = component._rootItem || component._item;
 
-    if (item) {
-        item.className = component.className;
-    }
+  if (item) {
+    item.className = component.className;
+  }
 }
 
-window.Vaadin.Flow.menubarConnector = {initLazy, setClassName};
+window.Vaadin.Flow.menubarConnector = { initLazy, setClassName };

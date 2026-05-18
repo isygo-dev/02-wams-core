@@ -3,6 +3,7 @@ package eu.isygoit.ui.views.key;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -12,6 +13,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
@@ -25,11 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-// =========================================================================
-// Key Card
-// =========================================================================
 @Slf4j
 class KeyCard extends VerticalLayout {
+
     private final KeyManagementView keyManagementView;
     private final KmsApiService kmsApiService;
     private final String keyId;
@@ -127,19 +127,34 @@ class KeyCard extends VerticalLayout {
         }
         toggleStatusBtn.addClickListener(e -> toggleKeyStatus());
 
+        // --- Edit button ---
         Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit alias & description & tags");
         editBtn.addClickListener(e -> openUpdateDialog());
 
+        // --- Rotation toggle button ---
+        boolean rotationEnabled = metadata != null && metadata.getRotationEnabled() != null && metadata.getRotationEnabled();
+        Button rotationBtn = createIconButton(VaadinIcon.ROTATE_RIGHT, rotationEnabled ? "Disable rotation" : "Enable rotation");
+        if (rotationEnabled) {
+            rotationBtn.getStyle().set("color", "var(--lumo-success-color)"); // green
+        } else {
+            rotationBtn.getStyle().set("color", "var(--lumo-tertiary-text-color)"); // gray
+        }
+        rotationBtn.addClickListener(e -> toggleRotation());
+
+        // --- Describe button ---
         Button describeBtn = createIconButton(VaadinIcon.INFO_CIRCLE, "View details");
         describeBtn.addClickListener(e -> showKeyDetails());
 
+        // --- Schedule deletion button ---
         Button scheduleDeleteBtn = createIconButton(VaadinIcon.CLOCK, "Schedule deletion");
         scheduleDeleteBtn.addClickListener(e -> scheduleDeletionDialog());
 
+        // --- Cancel deletion button (visible only if pending) ---
         Button cancelDeleteBtn = createIconButton(VaadinIcon.REFRESH, "Cancel deletion");
         cancelDeleteBtn.addClickListener(e -> cancelDeletion());
         cancelDeleteBtn.setVisible("PENDING_DELETION".equalsIgnoreCase(statusText));
 
+        // --- Permanent delete button (changes icon and behavior based on state) ---
         boolean isPendingDeletion = "PENDING_DELETION".equalsIgnoreCase(statusText);
         Button deleteBtn;
         if (isPendingDeletion) {
@@ -150,18 +165,18 @@ class KeyCard extends VerticalLayout {
             deleteBtn = createIconButton(VaadinIcon.BAN, "Key can only be permanently deleted when it is in PENDING_DELETION state.");
             deleteBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
             deleteBtn.getStyle().set("opacity", "0.6");
-            // Add a click listener that does nothing or shows a notification
             deleteBtn.addClickListener(e -> {
                 Notification.show("Only keys in PENDING_DELETION state can be permanently deleted.", 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
             });
         }
 
-        buttonBar.add(toggleStatusBtn, editBtn, describeBtn, scheduleDeleteBtn, cancelDeleteBtn, deleteBtn);
+        buttonBar.add(toggleStatusBtn, editBtn, rotationBtn, describeBtn, scheduleDeleteBtn, cancelDeleteBtn, deleteBtn);
         headerRow.add(titleRow, buttonBar);
         headerRow.expand(titleRow);
         add(headerRow);
 
+        // Description
         String descText = (metadata != null && metadata.getDescription() != null && !metadata.getDescription().isEmpty())
                 ? metadata.getDescription() : "No description provided";
         Span descSpan = new Span(descText);
@@ -171,6 +186,7 @@ class KeyCard extends VerticalLayout {
         descSpan.getStyle().set("display", "block");
         add(descSpan);
 
+        // First meta row: spec, usage, creation date, multi-region
         HorizontalLayout metaRow1 = new HorizontalLayout();
         metaRow1.setSpacing(true);
         metaRow1.addClassName(LumoUtility.FontSize.XSMALL);
@@ -193,6 +209,7 @@ class KeyCard extends VerticalLayout {
         metaRow1.add(new Span(multiRegion));
         add(metaRow1);
 
+        // Second meta row: key ID (if not duplicate), origin, rotation status, version
         HorizontalLayout metaRow2 = new HorizontalLayout();
         metaRow2.setSpacing(true);
         metaRow2.addClassName(LumoUtility.FontSize.XSMALL);
@@ -238,6 +255,8 @@ class KeyCard extends VerticalLayout {
 
     private void openUpdateDialog() {
         List<KmsDtos.ListResourceTagsResponse.Tag> currentTags = fetchKeyTags(keyId);
+        boolean rotationEnabled = metadata != null && metadata.getRotationEnabled() != null ? metadata.getRotationEnabled() : false;
+        Integer rotationPeriod = metadata != null && metadata.getRotationPeriodInDays() != null ? metadata.getRotationPeriodInDays() : null;
         new UpdateKeyDialog(
                 keyManagementView,
                 kmsApiService,
@@ -245,13 +264,79 @@ class KeyCard extends VerticalLayout {
                 keyId,
                 metadata != null ? metadata.getKeyAlias() : null,
                 metadata != null ? metadata.getDescription() : null,
-                currentTags
+                currentTags,
+                rotationEnabled,
+                rotationPeriod
         ).open();
+    }
+
+    private void toggleRotation() {
+        boolean currentlyEnabled = metadata != null && metadata.getRotationEnabled() != null && metadata.getRotationEnabled();
+        if (currentlyEnabled) {
+            // Disable rotation
+            ConfirmDialog confirm = new ConfirmDialog();
+            confirm.setHeader("Disable rotation");
+            confirm.setText("Are you sure you want to disable automatic key rotation?");
+            confirm.setCancelable(true);
+            confirm.setConfirmText("Disable");
+            confirm.setConfirmButtonTheme(ButtonVariant.LUMO_ERROR.getVariantName());
+            confirm.addConfirmListener(event -> {
+                try {
+                    KmsDtos.UpdateKeyRotationRequest request = KmsDtos.UpdateKeyRotationRequest.builder()
+                            .enableRotation(false)
+                            .build();
+                    kmsApiService.updateKeyRotation(keyId, request);
+                    Notification.show("Rotation disabled", 3000, Notification.Position.TOP_END)
+                            .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                    keyManagementView.loadKeys();
+                } catch (Exception ex) {
+                    Notification.show("Failed to disable rotation: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
+                            .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                }
+            });
+            confirm.open();
+        } else {
+            // Enable rotation: ask for rotation period
+            Dialog periodDialog = new Dialog();
+            periodDialog.setHeaderTitle("Enable automatic rotation");
+            periodDialog.setWidth("400px");
+
+            IntegerField periodField = new IntegerField("Rotation period (days)");
+            periodField.setMin(90);
+            periodField.setMax(3650);
+            periodField.setValue(365);
+            periodField.setStepButtonsVisible(true);
+            periodField.setWidthFull();
+
+            Button enableBtn = new Button("Enable", e -> {
+                int period = periodField.getValue();
+                periodDialog.close();
+                try {
+                    KmsDtos.UpdateKeyRotationRequest request = KmsDtos.UpdateKeyRotationRequest.builder()
+                            .enableRotation(true)
+                            .rotationPeriodInDays(period)
+                            .build();
+                    kmsApiService.updateKeyRotation(keyId, request);
+                    Notification.show("Rotation enabled with period " + period + " days", 3000, Notification.Position.TOP_END)
+                            .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                    keyManagementView.loadKeys();
+                } catch (Exception ex) {
+                    Notification.show("Failed to enable rotation: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
+                            .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                }
+            });
+            enableBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            Button cancelBtn = new Button("Cancel", e -> periodDialog.close());
+
+            periodDialog.getFooter().add(cancelBtn, enableBtn);
+            periodDialog.add(periodField);
+            periodDialog.open();
+        }
     }
 
     private List<KmsDtos.ListResourceTagsResponse.Tag> fetchKeyTags(String keyId) {
         try {
-            ResponseEntity<KmsDtos.ListResourceTagsResponse> response = this.kmsApiService.listResourceTags(keyId, 100, null);
+            ResponseEntity<KmsDtos.ListResourceTagsResponse> response = kmsApiService.listResourceTags(keyId, 100, null);
             KmsDtos.ListResourceTagsResponse tagsResponse = response.getBody();
             if (tagsResponse != null && tagsResponse.getTags() != null) {
                 return tagsResponse.getTags();
@@ -262,7 +347,7 @@ class KeyCard extends VerticalLayout {
 
     private void showKeyDetails() {
         try {
-            ResponseEntity<KmsDtos.DescribeKeyResponse> response = this.kmsApiService.describeKey(keyId);
+            ResponseEntity<KmsDtos.DescribeKeyResponse> response = kmsApiService.describeKey(keyId);
             KmsDtos.DescribeKeyResponse desc = response.getBody();
             if (desc != null && desc.getKeyMetadata() != null) {
                 KmsDtos.CreateKeyResponse.KeyMetadata meta = desc.getKeyMetadata();
@@ -291,7 +376,7 @@ class KeyCard extends VerticalLayout {
 
                 if (meta.getMultiRegionConfiguration() != null) {
                     try {
-                        String mrConfig = this.objectMapper.writerWithDefaultPrettyPrinter()
+                        String mrConfig = objectMapper.writerWithDefaultPrettyPrinter()
                                 .writeValueAsString(meta.getMultiRegionConfiguration());
                         if (mrConfig != null && !mrConfig.isBlank()) {
                             content.add(detailRow("Multi-region config", mrConfig));
@@ -334,15 +419,15 @@ class KeyCard extends VerticalLayout {
                 }
 
                 try {
-                    ResponseEntity<KmsDtos.GetKeyPolicyResponse> policyResponse = this.kmsApiService.getKeyPolicy(keyId);
+                    ResponseEntity<KmsDtos.GetKeyPolicyResponse> policyResponse = kmsApiService.getKeyPolicy(keyId);
                     if (policyResponse.getStatusCode().is2xxSuccessful() && policyResponse.getBody() != null) {
                         Object policyObj = policyResponse.getBody().getPolicy();
                         String prettyPolicy = null;
                         if (policyObj instanceof String) {
-                            Object json = this.objectMapper.readValue((String) policyObj, Object.class);
-                            prettyPolicy = this.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+                            Object json = objectMapper.readValue((String) policyObj, Object.class);
+                            prettyPolicy = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
                         } else if (policyObj instanceof Map) {
-                            prettyPolicy = this.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(policyObj);
+                            prettyPolicy = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(policyObj);
                         }
                         if (prettyPolicy != null && !prettyPolicy.isBlank()) {
                             Span label = new Span("Policy: ");

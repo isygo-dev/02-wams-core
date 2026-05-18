@@ -16,6 +16,7 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.KmsDtos.CreateKeyRequest;
@@ -55,10 +56,12 @@ public class CreateKeyDialog extends Dialog {
     private TextField primaryRegionField;
     private TextField replicaRegionsField;
     private Checkbox bypassPolicyCheckbox;
+    private Checkbox rotationEnabledCheckbox;
+    private IntegerField rotationPeriodField;
     private TextArea policyField;
     private VerticalLayout tagsContainer;
     private List<HorizontalLayout> tagRows;
-    private HorizontalLayout tagsHeader;  // <-- store header with label + button
+    private HorizontalLayout tagsHeader;
     private Span errorSpan;
 
     public CreateKeyDialog(KeyManagementView parentView, KmsApiService kmsApiService, ObjectMapper objectMapper) {
@@ -78,7 +81,7 @@ public class CreateKeyDialog extends Dialog {
     }
 
     private void buildForm() {
-        // Alias section (unchanged)
+        // Alias section
         aliasCombo = new ComboBox<>("Alias (optional)");
         aliasCombo.setItems(parentView.existingAliases);
         aliasCombo.setPlaceholder("Select existing or type new");
@@ -138,6 +141,24 @@ public class CreateKeyDialog extends Dialog {
         });
 
         bypassPolicyCheckbox = new Checkbox("Bypass policy lockout safety check");
+
+        // Rotation settings
+        rotationEnabledCheckbox = new Checkbox("Enable automatic rotation");
+        rotationPeriodField = new IntegerField("Rotation period (days)");
+        rotationPeriodField.setMin(90);
+        rotationPeriodField.setMax(3650);
+        rotationPeriodField.setValue(365);
+        rotationPeriodField.setVisible(false);
+        rotationPeriodField.setHelperText("Default 365 days, min 90, max 3650");
+
+        rotationEnabledCheckbox.addValueChangeListener(e -> {
+            boolean enabled = e.getValue();
+            rotationPeriodField.setVisible(enabled);
+            if (!enabled) {
+                rotationPeriodField.clear();
+            }
+        });
+
         policyField = new TextArea("Policy (JSON)");
         policyField.setPlaceholder("{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [...]\n}");
         policyField.setWidthFull();
@@ -149,7 +170,6 @@ public class CreateKeyDialog extends Dialog {
         tagsContainer.setPadding(false);
         tagRows = new ArrayList<>();
 
-        // Create the header with label and add button
         Button addTagButton = new Button("Add tag", new Icon(VaadinIcon.PLUS));
         addTagButton.addClickListener(e -> addTagRow(null, null));
         tagsHeader = new HorizontalLayout(new Span("Tags (random key + value)"), addTagButton);
@@ -185,8 +205,10 @@ public class CreateKeyDialog extends Dialog {
         form.add(aliasCombo, newAliasField, descriptionField,
                 keySpecCombo, keyUsageCombo, originCombo,
                 multiRegionCheckbox, primaryRegionField, replicaRegionsField,
-                bypassPolicyCheckbox, policyField,
-                tagsHeader, tagsContainer);   // <-- add both header and container
+                bypassPolicyCheckbox,
+                rotationEnabledCheckbox, rotationPeriodField,
+                policyField,
+                tagsHeader, tagsContainer);
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
         return form;
     }
@@ -242,8 +264,7 @@ public class CreateKeyDialog extends Dialog {
         Map<String, Object> policyMap = null;
         if (!policyField.getValue().isBlank()) {
             try {
-                policyMap = objectMapper.readValue(policyField.getValue(), new TypeReference<>() {
-                });
+                policyMap = objectMapper.readValue(policyField.getValue(), new TypeReference<>() {});
             } catch (Exception ex) {
                 String errorMsg = "Invalid JSON in policy field: " + ex.getMessage();
                 errorSpan.setText(errorMsg);
@@ -263,6 +284,8 @@ public class CreateKeyDialog extends Dialog {
                     .origin(originCombo.getValue())
                     .multiRegion(multiRegionCheckbox.getValue())
                     .bypassPolicyLockoutSafetyCheck(bypassPolicyCheckbox.getValue())
+                    .rotationEnabled(rotationEnabledCheckbox.getValue())
+                    .rotationPeriodInDays(rotationEnabledCheckbox.getValue() ? rotationPeriodField.getValue() : null)
                     .policy(policyMap)
                     .tags(tags.isEmpty() ? null : tags)
                     .primaryRegion(primaryRegionField.getValue())

@@ -252,6 +252,7 @@ public class KeyManagementService implements IKeyManagementService {
                 .keyAlias(key.getPrimaryKeyAlias())
                 .description(key.getDescription())
                 .rotationEnabled(key.getRotationEnabled())
+                .rotationPeriodInDays(key.getRotationPeriodInDays())
                 .origin(key.getOrigin())
                 .expirationModel(key.getExpirationModel())
                 .multiRegion(key.getMultiRegion())

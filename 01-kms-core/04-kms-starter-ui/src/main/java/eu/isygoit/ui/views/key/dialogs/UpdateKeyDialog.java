@@ -3,6 +3,7 @@ package eu.isygoit.ui.views.key.dialogs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -14,9 +15,10 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import eu.isygoit.dto.KmsDtos;
+import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.views.key.KeyManagementView;
 
@@ -25,7 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Dialog for updating a KMS key's alias, description, and tags.
+ * Dialog for updating a KMS key's alias, description, tags, and rotation settings.
  */
 public class UpdateKeyDialog extends Dialog {
 
@@ -35,12 +37,16 @@ public class UpdateKeyDialog extends Dialog {
     private final String keyId;
     private final String currentAlias;
     private final String currentDesc;
-    private final List<KmsDtos.ListResourceTagsResponse.Tag> currentTags;
+    private final List<ListResourceTagsResponse.Tag> currentTags;
+    private final Boolean currentRotationEnabled;
+    private final Integer currentRotationPeriodInDays;
 
     // UI fields
     private ComboBox<String> aliasCombo;
     private TextField newAliasField;
     private TextArea descriptionField;
+    private Checkbox rotationEnabledCheckbox;
+    private IntegerField rotationPeriodField;
     private VerticalLayout tagsContainer;
     private List<HorizontalLayout> tagRows;
 
@@ -50,7 +56,9 @@ public class UpdateKeyDialog extends Dialog {
                            String keyId,
                            String currentAlias,
                            String currentDesc,
-                           List<KmsDtos.ListResourceTagsResponse.Tag> currentTags) {
+                           List<ListResourceTagsResponse.Tag> currentTags,
+                           Boolean currentRotationEnabled,
+                           Integer currentRotationPeriodInDays) {
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
         this.objectMapper = objectMapper;
@@ -58,9 +66,11 @@ public class UpdateKeyDialog extends Dialog {
         this.currentAlias = currentAlias != null ? currentAlias : "";
         this.currentDesc = currentDesc != null ? currentDesc : "";
         this.currentTags = currentTags != null ? currentTags : new ArrayList<>();
+        this.currentRotationEnabled = currentRotationEnabled != null ? currentRotationEnabled : false;
+        this.currentRotationPeriodInDays = currentRotationPeriodInDays;
 
         setHeaderTitle("Edit key alias, description & tags");
-        setWidth("650px");
+        setWidth("700px");
         setCloseOnEsc(false);
         setCloseOnOutsideClick(false);
 
@@ -102,12 +112,32 @@ public class UpdateKeyDialog extends Dialog {
         descriptionField.setMaxLength(500);
         descriptionField.setValue(currentDesc);
 
+        // Rotation settings
+        rotationEnabledCheckbox = new Checkbox("Enable automatic rotation");
+        rotationPeriodField = new IntegerField("Rotation period (days)");
+        rotationPeriodField.setMin(90);
+        rotationPeriodField.setMax(3650);
+        rotationPeriodField.setHelperText("Default 365 days, min 90, max 3650");
+
+        rotationEnabledCheckbox.setValue(currentRotationEnabled);
+        if (currentRotationEnabled && currentRotationPeriodInDays != null) {
+            rotationPeriodField.setValue(currentRotationPeriodInDays);
+        }
+        rotationPeriodField.setVisible(currentRotationEnabled);
+
+        rotationEnabledCheckbox.addValueChangeListener(e -> {
+            rotationPeriodField.setVisible(e.getValue());
+            if (!e.getValue()) {
+                rotationPeriodField.clear();
+            }
+        });
+
         // Tags editor
         tagsContainer = new VerticalLayout();
         tagsContainer.setSpacing(true);
         tagsContainer.setPadding(false);
         tagRows = new ArrayList<>();
-        for (KmsDtos.ListResourceTagsResponse.Tag tag : currentTags) {
+        for (ListResourceTagsResponse.Tag tag : currentTags) {
             parentView.addTagRow(tagsContainer, tagRows, tag.getTagKey(), tag.getTagValue());
         }
         Button addTagButton = new Button("Add tag", new Icon(VaadinIcon.PLUS));
@@ -119,6 +149,7 @@ public class UpdateKeyDialog extends Dialog {
     private FormLayout createFormLayout() {
         FormLayout form = new FormLayout();
         form.add(aliasCombo, newAliasField, descriptionField,
+                rotationEnabledCheckbox, rotationPeriodField,
                 new HorizontalLayout(new Span("Tags"), tagsContainer));
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
         return form;
@@ -143,12 +174,15 @@ public class UpdateKeyDialog extends Dialog {
         }
         String newDescription = descriptionField.getValue();
 
-        List<KmsDtos.CreateKeyRequest.Tag> newTags = new ArrayList<>();
+        boolean newRotationEnabled = rotationEnabledCheckbox.getValue();
+        Integer newRotationPeriod = rotationEnabledCheckbox.getValue() ? rotationPeriodField.getValue() : null;
+
+        List<CreateKeyRequest.Tag> newTags = new ArrayList<>();
         for (HorizontalLayout row : tagRows) {
             TextField keyField = (TextField) row.getComponentAt(0);
             TextField valueField = (TextField) row.getComponentAt(1);
             if (!valueField.getValue().isBlank()) {
-                newTags.add(KmsDtos.CreateKeyRequest.Tag.builder()
+                newTags.add(CreateKeyRequest.Tag.builder()
                         .tagKey(keyField.getValue())
                         .tagValue(valueField.getValue())
                         .build());
@@ -158,7 +192,7 @@ public class UpdateKeyDialog extends Dialog {
         try {
             // Update description if changed
             if (!newDescription.equals(currentDesc)) {
-                KmsDtos.UpdateKeyDescriptionRequest descRequest = KmsDtos.UpdateKeyDescriptionRequest.builder()
+                UpdateKeyDescriptionRequest descRequest = UpdateKeyDescriptionRequest.builder()
                         .keyId(keyId)
                         .description(newDescription)
                         .build();
@@ -168,13 +202,13 @@ public class UpdateKeyDialog extends Dialog {
             // Update alias if changed
             if (newAlias != null && !newAlias.equals(currentAlias)) {
                 if (parentView.existingAliases.contains(newAlias)) {
-                    KmsDtos.UpdateAliasRequest aliasRequest = KmsDtos.UpdateAliasRequest.builder()
+                    UpdateAliasRequest aliasRequest = UpdateAliasRequest.builder()
                             .aliasName(newAlias)
                             .targetKeyId(keyId)
                             .build();
                     kmsApiService.updateAlias(newAlias, aliasRequest);
                 } else {
-                    KmsDtos.CreateAliasRequest createAliasRequest = KmsDtos.CreateAliasRequest.builder()
+                    CreateAliasRequest createAliasRequest = CreateAliasRequest.builder()
                             .aliasName(newAlias)
                             .targetKeyId(keyId)
                             .build();
@@ -182,25 +216,38 @@ public class UpdateKeyDialog extends Dialog {
                 }
             }
 
+            // Update rotation settings if changed
+            boolean rotationChanged = newRotationEnabled != currentRotationEnabled;
+            boolean periodChanged = (newRotationPeriod != null && !newRotationPeriod.equals(currentRotationPeriodInDays)) ||
+                    (newRotationPeriod == null && currentRotationPeriodInDays != null);
+            if (rotationChanged || periodChanged) {
+                UpdateKeyRotationRequest rotationRequest = UpdateKeyRotationRequest.builder()
+                        .enableRotation(newRotationEnabled)
+                        .rotationPeriodInDays(newRotationPeriod)
+                        .applyImmediately(true)
+                        .build();
+                kmsApiService.updateKeyRotation(keyId, rotationRequest);
+            }
+
             // Update tags: remove all existing, add new ones
             if (!currentTags.isEmpty()) {
                 List<String> keysToRemove = currentTags.stream()
-                        .map(KmsDtos.ListResourceTagsResponse.Tag::getTagKey)
+                        .map(ListResourceTagsResponse.Tag::getTagKey)
                         .collect(Collectors.toList());
-                KmsDtos.UntagResourceRequest untagRequest = KmsDtos.UntagResourceRequest.builder()
+                UntagResourceRequest untagRequest = UntagResourceRequest.builder()
                         .keyId(keyId)
                         .tagKeys(keysToRemove)
                         .build();
                 kmsApiService.untagResource(keyId, untagRequest);
             }
             if (!newTags.isEmpty()) {
-                List<KmsDtos.ListResourceTagsResponse.Tag> tagList = newTags.stream()
-                        .map(t -> KmsDtos.ListResourceTagsResponse.Tag.builder()
+                List<ListResourceTagsResponse.Tag> tagList = newTags.stream()
+                        .map(t -> ListResourceTagsResponse.Tag.builder()
                                 .tagKey(t.getTagKey())
                                 .tagValue(t.getTagValue())
                                 .build())
                         .collect(Collectors.toList());
-                KmsDtos.TagResourceRequest tagRequest = KmsDtos.TagResourceRequest.builder()
+                TagResourceRequest tagRequest = TagResourceRequest.builder()
                         .keyId(keyId)
                         .tags(tagList)
                         .build();
