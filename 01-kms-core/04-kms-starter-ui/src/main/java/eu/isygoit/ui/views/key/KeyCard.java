@@ -11,6 +11,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -55,17 +56,9 @@ class KeyCard extends VerticalLayout {
         buildCard();
     }
 
-    public String getKeyId() {
-        return keyId;
-    }
-
-    public String getAliasOrId() {
-        return aliasOrId;
-    }
-
-    public String getStatusText() {
-        return statusText;
-    }
+    public String getKeyId() { return keyId; }
+    public String getAliasOrId() { return aliasOrId; }
+    public String getStatusText() { return statusText; }
 
     private void buildCard() {
         setWidthFull();
@@ -79,9 +72,10 @@ class KeyCard extends VerticalLayout {
 
         HorizontalLayout headerRow = new HorizontalLayout();
         headerRow.setWidthFull();
-        headerRow.setJustifyContentMode(JustifyContentMode.BETWEEN);
-        headerRow.setAlignItems(Alignment.CENTER);
+        headerRow.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
 
+        // Title and status chip
         Span titleSpan = new Span(aliasOrId);
         titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
         titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
@@ -107,71 +101,39 @@ class KeyCard extends VerticalLayout {
                 statusChip.getStyle().set("background-color", "#F2F4F8").set("color", "#5E6C84");
         }
         HorizontalLayout titleRow = new HorizontalLayout(titleSpan, statusChip);
-        titleRow.setAlignItems(Alignment.CENTER);
+        titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
         titleRow.setSpacing(true);
 
+        // ---- Compact button bar (Edit, Info, Rotation, More) ----
         HorizontalLayout buttonBar = new HorizontalLayout();
         buttonBar.setSpacing(true);
         buttonBar.setPadding(false);
 
-        // --- Toggle status button (enable/disable) ---
-        boolean isEnabled = metadata != null && metadata.getKeyStatus() == IEnumKeyStatus.Types.ENABLED;
-        Button toggleStatusBtn = createIconButton(
-                isEnabled ? VaadinIcon.UNLOCK : VaadinIcon.LOCK,
-                isEnabled ? "Disable key" : "Enable key"
-        );
-        toggleStatusBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        if (metadata != null && !"ENABLED".equalsIgnoreCase(statusText) && !"DISABLED".equalsIgnoreCase(statusText)) {
-            toggleStatusBtn.setEnabled(false);
-            toggleStatusBtn.setTooltipText("Key cannot be enabled/disabled in its current state");
-        }
-        toggleStatusBtn.addClickListener(e -> toggleKeyStatus());
-
-        // --- Edit button ---
-        Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit alias & description & tags");
+        // Edit
+        Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit alias, description & tags");
         editBtn.addClickListener(e -> openUpdateDialog());
 
-        // --- Rotation toggle button ---
-        boolean rotationEnabled = metadata != null && metadata.getRotationEnabled() != null && metadata.getRotationEnabled();
-        Button rotationBtn = createIconButton(VaadinIcon.ROTATE_RIGHT, rotationEnabled ? "Disable rotation" : "Enable rotation");
-        if (rotationEnabled) {
-            rotationBtn.getStyle().set("color", "var(--lumo-success-color)"); // green
-        } else {
-            rotationBtn.getStyle().set("color", "var(--lumo-tertiary-text-color)"); // gray
-        }
-        rotationBtn.addClickListener(e -> toggleRotation());
-
-        // --- Describe button ---
+        // Info
         Button describeBtn = createIconButton(VaadinIcon.INFO_CIRCLE, "View details");
         describeBtn.addClickListener(e -> showKeyDetails());
 
-        // --- Schedule deletion button ---
-        Button scheduleDeleteBtn = createIconButton(VaadinIcon.CLOCK, "Schedule deletion");
-        scheduleDeleteBtn.addClickListener(e -> scheduleDeletionDialog());
-
-        // --- Cancel deletion button (visible only if pending) ---
-        Button cancelDeleteBtn = createIconButton(VaadinIcon.REFRESH, "Cancel deletion");
-        cancelDeleteBtn.addClickListener(e -> cancelDeletion());
-        cancelDeleteBtn.setVisible("PENDING_DELETION".equalsIgnoreCase(statusText));
-
-        // --- Permanent delete button (changes icon and behavior based on state) ---
-        boolean isPendingDeletion = "PENDING_DELETION".equalsIgnoreCase(statusText);
-        Button deleteBtn;
-        if (isPendingDeletion) {
-            deleteBtn = createIconButton(VaadinIcon.TRASH, "Permanently delete");
-            deleteBtn.addThemeVariants(ButtonVariant.LUMO_ERROR);
-            deleteBtn.addClickListener(e -> confirmPermanentDelete());
+        // Rotation toggle
+        boolean rotationEnabled = metadata != null && metadata.getRotationEnabled() != null && metadata.getRotationEnabled();
+        Button rotationBtn = createIconButton(VaadinIcon.ROTATE_RIGHT, rotationEnabled ? "Disable rotation" : "Enable rotation");
+        if (rotationEnabled) {
+            rotationBtn.getStyle().set("color", "var(--lumo-success-color)");
         } else {
-            deleteBtn = createIconButton(VaadinIcon.BAN, "Key can only be permanently deleted when it is in PENDING_DELETION state.");
-            deleteBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-            deleteBtn.getStyle().set("opacity", "0.6");
-            deleteBtn.addClickListener(e -> {
-                Notification.show("Only keys in PENDING_DELETION state can be permanently deleted.", 3000, Notification.Position.TOP_END)
-                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
-            });
+            rotationBtn.getStyle().set("color", "var(--lumo-tertiary-text-color)");
         }
+        rotationBtn.addClickListener(e -> toggleRotation());
 
-        buttonBar.add(toggleStatusBtn, editBtn, rotationBtn, describeBtn, scheduleDeleteBtn, cancelDeleteBtn, deleteBtn);
+        // More actions (three dots)
+        Button moreBtn = createIconButton(VaadinIcon.ELLIPSIS_DOTS_V, "More actions");
+        moreBtn.addClickListener(e -> showContextMenu());
+
+        buttonBar.add(editBtn, describeBtn, rotationBtn, moreBtn);
+        // ========================================================
+
         headerRow.add(titleRow, buttonBar);
         headerRow.expand(titleRow);
         add(headerRow);
@@ -186,7 +148,7 @@ class KeyCard extends VerticalLayout {
         descSpan.getStyle().set("display", "block");
         add(descSpan);
 
-        // First meta row: spec, usage, creation date, multi-region
+        // First meta row: Spec, Usage, Creation date, Multi‑region
         HorizontalLayout metaRow1 = new HorizontalLayout();
         metaRow1.setSpacing(true);
         metaRow1.addClassName(LumoUtility.FontSize.XSMALL);
@@ -209,7 +171,7 @@ class KeyCard extends VerticalLayout {
         metaRow1.add(new Span(multiRegion));
         add(metaRow1);
 
-        // Second meta row: key ID (if not duplicate), origin, rotation status, version
+        // Second meta row: Key ID (if different from alias), Origin, Rotation status, Version
         HorizontalLayout metaRow2 = new HorizontalLayout();
         metaRow2.setSpacing(true);
         metaRow2.addClassName(LumoUtility.FontSize.XSMALL);
@@ -240,6 +202,8 @@ class KeyCard extends VerticalLayout {
         metaRow2.add(new Span("Ver: " + version));
         add(metaRow2);
     }
+
+    // ========== Helper methods ==========
 
     private Button createIconButton(VaadinIcon icon, String tooltip) {
         Button btn = new Button(new Icon(icon));
@@ -273,7 +237,6 @@ class KeyCard extends VerticalLayout {
     private void toggleRotation() {
         boolean currentlyEnabled = metadata != null && metadata.getRotationEnabled() != null && metadata.getRotationEnabled();
         if (currentlyEnabled) {
-            // Disable rotation
             ConfirmDialog confirm = new ConfirmDialog();
             confirm.setHeader("Disable rotation");
             confirm.setText("Are you sure you want to disable automatic key rotation?");
@@ -296,7 +259,6 @@ class KeyCard extends VerticalLayout {
             });
             confirm.open();
         } else {
-            // Enable rotation: ask for rotation period
             Dialog periodDialog = new Dialog();
             periodDialog.setHeaderTitle("Enable automatic rotation");
             periodDialog.setWidth("400px");
@@ -332,6 +294,79 @@ class KeyCard extends VerticalLayout {
             periodDialog.add(periodField);
             periodDialog.open();
         }
+    }
+
+    private void showContextMenu() {
+        Dialog menuDialog = new Dialog();
+        menuDialog.setHeaderTitle("Key actions");
+        menuDialog.setWidth("280px");
+        menuDialog.setCloseOnOutsideClick(true);
+        menuDialog.setCloseOnEsc(true);
+
+        VerticalLayout layout = new VerticalLayout();
+        layout.setPadding(true);
+        layout.setSpacing(true);
+        layout.setWidthFull();
+
+        // Enable/Disable button
+        boolean isEnabled = metadata != null && metadata.getKeyStatus() == IEnumKeyStatus.Types.ENABLED;
+        Button toggleStatusBtn = new Button(isEnabled ? "Disable key" : "Enable key", new Icon(isEnabled ? VaadinIcon.UNLOCK : VaadinIcon.LOCK));
+        toggleStatusBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        toggleStatusBtn.setWidthFull();
+        if (metadata != null && !"ENABLED".equalsIgnoreCase(statusText) && !"DISABLED".equalsIgnoreCase(statusText)) {
+            toggleStatusBtn.setEnabled(false);
+            toggleStatusBtn.setTooltipText("Key cannot be enabled/disabled in its current state");
+        }
+        toggleStatusBtn.addClickListener(e -> {
+            menuDialog.close();
+            toggleKeyStatus();
+        });
+        layout.add(toggleStatusBtn);
+
+        // Schedule deletion
+        Button scheduleDeleteBtn = new Button("Schedule deletion", new Icon(VaadinIcon.CLOCK));
+        scheduleDeleteBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        scheduleDeleteBtn.setWidthFull();
+        scheduleDeleteBtn.addClickListener(e -> {
+            menuDialog.close();
+            scheduleDeletionDialog();
+        });
+        layout.add(scheduleDeleteBtn);
+
+        // Cancel deletion (only if pending)
+        if ("PENDING_DELETION".equalsIgnoreCase(statusText)) {
+            Button cancelDeleteBtn = new Button("Cancel deletion", new Icon(VaadinIcon.REFRESH));
+            cancelDeleteBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+            cancelDeleteBtn.setWidthFull();
+            cancelDeleteBtn.addClickListener(e -> {
+                menuDialog.close();
+                cancelDeletion();
+            });
+            layout.add(cancelDeleteBtn);
+        }
+
+        // Permanent delete
+        boolean isPendingDeletion = "PENDING_DELETION".equalsIgnoreCase(statusText);
+        if (isPendingDeletion) {
+            Button deleteBtn = new Button("Permanently delete", new Icon(VaadinIcon.TRASH));
+            deleteBtn.addThemeVariants(ButtonVariant.LUMO_ERROR);
+            deleteBtn.setWidthFull();
+            deleteBtn.addClickListener(e -> {
+                menuDialog.close();
+                confirmPermanentDelete();
+            });
+            layout.add(deleteBtn);
+        } else {
+            Button disabledDeleteBtn = new Button("Permanently delete (not pending)", new Icon(VaadinIcon.BAN));
+            disabledDeleteBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+            disabledDeleteBtn.setEnabled(false);
+            disabledDeleteBtn.setTooltipText("Key can only be permanently deleted when it is in PENDING_DELETION state.");
+            disabledDeleteBtn.setWidthFull();
+            layout.add(disabledDeleteBtn);
+        }
+
+        menuDialog.add(layout);
+        menuDialog.open();
     }
 
     private List<KmsDtos.ListResourceTagsResponse.Tag> fetchKeyTags(String keyId) {
