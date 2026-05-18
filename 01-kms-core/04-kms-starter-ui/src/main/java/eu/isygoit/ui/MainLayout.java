@@ -10,6 +10,7 @@ import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.ui.views.*;
+import eu.isygoit.ui.views.key.KeyManagementView;
 
 public class MainLayout extends AppLayout {
 

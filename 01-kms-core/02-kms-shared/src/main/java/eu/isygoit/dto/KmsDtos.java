@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.isygoit.annotation.ValidCreateCustomKeyStoreRequest;
 import eu.isygoit.enums.*;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -49,6 +50,12 @@ public final class KmsDtos {
 
         @Schema(description = "Tags to attach to the key (max 50)")
         private List<Tag> tags;
+
+        @Schema(description = "Whether automatic rotation is enabled (default false)")
+        private Boolean rotationEnabled;
+
+        @Schema(description = "Rotation period in days (default 365). Only used if rotationEnabled = true")
+        private Integer rotationPeriodInDays;
 
         @Schema(description = "Whether this key is part of a multi‑region setup")
         private Boolean multiRegion;

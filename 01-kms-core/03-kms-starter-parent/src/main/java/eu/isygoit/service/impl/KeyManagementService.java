@@ -91,9 +91,11 @@ public class KeyManagementService implements IKeyManagementService {
                     .primaryKeyAlias(request.getKeyAlias())
                     .description(request.getDescription())
                     .keyStatus(IEnumKeyStatus.Types.ENABLED)
+                    .origin(request.getOrigin())
                     .multiRegion(request.getMultiRegion())
                     .currentVersionId(versionId)
-                    .rotationEnabled(false)
+                    .rotationEnabled(request.getRotationEnabled())
+                    .rotationPeriodInDays(request.getRotationPeriodInDays())
                     .keyMaterial(keyMaterial)
                     .build();
 
