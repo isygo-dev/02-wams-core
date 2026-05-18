@@ -270,4 +270,47 @@ public interface IEnumKeySpec {
             return keySizeBits / 8;
         }
     }
+
+    public static String mapMacAlgorithm(String yourAlgorithm) {
+        switch (yourAlgorithm) {
+            case "HMAC_SHA_224":
+                return "HmacSHA224";
+            case "HMAC_SHA_256":
+                return "HmacSHA256";
+            case "HMAC_SHA_384":
+                return "HmacSHA384";
+            case "HMAC_SHA_512":
+                return "HmacSHA512";
+            // Add your own custom algorithm names if they differ
+            default:
+                throw new IllegalArgumentException("Unsupported MAC algorithm: " + yourAlgorithm);
+        }
+    }
+
+    public static String mapSigningAlgorithm(String awsAlgo) {
+        switch (awsAlgo) {
+            case "RSASSA_PKCS1_V1_5_SHA_256":
+                return "SHA256withRSA";
+            case "RSASSA_PKCS1_V1_5_SHA_384":
+                return "SHA384withRSA";
+            case "RSASSA_PKCS1_V1_5_SHA_512":
+                return "SHA512withRSA";
+            case "RSASSA_PSS_SHA_256":
+                return "SHA256withRSA/PSS";
+            case "RSASSA_PSS_SHA_384":
+                return "SHA384withRSA/PSS";
+            case "RSASSA_PSS_SHA_512":
+                return "SHA512withRSA/PSS";
+            case "ECDSA_SHA_256":
+                return "SHA256withECDSA";
+            case "ECDSA_SHA_384":
+                return "SHA384withECDSA";
+            case "ECDSA_SHA_512":
+                return "SHA512withECDSA";
+            case "SM2DSA":
+                return "SM3withSM2"; // Requires Bouncy Castle
+            default:
+                throw new IllegalArgumentException("Unsupported signing algorithm: " + awsAlgo);
+        }
+    }
 }

@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.model.KmsKey;
 import eu.isygoit.repository.KmsKeyRepository;
@@ -114,7 +115,7 @@ public class SigningService implements ISigningService {
         }
 
         try {
-            Mac mac = Mac.getInstance(request.getMacAlgorithm());
+            Mac mac = Mac.getInstance(IEnumKeySpec.mapMacAlgorithm(request.getMacAlgorithm()));
 
             SecretKeySpec keySpec =
                     new SecretKeySpec(kmsKey.getKeyMaterial(), request.getMacAlgorithm());
@@ -148,7 +149,7 @@ public class SigningService implements ISigningService {
         }
 
         try {
-            Mac mac = Mac.getInstance(request.getMacAlgorithm());
+            Mac mac = Mac.getInstance(IEnumKeySpec.mapMacAlgorithm(request.getMacAlgorithm()));
 
             SecretKeySpec keySpec =
                     new SecretKeySpec(kmsKey.getKeyMaterial(), request.getMacAlgorithm());

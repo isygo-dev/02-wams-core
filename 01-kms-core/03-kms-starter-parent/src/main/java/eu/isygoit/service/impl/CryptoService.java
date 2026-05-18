@@ -300,7 +300,7 @@ public class CryptoService implements ICryptoService {
     public byte[] signData(byte[] message, byte[] keyMaterial, String algorithm) {
         try {
             String sigAlgo = algorithm != null ? algorithm : "SHA256withRSA";
-            java.security.Signature signature = java.security.Signature.getInstance(sigAlgo);
+            java.security.Signature signature = java.security.Signature.getInstance(IEnumKeySpec.mapSigningAlgorithm(sigAlgo));
             String keyAlgo = sigAlgo.contains("ECDSA") ? "EC" : "RSA";
             java.security.PrivateKey privateKey = java.security.KeyFactory.getInstance(keyAlgo)
                     .generatePrivate(new java.security.spec.PKCS8EncodedKeySpec(keyMaterial));
@@ -320,7 +320,7 @@ public class CryptoService implements ICryptoService {
     public boolean verifySignature(byte[] message, byte[] signature, byte[] keyMaterial, String algorithm) {
         try {
             String sigAlgo = algorithm != null ? algorithm : "SHA256withRSA";
-            java.security.Signature sig = java.security.Signature.getInstance(sigAlgo);
+            java.security.Signature sig = java.security.Signature.getInstance(IEnumKeySpec.mapSigningAlgorithm(sigAlgo));
             String keyAlgo = sigAlgo.contains("ECDSA") ? "EC" : "RSA";
             java.security.PublicKey publicKey = java.security.KeyFactory.getInstance(keyAlgo)
                     .generatePublic(new java.security.spec.X509EncodedKeySpec(keyMaterial));
