@@ -34,11 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-/**
- * Dialog for creating a new KMS key.
- * Encapsulates all UI fields and creation logic.
- */
 public class CreateKeyDialog extends Dialog {
 
     private final KeyManagementView parentView;
@@ -49,8 +46,8 @@ public class CreateKeyDialog extends Dialog {
     private ComboBox<String> aliasCombo;
     private TextField newAliasField;
     private TextArea descriptionField;
-    private ComboBox<IEnumKeySpec.Types> keySpecCombo;
     private ComboBox<IEnumKeyUsage.Types> keyUsageCombo;
+    private ComboBox<IEnumKeySpec.Types> keySpecCombo;
     private ComboBox<IEnumKeyOrigin.Types> originCombo;
     private Checkbox multiRegionCheckbox;
     private TextField primaryRegionField;
@@ -106,15 +103,26 @@ public class CreateKeyDialog extends Dialog {
         descriptionField = new TextArea("Description");
         descriptionField.setMaxLength(500);
 
-        keySpecCombo = new ComboBox<>("Key specification");
-        keySpecCombo.setItems(IEnumKeySpec.Types.values());
-        keySpecCombo.setValue(IEnumKeySpec.Types.SYMMETRIC_DEFAULT);
-        keySpecCombo.setRequiredIndicatorVisible(true);
-
+        // Key usage first (so it can filter key spec)
         keyUsageCombo = new ComboBox<>("Key usage");
         keyUsageCombo.setItems(IEnumKeyUsage.Types.values());
         keyUsageCombo.setValue(IEnumKeyUsage.Types.ENCRYPT_DECRYPT);
         keyUsageCombo.setRequiredIndicatorVisible(true);
+
+        // Key spec will be filtered based on selected usage
+        keySpecCombo = new ComboBox<>("Key specification");
+        keySpecCombo.setRequiredIndicatorVisible(true);
+
+        // Initial filter based on default usage
+        updateKeySpecOptions(IEnumKeyUsage.Types.ENCRYPT_DECRYPT);
+        keyUsageCombo.addValueChangeListener(e -> {
+            IEnumKeyUsage.Types selectedUsage = e.getValue();
+            if (selectedUsage != null) {
+                updateKeySpecOptions(selectedUsage);
+            } else {
+                keySpecCombo.setItems();
+            }
+        });
 
         originCombo = new ComboBox<>("Origin");
         originCombo.setItems(IEnumKeyOrigin.Types.values());
@@ -177,6 +185,29 @@ public class CreateKeyDialog extends Dialog {
         tagsHeader.setSpacing(true);
     }
 
+    /**
+     * Updates the items in keySpecCombo to those that support the given usage.
+     */
+    private void updateKeySpecOptions(IEnumKeyUsage.Types usage) {
+        List<IEnumKeySpec.Types> compatibleSpecs = new ArrayList<>();
+        for (IEnumKeySpec.Types spec : IEnumKeySpec.Types.values()) {
+            if (spec.allowedUsages().contains(usage)) {
+                compatibleSpecs.add(spec);
+            }
+        }
+        keySpecCombo.setItems(compatibleSpecs);
+        // Set a sensible default if the current value is not compatible
+        if (!compatibleSpecs.contains(keySpecCombo.getValue())) {
+            if (compatibleSpecs.contains(IEnumKeySpec.Types.SYMMETRIC_DEFAULT)) {
+                keySpecCombo.setValue(IEnumKeySpec.Types.SYMMETRIC_DEFAULT);
+            } else if (!compatibleSpecs.isEmpty()) {
+                keySpecCombo.setValue(compatibleSpecs.get(0));
+            } else {
+                keySpecCombo.clear();
+            }
+        }
+    }
+
     private void addTagRow(String existingKey, String existingValue) {
         String randomKey = (existingKey != null) ? existingKey : "tag-" + UUID.randomUUID().toString().substring(0, 8);
         TextField keyField = new TextField();
@@ -203,7 +234,7 @@ public class CreateKeyDialog extends Dialog {
     private FormLayout createFormLayout() {
         FormLayout form = new FormLayout();
         form.add(aliasCombo, newAliasField, descriptionField,
-                keySpecCombo, keyUsageCombo, originCombo,
+                keyUsageCombo, keySpecCombo, originCombo,
                 multiRegionCheckbox, primaryRegionField, replicaRegionsField,
                 bypassPolicyCheckbox,
                 rotationEnabledCheckbox, rotationPeriodField,
@@ -279,8 +310,8 @@ public class CreateKeyDialog extends Dialog {
             CreateKeyRequest request = CreateKeyRequest.builder()
                     .keyAlias(StringUtils.hasText(newAlias) ? newAlias : existingSelectedAlias)
                     .description(descriptionField.getValue())
-                    .keySpec(keySpecCombo.getValue())
                     .keyUsage(keyUsageCombo.getValue())
+                    .keySpec(keySpecCombo.getValue())
                     .origin(originCombo.getValue())
                     .multiRegion(multiRegionCheckbox.getValue())
                     .bypassPolicyLockoutSafetyCheck(bypassPolicyCheckbox.getValue())

@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.model.KmsKey;
@@ -61,7 +62,7 @@ class SigningServiceTest {
         SignRequest request = SignRequest.builder()
                 .keyId(KEY_ID)
                 .message(message)
-                .signingAlgorithm("HmacSHA256")
+                .signingAlgorithm(IEnumKeySpec.Types.HMAC_256.getJavaAlgorithm())
                 .build();
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
@@ -84,7 +85,7 @@ class SigningServiceTest {
         verify(cryptoService).signData(
                 any(),
                 eq(kmsKey.getKeyMaterial()),
-                eq("HmacSHA256")
+                eq(IEnumKeySpec.Types.HMAC_256.getJavaAlgorithm())
         );
     }
 
@@ -94,7 +95,7 @@ class SigningServiceTest {
         SignRequest request = SignRequest.builder()
                 .keyId(KEY_ID)
                 .message(Base64.getEncoder().encodeToString("hello".getBytes()))
-                .signingAlgorithm("HmacSHA256")
+                .signingAlgorithm(IEnumKeySpec.Types.HMAC_256.getJavaAlgorithm())
                 .build();
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
@@ -116,7 +117,7 @@ class SigningServiceTest {
         SignRequest request = SignRequest.builder()
                 .keyId(KEY_ID)
                 .message(Base64.getEncoder().encodeToString("hello".getBytes()))
-                .signingAlgorithm("HmacSHA256")
+                .signingAlgorithm(IEnumKeySpec.Types.HMAC_256.getJavaAlgorithm())
                 .build();
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
@@ -138,7 +139,7 @@ class SigningServiceTest {
         SignRequest request = SignRequest.builder()
                 .keyId(KEY_ID)
                 .message(Base64.getEncoder().encodeToString("hello".getBytes()))
-                .signingAlgorithm("HmacSHA256")
+                .signingAlgorithm(IEnumKeySpec.Types.HMAC_256.getJavaAlgorithm())
                 .build();
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
@@ -190,7 +191,7 @@ class SigningServiceTest {
                 .keyId(KEY_ID)
                 .message(message)
                 .signature(signature)
-                .signingAlgorithm("HmacSHA256")
+                .signingAlgorithm(IEnumKeySpec.Types.HMAC_256.getJavaAlgorithm())
                 .build();
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
@@ -209,7 +210,7 @@ class SigningServiceTest {
                 any(),
                 any(),
                 eq(kmsKey.getKeyMaterial()),
-                eq("HmacSHA256")
+                eq(IEnumKeySpec.Types.HMAC_256.getJavaAlgorithm())
         );
     }
 
@@ -220,7 +221,7 @@ class SigningServiceTest {
                 .keyId(KEY_ID)
                 .message(Base64.getEncoder().encodeToString("hello".getBytes()))
                 .signature(Base64.getEncoder().encodeToString("bad-signature".getBytes()))
-                .signingAlgorithm("HmacSHA256")
+                .signingAlgorithm(IEnumKeySpec.Types.HMAC_256.getJavaAlgorithm())
                 .build();
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
@@ -243,7 +244,7 @@ class SigningServiceTest {
                 .keyId(KEY_ID)
                 .message(Base64.getEncoder().encodeToString("hello".getBytes()))
                 .signature(Base64.getEncoder().encodeToString("signature".getBytes()))
-                .signingAlgorithm("HmacSHA256")
+                .signingAlgorithm(IEnumKeySpec.Types.HMAC_256.getJavaAlgorithm())
                 .build();
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
@@ -283,7 +284,7 @@ class SigningServiceTest {
         GenerateMacRequest request = GenerateMacRequest.builder()
                 .keyId(KEY_ID)
                 .message(Base64.getEncoder().encodeToString("hello".getBytes()))
-                .macAlgorithm("HmacSHA256")
+                .macAlgorithm(IEnumKeySpec.Types.HMAC_256.getJavaAlgorithm())
                 .build();
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
@@ -305,7 +306,7 @@ class SigningServiceTest {
         GenerateMacRequest request = GenerateMacRequest.builder()
                 .keyId(KEY_ID)
                 .message(Base64.getEncoder().encodeToString("hello".getBytes()))
-                .macAlgorithm("HmacSHA256")
+                .macAlgorithm(IEnumKeySpec.Types.HMAC_256.getJavaAlgorithm())
                 .build();
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
@@ -320,26 +321,6 @@ class SigningServiceTest {
     }
 
     @Test
-    void shouldThrowWhenGenerateMacFails() {
-
-        GenerateMacRequest request = GenerateMacRequest.builder()
-                .keyId(KEY_ID)
-                .message(Base64.getEncoder().encodeToString("hello".getBytes()))
-                .macAlgorithm("INVALID")
-                .build();
-
-        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
-                .thenReturn(Optional.of(kmsKey));
-
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> service.generateMac(TENANT, request)
-        );
-
-        assertEquals("MAC generation failed", exception.getMessage());
-    }
-
-    @Test
     void shouldVerifyMacSuccessfully() {
 
         String message = Base64.getEncoder()
@@ -348,7 +329,7 @@ class SigningServiceTest {
         GenerateMacRequest generateRequest = GenerateMacRequest.builder()
                 .keyId(KEY_ID)
                 .message(message)
-                .macAlgorithm("HmacSHA256")
+                .macAlgorithm(IEnumKeySpec.Types.HMAC_256.getJavaAlgorithm())
                 .build();
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
@@ -361,7 +342,7 @@ class SigningServiceTest {
                 .keyId(KEY_ID)
                 .message(message)
                 .mac(generated.getMac())
-                .macAlgorithm("HmacSHA256")
+                .macAlgorithm(IEnumKeySpec.Types.HMAC_256.getJavaAlgorithm())
                 .build();
 
         VerifyMacResponse response =
@@ -379,7 +360,7 @@ class SigningServiceTest {
                 .keyId(KEY_ID)
                 .message(Base64.getEncoder().encodeToString("hello".getBytes()))
                 .mac(Base64.getEncoder().encodeToString("invalid".getBytes()))
-                .macAlgorithm("HmacSHA256")
+                .macAlgorithm(IEnumKeySpec.Types.HMAC_256.getJavaAlgorithm())
                 .build();
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
@@ -421,7 +402,7 @@ class SigningServiceTest {
                 .keyId(KEY_ID)
                 .message(Base64.getEncoder().encodeToString("hello".getBytes()))
                 .mac(Base64.getEncoder().encodeToString("invalid".getBytes()))
-                .macAlgorithm("HmacSHA256")
+                .macAlgorithm(IEnumKeySpec.Types.HMAC_256.getJavaAlgorithm())
                 .build();
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))

@@ -3,7 +3,6 @@ package eu.isygoit.ui.views;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -55,6 +54,11 @@ public class CryptoOperationsView extends VerticalLayout {
     private final VerticalLayout dataKeyTab;
     private final VerticalLayout macTab;
 
+    // Dynamic combo boxes
+    private ComboBox<String> algorithmCombo;
+    private ComboBox<String> signAlgoCombo;
+    private ComboBox<String> macAlgoCombo;
+
     private List<KeyOption> keyOptions = new ArrayList<>();
     private String selectedKeyId = null;
     private IEnumKeySpec.Types selectedKeySpec = null;
@@ -91,6 +95,7 @@ public class CryptoOperationsView extends VerticalLayout {
                 selectedKeyId = null;
                 selectedKeySpec = null;
                 selectedKeyUsage = null;
+                updateAlgorithmCombos();
             }
         });
 
@@ -156,6 +161,7 @@ public class CryptoOperationsView extends VerticalLayout {
             if (selectedKeyId != null && keyOptions.stream().noneMatch(opt -> opt.getKeyId().equals(selectedKeyId))) {
                 selectedKeyId = null;
                 keyCombo.clear();
+                updateAlgorithmCombos();
             }
         } catch (Exception e) {
             Notification.show("Failed to load keys: " + e.getMessage(), 5000, Notification.Position.TOP_END)
@@ -186,10 +192,69 @@ public class CryptoOperationsView extends VerticalLayout {
             if (desc != null && desc.getKeyMetadata() != null) {
                 selectedKeySpec = desc.getKeyMetadata().getKeySpec();
                 selectedKeyUsage = desc.getKeyMetadata().getKeyUsage();
+                updateAlgorithmCombos();
             }
         } catch (Exception e) {
             Notification.show("Failed to load key metadata", 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
+        }
+    }
+
+    private void updateAlgorithmCombos() {
+        // Update encryption algorithm combo
+        if (selectedKeySpec != null) {
+            if (selectedKeySpec == IEnumKeySpec.Types.SYMMETRIC_DEFAULT) {
+                algorithmCombo.setItems("SYMMETRIC_DEFAULT");
+                algorithmCombo.setValue("SYMMETRIC_DEFAULT");
+                algorithmCombo.setEnabled(true);
+            } else if (selectedKeySpec.name().startsWith("RSA")) {
+                algorithmCombo.setItems("RSAES_OAEP_SHA_256", "RSAES_PKCS1_V1_5");
+                algorithmCombo.setValue("RSAES_OAEP_SHA_256");
+                algorithmCombo.setEnabled(true);
+            } else {
+                algorithmCombo.setItems();
+                algorithmCombo.setEnabled(false);
+                algorithmCombo.setPlaceholder("No encryption algorithm for this key");
+            }
+        } else {
+            algorithmCombo.setItems();
+            algorithmCombo.setEnabled(false);
+        }
+
+        // Update signing algorithm combo
+        if (selectedKeyUsage == IEnumKeyUsage.Types.SIGN_VERIFY && selectedKeySpec != null) {
+            if (selectedKeySpec.name().startsWith("RSA")) {
+                signAlgoCombo.setItems("RSASSA_PKCS1_V1_5_SHA_256", "RSASSA_PSS_SHA_256");
+                signAlgoCombo.setValue("RSASSA_PKCS1_V1_5_SHA_256");
+                signAlgoCombo.setEnabled(true);
+            } else if (selectedKeySpec.name().startsWith("ECC")) {
+                signAlgoCombo.setItems("ECDSA_SHA_256", "ECDSA_SHA_384", "ECDSA_SHA_512");
+                signAlgoCombo.setValue("ECDSA_SHA_256");
+                signAlgoCombo.setEnabled(true);
+            } else if (selectedKeySpec == IEnumKeySpec.Types.SM2) {
+                signAlgoCombo.setItems("SM2DSA");
+                signAlgoCombo.setValue("SM2DSA");
+                signAlgoCombo.setEnabled(true);
+            } else {
+                signAlgoCombo.setItems();
+                signAlgoCombo.setEnabled(false);
+                signAlgoCombo.setPlaceholder("No signing algorithm for this key");
+            }
+        } else {
+            signAlgoCombo.setItems();
+            signAlgoCombo.setEnabled(false);
+        }
+
+        // Update MAC algorithm combo (only for HMAC keys with GENERATE_VERIFY_MAC usage)
+        if (selectedKeyUsage == IEnumKeyUsage.Types.GENERATE_VERIFY_MAC &&
+                selectedKeySpec != null && selectedKeySpec.name().startsWith("HMAC")) {
+            macAlgoCombo.setItems("HMAC_SHA_224", "HMAC_SHA_256", "HMAC_SHA_384", "HMAC_SHA_512");
+            macAlgoCombo.setValue("HMAC_SHA_256");
+            macAlgoCombo.setEnabled(true);
+        } else {
+            macAlgoCombo.setItems();
+            macAlgoCombo.setEnabled(false);
+            macAlgoCombo.setPlaceholder("Select an HMAC key to enable MAC operations");
         }
     }
 
@@ -213,9 +278,9 @@ public class CryptoOperationsView extends VerticalLayout {
         ciphertextArea.setWidthFull();
         ciphertextArea.setHeight("150px");
 
-        ComboBox<String> algorithmCombo = new ComboBox<>("Algorithm");
-        algorithmCombo.setItems("SYMMETRIC_DEFAULT", "RSAES_OAEP_SHA_256", "RSAES_PKCS1_V1_5");
-        algorithmCombo.setValue("SYMMETRIC_DEFAULT");
+        algorithmCombo = new ComboBox<>("Algorithm");
+        algorithmCombo.setEnabled(false);
+        algorithmCombo.setPlaceholder("Select a key first");
 
         TextField contextField = new TextField("Encryption Context (key:value, comma-separated)");
         contextField.setPlaceholder("e.g., purpose=test,env=dev");
@@ -228,6 +293,11 @@ public class CryptoOperationsView extends VerticalLayout {
         encryptBtn.addClickListener(e -> {
             if (selectedKeyId == null) {
                 Notification.show("Select a key first", 3000, Notification.Position.TOP_END).addThemeVariants(NotificationVariant.LUMO_WARNING);
+                return;
+            }
+            if (!algorithmCombo.isEnabled() || algorithmCombo.getValue() == null) {
+                Notification.show("No compatible encryption algorithm for this key", 3000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
             }
             String plain = plaintextArea.getValue();
@@ -313,9 +383,9 @@ public class CryptoOperationsView extends VerticalLayout {
         signatureArea.setWidthFull();
         signatureArea.setHeight("150px");
 
-        ComboBox<String> signAlgoCombo = new ComboBox<>("Signing Algorithm");
-        signAlgoCombo.setItems("RSASSA_PKCS1_V1_5_SHA_256", "RSASSA_PSS_SHA_256", "ECDSA_SHA_256");
-        signAlgoCombo.setValue("RSASSA_PKCS1_V1_5_SHA_256");
+        signAlgoCombo = new ComboBox<>("Signing Algorithm");
+        signAlgoCombo.setEnabled(false);
+        signAlgoCombo.setPlaceholder("Select a key that supports SIGN_VERIFY");
 
         Button signBtn = new Button("Sign", new Icon(VaadinIcon.PENCIL));
         Button verifyBtn = new Button("Verify", new Icon(VaadinIcon.CHECK));
@@ -329,6 +399,11 @@ public class CryptoOperationsView extends VerticalLayout {
             }
             if (selectedKeyUsage != IEnumKeyUsage.Types.SIGN_VERIFY) {
                 Notification.show("Selected key does not support SIGN_VERIFY", 3000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
+                return;
+            }
+            if (!signAlgoCombo.isEnabled() || signAlgoCombo.getValue() == null) {
+                Notification.show("No compatible signing algorithm for this key", 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
             }
@@ -437,6 +512,11 @@ public class CryptoOperationsView extends VerticalLayout {
                 Notification.show("Select a key first", 3000, Notification.Position.TOP_END).addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
             }
+            if (selectedKeyUsage != IEnumKeyUsage.Types.ENCRYPT_DECRYPT) {
+                Notification.show("Selected key does not support encryption/decryption", 3000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
+                return;
+            }
             try {
                 KmsDtos.GenerateDataKeyRequest request = KmsDtos.GenerateDataKeyRequest.builder()
                         .keyId(selectedKeyId)
@@ -477,9 +557,9 @@ public class CryptoOperationsView extends VerticalLayout {
         macArea.setWidthFull();
         macArea.setHeight("100px");
 
-        ComboBox<String> macAlgoCombo = new ComboBox<>("MAC Algorithm");
-        macAlgoCombo.setItems("HMAC_SHA_256", "HMAC_SHA_384", "HMAC_SHA_512");
-        macAlgoCombo.setValue("HMAC_SHA_256");
+        macAlgoCombo = new ComboBox<>("MAC Algorithm");
+        macAlgoCombo.setEnabled(false);
+        macAlgoCombo.setPlaceholder("Select an HMAC key");
 
         Button generateBtn = new Button("Generate MAC", new Icon(VaadinIcon.SIGNAL));
         Button verifyBtn = new Button("Verify MAC", new Icon(VaadinIcon.CHECK));
@@ -493,6 +573,11 @@ public class CryptoOperationsView extends VerticalLayout {
             }
             if (selectedKeyUsage != IEnumKeyUsage.Types.GENERATE_VERIFY_MAC) {
                 Notification.show("Selected key does not support MAC operations", 3000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
+                return;
+            }
+            if (!macAlgoCombo.isEnabled() || macAlgoCombo.getValue() == null) {
+                Notification.show("No compatible MAC algorithm for this key", 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
             }

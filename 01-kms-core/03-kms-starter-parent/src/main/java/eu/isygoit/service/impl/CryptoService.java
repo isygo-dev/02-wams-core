@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.KeyPair;
@@ -173,22 +174,72 @@ public class CryptoService implements ICryptoService {
     @Override
     public byte[] generateKeyMaterial(IEnumKeySpec.Types keySpec) {
         try {
-            if (keySpec.name().startsWith("AES") || keySpec.name().startsWith("DES")) {
-                int keySize = extractKeySize(keySpec);
-                javax.crypto.KeyGenerator keyGen = javax.crypto.KeyGenerator.getInstance("AES");
-                keyGen.init(keySize);
-                return keyGen.generateKey().getEncoded();
-            } else if (keySpec.name().startsWith("RSA") || keySpec.name().startsWith("EC")) {
-                int keySize = extractKeySize(keySpec);
-                KeyPairGenerator generator = KeyPairGenerator.getInstance(extractAlgorithm(keySpec));
-                generator.initialize(keySize);
-                KeyPair keyPair = generator.generateKeyPair();
-                return keyPair.getPrivate().getEncoded(); // Return private key (standard practice)
+            switch (keySpec) {
+                case SYMMETRIC_DEFAULT:
+                    // AES-256 key (32 bytes)
+                    KeyGenerator aesGen = KeyGenerator.getInstance("AES");
+                    aesGen.init(256);
+                    return aesGen.generateKey().getEncoded();
+
+                case HMAC_224:
+                    KeyGenerator hmac224 = KeyGenerator.getInstance("HmacSHA224");
+                    hmac224.init(224); // 28 bytes
+                    return hmac224.generateKey().getEncoded();
+                case HMAC_256:
+                    KeyGenerator hmac256 = KeyGenerator.getInstance("HmacSHA256");
+                    hmac256.init(256); // 32 bytes
+                    return hmac256.generateKey().getEncoded();
+                case HMAC_384:
+                    KeyGenerator hmac384 = KeyGenerator.getInstance("HmacSHA384");
+                    hmac384.init(384); // 48 bytes
+                    return hmac384.generateKey().getEncoded();
+                case HMAC_512:
+                    KeyGenerator hmac512 = KeyGenerator.getInstance("HmacSHA512");
+                    hmac512.init(512); // 64 bytes
+                    return hmac512.generateKey().getEncoded();
+
+                case RSA_2048:
+                    return generateRsaPrivateKey(2048);
+                case RSA_3072:
+                    return generateRsaPrivateKey(3072);
+                case RSA_4096:
+                    return generateRsaPrivateKey(4096);
+
+                case ECC_NIST_P256:
+                    return generateEcPrivateKey("secp256r1");
+                case ECC_NIST_P384:
+                    return generateEcPrivateKey("secp384r1");
+                case ECC_NIST_P521:
+                    return generateEcPrivateKey("secp521r1");
+                case ECC_SECG_P256K1:
+                    return generateEcPrivateKey("secp256k1");
+                case SM2:
+                    // SM2 is a Chinese national standard elliptic curve. Use Bouncy Castle or an appropriate provider.
+                    // For simplicity, treat as secp256r1-like; but ideally you'd use a provider that supports SM2.
+                    // If SM2 is not needed, throw UnsupportedOperationException.
+                    throw new UnsupportedOperationException("SM2 key generation not yet implemented");
+                default:
+                    throw new IllegalArgumentException("Unsupported key specification: " + keySpec);
             }
         } catch (Exception e) {
             log.error("Failed to generate key material for {}", keySpec, e);
+            throw new RuntimeException("Key material generation failed for " + keySpec, e);
         }
-        return new byte[0];
+    }
+
+    private byte[] generateRsaPrivateKey(int keySize) throws Exception {
+        KeyPairGenerator rsaGen = KeyPairGenerator.getInstance("RSA");
+        rsaGen.initialize(keySize);
+        KeyPair keyPair = rsaGen.generateKeyPair();
+        return keyPair.getPrivate().getEncoded(); // PKCS#8 encoding
+    }
+
+    private byte[] generateEcPrivateKey(String curveName) throws Exception {
+        KeyPairGenerator ecGen = KeyPairGenerator.getInstance("EC");
+        java.security.spec.ECGenParameterSpec ecSpec = new java.security.spec.ECGenParameterSpec(curveName);
+        ecGen.initialize(ecSpec);
+        KeyPair keyPair = ecGen.generateKeyPair();
+        return keyPair.getPrivate().getEncoded(); // PKCS#8 encoding
     }
 
     /**

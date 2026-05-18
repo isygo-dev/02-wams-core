@@ -4,6 +4,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
@@ -307,14 +308,14 @@ public class CustomKeyStoresView extends VerticalLayout {
             buttonBar.setPadding(false);
 
             Button connectBtn = createIconButton(VaadinIcon.CONNECT, "Connect");
-            connectBtn.addClickListener(e -> connectStore());
+            connectBtn.addClickListener(e -> confirmConnect());
             if ("CONNECTED".equalsIgnoreCase(connectionState)) {
                 connectBtn.setEnabled(false);
                 connectBtn.setTooltipText("Already connected");
             }
 
             Button disconnectBtn = createIconButton(VaadinIcon.OUT, "Disconnect");
-            disconnectBtn.addClickListener(e -> disconnectStore());
+            disconnectBtn.addClickListener(e -> confirmDisconnect());
             if (!"CONNECTED".equalsIgnoreCase(connectionState)) {
                 disconnectBtn.setEnabled(false);
                 disconnectBtn.setTooltipText("Not connected");
@@ -456,6 +457,28 @@ public class CustomKeyStoresView extends VerticalLayout {
             btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
             btn.setTooltipText(tooltip);
             return btn;
+        }
+
+        private void confirmConnect() {
+            ConfirmDialog confirm = new ConfirmDialog();
+            confirm.setHeader("Connect to store");
+            confirm.setText("Are you sure you want to connect to the custom key store '" + storeName + "'?");
+            confirm.setCancelable(true);
+            confirm.setConfirmText("Connect");
+            confirm.setConfirmButtonTheme(ButtonVariant.LUMO_SUCCESS.getVariantName());
+            confirm.addConfirmListener(event -> connectStore());
+            confirm.open();
+        }
+
+        private void confirmDisconnect() {
+            ConfirmDialog confirm = new ConfirmDialog();
+            confirm.setHeader("Disconnect from store");
+            confirm.setText("Disconnecting the store may make any keys hosted in this store temporarily unusable.\nAre you sure you want to disconnect?");
+            confirm.setCancelable(true);
+            confirm.setConfirmText("Disconnect");
+            confirm.setConfirmButtonTheme(ButtonVariant.LUMO_WARNING.getVariantName());
+            confirm.addConfirmListener(event -> disconnectStore());
+            confirm.open();
         }
 
         private void connectStore() {
