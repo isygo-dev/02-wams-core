@@ -70,7 +70,7 @@ class KeyManagementServiceTest {
                 .keyStatus(IEnumKeyStatus.Types.ENABLED)
                 .currentVersionId("v1")
                 .rotationEnabled(false)
-                .keyAlias("alias/test")
+                .primaryKeyAlias("alias:test")
                 .description("desc")
                 .keyMaterial(new byte[]{1, 2, 3})
                 .build();

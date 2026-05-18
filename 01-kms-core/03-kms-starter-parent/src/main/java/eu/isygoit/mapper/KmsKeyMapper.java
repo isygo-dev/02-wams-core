@@ -29,7 +29,7 @@ public interface KmsKeyMapper {
         List<ListKeysResponseDto.KeySummaryDto> keys = (List<ListKeysResponseDto.KeySummaryDto>) page.getContent().stream()
                 .map(key -> ListKeysResponseDto.KeySummaryDto.builder()
                         .keyId(key.getKeyId())
-                        .alias(key.getKeyAlias())
+                        .alias(key.getPrimaryKeyAlias())
                         .status(key.getKeyStatus())
                         .build())
                 .toList();

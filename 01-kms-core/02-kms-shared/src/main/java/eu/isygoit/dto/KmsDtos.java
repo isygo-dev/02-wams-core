@@ -1137,7 +1137,7 @@ public final class KmsDtos {
     @Schema(description = "Create alias request")
     public static class CreateAliasRequest {
         @NotBlank
-        @Pattern(regexp = "^alias:.*", message = "Alias name must start with 'alias:'")
+        @Pattern(regexp = "^alias:.*", message = "alias.name.must.start.with.alias")
         @Schema(description = "Alias name (must start with 'alias:')", required = true)
         private String aliasName;
 

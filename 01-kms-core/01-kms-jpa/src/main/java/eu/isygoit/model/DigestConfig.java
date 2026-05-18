@@ -85,6 +85,7 @@ public class DigestConfig extends AuditableEntity<Long> implements ITenantAssign
     private Boolean invertPositionOfPlainSaltInEncryptionResults = Boolean.FALSE;
 
     @Builder.Default
+    @ColumnDefault("false")
     @Column(name = SchemaColumnConstantName.C_USE_LENIENT_SALT_SIZE_CHECK, nullable = false)
     private Boolean useLenientSaltSizeCheck = Boolean.FALSE;
 

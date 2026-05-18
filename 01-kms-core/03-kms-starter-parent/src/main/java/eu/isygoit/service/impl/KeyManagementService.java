@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -83,7 +84,7 @@ public class KeyManagementService implements IKeyManagementService {
                     .keyWrn(wrn)
                     .keySpec(request.getKeySpec())
                     .keyUsage(request.getKeyUsage())
-                    .keyAlias(request.getKeyAlias())
+                    .primaryKeyAlias(request.getKeyAlias())
                     .description(request.getDescription())
                     .keyStatus(IEnumKeyStatus.Types.ENABLED)
                     .currentVersionId(versionId)
@@ -114,6 +115,18 @@ public class KeyManagementService implements IKeyManagementService {
                 kmsKeyPolicyRepository.save(keyPolicy);
             }
 
+            // Create Alias
+            if(StringUtils.hasText(request.getKeyAlias())){
+                KmsAlias kmsAlias = KmsAlias.builder()
+                        .tenant(tenant)
+                        .targetKeyId(savedKey.getKeyId())
+                        .primaryKey(true)
+                        .aliasName(request.getKeyAlias())
+                        .build();
+                kmsAliasRepository.save(kmsAlias);
+            }
+
+            // Create Tags
             if (request.getTags() != null && !request.getTags().isEmpty()) {
                 List<KmsTag> tags = request.getTags().stream()
                         .map(tag -> KmsTag.builder()
@@ -148,7 +161,7 @@ public class KeyManagementService implements IKeyManagementService {
                             .keyStatus(savedKey.getKeyStatus())
                             .createdAt(savedKey.getCreateDate())
                             .updatedAt(savedKey.getUpdateDate())
-                            .keyAlias(savedKey.getKeyAlias())
+                            .keyAlias(savedKey.getPrimaryKeyAlias())
                             .expirationModel(savedKey.getExpirationModel())
                             .customerMasterKeySpec(
                                     savedKey.getKeySpec() != null
@@ -211,7 +224,7 @@ public class KeyManagementService implements IKeyManagementService {
                 .currentVersion(key.getCurrentVersionId())
                 .createDate(key.getCreateDate())
                 .createdAt(key.getCreateDate())
-                .keyAlias(key.getKeyAlias())
+                .keyAlias(key.getPrimaryKeyAlias())
                 .description(key.getDescription())
                 .rotationEnabled(key.getRotationEnabled())
                 .origin(key.getOrigin())
@@ -430,7 +443,7 @@ public class KeyManagementService implements IKeyManagementService {
 
         return UpdateKeyDescriptionResponse.builder().keyMetadata(CreateKeyResponse.KeyMetadata.builder()
                         .keyId(String.valueOf(updated.getKeyId()))
-                        .keyAlias(updated.getKeyAlias())
+                        .keyAlias(updated.getPrimaryKeyAlias())
                         .description(updated.getDescription())
                         .keyStatus(updated.getKeyStatus())
                         .updatedAt(LocalDateTime.now())

@@ -128,7 +128,7 @@ public class AliasesView extends VerticalLayout {
             }
             filterCards();
         } catch (Exception e) {
-            Notification.show("Failed to load aliases: " + e.getMessage(), 5000, Notification.Position.TOP_CENTER)
+            Notification.show("Failed to load aliases: " + e.getMessage(), 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             showLoading(false);
@@ -204,12 +204,12 @@ public class AliasesView extends VerticalLayout {
             String aliasName = aliasNameField.getValue();
             String targetKeyId = targetKeyCombo.getValue();
             if (aliasName == null || aliasName.isBlank()) {
-                Notification.show("Alias name is required", 3000, Notification.Position.TOP_CENTER)
+                Notification.show("Alias name is required", 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return;
             }
             if (targetKeyId == null || targetKeyId.isBlank()) {
-                Notification.show("Target key is required", 3000, Notification.Position.TOP_CENTER)
+                Notification.show("Target key is required", 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return;
             }
@@ -221,15 +221,15 @@ public class AliasesView extends VerticalLayout {
                         .build();
                 ResponseEntity<CreateAliasResponse> response = kmsApiService.createAlias(request);
                 if (response.getStatusCode().is2xxSuccessful()) {
-                    Notification.show("Alias created successfully", 3000, Notification.Position.TOP_CENTER)
+                    Notification.show("Alias created successfully", 3000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                     loadAliases();
                 } else {
-                    Notification.show("Creation failed: " + response.getStatusCode(), 3000, Notification.Position.TOP_CENTER)
+                    Notification.show("Creation failed: " + response.getStatusCode(), 3000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
             } catch (Exception ex) {
-                Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_CENTER)
+                Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
@@ -251,7 +251,7 @@ public class AliasesView extends VerticalLayout {
                         .collect(Collectors.toList());
             }
         } catch (Exception e) {
-            Notification.show("Could not load keys: " + e.getMessage(), 3000, Notification.Position.TOP_CENTER)
+            Notification.show("Could not load keys: " + e.getMessage(), 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
         return keyIds;
@@ -351,15 +351,15 @@ public class AliasesView extends VerticalLayout {
                             .build();
                     ResponseEntity<DeleteAliasResponse> response = kmsApiService.deleteAlias(aliasName);
                     if (response.getStatusCode().is2xxSuccessful()) {
-                        Notification.show("Alias deleted", 3000, Notification.Position.TOP_CENTER)
+                        Notification.show("Alias deleted", 3000, Notification.Position.TOP_END)
                                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                         loadAliases();
                     } else {
-                        Notification.show("Deletion failed", 3000, Notification.Position.TOP_CENTER)
+                        Notification.show("Deletion failed", 3000, Notification.Position.TOP_END)
                                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
                     }
                 } catch (Exception e) {
-                    Notification.show("Error: " + e.getMessage(), 5000, Notification.Position.TOP_CENTER)
+                    Notification.show("Error: " + e.getMessage(), 5000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
             });
@@ -391,7 +391,7 @@ public class AliasesView extends VerticalLayout {
             Button updateBtn = new Button("Update", e -> {
                 String newTargetId = targetKeyCombo.getValue();
                 if (newTargetId == null || newTargetId.isBlank()) {
-                    Notification.show("Please select a target key", 3000, Notification.Position.TOP_CENTER)
+                    Notification.show("Please select a target key", 3000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                     return;
                 }
@@ -403,15 +403,15 @@ public class AliasesView extends VerticalLayout {
                             .build();
                     ResponseEntity<UpdateAliasResponse> response = kmsApiService.updateAlias(aliasName, request);
                     if (response.getStatusCode().is2xxSuccessful()) {
-                        Notification.show("Alias reassigned", 3000, Notification.Position.TOP_CENTER)
+                        Notification.show("Alias reassigned", 3000, Notification.Position.TOP_END)
                                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                         loadAliases();
                     } else {
-                        Notification.show("Update failed", 3000, Notification.Position.TOP_CENTER)
+                        Notification.show("Update failed", 3000, Notification.Position.TOP_END)
                                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
                     }
                 } catch (Exception ex) {
-                    Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_CENTER)
+                    Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
             });

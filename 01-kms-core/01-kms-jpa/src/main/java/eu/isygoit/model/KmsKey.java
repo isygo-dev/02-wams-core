@@ -5,6 +5,7 @@ import eu.isygoit.enums.*;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.*;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -159,8 +160,9 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * AWS equivalent: part of Alias API, not part of KeyMetadata.
      * </p>
      */
+    @Pattern(regexp = "^alias:.*", message = "alias.name.must.start.with.alias")
     @Column(name = SchemaColumnConstantName.C_KEY_ALIAS, length = 255)
-    private String keyAlias;
+    private String primaryKeyAlias;
 
     /**
      * Human‑readable description of the key (max 1024 characters).
@@ -191,6 +193,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * </p>
      */
     @Builder.Default
+    @ColumnDefault("'ENABLED'")
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_STATUS, length = 50, nullable = false)
     private IEnumKeyStatus.Types keyStatus = IEnumKeyStatus.Types.ENABLED;
@@ -217,9 +220,9 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * </p>
      */
     @Builder.Default
-    @Column(name = SchemaColumnConstantName.C_ROTATION_ENABLED, nullable = false)
     @ColumnDefault("false")
-    private Boolean rotationEnabled = false;
+    @Column(name = SchemaColumnConstantName.C_ROTATION_ENABLED, nullable = false)
+    private Boolean rotationEnabled = Boolean.FALSE;
 
     /**
      * Rotation period in days (default 365). Only meaningful if `rotationEnabled` is true.
@@ -346,15 +349,13 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * </p>
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = SchemaColumnConstantName.C_KEY_STORE_ID,
-            referencedColumnName = SchemaColumnConstantName.C_ID)
+    @JoinColumn(name = SchemaColumnConstantName.C_KEY_STORE_ID, referencedColumnName = SchemaColumnConstantName.C_ID)
     private CustomKeyStore customKeyStore;
 
     /**
      * Foreign key column for `customKeyStore` (denormalized).
      */
-    @Column(name = SchemaColumnConstantName.C_KEY_STORE_ID,
-            insertable = false, updatable = false, length = 255)
+    @Column(name = SchemaColumnConstantName.C_KEY_STORE_ID, insertable = false, updatable = false, length = 255)
     private Long keyStoreId;
 
     // =========================================================================
@@ -368,9 +369,9 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * </p>
      */
     @Builder.Default
-    @Column(name = SchemaColumnConstantName.C_MULTI_REGION, nullable = false)
     @ColumnDefault("false")
-    private Boolean multiRegion = false;
+    @Column(name = SchemaColumnConstantName.C_MULTI_REGION, nullable = false)
+    private Boolean multiRegion = Boolean.FALSE;
 
     /**
      * For replica keys: points to the primary key's `keyId`.

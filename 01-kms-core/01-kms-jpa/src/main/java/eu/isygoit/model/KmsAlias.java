@@ -43,12 +43,17 @@ public class KmsAlias extends AuditableEntity<Long> implements ITenantAssignable
     @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
 
-    @Pattern(regexp = "^alias:.*", message = "Alias name must start with 'alias:'")
+    @Pattern(regexp = "^alias:.*", message = "alias.name.must.start.with.alias")
     @Column(name = SchemaColumnConstantName.C_ALIAS_NAME, nullable = false, length = 256)
     private String aliasName;
 
     @Column(name = SchemaColumnConstantName.C_KEY_ID, nullable = false)
     private String targetKeyId;
+
+    @Builder.Default
+    @ColumnDefault("false")
+    @Column(name = SchemaColumnConstantName.C_IS_PRIMARY, nullable = false)
+    private Boolean primaryKey = Boolean.FALSE;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({

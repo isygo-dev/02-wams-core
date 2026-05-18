@@ -31,6 +31,7 @@ import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainLayout;
+import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,7 +126,7 @@ public class KeyManagementView extends VerticalLayout {
                 existingAliases = new ArrayList<>();
             }
         } catch (Exception e) {
-            Notification.show("Failed to load aliases: " + e.getMessage(), 3000, Notification.Position.TOP_CENTER)
+            Notification.show("Failed to load aliases: " + e.getMessage(), 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             existingAliases = new ArrayList<>();
         }
@@ -184,7 +185,7 @@ public class KeyManagementView extends VerticalLayout {
             }
             filterCards();
         } catch (Exception e) {
-            Notification.show("Failed to load keys: " + e.getMessage(), 5000, Notification.Position.TOP_CENTER)
+            Notification.show("Failed to load keys: " + e.getMessage(), 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             showLoading(false);
@@ -347,33 +348,27 @@ public class KeyManagementView extends VerticalLayout {
 
                 ResponseEntity<CreateKeyResponse> response = kmsApiService.createKey(request);
                 if (!response.getStatusCode().is2xxSuccessful()) {
-                    Notification.show("Key creation failed", 3000, Notification.Position.TOP_CENTER)
+                    Notification.show("Key creation failed : " + response.getBody(),
+                                    3000,
+                                    Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                     return;
                 }
                 CreateKeyResponse created = response.getBody();
                 String newKeyId = created.getKeyMetadata().getKeyId();
 
-                if (newAlias != null && !newAlias.isBlank()) {
-                    CreateAliasRequest aliasRequest = CreateAliasRequest.builder()
-                            .aliasName(newAlias)
-                            .targetKeyId(newKeyId)
-                            .build();
-                    kmsApiService.createAlias(aliasRequest);
-                } else if (existingSelectedAlias != null && !existingSelectedAlias.isBlank()) {
-                    UpdateAliasRequest aliasRequest = UpdateAliasRequest.builder()
-                            .aliasName(existingSelectedAlias)
-                            .targetKeyId(newKeyId)
-                            .build();
-                    kmsApiService.updateAlias(existingSelectedAlias, aliasRequest);
-                }
-
-                Notification.show("Key created successfully", 3000, Notification.Position.TOP_CENTER)
+                Notification.show("Key created successfully", 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 loadAliases();
                 loadKeys();
-            } catch (Exception ex) {
-                Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_CENTER)
+            } catch (FeignException ex) {
+                if (ex.status() == 500) {
+                    String body = ex.contentUTF8();
+                    Notification.show("Error: " + body, 5000, Notification.Position.TOP_END)
+                            .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                }
+            }catch (Exception ex) {
+                Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
@@ -669,12 +664,12 @@ public class KeyManagementView extends VerticalLayout {
                         kmsApiService.tagResource(keyId, tagRequest);
                     }
 
-                    Notification.show("Key updated successfully", 3000, Notification.Position.TOP_CENTER)
+                    Notification.show("Key updated successfully", 3000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                     loadAliases();
                     loadKeys();
                 } catch (Exception ex) {
-                    Notification.show("Update failed: " + ex.getMessage(), 5000, Notification.Position.TOP_CENTER)
+                    Notification.show("Update failed: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
             });
@@ -792,10 +787,10 @@ public class KeyManagementView extends VerticalLayout {
                     detailsDialog.getFooter().add(closeBtn);
                     detailsDialog.open();
                 } else {
-                    Notification.show("No metadata found", 3000, Notification.Position.TOP_CENTER);
+                    Notification.show("No metadata found", 3000, Notification.Position.TOP_END);
                 }
             } catch (Exception e) {
-                Notification.show("Failed to load details", 3000, Notification.Position.TOP_CENTER)
+                Notification.show("Failed to load details", 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         }
@@ -829,15 +824,15 @@ public class KeyManagementView extends VerticalLayout {
                     ResponseEntity<ScheduleKeyDeletionResponse> response =
                             kmsApiService.scheduleKeyDeletion(keyId, daysField.getValue());
                     if (response.getStatusCode().is2xxSuccessful()) {
-                        Notification.show("Deletion scheduled in " + daysField.getValue() + " days", 3000, Notification.Position.TOP_CENTER)
+                        Notification.show("Deletion scheduled in " + daysField.getValue() + " days", 3000, Notification.Position.TOP_END)
                                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                         loadKeys();
                     } else {
-                        Notification.show("Failed to schedule deletion", 3000, Notification.Position.TOP_CENTER)
+                        Notification.show("Failed to schedule deletion", 3000, Notification.Position.TOP_END)
                                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
                     }
                 } catch (Exception ex) {
-                    Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_CENTER)
+                    Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
             });
@@ -859,15 +854,15 @@ public class KeyManagementView extends VerticalLayout {
                     ResponseEntity<CancelKeyDeletionResponse> response =
                             kmsApiService.cancelKeyDeletion(keyId);
                     if (response.getStatusCode().is2xxSuccessful()) {
-                        Notification.show("Deletion cancelled", 3000, Notification.Position.TOP_CENTER)
+                        Notification.show("Deletion cancelled", 3000, Notification.Position.TOP_END)
                                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                         loadKeys();
                     } else {
-                        Notification.show("Failed to cancel deletion", 3000, Notification.Position.TOP_CENTER)
+                        Notification.show("Failed to cancel deletion", 3000, Notification.Position.TOP_END)
                                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
                     }
                 } catch (Exception e) {
-                    Notification.show("Error: " + e.getMessage(), 5000, Notification.Position.TOP_CENTER)
+                    Notification.show("Error: " + e.getMessage(), 5000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
             });
@@ -885,15 +880,15 @@ public class KeyManagementView extends VerticalLayout {
                 try {
                     ResponseEntity<DeleteKeyResponse> response = kmsApiService.deleteKey(keyId);
                     if (response.getStatusCode().is2xxSuccessful()) {
-                        Notification.show("Key permanently deleted", 3000, Notification.Position.TOP_CENTER)
+                        Notification.show("Key permanently deleted", 3000, Notification.Position.TOP_END)
                                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                         loadKeys();
                     } else {
-                        Notification.show("Deletion failed", 3000, Notification.Position.TOP_CENTER)
+                        Notification.show("Deletion failed", 3000, Notification.Position.TOP_END)
                                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
                     }
                 } catch (Exception e) {
-                    Notification.show("Error: " + e.getMessage(), 5000, Notification.Position.TOP_CENTER)
+                    Notification.show("Error: " + e.getMessage(), 5000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
             });
