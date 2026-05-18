@@ -51,11 +51,11 @@ public class KeyManagementView extends VerticalLayout {
     private final TextField searchField = new TextField();
     private final ComboBox<String> statusFilter = new ComboBox<>("Status");
     private final ProgressBar loadingBar = new ProgressBar();
+    private final ObjectMapper objectMapper;
+    public List<String> existingAliases = new ArrayList<>();
     private List<KeyCard> allCards = new ArrayList<>();
     private String currentSearch = "";
     private String currentStatus = "All";
-    private final ObjectMapper objectMapper;
-    public List<String> existingAliases = new ArrayList<>();
 
     @Autowired
     public KeyManagementView(KmsApiService kmsApiService, ObjectMapper objectMapper) {

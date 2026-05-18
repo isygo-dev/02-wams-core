@@ -1,103 +1,168 @@
-import { r as b, M as R, u as Y, b as u, j as l, C as Z, v as h, w as je, x as k, y as ae, z as O, O as ye, A as D, B as r, D as G, F as ct, G as pt, H as f, I as te, J as Ae, K as $e, E as g, L as Be, k as re, l as Ve, P as Fe, N as ht, V as ut, Q as qe, R as E, S as p, T as gt, U as z, W as S, X as ft, Y as Q, Z as vt, _ as ke, $ as xe, a0 as mt, a1 as bt, a2 as wt, a3 as yt, a4 as Je, a5 as xt, a6 as Pt, a7 as It, a8 as Ct, a9 as Xe, aa as At, ab as $t, ac as kt, ad as St, ae as Ye, af as Rt, ag as Pe, ah as Ie, ai as Et } from "./copilot-CtbfhQDw.js";
-import { n as w, r as y } from "./state-BBJz6bnG.js";
-import { e as N } from "./query-BykXNUlT.js";
-import { i as d } from "./icons-DsRzzXLG.js";
-import { m as K } from "./overlay-monkeypatch-DLSz8eH8.js";
-import { c as We } from "./index-Dn-LW8Ql.js";
+import {
+    $ as xe,
+    _ as ke,
+    A as D,
+    a0 as mt,
+    a1 as bt,
+    a2 as wt,
+    a3 as yt,
+    a4 as Je,
+    a5 as xt,
+    a6 as Pt,
+    a7 as It,
+    a8 as Ct,
+    a9 as Xe,
+    aa as At,
+    ab as $t,
+    ac as kt,
+    ad as St,
+    ae as Ye,
+    af as Rt,
+    ag as Pe,
+    ah as Ie,
+    ai as Et,
+    b as u,
+    B as r,
+    C as Z,
+    D as G,
+    E as g,
+    F as ct,
+    G as pt,
+    H as f,
+    I as te,
+    j as l,
+    J as Ae,
+    K as $e,
+    k as re,
+    L as Be,
+    l as Ve,
+    M as R,
+    N as ht,
+    O as ye,
+    P as Fe,
+    Q as qe,
+    r as b,
+    R as E,
+    S as p,
+    T as gt,
+    u as Y,
+    U as z,
+    v as h,
+    V as ut,
+    w as je,
+    W as S,
+    x as k,
+    X as ft,
+    y as ae,
+    Y as Q,
+    z as O,
+    Z as vt
+} from "./copilot-CtbfhQDw.js";
+import {n as w, r as y} from "./state-BBJz6bnG.js";
+import {e as N} from "./query-BykXNUlT.js";
+import {i as d} from "./icons-DsRzzXLG.js";
+import {m as K} from "./overlay-monkeypatch-DLSz8eH8.js";
+import {c as We} from "./index-Dn-LW8Ql.js";
+
 const Dt = 1, Se = 36, Lt = 18;
+
 function zt(e, t) {
-  if (e.length === 0)
-    return;
-  const i = Mt(e, t);
-  for (const n in e)
-    e[n].style.setProperty("--content-height", `${i[n]}px`);
+    if (e.length === 0)
+        return;
+    const i = Mt(e, t);
+    for (const n in e)
+        e[n].style.setProperty("--content-height", `${i[n]}px`);
 }
+
 function Mt(e, t) {
-  const i = e.length, n = e.filter((s) => s.panelInfo && s.panelInfo.expanded).length, o = i - n;
-  return e.map((s) => {
-    const a = s.panelInfo;
-    return a && !a.expanded ? Se : (t.offsetHeight - (t.position === "bottom" ? Lt : 0) - o * Se - i * Dt) / n;
-  });
+    const i = e.length, n = e.filter((s) => s.panelInfo && s.panelInfo.expanded).length, o = i - n;
+    return e.map((s) => {
+        const a = s.panelInfo;
+        return a && !a.expanded ? Se : (t.offsetHeight - (t.position === "bottom" ? Lt : 0) - o * Se - i * Dt) / n;
+    });
 }
+
 var _t = Object.defineProperty, Ot = Object.getOwnPropertyDescriptor, j = (e, t, i, n) => {
-  for (var o = n > 1 ? void 0 : n ? Ot(t, i) : t, s = e.length - 1, a; s >= 0; s--)
-    (a = e[s]) && (o = (n ? a(t, i, o) : a(o)) || o);
-  return n && o && _t(t, i, o), o;
+    for (var o = n > 1 ? void 0 : n ? Ot(t, i) : t, s = e.length - 1, a; s >= 0; s--)
+        (a = e[s]) && (o = (n ? a(t, i, o) : a(o)) || o);
+    return n && o && _t(t, i, o), o;
 };
 const le = "data-drag-initial-index", J = "data-drag-final-index";
 let M = class extends R {
-  constructor() {
-    super(...arguments), this.position = "right", this.opened = !1, this.keepOpen = !1, this.resizing = !1, this.closingForcefully = !1, this.draggingSectionPanel = null, this.panelCountChanged = Y(() => {
-      this.refreshSplit();
-    }, 100), this.documentMouseUpListener = () => {
-      this.resizing && u.emit("user-select", { allowSelection: !0 }), this.resizing = !1, l.setDrawerResizing(!1), this.removeAttribute("resizing");
-    }, this.resizingMouseMoveListener = (e) => {
-      if (!this.resizing)
-        return;
-      const { x: t, y: i } = e;
-      e.stopPropagation(), e.preventDefault(), requestAnimationFrame(() => {
-        let n;
-        if (this.position === "right") {
-          const o = document.body.clientWidth - t;
-          this.style.setProperty("--size", `${o}px`), Z.saveDrawerSize(this.position, o), n = { width: o };
-        } else if (this.position === "left") {
-          const o = t;
-          this.style.setProperty("--size", `${o}px`), Z.saveDrawerSize(this.position, o), n = { width: o };
-        } else if (this.position === "bottom") {
-          const o = document.body.clientHeight - i;
-          this.style.setProperty("--size", `${o}px`), Z.saveDrawerSize(this.position, o), n = { height: o };
-        }
-        this.setActualSize(), h.panels.filter((o) => !o.floating && o.panel === this.position).forEach((o) => {
-          h.updatePanel(o.tag, n);
-        });
-      });
-    }, this.sectionPanelDraggingStarted = (e, t) => {
-      this.draggingSectionPanel = e, u.emit("user-select", { allowSelection: !1 }), this.draggingSectionPointerStartY = t.clientY, e.toggleAttribute("dragging", !0), e.style.zIndex = "1000", Array.from(this.querySelectorAll("copilot-section-panel-wrapper")).forEach((i, n) => {
-        i.setAttribute(le, `${n}`);
-      }), document.addEventListener("mousemove", this.sectionPanelDragging), document.addEventListener("mouseup", this.sectionPanelDraggingFinished);
-    }, this.sectionPanelDragging = (e) => {
-      if (!this.draggingSectionPanel)
-        return;
-      const { clientX: t, clientY: i } = e;
-      if (!je(this.getBoundingClientRect(), t, i)) {
-        this.cleanUpDragging();
-        return;
-      }
-      const n = i - this.draggingSectionPointerStartY;
-      this.draggingSectionPanel.style.transform = `translateY(${n}px)`, this.updateSectionPanelPositionsWhileDragging();
-    }, this.sectionPanelDraggingFinished = () => {
-      if (!this.draggingSectionPanel)
-        return;
-      u.emit("user-select", { allowSelection: !0 });
-      const e = this.getAllPanels().filter(
-        (t) => t.hasAttribute(J) && t.panelInfo?.panelOrder !== Number.parseInt(t.getAttribute(J), 10)
-      ).map((t) => ({
-        tag: t.panelTag,
-        order: Number.parseInt(t.getAttribute(J), 10)
-      }));
-      this.cleanUpDragging(), h.updateOrders(e), document.removeEventListener("mouseup", this.sectionPanelDraggingFinished), document.removeEventListener("mousemove", this.sectionPanelDragging), this.refreshSplit();
-    }, this.updateSectionPanelPositionsWhileDragging = () => {
-      const e = this.draggingSectionPanel.getBoundingClientRect().height;
-      this.getAllPanels().sort((t, i) => {
-        const n = t.getBoundingClientRect(), o = i.getBoundingClientRect(), s = (n.top + n.bottom) / 2, a = (o.top + o.bottom) / 2;
-        return s - a;
-      }).forEach((t, i) => {
-        if (t.setAttribute(J, `${i}`), t.panelTag !== this.draggingSectionPanel?.panelTag) {
-          const n = Number.parseInt(t.getAttribute(le), 10);
-          n > i ? t.style.transform = `translateY(${-e}px)` : n < i ? t.style.transform = `translateY(${e}px)` : t.style.removeProperty("transform");
-        }
-      });
-    }, this.panelExpandedListener = (e) => {
-      this.querySelector(`copilot-section-panel-wrapper[paneltag="${e.detail.panelTag}"]`) && this.refreshSplit();
-    }, this.setActualSize = () => {
-      let e = this.offsetWidth;
-      this.position === "bottom" && (e = this.offsetHeight), this.style.setProperty("--actual-size", `calc(${e}px - var(--hover-size))`);
-    };
-  }
-  static get styles() {
-    return [
-      k(ae),
-      O`
+    constructor() {
+        super(...arguments), this.position = "right", this.opened = !1, this.keepOpen = !1, this.resizing = !1, this.closingForcefully = !1, this.draggingSectionPanel = null, this.panelCountChanged = Y(() => {
+            this.refreshSplit();
+        }, 100), this.documentMouseUpListener = () => {
+            this.resizing && u.emit("user-select", {allowSelection: !0}), this.resizing = !1, l.setDrawerResizing(!1), this.removeAttribute("resizing");
+        }, this.resizingMouseMoveListener = (e) => {
+            if (!this.resizing)
+                return;
+            const {x: t, y: i} = e;
+            e.stopPropagation(), e.preventDefault(), requestAnimationFrame(() => {
+                let n;
+                if (this.position === "right") {
+                    const o = document.body.clientWidth - t;
+                    this.style.setProperty("--size", `${o}px`), Z.saveDrawerSize(this.position, o), n = {width: o};
+                } else if (this.position === "left") {
+                    const o = t;
+                    this.style.setProperty("--size", `${o}px`), Z.saveDrawerSize(this.position, o), n = {width: o};
+                } else if (this.position === "bottom") {
+                    const o = document.body.clientHeight - i;
+                    this.style.setProperty("--size", `${o}px`), Z.saveDrawerSize(this.position, o), n = {height: o};
+                }
+                this.setActualSize(), h.panels.filter((o) => !o.floating && o.panel === this.position).forEach((o) => {
+                    h.updatePanel(o.tag, n);
+                });
+            });
+        }, this.sectionPanelDraggingStarted = (e, t) => {
+            this.draggingSectionPanel = e, u.emit("user-select", {allowSelection: !1}), this.draggingSectionPointerStartY = t.clientY, e.toggleAttribute("dragging", !0), e.style.zIndex = "1000", Array.from(this.querySelectorAll("copilot-section-panel-wrapper")).forEach((i, n) => {
+                i.setAttribute(le, `${n}`);
+            }), document.addEventListener("mousemove", this.sectionPanelDragging), document.addEventListener("mouseup", this.sectionPanelDraggingFinished);
+        }, this.sectionPanelDragging = (e) => {
+            if (!this.draggingSectionPanel)
+                return;
+            const {clientX: t, clientY: i} = e;
+            if (!je(this.getBoundingClientRect(), t, i)) {
+                this.cleanUpDragging();
+                return;
+            }
+            const n = i - this.draggingSectionPointerStartY;
+            this.draggingSectionPanel.style.transform = `translateY(${n}px)`, this.updateSectionPanelPositionsWhileDragging();
+        }, this.sectionPanelDraggingFinished = () => {
+            if (!this.draggingSectionPanel)
+                return;
+            u.emit("user-select", {allowSelection: !0});
+            const e = this.getAllPanels().filter(
+                (t) => t.hasAttribute(J) && t.panelInfo?.panelOrder !== Number.parseInt(t.getAttribute(J), 10)
+            ).map((t) => ({
+                tag: t.panelTag,
+                order: Number.parseInt(t.getAttribute(J), 10)
+            }));
+            this.cleanUpDragging(), h.updateOrders(e), document.removeEventListener("mouseup", this.sectionPanelDraggingFinished), document.removeEventListener("mousemove", this.sectionPanelDragging), this.refreshSplit();
+        }, this.updateSectionPanelPositionsWhileDragging = () => {
+            const e = this.draggingSectionPanel.getBoundingClientRect().height;
+            this.getAllPanels().sort((t, i) => {
+                const n = t.getBoundingClientRect(), o = i.getBoundingClientRect(), s = (n.top + n.bottom) / 2,
+                    a = (o.top + o.bottom) / 2;
+                return s - a;
+            }).forEach((t, i) => {
+                if (t.setAttribute(J, `${i}`), t.panelTag !== this.draggingSectionPanel?.panelTag) {
+                    const n = Number.parseInt(t.getAttribute(le), 10);
+                    n > i ? t.style.transform = `translateY(${-e}px)` : n < i ? t.style.transform = `translateY(${e}px)` : t.style.removeProperty("transform");
+                }
+            });
+        }, this.panelExpandedListener = (e) => {
+            this.querySelector(`copilot-section-panel-wrapper[paneltag="${e.detail.panelTag}"]`) && this.refreshSplit();
+        }, this.setActualSize = () => {
+            let e = this.offsetWidth;
+            this.position === "bottom" && (e = this.offsetHeight), this.style.setProperty("--actual-size", `calc(${e}px - var(--hover-size))`);
+        };
+    }
+
+    static get styles() {
+        return [
+            k(ae),
+            O`
         :host {
           --size: 350px;
           --actual-size: 350px;
@@ -349,122 +414,134 @@ let M = class extends R {
           opacity: 0;
         }
       `
-    ];
-  }
-  connectedCallback() {
-    super.connectedCallback(), this.reaction(
-      () => h.panels,
-      () => this.requestUpdate()
-    ), this.reaction(
-      () => l.operationInProgress,
-      (t) => {
-        t === ye.DragAndDrop && !this.opened && !this.keepOpen ? this.style.setProperty("pointer-events", "none") : this.style.setProperty("pointer-events", "auto");
-      }
-    ), this.reaction(
-      () => h.getAttentionRequiredPanelConfiguration(),
-      () => {
-        const t = h.getAttentionRequiredPanelConfiguration();
-        t && !t.floating && this.toggleAttribute(D, t.panel === this.position);
-      }
-    ), this.reaction(
-      () => l.active,
-      () => {
-        l.active || (this.opened = !1);
-      }
-    ), document.addEventListener("mouseup", this.documentMouseUpListener);
-    const e = Z.getDrawerSize(this.position);
-    e && (this.style.setProperty("--size", `${e}px`), this.setActualSize()), document.addEventListener("mousemove", this.resizingMouseMoveListener), this.addEventListener("mouseenter", this.mouseEnterListener), u.on("document-activation-change", (t) => {
-      this.toggleAttribute("document-hidden", !t.detail.active);
-    }), u.on("panel-expanded", this.panelExpandedListener), u.on("copilot-main-resized", this.setActualSize), this.reaction(
-      () => h.panels.filter(
-        (t) => !t.floating && t.panel === this.position
-      ).length,
-      () => {
-        this.panelCountChanged();
-      }
-    );
-  }
-  firstUpdated(e) {
-    super.firstUpdated(e), this.resizeElement.addEventListener("mousedown", (t) => {
-      t.button === 0 && (this.resizing = !0, l.setDrawerResizing(!0), this.setAttribute("resizing", ""), u.emit("user-select", { allowSelection: !1 }));
-    });
-  }
-  updated(e) {
-    super.updated(e), e.has("opened") && this.opened && this.hasAttribute(D) && (this.removeAttribute(D), h.clearAttention());
-  }
-  disconnectedCallback() {
-    super.disconnectedCallback(), document.removeEventListener("mousemove", this.resizingMouseMoveListener), document.removeEventListener("mouseup", this.documentMouseUpListener), this.removeEventListener("mouseenter", this.mouseEnterListener), u.off("panel-expanded", this.panelExpandedListener), u.off("copilot-main-resized", this.setActualSize);
-  }
-  /**
-   * Cleans up attributes/styles etc... for dragging operations
-   * @private
-   */
-  cleanUpDragging() {
-    this.draggingSectionPanel && (l.setSectionPanelDragging(!1), this.draggingSectionPanel.style.zIndex = "", Array.from(this.querySelectorAll("copilot-section-panel-wrapper")).forEach((e) => {
-      e.style.removeProperty("transform"), e.removeAttribute(J), e.removeAttribute(le);
-    }), this.draggingSectionPanel.removeAttribute("dragging"), this.draggingSectionPanel = null);
-  }
-  getAllPanels() {
-    return Array.from(this.querySelectorAll("copilot-section-panel-wrapper"));
-  }
-  getAllPanelsOrdered() {
-    return this.getAllPanels().sort((e, t) => e.panelInfo && t.panelInfo ? e.panelInfo.panelOrder - t.panelInfo.panelOrder : 0);
-  }
-  /**
-   * Closes the drawer and disables mouse enter event for a while.
-   */
-  forceClose() {
-    this.closingForcefully = !0, this.opened = !1, setTimeout(() => {
-      this.closingForcefully = !1;
-    }, 0.5);
-  }
-  mouseEnterListener(e) {
-    if (this.closingForcefully || l.sectionPanelResizing)
-      return;
-    document.querySelector("copilot-main").shadowRoot.querySelector("copilot-drawer-panel[opened]") || (this.refreshSplit(), this.opened = !0);
-  }
-  render() {
-    return r`
+        ];
+    }
+
+    connectedCallback() {
+        super.connectedCallback(), this.reaction(
+            () => h.panels,
+            () => this.requestUpdate()
+        ), this.reaction(
+            () => l.operationInProgress,
+            (t) => {
+                t === ye.DragAndDrop && !this.opened && !this.keepOpen ? this.style.setProperty("pointer-events", "none") : this.style.setProperty("pointer-events", "auto");
+            }
+        ), this.reaction(
+            () => h.getAttentionRequiredPanelConfiguration(),
+            () => {
+                const t = h.getAttentionRequiredPanelConfiguration();
+                t && !t.floating && this.toggleAttribute(D, t.panel === this.position);
+            }
+        ), this.reaction(
+            () => l.active,
+            () => {
+                l.active || (this.opened = !1);
+            }
+        ), document.addEventListener("mouseup", this.documentMouseUpListener);
+        const e = Z.getDrawerSize(this.position);
+        e && (this.style.setProperty("--size", `${e}px`), this.setActualSize()), document.addEventListener("mousemove", this.resizingMouseMoveListener), this.addEventListener("mouseenter", this.mouseEnterListener), u.on("document-activation-change", (t) => {
+            this.toggleAttribute("document-hidden", !t.detail.active);
+        }), u.on("panel-expanded", this.panelExpandedListener), u.on("copilot-main-resized", this.setActualSize), this.reaction(
+            () => h.panels.filter(
+                (t) => !t.floating && t.panel === this.position
+            ).length,
+            () => {
+                this.panelCountChanged();
+            }
+        );
+    }
+
+    firstUpdated(e) {
+        super.firstUpdated(e), this.resizeElement.addEventListener("mousedown", (t) => {
+            t.button === 0 && (this.resizing = !0, l.setDrawerResizing(!0), this.setAttribute("resizing", ""), u.emit("user-select", {allowSelection: !1}));
+        });
+    }
+
+    updated(e) {
+        super.updated(e), e.has("opened") && this.opened && this.hasAttribute(D) && (this.removeAttribute(D), h.clearAttention());
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback(), document.removeEventListener("mousemove", this.resizingMouseMoveListener), document.removeEventListener("mouseup", this.documentMouseUpListener), this.removeEventListener("mouseenter", this.mouseEnterListener), u.off("panel-expanded", this.panelExpandedListener), u.off("copilot-main-resized", this.setActualSize);
+    }
+
+    /**
+     * Cleans up attributes/styles etc... for dragging operations
+     * @private
+     */
+    cleanUpDragging() {
+        this.draggingSectionPanel && (l.setSectionPanelDragging(!1), this.draggingSectionPanel.style.zIndex = "", Array.from(this.querySelectorAll("copilot-section-panel-wrapper")).forEach((e) => {
+            e.style.removeProperty("transform"), e.removeAttribute(J), e.removeAttribute(le);
+        }), this.draggingSectionPanel.removeAttribute("dragging"), this.draggingSectionPanel = null);
+    }
+
+    getAllPanels() {
+        return Array.from(this.querySelectorAll("copilot-section-panel-wrapper"));
+    }
+
+    getAllPanelsOrdered() {
+        return this.getAllPanels().sort((e, t) => e.panelInfo && t.panelInfo ? e.panelInfo.panelOrder - t.panelInfo.panelOrder : 0);
+    }
+
+    /**
+     * Closes the drawer and disables mouse enter event for a while.
+     */
+    forceClose() {
+        this.closingForcefully = !0, this.opened = !1, setTimeout(() => {
+            this.closingForcefully = !1;
+        }, 0.5);
+    }
+
+    mouseEnterListener(e) {
+        if (this.closingForcefully || l.sectionPanelResizing)
+            return;
+        document.querySelector("copilot-main").shadowRoot.querySelector("copilot-drawer-panel[opened]") || (this.refreshSplit(), this.opened = !0);
+    }
+
+    render() {
+        return r`
       <div class="container">
         <slot></slot>
       </div>
       <div class="resize"></div>
       <div class="drawer-indicator">${d.chevronUp}</div>
     `;
-  }
-  refreshSplit() {
-    zt(this.getAllPanelsOrdered(), this);
-  }
+    }
+
+    refreshSplit() {
+        zt(this.getAllPanelsOrdered(), this);
+    }
 };
 j([
-  w({ reflect: !0, attribute: !0 })
+    w({reflect: !0, attribute: !0})
 ], M.prototype, "position", 2);
 j([
-  w({ reflect: !0, type: Boolean })
+    w({reflect: !0, type: Boolean})
 ], M.prototype, "opened", 2);
 j([
-  w({ reflect: !0, type: Boolean })
+    w({reflect: !0, type: Boolean})
 ], M.prototype, "keepOpen", 2);
 j([
-  N(".container")
+    N(".container")
 ], M.prototype, "container", 2);
 j([
-  N(".resize")
+    N(".resize")
 ], M.prototype, "resizeElement", 2);
 M = j([
-  b("copilot-drawer-panel")
+    b("copilot-drawer-panel")
 ], M);
 var Tt = Object.defineProperty, Ut = Object.getOwnPropertyDescriptor, Ge = (e, t, i, n) => {
-  for (var o = n > 1 ? void 0 : n ? Ut(t, i) : t, s = e.length - 1, a; s >= 0; s--)
-    (a = e[s]) && (o = (n ? a(t, i, o) : a(o)) || o);
-  return n && o && Tt(t, i, o), o;
+    for (var o = n > 1 ? void 0 : n ? Ut(t, i) : t, s = e.length - 1, a; s >= 0; s--)
+        (a = e[s]) && (o = (n ? a(t, i, o) : a(o)) || o);
+    return n && o && Tt(t, i, o), o;
 };
 let ue = class extends G {
-  constructor() {
-    super(...arguments), this.checked = !1;
-  }
-  static get styles() {
-    return O`
+    constructor() {
+        super(...arguments), this.checked = !1;
+    }
+
+    static get styles() {
+        return O`
       .switch {
         align-items: center;
         border-radius: var(--radius-2);
@@ -515,9 +592,10 @@ let ue = class extends G {
         outline-offset: 1px;
       }
     `;
-  }
-  render() {
-    return r`
+    }
+
+    render() {
+        return r`
       <label class="switch">
         <input
           class="feature-toggle"
@@ -525,127 +603,144 @@ let ue = class extends G {
           type="checkbox"
           ?checked="${this.checked}"
           @change=${(e) => {
-      e.preventDefault(), this.checked = e.target.checked, this.dispatchEvent(new CustomEvent("on-change"));
-    }} />
+            e.preventDefault(), this.checked = e.target.checked, this.dispatchEvent(new CustomEvent("on-change"));
+        }} />
         <span aria-hidden="true" class="slider"></span>
         ${this.title}
       </label>
     `;
-  }
-  //  @change=${(e: InputEvent) => this.toggleFeatureFlag(e, feature)}
+    }
+
+    //  @change=${(e: InputEvent) => this.toggleFeatureFlag(e, feature)}
 };
 Ge([
-  w({ reflect: !0, type: Boolean })
+    w({reflect: !0, type: Boolean})
 ], ue.prototype, "checked", 2);
 ue = Ge([
-  b("copilot-toggle-button")
+    b("copilot-toggle-button")
 ], ue);
+
 class Ht {
-  constructor() {
-    this.offsetX = 0, this.offsetY = 0;
-  }
-  draggingStarts(t, i) {
-    this.offsetX = i.clientX - t.getBoundingClientRect().left, this.offsetY = i.clientY - t.getBoundingClientRect().top;
-  }
-  dragging(t, i) {
-    const n = i.clientX, o = i.clientY, s = n - this.offsetX, a = n - this.offsetX + t.getBoundingClientRect().width, c = o - this.offsetY, m = o - this.offsetY + t.getBoundingClientRect().height;
-    return this.adjust(t, s, c, a, m);
-  }
-  adjust(t, i, n, o, s) {
-    let a, c, m, x;
-    const A = document.documentElement.getBoundingClientRect().width, q = document.documentElement.getBoundingClientRect().height;
-    return (o + i) / 2 < A / 2 ? (t.style.setProperty("--left", `${i}px`), t.style.setProperty("--right", ""), x = void 0, a = Math.max(0, i)) : (t.style.removeProperty("--left"), t.style.setProperty("--right", `${A - o}px`), a = void 0, x = Math.max(0, A - o)), (n + s) / 2 < q / 2 ? (c = Math.max(0, n), t.style.setProperty("--top", `${c}px`), t.style.setProperty("--bottom", ""), m = void 0) : (t.style.setProperty("--top", ""), t.style.setProperty("--bottom", `${q - s}px`), c = void 0, m = Math.max(0, q - s)), {
-      left: a,
-      right: x,
-      top: c,
-      bottom: m
-    };
-  }
-  anchor(t) {
-    const { left: i, top: n, bottom: o, right: s } = t.getBoundingClientRect();
-    return this.adjust(t, i, n, s, o);
-  }
-  anchorLeftTop(t) {
-    const { left: i, top: n } = t.getBoundingClientRect();
-    return t.style.setProperty("--left", `${i}px`), t.style.setProperty("--right", ""), t.style.setProperty("--top", `${n}px`), t.style.setProperty("--bottom", ""), {
-      left: i,
-      top: n
-    };
-  }
+    constructor() {
+        this.offsetX = 0, this.offsetY = 0;
+    }
+
+    draggingStarts(t, i) {
+        this.offsetX = i.clientX - t.getBoundingClientRect().left, this.offsetY = i.clientY - t.getBoundingClientRect().top;
+    }
+
+    dragging(t, i) {
+        const n = i.clientX, o = i.clientY, s = n - this.offsetX,
+            a = n - this.offsetX + t.getBoundingClientRect().width, c = o - this.offsetY,
+            m = o - this.offsetY + t.getBoundingClientRect().height;
+        return this.adjust(t, s, c, a, m);
+    }
+
+    adjust(t, i, n, o, s) {
+        let a, c, m, x;
+        const A = document.documentElement.getBoundingClientRect().width,
+            q = document.documentElement.getBoundingClientRect().height;
+        return (o + i) / 2 < A / 2 ? (t.style.setProperty("--left", `${i}px`), t.style.setProperty("--right", ""), x = void 0, a = Math.max(0, i)) : (t.style.removeProperty("--left"), t.style.setProperty("--right", `${A - o}px`), a = void 0, x = Math.max(0, A - o)), (n + s) / 2 < q / 2 ? (c = Math.max(0, n), t.style.setProperty("--top", `${c}px`), t.style.setProperty("--bottom", ""), m = void 0) : (t.style.setProperty("--top", ""), t.style.setProperty("--bottom", `${q - s}px`), c = void 0, m = Math.max(0, q - s)), {
+            left: a,
+            right: x,
+            top: c,
+            bottom: m
+        };
+    }
+
+    anchor(t) {
+        const {left: i, top: n, bottom: o, right: s} = t.getBoundingClientRect();
+        return this.adjust(t, i, n, s, o);
+    }
+
+    anchorLeftTop(t) {
+        const {left: i, top: n} = t.getBoundingClientRect();
+        return t.style.setProperty("--left", `${i}px`), t.style.setProperty("--right", ""), t.style.setProperty("--top", `${n}px`), t.style.setProperty("--bottom", ""), {
+            left: i,
+            top: n
+        };
+    }
 }
+
 const $ = new Ht();
 var Nt = Object.defineProperty, jt = Object.getOwnPropertyDescriptor, B = (e, t, i, n) => {
-  for (var o = n > 1 ? void 0 : n ? jt(t, i) : t, s = e.length - 1, a; s >= 0; s--)
-    (a = e[s]) && (o = (n ? a(t, i, o) : a(o)) || o);
-  return n && o && Nt(t, i, o), o;
+    for (var o = n > 1 ? void 0 : n ? jt(t, i) : t, s = e.length - 1, a; s >= 0; s--)
+        (a = e[s]) && (o = (n ? a(t, i, o) : a(o)) || o);
+    return n && o && Nt(t, i, o), o;
 };
 const Re = "https://github.com/JetBrains/JetBrainsRuntime/releases";
+
 function Bt(e, t) {
-  if (!t)
-    return !0;
-  const [i, n, o] = t.split(".").map((m) => parseInt(m)), [s, a, c] = e.split(".").map((m) => parseInt(m));
-  if (i < s)
-    return !0;
-  if (i === s) {
-    if (n < a)
-      return !0;
-    if (n === a)
-      return o < c;
-  }
-  return !1;
+    if (!t)
+        return !0;
+    const [i, n, o] = t.split(".").map((m) => parseInt(m)), [s, a, c] = e.split(".").map((m) => parseInt(m));
+    if (i < s)
+        return !0;
+    if (i === s) {
+        if (n < a)
+            return !0;
+        if (n === a)
+            return o < c;
+    }
+    return !1;
 }
+
 const Ee = "Download complete";
 let I = class extends R {
-  constructor() {
-    super(), this.javaPluginSectionOpened = !1, this.hotswapSectionOpened = !1, this.hotswapTab = "hotswapagent", this.downloadStatusMessages = [], this.downloadProgress = 0, this.onDownloadStatusUpdate = this.downloadStatusUpdate.bind(this), this.handleESC = (e) => {
-      l.active && e.key === "Escape" && h.updatePanel(ie.tag, { floating: !1 });
-    }, this.reaction(
-      () => [f.jdkInfo, l.idePluginState],
-      () => {
-        l.idePluginState && (!l.idePluginState.ide || !l.idePluginState.active ? this.javaPluginSectionOpened = !0 : (!(/* @__PURE__ */ new Set(["vscode", "intellij"])).has(l.idePluginState.ide) || !l.idePluginState.active) && (this.javaPluginSectionOpened = !1)), f.jdkInfo && te() !== "success" && (this.hotswapSectionOpened = !0);
-      },
-      { fireImmediately: !0 }
-    );
-  }
-  connectedCallback() {
-    super.connectedCallback(), u.on("set-up-vs-code-hotswap-status", this.onDownloadStatusUpdate), this.addESCListener();
-  }
-  disconnectedCallback() {
-    super.disconnectedCallback(), u.off("set-up-vs-code-hotswap-status", this.onDownloadStatusUpdate), this.removeESCListener();
-  }
-  render() {
-    const e = {
-      intellij: l.idePluginState?.ide === "intellij",
-      vscode: l.idePluginState?.ide === "vscode",
-      eclipse: l.idePluginState?.ide === "eclipse",
-      idePluginInstalled: !!l.idePluginState?.active
-    };
-    return r`
+    constructor() {
+        super(), this.javaPluginSectionOpened = !1, this.hotswapSectionOpened = !1, this.hotswapTab = "hotswapagent", this.downloadStatusMessages = [], this.downloadProgress = 0, this.onDownloadStatusUpdate = this.downloadStatusUpdate.bind(this), this.handleESC = (e) => {
+            l.active && e.key === "Escape" && h.updatePanel(ie.tag, {floating: !1});
+        }, this.reaction(
+            () => [f.jdkInfo, l.idePluginState],
+            () => {
+                l.idePluginState && (!l.idePluginState.ide || !l.idePluginState.active ? this.javaPluginSectionOpened = !0 : (!(/* @__PURE__ */ new Set(["vscode", "intellij"])).has(l.idePluginState.ide) || !l.idePluginState.active) && (this.javaPluginSectionOpened = !1)), f.jdkInfo && te() !== "success" && (this.hotswapSectionOpened = !0);
+            },
+            {fireImmediately: !0}
+        );
+    }
+
+    connectedCallback() {
+        super.connectedCallback(), u.on("set-up-vs-code-hotswap-status", this.onDownloadStatusUpdate), this.addESCListener();
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback(), u.off("set-up-vs-code-hotswap-status", this.onDownloadStatusUpdate), this.removeESCListener();
+    }
+
+    render() {
+        const e = {
+            intellij: l.idePluginState?.ide === "intellij",
+            vscode: l.idePluginState?.ide === "vscode",
+            eclipse: l.idePluginState?.ide === "eclipse",
+            idePluginInstalled: !!l.idePluginState?.active
+        };
+        return r`
       <div part="container">${this.renderPluginSection(e)} ${this.renderHotswapSection(e)}</div>
       <div part="footer">
         <vaadin-button
           id="close"
-          @click="${() => h.updatePanel(ie.tag, { floating: !1 })}"
+          @click="${() => h.updatePanel(ie.tag, {floating: !1})}"
           >Close
         </vaadin-button>
       </div>
     `;
-  }
-  renderPluginSection(e) {
-    let t = "";
-    e.intellij ? t = "IntelliJ" : e.vscode ? t = "VS Code" : e.eclipse && (t = "Eclipse");
-    let i, n;
-    e.vscode || e.intellij ? e.idePluginInstalled ? (i = `Plugin for ${t} installed`, n = this.renderPluginInstalledContent()) : (i = `Plugin for ${t} not installed`, n = this.renderPluginIsNotInstalledContent(e)) : e.eclipse ? (i = e.idePluginInstalled ? "Eclipse plugin installed" : "Eclipse plugin not installed", n = e.idePluginInstalled ? this.renderPluginInstalledContent() : this.renderEclipsePluginContent()) : (i = "No IDE found", n = this.renderNoIdePluginContent());
-    const o = e.idePluginInstalled ? d.checkCircle : d.alertTriangle;
-    return r`
+    }
+
+    renderPluginSection(e) {
+        let t = "";
+        e.intellij ? t = "IntelliJ" : e.vscode ? t = "VS Code" : e.eclipse && (t = "Eclipse");
+        let i, n;
+        e.vscode || e.intellij ? e.idePluginInstalled ? (i = `Plugin for ${t} installed`, n = this.renderPluginInstalledContent()) : (i = `Plugin for ${t} not installed`, n = this.renderPluginIsNotInstalledContent(e)) : e.eclipse ? (i = e.idePluginInstalled ? "Eclipse plugin installed" : "Eclipse plugin not installed", n = e.idePluginInstalled ? this.renderPluginInstalledContent() : this.renderEclipsePluginContent()) : (i = "No IDE found", n = this.renderNoIdePluginContent());
+        const o = e.idePluginInstalled ? d.checkCircle : d.alertTriangle;
+        return r`
       <details
         part="panel"
         .open=${this.javaPluginSectionOpened}
         @toggle=${(s) => {
-      Ae(() => {
-        this.javaPluginSectionOpened = s.target.open;
-      });
-    }}>
+            Ae(() => {
+                this.javaPluginSectionOpened = s.target.open;
+            });
+        }}>
         <summary part="header">
           <span class="icon ${e.idePluginInstalled ? "success" : "warning"}">${o}</span>
           <div>${i}</div>
@@ -653,17 +748,19 @@ let I = class extends R {
         <div part="content">${n}</div>
       </details>
     `;
-  }
-  renderNoIdePluginContent() {
-    return r`
+    }
+
+    renderNoIdePluginContent() {
+        return r`
       <div>
         <div>We could not detect an IDE</div>
         ${this.recommendSupportedPlugin()}
       </div>
     `;
-  }
-  renderEclipsePluginContent() {
-    return r`
+    }
+
+    renderEclipsePluginContent() {
+        return r`
       <div>
         <div>Install the Vaadin Eclipse Plugin to ensure a smooth development workflow</div>
         <p>
@@ -673,27 +770,30 @@ let I = class extends R {
         <div>
           <vaadin-button
             @click="${() => {
-      window.open($e, "_blank");
-    }}"
+            window.open($e, "_blank");
+        }}"
             >Install from Eclipse Marketplace
             <vaadin-icon icon="vaadin:external-link"></vaadin-icon>
           </vaadin-button>
         </div>
       </div>
     `;
-  }
-  recommendSupportedPlugin() {
-    return r`<p>
+    }
+
+    recommendSupportedPlugin() {
+        return r`<p>
       Please use <a href="https://code.visualstudio.com">Visual Studio Code</a> or
       <a href="https://www.jetbrains.com/idea">IntelliJ IDEA</a> for better development experience
     </p>`;
-  }
-  renderPluginInstalledContent() {
-    return r` <p>You have a running plugin. Enjoy your awesome development workflow!</p> `;
-  }
-  renderPluginIsNotInstalledContent(e) {
-    let t = null, i = "Install from Marketplace";
-    return e.intellij ? (t = ht, i = "Install from JetBrains Marketplace") : e.vscode ? (t = ut, i = "Install from VSCode Marketplace") : e.eclipse && (t = $e, i = "Install from Eclipse Marketplace"), r`
+    }
+
+    renderPluginInstalledContent() {
+        return r` <p>You have a running plugin. Enjoy your awesome development workflow!</p> `;
+    }
+
+    renderPluginIsNotInstalledContent(e) {
+        let t = null, i = "Install from Marketplace";
+        return e.intellij ? (t = ht, i = "Install from JetBrains Marketplace") : e.vscode ? (t = ut, i = "Install from VSCode Marketplace") : e.eclipse && (t = $e, i = "Install from Eclipse Marketplace"), r`
       <div>
         <div>Install the Vaadin IDE Plugin to ensure a smooth development workflow</div>
         <p>
@@ -703,29 +803,30 @@ let I = class extends R {
         ${t ? r` <div>
               <vaadin-button
                 @click="${() => {
-      window.open(t, "_blank");
-    }}"
+            window.open(t, "_blank");
+        }}"
                 >${i}
                 <vaadin-icon icon="vaadin:external-link"></vaadin-icon>
               </vaadin-button>
             </div>` : g}
       </div>
     `;
-  }
-  renderHotswapSection(e) {
-    const { jdkInfo: t } = f;
-    if (!t)
-      return g;
-    const i = te(), n = Be();
-    let o, s, a;
-    return i === "success" ? (o = d.checkCircle, a = "Java Hotswap is enabled") : i === "warning" ? (o = d.alertTriangle, a = "Java Hotswap is not enabled") : i === "error" && (o = d.alertTriangle, a = "Java Hotswap is partially enabled"), this.hotswapTab === "jrebel" ? t.jrebel ? s = this.renderJRebelInstalledContent() : s = this.renderJRebelNotInstalledContent() : e.intellij ? s = this.renderHotswapAgentPluginContent(this.renderIntelliJHotswapHint) : e.vscode ? s = this.renderHotswapAgentPluginContent(this.renderVSCodeHotswapHint) : s = this.renderHotswapAgentNotInstalledContent(e), r` <details
+    }
+
+    renderHotswapSection(e) {
+        const {jdkInfo: t} = f;
+        if (!t)
+            return g;
+        const i = te(), n = Be();
+        let o, s, a;
+        return i === "success" ? (o = d.checkCircle, a = "Java Hotswap is enabled") : i === "warning" ? (o = d.alertTriangle, a = "Java Hotswap is not enabled") : i === "error" && (o = d.alertTriangle, a = "Java Hotswap is partially enabled"), this.hotswapTab === "jrebel" ? t.jrebel ? s = this.renderJRebelInstalledContent() : s = this.renderJRebelNotInstalledContent() : e.intellij ? s = this.renderHotswapAgentPluginContent(this.renderIntelliJHotswapHint) : e.vscode ? s = this.renderHotswapAgentPluginContent(this.renderVSCodeHotswapHint) : s = this.renderHotswapAgentNotInstalledContent(e), r` <details
       part="panel"
       .open=${this.hotswapSectionOpened}
       @toggle=${(c) => {
-      Ae(() => {
-        this.hotswapSectionOpened = c.target.open;
-      });
-    }}>
+            Ae(() => {
+                this.hotswapSectionOpened = c.target.open;
+            });
+        }}>
       <summary part="header">
         <span class="icon ${i}">${o}</span>
         <div>${a}</div>
@@ -738,8 +839,8 @@ let I = class extends R {
                 class="tab"
                 role="tab"
                 @click=${() => {
-      this.hotswapTab = "hotswapagent";
-    }}>
+            this.hotswapTab = "hotswapagent";
+        }}>
                 Hotswap Agent
               </button>
               <button
@@ -747,8 +848,8 @@ let I = class extends R {
                 class="tab"
                 role="tab"
                 @click=${() => {
-      this.hotswapTab = "jrebel";
-    }}>
+            this.hotswapTab = "jrebel";
+        }}>
                 JRebel
               </button>
             </div>
@@ -758,9 +859,10 @@ let I = class extends R {
           `}
       </div>
     </details>`;
-  }
-  renderJRebelNotInstalledContent() {
-    return r`
+    }
+
+    renderJRebelNotInstalledContent() {
+        return r`
       <div>
         <a href="https://www.jrebel.com">JRebel ${d.share}</a> is a commercial hotswap solution. Vaadin detects the
         JRebel Agent and automatically reloads the application in the browser after the Java changes have been
@@ -774,20 +876,22 @@ let I = class extends R {
         </p>
       </div>
     `;
-  }
-  renderHotswapAgentNotInstalledContent(e) {
-    const t = [
-      this.renderJavaRunningInDebugModeSection(),
-      this.renderHotswapAgentJdkSection(e),
-      this.renderInstallHotswapAgentJdkSection(e),
-      this.renderHotswapAgentVersionSection(),
-      this.renderHotswapAgentMissingArgParam(e)
-    ];
-    return r` <div part="hotswap-agent-section-container">${t}</div> `;
-  }
-  renderHotswapAgentPluginContent(e) {
-    const i = te() === "success";
-    return r`
+    }
+
+    renderHotswapAgentNotInstalledContent(e) {
+        const t = [
+            this.renderJavaRunningInDebugModeSection(),
+            this.renderHotswapAgentJdkSection(e),
+            this.renderInstallHotswapAgentJdkSection(e),
+            this.renderHotswapAgentVersionSection(),
+            this.renderHotswapAgentMissingArgParam(e)
+        ];
+        return r` <div part="hotswap-agent-section-container">${t}</div> `;
+    }
+
+    renderHotswapAgentPluginContent(e) {
+        const i = te() === "success";
+        return r`
       <div part="hotswap-agent-section-container">
         <div class="inner-section">
           <span class="hotswap icon ${i ? "success" : "warning"}"
@@ -797,9 +901,10 @@ let I = class extends R {
         </div>
       </div>
     `;
-  }
-  renderIntelliJHotswapHint() {
-    return r` <div class="hint">
+    }
+
+    renderIntelliJHotswapHint() {
+        return r` <div class="hint">
       <h3>Use 'Debug using Hotswap Agent' launch configuration</h3>
       Vaadin IntelliJ plugin offers launch mode that does not require any manual configuration!
       <p>
@@ -807,17 +912,19 @@ let I = class extends R {
         select <code>Debug using Hotswap Agent</code> option.
       </p>
     </div>`;
-  }
-  renderVSCodeHotswapHint() {
-    return r` <div class="hint">
+    }
+
+    renderVSCodeHotswapHint() {
+        return r` <div class="hint">
       <h3>Use 'Debug (hotswap)'</h3>
       With Vaadin Visual Studio Code extension you can run Hotswap Agent without any manual configuration required!
       <p>Click <code>Debug (hotswap)</code> within your main class to debug application using Hotswap Agent.</p>
     </div>`;
-  }
-  renderJavaRunningInDebugModeSection() {
-    const e = f.jdkInfo?.runningInJavaDebugMode;
-    return r`
+    }
+
+    renderJavaRunningInDebugModeSection() {
+        const e = f.jdkInfo?.runningInJavaDebugMode;
+        return r`
       <div class="inner-section">
         <details class="inner" .open="${!e}">
           <summary>
@@ -830,10 +937,11 @@ let I = class extends R {
         </details>
       </div>
     `;
-  }
-  renderHotswapAgentMissingArgParam(e) {
-    const t = f.jdkInfo?.runningWitHotswap && f.jdkInfo?.runningWithExtendClassDef;
-    return r`
+    }
+
+    renderHotswapAgentMissingArgParam(e) {
+        const t = f.jdkInfo?.runningWitHotswap && f.jdkInfo?.runningWithExtendClassDef;
+        return r`
       <div class="inner-section">
         <details class="inner" .open="${!t}">
           <summary>
@@ -859,10 +967,12 @@ let I = class extends R {
         </details>
       </div>
     `;
-  }
-  renderHotswapAgentJdkSection(e) {
-    const t = f.jdkInfo?.extendedClassDefCapable, i = this.downloadStatusMessages?.[this.downloadStatusMessages.length - 1] === Ee;
-    return r`
+    }
+
+    renderHotswapAgentJdkSection(e) {
+        const t = f.jdkInfo?.extendedClassDefCapable,
+            i = this.downloadStatusMessages?.[this.downloadStatusMessages.length - 1] === Ee;
+        return r`
       <div class="inner-section">
         <details class="inner" .open="${!t}">
           <summary>
@@ -900,10 +1010,11 @@ let I = class extends R {
         </details>
       </div>
     `;
-  }
-  renderInstallHotswapAgentJdkSection(e) {
-    const t = f.jdkInfo?.hotswapAgentFound, i = f.jdkInfo?.extendedClassDefCapable;
-    return r`
+    }
+
+    renderInstallHotswapAgentJdkSection(e) {
+        const t = f.jdkInfo?.hotswapAgentFound, i = f.jdkInfo?.extendedClassDefCapable;
+        return r`
       <div class="inner-section">
         <details class="inner" .open="${!t}">
           <summary>
@@ -932,12 +1043,13 @@ let I = class extends R {
         </details>
       </div>
     `;
-  }
-  renderHotswapAgentVersionSection() {
-    if (!f.jdkInfo?.hotswapAgentFound)
-      return g;
-    const e = f.jdkInfo?.hotswapVersionOk, t = f.jdkInfo?.hotswapVersion, i = f.jdkInfo?.hotswapAgentLocation;
-    return r`
+    }
+
+    renderHotswapAgentVersionSection() {
+        if (!f.jdkInfo?.hotswapAgentFound)
+            return g;
+        const e = f.jdkInfo?.hotswapVersionOk, t = f.jdkInfo?.hotswapVersion, i = f.jdkInfo?.hotswapAgentLocation;
+        return r`
       <div class="inner-section">
         <details class="inner" .open="${!e}">
           <summary>
@@ -956,28 +1068,34 @@ let I = class extends R {
         </details>
       </div>
     `;
-  }
-  renderJRebelInstalledContent() {
-    return r` <div>JRebel is in use. Enjoy your awesome development workflow!</div> `;
-  }
-  renderHotswapAgentInstalledContent() {
-    return r` <div>Hotswap agent is in use. Enjoy your awesome development workflow!</div> `;
-  }
-  async downloadJetbrainsRuntime(e) {
-    return e.target.disabled = !0, e.preventDefault(), this.downloadStatusMessages = [], re(`${Fe}set-up-vs-code-hotswap`, {}, (t) => {
-      t.data.error ? (Ve("Error downloading JetBrains runtime", t.data.error), this.downloadStatusMessages = [...this.downloadStatusMessages, "Download failed"]) : this.downloadStatusMessages = [...this.downloadStatusMessages, Ee];
-    });
-  }
-  downloadStatusUpdate(e) {
-    const t = e.detail.progress;
-    t ? this.downloadProgress = t : this.downloadStatusMessages = [...this.downloadStatusMessages, e.detail.message];
-  }
-  addESCListener() {
-    document.addEventListener("keydown", this.handleESC);
-  }
-  removeESCListener() {
-    document.removeEventListener("keydown", this.handleESC);
-  }
+    }
+
+    renderJRebelInstalledContent() {
+        return r` <div>JRebel is in use. Enjoy your awesome development workflow!</div> `;
+    }
+
+    renderHotswapAgentInstalledContent() {
+        return r` <div>Hotswap agent is in use. Enjoy your awesome development workflow!</div> `;
+    }
+
+    async downloadJetbrainsRuntime(e) {
+        return e.target.disabled = !0, e.preventDefault(), this.downloadStatusMessages = [], re(`${Fe}set-up-vs-code-hotswap`, {}, (t) => {
+            t.data.error ? (Ve("Error downloading JetBrains runtime", t.data.error), this.downloadStatusMessages = [...this.downloadStatusMessages, "Download failed"]) : this.downloadStatusMessages = [...this.downloadStatusMessages, Ee];
+        });
+    }
+
+    downloadStatusUpdate(e) {
+        const t = e.detail.progress;
+        t ? this.downloadProgress = t : this.downloadStatusMessages = [...this.downloadStatusMessages, e.detail.message];
+    }
+
+    addESCListener() {
+        document.addEventListener("keydown", this.handleESC);
+    }
+
+    removeESCListener() {
+        document.removeEventListener("keydown", this.handleESC);
+    }
 };
 I.NAME = "copilot-development-setup-user-guide";
 I.styles = O`
@@ -1151,55 +1269,57 @@ I.styles = O`
     }
   `;
 B([
-  y()
+    y()
 ], I.prototype, "javaPluginSectionOpened", 2);
 B([
-  y()
+    y()
 ], I.prototype, "hotswapSectionOpened", 2);
 B([
-  y()
+    y()
 ], I.prototype, "hotswapTab", 2);
 B([
-  y()
+    y()
 ], I.prototype, "downloadStatusMessages", 2);
 B([
-  y()
+    y()
 ], I.prototype, "downloadProgress", 2);
 I = B([
-  b(I.NAME)
+    b(I.NAME)
 ], I);
 const ie = ct({
-  header: "Development Workflow",
-  tag: pt,
-  width: 800,
-  height: 800,
-  floatingPosition: {
-    top: 50,
-    left: 50
-  },
-  individual: !0
+    header: "Development Workflow",
+    tag: pt,
+    width: 800,
+    height: 800,
+    floatingPosition: {
+        top: 50,
+        left: 50
+    },
+    individual: !0
 }), Vt = {
-  init(e) {
-    e.addPanel(ie);
-  }
+    init(e) {
+        e.addPanel(ie);
+    }
 };
 window.Vaadin.copilot.plugins.push(Vt);
 h.addPanel(ie);
 var Ft = Object.getOwnPropertyDescriptor, qt = (e, t, i, n) => {
-  for (var o = n > 1 ? void 0 : n ? Ft(t, i) : t, s = e.length - 1, a; s >= 0; s--)
-    (a = e[s]) && (o = a(o) || o);
-  return o;
+    for (var o = n > 1 ? void 0 : n ? Ft(t, i) : t, s = e.length - 1, a; s >= 0; s--)
+        (a = e[s]) && (o = a(o) || o);
+    return o;
 };
 let De = class extends R {
-  createRenderRoot() {
-    return this;
-  }
-  connectedCallback() {
-    super.connectedCallback(), this.classList.add("custom-menu-item");
-  }
-  render() {
-    const t = qe(), i = t.status === "warning" || t.status === "error";
-    return r`
+    createRenderRoot() {
+        return this;
+    }
+
+    connectedCallback() {
+        super.connectedCallback(), this.classList.add("custom-menu-item");
+    }
+
+    render() {
+        const t = qe(), i = t.status === "warning" || t.status === "error";
+        return r`
       <div aria-hidden="true" class="prefix ${i ? t.status : ""}">${d.lightning}</div>
       <div class="content">
         <span class="label">Development Workflow</span>
@@ -1209,37 +1329,41 @@ let De = class extends R {
         ${i ? r`<div class="dot ${t.status}"></div>` : g}
       </div>
     `;
-  }
+    }
 };
 De = qt([
-  b("copilot-activation-button-development-workflow")
+    b("copilot-activation-button-development-workflow")
 ], De);
 var Jt = Object.getOwnPropertyDescriptor, Xt = (e, t, i, n) => {
-  for (var o = n > 1 ? void 0 : n ? Jt(t, i) : t, s = e.length - 1, a; s >= 0; s--)
-    (a = e[s]) && (o = a(o) || o);
-  return o;
+    for (var o = n > 1 ? void 0 : n ? Jt(t, i) : t, s = e.length - 1, a; s >= 0; s--)
+        (a = e[s]) && (o = a(o) || o);
+    return o;
 };
 let Le = class extends R {
-  constructor() {
-    super(), this.reaction(
-      () => l.userInfo,
-      () => {
-        this.requestUpdate();
-      }
-    );
-  }
-  createRenderRoot() {
-    return this;
-  }
-  connectedCallback() {
-    super.connectedCallback(), this.classList.add("custom-menu-item"), this.addEventListener("click", this.clickListener);
-  }
-  disconnectedCallback() {
-    super.disconnectedCallback(), this.removeEventListener("click", this.clickListener);
-  }
-  render() {
-    const e = this.getStatus();
-    return r`
+    constructor() {
+        super(), this.reaction(
+            () => l.userInfo,
+            () => {
+                this.requestUpdate();
+            }
+        );
+    }
+
+    createRenderRoot() {
+        return this;
+    }
+
+    connectedCallback() {
+        super.connectedCallback(), this.classList.add("custom-menu-item"), this.addEventListener("click", this.clickListener);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback(), this.removeEventListener("click", this.clickListener);
+    }
+
+    render() {
+        const e = this.getStatus();
+        return r`
       <div class="prefix">${this.renderPortrait()}</div>
       <div class="content">
         <span class="label"> ${this.getUsername()} </span>
@@ -1247,74 +1371,84 @@ let Le = class extends R {
       </div>
       <div aria-hidden="true" class="suffix">${this.renderDot()}</div>
     `;
-  }
-  clickListener() {
-    if (l.userInfo?.validLicense) {
-      window.open("https://vaadin.com/myaccount", "_blank", "noopener");
-      return;
     }
-    if (E.active) {
-      re(`${Fe}log-in`, {}, (e) => {
-        window.open(e.data.loginUrl, "_blank");
-      }).catch((e) => Ve("Login processing failed", e));
-      return;
+
+    clickListener() {
+        if (l.userInfo?.validLicense) {
+            window.open("https://vaadin.com/myaccount", "_blank", "noopener");
+            return;
+        }
+        if (E.active) {
+            re(`${Fe}log-in`, {}, (e) => {
+                window.open(e.data.loginUrl, "_blank");
+            }).catch((e) => Ve("Login processing failed", e));
+            return;
+        }
+        l.setLoginCheckActive(!0);
     }
-    l.setLoginCheckActive(!0);
-  }
-  getUsername() {
-    return l.userInfo?.firstName ? `${l.userInfo.firstName} ${l.userInfo.lastName}` : "Log in";
-  }
-  getStatus() {
-    if (l.userInfo?.validLicense)
-      return l.userInfo?.copilotProjectCannotLeaveLocalhost ? "AI Disabled" : void 0;
-    if (E.active) {
-      const e = Math.round(E.remainingTimeInMillis / 864e5);
-      return `Trial expires in ${e}${e === 1 ? " day" : " days"}`;
+
+    getUsername() {
+        return l.userInfo?.firstName ? `${l.userInfo.firstName} ${l.userInfo.lastName}` : "Log in";
     }
-    if (E.expired && !l.userInfo?.validLicense)
-      return "Trial expired";
-    if (!E.active && !E.expired && !l.userInfo?.validLicense)
-      return "No valid license available";
-  }
-  renderPortrait() {
-    return l.userInfo?.portraitUrl ? r`<div
+
+    getStatus() {
+        if (l.userInfo?.validLicense)
+            return l.userInfo?.copilotProjectCannotLeaveLocalhost ? "AI Disabled" : void 0;
+        if (E.active) {
+            const e = Math.round(E.remainingTimeInMillis / 864e5);
+            return `Trial expires in ${e}${e === 1 ? " day" : " days"}`;
+        }
+        if (E.expired && !l.userInfo?.validLicense)
+            return "Trial expired";
+        if (!E.active && !E.expired && !l.userInfo?.validLicense)
+            return "No valid license available";
+    }
+
+    renderPortrait() {
+        return l.userInfo?.portraitUrl ? r`<div
         class="portrait"
         style="background-image: url('https://vaadin.com${l.userInfo.portraitUrl}')"></div>` : g;
-  }
-  renderDot() {
-    return l.userInfo?.validLicense ? g : E.active || E.expired ? r`<div class="dot warning"></div>` : g;
-  }
+    }
+
+    renderDot() {
+        return l.userInfo?.validLicense ? g : E.active || E.expired ? r`<div class="dot warning"></div>` : g;
+    }
 };
 Le = Xt([
-  b("copilot-activation-button-user-info")
+    b("copilot-activation-button-user-info")
 ], Le);
 var Yt = Object.getOwnPropertyDescriptor, Wt = (e, t, i, n) => {
-  for (var o = n > 1 ? void 0 : n ? Yt(t, i) : t, s = e.length - 1, a; s >= 0; s--)
-    (a = e[s]) && (o = a(o) || o);
-  return o;
+    for (var o = n > 1 ? void 0 : n ? Yt(t, i) : t, s = e.length - 1, a; s >= 0; s--)
+        (a = e[s]) && (o = a(o) || o);
+    return o;
 };
+
 function Gt() {
-  h.updatePanel("copilot-feedback-panel", {
-    floating: !0
-  }), p.setFeedbackDisplayedAtLeastOnce(!0);
+    h.updatePanel("copilot-feedback-panel", {
+        floating: !0
+    }), p.setFeedbackDisplayedAtLeastOnce(!0);
 }
+
 let ze = class extends R {
-  constructor() {
-    super(), this.reaction(
-      () => p.isFeedbackDisplayedAtLeastOnce(),
-      () => {
-        this.requestUpdate();
-      }
-    );
-  }
-  createRenderRoot() {
-    return this;
-  }
-  connectedCallback() {
-    super.connectedCallback(), this.classList.add("custom-menu-item");
-  }
-  render() {
-    return r`
+    constructor() {
+        super(), this.reaction(
+            () => p.isFeedbackDisplayedAtLeastOnce(),
+            () => {
+                this.requestUpdate();
+            }
+        );
+    }
+
+    createRenderRoot() {
+        return this;
+    }
+
+    connectedCallback() {
+        super.connectedCallback(), this.classList.add("custom-menu-item");
+    }
+
+    render() {
+        return r`
       <div aria-hidden="true" class="prefix">${d.annotation}</div>
       <div class="content" style="display: flex; flex-direction: column;">
         <span class="label">Tell Us What You Think</span>
@@ -1324,184 +1458,206 @@ let ze = class extends R {
         ${p.isFeedbackDisplayedAtLeastOnce() ? g : r`<div class="dot info"></div>`}
       </div>
     `;
-  }
+    }
 };
 ze = Wt([
-  b("copilot-activation-button-feedback")
+    b("copilot-activation-button-feedback")
 ], ze);
+
 function v(e) {
-  return Ke("vaadin-menu-bar-item", e);
+    return Ke("vaadin-menu-bar-item", e);
 }
+
 function de(e) {
-  return Ke("vaadin-context-menu-item", e);
+    return Ke("vaadin-context-menu-item", e);
 }
+
 function Ke(e, t) {
-  const i = document.createElement(e);
-  if (t.style && (i.className = t.style), t.icon)
-    if (typeof t.icon == "string") {
-      const n = document.createElement("vaadin-icon");
-      n.setAttribute("icon", t.icon), i.append(n);
-    } else
-      i.append(Me(t.icon.strings[0]));
-  if (t.label) {
-    const n = document.createElement("span");
-    n.className = "label", n.innerHTML = t.label, i.append(n);
-  } else if (t.component) {
-    const n = gt(t.component) ? t.component : document.createElement(t.component);
-    i.append(n);
-  }
-  if (t.description) {
-    const n = document.createElement("span");
-    n.className = "desc", n.innerHTML = t.description, i.append(n);
-  }
-  if (t.hint) {
-    const n = document.createElement("span");
-    n.className = "hint", n.innerHTML = t.hint, i.append(n);
-  }
-  if (t.suffix)
-    if (typeof t.suffix == "string") {
-      const n = document.createElement("span");
-      n.innerHTML = t.suffix, i.append(n);
-    } else
-      i.append(Me(t.suffix.strings[0]));
-  return i;
+    const i = document.createElement(e);
+    if (t.style && (i.className = t.style), t.icon)
+        if (typeof t.icon == "string") {
+            const n = document.createElement("vaadin-icon");
+            n.setAttribute("icon", t.icon), i.append(n);
+        } else
+            i.append(Me(t.icon.strings[0]));
+    if (t.label) {
+        const n = document.createElement("span");
+        n.className = "label", n.innerHTML = t.label, i.append(n);
+    } else if (t.component) {
+        const n = gt(t.component) ? t.component : document.createElement(t.component);
+        i.append(n);
+    }
+    if (t.description) {
+        const n = document.createElement("span");
+        n.className = "desc", n.innerHTML = t.description, i.append(n);
+    }
+    if (t.hint) {
+        const n = document.createElement("span");
+        n.className = "hint", n.innerHTML = t.hint, i.append(n);
+    }
+    if (t.suffix)
+        if (typeof t.suffix == "string") {
+            const n = document.createElement("span");
+            n.innerHTML = t.suffix, i.append(n);
+        } else
+            i.append(Me(t.suffix.strings[0]));
+    return i;
 }
+
 function Me(e) {
-  if (!e) return null;
-  const t = document.createElement("template");
-  t.innerHTML = e;
-  const i = t.content.children;
-  return i.length === 1 ? i[0] : i;
+    if (!e) return null;
+    const t = document.createElement("template");
+    t.innerHTML = e;
+    const i = t.content.children;
+    return i.length === 1 ? i[0] : i;
 }
+
 function Ze(e) {
-  return re("copilot-switch-user", { username: e }, (t) => t.data.error ? (z({ type: S.ERROR, message: "Unable to switch user", details: t.data.error.message }), !1) : !0);
+    return re("copilot-switch-user", {username: e}, (t) => t.data.error ? (z({
+        type: S.ERROR,
+        message: "Unable to switch user",
+        details: t.data.error.message
+    }), !1) : !0);
 }
+
 var Kt = Object.defineProperty, Zt = Object.getOwnPropertyDescriptor, V = (e, t, i, n) => {
-  for (var o = n > 1 ? void 0 : n ? Zt(t, i) : t, s = e.length - 1, a; s >= 0; s--)
-    (a = e[s]) && (o = (n ? a(t, i, o) : a(o)) || o);
-  return n && o && Kt(t, i, o), o;
+    for (var o = n > 1 ? void 0 : n ? Zt(t, i) : t, s = e.length - 1, a; s >= 0; s--)
+        (a = e[s]) && (o = (n ? a(t, i, o) : a(o)) || o);
+    return n && o && Kt(t, i, o), o;
 };
 const Qt = 8;
+
 function ei() {
-  const e = document.createElement("vaadin-text-field");
-  return e.label = "Username to Switch To", e.style.width = "100%", e.autocomplete = "off", e.addEventListener("click", async (t) => {
-    t.stopPropagation();
-  }), e.addEventListener("keydown", async (t) => {
-    if (t.stopPropagation(), t.key === "Enter") {
-      const i = e.value;
-      await Ze(i) && (p.addRecentSwitchedUsername(i), window.location.reload());
-    }
-  }), e;
+    const e = document.createElement("vaadin-text-field");
+    return e.label = "Username to Switch To", e.style.width = "100%", e.autocomplete = "off", e.addEventListener("click", async (t) => {
+        t.stopPropagation();
+    }), e.addEventListener("keydown", async (t) => {
+        if (t.stopPropagation(), t.key === "Enter") {
+            const i = e.value;
+            await Ze(i) && (p.addRecentSwitchedUsername(i), window.location.reload());
+        }
+    }), e;
 }
+
 let ge = class extends R {
-  constructor() {
-    super(...arguments), this.username = "";
-  }
-  connectedCallback() {
-    super.connectedCallback(), this.style.display = "contents";
-  }
-  render() {
-    return r`<span style="flex: 1;  display: flex; justify-content: space-between;"
+    constructor() {
+        super(...arguments), this.username = "";
+    }
+
+    connectedCallback() {
+        super.connectedCallback(), this.style.display = "contents";
+    }
+
+    render() {
+        return r`<span style="flex: 1;  display: flex; justify-content: space-between;"
       ><span>${this.username}</span
       ><span
         @click=${(e) => {
-      p.removeRecentSwitchedUsername(this.username), e.stopPropagation();
-      const t = this.parentElement;
-      if (t.style.display = "none", p.getRecentSwitchedUsernames().length === 0) {
-        const i = t.parentElement?.firstElementChild;
-        i && (i.style.display = "none");
-      }
-    }}
+            p.removeRecentSwitchedUsername(this.username), e.stopPropagation();
+            const t = this.parentElement;
+            if (t.style.display = "none", p.getRecentSwitchedUsernames().length === 0) {
+                const i = t.parentElement?.firstElementChild;
+                i && (i.style.display = "none");
+            }
+        }}
         >${d.trash}</span
       ></span
     >`;
-  }
+    }
 };
 V([
-  w({ type: String })
+    w({type: String})
 ], ge.prototype, "username", 2);
 ge = V([
-  b("copilot-switch-user")
+    b("copilot-switch-user")
 ], ge);
+
 function ti(e) {
-  const t = document.createElement("copilot-switch-user");
-  return t.username = e, t;
+    const t = document.createElement("copilot-switch-user");
+    return t.username = e, t;
 }
+
 let W = class extends R {
-  constructor() {
-    super(...arguments), this.initialMouseDownPosition = null, this.dragging = !1, this.items = [], this.mouseDownListener = (e) => {
-      this.initialMouseDownPosition = { x: e.clientX, y: e.clientY }, $.draggingStarts(this, e), document.addEventListener("mousemove", this.documentDraggingMouseMoveEventListener);
-    }, this.documentDraggingMouseMoveEventListener = (e) => {
-      if (this.initialMouseDownPosition && !this.dragging) {
-        const { clientX: t, clientY: i } = e;
-        this.dragging = Math.abs(t - this.initialMouseDownPosition.x) + Math.abs(i - this.initialMouseDownPosition.y) > Qt;
-      }
-      this.dragging && (this.setOverlayVisibility(!1), $.dragging(this, e));
-    }, this.documentMouseUpListener = (e) => {
-      if (this.initialMouseDownPosition = null, document.removeEventListener("mousemove", this.documentDraggingMouseMoveEventListener), this.dragging) {
-        const t = $.dragging(this, e);
-        p.setActivationButtonPosition(t), this.setOverlayVisibility(!0);
-      } else
-        this.setMenuBarOnClick();
-      this.postDragReset(e);
-    }, this.postDragReset = Y((e) => {
-      this.dragging = !1, this.closeMenuMouseMoveListener(e);
-    }, 100), this.closeMenuMouseMoveListener = (e) => {
-      if (!e.composed || this.dragging)
-        return;
-      e.composedPath().some((n) => {
-        if (n instanceof HTMLElement) {
-          const o = n;
-          if (o.localName === this.localName || o.localName === "vaadin-menu-bar-overlay" && o.classList.contains("activation-button-menu"))
-            return !0;
-        }
-        return this.checkPointerIsInRangeInSurroundingRectangle(e);
-      }) ? this.closeMenuWithDebounce.clear() : this.closeMenuWithDebounce();
-    }, this.closeMenuWithDebounce = Y(() => {
-      this.closeMenu();
-    }, 250), this.checkPointerIsInRangeInSurroundingRectangle = (e) => {
-      const i = document.querySelector("copilot-main")?.shadowRoot?.querySelectorAll("vaadin-menu-bar-overlay.activation-button-menu"), n = this.menubar;
-      return i ? Array.from(i).some((o) => {
-        const s = o.querySelector("vaadin-menu-bar-list-box");
-        if (!s)
-          return !1;
-        const a = s.getBoundingClientRect(), c = n.getBoundingClientRect(), m = Math.min(a.x, c.x), x = Math.min(a.y, c.y), A = Math.max(a.width, c.width), q = a.height + c.height;
-        return je(new DOMRect(m, x, A, q), e.clientX, e.clientY);
-      }) : !1;
-    }, this.dispatchSpotlightActivationEvent = (e) => {
-      this.dispatchEvent(
-        new CustomEvent("spotlight-activation-changed", {
-          detail: e
-        })
-      );
-    }, this.activationBtnClicked = (e) => {
-      if (this.dragging) {
-        e?.preventDefault();
-        return;
-      }
-      if (l.active && this.handleAttentionRequiredOnClick()) {
-        e?.stopPropagation(), e?.preventDefault();
-        return;
-      }
-      e?.stopPropagation(), this.dispatchEvent(new CustomEvent("activation-btn-clicked")), requestAnimationFrame(() => {
-        this.closeMenu(), this.openMenu();
-      });
-    }, this.handleAttentionRequiredOnClick = () => {
-      const e = h.getAttentionRequiredPanelConfiguration();
-      return e ? e.panel && !e.floating ? (u.emit("open-attention-required-drawer", null), !0) : (h.clearAttention(), !0) : !1;
-    }, this.closeMenu = () => {
-      this.menubar._close();
-    }, this.openMenu = () => {
-      this.menubar._buttons[0].dispatchEvent(new CustomEvent("mouseover", { bubbles: !0 }));
-    }, this.setMenuBarOnClick = () => {
-      const e = this.shadowRoot.querySelector("vaadin-menu-bar-button");
-      e && (e.onclick = this.activationBtnClicked);
-    };
-  }
-  static get styles() {
-    return [
-      k(ae),
-      O`
+    constructor() {
+        super(...arguments), this.initialMouseDownPosition = null, this.dragging = !1, this.items = [], this.mouseDownListener = (e) => {
+            this.initialMouseDownPosition = {
+                x: e.clientX,
+                y: e.clientY
+            }, $.draggingStarts(this, e), document.addEventListener("mousemove", this.documentDraggingMouseMoveEventListener);
+        }, this.documentDraggingMouseMoveEventListener = (e) => {
+            if (this.initialMouseDownPosition && !this.dragging) {
+                const {clientX: t, clientY: i} = e;
+                this.dragging = Math.abs(t - this.initialMouseDownPosition.x) + Math.abs(i - this.initialMouseDownPosition.y) > Qt;
+            }
+            this.dragging && (this.setOverlayVisibility(!1), $.dragging(this, e));
+        }, this.documentMouseUpListener = (e) => {
+            if (this.initialMouseDownPosition = null, document.removeEventListener("mousemove", this.documentDraggingMouseMoveEventListener), this.dragging) {
+                const t = $.dragging(this, e);
+                p.setActivationButtonPosition(t), this.setOverlayVisibility(!0);
+            } else
+                this.setMenuBarOnClick();
+            this.postDragReset(e);
+        }, this.postDragReset = Y((e) => {
+            this.dragging = !1, this.closeMenuMouseMoveListener(e);
+        }, 100), this.closeMenuMouseMoveListener = (e) => {
+            if (!e.composed || this.dragging)
+                return;
+            e.composedPath().some((n) => {
+                if (n instanceof HTMLElement) {
+                    const o = n;
+                    if (o.localName === this.localName || o.localName === "vaadin-menu-bar-overlay" && o.classList.contains("activation-button-menu"))
+                        return !0;
+                }
+                return this.checkPointerIsInRangeInSurroundingRectangle(e);
+            }) ? this.closeMenuWithDebounce.clear() : this.closeMenuWithDebounce();
+        }, this.closeMenuWithDebounce = Y(() => {
+            this.closeMenu();
+        }, 250), this.checkPointerIsInRangeInSurroundingRectangle = (e) => {
+            const i = document.querySelector("copilot-main")?.shadowRoot?.querySelectorAll("vaadin-menu-bar-overlay.activation-button-menu"),
+                n = this.menubar;
+            return i ? Array.from(i).some((o) => {
+                const s = o.querySelector("vaadin-menu-bar-list-box");
+                if (!s)
+                    return !1;
+                const a = s.getBoundingClientRect(), c = n.getBoundingClientRect(), m = Math.min(a.x, c.x),
+                    x = Math.min(a.y, c.y), A = Math.max(a.width, c.width), q = a.height + c.height;
+                return je(new DOMRect(m, x, A, q), e.clientX, e.clientY);
+            }) : !1;
+        }, this.dispatchSpotlightActivationEvent = (e) => {
+            this.dispatchEvent(
+                new CustomEvent("spotlight-activation-changed", {
+                    detail: e
+                })
+            );
+        }, this.activationBtnClicked = (e) => {
+            if (this.dragging) {
+                e?.preventDefault();
+                return;
+            }
+            if (l.active && this.handleAttentionRequiredOnClick()) {
+                e?.stopPropagation(), e?.preventDefault();
+                return;
+            }
+            e?.stopPropagation(), this.dispatchEvent(new CustomEvent("activation-btn-clicked")), requestAnimationFrame(() => {
+                this.closeMenu(), this.openMenu();
+            });
+        }, this.handleAttentionRequiredOnClick = () => {
+            const e = h.getAttentionRequiredPanelConfiguration();
+            return e ? e.panel && !e.floating ? (u.emit("open-attention-required-drawer", null), !0) : (h.clearAttention(), !0) : !1;
+        }, this.closeMenu = () => {
+            this.menubar._close();
+        }, this.openMenu = () => {
+            this.menubar._buttons[0].dispatchEvent(new CustomEvent("mouseover", {bubbles: !0}));
+        }, this.setMenuBarOnClick = () => {
+            const e = this.shadowRoot.querySelector("vaadin-menu-bar-button");
+            e && (e.onclick = this.activationBtnClicked);
+        };
+    }
+
+    static get styles() {
+        return [
+            k(ae),
+            O`
         :host {
           --space: 8px;
           --height: 28px;
@@ -1639,476 +1795,499 @@ let W = class extends R {
           --indicator-color: var(--error-color);
         }
       `
-    ];
-  }
-  connectedCallback() {
-    super.connectedCallback(), this.reaction(
-      () => h.attentionRequiredPanelTag,
-      () => {
-        this.toggleAttribute(D, h.attentionRequiredPanelTag !== null), this.updateIndicator();
-      }
-    ), this.reaction(
-      () => l.active,
-      () => {
-        this.toggleAttribute("active", l.active);
-      },
-      { fireImmediately: !0 }
-    ), this.addEventListener("mousedown", this.mouseDownListener), document.addEventListener("mouseup", this.documentMouseUpListener);
-    const e = p.getActivationButtonPosition();
-    e ? (this.style.setProperty("--left", `${e.left}px`), this.style.setProperty("--bottom", `${e.bottom}px`), this.style.setProperty("--right", `${e.right}px`), this.style.setProperty("--top", `${e.top}px`)) : (this.style.setProperty("--bottom", "var(--space)"), this.style.setProperty("--right", "var(--space)")), u.on("document-activation-change", (t) => {
-      this.toggleAttribute("document-hidden", !t.detail.active);
-    }), this.reaction(
-      () => [
-        f.jdkInfo,
-        l.idePluginState,
-        p.isFeedbackDisplayedAtLeastOnce()
-      ],
-      () => {
-        this.updateIndicator();
-      }
-    ), this.reaction(
-      () => [
-        l.active,
-        l.idePluginState,
-        p.isActivationAnimation(),
-        p.isActivationShortcut(),
-        p.isSendErrorReportsAllowed(),
-        p.isAIUsageAllowed(),
-        p.getDismissedNotifications()
-      ],
-      () => {
-        this.generateItems();
-      }
-    ), document.addEventListener("mousemove", this.closeMenuMouseMoveListener);
-  }
-  disconnectedCallback() {
-    super.disconnectedCallback(), this.removeEventListener("mousedown", this.mouseDownListener), document.removeEventListener("mouseup", this.documentMouseUpListener), document.removeEventListener("mousemove", this.closeMenuMouseMoveListener);
-  }
-  updateIndicator() {
-    if (this.hasAttribute(D)) {
-      this.setAttribute("indicator", "error");
-      return;
+        ];
     }
-    const e = qe();
-    if (e.status !== "success") {
-      this.setAttribute("indicator", e.status);
-      return;
+
+    connectedCallback() {
+        super.connectedCallback(), this.reaction(
+            () => h.attentionRequiredPanelTag,
+            () => {
+                this.toggleAttribute(D, h.attentionRequiredPanelTag !== null), this.updateIndicator();
+            }
+        ), this.reaction(
+            () => l.active,
+            () => {
+                this.toggleAttribute("active", l.active);
+            },
+            {fireImmediately: !0}
+        ), this.addEventListener("mousedown", this.mouseDownListener), document.addEventListener("mouseup", this.documentMouseUpListener);
+        const e = p.getActivationButtonPosition();
+        e ? (this.style.setProperty("--left", `${e.left}px`), this.style.setProperty("--bottom", `${e.bottom}px`), this.style.setProperty("--right", `${e.right}px`), this.style.setProperty("--top", `${e.top}px`)) : (this.style.setProperty("--bottom", "var(--space)"), this.style.setProperty("--right", "var(--space)")), u.on("document-activation-change", (t) => {
+            this.toggleAttribute("document-hidden", !t.detail.active);
+        }), this.reaction(
+            () => [
+                f.jdkInfo,
+                l.idePluginState,
+                p.isFeedbackDisplayedAtLeastOnce()
+            ],
+            () => {
+                this.updateIndicator();
+            }
+        ), this.reaction(
+            () => [
+                l.active,
+                l.idePluginState,
+                p.isActivationAnimation(),
+                p.isActivationShortcut(),
+                p.isSendErrorReportsAllowed(),
+                p.isAIUsageAllowed(),
+                p.getDismissedNotifications()
+            ],
+            () => {
+                this.generateItems();
+            }
+        ), document.addEventListener("mousemove", this.closeMenuMouseMoveListener);
     }
-    if (!p.isFeedbackDisplayedAtLeastOnce()) {
-      this.setAttribute("indicator", "info");
-      return;
+
+    disconnectedCallback() {
+        super.disconnectedCallback(), this.removeEventListener("mousedown", this.mouseDownListener), document.removeEventListener("mouseup", this.documentMouseUpListener), document.removeEventListener("mousemove", this.closeMenuMouseMoveListener);
     }
-    this.removeAttribute("indicator");
-  }
-  /**
-   * To hide overlay while dragging
-   * @param visible
-   */
-  setOverlayVisibility(e) {
-    const t = this.shadowRoot.querySelector("vaadin-menu-bar-button").__overlay;
-    e ? (t?.style.setProperty("display", "flex"), t?.style.setProperty("visibility", "visible")) : (t?.style.setProperty("display", "none"), t?.style.setProperty("visibility", "invisible"));
-  }
-  generateItems() {
-    const e = l.active, t = e && !!l.idePluginState?.supportedActions?.find((o) => o === "undo"), i = [];
-    if (f.springSecurityEnabled) {
-      const o = p.getRecentSwitchedUsernames();
-      i.push(
-        ...o.map((s) => ({
-          component: v({ component: ti(s) }),
-          action: async () => {
-            await Ze(s) && window.location.reload();
-          }
-        }))
-      ), i.length > 0 && i.unshift({
-        component: v({ label: "Recently Used Usernames" }),
-        disabled: !0
-      });
+
+    updateIndicator() {
+        if (this.hasAttribute(D)) {
+            this.setAttribute("indicator", "error");
+            return;
+        }
+        const e = qe();
+        if (e.status !== "success") {
+            this.setAttribute("indicator", e.status);
+            return;
+        }
+        if (!p.isFeedbackDisplayedAtLeastOnce()) {
+            this.setAttribute("indicator", "info");
+            return;
+        }
+        this.removeAttribute("indicator");
     }
-    const n = [
-      {
-        text: "Vaadin Copilot",
-        children: [
-          { visible: e, component: v({ component: "copilot-activation-button-user-info" }) },
-          { visible: e, component: "hr" },
-          {
-            component: v({ component: "copilot-activation-button-development-workflow" }),
-            action: ft
-          },
-          { visible: e, component: "hr" },
-          {
-            visible: f.springSecurityEnabled,
-            component: v({
-              icon: d.user,
-              label: "Application's User"
-            }),
-            children: [
-              ...i,
-              {
-                component: v({ component: ei() })
-              }
-            ]
-          },
-          {
-            component: "hr",
-            visible: e
-          },
-          {
-            visible: t,
-            component: v({
-              icon: d.flipBack,
-              label: "Undo",
-              hint: Q.undo
-            }),
-            action: () => {
-              u.emit("undoRedo", { undo: !0 });
+
+    /**
+     * To hide overlay while dragging
+     * @param visible
+     */
+    setOverlayVisibility(e) {
+        const t = this.shadowRoot.querySelector("vaadin-menu-bar-button").__overlay;
+        e ? (t?.style.setProperty("display", "flex"), t?.style.setProperty("visibility", "visible")) : (t?.style.setProperty("display", "none"), t?.style.setProperty("visibility", "invisible"));
+    }
+
+    generateItems() {
+        const e = l.active, t = e && !!l.idePluginState?.supportedActions?.find((o) => o === "undo"), i = [];
+        if (f.springSecurityEnabled) {
+            const o = p.getRecentSwitchedUsernames();
+            i.push(
+                ...o.map((s) => ({
+                    component: v({component: ti(s)}),
+                    action: async () => {
+                        await Ze(s) && window.location.reload();
+                    }
+                }))
+            ), i.length > 0 && i.unshift({
+                component: v({label: "Recently Used Usernames"}),
+                disabled: !0
+            });
+        }
+        const n = [
+            {
+                text: "Vaadin Copilot",
+                children: [
+                    {visible: e, component: v({component: "copilot-activation-button-user-info"})},
+                    {visible: e, component: "hr"},
+                    {
+                        component: v({component: "copilot-activation-button-development-workflow"}),
+                        action: ft
+                    },
+                    {visible: e, component: "hr"},
+                    {
+                        visible: f.springSecurityEnabled,
+                        component: v({
+                            icon: d.user,
+                            label: "Application's User"
+                        }),
+                        children: [
+                            ...i,
+                            {
+                                component: v({component: ei()})
+                            }
+                        ]
+                    },
+                    {
+                        component: "hr",
+                        visible: e
+                    },
+                    {
+                        visible: t,
+                        component: v({
+                            icon: d.flipBack,
+                            label: "Undo",
+                            hint: Q.undo
+                        }),
+                        action: () => {
+                            u.emit("undoRedo", {undo: !0});
+                        }
+                    },
+                    {
+                        visible: t,
+                        component: v({
+                            icon: d.flipForward,
+                            label: "Redo",
+                            hint: Q.redo
+                        }),
+                        action: () => {
+                            u.emit("undoRedo", {undo: !1});
+                        }
+                    },
+                    {
+                        component: v({
+                            icon: d.starsAlt,
+                            label: "Toggle Command Window",
+                            hint: Q.toggleCommandWindow,
+                            style: "toggle-spotlight"
+                        }),
+                        action: () => {
+                            l.setSpotlightActive(!l.spotlightActive);
+                        }
+                    },
+                    {
+                        component: "hr",
+                        visible: e
+                    },
+                    {
+                        visible: e,
+                        component: v({
+                            icon: d.settings,
+                            label: "Settings"
+                        }),
+                        children: [
+                            {
+                                component: v({
+                                    icon: d.keyboard,
+                                    label: "Activation Shortcut",
+                                    suffix: p.isActivationShortcut() ? '<div aria-hidden="true" class="switch on"></div>' : '<div aria-hidden="true" class="switch off"></div>'
+                                }),
+                                keepOpen: !0,
+                                action: (o) => {
+                                    p.setActivationShortcut(!p.isActivationShortcut()), ce(o, p.isActivationShortcut());
+                                }
+                            },
+                            {
+                                component: v({
+                                    icon: d.play,
+                                    label: "Activation Animation",
+                                    suffix: p.isActivationAnimation() ? '<div aria-hidden="true" class="switch on"></div>' : '<div aria-hidden="true" class="switch off"></div>'
+                                }),
+                                keepOpen: !0,
+                                action: (o) => {
+                                    p.setActivationAnimation(!p.isActivationAnimation()), ce(o, p.isActivationAnimation());
+                                }
+                            },
+                            {
+                                component: v({
+                                    icon: d.starsAlt,
+                                    label: "AI Usage",
+                                    hint: Qe()
+                                }),
+                                keepOpen: !0,
+                                action: (o) => {
+                                    let s;
+                                    const a = p.isAIUsageAllowed();
+                                    a === "ask" ? s = "yes" : a === "no" ? s = "ask" : s = "no", p.setAIUsageAllowed(s), ii(o);
+                                }
+                            },
+                            {
+                                visible: l.userInfo?.vaadiner,
+                                component: v({
+                                    icon: d.starsAlt,
+                                    label: "AI Provider (Experimental, Vaadin employees only)",
+                                    hint: et()
+                                }),
+                                keepOpen: !0,
+                                action: (o) => {
+                                    const s = p.getAIProvider() === "ANY" ? "EU_ONLY" : "ANY";
+                                    p.setAIProvider(s), ni(o);
+                                }
+                            },
+                            {
+                                component: v({
+                                    icon: d.alertCircle,
+                                    label: "Report Errors to Vaadin",
+                                    suffix: p.isSendErrorReportsAllowed() ? '<div aria-hidden="true" class="switch on"></div>' : '<div aria-hidden="true" class="switch off"></div>'
+                                }),
+                                keepOpen: !0,
+                                action: (o) => {
+                                    p.setSendErrorReportsAllowed(!p.isSendErrorReportsAllowed()), ce(o, p.isSendErrorReportsAllowed());
+                                }
+                            },
+                            {component: "hr"},
+                            {
+                                visible: e,
+                                component: v({
+                                    icon: d.annotation,
+                                    label: "Show Welcome Message"
+                                }),
+                                keepOpen: !0,
+                                action: () => {
+                                    l.setWelcomeActive(!0), l.setSpotlightActive(!0);
+                                }
+                            },
+                            {
+                                visible: e,
+                                component: v({
+                                    icon: d.keyboard,
+                                    label: "Show Keyboard Shortcuts"
+                                }),
+                                action: () => {
+                                    h.updatePanel("copilot-shortcuts-panel", {
+                                        floating: !0
+                                    });
+                                }
+                            },
+                            {
+                                visible: p.getDismissedNotifications().length > 0,
+                                component: v({
+                                    icon: d.annotationX,
+                                    label: "Clear Dismissed Notifications"
+                                }),
+                                action: () => {
+                                    p.clearDismissedNotifications();
+                                }
+                            }
+                        ]
+                    },
+                    {component: "hr"},
+                    {
+                        component: v({
+                            component: "copilot-activation-button-feedback"
+                        }),
+                        action: Gt
+                    },
+                    {
+                        component: v({
+                            icon: d.vaadinLogo,
+                            label: "Copilot",
+                            hint: p.isActivationShortcut() ? Q.toggleCopilot : void 0,
+                            suffix: l.active ? '<div aria-hidden="true" class="switch on"></div>' : '<div aria-hidden="true" class="switch off"></div>'
+                        }),
+                        action: () => {
+                            this.activationBtnClicked();
+                        }
+                    }
+                ]
             }
-          },
-          {
-            visible: t,
-            component: v({
-              icon: d.flipForward,
-              label: "Redo",
-              hint: Q.redo
-            }),
-            action: () => {
-              u.emit("undoRedo", { undo: !1 });
-            }
-          },
-          {
-            component: v({
-              icon: d.starsAlt,
-              label: "Toggle Command Window",
-              hint: Q.toggleCommandWindow,
-              style: "toggle-spotlight"
-            }),
-            action: () => {
-              l.setSpotlightActive(!l.spotlightActive);
-            }
-          },
-          {
-            component: "hr",
-            visible: e
-          },
-          {
-            visible: e,
-            component: v({
-              icon: d.settings,
-              label: "Settings"
-            }),
-            children: [
-              {
-                component: v({
-                  icon: d.keyboard,
-                  label: "Activation Shortcut",
-                  suffix: p.isActivationShortcut() ? '<div aria-hidden="true" class="switch on"></div>' : '<div aria-hidden="true" class="switch off"></div>'
-                }),
-                keepOpen: !0,
-                action: (o) => {
-                  p.setActivationShortcut(!p.isActivationShortcut()), ce(o, p.isActivationShortcut());
-                }
-              },
-              {
-                component: v({
-                  icon: d.play,
-                  label: "Activation Animation",
-                  suffix: p.isActivationAnimation() ? '<div aria-hidden="true" class="switch on"></div>' : '<div aria-hidden="true" class="switch off"></div>'
-                }),
-                keepOpen: !0,
-                action: (o) => {
-                  p.setActivationAnimation(!p.isActivationAnimation()), ce(o, p.isActivationAnimation());
-                }
-              },
-              {
-                component: v({
-                  icon: d.starsAlt,
-                  label: "AI Usage",
-                  hint: Qe()
-                }),
-                keepOpen: !0,
-                action: (o) => {
-                  let s;
-                  const a = p.isAIUsageAllowed();
-                  a === "ask" ? s = "yes" : a === "no" ? s = "ask" : s = "no", p.setAIUsageAllowed(s), ii(o);
-                }
-              },
-              {
-                visible: l.userInfo?.vaadiner,
-                component: v({
-                  icon: d.starsAlt,
-                  label: "AI Provider (Experimental, Vaadin employees only)",
-                  hint: et()
-                }),
-                keepOpen: !0,
-                action: (o) => {
-                  const s = p.getAIProvider() === "ANY" ? "EU_ONLY" : "ANY";
-                  p.setAIProvider(s), ni(o);
-                }
-              },
-              {
-                component: v({
-                  icon: d.alertCircle,
-                  label: "Report Errors to Vaadin",
-                  suffix: p.isSendErrorReportsAllowed() ? '<div aria-hidden="true" class="switch on"></div>' : '<div aria-hidden="true" class="switch off"></div>'
-                }),
-                keepOpen: !0,
-                action: (o) => {
-                  p.setSendErrorReportsAllowed(!p.isSendErrorReportsAllowed()), ce(o, p.isSendErrorReportsAllowed());
-                }
-              },
-              { component: "hr" },
-              {
-                visible: e,
-                component: v({
-                  icon: d.annotation,
-                  label: "Show Welcome Message"
-                }),
-                keepOpen: !0,
-                action: () => {
-                  l.setWelcomeActive(!0), l.setSpotlightActive(!0);
-                }
-              },
-              {
-                visible: e,
-                component: v({
-                  icon: d.keyboard,
-                  label: "Show Keyboard Shortcuts"
-                }),
-                action: () => {
-                  h.updatePanel("copilot-shortcuts-panel", {
-                    floating: !0
-                  });
-                }
-              },
-              {
-                visible: p.getDismissedNotifications().length > 0,
-                component: v({
-                  icon: d.annotationX,
-                  label: "Clear Dismissed Notifications"
-                }),
-                action: () => {
-                  p.clearDismissedNotifications();
-                }
-              }
-            ]
-          },
-          { component: "hr" },
-          {
-            component: v({
-              component: "copilot-activation-button-feedback"
-            }),
-            action: Gt
-          },
-          {
-            component: v({
-              icon: d.vaadinLogo,
-              label: "Copilot",
-              hint: p.isActivationShortcut() ? Q.toggleCopilot : void 0,
-              suffix: l.active ? '<div aria-hidden="true" class="switch on"></div>' : '<div aria-hidden="true" class="switch off"></div>'
-            }),
-            action: () => {
-              this.activationBtnClicked();
-            }
-          }
-        ]
-      }
-    ];
-    this.items = n.filter(vt);
-  }
-  render() {
-    return r`
+        ];
+        this.items = n.filter(vt);
+    }
+
+    render() {
+        return r`
       <vaadin-menu-bar
         class="menu-button"
         .items="${this.items}"
         @item-selected="${(e) => {
-      this.handleMenuItemClick(e.detail.value);
-    }}"
+            this.handleMenuItemClick(e.detail.value);
+        }}"
         ?open-on-hover=${!this.dragging}
         overlay-class="activation-button-menu">
       </vaadin-menu-bar>
       <div part="indicator"></div>
     `;
-  }
-  handleMenuItemClick(e) {
-    e.action && e.action(e);
-  }
-  firstUpdated() {
-    K(this.shadowRoot);
-  }
+    }
+
+    handleMenuItemClick(e) {
+        e.action && e.action(e);
+    }
+
+    firstUpdated() {
+        K(this.shadowRoot);
+    }
 };
 V([
-  N("vaadin-menu-bar")
+    N("vaadin-menu-bar")
 ], W.prototype, "menubar", 2);
 V([
-  y()
+    y()
 ], W.prototype, "dragging", 2);
 V([
-  y()
+    y()
 ], W.prototype, "items", 2);
 W = V([
-  b("copilot-activation-button")
+    b("copilot-activation-button")
 ], W);
+
 function ce(e, t) {
-  const i = e.component;
-  if (!i || typeof i == "string") {
-    console.error("Unable to set switch value for a non-component item");
-    return;
-  }
-  const n = i.querySelector(".switch");
-  if (!n) {
-    console.error("No element found when setting switch value");
-    return;
-  }
-  t ? (n.classList.remove("off"), n.classList.add("on")) : (n.classList.add("off"), n.classList.remove("on"));
+    const i = e.component;
+    if (!i || typeof i == "string") {
+        console.error("Unable to set switch value for a non-component item");
+        return;
+    }
+    const n = i.querySelector(".switch");
+    if (!n) {
+        console.error("No element found when setting switch value");
+        return;
+    }
+    t ? (n.classList.remove("off"), n.classList.add("on")) : (n.classList.add("off"), n.classList.remove("on"));
 }
+
 function ii(e) {
-  const t = e.component;
-  if (!t || typeof t == "string") {
-    console.error("Unable to set switch value for a non-component item");
-    return;
-  }
-  const i = t.querySelector(".hint");
-  if (!i) {
-    console.error("No element found when setting switch value");
-    return;
-  }
-  i.innerText = Qe();
+    const t = e.component;
+    if (!t || typeof t == "string") {
+        console.error("Unable to set switch value for a non-component item");
+        return;
+    }
+    const i = t.querySelector(".hint");
+    if (!i) {
+        console.error("No element found when setting switch value");
+        return;
+    }
+    i.innerText = Qe();
 }
+
 function ni(e) {
-  const t = e.component;
-  if (!t || typeof t == "string") {
-    console.error("Unable to set switch value for a non-component item");
-    return;
-  }
-  const i = t.querySelector(".hint");
-  if (!i) {
-    console.error("No element found when setting switch value");
-    return;
-  }
-  i.innerText = et();
+    const t = e.component;
+    if (!t || typeof t == "string") {
+        console.error("Unable to set switch value for a non-component item");
+        return;
+    }
+    const i = t.querySelector(".hint");
+    if (!i) {
+        console.error("No element found when setting switch value");
+        return;
+    }
+    i.innerText = et();
 }
+
 function Qe() {
-  return p.isAIUsageAllowed() === "ask" ? "Always Ask" : p.isAIUsageAllowed() === "no" ? "Disabled" : "Enabled";
+    return p.isAIUsageAllowed() === "ask" ? "Always Ask" : p.isAIUsageAllowed() === "no" ? "Disabled" : "Enabled";
 }
+
 function et() {
-  return p.getAIProvider() === "ANY" ? "Any" : p.getAIProvider() === "EU_ONLY" ? "Inside EU" : "???";
+    return p.getAIProvider() === "ANY" ? "Any" : p.getAIProvider() === "EU_ONLY" ? "Inside EU" : "???";
 }
+
 var oi = Object.defineProperty, si = Object.getOwnPropertyDescriptor, F = (e, t, i, n) => {
-  for (var o = n > 1 ? void 0 : n ? si(t, i) : t, s = e.length - 1, a; s >= 0; s--)
-    (a = e[s]) && (o = (n ? a(t, i, o) : a(o)) || o);
-  return n && o && oi(t, i, o), o;
+    for (var o = n > 1 ? void 0 : n ? si(t, i) : t, s = e.length - 1, a; s >= 0; s--)
+        (a = e[s]) && (o = (n ? a(t, i, o) : a(o)) || o);
+    return n && o && oi(t, i, o), o;
 };
 const P = "resize-dir", pe = "floating-resizing-active";
 let _ = class extends R {
-  constructor() {
-    super(...arguments), this.panelTag = "", this.dockingItems = [
-      {
-        component: de({
-          icon: d.layoutRight,
-          label: "Dock right"
-        }),
-        panel: "right"
-      },
-      {
-        component: de({
-          icon: d.layoutLeft,
-          label: "Dock left"
-        }),
-        panel: "left"
-      },
-      {
-        component: de({
-          icon: d.layoutBottom,
-          label: "Dock bottom"
-        }),
-        panel: "bottom"
-      }
-    ], this.floatingResizingStarted = !1, this.resizingInDrawerStarted = !1, this.toggling = !1, this.rectangleBeforeResizing = null, this.floatingResizeHandlerMouseMoveListener = (e) => {
-      if (!this.panelInfo?.floating || this.floatingResizingStarted || !this.panelInfo?.expanded)
-        return;
-      const t = this.getBoundingClientRect(), i = Math.abs(e.clientX - t.x), n = Math.abs(t.x + t.width - e.clientX), o = Math.abs(e.clientY - t.y), s = Math.abs(t.y + t.height - e.clientY), a = Number.parseInt(
-        window.getComputedStyle(this).getPropertyValue("--floating-offset-resize-threshold"),
-        10
-      );
-      let c = "";
-      i < a ? o < a ? (c = "nw-resize", this.setAttribute(P, "top left")) : s < a ? (c = "sw-resize", this.setAttribute(P, "bottom left")) : (c = "col-resize", this.setAttribute(P, "left")) : n < a ? o < a ? (c = "ne-resize", this.setAttribute(P, "top right")) : s < a ? (c = "se-resize", this.setAttribute(P, "bottom right")) : (c = "col-resize", this.setAttribute(P, "right")) : s < a ? (c = "row-resize", this.setAttribute(P, "bottom")) : o < a && (c = "row-resize", this.setAttribute(P, "top")), c !== "" ? (this.rectangleBeforeResizing = this.getBoundingClientRect(), this.style.setProperty("--resize-cursor", c)) : (this.style.removeProperty("--resize-cursor"), this.removeAttribute(P)), this.toggleAttribute(pe, c !== "");
-    }, this.floatingResizingMouseDownListener = (e) => {
-      if (!this.hasAttribute(pe) || e.button !== 0)
-        return;
-      e.stopPropagation(), e.preventDefault(), $.anchorLeftTop(this), this.floatingResizingStarted = !0, this.toggleAttribute("resizing", !0);
-      const t = this.getResizeDirections(), { clientX: i, clientY: n } = e;
-      (t.includes("top") || t.includes("bottom")) && this.style.setProperty("--section-height", null), t.forEach((o) => this.setResizePosition(o, i, n)), l.setSectionPanelResizing(!0);
-    }, this.floatingResizingMouseLeaveListener = () => {
-      this.panelInfo?.floating && (this.floatingResizingStarted || (this.removeAttribute("resizing"), this.removeAttribute(pe), this.removeAttribute("dragging"), this.style.removeProperty("--resize-cursor"), this.removeAttribute(P), this.panelInfo != null && this.panelInfo.height != null && this.panelInfo?.height > window.innerHeight && (h.updatePanel(this.panelInfo.tag, {
-        height: window.innerHeight - 10
-      }), this.setCssSizePositionProperties())));
-    }, this.floatingResizingMouseMoveListener = (e) => {
-      if (!this.panelInfo?.floating || !this.floatingResizingStarted)
-        return;
-      e.stopPropagation(), e.preventDefault();
-      const t = this.getResizeDirections(), { clientX: i, clientY: n } = e;
-      t.forEach((o) => this.setResizePosition(o, i, n));
-    }, this.setFloatingResizeDirectionProps = (e, t, i, n) => {
-      i && i > Number.parseFloat(window.getComputedStyle(this).getPropertyValue("--min-width")) && (this.style.setProperty(`--${e}`, `${t}px`), this.style.setProperty("width", `${i}px`));
-      const o = window.getComputedStyle(this), s = Number.parseFloat(o.getPropertyValue("--header-height")), a = Number.parseFloat(o.getPropertyValue("--floating-offset-resize-threshold")) / 2;
-      n && n > s + a && (this.style.setProperty(`--${e}`, `${t}px`), this.style.setProperty("height", `${n}px`), this.container.style.setProperty("margin-top", "calc(var(--floating-offset-resize-threshold) / 4)"), this.container.style.height = `calc(${n}px - var(--floating-offset-resize-threshold) / 2)`, this.contentArea.style.setProperty("height", `${n}px`));
-    }, this.floatingResizingMouseUpListener = (e) => {
-      if (!this.floatingResizingStarted || !this.panelInfo?.floating)
-        return;
-      e.stopPropagation(), e.preventDefault(), this.floatingResizingStarted = !1, this.contentArea.style.removeProperty("height"), l.setSectionPanelResizing(!1);
-      const { width: t, height: i } = this.getBoundingClientRect(), { left: n, top: o, bottom: s, right: a } = $.anchor(this), c = window.getComputedStyle(this.container), m = Number.parseInt(c.borderTopWidth, 10), x = Number.parseInt(c.borderBottomWidth, 10);
-      h.updatePanel(this.panelInfo.tag, {
-        width: t,
-        height: i - (m + x),
-        floatingPosition: {
-          ...this.panelInfo.floatingPosition,
-          left: n,
-          top: o,
-          bottom: s,
-          right: a
-        }
-      }), this.style.removeProperty("width"), this.style.removeProperty("height"), this.container.style.removeProperty("height"), this.container.style.removeProperty("margin-top"), this.setCssSizePositionProperties(), this.toggleAttribute("dragging", !1);
-    }, this.transitionEndEventListener = () => {
-      this.toggling && (this.toggling = !1, $.anchor(this));
-    }, this.sectionPanelMouseEnterListener = () => {
-      this.hasAttribute(D) && (this.removeAttribute(D), h.clearAttention());
-    }, this.contentAreaMouseDownListener = () => {
-      h.bringToFront(this.panelInfo.tag);
-    }, this.documentMouseUpEventListener = () => {
-      document.removeEventListener("mousemove", this.draggingEventListener), this.panelInfo?.floating && (this.toggleAttribute("dragging", !1), l.setSectionPanelDragging(!1));
-    }, this.panelHeaderMouseDownEventListener = (e) => {
-      e.button === 0 && (h.bringToFront(this.panelInfo.tag), !this.hasAttribute(P) && (e.target instanceof HTMLButtonElement && e.target.getAttribute("part") === "title-button" ? this.startDraggingDebounce(e) : this.startDragging(e)));
-    }, this.panelHeaderMouseUpEventListener = (e) => {
-      e.button === 0 && this.startDraggingDebounce.clear();
-    }, this.startDragging = (e) => {
-      $.draggingStarts(this, e), document.addEventListener("mousemove", this.draggingEventListener), l.setSectionPanelDragging(!0), this.panelInfo?.floating ? this.toggleAttribute("dragging", !0) : this.parentElement.sectionPanelDraggingStarted(this, e), e.preventDefault(), e.stopPropagation();
-    }, this.startDraggingDebounce = Y(this.startDragging, 200), this.draggingEventListener = (e) => {
-      const t = $.dragging(this, e);
-      if (this.panelInfo?.floating && this.panelInfo?.floatingPosition) {
-        e.preventDefault();
-        const { left: i, top: n, bottom: o, right: s } = t;
-        h.updatePanel(this.panelInfo.tag, {
-          floatingPosition: {
-            ...this.panelInfo.floatingPosition,
-            left: i,
-            top: n,
-            bottom: o,
-            right: s
-          }
-        });
-      }
-    }, this.setCssSizePositionProperties = () => {
-      const e = h.getPanelByTag(this.panelTag);
-      if (e && (e.height !== void 0 && (this.panelInfo?.floating || e.panel === "left" || e.panel === "right" ? this.style.setProperty("--section-height", `${e.height}px`) : this.style.removeProperty("--section-height")), e.width !== void 0 && (e.floating || e.panel === "bottom" ? this.style.setProperty("--section-width", `${e.width}px`) : this.style.removeProperty("--section-width")), e.floating && e.floatingPosition && !this.toggling)) {
-        const { left: t, top: i, bottom: n, right: o } = e.floatingPosition;
-        this.style.setProperty("--left", t !== void 0 ? `${t}px` : "auto"), this.style.setProperty("--top", i !== void 0 ? `${i}px` : "auto"), this.style.setProperty("--bottom", n !== void 0 ? `${n}px` : ""), this.style.setProperty("--right", o !== void 0 ? `${o}px` : "");
-        const s = window.getComputedStyle(this);
-        parseInt(s.top, 10) < 0 && this.style.setProperty("--top", "0px"), parseInt(s.bottom, 10) < 0 && this.style.setProperty("--bottom", "0px");
-      }
-    }, this.renderPopupButton = () => {
-      if (!this.panelInfo)
-        return g;
-      let e;
-      return this.panelInfo.panel === void 0 ? e = "Close the popup" : e = this.panelInfo.floating ? `Dock ${this.panelInfo.header} to ${this.panelInfo.panel}` : `Open ${this.panelInfo.header} as a popup`, r`
+    constructor() {
+        super(...arguments), this.panelTag = "", this.dockingItems = [
+            {
+                component: de({
+                    icon: d.layoutRight,
+                    label: "Dock right"
+                }),
+                panel: "right"
+            },
+            {
+                component: de({
+                    icon: d.layoutLeft,
+                    label: "Dock left"
+                }),
+                panel: "left"
+            },
+            {
+                component: de({
+                    icon: d.layoutBottom,
+                    label: "Dock bottom"
+                }),
+                panel: "bottom"
+            }
+        ], this.floatingResizingStarted = !1, this.resizingInDrawerStarted = !1, this.toggling = !1, this.rectangleBeforeResizing = null, this.floatingResizeHandlerMouseMoveListener = (e) => {
+            if (!this.panelInfo?.floating || this.floatingResizingStarted || !this.panelInfo?.expanded)
+                return;
+            const t = this.getBoundingClientRect(), i = Math.abs(e.clientX - t.x),
+                n = Math.abs(t.x + t.width - e.clientX), o = Math.abs(e.clientY - t.y),
+                s = Math.abs(t.y + t.height - e.clientY), a = Number.parseInt(
+                    window.getComputedStyle(this).getPropertyValue("--floating-offset-resize-threshold"),
+                    10
+                );
+            let c = "";
+            i < a ? o < a ? (c = "nw-resize", this.setAttribute(P, "top left")) : s < a ? (c = "sw-resize", this.setAttribute(P, "bottom left")) : (c = "col-resize", this.setAttribute(P, "left")) : n < a ? o < a ? (c = "ne-resize", this.setAttribute(P, "top right")) : s < a ? (c = "se-resize", this.setAttribute(P, "bottom right")) : (c = "col-resize", this.setAttribute(P, "right")) : s < a ? (c = "row-resize", this.setAttribute(P, "bottom")) : o < a && (c = "row-resize", this.setAttribute(P, "top")), c !== "" ? (this.rectangleBeforeResizing = this.getBoundingClientRect(), this.style.setProperty("--resize-cursor", c)) : (this.style.removeProperty("--resize-cursor"), this.removeAttribute(P)), this.toggleAttribute(pe, c !== "");
+        }, this.floatingResizingMouseDownListener = (e) => {
+            if (!this.hasAttribute(pe) || e.button !== 0)
+                return;
+            e.stopPropagation(), e.preventDefault(), $.anchorLeftTop(this), this.floatingResizingStarted = !0, this.toggleAttribute("resizing", !0);
+            const t = this.getResizeDirections(), {clientX: i, clientY: n} = e;
+            (t.includes("top") || t.includes("bottom")) && this.style.setProperty("--section-height", null), t.forEach((o) => this.setResizePosition(o, i, n)), l.setSectionPanelResizing(!0);
+        }, this.floatingResizingMouseLeaveListener = () => {
+            this.panelInfo?.floating && (this.floatingResizingStarted || (this.removeAttribute("resizing"), this.removeAttribute(pe), this.removeAttribute("dragging"), this.style.removeProperty("--resize-cursor"), this.removeAttribute(P), this.panelInfo != null && this.panelInfo.height != null && this.panelInfo?.height > window.innerHeight && (h.updatePanel(this.panelInfo.tag, {
+                height: window.innerHeight - 10
+            }), this.setCssSizePositionProperties())));
+        }, this.floatingResizingMouseMoveListener = (e) => {
+            if (!this.panelInfo?.floating || !this.floatingResizingStarted)
+                return;
+            e.stopPropagation(), e.preventDefault();
+            const t = this.getResizeDirections(), {clientX: i, clientY: n} = e;
+            t.forEach((o) => this.setResizePosition(o, i, n));
+        }, this.setFloatingResizeDirectionProps = (e, t, i, n) => {
+            i && i > Number.parseFloat(window.getComputedStyle(this).getPropertyValue("--min-width")) && (this.style.setProperty(`--${e}`, `${t}px`), this.style.setProperty("width", `${i}px`));
+            const o = window.getComputedStyle(this), s = Number.parseFloat(o.getPropertyValue("--header-height")),
+                a = Number.parseFloat(o.getPropertyValue("--floating-offset-resize-threshold")) / 2;
+            n && n > s + a && (this.style.setProperty(`--${e}`, `${t}px`), this.style.setProperty("height", `${n}px`), this.container.style.setProperty("margin-top", "calc(var(--floating-offset-resize-threshold) / 4)"), this.container.style.height = `calc(${n}px - var(--floating-offset-resize-threshold) / 2)`, this.contentArea.style.setProperty("height", `${n}px`));
+        }, this.floatingResizingMouseUpListener = (e) => {
+            if (!this.floatingResizingStarted || !this.panelInfo?.floating)
+                return;
+            e.stopPropagation(), e.preventDefault(), this.floatingResizingStarted = !1, this.contentArea.style.removeProperty("height"), l.setSectionPanelResizing(!1);
+            const {width: t, height: i} = this.getBoundingClientRect(), {
+                    left: n,
+                    top: o,
+                    bottom: s,
+                    right: a
+                } = $.anchor(this), c = window.getComputedStyle(this.container), m = Number.parseInt(c.borderTopWidth, 10),
+                x = Number.parseInt(c.borderBottomWidth, 10);
+            h.updatePanel(this.panelInfo.tag, {
+                width: t,
+                height: i - (m + x),
+                floatingPosition: {
+                    ...this.panelInfo.floatingPosition,
+                    left: n,
+                    top: o,
+                    bottom: s,
+                    right: a
+                }
+            }), this.style.removeProperty("width"), this.style.removeProperty("height"), this.container.style.removeProperty("height"), this.container.style.removeProperty("margin-top"), this.setCssSizePositionProperties(), this.toggleAttribute("dragging", !1);
+        }, this.transitionEndEventListener = () => {
+            this.toggling && (this.toggling = !1, $.anchor(this));
+        }, this.sectionPanelMouseEnterListener = () => {
+            this.hasAttribute(D) && (this.removeAttribute(D), h.clearAttention());
+        }, this.contentAreaMouseDownListener = () => {
+            h.bringToFront(this.panelInfo.tag);
+        }, this.documentMouseUpEventListener = () => {
+            document.removeEventListener("mousemove", this.draggingEventListener), this.panelInfo?.floating && (this.toggleAttribute("dragging", !1), l.setSectionPanelDragging(!1));
+        }, this.panelHeaderMouseDownEventListener = (e) => {
+            e.button === 0 && (h.bringToFront(this.panelInfo.tag), !this.hasAttribute(P) && (e.target instanceof HTMLButtonElement && e.target.getAttribute("part") === "title-button" ? this.startDraggingDebounce(e) : this.startDragging(e)));
+        }, this.panelHeaderMouseUpEventListener = (e) => {
+            e.button === 0 && this.startDraggingDebounce.clear();
+        }, this.startDragging = (e) => {
+            $.draggingStarts(this, e), document.addEventListener("mousemove", this.draggingEventListener), l.setSectionPanelDragging(!0), this.panelInfo?.floating ? this.toggleAttribute("dragging", !0) : this.parentElement.sectionPanelDraggingStarted(this, e), e.preventDefault(), e.stopPropagation();
+        }, this.startDraggingDebounce = Y(this.startDragging, 200), this.draggingEventListener = (e) => {
+            const t = $.dragging(this, e);
+            if (this.panelInfo?.floating && this.panelInfo?.floatingPosition) {
+                e.preventDefault();
+                const {left: i, top: n, bottom: o, right: s} = t;
+                h.updatePanel(this.panelInfo.tag, {
+                    floatingPosition: {
+                        ...this.panelInfo.floatingPosition,
+                        left: i,
+                        top: n,
+                        bottom: o,
+                        right: s
+                    }
+                });
+            }
+        }, this.setCssSizePositionProperties = () => {
+            const e = h.getPanelByTag(this.panelTag);
+            if (e && (e.height !== void 0 && (this.panelInfo?.floating || e.panel === "left" || e.panel === "right" ? this.style.setProperty("--section-height", `${e.height}px`) : this.style.removeProperty("--section-height")), e.width !== void 0 && (e.floating || e.panel === "bottom" ? this.style.setProperty("--section-width", `${e.width}px`) : this.style.removeProperty("--section-width")), e.floating && e.floatingPosition && !this.toggling)) {
+                const {left: t, top: i, bottom: n, right: o} = e.floatingPosition;
+                this.style.setProperty("--left", t !== void 0 ? `${t}px` : "auto"), this.style.setProperty("--top", i !== void 0 ? `${i}px` : "auto"), this.style.setProperty("--bottom", n !== void 0 ? `${n}px` : ""), this.style.setProperty("--right", o !== void 0 ? `${o}px` : "");
+                const s = window.getComputedStyle(this);
+                parseInt(s.top, 10) < 0 && this.style.setProperty("--top", "0px"), parseInt(s.bottom, 10) < 0 && this.style.setProperty("--bottom", "0px");
+            }
+        }, this.renderPopupButton = () => {
+            if (!this.panelInfo)
+                return g;
+            let e;
+            return this.panelInfo.panel === void 0 ? e = "Close the popup" : e = this.panelInfo.floating ? `Dock ${this.panelInfo.header} to ${this.panelInfo.panel}` : `Open ${this.panelInfo.header} as a popup`, r`
       <vaadin-context-menu .items=${this.dockingItems} @item-selected="${this.changeDockingPanel}">
         <button
           @click="${(t) => this.changePanelFloating(t)}"
@@ -2121,41 +2300,45 @@ let _ = class extends R {
         </button>
       </vaadin-context-menu>
     `;
-    }, this.changePanelFloating = (e) => {
-      if (this.panelInfo)
-        if (e.stopPropagation(), ke(this), this.panelInfo?.floating)
-          h.updatePanel(this.panelInfo.tag, { floating: !1 });
-        else {
-          let t;
-          if (this.panelInfo.floatingPosition)
-            t = this.panelInfo.floatingPosition;
-          else {
-            const { left: o, top: s } = this.getBoundingClientRect();
-            t = {
-              left: o,
-              top: s
-            };
-          }
-          let i = this.panelInfo?.height;
-          i === void 0 && this.panelInfo.expanded && (i = Number.parseInt(window.getComputedStyle(this).height, 10)), this.parentElement.forceClose(), h.updatePanel(this.panelInfo.tag, {
-            floating: !0,
-            expanded: !0,
-            width: this.panelInfo?.width || Number.parseInt(window.getComputedStyle(this).width, 10),
-            height: i,
-            floatingPosition: t
-          }), h.bringToFront(this.panelInfo.tag);
-        }
-    }, this.toggleExpand = (e) => {
-      this.panelInfo && (e.stopPropagation(), $.anchorLeftTop(this), h.updatePanel(this.panelInfo.tag, {
-        expanded: !this.panelInfo.expanded
-      }), this.toggling = !0, this.toggleAttribute("expanded", this.panelInfo.expanded), u.emit("panel-expanded", { panelTag: this.panelInfo.tag, expanded: this.panelInfo.expanded }));
-    };
-  }
-  static get styles() {
-    return [
-      k(ae),
-      k(xe),
-      O`
+        }, this.changePanelFloating = (e) => {
+            if (this.panelInfo)
+                if (e.stopPropagation(), ke(this), this.panelInfo?.floating)
+                    h.updatePanel(this.panelInfo.tag, {floating: !1});
+                else {
+                    let t;
+                    if (this.panelInfo.floatingPosition)
+                        t = this.panelInfo.floatingPosition;
+                    else {
+                        const {left: o, top: s} = this.getBoundingClientRect();
+                        t = {
+                            left: o,
+                            top: s
+                        };
+                    }
+                    let i = this.panelInfo?.height;
+                    i === void 0 && this.panelInfo.expanded && (i = Number.parseInt(window.getComputedStyle(this).height, 10)), this.parentElement.forceClose(), h.updatePanel(this.panelInfo.tag, {
+                        floating: !0,
+                        expanded: !0,
+                        width: this.panelInfo?.width || Number.parseInt(window.getComputedStyle(this).width, 10),
+                        height: i,
+                        floatingPosition: t
+                    }), h.bringToFront(this.panelInfo.tag);
+                }
+        }, this.toggleExpand = (e) => {
+            this.panelInfo && (e.stopPropagation(), $.anchorLeftTop(this), h.updatePanel(this.panelInfo.tag, {
+                expanded: !this.panelInfo.expanded
+            }), this.toggling = !0, this.toggleAttribute("expanded", this.panelInfo.expanded), u.emit("panel-expanded", {
+                panelTag: this.panelInfo.tag,
+                expanded: this.panelInfo.expanded
+            }));
+        };
+    }
+
+    static get styles() {
+        return [
+            k(ae),
+            k(xe),
+            O`
         * {
           box-sizing: border-box;
         }
@@ -2367,92 +2550,100 @@ let _ = class extends R {
           cursor: grabbing;
         }
       `
-    ];
-  }
-  connectedCallback() {
-    super.connectedCallback(), this.setAttribute("role", "region"), this.reaction(
-      () => h.getAttentionRequiredPanelConfiguration(),
-      () => {
-        const e = h.getAttentionRequiredPanelConfiguration();
-        this.toggleAttribute(D, e?.tag === this.panelTag && e?.floating);
-      }
-    ), this.addEventListener("mouseenter", this.sectionPanelMouseEnterListener), this.reaction(
-      () => l.operationInProgress,
-      () => {
-        requestAnimationFrame(() => {
-          this.toggleAttribute(
-            "hiding-while-drag-and-drop",
-            l.operationInProgress === ye.DragAndDrop && this.panelInfo?.floating && !this.panelInfo.showWhileDragging && !this.hasDropTarget()
-          );
-        });
-      }
-    ), this.reaction(
-      () => h.floatingPanelsZIndexOrder,
-      () => {
-        this.style.setProperty("--z-index-focus", `${h.getFloatingPanelZIndex(this.panelTag)}`);
-      },
-      { fireImmediately: !0 }
-    ), this.reaction(
-      () => h.getPanelByTag(this.panelTag)?.floatingPosition,
-      () => {
-        !this.floatingResizingStarted && !l.sectionPanelDragging && this.setCssSizePositionProperties();
-      }
-    ), this.addEventListener("transitionend", this.transitionEndEventListener), this.addEventListener("mousemove", this.floatingResizeHandlerMouseMoveListener), this.addEventListener("mousedown", this.floatingResizingMouseDownListener), this.addEventListener("mouseleave", this.floatingResizingMouseLeaveListener), document.addEventListener("mousemove", this.floatingResizingMouseMoveListener), document.addEventListener("mouseup", this.floatingResizingMouseUpListener);
-  }
-  disconnectedCallback() {
-    super.disconnectedCallback(), this.removeEventListener("mouseenter", this.sectionPanelMouseEnterListener), this.removeEventListener("mousemove", this.floatingResizeHandlerMouseMoveListener), this.removeEventListener("mousedown", this.floatingResizingMouseDownListener), document.removeEventListener("mousemove", this.floatingResizingMouseMoveListener), document.removeEventListener("mouseup", this.floatingResizingMouseUpListener);
-  }
-  setResizePosition(e, t, i) {
-    const n = this.rectangleBeforeResizing, o = 0, s = window.innerWidth, a = 0, c = window.innerHeight, m = Math.max(o, Math.min(s, t)), x = Math.max(a, Math.min(c, i));
-    if (e === "left")
-      this.setFloatingResizeDirectionProps(
-        "left",
-        m,
-        n.left - m + n.width
-      );
-    else if (e === "right")
-      this.setFloatingResizeDirectionProps(
-        "right",
-        m,
-        m - n.right + n.width
-      );
-    else if (e === "top") {
-      const A = n.top - x + n.height;
-      this.setFloatingResizeDirectionProps("top", x, void 0, A);
-    } else if (e === "bottom") {
-      const A = x - n.bottom + n.height;
-      this.setFloatingResizeDirectionProps("bottom", x, void 0, A);
+        ];
     }
-  }
-  willUpdate(e) {
-    super.willUpdate(e), e.has("panelTag") && (this.panelInfo = h.getPanelByTag(this.panelTag), this.setAttribute("aria-labelledby", this.panelInfo.tag.concat("-title"))), this.toggleAttribute("floating", this.panelInfo?.floating);
-  }
-  updated(e) {
-    super.updated(e), this.setCssSizePositionProperties(), requestAnimationFrame(() => {
-      if (this.panelInfo !== void 0 && this.panelInfo.floating && this.panelInfo.floatingPosition?.top != null && (this.panelInfo?.height === void 0 || this.panelInfo?.width === void 0)) {
-        let t = this.panelInfo?.height, i = this.panelInfo?.width, n = !1;
-        const o = this.panelInfo.floatingPosition;
-        if (this.offsetWidth !== void 0 && this.offsetWidth !== 0 && this.panelInfo.width === void 0 && (n = !0, i = this.offsetWidth), this.offsetHeight !== void 0 && this.offsetHeight !== 0 && this.panelInfo.height === void 0) {
-          n = !0, t = this.offsetHeight;
-          const s = window.innerHeight;
-          let a = this.panelInfo.floatingPosition.top;
-          t > s && (t = s);
-          const c = Math.floor(s / 3);
-          t < c ? (t = c, a = c) : t > 2 * c ? a -= t - (s - this.panelInfo.floatingPosition.top) : a = c, o.top = a;
+
+    connectedCallback() {
+        super.connectedCallback(), this.setAttribute("role", "region"), this.reaction(
+            () => h.getAttentionRequiredPanelConfiguration(),
+            () => {
+                const e = h.getAttentionRequiredPanelConfiguration();
+                this.toggleAttribute(D, e?.tag === this.panelTag && e?.floating);
+            }
+        ), this.addEventListener("mouseenter", this.sectionPanelMouseEnterListener), this.reaction(
+            () => l.operationInProgress,
+            () => {
+                requestAnimationFrame(() => {
+                    this.toggleAttribute(
+                        "hiding-while-drag-and-drop",
+                        l.operationInProgress === ye.DragAndDrop && this.panelInfo?.floating && !this.panelInfo.showWhileDragging && !this.hasDropTarget()
+                    );
+                });
+            }
+        ), this.reaction(
+            () => h.floatingPanelsZIndexOrder,
+            () => {
+                this.style.setProperty("--z-index-focus", `${h.getFloatingPanelZIndex(this.panelTag)}`);
+            },
+            {fireImmediately: !0}
+        ), this.reaction(
+            () => h.getPanelByTag(this.panelTag)?.floatingPosition,
+            () => {
+                !this.floatingResizingStarted && !l.sectionPanelDragging && this.setCssSizePositionProperties();
+            }
+        ), this.addEventListener("transitionend", this.transitionEndEventListener), this.addEventListener("mousemove", this.floatingResizeHandlerMouseMoveListener), this.addEventListener("mousedown", this.floatingResizingMouseDownListener), this.addEventListener("mouseleave", this.floatingResizingMouseLeaveListener), document.addEventListener("mousemove", this.floatingResizingMouseMoveListener), document.addEventListener("mouseup", this.floatingResizingMouseUpListener);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback(), this.removeEventListener("mouseenter", this.sectionPanelMouseEnterListener), this.removeEventListener("mousemove", this.floatingResizeHandlerMouseMoveListener), this.removeEventListener("mousedown", this.floatingResizingMouseDownListener), document.removeEventListener("mousemove", this.floatingResizingMouseMoveListener), document.removeEventListener("mouseup", this.floatingResizingMouseUpListener);
+    }
+
+    setResizePosition(e, t, i) {
+        const n = this.rectangleBeforeResizing, o = 0, s = window.innerWidth, a = 0, c = window.innerHeight,
+            m = Math.max(o, Math.min(s, t)), x = Math.max(a, Math.min(c, i));
+        if (e === "left")
+            this.setFloatingResizeDirectionProps(
+                "left",
+                m,
+                n.left - m + n.width
+            );
+        else if (e === "right")
+            this.setFloatingResizeDirectionProps(
+                "right",
+                m,
+                m - n.right + n.width
+            );
+        else if (e === "top") {
+            const A = n.top - x + n.height;
+            this.setFloatingResizeDirectionProps("top", x, void 0, A);
+        } else if (e === "bottom") {
+            const A = x - n.bottom + n.height;
+            this.setFloatingResizeDirectionProps("bottom", x, void 0, A);
         }
-        n && (h.updatePanel(this.panelInfo?.tag, {
-          height: t,
-          width: i,
-          floatingPosition: o
-        }), this.setCssSizePositionProperties());
-      }
-    });
-  }
-  firstUpdated(e) {
-    super.firstUpdated(e), document.addEventListener("mouseup", this.documentMouseUpEventListener), this.headerDraggableArea.addEventListener("mousedown", this.panelHeaderMouseDownEventListener), this.headerDraggableArea.addEventListener("mouseup", this.panelHeaderMouseUpEventListener), this.toggleAttribute("expanded", this.panelInfo?.expanded), this.toggleAttribute("individual", this.panelInfo?.individual ?? !1), mt(this), this.setCssSizePositionProperties(), this.contentArea.addEventListener("mousedown", this.contentAreaMouseDownListener), K(this.shadowRoot);
-  }
-  render() {
-    return this.panelInfo ? r`
+    }
+
+    willUpdate(e) {
+        super.willUpdate(e), e.has("panelTag") && (this.panelInfo = h.getPanelByTag(this.panelTag), this.setAttribute("aria-labelledby", this.panelInfo.tag.concat("-title"))), this.toggleAttribute("floating", this.panelInfo?.floating);
+    }
+
+    updated(e) {
+        super.updated(e), this.setCssSizePositionProperties(), requestAnimationFrame(() => {
+            if (this.panelInfo !== void 0 && this.panelInfo.floating && this.panelInfo.floatingPosition?.top != null && (this.panelInfo?.height === void 0 || this.panelInfo?.width === void 0)) {
+                let t = this.panelInfo?.height, i = this.panelInfo?.width, n = !1;
+                const o = this.panelInfo.floatingPosition;
+                if (this.offsetWidth !== void 0 && this.offsetWidth !== 0 && this.panelInfo.width === void 0 && (n = !0, i = this.offsetWidth), this.offsetHeight !== void 0 && this.offsetHeight !== 0 && this.panelInfo.height === void 0) {
+                    n = !0, t = this.offsetHeight;
+                    const s = window.innerHeight;
+                    let a = this.panelInfo.floatingPosition.top;
+                    t > s && (t = s);
+                    const c = Math.floor(s / 3);
+                    t < c ? (t = c, a = c) : t > 2 * c ? a -= t - (s - this.panelInfo.floatingPosition.top) : a = c, o.top = a;
+                }
+                n && (h.updatePanel(this.panelInfo?.tag, {
+                    height: t,
+                    width: i,
+                    floatingPosition: o
+                }), this.setCssSizePositionProperties());
+            }
+        });
+    }
+
+    firstUpdated(e) {
+        super.firstUpdated(e), document.addEventListener("mouseup", this.documentMouseUpEventListener), this.headerDraggableArea.addEventListener("mousedown", this.panelHeaderMouseDownEventListener), this.headerDraggableArea.addEventListener("mouseup", this.panelHeaderMouseUpEventListener), this.toggleAttribute("expanded", this.panelInfo?.expanded), this.toggleAttribute("individual", this.panelInfo?.individual ?? !1), mt(this), this.setCssSizePositionProperties(), this.contentArea.addEventListener("mousedown", this.contentAreaMouseDownListener), K(this.shadowRoot);
+    }
+
+    render() {
+        return this.panelInfo ? r`
       <div part="container">
         <div part="header" class="drag-handle">
           ${this.panelInfo.expandable !== !1 ? r` <button
@@ -2469,8 +2660,8 @@ let _ = class extends R {
             <button
               part="title-button"
               @dblclick="${(e) => {
-      this.toggleExpand(e), this.startDraggingDebounce.clear();
-    }}">
+            this.toggleExpand(e), this.startDraggingDebounce.clear();
+        }}">
               ${h.getPanelHeader(this.panelInfo)}
             </button>
           </h2>
@@ -2482,12 +2673,14 @@ let _ = class extends R {
         </div>
       </div>
     ` : g;
-  }
-  getPopupButtonIcon() {
-    return this.panelInfo ? this.panelInfo.panel === void 0 ? d.x : this.panelInfo.floating ? this.panelInfo.panel === "bottom" ? d.layoutBottom : this.panelInfo.panel === "left" ? d.layoutLeft : this.panelInfo.panel === "right" ? d.layoutRight : g : d.share : g;
-  }
-  renderHelpButton() {
-    return this.panelInfo?.helpUrl ? r` <button
+    }
+
+    getPopupButtonIcon() {
+        return this.panelInfo ? this.panelInfo.panel === void 0 ? d.x : this.panelInfo.floating ? this.panelInfo.panel === "bottom" ? d.layoutBottom : this.panelInfo.panel === "left" ? d.layoutLeft : this.panelInfo.panel === "right" ? d.layoutRight : g : d.share : g;
+    }
+
+    renderHelpButton() {
+        return this.panelInfo?.helpUrl ? r` <button
       @click="${() => window.open(this.panelInfo.helpUrl, "_blank")}"
       @mousedown="${(e) => e.stopPropagation()}"
       aria-label="More information about ${this.panelInfo.header}"
@@ -2495,106 +2688,115 @@ let _ = class extends R {
       title="More information about ${this.panelInfo.header}">
       <span>${d.help}</span>
     </button>` : g;
-  }
-  renderActions() {
-    if (!this.panelInfo?.actionsTag)
-      return g;
-    const e = this.panelInfo.actionsTag;
-    return bt(`<${e}></${e}>`);
-  }
-  changeDockingPanel(e) {
-    const t = e.detail.value.panel;
-    if (this.panelInfo?.panel !== t) {
-      const i = h.panels.filter((n) => n.panel === t).map((n) => n.panelOrder).sort((n, o) => o - n)[0];
-      ke(this), h.updatePanel(this.panelInfo.tag, { panel: t, panelOrder: i + 1 });
     }
-    this.panelInfo.floating && this.changePanelFloating(e);
-  }
-  getResizeDirections() {
-    const e = this.getAttribute(P);
-    return e ? e.split(" ") : [];
-  }
-  hasDropTarget() {
-    const e = this.shadowRoot?.querySelector("slot")?.assignedElements();
-    if (!e)
-      return !1;
-    for (const t of e) {
-      const i = wt(
-        t.shadowRoot ?? t,
-        "copilot-image-upload"
-      );
-      if (i && window.getComputedStyle(i).display !== "none")
-        return !0;
+
+    renderActions() {
+        if (!this.panelInfo?.actionsTag)
+            return g;
+        const e = this.panelInfo.actionsTag;
+        return bt(`<${e}></${e}>`);
     }
-    return !1;
-  }
+
+    changeDockingPanel(e) {
+        const t = e.detail.value.panel;
+        if (this.panelInfo?.panel !== t) {
+            const i = h.panels.filter((n) => n.panel === t).map((n) => n.panelOrder).sort((n, o) => o - n)[0];
+            ke(this), h.updatePanel(this.panelInfo.tag, {panel: t, panelOrder: i + 1});
+        }
+        this.panelInfo.floating && this.changePanelFloating(e);
+    }
+
+    getResizeDirections() {
+        const e = this.getAttribute(P);
+        return e ? e.split(" ") : [];
+    }
+
+    hasDropTarget() {
+        const e = this.shadowRoot?.querySelector("slot")?.assignedElements();
+        if (!e)
+            return !1;
+        for (const t of e) {
+            const i = wt(
+                t.shadowRoot ?? t,
+                "copilot-image-upload"
+            );
+            if (i && window.getComputedStyle(i).display !== "none")
+                return !0;
+        }
+        return !1;
+    }
 };
 F([
-  w()
+    w()
 ], _.prototype, "panelTag", 2);
 F([
-  N(".drag-handle")
+    N(".drag-handle")
 ], _.prototype, "headerDraggableArea", 2);
 F([
-  N("#content")
+    N("#content")
 ], _.prototype, "contentArea", 2);
 F([
-  N('[part="container"]')
+    N('[part="container"]')
 ], _.prototype, "container", 2);
 F([
-  y()
+    y()
 ], _.prototype, "dockingItems", 2);
 _ = F([
-  b("copilot-section-panel-wrapper")
+    b("copilot-section-panel-wrapper")
 ], _);
 const fe = window.Vaadin.copilot.customComponentHandler;
 if (!fe)
-  throw new Error("Tried to access custom component handler before it was initialized.");
+    throw new Error("Tried to access custom component handler before it was initialized.");
+
 function ai(e) {
-  l.setOperationWaitsHmrUpdate(e, 3e4);
+    l.setOperationWaitsHmrUpdate(e, 3e4);
 }
+
 u.on("undoRedo", (e) => {
-  const i = { files: ri(e), uiId: yt() }, n = e.detail.undo ? "copilot-plugin-undo" : "copilot-plugin-redo", o = e.detail.undo ? "undo" : "redo";
-  Je(o), ai(ye.RedoUndo), re(n, i, (s) => {
-    if (!s.data.performed) {
-      if (s.data.error && s.data.error.message) {
-        z({
-          type: S.ERROR,
-          message: s.data.error.message
-        }), u.emit("vite-after-update", {});
-        return;
-      }
-      z({
-        type: S.INFORMATION,
-        message: `Nothing to ${o}`
-      }), u.emit("vite-after-update", {});
-    }
-  });
+    const i = {files: ri(e), uiId: yt()}, n = e.detail.undo ? "copilot-plugin-undo" : "copilot-plugin-redo",
+        o = e.detail.undo ? "undo" : "redo";
+    Je(o), ai(ye.RedoUndo), re(n, i, (s) => {
+        if (!s.data.performed) {
+            if (s.data.error && s.data.error.message) {
+                z({
+                    type: S.ERROR,
+                    message: s.data.error.message
+                }), u.emit("vite-after-update", {});
+                return;
+            }
+            z({
+                type: S.INFORMATION,
+                message: `Nothing to ${o}`
+            }), u.emit("vite-after-update", {});
+        }
+    });
 });
+
 function ri(e) {
-  if (e.detail.files)
-    return e.detail.files;
-  const t = fe.getActiveDrillDownContext();
-  if (t) {
-    const i = fe.getCustomComponentInfo(t);
-    if (i)
-      return new Array(i.customComponentFilePath);
-  }
-  return xt();
+    if (e.detail.files)
+        return e.detail.files;
+    const t = fe.getActiveDrillDownContext();
+    if (t) {
+        const i = fe.getCustomComponentInfo(t);
+        if (i)
+            return new Array(i.customComponentFilePath);
+    }
+    return xt();
 }
+
 var li = Object.getOwnPropertyDescriptor, di = (e, t, i, n) => {
-  for (var o = n > 1 ? void 0 : n ? li(t, i) : t, s = e.length - 1, a; s >= 0; s--)
-    (a = e[s]) && (o = a(o) || o);
-  return o;
+    for (var o = n > 1 ? void 0 : n ? li(t, i) : t, s = e.length - 1, a; s >= 0; s--)
+        (a = e[s]) && (o = a(o) || o);
+    return o;
 };
 let _e = class extends R {
-  static get styles() {
-    return [
-      k(ae),
-      k(xe),
-      k(Pt),
-      k(It),
-      O`
+    static get styles() {
+        return [
+            k(ae),
+            k(xe),
+            k(Pt),
+            k(It),
+            O`
         :host {
           --lumo-secondary-text-color: var(--dev-tools-text-color);
           --lumo-contrast-80pct: var(--dev-tools-text-color-emphasis);
@@ -2822,15 +3024,17 @@ let _e = class extends R {
           }
         }
       `
-    ];
-  }
-  render() {
-    return r`<div class="notification-tray">
+        ];
+    }
+
+    render() {
+        return r`<div class="notification-tray">
       ${l.notifications.map((e) => this.renderNotification(e))}
     </div>`;
-  }
-  renderNotification(e) {
-    return r`
+    }
+
+    renderNotification(e) {
+        return r`
       <div
         class="message ${e.type} ${e.animatingOut ? "animate-out" : ""} ${e.details || e.link ? "has-details" : ""}"
         data-testid="message">
@@ -2845,8 +3049,8 @@ let _e = class extends R {
                 <div
                   class="flex gap-75 items-center py-75 relative hover:text-white"
                   @click=${() => {
-      this.toggleDontShowAgain(e);
-    }}>
+            this.toggleDontShowAgain(e);
+        }}>
                   ${r`${e.dontShowAgain ? d.checkSquare : d.square}`}
                   ${ci(e)}
                 </div>` : ""}
@@ -2857,58 +3061,63 @@ let _e = class extends R {
           id="dismiss"
           title="Close"
           @click=${(t) => {
-      Xe(e), t.stopPropagation();
-    }}>
+            Xe(e), t.stopPropagation();
+        }}>
           ${d.x}
         </button>
       </div>
     `;
-  }
-  toggleDontShowAgain(e) {
-    e.dontShowAgain = !e.dontShowAgain, this.requestUpdate();
-  }
+    }
+
+    toggleDontShowAgain(e) {
+        e.dontShowAgain = !e.dontShowAgain, this.requestUpdate();
+    }
 };
 _e = di([
-  b("copilot-notifications-container")
+    b("copilot-notifications-container")
 ], _e);
+
 function ci(e) {
-  return e.dontShowAgainMessage ? e.dontShowAgainMessage : "Do not show this again";
+    return e.dontShowAgainMessage ? e.dontShowAgainMessage : "Do not show this again";
 }
+
 z({
-  type: S.WARNING,
-  message: "Development Mode",
-  details: "This application is running in development mode.",
-  dismissId: "devmode"
+    type: S.WARNING,
+    message: "Development Mode",
+    details: "This application is running in development mode.",
+    dismissId: "devmode"
 });
 const ve = Y(async () => {
-  await At();
+    await At();
 }, 100);
 u.on("vite-after-update", () => {
-  l.active && ve();
+    l.active && ve();
 });
+
 function tt() {
-  l.active && (ve.clear(), ve(), $t());
+    l.active && (ve.clear(), ve(), $t());
 }
+
 if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
-  const e = window.__REACT_DEVTOOLS_GLOBAL_HOOK__, t = e.onCommitFiberRoot;
-  e.onCommitFiberRoot = (i, n, o, s) => (tt(), t(i, n, o, s));
+    const e = window.__REACT_DEVTOOLS_GLOBAL_HOOK__, t = e.onCommitFiberRoot;
+    e.onCommitFiberRoot = (i, n, o, s) => (tt(), t(i, n, o, s));
 }
 const Oe = window?.Vaadin?.connectionState?.stateChangeListeners;
 Oe ? Oe.add((e, t) => {
-  e === "loading" && t === "connected" && l.active && tt();
+    e === "loading" && t === "connected" && l.active && tt();
 }) : console.warn("Unable to add listener for connection state changes");
 u.on("copilot-plugin-state", (e) => {
-  l.setIdePluginState(e.detail), e.preventDefault();
+    l.setIdePluginState(e.detail), e.preventDefault();
 });
 u.on("copilot-early-project-state", (e) => {
-  f.setSpringSecurityEnabled(e.detail.springSecurityEnabled), f.setSpringJpaDataEnabled(e.detail.springJpaDataEnabled), f.setSupportsHilla(e.detail.supportsHilla), f.setSpringApplication(e.detail.springApplication), f.setUrlPrefix(e.detail.urlPrefix), f.setServerVersions(e.detail.serverVersions), f.setJdkInfo(e.detail.jdkInfo), te() === "success" && Je("hotswap-active", { value: Be() }), e.preventDefault();
+    f.setSpringSecurityEnabled(e.detail.springSecurityEnabled), f.setSpringJpaDataEnabled(e.detail.springJpaDataEnabled), f.setSupportsHilla(e.detail.supportsHilla), f.setSpringApplication(e.detail.springApplication), f.setUrlPrefix(e.detail.urlPrefix), f.setServerVersions(e.detail.serverVersions), f.setJdkInfo(e.detail.jdkInfo), te() === "success" && Je("hotswap-active", {value: Be()}), e.preventDefault();
 });
 u.on("copilot-ide-notification", (e) => {
-  z({
-    type: S[e.detail.type],
-    message: e.detail.message,
-    dismissId: e.detail.dismissId
-  }), e.preventDefault();
+    z({
+        type: S[e.detail.type],
+        message: e.detail.message,
+        dismissId: e.detail.dismissId
+    }), e.preventDefault();
 });
 /**
  * @license
@@ -2922,436 +3131,488 @@ u.on("copilot-ide-notification", (e) => {
 let Te = 0, it = 0;
 const H = [];
 let me = !1;
+
 function pi() {
-  me = !1;
-  const e = H.length;
-  for (let t = 0; t < e; t++) {
-    const i = H[t];
-    if (i)
-      try {
-        i();
-      } catch (n) {
-        setTimeout(() => {
-          throw n;
-        });
-      }
-  }
-  H.splice(0, e), it += e;
-}
-const hi = {
-  /**
-   * Enqueues a function called at microtask timing.
-   *
-   * @memberof microTask
-   * @param {!Function=} callback Callback to run
-   * @return {number} Handle used for canceling task
-   */
-  run(e) {
-    me || (me = !0, queueMicrotask(() => pi())), H.push(e);
-    const t = Te;
-    return Te += 1, t;
-  },
-  /**
-   * Cancels a previously enqueued `microTask` callback.
-   *
-   * @memberof microTask
-   * @param {number} handle Handle returned from `run` of callback to cancel
-   * @return {void}
-   */
-  cancel(e) {
-    const t = e - it;
-    if (t >= 0) {
-      if (!H[t])
-        throw new Error(`invalid async handle: ${e}`);
-      H[t] = null;
+    me = !1;
+    const e = H.length;
+    for (let t = 0; t < e; t++) {
+        const i = H[t];
+        if (i)
+            try {
+                i();
+            } catch (n) {
+                setTimeout(() => {
+                    throw n;
+                });
+            }
     }
-  }
+    H.splice(0, e), it += e;
+}
+
+const hi = {
+    /**
+     * Enqueues a function called at microtask timing.
+     *
+     * @memberof microTask
+     * @param {!Function=} callback Callback to run
+     * @return {number} Handle used for canceling task
+     */
+    run(e) {
+        me || (me = !0, queueMicrotask(() => pi())), H.push(e);
+        const t = Te;
+        return Te += 1, t;
+    },
+    /**
+     * Cancels a previously enqueued `microTask` callback.
+     *
+     * @memberof microTask
+     * @param {number} handle Handle returned from `run` of callback to cancel
+     * @return {void}
+     */
+    cancel(e) {
+        const t = e - it;
+        if (t >= 0) {
+            if (!H[t])
+                throw new Error(`invalid async handle: ${e}`);
+            H[t] = null;
+        }
+    }
 };
 /**
-@license
-Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
-*/
+ @license
+ Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+ This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+ The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+ The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+ Code distributed by Google as part of the polymer project is also
+ subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+ */
 const Ue = /* @__PURE__ */ new Set();
+
 class ne {
-  /**
-   * Creates a debouncer if no debouncer is passed as a parameter
-   * or it cancels an active debouncer otherwise. The following
-   * example shows how a debouncer can be called multiple times within a
-   * microtask and "debounced" such that the provided callback function is
-   * called once. Add this method to a custom element:
-   *
-   * ```js
-   * import {microTask} from '@vaadin/component-base/src/async.js';
-   * import {Debouncer} from '@vaadin/component-base/src/debounce.js';
-   * // ...
-   *
-   * _debounceWork() {
-   *   this._debounceJob = Debouncer.debounce(this._debounceJob,
-   *       microTask, () => this._doWork());
-   * }
-   * ```
-   *
-   * If the `_debounceWork` method is called multiple times within the same
-   * microtask, the `_doWork` function will be called only once at the next
-   * microtask checkpoint.
-   *
-   * Note: In testing it is often convenient to avoid asynchrony. To accomplish
-   * this with a debouncer, you can use `enqueueDebouncer` and
-   * `flush`. For example, extend the above example by adding
-   * `enqueueDebouncer(this._debounceJob)` at the end of the
-   * `_debounceWork` method. Then in a test, call `flush` to ensure
-   * the debouncer has completed.
-   *
-   * @param {Debouncer?} debouncer Debouncer object.
-   * @param {!AsyncInterface} asyncModule Object with Async interface
-   * @param {function()} callback Callback to run.
-   * @return {!Debouncer} Returns a debouncer object.
-   */
-  static debounce(t, i, n) {
-    return t instanceof ne ? t._cancelAsync() : t = new ne(), t.setConfig(i, n), t;
-  }
-  constructor() {
-    this._asyncModule = null, this._callback = null, this._timer = null;
-  }
-  /**
-   * Sets the scheduler; that is, a module with the Async interface,
-   * a callback and optional arguments to be passed to the run function
-   * from the async module.
-   *
-   * @param {!AsyncInterface} asyncModule Object with Async interface.
-   * @param {function()} callback Callback to run.
-   * @return {void}
-   */
-  setConfig(t, i) {
-    this._asyncModule = t, this._callback = i, this._timer = this._asyncModule.run(() => {
-      this._timer = null, Ue.delete(this), this._callback();
-    });
-  }
-  /**
-   * Cancels an active debouncer and returns a reference to itself.
-   *
-   * @return {void}
-   */
-  cancel() {
-    this.isActive() && (this._cancelAsync(), Ue.delete(this));
-  }
-  /**
-   * Cancels a debouncer's async callback.
-   *
-   * @return {void}
-   */
-  _cancelAsync() {
-    this.isActive() && (this._asyncModule.cancel(
-      /** @type {number} */
-      this._timer
-    ), this._timer = null);
-  }
-  /**
-   * Flushes an active debouncer and returns a reference to itself.
-   *
-   * @return {void}
-   */
-  flush() {
-    this.isActive() && (this.cancel(), this._callback());
-  }
-  /**
-   * Returns true if the debouncer is active.
-   *
-   * @return {boolean} True if active.
-   */
-  isActive() {
-    return this._timer != null;
-  }
+    constructor() {
+        this._asyncModule = null, this._callback = null, this._timer = null;
+    }
+
+    /**
+     * Creates a debouncer if no debouncer is passed as a parameter
+     * or it cancels an active debouncer otherwise. The following
+     * example shows how a debouncer can be called multiple times within a
+     * microtask and "debounced" such that the provided callback function is
+     * called once. Add this method to a custom element:
+     *
+     * ```js
+     * import {microTask} from '@vaadin/component-base/src/async.js';
+     * import {Debouncer} from '@vaadin/component-base/src/debounce.js';
+     * // ...
+     *
+     * _debounceWork() {
+     *   this._debounceJob = Debouncer.debounce(this._debounceJob,
+     *       microTask, () => this._doWork());
+     * }
+     * ```
+     *
+     * If the `_debounceWork` method is called multiple times within the same
+     * microtask, the `_doWork` function will be called only once at the next
+     * microtask checkpoint.
+     *
+     * Note: In testing it is often convenient to avoid asynchrony. To accomplish
+     * this with a debouncer, you can use `enqueueDebouncer` and
+     * `flush`. For example, extend the above example by adding
+     * `enqueueDebouncer(this._debounceJob)` at the end of the
+     * `_debounceWork` method. Then in a test, call `flush` to ensure
+     * the debouncer has completed.
+     *
+     * @param {Debouncer?} debouncer Debouncer object.
+     * @param {!AsyncInterface} asyncModule Object with Async interface
+     * @param {function()} callback Callback to run.
+     * @return {!Debouncer} Returns a debouncer object.
+     */
+    static debounce(t, i, n) {
+        return t instanceof ne ? t._cancelAsync() : t = new ne(), t.setConfig(i, n), t;
+    }
+
+    /**
+     * Sets the scheduler; that is, a module with the Async interface,
+     * a callback and optional arguments to be passed to the run function
+     * from the async module.
+     *
+     * @param {!AsyncInterface} asyncModule Object with Async interface.
+     * @param {function()} callback Callback to run.
+     * @return {void}
+     */
+    setConfig(t, i) {
+        this._asyncModule = t, this._callback = i, this._timer = this._asyncModule.run(() => {
+            this._timer = null, Ue.delete(this), this._callback();
+        });
+    }
+
+    /**
+     * Cancels an active debouncer and returns a reference to itself.
+     *
+     * @return {void}
+     */
+    cancel() {
+        this.isActive() && (this._cancelAsync(), Ue.delete(this));
+    }
+
+    /**
+     * Cancels a debouncer's async callback.
+     *
+     * @return {void}
+     */
+    _cancelAsync() {
+        this.isActive() && (this._asyncModule.cancel(
+            /** @type {number} */
+            this._timer
+        ), this._timer = null);
+    }
+
+    /**
+     * Flushes an active debouncer and returns a reference to itself.
+     *
+     * @return {void}
+     */
+    flush() {
+        this.isActive() && (this.cancel(), this._callback());
+    }
+
+    /**
+     * Returns true if the debouncer is active.
+     *
+     * @return {boolean} True if active.
+     */
+    isActive() {
+        return this._timer != null;
+    }
 }
+
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
 const X = (e, t) => {
-  const i = e._$AN;
-  if (i === void 0) return !1;
-  for (const n of i) n._$AO?.(t, !1), X(n, t);
-  return !0;
+    const i = e._$AN;
+    if (i === void 0) return !1;
+    for (const n of i) n._$AO?.(t, !1), X(n, t);
+    return !0;
 }, oe = (e) => {
-  let t, i;
-  do {
-    if ((t = e._$AM) === void 0) break;
-    i = t._$AN, i.delete(e), e = t;
-  } while (i?.size === 0);
+    let t, i;
+    do {
+        if ((t = e._$AM) === void 0) break;
+        i = t._$AN, i.delete(e), e = t;
+    } while (i?.size === 0);
 }, nt = (e) => {
-  for (let t; t = e._$AM; e = t) {
-    let i = t._$AN;
-    if (i === void 0) t._$AN = i = /* @__PURE__ */ new Set();
-    else if (i.has(e)) break;
-    i.add(e), fi(t);
-  }
-};
-function ui(e) {
-  this._$AN !== void 0 ? (oe(this), this._$AM = e, nt(this)) : this._$AM = e;
-}
-function gi(e, t = !1, i = 0) {
-  const n = this._$AH, o = this._$AN;
-  if (o !== void 0 && o.size !== 0) if (t) if (Array.isArray(n)) for (let s = i; s < n.length; s++) X(n[s], !1), oe(n[s]);
-  else n != null && (X(n, !1), oe(n));
-  else X(this, e);
-}
-const fi = (e) => {
-  e.type == Ye.CHILD && (e._$AP ??= gi, e._$AQ ??= ui);
-};
-class vi extends kt {
-  constructor() {
-    super(...arguments), this._$AN = void 0;
-  }
-  _$AT(t, i, n) {
-    super._$AT(t, i, n), nt(this), this.isConnected = t._$AU;
-  }
-  _$AO(t, i = !0) {
-    t !== this.isConnected && (this.isConnected = t, t ? this.reconnected?.() : this.disconnected?.()), i && (X(this, t), oe(this));
-  }
-  setValue(t) {
-    if (St(this._$Ct)) this._$Ct._$AI(t, this);
-    else {
-      const i = [...this._$Ct._$AH];
-      i[this._$Ci] = t, this._$Ct._$AI(i, this, 0);
+    for (let t; t = e._$AM; e = t) {
+        let i = t._$AN;
+        if (i === void 0) t._$AN = i = /* @__PURE__ */ new Set();
+        else if (i.has(e)) break;
+        i.add(e), fi(t);
     }
-  }
-  disconnected() {
-  }
-  reconnected() {
-  }
+};
+
+function ui(e) {
+    this._$AN !== void 0 ? (oe(this), this._$AM = e, nt(this)) : this._$AM = e;
 }
+
+function gi(e, t = !1, i = 0) {
+    const n = this._$AH, o = this._$AN;
+    if (o !== void 0 && o.size !== 0) if (t) if (Array.isArray(n)) for (let s = i; s < n.length; s++) X(n[s], !1), oe(n[s]);
+    else n != null && (X(n, !1), oe(n));
+    else X(this, e);
+}
+
+const fi = (e) => {
+    e.type == Ye.CHILD && (e._$AP ??= gi, e._$AQ ??= ui);
+};
+
+class vi extends kt {
+    constructor() {
+        super(...arguments), this._$AN = void 0;
+    }
+
+    _$AT(t, i, n) {
+        super._$AT(t, i, n), nt(this), this.isConnected = t._$AU;
+    }
+
+    _$AO(t, i = !0) {
+        t !== this.isConnected && (this.isConnected = t, t ? this.reconnected?.() : this.disconnected?.()), i && (X(this, t), oe(this));
+    }
+
+    setValue(t) {
+        if (St(this._$Ct)) this._$Ct._$AI(t, this);
+        else {
+            const i = [...this._$Ct._$AH];
+            i[this._$Ci] = t, this._$Ct._$AI(i, this, 0);
+        }
+    }
+
+    disconnected() {
+    }
+
+    reconnected() {
+    }
+}
+
 /**
  * @license
  * Copyright (c) 2016 - 2025 Vaadin Ltd.
  * This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
  */
 const He = Symbol("valueNotInitialized");
+
 class mi extends vi {
-  constructor(t) {
-    if (super(t), t.type !== Ye.ELEMENT)
-      throw new Error(`\`${this.constructor.name}\` must be bound to an element.`);
-    this.previousValue = He;
-  }
-  /** @override */
-  render(t, i) {
-    return g;
-  }
-  /** @override */
-  update(t, [i, n]) {
-    return this.hasChanged(n) ? (this.host = t.options && t.options.host, this.element = t.element, this.renderer = i, this.previousValue === He ? this.addRenderer() : this.runRenderer(), this.previousValue = Array.isArray(n) ? [...n] : n, g) : g;
-  }
-  /** @override */
-  reconnected() {
-    this.addRenderer();
-  }
-  /** @override */
-  disconnected() {
-    this.removeRenderer();
-  }
-  /** @abstract */
-  addRenderer() {
-    throw new Error("The `addRenderer` method must be implemented.");
-  }
-  /** @abstract */
-  runRenderer() {
-    throw new Error("The `runRenderer` method must be implemented.");
-  }
-  /** @abstract */
-  removeRenderer() {
-    throw new Error("The `removeRenderer` method must be implemented.");
-  }
-  /** @protected */
-  renderRenderer(t, ...i) {
-    const n = this.renderer.call(this.host, ...i);
-    Rt(n, t, { host: this.host });
-  }
-  /** @protected */
-  hasChanged(t) {
-    return Array.isArray(t) ? !Array.isArray(this.previousValue) || this.previousValue.length !== t.length ? !0 : t.some((i, n) => i !== this.previousValue[n]) : this.previousValue !== t;
-  }
+    constructor(t) {
+        if (super(t), t.type !== Ye.ELEMENT)
+            throw new Error(`\`${this.constructor.name}\` must be bound to an element.`);
+        this.previousValue = He;
+    }
+
+    /** @override */
+    render(t, i) {
+        return g;
+    }
+
+    /** @override */
+    update(t, [i, n]) {
+        return this.hasChanged(n) ? (this.host = t.options && t.options.host, this.element = t.element, this.renderer = i, this.previousValue === He ? this.addRenderer() : this.runRenderer(), this.previousValue = Array.isArray(n) ? [...n] : n, g) : g;
+    }
+
+    /** @override */
+    reconnected() {
+        this.addRenderer();
+    }
+
+    /** @override */
+    disconnected() {
+        this.removeRenderer();
+    }
+
+    /** @abstract */
+    addRenderer() {
+        throw new Error("The `addRenderer` method must be implemented.");
+    }
+
+    /** @abstract */
+    runRenderer() {
+        throw new Error("The `runRenderer` method must be implemented.");
+    }
+
+    /** @abstract */
+    removeRenderer() {
+        throw new Error("The `removeRenderer` method must be implemented.");
+    }
+
+    /** @protected */
+    renderRenderer(t, ...i) {
+        const n = this.renderer.call(this.host, ...i);
+        Rt(n, t, {host: this.host});
+    }
+
+    /** @protected */
+    hasChanged(t) {
+        return Array.isArray(t) ? !Array.isArray(this.previousValue) || this.previousValue.length !== t.length ? !0 : t.some((i, n) => i !== this.previousValue[n]) : this.previousValue !== t;
+    }
 }
+
 /**
  * @license
  * Copyright (c) 2017 - 2025 Vaadin Ltd.
  * This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
  */
 const he = Symbol("contentUpdateDebouncer");
+
 class Ce extends mi {
-  /**
-   * A property to that the renderer callback will be assigned.
-   *
-   * @abstract
-   */
-  get rendererProperty() {
-    throw new Error("The `rendererProperty` getter must be implemented.");
-  }
-  /**
-   * Adds the renderer callback to the dialog.
-   */
-  addRenderer() {
-    this.element[this.rendererProperty] = (t, i) => {
-      this.renderRenderer(t, i);
-    };
-  }
-  /**
-   * Runs the renderer callback on the dialog.
-   */
-  runRenderer() {
-    this.element[he] = ne.debounce(
-      this.element[he],
-      hi,
-      () => {
-        this.element.requestContentUpdate();
-      }
-    );
-  }
-  /**
-   * Removes the renderer callback from the dialog.
-   */
-  removeRenderer() {
-    this.element[this.rendererProperty] = null, delete this.element[he];
-  }
+    /**
+     * A property to that the renderer callback will be assigned.
+     *
+     * @abstract
+     */
+    get rendererProperty() {
+        throw new Error("The `rendererProperty` getter must be implemented.");
+    }
+
+    /**
+     * Adds the renderer callback to the dialog.
+     */
+    addRenderer() {
+        this.element[this.rendererProperty] = (t, i) => {
+            this.renderRenderer(t, i);
+        };
+    }
+
+    /**
+     * Runs the renderer callback on the dialog.
+     */
+    runRenderer() {
+        this.element[he] = ne.debounce(
+            this.element[he],
+            hi,
+            () => {
+                this.element.requestContentUpdate();
+            }
+        );
+    }
+
+    /**
+     * Removes the renderer callback from the dialog.
+     */
+    removeRenderer() {
+        this.element[this.rendererProperty] = null, delete this.element[he];
+    }
 }
+
 class bi extends Ce {
-  get rendererProperty() {
-    return "renderer";
-  }
+    get rendererProperty() {
+        return "renderer";
+    }
 }
+
 class wi extends Ce {
-  get rendererProperty() {
-    return "headerRenderer";
-  }
+    get rendererProperty() {
+        return "headerRenderer";
+    }
 }
+
 class yi extends Ce {
-  get rendererProperty() {
-    return "footerRenderer";
-  }
+    get rendererProperty() {
+        return "footerRenderer";
+    }
 }
+
 const ot = Pe(bi), st = Pe(wi), at = Pe(yi);
 var xi = Object.defineProperty, Pi = Object.getOwnPropertyDescriptor, rt = (e, t, i, n) => {
-  for (var o = n > 1 ? void 0 : n ? Pi(t, i) : t, s = e.length - 1, a; s >= 0; s--)
-    (a = e[s]) && (o = (n ? a(t, i, o) : a(o)) || o);
-  return n && o && xi(t, i, o), o;
+    for (var o = n > 1 ? void 0 : n ? Pi(t, i) : t, s = e.length - 1, a; s >= 0; s--)
+        (a = e[s]) && (o = (n ? a(t, i, o) : a(o)) || o);
+    return n && o && xi(t, i, o), o;
 };
 let be = class extends G {
-  constructor() {
-    super(...arguments), this.rememberChoice = !1, this.opened = !1, this.handleESC = (e) => {
-      !l.active || !this.opened || (e.key === "Escape" && this.sendEvent("cancel"), e.preventDefault(), e.stopPropagation());
-    };
-  }
-  firstUpdated(e) {
-    super.firstUpdated(e), K(this.renderRoot);
-  }
-  connectedCallback() {
-    super.connectedCallback(), this.addESCListener();
-  }
-  disconnectedCallback() {
-    super.disconnectedCallback(), this.removeESCListener();
-  }
-  render() {
-    return r` <vaadin-dialog
+    constructor() {
+        super(...arguments), this.rememberChoice = !1, this.opened = !1, this.handleESC = (e) => {
+            !l.active || !this.opened || (e.key === "Escape" && this.sendEvent("cancel"), e.preventDefault(), e.stopPropagation());
+        };
+    }
+
+    firstUpdated(e) {
+        super.firstUpdated(e), K(this.renderRoot);
+    }
+
+    connectedCallback() {
+        super.connectedCallback(), this.addESCListener();
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback(), this.removeESCListener();
+    }
+
+    render() {
+        return r` <vaadin-dialog
       id="ai-dialog"
       no-close-on-outside-click
       overlay-class="ai-dialog"
       ?opened=${this.opened}
       ${st(
-      () => r`
+            () => r`
           <h2>This Operation Uses AI</h2>
           ${d.starsAlt}
         `
-    )}
+        )}
       ${ot(
-      () => r`
+            () => r`
           <p>AI is a third-party service that will receive some of your project code as context for the operation.</p>
           <label>
             <input
               type="checkbox"
               @change=${(e) => {
-        this.rememberChoice = e.target.checked;
-      }} />Don’t ask again
+                this.rememberChoice = e.target.checked;
+            }} />Don’t ask again
           </label>
         `
-    )}
+        )}
       ${at(
-      () => r`
+            () => r`
           <button @click=${() => this.sendEvent("cancel")}>Cancel</button>
           <button class="primary" @click=${() => this.sendEvent("ok")}>OK</button>
         `
-    )}></vaadin-dialog>`;
-  }
-  sendEvent(e) {
-    this.dispatchEvent(
-      new CustomEvent("ai-usage-response", {
-        detail: { response: e, rememberChoice: this.rememberChoice }
-      })
-    );
-  }
-  addESCListener() {
-    document.addEventListener("keydown", this.handleESC, { capture: !0 });
-  }
-  removeESCListener() {
-    document.removeEventListener("keydown", this.handleESC, { capture: !0 });
-  }
+        )}></vaadin-dialog>`;
+    }
+
+    sendEvent(e) {
+        this.dispatchEvent(
+            new CustomEvent("ai-usage-response", {
+                detail: {response: e, rememberChoice: this.rememberChoice}
+            })
+        );
+    }
+
+    addESCListener() {
+        document.addEventListener("keydown", this.handleESC, {capture: !0});
+    }
+
+    removeESCListener() {
+        document.removeEventListener("keydown", this.handleESC, {capture: !0});
+    }
 };
 rt([
-  w()
+    w()
 ], be.prototype, "opened", 2);
 be = rt([
-  b("copilot-ai-usage-confirmation-dialog")
+    b("copilot-ai-usage-confirmation-dialog")
 ], be);
 var Ii = Object.defineProperty, Ci = Object.getOwnPropertyDescriptor, T = (e, t, i, n) => {
-  for (var o = n > 1 ? void 0 : n ? Ci(t, i) : t, s = e.length - 1, a; s >= 0; s--)
-    (a = e[s]) && (o = (n ? a(t, i, o) : a(o)) || o);
-  return n && o && Ii(t, i, o), o;
+    for (var o = n > 1 ? void 0 : n ? Ci(t, i) : t, s = e.length - 1, a; s >= 0; s--)
+        (a = e[s]) && (o = (n ? a(t, i, o) : a(o)) || o);
+    return n && o && Ii(t, i, o), o;
 };
 const Ne = {
-  info: "UI state info",
-  stacktrace: "Exception details",
-  versions: "Vaadin, Java, OS, etc.."
+    info: "UI state info",
+    stacktrace: "Exception details",
+    versions: "Vaadin, Java, OS, etc.."
 };
 let L = class extends G {
-  constructor() {
-    super(...arguments), this.exceptionReport = void 0, this.dialogOpened = !1, this.visibleItemIndex = 0, this.versions = void 0, this.selectedItems = [], this.eventListener = (e) => {
-      this.exceptionReport = e.detail, this.selectedItems = this.exceptionReport.items.map((t, i) => i), this.visibleItemIndex = 0, this.searchInputValue = void 0, this.dialogOpened = this.exceptionReport !== void 0;
-    };
-  }
-  connectedCallback() {
-    super.connectedCallback(), u.on("submit-exception-report-clicked", this.eventListener);
-  }
-  disconnectedCallback() {
-    super.disconnectedCallback(), u.off("submit-exception-report-clicked", this.eventListener);
-  }
-  firstUpdated(e) {
-    super.firstUpdated(e), K(this.renderRoot);
-  }
-  close() {
-    this.dialogOpened = !1;
-  }
-  clear() {
-    this.exceptionReport = void 0;
-  }
-  render() {
-    let e = "";
-    return this.exceptionReport && this.exceptionReport.items.length > 0 && (e = this.exceptionReport.items[this.visibleItemIndex].content), r` <vaadin-dialog
+    constructor() {
+        super(...arguments), this.exceptionReport = void 0, this.dialogOpened = !1, this.visibleItemIndex = 0, this.versions = void 0, this.selectedItems = [], this.eventListener = (e) => {
+            this.exceptionReport = e.detail, this.selectedItems = this.exceptionReport.items.map((t, i) => i), this.visibleItemIndex = 0, this.searchInputValue = void 0, this.dialogOpened = this.exceptionReport !== void 0;
+        };
+    }
+
+    connectedCallback() {
+        super.connectedCallback(), u.on("submit-exception-report-clicked", this.eventListener);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback(), u.off("submit-exception-report-clicked", this.eventListener);
+    }
+
+    firstUpdated(e) {
+        super.firstUpdated(e), K(this.renderRoot);
+    }
+
+    close() {
+        this.dialogOpened = !1;
+    }
+
+    clear() {
+        this.exceptionReport = void 0;
+    }
+
+    render() {
+        let e = "";
+        return this.exceptionReport && this.exceptionReport.items.length > 0 && (e = this.exceptionReport.items[this.visibleItemIndex].content), r` <vaadin-dialog
       id="report-exception-dialog"
       overlay-class="report-exception-dialog"
       no-close-on-outside-click
       draggable
       ?opened=${this.dialogOpened}
       @closed="${() => {
-      this.clear();
-    }}"
+            this.clear();
+        }}"
       @opened-changed="${(t) => {
-      t.detail.value || this.close();
-    }}"
+            t.detail.value || this.close();
+        }}"
       ${st(
-      () => r`
+            () => r`
           <div
             class="draggable"
             style="display: flex; justify-content: space-between; align-items: center; width: 100%">
@@ -3361,14 +3622,14 @@ let L = class extends G {
             </vaadin-button>
           </div>
         `
-    )}
+        )}
       ${ot(
-      () => r`
+            () => r`
           <div class="description-container">
             <vaadin-text-area
               @input=${(t) => {
-        this.searchInputValue = t.target.value;
-      }}
+                this.searchInputValue = t.target.value;
+            }}
               label="Description of the Bug"
               placeholder="A short, concise description of the bug and why you consider it a bug."></vaadin-text-area>
           </div>
@@ -3379,29 +3640,29 @@ let L = class extends G {
                 single
                 selected="${this.visibleItemIndex}"
                 @selected-changed="${(t) => {
-        this.visibleItemIndex = t.detail.value;
-      }}">
+                this.visibleItemIndex = t.detail.value;
+            }}">
                 ${this.exceptionReport?.items.map(
-        (t, i) => r` <vaadin-item>
+                (t, i) => r` <vaadin-item>
                       <input
                         type="checkbox"
                         .checked="${this.selectedItems.indexOf(i) !== -1}"
                         @change="${(n) => {
-          const o = n.target, s = [...this.selectedItems];
-          if (o.checked)
-            s.push(i), this.selectedItems = [...this.selectedItems];
-          else {
-            const a = this.selectedItems.indexOf(i);
-            s.splice(a, 1);
-          }
-          this.selectedItems = s;
-        }}" />
+                    const o = n.target, s = [...this.selectedItems];
+                    if (o.checked)
+                        s.push(i), this.selectedItems = [...this.selectedItems];
+                    else {
+                        const a = this.selectedItems.indexOf(i);
+                        s.splice(a, 1);
+                    }
+                    this.selectedItems = s;
+                }}" />
                       <div class="item-content">
                         <span class="item-name"> ${t.name} </span>
                         <span class="item-description">${this.renderItemDescription(t)}</span>
                       </div>
                     </vaadin-item>`
-      )}
+            )}
               </vaadin-list-box>
             </div>
             <div class="right-menu">
@@ -3410,15 +3671,15 @@ let L = class extends G {
             </div>
           </div>
         `,
-      [this.exceptionReport, this.visibleItemIndex, this.selectedItems]
-    )}
+            [this.exceptionReport, this.visibleItemIndex, this.selectedItems]
+        )}
       ${at(
-      () => r`
+            () => r`
           <button
             id="cancel"
             @click=${() => {
-        this.close();
-      }}>
+                this.close();
+            }}>
             Cancel
           </button>
 
@@ -3426,8 +3687,8 @@ let L = class extends G {
             id="submit"
             class="primary"
             @click=${() => {
-        this.submitErrorToGithub(), this.close();
-      }}>
+                this.submitErrorToGithub(), this.close();
+            }}>
             Submit in GitHub
             <vaadin-tooltip
               for="submit"
@@ -3435,271 +3696,285 @@ let L = class extends G {
               position="top-start"></vaadin-tooltip>
           </button>
         `,
-      [this.exceptionReport, this.selectedItems, this.searchInputValue]
-    )}></vaadin-dialog>`;
-  }
-  renderItemDescription(e) {
-    return Object.keys(Ne).indexOf(e.name.toLowerCase()) !== -1 ? Ne[e.name.toLowerCase()] : null;
-  }
-  bodyLengthExceeds() {
-    const e = this.getIssueBodyNotEncoded();
-    return e !== void 0 && encodeURIComponent(e).length > 7500;
-  }
-  getIssueBodyNotEncoded() {
-    if (!this.exceptionReport)
-      return;
-    const e = this.exceptionReport.items.filter((t, i) => this.selectedItems.indexOf(i) !== -1).map((t) => {
-      let i = "```";
-      return t.name.includes(".java") && (i = `${i}java`), `## ${t.name} 
+            [this.exceptionReport, this.selectedItems, this.searchInputValue]
+        )}></vaadin-dialog>`;
+    }
+
+    renderItemDescription(e) {
+        return Object.keys(Ne).indexOf(e.name.toLowerCase()) !== -1 ? Ne[e.name.toLowerCase()] : null;
+    }
+
+    bodyLengthExceeds() {
+        const e = this.getIssueBodyNotEncoded();
+        return e !== void 0 && encodeURIComponent(e).length > 7500;
+    }
+
+    getIssueBodyNotEncoded() {
+        if (!this.exceptionReport)
+            return;
+        const e = this.exceptionReport.items.filter((t, i) => this.selectedItems.indexOf(i) !== -1).map((t) => {
+            let i = "```";
+            return t.name.includes(".java") && (i = `${i}java`), `## ${t.name} 
  
  ${i}
 ${t.content}
 \`\`\``;
-    });
-    return this.searchInputValue ? `## Description of the bug 
+        });
+        return this.searchInputValue ? `## Description of the bug 
  ${this.searchInputValue} 
  ${e.join(`
 `)}` : `## Description of the bug 
  Please enter bug description here 
  ${e.join(`
 `)}`;
-  }
-  submitErrorToGithub() {
-    const e = this.exceptionReport;
-    if (!e)
-      return;
-    const t = encodeURIComponent(e.title ?? "Bug report "), i = this.getIssueBodyNotEncoded();
-    if (!i)
-      return;
-    let n = encodeURIComponent(i);
-    n.length >= 7500 && (We(i), n = encodeURIComponent("Please paste report here. It was automatically added to your clipboard."));
-    const o = `https://github.com/vaadin/copilot/issues/new?title=${t}&body=${n}`;
-    window.open(o, "_blank");
-  }
+    }
+
+    submitErrorToGithub() {
+        const e = this.exceptionReport;
+        if (!e)
+            return;
+        const t = encodeURIComponent(e.title ?? "Bug report "), i = this.getIssueBodyNotEncoded();
+        if (!i)
+            return;
+        let n = encodeURIComponent(i);
+        n.length >= 7500 && (We(i), n = encodeURIComponent("Please paste report here. It was automatically added to your clipboard."));
+        const o = `https://github.com/vaadin/copilot/issues/new?title=${t}&body=${n}`;
+        window.open(o, "_blank");
+    }
 };
 T([
-  y()
+    y()
 ], L.prototype, "exceptionReport", 2);
 T([
-  y()
+    y()
 ], L.prototype, "dialogOpened", 2);
 T([
-  y()
+    y()
 ], L.prototype, "visibleItemIndex", 2);
 T([
-  y()
+    y()
 ], L.prototype, "versions", 2);
 T([
-  y()
+    y()
 ], L.prototype, "selectedItems", 2);
 T([
-  y()
+    y()
 ], L.prototype, "searchInputValue", 2);
 L = T([
-  b("copilot-report-exception-dialog")
+    b("copilot-report-exception-dialog")
 ], L);
 let ee;
 u.on("copilot-project-compilation-error", (e) => {
-  if (e.detail.error) {
-    let t;
-    if (e.detail.files && e.detail.files.length > 0) {
-      const i = l.idePluginState?.supportedActions?.includes("undo") ? r`
+    if (e.detail.error) {
+        let t;
+        if (e.detail.files && e.detail.files.length > 0) {
+            const i = l.idePluginState?.supportedActions?.includes("undo") ? r`
             <button
               class="text-white"
               @click="${(n) => {
-        n.preventDefault(), u.emit("undoRedo", { undo: !0, files: e.detail.files?.map((o) => o.path) });
-      }}">
+                n.preventDefault(), u.emit("undoRedo", {undo: !0, files: e.detail.files?.map((o) => o.path)});
+            }}">
               <span aria-hidden="true" class="prefix">${d.flipBack}</span>
               Undo Last Change
             </button>
           ` : g;
-      t = Ie(
-        r`<div>
+            t = Ie(
+                r`<div>
           <span> Following files have compilation errors: </span>
           <ul class="mb-0 mt-25 ps-200">
             ${e.detail.files.map(
-          (n) => r` <li>
+                    (n) => r` <li>
                   <button
                     class="-ms-75 text-white"
                     @click="${() => {
-            u.emit("show-in-ide", { javaSource: { absoluteFilePath: n.path } });
-          }}">
+                        u.emit("show-in-ide", {javaSource: {absoluteFilePath: n.path}});
+                    }}">
                     ${n.name}
                   </button>
                 </li>`
-        )}
+                )}
           </ul>
           <hr class="border-b border-white/10 border-e-0 border-s-0 border-t-0 my-50" />
           ${i}
         </div>`
-      );
+            );
+        } else
+            t = "Project contains one or more compilation errors.";
+        ee = z({
+            message: "Compilation error",
+            details: t,
+            type: S.WARNING,
+            delay: 3e4
+        });
     } else
-      t = "Project contains one or more compilation errors.";
-    ee = z({
-      message: "Compilation error",
-      details: t,
-      type: S.WARNING,
-      delay: 3e4
-    });
-  } else
-    ee && Xe(ee), ee = void 0;
+        ee && Xe(ee), ee = void 0;
 });
 var Ai = Object.defineProperty, $i = Object.getOwnPropertyDescriptor, lt = (e, t, i, n) => {
-  for (var o = n > 1 ? void 0 : n ? $i(t, i) : t, s = e.length - 1, a; s >= 0; s--)
-    (a = e[s]) && (o = (n ? a(t, i, o) : a(o)) || o);
-  return n && o && Ai(t, i, o), o;
+    for (var o = n > 1 ? void 0 : n ? $i(t, i) : t, s = e.length - 1, a; s >= 0; s--)
+        (a = e[s]) && (o = (n ? a(t, i, o) : a(o)) || o);
+    return n && o && Ai(t, i, o), o;
 };
 let we = class extends G {
-  constructor() {
-    super(...arguments), this.text = () => (this.parentElement.textContent ?? "").trim();
-  }
-  createRenderRoot() {
-    return this;
-  }
-  render() {
-    return r`<button
+    constructor() {
+        super(...arguments), this.text = () => (this.parentElement.textContent ?? "").trim();
+    }
+
+    createRenderRoot() {
+        return this;
+    }
+
+    render() {
+        return r`<button
       aria-label="Copy to Clipboard"
       class="icon"
       title="Copy to Clipboard"
       @click=${(e) => {
-      e.stopPropagation(), e.preventDefault();
-      const t = this.text();
-      We(t);
-    }}>
+            e.stopPropagation(), e.preventDefault();
+            const t = this.text();
+            We(t);
+        }}>
       ${d.copy}
     </button>`;
-  }
+    }
 };
 lt([
-  w({ type: Function })
+    w({type: Function})
 ], we.prototype, "text", 2);
 we = lt([
-  b("copilot-copy")
+    b("copilot-copy")
 ], we);
 var ki = {
-  202: "Accepted",
-  502: "Bad Gateway",
-  400: "Bad Request",
-  409: "Conflict",
-  100: "Continue",
-  201: "Created",
-  417: "Expectation Failed",
-  424: "Failed Dependency",
-  403: "Forbidden",
-  504: "Gateway Timeout",
-  410: "Gone",
-  505: "HTTP Version Not Supported",
-  418: "I'm a teapot",
-  419: "Insufficient Space on Resource",
-  507: "Insufficient Storage",
-  500: "Internal Server Error",
-  411: "Length Required",
-  423: "Locked",
-  420: "Method Failure",
-  405: "Method Not Allowed",
-  301: "Moved Permanently",
-  302: "Moved Temporarily",
-  207: "Multi-Status",
-  300: "Multiple Choices",
-  511: "Network Authentication Required",
-  204: "No Content",
-  203: "Non Authoritative Information",
-  406: "Not Acceptable",
-  404: "Not Found",
-  501: "Not Implemented",
-  304: "Not Modified",
-  200: "OK",
-  206: "Partial Content",
-  402: "Payment Required",
-  308: "Permanent Redirect",
-  412: "Precondition Failed",
-  428: "Precondition Required",
-  102: "Processing",
-  103: "Early Hints",
-  426: "Upgrade Required",
-  407: "Proxy Authentication Required",
-  431: "Request Header Fields Too Large",
-  408: "Request Timeout",
-  413: "Request Entity Too Large",
-  414: "Request-URI Too Long",
-  416: "Requested Range Not Satisfiable",
-  205: "Reset Content",
-  303: "See Other",
-  503: "Service Unavailable",
-  101: "Switching Protocols",
-  307: "Temporary Redirect",
-  429: "Too Many Requests",
-  401: "Unauthorized",
-  451: "Unavailable For Legal Reasons",
-  422: "Unprocessable Entity",
-  415: "Unsupported Media Type",
-  305: "Use Proxy",
-  421: "Misdirected Request"
+    202: "Accepted",
+    502: "Bad Gateway",
+    400: "Bad Request",
+    409: "Conflict",
+    100: "Continue",
+    201: "Created",
+    417: "Expectation Failed",
+    424: "Failed Dependency",
+    403: "Forbidden",
+    504: "Gateway Timeout",
+    410: "Gone",
+    505: "HTTP Version Not Supported",
+    418: "I'm a teapot",
+    419: "Insufficient Space on Resource",
+    507: "Insufficient Storage",
+    500: "Internal Server Error",
+    411: "Length Required",
+    423: "Locked",
+    420: "Method Failure",
+    405: "Method Not Allowed",
+    301: "Moved Permanently",
+    302: "Moved Temporarily",
+    207: "Multi-Status",
+    300: "Multiple Choices",
+    511: "Network Authentication Required",
+    204: "No Content",
+    203: "Non Authoritative Information",
+    406: "Not Acceptable",
+    404: "Not Found",
+    501: "Not Implemented",
+    304: "Not Modified",
+    200: "OK",
+    206: "Partial Content",
+    402: "Payment Required",
+    308: "Permanent Redirect",
+    412: "Precondition Failed",
+    428: "Precondition Required",
+    102: "Processing",
+    103: "Early Hints",
+    426: "Upgrade Required",
+    407: "Proxy Authentication Required",
+    431: "Request Header Fields Too Large",
+    408: "Request Timeout",
+    413: "Request Entity Too Large",
+    414: "Request-URI Too Long",
+    416: "Requested Range Not Satisfiable",
+    205: "Reset Content",
+    303: "See Other",
+    503: "Service Unavailable",
+    101: "Switching Protocols",
+    307: "Temporary Redirect",
+    429: "Too Many Requests",
+    401: "Unauthorized",
+    451: "Unavailable For Legal Reasons",
+    422: "Unprocessable Entity",
+    415: "Unsupported Media Type",
+    305: "Use Proxy",
+    421: "Misdirected Request"
 };
+
 function Si(e) {
-  var t = ki[e.toString()];
-  if (!t)
-    throw new Error("Status code does not exist: " + e);
-  return t;
+    var t = ki[e.toString()];
+    if (!t)
+        throw new Error("Status code does not exist: " + e);
+    return t;
 }
+
 function dt(e) {
-  return `endpoint-request-${e.id}`;
+    return `endpoint-request-${e.id}`;
 }
+
 u.on("endpoint-request", (e) => {
-  const t = e.detail, i = dt(t);
-  delete t.id;
-  const n = Object.values(t.params), o = n.map(se).join(", ");
-  u.emit("log", {
-    id: i,
-    type: S.INFORMATION,
-    message: `Called endpoint ${t.endpoint}.${t.method}(${o})`,
-    expandedMessage: Ie(
-      r`Called endpoint ${t.endpoint}.${t.method} with parameters
+    const t = e.detail, i = dt(t);
+    delete t.id;
+    const n = Object.values(t.params), o = n.map(se).join(", ");
+    u.emit("log", {
+        id: i,
+        type: S.INFORMATION,
+        message: `Called endpoint ${t.endpoint}.${t.method}(${o})`,
+        expandedMessage: Ie(
+            r`Called endpoint ${t.endpoint}.${t.method} with parameters
         <code class="codeblock"><copilot-copy></copilot-copy>${se(n)}</code>`
-    ),
-    details: "Response: <pending>"
-  });
+        ),
+        details: "Response: <pending>"
+    });
 });
 u.on("endpoint-response", (e) => {
-  let t;
-  try {
-    t = JSON.parse(e.detail.text);
-  } catch {
-    t = e.detail.text;
-  }
-  const i = {}, n = e.detail.status ?? 200;
-  n === 200 ? (i.details = `Response: ${se(t)}`, i.expandedDetails = Ie(
-    r`Response: <code class="codeblock"><copilot-copy></copilot-copy>${se(t)}</code>`
-  )) : (i.details = `Error: ${n} ${Si(n)}`, i.type = S.ERROR), u.emit("update-log", {
-    id: dt(e.detail),
-    ...i
-  });
-});
-function se(e) {
-  return typeof e == "string" ? `${e}` : JSON.stringify(e, void 0, 2);
-}
-var Ri = Object.defineProperty, Ei = Object.getOwnPropertyDescriptor, U = (e, t, i, n) => {
-  for (var o = n > 1 ? void 0 : n ? Ei(t, i) : t, s = e.length - 1, a; s >= 0; s--)
-    (a = e[s]) && (o = (n ? a(t, i, o) : a(o)) || o);
-  return n && o && Ri(t, i, o), o;
-};
-class Di extends CustomEvent {
-  constructor(t) {
-    super("show-in-ide-clicked", {
-      detail: t,
-      bubbles: !0,
-      composed: !0
+    let t;
+    try {
+        t = JSON.parse(e.detail.text);
+    } catch {
+        t = e.detail.text;
+    }
+    const i = {}, n = e.detail.status ?? 200;
+    n === 200 ? (i.details = `Response: ${se(t)}`, i.expandedDetails = Ie(
+        r`Response: <code class="codeblock"><copilot-copy></copilot-copy>${se(t)}</code>`
+    )) : (i.details = `Error: ${n} ${Si(n)}`, i.type = S.ERROR), u.emit("update-log", {
+        id: dt(e.detail),
+        ...i
     });
-  }
+});
+
+function se(e) {
+    return typeof e == "string" ? `${e}` : JSON.stringify(e, void 0, 2);
 }
+
+var Ri = Object.defineProperty, Ei = Object.getOwnPropertyDescriptor, U = (e, t, i, n) => {
+    for (var o = n > 1 ? void 0 : n ? Ei(t, i) : t, s = e.length - 1, a; s >= 0; s--)
+        (a = e[s]) && (o = (n ? a(t, i, o) : a(o)) || o);
+    return n && o && Ri(t, i, o), o;
+};
+
+class Di extends CustomEvent {
+    constructor(t) {
+        super("show-in-ide-clicked", {
+            detail: t,
+            bubbles: !0,
+            composed: !0
+        });
+    }
+}
+
 let C = class extends G {
-  constructor() {
-    super(...arguments), this.iconHidden = !1, this.linkHidden = !1, this.tooltipText = void 0, this.linkText = void 0, this.source = void 0, this.javaSource = void 0;
-  }
-  static get styles() {
-    return [
-      k(xe),
-      O`
+    constructor() {
+        super(...arguments), this.iconHidden = !1, this.linkHidden = !1, this.tooltipText = void 0, this.linkText = void 0, this.source = void 0, this.javaSource = void 0;
+    }
+
+    static get styles() {
+        return [
+            k(xe),
+            O`
         :host {
           display: inline-block;
         }
@@ -3718,108 +3993,117 @@ let C = class extends G {
           color: var(--source-file-link-button-color, currentColor);
         }
       `
-    ];
-  }
-  firstUpdated(e) {
-    super.firstUpdated(e), K(this.shadowRoot);
-  }
-  render() {
-    if (this.iconHidden) {
-      if (!this.linkHidden)
-        return this.renderContent(this.renderAnchor());
-    } else return this.linkHidden ? this.renderContent(this.renderIcon()) : this.renderContent([this.renderIcon(), this.renderAnchor()]);
-    return g;
-  }
-  renderContent(e) {
-    return r` <div class="content">${e}</div> `;
-  }
-  renderIcon() {
-    const e = this.tooltipText ?? `Open ${this.getFileName()} in IDE`;
-    return r`
+        ];
+    }
+
+    firstUpdated(e) {
+        super.firstUpdated(e), K(this.shadowRoot);
+    }
+
+    render() {
+        if (this.iconHidden) {
+            if (!this.linkHidden)
+                return this.renderContent(this.renderAnchor());
+        } else return this.linkHidden ? this.renderContent(this.renderIcon()) : this.renderContent([this.renderIcon(), this.renderAnchor()]);
+        return g;
+    }
+
+    renderContent(e) {
+        return r` <div class="content">${e}</div> `;
+    }
+
+    renderIcon() {
+        const e = this.tooltipText ?? `Open ${this.getFileName()} in IDE`;
+        return r`
       <button
         id="show-in-ide"
         @click=${(t) => {
-      t.stopPropagation(), t.preventDefault(), this._showInIde();
-    }}
+            t.stopPropagation(), t.preventDefault(), this._showInIde();
+        }}
         aria-label="${e}"
         class="icon">
         <span>${d.fileCodeAlt}</span>
       </button>
       ${this.renderTooltip("show-in-ide")}
     `;
-  }
-  renderAnchor() {
-    return r`
+    }
+
+    renderAnchor() {
+        return r`
       <a
         id="link"
         href="#"
         class="ahreflike"
         @click=${(e) => {
-      e.preventDefault(), this._showInIde();
-    }}
+            e.preventDefault(), this._showInIde();
+        }}
         >${this.linkText ?? this.getFileName() ?? ""}</a
       >
       ${this.renderTooltip("link")}
     `;
-  }
-  dispatchClickedEvent() {
-    this.dispatchEvent(
-      new Di({
-        source: this.source,
-        javaSource: this.javaSource
-      })
-    );
-  }
-  renderTooltip(e) {
-    const t = this.tooltipText ?? `Open ${this.getFileName()} in IDE`;
-    return r`<vaadin-tooltip for="${e}" text="${t}" position="top-start"></vaadin-tooltip>`;
-  }
-  getFileName() {
-    if (this.tooltipText)
-      return this.tooltipText;
-    if (this.source && this.source.fileName)
-      return this.source.fileName;
-    if (this.javaSource)
-      return this.javaSource.className;
-  }
-  _showInIde() {
-    u.emit("show-in-ide", {
-      source: this.source,
-      javaSource: this.javaSource
-    }), this.dispatchClickedEvent();
-  }
+    }
+
+    dispatchClickedEvent() {
+        this.dispatchEvent(
+            new Di({
+                source: this.source,
+                javaSource: this.javaSource
+            })
+        );
+    }
+
+    renderTooltip(e) {
+        const t = this.tooltipText ?? `Open ${this.getFileName()} in IDE`;
+        return r`<vaadin-tooltip for="${e}" text="${t}" position="top-start"></vaadin-tooltip>`;
+    }
+
+    getFileName() {
+        if (this.tooltipText)
+            return this.tooltipText;
+        if (this.source && this.source.fileName)
+            return this.source.fileName;
+        if (this.javaSource)
+            return this.javaSource.className;
+    }
+
+    _showInIde() {
+        u.emit("show-in-ide", {
+            source: this.source,
+            javaSource: this.javaSource
+        }), this.dispatchClickedEvent();
+    }
 };
 C.TAG = "copilot-go-to-source";
 U([
-  w({ type: Boolean })
+    w({type: Boolean})
 ], C.prototype, "iconHidden", 2);
 U([
-  w({ type: Boolean })
+    w({type: Boolean})
 ], C.prototype, "linkHidden", 2);
 U([
-  w()
+    w()
 ], C.prototype, "tooltipText", 2);
 U([
-  w()
+    w()
 ], C.prototype, "linkText", 2);
 U([
-  w()
+    w()
 ], C.prototype, "source", 2);
 U([
-  w()
+    w()
 ], C.prototype, "javaSource", 2);
 C = U([
-  b(C.TAG)
+    b(C.TAG)
 ], C);
 u.on("copilot-java-after-update", (e) => {
-  const t = e.detail.classes.filter((n) => n.redefined).map((n) => n.class).join(", ");
-  if (t.length === 0)
-    return;
-  const i = "java-hot-deploy";
-  e.detail.classes.find((n) => n.routePath !== void 0) && u.emit("update-routes", {}), z({
-    type: S.INFORMATION,
-    message: `Java changes were hot deployed for ${Et(t)}`,
-    dismissId: i,
-    delay: 5e3
-  });
+    const t = e.detail.classes.filter((n) => n.redefined).map((n) => n.class).join(", ");
+    if (t.length === 0)
+        return;
+    const i = "java-hot-deploy";
+    e.detail.classes.find((n) => n.routePath !== void 0) && u.emit("update-routes", {}), z({
+        type: S.INFORMATION,
+        message: `Java changes were hot deployed for ${Et(t)}`,
+        dismissId: i,
+        delay: 5e3
+    });
 });

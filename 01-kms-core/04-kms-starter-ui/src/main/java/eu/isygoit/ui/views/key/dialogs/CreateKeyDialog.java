@@ -242,7 +242,8 @@ public class CreateKeyDialog extends Dialog {
         Map<String, Object> policyMap = null;
         if (!policyField.getValue().isBlank()) {
             try {
-                policyMap = objectMapper.readValue(policyField.getValue(), new TypeReference<>() {});
+                policyMap = objectMapper.readValue(policyField.getValue(), new TypeReference<>() {
+                });
             } catch (Exception ex) {
                 String errorMsg = "Invalid JSON in policy field: " + ex.getMessage();
                 errorSpan.setText(errorMsg);

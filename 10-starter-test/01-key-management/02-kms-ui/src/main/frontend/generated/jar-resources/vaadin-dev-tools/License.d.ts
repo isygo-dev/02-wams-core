@@ -1,20 +1,24 @@
-import { ServerMessage } from './vaadin-dev-tools';
+import {ServerMessage} from './vaadin-dev-tools';
+
 export interface Product {
     name: string;
     version: string;
 }
+
 export interface PreTrial {
     trialName?: String;
     trialState: String;
     daysRemaining?: number;
     daysRemainingUntilRenewal?: number;
 }
+
 export interface ProductAndMessage {
     message: string;
     messageHtml?: string;
     product: Product;
     preTrial?: PreTrial;
 }
+
 export declare const findAll: (element: Element | ShadowRoot | Document, tags: string[]) => Element[];
 export declare const licenseCheckOk: (data: Product) => void;
 export declare const licenseCheckFailed: (data: ProductAndMessage) => void;

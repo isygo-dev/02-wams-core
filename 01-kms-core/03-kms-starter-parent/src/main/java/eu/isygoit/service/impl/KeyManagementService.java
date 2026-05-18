@@ -189,6 +189,8 @@ public class KeyManagementService implements IKeyManagementService {
                             //.tags(savedKey.getTags())   // deserialize JSON if needed
                             .currentVersion(savedKey.getCurrentVersionId())
                             .origin(savedKey.getOrigin())
+                            .rotationEnabled(savedKey.getRotationEnabled())
+                            .rotationPeriodInDays(savedKey.getRotationPeriodInDays())
                             .keyStatus(savedKey.getKeyStatus())
                             .createdAt(savedKey.getCreateDate())
                             .updatedAt(savedKey.getUpdateDate())
