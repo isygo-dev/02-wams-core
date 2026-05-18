@@ -177,7 +177,7 @@ public class AliasesView extends VerticalLayout {
 
         FormLayout form = new FormLayout();
         TextField aliasNameField = new TextField("Alias name");
-        aliasNameField.setPlaceholder("alias/my-key-alias");
+        aliasNameField.setPlaceholder("alias:my-key-alias");
         aliasNameField.setRequiredIndicatorVisible(true);
 
         // Load KMS keys for selection

@@ -81,7 +81,7 @@ class KeyManagementServiceTest {
         CreateKeyRequest request = CreateKeyRequest.builder()
                 .keySpec(IEnumKeySpec.Types.RSA_2048)
                 .keyUsage(IEnumKeyUsage.Types.ENCRYPT_DECRYPT)
-                .keyAlias("alias/test")
+                .keyAlias("alias:test")
                 .description("description")
                 .build();
 
@@ -325,11 +325,11 @@ class KeyManagementServiceTest {
     @Test
     void shouldCreateAlias() {
         CreateAliasRequest request = CreateAliasRequest.builder()
-                .aliasName("alias/test")
+                .aliasName("alias:test")
                 .targetKeyId(KEY_ID)
                 .build();
 
-        when(kmsAliasRepository.findByTenantAndAliasName(TENANT, "alias/test"))
+        when(kmsAliasRepository.findByTenantAndAliasName(TENANT, "alias:test"))
                 .thenReturn(Optional.empty());
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
@@ -339,18 +339,18 @@ class KeyManagementServiceTest {
 
         AliasResponseDto response = keyManagementService.createAlias(TENANT, request);
 
-        assertEquals("alias/test", response.getAliasName());
+        assertEquals("alias:test", response.getAliasName());
         assertEquals(KEY_ID, response.getTargetKeyId());
     }
 
     @Test
     void shouldThrowWhenAliasAlreadyExists() {
         CreateAliasRequest request = CreateAliasRequest.builder()
-                .aliasName("alias/test")
+                .aliasName("alias:test")
                 .targetKeyId(KEY_ID)
                 .build();
 
-        when(kmsAliasRepository.findByTenantAndAliasName(TENANT, "alias/test"))
+        when(kmsAliasRepository.findByTenantAndAliasName(TENANT, "alias:test"))
                 .thenReturn(Optional.of(KmsAlias.builder().build()));
 
         assertThrows(IllegalArgumentException.class,
@@ -360,7 +360,7 @@ class KeyManagementServiceTest {
     @Test
     void shouldUpdateAlias() {
         KmsAlias alias = KmsAlias.builder()
-                .aliasName("alias/test")
+                .aliasName("alias:test")
                 .targetKeyId(KEY_ID)
                 .build();
 
@@ -368,26 +368,26 @@ class KeyManagementServiceTest {
                 .targetKeyId(KEY_ID)
                 .build();
 
-        when(kmsAliasRepository.findByTenantAndAliasName(TENANT, "alias/test"))
+        when(kmsAliasRepository.findByTenantAndAliasName(TENANT, "alias:test"))
                 .thenReturn(Optional.of(alias));
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.of(key));
 
         AliasResponseDto response =
-                keyManagementService.updateAlias(TENANT, "alias/test", request);
+                keyManagementService.updateAlias(TENANT, "alias:test", request);
 
         assertEquals(KEY_ID, response.getTargetKeyId());
     }
 
     @Test
     void shouldDeleteAlias() {
-        KmsAlias alias = KmsAlias.builder().aliasName("alias/test").build();
+        KmsAlias alias = KmsAlias.builder().aliasName("alias:test").build();
 
-        when(kmsAliasRepository.findByTenantAndAliasName(TENANT, "alias/test"))
+        when(kmsAliasRepository.findByTenantAndAliasName(TENANT, "alias:test"))
                 .thenReturn(Optional.of(alias));
 
-        keyManagementService.deleteAlias(TENANT, "alias/test");
+        keyManagementService.deleteAlias(TENANT, "alias:test");
 
         verify(kmsAliasRepository).delete(alias);
     }
@@ -395,7 +395,7 @@ class KeyManagementServiceTest {
     @Test
     void shouldListAliases() {
         KmsAlias alias = KmsAlias.builder()
-                .aliasName("alias/test")
+                .aliasName("alias:test")
                 .targetKeyId(KEY_ID)
                 .build();
 
@@ -412,7 +412,7 @@ class KeyManagementServiceTest {
     @Test
     void shouldListAliasesForKey() {
         KmsAlias alias = KmsAlias.builder()
-                .aliasName("alias/test")
+                .aliasName("alias:test")
                 .targetKeyId(KEY_ID)
                 .build();
 

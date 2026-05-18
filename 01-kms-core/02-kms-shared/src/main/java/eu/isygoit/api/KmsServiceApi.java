@@ -467,7 +467,7 @@ public interface KmsServiceApi {
     @PostMapping(value = "/aliases", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Create Alias",
-            description = "Creates a friendly name alias for a KMS key (must start with 'alias/').",
+            description = "Creates a friendly name alias for a KMS key (must start with 'alias:').",
             operationId = "createAlias"
     )
     ResponseEntity<CreateAliasResponse> createAlias(@Valid @RequestBody CreateAliasRequest request);
@@ -479,7 +479,7 @@ public interface KmsServiceApi {
             operationId = "updateAlias"
     )
     ResponseEntity<UpdateAliasResponse> updateAlias(
-            @Parameter(description = "Alias name (e.g., alias/MyKey)", required = true)
+            @Parameter(description = "Alias name (e.g., alias:MyKey)", required = true)
             @PathVariable("aliasName") String aliasName,
             @Valid @RequestBody UpdateAliasRequest request);
 
@@ -490,7 +490,7 @@ public interface KmsServiceApi {
             operationId = "deleteAlias"
     )
     ResponseEntity<DeleteAliasResponse> deleteAlias(
-            @Parameter(description = "Alias name (e.g., alias/MyKey)", required = true)
+            @Parameter(description = "Alias name (e.g., alias:MyKey)", required = true)
             @PathVariable("aliasName") String aliasName);
 
     // =========================================================================

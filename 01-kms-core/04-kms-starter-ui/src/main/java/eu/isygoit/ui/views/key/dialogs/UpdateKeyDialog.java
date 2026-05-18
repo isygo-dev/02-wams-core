@@ -88,7 +88,7 @@ public class UpdateKeyDialog extends Dialog {
         aliasCombo.setAllowCustomValue(true);
         newAliasField = new TextField("New alias name");
         newAliasField.setVisible(false);
-        newAliasField.setPlaceholder("alias/my-new-alias");
+        newAliasField.setPlaceholder("alias:my-new-alias");
 
         aliasCombo.setValue(currentAlias.isEmpty() ? null : currentAlias);
 

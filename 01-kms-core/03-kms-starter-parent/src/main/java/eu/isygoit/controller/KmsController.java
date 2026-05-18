@@ -1010,7 +1010,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     private String buildAliasWrn(String aliasName) {
         String accountId = "123456789012"; // replace with real account ID
         String region = "us-east-1";
-        return String.format("wrn:wams:kms:%s:%s:alias/%s", region, accountId, aliasName);
+        return String.format("wrn:wams:kms:%s:%s:alias:%s", region, accountId, aliasName);
     }
 
     private String formatDate(LocalDateTime date) {

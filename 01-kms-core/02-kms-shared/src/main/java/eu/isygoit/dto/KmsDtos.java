@@ -41,7 +41,7 @@ public final class KmsDtos {
         @Schema(description = "Intended usage of the key", required = true)
         private IEnumKeyUsage.Types keyUsage;
 
-        @Schema(description = "Optional friendly alias (e.g., 'alias/my-key')")
+        @Schema(description = "Optional friendly alias (e.g., 'alias:my-key')")
         private String keyAlias;
 
         @Schema(description = "Origin of the key material", defaultValue = "WAMS_KMS")

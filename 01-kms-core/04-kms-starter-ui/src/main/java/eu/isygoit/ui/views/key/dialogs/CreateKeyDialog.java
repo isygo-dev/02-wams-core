@@ -88,7 +88,7 @@ public class CreateKeyDialog extends Dialog {
         aliasCombo.setAllowCustomValue(true);
         newAliasField = new TextField("New alias name");
         newAliasField.setVisible(false);
-        newAliasField.setPlaceholder("alias/my-new-alias");
+        newAliasField.setPlaceholder("alias:my-new-alias");
         aliasCombo.addCustomValueSetListener(e -> {
             newAliasField.setVisible(true);
             newAliasField.setValue(e.getDetail());

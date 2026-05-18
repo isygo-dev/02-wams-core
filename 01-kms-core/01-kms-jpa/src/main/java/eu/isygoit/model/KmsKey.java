@@ -151,7 +151,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     // =========================================================================
 
     /**
-     * Friendly alias for the key (e.g., "alias/my-key").
+     * Friendly alias for the key (e.g., "alias:my-key").
      * Aliases are separate resources in AWS but denormalized here for quick access.
      * <p>
      * Note: A key can have multiple aliases; this field stores the primary/default alias.

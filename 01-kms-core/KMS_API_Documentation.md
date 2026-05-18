@@ -1418,7 +1418,7 @@ maintaining full control of key material storage.
 
 - **Encryption Context**: Always use encryption context for authenticated encryption.
 
-- **Aliases**: Reference keys by alias (e.g., alias/production-db-key) for easier rotation.
+- **Aliases**: Reference keys by alias (e.g., alias:production-db-key) for easier rotation.
 
 - **Key Identifier Flexibility**: Use key IDs for scripts, aliases for application code, and WRNs for audit logs and
   infrastructure code.

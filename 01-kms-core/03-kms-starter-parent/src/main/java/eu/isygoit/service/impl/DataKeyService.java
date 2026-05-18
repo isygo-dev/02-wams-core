@@ -82,7 +82,7 @@ public class DataKeyService implements IDataKeyService {
             return parts[parts.length - 1]; // returns the key ID
         }
 
-        // 2. If it's an alias (starts with "alias/")
+        // 2. If it's an alias (starts with "alias:")
         if (keyIdOrAlias.startsWith("alias:")) {
             String aliasName = keyIdOrAlias.substring("alias:".length()); // remove "alias:" prefixx
             return kmsAliasRepository.findByTenantAndAliasName(tenant, aliasName)
