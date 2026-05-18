@@ -28,6 +28,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.enums.IEnumKeyOrigin;
 import eu.isygoit.enums.IEnumKeySpec;
+import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainLayout;
@@ -530,6 +531,19 @@ public class KeyManagementView extends VerticalLayout {
             buttonBar.setSpacing(true);
             buttonBar.setPadding(false);
 
+            // --- Toggle status button (enable/disable) ---
+            boolean isEnabled = metadata != null && metadata.getKeyStatus() == IEnumKeyStatus.Types.ENABLED;
+            Button toggleStatusBtn = createIconButton(
+                    isEnabled ? VaadinIcon.UNLOCK : VaadinIcon.LOCK,
+                    isEnabled ? "Disable key" : "Enable key"
+            );
+            toggleStatusBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+            if (metadata != null && !"ENABLED".equalsIgnoreCase(statusText) && !"DISABLED".equalsIgnoreCase(statusText)) {
+                toggleStatusBtn.setEnabled(false);
+                toggleStatusBtn.setTooltipText("Key cannot be enabled/disabled in its current state");
+            }
+            toggleStatusBtn.addClickListener(e -> toggleKeyStatus());
+
             Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit alias & description & tags");
             editBtn.addClickListener(e -> openUpdateDialog());
 
@@ -547,7 +561,7 @@ public class KeyManagementView extends VerticalLayout {
             deleteBtn.addThemeVariants(ButtonVariant.LUMO_ERROR);
             deleteBtn.addClickListener(e -> confirmPermanentDelete());
 
-            buttonBar.add(editBtn, describeBtn, scheduleDeleteBtn, cancelDeleteBtn, deleteBtn);
+            buttonBar.add(toggleStatusBtn, editBtn, describeBtn, scheduleDeleteBtn, cancelDeleteBtn, deleteBtn);
             headerRow.add(titleRow, buttonBar);
             headerRow.expand(titleRow);
             add(headerRow);
@@ -561,11 +575,11 @@ public class KeyManagementView extends VerticalLayout {
             descSpan.getStyle().set("display", "block");
             add(descSpan);
 
-            HorizontalLayout metaRow = new HorizontalLayout();
-            metaRow.setSpacing(true);
-            metaRow.addClassName(LumoUtility.FontSize.XSMALL);
-            metaRow.addClassName(LumoUtility.TextColor.TERTIARY);
-            metaRow.getStyle().set("margin-top", "var(--lumo-space-s)");
+            HorizontalLayout metaRow1 = new HorizontalLayout();
+            metaRow1.setSpacing(true);
+            metaRow1.addClassName(LumoUtility.FontSize.XSMALL);
+            metaRow1.addClassName(LumoUtility.TextColor.TERTIARY);
+            metaRow1.getStyle().set("margin-top", "var(--lumo-space-s)");
 
             String keySpec = (metadata != null && metadata.getKeySpec() != null) ? metadata.getKeySpec().name() : "N/A";
             String keyUsage = (metadata != null && metadata.getKeyUsage() != null) ? metadata.getKeyUsage().name() : "N/A";
@@ -574,14 +588,44 @@ public class KeyManagementView extends VerticalLayout {
             String multiRegion = (metadata != null && metadata.getMultiRegion() != null && metadata.getMultiRegion())
                     ? "🌍 Multi-region" : "📍 Single-region";
 
-            metaRow.add(new Span("Spec: " + keySpec));
-            metaRow.add(new Span("•"));
-            metaRow.add(new Span("Usage: " + keyUsage));
-            metaRow.add(new Span("•"));
-            metaRow.add(new Span("Created: " + created));
-            metaRow.add(new Span("•"));
-            metaRow.add(new Span(multiRegion));
-            add(metaRow);
+            metaRow1.add(new Span("Spec: " + keySpec));
+            metaRow1.add(new Span("•"));
+            metaRow1.add(new Span("Usage: " + keyUsage));
+            metaRow1.add(new Span("•"));
+            metaRow1.add(new Span("Created: " + created));
+            metaRow1.add(new Span("•"));
+            metaRow1.add(new Span(multiRegion));
+            add(metaRow1);
+
+            HorizontalLayout metaRow2 = new HorizontalLayout();
+            metaRow2.setSpacing(true);
+            metaRow2.addClassName(LumoUtility.FontSize.XSMALL);
+            metaRow2.addClassName(LumoUtility.TextColor.TERTIARY);
+            metaRow2.getStyle().set("margin-top", "var(--lumo-space-xs)");
+
+            String keyIdDisplay = keyId;
+            if (aliasOrId.equals(keyId)) {
+                keyIdDisplay = null;
+            }
+            if (keyIdDisplay != null) {
+                metaRow2.add(new Span("ID: " + keyIdDisplay));
+                metaRow2.add(new Span("•"));
+            }
+
+            String origin = (metadata != null && metadata.getOrigin() != null) ? metadata.getOrigin().name() : "N/A";
+            metaRow2.add(new Span("Origin: " + origin));
+            metaRow2.add(new Span("•"));
+
+            String rotation = (metadata != null && metadata.getRotationEnabled() != null && metadata.getRotationEnabled())
+                    ? "✅ Rotation ON" : "❌ Rotation OFF";
+            metaRow2.add(new Span(rotation));
+
+            String version = (metadata != null && metadata.getCurrentVersion() != null && !metadata.getCurrentVersion().isEmpty())
+                    ? metadata.getCurrentVersion().length() > 12 ? metadata.getCurrentVersion().substring(0, 12) + "…" : metadata.getCurrentVersion()
+                    : "N/A";
+            metaRow2.add(new Span("•"));
+            metaRow2.add(new Span("Ver: " + version));
+            add(metaRow2);
         }
 
         private Button createIconButton(VaadinIcon icon, String tooltip) {
@@ -591,9 +635,37 @@ public class KeyManagementView extends VerticalLayout {
             return btn;
         }
 
-        // ---------------------------------------------------------------------
-        // Edit dialog (alias, description, tags)
-        // ---------------------------------------------------------------------
+        private void toggleKeyStatus() {
+            boolean currentlyEnabled = metadata != null && metadata.getKeyStatus() == IEnumKeyStatus.Types.ENABLED;
+            ConfirmDialog confirm = new ConfirmDialog();
+            confirm.setHeader(currentlyEnabled ? "Disable key" : "Enable key");
+            confirm.setText(currentlyEnabled
+                    ? "Disabling the key prevents any cryptographic operations. Are you sure?"
+                    : "Enabling the key will restore its ability to perform cryptographic operations.");
+            confirm.setCancelable(true);
+            confirm.setConfirmText(currentlyEnabled ? "Disable" : "Enable");
+            confirm.setConfirmButtonTheme(currentlyEnabled ? ButtonVariant.LUMO_ERROR.getVariantName() : ButtonVariant.LUMO_SUCCESS.getVariantName());
+
+            confirm.addConfirmListener(event -> {
+                try {
+                    if (currentlyEnabled) {
+                        kmsApiService.disableKey(keyId);
+                        Notification.show("Key disabled successfully", 3000, Notification.Position.TOP_END)
+                                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                    } else {
+                        kmsApiService.enableKey(keyId);
+                        Notification.show("Key enabled successfully", 3000, Notification.Position.TOP_END)
+                                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                    }
+                    loadKeys(); // refresh the view to reflect status change
+                } catch (Exception ex) {
+                    Notification.show("Failed to toggle key status: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
+                            .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                }
+            });
+            confirm.open();
+        }
+
         private void openUpdateDialog() {
             Dialog dialog = new Dialog();
             dialog.setHeaderTitle("Edit key alias, description & tags");
@@ -695,7 +767,6 @@ public class KeyManagementView extends VerticalLayout {
                         }
                     }
 
-                    // Remove all existing tags
                     if (!currentTags.isEmpty()) {
                         List<String> keysToRemove = currentTags.stream()
                                 .map(ListResourceTagsResponse.Tag::getTagKey)
@@ -707,7 +778,6 @@ public class KeyManagementView extends VerticalLayout {
                         kmsApiService.untagResource(keyId, untagRequest);
                     }
 
-                    // Add new tags
                     if (!newTags.isEmpty()) {
                         List<ListResourceTagsResponse.Tag> tagList = newTags.stream()
                                 .map(t -> ListResourceTagsResponse.Tag.builder()
@@ -749,9 +819,6 @@ public class KeyManagementView extends VerticalLayout {
             return new ArrayList<>();
         }
 
-        // ---------------------------------------------------------------------
-        // Key Details Dialog (includes tags and policy)
-        // ---------------------------------------------------------------------
         private void showKeyDetails() {
             try {
                 ResponseEntity<DescribeKeyResponse> response = kmsApiService.describeKey(keyId);
@@ -760,10 +827,11 @@ public class KeyManagementView extends VerticalLayout {
                     CreateKeyResponse.KeyMetadata meta = desc.getKeyMetadata();
                     Dialog detailsDialog = new Dialog();
                     detailsDialog.setHeaderTitle("Key details");
-                    detailsDialog.setWidth("700px");
+                    detailsDialog.setWidth("750px");
 
                     VerticalLayout content = new VerticalLayout();
                     content.setSpacing(true);
+
                     content.add(detailRow("Key ID", meta.getKeyId()),
                             detailRow("WRN", meta.getWrn()),
                             detailRow("Alias", meta.getKeyAlias()),
@@ -771,12 +839,34 @@ public class KeyManagementView extends VerticalLayout {
                             detailRow("Status", meta.getKeyStatus() != null ? meta.getKeyStatus().name() : "N/A"),
                             detailRow("Key spec", meta.getKeySpec() != null ? meta.getKeySpec().name() : "N/A"),
                             detailRow("Key usage", meta.getKeyUsage() != null ? meta.getKeyUsage().name() : "N/A"),
+                            detailRow("Customer master key spec", meta.getCustomerMasterKeySpec()),
                             detailRow("Origin", meta.getOrigin() != null ? meta.getOrigin().name() : "N/A"),
                             detailRow("Creation date", meta.getCreateDate() != null ? meta.getCreateDate().toString() : "N/A"),
                             detailRow("Rotation enabled", meta.getRotationEnabled() != null ? meta.getRotationEnabled().toString() : "N/A"),
-                            detailRow("Multi-region", meta.getMultiRegion() != null ? meta.getMultiRegion().toString() : "N/A"));
+                            detailRow("Current version", meta.getCurrentVersion()),
+                            detailRow("Key manager", meta.getKeyManager()),
+                            detailRow("Expiration model", meta.getExpirationModel() != null ? meta.getExpirationModel().name() : "N/A"),
+                            detailRow("Multi-region", meta.getMultiRegion() != null ? meta.getMultiRegion().toString() : "false"));
 
-                    // ========== TAGS (show as chips with key=value) ==========
+                    if (meta.getMultiRegionConfiguration() != null) {
+                        try {
+                            String mrConfig = objectMapper.writerWithDefaultPrettyPrinter()
+                                    .writeValueAsString(meta.getMultiRegionConfiguration());
+                            if (mrConfig != null && !mrConfig.isBlank()) {
+                                content.add(detailRow("Multi-region config", mrConfig));
+                            }
+                        } catch (Exception e) {
+                            content.add(detailRow("Multi-region config", meta.getMultiRegionConfiguration().toString()));
+                        }
+                    }
+
+                    if (meta.getEncryptionAlgorithmSpecs() != null && !meta.getEncryptionAlgorithmSpecs().isEmpty()) {
+                        content.add(detailRow("Encryption algorithms", String.join(", ", meta.getEncryptionAlgorithmSpecs())));
+                    }
+                    if (meta.getSigningAlgorithms() != null && !meta.getSigningAlgorithms().isEmpty()) {
+                        content.add(detailRow("Signing algorithms", String.join(", ", meta.getSigningAlgorithms())));
+                    }
+
                     List<ListResourceTagsResponse.Tag> tags = fetchKeyTags(keyId);
                     if (!tags.isEmpty()) {
                         Div tagsContainer = new Div();
@@ -785,11 +875,9 @@ public class KeyManagementView extends VerticalLayout {
                                 .set("flex-wrap", "wrap")
                                 .set("gap", "var(--lumo-space-xs)")
                                 .set("margin-top", "var(--lumo-space-s)");
-
                         Span label = new Span("Tags: ");
                         label.addClassName(LumoUtility.FontWeight.BOLD);
                         tagsContainer.add(label);
-
                         for (ListResourceTagsResponse.Tag tag : tags) {
                             Span chip = new Span(tag.getTagKey() + "=" + tag.getTagValue());
                             chip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
@@ -804,28 +892,22 @@ public class KeyManagementView extends VerticalLayout {
                         content.add(tagsContainer);
                     }
 
-                    // ========== POLICY (pretty‑printed JSON) ==========
                     try {
-                        ResponseEntity<GetKeyPolicyResponse> policyResponse =
-                                kmsApiService.getKeyPolicy(keyId);
+                        ResponseEntity<GetKeyPolicyResponse> policyResponse = kmsApiService.getKeyPolicy(keyId);
                         if (policyResponse.getStatusCode().is2xxSuccessful() && policyResponse.getBody() != null) {
                             Object policyObj = policyResponse.getBody().getPolicy();
                             String prettyPolicy = null;
                             if (policyObj instanceof String) {
-                                // Already a JSON string – pretty‑print it
                                 Object json = objectMapper.readValue((String) policyObj, Object.class);
                                 prettyPolicy = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
                             } else if (policyObj instanceof Map) {
-                                // It's a Map (Jackson already parsed it)
                                 prettyPolicy = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(policyObj);
                             }
                             if (prettyPolicy != null && !prettyPolicy.isBlank()) {
                                 Span label = new Span("Policy: ");
                                 label.addClassName(LumoUtility.FontWeight.BOLD);
                                 content.add(label);
-                                // Use a TextArea to display the formatted JSON
                                 TextArea policyArea = new TextArea();
-                                policyArea.addClassName(LumoUtility.FontWeight.BOLD);
                                 policyArea.setValue(prettyPolicy);
                                 policyArea.setWidthFull();
                                 policyArea.setHeight("300px");
@@ -835,7 +917,6 @@ public class KeyManagementView extends VerticalLayout {
                             }
                         }
                     } catch (Exception e) {
-                        // Policy may not exist – ignore
                         log.warn("Could not fetch or format policy for key {}", keyId, e);
                     }
 
