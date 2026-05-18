@@ -179,11 +179,24 @@ class KeyCard extends VerticalLayout {
         metaRow2.getStyle().set("margin-top", "var(--lumo-space-xs)");
 
         String keyIdDisplay = keyId;
-        if (aliasOrId.equals(keyId)) {
+        /*if (aliasOrId.equals(keyId)) {
             keyIdDisplay = null;
-        }
+        }*/
         if (keyIdDisplay != null) {
-            metaRow2.add(new Span("ID: " + keyIdDisplay));
+            // Instead of a plain Span, create a layout with copy button
+            HorizontalLayout keyIdLayout = new HorizontalLayout();
+            keyIdLayout.setSpacing(false);
+            keyIdLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+            Span keyIdSpan = new Span("ID: " + keyIdDisplay);
+            keyIdSpan.getStyle().set("margin-right", "4px");
+            Button copyBtn = new Button(new Icon(VaadinIcon.COPY_O));
+            copyBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+            copyBtn.setTooltipText("Copy key ID");
+            copyBtn.addClickListener(e -> keyManagementView.copyToClipboard(keyIdDisplay));
+            copyBtn.setWidth("24px");
+            copyBtn.setHeight("24px");
+            keyIdLayout.add(keyIdSpan, copyBtn);
+            metaRow2.add(keyIdLayout);
             metaRow2.add(new Span("•"));
         }
 

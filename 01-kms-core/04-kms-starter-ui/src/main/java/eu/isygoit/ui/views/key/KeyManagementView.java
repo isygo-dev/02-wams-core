@@ -1,6 +1,7 @@
 package eu.isygoit.ui.views.key;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -257,4 +258,17 @@ public class KeyManagementView extends VerticalLayout {
         });
     }
 
+    void copyToClipboard(String text) {
+        UI.getCurrent().getPage().executeJs(
+                "navigator.clipboard.writeText($0).then(() => {" +
+                        "  $0.dispatchEvent(new Event('copy-success'));" +
+                        "}).catch(() => {" +
+                        "  $0.dispatchEvent(new Event('copy-error'));" +
+                        "});",
+                text
+        );
+        // Optional: show a small notification
+        Notification.show("Key ID copied to clipboard", 1500, Notification.Position.TOP_END)
+                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+    }
 }
