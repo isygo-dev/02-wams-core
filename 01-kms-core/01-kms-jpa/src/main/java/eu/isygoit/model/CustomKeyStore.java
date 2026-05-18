@@ -4,7 +4,6 @@ import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumCustomKeyStoreStatus;
 import eu.isygoit.enums.IEnumCustomKeyStoreType;
 import eu.isygoit.model.jakarta.AuditableEntity;
-import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

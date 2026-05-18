@@ -130,7 +130,7 @@ public class KeyManagementService implements IKeyManagementService {
             }
 
             // Create Alias
-            if(StringUtils.hasText(request.getKeyAlias())){
+            if (StringUtils.hasText(request.getKeyAlias())) {
                 KmsAlias kmsAlias = KmsAlias.builder()
                         .tenant(tenant)
                         .targetKeyId(savedKey.getKeyId())
@@ -891,64 +891,60 @@ public class KeyManagementService implements IKeyManagementService {
     }
 
 
+    @Override
+    public void registerKeyInCustomStore(String tenant, Long keyStoreId, String keyId) {
+        log.debug("Registering key {} in custom store {}/{}", keyId, tenant, keyStoreId);
 
+        // Fetch the CustomKeyStore (ensure tenant isolation)
+        CustomKeyStore store = customKeyStoreRepository
+                .findByTenantAndId(tenant, keyStoreId)
+                .orElseThrow(() -> new CustomKeyStoreNotFoundException(
+                        "Custom key store not found: " + keyStoreId));
 
+        // Fetch the KmsKey (ensure tenant isolation)
+        KmsKey key = kmsKeyRepository
+                .findByTenantAndKeyId(tenant, keyId)
+                .orElseThrow(() -> new KmsKeyNotFoundException(
+                        "KMS key not found: " + keyId));
 
+        // Set the bidirectional relationship
+        store.addKey(key);  // updates keyCount and the in‑memory list
 
-        @Override
-        public void registerKeyInCustomStore(String tenant, Long keyStoreId, String keyId) {
-            log.debug("Registering key {} in custom store {}/{}", keyId, tenant, keyStoreId);
+        // Persist both sides (cascade is not configured, so save both)
+        kmsKeyRepository.save(key);
+        customKeyStoreRepository.save(store);
 
-            // Fetch the CustomKeyStore (ensure tenant isolation)
-            CustomKeyStore store = customKeyStoreRepository
-                    .findByTenantAndId(tenant, keyStoreId)
-                    .orElseThrow(() -> new CustomKeyStoreNotFoundException(
-                            "Custom key store not found: " + keyStoreId));
+        log.info("Registered key {} in custom store {}/{}", keyId, tenant, keyStoreId);
+    }
 
-            // Fetch the KmsKey (ensure tenant isolation)
-            KmsKey key = kmsKeyRepository
-                    .findByTenantAndKeyId(tenant, keyId)
-                    .orElseThrow(() -> new KmsKeyNotFoundException(
-                            "KMS key not found: " + keyId));
+    @Override
+    public void unregisterKeyFromCustomStore(String tenant, Long keyStoreId, String keyId) {
+        log.debug("Unregistering key {} from custom store {}/{}", keyId, tenant, keyStoreId);
 
-            // Set the bidirectional relationship
-            store.addKey(key);  // updates keyCount and the in‑memory list
-
-            // Persist both sides (cascade is not configured, so save both)
-            kmsKeyRepository.save(key);
-            customKeyStoreRepository.save(store);
-
-            log.info("Registered key {} in custom store {}/{}", keyId, tenant, keyStoreId);
+        CustomKeyStore store = customKeyStoreRepository
+                .findByTenantAndId(tenant, keyStoreId)
+                .orElse(null);
+        if (store == null) {
+            log.warn("Custom store {} not found – cannot unregister key {}", keyStoreId, keyId);
+            return;
         }
 
-        @Override
-        public void unregisterKeyFromCustomStore(String tenant, Long keyStoreId, String keyId) {
-            log.debug("Unregistering key {} from custom store {}/{}", keyId, tenant, keyStoreId);
-
-            CustomKeyStore store = customKeyStoreRepository
-                    .findByTenantAndId(tenant, keyStoreId)
-                    .orElse(null);
-            if (store == null) {
-                log.warn("Custom store {} not found – cannot unregister key {}", keyStoreId, keyId);
-                return;
-            }
-
-            KmsKey key = kmsKeyRepository
-                    .findByTenantAndKeyId(tenant, keyId)
-                    .orElse(null);
-            if (key == null) {
-                log.warn("KMS key {} not found – cannot unregister from store {}", keyId, keyStoreId);
-                return;
-            }
-
-            store.removeKey(key);
-
-            // Save changes
-            kmsKeyRepository.save(key);
-            customKeyStoreRepository.save(store);
-
-            log.info("Unregistered key {} from custom store {}/{}", keyId, tenant, keyStoreId);
+        KmsKey key = kmsKeyRepository
+                .findByTenantAndKeyId(tenant, keyId)
+                .orElse(null);
+        if (key == null) {
+            log.warn("KMS key {} not found – cannot unregister from store {}", keyId, keyStoreId);
+            return;
         }
+
+        store.removeKey(key);
+
+        // Save changes
+        kmsKeyRepository.save(key);
+        customKeyStoreRepository.save(store);
+
+        log.info("Unregistered key {} from custom store {}/{}", keyId, tenant, keyStoreId);
+    }
 
     @Override
     public int countKeysInCustomKeyStore(String tenant, Long keyStoreId) {

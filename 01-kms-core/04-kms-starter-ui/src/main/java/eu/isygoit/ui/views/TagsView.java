@@ -3,7 +3,8 @@ package eu.isygoit.ui.views;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
 import eu.isygoit.ui.MainLayout;
 
 @Route(value = "tags", layout = MainLayout.class)

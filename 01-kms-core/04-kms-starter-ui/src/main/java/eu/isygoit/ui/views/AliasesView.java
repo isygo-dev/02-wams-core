@@ -193,7 +193,8 @@ public class AliasesView extends VerticalLayout {
                     String alias = descBody.getKeyMetadata().getKeyAlias();
                     if (alias != null && !alias.isEmpty()) return alias + " (" + keyId + ")";
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
             return keyId;
         });
 
@@ -274,8 +275,13 @@ public class AliasesView extends VerticalLayout {
             buildCard();
         }
 
-        public String getAliasName() { return aliasName; }
-        public String getTargetKeyId() { return targetKeyId; }
+        public String getAliasName() {
+            return aliasName;
+        }
+
+        public String getTargetKeyId() {
+            return targetKeyId;
+        }
 
         private void buildCard() {
             setWidthFull();
@@ -383,7 +389,8 @@ public class AliasesView extends VerticalLayout {
                         String alias = descBody.getKeyMetadata().getKeyAlias();
                         if (alias != null && !alias.isEmpty()) return alias + " (" + keyId + ")";
                     }
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
                 return keyId;
             });
             targetKeyCombo.setValue(targetKeyId); // pre-select current

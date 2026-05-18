@@ -5,6 +5,7 @@ package eu.isygoit.enums;
  * <p>
  * Represents the intended use of the key material.
  * </p>
+ *
  * @see <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_KeyMetadata.html#KMS-Type-KeyMetadata-KeyUsage">AWS KeyUsage</a>
  */
 public interface IEnumKeyUsage {

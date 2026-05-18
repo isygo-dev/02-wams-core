@@ -5,6 +5,7 @@ package eu.isygoit.enums;
  * <p>
  * Represents the cryptographic key specification (type and length).
  * </p>
+ *
  * @see <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_KeyMetadata.html#KMS-Type-KeyMetadata-KeySpec">AWS KeySpec</a>
  */
 public interface IEnumKeySpec {

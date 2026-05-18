@@ -1,6 +1,8 @@
 # KMS Service API Documentation
 
-A comprehensive REST API for managing cryptographic keys, performing encryption/decryption operations, and securing sensitive data. This service supports symmetric keys (AES-256), asymmetric keys (RSA, ECC), key rotation, multi-region configurations, grants, and Bring Your Own Key (BYOK) functionality.
+A comprehensive REST API for managing cryptographic keys, performing encryption/decryption operations, and securing
+sensitive data. This service supports symmetric keys (AES-256), asymmetric keys (RSA, ECC), key rotation, multi-region
+configurations, grants, and Bring Your Own Key (BYOK) functionality.
 
 ---
 
@@ -43,9 +45,12 @@ A comprehensive REST API for managing cryptographic keys, performing encryption/
 ### 1. Create Key
 
 **Description**  
-Creates a new customer-managed key (CMK) in the KMS service. Supports both symmetric (AES-256) and asymmetric (RSA, ECC) keys. The key can be configured with a description, usage policy, key spec, origin (WAMS-managed or EXTERNAL for BYOK), tags, and multi-region capabilities.
+Creates a new customer-managed key (CMK) in the KMS service. Supports both symmetric (AES-256) and asymmetric (RSA, ECC)
+keys. The key can be configured with a description, usage policy, key spec, origin (WAMS-managed or EXTERNAL for BYOK),
+tags, and multi-region capabilities.
 
 **HTTP Method & Endpoint**
+
 ```
 POST /keys
 Content-Type: application/json
@@ -88,7 +93,9 @@ curl -X POST http://localhost:8080/keys \
 ```
 
 **Real Use Case**  
-A financial services company needs to encrypt customer credit card data stored in their RDS database. They create a CMK to ensure PCI-DSS compliance. The key is tagged with environment and application metadata for audit trails, and only applications with explicit IAM permissions can use the key for encryption.
+A financial services company needs to encrypt customer credit card data stored in their RDS database. They create a CMK
+to ensure PCI-DSS compliance. The key is tagged with environment and application metadata for audit trails, and only
+applications with explicit IAM permissions can use the key for encryption.
 
 **Internal Behavior**
 
@@ -106,7 +113,8 @@ A financial services company needs to encrypt customer credit card data stored i
 ### 2. Describe Key
 
 **Description**  
-Retrieves detailed metadata about a KMS key, including its WRN, state (Enabled/Disabled/PendingDeletion), creation date, rotation status, key material origin, and multi-region configuration.
+Retrieves detailed metadata about a KMS key, including its WRN, state (Enabled/Disabled/PendingDeletion), creation date,
+rotation status, key material origin, and multi-region configuration.
 
 **Note:** The `keyId` parameter accepts a key ID, alias, or WRN (see resolver above).
 
@@ -154,7 +162,9 @@ curl -X GET "http://localhost:8080/keys/wrn:wams:kms:us-east-1:123456789012:key:
 ```
 
 **Real Use Case**  
-A DevOps team audits all KMS keys quarterly to verify rotation status. They use this API to retrieve metadata for every key and identify keys that haven't been rotated in over 90 days, triggering a manual review and rotation process for compliance.
+A DevOps team audits all KMS keys quarterly to verify rotation status. They use this API to retrieve metadata for every
+key and identify keys that haven't been rotated in over 90 days, triggering a manual review and rotation process for
+compliance.
 
 **Internal Behavior**
 
@@ -170,7 +180,8 @@ A DevOps team audits all KMS keys quarterly to verify rotation status. They use 
 ### 3. List Keys
 
 **Description**  
-Returns a paginated list of all KMS keys in the account. Each entry includes the key ID and WRN, supporting pagination with limit and nextToken parameters.
+Returns a paginated list of all KMS keys in the account. Each entry includes the key ID and WRN, supporting pagination
+with limit and nextToken parameters.
 
 **HTTP Method & Endpoint**
 
@@ -205,7 +216,9 @@ curl -X GET "http://localhost:8080/keys?limit=50&nextToken=abc123" \
 ```
 
 **Real Use Case**  
-An organization's security team uses this API to build an automated inventory of all encryption keys across the account. They export the list to their CMDB (Configuration Management Database) daily and generate reports on key ownership, rotation status, and usage patterns.
+An organization's security team uses this API to build an automated inventory of all encryption keys across the account.
+They export the list to their CMDB (Configuration Management Database) daily and generate reports on key ownership,
+rotation status, and usage patterns.
 
 **Internal Behavior**
 
@@ -221,7 +234,9 @@ An organization's security team uses this API to build an automated inventory of
 ### 4. Schedule Key Deletion
 
 **Description**  
-Schedules a KMS key for deletion with a configurable waiting period (7–30 days). During the waiting period, the key cannot be used and its state becomes 'PendingDeletion'. This provides a safety mechanism to prevent accidental key deletion.
+Schedules a KMS key for deletion with a configurable waiting period (7–30 days). During the waiting period, the key
+cannot be used and its state becomes 'PendingDeletion'. This provides a safety mechanism to prevent accidental key
+deletion.
 
 **Note:** The `keyId` parameter accepts a key ID, alias, or WRN (see resolver above).
 
@@ -254,7 +269,9 @@ curl -X DELETE "http://localhost:8080/keys/alias:production-db-key/schedule-dele
 ```
 
 **Real Use Case**  
-When decommissioning a legacy application, the DevOps team schedules its encryption key for deletion with a 30-day waiting period. This allows time to verify that no running processes still depend on the key. After 30 days with no issues, they proceed with permanent deletion.
+When decommissioning a legacy application, the DevOps team schedules its encryption key for deletion with a 30-day
+waiting period. This allows time to verify that no running processes still depend on the key. After 30 days with no
+issues, they proceed with permanent deletion.
 
 **Internal Behavior**
 
@@ -272,7 +289,8 @@ When decommissioning a legacy application, the DevOps team schedules its encrypt
 ### 5. Cancel Key Deletion
 
 **Description**  
-Cancels a previously scheduled key deletion, restoring the key to its previous state (Enabled or Disabled). This is useful if the scheduled deletion was initiated by mistake or if new dependencies on the key are discovered.
+Cancels a previously scheduled key deletion, restoring the key to its previous state (Enabled or Disabled). This is
+useful if the scheduled deletion was initiated by mistake or if new dependencies on the key are discovered.
 
 **Note:** The `keyId` parameter accepts a key ID, alias, or WRN (see resolver above).
 
@@ -303,7 +321,9 @@ curl -X POST "http://localhost:8080/keys/alias:production-db-key/cancel-deletion
 ```
 
 **Real Use Case**  
-A database team accidentally schedules deletion of a production database encryption key. Before the waiting period expires, they discover the mistake and call this API to cancel the deletion and restore the key, preventing a catastrophic outage.
+A database team accidentally schedules deletion of a production database encryption key. Before the waiting period
+expires, they discover the mistake and call this API to cancel the deletion and restore the key, preventing a
+catastrophic outage.
 
 **Internal Behavior**
 
@@ -320,7 +340,8 @@ A database team accidentally schedules deletion of a production database encrypt
 ### 6. Delete Key (Permanent)
 
 **Description**  
-Permanently deletes a KMS key. This operation is irreversible and should only be used after the key has been scheduled for deletion and the waiting period has expired. Once deleted, any data encrypted with this key cannot be decrypted.
+Permanently deletes a KMS key. This operation is irreversible and should only be used after the key has been scheduled
+for deletion and the waiting period has expired. Once deleted, any data encrypted with this key cannot be decrypted.
 
 **Note:** The `keyId` parameter accepts a key ID, alias, or WRN (see resolver above).
 
@@ -353,7 +374,8 @@ curl -X DELETE "http://localhost:8080/keys/alias:legacy-key" \
 ```
 
 **Real Use Case**  
-After the 30-day waiting period expires and all systems confirm the key is no longer needed, an automated compliance tool calls this API to permanently delete the key, freeing up key quotas and ensuring no accidental reuse.
+After the 30-day waiting period expires and all systems confirm the key is no longer needed, an automated compliance
+tool calls this API to permanently delete the key, freeing up key quotas and ensuring no accidental reuse.
 
 **Internal Behavior**
 
@@ -370,7 +392,8 @@ After the 30-day waiting period expires and all systems confirm the key is no lo
 ### 7. Update Key Rotation
 
 **Description**  
-Enables or disables automatic key rotation for a CMK. When enabled, WAMS KMS automatically rotates the key material annually. Key rotation strengthens security by limiting the amount of data encrypted with a single key material version.
+Enables or disables automatic key rotation for a CMK. When enabled, WAMS KMS automatically rotates the key material
+annually. Key rotation strengthens security by limiting the amount of data encrypted with a single key material version.
 
 **Note:** The `keyId` parameter accepts a key ID, alias, or WRN (see resolver above).
 
@@ -413,7 +436,9 @@ curl -X PATCH "http://localhost:8080/keys/alias:production-db-key/rotation" \
 ```
 
 **Real Use Case**  
-A healthcare organization adopts a policy requiring all encryption keys to rotate annually for HIPAA compliance. They use this API to enable rotation on all production encryption keys, and KMS automatically rotates each key every 365 days without manual intervention.
+A healthcare organization adopts a policy requiring all encryption keys to rotate annually for HIPAA compliance. They
+use this API to enable rotation on all production encryption keys, and KMS automatically rotates each key every 365 days
+without manual intervention.
 
 **Internal Behavior**
 
@@ -432,7 +457,8 @@ A healthcare organization adopts a policy requiring all encryption keys to rotat
 ### 8. Encrypt
 
 **Description**  
-Encrypts plaintext data using a KMS key. The plaintext must be up to 4 KB in size. Returns an encrypted ciphertext blob that can only be decrypted using the same KMS key or a replica in a multi-region setup.
+Encrypts plaintext data using a KMS key. The plaintext must be up to 4 KB in size. Returns an encrypted ciphertext blob
+that can only be decrypted using the same KMS key or a replica in a multi-region setup.
 
 **Note:** The `KeyId` parameter accepts a key ID, alias, or WRN (see resolver above).
 
@@ -482,7 +508,9 @@ curl -X POST "http://localhost:8080/encrypt" \
 ```
 
 **Real Use Case**  
-An e-commerce platform encrypts customer payment information before storing it in the database. Each credit card number is encrypted with the same key, and the ciphertext is stored in the payment records table. Only authorized services with KMS decrypt permissions can access the original card data.
+An e-commerce platform encrypts customer payment information before storing it in the database. Each credit card number
+is encrypted with the same key, and the ciphertext is stored in the payment records table. Only authorized services with
+KMS decrypt permissions can access the original card data.
 
 **Internal Behavior**
 
@@ -501,7 +529,8 @@ An e-commerce platform encrypts customer payment information before storing it i
 ### 9. Decrypt
 
 **Description**  
-Decrypts a ciphertext blob encrypted by the Encrypt operation. Returns the plaintext. The user must have permission to use the key (via IAM policy or grant) to decrypt data.
+Decrypts a ciphertext blob encrypted by the Encrypt operation. Returns the plaintext. The user must have permission to
+use the key (via IAM policy or grant) to decrypt data.
 
 **HTTP Method & Endpoint**
 
@@ -536,7 +565,9 @@ curl -X POST "http://localhost:8080/decrypt" \
 ```
 
 **Real Use Case**  
-When a customer requests a refund, the payment processing system retrieves the encrypted credit card number from the database and calls this API to decrypt it. The plaintext is temporarily held in memory for the refund operation, then immediately discarded.
+When a customer requests a refund, the payment processing system retrieves the encrypted credit card number from the
+database and calls this API to decrypt it. The plaintext is temporarily held in memory for the refund operation, then
+immediately discarded.
 
 **Internal Behavior**
 
@@ -555,7 +586,9 @@ When a customer requests a refund, the payment processing system retrieves the e
 ### 10. Generate Data Key
 
 **Description**  
-Generates a unique symmetric data key and returns both a plaintext and encrypted copy. The plaintext key is used for local encryption, while the encrypted key is stored alongside the encrypted data. This enables envelope encryption pattern, protecting the data key with the KMS key.
+Generates a unique symmetric data key and returns both a plaintext and encrypted copy. The plaintext key is used for
+local encryption, while the encrypted key is stored alongside the encrypted data. This enables envelope encryption
+pattern, protecting the data key with the KMS key.
 
 **Note:** The `KeyId` parameter accepts a key ID, alias, or WRN (see resolver above).
 
@@ -603,7 +636,10 @@ curl -X POST "http://localhost:8080/datakey/generate" \
 ```
 
 **Real Use Case**  
-A cloud storage service stores millions of user files. Instead of encrypting each file directly with the master KMS key (which would be slow and costly), they use this API to generate a unique data key for each file. The file is encrypted locally with the plaintext key, then the encrypted data key is stored with the file. When decryption is needed, they decrypt the data key first, then decrypt the file.
+A cloud storage service stores millions of user files. Instead of encrypting each file directly with the master KMS
+key (which would be slow and costly), they use this API to generate a unique data key for each file. The file is
+encrypted locally with the plaintext key, then the encrypted data key is stored with the file. When decryption is
+needed, they decrypt the data key first, then decrypt the file.
 
 **Internal Behavior**
 
@@ -620,7 +656,8 @@ A cloud storage service stores millions of user files. Instead of encrypting eac
 ### 11. Generate Data Key Pair
 
 **Description**  
-Generates an asymmetric data key pair (RSA or ECC) for envelope encryption with asymmetric keys. Returns the public key (plaintext) and the encrypted private key. The private key never leaves KMS in plaintext form.
+Generates an asymmetric data key pair (RSA or ECC) for envelope encryption with asymmetric keys. Returns the public
+key (plaintext) and the encrypted private key. The private key never leaves KMS in plaintext form.
 
 **Note:** The `KeyId` parameter accepts a key ID, alias, or WRN (see resolver above).
 
@@ -666,7 +703,9 @@ curl -X POST "http://localhost:8080/datakey/generate-pair" \
 ```
 
 **Real Use Case**  
-A messaging application needs to establish end-to-end encrypted sessions. For each user session, the server generates an ephemeral RSA key pair. The public key is sent to the client, while the encrypted private key is stored in the session database. Only the KMS can decrypt the private key when needed for message decryption.
+A messaging application needs to establish end-to-end encrypted sessions. For each user session, the server generates an
+ephemeral RSA key pair. The public key is sent to the client, while the encrypted private key is stored in the session
+database. Only the KMS can decrypt the private key when needed for message decryption.
 
 **Internal Behavior**
 
@@ -683,7 +722,8 @@ A messaging application needs to establish end-to-end encrypted sessions. For ea
 ### 12. Sign
 
 **Description**  
-Creates a digital signature for data using an asymmetric KMS key (RSA or ECC). The signature proves that specific data was signed by the key owner and provides non-repudiation.
+Creates a digital signature for data using an asymmetric KMS key (RSA or ECC). The signature proves that specific data
+was signed by the key owner and provides non-repudiation.
 
 **Note:** The `KeyId` parameter accepts a key ID, alias, or WRN (see resolver above).
 
@@ -729,7 +769,9 @@ curl -X POST "http://localhost:8080/sign" \
 ```
 
 **Real Use Case**  
-A legal tech company uses this API to digitally sign electronic contracts. Each contract is hashed and signed with an asymmetric key. The signature is stored with the contract. Later, any party can verify the signature using the public key to prove that the contract was signed by the company and has not been altered.
+A legal tech company uses this API to digitally sign electronic contracts. Each contract is hashed and signed with an
+asymmetric key. The signature is stored with the contract. Later, any party can verify the signature using the public
+key to prove that the contract was signed by the company and has not been altered.
 
 **Internal Behavior**
 
@@ -746,7 +788,8 @@ A legal tech company uses this API to digitally sign electronic contracts. Each 
 ### 13. Verify
 
 **Description**  
-Verifies a digital signature created by the Sign operation. Confirms that the signature is valid and was created using the specified asymmetric key.
+Verifies a digital signature created by the Sign operation. Confirms that the signature is valid and was created using
+the specified asymmetric key.
 
 **Note:** The `KeyId` parameter accepts a key ID, alias, or WRN (see resolver above).
 
@@ -791,7 +834,9 @@ curl -X POST "http://localhost:8080/verify" \
 ```
 
 **Real Use Case**  
-A SaaS platform receives digitally signed API requests from partners. Before processing each request, the platform calls this API to verify the signature. If the signature is invalid, the request is rejected. This ensures that only authorized partners can access certain API endpoints.
+A SaaS platform receives digitally signed API requests from partners. Before processing each request, the platform calls
+this API to verify the signature. If the signature is invalid, the request is rejected. This ensures that only
+authorized partners can access certain API endpoints.
 
 **Internal Behavior**
 
@@ -810,7 +855,8 @@ A SaaS platform receives digitally signed API requests from partners. Before pro
 ### 14. Get Key Policy
 
 **Description**  
-Retrieves the resource-based policy document attached to a KMS key. Policies define who can perform which operations on the key.
+Retrieves the resource-based policy document attached to a KMS key. Policies define who can perform which operations on
+the key.
 
 **Note:** The `keyId` parameter accepts a key ID, alias, or WRN (see resolver above).
 
@@ -865,7 +911,9 @@ curl -X GET "http://localhost:8080/keys/alias:production-db-key/policy" \
 ```
 
 **Real Use Case**  
-A security auditor retrieves the policy of a key to verify that only authorized roles and services have encryption/decryption permissions. They check that the policy follows the principle of least privilege and doesn't grant overly broad permissions.
+A security auditor retrieves the policy of a key to verify that only authorized roles and services have
+encryption/decryption permissions. They check that the policy follows the principle of least privilege and doesn't grant
+overly broad permissions.
 
 **Internal Behavior**
 
@@ -881,7 +929,8 @@ A security auditor retrieves the policy of a key to verify that only authorized 
 ### 15. Put Key Policy
 
 **Description**  
-Replaces the resource-based policy document for a KMS key. This completely replaces the existing policy with the new one.
+Replaces the resource-based policy document for a KMS key. This completely replaces the existing policy with the new
+one.
 
 **Note:** The `keyId` parameter accepts a key ID, alias, or WRN (see resolver above).
 
@@ -936,7 +985,9 @@ curl -X PUT "http://localhost:8080/keys/alias:production-db-key/policy" \
 ```
 
 **Real Use Case**  
-When a new microservice is deployed, the infrastructure team updates the key policy to grant the microservice's IAM role permission to encrypt and decrypt data. The policy update is reviewed and approved through the CI/CD pipeline before being applied.
+When a new microservice is deployed, the infrastructure team updates the key policy to grant the microservice's IAM role
+permission to encrypt and decrypt data. The policy update is reviewed and approved through the CI/CD pipeline before
+being applied.
 
 **Internal Behavior**
 
@@ -955,7 +1006,9 @@ When a new microservice is deployed, the infrastructure team updates the key pol
 ### 16. Create Grant
 
 **Description**  
-Creates a grant, which is a flexible permission mechanism for temporary or delegated access. Grants are useful for giving applications, services, or cross-account principals limited permissions on a key without modifying the key policy. Grants can be revoked instantly.
+Creates a grant, which is a flexible permission mechanism for temporary or delegated access. Grants are useful for
+giving applications, services, or cross-account principals limited permissions on a key without modifying the key
+policy. Grants can be revoked instantly.
 
 **Note:** The `KeyId` parameter accepts a key ID, alias, or WRN (see resolver above).
 
@@ -1000,7 +1053,9 @@ curl -X POST "http://localhost:8080/keys/alias:production-db-key/grants" \
 ```
 
 **Real Use Case**  
-A temporary Lambda function needs to decrypt data from S3 for a one-time batch processing job. Instead of modifying the key policy, the infrastructure team creates a grant that expires in 2 hours. After the Lambda function completes and terminates, the grant automatically expires, and the Lambda function can no longer use the key.
+A temporary Lambda function needs to decrypt data from S3 for a one-time batch processing job. Instead of modifying the
+key policy, the infrastructure team creates a grant that expires in 2 hours. After the Lambda function completes and
+terminates, the grant automatically expires, and the Lambda function can no longer use the key.
 
 **Internal Behavior**
 
@@ -1017,7 +1072,8 @@ A temporary Lambda function needs to decrypt data from S3 for a one-time batch p
 ### 17. Revoke Grant
 
 **Description**  
-Revokes a grant by grant ID and key ID. Similar to retiring a grant but can only be done by the key owner (not by the grantee).
+Revokes a grant by grant ID and key ID. Similar to retiring a grant but can only be done by the key owner (not by the
+grantee).
 
 **Note:** The `keyId` parameter accepts a key ID, alias, or WRN (see resolver above).
 
@@ -1047,7 +1103,8 @@ curl -X DELETE "http://localhost:8080/keys/alias:production-db-key/grants/0c2374
 ```
 
 **Real Use Case**  
-A team's project is cancelled, and the grant created for that project needs to be revoked. The key owner immediately calls this API to revoke the grant, preventing the team from continuing to use the key.
+A team's project is cancelled, and the grant created for that project needs to be revoked. The key owner immediately
+calls this API to revoke the grant, preventing the team from continuing to use the key.
 
 **Internal Behavior**
 
@@ -1066,7 +1123,9 @@ A team's project is cancelled, and the grant created for that project needs to b
 ### 18. Get Parameters for Import
 
 **Description**  
-Returns a public key and import token needed to import your own key material (BYOK). The public key is used to encrypt your key material externally, and the token binds the encrypted material to the KMS key. This is a two-step process that ensures key material never exists in plaintext in WAMS.
+Returns a public key and import token needed to import your own key material (BYOK). The public key is used to encrypt
+your key material externally, and the token binds the encrypted material to the KMS key. This is a two-step process that
+ensures key material never exists in plaintext in WAMS.
 
 **HTTP Method & Endpoint**
 
@@ -1106,7 +1165,9 @@ curl -X POST "http://localhost:8080/keys/alias:byok-key/import-parameters" \
 ```
 
 **Real Use Case**  
-A financial institution with strict key management requirements wants to generate encryption keys on their own hardware security module (HSM) and import them into WAMS KMS. The security team calls this API, uses the returned public key to encrypt their HSM-generated key material, and then imports it in the next step.
+A financial institution with strict key management requirements wants to generate encryption keys on their own hardware
+security module (HSM) and import them into WAMS KMS. The security team calls this API, uses the returned public key to
+encrypt their HSM-generated key material, and then imports it in the next step.
 
 **Internal Behavior**
 
@@ -1123,7 +1184,8 @@ A financial institution with strict key management requirements wants to generat
 ### 19. Import Key Material
 
 **Description**  
-Imports your own key material (encrypted with the public key from Get Parameters for Import) into a KMS key created with origin = EXTERNAL. Once imported, the key can be used immediately for encryption/decryption operations.
+Imports your own key material (encrypted with the public key from Get Parameters for Import) into a KMS key created with
+origin = EXTERNAL. Once imported, the key can be used immediately for encryption/decryption operations.
 
 **Note:** The `keyId` parameter accepts a key ID, alias, or WRN (see resolver above).
 
@@ -1164,7 +1226,9 @@ curl -X POST "http://localhost:8080/keys/alias:byok-key/import" \
 ```
 
 **Real Use Case**  
-Continuing the HSM scenario: after the security team encrypts their key material with the public key, they call this API with the encrypted material and import token. The key material is never exposed in plaintext to WAMS systems, satisfying their compliance requirements. The key is now ready for use.
+Continuing the HSM scenario: after the security team encrypts their key material with the public key, they call this API
+with the encrypted material and import token. The key material is never exposed in plaintext to WAMS systems, satisfying
+their compliance requirements. The key is now ready for use.
 
 **Internal Behavior**
 
@@ -1183,7 +1247,8 @@ Continuing the HSM scenario: after the security team encrypts their key material
 ### 20. Create Custom Key Store
 
 **Description**  
-Creates a custom key store backed by a CloudHSM cluster or external proxy (XKS - External Key Store). Custom key stores allow you to store and use key material in your own hardware while leveraging WAMS KMS APIs.
+Creates a custom key store backed by a CloudHSM cluster or external proxy (XKS - External Key Store). Custom key stores
+allow you to store and use key material in your own hardware while leveraging WAMS KMS APIs.
 
 **HTTP Method & Endpoint**
 
@@ -1215,7 +1280,9 @@ curl -X POST "http://localhost:8080/custom-key-stores" \
 ```
 
 **Real Use Case**  
-A regulated financial institution requires key material to be stored on their own CloudHSM cluster for regulatory compliance. They create a custom key store pointing to their CloudHSM cluster, allowing them to use WAMS KMS APIs while maintaining full control of key material storage.
+A regulated financial institution requires key material to be stored on their own CloudHSM cluster for regulatory
+compliance. They create a custom key store pointing to their CloudHSM cluster, allowing them to use WAMS KMS APIs while
+maintaining full control of key material storage.
 
 **Internal Behavior**
 
@@ -1233,111 +1300,111 @@ A regulated financial institution requires key material to be stored on their ow
 
 ### Core Cryptographic Terms
 
-| Term | Definition | Technical Context |
-|------|-----------|-------------------|
-| AES | Advanced Encryption Standard | Symmetric block cipher, NIST standard. Key sizes: 128, 192, 256 bits. Used for data encryption. |
-| RSA | Rivest-Shamir-Adleman | Asymmetric cryptosystem for encryption and digital signatures. Security based on integer factorization. |
-| ECC | Elliptic Curve Cryptography | Asymmetric cryptography using elliptic curve mathematics. Smaller key sizes than RSA for equivalent security. |
-| HMAC | Hash-based Message Authentication Code | Message authentication using cryptographic hash function + secret key. Provides integrity and authenticity. |
-| DEK | Data Encryption Key | Symmetric key used to encrypt actual data (payload). Typically ephemeral and per-item. |
-| KEK | Key Encryption Key | Key used to encrypt other keys (DEKs). Core component of envelope encryption. |
-| CMK | Customer Master Key | Primary key in KMS used to protect other keys or small amounts of data. |
-| BYOK | Bring Your Own Key | Ability to import externally generated key material into KMS. |
-| HSM | Hardware Security Module | Physical device for secure key generation, storage, and cryptographic operations. |
-| XKS | External Key Store | KMS feature using key material stored in external systems via proxy. |
+| Term | Definition                             | Technical Context                                                                                             |
+|------|----------------------------------------|---------------------------------------------------------------------------------------------------------------|
+| AES  | Advanced Encryption Standard           | Symmetric block cipher, NIST standard. Key sizes: 128, 192, 256 bits. Used for data encryption.               |
+| RSA  | Rivest-Shamir-Adleman                  | Asymmetric cryptosystem for encryption and digital signatures. Security based on integer factorization.       |
+| ECC  | Elliptic Curve Cryptography            | Asymmetric cryptography using elliptic curve mathematics. Smaller key sizes than RSA for equivalent security. |
+| HMAC | Hash-based Message Authentication Code | Message authentication using cryptographic hash function + secret key. Provides integrity and authenticity.   |
+| DEK  | Data Encryption Key                    | Symmetric key used to encrypt actual data (payload). Typically ephemeral and per-item.                        |
+| KEK  | Key Encryption Key                     | Key used to encrypt other keys (DEKs). Core component of envelope encryption.                                 |
+| CMK  | Customer Master Key                    | Primary key in KMS used to protect other keys or small amounts of data.                                       |
+| BYOK | Bring Your Own Key                     | Ability to import externally generated key material into KMS.                                                 |
+| HSM  | Hardware Security Module               | Physical device for secure key generation, storage, and cryptographic operations.                             |
+| XKS  | External Key Store                     | KMS feature using key material stored in external systems via proxy.                                          |
 
 ### Protocol & Algorithm Terms
 
-| Term | Definition | Usage |
-|------|-----------|-------|
-| OAEP | Optimal Asymmetric Encryption Padding | Padding scheme for RSA encryption. Provides semantic security against chosen plaintext attacks. |
-| PSS | Probabilistic Signature Scheme | Padding scheme for RSA signatures. Provides provable security. |
-| GCM | Galois/Counter Mode | Authenticated encryption mode for block ciphers. Provides confidentiality + integrity. |
-| CBC | Cipher Block Chaining | Block cipher mode where each plaintext block XORed with previous ciphertext block. |
-| IV | Initialization Vector | Random/nonce value used to ensure same plaintext produces different ciphertext. |
-| Nonce | Number Used Once | Cryptographic value used only once per cryptographic operation. Prevents replay attacks. |
-| Salt | N/A | Random data added to hashing input to prevent rainbow table attacks. |
+| Term  | Definition                            | Usage                                                                                           |
+|-------|---------------------------------------|-------------------------------------------------------------------------------------------------|
+| OAEP  | Optimal Asymmetric Encryption Padding | Padding scheme for RSA encryption. Provides semantic security against chosen plaintext attacks. |
+| PSS   | Probabilistic Signature Scheme        | Padding scheme for RSA signatures. Provides provable security.                                  |
+| GCM   | Galois/Counter Mode                   | Authenticated encryption mode for block ciphers. Provides confidentiality + integrity.          |
+| CBC   | Cipher Block Chaining                 | Block cipher mode where each plaintext block XORed with previous ciphertext block.              |
+| IV    | Initialization Vector                 | Random/nonce value used to ensure same plaintext produces different ciphertext.                 |
+| Nonce | Number Used Once                      | Cryptographic value used only once per cryptographic operation. Prevents replay attacks.        |
+| Salt  | N/A                                   | Random data added to hashing input to prevent rainbow table attacks.                            |
 
 ### KMS Architecture Terms
 
-| Term | Definition |
-|------|-----------|
-| WRN | WAMS Resource Name - Unique identifier for WAMS resources. Format: `wrn:wams:service:region:account:resource` |
-| Key Material | Actual cryptographic key bits. Never exposed from KMS for CMKs. |
-| Key Rotation | Replacing key material with new version while retaining old versions for decryption. |
-| Key Version | Specific generation of key material. Multiple versions can coexist during rotation. |
-| Key State | Current lifecycle status: Enabled, Disabled, PendingDeletion, PendingImport. |
-| Grant | Temporary permission mechanism allowing delegated access without modifying key policy. |
-| Grant Token | Opaque token returned during grant creation, usable immediately. |
-| Encryption Context | Key-value pairs bound to ciphertext. Must match for decryption. Provides authenticated data. |
+| Term               | Definition                                                                                                    |
+|--------------------|---------------------------------------------------------------------------------------------------------------|
+| WRN                | WAMS Resource Name - Unique identifier for WAMS resources. Format: `wrn:wams:service:region:account:resource` |
+| Key Material       | Actual cryptographic key bits. Never exposed from KMS for CMKs.                                               |
+| Key Rotation       | Replacing key material with new version while retaining old versions for decryption.                          |
+| Key Version        | Specific generation of key material. Multiple versions can coexist during rotation.                           |
+| Key State          | Current lifecycle status: Enabled, Disabled, PendingDeletion, PendingImport.                                  |
+| Grant              | Temporary permission mechanism allowing delegated access without modifying key policy.                        |
+| Grant Token        | Opaque token returned during grant creation, usable immediately.                                              |
+| Encryption Context | Key-value pairs bound to ciphertext. Must match for decryption. Provides authenticated data.                  |
 
 ### Security & Compliance Terms
 
-| Term | Definition |
-|------|-----------|
-| FIPS 140-2/140-3 | US government standard for cryptographic module security levels (Level 1-4). |
-| PCI-DSS | Payment Card Industry Data Security Standard. Requires encryption of cardholder data. |
-| HIPAA | Health Insurance Portability and Accountability Act. Protects health information. |
-| GDPR | General Data Protection Regulation. EU data protection law. |
-| SOC 2 | Service Organization Control 2. Audits security, availability, processing integrity. |
-| Non-repudiation | Ability to prove a specific action was performed by a specific entity. |
-| Least Privilege | Security principle granting only necessary permissions for task completion. |
-| Envelope Encryption | Pattern where data encrypted with DEK, DEK encrypted with KEK. |
+| Term                | Definition                                                                            |
+|---------------------|---------------------------------------------------------------------------------------|
+| FIPS 140-2/140-3    | US government standard for cryptographic module security levels (Level 1-4).          |
+| PCI-DSS             | Payment Card Industry Data Security Standard. Requires encryption of cardholder data. |
+| HIPAA               | Health Insurance Portability and Accountability Act. Protects health information.     |
+| GDPR                | General Data Protection Regulation. EU data protection law.                           |
+| SOC 2               | Service Organization Control 2. Audits security, availability, processing integrity.  |
+| Non-repudiation     | Ability to prove a specific action was performed by a specific entity.                |
+| Least Privilege     | Security principle granting only necessary permissions for task completion.           |
+| Envelope Encryption | Pattern where data encrypted with DEK, DEK encrypted with KEK.                        |
 
 ### Infrastructure & Network Terms
 
-| Term | Definition |
-|------|-----------|
-| CloudHSM | AWS-managed HSM service providing single-tenant HSM instances. |
-| VPC | Virtual Private Cloud - Isolated network segment within AWS cloud. |
-| TLS | Transport Layer Security - Protocol for secure network communications. |
+| Term      | Definition                                                                           |
+|-----------|--------------------------------------------------------------------------------------|
+| CloudHSM  | AWS-managed HSM service providing single-tenant HSM instances.                       |
+| VPC       | Virtual Private Cloud - Isolated network segment within AWS cloud.                   |
+| TLS       | Transport Layer Security - Protocol for secure network communications.               |
 | XKS Proxy | External Key Store proxy - Interface between KMS and external key management system. |
-| CMDB | Configuration Management Database - Repository of IT infrastructure assets. |
+| CMDB      | Configuration Management Database - Repository of IT infrastructure assets.          |
 
 ### API & Data Format Terms
 
-| Term | Definition |
-|------|-----------|
-| REST | Representational State Transfer - Architectural style for web APIs. |
-| JSON | JavaScript Object Notation - Lightweight data interchange format. |
-| Base64 | Binary-to-text encoding scheme. Used for transmitting binary data in JSON. |
-| UUID | Universally Unique Identifier - 128-bit identifier, standard format: 12345678-1234-1234-1234-123456789abc |
-| Pagination | Technique for splitting large result sets into pages. Uses limit and nextToken. |
+| Term       | Definition                                                                                                |
+|------------|-----------------------------------------------------------------------------------------------------------|
+| REST       | Representational State Transfer - Architectural style for web APIs.                                       |
+| JSON       | JavaScript Object Notation - Lightweight data interchange format.                                         |
+| Base64     | Binary-to-text encoding scheme. Used for transmitting binary data in JSON.                                |
+| UUID       | Universally Unique Identifier - 128-bit identifier, standard format: 12345678-1234-1234-1234-123456789abc |
+| Pagination | Technique for splitting large result sets into pages. Uses limit and nextToken.                           |
 
 ### Key Specifications (KeySpec)
 
-| KeySpec Value | Type | Key Size | Primary Use |
-|---|---|---|---|
-| SYMMETRIC_DEFAULT | Symmetric | 256-bit AES | Encryption/Decryption |
-| RSA_2048 | Asymmetric | 2048-bit | Encryption or Signing |
-| RSA_3072 | Asymmetric | 3072-bit | Encryption or Signing |
-| RSA_4096 | Asymmetric | 4096-bit | Encryption or Signing |
-| ECC_NIST_P256 | Asymmetric | 256-bit ECC | Signing |
-| ECC_NIST_P384 | Asymmetric | 384-bit ECC | Signing |
-| ECC_NIST_P521 | Asymmetric | 521-bit ECC | Signing |
-| ECC_SECG_P256K1 | Asymmetric | 256-bit ECC | Signing (Bitcoin) |
-| HMAC_256 | Symmetric | 256-bit | Generate/Verify MAC |
+| KeySpec Value     | Type       | Key Size    | Primary Use           |
+|-------------------|------------|-------------|-----------------------|
+| SYMMETRIC_DEFAULT | Symmetric  | 256-bit AES | Encryption/Decryption |
+| RSA_2048          | Asymmetric | 2048-bit    | Encryption or Signing |
+| RSA_3072          | Asymmetric | 3072-bit    | Encryption or Signing |
+| RSA_4096          | Asymmetric | 4096-bit    | Encryption or Signing |
+| ECC_NIST_P256     | Asymmetric | 256-bit ECC | Signing               |
+| ECC_NIST_P384     | Asymmetric | 384-bit ECC | Signing               |
+| ECC_NIST_P521     | Asymmetric | 521-bit ECC | Signing               |
+| ECC_SECG_P256K1   | Asymmetric | 256-bit ECC | Signing (Bitcoin)     |
+| HMAC_256          | Symmetric  | 256-bit     | Generate/Verify MAC   |
 
 ### Key Usage Types
 
-| KeyUsage Value | Supported Operations | Key Types |
-|---|---|---|
-| ENCRYPT_DECRYPT | Encrypt, Decrypt, GenerateDataKey | SYMMETRIC_DEFAULT, RSA_* |
-| SIGN_VERIFY | Sign, Verify, GetPublicKey | RSA_, ECC_ |
-| GENERATE_VERIFY_MAC | GenerateMac, VerifyMac | HMAC_* |
+| KeyUsage Value      | Supported Operations              | Key Types                |
+|---------------------|-----------------------------------|--------------------------|
+| ENCRYPT_DECRYPT     | Encrypt, Decrypt, GenerateDataKey | SYMMETRIC_DEFAULT, RSA_* |
+| SIGN_VERIFY         | Sign, Verify, GetPublicKey        | RSA_, ECC_               |
+| GENERATE_VERIFY_MAC | GenerateMac, VerifyMac            | HMAC_*                   |
 
 ### Error Codes
 
-| HTTP Status | Error Code | Description |
-|---|---|---|
-| 400 | ValidationException | Invalid parameter (e.g., key spec + usage mismatch) |
-| 400 | InvalidCiphertextException | Ciphertext corrupted or malformed |
-| 400 | IncorrectKeyException | Ciphertext was encrypted with different key |
-| 403 | AccessDeniedException | Missing IAM permissions |
-| 404 | NotFoundException | Key ID, alias, or grant not found |
-| 409 | ConflictException | Alias already exists or key in invalid state |
-| 500 | DependencyTimeoutException | HSM or external dependency timeout |
-| 500 | KMSInternalException | Internal KMS service error |
+| HTTP Status | Error Code                 | Description                                         |
+|-------------|----------------------------|-----------------------------------------------------|
+| 400         | ValidationException        | Invalid parameter (e.g., key spec + usage mismatch) |
+| 400         | InvalidCiphertextException | Ciphertext corrupted or malformed                   |
+| 400         | IncorrectKeyException      | Ciphertext was encrypted with different key         |
+| 403         | AccessDeniedException      | Missing IAM permissions                             |
+| 404         | NotFoundException          | Key ID, alias, or grant not found                   |
+| 409         | ConflictException          | Alias already exists or key in invalid state        |
+| 500         | DependencyTimeoutException | HSM or external dependency timeout                  |
+| 500         | KMSInternalException       | Internal KMS service error                          |
 
 ---
 
@@ -1353,7 +1420,8 @@ A regulated financial institution requires key material to be stored on their ow
 
 - **Aliases**: Reference keys by alias (e.g., alias/production-db-key) for easier rotation.
 
-- **Key Identifier Flexibility**: Use key IDs for scripts, aliases for application code, and WRNs for audit logs and infrastructure code.
+- **Key Identifier Flexibility**: Use key IDs for scripts, aliases for application code, and WRNs for audit logs and
+  infrastructure code.
 
 - **Grants**: Use for temporary access (Lambda functions, cross-account) instead of policy modifications.
 
@@ -1367,12 +1435,16 @@ A regulated financial institution requires key material to be stored on their ow
 
 ## Summary
 
-This KMS Service API provides a comprehensive suite of cryptographic key management and operations. From basic key creation and deletion to advanced features like envelope encryption, digital signatures, grants, and Bring Your Own Key (BYOK), it supports a wide range of security and compliance requirements.
+This KMS Service API provides a comprehensive suite of cryptographic key management and operations. From basic key
+creation and deletion to advanced features like envelope encryption, digital signatures, grants, and Bring Your Own
+Key (BYOK), it supports a wide range of security and compliance requirements.
 
-**Key Identifier Flexibility**: The API's support for multiple key identifier formats (Key ID, Alias, and WRN) through the resolver ensures that:
+**Key Identifier Flexibility**: The API's support for multiple key identifier formats (Key ID, Alias, and WRN) through
+the resolver ensures that:
 
 - **Applications** can use human-readable aliases that support transparent key rotation
 - **Infrastructure code** can reference keys using fully-qualified WRNs for auditability
 - **Automation** can work with direct key IDs for performance-critical operations
 
-By following best practices and leveraging the API's features appropriately, organizations can build secure, compliant applications that protect sensitive data throughout their lifecycle.
+By following best practices and leveraging the API's features appropriately, organizations can build secure, compliant
+applications that protect sensitive data throughout their lifecycle.

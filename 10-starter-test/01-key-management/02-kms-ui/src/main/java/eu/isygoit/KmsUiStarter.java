@@ -1,8 +1,6 @@
 package eu.isygoit;
 
 
-import eu.isygoit.api.IApiExtractor;
-import eu.isygoit.app.ApplicationContextService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;

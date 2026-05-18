@@ -2,7 +2,7 @@ package eu.isygoit.enums;
 
 /**
  * WAMS KMS Custom Key Store Status alignment.
- *
+ * <p>
  * Represents lifecycle states of CloudHSM / XKS custom key stores.
  */
 public interface IEnumCustomKeyStoreStatus {

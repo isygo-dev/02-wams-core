@@ -24,9 +24,9 @@ public class ExternalKeyProxyInstance {
     private final Long storeId;
     private final String endpoint;
     private final String path;
+    private final ConcurrentHashMap<String, byte[]> remoteKeys = new ConcurrentHashMap<>();
     private boolean connected;
     private String sessionId;
-    private final ConcurrentHashMap<String, byte[]> remoteKeys = new ConcurrentHashMap<>();
 
     public ExternalKeyProxyInstance(Long storeId, String endpoint, String path) {
         this.storeId = storeId;

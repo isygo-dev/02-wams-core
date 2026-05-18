@@ -5,6 +5,7 @@ package eu.isygoit.enums;
  * <p>
  * Represents the source of key material as defined by AWS KMS.
  * </p>
+ *
  * @see <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_KeyMetadata.html#KMS-Type-KeyMetadata-Origin">AWS Origin</a>
  */
 public interface IEnumKeyOrigin {

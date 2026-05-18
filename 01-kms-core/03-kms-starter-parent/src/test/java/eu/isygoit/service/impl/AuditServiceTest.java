@@ -2,7 +2,6 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.KmsDtos.AuditLogResponseDto;
 import eu.isygoit.enums.IKmsActionType;
-import eu.isygoit.service.IAuditService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test class for AuditServiceImpl.
- *
+ * <p>
  * Covers:
  * - Getting audit logs with various date ranges
  * - Logging actions for different KMS operations

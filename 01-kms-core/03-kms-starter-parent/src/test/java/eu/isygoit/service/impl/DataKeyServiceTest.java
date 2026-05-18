@@ -1,8 +1,8 @@
 package eu.isygoit.service.impl;
 
+import eu.isygoit.dto.KmsDtos.GenerateDataKeyPairRequest;
 import eu.isygoit.dto.KmsDtos.GenerateDataKeyRequest;
 import eu.isygoit.dto.KmsDtos.GenerateDataKeyResponse;
-import eu.isygoit.dto.KmsDtos.GenerateDataKeyPairRequest;
 import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.enums.IEnumKeyUsage;
@@ -48,7 +48,7 @@ class DataKeyServiceTest {
         kmsKey.setTenant(TENANT);
         kmsKey.setKeyStatus(IEnumKeyStatus.Types.ENABLED);
         kmsKey.setKeyUsage(IEnumKeyUsage.Types.ENCRYPT_DECRYPT);
-        kmsKey.setKeyMaterial(new byte[]{1,2,3});
+        kmsKey.setKeyMaterial(new byte[]{1, 2, 3});
     }
 
     @Test

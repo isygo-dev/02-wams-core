@@ -2,7 +2,7 @@ package eu.isygoit.enums;
 
 /**
  * WAMS KMS Custom Key Store types.
- *
+ * <p>
  * Aligns with WAMS KMS:
  * - WAMS CloudHSM key store
  * - External Key Store (XKS)

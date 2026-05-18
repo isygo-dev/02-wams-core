@@ -5,6 +5,7 @@ package eu.isygoit.enums;
  * <p>
  * Represents the expiration behavior for imported key material (BYOK).
  * </p>
+ *
  * @see <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_GetParametersForImport.html#KMS-GetParametersForImport-request-ExpirationModel">AWS ExpirationModel</a>
  */
 public interface IEnumKeyExpirationModel {

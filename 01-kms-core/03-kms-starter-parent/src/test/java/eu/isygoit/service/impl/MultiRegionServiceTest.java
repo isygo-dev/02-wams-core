@@ -26,7 +26,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Test class for MultiRegionService.
- *
+ * <p>
  * Covers:
  * - Updating primary region for multi-region keys
  * - Replicating keys to different regions
@@ -385,7 +385,7 @@ public class MultiRegionServiceTest {
 
         ReplicateKeyResponse finalResponse = multiRegionService.replicateKey(TENANT, KEY_ID,
                 ReplicateKeyRequest.builder().replicaRegion(REPLICA_REGION).build());
-        
+
         assertNotNull(finalResponse);
     }
 

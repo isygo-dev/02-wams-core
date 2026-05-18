@@ -3,7 +3,7 @@ package eu.isygoit.model;
 import eu.isygoit.model.jakarta.AbstractEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaConstantSize;
-import eu.isygoit.model.schema.*;
+import eu.isygoit.model.schema.SchemaTableConstantName;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

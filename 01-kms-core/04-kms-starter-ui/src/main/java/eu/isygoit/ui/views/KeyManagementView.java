@@ -58,11 +58,11 @@ public class KeyManagementView extends VerticalLayout {
     private final TextField searchField = new TextField();
     private final ComboBox<String> statusFilter = new ComboBox<>("Status");
     private final ProgressBar loadingBar = new ProgressBar();
+    private final ObjectMapper objectMapper;
     private List<KeyCard> allCards = new ArrayList<>();
     private String currentSearch = "";
     private String currentStatus = "All";
     private List<String> existingAliases = new ArrayList<>();
-    private final ObjectMapper objectMapper;
 
     @Autowired
     public KeyManagementView(KmsApiService kmsApiService, ObjectMapper objectMapper) {
@@ -363,7 +363,8 @@ public class KeyManagementView extends VerticalLayout {
             Map<String, Object> policyMap = null;
             if (!policyField.getValue().isBlank()) {
                 try {
-                    policyMap = objectMapper.readValue(policyField.getValue(), new TypeReference<>() {});
+                    policyMap = objectMapper.readValue(policyField.getValue(), new TypeReference<>() {
+                    });
                 } catch (Exception ex) {
                     String errorMsg = "Invalid JSON in policy field: " + ex.getMessage();
                     errorSpan.setText(errorMsg);
@@ -480,9 +481,17 @@ public class KeyManagementView extends VerticalLayout {
             buildCard();
         }
 
-        public String getKeyId() { return keyId; }
-        public String getAliasOrId() { return aliasOrId; }
-        public String getStatusText() { return statusText; }
+        public String getKeyId() {
+            return keyId;
+        }
+
+        public String getAliasOrId() {
+            return aliasOrId;
+        }
+
+        public String getStatusText() {
+            return statusText;
+        }
 
         private void buildCard() {
             setWidthFull();

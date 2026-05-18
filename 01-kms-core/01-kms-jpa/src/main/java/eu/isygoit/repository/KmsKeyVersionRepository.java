@@ -23,6 +23,7 @@ public interface KmsKeyVersionRepository extends JpaRepository<KmsKeyVersion, Lo
             String keyId,
             IEnumKeyStatus.Types keyStatus
     );
+
     /**
      * List all versions for a key with pagination
      */

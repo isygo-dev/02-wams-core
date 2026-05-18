@@ -2,11 +2,8 @@ package eu.isygoit.validator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -22,9 +19,9 @@ public class KeyPolicyValidator {
      * Validates that the given policy document does not lock out the key administrator.
      * Throws an exception if the safety check fails and bypass flag is false.
      *
-     * @param policyJson          The policy document as a JSON string (or Map serialized to string).
-     * @param bypassSafetyCheck   Whether to bypass the lockout safety check.
-     * @param tenantAccountId     The account/tenant identifier (e.g., "123456789012" or tenant name).
+     * @param policyJson        The policy document as a JSON string (or Map serialized to string).
+     * @param bypassSafetyCheck Whether to bypass the lockout safety check.
+     * @param tenantAccountId   The account/tenant identifier (e.g., "123456789012" or tenant name).
      * @throws IllegalArgumentException if the policy would lock out the administrator and bypass is false.
      */
     public void validatePolicyLockout(String policyJson, Boolean bypassSafetyCheck, String tenantAccountId) {

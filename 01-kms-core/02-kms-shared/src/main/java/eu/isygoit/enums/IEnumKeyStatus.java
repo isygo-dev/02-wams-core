@@ -2,7 +2,7 @@ package eu.isygoit.enums;
 
 /**
  * WAMS KMS Key Status alignment.
- *
+ * <p>
  * Represents lifecycle states of a KMS Key as defined by WAMS KMS API.
  */
 public interface IEnumKeyStatus {

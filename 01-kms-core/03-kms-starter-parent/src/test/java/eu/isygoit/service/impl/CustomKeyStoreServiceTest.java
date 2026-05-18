@@ -134,11 +134,15 @@ class CustomKeyStoreServiceTest {
 
     @Test
     void shouldListCustomKeyStoresWithPagination() {
-        CustomKeyStore s1 = new CustomKeyStore(); s1.setId(10L); s1.setName("a");
-        CustomKeyStore s2 = new CustomKeyStore(); s2.setId(11L); s2.setName("b");
+        CustomKeyStore s1 = new CustomKeyStore();
+        s1.setId(10L);
+        s1.setName("a");
+        CustomKeyStore s2 = new CustomKeyStore();
+        s2.setId(11L);
+        s2.setName("b");
 
         when(customKeyStoreRepository.findByTenantOrderByIdAsc(TENANT,
-                        PageRequest.of(0, 2, Sort.by("createDate").descending())))
+                PageRequest.of(0, 2, Sort.by("createDate").descending())))
                 .thenReturn(List.of(s1, s2));
         ListCustomKeyStoresResponseDto resp = service.listCustomKeyStores(TENANT, 2, null);
         assertNotNull(resp);

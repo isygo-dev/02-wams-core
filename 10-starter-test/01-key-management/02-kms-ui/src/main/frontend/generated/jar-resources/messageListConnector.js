@@ -18,51 +18,51 @@
  * Maps the given items to a new array of items with formatted time.
  */
 function formatItems(items, locale) {
-  const formatter = new Intl.DateTimeFormat(locale, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric'
-  });
+    const formatter = new Intl.DateTimeFormat(locale, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric'
+    });
 
-  return items.map((item) =>
-    item.time
-      ? Object.assign(item, {
-          time: formatter.format(new Date(item.time))
-        })
-      : item
-  );
+    return items.map((item) =>
+        item.time
+            ? Object.assign(item, {
+                time: formatter.format(new Date(item.time))
+            })
+            : item
+    );
 }
 
 window.Vaadin.Flow.messageListConnector = {
-  /**
-   * Fully replaces the items in the list with the given items.
-   */
-  setItems(list, items, locale) {
-    list.items = formatItems(items, locale);
-  },
+    /**
+     * Fully replaces the items in the list with the given items.
+     */
+    setItems(list, items, locale) {
+        list.items = formatItems(items, locale);
+    },
 
-  /**
-   * Sets the text of the item at the given index to the given text.
-   */
-  setItemText(list, text, index) {
-    list.items[index].text = text;
-    list.items = [...list.items];
-  },
+    /**
+     * Sets the text of the item at the given index to the given text.
+     */
+    setItemText(list, text, index) {
+        list.items[index].text = text;
+        list.items = [...list.items];
+    },
 
-  /**
-   * Appends the given text to the text of the item at the given index.
-   */
-  appendItemText(list, appendedText, index) {
-    const currentText = list.items[index].text || '';
-    this.setItemText(list, currentText + appendedText, index);
-  },
+    /**
+     * Appends the given text to the text of the item at the given index.
+     */
+    appendItemText(list, appendedText, index) {
+        const currentText = list.items[index].text || '';
+        this.setItemText(list, currentText + appendedText, index);
+    },
 
-  /**
-   * Adds the given items to the end of the list.
-   */
-  addItems(list, newItems, locale) {
-    list.items = [...(list.items || []), ...formatItems(newItems, locale)];
-  }
+    /**
+     * Adds the given items to the end of the list.
+     */
+    addItems(list, newItems, locale) {
+        list.items = [...(list.items || []), ...formatItems(newItems, locale)];
+    }
 };

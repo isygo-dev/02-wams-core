@@ -31,8 +31,8 @@ public interface IKeyManagementService {
     /**
      * List keys.
      *
-     * @param tenant the tenant
-     * @param limit  the limit
+     * @param tenant    the tenant
+     * @param limit     the limit
      * @param nextToken the next token
      * @return the list keys response dto
      */
@@ -132,18 +132,18 @@ public interface IKeyManagementService {
      * Registers a key as belonging to a specific custom key store.
      * Used when a key is generated inside a custom key store.
      *
-     * @param tenant      the tenant identifier
-     * @param keyStoreId  the custom key store ID
-     * @param keyId       the KMS key ID
+     * @param tenant     the tenant identifier
+     * @param keyStoreId the custom key store ID
+     * @param keyId      the KMS key ID
      */
     void registerKeyInCustomStore(String tenant, Long keyStoreId, String keyId);
 
     /**
      * Unregisters a key from a custom key store (e.g., when key is deleted).
      *
-     * @param tenant      the tenant identifier
-     * @param keyStoreId  the custom key store ID
-     * @param keyId       the KMS key ID
+     * @param tenant     the tenant identifier
+     * @param keyStoreId the custom key store ID
+     * @param keyId      the KMS key ID
      */
     void unregisterKeyFromCustomStore(String tenant, Long keyStoreId, String keyId);
 

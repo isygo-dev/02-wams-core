@@ -1,9 +1,7 @@
 package eu.isygoit.security.config;
 
-import eu.isygoit.filter.jwt.JwtKmsAuthFilter;
 import eu.isygoit.filter.jwt.JwtKmsClientAuthFilter;
 import eu.isygoit.jwt.IJwtService;
-import eu.isygoit.service.ITokenValidationService;
 import eu.isygoit.service.RequestContextService;
 import eu.isygoit.service.TokenServiceApi;
 import lombok.extern.slf4j.Slf4j;

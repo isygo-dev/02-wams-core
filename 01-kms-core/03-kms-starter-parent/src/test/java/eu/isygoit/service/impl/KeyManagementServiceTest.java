@@ -666,7 +666,7 @@ class KeyManagementServiceTest {
                 .keyUsage(null)
                 .build();
 
-        byte[] material = new byte[]{1,2,3};
+        byte[] material = new byte[]{1, 2, 3};
         when(cryptoService.generateKeyMaterial(any())).thenReturn(material);
 
         KmsKey savedKey = KmsKey.builder()
