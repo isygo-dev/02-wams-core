@@ -1,13 +1,11 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.dto.KmsDtos.CreateCustomKeyStoreRequest;
-import eu.isygoit.dto.KmsDtos.CustomKeyStoreResponseDto;
-import eu.isygoit.dto.KmsDtos.ListCustomKeyStoresResponseDto;
+import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.enums.IEnumCustomKeyStoreStatus;
 import eu.isygoit.enums.IEnumCustomKeyStoreType;
 import eu.isygoit.exception.CustomKeyStoreHasKeysException;
 import eu.isygoit.exception.DuplicateCustomKeyStoreNameException;
-import eu.isygoit.model.CustomKeyStore;
+import eu.isygoit.model.KmsCustomKeyStore;
 import eu.isygoit.repository.CustomKeyStoreRepository;
 import eu.isygoit.service.IKeyManagementService;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,16 +65,14 @@ class CustomKeyStoreServiceTest {
         when(customKeyStoreRepository.countByTenant(TENANT)).thenReturn(0L);
         when(customKeyStoreRepository.existsByTenantAndName(TENANT, "store1")).thenReturn(false);
         when(customKeyStoreRepository.save(any())).thenAnswer(i -> {
-            CustomKeyStore s = i.getArgument(0);
+            KmsCustomKeyStore s = i.getArgument(0);
             s.setId(1L);
-            s.setCreatedAt(LocalDateTime.now());
-            s.setUpdatedAt(LocalDateTime.now());
             return s;
         });
 
-        CustomKeyStoreResponseDto resp = service.createCustomKeyStore(TENANT, req);
+        DescribeCustomKeyStoreResponse.CustomKeyStore resp = service.createCustomKeyStore(TENANT, req);
         assertNotNull(resp);
-        assertEquals(1L, resp.getKeyStoreId());
+        assertEquals(1L, resp.getCustomKeyStoreId());
         assertEquals(IEnumCustomKeyStoreStatus.Types.DISCONNECTED, resp.getStatus());
     }
 
@@ -98,7 +94,7 @@ class CustomKeyStoreServiceTest {
 
     @Test
     void shouldConnectAndDisconnectCustomKeyStore() {
-        CustomKeyStore store = new CustomKeyStore();
+        KmsCustomKeyStore store = new KmsCustomKeyStore();
         store.setId(2L);
         store.setTenant(TENANT);
         store.setName("store2");
@@ -120,7 +116,7 @@ class CustomKeyStoreServiceTest {
 
     @Test
     void shouldPreventDeleteWhenKeysExist() {
-        CustomKeyStore store = new CustomKeyStore();
+        KmsCustomKeyStore store = new KmsCustomKeyStore();
         store.setId(3L);
         store.setTenant(TENANT);
         store.setName("store3");
@@ -134,19 +130,19 @@ class CustomKeyStoreServiceTest {
 
     @Test
     void shouldListCustomKeyStoresWithPagination() {
-        CustomKeyStore s1 = new CustomKeyStore();
+        KmsCustomKeyStore s1 = new KmsCustomKeyStore();
         s1.setId(10L);
         s1.setName("a");
-        CustomKeyStore s2 = new CustomKeyStore();
+        KmsCustomKeyStore s2 = new KmsCustomKeyStore();
         s2.setId(11L);
         s2.setName("b");
 
         when(customKeyStoreRepository.findByTenantOrderByIdAsc(TENANT,
                 PageRequest.of(0, 2, Sort.by("createDate").descending())))
                 .thenReturn(List.of(s1, s2));
-        ListCustomKeyStoresResponseDto resp = service.listCustomKeyStores(TENANT, 2, null);
+        ListCustomKeyStoresResponse resp = service.listCustomKeyStores(TENANT, 2, null);
         assertNotNull(resp);
         assertEquals(2, resp.getCustomKeyStores().size());
-        assertTrue(resp.isTruncated());
+        assertTrue(resp.getTruncated());
     }
 }

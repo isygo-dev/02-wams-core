@@ -1,13 +1,13 @@
 package eu.isygoit.service.impl;
 
+import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.dto.KmsDtos.CreateCustomKeyStoreRequest;
-import eu.isygoit.dto.KmsDtos.CustomKeyStoreResponseDto;
-import eu.isygoit.dto.KmsDtos.ListCustomKeyStoresResponseDto;
+import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.dto.KmsDtos.UpdateCustomKeyStoreRequest;
 import eu.isygoit.enums.IEnumCustomKeyStoreStatus;
 import eu.isygoit.enums.IEnumCustomKeyStoreType;
 import eu.isygoit.exception.*;
-import eu.isygoit.model.CustomKeyStore;
+import eu.isygoit.model.KmsCustomKeyStore;
 import eu.isygoit.repository.CustomKeyStoreRepository;
 import eu.isygoit.repository.RepoHelper;
 import eu.isygoit.service.ICustomKeyStoreService;
@@ -71,7 +71,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
     // =========================================================================
 
     @Override
-    public CustomKeyStoreResponseDto createCustomKeyStore(String tenant, CreateCustomKeyStoreRequest request) {
+    public DescribeCustomKeyStoreResponse.CustomKeyStore createCustomKeyStore(String tenant, CreateCustomKeyStoreRequest request) {
         log.info("Creating custom key store for tenant: {}, name: {}, type: {}",
                 tenant, request.getCustomKeyStoreName(), request.getCustomKeyStoreType());
 
@@ -81,13 +81,11 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
                     "Custom key store with name '" + request.getCustomKeyStoreName() + "' already exists for tenant");
         }
 
-        CustomKeyStore store = new CustomKeyStore();
+        KmsCustomKeyStore store = new KmsCustomKeyStore();
         store.setTenant(tenant);
         store.setName(request.getCustomKeyStoreName());
         store.setType(request.getCustomKeyStoreType());
         store.setStatus(IEnumCustomKeyStoreStatus.Types.DISCONNECTED);
-        store.setCreatedAt(LocalDateTime.now());
-        store.setUpdatedAt(LocalDateTime.now());
         store.setMaxKeys(request.getMaxKeys() != null ? request.getMaxKeys() : defaultMaxKeys);
         store.setHealthStatus("UNKNOWN");
         store.setMetadata(request.getMetadata() != null ? convertMapToJson(request.getMetadata()) : null);
@@ -105,7 +103,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         }
 
         // Initialize underlying simulation
-        CustomKeyStore saved = customKeyStoreRepository.save(store);
+        KmsCustomKeyStore saved = customKeyStoreRepository.save(store);
         log.info("Custom key store created with id: {}", saved.getId());
 
         initializeStoreSimulation(saved);
@@ -115,16 +113,16 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
     }
 
     @Override
-    public CustomKeyStoreResponseDto describeCustomKeyStore(String tenant, Long keyStoreId) {
-        CustomKeyStore store = findCustomKeyStore(tenant, keyStoreId);
+    public DescribeCustomKeyStoreResponse.CustomKeyStore describeCustomKeyStore(String tenant, Long keyStoreId) {
+        KmsCustomKeyStore store = findCustomKeyStore(tenant, keyStoreId);
         updateConnectionStatus(store);   // refresh based on heartbeat
         return convertToResponseDto(store);
     }
 
     @Override
-    public CustomKeyStoreResponseDto updateCustomKeyStore(String tenant, Long keyStoreId,
+    public DescribeCustomKeyStoreResponse.CustomKeyStore updateCustomKeyStore(String tenant, Long keyStoreId,
                                                           UpdateCustomKeyStoreRequest request) {
-        CustomKeyStore store = findCustomKeyStore(tenant, keyStoreId);
+        KmsCustomKeyStore store = findCustomKeyStore(tenant, keyStoreId);
         if (store.getStatus() == IEnumCustomKeyStoreStatus.Types.CONNECTED) {
             throw new CustomKeyStoreConnectedException("Cannot update while connected. Disconnect first.");
         }
@@ -154,15 +152,14 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
             updateExternalKeyStore(store, request);
         }
 
-        store.setUpdatedAt(LocalDateTime.now());
-        CustomKeyStore updated = customKeyStoreRepository.save(store);
+        KmsCustomKeyStore updated = customKeyStoreRepository.save(store);
         log.info("Updated custom key store: {}", keyStoreId);
         return convertToResponseDto(updated);
     }
 
     @Override
     public void deleteCustomKeyStore(String tenant, Long keyStoreId) {
-        CustomKeyStore store = findCustomKeyStore(tenant, keyStoreId);
+        KmsCustomKeyStore store = findCustomKeyStore(tenant, keyStoreId);
         int keyCount = keyManagementService.countKeysInCustomKeyStore(tenant, keyStoreId);
         if (keyCount > 0) {
             throw new CustomKeyStoreHasKeysException("Cannot delete store containing " + keyCount + " keys.");
@@ -177,11 +174,11 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
     }
 
     @Override
-    public ListCustomKeyStoresResponseDto listCustomKeyStores(String tenant, Integer limit, String nextToken) {
+    public ListCustomKeyStoresResponse listCustomKeyStores(String tenant, Integer limit, String nextToken) {
 
         Pageable pageable = RepoHelper.resolvePageable(limit, nextToken, "createDate");
 
-        List<CustomKeyStore> stores;
+        List<KmsCustomKeyStore> stores;
         String newNextToken = null;
 
         if (nextToken != null && !nextToken.isEmpty()) {
@@ -195,10 +192,10 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
             newNextToken = encodeNextToken(stores.get(stores.size() - 1).getId());
         }
 
-        List<CustomKeyStoreResponseDto> dtos = stores.stream()
+        List<DescribeCustomKeyStoreResponse.CustomKeyStore> dtos = stores.stream()
                 .map(this::convertToResponseDto)
                 .collect(Collectors.toList());
-        return ListCustomKeyStoresResponseDto.builder()
+        return ListCustomKeyStoresResponse.builder()
                 .customKeyStores(dtos)
                 .nextToken(newNextToken)
                 .truncated(newNextToken != null)
@@ -207,7 +204,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
 
     @Override
     public void connectCustomKeyStore(String tenant, Long keyStoreId) {
-        CustomKeyStore store = findCustomKeyStore(tenant, keyStoreId);
+        KmsCustomKeyStore store = findCustomKeyStore(tenant, keyStoreId);
         if (store.getStatus() == IEnumCustomKeyStoreStatus.Types.CONNECTED) {
             throw new CustomKeyStoreAlreadyConnectedException("Already connected.");
         }
@@ -239,14 +236,13 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
             throw new CustomKeyStoreConnectionException("Connection error: " + e.getMessage());
         } finally {
             store.updateHealthStatus();
-            store.setUpdatedAt(LocalDateTime.now());
             customKeyStoreRepository.save(store);
         }
     }
 
     @Override
     public void disconnectCustomKeyStore(String tenant, Long keyStoreId) {
-        CustomKeyStore store = findCustomKeyStore(tenant, keyStoreId);
+        KmsCustomKeyStore store = findCustomKeyStore(tenant, keyStoreId);
         if (store.getStatus() != IEnumCustomKeyStoreStatus.Types.CONNECTED) {
             throw new CustomKeyStoreNotConnectedException("Store is not connected.");
         }
@@ -255,7 +251,6 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         activeConnections.remove(store.getId());
         store.setStatus(IEnumCustomKeyStoreStatus.Types.DISCONNECTED);
         store.updateHealthStatus();
-        store.setUpdatedAt(LocalDateTime.now());
         customKeyStoreRepository.save(store);
         log.info("Disconnected custom key store: {}", keyStoreId);
     }
@@ -267,7 +262,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
     @Override
     public byte[] encrypt(String tenant, Long keyStoreId, String keyId, byte[] plaintext,
                           Map<String, String> encryptionContext) throws Exception {
-        CustomKeyStore store = findCustomKeyStore(tenant, keyStoreId);
+        KmsCustomKeyStore store = findCustomKeyStore(tenant, keyStoreId);
         ensureConnected(store);
         if (store.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
             SoftwareHsmInstance hsm = hsmInstances.get(store.getId());
@@ -281,7 +276,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
     @Override
     public byte[] decrypt(String tenant, Long keyStoreId, String keyId, byte[] ciphertext,
                           Map<String, String> encryptionContext) throws Exception {
-        CustomKeyStore store = findCustomKeyStore(tenant, keyStoreId);
+        KmsCustomKeyStore store = findCustomKeyStore(tenant, keyStoreId);
         ensureConnected(store);
         if (store.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
             SoftwareHsmInstance hsm = hsmInstances.get(store.getId());
@@ -294,7 +289,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
 
     @Override
     public byte[] sign(String tenant, Long keyStoreId, String keyId, byte[] message, String algorithm) throws Exception {
-        CustomKeyStore store = findCustomKeyStore(tenant, keyStoreId);
+        KmsCustomKeyStore store = findCustomKeyStore(tenant, keyStoreId);
         ensureConnected(store);
         if (store.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
             return hsmInstances.get(store.getId()).sign(keyId, message, algorithm);
@@ -306,7 +301,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
     @Override
     public boolean verify(String tenant, Long keyStoreId, String keyId, byte[] message, byte[] signature, String algorithm)
             throws Exception {
-        CustomKeyStore store = findCustomKeyStore(tenant, keyStoreId);
+        KmsCustomKeyStore store = findCustomKeyStore(tenant, keyStoreId);
         ensureConnected(store);
         if (store.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
             return hsmInstances.get(store.getId()).verify(keyId, message, signature, algorithm);
@@ -321,8 +316,8 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
 
     @Scheduled(fixedDelayString = "${kms.custom-key-store.health-check-interval-ms:300000}")
     public void healthCheckAllStores() {
-        List<CustomKeyStore> stores = customKeyStoreRepository.findAll();
-        for (CustomKeyStore store : stores) {
+        List<KmsCustomKeyStore> stores = customKeyStoreRepository.findAll();
+        for (KmsCustomKeyStore store : stores) {
             if (store.getStatus() == IEnumCustomKeyStoreStatus.Types.CONNECTED) {
                 try {
                     boolean healthy = performHealthCheck(store);
@@ -348,7 +343,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
     }
 
     // Modified performHealthCheck:
-    private boolean performHealthCheck(CustomKeyStore store) {
+    private boolean performHealthCheck(KmsCustomKeyStore store) {
         if (store.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
             SoftwareHsmInstance hsm = hsmInstances.get(store.getId());
             return hsm != null && hsm.isConnected();
@@ -388,7 +383,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
             throw new MissingXksProxyAuthCredentialException("xksProxyAuthenticationCredential required");
     }
 
-    private void configureCloudHsmStore(CustomKeyStore store, CreateCustomKeyStoreRequest request) {
+    private void configureCloudHsmStore(KmsCustomKeyStore store, CreateCustomKeyStoreRequest request) {
         store.setCloudHsmClusterId(request.getCloudHsmClusterId());
         store.setKeyStorePassword(hashPassword(request.getKeyStorePassword()));
         store.setTrustAnchorCertificate(request.getTrustAnchorCertificate());
@@ -396,7 +391,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
                 String.format("{\"clusterId\":\"%s\",\"hsmType\":\"SOFTWARE_SIMULATED\"}", request.getCloudHsmClusterId()));
     }
 
-    private void configureExternalKeyStore(CustomKeyStore store, CreateCustomKeyStoreRequest request) {
+    private void configureExternalKeyStore(KmsCustomKeyStore store, CreateCustomKeyStoreRequest request) {
         store.setXksProxyUriEndpoint(request.getXksProxyUriEndpoint());
         store.setXksProxyUriPath(request.getXksProxyUriPath());
         store.setXksProxyAuthenticationCredential(hashPassword(request.getXksProxyAuthenticationCredential()));
@@ -405,7 +400,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
                         request.getXksProxyUriEndpoint(), request.getXksProxyUriPath()));
     }
 
-    private void updateCloudHsmStore(CustomKeyStore store, UpdateCustomKeyStoreRequest request) {
+    private void updateCloudHsmStore(KmsCustomKeyStore store, UpdateCustomKeyStoreRequest request) {
         if (request.getKeyStorePassword() != null && !request.getKeyStorePassword().isEmpty()) {
             store.setKeyStorePassword(hashPassword(request.getKeyStorePassword()));
         }
@@ -414,7 +409,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         }
     }
 
-    private void updateExternalKeyStore(CustomKeyStore store, UpdateCustomKeyStoreRequest request) {
+    private void updateExternalKeyStore(KmsCustomKeyStore store, UpdateCustomKeyStoreRequest request) {
         if (request.getXksProxyUriEndpoint() != null && !request.getXksProxyUriEndpoint().isEmpty()) {
             store.setXksProxyUriEndpoint(request.getXksProxyUriEndpoint());
         }
@@ -426,7 +421,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         }
     }
 
-    private void initializeStoreSimulation(CustomKeyStore store) {
+    private void initializeStoreSimulation(KmsCustomKeyStore store) {
         if (store.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
             hsmInstances.put(store.getId(), new SoftwareHsmInstance(store.getId(), store.getName()));
         } else {
@@ -435,7 +430,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         }
     }
 
-    private void cleanupStoreSimulation(CustomKeyStore store) {
+    private void cleanupStoreSimulation(KmsCustomKeyStore store) {
         if (store.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
             hsmInstances.remove(store.getId());
         } else {
@@ -445,7 +440,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
     }
 
     // Modified establishInternalConnection:
-    private boolean establishInternalConnection(CustomKeyStore store) {
+    private boolean establishInternalConnection(KmsCustomKeyStore store) {
         if (store.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
             SoftwareHsmInstance hsm = hsmInstances.computeIfAbsent(store.getId(),
                     id -> new SoftwareHsmInstance(store.getId(), store.getName()));
@@ -458,7 +453,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
     }
 
     // Modified closeInternalConnection:
-    private void closeInternalConnection(CustomKeyStore store) {
+    private void closeInternalConnection(KmsCustomKeyStore store) {
         if (store.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
             SoftwareHsmInstance hsm = hsmInstances.get(store.getId());
             if (hsm != null) hsm.disconnect();
@@ -468,7 +463,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         }
     }
 
-    private void updateConnectionStatus(CustomKeyStore store) {
+    private void updateConnectionStatus(KmsCustomKeyStore store) {
         if (store.getStatus() == IEnumCustomKeyStoreStatus.Types.CONNECTED) {
             CustomKeyStoreConnection conn = activeConnections.get(store.getId());
             if (conn == null || conn.isExpired()) {
@@ -484,7 +479,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         }
     }
 
-    private void ensureConnected(CustomKeyStore store) {
+    private void ensureConnected(KmsCustomKeyStore store) {
         if (store.getStatus() != IEnumCustomKeyStoreStatus.Types.CONNECTED) {
             throw new CustomKeyStoreNotConnectedException("Custom key store is not connected.");
         }
@@ -494,7 +489,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         }
     }
 
-    private CustomKeyStore findCustomKeyStore(String tenant, Long keyStoreId) {
+    private KmsCustomKeyStore findCustomKeyStore(String tenant, Long keyStoreId) {
         return customKeyStoreRepository.findByTenantAndId(tenant, keyStoreId)
                 .orElseThrow(() -> new CustomKeyStoreNotFoundException("Store not found: " + keyStoreId));
     }
@@ -528,20 +523,34 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         }
     }
 
-    private CustomKeyStoreResponseDto convertToResponseDto(CustomKeyStore store) {
-        return CustomKeyStoreResponseDto.builder()
-                .keyStoreId(store.getId())
-                .customKeyStoreName(store.getName())
+    private DescribeCustomKeyStoreResponse.CustomKeyStore convertToResponseDto(KmsCustomKeyStore store) {
+        return DescribeCustomKeyStoreResponse.CustomKeyStore.builder()
+                .customKeyStoreId(store.getId())
+                .name(store.getName())
+                .createDate(store.getCreateDate())
+                .updateDate(store.getUpdateDate())
                 .type(store.getType())
                 .status(store.getStatus())
-                .connectionState(store.getConnectionError())
-                .createdAt(store.getCreatedAt())
-                .updatedAt(store.getUpdatedAt())
                 .lastSuccessfulConnection(store.getLastSuccessfulConnection())
-                .cloudHsmClusterId(maskSensitive(store.getCloudHsmClusterId()))
-                .xksProxyUriEndpoint(maskSensitive(store.getXksProxyUriEndpoint()))
+                .lastConnectionAttempt(store.getLastConnectionAttempt())
+                .lastHealthCheck(store.getLastHealthCheck())
+                .connectionError(store.getConnectionError())
+                .connectionId(store.getConnectionId())
+                .cloudHsmClusterId(store.getCloudHsmClusterId())
+                .keyStorePassword(maskSensitive(store.getKeyStorePassword()))
+                .trustAnchorCertificate(store.getTrustAnchorCertificate())
+                .xksProxyUriEndpoint(store.getXksProxyUriEndpoint())
                 .xksProxyUriPath(store.getXksProxyUriPath())
-                .configuration(store.getMetadata() != null ? parseJsonToMap(store.getMetadata()) : null)
+                .xksProxyAuthenticationCredential(maskSensitive(store.getXksProxyAuthenticationCredential()))
+                .xksProxyConnectivity(store.getXksProxyConnectivity())
+                .customKeyStoreTypeSpecificData(store.getCustomKeyStoreTypeSpecificData())
+                .maxKeys(store.getMaxKeys())
+                .healthStatus(store.getHealthStatus())
+                .metadata(store.getMetadata())
+                .tags(store.getTags())
+                .connectionTimeoutSeconds(store.getConnectionTimeoutSeconds())
+                .healthCheckIntervalSeconds(store.getHealthCheckIntervalSeconds())
+                .autoReconnect(store.getAutoReconnect())
                 .build();
     }
 

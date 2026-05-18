@@ -11,8 +11,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -51,7 +49,7 @@ import java.util.List;
                 @Index(name = SchemaIndexConstantName.IDX_CUSTOM_KEY_STORE_STATUS, columnList = SchemaColumnConstantName.C_STATUS),
                 @Index(name = SchemaIndexConstantName.IDX_CUSTOM_KEY_STORE_TYPE, columnList = SchemaColumnConstantName.C_STORE_TYPE)
         })
-public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssignable {
+public class KmsCustomKeyStore extends AuditableEntity<Long> implements ITenantAssignable {
 
     /**
      * Unique identifier for the custom key store
@@ -88,20 +86,6 @@ public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssi
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_STATUS, nullable = false, length = 50)
     private IEnumCustomKeyStoreStatus.Types status;
-
-    /**
-     * Timestamp when the custom key store was created
-     */
-    @CreationTimestamp
-    @Column(name = SchemaColumnConstantName.C_CREATED_AT, nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    /**
-     * Timestamp when the custom key store was last updated
-     */
-    @UpdateTimestamp
-    @Column(name = SchemaColumnConstantName.C_UPDATED_AT, nullable = false)
-    private LocalDateTime updatedAt;
 
     /**
      * Timestamp of the last successful connection to the underlying store
@@ -176,6 +160,9 @@ public class CustomKeyStore extends AuditableEntity<Long> implements ITenantAssi
      */
     @Column(name = SchemaColumnConstantName.C_XKS_PROXY_AUTH_CREDENTIAL, length = 512)
     private String xksProxyAuthenticationCredential;
+
+    @Column(name = SchemaColumnConstantName.C_XKS_PROXY_CONNECTIVITY, length = 255)
+    private String xksProxyConnectivity;
 
     // ============================================================================
     // ADDITIONAL CONFIGURATION

@@ -1342,9 +1342,9 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     .xksProxyAuthenticationCredential(request.getXksProxyAuthenticationCredential())
                     .xksProxyConnectivity(request.getXksProxyConnectivity())
                     .build();
-            CustomKeyStoreResponseDto internalRes = customKeyStoreService.createCustomKeyStore(tenant, internal);
+            DescribeCustomKeyStoreResponse.CustomKeyStore internalRes = customKeyStoreService.createCustomKeyStore(tenant, internal);
             CreateCustomKeyStoreResponse response = CreateCustomKeyStoreResponse.builder()
-                    .customKeyStoreId(internalRes.getKeyStoreId())
+                    .customKeyStoreId(internalRes.getCustomKeyStoreId())
                     .build();
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {
@@ -1358,8 +1358,10 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            CustomKeyStoreResponseDto internal = customKeyStoreService.describeCustomKeyStore(tenant, customKeyStoreId);
-            DescribeCustomKeyStoreResponse response = toAwsResponse(internal);
+            DescribeCustomKeyStoreResponse.CustomKeyStore internal = customKeyStoreService.describeCustomKeyStore(tenant, customKeyStoreId);
+            DescribeCustomKeyStoreResponse response = DescribeCustomKeyStoreResponse.builder()
+                    .customKeyStore(internal)
+                    .build();
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -1437,41 +1439,11 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            ListCustomKeyStoresResponseDto internal = customKeyStoreService.listCustomKeyStores(tenant, limit, nextToken);
-            ListCustomKeyStoresResponse response = ListCustomKeyStoresResponse.builder()
-                    .customKeyStores(internal.getCustomKeyStores().stream()
-                            .map(s -> DescribeCustomKeyStoreResponse.CustomKeyStore.builder()
-                                    .customKeyStoreId(s.getKeyStoreId())
-                                    .customKeyStoreName(s.getCustomKeyStoreName())
-                                    .createDate(s.getCreatedAt())
-                                    .connectionState(s.getConnectionState())
-                                    .build())
-                            .collect(Collectors.toList()))
-                    .nextToken(internal.getNextToken())
-                    .truncated(internal.isTruncated())
-                    .build();
+            ListCustomKeyStoresResponse response = customKeyStoreService.listCustomKeyStores(tenant, limit, nextToken);
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
         }
-    }
-
-    private DescribeCustomKeyStoreResponse toAwsResponse(CustomKeyStoreResponseDto internal) {
-        DescribeCustomKeyStoreResponse.CustomKeyStore store =
-                DescribeCustomKeyStoreResponse.CustomKeyStore.builder()
-                        .customKeyStoreId(internal.getKeyStoreId())
-                        .customKeyStoreName(internal.getCustomKeyStoreName())
-                        .createDate(internal.getCreatedAt())
-                        .connectionState(internal.getStatus() != null ? internal.getStatus().name() : null)
-                        .cloudHsmClusterId(internal.getCloudHsmClusterId())
-                        .customKeyStoreType(internal.getType() != null ? internal.getType().name() : null)
-                        .xksProxyUriEndpoint(internal.getXksProxyUriEndpoint())
-                        .xksProxyUriPath(internal.getXksProxyUriPath())
-                        .xksProxyAuthenticationCredential(null)
-                        .xksProxyConnectivity(null)
-                        .build();
-
-        return DescribeCustomKeyStoreResponse.builder().customKeyStore(store).build();
     }
 
     // =========================================================================

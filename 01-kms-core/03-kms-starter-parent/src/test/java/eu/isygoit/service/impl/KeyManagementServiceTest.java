@@ -649,7 +649,7 @@ class KeyManagementServiceTest {
                 KmsKey.builder().keyId("k5").build()
         );
         when(customKeyStoreRepository.findByTenantAndId(TENANT, 1L))
-                .thenReturn(Optional.of(CustomKeyStore.builder()
+                .thenReturn(Optional.of(KmsCustomKeyStore.builder()
                         .id(1L)
                         .keys(keys)
                         .build()));

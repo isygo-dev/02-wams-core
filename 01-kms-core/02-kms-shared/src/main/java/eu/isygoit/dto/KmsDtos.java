@@ -1793,8 +1793,8 @@ public final class KmsDtos {
     }
 
     // =========================================================================
-    // Custom Key Stores
-    // =========================================================================
+// Custom Key Stores (aligned with KmsCustomKeyStore entity)
+// =========================================================================
 
     @Data
     @Builder
@@ -1815,7 +1815,7 @@ public final class KmsDtos {
         @Schema(description = "CloudHSM cluster ID (required for CLOUDHSM type)")
         private String cloudHsmClusterId;
 
-        @Schema(description = "Password for CloudHSM cluster authentication (will be hashed)")
+        @Schema(description = "Password for CloudHSM cluster authentication (will be encrypted)")
         private String keyStorePassword;
 
         @Schema(description = "Trust anchor certificate (PEM format) – required for CLOUDHSM type")
@@ -1828,7 +1828,7 @@ public final class KmsDtos {
         @Schema(description = "XKS proxy URI path (optional)")
         private String xksProxyUriPath;
 
-        @Schema(description = "Authentication credential for XKS proxy (will be hashed)")
+        @Schema(description = "Authentication credential for XKS proxy (will be encrypted)")
         private String xksProxyAuthenticationCredential;
 
         @Schema(description = "XKS proxy connectivity type (e.g., PUBLIC_ENDPOINT, VPC_ENDPOINT_SERVICE)")
@@ -1845,6 +1845,9 @@ public final class KmsDtos {
 
         @Schema(description = "Tags for cost allocation and organization", example = "{\"Project\": \"PCI\", \"CostCenter\": \"12345\"}")
         private Map<String, String> tags;
+
+        @Schema(description = "Type‑specific configuration data (JSON)")
+        private String customKeyStoreTypeSpecificData;
 
         // ========== Connection settings ==========
         @Min(1)
@@ -1888,26 +1891,48 @@ public final class KmsDtos {
             private Long customKeyStoreId;
 
             @Schema(description = "Store name")
-            private String customKeyStoreName;
+            private String name;
 
             @Schema(description = "Creation date")
             @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
             private LocalDateTime createDate;
 
-            @Schema(description = "Connection state (CONNECTED, DISCONNECTED, FAILED)")
-            private String connectionState;
+            @Schema(description = "Last update date")
+            @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+            private LocalDateTime updateDate;
 
-            @Schema(description = "Connection error code")
-            private String connectionErrorCode;
+            @Schema(description = "Custom key store type (enum)")
+            private IEnumCustomKeyStoreType.Types type;
+
+            @Schema(description = "Custom key store status (enum)")
+            private IEnumCustomKeyStoreStatus.Types status;
+
+            @Schema(description = "Last successful connection timestamp")
+            @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+            private LocalDateTime lastSuccessfulConnection;
+
+            @Schema(description = "Last connection attempt timestamp")
+            @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+            private LocalDateTime lastConnectionAttempt;
+
+            @Schema(description = "Last health check timestamp")
+            @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+            private LocalDateTime lastHealthCheck;
+
+            @Schema(description = "Error message from last failed connection")
+            private String connectionError;
+
+            @Schema(description = "Active connection ID (when connected)")
+            private String connectionId;
 
             @Schema(description = "CloudHSM cluster ID (if applicable)")
             private String cloudHsmClusterId;
 
-            @Schema(description = "Trust anchor certificate")
-            private String trustAnchorCertificate;
+            @Schema(description = "Encrypted key store password (masked)")
+            private String keyStorePassword;
 
-            @Schema(description = "Custom key store type")
-            private String customKeyStoreType;
+            @Schema(description = "Trust anchor certificate (PEM format)")
+            private String trustAnchorCertificate;
 
             @Schema(description = "XKS proxy URI endpoint")
             private String xksProxyUriEndpoint;
@@ -1915,11 +1940,45 @@ public final class KmsDtos {
             @Schema(description = "XKS proxy URI path")
             private String xksProxyUriPath;
 
-            @Schema(description = "XKS proxy authentication credential")
+            @Schema(description = "Encrypted authentication credential for XKS proxy")
             private String xksProxyAuthenticationCredential;
 
-            @Schema(description = "XKS proxy connectivity")
+            @Schema(description = "New XKS proxy connectivity type")
             private String xksProxyConnectivity;
+
+            @Schema(description = "Type‑specific configuration data (JSON)")
+            private String customKeyStoreTypeSpecificData;
+
+            @Schema(description = "Maximum number of keys allowed in this store")
+            private Integer maxKeys;
+
+            @Schema(description = "Health status (HEALTHY, DEGRADED, UNHEALTHY)")
+            private String healthStatus;
+
+            @Schema(description = "Custom metadata (JSON string)")
+            private String metadata;
+
+            @Schema(description = "Tags (JSON string)")
+            private String tags;
+
+            @Schema(description = "Connection timeout in seconds")
+            private Integer connectionTimeoutSeconds;
+
+            @Schema(description = "Health check interval in seconds")
+            private Integer healthCheckIntervalSeconds;
+
+            @Schema(description = "Auto‑reconnect on failure")
+            private Boolean autoReconnect;
+
+            @Schema(description = "Connection state as string (from status)")
+            public String getConnectionState() {
+                return status != null ? status.name() : null;
+            }
+
+            @Schema(description = "Custom key store type as string (from type)")
+            public String getCustomKeyStoreType() {
+                return type != null ? type.name() : null;
+            }
         }
     }
 
@@ -1940,7 +1999,7 @@ public final class KmsDtos {
         @Schema(description = "New CloudHSM cluster ID")
         private String cloudHsmClusterId;
 
-        @Schema(description = "New password for CloudHSM cluster (will be hashed)")
+        @Schema(description = "New password for CloudHSM cluster (will be encrypted)")
         private String keyStorePassword;
 
         @Schema(description = "New trust anchor certificate (PEM format)")
@@ -1953,16 +2012,14 @@ public final class KmsDtos {
         @Schema(description = "New XKS proxy URI path")
         private String xksProxyUriPath;
 
-        @Schema(description = "New authentication credential for XKS proxy (will be hashed)")
+        @Schema(description = "New authentication credential for XKS proxy (will be encrypted)")
         private String xksProxyAuthenticationCredential;
+
 
         @Schema(description = "New XKS proxy connectivity type")
         private String xksProxyConnectivity;
 
         // ========== Common update fields ==========
-        @Schema(description = "Enable or disable the custom key store")
-        private Boolean enabled;
-
         @Min(1)
         @Max(10000)
         @Schema(description = "New maximum number of keys allowed")
@@ -1973,6 +2030,9 @@ public final class KmsDtos {
 
         @Schema(description = "New tags (replaces existing)")
         private Map<String, String> tags;
+
+        @Schema(description = "New type‑specific configuration data (JSON)")
+        private String customKeyStoreTypeSpecificData;
 
         // ========== Connection settings ==========
         @Min(1)
@@ -1993,8 +2053,8 @@ public final class KmsDtos {
     @AllArgsConstructor
     @Schema(description = "Update custom key store response")
     public static class UpdateCustomKeyStoreResponse {
-        @Schema(description = "Key ID (or confirmation)")
-        private String keyId;
+        @Schema(description = "Custom key store ID")
+        private Long customKeyStoreId;
     }
 
     @Data
@@ -2003,8 +2063,8 @@ public final class KmsDtos {
     @AllArgsConstructor
     @Schema(description = "Delete custom key store response")
     public static class DeleteCustomKeyStoreResponse {
-        @Schema(description = "Key ID")
-        private String keyId;
+        @Schema(description = "Custom key store ID")
+        private Long customKeyStoreId;
     }
 
     @Data
@@ -2013,8 +2073,8 @@ public final class KmsDtos {
     @AllArgsConstructor
     @Schema(description = "Connect custom key store response")
     public static class ConnectCustomKeyStoreResponse {
-        @Schema(description = "Key ID")
-        private String keyId;
+        @Schema(description = "Custom key store ID")
+        private Long customKeyStoreId;
     }
 
     @Data
@@ -2023,8 +2083,8 @@ public final class KmsDtos {
     @AllArgsConstructor
     @Schema(description = "Disconnect custom key store response")
     public static class DisconnectCustomKeyStoreResponse {
-        @Schema(description = "Key ID")
-        private String keyId;
+        @Schema(description = "Custom key store ID")
+        private Long customKeyStoreId;
     }
 
     @Data
@@ -2184,22 +2244,6 @@ public final class KmsDtos {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    @Schema(description = "List custom key stores response DTO")
-    public static class ListCustomKeyStoresResponseDto {
-        @Schema(description = "List of custom key stores")
-        private List<CustomKeyStoreResponseDto> customKeyStores;
-
-        @Schema(description = "Pagination token")
-        private String nextToken;
-
-        @Schema(description = "Whether truncated")
-        private boolean truncated;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class TagDto {
         private String tagKey;
         private String tagValue;
@@ -2245,63 +2289,6 @@ public final class KmsDtos {
 
         @Schema(description = "Description")
         private String description;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Schema(description = "Custom key store response DTO")
-    public static class CustomKeyStoreResponseDto {
-        @Schema(description = "Last successful connection timestamp")
-        private LocalDateTime lastSuccessfulConnection;
-
-        @Schema(description = "Key store ID")
-        private Long keyStoreId;
-
-        @Schema(description = "Key store name")
-        private String customKeyStoreName;
-
-        @Schema(description = "Key store type")
-        private IEnumCustomKeyStoreType.Types type;
-
-        @Schema(description = "Key store status")
-        private IEnumCustomKeyStoreStatus.Types status;
-
-        @Schema(description = "Connection state")
-        private String connectionState;
-
-        @Schema(description = "Endpoint")
-        private String endpoint;
-
-        @Schema(description = "Vendor")
-        private String vendor;
-
-        @Schema(description = "Region")
-        private String region;
-
-        @Schema(description = "Whether connected")
-        private Boolean connected;
-
-        @Schema(description = "Creation timestamp")
-        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-        private LocalDateTime createdAt;
-
-        @Schema(description = "Last update timestamp")
-        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-        private LocalDateTime updatedAt;
-
-        @Schema(description = "CloudHSM cluster ID (if applicable)")
-        private String cloudHsmClusterId;
-
-        @Schema(description = "XKS proxy URI endpoint")
-        private String xksProxyUriEndpoint;
-
-        @Schema(description = "XKS proxy URI path")
-        private String xksProxyUriPath;
-
-        @Schema(description = "Additional configuration")
-        private Map<String, String> configuration;
     }
 
     @Data

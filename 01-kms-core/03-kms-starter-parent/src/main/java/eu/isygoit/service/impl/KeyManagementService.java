@@ -901,7 +901,7 @@ public class KeyManagementService implements IKeyManagementService {
         log.debug("Registering key {} in custom store {}/{}", keyId, tenant, keyStoreId);
 
         // Fetch the CustomKeyStore (ensure tenant isolation)
-        CustomKeyStore store = customKeyStoreRepository
+        KmsCustomKeyStore store = customKeyStoreRepository
                 .findByTenantAndId(tenant, keyStoreId)
                 .orElseThrow(() -> new CustomKeyStoreNotFoundException(
                         "Custom key store not found: " + keyStoreId));
@@ -926,7 +926,7 @@ public class KeyManagementService implements IKeyManagementService {
     public void unregisterKeyFromCustomStore(String tenant, Long keyStoreId, String keyId) {
         log.debug("Unregistering key {} from custom store {}/{}", keyId, tenant, keyStoreId);
 
-        CustomKeyStore store = customKeyStoreRepository
+        KmsCustomKeyStore store = customKeyStoreRepository
                 .findByTenantAndId(tenant, keyStoreId)
                 .orElse(null);
         if (store == null) {

@@ -232,4 +232,5 @@ public interface SchemaColumnConstantName extends ComSchemaColumnConstantName {
     String C_RETIRING_PRINCIPAL = "RETIRING_PRINCIPAL";
     String C_RETIREMENT_DATE = "RETIREMENT_DATE";
     String C_IS_PRIMARY = "IS_PRIMARY";
+    String C_XKS_PROXY_CONNECTIVITY = "XKS_PROXY_CONNECTIVITY";
 }

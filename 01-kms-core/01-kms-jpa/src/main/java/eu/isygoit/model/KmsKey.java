@@ -350,7 +350,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = SchemaColumnConstantName.C_KEY_STORE_ID, referencedColumnName = SchemaColumnConstantName.C_ID)
-    private CustomKeyStore customKeyStore;
+    private KmsCustomKeyStore customKeyStore;
 
     /**
      * Foreign key column for `customKeyStore` (denormalized).

@@ -757,7 +757,7 @@ class KmsControllerTest {
         request.setCustomKeyStoreType(IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM);
 
         when(customKeyStoreService.createCustomKeyStore(eq(TENANT), any()))
-                .thenReturn(CustomKeyStoreResponseDto.builder().keyStoreId(CUSTOM_KEY_STORE_ID).build());
+                .thenReturn(DescribeCustomKeyStoreResponse.CustomKeyStore.builder().customKeyStoreId(CUSTOM_KEY_STORE_ID).build());
 
         mockMvc.perform(post("/api/v1/private/kms/custom-key-stores")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -768,9 +768,9 @@ class KmsControllerTest {
 
     @Test
     void describeCustomKeyStore_Success() throws Exception {
-        CustomKeyStoreResponseDto dto = CustomKeyStoreResponseDto.builder()
-                .keyStoreId(CUSTOM_KEY_STORE_ID)
-                .customKeyStoreName("test-store")
+        DescribeCustomKeyStoreResponse.CustomKeyStore dto = DescribeCustomKeyStoreResponse.CustomKeyStore.builder()
+                .customKeyStoreId(CUSTOM_KEY_STORE_ID)
+                .name("test-store")
                 .status(IEnumCustomKeyStoreStatus.Types.CONNECTED)
                 .build();
         when(customKeyStoreService.describeCustomKeyStore(eq(TENANT), eq(CUSTOM_KEY_STORE_ID))).thenReturn(dto);
@@ -810,8 +810,8 @@ class KmsControllerTest {
 
     @Test
     void listCustomKeyStores_Success() throws Exception {
-        ListCustomKeyStoresResponseDto dto = ListCustomKeyStoresResponseDto.builder()
-                .customKeyStores(List.of(CustomKeyStoreResponseDto.builder().keyStoreId(CUSTOM_KEY_STORE_ID).build()))
+        ListCustomKeyStoresResponse dto = ListCustomKeyStoresResponse.builder()
+                .customKeyStores(List.of(DescribeCustomKeyStoreResponse.CustomKeyStore.builder().customKeyStoreId(CUSTOM_KEY_STORE_ID).build()))
                 .nextToken(null)
                 .truncated(false)
                 .build();
