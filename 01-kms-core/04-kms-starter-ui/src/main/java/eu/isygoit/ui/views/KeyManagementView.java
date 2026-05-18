@@ -243,9 +243,9 @@ public class KeyManagementView extends VerticalLayout {
         dialog.setCloseOnEsc(false);
         dialog.setCloseOnOutsideClick(false);
 
-        // ---- Form fields (same as before) ----
         FormLayout form = new FormLayout();
 
+        // Alias section (unchanged)
         ComboBox<String> aliasCombo = new ComboBox<>("Alias (optional)");
         aliasCombo.setItems(existingAliases);
         aliasCombo.setPlaceholder("Select existing or type new");
@@ -285,13 +285,33 @@ public class KeyManagementView extends VerticalLayout {
         originCombo.setValue(IEnumKeyOrigin.Types.WAMS_KMS);
         originCombo.setRequiredIndicatorVisible(true);
 
+        // Multi‑region checkbox and conditional fields
         Checkbox multiRegionCheckbox = new Checkbox("Multi-region key");
+        TextField primaryRegionField = new TextField("Primary region");
+        primaryRegionField.setPlaceholder("e.g., us-east-1");
+        primaryRegionField.setValue("us-east-1"); // default, can be changed
+        primaryRegionField.setVisible(false);
+        TextField replicaRegionsField = new TextField("Replica regions (comma‑separated)");
+        replicaRegionsField.setPlaceholder("e.g., eu-west-1,ap-southeast-1");
+        replicaRegionsField.setVisible(false);
+
+        multiRegionCheckbox.addValueChangeListener(e -> {
+            boolean visible = e.getValue();
+            primaryRegionField.setVisible(visible);
+            replicaRegionsField.setVisible(visible);
+            if (!visible) {
+                primaryRegionField.clear();
+                replicaRegionsField.clear();
+            }
+        });
+
         Checkbox bypassPolicyCheckbox = new Checkbox("Bypass policy lockout safety check");
         TextArea policyField = new TextArea("Policy (JSON)");
         policyField.setPlaceholder("{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [...]\n}");
         policyField.setWidthFull();
         policyField.setHeight("150px");
 
+        // Tag editor
         VerticalLayout tagsContainer = new VerticalLayout();
         tagsContainer.setSpacing(true);
         tagsContainer.setPadding(false);
@@ -303,10 +323,11 @@ public class KeyManagementView extends VerticalLayout {
         tagsHeader.setSpacing(true);
 
         form.add(aliasCombo, newAliasField, descriptionField, keySpecCombo, keyUsageCombo, originCombo,
-                multiRegionCheckbox, bypassPolicyCheckbox, policyField, tagsHeader, tagsContainer);
+                multiRegionCheckbox, primaryRegionField, replicaRegionsField,
+                bypassPolicyCheckbox, policyField, tagsHeader, tagsContainer);
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
-        // ---- Footer for error messages ----
+        // Footer for error messages
         Span errorSpan = new Span();
         errorSpan.getStyle().set("color", "var(--lumo-error-text-color)");
         errorSpan.getStyle().set("font-size", "var(--lumo-font-size-xs)");
@@ -314,7 +335,6 @@ public class KeyManagementView extends VerticalLayout {
         errorSpan.setVisible(false);
 
         Button createBtn = new Button("Create", e -> {
-            // Clear previous error
             errorSpan.setText("");
             errorSpan.setVisible(false);
 
@@ -364,6 +384,8 @@ public class KeyManagementView extends VerticalLayout {
                         .bypassPolicyLockoutSafetyCheck(bypassPolicyCheckbox.getValue())
                         .policy(policyMap)
                         .tags(tags.isEmpty() ? null : tags)
+                        .primaryRegion(primaryRegionField.getValue())
+                        .replicaRegions(replicaRegionsField.getValue())
                         .build();
 
                 ResponseEntity<CreateKeyResponse> response = kmsApiService.createKey(request);
@@ -376,7 +398,6 @@ public class KeyManagementView extends VerticalLayout {
                     return;
                 }
 
-                // Success
                 dialog.close();
                 Notification.show("Key created successfully", 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
@@ -401,7 +422,6 @@ public class KeyManagementView extends VerticalLayout {
         createBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         Button cancelBtn = new Button("Cancel", e -> dialog.close());
 
-        // Footer layout: error span on the left, buttons on the right
         HorizontalLayout footerLayout = new HorizontalLayout();
         footerLayout.setWidthFull();
         footerLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);

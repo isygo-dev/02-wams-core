@@ -53,6 +53,12 @@ public final class KmsDtos {
         @Schema(description = "Whether this key is part of a multi‑region setup")
         private Boolean multiRegion;
 
+        @Schema(description = "Primary region for multi‑region key")
+        private String primaryRegion;
+
+        @Schema(description = "Comma‑separated list of replica regions for multi‑region key")
+        private String replicaRegions;
+
         @Schema(description = "Bypass policy lockout safety check (use with caution)")
         @JsonProperty("BypassPolicyLockoutSafetyCheck")
         private Boolean bypassPolicyLockoutSafetyCheck;
