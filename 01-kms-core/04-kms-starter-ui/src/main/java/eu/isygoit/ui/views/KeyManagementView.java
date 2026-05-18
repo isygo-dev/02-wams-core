@@ -240,10 +240,12 @@ public class KeyManagementView extends VerticalLayout {
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Create new KMS key");
         dialog.setWidth("700px");
+        dialog.setCloseOnEsc(false);
+        dialog.setCloseOnOutsideClick(false);
 
+        // ---- Form fields (same as before) ----
         FormLayout form = new FormLayout();
 
-        // Alias section
         ComboBox<String> aliasCombo = new ComboBox<>("Alias (optional)");
         aliasCombo.setItems(existingAliases);
         aliasCombo.setPlaceholder("Select existing or type new");
@@ -290,7 +292,6 @@ public class KeyManagementView extends VerticalLayout {
         policyField.setWidthFull();
         policyField.setHeight("150px");
 
-        // Tag editor
         VerticalLayout tagsContainer = new VerticalLayout();
         tagsContainer.setSpacing(true);
         tagsContainer.setPadding(false);
@@ -305,8 +306,17 @@ public class KeyManagementView extends VerticalLayout {
                 multiRegionCheckbox, bypassPolicyCheckbox, policyField, tagsHeader, tagsContainer);
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
+        // ---- Footer for error messages ----
+        Span errorSpan = new Span();
+        errorSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+        errorSpan.getStyle().set("font-size", "var(--lumo-font-size-xs)");
+        errorSpan.getStyle().set("margin-right", "auto");
+        errorSpan.setVisible(false);
+
         Button createBtn = new Button("Create", e -> {
-            dialog.close();
+            // Clear previous error
+            errorSpan.setText("");
+            errorSpan.setVisible(false);
 
             String newAlias = null;
             String existingSelectedAlias = null;
@@ -328,53 +338,81 @@ public class KeyManagementView extends VerticalLayout {
                 }
             }
 
+            // Validate policy JSON
+            Map<String, Object> policyMap = null;
+            if (!policyField.getValue().isBlank()) {
+                try {
+                    policyMap = objectMapper.readValue(policyField.getValue(), new TypeReference<>() {});
+                } catch (Exception ex) {
+                    String errorMsg = "Invalid JSON in policy field: " + ex.getMessage();
+                    errorSpan.setText(errorMsg);
+                    errorSpan.setVisible(true);
+                    Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
+                            .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                    return;
+                }
+            }
+
             try {
                 CreateKeyRequest request = CreateKeyRequest.builder()
-                        .keyAlias(StringUtils.hasText(newAlias)?newAlias:existingSelectedAlias)  // do not set alias here; we'll create it separately
+                        .keyAlias(StringUtils.hasText(newAlias) ? newAlias : existingSelectedAlias)
                         .description(descriptionField.getValue())
                         .keySpec(keySpecCombo.getValue())
                         .keyUsage(keyUsageCombo.getValue())
                         .origin(originCombo.getValue())
                         .multiRegion(multiRegionCheckbox.getValue())
                         .bypassPolicyLockoutSafetyCheck(bypassPolicyCheckbox.getValue())
-                        .policy(policyField.getValue().isBlank() ? null : objectMapper.readValue(
-                                policyField.getValue(),
-                                new TypeReference<Map<String, Object>>() {
-                                }
-                        ))
+                        .policy(policyMap)
                         .tags(tags.isEmpty() ? null : tags)
                         .build();
 
-
                 ResponseEntity<CreateKeyResponse> response = kmsApiService.createKey(request);
                 if (!response.getStatusCode().is2xxSuccessful()) {
-                    Notification.show("Key creation failed : " + response.getBody(),
-                                    3000,
-                                    Notification.Position.TOP_END)
+                    String errorMsg = "Key creation failed: " + (response.getBody() != null ? response.getBody().toString() : "unknown error");
+                    errorSpan.setText(errorMsg);
+                    errorSpan.setVisible(true);
+                    Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                     return;
                 }
-                CreateKeyResponse created = response.getBody();
-                String newKeyId = created.getKeyMetadata().getKeyId();
 
+                // Success
+                dialog.close();
                 Notification.show("Key created successfully", 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 loadAliases();
                 loadKeys();
+
             } catch (FeignException ex) {
-                if (ex.status() == 500) {
-                    String body = ex.contentUTF8();
-                    Notification.show("Error: " + body, 5000, Notification.Position.TOP_END)
-                            .addThemeVariants(NotificationVariant.LUMO_ERROR);
-                }
-            }catch (Exception ex) {
-                Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
+                String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+                errorSpan.setText(errorMsg);
+                errorSpan.setVisible(true);
+                Notification.show("Creation error: " + errorMsg, 5000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            } catch (Exception ex) {
+                String errorMsg = ex.getMessage();
+                errorSpan.setText(errorMsg);
+                errorSpan.setVisible(true);
+                Notification.show("Error: " + errorMsg, 5000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
+
         createBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         Button cancelBtn = new Button("Cancel", e -> dialog.close());
-        dialog.getFooter().add(cancelBtn, createBtn);
+
+        // Footer layout: error span on the left, buttons on the right
+        HorizontalLayout footerLayout = new HorizontalLayout();
+        footerLayout.setWidthFull();
+        footerLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        footerLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        footerLayout.add(errorSpan);
+        HorizontalLayout buttonLayout = new HorizontalLayout(cancelBtn, createBtn);
+        buttonLayout.setSpacing(true);
+        footerLayout.add(buttonLayout);
+
+        dialog.getFooter().removeAll();
+        dialog.getFooter().add(footerLayout);
         dialog.add(form);
         dialog.open();
     }

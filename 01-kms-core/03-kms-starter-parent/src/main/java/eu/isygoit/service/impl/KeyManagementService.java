@@ -11,6 +11,7 @@ import eu.isygoit.model.*;
 import eu.isygoit.repository.*;
 import eu.isygoit.service.ICryptoService;
 import eu.isygoit.service.IKeyManagementService;
+import eu.isygoit.validator.KeyPolicyValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -56,6 +57,9 @@ public class KeyManagementService implements IKeyManagementService {
     @Autowired
     private KmsKeyPolicyRepository kmsKeyPolicyRepository;
 
+    @Autowired
+    private KeyPolicyValidator policyValidator;
+
     @Override
     public CreateKeyResponse createKey(String tenant, CreateKeyRequest request) {
         log.info("Creating key for tenant: {} with spec: {}",
@@ -87,10 +91,18 @@ public class KeyManagementService implements IKeyManagementService {
                     .primaryKeyAlias(request.getKeyAlias())
                     .description(request.getDescription())
                     .keyStatus(IEnumKeyStatus.Types.ENABLED)
+                    .multiRegion(request.getMultiRegion())
                     .currentVersionId(versionId)
                     .rotationEnabled(false)
                     .keyMaterial(keyMaterial)
                     .build();
+
+            if (Boolean.TRUE.equals(request.getMultiRegion())) {
+                // This is a primary key
+                key.setPrimaryKeyId(null);
+                key.setPrimaryRegion("region:" + tenant); // e.g., from tenant or config
+                key.setReplicaRegions(null); // or empty string
+            }
 
             KmsKey savedKey = kmsKeyRepository.save(key);
 
@@ -106,10 +118,12 @@ public class KeyManagementService implements IKeyManagementService {
             kmsKeyVersionRepository.save(keyVersion);
 
             if (request.getPolicy() != null && !request.getPolicy().isEmpty()) {
+                String policyString = KmsKeyPolicy.serializePolicy(request.getPolicy());
+                policyValidator.validatePolicyLockout(policyString, request.getBypassPolicyLockoutSafetyCheck(), tenant);
                 KmsKeyPolicy keyPolicy = KmsKeyPolicy.builder()
                         .tenant(tenant)
                         .keyId(savedKey.getKeyId())
-                        .policyDocument(KmsKeyPolicy.serializePolicy(request.getPolicy()))
+                        .policyDocument(policyString)
                         .description("Default key policy")
                         .build();
                 kmsKeyPolicyRepository.save(keyPolicy);
@@ -142,6 +156,21 @@ public class KeyManagementService implements IKeyManagementService {
             log.info("Key created successfully: keyId={}, wrn={}",
                     keyVersion.getKeyId(),
                     wrn);
+
+            Map<String, Object> multiRegionConfig = null;
+            if (Boolean.TRUE.equals(savedKey.getMultiRegion())) {
+                multiRegionConfig = new HashMap<>();
+                if (savedKey.getPrimaryKeyId() != null) {
+                    multiRegionConfig.put("primaryKeyId", savedKey.getPrimaryKeyId());
+                }
+                if (savedKey.getPrimaryRegion() != null) {
+                    multiRegionConfig.put("primaryRegion", savedKey.getPrimaryRegion());
+                }
+                if (savedKey.getReplicaRegions() != null) {
+                    // Assuming replicaRegions is a comma‑separated string; split into list if desired
+                    multiRegionConfig.put("replicaRegions", savedKey.getReplicaRegions());
+                }
+            }
 
             return CreateKeyResponse.builder()
                     .keyMetadata(CreateKeyResponse.KeyMetadata.builder()
@@ -176,15 +205,7 @@ public class KeyManagementService implements IKeyManagementService {
                                             : "WAMS"
                             )
                             .multiRegion(savedKey.getMultiRegion())
-                            .multiRegionConfiguration(
-                                    savedKey.getMultiRegion() != null && savedKey.getMultiRegion()
-                                            ? Map.of(
-                                            "primaryKeyId", savedKey.getPrimaryKeyId(),
-                                            "primaryRegion", savedKey.getPrimaryRegion(),
-                                            "replicaRegions", savedKey.getReplicaRegions()
-                                    )
-                                            : null
-                            )
+                            .multiRegionConfiguration(multiRegionConfig)
                             .build())
                     .build();
         } catch (Exception e) {
