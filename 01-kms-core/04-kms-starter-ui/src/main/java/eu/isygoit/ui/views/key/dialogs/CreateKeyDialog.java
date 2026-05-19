@@ -7,7 +7,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -27,6 +26,7 @@ import eu.isygoit.enums.IEnumKeyOrigin;
 import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.views.BaseActionDialog;
 import eu.isygoit.ui.views.key.KeyManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class CreateKeyDialog extends Dialog {
+public class CreateKeyDialog extends BaseActionDialog {
 
     private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;
@@ -64,22 +64,107 @@ public class CreateKeyDialog extends Dialog {
     private VerticalLayout tagsContainer;
     private List<HorizontalLayout> tagRows;
     private HorizontalLayout tagsHeader;
-    private Span errorSpan;
 
     public CreateKeyDialog(KeyManagementView parentView, KmsApiService kmsApiService, ObjectMapper objectMapper) {
+        super("Create new KMS key");
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
         this.objectMapper = objectMapper;
 
-        setHeaderTitle("Create new KMS key");
+        setOkButtonText("Create");
         setWidth("700px");
-        setCloseOnEsc(false);
-        setCloseOnOutsideClick(false);
 
         buildForm();
-        buildFooter();
-
         add(createFormLayout());
+    }
+
+    @Override
+    protected void onOk() {
+        String newAlias = null;
+        String existingSelectedAlias = null;
+        if (newAliasField.isVisible() && !newAliasField.getValue().isBlank()) {
+            newAlias = newAliasField.getValue();
+        } else if (aliasCombo.getValue() != null && !aliasCombo.getValue().isBlank()) {
+            existingSelectedAlias = aliasCombo.getValue();
+        }
+
+        List<CreateKeyRequest.Tag> tags = new ArrayList<>();
+        for (HorizontalLayout row : tagRows) {
+            TextField keyField = (TextField) row.getComponentAt(0);
+            TextField valueField = (TextField) row.getComponentAt(1);
+            if (!valueField.getValue().isBlank()) {
+                tags.add(CreateKeyRequest.Tag.builder()
+                        .tagKey(keyField.getValue())
+                        .tagValue(valueField.getValue())
+                        .build());
+            }
+        }
+
+        Map<String, Object> policyMap = null;
+        if (!policyField.getValue().isBlank()) {
+            try {
+                policyMap = objectMapper.readValue(policyField.getValue(), new TypeReference<>() {
+                });
+            } catch (Exception ex) {
+                String errorMsg = "Invalid JSON in policy field: " + ex.getMessage();
+                showError(errorMsg);
+                Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                return;
+            }
+        }
+
+        IEnumKeyExpirationModel.Types expirationModel = expirationModelCombo.getValue();
+        LocalDateTime validTo = null;
+        if (expirationModel == IEnumKeyExpirationModel.Types.KEY_MATERIAL_EXPIRES && validToPicker.getValue() != null) {
+            validTo = validToPicker.getValue().atTime(LocalTime.MAX);
+        }
+
+        try {
+            CreateKeyRequest request = CreateKeyRequest.builder()
+                    .keyAlias(StringUtils.hasText(newAlias) ? newAlias : existingSelectedAlias)
+                    .description(descriptionField.getValue())
+                    .keyUsage(keyUsageCombo.getValue())
+                    .keySpec(keySpecCombo.getValue())
+                    .origin(originCombo.getValue())
+                    .multiRegion(multiRegionCheckbox.getValue())
+                    .bypassPolicyLockoutSafetyCheck(bypassPolicyCheckbox.getValue())
+                    .rotationEnabled(rotationEnabledCheckbox.getValue())
+                    .rotationPeriodInDays(rotationEnabledCheckbox.getValue() ? rotationPeriodField.getValue() : null)
+                    .expirationModel(expirationModel)
+                    .validTo(validTo)
+                    .policy(policyMap)
+                    .tags(tags.isEmpty() ? null : tags)
+                    .primaryRegion(primaryRegionField.getValue())
+                    .replicaRegions(replicaRegionsField.getValue())
+                    .build();
+
+            ResponseEntity<CreateKeyResponse> response = kmsApiService.createKey(request);
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                String errorMsg = "Key creation failed: " + (response.getBody() != null ? response.getBody().toString() : "unknown error");
+                showError(errorMsg);
+                Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                return;
+            }
+
+            close();
+            Notification.show("Key created successfully", 3000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            parentView.loadAliases();
+            parentView.loadKeys();
+
+        } catch (FeignException ex) {
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            showError(errorMsg);
+            Notification.show("Creation error: " + errorMsg, 5000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        } catch (Exception ex) {
+            String errorMsg = ex.getMessage();
+            showError(errorMsg);
+            Notification.show("Error: " + errorMsg, 5000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        }
     }
 
     private void buildForm() {
@@ -275,124 +360,5 @@ public class CreateKeyDialog extends Dialog {
                 tagsHeader, tagsContainer);
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
         return form;
-    }
-
-    private void buildFooter() {
-        errorSpan = new Span();
-        errorSpan.getStyle().set("color", "var(--lumo-error-text-color)");
-        errorSpan.getStyle().set("font-size", "var(--lumo-font-size-xs)");
-        errorSpan.getStyle().set("margin-right", "auto");
-        errorSpan.setVisible(false);
-
-        Button createBtn = new Button("Create", e -> onCreate());
-        createBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        Button cancelBtn = new Button("Cancel", e -> close());
-
-        HorizontalLayout footerLayout = new HorizontalLayout();
-        footerLayout.setWidthFull();
-        footerLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        footerLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        footerLayout.add(errorSpan);
-        HorizontalLayout buttonLayout = new HorizontalLayout(cancelBtn, createBtn);
-        buttonLayout.setSpacing(true);
-        footerLayout.add(buttonLayout);
-
-        getFooter().removeAll();
-        getFooter().add(footerLayout);
-    }
-
-    private void onCreate() {
-        errorSpan.setText("");
-        errorSpan.setVisible(false);
-
-        String newAlias = null;
-        String existingSelectedAlias = null;
-        if (newAliasField.isVisible() && !newAliasField.getValue().isBlank()) {
-            newAlias = newAliasField.getValue();
-        } else if (aliasCombo.getValue() != null && !aliasCombo.getValue().isBlank()) {
-            existingSelectedAlias = aliasCombo.getValue();
-        }
-
-        List<CreateKeyRequest.Tag> tags = new ArrayList<>();
-        for (HorizontalLayout row : tagRows) {
-            TextField keyField = (TextField) row.getComponentAt(0);
-            TextField valueField = (TextField) row.getComponentAt(1);
-            if (!valueField.getValue().isBlank()) {
-                tags.add(CreateKeyRequest.Tag.builder()
-                        .tagKey(keyField.getValue())
-                        .tagValue(valueField.getValue())
-                        .build());
-            }
-        }
-
-        Map<String, Object> policyMap = null;
-        if (!policyField.getValue().isBlank()) {
-            try {
-                policyMap = objectMapper.readValue(policyField.getValue(), new TypeReference<>() {});
-            } catch (Exception ex) {
-                String errorMsg = "Invalid JSON in policy field: " + ex.getMessage();
-                errorSpan.setText(errorMsg);
-                errorSpan.setVisible(true);
-                Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
-                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
-                return;
-            }
-        }
-
-        // Expiration data
-        IEnumKeyExpirationModel.Types expirationModel = expirationModelCombo.getValue();
-        LocalDateTime validTo = null;
-        if (expirationModel == IEnumKeyExpirationModel.Types.KEY_MATERIAL_EXPIRES && validToPicker.getValue() != null) {
-            validTo = validToPicker.getValue().atTime(LocalTime.MAX);
-        }
-
-        try {
-            CreateKeyRequest request = CreateKeyRequest.builder()
-                    .keyAlias(StringUtils.hasText(newAlias) ? newAlias : existingSelectedAlias)
-                    .description(descriptionField.getValue())
-                    .keyUsage(keyUsageCombo.getValue())
-                    .keySpec(keySpecCombo.getValue())
-                    .origin(originCombo.getValue())
-                    .multiRegion(multiRegionCheckbox.getValue())
-                    .bypassPolicyLockoutSafetyCheck(bypassPolicyCheckbox.getValue())
-                    .rotationEnabled(rotationEnabledCheckbox.getValue())
-                    .rotationPeriodInDays(rotationEnabledCheckbox.getValue() ? rotationPeriodField.getValue() : null)
-                    .expirationModel(expirationModel)
-                    .validTo(validTo)
-                    .policy(policyMap)
-                    .tags(tags.isEmpty() ? null : tags)
-                    .primaryRegion(primaryRegionField.getValue())
-                    .replicaRegions(replicaRegionsField.getValue())
-                    .build();
-
-            ResponseEntity<CreateKeyResponse> response = kmsApiService.createKey(request);
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                String errorMsg = "Key creation failed: " + (response.getBody() != null ? response.getBody().toString() : "unknown error");
-                errorSpan.setText(errorMsg);
-                errorSpan.setVisible(true);
-                Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
-                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
-                return;
-            }
-
-            close();
-            Notification.show("Key created successfully", 3000, Notification.Position.TOP_END)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            parentView.loadAliases();
-            parentView.loadKeys();
-
-        } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
-            errorSpan.setText(errorMsg);
-            errorSpan.setVisible(true);
-            Notification.show("Creation error: " + errorMsg, 5000, Notification.Position.TOP_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-        } catch (Exception ex) {
-            String errorMsg = ex.getMessage();
-            errorSpan.setText(errorMsg);
-            errorSpan.setVisible(true);
-            Notification.show("Error: " + errorMsg, 5000, Notification.Position.TOP_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-        }
     }
 }

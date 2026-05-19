@@ -1,20 +1,17 @@
 package eu.isygoit.ui.views.key.dialogs;
 
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.views.BaseActionDialog;
 import eu.isygoit.ui.views.key.KeyManagementView;
+import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -22,24 +19,45 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * Dialog for permanently deleting a KMS key with a 9‑digit confirmation code.
  */
-public class PermanentKeyDeleteDialog extends Dialog {
+public class PermanentKeyDeleteDialog extends BaseActionDialog {
 
     private final KmsApiService kmsApiService;
     private final String keyId;
     private final KeyManagementView parentView;
     private final String confirmationCode;
 
+    private TextField pinField;
+
     public PermanentKeyDeleteDialog(KmsApiService kmsApiService, String keyId, KeyManagementView parentView) {
+        super("Permanently delete key");
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
         this.parentView = parentView;
         this.confirmationCode = generateConfirmationCode();
 
-        setHeaderTitle("Permanently delete key");
+        setOkButtonText("Delete permanently");
         setWidth("450px");
-        setCloseOnEsc(false);
-        setCloseOnOutsideClick(false);
 
+        buildContent();
+
+        // Disable ok button initially – will be enabled when code matches
+        okButton.setEnabled(false);
+    }
+
+    @Override
+    protected void onOk() {
+        clearError();
+        if (pinField.getValue().equals(confirmationCode)) {
+            deleteKey();
+        } else {
+            String errorMsg = "Incorrect confirmation code";
+            showError(errorMsg);
+            Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        }
+    }
+
+    private void buildContent() {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
         layout.setPadding(true);
@@ -60,40 +78,21 @@ public class PermanentKeyDeleteDialog extends Dialog {
         codeDiv.getStyle().set("text-align", "center");
         layout.add(codeDiv);
 
-        TextField pinField = new TextField();
+        pinField = new TextField();
         pinField.setPlaceholder("Enter 9‑digit code");
         pinField.setWidthFull();
         pinField.setPattern("[0-9]*");
         pinField.setMaxLength(9);
         pinField.setValueChangeMode(ValueChangeMode.ON_CHANGE);
         pinField.setAllowedCharPattern("[0-9]");
-        layout.add(pinField);
-
-        Button confirmBtn = new Button("Delete permanently", e -> {
-            if (pinField.getValue().equals(confirmationCode)) {
-                deleteKey();
-            } else {
-                Notification.show("Incorrect confirmation code", 3000, Notification.Position.TOP_END)
-                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            }
-        });
-        confirmBtn.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        confirmBtn.setEnabled(false);
-
         pinField.addValueChangeListener(e -> {
             String value = e.getValue();
             boolean isExactNineDigits = value != null && value.matches("\\d{9}");
-            confirmBtn.setEnabled(isExactNineDigits && value.equals(confirmationCode));
+            okButton.setEnabled(isExactNineDigits && value.equals(confirmationCode));
         });
-
-        Button cancelBtn = new Button("Cancel", e -> close());
-
-        HorizontalLayout buttonBar = new HorizontalLayout(cancelBtn, confirmBtn);
-        buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        layout.add(buttonBar);
+        layout.add(pinField);
 
         add(layout);
-        this.open();
     }
 
     private String generateConfirmationCode() {
@@ -105,16 +104,25 @@ public class PermanentKeyDeleteDialog extends Dialog {
         try {
             ResponseEntity<KmsDtos.DeleteKeyResponse> response = kmsApiService.deleteKey(keyId);
             if (response.getStatusCode().is2xxSuccessful()) {
+                close();
                 Notification.show("Key permanently deleted", 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                close();
                 parentView.loadKeys();
             } else {
-                Notification.show("Deletion failed", 3000, Notification.Position.TOP_END)
+                String errorMsg = "Deletion failed: " + response.getStatusCode();
+                showError(errorMsg);
+                Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
-        } catch (Exception e) {
-            Notification.show("Error: " + e.getMessage(), 5000, Notification.Position.TOP_END)
+        } catch (FeignException ex) {
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            showError(errorMsg);
+            Notification.show("Update error: " + errorMsg, 5000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        } catch (Exception ex) {
+            String errorMsg = ex.getMessage();
+            showError(errorMsg);
+            Notification.show("Error: " + errorMsg, 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }

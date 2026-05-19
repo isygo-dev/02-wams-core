@@ -1,34 +1,41 @@
 package eu.isygoit.ui.views.key.dialogs;
 
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.views.BaseActionDialog;
 import eu.isygoit.ui.views.key.KeyManagementView;
 import feign.FeignException;
-import org.springframework.http.ResponseEntity;
 
 /**
- * Dialog for cancelling the scheduled deletion of a KMS key.
+ * Dialog to confirm enabling or disabling a KMS key.
  */
-public class CancelKeyDeletionDialog extends BaseActionDialog {
+public class ToggleKeyStatusDialog extends BaseActionDialog {
 
     private final KmsApiService kmsApiService;
     private final String keyId;
-    private final String keyAliasOrId;
+    private final boolean currentlyEnabled;
     private final KeyManagementView parentView;
 
-    public CancelKeyDeletionDialog(KmsApiService kmsApiService, String keyId, String keyAliasOrId, KeyManagementView parentView) {
-        super("Cancel deletion");
+    public ToggleKeyStatusDialog(KmsApiService kmsApiService,
+                                 String keyId,
+                                 boolean currentlyEnabled,
+                                 KeyManagementView parentView) {
+        super(currentlyEnabled ? "Disable key" : "Enable key");
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
-        this.keyAliasOrId = keyAliasOrId;
+        this.currentlyEnabled = currentlyEnabled;
         this.parentView = parentView;
 
-        setOkButtonText("Yes, cancel");
+        setOkButtonText(currentlyEnabled ? "Disable" : "Enable");
+        if (currentlyEnabled) {
+            okButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        } else {
+            okButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+        }
         setWidth("450px");
 
         buildContent();
@@ -38,19 +45,17 @@ public class CancelKeyDeletionDialog extends BaseActionDialog {
     protected void onOk() {
         clearError();
         try {
-            ResponseEntity<KmsDtos.CancelKeyDeletionResponse> response =
-                    kmsApiService.cancelKeyDeletion(keyId);
-            if (response.getStatusCode().is2xxSuccessful()) {
-                close();
-                Notification.show("Deletion cancelled", 3000, Notification.Position.TOP_END)
+            if (currentlyEnabled) {
+                kmsApiService.disableKey(keyId);
+                Notification.show("Key disabled successfully", 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                parentView.loadKeys();
             } else {
-                String errorMsg = "Failed to cancel deletion: " + response.getStatusCode();
-                showError(errorMsg);
-                Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
-                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                kmsApiService.enableKey(keyId);
+                Notification.show("Key enabled successfully", 3000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             }
+            close();
+            parentView.loadKeys();
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
             showError(errorMsg);
@@ -68,7 +73,9 @@ public class CancelKeyDeletionDialog extends BaseActionDialog {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
         layout.setPadding(true);
-        layout.add(new Span("Are you sure you want to cancel the deletion of key " + keyAliasOrId + "?"));
+        layout.add(new Span(currentlyEnabled
+                ? "Disabling the key prevents any cryptographic operations. Are you sure?"
+                : "Enabling the key will restore its ability to perform cryptographic operations."));
         add(layout);
     }
 }

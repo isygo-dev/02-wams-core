@@ -15,7 +15,9 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
+import eu.isygoit.dto.KmsDtos.ListResourceTagsResponse;
+import eu.isygoit.dto.KmsDtos.UpdateKeyRotationRequest;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.views.key.dialogs.*;
@@ -383,7 +385,7 @@ class KeyCard extends VerticalLayout {
 
     private void toggleKeyStatus() {
         boolean currentlyEnabled = metadata != null && metadata.getKeyStatus() == IEnumKeyStatus.Types.ENABLED;
-        new ConfirmToggleKeyStatusDialog(kmsApiService, keyId, currentlyEnabled, keyManagementView);
+        new ToggleKeyStatusDialog(kmsApiService, keyId, currentlyEnabled, keyManagementView).open();
     }
 
     private void updateKey() {
@@ -404,15 +406,15 @@ class KeyCard extends VerticalLayout {
     }
 
     private void scheduleDeletion() {
-        new ScheduleKeyDeletionDialog(kmsApiService, keyId, keyManagementView);
+        new ScheduleKeyDeletionDialog(kmsApiService, keyId, keyManagementView).open();
     }
 
     private void cancelDeletion() {
-        new CancelKeyDeletionDialog(kmsApiService, keyId, aliasOrId, keyManagementView);
+        new CancelKeyDeletionDialog(kmsApiService, keyId, aliasOrId, keyManagementView).open();
     }
 
     private void confirmPermanentDelete() {
-        new PermanentKeyDeleteDialog(kmsApiService, keyId, keyManagementView);
+        new PermanentKeyDeleteDialog(kmsApiService, keyId, keyManagementView).open();
     }
 
     private void describeKey() {
