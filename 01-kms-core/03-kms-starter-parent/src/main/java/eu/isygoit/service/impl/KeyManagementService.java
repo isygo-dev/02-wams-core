@@ -97,6 +97,8 @@ public class KeyManagementService implements IKeyManagementService {
                     .rotationEnabled(request.getRotationEnabled())
                     .rotationPeriodInDays(request.getRotationPeriodInDays())
                     .keyMaterial(keyMaterial)
+                    .expirationModel(request.getExpirationModel())
+                    .validTo(request.getValidTo())
                     .build();
 
             if (Boolean.TRUE.equals(request.getMultiRegion())) {
@@ -192,8 +194,8 @@ public class KeyManagementService implements IKeyManagementService {
                             .rotationEnabled(savedKey.getRotationEnabled())
                             .rotationPeriodInDays(savedKey.getRotationPeriodInDays())
                             .keyStatus(savedKey.getKeyStatus())
-                            .createdAt(savedKey.getCreateDate())
-                            .updatedAt(savedKey.getUpdateDate())
+                            .createDate(savedKey.getCreateDate())
+                            .updateDate(savedKey.getUpdateDate())
                             .keyAlias(savedKey.getPrimaryKeyAlias())
                             .expirationModel(savedKey.getExpirationModel())
                             .customerMasterKeySpec(
@@ -240,7 +242,7 @@ public class KeyManagementService implements IKeyManagementService {
         // Fetch key policy (if any)
         Optional<KmsKeyPolicy> policy = kmsKeyPolicyRepository.findByTenantAndKeyId(tenant, key.getKeyId());
 
-        CreateKeyResponse.KeyMetadata metadata = CreateKeyResponse.KeyMetadata.builder()
+        DescribeKeyResponse.KeyMetadata metadata = DescribeKeyResponse.KeyMetadata.builder()
                 .keyId(key.getKeyId())
                 .wrn(key.getKeyWrn())
                 .keyStatus(key.getKeyStatus())
@@ -248,7 +250,7 @@ public class KeyManagementService implements IKeyManagementService {
                 .keyUsage(key.getKeyUsage())
                 .currentVersion(key.getCurrentVersionId())
                 .createDate(key.getCreateDate())
-                .createdAt(key.getCreateDate())
+                .updateDate(key.getUpdateDate())
                 .keyAlias(key.getPrimaryKeyAlias())
                 .description(key.getDescription())
                 .rotationEnabled(key.getRotationEnabled())
@@ -450,30 +452,92 @@ public class KeyManagementService implements IKeyManagementService {
     }
 
     @Override
-    public UpdateKeyDescriptionResponse updateKeyDescription(
-            String tenant,
-            String keyId,
-            UpdateKeyDescriptionRequest request) {
-
-        log.info("Updating key description for tenant: {} keyId: {}", tenant, keyId);
+    @Transactional
+    public UpdateKeyDescriptionResponse updateKeyDescription(String tenant, String keyId, UpdateKeyDescriptionRequest request) {
+        log.info("Updating key description, alias, and tags for tenant: {} keyId: {}", tenant, keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
-
+        // 1. Update description if provided
         if (request.getDescription() != null) {
             key.setDescription(request.getDescription());
         }
 
+        // 2. Update alias if provided
+        String newAlias = request.getKeyAlias();
+        String currentAlias = key.getPrimaryKeyAlias();
+        if (newAlias != null && !newAlias.equals(currentAlias)) {
+
+            // Check if alias already exists for another key
+            Optional<KmsAlias> existingAlias = kmsAliasRepository.findByTenantAndAliasName(tenant, newAlias);
+            if (existingAlias.isPresent()) {
+                // Reassign existing alias to this key
+                KmsAlias alias = existingAlias.get();
+                alias.setTargetKeyId(key.getKeyId());
+                kmsAliasRepository.save(alias);
+            } else {
+                // Create new alias
+                KmsAlias alias = KmsAlias.builder()
+                        .tenant(tenant)
+                        .aliasName(newAlias)
+                        .targetKeyId(key.getKeyId())
+                        .primaryKey(true)  // mark as primary if this is the main alias
+                        .build();
+                kmsAliasRepository.save(alias);
+            }
+            // Update denormalized field on KmsKey
+            key.setPrimaryKeyAlias(newAlias);
+        }
+
+        // 3. Update tags if provided (replace all existing tags)
+        List<CreateKeyRequest.Tag> newTags = request.getTags();
+        if (newTags != null) {
+            // Remove all existing tags for this key
+            List<KmsTag> existingTags = kmsTagRepository.findByTenantAndKeyId(tenant, key.getKeyId());
+            if (!existingTags.isEmpty()) {
+                kmsTagRepository.deleteAll(existingTags);
+            }
+            // Add new tags
+            if (!newTags.isEmpty()) {
+                List<KmsTag> tagsToAdd = newTags.stream()
+                        .map(tag -> KmsTag.builder()
+                                .tenant(tenant)
+                                .keyId(key.getKeyId())
+                                .tagKey(tag.getTagKey())
+                                .tagValue(tag.getTagValue())
+                                .build())
+                        .collect(Collectors.toList());
+                kmsTagRepository.saveAll(tagsToAdd);
+            }
+        }
+
         KmsKey updated = kmsKeyRepository.save(key);
 
-        return UpdateKeyDescriptionResponse.builder().keyMetadata(CreateKeyResponse.KeyMetadata.builder()
-                        .keyId(String.valueOf(updated.getKeyId()))
-                        .keyAlias(updated.getPrimaryKeyAlias())
-                        .description(updated.getDescription())
-                        .keyStatus(updated.getKeyStatus())
-                        .updatedAt(LocalDateTime.now())
-                        .build())
+        // Build response metadata
+        CreateKeyResponse.KeyMetadata keyMetadata = CreateKeyResponse.KeyMetadata.builder()
+                .keyId(updated.getKeyId())
+                .wrn(updated.getKeyWrn())
+                .keyAlias(updated.getPrimaryKeyAlias())
+                .description(updated.getDescription())
+                .keyStatus(updated.getKeyStatus())
+                .rotationEnabled(updated.getRotationEnabled())
+                .rotationPeriodInDays(updated.getRotationPeriodInDays())
+                .keySpec(updated.getKeySpec())
+                .keyUsage(updated.getKeyUsage())
+                .origin(updated.getOrigin())
+                .createDate(updated.getCreateDate())
+                .updateDate(updated.getUpdateDate())
+                .currentVersion(updated.getCurrentVersionId())
+                .enabled(updated.isEnabled())
+                .multiRegion(updated.getMultiRegion())
+                .build();
+
+        // Optionally include tags in response (if needed)
+        // keyMetadata.setTags(convertTagsToDto(newTags));
+
+        return UpdateKeyDescriptionResponse.builder()
+                .keyMetadata(keyMetadata)
                 .build();
     }
 

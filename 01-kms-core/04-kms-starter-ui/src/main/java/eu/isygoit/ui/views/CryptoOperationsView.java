@@ -20,8 +20,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
-import eu.isygoit.enums.IEnumKeySpec;
-import eu.isygoit.enums.IEnumKeyUsage;
+import eu.isygoit.enums.*;
+import eu.isygoit.mapper.AlgorithmMapper;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainLayout;
 import jakarta.annotation.security.PermitAll;
@@ -35,6 +35,8 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Route(value = "crypto", layout = MainLayout.class)
@@ -47,8 +49,12 @@ public class CryptoOperationsView extends VerticalLayout {
     private final Button refreshKeysButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final ProgressBar loadingBar = new ProgressBar();
 
-    // Tabs
+    // Tabs and their headers
     private final Tabs tabs;
+    private final Tab encryptDecryptTabHeader;
+    private final Tab signVerifyTabHeader;
+    private final Tab dataKeyTabHeader;
+    private final Tab macTabHeader;
     private final VerticalLayout encryptDecryptTab;
     private final VerticalLayout signVerifyTab;
     private final VerticalLayout dataKeyTab;
@@ -96,6 +102,7 @@ public class CryptoOperationsView extends VerticalLayout {
                 selectedKeySpec = null;
                 selectedKeyUsage = null;
                 updateAlgorithmCombos();
+                updateTabBasedOnKey();
             }
         });
 
@@ -114,10 +121,10 @@ public class CryptoOperationsView extends VerticalLayout {
 
         // Tabs
         tabs = new Tabs();
-        Tab encryptDecryptTabHeader = new Tab("Encrypt / Decrypt");
-        Tab signVerifyTabHeader = new Tab("Sign / Verify");
-        Tab dataKeyTabHeader = new Tab("Data Keys");
-        Tab macTabHeader = new Tab("MAC");
+        encryptDecryptTabHeader = new Tab("Encrypt / Decrypt");
+        signVerifyTabHeader = new Tab("Sign / Verify");
+        dataKeyTabHeader = new Tab("Data Keys");
+        macTabHeader = new Tab("MAC");
         tabs.add(encryptDecryptTabHeader, signVerifyTabHeader, dataKeyTabHeader, macTabHeader);
 
         encryptDecryptTab = createEncryptDecryptPanel();
@@ -131,10 +138,16 @@ public class CryptoOperationsView extends VerticalLayout {
         macTab.setVisible(false);
 
         tabs.addSelectedChangeListener(event -> {
-            encryptDecryptTab.setVisible(event.getSelectedTab() == encryptDecryptTabHeader);
-            signVerifyTab.setVisible(event.getSelectedTab() == signVerifyTabHeader);
-            dataKeyTab.setVisible(event.getSelectedTab() == dataKeyTabHeader);
-            macTab.setVisible(event.getSelectedTab() == macTabHeader);
+            Tab selected = event.getSelectedTab();
+            boolean supported = isTabSupported(selected);
+            if (!supported && selectedKeyId != null) {
+                Notification.show("The selected key does not support this operation.", 3000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
+            }
+            encryptDecryptTab.setVisible(selected == encryptDecryptTabHeader);
+            signVerifyTab.setVisible(selected == signVerifyTabHeader);
+            dataKeyTab.setVisible(selected == dataKeyTabHeader);
+            macTab.setVisible(selected == macTabHeader);
         });
 
         add(tabs, encryptDecryptTab, signVerifyTab, dataKeyTab, macTab);
@@ -162,6 +175,7 @@ public class CryptoOperationsView extends VerticalLayout {
                 selectedKeyId = null;
                 keyCombo.clear();
                 updateAlgorithmCombos();
+                updateTabBasedOnKey();
             }
         } catch (Exception e) {
             Notification.show("Failed to load keys: " + e.getMessage(), 5000, Notification.Position.TOP_END)
@@ -193,6 +207,7 @@ public class CryptoOperationsView extends VerticalLayout {
                 selectedKeySpec = desc.getKeyMetadata().getKeySpec();
                 selectedKeyUsage = desc.getKeyMetadata().getKeyUsage();
                 updateAlgorithmCombos();
+                updateTabBasedOnKey();
             }
         } catch (Exception e) {
             Notification.show("Failed to load key metadata", 3000, Notification.Position.TOP_END)
@@ -200,61 +215,107 @@ public class CryptoOperationsView extends VerticalLayout {
         }
     }
 
+    private void updateTabBasedOnKey() {
+        if (selectedKeyId == null) return;
+        Tab current = tabs.getSelectedTab();
+        if (!isTabSupported(current)) {
+            Tab supported = getFirstSupportedTab();
+            if (supported != null) {
+                tabs.setSelectedTab(supported);
+                Notification.show("Switched to a supported operation for this key.", 3000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
+            } else {
+                Notification.show("This key does not support any cryptographic operation.", 3000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            }
+        }
+    }
+
+    private boolean isTabSupported(Tab tab) {
+        if (tab == encryptDecryptTabHeader) return selectedKeyUsage == IEnumKeyUsage.Types.ENCRYPT_DECRYPT;
+        if (tab == signVerifyTabHeader) return selectedKeyUsage == IEnumKeyUsage.Types.SIGN_VERIFY;
+        if (tab == dataKeyTabHeader) return selectedKeyUsage == IEnumKeyUsage.Types.ENCRYPT_DECRYPT;
+        if (tab == macTabHeader) return selectedKeyUsage == IEnumKeyUsage.Types.GENERATE_VERIFY_MAC;
+        return false;
+    }
+
+    private Tab getFirstSupportedTab() {
+        if (selectedKeyUsage == IEnumKeyUsage.Types.ENCRYPT_DECRYPT) return encryptDecryptTabHeader;
+        if (selectedKeyUsage == IEnumKeyUsage.Types.SIGN_VERIFY) return signVerifyTabHeader;
+        if (selectedKeyUsage == IEnumKeyUsage.Types.GENERATE_VERIFY_MAC) return macTabHeader;
+        return null;
+    }
+
     private void updateAlgorithmCombos() {
-        // Update encryption algorithm combo
-        if (selectedKeySpec != null) {
-            if (selectedKeySpec == IEnumKeySpec.Types.SYMMETRIC_DEFAULT) {
-                algorithmCombo.setItems("SYMMETRIC_DEFAULT");
-                algorithmCombo.setValue("SYMMETRIC_DEFAULT");
-                algorithmCombo.setEnabled(true);
-            } else if (selectedKeySpec.name().startsWith("RSA")) {
-                algorithmCombo.setItems("RSAES_OAEP_SHA_256", "RSAES_PKCS1_V1_5");
-                algorithmCombo.setValue("RSAES_OAEP_SHA_256");
-                algorithmCombo.setEnabled(true);
-            } else {
-                algorithmCombo.setItems();
-                algorithmCombo.setEnabled(false);
-                algorithmCombo.setPlaceholder("No encryption algorithm for this key");
-            }
-        } else {
-            algorithmCombo.setItems();
+        // Reset all combo boxes first
+        algorithmCombo.clear();
+        signAlgoCombo.clear();
+        macAlgoCombo.clear();
+
+        // Early exit if key usage or spec is missing
+        if (selectedKeyUsage == null || selectedKeySpec == null) {
             algorithmCombo.setEnabled(false);
-        }
-
-        // Update signing algorithm combo
-        if (selectedKeyUsage == IEnumKeyUsage.Types.SIGN_VERIFY && selectedKeySpec != null) {
-            if (selectedKeySpec.name().startsWith("RSA")) {
-                signAlgoCombo.setItems("RSASSA_PKCS1_V1_5_SHA_256", "RSASSA_PSS_SHA_256");
-                signAlgoCombo.setValue("RSASSA_PKCS1_V1_5_SHA_256");
-                signAlgoCombo.setEnabled(true);
-            } else if (selectedKeySpec.name().startsWith("ECC")) {
-                signAlgoCombo.setItems("ECDSA_SHA_256", "ECDSA_SHA_384", "ECDSA_SHA_512");
-                signAlgoCombo.setValue("ECDSA_SHA_256");
-                signAlgoCombo.setEnabled(true);
-            } else if (selectedKeySpec == IEnumKeySpec.Types.SM2) {
-                signAlgoCombo.setItems("SM2DSA");
-                signAlgoCombo.setValue("SM2DSA");
-                signAlgoCombo.setEnabled(true);
-            } else {
-                signAlgoCombo.setItems();
-                signAlgoCombo.setEnabled(false);
-                signAlgoCombo.setPlaceholder("No signing algorithm for this key");
-            }
-        } else {
-            signAlgoCombo.setItems();
             signAlgoCombo.setEnabled(false);
+            macAlgoCombo.setEnabled(false);
+            return;
         }
 
-        // Update MAC algorithm combo (only for HMAC keys with GENERATE_VERIFY_MAC usage)
-        if (selectedKeyUsage == IEnumKeyUsage.Types.GENERATE_VERIFY_MAC &&
-                selectedKeySpec != null && selectedKeySpec.name().startsWith("HMAC")) {
-            macAlgoCombo.setItems("HMAC_SHA_224", "HMAC_SHA_256", "HMAC_SHA_384", "HMAC_SHA_512");
-            macAlgoCombo.setValue("HMAC_SHA_256");
-            macAlgoCombo.setEnabled(true);
+        // Update encryption combo
+        updateComboForUsage(selectedKeyUsage, selectedKeySpec, algorithmCombo,
+                usage -> usage == IEnumKeyUsage.Types.ENCRYPT_DECRYPT,
+                spec -> AlgorithmMapper.keySpecToEncryptionAlgo(spec).stream()
+                        .map(IEnumEncryptionAlgorithm::name)
+                        .collect(Collectors.toList()));
+
+        // Update signing combo
+        updateComboForUsage(selectedKeyUsage, selectedKeySpec, signAlgoCombo,
+                usage -> usage == IEnumKeyUsage.Types.SIGN_VERIFY,
+                spec -> AlgorithmMapper.keySpecToSigningAlgo(spec).stream()
+                        .map(IEnumSignatureAlgorithm::name)
+                        .collect(Collectors.toList()));
+
+        // Update MAC combo
+        updateComboForUsage(selectedKeyUsage, selectedKeySpec, macAlgoCombo,
+                usage -> usage == IEnumKeyUsage.Types.GENERATE_VERIFY_MAC,
+                spec -> {
+                    if (spec.name().startsWith("HMAC")) {
+                        return AlgorithmMapper.keySpecToMacAlgo(spec).stream()
+                                .map(IEnumMacAlgorithm::name)
+                                .collect(Collectors.toList());
+                    }
+                    return List.of();
+                });
+    }
+
+    /**
+     * Helper method to update a combo box based on key usage and spec.
+     *
+     * @param usage       the current key usage
+     * @param spec        the current key spec
+     * @param comboBox    the combo box to update
+     * @param usageCheck  predicate that checks if the usage matches the required type
+     * @param algoMapper  function that returns a list of algorithm names for the given spec
+     */
+    private void updateComboForUsage(IEnumKeyUsage.Types usage,
+                                     IEnumKeySpec.Types spec,
+                                     ComboBox<String> comboBox,
+                                     Predicate<IEnumKeyUsage.Types> usageCheck,
+                                     Function<IEnumKeySpec.Types, List<String>> algoMapper) {
+        if (usageCheck.test(usage)) {
+            List<String> algorithms = algoMapper.apply(spec);
+            if (!algorithms.isEmpty()) {
+                comboBox.setItems(algorithms);
+                comboBox.setValue(algorithms.get(0));
+                comboBox.setEnabled(true);
+                return;
+            }
+            // fall through: no algorithms for this spec/usage
+        }
+        comboBox.setEnabled(false);
+        if (comboBox == macAlgoCombo) {
+            comboBox.setPlaceholder("Select an HMAC key to enable MAC operations");
         } else {
-            macAlgoCombo.setItems();
-            macAlgoCombo.setEnabled(false);
-            macAlgoCombo.setPlaceholder("Select an HMAC key to enable MAC operations");
+            comboBox.setPlaceholder("No algorithm available for this key");
         }
     }
 
@@ -418,7 +479,7 @@ public class CryptoOperationsView extends VerticalLayout {
                         .keyId(selectedKeyId)
                         .message(msgB64)
                         .messageType("RAW")
-                        .signingAlgorithm(signAlgoCombo.getValue())
+                        .signingAlgorithm(IEnumSignatureAlgorithm.valueOf(signAlgoCombo.getValue()))
                         .build();
                 ResponseEntity<KmsDtos.SignResponse> response = kmsApiService.sign(request);
                 if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
@@ -454,7 +515,7 @@ public class CryptoOperationsView extends VerticalLayout {
                         .message(msgB64)
                         .messageType("RAW")
                         .signature(signature)
-                        .signingAlgorithm(signAlgoCombo.getValue())
+                        .signingAlgorithm(IEnumSignatureAlgorithm.valueOf(signAlgoCombo.getValue()))
                         .build();
                 ResponseEntity<KmsDtos.VerifyResponse> response = kmsApiService.verify(request);
                 if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
@@ -591,7 +652,7 @@ public class CryptoOperationsView extends VerticalLayout {
                 KmsDtos.GenerateMacRequest request = KmsDtos.GenerateMacRequest.builder()
                         .keyId(selectedKeyId)
                         .message(msgB64)
-                        .macAlgorithm(macAlgoCombo.getValue())
+                        .macAlgorithm(IEnumMacAlgorithm.valueOf(macAlgoCombo.getValue()))
                         .build();
                 ResponseEntity<KmsDtos.GenerateMacResponse> response = kmsApiService.generateMac(request);
                 if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
@@ -626,7 +687,7 @@ public class CryptoOperationsView extends VerticalLayout {
                         .keyId(selectedKeyId)
                         .message(msgB64)
                         .mac(mac)
-                        .macAlgorithm(macAlgoCombo.getValue())
+                        .macAlgorithm(IEnumMacAlgorithm.valueOf(macAlgoCombo.getValue()))
                         .build();
                 ResponseEntity<KmsDtos.VerifyMacResponse> response = kmsApiService.verifyMac(request);
                 if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {

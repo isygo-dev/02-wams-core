@@ -2,6 +2,7 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumKeySpec;
+import eu.isygoit.enums.IEnumSignatureAlgorithm;
 import eu.isygoit.enums.IKmsActionType;
 import eu.isygoit.model.DigestConfig;
 import eu.isygoit.model.KmsAuditLog;
@@ -31,9 +32,9 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.SecureRandom;
+import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -297,19 +298,30 @@ public class CryptoService implements ICryptoService {
      * Signs data using standard Java Signature API.
      */
     @Override
-    public byte[] signData(byte[] message, byte[] keyMaterial, String algorithm) {
+    public byte[] signData(byte[] message, byte[] keyMaterial, IEnumSignatureAlgorithm algorithm) {
         try {
-            String sigAlgo = algorithm != null ? algorithm : "SHA256withRSA";
-            java.security.Signature signature = java.security.Signature.getInstance(IEnumKeySpec.mapSigningAlgorithm(sigAlgo));
-            String keyAlgo = sigAlgo.contains("ECDSA") ? "EC" : "RSA";
-            java.security.PrivateKey privateKey = java.security.KeyFactory.getInstance(keyAlgo)
-                    .generatePrivate(new java.security.spec.PKCS8EncodedKeySpec(keyMaterial));
+            if (algorithm == null) {
+                throw new IllegalArgumentException("Signature algorithm is required");
+            }
+            // 1. Get Signature instance
+            Signature signature = Signature.getInstance(algorithm.getJavaAlgorithm());
+
+            // 2. Load private key (use the key algorithm from the enum)
+            PrivateKey privateKey = KeyFactory.getInstance(algorithm.getKeyAlgorithm())
+                    .generatePrivate(new PKCS8EncodedKeySpec(keyMaterial));
+
+            // 3. For RSA-PSS, set the PSS parameters (must be done before initSign)
+            if (algorithm.getPssSpec() != null) {
+                signature.setParameter(algorithm.getPssSpec());
+            }
+
+            // 4. Initialize and sign
             signature.initSign(privateKey);
             signature.update(message);
             return signature.sign();
         } catch (Exception e) {
-            log.error("Signing failed", e);
-            return new byte[0];
+            log.error("Signing failed for algorithm: {}", algorithm, e);
+            throw new RuntimeException("Signing failed", e);
         }
     }
 
@@ -317,18 +329,29 @@ public class CryptoService implements ICryptoService {
      * Verifies digital signature.
      */
     @Override
-    public boolean verifySignature(byte[] message, byte[] signature, byte[] keyMaterial, String algorithm) {
+    public boolean verifySignature(byte[] message, byte[] signatureBytes, byte[] keyMaterial, IEnumSignatureAlgorithm algorithm) {
         try {
-            String sigAlgo = algorithm != null ? algorithm : "SHA256withRSA";
-            java.security.Signature sig = java.security.Signature.getInstance(IEnumKeySpec.mapSigningAlgorithm(sigAlgo));
-            String keyAlgo = sigAlgo.contains("ECDSA") ? "EC" : "RSA";
-            java.security.PublicKey publicKey = java.security.KeyFactory.getInstance(keyAlgo)
-                    .generatePublic(new java.security.spec.X509EncodedKeySpec(keyMaterial));
+            if (algorithm == null) {
+                throw new IllegalArgumentException("Signature algorithm is required");
+            }
+            // 1. Get Signature instance
+            Signature sig = Signature.getInstance(algorithm.getJavaAlgorithm());
+
+            // 2. Load public key (X.509 format)
+            PublicKey publicKey = KeyFactory.getInstance(algorithm.getKeyAlgorithm())
+                    .generatePublic(new X509EncodedKeySpec(keyMaterial));
+
+            // 3. For RSA-PSS, set the PSS parameters before initVerify
+            if (algorithm.getPssSpec() != null) {
+                sig.setParameter(algorithm.getPssSpec());
+            }
+
+            // 4. Initialize and verify
             sig.initVerify(publicKey);
             sig.update(message);
-            return sig.verify(signature);
+            return sig.verify(signatureBytes);
         } catch (Exception e) {
-            log.error("Signature verification failed", e);
+            log.error("Signature verification failed for algorithm: {}", algorithm, e);
             return false;
         }
     }

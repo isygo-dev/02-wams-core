@@ -6,6 +6,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Span;
@@ -21,6 +22,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.KmsDtos.CreateKeyRequest;
 import eu.isygoit.dto.KmsDtos.CreateKeyResponse;
+import eu.isygoit.enums.IEnumKeyExpirationModel;
 import eu.isygoit.enums.IEnumKeyOrigin;
 import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyUsage;
@@ -30,11 +32,12 @@ import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class CreateKeyDialog extends Dialog {
 
@@ -55,6 +58,8 @@ public class CreateKeyDialog extends Dialog {
     private Checkbox bypassPolicyCheckbox;
     private Checkbox rotationEnabledCheckbox;
     private IntegerField rotationPeriodField;
+    private ComboBox<IEnumKeyExpirationModel.Types> expirationModelCombo;
+    private DatePicker validToPicker;
     private TextArea policyField;
     private VerticalLayout tagsContainer;
     private List<HorizontalLayout> tagRows;
@@ -112,8 +117,6 @@ public class CreateKeyDialog extends Dialog {
         // Key spec will be filtered based on selected usage
         keySpecCombo = new ComboBox<>("Key specification");
         keySpecCombo.setRequiredIndicatorVisible(true);
-
-        // Initial filter based on default usage
         updateKeySpecOptions(IEnumKeyUsage.Types.ENCRYPT_DECRYPT);
         keyUsageCombo.addValueChangeListener(e -> {
             IEnumKeyUsage.Types selectedUsage = e.getValue();
@@ -158,12 +161,46 @@ public class CreateKeyDialog extends Dialog {
         rotationPeriodField.setValue(365);
         rotationPeriodField.setVisible(false);
         rotationPeriodField.setHelperText("Default 365 days, min 90, max 3650");
-
         rotationEnabledCheckbox.addValueChangeListener(e -> {
             boolean enabled = e.getValue();
             rotationPeriodField.setVisible(enabled);
             if (!enabled) {
                 rotationPeriodField.clear();
+            }
+        });
+
+        // Expiration model for imported key material (BYOK) – initially hidden
+        expirationModelCombo = new ComboBox<>("Expiration model (for imported key)");
+        expirationModelCombo.setItems(IEnumKeyExpirationModel.Types.values());
+        expirationModelCombo.setValue(IEnumKeyExpirationModel.Types.KEY_MATERIAL_DOES_NOT_EXPIRE);
+        expirationModelCombo.setHelperText("Select how the imported key material should expire (only for origin = EXTERNAL)");
+        expirationModelCombo.setVisible(false);
+
+        validToPicker = new DatePicker("Valid until (date)");
+        validToPicker.setPlaceholder("YYYY-MM-DD");
+        validToPicker.setVisible(false);
+        validToPicker.setHelperText("Date after which the key material becomes unusable");
+
+        // Listeners to toggle expiration fields based on origin
+        originCombo.addValueChangeListener(e -> {
+            boolean isExternal = e.getValue() == IEnumKeyOrigin.Types.EXTERNAL;
+            expirationModelCombo.setVisible(isExternal);
+            if (isExternal) {
+                boolean expires = expirationModelCombo.getValue() == IEnumKeyExpirationModel.Types.KEY_MATERIAL_EXPIRES;
+                validToPicker.setVisible(expires);
+            } else {
+                validToPicker.setVisible(false);
+                expirationModelCombo.setValue(IEnumKeyExpirationModel.Types.KEY_MATERIAL_DOES_NOT_EXPIRE);
+                validToPicker.clear();
+            }
+        });
+
+        expirationModelCombo.addValueChangeListener(e -> {
+            boolean isExternal = originCombo.getValue() == IEnumKeyOrigin.Types.EXTERNAL;
+            if (isExternal) {
+                validToPicker.setVisible(e.getValue() == IEnumKeyExpirationModel.Types.KEY_MATERIAL_EXPIRES);
+            } else {
+                validToPicker.setVisible(false);
             }
         });
 
@@ -177,7 +214,6 @@ public class CreateKeyDialog extends Dialog {
         tagsContainer.setSpacing(true);
         tagsContainer.setPadding(false);
         tagRows = new ArrayList<>();
-
         Button addTagButton = new Button("Add tag", new Icon(VaadinIcon.PLUS));
         addTagButton.addClickListener(e -> addTagRow(null, null));
         tagsHeader = new HorizontalLayout(new Span("Tags (random key + value)"), addTagButton);
@@ -185,9 +221,6 @@ public class CreateKeyDialog extends Dialog {
         tagsHeader.setSpacing(true);
     }
 
-    /**
-     * Updates the items in keySpecCombo to those that support the given usage.
-     */
     private void updateKeySpecOptions(IEnumKeyUsage.Types usage) {
         List<IEnumKeySpec.Types> compatibleSpecs = new ArrayList<>();
         for (IEnumKeySpec.Types spec : IEnumKeySpec.Types.values()) {
@@ -196,7 +229,6 @@ public class CreateKeyDialog extends Dialog {
             }
         }
         keySpecCombo.setItems(compatibleSpecs);
-        // Set a sensible default if the current value is not compatible
         if (!compatibleSpecs.contains(keySpecCombo.getValue())) {
             if (compatibleSpecs.contains(IEnumKeySpec.Types.SYMMETRIC_DEFAULT)) {
                 keySpecCombo.setValue(IEnumKeySpec.Types.SYMMETRIC_DEFAULT);
@@ -238,6 +270,7 @@ public class CreateKeyDialog extends Dialog {
                 multiRegionCheckbox, primaryRegionField, replicaRegionsField,
                 bypassPolicyCheckbox,
                 rotationEnabledCheckbox, rotationPeriodField,
+                expirationModelCombo, validToPicker,
                 policyField,
                 tagsHeader, tagsContainer);
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
@@ -306,6 +339,13 @@ public class CreateKeyDialog extends Dialog {
             }
         }
 
+        // Expiration data
+        IEnumKeyExpirationModel.Types expirationModel = expirationModelCombo.getValue();
+        LocalDateTime validTo = null;
+        if (expirationModel == IEnumKeyExpirationModel.Types.KEY_MATERIAL_EXPIRES && validToPicker.getValue() != null) {
+            validTo = validToPicker.getValue().atTime(LocalTime.MAX);
+        }
+
         try {
             CreateKeyRequest request = CreateKeyRequest.builder()
                     .keyAlias(StringUtils.hasText(newAlias) ? newAlias : existingSelectedAlias)
@@ -317,6 +357,8 @@ public class CreateKeyDialog extends Dialog {
                     .bypassPolicyLockoutSafetyCheck(bypassPolicyCheckbox.getValue())
                     .rotationEnabled(rotationEnabledCheckbox.getValue())
                     .rotationPeriodInDays(rotationEnabledCheckbox.getValue() ? rotationPeriodField.getValue() : null)
+                    .expirationModel(expirationModel)
+                    .validTo(validTo)
                     .policy(policyMap)
                     .tags(tags.isEmpty() ? null : tags)
                     .primaryRegion(primaryRegionField.getValue())

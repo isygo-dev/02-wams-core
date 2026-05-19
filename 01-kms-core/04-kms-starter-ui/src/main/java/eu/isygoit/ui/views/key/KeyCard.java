@@ -5,7 +5,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -15,9 +14,8 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import eu.isygoit.dto.KmsDtos;
+import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.views.key.dialogs.*;
@@ -26,7 +24,6 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 class KeyCard extends VerticalLayout {
@@ -34,7 +31,7 @@ class KeyCard extends VerticalLayout {
     private final KeyManagementView keyManagementView;
     private final KmsApiService kmsApiService;
     private final String keyId;
-    private final KmsDtos.CreateKeyResponse.KeyMetadata metadata;
+    private final DescribeKeyResponse.KeyMetadata metadata;
     private final String aliasOrId;
     private final String statusText;
     private final ObjectMapper objectMapper;
@@ -43,7 +40,7 @@ class KeyCard extends VerticalLayout {
                    KmsApiService kmsApiService,
                    ObjectMapper objectMapper,
                    String keyId,
-                   KmsDtos.CreateKeyResponse.KeyMetadata metadata) {
+                   DescribeKeyResponse.KeyMetadata metadata) {
         this.keyManagementView = keyManagementView;
         this.kmsApiService = kmsApiService;
         this.objectMapper = objectMapper;
@@ -111,11 +108,11 @@ class KeyCard extends VerticalLayout {
 
         // Edit
         Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit alias, description & tags");
-        editBtn.addClickListener(e -> openUpdateDialog());
+        editBtn.addClickListener(e -> updateKey());
 
         // Info
         Button describeBtn = createIconButton(VaadinIcon.INFO_CIRCLE, "View details");
-        describeBtn.addClickListener(e -> showKeyDetails());
+        describeBtn.addClickListener(e -> describeKey());
 
         // Rotation toggle
         boolean rotationEnabled = metadata != null && metadata.getRotationEnabled() != null && metadata.getRotationEnabled();
@@ -225,28 +222,6 @@ class KeyCard extends VerticalLayout {
         return btn;
     }
 
-    private void toggleKeyStatus() {
-        boolean currentlyEnabled = metadata != null && metadata.getKeyStatus() == IEnumKeyStatus.Types.ENABLED;
-        new ConfirmToggleKeyStatusDialog(kmsApiService, keyId, currentlyEnabled, keyManagementView);
-    }
-
-    private void openUpdateDialog() {
-        List<KmsDtos.ListResourceTagsResponse.Tag> currentTags = fetchKeyTags(keyId);
-        boolean rotationEnabled = metadata != null && metadata.getRotationEnabled() != null ? metadata.getRotationEnabled() : false;
-        Integer rotationPeriod = metadata != null && metadata.getRotationPeriodInDays() != null ? metadata.getRotationPeriodInDays() : null;
-        new UpdateKeyDialog(
-                keyManagementView,
-                kmsApiService,
-                objectMapper,
-                keyId,
-                metadata != null ? metadata.getKeyAlias() : null,
-                metadata != null ? metadata.getDescription() : null,
-                currentTags,
-                rotationEnabled,
-                rotationPeriod
-        ).open();
-    }
-
     private void toggleRotation() {
         boolean currentlyEnabled = metadata != null && metadata.getRotationEnabled() != null && metadata.getRotationEnabled();
         if (currentlyEnabled) {
@@ -258,7 +233,7 @@ class KeyCard extends VerticalLayout {
             confirm.setConfirmButtonTheme(ButtonVariant.LUMO_ERROR.getVariantName());
             confirm.addConfirmListener(event -> {
                 try {
-                    KmsDtos.UpdateKeyRotationRequest request = KmsDtos.UpdateKeyRotationRequest.builder()
+                    UpdateKeyRotationRequest request = UpdateKeyRotationRequest.builder()
                             .enableRotation(false)
                             .build();
                     kmsApiService.updateKeyRotation(keyId, request);
@@ -287,7 +262,7 @@ class KeyCard extends VerticalLayout {
                 int period = periodField.getValue();
                 periodDialog.close();
                 try {
-                    KmsDtos.UpdateKeyRotationRequest request = KmsDtos.UpdateKeyRotationRequest.builder()
+                    UpdateKeyRotationRequest request = UpdateKeyRotationRequest.builder()
                             .enableRotation(true)
                             .rotationPeriodInDays(period)
                             .build();
@@ -342,7 +317,7 @@ class KeyCard extends VerticalLayout {
         scheduleDeleteBtn.setWidthFull();
         scheduleDeleteBtn.addClickListener(e -> {
             menuDialog.close();
-            scheduleDeletionDialog();
+            scheduleDeletion();
         });
         layout.add(scheduleDeleteBtn);
 
@@ -382,130 +357,15 @@ class KeyCard extends VerticalLayout {
         menuDialog.open();
     }
 
-    private List<KmsDtos.ListResourceTagsResponse.Tag> fetchKeyTags(String keyId) {
+    private List<ListResourceTagsResponse.Tag> fetchKeyTags(String keyId) {
         try {
-            ResponseEntity<KmsDtos.ListResourceTagsResponse> response = kmsApiService.listResourceTags(keyId, 100, null);
-            KmsDtos.ListResourceTagsResponse tagsResponse = response.getBody();
+            ResponseEntity<ListResourceTagsResponse> response = kmsApiService.listResourceTags(keyId, 100, null);
+            ListResourceTagsResponse tagsResponse = response.getBody();
             if (tagsResponse != null && tagsResponse.getTags() != null) {
                 return tagsResponse.getTags();
             }
         } catch (Exception e) { /* ignore */ }
         return new ArrayList<>();
-    }
-
-    private void showKeyDetails() {
-        try {
-            ResponseEntity<KmsDtos.DescribeKeyResponse> response = kmsApiService.describeKey(keyId);
-            KmsDtos.DescribeKeyResponse desc = response.getBody();
-            if (desc != null && desc.getKeyMetadata() != null) {
-                KmsDtos.CreateKeyResponse.KeyMetadata meta = desc.getKeyMetadata();
-                Dialog detailsDialog = new Dialog();
-                detailsDialog.setHeaderTitle("Key details");
-                detailsDialog.setWidth("750px");
-
-                VerticalLayout content = new VerticalLayout();
-                content.setSpacing(true);
-
-                content.add(detailRow("Key ID", meta.getKeyId()),
-                        detailRow("WRN", meta.getWrn()),
-                        detailRow("Alias", meta.getKeyAlias()),
-                        detailRow("Description", meta.getDescription()),
-                        detailRow("Status", meta.getKeyStatus() != null ? meta.getKeyStatus().name() : "N/A"),
-                        detailRow("Key spec", meta.getKeySpec() != null ? meta.getKeySpec().name() : "N/A"),
-                        detailRow("Key usage", meta.getKeyUsage() != null ? meta.getKeyUsage().name() : "N/A"),
-                        detailRow("Customer master key spec", meta.getCustomerMasterKeySpec()),
-                        detailRow("Origin", meta.getOrigin() != null ? meta.getOrigin().name() : "N/A"),
-                        detailRow("Creation date", meta.getCreateDate() != null ? meta.getCreateDate().toString() : "N/A"),
-                        detailRow("Rotation enabled", meta.getRotationEnabled() != null ? meta.getRotationEnabled().toString() : "N/A"),
-                        detailRow("Current version", meta.getCurrentVersion()),
-                        detailRow("Key manager", meta.getKeyManager()),
-                        detailRow("Expiration model", meta.getExpirationModel() != null ? meta.getExpirationModel().name() : "N/A"),
-                        detailRow("Multi-region", meta.getMultiRegion() != null ? meta.getMultiRegion().toString() : "false"));
-
-                if (meta.getMultiRegionConfiguration() != null) {
-                    try {
-                        String mrConfig = objectMapper.writerWithDefaultPrettyPrinter()
-                                .writeValueAsString(meta.getMultiRegionConfiguration());
-                        if (mrConfig != null && !mrConfig.isBlank()) {
-                            content.add(detailRow("Multi-region config", mrConfig));
-                        }
-                    } catch (Exception e) {
-                        content.add(detailRow("Multi-region config", meta.getMultiRegionConfiguration().toString()));
-                    }
-                }
-
-                if (meta.getEncryptionAlgorithmSpecs() != null && !meta.getEncryptionAlgorithmSpecs().isEmpty()) {
-                    content.add(detailRow("Encryption algorithms", String.join(", ", meta.getEncryptionAlgorithmSpecs())));
-                }
-                if (meta.getSigningAlgorithms() != null && !meta.getSigningAlgorithms().isEmpty()) {
-                    content.add(detailRow("Signing algorithms", String.join(", ", meta.getSigningAlgorithms())));
-                }
-
-                List<KmsDtos.ListResourceTagsResponse.Tag> tags = fetchKeyTags(keyId);
-                if (!tags.isEmpty()) {
-                    Div tagsContainer = new Div();
-                    tagsContainer.getStyle()
-                            .set("display", "flex")
-                            .set("flex-wrap", "wrap")
-                            .set("gap", "var(--lumo-space-xs)")
-                            .set("margin-top", "var(--lumo-space-s)");
-                    Span label = new Span("Tags: ");
-                    label.addClassName(LumoUtility.FontWeight.BOLD);
-                    tagsContainer.add(label);
-                    for (KmsDtos.ListResourceTagsResponse.Tag tag : tags) {
-                        Span chip = new Span(tag.getTagKey() + "=" + tag.getTagValue());
-                        chip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
-                        chip.addClassName(LumoUtility.Padding.Vertical.XSMALL);
-                        chip.addClassName(LumoUtility.BorderRadius.LARGE);
-                        chip.getStyle()
-                                .set("background-color", "#E9ECEF")
-                                .set("color", "#495057")
-                                .set("white-space", "nowrap");
-                        tagsContainer.add(chip);
-                    }
-                    content.add(tagsContainer);
-                }
-
-                try {
-                    ResponseEntity<KmsDtos.GetKeyPolicyResponse> policyResponse = kmsApiService.getKeyPolicy(keyId);
-                    if (policyResponse.getStatusCode().is2xxSuccessful() && policyResponse.getBody() != null) {
-                        Object policyObj = policyResponse.getBody().getPolicy();
-                        String prettyPolicy = null;
-                        if (policyObj instanceof String) {
-                            Object json = objectMapper.readValue((String) policyObj, Object.class);
-                            prettyPolicy = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
-                        } else if (policyObj instanceof Map) {
-                            prettyPolicy = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(policyObj);
-                        }
-                        if (prettyPolicy != null && !prettyPolicy.isBlank()) {
-                            Span label = new Span("Policy: ");
-                            label.addClassName(LumoUtility.FontWeight.BOLD);
-                            content.add(label);
-                            TextArea policyArea = new TextArea();
-                            policyArea.setValue(prettyPolicy);
-                            policyArea.setWidthFull();
-                            policyArea.setHeight("300px");
-                            policyArea.setReadOnly(true);
-                            policyArea.getStyle().set("font-family", "monospace");
-                            content.add(policyArea);
-                        }
-                    }
-                } catch (Exception e) {
-                    log.warn("Could not fetch or format policy for key {}", keyId, e);
-                }
-
-                detailsDialog.add(content);
-                Button closeBtn = new Button("Close", e -> detailsDialog.close());
-                closeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-                detailsDialog.getFooter().add(closeBtn);
-                detailsDialog.open();
-            } else {
-                Notification.show("No metadata found", 3000, Notification.Position.TOP_END);
-            }
-        } catch (Exception e) {
-            Notification.show("Failed to load details", 3000, Notification.Position.TOP_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-        }
     }
 
     private HorizontalLayout detailRow(String label, String value) {
@@ -521,7 +381,29 @@ class KeyCard extends VerticalLayout {
         return row;
     }
 
-    private void scheduleDeletionDialog() {
+    private void toggleKeyStatus() {
+        boolean currentlyEnabled = metadata != null && metadata.getKeyStatus() == IEnumKeyStatus.Types.ENABLED;
+        new ConfirmToggleKeyStatusDialog(kmsApiService, keyId, currentlyEnabled, keyManagementView);
+    }
+
+    private void updateKey() {
+        List<ListResourceTagsResponse.Tag> currentTags = fetchKeyTags(keyId);
+        boolean rotationEnabled = metadata != null && metadata.getRotationEnabled() != null ? metadata.getRotationEnabled() : false;
+        Integer rotationPeriod = metadata != null && metadata.getRotationPeriodInDays() != null ? metadata.getRotationPeriodInDays() : null;
+        new UpdateKeyDialog(
+                keyManagementView,
+                kmsApiService,
+                objectMapper,
+                keyId,
+                metadata != null ? metadata.getKeyAlias() : null,
+                metadata != null ? metadata.getDescription() : null,
+                currentTags,
+                rotationEnabled,
+                rotationPeriod
+        ).open();
+    }
+
+    private void scheduleDeletion() {
         new ScheduleKeyDeletionDialog(kmsApiService, keyId, keyManagementView);
     }
 
@@ -531,5 +413,9 @@ class KeyCard extends VerticalLayout {
 
     private void confirmPermanentDelete() {
         new PermanentKeyDeleteDialog(kmsApiService, keyId, keyManagementView);
+    }
+
+    private void describeKey() {
+        new DescribeKeyDialog(kmsApiService, objectMapper, keyId, metadata).open();
     }
 }

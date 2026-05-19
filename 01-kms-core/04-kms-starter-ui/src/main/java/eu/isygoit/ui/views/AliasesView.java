@@ -23,6 +23,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainLayout;
+import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -53,23 +54,19 @@ public class AliasesView extends VerticalLayout {
         setSpacing(true);
         addClassName("kms-aliases-view");
 
-        // Header
         H2 header = new H2("Key Aliases");
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         add(header);
 
-        // Toolbar
         HorizontalLayout toolbar = buildToolbar();
         add(toolbar);
 
-        // Cards container
         cardsContainer.setWidthFull();
         cardsContainer.setPadding(false);
         cardsContainer.setSpacing(true);
         add(cardsContainer);
 
-        // Loading bar
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
         loadingBar.setWidth("200px");
@@ -174,13 +171,14 @@ public class AliasesView extends VerticalLayout {
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Create alias");
         dialog.setWidth("500px");
+        dialog.setCloseOnEsc(false);
+        dialog.setCloseOnOutsideClick(false);
 
         FormLayout form = new FormLayout();
         TextField aliasNameField = new TextField("Alias name");
         aliasNameField.setPlaceholder("alias:my-key-alias");
         aliasNameField.setRequiredIndicatorVisible(true);
 
-        // Load KMS keys for selection
         ComboBox<String> targetKeyCombo = new ComboBox<>("Target KMS key");
         targetKeyCombo.setRequiredIndicatorVisible(true);
         targetKeyCombo.setPlaceholder("Select a key...");
@@ -201,42 +199,81 @@ public class AliasesView extends VerticalLayout {
         form.add(aliasNameField, targetKeyCombo);
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
+        // Error span for footer
+        Span errorSpan = new Span();
+        errorSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+        errorSpan.getStyle().set("font-size", "var(--lumo-font-size-xs)");
+        errorSpan.getStyle().set("margin-right", "auto");
+        errorSpan.setVisible(false);
+
         Button createBtn = new Button("Create", e -> {
+            errorSpan.setText("");
+            errorSpan.setVisible(false);
+
             String aliasName = aliasNameField.getValue();
             String targetKeyId = targetKeyCombo.getValue();
             if (aliasName == null || aliasName.isBlank()) {
-                Notification.show("Alias name is required", 3000, Notification.Position.TOP_END)
+                String errorMsg = "Alias name is required";
+                errorSpan.setText(errorMsg);
+                errorSpan.setVisible(true);
+                Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return;
             }
             if (targetKeyId == null || targetKeyId.isBlank()) {
-                Notification.show("Target key is required", 3000, Notification.Position.TOP_END)
+                String errorMsg = "Target key is required";
+                errorSpan.setText(errorMsg);
+                errorSpan.setVisible(true);
+                Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return;
             }
-            dialog.close();
             try {
                 CreateAliasRequest request = CreateAliasRequest.builder()
                         .aliasName(aliasName)
                         .targetKeyId(targetKeyId)
                         .build();
                 ResponseEntity<CreateAliasResponse> response = kmsApiService.createAlias(request);
-                if (response.getStatusCode().is2xxSuccessful()) {
-                    Notification.show("Alias created successfully", 3000, Notification.Position.TOP_END)
-                            .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                    loadAliases();
-                } else {
-                    Notification.show("Creation failed: " + response.getStatusCode(), 3000, Notification.Position.TOP_END)
+                if (!response.getStatusCode().is2xxSuccessful()) {
+                    String errorMsg = "Creation failed: " + response.getStatusCode();
+                    errorSpan.setText(errorMsg);
+                    errorSpan.setVisible(true);
+                    Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                    return;
                 }
+                dialog.close();
+                Notification.show("Alias created successfully", 3000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                loadAliases();
+            } catch (FeignException ex) {
+                String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+                errorSpan.setText(errorMsg);
+                errorSpan.setVisible(true);
+                Notification.show("Creation error: " + errorMsg, 5000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
             } catch (Exception ex) {
-                Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
+                String errorMsg = ex.getMessage();
+                errorSpan.setText(errorMsg);
+                errorSpan.setVisible(true);
+                Notification.show("Error: " + errorMsg, 5000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
         createBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         Button cancelBtn = new Button("Cancel", e -> dialog.close());
-        dialog.getFooter().add(cancelBtn, createBtn);
+
+        HorizontalLayout footerLayout = new HorizontalLayout();
+        footerLayout.setWidthFull();
+        footerLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        footerLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        footerLayout.add(errorSpan);
+        HorizontalLayout buttonLayout = new HorizontalLayout(cancelBtn, createBtn);
+        buttonLayout.setSpacing(true);
+        footerLayout.add(buttonLayout);
+
+        dialog.getFooter().removeAll();
+        dialog.getFooter().add(footerLayout);
         dialog.add(form);
         dialog.open();
     }
@@ -259,7 +296,7 @@ public class AliasesView extends VerticalLayout {
     }
 
     // -------------------------------------------------------------------------
-    // Alias Card (Jira style)
+    // Alias Card
     // -------------------------------------------------------------------------
     private class AliasCard extends VerticalLayout {
         private final String aliasName;
@@ -293,7 +330,6 @@ public class AliasesView extends VerticalLayout {
             getStyle().set("transition", "all 0.2s ease-in-out");
             addClassName("hover:shadow-m");
 
-            // Header row: alias name + icon buttons
             HorizontalLayout headerRow = new HorizontalLayout();
             headerRow.setWidthFull();
             headerRow.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
@@ -307,12 +343,10 @@ public class AliasesView extends VerticalLayout {
             HorizontalLayout buttonBar = new HorizontalLayout();
             buttonBar.setSpacing(true);
 
-            // Delete alias button
             Button deleteBtn = createIconButton(VaadinIcon.TRASH, "Delete alias");
             deleteBtn.addThemeVariants(ButtonVariant.LUMO_ERROR);
             deleteBtn.addClickListener(e -> confirmDeleteAlias());
 
-            // Optional: Update alias (reassign to another key) – extra feature
             Button updateBtn = createIconButton(VaadinIcon.EDIT, "Reassign alias");
             updateBtn.addClickListener(e -> openUpdateAliasDialog());
 
@@ -321,13 +355,11 @@ public class AliasesView extends VerticalLayout {
             headerRow.expand(aliasSpan);
             add(headerRow);
 
-            // Details: target key ID
             Span targetSpan = new Span("Target key: " + targetKeyId);
             targetSpan.addClassName(LumoUtility.FontSize.SMALL);
             targetSpan.addClassName(LumoUtility.TextColor.SECONDARY);
             add(targetSpan);
 
-            // Optional: creation date
             if (createDate != null && !createDate.isEmpty()) {
                 Span dateSpan = new Span("Created: " + createDate);
                 dateSpan.addClassName(LumoUtility.FontSize.XSMALL);
@@ -352,9 +384,6 @@ public class AliasesView extends VerticalLayout {
             confirm.setConfirmButtonTheme(ButtonVariant.LUMO_ERROR.getVariantName());
             confirm.addConfirmListener(event -> {
                 try {
-                    DeleteAliasRequest request = DeleteAliasRequest.builder()
-                            .aliasName(aliasName)
-                            .build();
                     ResponseEntity<DeleteAliasResponse> response = kmsApiService.deleteAlias(aliasName);
                     if (response.getStatusCode().is2xxSuccessful()) {
                         Notification.show("Alias deleted", 3000, Notification.Position.TOP_END)
@@ -376,6 +405,8 @@ public class AliasesView extends VerticalLayout {
             Dialog dialog = new Dialog();
             dialog.setHeaderTitle("Reassign alias");
             dialog.setWidth("500px");
+            dialog.setCloseOnEsc(false);
+            dialog.setCloseOnOutsideClick(false);
 
             ComboBox<String> targetKeyCombo = new ComboBox<>("New target KMS key");
             targetKeyCombo.setRequiredIndicatorVisible(true);
@@ -393,38 +424,68 @@ public class AliasesView extends VerticalLayout {
                 }
                 return keyId;
             });
-            targetKeyCombo.setValue(targetKeyId); // pre-select current
+            targetKeyCombo.setValue(targetKeyId);
+
+            // Error span for footer
+            Span errorSpan = new Span();
+            errorSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+            errorSpan.getStyle().set("font-size", "var(--lumo-font-size-xs)");
+            errorSpan.getStyle().set("margin-right", "auto");
+            errorSpan.setVisible(false);
 
             Button updateBtn = new Button("Update", e -> {
+                errorSpan.setText("");
+                errorSpan.setVisible(false);
+
                 String newTargetId = targetKeyCombo.getValue();
                 if (newTargetId == null || newTargetId.isBlank()) {
-                    Notification.show("Please select a target key", 3000, Notification.Position.TOP_END)
+                    String errorMsg = "Please select a target key";
+                    errorSpan.setText(errorMsg);
+                    errorSpan.setVisible(true);
+                    Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                     return;
                 }
-                dialog.close();
                 try {
                     UpdateAliasRequest request = UpdateAliasRequest.builder()
                             .aliasName(aliasName)
                             .targetKeyId(newTargetId)
                             .build();
                     ResponseEntity<UpdateAliasResponse> response = kmsApiService.updateAlias(aliasName, request);
-                    if (response.getStatusCode().is2xxSuccessful()) {
-                        Notification.show("Alias reassigned", 3000, Notification.Position.TOP_END)
-                                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                        loadAliases();
-                    } else {
-                        Notification.show("Update failed", 3000, Notification.Position.TOP_END)
+                    if (!response.getStatusCode().is2xxSuccessful()) {
+                        String errorMsg = "Update failed: " + response.getStatusCode();
+                        errorSpan.setText(errorMsg);
+                        errorSpan.setVisible(true);
+                        Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                        return;
                     }
+                    dialog.close();
+                    Notification.show("Alias reassigned", 3000, Notification.Position.TOP_END)
+                            .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                    loadAliases();
                 } catch (Exception ex) {
-                    Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
+                    String errorMsg = "Error: " + ex.getMessage();
+                    errorSpan.setText(errorMsg);
+                    errorSpan.setVisible(true);
+                    Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
             });
             updateBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
             Button cancelBtn = new Button("Cancel", e -> dialog.close());
-            dialog.getFooter().add(cancelBtn, updateBtn);
+
+            HorizontalLayout footerLayout = new HorizontalLayout();
+            footerLayout.setWidthFull();
+            footerLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+            footerLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+            footerLayout.add(errorSpan);
+            HorizontalLayout buttonLayout = new HorizontalLayout(cancelBtn, updateBtn);
+            buttonLayout.setSpacing(true);
+            footerLayout.add(buttonLayout);
+
+            dialog.getFooter().removeAll();
+            dialog.getFooter().add(footerLayout);
             dialog.add(targetKeyCombo);
             dialog.open();
         }

@@ -72,6 +72,12 @@ public final class KmsDtos {
         @Schema(description = "IAM policy document as a JSON object")
         private Map<String, Object> policy;
 
+        @Schema(description = "Key expiration model")
+        private IEnumKeyExpirationModel.Types expirationModel;
+
+        @Schema(description = "Validity period for imported key material (required if expirationModel = KEY_MATERIAL_EXPIRES)")
+        private LocalDateTime validTo;
+
         @Data
         @Builder
         @NoArgsConstructor
@@ -110,12 +116,16 @@ public final class KmsDtos {
             @Schema(description = "Key ARN (WAMS Resource Name)")
             private String wrn;
 
+            @Schema(description = "Whether the key is enabled")
+            private Boolean enabled;
+
             @Schema(description = "Key creation timestamp")
             @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
             private LocalDateTime createDate;
 
-            @Schema(description = "Whether the key is enabled")
-            private Boolean enabled;
+            @Schema(description = "Key creation timestamp")
+            @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+            private LocalDateTime updateDate;
 
             @Schema(description = "Key description")
             private String description;
@@ -141,19 +151,14 @@ public final class KmsDtos {
             @Schema(description = "Current key state (Enabled, Disabled, PendingDeletion, etc.)")
             private IEnumKeyStatus.Types keyStatus;
 
-            @Schema(description = "Creation timestamp (alias for createDate)")
-            @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-            private LocalDateTime createdAt;
-
-            @Schema(description = "Last update timestamp")
-            @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-            private LocalDateTime updatedAt;
-
             @Schema(description = "Primary alias (if any)")
             private String keyAlias;
 
             @Schema(description = "Expiration model for imported key material")
             private IEnumKeyExpirationModel.Types expirationModel;
+
+            @Schema(description = "Validity period for imported key material (required if expirationModel = KEY_MATERIAL_EXPIRES)")
+            private LocalDateTime validTo;
 
             @Schema(description = "Alias for keySpec (for AWS compatibility)")
             private String customerMasterKeySpec;
@@ -182,7 +187,85 @@ public final class KmsDtos {
     @Schema(description = "Response containing full key metadata")
     public static class DescribeKeyResponse {
         @Schema(description = "Full key metadata")
-        private CreateKeyResponse.KeyMetadata keyMetadata;
+        private KeyMetadata keyMetadata;
+
+        @Data
+        @Builder
+        @NoArgsConstructor
+        @AllArgsConstructor
+        @Schema(description = "Key metadata (subset of full key properties)")
+        public static class KeyMetadata {
+            @Schema(description = "Tenant (account) that owns the key")
+            private String tenant;
+
+            @Schema(description = "Unique key identifier (UUID)")
+            private String keyId;
+
+            @Schema(description = "Key ARN (WAMS Resource Name)")
+            private String wrn;
+
+            @Schema(description = "Whether the key is enabled")
+            private Boolean enabled;
+
+            @Schema(description = "Key creation timestamp")
+            @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+            private LocalDateTime createDate;
+
+            @Schema(description = "Key creation timestamp")
+            @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+            private LocalDateTime updateDate;
+
+            @Schema(description = "Key description")
+            private String description;
+
+            @Schema(description = "Whether automatic rotation is enabled")
+            private Boolean rotationEnabled;
+
+            @Schema(description = "Rotation period in days (default 365). Only used if rotationEnabled = true")
+            private Integer rotationPeriodInDays;
+
+            @Schema(description = "Key specification")
+            private IEnumKeySpec.Types keySpec;
+
+            @Schema(description = "Key usage")
+            private IEnumKeyUsage.Types keyUsage;
+
+            @Schema(description = "Current active version ID")
+            private String currentVersion;
+
+            @Schema(description = "Origin of key material")
+            private IEnumKeyOrigin.Types origin;
+
+            @Schema(description = "Current key state (Enabled, Disabled, PendingDeletion, etc.)")
+            private IEnumKeyStatus.Types keyStatus;
+
+            @Schema(description = "Primary alias (if any)")
+            private String keyAlias;
+
+            @Schema(description = "Expiration model for imported key material")
+            private IEnumKeyExpirationModel.Types expirationModel;
+
+            @Schema(description = "Validity period for imported key material (required if expirationModel = KEY_MATERIAL_EXPIRES)")
+            private LocalDateTime validTo;
+
+            @Schema(description = "Alias for keySpec (for AWS compatibility)")
+            private String customerMasterKeySpec;
+
+            @Schema(description = "List of supported encryption algorithms (derived)")
+            private List<String> encryptionAlgorithmSpecs;
+
+            @Schema(description = "List of supported signing algorithms (derived)")
+            private List<String> signingAlgorithms;
+
+            @Schema(description = "Key manager (WAMS or CUSTOMER)")
+            private String keyManager;
+
+            @Schema(description = "Whether this key is multi‑region")
+            private Boolean multiRegion;
+
+            @Schema(description = "Multi‑region configuration (if applicable)")
+            private Object multiRegionConfiguration;
+        }
     }
 
     @Data
@@ -298,11 +381,20 @@ public final class KmsDtos {
         @Schema(description = "Key ID")
         private String keyId;
 
-        @Schema(description = "New alias (optional)")
-        private String keyAlias;
-
         @Schema(description = "New description")
         private String description;
+
+        @Schema(description = "Optional friendly alias (e.g., 'alias:my-key')")
+        private String keyAlias;
+
+        @Schema(description = "Whether automatic rotation is enabled (default false)")
+        private Boolean rotationEnabled;
+
+        @Schema(description = "Rotation period in days (default 365). Only used if rotationEnabled = true")
+        private Integer rotationPeriodInDays;
+
+        @Schema(description = "Tags to attach to the key (max 50)")
+        private List<CreateKeyRequest.Tag> tags;
     }
 
     @Data
@@ -954,7 +1046,7 @@ public final class KmsDtos {
         private String messageType;
 
         @Schema(description = "Signing algorithm", required = true)
-        private String signingAlgorithm;
+        private IEnumSignatureAlgorithm signingAlgorithm;
 
         @Schema(description = "Grant tokens")
         private List<String> grantTokens;
@@ -998,7 +1090,7 @@ public final class KmsDtos {
         private String signature;
 
         @Schema(description = "Signing algorithm", required = true)
-        private String signingAlgorithm;
+        private IEnumSignatureAlgorithm signingAlgorithm;
 
         @Schema(description = "Grant tokens")
         private List<String> grantTokens;
@@ -1036,7 +1128,7 @@ public final class KmsDtos {
         private String message;
 
         @Schema(description = "MAC algorithm (e.g., HMAC_SHA_256)", required = true)
-        private String macAlgorithm;
+        private IEnumMacAlgorithm macAlgorithm;
 
         @Schema(description = "Grant tokens")
         private List<String> grantTokens;
@@ -1074,7 +1166,7 @@ public final class KmsDtos {
         private String mac;
 
         @Schema(description = "MAC algorithm", required = true)
-        private String macAlgorithm;
+        private IEnumMacAlgorithm macAlgorithm;
 
         @Schema(description = "Grant tokens")
         private List<String> grantTokens;

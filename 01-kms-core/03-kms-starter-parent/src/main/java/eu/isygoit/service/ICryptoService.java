@@ -1,6 +1,7 @@
 package eu.isygoit.service;
 
 import eu.isygoit.enums.IEnumKeySpec;
+import eu.isygoit.enums.IEnumSignatureAlgorithm;
 import jakarta.validation.constraints.NotNull;
 import org.jasypt.digest.StringDigester;
 import org.jasypt.encryption.StringEncryptor;
@@ -77,7 +78,7 @@ public interface ICryptoService {
      * @param algorithm   signing algorithm (RSASSA_PSS_SHA256, ECDSA_SHA256, etc.)
      * @return signature bytes
      */
-    byte[] signData(byte[] message, byte[] keyMaterial, String algorithm);
+    byte[] signData(byte[] message, byte[] keyMaterial, IEnumSignatureAlgorithm algorithm);
 
     /**
      * Verify signature
@@ -88,7 +89,7 @@ public interface ICryptoService {
      * @param algorithm   signing algorithm
      * @return true if signature is valid
      */
-    boolean verifySignature(byte[] message, byte[] signature, byte[] keyMaterial, String algorithm);
+    boolean verifySignature(byte[] message, byte[] signature, byte[] keyMaterial, IEnumSignatureAlgorithm algorithm);
 
     /**
      * Generate data key for envelope encryption

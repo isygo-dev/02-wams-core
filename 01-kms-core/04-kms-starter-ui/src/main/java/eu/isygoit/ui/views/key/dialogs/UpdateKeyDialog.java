@@ -21,14 +21,13 @@ import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.views.key.KeyManagementView;
+import feign.FeignException;
+import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Dialog for updating a KMS key's alias, description, tags, and rotation settings.
- */
 public class UpdateKeyDialog extends Dialog {
 
     private final KeyManagementView parentView;
@@ -49,6 +48,7 @@ public class UpdateKeyDialog extends Dialog {
     private IntegerField rotationPeriodField;
     private VerticalLayout tagsContainer;
     private List<HorizontalLayout> tagRows;
+    private Span errorSpan;
 
     public UpdateKeyDialog(KeyManagementView parentView,
                            KmsApiService kmsApiService,
@@ -69,7 +69,7 @@ public class UpdateKeyDialog extends Dialog {
         this.currentRotationEnabled = currentRotationEnabled != null ? currentRotationEnabled : false;
         this.currentRotationPeriodInDays = currentRotationPeriodInDays;
 
-        setHeaderTitle("Edit key alias, description & tags");
+        setHeaderTitle("Edit key");
         setWidth("700px");
         setCloseOnEsc(false);
         setCloseOnOutsideClick(false);
@@ -156,16 +156,33 @@ public class UpdateKeyDialog extends Dialog {
     }
 
     private void buildFooter() {
+        errorSpan = new Span();
+        errorSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+        errorSpan.getStyle().set("font-size", "var(--lumo-font-size-xs)");
+        errorSpan.getStyle().set("margin-right", "auto");
+        errorSpan.setVisible(false);
+
         Button saveBtn = new Button("Save", e -> onSave());
         saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         Button cancelBtn = new Button("Cancel", e -> close());
 
-        HorizontalLayout footerLayout = new HorizontalLayout(cancelBtn, saveBtn);
-        footerLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+        HorizontalLayout footerLayout = new HorizontalLayout();
+        footerLayout.setWidthFull();
+        footerLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        footerLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        footerLayout.add(errorSpan);
+        HorizontalLayout buttonLayout = new HorizontalLayout(cancelBtn, saveBtn);
+        buttonLayout.setSpacing(true);
+        footerLayout.add(buttonLayout);
+
+        getFooter().removeAll();
         getFooter().add(footerLayout);
     }
 
     private void onSave() {
+        errorSpan.setText("");
+        errorSpan.setVisible(false);
+
         String newAlias = null;
         if (newAliasField.isVisible() && !newAliasField.getValue().isBlank()) {
             newAlias = newAliasField.getValue();
@@ -175,7 +192,7 @@ public class UpdateKeyDialog extends Dialog {
         String newDescription = descriptionField.getValue();
 
         boolean newRotationEnabled = rotationEnabledCheckbox.getValue();
-        Integer newRotationPeriod = rotationEnabledCheckbox.getValue() ? rotationPeriodField.getValue() : null;
+        Integer newRotationPeriod = newRotationEnabled ? rotationPeriodField.getValue() : null;
 
         List<CreateKeyRequest.Tag> newTags = new ArrayList<>();
         for (HorizontalLayout row : tagRows) {
@@ -189,79 +206,42 @@ public class UpdateKeyDialog extends Dialog {
             }
         }
 
+        // Build single update request
+        UpdateKeyDescriptionRequest request = UpdateKeyDescriptionRequest.builder()
+                .keyId(keyId)
+                .keyAlias(newAlias)
+                .description(newDescription)
+                .rotationEnabled(newRotationEnabled)
+                .rotationPeriodInDays(newRotationPeriod)
+                .tags(newTags.isEmpty() ? null : newTags)
+                .build();
+
         try {
-            // Update description if changed
-            if (!newDescription.equals(currentDesc)) {
-                UpdateKeyDescriptionRequest descRequest = UpdateKeyDescriptionRequest.builder()
-                        .keyId(keyId)
-                        .description(newDescription)
-                        .build();
-                kmsApiService.updateKeyDescription(keyId, descRequest);
+            ResponseEntity<UpdateKeyDescriptionResponse> response = kmsApiService.updateKeyDescription(keyId, request);
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                String errorMsg = "Update failed: " + (response.getBody() != null ? response.getBody().toString() : "unknown error");
+                errorSpan.setText(errorMsg);
+                errorSpan.setVisible(true);
+                Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                return;
             }
-
-            // Update alias if changed
-            if (newAlias != null && !newAlias.equals(currentAlias)) {
-                if (parentView.existingAliases.contains(newAlias)) {
-                    UpdateAliasRequest aliasRequest = UpdateAliasRequest.builder()
-                            .aliasName(newAlias)
-                            .targetKeyId(keyId)
-                            .build();
-                    kmsApiService.updateAlias(newAlias, aliasRequest);
-                } else {
-                    CreateAliasRequest createAliasRequest = CreateAliasRequest.builder()
-                            .aliasName(newAlias)
-                            .targetKeyId(keyId)
-                            .build();
-                    kmsApiService.createAlias(createAliasRequest);
-                }
-            }
-
-            // Update rotation settings if changed
-            boolean rotationChanged = newRotationEnabled != currentRotationEnabled;
-            boolean periodChanged = (newRotationPeriod != null && !newRotationPeriod.equals(currentRotationPeriodInDays)) ||
-                    (newRotationPeriod == null && currentRotationPeriodInDays != null);
-            if (rotationChanged || periodChanged) {
-                UpdateKeyRotationRequest rotationRequest = UpdateKeyRotationRequest.builder()
-                        .enableRotation(newRotationEnabled)
-                        .rotationPeriodInDays(newRotationPeriod)
-                        .applyImmediately(true)
-                        .build();
-                kmsApiService.updateKeyRotation(keyId, rotationRequest);
-            }
-
-            // Update tags: remove all existing, add new ones
-            if (!currentTags.isEmpty()) {
-                List<String> keysToRemove = currentTags.stream()
-                        .map(ListResourceTagsResponse.Tag::getTagKey)
-                        .collect(Collectors.toList());
-                UntagResourceRequest untagRequest = UntagResourceRequest.builder()
-                        .keyId(keyId)
-                        .tagKeys(keysToRemove)
-                        .build();
-                kmsApiService.untagResource(keyId, untagRequest);
-            }
-            if (!newTags.isEmpty()) {
-                List<ListResourceTagsResponse.Tag> tagList = newTags.stream()
-                        .map(t -> ListResourceTagsResponse.Tag.builder()
-                                .tagKey(t.getTagKey())
-                                .tagValue(t.getTagValue())
-                                .build())
-                        .collect(Collectors.toList());
-                TagResourceRequest tagRequest = TagResourceRequest.builder()
-                        .keyId(keyId)
-                        .tags(tagList)
-                        .build();
-                kmsApiService.tagResource(keyId, tagRequest);
-            }
-
             close();
             Notification.show("Key updated successfully", 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             parentView.loadAliases();
             parentView.loadKeys();
-
+        } catch (FeignException ex) {
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            errorSpan.setText(errorMsg);
+            errorSpan.setVisible(true);
+            Notification.show("Creation error: " + errorMsg, 5000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } catch (Exception ex) {
-            Notification.show("Update failed: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
+            String errorMsg = ex.getMessage();
+            errorSpan.setText(errorMsg);
+            errorSpan.setVisible(true);
+            Notification.show("Error: " + errorMsg, 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }

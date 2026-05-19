@@ -115,10 +115,10 @@ public class SigningService implements ISigningService {
         }
 
         try {
-            Mac mac = Mac.getInstance(IEnumKeySpec.mapMacAlgorithm(request.getMacAlgorithm()));
+            Mac mac = Mac.getInstance(request.getMacAlgorithm().getJavaAlgorithm());
 
             SecretKeySpec keySpec =
-                    new SecretKeySpec(kmsKey.getKeyMaterial(), request.getMacAlgorithm());
+                    new SecretKeySpec(kmsKey.getKeyMaterial(), request.getMacAlgorithm().getJavaAlgorithm());
 
             mac.init(keySpec);
 
@@ -149,10 +149,10 @@ public class SigningService implements ISigningService {
         }
 
         try {
-            Mac mac = Mac.getInstance(IEnumKeySpec.mapMacAlgorithm(request.getMacAlgorithm()));
+            Mac mac = Mac.getInstance(request.getMacAlgorithm().getJavaAlgorithm());
 
             SecretKeySpec keySpec =
-                    new SecretKeySpec(kmsKey.getKeyMaterial(), request.getMacAlgorithm());
+                    new SecretKeySpec(kmsKey.getKeyMaterial(), request.getMacAlgorithm().getJavaAlgorithm());
 
             mac.init(keySpec);
 
