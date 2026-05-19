@@ -1,7 +1,6 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.KmsDtos.*;
-import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.model.KmsKey;
 import eu.isygoit.repository.KmsKeyRepository;
@@ -92,7 +91,7 @@ public class SigningService implements ISigningService {
         boolean valid = cryptoService.verifySignature(
                 message,
                 signature,
-                kmsKey.getKeyMaterial(),
+                kmsKey.getPublicKey(),
                 request.getSigningAlgorithm()
         );
 

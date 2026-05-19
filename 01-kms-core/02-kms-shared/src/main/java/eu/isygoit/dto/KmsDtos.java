@@ -3,6 +3,7 @@ package eu.isygoit.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.isygoit.annotation.ValidCreateCustomKeyStoreRequest;
+import eu.isygoit.dto.data.KeyPairMaterial;
 import eu.isygoit.enums.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
@@ -2296,7 +2297,7 @@ public final class KmsDtos {
         private String keyWrn;
 
         @Schema(description = "Wrapping key (public key)")
-        private byte[] wrappingKey;
+        private KeyPairMaterial wrappingKey;
 
         @Schema(description = "Import token")
         private byte[] importToken;

@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.dto.data.KeyPairMaterial;
 import eu.isygoit.enums.IEnumKeyOrigin;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.exception.CustomKeyStoreNotFoundException;
@@ -79,7 +80,7 @@ public class KeyManagementService implements IKeyManagementService {
 
         try {
             // Generate key material
-            byte[] keyMaterial = cryptoService.generateKeyMaterial(request.getKeySpec());
+            KeyPairMaterial keyMaterial = cryptoService.generateKeyMaterial(request.getKeySpec());
 
             // Create and save KMS Key
             KmsKey key = KmsKey.builder()
@@ -96,7 +97,8 @@ public class KeyManagementService implements IKeyManagementService {
                     .currentVersionId(versionId)
                     .rotationEnabled(request.getRotationEnabled())
                     .rotationPeriodInDays(request.getRotationPeriodInDays())
-                    .keyMaterial(keyMaterial)
+                    .keyMaterial(keyMaterial.privateKey())
+                    .publicKey(keyMaterial.publicKey())
                     .expirationModel(request.getExpirationModel())
                     .validTo(request.getValidTo())
                     .build();
@@ -116,7 +118,8 @@ public class KeyManagementService implements IKeyManagementService {
                     .keyId(savedKey.getKeyId())
                     .versionId(versionId)
                     .keyStatus(IEnumKeyStatus.Types.ENABLED)
-                    .keyMaterial(keyMaterial)
+                    .keyMaterial(keyMaterial.privateKey())
+                    .publicKey(keyMaterial.publicKey())
                     .build();
 
             kmsKeyVersionRepository.save(keyVersion);
@@ -411,7 +414,7 @@ public class KeyManagementService implements IKeyManagementService {
 
         try {
             // Generate new key material
-            byte[] newKeyMaterial =
+            KeyPairMaterial newKeyMaterial =
                     cryptoService.generateKeyMaterial(key.getKeySpec());
 
             // Create new key version
@@ -420,7 +423,8 @@ public class KeyManagementService implements IKeyManagementService {
                     .keyId(keyId)
                     .versionId(newVersionId)
                     .keyStatus(IEnumKeyStatus.Types.ENABLED)
-                    .keyMaterial(newKeyMaterial)
+                    .keyMaterial(newKeyMaterial.privateKey())
+                    .publicKey(newKeyMaterial.publicKey())
                     .build();
 
             kmsKeyVersionRepository.save(newVersion);
@@ -787,7 +791,7 @@ public class KeyManagementService implements IKeyManagementService {
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
         // Generate import parameters (wrapping key and token)
-        byte[] wrappingKey = cryptoService.generateWrappingKey();
+        KeyPairMaterial wrappingKey = cryptoService.generateWrappingKey();
         byte[] importToken = cryptoService.generateImportToken();
 
         return ImportParametersResponseDto.builder()

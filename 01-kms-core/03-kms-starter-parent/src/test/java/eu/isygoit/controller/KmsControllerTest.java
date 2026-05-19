@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.dto.common.ContextRequestDto;
+import eu.isygoit.dto.data.KeyPairMaterial;
 import eu.isygoit.enums.*;
 import eu.isygoit.service.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -116,7 +117,9 @@ class KmsControllerTest {
     @Test
     void describeKey_Success() throws Exception {
         DescribeKeyResponse response = DescribeKeyResponse.builder()
-                .keyMetadata(CreateKeyResponse.KeyMetadata.builder().keyId(KEY_ID).build())
+                .keyMetadata(DescribeKeyResponse.KeyMetadata.builder()
+                        .keyId(KEY_ID)
+                        .build())
                 .build();
         when(keyManagementService.describeKey(eq(TENANT), eq(KEY_ID), isNull())).thenReturn(response);
         when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
@@ -717,7 +720,7 @@ class KmsControllerTest {
         ImportParametersResponseDto internal = ImportParametersResponseDto.builder()
                 .keyId(KEY_ID)
                 .importToken(new byte[]{1, 2, 3})
-                .wrappingKey(new byte[]{4, 5, 6})
+                .wrappingKey(new KeyPairMaterial(new byte[]{4, 5, 6}, new byte[]{7, 8, 9}))
                 .validTo(LocalDateTime.now().plusDays(1))
                 .build();
         when(keyManagementService.getParametersForImport(eq(TENANT), eq(KEY_ID))).thenReturn(internal);

@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.dto.data.KeyPairMaterial;
 import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.enums.IEnumKeyUsage;
@@ -85,7 +86,7 @@ class KeyManagementServiceTest {
                 .description("description")
                 .build();
 
-        when(cryptoService.generateKeyMaterial(any())).thenReturn(new byte[]{1, 2, 3});
+        when(cryptoService.generateKeyMaterial(any())).thenReturn(new KeyPairMaterial(new byte[]{1}, new byte[]{2}));
         when(kmsKeyRepository.save(any())).thenAnswer(invocation -> {
             KmsKey saved = invocation.getArgument(0);
             saved.setKeyId(KEY_ID);
@@ -216,7 +217,7 @@ class KeyManagementServiceTest {
                 .thenReturn(Optional.of(key));
 
         when(cryptoService.generateKeyMaterial(any()))
-                .thenReturn(new byte[]{4, 5, 6});
+                .thenReturn(new KeyPairMaterial(new byte[]{4}, new byte[]{5}));
 
         RotateKeyResponse response = keyManagementService.rotateKey(TENANT, KEY_ID);
 
@@ -480,7 +481,7 @@ class KeyManagementServiceTest {
                 .thenReturn(Optional.of(key));
 
         when(cryptoService.generateWrappingKey())
-                .thenReturn(new byte[]{1});
+                .thenReturn(new KeyPairMaterial(new byte[]{1}, new byte[]{2}));
 
         when(cryptoService.generateImportToken())
                 .thenReturn(new byte[]{2});
@@ -666,7 +667,7 @@ class KeyManagementServiceTest {
                 .keyUsage(null)
                 .build();
 
-        byte[] material = new byte[]{1, 2, 3};
+        KeyPairMaterial material = new KeyPairMaterial(new byte[]{1}, new byte[]{2});
         when(cryptoService.generateKeyMaterial(any())).thenReturn(material);
 
         KmsKey savedKey = KmsKey.builder()
@@ -675,7 +676,8 @@ class KeyManagementServiceTest {
                 .keySpec(IEnumKeySpec.Types.RSA_2048)
                 .keyStatus(IEnumKeyStatus.Types.ENABLED)
                 .currentVersionId("v-1")
-                .keyMaterial(material)
+                .keyMaterial(material.privateKey())
+                .publicKey(material.publicKey())
                 .build();
 
         when(kmsKeyRepository.save(any(KmsKey.class))).thenReturn(savedKey);
@@ -683,7 +685,8 @@ class KeyManagementServiceTest {
         KmsKeyVersion savedVersion = KmsKeyVersion.builder()
                 .keyId("key-1")
                 .versionId("v-1")
-                .keyMaterial(material)
+                .keyMaterial(material.privateKey())
+                .publicKey(material.publicKey())
                 .build();
 
         when(kmsKeyVersionRepository.save(any(KmsKeyVersion.class))).thenReturn(savedVersion);

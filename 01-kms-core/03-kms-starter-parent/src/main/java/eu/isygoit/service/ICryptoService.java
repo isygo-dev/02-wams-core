@@ -1,5 +1,6 @@
 package eu.isygoit.service;
 
+import eu.isygoit.dto.data.KeyPairMaterial;
 import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumSignatureAlgorithm;
 import jakarta.validation.constraints.NotNull;
@@ -47,7 +48,7 @@ public interface ICryptoService {
      * @param keySpec (AES_256, RSA_2048, EC_P256, etc.)
      * @return encrypted key material bytes
      */
-    byte[] generateKeyMaterial(IEnumKeySpec.Types keySpec);
+    KeyPairMaterial generateKeyMaterial(IEnumKeySpec.Types keySpec);
 
     /**
      * Encrypt plaintext using specified key material
@@ -102,7 +103,7 @@ public interface ICryptoService {
 
     byte[] extractPublicKey(byte[] keyMaterial, IEnumKeySpec.Types keySpec);
 
-    byte[] generateWrappingKey();
+    KeyPairMaterial generateWrappingKey();
 
     byte[] generateImportToken();
 

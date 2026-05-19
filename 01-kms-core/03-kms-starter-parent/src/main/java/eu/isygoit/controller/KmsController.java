@@ -1271,7 +1271,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             GetParametersForImportResponse response = GetParametersForImportResponse.builder()
                     .keyId(internal.getKeyId())
                     .importToken(Arrays.toString(internal.getImportToken()))
-                    .publicKey(Arrays.toString(internal.getWrappingKey()))
+                    .publicKey(Arrays.toString(internal.getWrappingKey().publicKey()))
                     .validTo(internal.getValidTo())
                     .build();
             return ResponseFactory.responseOk(response);

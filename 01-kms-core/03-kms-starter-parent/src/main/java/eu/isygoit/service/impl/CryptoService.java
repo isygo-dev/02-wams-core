@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.constants.TenantConstants;
+import eu.isygoit.dto.data.KeyPairMaterial;
 import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumSignatureAlgorithm;
 import eu.isygoit.enums.IKmsActionType;
@@ -33,6 +34,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
+import java.security.spec.ECGenParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.LocalDateTime;
@@ -172,58 +174,58 @@ public class CryptoService implements ICryptoService {
      * @param keySpec the type of key to generate (e.g. AES_256, RSA_2048)
      * @return raw key bytes
      */
-    @Override
-    public byte[] generateKeyMaterial(IEnumKeySpec.Types keySpec) {
+    public KeyPairMaterial generateKeyMaterial(IEnumKeySpec.Types keySpec) {
         try {
             switch (keySpec) {
+                // ========== Symmetric and HMAC keys ==========
                 case SYMMETRIC_DEFAULT:
-                    // AES-256 key (32 bytes)
                     KeyGenerator aesGen = KeyGenerator.getInstance("AES");
-                    aesGen.init(256);
-                    return aesGen.generateKey().getEncoded();
+                    aesGen.init(keySpec.getKeySizeBits()); // 256 bits
+                    byte[] aesKey = aesGen.generateKey().getEncoded();
+                    return new KeyPairMaterial(aesKey, null);
 
                 case HMAC_224:
                     KeyGenerator hmac224 = KeyGenerator.getInstance("HmacSHA224");
-                    hmac224.init(224); // 28 bytes
-                    return hmac224.generateKey().getEncoded();
+                    hmac224.init(224);
+                    return new KeyPairMaterial(hmac224.generateKey().getEncoded(), null);
+
                 case HMAC_256:
                     KeyGenerator hmac256 = KeyGenerator.getInstance("HmacSHA256");
-                    hmac256.init(256); // 32 bytes
-                    return hmac256.generateKey().getEncoded();
+                    hmac256.init(256);
+                    return new KeyPairMaterial(hmac256.generateKey().getEncoded(), null);
+
                 case HMAC_384:
                     KeyGenerator hmac384 = KeyGenerator.getInstance("HmacSHA384");
-                    hmac384.init(384); // 48 bytes
-                    return hmac384.generateKey().getEncoded();
+                    hmac384.init(384);
+                    return new KeyPairMaterial(hmac384.generateKey().getEncoded(), null);
+
                 case HMAC_512:
                     KeyGenerator hmac512 = KeyGenerator.getInstance("HmacSHA512");
-                    hmac512.init(512); // 64 bytes
-                    return hmac512.generateKey().getEncoded();
+                    hmac512.init(512);
+                    return new KeyPairMaterial(hmac512.generateKey().getEncoded(), null);
 
-                case RSA_2048:
-                    return generateRsaPrivateKey(2048);
-                case RSA_3072:
-                    return generateRsaPrivateKey(3072);
-                case RSA_4096:
-                    return generateRsaPrivateKey(4096);
+                // ========== RSA keys ==========
+                case RSA_2048, RSA_3072, RSA_4096:
+                    KeyPairGenerator rsaGen = KeyPairGenerator.getInstance("RSA");
+                    rsaGen.initialize(keySpec.getKeySizeBits());
+                    KeyPair rsaPair = rsaGen.generateKeyPair();
+                    return new KeyPairMaterial(rsaPair.getPrivate().getEncoded(), rsaPair.getPublic().getEncoded());
 
-                case ECC_NIST_P256:
-                    return generateEcPrivateKey("secp256r1");
-                case ECC_NIST_P384:
-                    return generateEcPrivateKey("secp384r1");
-                case ECC_NIST_P521:
-                    return generateEcPrivateKey("secp521r1");
-                case ECC_SECG_P256K1:
-                    return generateEcPrivateKey("secp256k1");
+                // ========== Elliptic Curve keys ==========
+                case ECC_NIST_P256, ECC_NIST_P384, ECC_NIST_P521, ECC_SECG_P256K1:
+                    KeyPairGenerator ecGen = KeyPairGenerator.getInstance("EC");
+                    ecGen.initialize(new ECGenParameterSpec(keySpec.getCurveName()));
+                    KeyPair ecPair = ecGen.generateKeyPair();
+                    return new KeyPairMaterial(ecPair.getPrivate().getEncoded(), ecPair.getPublic().getEncoded());
+
+                // ========== SM2 (requires Bouncy Castle) ==========
                 case SM2:
-                    // SM2 is a Chinese national standard elliptic curve. Use Bouncy Castle or an appropriate provider.
-                    // For simplicity, treat as secp256r1-like; but ideally you'd use a provider that supports SM2.
-                    // If SM2 is not needed, throw UnsupportedOperationException.
                     throw new UnsupportedOperationException("SM2 key generation not yet implemented");
+
                 default:
-                    throw new IllegalArgumentException("Unsupported key specification: " + keySpec);
+                    throw new IllegalArgumentException("Unsupported key spec: " + keySpec);
             }
         } catch (Exception e) {
-            log.error("Failed to generate key material for {}", keySpec, e);
             throw new RuntimeException("Key material generation failed for " + keySpec, e);
         }
     }
@@ -329,29 +331,18 @@ public class CryptoService implements ICryptoService {
      * Verifies digital signature.
      */
     @Override
-    public boolean verifySignature(byte[] message, byte[] signatureBytes, byte[] keyMaterial, IEnumSignatureAlgorithm algorithm) {
+    public boolean verifySignature(byte[] message, byte[] signatureBytes, byte[] publicKeyBytes, IEnumSignatureAlgorithm algorithm) {
         try {
-            if (algorithm == null) {
-                throw new IllegalArgumentException("Signature algorithm is required");
-            }
-            // 1. Get Signature instance
+            if (algorithm == null) throw new IllegalArgumentException("Algorithm required");
             Signature sig = Signature.getInstance(algorithm.getJavaAlgorithm());
-
-            // 2. Load public key (X.509 format)
             PublicKey publicKey = KeyFactory.getInstance(algorithm.getKeyAlgorithm())
-                    .generatePublic(new X509EncodedKeySpec(keyMaterial));
-
-            // 3. For RSA-PSS, set the PSS parameters before initVerify
-            if (algorithm.getPssSpec() != null) {
-                sig.setParameter(algorithm.getPssSpec());
-            }
-
-            // 4. Initialize and verify
+                    .generatePublic(new X509EncodedKeySpec(publicKeyBytes));
+            if (algorithm.getPssSpec() != null) sig.setParameter(algorithm.getPssSpec());
             sig.initVerify(publicKey);
             sig.update(message);
             return sig.verify(signatureBytes);
         } catch (Exception e) {
-            log.error("Signature verification failed for algorithm: {}", algorithm, e);
+            log.error("Signature verification failed", e);
             return false;
         }
     }
@@ -382,7 +373,7 @@ public class CryptoService implements ICryptoService {
     }
 
     @Override
-    public byte[] generateWrappingKey() {
+    public KeyPairMaterial generateWrappingKey() {
         return generateKeyMaterial(IEnumKeySpec.Types.RSA_2048); // Reuse existing logic
     }
 

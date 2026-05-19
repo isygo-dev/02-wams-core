@@ -12,6 +12,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
@@ -58,6 +60,10 @@ public class KmsKeyVersion extends AuditableEntity<Long> implements ITenantAssig
     @Lob
     @Column(name = SchemaColumnConstantName.C_KEY_MATERIAL, nullable = false)
     private byte[] keyMaterial;
+
+    @JdbcTypeCode(SqlTypes.VARBINARY)
+    @Column(name = SchemaColumnConstantName.C_PUBLIC_KEY)
+    private byte[] publicKey; // X.509 encoded public key (null for symmetric/HMAC keys)
 
     @Column(name = SchemaColumnConstantName.C_DEACTIVATION_DATE)
     private LocalDateTime deactivationDate;
