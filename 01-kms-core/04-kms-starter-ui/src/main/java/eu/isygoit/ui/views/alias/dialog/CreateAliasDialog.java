@@ -78,7 +78,9 @@ public class CreateAliasDialog extends BaseActionDialog {
                 showError(errorMsg);
                 Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                return false;
             }
+
             close();
             Notification.show("Alias created successfully", 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);

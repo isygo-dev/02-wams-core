@@ -53,8 +53,6 @@ public class ToggleKeyStatusDialog extends BaseActionDialog {
         try {
             if (currentlyEnabled) {
                 ResponseEntity<KmsDtos.DisableKeyResponse> response = kmsApiService.disableKey(keyId);
-                Notification.show("Key disabled successfully", 3000, Notification.Position.TOP_END)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 if (!response.getStatusCode().is2xxSuccessful()) {
                     String errorMsg = "Disable key failed: " + (response.getBody() != null ? response.getBody().toString() : "unknown error");
                     showError(errorMsg);
@@ -62,10 +60,11 @@ public class ToggleKeyStatusDialog extends BaseActionDialog {
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                     return false;
                 }
+
+                Notification.show("Key disabled successfully", 3000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } else {
                 ResponseEntity<KmsDtos.EnableKeyResponse> response = kmsApiService.enableKey(keyId);
-                Notification.show("Key enabled successfully", 3000, Notification.Position.TOP_END)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 if (!response.getStatusCode().is2xxSuccessful()) {
                     String errorMsg = "Enable key failed: " + (response.getBody() != null ? response.getBody().toString() : "unknown error");
                     showError(errorMsg);
@@ -73,8 +72,13 @@ public class ToggleKeyStatusDialog extends BaseActionDialog {
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                     return false;
                 }
+
+                Notification.show("Key enabled successfully", 3000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             }
+
             close();
+
             return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();

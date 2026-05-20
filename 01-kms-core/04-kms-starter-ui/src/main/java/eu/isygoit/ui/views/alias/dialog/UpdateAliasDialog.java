@@ -66,7 +66,9 @@ public class UpdateAliasDialog extends BaseActionDialog {
                 showError(errorMsg);
                 Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                return false;
             }
+
             close();
             Notification.show("Alias reassigned", 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);

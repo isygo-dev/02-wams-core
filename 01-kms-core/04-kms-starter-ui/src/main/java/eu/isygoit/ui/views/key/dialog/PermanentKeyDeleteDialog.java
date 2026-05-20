@@ -46,6 +46,7 @@ public class PermanentKeyDeleteDialog extends PinBaseActionDialog {
             close();
             Notification.show("Key permanently deleted", 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+
             return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();

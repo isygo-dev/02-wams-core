@@ -47,10 +47,10 @@ public class DeleteCustomKeyStoreDialog extends PinBaseActionDialog {
                 return false;
             }
 
+            close();
             Notification.show("Store deleted", 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
-            close();
             return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
