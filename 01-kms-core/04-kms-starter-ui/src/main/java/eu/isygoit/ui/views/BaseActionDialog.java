@@ -102,8 +102,10 @@ public abstract class BaseActionDialog extends Dialog {
         button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         button.addClickListener(e -> {
             clearError();
-            onOk();
-            if (onSuccess != null) onSuccess.run();
+            boolean ok = onOk();
+            if (ok && onSuccess != null) {
+                onSuccess.run();
+            }
         });
         return button;
     }
