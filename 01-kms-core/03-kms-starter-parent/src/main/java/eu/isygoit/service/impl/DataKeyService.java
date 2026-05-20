@@ -14,16 +14,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.crypto.KeyGenerator;
 import java.security.InvalidParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 import java.security.spec.ECGenParameterSpec;
 import java.util.Base64;
-import java.util.Map;
 
 /**
- * The type Data key service.
+ * Data key service - supports hybrid encryption for RSA KEKs.
+ * Fixed: Uses public key for wrapping data keys when KEK is asymmetric.
  */
 @Slf4j
 @Service
@@ -36,76 +37,73 @@ public class DataKeyService implements IDataKeyService {
     private final ICryptoService cryptoService;
 
     @Override
-    public GenerateDataKeyResponse generateDataKey(
-            String tenant,
-            GenerateDataKeyRequest request) {
+    public GenerateDataKeyResponse generateDataKey(String tenant, GenerateDataKeyRequest request) {
+        log.info("Generating data key for tenant: {} keyId: {}", tenant, request.getKeyId());
 
-        log.info("Generating data key for tenant: {} keyId: {}",
-                tenant, request.getKeyId());
-
-        KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(
-                        tenant,
-                        request.getKeyId()
-                )
+        KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(tenant, request.getKeyId())
                 .orElseThrow(() -> new RuntimeException("KMS Key not found"));
 
         if (!kmsKey.isEnabled()) {
             throw new RuntimeException("KMS Key is not enabled");
         }
-
         if (kmsKey.getKeyUsage() != IEnumKeyUsage.Types.ENCRYPT_DECRYPT) {
             throw new RuntimeException("KMS Key is not authorized for data key generation");
         }
 
-        Map<String, byte[]> result =
-                cryptoService.generateDataKey(kmsKey.getKeyMaterial(), request.getKeySize());
+        // 1. Generate a plaintext AES data key
+        int keySizeBits = (request.getKeySize() != null) ? request.getKeySize() : 256;
+        byte[] plaintextKey = generateAesKey(keySizeBits);
+
+        // 2. Encrypt the data key using the KEK
+        byte[] kekMaterial;
+        if (kmsKey.getKeySpec() != null && kmsKey.getKeySpec().isAsymmetric()) {
+            if (kmsKey.getPublicKey() == null) {
+                throw new RuntimeException("Asymmetric KEK has no public key for wrapping");
+            }
+            kekMaterial = kmsKey.getPublicKey();   // use public key for wrapping
+        } else {
+            kekMaterial = kmsKey.getKeyMaterial(); // symmetric key
+        }
+
+        byte[] encryptedKey = cryptoService.encryptData(
+                plaintextKey,
+                kekMaterial,
+                kmsKey.getKeySpec(),
+                request.getEncryptionContext()
+        );
 
         return GenerateDataKeyResponse.builder()
-                .plaintext(Base64.getEncoder().encodeToString(result.get("plaintextKey")))
-                .ciphertextBlob(Base64.getEncoder().encodeToString(result.get("encryptedKey")))
+                .plaintext(Base64.getEncoder().encodeToString(plaintextKey))
+                .ciphertextBlob(Base64.getEncoder().encodeToString(encryptedKey))
                 .keyId(kmsKey.getKeyId())
                 .build();
     }
 
+    @Override
     public String resolveKeyId(String tenant, String keyIdOrAlias) {
         if (keyIdOrAlias == null || keyIdOrAlias.isBlank()) {
             throw new InvalidParameterException("KeyId is required");
         }
-
-        // 1. If it's an AWS-style ARN (e.g., wrn:aws:kms:region:account:key:1234abcd-...)
         if (keyIdOrAlias.startsWith("wrn:")) {
-            // Extract the key ID from the ARN (last part after "key:")
             String[] parts = keyIdOrAlias.split(":");
             if (parts.length < 2) {
                 throw new InvalidParameterException("Invalid ARN format");
             }
-            return parts[parts.length - 1]; // returns the key ID
+            return parts[parts.length - 1];
         }
-
-        // 2. If it's an alias (starts with "alias:")
         if (keyIdOrAlias.startsWith("alias:")) {
-            String aliasName = keyIdOrAlias.substring("alias:".length()); // remove "alias:" prefixx
+            String aliasName = keyIdOrAlias.substring("alias:".length());
             return kmsAliasRepository.findByTenantAndAliasName(tenant, aliasName)
-                    .map(KmsAlias::getTargetKeyId)  // assuming AliasEntity has getTargetKeyId()
+                    .map(KmsAlias::getTargetKeyId)
                     .orElseThrow(() -> new AliasNotFoundException("Alias not found: " + keyIdOrAlias));
         }
-
-        // 3. Otherwise treat as a raw key ID (UUID format)
-        // Optionally validate UUID format here if required
         return keyIdOrAlias;
     }
 
     @Override
     public GenerateDataKeyWithoutPlaintextResponse generateDataKeyWithoutPlaintext(
-            String tenant,
-            GenerateDataKeyWithoutPlaintextRequest request) {
-
-        GenerateDataKeyResponse base =
-                generateDataKey(
-                        tenant,
-                        toBaseRequest(request)
-                );
-
+            String tenant, GenerateDataKeyWithoutPlaintextRequest request) {
+        GenerateDataKeyResponse base = generateDataKey(tenant, toBaseRequest(request));
         return GenerateDataKeyWithoutPlaintextResponse.builder()
                 .ciphertextBlob(base.getCiphertextBlob())
                 .keyId(base.getKeyId())
@@ -113,18 +111,10 @@ public class DataKeyService implements IDataKeyService {
     }
 
     @Override
-    public GenerateDataKeyPairResponse generateDataKeyPair(
-            String tenant,
-            GenerateDataKeyPairRequest request) {
+    public GenerateDataKeyPairResponse generateDataKeyPair(String tenant, GenerateDataKeyPairRequest request) {
+        log.info("Generating data key pair for tenant: {} keyId: {}", tenant, request.getKeyId());
 
-        log.info("Generating data key pair for tenant: {} keyId: {}",
-                tenant,
-                request.getKeyId());
-
-        KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(
-                        tenant,
-                        request.getKeyId()
-                )
+        KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(tenant, request.getKeyId())
                 .orElseThrow(() -> new RuntimeException("KMS Key not found"));
 
         if (!kmsKey.isEnabled()) {
@@ -132,9 +122,8 @@ public class DataKeyService implements IDataKeyService {
         }
 
         try {
-            // 1. Select algorithm
+            // 1. Generate ephemeral key pair (RSA or EC)
             String algorithm = request.getKeyPairSpec().name().startsWith("RSA") ? "RSA" : "ECC";
-
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algorithm);
 
             if ("RSA".equals(algorithm)) {
@@ -149,20 +138,28 @@ public class DataKeyService implements IDataKeyService {
                 keyGen.initialize(new ECGenParameterSpec(curve));
             }
 
-            // 2. Generate key pair
             KeyPair pair = keyGen.generateKeyPair();
-
             byte[] publicKeyBytes = pair.getPublic().getEncoded();
             byte[] privateKeyBytes = pair.getPrivate().getEncoded();
 
-            // 3. Encrypt ONLY private key (KMS-safe)
+            // 2. Encrypt the ephemeral private key using the KEK (public key if asymmetric)
+            byte[] kekMaterial;
+            if (kmsKey.getKeySpec() != null && kmsKey.getKeySpec().isAsymmetric()) {
+                if (kmsKey.getPublicKey() == null) {
+                    throw new RuntimeException("Asymmetric KEK has no public key");
+                }
+                kekMaterial = kmsKey.getPublicKey();
+            } else {
+                kekMaterial = kmsKey.getKeyMaterial();
+            }
+
             byte[] encryptedPrivateKey = cryptoService.encryptData(
                     privateKeyBytes,
-                    kmsKey.getKeyMaterial(),
+                    kekMaterial,
+                    kmsKey.getKeySpec(),
                     request.getEncryptionContext()
             );
 
-            // 4. Build response (aligned DTO contract)
             return GenerateDataKeyPairResponse.builder()
                     .publicKey(Base64.getEncoder().encodeToString(publicKeyBytes))
                     .privateKeyCiphertextBlob(Base64.getEncoder().encodeToString(encryptedPrivateKey))
@@ -180,15 +177,8 @@ public class DataKeyService implements IDataKeyService {
 
     @Override
     public GenerateDataKeyPairWithoutPlaintextResponse generateDataKeyPairWithoutPlaintext(
-            String tenant,
-            GenerateDataKeyPairWithoutPlaintextRequest request) {
-
-        GenerateDataKeyPairResponse base =
-                generateDataKeyPair(
-                        tenant,
-                        mapToBaseRequest(request)
-                );
-
+            String tenant, GenerateDataKeyPairWithoutPlaintextRequest request) {
+        GenerateDataKeyPairResponse base = generateDataKeyPair(tenant, mapToBaseRequest(request));
         return GenerateDataKeyPairWithoutPlaintextResponse.builder()
                 .publicKey(base.getPublicKey())
                 .privateKeyCiphertextBlob(base.getPrivateKeyCiphertextBlob())
@@ -207,9 +197,7 @@ public class DataKeyService implements IDataKeyService {
         return GenerateRandomResponse.builder().plaintext(plaintext).build();
     }
 
-    private GenerateDataKeyPairRequest mapToBaseRequest(
-            GenerateDataKeyPairWithoutPlaintextRequest request) {
-
+    private GenerateDataKeyPairRequest mapToBaseRequest(GenerateDataKeyPairWithoutPlaintextRequest request) {
         return GenerateDataKeyPairRequest.builder()
                 .keyId(request.getKeyId())
                 .keyPairSpec(request.getKeyPairSpec())
@@ -217,13 +205,21 @@ public class DataKeyService implements IDataKeyService {
                 .build();
     }
 
-    private GenerateDataKeyRequest toBaseRequest(
-            GenerateDataKeyWithoutPlaintextRequest request) {
-
+    private GenerateDataKeyRequest toBaseRequest(GenerateDataKeyWithoutPlaintextRequest request) {
         return GenerateDataKeyRequest.builder()
                 .keyId(request.getKeyId())
                 .keySize(request.getKeySize())
                 .encryptionContext(request.getEncryptionContext())
                 .build();
+    }
+
+    private byte[] generateAesKey(int keySizeBits) {
+        try {
+            KeyGenerator kg = KeyGenerator.getInstance("AES");
+            kg.init(keySizeBits);
+            return kg.generateKey().getEncoded();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate AES data key", e);
+        }
     }
 }

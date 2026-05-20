@@ -91,7 +91,7 @@ class DataKeyServiceTest {
     @Test
     void shouldGenerateDataKeyPairSuccessfully() {
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID)).thenReturn(Optional.of(kmsKey));
-        when(cryptoService.encryptData(any(), any(), any())).thenReturn("encPriv".getBytes());
+        when(cryptoService.encryptData(any(), any(), any(),any())).thenReturn("encPriv".getBytes());
 
         GenerateDataKeyPairRequest req = GenerateDataKeyPairRequest.builder()
                 .keyId(KEY_ID)

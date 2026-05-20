@@ -58,7 +58,9 @@ public interface ICryptoService {
      * @param encryptionContext optional encryption context
      * @return ciphertext bytes
      */
-    byte[] encryptData(byte[] plaintext, byte[] keyMaterial, Map<String, String> encryptionContext);
+    byte[] encryptData(byte[] plaintext, byte[] keyMaterial,
+                       IEnumKeySpec.Types keySpec,
+                       Map<String, String> encryptionContext);
 
     /**
      * Decrypt ciphertext using specified key material
@@ -69,7 +71,9 @@ public interface ICryptoService {
      * @param encryptionContext optional encryption context
      * @return plaintext bytes
      */
-    byte[] decryptData(String tenant, byte[] ciphertext, byte[] keyMaterial, Map<String, String> encryptionContext);
+    public byte[] decryptData(String tenant, byte[] ciphertext, byte[] keyMaterial,
+                              IEnumKeySpec.Types keySpec,
+                              Map<String, String> encryptionContext);
 
     /**
      * Sign data using asymmetric key

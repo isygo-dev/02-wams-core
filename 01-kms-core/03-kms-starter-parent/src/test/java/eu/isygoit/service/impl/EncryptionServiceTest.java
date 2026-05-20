@@ -69,7 +69,7 @@ class EncryptionServiceTest {
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.of(kmsKey));
 
-        when(cryptoService.encryptData(any(), any(), any()))
+        when(cryptoService.encryptData(any(), any(), any(),any()))
                 .thenReturn("encrypted".getBytes());
 
         EncryptResponse response = service.encrypt(TENANT, request);
@@ -86,6 +86,7 @@ class EncryptionServiceTest {
         verify(cryptoService).encryptData(
                 any(),
                 eq(kmsKey.getKeyMaterial()),
+                any(),
                 eq(request.getEncryptionContext())
         );
     }
@@ -169,7 +170,7 @@ class EncryptionServiceTest {
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.of(kmsKey));
 
-        when(cryptoService.decryptData(any(), any(), any(), any()))
+        when(cryptoService.decryptData(any(), any(), any(),any(), any()))
                 .thenReturn("hello".getBytes());
 
         DecryptResponse response = service.decrypt(TENANT, request);
@@ -188,6 +189,7 @@ class EncryptionServiceTest {
                 eq(TENANT),
                 any(),
                 eq(kmsKey.getKeyMaterial()),
+                any(),
                 eq(request.getEncryptionContext())
         );
     }
@@ -280,10 +282,10 @@ class EncryptionServiceTest {
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, DEST_KEY_ID))
                 .thenReturn(Optional.of(destinationKey));
 
-        when(cryptoService.decryptData(any(), any(), any(), any()))
+        when(cryptoService.decryptData(any(), any(),any(), any(), any()))
                 .thenReturn("plain".getBytes());
 
-        when(cryptoService.encryptData(any(), any(), any()))
+        when(cryptoService.encryptData(any(), any(),any(), any()))
                 .thenReturn("reencrypted".getBytes());
 
         ReEncryptResponse response =
@@ -356,7 +358,7 @@ class EncryptionServiceTest {
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.of(kmsKey));
 
-        when(cryptoService.decryptData(any(), any(), any(), any()))
+        when(cryptoService.decryptData(any(), any(),any(), any(), any()))
                 .thenReturn("plain".getBytes());
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, DEST_KEY_ID))
@@ -389,7 +391,7 @@ class EncryptionServiceTest {
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.of(kmsKey));
 
-        when(cryptoService.decryptData(any(), any(), any(), any()))
+        when(cryptoService.decryptData(any(), any(), any(),any(), any()))
                 .thenReturn("plain".getBytes());
 
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, DEST_KEY_ID))

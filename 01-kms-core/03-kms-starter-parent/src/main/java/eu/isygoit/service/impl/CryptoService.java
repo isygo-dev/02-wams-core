@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
@@ -46,6 +47,13 @@ import java.util.Optional;
  * <p>
  * Provides cryptographic operations using Jasypt for consistent configuration-driven
  * encryption/digestion and standard JCA for key generation and asymmetric operations.
+ * </p>
+ * <p>
+ * <strong>Fix applied:</strong> Now supports hybrid encryption for RSA keys.
+ * {@code encryptData} and {@code decryptData} accept a {@code keySpec} parameter
+ * to determine the correct algorithm. Asymmetric keys (RSA) trigger hybrid encryption:
+ * AES‑256/GCM for the data, RSA‑OAEP for the AES key.
+ * </p>
  */
 @Slf4j
 @Service
@@ -128,10 +136,6 @@ public class CryptoService implements ICryptoService {
 
     // ====================== Public API Methods ======================
 
-    /**
-     * Retrieves a configured PBE StringEncryptor for the given tenant.
-     * Falls back to default tenant if tenant-specific configuration is not found.
-     */
     @Override
     public StringEncryptor getPebEncryptor(String tenant) {
         Optional<PEBConfig> optional = pebConfigRepository.findFirstByTenantIgnoreCase(tenant);
@@ -142,9 +146,6 @@ public class CryptoService implements ICryptoService {
                 .orElseGet(this::stringEncryptorDefault);
     }
 
-    /**
-     * Retrieves a configured StringDigester for the given tenant.
-     */
     @Override
     public StringDigester getDigestEncryptor(String tenant) {
         Optional<DigestConfig> optional = digesterConfigRepository.findFirstByTenantIgnoreCase(tenant);
@@ -155,9 +156,6 @@ public class CryptoService implements ICryptoService {
                 .orElseGet(this::stringDigesterDefault);
     }
 
-    /**
-     * Retrieves a configured PasswordEncryptor for the given tenant.
-     */
     @Override
     public PasswordEncryptor getPasswordEncryptor(String tenant) {
         Optional<DigestConfig> optional = digesterConfigRepository.findFirstByTenantIgnoreCase(tenant);
@@ -168,19 +166,13 @@ public class CryptoService implements ICryptoService {
                 .orElseGet(this::passwordEncryptorDefault);
     }
 
-    /**
-     * Generates cryptographic key material (symmetric secret key or asymmetric private key).
-     *
-     * @param keySpec the type of key to generate (e.g. AES_256, RSA_2048)
-     * @return raw key bytes
-     */
+    @Override
     public KeyPairMaterial generateKeyMaterial(IEnumKeySpec.Types keySpec) {
         try {
             switch (keySpec) {
-                // ========== Symmetric and HMAC keys ==========
                 case SYMMETRIC_DEFAULT:
                     KeyGenerator aesGen = KeyGenerator.getInstance("AES");
-                    aesGen.init(keySpec.getKeySizeBits()); // 256 bits
+                    aesGen.init(keySpec.getKeySizeBits());
                     byte[] aesKey = aesGen.generateKey().getEncoded();
                     return new KeyPairMaterial(aesKey, null);
 
@@ -204,21 +196,23 @@ public class CryptoService implements ICryptoService {
                     hmac512.init(512);
                     return new KeyPairMaterial(hmac512.generateKey().getEncoded(), null);
 
-                // ========== RSA keys ==========
-                case RSA_2048, RSA_3072, RSA_4096:
+                case RSA_2048:
+                case RSA_3072:
+                case RSA_4096:
                     KeyPairGenerator rsaGen = KeyPairGenerator.getInstance("RSA");
                     rsaGen.initialize(keySpec.getKeySizeBits());
                     KeyPair rsaPair = rsaGen.generateKeyPair();
                     return new KeyPairMaterial(rsaPair.getPrivate().getEncoded(), rsaPair.getPublic().getEncoded());
 
-                // ========== Elliptic Curve keys ==========
-                case ECC_NIST_P256, ECC_NIST_P384, ECC_NIST_P521, ECC_SECG_P256K1:
+                case ECC_NIST_P256:
+                case ECC_NIST_P384:
+                case ECC_NIST_P521:
+                case ECC_SECG_P256K1:
                     KeyPairGenerator ecGen = KeyPairGenerator.getInstance("EC");
                     ecGen.initialize(new ECGenParameterSpec(keySpec.getCurveName()));
                     KeyPair ecPair = ecGen.generateKeyPair();
                     return new KeyPairMaterial(ecPair.getPrivate().getEncoded(), ecPair.getPublic().getEncoded());
 
-                // ========== SM2 (requires Bouncy Castle) ==========
                 case SM2:
                     throw new UnsupportedOperationException("SM2 key generation not yet implemented");
 
@@ -230,94 +224,192 @@ public class CryptoService implements ICryptoService {
         }
     }
 
-    private byte[] generateRsaPrivateKey(int keySize) throws Exception {
-        KeyPairGenerator rsaGen = KeyPairGenerator.getInstance("RSA");
-        rsaGen.initialize(keySize);
-        KeyPair keyPair = rsaGen.generateKeyPair();
-        return keyPair.getPrivate().getEncoded(); // PKCS#8 encoding
-    }
+    // -----------------------------------------------------------------
+    //  ENCRYPTION / DECRYPTION (with key type awareness)
+    // -----------------------------------------------------------------
 
-    private byte[] generateEcPrivateKey(String curveName) throws Exception {
-        KeyPairGenerator ecGen = KeyPairGenerator.getInstance("EC");
-        java.security.spec.ECGenParameterSpec ecSpec = new java.security.spec.ECGenParameterSpec(curveName);
-        ecGen.initialize(ecSpec);
-        KeyPair keyPair = ecGen.generateKeyPair();
-        return keyPair.getPrivate().getEncoded(); // PKCS#8 encoding
-    }
-
-    /**
-     * Encrypts byte array data using JCA (AES for symmetric).
-     */
     @Override
-    public byte[] encryptData(byte[] plaintext, byte[] keyMaterial, Map<String, String> encryptionContext) {
+    public byte[] encryptData(byte[] plaintext, byte[] keyMaterial,
+                              IEnumKeySpec.Types keySpec,
+                              Map<String, String> encryptionContext) {
         if (plaintext == null || plaintext.length == 0) return new byte[0];
 
         try {
-            // Simple AES/GCM implementation for KMS-style encryption
-            Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-            byte[] iv = new byte[12];
-            new SecureRandom().nextBytes(iv);
-            GCMParameterSpec spec = new GCMParameterSpec(128, iv);
-            SecretKeySpec keySpec = new SecretKeySpec(keyMaterial, "AES");
-
-            cipher.init(Cipher.ENCRYPT_MODE, keySpec, spec);
-            byte[] encrypted = cipher.doFinal(plaintext);
-
-            // Return IV + Ciphertext
-            byte[] result = new byte[iv.length + encrypted.length];
-            System.arraycopy(iv, 0, result, 0, iv.length);
-            System.arraycopy(encrypted, 0, result, iv.length, encrypted.length);
-            return result;
+            if (keySpec.isAsymmetric()) {
+                // RSA hybrid encryption
+                return hybridEncrypt(plaintext, keyMaterial, keySpec);
+            } else {
+                // Symmetric encryption (AES/GCM)
+                return symmetricEncrypt(plaintext, keyMaterial);
+            }
         } catch (Exception e) {
             log.error("Data encryption failed", e);
             return new byte[0];
         }
     }
 
-    /**
-     * Decrypts byte array data using JCA (AES for symmetric).
-     */
     @Override
-    public byte[] decryptData(String tenant, byte[] ciphertext, byte[] keyMaterial, Map<String, String> encryptionContext) {
+    public byte[] decryptData(String tenant, byte[] ciphertext, byte[] keyMaterial,
+                              IEnumKeySpec.Types keySpec,
+                              Map<String, String> encryptionContext) {
         if (ciphertext == null || ciphertext.length == 0) return new byte[0];
 
         try {
-            javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance("AES/GCM/NoPadding");
-            byte[] iv = new byte[12];
-            System.arraycopy(ciphertext, 0, iv, 0, iv.length);
-            javax.crypto.spec.GCMParameterSpec spec = new javax.crypto.spec.GCMParameterSpec(128, iv);
-            javax.crypto.spec.SecretKeySpec keySpec = new javax.crypto.spec.SecretKeySpec(keyMaterial, "AES");
-
-            cipher.init(javax.crypto.Cipher.DECRYPT_MODE, keySpec, spec);
-            return cipher.doFinal(ciphertext, iv.length, ciphertext.length - iv.length);
+            if (keySpec.isAsymmetric()) {
+                return hybridDecrypt(ciphertext, keyMaterial, keySpec);
+            } else {
+                return symmetricDecrypt(ciphertext, keyMaterial);
+            }
         } catch (Exception e) {
             log.error("Data decryption failed", e);
             return new byte[0];
         }
     }
 
+    // -----------------------------------------------------------------
+    //  HYBRID ENCRYPTION (RSA + AES)
+    // -----------------------------------------------------------------
+
     /**
-     * Signs data using standard Java Signature API.
+     * Hybrid encryption: generate ephemeral AES‑256 key, encrypt data with AES/GCM,
+     * encrypt the AES key with RSA public key (OAEP with SHA‑256), then pack the result.
+     * Output format: [ encryptedAesKeyLength (2 bytes) ][ encryptedAesKey ][ iv (12 bytes) ][ ciphertext + auth tag ]
      */
+    private byte[] hybridEncrypt(byte[] plaintext, byte[] publicKeyMaterial, IEnumKeySpec.Types keySpec) throws Exception {
+        // 1. Generate ephemeral AES‑256 key
+        SecretKey aesKey = generateAESKey(256);
+
+        // 2. Encrypt data with AES/GCM
+        byte[] iv = new byte[12];
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(iv);
+
+        Cipher aesCipher = Cipher.getInstance("AES/GCM/NoPadding");
+        GCMParameterSpec gcmSpec = new GCMParameterSpec(128, iv);
+        aesCipher.init(Cipher.ENCRYPT_MODE, aesKey, gcmSpec);
+        byte[] encryptedData = aesCipher.doFinal(plaintext);  // includes auth tag
+
+        // 3. Encrypt the AES key with RSA public key (OAEP)
+        PublicKey rsaPublicKey = KeyFactory.getInstance("RSA")
+                .generatePublic(new X509EncodedKeySpec(publicKeyMaterial));
+        Cipher rsaCipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
+        rsaCipher.init(Cipher.ENCRYPT_MODE, rsaPublicKey);
+        byte[] encryptedAesKey = rsaCipher.doFinal(aesKey.getEncoded());
+
+        // 4. Pack: [ encryptedAesKeyLength (2 bytes) ][ encryptedAesKey ][ iv ][ encryptedData ]
+        byte[] result = new byte[2 + encryptedAesKey.length + iv.length + encryptedData.length];
+        int pos = 0;
+        result[pos++] = (byte) ((encryptedAesKey.length >> 8) & 0xFF);
+        result[pos++] = (byte) (encryptedAesKey.length & 0xFF);
+        System.arraycopy(encryptedAesKey, 0, result, pos, encryptedAesKey.length);
+        pos += encryptedAesKey.length;
+        System.arraycopy(iv, 0, result, pos, iv.length);
+        pos += iv.length;
+        System.arraycopy(encryptedData, 0, result, pos, encryptedData.length);
+        return result;
+    }
+
+    /**
+     * Hybrid decryption: extract the encrypted AES key, decrypt it with RSA private key,
+     * then decrypt the data with AES/GCM.
+     */
+    private byte[] hybridDecrypt(byte[] ciphertext, byte[] privateKeyMaterial, IEnumKeySpec.Types keySpec) throws Exception {
+        if (ciphertext.length < 2) throw new IllegalArgumentException("Invalid hybrid ciphertext");
+
+        // 1. Read encrypted AES key length
+        int encryptedKeyLen = ((ciphertext[0] & 0xFF) << 8) | (ciphertext[1] & 0xFF);
+        if (ciphertext.length < 2 + encryptedKeyLen + 12) throw new IllegalArgumentException("Malformed hybrid ciphertext");
+
+        int pos = 2;
+        byte[] encryptedAesKey = new byte[encryptedKeyLen];
+        System.arraycopy(ciphertext, pos, encryptedAesKey, 0, encryptedKeyLen);
+        pos += encryptedKeyLen;
+
+        // 2. Read IV
+        byte[] iv = new byte[12];
+        System.arraycopy(ciphertext, pos, iv, 0, 12);
+        pos += 12;
+
+        // 3. Rest is encrypted data
+        byte[] encryptedData = new byte[ciphertext.length - pos];
+        System.arraycopy(ciphertext, pos, encryptedData, 0, encryptedData.length);
+
+        // 4. Decrypt AES key with RSA private key
+        PrivateKey rsaPrivateKey = KeyFactory.getInstance("RSA")
+                .generatePrivate(new PKCS8EncodedKeySpec(privateKeyMaterial));
+        Cipher rsaCipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
+        rsaCipher.init(Cipher.DECRYPT_MODE, rsaPrivateKey);
+        byte[] aesKeyBytes = rsaCipher.doFinal(encryptedAesKey);
+
+        // 5. Decrypt data with AES/GCM
+        SecretKeySpec aesKeySpec = new SecretKeySpec(aesKeyBytes, "AES");
+        Cipher aesCipher = Cipher.getInstance("AES/GCM/NoPadding");
+        GCMParameterSpec gcmSpec = new GCMParameterSpec(128, iv);
+        aesCipher.init(Cipher.DECRYPT_MODE, aesKeySpec, gcmSpec);
+        return aesCipher.doFinal(encryptedData);
+    }
+
+    // -----------------------------------------------------------------
+    //  SYMMETRIC ENCRYPTION (AES/GCM)
+    // -----------------------------------------------------------------
+
+    private byte[] symmetricEncrypt(byte[] plaintext, byte[] symmetricKey) throws Exception {
+        if (symmetricKey.length != 16 && symmetricKey.length != 24 && symmetricKey.length != 32) {
+            throw new InvalidKeyException("Symmetric key must be 16, 24, or 32 bytes. Got: " + symmetricKey.length);
+        }
+        byte[] iv = new byte[12];
+        new SecureRandom().nextBytes(iv);
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        GCMParameterSpec spec = new GCMParameterSpec(128, iv);
+        SecretKeySpec keySpec = new SecretKeySpec(symmetricKey, "AES");
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec, spec);
+        byte[] encrypted = cipher.doFinal(plaintext);
+        // Pack IV + ciphertext
+        byte[] result = new byte[iv.length + encrypted.length];
+        System.arraycopy(iv, 0, result, 0, iv.length);
+        System.arraycopy(encrypted, 0, result, iv.length, encrypted.length);
+        return result;
+    }
+
+    private byte[] symmetricDecrypt(byte[] ciphertext, byte[] symmetricKey) throws Exception {
+        if (ciphertext.length < 12) throw new IllegalArgumentException("Ciphertext too short");
+        if (symmetricKey.length != 16 && symmetricKey.length != 24 && symmetricKey.length != 32) {
+            throw new InvalidKeyException("Symmetric key must be 16, 24, or 32 bytes. Got: " + symmetricKey.length);
+        }
+        byte[] iv = new byte[12];
+        System.arraycopy(ciphertext, 0, iv, 0, 12);
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        GCMParameterSpec spec = new GCMParameterSpec(128, iv);
+        SecretKeySpec keySpec = new SecretKeySpec(symmetricKey, "AES");
+        cipher.init(Cipher.DECRYPT_MODE, keySpec, spec);
+        return cipher.doFinal(ciphertext, 12, ciphertext.length - 12);
+    }
+
+    private SecretKey generateAESKey(int keySizeBits) throws Exception {
+        KeyGenerator kg = KeyGenerator.getInstance("AES");
+        kg.init(keySizeBits);
+        return kg.generateKey();
+    }
+
+    // -----------------------------------------------------------------
+    //  SIGNATURE METHODS (unchanged)
+    // -----------------------------------------------------------------
+
     @Override
     public byte[] signData(byte[] message, byte[] keyMaterial, IEnumSignatureAlgorithm algorithm) {
         try {
             if (algorithm == null) {
                 throw new IllegalArgumentException("Signature algorithm is required");
             }
-            // 1. Get Signature instance
             Signature signature = Signature.getInstance(algorithm.getJavaAlgorithm());
 
-            // 2. Load private key (use the key algorithm from the enum)
             PrivateKey privateKey = KeyFactory.getInstance(algorithm.getKeyAlgorithm())
                     .generatePrivate(new PKCS8EncodedKeySpec(keyMaterial));
 
-            // 3. For RSA-PSS, set the PSS parameters (must be done before initSign)
             if (algorithm.getPssSpec() != null) {
                 signature.setParameter(algorithm.getPssSpec());
             }
 
-            // 4. Initialize and sign
             signature.initSign(privateKey);
             signature.update(message);
             return signature.sign();
@@ -327,9 +419,6 @@ public class CryptoService implements ICryptoService {
         }
     }
 
-    /**
-     * Verifies digital signature.
-     */
     @Override
     public boolean verifySignature(byte[] message, byte[] signatureBytes, byte[] publicKeyBytes, IEnumSignatureAlgorithm algorithm) {
         try {
@@ -347,15 +436,22 @@ public class CryptoService implements ICryptoService {
         }
     }
 
+    // -----------------------------------------------------------------
+    //  DATA KEY GENERATION (updated to pass keySpec)
+    // -----------------------------------------------------------------
+
     @Override
     public Map<String, byte[]> generateDataKey(byte[] keyMaterial, Integer keySize) {
         try {
             int size = (keySize != null) ? keySize : 256;
-            javax.crypto.KeyGenerator keyGen = javax.crypto.KeyGenerator.getInstance("AES");
+            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
             keyGen.init(size);
             byte[] plaintextKey = keyGen.generateKey().getEncoded();
-            byte[] encryptedKey = encryptData(plaintextKey, keyMaterial, null);
-
+            // For data key wrapping, we assume the keyMaterial is from a symmetric KEK.
+            // If the KEK is RSA, this method would need the keySpec as well.
+            // Here we keep the original behaviour: use symmetric encryption with the given keyMaterial.
+            // To support RSA KEK, you would need to modify the method signature similarly.
+            byte[] encryptedKey = symmetricEncrypt(plaintextKey, keyMaterial);
             return Map.of(
                     "plaintextKey", plaintextKey,
                     "encryptedKey", encryptedKey
@@ -366,6 +462,10 @@ public class CryptoService implements ICryptoService {
         }
     }
 
+    // -----------------------------------------------------------------
+    //  OTHER METHODS (unchanged or adapted)
+    // -----------------------------------------------------------------
+
     @Override
     public byte[] extractPublicKey(byte[] keyMaterial, IEnumKeySpec.Types keySpec) {
         log.warn("extractPublicKey - full implementation pending (requires key pair storage)");
@@ -374,7 +474,7 @@ public class CryptoService implements ICryptoService {
 
     @Override
     public KeyPairMaterial generateWrappingKey() {
-        return generateKeyMaterial(IEnumKeySpec.Types.RSA_2048); // Reuse existing logic
+        return generateKeyMaterial(IEnumKeySpec.Types.RSA_2048);
     }
 
     @Override
@@ -386,7 +486,6 @@ public class CryptoService implements ICryptoService {
 
     @Override
     public byte[] decryptKeyMaterial(String tenant, @NotNull byte[] encryptedKeyMaterial, @NotNull byte[] importToken) {
-        // Simple implementation using Jasypt-style PBE
         try {
             PooledPBEByteEncryptor encryptor = new PooledPBEByteEncryptor();
             PEBConfig pebConfig = pebConfigRepository.findFirstByTenantIgnoreCase(tenant)
@@ -453,25 +552,5 @@ public class CryptoService implements ICryptoService {
     private PEBConfig getDefaultPebConfig() {
         return pebConfigRepository.findFirstByTenantIgnoreCase(TenantConstants.DEFAULT_TENANT_NAME)
                 .orElse(null);
-    }
-
-    // ====================== Helpers ======================
-
-    private int extractKeySize(IEnumKeySpec.Types keySpec) {
-        try {
-            String name = keySpec.name();
-            if (name.contains("_")) {
-                return Integer.parseInt(name.substring(name.lastIndexOf('_') + 1));
-            }
-        } catch (Exception ignored) {
-        }
-        return 256;
-    }
-
-    private String extractAlgorithm(IEnumKeySpec.Types keySpec) {
-        String name = keySpec.name();
-        if (name.startsWith("RSA")) return "RSA";
-        if (name.startsWith("EC")) return "EC";
-        return "AES";
     }
 }
