@@ -880,6 +880,9 @@ public final class KmsDtos {
         @Schema(description = "Encryption context")
         private Map<String, String> encryptionContext;
 
+        @Schema(description = "Encryption algorithm spec")
+        private String encryptionAlgorithmSpec;
+
         @Schema(description = "Grant tokens")
         private List<String> grantTokens;
     }
@@ -921,6 +924,9 @@ public final class KmsDtos {
         @Schema(description = "Encryption context")
         private Map<String, String> encryptionContext;
 
+        @Schema(description = "Encryption algorithm spec")
+        private String encryptionAlgorithmSpec;
+
         @Schema(description = "Grant tokens")
         private List<String> grantTokens;
     }
@@ -957,6 +963,9 @@ public final class KmsDtos {
 
         @Schema(description = "Encryption context")
         private Map<String, String> encryptionContext;
+
+        @Schema(description = "Encryption algorithm spec")
+        private String encryptionAlgorithmSpec;
 
         @Schema(description = "Grant tokens")
         private List<String> grantTokens;
@@ -1001,6 +1010,9 @@ public final class KmsDtos {
 
         @Schema(description = "Encryption context")
         private Map<String, String> encryptionContext;
+
+        @Schema(description = "Encryption algorithm spec")
+        private String encryptionAlgorithmSpec;
 
         @Schema(description = "Grant tokens")
         private List<String> grantTokens;

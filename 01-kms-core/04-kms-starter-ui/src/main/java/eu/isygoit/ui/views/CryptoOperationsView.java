@@ -4,7 +4,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -24,17 +23,14 @@ import eu.isygoit.enums.*;
 import eu.isygoit.mapper.AlgorithmMapper;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainLayout;
+import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -386,8 +382,13 @@ public class CryptoOperationsView extends VerticalLayout {
                     Notification.show("Encryption failed", 3000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
+            } catch (FeignException ex) {
+                String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+                Notification.show("Encryption error: " + errorMsg, 5000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
             } catch (Exception ex) {
-                Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
+                String errorMsg = ex.getMessage();
+                Notification.show("Encryption error: " + errorMsg, 5000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
@@ -421,8 +422,13 @@ public class CryptoOperationsView extends VerticalLayout {
                     Notification.show("Decryption failed", 3000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
+            } catch (FeignException ex) {
+                String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+                Notification.show("Decryption error: " + errorMsg, 5000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
             } catch (Exception ex) {
-                Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
+                String errorMsg = ex.getMessage();
+                Notification.show("Decryption error: " + errorMsg, 5000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
@@ -492,8 +498,13 @@ public class CryptoOperationsView extends VerticalLayout {
                     Notification.show("Signing failed", 3000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
+            } catch (FeignException ex) {
+                String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+                Notification.show("Signing error: " + errorMsg, 5000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
             } catch (Exception ex) {
-                Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
+                String errorMsg = ex.getMessage();
+                Notification.show("Signing error: " + errorMsg, 5000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
@@ -533,8 +544,13 @@ public class CryptoOperationsView extends VerticalLayout {
                     Notification.show("Verification failed", 3000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
+            } catch (FeignException ex) {
+                String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+                Notification.show("Verification error: " + errorMsg, 5000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
             } catch (Exception ex) {
-                Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
+                String errorMsg = ex.getMessage();
+                Notification.show("Verification error: " + errorMsg, 5000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
@@ -596,8 +612,13 @@ public class CryptoOperationsView extends VerticalLayout {
                     Notification.show("Generation failed", 3000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
+            } catch (FeignException ex) {
+                String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+                Notification.show("Generation error: " + errorMsg, 5000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
             } catch (Exception ex) {
-                Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
+                String errorMsg = ex.getMessage();
+                Notification.show("Generation error: " + errorMsg, 5000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
@@ -665,8 +686,13 @@ public class CryptoOperationsView extends VerticalLayout {
                     Notification.show("MAC generation failed", 3000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
+            } catch (FeignException ex) {
+                String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+                Notification.show("MAC generation error: " + errorMsg, 5000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
             } catch (Exception ex) {
-                Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
+                String errorMsg = ex.getMessage();
+                Notification.show("MAC generation error: " + errorMsg, 5000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
@@ -705,8 +731,13 @@ public class CryptoOperationsView extends VerticalLayout {
                     Notification.show("MAC verification failed", 3000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
+            } catch (FeignException ex) {
+                String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+                Notification.show("MAC verification error: " + errorMsg, 5000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
             } catch (Exception ex) {
-                Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
+                String errorMsg = ex.getMessage();
+                Notification.show("MAC verification error: " + errorMsg, 5000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
