@@ -17,9 +17,11 @@ public abstract class BaseActionDialog extends Dialog {
 
     private final Runnable onSuccess;
     
-    protected final Span errorSpan;
-    protected final Button okButton;
-    protected final Button cancelButton;
+    private final Span errorSpan;
+    private final Button okButton;
+    private final Button cancelButton;
+
+    private StringBuilder errorMsgBuilder = new StringBuilder();
 
     /**
      * Constructs a new dialog with the given header title.
@@ -37,6 +39,18 @@ public abstract class BaseActionDialog extends Dialog {
         this.cancelButton = createCancelButton();
 
         buildFooter();
+    }
+
+    public void append(String error) {
+        errorMsgBuilder.append(error).append("\n");
+    }
+
+    public void enableOkButton(boolean enable) {
+        okButton.setEnabled(enable);
+    }
+
+    public void addThemeVariantsOkButton(ButtonVariant... variants){
+        okButton.addThemeVariants(variants);
     }
 
     /**
@@ -80,6 +94,7 @@ public abstract class BaseActionDialog extends Dialog {
      * Clears any displayed error message.
      */
     protected void clearError() {
+        errorMsgBuilder = new StringBuilder();
         errorSpan.setText("");
         errorSpan.setVisible(false);
     }
@@ -105,6 +120,8 @@ public abstract class BaseActionDialog extends Dialog {
             boolean ok = onOk();
             if (ok && onSuccess != null) {
                 onSuccess.run();
+            } else {
+                showError(errorMsgBuilder.toString());
             }
         });
         return button;

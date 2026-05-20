@@ -51,7 +51,7 @@ public class UpdateAliasDialog extends BaseActionDialog {
         String newTargetId = targetKeyCombo.getValue();
         if (newTargetId == null || newTargetId.isBlank()) {
             String errorMsg = "Please select a target key";
-            showError(errorMsg);
+            this.append(errorMsg);
             Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
@@ -63,7 +63,7 @@ public class UpdateAliasDialog extends BaseActionDialog {
             ResponseEntity<UpdateAliasResponse> response = kmsApiService.updateAlias(aliasName, request);
             if (!response.getStatusCode().is2xxSuccessful()) {
                 String errorMsg = "Update failed: " + response.getStatusCode();
-                showError(errorMsg);
+                this.append(errorMsg);
                 Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return false;
@@ -76,12 +76,12 @@ public class UpdateAliasDialog extends BaseActionDialog {
             return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
-            showError(errorMsg);
+            this.append(errorMsg);
             Notification.show("Update error: " + errorMsg, 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } catch (Exception ex) {
             String errorMsg = ex.getMessage();
-            showError(errorMsg);
+            this.append(errorMsg);
             Notification.show("Error: " + errorMsg, 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {

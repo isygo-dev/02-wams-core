@@ -340,10 +340,12 @@ public class CryptoOperationsView extends VerticalLayout {
         ciphertextArea.setHeight("150px");
 
         algorithmCombo = new ComboBox<>("Algorithm");
+        algorithmCombo.setWidth("300px");
         algorithmCombo.setEnabled(false);
         algorithmCombo.setPlaceholder("Select a key first");
 
         TextField contextField = new TextField("Encryption Context (key:value, comma-separated)");
+        contextField.setWidth("300px");
         contextField.setPlaceholder("e.g., purpose=test,env=dev");
 
         Button encryptBtn = new Button("Encrypt", new Icon(VaadinIcon.LOCK));

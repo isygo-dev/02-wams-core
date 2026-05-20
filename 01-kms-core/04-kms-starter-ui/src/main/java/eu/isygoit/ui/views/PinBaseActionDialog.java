@@ -29,7 +29,7 @@ public abstract class PinBaseActionDialog extends BaseActionDialog {
     public PinBaseActionDialog(String title, String warningMessage, Runnable onSuccess) {
         super(title, onSuccess);
         this.confirmationCode = generateConfirmationCode();
-        this.okButton.setEnabled(false);
+        this.enableOkButton(false);
         buildContent(warningMessage);
     }
 
@@ -93,7 +93,7 @@ public abstract class PinBaseActionDialog extends BaseActionDialog {
     protected void validateAndEnableButton() {
         String value = pinField.getValue();
         boolean isValid = value != null && value.matches("\\d{9}") && value.equals(confirmationCode);
-        okButton.setEnabled(isValid);
+        enableOkButton(isValid);
         if (isValid) {
             clearError();
         }

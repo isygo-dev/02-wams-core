@@ -39,9 +39,9 @@ public class ToggleKeyStatusDialog extends BaseActionDialog {
 
         setOkButtonText(currentlyEnabled ? "Disable" : "Enable");
         if (currentlyEnabled) {
-            okButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+            addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
         } else {
-            okButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+            addThemeVariantsOkButton(ButtonVariant.LUMO_SUCCESS);
         }
         setWidth("450px");
 
@@ -55,7 +55,7 @@ public class ToggleKeyStatusDialog extends BaseActionDialog {
                 ResponseEntity<KmsDtos.DisableKeyResponse> response = kmsApiService.disableKey(keyId);
                 if (!response.getStatusCode().is2xxSuccessful()) {
                     String errorMsg = "Disable key failed: " + (response.getBody() != null ? response.getBody().toString() : "unknown error");
-                    showError(errorMsg);
+                    this.append(errorMsg);
                     Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                     return false;
@@ -67,7 +67,7 @@ public class ToggleKeyStatusDialog extends BaseActionDialog {
                 ResponseEntity<KmsDtos.EnableKeyResponse> response = kmsApiService.enableKey(keyId);
                 if (!response.getStatusCode().is2xxSuccessful()) {
                     String errorMsg = "Enable key failed: " + (response.getBody() != null ? response.getBody().toString() : "unknown error");
-                    showError(errorMsg);
+                    this.append(errorMsg);
                     Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                     return false;
@@ -82,12 +82,12 @@ public class ToggleKeyStatusDialog extends BaseActionDialog {
             return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
-            showError(errorMsg);
+            this.append(errorMsg);
             Notification.show("Update error: " + errorMsg, 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } catch (Exception ex) {
             String errorMsg = ex.getMessage();
-            showError(errorMsg);
+            this.append(errorMsg);
             Notification.show("Error: " + errorMsg, 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }

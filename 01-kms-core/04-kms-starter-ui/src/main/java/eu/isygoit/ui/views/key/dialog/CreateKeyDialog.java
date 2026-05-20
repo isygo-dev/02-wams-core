@@ -115,7 +115,7 @@ public class CreateKeyDialog extends BaseActionDialog {
                 });
             } catch (Exception ex) {
                 String errorMsg = "Invalid JSON in policy field: " + ex.getMessage();
-                showError(errorMsg);
+                this.append(errorMsg);
                 Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return false;
@@ -150,7 +150,7 @@ public class CreateKeyDialog extends BaseActionDialog {
             ResponseEntity<CreateKeyResponse> response = kmsApiService.createKey(request);
             if (!response.getStatusCode().is2xxSuccessful()) {
                 String errorMsg = "Key creation failed: " + (response.getBody() != null ? response.getBody().toString() : "unknown error");
-                showError(errorMsg);
+                this.append(errorMsg);
                 Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return false;
@@ -163,13 +163,13 @@ public class CreateKeyDialog extends BaseActionDialog {
             return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
-            showError(errorMsg);
+            this.append(errorMsg);
             Notification.show("Creation error: " + errorMsg, 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } catch (Exception ex) {
             String errorMsg = ex.getMessage();
-            showError(errorMsg);
-            Notification.show("Error: " + errorMsg, 5000, Notification.Position.TOP_END)
+            this.append(errorMsg);
+            Notification.show("Creation error: " + errorMsg, 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             parentView.showLoading(false);
