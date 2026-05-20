@@ -1,4 +1,4 @@
-package eu.isygoit.ui.views.key.dialogs;
+package eu.isygoit.ui.views.key.dialog;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.button.Button;
@@ -33,6 +33,8 @@ public class UpdateKeyDialog extends BaseActionDialog {
 
     private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;
+    private final Runnable onSuccess;
+
     private final ObjectMapper objectMapper;
     private final String keyId;
     private final String currentAlias;
@@ -52,6 +54,7 @@ public class UpdateKeyDialog extends BaseActionDialog {
 
     public UpdateKeyDialog(KeyManagementView parentView,
                            KmsApiService kmsApiService,
+                           Runnable onSuccess,
                            ObjectMapper objectMapper,
                            String keyId,
                            String currentAlias,
@@ -59,9 +62,10 @@ public class UpdateKeyDialog extends BaseActionDialog {
                            List<ListResourceTagsResponse.Tag> currentTags,
                            Boolean currentRotationEnabled,
                            Integer currentRotationPeriodInDays) {
-        super("Edit key");
+        super("Edit key", onSuccess);
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
+        this.onSuccess = onSuccess;
         this.objectMapper = objectMapper;
         this.keyId = keyId;
         this.currentAlias = currentAlias != null ? currentAlias : "";
@@ -78,8 +82,8 @@ public class UpdateKeyDialog extends BaseActionDialog {
     }
 
     @Override
-    protected void onOk() {
-        clearError();
+    protected boolean onOk() {
+        parentView.showLoading(true);
 
         String newAlias = null;
         if (newAliasField.isVisible() && !newAliasField.getValue().isBlank()) {
@@ -120,13 +124,12 @@ public class UpdateKeyDialog extends BaseActionDialog {
                 showError(errorMsg);
                 Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
-                return;
+                return false;
             }
             close();
             Notification.show("Key updated successfully", 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            parentView.loadAliases();
-            parentView.loadKeys();
+            return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
             showError(errorMsg);
@@ -137,7 +140,11 @@ public class UpdateKeyDialog extends BaseActionDialog {
             showError(errorMsg);
             Notification.show("Error: " + errorMsg, 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        } finally {
+            parentView.showLoading(false);
         }
+
+        return false;
     }
 
     private void buildForm() {

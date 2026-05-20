@@ -1,4 +1,4 @@
-package eu.isygoit.ui.views.key.dialogs;
+package eu.isygoit.ui.views.key.dialog;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.button.Button;
@@ -6,14 +6,15 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import eu.isygoit.dto.KmsDtos.*;
-        import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
+import eu.isygoit.dto.KmsDtos.GetKeyPolicyResponse;
+import eu.isygoit.dto.KmsDtos.ListResourceTagsResponse;
+import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.views.key.KeyManagementView;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 
@@ -26,13 +27,23 @@ import java.util.Map;
 @Slf4j
 public class DescribeKeyDialog extends Dialog {
 
+    private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;
+    private final Runnable onSuccess;
+
     private final ObjectMapper objectMapper;
     private final String keyId;
     private final DescribeKeyResponse.KeyMetadata metadata;
 
-    public DescribeKeyDialog(KmsApiService kmsApiService, ObjectMapper objectMapper, String keyId, DescribeKeyResponse.KeyMetadata metadata) {
+    public DescribeKeyDialog(KeyManagementView parentView,
+                             KmsApiService kmsApiService,
+                             Runnable onSuccess,
+                             ObjectMapper objectMapper,
+                             String keyId,
+                             DescribeKeyResponse.KeyMetadata metadata) {
+        this.parentView = parentView;
         this.kmsApiService = kmsApiService;
+        this.onSuccess = onSuccess;
         this.objectMapper = objectMapper;
         this.keyId = keyId;
         this.metadata = metadata;

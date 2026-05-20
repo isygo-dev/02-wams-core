@@ -10,22 +10,24 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.views.alias.dialogs.DeleteAliasDialog;
-import eu.isygoit.ui.views.alias.dialogs.UpdateAliasDialog;
+import eu.isygoit.ui.views.alias.dialog.DeleteAliasDialog;
+import eu.isygoit.ui.views.alias.dialog.UpdateAliasDialog;
 
 // -------------------------------------------------------------------------
 // Alias Card
 // -------------------------------------------------------------------------
 class AliasCard extends VerticalLayout {
-    private final AliasesView aliasesView;
+    private final AliasesView parentView;
     private final KmsApiService kmsApiService;
     private final String aliasName;
     private final String targetKeyId;
     private final String aliasWrn;
     private final String createDate;
 
-    public AliasCard(AliasesView aliasesView, KmsApiService kmsApiService, KmsDtos.ListAliasesResponse.AliasEntry entry) {
-        this.aliasesView = aliasesView;
+    public AliasCard(AliasesView aliasesView,
+                     KmsApiService kmsApiService,
+                     KmsDtos.ListAliasesResponse.AliasEntry entry) {
+        this.parentView = aliasesView;
         this.kmsApiService = kmsApiService;
         this.aliasName = entry.getAliasName();
         this.targetKeyId = entry.getTargetKeyId();
@@ -98,10 +100,10 @@ class AliasCard extends VerticalLayout {
     }
 
     private void deleteAlias() {
-        new DeleteAliasDialog(kmsApiService, aliasName, aliasesView::loadAliases).open();
+        new DeleteAliasDialog(parentView, kmsApiService, parentView::loadAliases, aliasName).open();
     }
 
     private void updateAlias() {
-        new UpdateAliasDialog(aliasesView, kmsApiService, aliasName, targetKeyId).open();
+        new UpdateAliasDialog(parentView, kmsApiService, parentView::loadAliases, aliasName, targetKeyId).open();
     }
 }

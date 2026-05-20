@@ -1,4 +1,4 @@
-package eu.isygoit.ui.views.alias.dialogs;
+package eu.isygoit.ui.views.alias.dialog;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -31,8 +31,10 @@ public class CreateAliasDialog extends BaseActionDialog {
     private TextField aliasNameField;
     private ComboBox<String> targetKeyCombo;
 
-    public CreateAliasDialog(AliasesView parentView, KmsApiService kmsApiService, Runnable onSuccess) {
-        super("Create alias");
+    public CreateAliasDialog(AliasesView parentView,
+                             KmsApiService kmsApiService,
+                             Runnable onSuccess) {
+        super("Create alias", onSuccess);
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
         this.onSuccess = onSuccess;
@@ -45,8 +47,8 @@ public class CreateAliasDialog extends BaseActionDialog {
     }
 
     @Override
-    protected void onOk() {
-        clearError();
+    protected boolean onOk() {
+        parentView.showLoading(true);
 
         String aliasName = aliasNameField.getValue();
         String targetKeyId = targetKeyCombo.getValue();
@@ -55,14 +57,14 @@ public class CreateAliasDialog extends BaseActionDialog {
             showError(errorMsg);
             Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            return;
+            return false;
         }
         if (targetKeyId == null || targetKeyId.isBlank()) {
             String errorMsg = "Target key is required";
             showError(errorMsg);
             Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            return;
+            return false;
         }
 
         try {
@@ -76,12 +78,12 @@ public class CreateAliasDialog extends BaseActionDialog {
                 showError(errorMsg);
                 Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
-                return;
             }
             close();
             Notification.show("Alias created successfully", 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            if (onSuccess != null) onSuccess.run();
+
+            return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
             showError(errorMsg);
@@ -92,7 +94,11 @@ public class CreateAliasDialog extends BaseActionDialog {
             showError(errorMsg);
             Notification.show("Error: " + errorMsg, 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        } finally {
+            parentView.showLoading(false);
         }
+
+        return false;
     }
 
     private void buildForm() {

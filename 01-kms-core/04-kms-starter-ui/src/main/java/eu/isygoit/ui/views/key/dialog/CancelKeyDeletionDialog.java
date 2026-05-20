@@ -1,4 +1,4 @@
-package eu.isygoit.ui.views.key.dialogs;
+package eu.isygoit.ui.views.key.dialog;
 
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
@@ -16,17 +16,25 @@ import org.springframework.http.ResponseEntity;
  */
 public class CancelKeyDeletionDialog extends BaseActionDialog {
 
+    private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;
+    private final Runnable onSuccess;
+
     private final String keyId;
     private final String keyAliasOrId;
-    private final KeyManagementView parentView;
 
-    public CancelKeyDeletionDialog(KmsApiService kmsApiService, String keyId, String keyAliasOrId, KeyManagementView parentView) {
-        super("Cancel deletion");
+
+    public CancelKeyDeletionDialog(KeyManagementView parentView,
+                                   KmsApiService kmsApiService,
+                                   Runnable onSuccess,
+                                   String keyId,
+                                   String keyAliasOrId) {
+        super("Cancel deletion", onSuccess);
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
         this.keyAliasOrId = keyAliasOrId;
         this.parentView = parentView;
+        this.onSuccess = onSuccess;
 
         setOkButtonText("Yes, cancel");
         setWidth("450px");
@@ -35,22 +43,22 @@ public class CancelKeyDeletionDialog extends BaseActionDialog {
     }
 
     @Override
-    protected void onOk() {
-        clearError();
+    protected boolean onOk() {
+        parentView.showLoading(true);
         try {
             ResponseEntity<KmsDtos.CancelKeyDeletionResponse> response =
                     kmsApiService.cancelKeyDeletion(keyId);
-            if (response.getStatusCode().is2xxSuccessful()) {
-                close();
-                Notification.show("Deletion cancelled", 3000, Notification.Position.TOP_END)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                parentView.loadKeys();
-            } else {
+            if (!response.getStatusCode().is2xxSuccessful()) {
                 String errorMsg = "Failed to cancel deletion: " + response.getStatusCode();
                 showError(errorMsg);
                 Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
+
+            close();
+            Notification.show("Deletion cancelled", 3000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
             showError(errorMsg);
@@ -61,7 +69,11 @@ public class CancelKeyDeletionDialog extends BaseActionDialog {
             showError(errorMsg);
             Notification.show("Error: " + errorMsg, 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        } finally {
+            parentView.showLoading(false);
         }
+
+        return false;
     }
 
     private void buildContent() {

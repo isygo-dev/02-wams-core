@@ -27,7 +27,7 @@ import eu.isygoit.dto.KmsDtos.ListAliasesResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainLayout;
-import eu.isygoit.ui.views.key.dialogs.CreateKeyDialog;
+import eu.isygoit.ui.views.key.dialog.CreateKeyDialog;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,6 +109,11 @@ public class KeyManagementView extends VerticalLayout {
         loadKeys();
     }
 
+    public void loadAliasesAndKeys() {
+        loadAliases();
+        loadKeys();
+    }
+
     public void loadAliases() {
         try {
             ResponseEntity<ListAliasesResponse> response = kmsApiService.listAliases(100, null);
@@ -169,12 +174,15 @@ public class KeyManagementView extends VerticalLayout {
                                 kmsApiService.describeKey(entry.getKeyId());
                         DescribeKeyResponse describe = descResponse.getBody();
                         if (describe != null && describe.getKeyMetadata() != null) {
-                            allCards.add(new KeyCard(this, this.kmsApiService, this.objectMapper, entry.getKeyId(), describe.getKeyMetadata()));
+                            allCards.add(new KeyCard(this,
+                                    this.kmsApiService, this.objectMapper, entry.getKeyId(), describe.getKeyMetadata()));
                         } else {
-                            allCards.add(new KeyCard(this, this.kmsApiService, this.objectMapper, entry.getKeyId(), null));
+                            allCards.add(new KeyCard(this,
+                                    this.kmsApiService, this.objectMapper, entry.getKeyId(), null));
                         }
                     } catch (Exception ex) {
-                        allCards.add(new KeyCard(this, this.kmsApiService, this.objectMapper, entry.getKeyId(), null));
+                        allCards.add(new KeyCard(this,
+                                this.kmsApiService, this.objectMapper, entry.getKeyId(), null));
                     }
                 }
             }
@@ -221,7 +229,7 @@ public class KeyManagementView extends VerticalLayout {
         }
     }
 
-    private void showLoading(boolean show) {
+    public void showLoading(boolean show) {
         loadingBar.setVisible(show);
         cardsContainer.setVisible(!show);
         refreshButton.setEnabled(!show);
@@ -232,7 +240,7 @@ public class KeyManagementView extends VerticalLayout {
     // Create Key Dialog
     // =========================================================================
     private void openCreateKeyDialog() {
-        new CreateKeyDialog(this, kmsApiService, objectMapper).open();
+        new CreateKeyDialog(this, kmsApiService, this::loadAliasesAndKeys, objectMapper).open();
     }
 
     public void addTagRow(VerticalLayout container, List<HorizontalLayout> rows, String existingKey, String existingValue) {

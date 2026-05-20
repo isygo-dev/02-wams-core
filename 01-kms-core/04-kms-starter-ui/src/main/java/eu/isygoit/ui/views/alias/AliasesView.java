@@ -23,7 +23,7 @@ import eu.isygoit.dto.KmsDtos.ListAliasesResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainLayout;
-import eu.isygoit.ui.views.alias.dialogs.CreateAliasDialog;
+import eu.isygoit.ui.views.alias.dialog.CreateAliasDialog;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -160,7 +160,7 @@ public class AliasesView extends VerticalLayout {
         }
     }
 
-    private void showLoading(boolean show) {
+    public void showLoading(boolean show) {
         loadingBar.setVisible(show);
         cardsContainer.setVisible(!show);
         refreshButton.setEnabled(!show);

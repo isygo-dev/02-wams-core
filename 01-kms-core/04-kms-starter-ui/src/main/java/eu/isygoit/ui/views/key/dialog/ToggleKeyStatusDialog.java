@@ -1,31 +1,38 @@
-package eu.isygoit.ui.views.key.dialogs;
+package eu.isygoit.ui.views.key.dialog;
 
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.views.BaseActionDialog;
 import eu.isygoit.ui.views.key.KeyManagementView;
 import feign.FeignException;
+import org.springframework.http.ResponseEntity;
 
 /**
  * Dialog to confirm enabling or disabling a KMS key.
  */
 public class ToggleKeyStatusDialog extends BaseActionDialog {
 
+    private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;
+    private final Runnable onSuccess;
+
     private final String keyId;
     private final boolean currentlyEnabled;
-    private final KeyManagementView parentView;
 
-    public ToggleKeyStatusDialog(KmsApiService kmsApiService,
+
+    public ToggleKeyStatusDialog(KeyManagementView parentView,
+                                 KmsApiService kmsApiService,
+                                 Runnable onSuccess,
                                  String keyId,
-                                 boolean currentlyEnabled,
-                                 KeyManagementView parentView) {
-        super(currentlyEnabled ? "Disable key" : "Enable key");
+                                 boolean currentlyEnabled) {
+        super(currentlyEnabled ? "Disable key" : "Enable key", onSuccess);
         this.kmsApiService = kmsApiService;
+        this.onSuccess = onSuccess;
         this.keyId = keyId;
         this.currentlyEnabled = currentlyEnabled;
         this.parentView = parentView;
@@ -42,20 +49,33 @@ public class ToggleKeyStatusDialog extends BaseActionDialog {
     }
 
     @Override
-    protected void onOk() {
-        clearError();
+    protected boolean onOk() {
         try {
             if (currentlyEnabled) {
-                kmsApiService.disableKey(keyId);
+                ResponseEntity<KmsDtos.DisableKeyResponse> response = kmsApiService.disableKey(keyId);
                 Notification.show("Key disabled successfully", 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                if (!response.getStatusCode().is2xxSuccessful()) {
+                    String errorMsg = "Disable key failed: " + (response.getBody() != null ? response.getBody().toString() : "unknown error");
+                    showError(errorMsg);
+                    Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
+                            .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                    return false;
+                }
             } else {
-                kmsApiService.enableKey(keyId);
+                ResponseEntity<KmsDtos.EnableKeyResponse> response = kmsApiService.enableKey(keyId);
                 Notification.show("Key enabled successfully", 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                if (!response.getStatusCode().is2xxSuccessful()) {
+                    String errorMsg = "Enable key failed: " + (response.getBody() != null ? response.getBody().toString() : "unknown error");
+                    showError(errorMsg);
+                    Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
+                            .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                    return false;
+                }
             }
             close();
-            parentView.loadKeys();
+            return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
             showError(errorMsg);
@@ -67,6 +87,8 @@ public class ToggleKeyStatusDialog extends BaseActionDialog {
             Notification.show("Error: " + errorMsg, 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
+
+        return false;
     }
 
     private void buildContent() {

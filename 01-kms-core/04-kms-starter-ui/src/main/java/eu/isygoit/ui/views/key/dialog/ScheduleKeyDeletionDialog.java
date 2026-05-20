@@ -1,4 +1,4 @@
-package eu.isygoit.ui.views.key.dialogs;
+package eu.isygoit.ui.views.key.dialog;
 
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -16,14 +16,21 @@ import org.springframework.http.ResponseEntity;
  */
 public class ScheduleKeyDeletionDialog extends BaseActionDialog {
 
-    private final KmsApiService kmsApiService;
-    private final String keyId;
     private final KeyManagementView parentView;
+    private final KmsApiService kmsApiService;
+    private final Runnable onSuccess;
+
+    private final String keyId;
+
 
     private IntegerField daysField;
 
-    public ScheduleKeyDeletionDialog(KmsApiService kmsApiService, String keyId, KeyManagementView parentView) {
-        super("Schedule key deletion");
+    public ScheduleKeyDeletionDialog(KeyManagementView parentView,
+                                     KmsApiService kmsApiService,
+                                     Runnable onSuccess,
+                                     String keyId) {
+        super("Schedule key deletion", onSuccess);
+        this.onSuccess = onSuccess;
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
         this.parentView = parentView;
@@ -35,34 +42,38 @@ public class ScheduleKeyDeletionDialog extends BaseActionDialog {
     }
 
     @Override
-    protected void onOk() {
-        clearError();
+    protected boolean onOk() {
+        parentView.showLoading(true);
         int days = daysField.getValue();
         try {
-            ResponseEntity<KmsDtos.ScheduleKeyDeletionResponse> response =
-                    kmsApiService.scheduleKeyDeletion(keyId, days);
-            if (response.getStatusCode().is2xxSuccessful()) {
-                close();
-                Notification.show("Deletion scheduled in " + days + " days", 3000, Notification.Position.TOP_END)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                parentView.loadKeys();
-            } else {
-                String errorMsg = "Failed to schedule deletion: " + response.getStatusCode();
+            ResponseEntity<KmsDtos.ScheduleKeyDeletionResponse> response = kmsApiService.scheduleKeyDeletion(keyId, days);
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                String errorMsg = "Schedule deletion error: " + response.getStatusCode();
                 showError(errorMsg);
                 Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                return false;
             }
+
+            close();
+            Notification.show("Deletion scheduled in " + days + " days", 3000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
             showError(errorMsg);
-            Notification.show("Update error: " + errorMsg, 5000, Notification.Position.TOP_END)
+            Notification.show("Schedule deletion error: " + errorMsg, 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } catch (Exception ex) {
             String errorMsg = ex.getMessage();
             showError(errorMsg);
-            Notification.show("Error: " + errorMsg, 5000, Notification.Position.TOP_END)
+            Notification.show("Schedule deletion error: " + errorMsg, 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        } finally {
+            parentView.showLoading(false);
         }
+
+        return false;
     }
 
     private void buildContent() {

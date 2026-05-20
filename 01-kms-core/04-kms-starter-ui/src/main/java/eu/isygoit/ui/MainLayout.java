@@ -12,6 +12,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.ui.views.*;
 import eu.isygoit.ui.views.alias.AliasesView;
 import eu.isygoit.ui.views.key.KeyManagementView;
+import eu.isygoit.ui.views.keyStore.CustomKeyStoresView;
 
 public class MainLayout extends AppLayout {
 

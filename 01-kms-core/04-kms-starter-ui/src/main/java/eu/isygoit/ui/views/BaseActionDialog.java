@@ -15,6 +15,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
  */
 public abstract class BaseActionDialog extends Dialog {
 
+    private final Runnable onSuccess;
+    
     protected final Span errorSpan;
     protected final Button okButton;
     protected final Button cancelButton;
@@ -24,7 +26,8 @@ public abstract class BaseActionDialog extends Dialog {
      *
      * @param title the dialog header title
      */
-    public BaseActionDialog(String title) {
+    public BaseActionDialog(String title, Runnable onSuccess) {
+        this.onSuccess = onSuccess;
         setHeaderTitle(title);
         setCloseOnEsc(false);
         setCloseOnOutsideClick(false);
@@ -41,7 +44,7 @@ public abstract class BaseActionDialog extends Dialog {
      * Implementations should perform the actual ok/creation logic and may call
      * {@link #showError(String)} to display an error.
      */
-    protected abstract void onOk();
+    protected abstract boolean onOk();
 
     /**
      * Sets the text of the Ok button.
@@ -100,6 +103,7 @@ public abstract class BaseActionDialog extends Dialog {
         button.addClickListener(e -> {
             clearError();
             onOk();
+            if (onSuccess != null) onSuccess.run();
         });
         return button;
     }

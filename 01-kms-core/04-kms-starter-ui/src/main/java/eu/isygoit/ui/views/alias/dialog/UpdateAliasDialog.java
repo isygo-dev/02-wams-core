@@ -1,4 +1,4 @@
-package eu.isygoit.ui.views.alias.dialogs;
+package eu.isygoit.ui.views.alias.dialog;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -20,18 +20,23 @@ public class UpdateAliasDialog extends BaseActionDialog {
 
     private final AliasesView parentView;
     private final KmsApiService kmsApiService;
+    private final Runnable onSuccess;
+
     private final String aliasName;
     private final String currentTargetKeyId;
-
     private ComboBox<String> targetKeyCombo;
 
-    public UpdateAliasDialog(AliasesView parentView, KmsApiService kmsApiService,
-                             String aliasName, String currentTargetKeyId) {
-        super("Reassign alias");
+    public UpdateAliasDialog(AliasesView parentView,
+                             KmsApiService kmsApiService,
+                             Runnable onSuccess,
+                             String aliasName,
+                             String currentTargetKeyId) {
+        super("Reassign alias", onSuccess);
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
         this.aliasName = aliasName;
         this.currentTargetKeyId = currentTargetKeyId;
+        this.onSuccess = onSuccess;
 
         setOkButtonText("Update");
         setWidth("500px");
@@ -41,16 +46,14 @@ public class UpdateAliasDialog extends BaseActionDialog {
     }
 
     @Override
-    protected void onOk() {
-        clearError();
-
+    protected boolean onOk() {
+        parentView.showLoading(true);
         String newTargetId = targetKeyCombo.getValue();
         if (newTargetId == null || newTargetId.isBlank()) {
             String errorMsg = "Please select a target key";
             showError(errorMsg);
             Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            return;
         }
         try {
             UpdateAliasRequest request = UpdateAliasRequest.builder()
@@ -63,12 +66,12 @@ public class UpdateAliasDialog extends BaseActionDialog {
                 showError(errorMsg);
                 Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
-                return;
             }
             close();
             Notification.show("Alias reassigned", 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            parentView.loadAliases();
+
+            return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
             showError(errorMsg);
@@ -79,7 +82,11 @@ public class UpdateAliasDialog extends BaseActionDialog {
             showError(errorMsg);
             Notification.show("Error: " + errorMsg, 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        } finally {
+            parentView.showLoading(false);
         }
+
+        return false;
     }
 
     private void buildForm() {

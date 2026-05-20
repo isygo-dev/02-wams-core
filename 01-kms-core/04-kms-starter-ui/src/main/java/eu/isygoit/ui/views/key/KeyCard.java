@@ -20,7 +20,7 @@ import eu.isygoit.dto.KmsDtos.ListResourceTagsResponse;
 import eu.isygoit.dto.KmsDtos.UpdateKeyRotationRequest;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.views.key.dialogs.*;
+import eu.isygoit.ui.views.key.dialog.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 
@@ -385,7 +385,7 @@ class KeyCard extends VerticalLayout {
 
     private void toggleKeyStatus() {
         boolean currentlyEnabled = metadata != null && metadata.getKeyStatus() == IEnumKeyStatus.Types.ENABLED;
-        new ToggleKeyStatusDialog(kmsApiService, keyId, currentlyEnabled, keyManagementView).open();
+        new ToggleKeyStatusDialog(keyManagementView, kmsApiService, keyManagementView::loadAliasesAndKeys, keyId, currentlyEnabled).open();
     }
 
     private void updateKey() {
@@ -395,6 +395,7 @@ class KeyCard extends VerticalLayout {
         new UpdateKeyDialog(
                 keyManagementView,
                 kmsApiService,
+                keyManagementView::loadAliasesAndKeys,
                 objectMapper,
                 keyId,
                 metadata != null ? metadata.getKeyAlias() : null,
@@ -406,18 +407,18 @@ class KeyCard extends VerticalLayout {
     }
 
     private void scheduleDeletion() {
-        new ScheduleKeyDeletionDialog(kmsApiService, keyId, keyManagementView).open();
+        new ScheduleKeyDeletionDialog(keyManagementView, kmsApiService, keyManagementView::loadAliasesAndKeys, keyId).open();
     }
 
     private void cancelDeletion() {
-        new CancelKeyDeletionDialog(kmsApiService, keyId, aliasOrId, keyManagementView).open();
+        new CancelKeyDeletionDialog(keyManagementView, kmsApiService, keyManagementView::loadAliasesAndKeys, keyId, aliasOrId).open();
     }
 
     private void confirmPermanentDelete() {
-        new PermanentKeyDeleteDialog(kmsApiService, keyId, keyManagementView).open();
+        new PermanentKeyDeleteDialog(keyManagementView, kmsApiService, keyManagementView::loadAliasesAndKeys, keyId).open();
     }
 
     private void describeKey() {
-        new DescribeKeyDialog(kmsApiService, objectMapper, keyId, metadata).open();
+        new DescribeKeyDialog(keyManagementView, kmsApiService, keyManagementView::loadAliasesAndKeys, objectMapper, keyId, metadata).open();
     }
 }

@@ -1,4 +1,4 @@
-package eu.isygoit.ui.views.key.dialogs;
+package eu.isygoit.ui.views.key.dialog;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,6 +43,8 @@ public class CreateKeyDialog extends BaseActionDialog {
 
     private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;
+    private final Runnable onSuccess;
+
     private final ObjectMapper objectMapper;
 
     // Form fields
@@ -65,10 +67,14 @@ public class CreateKeyDialog extends BaseActionDialog {
     private List<HorizontalLayout> tagRows;
     private HorizontalLayout tagsHeader;
 
-    public CreateKeyDialog(KeyManagementView parentView, KmsApiService kmsApiService, ObjectMapper objectMapper) {
-        super("Create new KMS key");
+    public CreateKeyDialog(KeyManagementView parentView,
+                           KmsApiService kmsApiService,
+                           Runnable onSuccess,
+                           ObjectMapper objectMapper) {
+        super("Create new KMS key", onSuccess);
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
+        this.onSuccess = onSuccess;
         this.objectMapper = objectMapper;
 
         setOkButtonText("Create");
@@ -79,7 +85,9 @@ public class CreateKeyDialog extends BaseActionDialog {
     }
 
     @Override
-    protected void onOk() {
+    protected boolean onOk() {
+        parentView.showLoading(true);
+
         String newAlias = null;
         String existingSelectedAlias = null;
         if (newAliasField.isVisible() && !newAliasField.getValue().isBlank()) {
@@ -110,7 +118,7 @@ public class CreateKeyDialog extends BaseActionDialog {
                 showError(errorMsg);
                 Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
-                return;
+                return false;
             }
         }
 
@@ -145,15 +153,14 @@ public class CreateKeyDialog extends BaseActionDialog {
                 showError(errorMsg);
                 Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
-                return;
+                return false;
             }
 
             close();
             Notification.show("Key created successfully", 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            parentView.loadAliases();
-            parentView.loadKeys();
-
+            
+            return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
             showError(errorMsg);
@@ -164,7 +171,11 @@ public class CreateKeyDialog extends BaseActionDialog {
             showError(errorMsg);
             Notification.show("Error: " + errorMsg, 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        } finally {
+            parentView.showLoading(false);
         }
+
+        return false;
     }
 
     private void buildForm() {
