@@ -62,6 +62,8 @@ public class KeyVersionService implements IKeyVersionService {
                                 .signingAlgorithm(v.getSigningAlgorithm())
                                 .expirationModel(v.getExpirationModel())
                                 .origin(v.getOrigin())
+                                .deactivationDate(v.getDeactivationDate())
+                                .validTo(v.getValidTo())
                                 .build()
                         )
                         .toList();

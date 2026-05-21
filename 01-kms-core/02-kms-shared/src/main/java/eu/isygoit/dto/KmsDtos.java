@@ -511,6 +511,14 @@ public final class KmsDtos {
 
             @Schema(description = "Origin")
             private IEnumKeyOrigin.Types origin;
+
+            @Schema(description = "Deactivation date (if version is deactivated)")
+            @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+            private LocalDateTime deactivationDate;
+
+            @Schema(description = "Expiry date for imported key material")
+            @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+            private LocalDateTime validTo;
         }
     }
 

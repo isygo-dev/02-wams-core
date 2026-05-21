@@ -70,7 +70,7 @@ class KeyCard extends VerticalLayout {
         addClassName("key-card");
         setWidthFull();
         setPadding(true);
-        loadVersionCount();
+        // Do NOT call loadVersionCount() here – it will be called in onAttach
     }
 
     public String getKeyId() { return keyId; }
@@ -168,7 +168,7 @@ class KeyCard extends VerticalLayout {
         // Versions button
         versionsBtn = createIconButton(VaadinIcon.CUBE, "View key versions");
         versionsBtn.addClickListener(e -> showVersionsDialog());
-        versionsBtn.setText("Versions (...)"); // will be updated later
+        versionsBtn.setText("Ver (...)"); // will be updated later
 
         buttonBar.add(editBtn, describeBtn, rotationBtn, versionsBtn, moreBtn);
 
@@ -265,6 +265,9 @@ class KeyCard extends VerticalLayout {
         // Initial adjustment – get window width on attach
         UI.getCurrent().getPage().executeJs("return window.innerWidth")
                 .then(Integer.class, width -> adjustForScreenWidth(width));
+
+        // Load version count now that the component is attached to a UI
+        loadVersionCount();
     }
 
     private void adjustForScreenWidth(int width) {
@@ -333,9 +336,9 @@ class KeyCard extends VerticalLayout {
         } catch (Exception e) {
             versionCount = 0;
         }
-        // Update button text on UI thread
+        // Update button text on UI thread – getUI() is now available
         getUI().ifPresent(ui -> ui.access(() ->
-                versionsBtn.setText("V (" + versionCount + ")")
+                versionsBtn.setText("Ver (" + versionCount + ")")
         ));
     }
 
