@@ -202,7 +202,7 @@ public class CryptoService implements ICryptoService {
             }
         } catch (Exception e) {
             log.error("Key generation failed for spec: {}", keySpec, e);
-            throw new GenerateKeyMaterialException("Key generation failed: " + keySpec, e);
+            throw new GenerateKeyException("Key generation failed: " + keySpec, e);
         }
     }
 

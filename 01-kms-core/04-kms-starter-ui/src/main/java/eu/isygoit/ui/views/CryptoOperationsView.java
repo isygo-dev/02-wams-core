@@ -367,7 +367,7 @@ public class CryptoOperationsView extends VerticalLayout {
                 Notification.show("Select a key first", 3000, Notification.Position.TOP_END).addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
             }
-            if (!algorithmCombo.isEnabled() || algorithmCombo.getValue() == null) {
+            if (algorithmCombo.getValue() == null) {
                 Notification.show("No compatible encryption algorithm for this key", 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
@@ -484,7 +484,7 @@ public class CryptoOperationsView extends VerticalLayout {
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
             }
-            if (!signAlgoCombo.isEnabled() || signAlgoCombo.getValue() == null) {
+            if (signAlgoCombo.getValue() == null) {
                 Notification.show("No compatible signing algorithm for this key", 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
@@ -584,7 +584,7 @@ public class CryptoOperationsView extends VerticalLayout {
         keySpecCombo.setValue("AES_256");
 
         TextField keySizeField = new TextField("Key Size (bits)");
-        keySizeField.setPlaceholder("e.g., 256");
+        keySizeField.setPlaceholder("e.g., 128, 192 or 256");
 
         Button generateBtn = new Button("Generate Data Key", new Icon(VaadinIcon.KEY));
         generateBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -673,7 +673,7 @@ public class CryptoOperationsView extends VerticalLayout {
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
             }
-            if (!macAlgoCombo.isEnabled() || macAlgoCombo.getValue() == null) {
+            if (macAlgoCombo.getValue() == null) {
                 Notification.show("No compatible MAC algorithm for this key", 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
