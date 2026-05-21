@@ -256,31 +256,32 @@ public class CryptoOperationsView extends VerticalLayout {
             return;
         }
 
+        // Determine if the combo should be read-only (when keySpec is non-null)
+        boolean readOnly = selectedKeySpec != null;
+
         // Update encryption combo
         updateComboForUsage(selectedKeyUsage, selectedKeySpec, algorithmCombo,
                 usage -> usage == IEnumKeyUsage.Types.ENCRYPT_DECRYPT,
                 spec -> AlgorithmMapper.keySpecToEncryptionAlgo(spec).stream()
                         .map(IEnumEncryptionAlgorithm::name)
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.toList()),
+                readOnly);
 
         // Update signing combo
         updateComboForUsage(selectedKeyUsage, selectedKeySpec, signAlgoCombo,
                 usage -> usage == IEnumKeyUsage.Types.SIGN_VERIFY,
                 spec -> AlgorithmMapper.keySpecToSigningAlgo(spec).stream()
                         .map(IEnumSignatureAlgorithm::name)
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.toList()),
+                readOnly);
 
         // Update MAC combo
         updateComboForUsage(selectedKeyUsage, selectedKeySpec, macAlgoCombo,
                 usage -> usage == IEnumKeyUsage.Types.GENERATE_VERIFY_MAC,
-                spec -> {
-                    if (spec.name().startsWith("HMAC")) {
-                        return AlgorithmMapper.keySpecToMacAlgo(spec).stream()
-                                .map(IEnumMacAlgorithm::name)
-                                .collect(Collectors.toList());
-                    }
-                    return List.of();
-                });
+                spec -> AlgorithmMapper.keySpecToMacAlgo(spec).stream()
+                        .map(IEnumMacAlgorithm::name)
+                        .collect(Collectors.toList()),
+                readOnly);
     }
 
     /**
@@ -291,21 +292,33 @@ public class CryptoOperationsView extends VerticalLayout {
      * @param comboBox    the combo box to update
      * @param usageCheck  predicate that checks if the usage matches the required type
      * @param algoMapper  function that returns a list of algorithm names for the given spec
+     * @param readOnly    if true, the combo is disabled after setting the first algorithm
      */
     private void updateComboForUsage(IEnumKeyUsage.Types usage,
                                      IEnumKeySpec.Types spec,
                                      ComboBox<String> comboBox,
                                      Predicate<IEnumKeyUsage.Types> usageCheck,
-                                     Function<IEnumKeySpec.Types, List<String>> algoMapper) {
+                                     Function<IEnumKeySpec.Types, List<String>> algoMapper,
+                                     boolean readOnly) {
         if (usageCheck.test(usage)) {
             List<String> algorithms = algoMapper.apply(spec);
             if (!algorithms.isEmpty()) {
                 comboBox.setItems(algorithms);
-                comboBox.setValue(algorithms.get(0));
-                comboBox.setEnabled(true);
+                if (readOnly) {
+                    // Try to get the default algorithm for this spec/usage
+                    String defaultAlgo = AlgorithmMapper.getDefaultAlgorithm(spec, usage);
+                    if (defaultAlgo != null && algorithms.contains(defaultAlgo)) {
+                        comboBox.setValue(defaultAlgo);
+                    } else {
+                        comboBox.setValue(algorithms.get(0)); // fallback to first
+                    }
+                    comboBox.setEnabled(false);  // read‑only
+                } else {
+                    comboBox.setValue(algorithms.get(0));
+                    comboBox.setEnabled(true);
+                }
                 return;
             }
-            // fall through: no algorithms for this spec/usage
         }
         comboBox.setEnabled(false);
         if (comboBox == macAlgoCombo) {
