@@ -1,8 +1,8 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.dto.KmsDtos.CreateCustomKeyStoreRequest;
-import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.dto.KmsDtos.DescribeCustomKeyStoreResponse;
+import eu.isygoit.dto.KmsDtos.ListCustomKeyStoresResponse;
 import eu.isygoit.dto.KmsDtos.UpdateCustomKeyStoreRequest;
 import eu.isygoit.enums.IEnumCustomKeyStoreStatus;
 import eu.isygoit.enums.IEnumCustomKeyStoreType;
@@ -121,7 +121,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
 
     @Override
     public DescribeCustomKeyStoreResponse.CustomKeyStore updateCustomKeyStore(String tenant, Long keyStoreId,
-                                                          UpdateCustomKeyStoreRequest request) {
+                                                                              UpdateCustomKeyStoreRequest request) {
         KmsCustomKeyStore store = findCustomKeyStore(tenant, keyStoreId);
         if (store.getStatus() == IEnumCustomKeyStoreStatus.Types.CONNECTED) {
             throw new CustomKeyStoreConnectedException("Cannot update while connected. Disconnect first.");

@@ -120,48 +120,48 @@ public class AliasesView extends VerticalLayout {
 
     private void injectResponsiveStyles() {
         String css = """
-            .aliases-toolbar {
-                display: flex;
-                flex-wrap: wrap;
-                gap: var(--lumo-space-s);
-                align-items: flex-end;
-                justify-content: space-between;
-                width: 100%;
-                margin-bottom: var(--lumo-space-m);
-            }
-            .toolbar-left-group,
-            .toolbar-right-group {
-                display: flex;
-                flex-wrap: wrap;
-                gap: var(--lumo-space-s);
-                align-items: flex-end;
-            }
-            @media (max-width: 768px) {
-                .aliases-toolbar {
-                    flex-direction: column;
-                    align-items: stretch;
-                }
-                .toolbar-left-group,
-                .toolbar-right-group {
-                    flex-direction: column;
-                    align-items: stretch;
-                    width: 100%;
-                }
-                .toolbar-left-group > *,
-                .toolbar-right-group > * {
-                    width: 100% !important;
-                }
-                /* Make search field full width */
-                .toolbar-left-group .vaadin-text-field {
-                    width: 100% !important;
-                }
-                /* Make buttons full width */
-                .toolbar-left-group .vaadin-button,
-                .toolbar-right-group .vaadin-button {
-                    width: 100% !important;
-                }
-            }
-        """;
+                    .aliases-toolbar {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: var(--lumo-space-s);
+                        align-items: flex-end;
+                        justify-content: space-between;
+                        width: 100%;
+                        margin-bottom: var(--lumo-space-m);
+                    }
+                    .toolbar-left-group,
+                    .toolbar-right-group {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: var(--lumo-space-s);
+                        align-items: flex-end;
+                    }
+                    @media (max-width: 768px) {
+                        .aliases-toolbar {
+                            flex-direction: column;
+                            align-items: stretch;
+                        }
+                        .toolbar-left-group,
+                        .toolbar-right-group {
+                            flex-direction: column;
+                            align-items: stretch;
+                            width: 100%;
+                        }
+                        .toolbar-left-group > *,
+                        .toolbar-right-group > * {
+                            width: 100% !important;
+                        }
+                        /* Make search field full width */
+                        .toolbar-left-group .vaadin-text-field {
+                            width: 100% !important;
+                        }
+                        /* Make buttons full width */
+                        .toolbar-left-group .vaadin-button,
+                        .toolbar-right-group .vaadin-button {
+                            width: 100% !important;
+                        }
+                    }
+                """;
         UI.getCurrent().getPage().executeJs(
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
                 css

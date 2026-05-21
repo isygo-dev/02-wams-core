@@ -109,10 +109,14 @@ public final class AlgorithmMapper {
             if (keySpec.name().startsWith("RSA")) {
                 int size = keySpec.getKeySizeBits();
                 switch (size) {
-                    case 2048: return IEnumSignatureAlgorithm.RSASSA_PKCS1_V1_5_SHA_256.name();
-                    case 3072: return IEnumSignatureAlgorithm.RSASSA_PKCS1_V1_5_SHA_384.name();
-                    case 4096: return IEnumSignatureAlgorithm.RSASSA_PKCS1_V1_5_SHA_512.name();
-                    default:   return IEnumSignatureAlgorithm.RSASSA_PKCS1_V1_5_SHA_256.name();
+                    case 2048:
+                        return IEnumSignatureAlgorithm.RSASSA_PKCS1_V1_5_SHA_256.name();
+                    case 3072:
+                        return IEnumSignatureAlgorithm.RSASSA_PKCS1_V1_5_SHA_384.name();
+                    case 4096:
+                        return IEnumSignatureAlgorithm.RSASSA_PKCS1_V1_5_SHA_512.name();
+                    default:
+                        return IEnumSignatureAlgorithm.RSASSA_PKCS1_V1_5_SHA_256.name();
                 }
             } else if (keySpec.name().startsWith("ECC") ||
                     keySpec == IEnumKeySpec.Types.ECC_NIST_P256 ||
@@ -121,10 +125,14 @@ public final class AlgorithmMapper {
                     keySpec == IEnumKeySpec.Types.ECC_SECG_P256K1) {
                 int size = keySpec.getKeySizeBits();
                 switch (size) {
-                    case 256: return IEnumSignatureAlgorithm.ECDSA_SHA_256.name();
-                    case 384: return IEnumSignatureAlgorithm.ECDSA_SHA_384.name();
-                    case 521: return IEnumSignatureAlgorithm.ECDSA_SHA_512.name();
-                    default:  return IEnumSignatureAlgorithm.ECDSA_SHA_256.name();
+                    case 256:
+                        return IEnumSignatureAlgorithm.ECDSA_SHA_256.name();
+                    case 384:
+                        return IEnumSignatureAlgorithm.ECDSA_SHA_384.name();
+                    case 521:
+                        return IEnumSignatureAlgorithm.ECDSA_SHA_512.name();
+                    default:
+                        return IEnumSignatureAlgorithm.ECDSA_SHA_256.name();
                 }
             } else if (keySpec == IEnumKeySpec.Types.SM2) {
                 return IEnumSignatureAlgorithm.SM2DSA.name();
@@ -135,11 +143,16 @@ public final class AlgorithmMapper {
             if (keySpec.name().startsWith("HMAC")) {
                 int size = keySpec.getKeySizeBits();
                 switch (size) {
-                    case 224: return IEnumMacAlgorithm.HMAC_SHA_224.name();
-                    case 256: return IEnumMacAlgorithm.HMAC_SHA_256.name();
-                    case 384: return IEnumMacAlgorithm.HMAC_SHA_384.name();
-                    case 512: return IEnumMacAlgorithm.HMAC_SHA_512.name();
-                    default:  return IEnumMacAlgorithm.HMAC_SHA_256.name();
+                    case 224:
+                        return IEnumMacAlgorithm.HMAC_SHA_224.name();
+                    case 256:
+                        return IEnumMacAlgorithm.HMAC_SHA_256.name();
+                    case 384:
+                        return IEnumMacAlgorithm.HMAC_SHA_384.name();
+                    case 512:
+                        return IEnumMacAlgorithm.HMAC_SHA_512.name();
+                    default:
+                        return IEnumMacAlgorithm.HMAC_SHA_256.name();
                 }
             }
         }

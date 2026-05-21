@@ -47,21 +47,19 @@ import java.util.stream.Collectors;
 public class MainView extends VerticalLayout {
 
     private static final Logger log = LoggerFactory.getLogger(MainView.class);
-
+    private static final int PAGE_SIZE = 20;
     private final KmsApiService kmsApiService;
     private final UI ui;
-
     // ==================== Key Statistics ====================
     private final ProgressBar statsLoadingBar = new ProgressBar();
     private final Button refreshButton = new Button("Refresh Stats", new Icon(VaadinIcon.REFRESH));
+    private final ProgressBar usageLoadingBar = new ProgressBar();
+    private final ProgressBar auditLoadingBar = new ProgressBar();
     private HorizontalLayout statsContainer;
-
     // ==================== Key Usage Statistics ====================
     private ComboBox<KeyOption> usageKeyCombo;
     private Button loadUsageStatsButton;
     private HorizontalLayout usageStatsContainer;
-    private final ProgressBar usageLoadingBar = new ProgressBar();
-
     // ==================== Audit Logs ====================
     private ComboBox<KeyOption> auditKeyCombo;
     private DatePicker fromDatePicker;
@@ -74,9 +72,6 @@ public class MainView extends VerticalLayout {
     private Span pageInfoSpan;
     private List<AuditLogResponse.LogEntry> allLogs = new ArrayList<>();
     private int currentPage = 0;
-    private static final int PAGE_SIZE = 20;
-    private final ProgressBar auditLoadingBar = new ProgressBar();
-
     // Shared key options
     private List<KeyOption> keyOptions = new ArrayList<>();
 
@@ -222,7 +217,8 @@ public class MainView extends VerticalLayout {
                                 var meta = desc.getKeyMetadata();
                                 if (meta.getKeyStatus() == IEnumKeyStatus.Types.ENABLED) stats.activeKeys++;
                                 else if (meta.getKeyStatus() == IEnumKeyStatus.Types.DISABLED) stats.disabledKeys++;
-                                else if (meta.getKeyStatus() == IEnumKeyStatus.Types.PENDING_DELETION) stats.pendingDeletion++;
+                                else if (meta.getKeyStatus() == IEnumKeyStatus.Types.PENDING_DELETION)
+                                    stats.pendingDeletion++;
                                 if (Boolean.TRUE.equals(meta.getRotationEnabled())) stats.rotationEnabled++;
                                 IEnumKeySpec.Types spec = meta.getKeySpec();
                                 if (spec != null) {
@@ -687,7 +683,12 @@ public class MainView extends VerticalLayout {
             this.displayName = aliasOrId != null ? aliasOrId + " (" + keyId + ")" : keyId;
         }
 
-        String getKeyId() { return keyId; }
-        String getDisplayName() { return displayName; }
+        String getKeyId() {
+            return keyId;
+        }
+
+        String getDisplayName() {
+            return displayName;
+        }
     }
 }

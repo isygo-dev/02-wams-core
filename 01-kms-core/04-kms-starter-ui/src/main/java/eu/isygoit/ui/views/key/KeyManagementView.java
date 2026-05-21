@@ -114,43 +114,43 @@ public class KeyManagementView extends VerticalLayout {
 
     private void injectResponsiveStyles() {
         String css = """
-            .key-management-toolbar {
-                display: flex;
-                flex-wrap: wrap;
-                gap: var(--lumo-space-s);
-                align-items: flex-end;
-                justify-content: space-between;
-                width: 100%;
-            }
-            .toolbar-left-group {
-                display: flex;
-                flex-wrap: wrap;
-                gap: var(--lumo-space-s);
-                align-items: flex-end;
-            }
-            .toolbar-right-group {
-                display: flex;
-                flex-wrap: wrap;
-                gap: var(--lumo-space-s);
-                align-items: flex-end;
-            }
-            @media (max-width: 768px) {
-                .key-management-toolbar {
-                    flex-direction: column;
-                    align-items: stretch;
-                }
-                .toolbar-left-group,
-                .toolbar-right-group {
-                    flex-direction: column;
-                    align-items: stretch;
-                    width: 100%;
-                }
-                .toolbar-left-group > *,
-                .toolbar-right-group > * {
-                    width: 100% !important;
-                }
-            }
-        """;
+                    .key-management-toolbar {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: var(--lumo-space-s);
+                        align-items: flex-end;
+                        justify-content: space-between;
+                        width: 100%;
+                    }
+                    .toolbar-left-group {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: var(--lumo-space-s);
+                        align-items: flex-end;
+                    }
+                    .toolbar-right-group {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: var(--lumo-space-s);
+                        align-items: flex-end;
+                    }
+                    @media (max-width: 768px) {
+                        .key-management-toolbar {
+                            flex-direction: column;
+                            align-items: stretch;
+                        }
+                        .toolbar-left-group,
+                        .toolbar-right-group {
+                            flex-direction: column;
+                            align-items: stretch;
+                            width: 100%;
+                        }
+                        .toolbar-left-group > *,
+                        .toolbar-right-group > * {
+                            width: 100% !important;
+                        }
+                    }
+                """;
         UI.getCurrent().getPage().executeJs(
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
                 css

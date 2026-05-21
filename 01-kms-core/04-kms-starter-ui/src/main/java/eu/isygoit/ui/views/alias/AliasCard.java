@@ -113,33 +113,33 @@ class AliasCard extends VerticalLayout {
 
     private void injectResponsiveStyles() {
         String css = """
-            .alias-card .alias-header-row {
-                display: flex;
-                flex-wrap: wrap;
-                gap: var(--lumo-space-s);
-                align-items: center;
-                justify-content: space-between;
-                width: 100%;
-            }
-            .alias-card .alias-button-bar {
-                display: flex;
-                flex-wrap: wrap;
-                gap: var(--lumo-space-xs);
-            }
-            @media (max-width: 640px) {
-                .alias-card .alias-header-row {
-                    flex-direction: column;
-                    align-items: flex-start;
-                }
-                .alias-card .alias-button-bar {
-                    width: 100%;
-                    justify-content: flex-start;
-                }
-                .alias-card .alias-button-bar > * {
-                    flex: 1;
-                }
-            }
-        """;
+                    .alias-card .alias-header-row {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: var(--lumo-space-s);
+                        align-items: center;
+                        justify-content: space-between;
+                        width: 100%;
+                    }
+                    .alias-card .alias-button-bar {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: var(--lumo-space-xs);
+                    }
+                    @media (max-width: 640px) {
+                        .alias-card .alias-header-row {
+                            flex-direction: column;
+                            align-items: flex-start;
+                        }
+                        .alias-card .alias-button-bar {
+                            width: 100%;
+                            justify-content: flex-start;
+                        }
+                        .alias-card .alias-button-bar > * {
+                            flex: 1;
+                        }
+                    }
+                """;
         UI.getCurrent().getPage().executeJs(
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
                 css

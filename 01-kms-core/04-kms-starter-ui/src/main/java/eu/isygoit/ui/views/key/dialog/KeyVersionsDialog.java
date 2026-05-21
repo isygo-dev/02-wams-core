@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class KeyVersionsDialog extends BaseActionDialog {

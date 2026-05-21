@@ -240,54 +240,54 @@ class StoreCard extends VerticalLayout {
 
     private void injectResponsiveStyles() {
         String css = """
-            .store-card .store-header-row {
-                display: flex;
-                flex-wrap: wrap;
-                gap: var(--lumo-space-s);
-                align-items: center;
-                justify-content: space-between;
-                width: 100%;
-            }
-            .store-card .store-button-bar {
-                display: flex;
-                flex-wrap: wrap;
-                gap: var(--lumo-space-xs);
-            }
-            .store-card .store-type-status,
-            .store-card .store-meta-row {
-                display: flex;
-                flex-wrap: wrap;
-                gap: var(--lumo-space-xs);
-                align-items: center;
-            }
-            @media (max-width: 640px) {
-                .store-card .store-header-row {
-                    flex-direction: column;
-                    align-items: flex-start;
-                }
-                .store-card .store-button-bar {
-                    width: 100%;
-                    justify-content: flex-start;
-                }
-                .store-card .store-button-bar > * {
-                    flex: 1;
-                }
-                .store-card .store-type-status {
-                    flex-direction: column;
-                    align-items: flex-start;
-                    gap: var(--lumo-space-xs);
-                }
-                .store-card .store-meta-row {
-                    flex-direction: column;
-                    align-items: flex-start;
-                    gap: var(--lumo-space-xs);
-                }
-                .store-card .store-meta-row > span {
-                    white-space: normal;
-                    word-break: break-word;
-                }
-            }
-        """;
+                    .store-card .store-header-row {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: var(--lumo-space-s);
+                        align-items: center;
+                        justify-content: space-between;
+                        width: 100%;
+                    }
+                    .store-card .store-button-bar {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: var(--lumo-space-xs);
+                    }
+                    .store-card .store-type-status,
+                    .store-card .store-meta-row {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: var(--lumo-space-xs);
+                        align-items: center;
+                    }
+                    @media (max-width: 640px) {
+                        .store-card .store-header-row {
+                            flex-direction: column;
+                            align-items: flex-start;
+                        }
+                        .store-card .store-button-bar {
+                            width: 100%;
+                            justify-content: flex-start;
+                        }
+                        .store-card .store-button-bar > * {
+                            flex: 1;
+                        }
+                        .store-card .store-type-status {
+                            flex-direction: column;
+                            align-items: flex-start;
+                            gap: var(--lumo-space-xs);
+                        }
+                        .store-card .store-meta-row {
+                            flex-direction: column;
+                            align-items: flex-start;
+                            gap: var(--lumo-space-xs);
+                        }
+                        .store-card .store-meta-row > span {
+                            white-space: normal;
+                            word-break: break-word;
+                        }
+                    }
+                """;
         UI.getCurrent().getPage().executeJs(
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
                 css

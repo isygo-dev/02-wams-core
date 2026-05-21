@@ -21,18 +21,6 @@ public enum IEnumEncryptionAlgorithm {
         this.needsIv = needsIv;
     }
 
-    public String getKmsName() {
-        return kmsName;
-    }
-
-    public String getJavaTransformation() {
-        return javaTransformation;
-    }
-
-    public boolean needsIv() {
-        return needsIv;
-    }
-
     /**
      * Returns the enum constant from the KMS algorithm name.
      *
@@ -47,5 +35,17 @@ public enum IEnumEncryptionAlgorithm {
             }
         }
         throw new IllegalArgumentException("Unsupported encryption algorithm: " + kmsName);
+    }
+
+    public String getKmsName() {
+        return kmsName;
+    }
+
+    public String getJavaTransformation() {
+        return javaTransformation;
+    }
+
+    public boolean needsIv() {
+        return needsIv;
     }
 }

@@ -128,28 +128,28 @@ public class PoliciesView extends VerticalLayout {
 
     private void injectResponsiveStyles() {
         String css = """
-            .policies-key-layout,
-            .policies-action-bar {
-                display: flex;
-                flex-wrap: wrap;
-                gap: var(--lumo-space-s);
-                align-items: center;
-            }
-            @media (max-width: 768px) {
-                .policies-key-layout,
-                .policies-action-bar {
-                    flex-direction: column;
-                    align-items: stretch;
-                }
-                .policies-key-layout > *,
-                .policies-action-bar > * {
-                    width: 100% !important;
-                }
-                .policies-key-layout > .vaadin-combo-box {
-                    width: 100% !important;
-                }
-            }
-        """;
+                    .policies-key-layout,
+                    .policies-action-bar {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: var(--lumo-space-s);
+                        align-items: center;
+                    }
+                    @media (max-width: 768px) {
+                        .policies-key-layout,
+                        .policies-action-bar {
+                            flex-direction: column;
+                            align-items: stretch;
+                        }
+                        .policies-key-layout > *,
+                        .policies-action-bar > * {
+                            width: 100% !important;
+                        }
+                        .policies-key-layout > .vaadin-combo-box {
+                            width: 100% !important;
+                        }
+                    }
+                """;
         UI.getCurrent().getPage().executeJs(
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
                 css
@@ -315,7 +315,12 @@ public class PoliciesView extends VerticalLayout {
             this.displayName = aliasOrId != null ? aliasOrId + " (" + keyId + ")" : keyId;
         }
 
-        String getKeyId() { return keyId; }
-        String getDisplayName() { return displayName; }
+        String getKeyId() {
+            return keyId;
+        }
+
+        String getDisplayName() {
+            return displayName;
+        }
     }
 }

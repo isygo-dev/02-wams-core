@@ -150,31 +150,31 @@ public class ByokView extends VerticalLayout {
 
     private void injectResponsiveStyles() {
         String css = """
-            .byok-key-layout,
-            .byok-param-layout {
-                display: flex;
-                flex-wrap: wrap;
-                gap: var(--lumo-space-s);
-                align-items: center;
-            }
-            @media (max-width: 768px) {
-                .byok-key-layout,
-                .byok-param-layout {
-                    flex-direction: column;
-                    align-items: stretch;
-                }
-                .byok-key-layout > *,
-                .byok-param-layout > * {
-                    width: 100% !important;
-                }
-                .byok-key-layout > .vaadin-combo-box {
-                    width: 100% !important;
-                }
-                textarea {
-                    font-size: 14px;
-                }
-            }
-        """;
+                    .byok-key-layout,
+                    .byok-param-layout {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: var(--lumo-space-s);
+                        align-items: center;
+                    }
+                    @media (max-width: 768px) {
+                        .byok-key-layout,
+                        .byok-param-layout {
+                            flex-direction: column;
+                            align-items: stretch;
+                        }
+                        .byok-key-layout > *,
+                        .byok-param-layout > * {
+                            width: 100% !important;
+                        }
+                        .byok-key-layout > .vaadin-combo-box {
+                            width: 100% !important;
+                        }
+                        textarea {
+                            font-size: 14px;
+                        }
+                    }
+                """;
         UI.getCurrent().getPage().executeJs(
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
                 css

@@ -21,22 +21,6 @@ public enum IEnumMacAlgorithm {
         this.keySizeBits = keySizeBits;
     }
 
-    public String getKmsName() {
-        return kmsName;
-    }
-
-    public String getJavaAlgorithm() {
-        return javaAlgorithm;
-    }
-
-    public int getKeySizeBits() {
-        return keySizeBits;
-    }
-
-    public int getKeySizeBytes() {
-        return keySizeBits / 8;
-    }
-
     /**
      * Returns the enum constant from the KMS algorithm name.
      *
@@ -51,5 +35,21 @@ public enum IEnumMacAlgorithm {
             }
         }
         throw new IllegalArgumentException("Unsupported MAC algorithm: " + kmsName);
+    }
+
+    public String getKmsName() {
+        return kmsName;
+    }
+
+    public String getJavaAlgorithm() {
+        return javaAlgorithm;
+    }
+
+    public int getKeySizeBits() {
+        return keySizeBits;
+    }
+
+    public int getKeySizeBytes() {
+        return keySizeBits / 8;
     }
 }

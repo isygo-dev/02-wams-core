@@ -178,45 +178,45 @@ public class GrantsView extends VerticalLayout {
 
     private void injectResponsiveStyles() {
         String css = """
-            .grants-key-layout,
-            .grants-action-bar {
-                display: flex;
-                flex-wrap: wrap;
-                gap: var(--lumo-space-s);
-                align-items: center;
-            }
-            @media (max-width: 768px) {
-                .grants-key-layout,
-                .grants-action-bar {
-                    flex-direction: column;
-                    align-items: stretch;
-                }
-                .grants-key-layout > *,
-                .grants-action-bar > * {
-                    width: 100% !important;
-                }
-                .grants-key-layout > .vaadin-combo-box {
-                    width: 100% !important;
-                }
-                /* Make grid horizontally scrollable */
-                .kms-grants-view vaadin-grid {
-                    overflow-x: auto;
-                }
-                .kms-grants-view vaadin-grid::part(table) {
-                    min-width: 900px;
-                }
-                /* Responsive dialog */
-                .grants-create-dialog {
-                    width: 90vw !important;
-                    max-width: 550px !important;
-                    margin: 0 auto;
-                }
-                .grants-create-dialog .vaadin-dialog-overlay {
-                    width: 90vw !important;
-                    max-width: 550px;
-                }
-            }
-        """;
+                    .grants-key-layout,
+                    .grants-action-bar {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: var(--lumo-space-s);
+                        align-items: center;
+                    }
+                    @media (max-width: 768px) {
+                        .grants-key-layout,
+                        .grants-action-bar {
+                            flex-direction: column;
+                            align-items: stretch;
+                        }
+                        .grants-key-layout > *,
+                        .grants-action-bar > * {
+                            width: 100% !important;
+                        }
+                        .grants-key-layout > .vaadin-combo-box {
+                            width: 100% !important;
+                        }
+                        /* Make grid horizontally scrollable */
+                        .kms-grants-view vaadin-grid {
+                            overflow-x: auto;
+                        }
+                        .kms-grants-view vaadin-grid::part(table) {
+                            min-width: 900px;
+                        }
+                        /* Responsive dialog */
+                        .grants-create-dialog {
+                            width: 90vw !important;
+                            max-width: 550px !important;
+                            margin: 0 auto;
+                        }
+                        .grants-create-dialog .vaadin-dialog-overlay {
+                            width: 90vw !important;
+                            max-width: 550px;
+                        }
+                    }
+                """;
         UI.getCurrent().getPage().executeJs(
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
                 css
@@ -344,7 +344,8 @@ public class GrantsView extends VerticalLayout {
             KmsDtos.CreateGrantRequest.GrantConstraints constraints = null;
             if (StringUtils.hasText(constraintsArea.getValue())) {
                 try {
-                    Map<String, Object> constraintsMap = objectMapper.readValue(constraintsArea.getValue(), new TypeReference<>() {});
+                    Map<String, Object> constraintsMap = objectMapper.readValue(constraintsArea.getValue(), new TypeReference<>() {
+                    });
                     constraints = KmsDtos.CreateGrantRequest.GrantConstraints.builder()
                             .encryptionContextSubset((Map<String, String>) constraintsMap.get("encryptionContextSubset"))
                             .encryptionContextEquals((Map<String, String>) constraintsMap.get("encryptionContextEquals"))
@@ -439,7 +440,12 @@ public class GrantsView extends VerticalLayout {
             this.displayName = aliasOrId != null ? aliasOrId + " (" + keyId + ")" : keyId;
         }
 
-        String getKeyId() { return keyId; }
-        String getDisplayName() { return displayName; }
+        String getKeyId() {
+            return keyId;
+        }
+
+        String getDisplayName() {
+            return displayName;
+        }
     }
 }

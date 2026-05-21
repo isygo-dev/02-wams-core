@@ -1,6 +1,7 @@
-import { au as t } from "./copilot-CtbfhQDw.js";
+import {au as t} from "./copilot-CtbfhQDw.js";
+
 const o = {
-  adsClick: t`
+    adsClick: t`
 <svg
   width="18"
   height="18"
@@ -13,7 +14,7 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  alertCircle: t`
+    alertCircle: t`
 <svg
   width="18"
   height="18"
@@ -29,7 +30,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  alertTriangle: t`
+    alertTriangle: t`
 <svg
   width="18"
   height="18"
@@ -45,7 +46,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  alignBottom: t`
+    alignBottom: t`
 <svg
   width="18"
   height="18"
@@ -61,7 +62,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  alignCenter: t`
+    alignCenter: t`
 <svg
   width="18"
   height="18"
@@ -77,7 +78,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  alignHorizontalAlt: t`
+    alignHorizontalAlt: t`
 <svg
   width="18"
   height="18"
@@ -93,7 +94,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  alignHorizontal: t`
+    alignHorizontal: t`
 <svg
   width="18"
   height="18"
@@ -116,7 +117,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  alignLeft: t`
+    alignLeft: t`
 <svg
   width="18"
   height="18"
@@ -132,7 +133,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  alignRight: t`
+    alignRight: t`
 <svg
   width="18"
   height="18"
@@ -148,7 +149,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  alignTop: t`
+    alignTop: t`
 <svg
   width="18"
   height="18"
@@ -164,7 +165,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  alignVerticalAlt: t`
+    alignVerticalAlt: t`
 <svg
   width="18"
   height="18"
@@ -180,7 +181,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  alignVertical: t`
+    alignVertical: t`
 <svg
   width="18"
   height="18"
@@ -203,20 +204,20 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  annotation: t`
+    annotation: t`
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M3 7.8C3 6.11984 3 5.27976 3.32698 4.63803C3.6146 4.07354 4.07354 3.6146 4.63803 3.32698C5.27976 3 6.11984 3 7.8 3H16.2C17.8802 3 18.7202 3 19.362 3.32698C19.9265 3.6146 20.3854 4.07354 20.673 4.63803C21 5.27976 21 6.11984 21 7.8V13.5C21 14.8978 21 15.5967 20.7716 16.1481C20.4672 16.8831 19.8831 17.4672 19.1481 17.7716C18.5967 18 17.8978 18 16.5 18C16.0114 18 15.7671 18 15.5405 18.0535C15.2383 18.1248 14.9569 18.2656 14.7185 18.4645C14.5397 18.6137 14.3931 18.8091 14.1 19.2L12.64 21.1467C12.4229 21.4362 12.3143 21.5809 12.1812 21.6327C12.0647 21.678 11.9353 21.678 11.8188 21.6327C11.6857 21.5809 11.5771 21.4362 11.36 21.1467L9.9 19.2C9.60685 18.8091 9.46028 18.6137 9.2815 18.4645C9.04312 18.2656 8.76169 18.1248 8.45951 18.0535C8.23287 18 7.98858 18 7.5 18C6.10218 18 5.40326 18 4.85195 17.7716C4.11687 17.4672 3.53284 16.8831 3.22836 16.1481C3 15.5967 3 14.8978 3 13.5V7.8Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>`,
-  annotationX: t`
+    annotationX: t`
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M9.5 8L14.5 13M14.5 8L9.5 13M9.9 19.2L11.36 21.1467C11.5771 21.4362 11.6857 21.5809 11.8188 21.6327C11.9353 21.678 12.0647 21.678 12.1812 21.6327C12.3143 21.5809 12.4229 21.4362 12.64 21.1467L14.1 19.2C14.3931 18.8091 14.5397 18.6137 14.7185 18.4645C14.9569 18.2656 15.2383 18.1248 15.5405 18.0535C15.7671 18 16.0114 18 16.5 18C17.8978 18 18.5967 18 19.1481 17.7716C19.8831 17.4672 20.4672 16.8831 20.7716 16.1481C21 15.5967 21 14.8978 21 13.5V7.8C21 6.11984 21 5.27976 20.673 4.63803C20.3854 4.07354 19.9265 3.6146 19.362 3.32698C18.7202 3 17.8802 3 16.2 3H7.8C6.11984 3 5.27976 3 4.63803 3.32698C4.07354 3.6146 3.6146 4.07354 3.32698 4.63803C3 5.27976 3 6.11984 3 7.8V13.5C3 14.8978 3 15.5967 3.22836 16.1481C3.53284 16.8831 4.11687 17.4672 4.85195 17.7716C5.40326 18 6.10218 18 7.5 18C7.98858 18 8.23287 18 8.45951 18.0535C8.76169 18.1248 9.04312 18.2656 9.2815 18.4645C9.46028 18.6137 9.60685 18.8091 9.9 19.2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>`,
-  areaChart: t`
+    areaChart: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M2.25 15V5.25L5.25 7.5L9 2.25L12.75 5.25H15.75V15H2.25ZM6 12.75L9 8.625L14.25 12.7125V6.75H12.225L9.3 4.40625L5.5875 9.61875L3.75 8.25V10.95L6 12.75Z" fill="currentColor"/>
 </svg>
 `,
-  arrowCircleUp: t`
+    arrowCircleUp: t`
 <svg
   width="18"
   height="18"
@@ -239,7 +240,7 @@ const o = {
     </clipPath>
   </defs>
 </svg>`,
-  arrowDownLeft: t`
+    arrowDownLeft: t`
 <svg
   width="18"
   height="18"
@@ -255,7 +256,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  arrowDownRight: t`
+    arrowDownRight: t`
 <svg
   width="18"
   height="18"
@@ -271,7 +272,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  arrowDown: t`
+    arrowDown: t`
 <svg
   width="18"
   height="18"
@@ -287,7 +288,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  arrowLeft: t`
+    arrowLeft: t`
 <svg
   width="18"
   height="18"
@@ -303,7 +304,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  arrowRight: t`
+    arrowRight: t`
 <svg
   width="18"
   height="18"
@@ -319,7 +320,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  arrowUpLeft: t`
+    arrowUpLeft: t`
 <svg
   width="18"
   height="18"
@@ -335,7 +336,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  arrowUpRight: t`
+    arrowUpRight: t`
 <svg
   width="18"
   height="18"
@@ -351,7 +352,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  atSign: t`
+    atSign: t`
 <svg
   width="18"
   height="18"
@@ -374,7 +375,7 @@ const o = {
     </clipPath>
   </defs>
 </svg>`,
-  atom: t`
+    atom: t`
 <svg
   width="18"
   height="18"
@@ -390,15 +391,15 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  autoMode: t`
+    autoMode: t`
   <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor"><g><rect fill="none" height="24" width="24"/></g><g><g><path d="M19.03,3.56c-1.67-1.39-3.74-2.3-6.03-2.51v2.01c1.73,0.19,3.31,0.88,4.61,1.92L19.03,3.56z"/><path d="M11,3.06V1.05C8.71,1.25,6.64,2.17,4.97,3.56l1.42,1.42C7.69,3.94,9.27,3.25,11,3.06z"/><path d="M4.98,6.39L3.56,4.97C2.17,6.64,1.26,8.71,1.05,11h2.01C3.25,9.27,3.94,7.69,4.98,6.39z"/><path d="M20.94,11h2.01c-0.21-2.29-1.12-4.36-2.51-6.03l-1.42,1.42C20.06,7.69,20.75,9.27,20.94,11z"/><polygon points="7,12 10.44,13.56 12,17 13.56,13.56 17,12 13.56,10.44 12,7 10.44,10.44"/><path d="M12,21c-3.11,0-5.85-1.59-7.46-4H7v-2H1v6h2v-2.7c1.99,2.84,5.27,4.7,9,4.7c4.87,0,9-3.17,10.44-7.56l-1.96-0.45 C19.25,18.48,15.92,21,12,21z"/></g></g></svg>
   `,
-  barChartAlt: t`
+    barChartAlt: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M6.75 5.25H3.45C3.02996 5.25 2.81994 5.25 2.65951 5.33174C2.51839 5.40365 2.40365 5.51839 2.33174 5.65951C2.25 5.81994 2.25 6.02996 2.25 6.45V14.55C2.25 14.9701 2.25 15.1801 2.33174 15.3405C2.40365 15.4817 2.51839 15.5963 2.65951 15.6683C2.81994 15.75 3.02996 15.75 3.45 15.75H6.75M6.75 15.75H11.25M6.75 15.75V3.45C6.75 3.02996 6.75 2.81994 6.83174 2.65951C6.90365 2.51839 7.01839 2.40365 7.15951 2.33174C7.31994 2.25 7.52993 2.25 7.95 2.25H10.05C10.4701 2.25 10.6801 2.25 10.8405 2.33174C10.9817 2.40365 11.0963 2.51839 11.1682 2.65951C11.25 2.81994 11.25 3.02996 11.25 3.45V15.75M11.25 15.75H14.55C14.9701 15.75 15.1801 15.75 15.3405 15.6683C15.4817 15.5963 15.5963 15.4817 15.6683 15.3405C15.75 15.1801 15.75 14.9701 15.75 14.55V9.45C15.75 9.02993 15.75 8.81992 15.6683 8.6595C15.5963 8.51835 15.4817 8.40368 15.3405 8.33175C15.1801 8.25 14.9701 8.25 14.55 8.25H11.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
   `,
-  barChart: t`
+    barChart: t`
 <svg
   width="18"
   height="18"
@@ -414,7 +415,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  bell: t`
+    bell: t`
 <svg
   width="18"
   height="18"
@@ -430,7 +431,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  bookOpen: t`
+    bookOpen: t`
 <svg
   width="18"
   height="18"
@@ -446,7 +447,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  browser: t`
+    browser: t`
 <svg
   width="18"
   height="18"
@@ -462,11 +463,11 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  bubbleChart: t`
+    bubbleChart: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M10.875 15.75C10.25 15.75 9.71875 15.5313 9.28125 15.0938C8.84375 14.6563 8.625 14.125 8.625 13.5C8.625 12.875 8.84375 12.3438 9.28125 11.9063C9.71875 11.4688 10.25 11.25 10.875 11.25C11.5 11.25 12.0313 11.4688 12.4688 11.9063C12.9063 12.3438 13.125 12.875 13.125 13.5C13.125 14.125 12.9063 14.6563 12.4688 15.0938C12.0313 15.5313 11.5 15.75 10.875 15.75ZM10.875 14.25C11.0875 14.25 11.2656 14.1781 11.4094 14.0344C11.5531 13.8906 11.625 13.7125 11.625 13.5C11.625 13.2875 11.5531 13.1094 11.4094 12.9656C11.2656 12.8219 11.0875 12.75 10.875 12.75C10.6625 12.75 10.4844 12.8219 10.3406 12.9656C10.1969 13.1094 10.125 13.2875 10.125 13.5C10.125 13.7125 10.1969 13.8906 10.3406 14.0344C10.4844 14.1781 10.6625 14.25 10.875 14.25ZM12.375 10.5C11.225 10.5 10.25 10.1 9.45 9.3C8.65 8.5 8.25 7.525 8.25 6.375C8.25 5.225 8.65 4.25 9.45 3.45C10.25 2.65 11.225 2.25 12.375 2.25C13.525 2.25 14.5 2.65 15.3 3.45C16.1 4.25 16.5 5.225 16.5 6.375C16.5 7.525 16.1 8.5 15.3 9.3C14.5 10.1 13.525 10.5 12.375 10.5ZM12.375 9C13.1125 9 13.7344 8.74688 14.2406 8.24063C14.7469 7.73438 15 7.1125 15 6.375C15 5.6375 14.7469 5.01563 14.2406 4.50938C13.7344 4.00313 13.1125 3.75 12.375 3.75C11.6375 3.75 11.0156 4.00313 10.5094 4.50938C10.0031 5.01563 9.75 5.6375 9.75 6.375C9.75 7.1125 10.0031 7.73438 10.5094 8.24063C11.0156 8.74688 11.6375 9 12.375 9ZM5.25 13.5C4.425 13.5 3.71875 13.2063 3.13125 12.6188C2.54375 12.0313 2.25 11.325 2.25 10.5C2.25 9.675 2.54375 8.96875 3.13125 8.38125C3.71875 7.79375 4.425 7.5 5.25 7.5C6.075 7.5 6.78125 7.79375 7.36875 8.38125C7.95625 8.96875 8.25 9.675 8.25 10.5C8.25 11.325 7.95625 12.0313 7.36875 12.6188C6.78125 13.2063 6.075 13.5 5.25 13.5ZM5.25 12C5.6625 12 6.01563 11.8531 6.30938 11.5594C6.60313 11.2656 6.75 10.9125 6.75 10.5C6.75 10.0875 6.60313 9.73438 6.30938 9.44063C6.01563 9.14688 5.6625 9 5.25 9C4.8375 9 4.48438 9.14688 4.19063 9.44063C3.89688 9.73438 3.75 10.0875 3.75 10.5C3.75 10.9125 3.89688 11.2656 4.19063 11.5594C4.48438 11.8531 4.8375 12 5.25 12Z" fill="currentColor"/>
 </svg>`,
-  calendarPlus: t`
+    calendarPlus: t`
 <svg
   width="18"
   height="18"
@@ -482,7 +483,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  calendar: t`
+    calendar: t`
 <svg
   width="18"
   height="18"
@@ -498,7 +499,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  caretDown: t`
+    caretDown: t`
 <svg
   width="18"
   height="18"
@@ -508,7 +509,7 @@ const o = {
 >
   <path d="M9 12L4 7H14L9 12Z" fill="currentColor" />
 </svg>`,
-  caretLeft: t`
+    caretLeft: t`
 <svg
   width="18"
   height="18"
@@ -518,7 +519,7 @@ const o = {
 >
   <path d="M7 9L12 4V14L7 9Z" fill="currentColor" />
 </svg>`,
-  caretRight: t`
+    caretRight: t`
 <svg
   width="18"
   height="18"
@@ -528,7 +529,7 @@ const o = {
 >
   <path d="M12 9L7 4V14L12 9Z" fill="currentColor" />
 </svg>`,
-  caretUp: t`
+    caretUp: t`
 <svg
   width="18"
   height="18"
@@ -538,10 +539,10 @@ const o = {
 >
   <path d="M9 7L4 12H14L9 7Z" fill="currentColor" />
 </svg>`,
-  category: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    category: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M4.875 8.25L9 1.5L13.125 8.25H4.875ZM13.125 16.5C12.1875 16.5 11.3906 16.1719 10.7344 15.5156C10.0781 14.8594 9.75 14.0625 9.75 13.125C9.75 12.1875 10.0781 11.3906 10.7344 10.7344C11.3906 10.0781 12.1875 9.75 13.125 9.75C14.0625 9.75 14.8594 10.0781 15.5156 10.7344C16.1719 11.3906 16.5 12.1875 16.5 13.125C16.5 14.0625 16.1719 14.8594 15.5156 15.5156C14.8594 16.1719 14.0625 16.5 13.125 16.5ZM2.25 16.125V10.125H8.25V16.125H2.25ZM13.125 15C13.65 15 14.0938 14.8188 14.4563 14.4563C14.8188 14.0938 15 13.65 15 13.125C15 12.6 14.8188 12.1563 14.4563 11.7938C14.0938 11.4313 13.65 11.25 13.125 11.25C12.6 11.25 12.1563 11.4313 11.7938 11.7938C11.4313 12.1563 11.25 12.6 11.25 13.125C11.25 13.65 11.4313 14.0938 11.7938 14.4563C12.1563 14.8188 12.6 15 13.125 15ZM3.75 14.625H6.75V11.625H3.75V14.625ZM7.5375 6.75H10.4625L9 4.3875L7.5375 6.75Z" fill="currentColor"/>
 </svg>`,
-  checkCircle: t`
+    checkCircle: t`
 <svg
   width="18"
   height="18"
@@ -564,7 +565,7 @@ const o = {
     </clipPath>
   </defs>
 </svg>`,
-  checkDone: t`
+    checkDone: t`
 <svg
   width="18"
   height="18"
@@ -587,7 +588,7 @@ const o = {
     </clipPath>
   </defs>
 </svg>`,
-  checkSquare: t`
+    checkSquare: t`
 <svg
   width="18"
   height="18"
@@ -603,7 +604,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  check: t`
+    check: t`
 <svg
   width="18"
   height="18"
@@ -619,7 +620,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  checklist: t`
+    checklist: t`
 <svg
   width="18"
   height="18"
@@ -632,7 +633,7 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  chevronDown: t`
+    chevronDown: t`
 <svg
   width="18"
   height="18"
@@ -648,7 +649,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  chevronLeft: t`
+    chevronLeft: t`
 <svg
   width="18"
   height="18"
@@ -664,7 +665,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  chevronRight: t`
+    chevronRight: t`
 <svg
   width="18"
   height="18"
@@ -680,14 +681,14 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  chevronRightDouble: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    chevronRightDouble: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M4.5 12.75L8.25 9L4.5 5.25M9.75 12.75L13.5 9L9.75 5.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`,
-  chevronSelectorHorizontal: t`
+    chevronSelectorHorizontal: t`
 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M6.75 5.25L3 9L6.75 12.75M11.25 5.25L15 9L11.25 12.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`,
-  chevronSelectorVertical: t`
+    chevronSelectorVertical: t`
 <svg
   width="18"
   height="18"
@@ -703,7 +704,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  chevronUp: t`
+    chevronUp: t`
 <svg
   width="18"
   height="18"
@@ -719,7 +720,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  circle: t`
+    circle: t`
 <svg
   width="18"
   height="18"
@@ -742,7 +743,7 @@ const o = {
     </clipPath>
   </defs>
 </svg>`,
-  clickAlt: t`
+    clickAlt: t`
 <svg
   width="18"
   height="18"
@@ -765,7 +766,7 @@ const o = {
     </clipPath>
   </defs>
 </svg>`,
-  click: t`
+    click: t`
 <svg
   width="18"
   height="18"
@@ -788,7 +789,7 @@ const o = {
     </clipPath>
   </defs>
 </svg>`,
-  clipboardCheck: t`
+    clipboardCheck: t`
 <svg
   width="18"
   height="18"
@@ -804,7 +805,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  clipboard: t`
+    clipboard: t`
 <svg
   width="18"
   height="18"
@@ -820,7 +821,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  clock: t`
+    clock: t`
 <svg
   width="18"
   height="18"
@@ -836,7 +837,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  cloud: t`
+    cloud: t`
 <svg
   width="18"
   height="18"
@@ -852,7 +853,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  codeAlt: t`
+    codeAlt: t`
 <svg
   width="18"
   height="18"
@@ -868,11 +869,11 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  codeBrowser: t`
+    codeBrowser: t`
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M22 9H2M14 17.5L16.5 15L14 12.5M10 12.5L7.5 15L10 17.5M2 7.8L2 16.2C2 17.8802 2 18.7202 2.32698 19.362C2.6146 19.9265 3.07354 20.3854 3.63803 20.673C4.27976 21 5.11984 21 6.8 21H17.2C18.8802 21 19.7202 21 20.362 20.673C20.9265 20.3854 21.3854 19.9265 21.673 19.362C22 18.7202 22 17.8802 22 16.2V7.8C22 6.11984 22 5.27977 21.673 4.63803C21.3854 4.07354 20.9265 3.6146 20.362 3.32698C19.7202 3 18.8802 3 17.2 3L6.8 3C5.11984 3 4.27976 3 3.63803 3.32698C3.07354 3.6146 2.6146 4.07354 2.32698 4.63803C2 5.27976 2 6.11984 2 7.8Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`,
-  code: t`
+    code: t`
 <svg
   width="18"
   height="18"
@@ -888,7 +889,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  coinsHand: t`
+    coinsHand: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_2290_25891)">
 <path d="M10.1471 6.2639C9.71783 6.56996 9.19245 6.75 8.625 6.75C7.17525 6.75 6 5.57475 6 4.125C6 2.67525 7.17525 1.5 8.625 1.5C9.56475 1.5 10.3891 1.99381 10.8529 2.7361M4.5 15.0654H6.45772C6.71297 15.0654 6.96666 15.0958 7.21411 15.1564L9.28267 15.6592C9.73147 15.7685 10.1991 15.7791 10.6526 15.6911L12.9398 15.2461C13.5439 15.1284 14.0997 14.8391 14.5352 14.4154L16.1534 12.8413C16.6155 12.3926 16.6155 11.6643 16.1534 11.2148C15.7374 10.8101 15.0785 10.7645 14.6078 11.1077L12.722 12.4837C12.4519 12.6811 12.1232 12.7874 11.7853 12.7874H9.96412H11.1233C11.7767 12.7874 12.3059 12.2725 12.3059 11.6369V11.4068C12.3059 10.8791 11.9367 10.419 11.4106 10.2914L9.62145 9.85627C9.3303 9.7857 9.0321 9.75 8.73232 9.75C8.00872 9.75 6.69892 10.3491 6.69892 10.3491L4.5 11.2687M15 4.875C15 6.32475 13.8247 7.5 12.375 7.5C10.9253 7.5 9.75 6.32475 9.75 4.875C9.75 3.42525 10.9253 2.25 12.375 2.25C13.8247 2.25 15 3.42525 15 4.875ZM1.5 10.95V15.3C1.5 15.7201 1.5 15.9301 1.58174 16.0905C1.65365 16.2317 1.76839 16.3463 1.90951 16.4183C2.06994 16.5 2.27996 16.5 2.7 16.5H3.3C3.72004 16.5 3.93006 16.5 4.09049 16.4183C4.23161 16.3463 4.34635 16.2317 4.41826 16.0905C4.5 15.9301 4.5 15.7201 4.5 15.3V10.95C4.5 10.5299 4.5 10.3199 4.41826 10.1595C4.34635 10.0183 4.23161 9.90368 4.09049 9.83175C3.93006 9.75 3.72004 9.75 3.3 9.75H2.7C2.27996 9.75 2.06994 9.75 1.90951 9.83175C1.76839 9.90368 1.65365 10.0183 1.58174 10.1595C1.5 10.3199 1.5 10.5299 1.5 10.95Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -899,12 +900,12 @@ const o = {
 </clipPath>
 </defs>
 </svg>`,
-  columnsAlt: t`
+    columnsAlt: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M5.1 2.25H4.65C3.80992 2.25 3.38988 2.25 3.06902 2.41349C2.78677 2.5573 2.5573 2.78677 2.41349 3.06902C2.25 3.38988 2.25 3.80992 2.25 4.65V13.35C2.25 14.1901 2.25 14.6102 2.41349 14.931C2.5573 15.2132 2.78677 15.4427 3.06902 15.5865C3.38988 15.75 3.80992 15.75 4.65 15.75H5.1C5.94008 15.75 6.36012 15.75 6.68098 15.5865C6.96323 15.4427 7.1927 15.2132 7.33651 14.931C7.5 14.6102 7.5 14.1901 7.5 13.35V4.65C7.5 3.80992 7.5 3.38988 7.33651 3.06902C7.1927 2.78677 6.96323 2.5573 6.68098 2.41349C6.36012 2.25 5.94008 2.25 5.1 2.25Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M13.35 2.25H12.9C12.0599 2.25 11.6399 2.25 11.319 2.41349C11.0368 2.5573 10.8073 2.78677 10.6635 3.06902C10.5 3.38988 10.5 3.80992 10.5 4.65V13.35C10.5 14.1901 10.5 14.6102 10.6635 14.931C10.8073 15.2132 11.0368 15.4427 11.319 15.5865C11.6399 15.75 12.0599 15.75 12.9 15.75H13.35C14.1901 15.75 14.6102 15.75 14.931 15.5865C15.2132 15.4427 15.4427 15.2132 15.5865 14.931C15.75 14.6102 15.75 14.1901 15.75 13.35V4.65C15.75 3.80992 15.75 3.38988 15.5865 3.06902C15.4427 2.78677 15.2132 2.5573 14.931 2.41349C14.6102 2.25 14.1901 2.25 13.35 2.25Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`,
-  columns: t`
+    columns: t`
 <svg
   width="18"
   height="18"
@@ -920,7 +921,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  command: t`
+    command: t`
 <svg
   width="18"
   height="18"
@@ -936,7 +937,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  components: t`
+    components: t`
 <svg
   width="18"
   height="18"
@@ -957,7 +958,7 @@ const o = {
     fill="#5748FF"
   />
 </svg>`,
-  cookie: t`
+    cookie: t`
 <svg
   width="18"
   height="18"
@@ -970,7 +971,7 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  copilot: t`
+    copilot: t`
 <svg
   width="18"
   height="18"
@@ -1004,7 +1005,7 @@ const o = {
     />
   </g>
 </svg>`,
-  copyAlt: t`
+    copyAlt: t`
 <svg
   width="18"
   height="18"
@@ -1027,7 +1028,7 @@ const o = {
     </clipPath>
   </defs>
 </svg>`,
-  copy: t`
+    copy: t`
 <svg
   width="18"
   height="18"
@@ -1050,7 +1051,7 @@ const o = {
     </clipPath>
   </defs>
 </svg>`,
-  cornerDownRight: t`
+    cornerDownRight: t`
 <svg
   width="18"
   height="18"
@@ -1066,7 +1067,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  creditCard: t`
+    creditCard: t`
 <svg
   width="18"
   height="18"
@@ -1082,7 +1083,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  cube: t`
+    cube: t`
 <svg
   width="18"
   height="18"
@@ -1098,7 +1099,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  cursorAlt: t`
+    cursorAlt: t`
 <svg
   width="18"
   height="18"
@@ -1114,7 +1115,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  cursorBox: t`
+    cursorBox: t`
 <svg
   width="18"
   height="18"
@@ -1130,7 +1131,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  cursor: t`
+    cursor: t`
 <svg
   width="18"
   height="18"
@@ -1146,7 +1147,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  dashboard: t`
+    dashboard: t`
 <svg
   width="18"
   height="18"
@@ -1159,7 +1160,7 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  databaseUpload: t`
+    databaseUpload: t`
 <svg
   width="18"
   height="18"
@@ -1172,7 +1173,7 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  database: t`
+    database: t`
 <svg
   width="18"
   height="18"
@@ -1185,7 +1186,7 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  distributeSpaceHorizontal: t`
+    distributeSpaceHorizontal: t`
 <svg
   width="18"
   height="18"
@@ -1201,7 +1202,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  distributeSpaceVertical: t`
+    distributeSpaceVertical: t`
 <svg
   width="18"
   height="18"
@@ -1217,11 +1218,11 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  dotpoints: t`
+    dotpoints: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M15.75 3.75H7.5M15.75 14.25H7.5M15.75 9H7.5M4.5 3.75C4.5 4.37132 3.99632 4.875 3.375 4.875C2.75368 4.875 2.25 4.37132 2.25 3.75C2.25 3.12868 2.75368 2.625 3.375 2.625C3.99632 2.625 4.5 3.12868 4.5 3.75ZM4.5 14.25C4.5 14.8713 3.99632 15.375 3.375 15.375C2.75368 15.375 2.25 14.8713 2.25 14.25C2.25 13.6287 2.75368 13.125 3.375 13.125C3.99632 13.125 4.5 13.6287 4.5 14.25ZM4.5 9C4.5 9.6213 3.99632 10.125 3.375 10.125C2.75368 10.125 2.25 9.6213 2.25 9C2.25 8.3787 2.75368 7.875 3.375 7.875C3.99632 7.875 4.5 8.3787 4.5 9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`,
-  dots: t`
+    dots: t`
 <svg
   width="18"
   height="18"
@@ -1251,7 +1252,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  download: t`
+    download: t`
 <svg
   width="18"
   height="18"
@@ -1267,7 +1268,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  dragHandle: t`
+    dragHandle: t`
 <svg
   width="18"
   height="18"
@@ -1283,7 +1284,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  dragIndicator: t`
+    dragIndicator: t`
 <svg
   width="18"
   height="18"
@@ -1334,7 +1335,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  dragPan: t`
+    dragPan: t`
 <svg
   width="18"
   height="18"
@@ -1347,7 +1348,7 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  editAlt: t`
+    editAlt: t`
 <svg
   width="18"
   height="18"
@@ -1363,7 +1364,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  edit: t`
+    edit: t`
 <svg
   width="18"
   height="18"
@@ -1379,7 +1380,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  expandAlt: t`
+    expandAlt: t`
 <svg
   width="18"
   height="18"
@@ -1395,7 +1396,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  expand: t`
+    expand: t`
 <svg
   width="18"
   height="18"
@@ -1411,7 +1412,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  eyeOff: t`
+    eyeOff: t`
 <svg
   width="18"
   height="18"
@@ -1427,7 +1428,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  eye: t`
+    eye: t`
 <svg
   width="18"
   height="18"
@@ -1450,7 +1451,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  faceSmile: t`
+    faceSmile: t`
 <svg
   width="18"
   height="18"
@@ -1473,7 +1474,7 @@ const o = {
     </clipPath>
   </defs>
 </svg>`,
-  fileCodeAlt: t`
+    fileCodeAlt: t`
 <svg
   width="18"
   height="18"
@@ -1489,7 +1490,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  fileCode: t`
+    fileCode: t`
 <svg
   width="18"
   height="18"
@@ -1505,7 +1506,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  file: t`
+    file: t`
 <svg
   width="18"
   height="18"
@@ -1521,11 +1522,11 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  filterFunnel: t`
+    filterFunnel: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M1.5 3.45C1.5 3.02996 1.5 2.81994 1.58174 2.65951C1.65365 2.51839 1.76839 2.40365 1.90951 2.33174C2.06994 2.25 2.27996 2.25 2.7 2.25H15.3C15.7201 2.25 15.9301 2.25 16.0905 2.33174C16.2317 2.40365 16.3463 2.51839 16.4183 2.65951C16.5 2.81994 16.5 3.02996 16.5 3.45V3.95204C16.5 4.15364 16.5 4.25444 16.4754 4.34817C16.4535 4.43123 16.4176 4.50992 16.3691 4.58082C16.3145 4.66082 16.2383 4.72684 16.0859 4.85887L11.2891 9.01612C11.1368 9.14812 11.0606 9.2142 11.0059 9.29415C10.9574 9.3651 10.9215 9.44378 10.8996 9.5268C10.875 9.62055 10.875 9.72135 10.875 9.92295V13.8438C10.875 13.9904 10.875 14.0638 10.8514 14.1272C10.8305 14.1832 10.7965 14.2334 10.7522 14.2736C10.7021 14.3191 10.634 14.3464 10.4978 14.4009L7.94783 15.4209C7.6722 15.5311 7.53435 15.5863 7.4237 15.5632C7.32695 15.5431 7.24204 15.4857 7.18744 15.4033C7.125 15.3092 7.125 15.1606 7.125 14.8638V9.92295C7.125 9.72135 7.125 9.62055 7.10036 9.5268C7.07854 9.44378 7.04261 9.3651 6.99413 9.29415C6.93944 9.2142 6.86327 9.14812 6.71092 9.01612L1.91408 4.85887C1.76173 4.72684 1.68556 4.66082 1.63087 4.58082C1.58239 4.50992 1.54646 4.43123 1.52464 4.34817C1.5 4.25444 1.5 4.15364 1.5 3.95204V3.45Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`,
-  flexAlignBottom: t`
+    flexAlignBottom: t`
 <svg
   width="18"
   height="18"
@@ -1541,7 +1542,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  flexAlignLeft: t`
+    flexAlignLeft: t`
 <svg
   width="18"
   height="18"
@@ -1557,7 +1558,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  flexAlignRight: t`
+    flexAlignRight: t`
 <svg
   width="18"
   height="18"
@@ -1573,7 +1574,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  flexAlignTop: t`
+    flexAlignTop: t`
 <svg
   width="18"
   height="18"
@@ -1589,7 +1590,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  flipBack: t`
+    flipBack: t`
 <svg
   width="18"
   height="18"
@@ -1605,7 +1606,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  flipForward: t`
+    flipForward: t`
 <svg
   width="18"
   height="18"
@@ -1621,7 +1622,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  flow: t`
+    flow: t`
 <svg
   width="18"
   height="18"
@@ -1642,7 +1643,7 @@ const o = {
     fill="#5748FF"
   />
 </svg>`,
-  github: t`
+    github: t`
 <svg
   width="18"
   height="18"
@@ -1655,7 +1656,7 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  globe: t`
+    globe: t`
 <svg
   width="18"
   height="18"
@@ -1678,7 +1679,7 @@ const o = {
     </clipPath>
   </defs>
 </svg>`,
-  gridAlt: t`
+    gridAlt: t`
 <svg
   width="18"
   height="18"
@@ -1694,7 +1695,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  gridDotsBlank: t`
+    gridDotsBlank: t`
 <svg
   width="18"
   height="18"
@@ -1710,7 +1711,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  gridDotsBottom: t`
+    gridDotsBottom: t`
 <svg
   width="18"
   height="18"
@@ -1726,7 +1727,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  gridDotsHorizontal: t`
+    gridDotsHorizontal: t`
 <svg
   width="18"
   height="18"
@@ -1742,7 +1743,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  gridDotsLeft: t`
+    gridDotsLeft: t`
 <svg
   width="18"
   height="18"
@@ -1758,7 +1759,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  gridDotsRight: t`
+    gridDotsRight: t`
 <svg
   width="18"
   height="18"
@@ -1774,7 +1775,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  gridDotsTop: t`
+    gridDotsTop: t`
 <svg
   width="18"
   height="18"
@@ -1790,7 +1791,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  gridDotsVertical: t`
+    gridDotsVertical: t`
 <svg
   width="18"
   height="18"
@@ -1806,7 +1807,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  grid: t`
+    grid: t`
 <svg
   width="18"
   height="18"
@@ -1843,7 +1844,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  group: t`
+    group: t`
 <svg
   width="18"
   height="18"
@@ -1856,25 +1857,25 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  h1: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    h1: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M3.75 12.75V5.25H5.25V8.25H8.25V5.25H9.75V12.75H8.25V9.75H5.25V12.75H3.75ZM12.75 12.75V6.75H11.25V5.25H14.25V12.75H12.75Z" fill="currentColor"/>
 </svg>`,
-  h2: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    h2: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M2.25 12.75V5.25H3.75V8.25H6.75V5.25H8.25V12.75H6.75V9.75H3.75V12.75H2.25ZM9.75 12.75V9.75C9.75 9.3375 9.89688 8.98438 10.1906 8.69063C10.4844 8.39688 10.8375 8.25 11.25 8.25H14.25V6.75H9.75V5.25H14.25C14.6625 5.25 15.0156 5.39687 15.3094 5.69063C15.6031 5.98438 15.75 6.3375 15.75 6.75V8.25C15.75 8.6625 15.6031 9.01563 15.3094 9.30938C15.0156 9.60313 14.6625 9.75 14.25 9.75H11.25V11.25H15.75V12.75H9.75Z" fill="currentColor"/>
 </svg>`,
-  h3: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    h3: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M2.25 12.75V5.25H3.75V8.25H6.75V5.25H8.25V12.75H6.75V9.75H3.75V12.75H2.25ZM9.75 12.75V11.25H14.25V9.75H11.25V8.25H14.25V6.75H9.75V5.25H14.25C14.6625 5.25 15.0156 5.39687 15.3094 5.69063C15.6031 5.98438 15.75 6.3375 15.75 6.75V11.25C15.75 11.6625 15.6031 12.0156 15.3094 12.3094C15.0156 12.6031 14.6625 12.75 14.25 12.75H9.75Z" fill="currentColor"/>
 </svg>`,
-  h4: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    h4: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M2.25 12.75V5.25H3.75V8.25H6.75V5.25H8.25V12.75H6.75V9.75H3.75V12.75H2.25ZM13.5 12.75V10.5H9.75V5.25H11.25V9H13.5V5.25H15V9H16.5V10.5H15V12.75H13.5Z" fill="currentColor"/>
 </svg>`,
-  h5: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    h5: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M2.25 12.75V5.25H3.75V8.25H6.75V5.25H8.25V12.75H6.75V9.75H3.75V12.75H2.25ZM9.75 12.75V11.25H14.25V9.75H9.75V5.25H15.75V6.75H11.25V8.25H14.25C14.6625 8.25 15.0156 8.39688 15.3094 8.69063C15.6031 8.98438 15.75 9.3375 15.75 9.75V11.25C15.75 11.6625 15.6031 12.0156 15.3094 12.3094C15.0156 12.6031 14.6625 12.75 14.25 12.75H9.75Z" fill="currentColor"/>
 </svg>`,
-  h6: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    h6: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M2.25 12.75V5.25H3.75V8.25H6.75V5.25H8.25V12.75H6.75V9.75H3.75V12.75H2.25ZM11.25 12.75C10.8375 12.75 10.4844 12.6031 10.1906 12.3094C9.89688 12.0156 9.75 11.6625 9.75 11.25V6.75C9.75 6.3375 9.89688 5.98438 10.1906 5.69063C10.4844 5.39687 10.8375 5.25 11.25 5.25H15.75V6.75H11.25V8.25H14.25C14.6625 8.25 15.0156 8.39688 15.3094 8.69063C15.6031 8.98438 15.75 9.3375 15.75 9.75V11.25C15.75 11.6625 15.6031 12.0156 15.3094 12.3094C15.0156 12.6031 14.6625 12.75 14.25 12.75H11.25ZM11.25 9.75V11.25H14.25V9.75H11.25Z" fill="currentColor"/>
 </svg>`,
-  hash: t`
+    hash: t`
 <svg
   width="18"
   height="18"
@@ -1890,7 +1891,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  heading: t`
+    heading: t`
 <svg
   width="18"
   height="18"
@@ -1906,7 +1907,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  heightFill: t`
+    heightFill: t`
 <svg
   width="18"
   height="18"
@@ -1922,7 +1923,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  heightFixed: t`
+    heightFixed: t`
 <svg
   width="18"
   height="18"
@@ -1938,7 +1939,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  heightHug: t`
+    heightHug: t`
 <svg
   width="18"
   height="18"
@@ -1954,7 +1955,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  help: t`
+    help: t`
 <svg
   width="18"
   height="18"
@@ -1970,7 +1971,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  hexagon: t`
+    hexagon: t`
 <svg
   width="18"
   height="18"
@@ -1986,11 +1987,11 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  horizontalBarChart: t`
+    horizontalBarChart: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M12.75 7.125V4.575C12.75 4.15496 12.75 3.94494 12.6683 3.78451C12.5963 3.64339 12.4817 3.52865 12.3405 3.45674C12.1801 3.375 11.9701 3.375 11.55 3.375H2.25M9.75 10.875V13.425C9.75 13.8451 9.75 14.0551 9.66825 14.2155C9.59632 14.3567 9.48165 14.4713 9.3405 14.5433C9.18008 14.625 8.97007 14.625 8.55 14.625H2.25M2.25 1.5V16.5M2.25 10.875H14.55C14.9701 10.875 15.1801 10.875 15.3405 10.7932C15.4817 10.7213 15.5963 10.6067 15.6683 10.4655C15.75 10.3051 15.75 10.0951 15.75 9.675V8.325C15.75 7.90493 15.75 7.69492 15.6683 7.5345C15.5963 7.39339 15.4817 7.27865 15.3405 7.20674C15.1801 7.125 14.9701 7.125 14.55 7.125H2.25V10.875Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`,
-  hilla: t`
+    hilla: t`
 <svg
   width="18"
   height="18"
@@ -2058,7 +2059,7 @@ const o = {
     </linearGradient>
   </defs>
 </svg>`,
-  horizontalBottom: t`
+    horizontalBottom: t`
 <svg
   width="18"
   height="18"
@@ -2088,7 +2089,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  horizontalCenter: t`
+    horizontalCenter: t`
 <svg
   width="18"
   height="18"
@@ -2118,11 +2119,11 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  horizontalRule: t`
+    horizontalRule: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M3 9.75V8.25H15V9.75H3Z" fill="currentColor"/>
   </svg>`,
-  horizontalTop: t`
+    horizontalTop: t`
 <svg
   width="18"
   height="18"
@@ -2152,11 +2153,11 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  html: t`
+    html: t`
 <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 -960 960 960" width="18" fill="currentColor">
   <path d="M0-360v-240h60v80h80v-80h60v240h-60v-100H60v100H0Zm310 0v-180h-70v-60h200v60h-70v180h-60Zm170 0v-200q0-17 11.5-28.5T520-600h180q17 0 28.5 11.5T740-560v200h-60v-180h-40v140h-60v-140h-40v180h-60Zm320 0v-240h60v180h100v60H800Z"/>
 </svg>`,
-  imageIndentLeft: t`
+    imageIndentLeft: t`
 <svg
   width="18"
   height="18"
@@ -2172,7 +2173,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  image: t`
+    image: t`
 <svg
   width="18"
   height="18"
@@ -2188,7 +2189,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  info: t`
+    info: t`
 <svg
   width="18"
   height="18"
@@ -2204,12 +2205,12 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  inbox: t`
+    inbox: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M1.875 9H4.41148C4.92538 9 5.39518 9.29032 5.625 9.75C5.85482 10.2097 6.32462 10.5 6.83852 10.5H11.1615C11.6754 10.5 12.1452 10.2097 12.375 9.75C12.6048 9.29032 13.0746 9 13.5885 9H16.125M6.72492 3H11.275C12.0827 3 12.4865 3 12.8431 3.12297C13.1584 3.23172 13.4456 3.4092 13.6838 3.64256C13.9532 3.90645 14.1338 4.26765 14.495 4.99003L16.1199 8.23987C16.2617 8.52337 16.3325 8.66513 16.3825 8.81363C16.4269 8.94563 16.459 9.08138 16.4783 9.21923C16.5 9.3744 16.5 9.53287 16.5 9.84982V11.4C16.5 12.6601 16.5 13.2901 16.2548 13.7715C16.0391 14.1949 15.6949 14.5391 15.2715 14.7548C14.7901 15 14.1602 15 12.9 15H5.1C3.83988 15 3.20982 15 2.72852 14.7548C2.30516 14.5391 1.96095 14.1949 1.74524 13.7715C1.5 13.2901 1.5 12.6601 1.5 11.4V9.84982C1.5 9.53287 1.5 9.3744 1.52173 9.21923C1.54103 9.08138 1.57308 8.94563 1.61747 8.81363C1.66745 8.66513 1.73832 8.52337 1.88006 8.23987L3.50498 4.99003C3.86617 4.26764 4.04678 3.90645 4.31621 3.64256C4.55447 3.4092 4.84163 3.23172 5.15692 3.12297C5.51344 3 5.91727 3 6.72492 3Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
   `,
-  justifyCenter: t`
+    justifyCenter: t`
 <svg
   width="18"
   height="18"
@@ -2222,7 +2223,7 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  justifyEnd: t`
+    justifyEnd: t`
 <svg
   width="18"
   height="18"
@@ -2235,7 +2236,7 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  justifyStart: t`
+    justifyStart: t`
 <svg
   width="18"
   height="18"
@@ -2248,7 +2249,7 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  key: t`
+    key: t`
 <svg
   width="18"
   height="18"
@@ -2264,7 +2265,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  keyboard: t`
+    keyboard: t`
 <svg
   width="18"
   height="18"
@@ -2280,7 +2281,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  kubernetes: t`
+    kubernetes: t`
 <svg
   width="18"
   height="18"
@@ -2306,7 +2307,7 @@ const o = {
     </clipPath>
   </defs>
 </svg>`,
-  layoutBottom: t`
+    layoutBottom: t`
   <svg
   width="18"
   height="18"
@@ -2322,7 +2323,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  layoutLeft: t`
+    layoutLeft: t`
 <svg
   width="18"
   height="18"
@@ -2338,7 +2339,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  layoutRight: t`
+    layoutRight: t`
   <svg
   width="18"
   height="18"
@@ -2354,7 +2355,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  layoutTop: t`
+    layoutTop: t`
   <svg
   width="18"
   height="18"
@@ -2370,7 +2371,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  layout: t`
+    layout: t`
 <svg
   width="18"
   height="18"
@@ -2386,7 +2387,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  letterSpacing: t`
+    letterSpacing: t`
 <svg
   width="18"
   height="18"
@@ -2402,7 +2403,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  lightning: t`
+    lightning: t`
 <svg
   width="18"
   height="18"
@@ -2418,11 +2419,11 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  lineChart: t`
+    lineChart: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M15.75 15.75H3.45C3.02996 15.75 2.81994 15.75 2.65951 15.6683C2.51839 15.5963 2.40365 15.4817 2.33174 15.3405C2.25 15.1801 2.25 14.9701 2.25 14.55V2.25M15 6L12.0608 9.13703C11.9495 9.2559 11.8938 9.3153 11.8266 9.34605C11.7673 9.3732 11.7019 9.38437 11.637 9.37852C11.5634 9.37185 11.4911 9.33435 11.3465 9.25928L8.90347 7.99072C8.75887 7.91565 8.68658 7.87815 8.613 7.87148C8.54805 7.86563 8.48273 7.8768 8.4234 7.90395C8.3562 7.9347 8.30055 7.9941 8.18917 8.11297L5.25 11.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`,
-  lineHeight: t`
+    lineHeight: t`
 <svg
   width="18"
   height="18"
@@ -2438,13 +2439,13 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  link: t`
+    link: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M6.75 12.75H5.25C3.17893 12.75 1.5 11.071 1.5 9C1.5 6.92893 3.17893 5.25 5.25 5.25H6.75M11.25 12.75H12.75C14.821 12.75 16.5 11.071 16.5 9C16.5 6.92893 14.821 5.25 12.75 5.25H11.25M5.25 9H12.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 
   `,
-  list: t`
+    list: t`
 <svg
   width="18"
   height="18"
@@ -2460,7 +2461,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  loading: t`
+    loading: t`
 <svg
   width="18"
   height="18"
@@ -2476,7 +2477,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  lock: t`
+    lock: t`
 <svg
   width="18"
   height="18"
@@ -2492,7 +2493,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  logIn: t`
+    logIn: t`
 <svg
   width="18"
   height="18"
@@ -2508,7 +2509,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  lowPriority: t`
+    lowPriority: t`
 <svg
   width="18"
   height="18"
@@ -2521,7 +2522,7 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  magic: t`
+    magic: t`
 <svg
   width="18"
   height="18"
@@ -2537,7 +2538,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  map: t`
+    map: t`
 <svg
   width="18"
   height="18"
@@ -2560,7 +2561,7 @@ const o = {
     </clipPath>
   </defs>
 </svg>`,
-  markerPin: t`
+    markerPin: t`
 <svg
   width="18"
   height="18"
@@ -2583,7 +2584,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  menuAlt: t`
+    menuAlt: t`
 <svg
   width="18"
   height="18"
@@ -2599,12 +2600,12 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  menu: t`
+    menu: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M2.25 9H15.75M2.25 4.5H15.75M2.25 13.5H15.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>
   `,
-  messageChat: t`
+    messageChat: t`
 <svg
   width="18"
   height="18"
@@ -2627,7 +2628,7 @@ const o = {
     </clipPath>
   </defs>
 </svg>`,
-  message: t`
+    message: t`
 <svg
   width="18"
   height="18"
@@ -2643,7 +2644,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  minus: t`
+    minus: t`
 <svg
   width="18"
   height="18"
@@ -2659,11 +2660,11 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  moon: t`
+    moon: t`
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M22 15.8442C20.6866 16.4382 19.2286 16.7688 17.6935 16.7688C11.9153 16.7688 7.23116 12.0847 7.23116 6.30654C7.23116 4.77135 7.5618 3.3134 8.15577 2C4.52576 3.64163 2 7.2947 2 11.5377C2 17.3159 6.68414 22 12.4623 22C16.7053 22 20.3584 19.4742 22 15.8442Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`,
-  mouse: t`
+    mouse: t`
 <svg
   width="18"
   height="18"
@@ -2676,7 +2677,7 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  paddingBottom: t`
+    paddingBottom: t`
 <svg
   width="18"
   height="18"
@@ -2701,7 +2702,7 @@ const o = {
     stroke-width="1.5"
   />
 </svg>`,
-  paddingHorizontal: t`
+    paddingHorizontal: t`
 <svg
   width="18"
   height="18"
@@ -2726,7 +2727,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  paddingLeft: t`
+    paddingLeft: t`
 <svg
   width="18"
   height="18"
@@ -2751,7 +2752,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  paddingRight: t`
+    paddingRight: t`
 <svg
   width="18"
   height="18"
@@ -2776,7 +2777,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  paddingTop: t`
+    paddingTop: t`
 <svg
   width="18"
   height="18"
@@ -2801,7 +2802,7 @@ const o = {
     stroke-width="1.5"
   />
 </svg>`,
-  paddingVertical: t`
+    paddingVertical: t`
 <svg
   width="18"
   height="18"
@@ -2826,7 +2827,7 @@ const o = {
     stroke-width="1.5"
   />
 </svg>`,
-  padding: t`
+    padding: t`
 <svg
   width="18"
   height="18"
@@ -2858,7 +2859,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  palette: t`
+    palette: t`
 <svg
   width="18"
   height="18"
@@ -2902,7 +2903,7 @@ const o = {
     </clipPath>
   </defs>
 </svg>`,
-  passcode: t`
+    passcode: t`
 <svg
   width="18"
   height="18"
@@ -2918,16 +2919,16 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  pentagon: t`
+    pentagon: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M8.29537 2.19902C8.54872 2.01517 8.6754 1.92324 8.81385 1.88772C8.9361 1.85636 9.06435 1.85636 9.1866 1.88772C9.32505 1.92324 9.45172 2.01517 9.70507 2.19902L15.7939 6.61797C16.0477 6.80217 16.1747 6.89426 16.2514 7.01513C16.3192 7.12184 16.3589 7.24397 16.3668 7.37013C16.3758 7.51305 16.3273 7.66215 16.2303 7.96035L13.9051 15.1087C13.8082 15.4066 13.7597 15.5555 13.6685 15.6657C13.588 15.763 13.4842 15.8384 13.3668 15.8849C13.2338 15.9375 13.0771 15.9375 12.7639 15.9375H5.23652C4.92328 15.9375 4.76665 15.9375 4.63366 15.8849C4.51623 15.8384 4.41244 15.763 4.33192 15.6657C4.24072 15.5555 4.19227 15.4066 4.09537 15.1087L1.77016 7.96035C1.67314 7.66215 1.62464 7.51305 1.63363 7.37013C1.64155 7.24397 1.68124 7.12184 1.74901 7.01513C1.82575 6.89426 1.95266 6.80217 2.20647 6.61797L8.29537 2.19902Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`,
-  phone: t`
+    phone: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M6.28521 6.64001C6.8072 7.72725 7.51882 8.7462 8.41995 9.6474C9.32115 10.5486 10.3402 11.2602 11.4274 11.7822C11.5209 11.8271 11.5676 11.8496 11.6268 11.8668C11.8371 11.9281 12.0952 11.884 12.2733 11.7565C12.3235 11.7206 12.3663 11.6778 12.452 11.5921C12.7142 11.3298 12.8453 11.1987 12.9772 11.113C13.4743 10.7898 14.1153 10.7898 14.6125 11.113C14.7443 11.1987 14.8754 11.3298 15.1376 11.5921L15.2837 11.7382C15.6823 12.1368 15.8816 12.3361 15.9898 12.5501C16.2052 12.9757 16.2052 13.4785 15.9898 13.9042C15.8816 14.1182 15.6823 14.3175 15.2837 14.7161L15.1655 14.8342C14.7683 15.2315 14.5697 15.4301 14.2996 15.5818C14 15.7501 13.5346 15.8711 13.191 15.8701C12.8813 15.8692 12.6696 15.8091 12.2463 15.689C9.97125 15.0432 7.82445 13.8249 6.03349 12.0339C4.24251 10.2429 3.02415 8.0961 2.37843 5.82108C2.25827 5.39774 2.19819 5.18608 2.19727 4.87637C2.19624 4.5327 2.31726 4.06733 2.48558 3.7677C2.63727 3.49768 2.83587 3.29907 3.2331 2.90185L3.35132 2.78362C3.7499 2.38504 3.9492 2.18575 4.16323 2.07749C4.5889 1.86219 5.0916 1.86219 5.51727 2.07749C5.7313 2.18575 5.9306 2.38504 6.32918 2.78362L6.47533 2.92978C6.73753 3.19198 6.86864 3.32309 6.95435 3.45491C7.2776 3.95209 7.2776 4.59302 6.95435 5.09019C6.86864 5.22202 6.73753 5.35313 6.47533 5.61533C6.3896 5.70107 6.34673 5.74393 6.31085 5.79403C6.18334 5.97211 6.13932 6.2303 6.20061 6.44057C6.21786 6.49974 6.2403 6.54649 6.28521 6.64001Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
   `,
-  pieChart: t`
+    pieChart: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_2290_25908)">
 <path d="M15.9078 11.9174C15.4307 13.0458 14.6844 14.0401 13.7342 14.8134C12.7841 15.5867 11.6589 16.1155 10.4571 16.3535C9.25538 16.5915 8.0136 16.5315 6.84041 16.1787C5.6672 15.826 4.59827 15.1912 3.72707 14.3299C2.85587 13.4686 2.20892 12.407 1.84278 11.2379C1.47665 10.0688 1.40247 8.82777 1.62675 7.62342C1.85103 6.41902 2.36693 5.2879 3.12934 4.32895C3.89175 3.37 4.87747 2.61242 6.0003 2.12243M15.9294 6.1298C16.2296 6.85465 16.4138 7.62095 16.4763 8.40057C16.4918 8.59317 16.4995 8.68947 16.4612 8.77625C16.4293 8.8487 16.366 8.91725 16.2963 8.9549C16.2129 8.9999 16.1087 8.9999 15.9003 8.9999H9.6003C9.3903 8.9999 9.2853 8.9999 9.20505 8.9591C9.13448 8.9231 9.0771 8.86572 9.04118 8.79515C9.0003 8.71497 9.0003 8.60997 9.0003 8.39989V2.09993C9.0003 1.89153 9.0003 1.78733 9.04538 1.70392C9.08303 1.63424 9.15158 1.57095 9.22403 1.539C9.3108 1.50076 9.4071 1.50847 9.5997 1.52392C10.3793 1.58642 11.1456 1.77059 11.8704 2.07083C12.7804 2.44774 13.6072 3.00019 14.3036 3.69663C15.0001 4.39307 15.5525 5.21986 15.9294 6.1298Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -2938,7 +2939,7 @@ const o = {
 </clipPath>
 </defs>
 </svg>`,
-  pinAlt: t`
+    pinAlt: t`
 <svg
   width="18"
   height="18"
@@ -2954,7 +2955,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  pin: t`
+    pin: t`
 <svg
   width="18"
   height="18"
@@ -2974,7 +2975,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  play: t`
+    play: t`
 <svg
   width="18"
   height="18"
@@ -2990,7 +2991,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  plus: t`
+    plus: t`
 <svg
   width="18"
   height="18"
@@ -3006,7 +3007,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  progressBar: t`
+    progressBar: t`
 <svg
   width="18"
   height="18"
@@ -3026,15 +3027,15 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  radioButtonChecked: t`
+    radioButtonChecked: t`
 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M9 12.75C10.0375 12.75 10.9219 12.3844 11.6531 11.6531C12.3844 10.9219 12.75 10.0375 12.75 9C12.75 7.9625 12.3844 7.07813 11.6531 6.34688C10.9219 5.61563 10.0375 5.25 9 5.25C7.9625 5.25 7.07813 5.61563 6.34688 6.34688C5.61563 7.07813 5.25 7.9625 5.25 9C5.25 10.0375 5.61563 10.9219 6.34688 11.6531C7.07813 12.3844 7.9625 12.75 9 12.75ZM9 16.5C7.9625 16.5 6.9875 16.3031 6.075 15.9094C5.1625 15.5156 4.36875 14.9813 3.69375 14.3063C3.01875 13.6313 2.48438 12.8375 2.09063 11.925C1.69688 11.0125 1.5 10.0375 1.5 9C1.5 7.9625 1.69688 6.9875 2.09063 6.075C2.48438 5.1625 3.01875 4.36875 3.69375 3.69375C4.36875 3.01875 5.1625 2.48438 6.075 2.09063C6.9875 1.69688 7.9625 1.5 9 1.5C10.0375 1.5 11.0125 1.69688 11.925 2.09063C12.8375 2.48438 13.6313 3.01875 14.3063 3.69375C14.9813 4.36875 15.5156 5.1625 15.9094 6.075C16.3031 6.9875 16.5 7.9625 16.5 9C16.5 10.0375 16.3031 11.0125 15.9094 11.925C15.5156 12.8375 14.9813 13.6313 14.3063 14.3063C13.6313 14.9813 12.8375 15.5156 11.925 15.9094C11.0125 16.3031 10.0375 16.5 9 16.5ZM9 15C10.675 15 12.0938 14.4188 13.2563 13.2563C14.4188 12.0938 15 10.675 15 9C15 7.325 14.4188 5.90625 13.2563 4.74375C12.0938 3.58125 10.675 3 9 3C7.325 3 5.90625 3.58125 4.74375 4.74375C3.58125 5.90625 3 7.325 3 9C3 10.675 3.58125 12.0938 4.74375 13.2563C5.90625 14.4188 7.325 15 9 15Z" fill="currentColor"/>
 </svg>`,
-  radioButtonPartial: t`
+    radioButtonPartial: t`
 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M9 12.75V5.25C7.9625 5.25 7.07813 5.61563 6.34688 6.34688C5.61563 7.07813 5.25 7.9625 5.25 9C5.25 10.0375 5.61563 10.9219 6.34688 11.6531C7.07813 12.3844 7.9625 12.75 9 12.75ZM9 16.5C7.9625 16.5 6.9875 16.3031 6.075 15.9094C5.1625 15.5156 4.36875 14.9813 3.69375 14.3063C3.01875 13.6313 2.48438 12.8375 2.09063 11.925C1.69688 11.0125 1.5 10.0375 1.5 9C1.5 7.9625 1.69688 6.9875 2.09063 6.075C2.48438 5.1625 3.01875 4.36875 3.69375 3.69375C4.36875 3.01875 5.1625 2.48438 6.075 2.09063C6.9875 1.69688 7.9625 1.5 9 1.5C10.0375 1.5 11.0125 1.69688 11.925 2.09063C12.8375 2.48438 13.6313 3.01875 14.3063 3.69375C14.9813 4.36875 15.5156 5.1625 15.9094 6.075C16.3031 6.9875 16.5 7.9625 16.5 9C16.5 10.0375 16.3031 11.0125 15.9094 11.925C15.5156 12.8375 14.9813 13.6313 14.3063 14.3063C13.6313 14.9813 12.8375 15.5156 11.925 15.9094C11.0125 16.3031 10.0375 16.5 9 16.5ZM9 15C10.675 15 12.0938 14.4188 13.2563 13.2563C14.4188 12.0938 15 10.675 15 9C15 7.325 14.4188 5.90625 13.2563 4.74375C12.0938 3.58125 10.675 3 9 3C7.325 3 5.90625 3.58125 4.74375 4.74375C3.58125 5.90625 3 7.325 3 9C3 10.675 3.58125 12.0938 4.74375 13.2563C5.90625 14.4188 7.325 15 9 15Z" fill="currentColor"/>
 </svg>`,
-  refreshAlt: t`
+    refreshAlt: t`
 <svg
   width="18"
   height="18"
@@ -3050,7 +3051,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  refresh: t`
+    refresh: t`
 <svg
   width="18"
   height="18"
@@ -3066,7 +3067,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  repeat: t`
+    repeat: t`
 <svg
   width="18"
   height="18"
@@ -3082,7 +3083,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  rocket: t`
+    rocket: t`
 <svg
   width="18"
   height="18"
@@ -3098,7 +3099,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  rotatingSpinner: t`
+    rotatingSpinner: t`
 <svg
   width="18"
   height="18"
@@ -3123,7 +3124,7 @@ const o = {
     />
   </path>
 </svg>`,
-  save: t`
+    save: t`
 <svg
   width="18"
   height="18"
@@ -3139,11 +3140,11 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  scatterPlot: t`
+    scatterPlot: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M12.75 15.75C11.925 15.75 11.2188 15.4563 10.6313 14.8688C10.0438 14.2813 9.75 13.575 9.75 12.75C9.75 11.925 10.0438 11.2188 10.6313 10.6313C11.2188 10.0438 11.925 9.75 12.75 9.75C13.575 9.75 14.2813 10.0438 14.8688 10.6313C15.4563 11.2188 15.75 11.925 15.75 12.75C15.75 13.575 15.4563 14.2813 14.8688 14.8688C14.2813 15.4563 13.575 15.75 12.75 15.75ZM12.75 14.25C13.1625 14.25 13.5156 14.1031 13.8094 13.8094C14.1031 13.5156 14.25 13.1625 14.25 12.75C14.25 12.3375 14.1031 11.9844 13.8094 11.6906C13.5156 11.3969 13.1625 11.25 12.75 11.25C12.3375 11.25 11.9844 11.3969 11.6906 11.6906C11.3969 11.9844 11.25 12.3375 11.25 12.75C11.25 13.1625 11.3969 13.5156 11.6906 13.8094C11.9844 14.1031 12.3375 14.25 12.75 14.25ZM5.25 13.5C4.425 13.5 3.71875 13.2063 3.13125 12.6188C2.54375 12.0313 2.25 11.325 2.25 10.5C2.25 9.675 2.54375 8.96875 3.13125 8.38125C3.71875 7.79375 4.425 7.5 5.25 7.5C6.075 7.5 6.78125 7.79375 7.36875 8.38125C7.95625 8.96875 8.25 9.675 8.25 10.5C8.25 11.325 7.95625 12.0313 7.36875 12.6188C6.78125 13.2063 6.075 13.5 5.25 13.5ZM5.25 12C5.6625 12 6.01563 11.8531 6.30938 11.5594C6.60313 11.2656 6.75 10.9125 6.75 10.5C6.75 10.0875 6.60313 9.73438 6.30938 9.44063C6.01563 9.14688 5.6625 9 5.25 9C4.8375 9 4.48438 9.14688 4.19063 9.44063C3.89688 9.73438 3.75 10.0875 3.75 10.5C3.75 10.9125 3.89688 11.2656 4.19063 11.5594C4.48438 11.8531 4.8375 12 5.25 12ZM8.25 7.5C7.425 7.5 6.71875 7.20625 6.13125 6.61875C5.54375 6.03125 5.25 5.325 5.25 4.5C5.25 3.675 5.54375 2.96875 6.13125 2.38125C6.71875 1.79375 7.425 1.5 8.25 1.5C9.075 1.5 9.78125 1.79375 10.3688 2.38125C10.9563 2.96875 11.25 3.675 11.25 4.5C11.25 5.325 10.9563 6.03125 10.3688 6.61875C9.78125 7.20625 9.075 7.5 8.25 7.5ZM8.25 6C8.6625 6 9.01563 5.85313 9.30938 5.55938C9.60313 5.26563 9.75 4.9125 9.75 4.5C9.75 4.0875 9.60313 3.73438 9.30938 3.44063C9.01563 3.14688 8.6625 3 8.25 3C7.8375 3 7.48438 3.14688 7.19063 3.44063C6.89688 3.73438 6.75 4.0875 6.75 4.5C6.75 4.9125 6.89688 5.26563 7.19063 5.55938C7.48438 5.85313 7.8375 6 8.25 6Z" fill="currentColor"/>
 </svg>`,
-  search: t`
+    search: t`
 <svg
   width="18"
   height="18"
@@ -3159,7 +3160,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  send: t`
+    send: t`
 <svg
   width="18"
   height="18"
@@ -3175,7 +3176,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  settings: t`
+    settings: t`
 <svg
   width="18"
   height="18"
@@ -3205,7 +3206,7 @@ const o = {
     </clipPath>
   </defs>
 </svg>`,
-  share: t`
+    share: t`
 <svg
   width="18"
   height="18"
@@ -3221,7 +3222,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  shieldTick: t`
+    shieldTick: t`
 <svg
   width="18"
   height="18"
@@ -3237,7 +3238,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  shoppingCart: t`
+    shoppingCart: t`
 <svg
   width="18"
   height="18"
@@ -3260,7 +3261,7 @@ const o = {
     </clipPath>
   </defs>
 </svg>`,
-  slidersAlt: t`
+    slidersAlt: t`
 <svg
   width="18"
   height="18"
@@ -3276,7 +3277,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  sliders: t`
+    sliders: t`
 <svg
   width="18"
   height="18"
@@ -3292,7 +3293,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  spacingHeight: t`
+    spacingHeight: t`
 <svg
   width="18"
   height="18"
@@ -3308,7 +3309,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  spacingWidth: t`
+    spacingWidth: t`
 <svg
   width="18"
   height="18"
@@ -3324,11 +3325,11 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  speed: t`
+    speed: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M7.8375 11.625C8.1375 11.925 8.525 12.0719 9 12.0656C9.475 12.0594 9.825 11.8875 10.05 11.55L14.25 5.25L7.95 9.45C7.6125 9.675 7.43438 10.0188 7.41563 10.4813C7.39688 10.9438 7.5375 11.325 7.8375 11.625ZM9 3C9.7375 3 10.4469 3.10313 11.1281 3.30938C11.8094 3.51563 12.45 3.825 13.05 4.2375L11.625 5.1375C11.2125 4.925 10.7844 4.76563 10.3406 4.65938C9.89688 4.55313 9.45 4.5 9 4.5C7.3375 4.5 5.92188 5.08438 4.75313 6.25313C3.58438 7.42188 3 8.8375 3 10.5C3 11.025 3.07188 11.5438 3.21563 12.0563C3.35938 12.5688 3.5625 13.05 3.825 13.5H14.175C14.4625 13.025 14.6719 12.5313 14.8031 12.0188C14.9344 11.5063 15 10.975 15 10.425C15 9.975 14.9469 9.5375 14.8406 9.1125C14.7344 8.6875 14.575 8.275 14.3625 7.875L15.2625 6.45C15.6375 7.0375 15.9344 7.6625 16.1531 8.325C16.3719 8.9875 16.4875 9.675 16.5 10.3875C16.5125 11.1 16.4313 11.7813 16.2563 12.4313C16.0813 13.0813 15.825 13.7 15.4875 14.2875C15.35 14.5125 15.1625 14.6875 14.925 14.8125C14.6875 14.9375 14.4375 15 14.175 15H3.825C3.5625 15 3.3125 14.9375 3.075 14.8125C2.8375 14.6875 2.65 14.5125 2.5125 14.2875C2.1875 13.725 1.9375 13.1281 1.7625 12.4969C1.5875 11.8656 1.5 11.2 1.5 10.5C1.5 9.4625 1.69688 8.49063 2.09063 7.58438C2.48438 6.67813 3.02188 5.88438 3.70313 5.20313C4.38438 4.52188 5.18125 3.98438 6.09375 3.59063C7.00625 3.19688 7.975 3 9 3Z" fill="currentColor"/>
 </svg>`,
-  square45: t`
+    square45: t`
 <svg
   width="18"
   height="18"
@@ -3344,7 +3345,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  square: t`
+    square: t`
 <svg
   width="18"
   height="18"
@@ -3360,7 +3361,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  star: t`
+    star: t`
 <svg
   width="18"
   height="18"
@@ -3376,7 +3377,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  starsAlt: t`
+    starsAlt: t`
 <svg
   width="18"
   height="18"
@@ -3399,7 +3400,7 @@ const o = {
     </clipPath>
   </defs>
 </svg>`,
-  stars: t`
+    stars: t`
 <svg
   width="18"
   height="18"
@@ -3429,10 +3430,10 @@ const o = {
     </clipPath>
   </defs>
 </svg>`,
-  stepper: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    stepper: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M3.75 11.25C3.125 11.25 2.59375 11.0313 2.15625 10.5938C1.71875 10.1563 1.5 9.625 1.5 9C1.5 8.375 1.71875 7.84375 2.15625 7.40625C2.59375 6.96875 3.125 6.75 3.75 6.75C4.375 6.75 4.90625 6.96875 5.34375 7.40625C5.78125 7.84375 6 8.375 6 9C6 9.625 5.78125 10.1563 5.34375 10.5938C4.90625 11.0313 4.375 11.25 3.75 11.25ZM3.75 9.75C3.9625 9.75 4.14063 9.67813 4.28438 9.53438C4.42813 9.39063 4.5 9.2125 4.5 9C4.5 8.7875 4.42813 8.60938 4.28438 8.46563C4.14063 8.32188 3.9625 8.25 3.75 8.25C3.5375 8.25 3.35938 8.32188 3.21563 8.46563C3.07188 8.60938 3 8.7875 3 9C3 9.2125 3.07188 9.39063 3.21563 9.53438C3.35938 9.67813 3.5375 9.75 3.75 9.75ZM9 11.25C8.375 11.25 7.84375 11.0313 7.40625 10.5938C6.96875 10.1563 6.75 9.625 6.75 9C6.75 8.375 6.96875 7.84375 7.40625 7.40625C7.84375 6.96875 8.375 6.75 9 6.75C9.625 6.75 10.1563 6.96875 10.5938 7.40625C11.0313 7.84375 11.25 8.375 11.25 9C11.25 9.625 11.0313 10.1563 10.5938 10.5938C10.1563 11.0313 9.625 11.25 9 11.25ZM9 9.75C9.2125 9.75 9.39063 9.67813 9.53438 9.53438C9.67813 9.39063 9.75 9.2125 9.75 9C9.75 8.7875 9.67813 8.60938 9.53438 8.46563C9.39063 8.32188 9.2125 8.25 9 8.25C8.7875 8.25 8.60938 8.32188 8.46563 8.46563C8.32188 8.60938 8.25 8.7875 8.25 9C8.25 9.2125 8.32188 9.39063 8.46563 9.53438C8.60938 9.67813 8.7875 9.75 9 9.75ZM14.25 11.25C13.625 11.25 13.0938 11.0313 12.6563 10.5938C12.2188 10.1563 12 9.625 12 9C12 8.375 12.2188 7.84375 12.6563 7.40625C13.0938 6.96875 13.625 6.75 14.25 6.75C14.875 6.75 15.4063 6.96875 15.8438 7.40625C16.2813 7.84375 16.5 8.375 16.5 9C16.5 9.625 16.2813 10.1563 15.8438 10.5938C15.4063 11.0313 14.875 11.25 14.25 11.25Z" fill="currentColor"/>
 </svg>`,
-  stopCircle: t`<svg
+    stopCircle: t`<svg
   width="18"
   height="18"
   viewBox="0 0 18 18"
@@ -3462,11 +3463,11 @@ const o = {
     </clipPath>
   </defs>
 </svg>`,
-  sun: t`
+    sun: t`
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
  <path d="M12 2V4M12 20V22M4 12H2M6.31412 6.31412L4.8999 4.8999M17.6859 6.31412L19.1001 4.8999M6.31412 17.69L4.8999 19.1042M17.6859 17.69L19.1001 19.1042M22 12H20M17 12C17 14.7614 14.7614 17 12 17C9.23858 17 7 14.7614 7 12C7 9.23858 9.23858 7 12 7C14.7614 7 17 9.23858 17 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`,
-  switchOff: t`
+    switchOff: t`
 <svg
   width="18"
   height="18"
@@ -3486,7 +3487,7 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  switchOn: t`
+    switchOn: t`
 <svg
   width="18"
   height="18"
@@ -3506,11 +3507,11 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  switchVertical: t`
+    switchVertical: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M12.75 3V15M12.75 15L9.75 12M12.75 15L15.75 12M5.25 15V3M5.25 3L2.25 6M5.25 3L8.25 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`,
-  tab: t`
+    tab: t`
 <svg
   width="18"
   height="18"
@@ -3523,17 +3524,17 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  tabs: t`
+    tabs: t`
 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M3.75 15.75C3.3375 15.75 2.98438 15.6031 2.69063 15.3094C2.39687 15.0156 2.25 14.6625 2.25 14.25V3.75C2.25 3.3375 2.39687 2.98438 2.69063 2.69063C2.98438 2.39687 3.3375 2.25 3.75 2.25H14.25C14.6625 2.25 15.0156 2.39687 15.3094 2.69063C15.6031 2.98438 15.75 3.3375 15.75 3.75V14.25C15.75 14.6625 15.6031 15.0156 15.3094 15.3094C15.0156 15.6031 14.6625 15.75 14.25 15.75H3.75ZM3.75 14.25H14.25V9H3.75V14.25ZM3.75 7.5H14.25V3.75H3.75V7.5ZM9 6H13.5V4.5H9V6Z" fill="currentColor"/>
 </svg>`,
-  tableAlt: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    tableAlt: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M3.75 15.75C3.3375 15.75 2.98438 15.6031 2.69063 15.3094C2.39687 15.0156 2.25 14.6625 2.25 14.25V3.75C2.25 3.3375 2.39687 2.98438 2.69063 2.69063C2.98438 2.39687 3.3375 2.25 3.75 2.25H14.25C14.6625 2.25 15.0156 2.39687 15.3094 2.69063C15.6031 2.98438 15.75 3.3375 15.75 3.75V14.25C15.75 14.6625 15.6031 15.0156 15.3094 15.3094C15.0156 15.6031 14.6625 15.75 14.25 15.75H3.75ZM8.25 11.25H3.75V14.25H8.25V11.25ZM9.75 11.25V14.25H14.25V11.25H9.75ZM8.25 9.75V6.75H3.75V9.75H8.25ZM9.75 9.75H14.25V6.75H9.75V9.75ZM3.75 5.25H14.25V3.75H3.75V5.25Z" fill="currentColor"/>
 </svg>`,
-  tableAltEdit: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    tableAltEdit: t`<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M3.75 9.75H8.25V6.75H3.75V9.75ZM3.75 5.25H14.25V3.75H3.75V5.25ZM3.75 15.75C3.3375 15.75 2.98438 15.6031 2.69063 15.3094C2.39687 15.0156 2.25 14.6625 2.25 14.25V3.75C2.25 3.3375 2.39687 2.98438 2.69063 2.69063C2.98438 2.39687 3.3375 2.25 3.75 2.25H14.25C14.6625 2.25 15.0156 2.39687 15.3094 2.69063C15.6031 2.98438 15.75 3.3375 15.75 3.75V8.475C15.5125 8.375 15.2656 8.30938 15.0094 8.27813C14.7531 8.24688 14.5 8.25 14.25 8.2875C13.9875 8.3375 13.7344 8.42188 13.4906 8.54063C13.2469 8.65938 13.025 8.81875 12.825 9.01875L12.0938 9.75L8.25 13.575V15.75H3.75ZM3.75 14.25H8.25V11.25H3.75V14.25ZM9.75 9.75H12.0938L12.825 9.01875C13.025 8.81875 13.2469 8.65938 13.4906 8.54063C13.7344 8.42188 13.9875 8.3375 14.25 8.2875V6.75H9.75V9.75ZM9.75 16.5V14.1938L13.8938 10.0688C14.0063 9.95625 14.1313 9.875 14.2688 9.825C14.4063 9.775 14.5438 9.75 14.6813 9.75C14.8313 9.75 14.975 9.77813 15.1125 9.83438C15.25 9.89063 15.375 9.975 15.4875 10.0875L16.1813 10.7813C16.2813 10.8938 16.3594 11.0188 16.4156 11.1563C16.4719 11.2938 16.5 11.4313 16.5 11.5688C16.5 11.7063 16.475 11.8469 16.425 11.9906C16.375 12.1344 16.2938 12.2625 16.1813 12.375L12.0563 16.5H9.75ZM10.875 15.375H11.5875L13.8563 13.0875L13.1625 12.3938L10.875 14.6625V15.375ZM13.5188 12.7313L13.1625 12.3938L13.8563 13.0875L13.5188 12.7313Z" fill="currentColor"/>
 </svg>`,
-  table: t`
+    table: t`
 <svg
   width="18"
   height="18"
@@ -3549,7 +3550,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  tag: t`
+    tag: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_2290_25895)">
 <path d="M6 6H6.0075M1.5 3.9V7.25588C1.5 7.62278 1.5 7.80623 1.54144 7.97888C1.57819 8.13188 1.63879 8.2782 1.72104 8.41245C1.8138 8.5638 1.94351 8.69355 2.20294 8.95297L7.95442 14.7044C8.84542 15.5954 9.291 16.041 9.80467 16.2079C10.2566 16.3547 10.7434 16.3547 11.1953 16.2079C11.709 16.041 12.1546 15.5954 13.0456 14.7044L14.7044 13.0456C15.5954 12.1546 16.041 11.709 16.2079 11.1953C16.3547 10.7434 16.3547 10.2566 16.2079 9.80467C16.041 9.291 15.5954 8.84542 14.7044 7.95442L8.95297 2.20294C8.69355 1.94351 8.5638 1.8138 8.41245 1.72104C8.2782 1.63879 8.13188 1.57819 7.97888 1.54144C7.80623 1.5 7.62277 1.5 7.25589 1.5H3.9C3.05992 1.5 2.63988 1.5 2.31902 1.66349C2.03678 1.8073 1.8073 2.03677 1.66349 2.31902C1.5 2.63988 1.5 3.05992 1.5 3.9ZM6.375 6C6.375 6.20711 6.20711 6.375 6 6.375C5.79289 6.375 5.625 6.20711 5.625 6C5.625 5.79289 5.79289 5.625 6 5.625C6.20711 5.625 6.375 5.79289 6.375 6Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -3562,7 +3563,7 @@ const o = {
 </svg>
 
   `,
-  terminal: t`
+    terminal: t`
 <svg
   width="18"
   height="18"
@@ -3578,7 +3579,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  textInput: t`
+    textInput: t`
 <svg
   width="18"
   height="18"
@@ -3594,7 +3595,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  thumbsDownAlt: t`
+    thumbsDownAlt: t`
 <svg
   width="18"
   height="18"
@@ -3614,7 +3615,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  thumbsDown: t`
+    thumbsDown: t`
 <svg
   width="18"
   height="18"
@@ -3630,7 +3631,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  thumbsUpAlt: t`
+    thumbsUpAlt: t`
 <svg
   width="18"
   height="18"
@@ -3650,7 +3651,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  thumbsUp: t`
+    thumbsUp: t`
 <svg
   width="18"
   height="18"
@@ -3666,7 +3667,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  tool: t`
+    tool: t`
 <svg
   width="18"
   height="18"
@@ -3682,7 +3683,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  topPanelOpen: t`
+    topPanelOpen: t`
 <svg
   width="18"
   height="18"
@@ -3695,7 +3696,7 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  touchApp: t`
+    touchApp: t`
 <svg
   width="18"
   height="18"
@@ -3708,7 +3709,7 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  trash: t`
+    trash: t`
 <svg
   width="18"
   height="18"
@@ -3724,15 +3725,15 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  trendUp: t`
+    trendUp: t`
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M16.5 5.25L10.5986 11.1514C10.3016 11.4484 10.153 11.597 9.98175 11.6526C9.83115 11.7016 9.66885 11.7016 9.51825 11.6526C9.34702 11.597 9.19845 11.4484 8.90145 11.1514L6.84853 9.09855C6.55151 8.80155 6.40301 8.65297 6.23177 8.5974C6.08113 8.54842 5.91887 8.54842 5.76823 8.5974C5.59699 8.65297 5.44849 8.80155 5.15147 9.09855L1.5 12.75M16.5 5.25H11.25M16.5 5.25V10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`,
-  triangle: t`
+    triangle: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M1.79264 13.5737L7.96133 2.91872C8.3022 2.32985 8.47268 2.03541 8.69513 1.93652C8.88908 1.85026 9.11055 1.85026 9.30458 1.93652C9.52695 2.03541 9.69743 2.32984 10.0383 2.91872L16.207 13.5737C16.5491 14.1647 16.7202 14.4602 16.6949 14.7027C16.6729 14.9142 16.562 15.1064 16.3901 15.2315C16.1928 15.3749 15.8514 15.3749 15.1685 15.3749H2.83115C2.14826 15.3749 1.80681 15.3749 1.6096 15.2315C1.43758 15.1064 1.32675 14.9142 1.30469 14.7027C1.27941 14.4602 1.45049 14.1647 1.79264 13.5737Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`,
-  type: t`
+    type: t`
 <svg
   width="18"
   height="18"
@@ -3748,7 +3749,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  unlock: t`
+    unlock: t`
 <svg
   width="18"
   height="18"
@@ -3764,11 +3765,11 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  upload: t`
+    upload: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M15.75 11.25V12.15C15.75 13.4102 15.75 14.0401 15.5048 14.5215C15.2891 14.9449 14.9449 15.2891 14.5215 15.5048C14.0401 15.75 13.4102 15.75 12.15 15.75H5.85C4.58988 15.75 3.95982 15.75 3.47852 15.5048C3.05516 15.2891 2.71095 14.9449 2.49524 14.5215C2.25 14.0401 2.25 13.4102 2.25 12.15V11.25M12.75 6L9 2.25M9 2.25L5.25 6M9 2.25V11.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`,
-  userLeft: t`
+    userLeft: t`
 <svg
   width="18"
   height="18"
@@ -3784,7 +3785,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  userRight: t`
+    userRight: t`
 <svg
   width="18"
   height="18"
@@ -3800,7 +3801,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  userUp: t`
+    userUp: t`
 <svg
   width="18"
   height="18"
@@ -3816,7 +3817,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  user: t`
+    user: t`
 <svg
   width="18"
   height="18"
@@ -3832,11 +3833,11 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  userCircle: t`
+    userCircle: t`
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M5.3163 19.4384C5.92462 18.0052 7.34492 17 9 17H15C16.6551 17 18.0754 18.0052 18.6837 19.4384M16 9.5C16 11.7091 14.2091 13.5 12 13.5C9.79086 13.5 8 11.7091 8 9.5C8 7.29086 9.79086 5.5 12 5.5C14.2091 5.5 16 7.29086 16 9.5ZM22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`,
-  users: t`
+    users: t`
 <svg
   width="18"
   height="18"
@@ -3852,7 +3853,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  vaadinLogo: t`
+    vaadinLogo: t`
 <svg 
   width="18" 
   height="18" 
@@ -3865,7 +3866,7 @@ const o = {
     fill="currentColor"
   />
 </svg>`,
-  verticalCenter: t`
+    verticalCenter: t`
 <svg
   width="18"
   height="18"
@@ -3895,7 +3896,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  verticalEnd: t`
+    verticalEnd: t`
 <svg
   width="18"
   height="18"
@@ -3925,7 +3926,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  verticalStart: t`
+    verticalStart: t`
 <svg
   width="18"
   height="18"
@@ -3955,11 +3956,11 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  viewDay: t`
+    viewDay: t`
 <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M3.75 12.75C3.3375 12.75 2.98438 12.6031 2.69063 12.3094C2.39687 12.0156 2.25 11.6625 2.25 11.25V6.75C2.25 6.3375 2.39687 5.98438 2.69063 5.69063C2.98438 5.39688 3.3375 5.25 3.75 5.25H14.25C14.6625 5.25 15.0156 5.39688 15.3094 5.69063C15.6031 5.98438 15.75 6.3375 15.75 6.75V11.25C15.75 11.6625 15.6031 12.0156 15.3094 12.3094C15.0156 12.6031 14.6625 12.75 14.25 12.75H3.75ZM3.75 11.25H14.25V6.75H3.75V11.25ZM2.25 3.75V2.25H15.75V3.75H2.25ZM2.25 15.75V14.25H15.75V15.75H2.25Z" fill="currentColor"/>
 </svg>`,
-  warning: t`
+    warning: t`
 <svg
   width="18"
   height="18"
@@ -3975,7 +3976,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  x: t`
+    x: t`
 <svg
   width="18"
   height="18"
@@ -3991,7 +3992,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  zap: t`
+    zap: t`
 <svg 
   width="18" 
   height="18" 
@@ -4007,7 +4008,7 @@ const o = {
     stroke-linejoin="round"
   />
 </svg>`,
-  filePlus: t`
+    filePlus: t`
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M15.0001 7.87504V5.10004C15.0001 3.83993 15.0001 3.20986 14.7548 2.72856C14.5391 2.3052 14.1949 1.961 13.7716 1.74528C13.2902 1.50004 12.6602 1.50004 11.4001 1.50004H6.60003C5.3399 1.50004 4.70985 1.50004 4.22855 1.74528C3.80518 1.961 3.46097 2.3052 3.24525 2.72856C3.00003 3.20986 3.00003 3.83993 3.00003 5.10004V12.9C3.00003 14.1601 3.00003 14.7902 3.24525 15.2715C3.46097 15.6949 3.80518 16.0391 4.22855 16.2548C4.70985 16.5 5.3399 16.5 6.60003 16.5H9.00002M13.5 15.75V11.25M11.25 13.5H15.75" 
   stroke="currentColor" 
@@ -4021,5 +4022,5 @@ const o = {
   `
 };
 export {
-  o as i
+    o as i
 };

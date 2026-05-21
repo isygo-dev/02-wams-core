@@ -159,7 +159,7 @@ public class CreateKeyDialog extends BaseActionDialog {
             close();
             Notification.show("Key created successfully", 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            
+
             return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();

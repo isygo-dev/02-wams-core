@@ -16,7 +16,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 public abstract class BaseActionDialog extends Dialog {
 
     private final Runnable onSuccess;
-    
+
     private final Span errorSpan;
     private final Button okButton;
     private final Button cancelButton;
@@ -49,7 +49,7 @@ public abstract class BaseActionDialog extends Dialog {
         okButton.setEnabled(enable);
     }
 
-    public void addThemeVariantsOkButton(ButtonVariant... variants){
+    public void addThemeVariantsOkButton(ButtonVariant... variants) {
         okButton.addThemeVariants(variants);
     }
 

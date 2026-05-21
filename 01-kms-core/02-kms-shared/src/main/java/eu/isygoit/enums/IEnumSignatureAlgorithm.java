@@ -28,11 +28,6 @@ public enum IEnumSignatureAlgorithm {
         this.pssSpec = pssSpec;
     }
 
-    public String getKmsName() { return kmsName; }
-    public String getJavaAlgorithm() { return javaAlgorithm; }
-    public String getKeyAlgorithm() { return keyAlgorithm; }
-    public PSSParameterSpec getPssSpec() { return pssSpec; }
-
     public static IEnumSignatureAlgorithm fromKmsName(String kmsName) {
         for (IEnumSignatureAlgorithm algo : values()) {
             if (algo.kmsName.equals(kmsName)) {
@@ -44,5 +39,21 @@ public enum IEnumSignatureAlgorithm {
 
     private static PSSParameterSpec createPSSParameterSpec(String hashAlgo, int saltLength) {
         return new PSSParameterSpec(hashAlgo, "MGF1", MGF1ParameterSpec.SHA256, saltLength, 1);
+    }
+
+    public String getKmsName() {
+        return kmsName;
+    }
+
+    public String getJavaAlgorithm() {
+        return javaAlgorithm;
+    }
+
+    public String getKeyAlgorithm() {
+        return keyAlgorithm;
+    }
+
+    public PSSParameterSpec getPssSpec() {
+        return pssSpec;
     }
 }

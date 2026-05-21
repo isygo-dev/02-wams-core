@@ -9,8 +9,11 @@ import jakarta.validation.Valid;
 public interface ISigningService {
 
     SignResponse sign(String tenant, SignRequest request);
+
     VerifyResponse verify(String tenant, VerifyRequest request);
+
     GenerateMacResponse generateMac(String tenant, @Valid GenerateMacRequest request);
+
     VerifyMacResponse verifyMac(String tenant, @Valid VerifyMacRequest request);
 }
 

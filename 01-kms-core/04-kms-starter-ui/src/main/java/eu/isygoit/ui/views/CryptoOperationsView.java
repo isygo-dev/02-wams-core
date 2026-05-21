@@ -164,46 +164,46 @@ public class CryptoOperationsView extends VerticalLayout {
 
     private void injectResponsiveStyles() {
         String css = """
-            .crypto-key-layout {
-                display: flex;
-                flex-wrap: wrap;
-                gap: var(--lumo-space-s);
-                align-items: center;
-            }
-            @media (max-width: 768px) {
-                .crypto-key-layout {
-                    flex-direction: column;
-                    align-items: stretch;
-                }
-                .crypto-key-layout > * {
-                    width: 100% !important;
-                }
-                /* Make combo boxes and text fields full width */
-                .crypto-key-layout .vaadin-combo-box {
-                    width: 100% !important;
-                }
-                /* Make all algorithm combo boxes and context field full width */
-                .crypto-panel .vaadin-combo-box,
-                .crypto-panel .vaadin-text-field,
-                .crypto-panel .vaadin-text-area {
-                    width: 100% !important;
-                }
-                /* Button rows wrap and buttons become full width */
-                .crypto-button-row {
-                    flex-direction: column;
-                    width: 100%;
-                }
-                .crypto-button-row > * {
-                    width: 100% !important;
-                    margin-bottom: var(--lumo-space-xs);
-                }
-                /* Data key panel adjustments */
-                .crypto-data-key-panel .vaadin-combo-box,
-                .crypto-data-key-panel .vaadin-text-field {
-                    width: 100% !important;
-                }
-            }
-        """;
+                    .crypto-key-layout {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: var(--lumo-space-s);
+                        align-items: center;
+                    }
+                    @media (max-width: 768px) {
+                        .crypto-key-layout {
+                            flex-direction: column;
+                            align-items: stretch;
+                        }
+                        .crypto-key-layout > * {
+                            width: 100% !important;
+                        }
+                        /* Make combo boxes and text fields full width */
+                        .crypto-key-layout .vaadin-combo-box {
+                            width: 100% !important;
+                        }
+                        /* Make all algorithm combo boxes and context field full width */
+                        .crypto-panel .vaadin-combo-box,
+                        .crypto-panel .vaadin-text-field,
+                        .crypto-panel .vaadin-text-area {
+                            width: 100% !important;
+                        }
+                        /* Button rows wrap and buttons become full width */
+                        .crypto-button-row {
+                            flex-direction: column;
+                            width: 100%;
+                        }
+                        .crypto-button-row > * {
+                            width: 100% !important;
+                            margin-bottom: var(--lumo-space-xs);
+                        }
+                        /* Data key panel adjustments */
+                        .crypto-data-key-panel .vaadin-combo-box,
+                        .crypto-data-key-panel .vaadin-text-field {
+                            width: 100% !important;
+                        }
+                    }
+                """;
         UI.getCurrent().getPage().executeJs(
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
                 css
@@ -878,7 +878,12 @@ public class CryptoOperationsView extends VerticalLayout {
             this.displayName = aliasOrId != null ? aliasOrId + " (" + keyId + ")" : keyId;
         }
 
-        String getKeyId() { return keyId; }
-        String getDisplayName() { return displayName; }
+        String getKeyId() {
+            return keyId;
+        }
+
+        String getDisplayName() {
+            return displayName;
+        }
     }
 }

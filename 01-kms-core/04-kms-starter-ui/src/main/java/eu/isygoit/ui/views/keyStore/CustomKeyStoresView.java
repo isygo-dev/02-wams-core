@@ -111,43 +111,43 @@ public class CustomKeyStoresView extends VerticalLayout {
 
     private void injectResponsiveStyles() {
         String css = """
-            .custom-stores-toolbar {
-                display: flex;
-                flex-wrap: wrap;
-                gap: var(--lumo-space-s);
-                align-items: center;
-                justify-content: space-between;
-                width: 100%;
-                margin-bottom: var(--lumo-space-m);
-            }
-            .toolbar-left-group,
-            .toolbar-right-group {
-                display: flex;
-                flex-wrap: wrap;
-                gap: var(--lumo-space-s);
-                align-items: center;
-            }
-            @media (max-width: 768px) {
-                .custom-stores-toolbar {
-                    flex-direction: column;
-                    align-items: stretch;
-                }
-                .toolbar-left-group,
-                .toolbar-right-group {
-                    flex-direction: column;
-                    align-items: stretch;
-                    width: 100%;
-                }
-                .toolbar-left-group > *,
-                .toolbar-right-group > * {
-                    width: 100% !important;
-                }
-                /* Ensure buttons in right group also become full width */
-                .toolbar-right-group .vaadin-button {
-                    width: 100% !important;
-                }
-            }
-        """;
+                    .custom-stores-toolbar {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: var(--lumo-space-s);
+                        align-items: center;
+                        justify-content: space-between;
+                        width: 100%;
+                        margin-bottom: var(--lumo-space-m);
+                    }
+                    .toolbar-left-group,
+                    .toolbar-right-group {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: var(--lumo-space-s);
+                        align-items: center;
+                    }
+                    @media (max-width: 768px) {
+                        .custom-stores-toolbar {
+                            flex-direction: column;
+                            align-items: stretch;
+                        }
+                        .toolbar-left-group,
+                        .toolbar-right-group {
+                            flex-direction: column;
+                            align-items: stretch;
+                            width: 100%;
+                        }
+                        .toolbar-left-group > *,
+                        .toolbar-right-group > * {
+                            width: 100% !important;
+                        }
+                        /* Ensure buttons in right group also become full width */
+                        .toolbar-right-group .vaadin-button {
+                            width: 100% !important;
+                        }
+                    }
+                """;
         UI.getCurrent().getPage().executeJs(
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
                 css

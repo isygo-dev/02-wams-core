@@ -99,7 +99,7 @@ public class CreateCustomKeyStoreDialog extends BaseActionDialog {
                 this.append(errorMsg);
                 Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
-                return false ;
+                return false;
             }
 
             close();

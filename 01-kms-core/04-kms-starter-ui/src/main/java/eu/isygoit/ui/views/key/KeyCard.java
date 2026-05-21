@@ -17,8 +17,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
+import eu.isygoit.dto.KmsDtos.ListKeyVersionsResponse;
 import eu.isygoit.dto.KmsDtos.ListResourceTagsResponse;
 import eu.isygoit.dto.KmsDtos.UpdateKeyRotationRequest;
 import eu.isygoit.enums.IEnumKeyStatus;
@@ -73,9 +73,17 @@ class KeyCard extends VerticalLayout {
         // Do NOT call loadVersionCount() here – it will be called in onAttach
     }
 
-    public String getKeyId() { return keyId; }
-    public String getAliasOrId() { return aliasOrId; }
-    public String getStatusText() { return statusText; }
+    public String getKeyId() {
+        return keyId;
+    }
+
+    public String getAliasOrId() {
+        return aliasOrId;
+    }
+
+    public String getStatusText() {
+        return statusText;
+    }
 
     private void buildCard() {
         setWidthFull();
