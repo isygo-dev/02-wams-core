@@ -13,6 +13,16 @@ public class MissingXksProxyAuthCredentialException extends ManagedException {
     public MissingXksProxyAuthCredentialException(String s) {
         super(s);
     }
+
+    /**
+     * Instantiates a new Missing xks proxy auth credential exception.
+     *
+     * @param message the message
+     * @param cause   the cause
+     */
+    public MissingXksProxyAuthCredentialException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
 
 

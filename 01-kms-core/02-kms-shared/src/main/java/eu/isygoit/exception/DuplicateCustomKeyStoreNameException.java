@@ -13,4 +13,8 @@ public class DuplicateCustomKeyStoreNameException extends ManagedException {
     public DuplicateCustomKeyStoreNameException(String s) {
         super(s);
     }
+
+    public DuplicateCustomKeyStoreNameException(String s, Throwable cause) {
+        super(s, cause);
+    }
 }

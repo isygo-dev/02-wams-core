@@ -11,5 +11,9 @@ public class KeyNotFoundException extends RuntimeException {
     public KeyNotFoundException(String s) {
         super(s);
     }
+
+    public KeyNotFoundException(String s, Throwable cause) {
+        super(s, cause);
+    }
 }
 

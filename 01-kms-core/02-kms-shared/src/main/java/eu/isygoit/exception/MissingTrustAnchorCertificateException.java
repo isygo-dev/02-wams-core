@@ -13,4 +13,8 @@ public class MissingTrustAnchorCertificateException extends ManagedException {
     public MissingTrustAnchorCertificateException(String s) {
         super(s);
     }
+
+    public MissingTrustAnchorCertificateException(String s, Throwable cause) {
+        super(s, cause);
+    }
 }

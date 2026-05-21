@@ -2,15 +2,15 @@ package eu.isygoit.exception;
 
 import eu.isygoit.annotation.MsgLocale;
 
-@MsgLocale("alias.not.found.exception")
-public class AliasNotFoundException extends ManagedException {
+@MsgLocale("sign.data.exception")
+public class SignDataException extends ManagedException {
 
     /**
      * Instantiates a new Token config not found exception.
      *
      * @param s the s
      */
-    public AliasNotFoundException(String s) {
+    public SignDataException(String s) {
         super(s);
     }
 
@@ -20,7 +20,7 @@ public class AliasNotFoundException extends ManagedException {
      * @param message the message
      * @param cause   the cause
      */
-    public AliasNotFoundException(String message, Throwable cause) {
+    public SignDataException(String message, Throwable cause) {
         super(message, cause);
     }
 }

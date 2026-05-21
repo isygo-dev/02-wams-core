@@ -13,4 +13,8 @@ public class CryptBadPaddingException extends ManagedException {
     public CryptBadPaddingException(String s) {
         super(s);
     }
+
+    public CryptBadPaddingException(String s, Throwable cause) {
+        super(s, cause);
+    }
 }

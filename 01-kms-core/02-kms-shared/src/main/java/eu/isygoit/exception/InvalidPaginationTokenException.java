@@ -13,4 +13,8 @@ public class InvalidPaginationTokenException extends ManagedException {
     public InvalidPaginationTokenException(String s) {
         super(s);
     }
+
+    public InvalidPaginationTokenException(String s, Throwable cause) {
+        super(s, cause);
+    }
 }

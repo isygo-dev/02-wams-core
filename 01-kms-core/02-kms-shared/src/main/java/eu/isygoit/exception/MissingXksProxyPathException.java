@@ -13,4 +13,14 @@ public class MissingXksProxyPathException extends ManagedException {
     public MissingXksProxyPathException(String s) {
         super(s);
     }
+
+    /**
+     * Instantiates a new Missing xks proxy path exception.
+     *
+     * @param message the message
+     * @param cause   the cause
+     */
+    public MissingXksProxyPathException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

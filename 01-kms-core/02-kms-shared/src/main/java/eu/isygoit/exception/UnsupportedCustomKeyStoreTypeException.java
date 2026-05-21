@@ -14,4 +14,14 @@ public class UnsupportedCustomKeyStoreTypeException extends ManagedException {
     public UnsupportedCustomKeyStoreTypeException(String s) {
         super(s);
     }
+
+    /**
+     * Instantiates a new Unsupported custom key store type exception.
+     *
+     * @param message the message
+     * @param cause   the cause
+     */
+    public UnsupportedCustomKeyStoreTypeException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

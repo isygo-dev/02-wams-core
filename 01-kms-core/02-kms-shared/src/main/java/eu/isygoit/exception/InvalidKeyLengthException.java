@@ -2,15 +2,15 @@ package eu.isygoit.exception;
 
 import eu.isygoit.annotation.MsgLocale;
 
-@MsgLocale("alias.not.found.exception")
-public class AliasNotFoundException extends ManagedException {
+@MsgLocale("invalid.key.length.exception")
+public class InvalidKeyLengthException extends ManagedException {
 
     /**
      * Instantiates a new Token config not found exception.
      *
      * @param s the s
      */
-    public AliasNotFoundException(String s) {
+    public InvalidKeyLengthException(String s) {
         super(s);
     }
 
@@ -20,7 +20,7 @@ public class AliasNotFoundException extends ManagedException {
      * @param message the message
      * @param cause   the cause
      */
-    public AliasNotFoundException(String message, Throwable cause) {
+    public InvalidKeyLengthException(String message, Throwable cause) {
         super(message, cause);
     }
 }

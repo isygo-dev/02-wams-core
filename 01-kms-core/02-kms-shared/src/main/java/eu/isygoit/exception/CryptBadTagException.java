@@ -13,4 +13,8 @@ public class CryptBadTagException extends ManagedException {
     public CryptBadTagException(String s) {
         super(s);
     }
+
+    public CryptBadTagException(String s, Throwable cause) {
+        super(s, cause);
+    }
 }

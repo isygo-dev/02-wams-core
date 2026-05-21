@@ -13,4 +13,8 @@ public class CryptSecurityException extends ManagedException {
     public CryptSecurityException(String s) {
         super(s);
     }
+
+    public CryptSecurityException(String s, Throwable cause) {
+        super(s, cause);
+    }
 }

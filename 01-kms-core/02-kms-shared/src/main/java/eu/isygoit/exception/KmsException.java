@@ -13,4 +13,8 @@ public class KmsException extends ManagedException {
     public KmsException(String s) {
         super(s);
     }
+
+    public KmsException(String s, Throwable cause) {
+        super(s, cause);
+    }
 }

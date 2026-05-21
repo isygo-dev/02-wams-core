@@ -13,4 +13,8 @@ public class CustomKeyStoreAlreadyConnectedException extends ManagedException {
     public CustomKeyStoreAlreadyConnectedException(String s) {
         super(s);
     }
+
+    public CustomKeyStoreAlreadyConnectedException(String s, Throwable cause) {
+        super(s, cause);
+    }
 }

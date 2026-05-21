@@ -5,9 +5,7 @@ import eu.isygoit.dto.data.KeyPairMaterial;
 import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumSignatureAlgorithm;
 import eu.isygoit.enums.IKmsActionType;
-import eu.isygoit.exception.CryptBadPaddingException;
-import eu.isygoit.exception.CryptBadTagException;
-import eu.isygoit.exception.CryptSecurityException;
+import eu.isygoit.exception.*;
 import eu.isygoit.model.DigestConfig;
 import eu.isygoit.model.KmsAuditLog;
 import eu.isygoit.model.PEBConfig;
@@ -198,12 +196,13 @@ public class CryptoService implements ICryptoService {
                     return new KeyPairMaterial(ecPair.getPrivate().getEncoded(), ecPair.getPublic().getEncoded());
 
                 case SM2:
-                    throw new UnsupportedOperationException("SM2 not yet implemented");
+                    throw new KeySpecNotYetSupportedException("SM2 not yet implemented");
                 default:
-                    throw new IllegalArgumentException("Unsupported key spec: " + keySpec);
+                    throw new KeySpecNotSupportedException("Unsupported key spec: " + keySpec);
             }
         } catch (Exception e) {
-            throw new RuntimeException("Key generation failed: " + keySpec, e);
+            log.error("Key generation failed for spec: {}", keySpec, e);
+            throw new GenerateKeyMaterialException("Key generation failed: " + keySpec, e);
         }
     }
 
@@ -234,7 +233,8 @@ public class CryptoService implements ICryptoService {
                               IEnumKeySpec.Types keySpec,
                               String encryptionAlgorithmSpec,
                               Map<String, String> encryptionContext) {
-        if (ciphertext == null || ciphertext.length == 0) return new byte[0];
+        if (ciphertext == null || ciphertext.length < 2)
+            throw new InvalidCipherTextException("Invalid or short ciphertext");
         try {
             if (keySpec != null && keySpec.isAsymmetric()) {
                 return hybridDecrypt(ciphertext, keyMaterial, keySpec, encryptionAlgorithmSpec, encryptionContext);
@@ -301,10 +301,11 @@ public class CryptoService implements ICryptoService {
                                  IEnumKeySpec.Types keySpec,
                                  String algorithmSpec,
                                  Map<String, String> context) {
-        if (ciphertext.length < 2) throw new IllegalArgumentException("Invalid ciphertext");
+        if (ciphertext == null || ciphertext.length < 2)
+            throw new InvalidCipherTextException("Invalid or short ciphertext");
         try {
             int encKeyLen = ((ciphertext[0] & 0xFF) << 8) | (ciphertext[1] & 0xFF);
-            if (ciphertext.length < 2 + encKeyLen + 12) throw new IllegalArgumentException("Malformed ciphertext");
+            if (ciphertext.length < 2 + encKeyLen + 12) throw new MalformedCipherTextException("Malformed ciphertext");
             int pos = 2;
             byte[] encAesKey = new byte[encKeyLen];
             System.arraycopy(ciphertext, pos, encAesKey, 0, encKeyLen);
@@ -334,13 +335,13 @@ public class CryptoService implements ICryptoService {
             return aesCipher.doFinal(encryptedData);
         } catch (AEADBadTagException e) {
             log.error("Decryption failed due to bad tag/context", e);
-            throw new CryptBadTagException("Bad tag/context in ciphertext");
+            throw new CryptBadTagException("Bad tag/context in ciphertext", e);
         } catch (BadPaddingException e) {
             log.error("Decryption failed due to bad padding", e);
-            throw new CryptBadPaddingException("Bad padding, possibly wrong key or corrupted data");
+            throw new CryptBadPaddingException("Bad padding, possibly wrong key or corrupted data", e);
         } catch (GeneralSecurityException e) {
             log.error("Decryption failed due to security error", e);
-            throw new CryptSecurityException("Decryption failed: " + e.getMessage());
+            throw new CryptSecurityException("Decryption failed: ", e);
         }
     }
 
@@ -350,7 +351,7 @@ public class CryptoService implements ICryptoService {
 
     private byte[] symmetricEncrypt(byte[] plaintext, byte[] key, Map<String, String> context) throws Exception {
         if (key.length != 16 && key.length != 24 && key.length != 32)
-            throw new InvalidKeyException("AES key length must be 16,24,32 bytes");
+            throw new InvalidKeyLengthException("AES key length must be 16,24,32 bytes");
         byte[] iv = new byte[12];
         new SecureRandom().nextBytes(iv);
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
@@ -368,9 +369,10 @@ public class CryptoService implements ICryptoService {
     }
 
     private byte[] symmetricDecrypt(byte[] ciphertext, byte[] key, Map<String, String> context) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-        if (ciphertext.length < 12) throw new IllegalArgumentException("Ciphertext too short");
+        if (ciphertext == null || ciphertext.length < 12)
+            throw new InvalidCipherTextException("Invalid or short ciphertext");
         if (key.length != 16 && key.length != 24 && key.length != 32)
-            throw new InvalidKeyException("AES key length must be 16,24,32 bytes");
+            throw new InvalidKeyLengthException("AES key length must be 16,24,32 bytes");
         byte[] iv = new byte[12];
         System.arraycopy(ciphertext, 0, iv, 0, 12);
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
@@ -430,7 +432,7 @@ public class CryptoService implements ICryptoService {
             return signature.sign();
         } catch (Exception e) {
             log.error("Signing failed", e);
-            throw new RuntimeException("Signing failed", e);
+            throw new SignDataException("Signing failed", e);
         }
     }
 

@@ -14,4 +14,14 @@ public class MissingXksProxyEndpointException extends ManagedException {
     public MissingXksProxyEndpointException(String s) {
         super(s);
     }
+
+    /**
+     * Instantiates a new Missing xks proxy endpoint exception.
+     *
+     * @param message the message
+     * @param cause   the cause
+     */
+    public MissingXksProxyEndpointException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

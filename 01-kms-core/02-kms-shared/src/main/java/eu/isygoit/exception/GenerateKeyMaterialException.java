@@ -2,19 +2,19 @@ package eu.isygoit.exception;
 
 import eu.isygoit.annotation.MsgLocale;
 
-@MsgLocale("kms.key.not.found.exception")
-public class KmsKeyNotFoundException extends ManagedException {
+@MsgLocale("generate.key.material.exception")
+public class GenerateKeyMaterialException extends ManagedException {
 
     /**
      * Instantiates a new Token config not found exception.
      *
      * @param s the s
      */
-    public KmsKeyNotFoundException(String s) {
+    public GenerateKeyMaterialException(String s) {
         super(s);
     }
 
-    public KmsKeyNotFoundException(String s, Throwable cause) {
+    public GenerateKeyMaterialException(String s, Throwable cause) {
         super(s, cause);
     }
 }

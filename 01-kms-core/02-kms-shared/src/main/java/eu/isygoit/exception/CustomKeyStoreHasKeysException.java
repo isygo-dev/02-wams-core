@@ -13,4 +13,8 @@ public class CustomKeyStoreHasKeysException extends ManagedException {
     public CustomKeyStoreHasKeysException(String s) {
         super(s);
     }
+
+    public CustomKeyStoreHasKeysException(String s, Throwable cause) {
+        super(s, cause);
+    }
 }

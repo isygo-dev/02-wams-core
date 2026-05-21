@@ -13,5 +13,9 @@ public class CustomKeyStoreConnectedException extends ManagedException {
     public CustomKeyStoreConnectedException(String s) {
         super(s);
     }
+
+    public CustomKeyStoreConnectedException(String s, Throwable cause) {
+        super(s, cause);
+    }
 }
 

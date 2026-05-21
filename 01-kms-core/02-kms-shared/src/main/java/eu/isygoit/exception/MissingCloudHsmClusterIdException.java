@@ -13,4 +13,8 @@ public class MissingCloudHsmClusterIdException extends ManagedException {
     public MissingCloudHsmClusterIdException(String s) {
         super(s);
     }
+
+    public MissingCloudHsmClusterIdException(String s, Throwable cause) {
+        super(s, cause);
+    }
 }

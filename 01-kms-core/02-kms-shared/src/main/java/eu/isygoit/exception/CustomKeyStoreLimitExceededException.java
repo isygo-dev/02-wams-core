@@ -13,4 +13,8 @@ public class CustomKeyStoreLimitExceededException extends ManagedException {
     public CustomKeyStoreLimitExceededException(String s) {
         super(s);
     }
+
+    public CustomKeyStoreLimitExceededException(String s, Throwable cause) {
+        super(s, cause);
+    }
 }

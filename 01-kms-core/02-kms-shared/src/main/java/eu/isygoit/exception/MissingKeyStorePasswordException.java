@@ -13,4 +13,8 @@ public class MissingKeyStorePasswordException extends ManagedException {
     public MissingKeyStorePasswordException(String s) {
         super(s);
     }
+
+    public MissingKeyStorePasswordException(String s, Throwable cause) {
+        super(s, cause);
+    }
 }

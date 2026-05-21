@@ -18,4 +18,8 @@ public class KmsTenantUpdateException extends ManagedException {
     public KmsTenantUpdateException(String s) {
         super(s);
     }
+
+    public KmsTenantUpdateException(String s, Throwable cause) {
+        super(s, cause);
+    }
 }

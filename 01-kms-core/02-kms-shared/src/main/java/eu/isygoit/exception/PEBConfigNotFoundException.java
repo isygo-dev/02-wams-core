@@ -16,5 +16,16 @@ public class PEBConfigNotFoundException extends ManagedException {
      * @param s the s
      */
     public PEBConfigNotFoundException(String s) {
+        super(s);
+    }
+
+    /**
+     * Instantiates a new Peb config not found exception.
+     *
+     * @param message the message
+     * @param cause   the cause
+     */
+    public PEBConfigNotFoundException(String message, Throwable cause) {
+        super(message, cause);
     }
 }
