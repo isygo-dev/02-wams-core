@@ -487,42 +487,6 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     }
 
     /**
-     * List of signing algorithms supported by this key.
-     * Derived from `keySpec` and `keyUsage`.
-     * <p>
-     * For RSA keys: ["RSASSA_PKCS1_V1_5_SHA_256", "RSASSA_PSS_SHA_256", ...]
-     * For ECC keys: ["ECDSA_SHA_256", "ECDSA_SHA_384", "ECDSA_SHA_512"]
-     * For HMAC keys: ["HMAC_SHA_224", "HMAC_SHA_256", ...]
-     * </p>
-     * <p>
-     * AWS equivalent: SigningAlgorithms.
-     * </p>
-     */
-    @Transient
-    public List<String> getSigningAlgorithms() {
-        List<String> algos = new ArrayList<>();
-        if (keySpec == null || keyUsage != IEnumKeyUsage.Types.SIGN_VERIFY) return algos;
-        if (keySpec.name().startsWith("RSA")) {
-            algos.add("RSASSA_PKCS1_V1_5_SHA_256");
-            algos.add("RSASSA_PKCS1_V1_5_SHA_384");
-            algos.add("RSASSA_PKCS1_V1_5_SHA_512");
-            algos.add("RSASSA_PSS_SHA_256");
-            algos.add("RSASSA_PSS_SHA_384");
-            algos.add("RSASSA_PSS_SHA_512");
-        } else if (keySpec.name().startsWith("ECC") || keySpec == IEnumKeySpec.Types.SM2) {
-            algos.add("ECDSA_SHA_256");
-            algos.add("ECDSA_SHA_384");
-            algos.add("ECDSA_SHA_512");
-        } else if (keySpec.name().startsWith("HMAC")) {
-            algos.add("HMAC_SHA_224");
-            algos.add("HMAC_SHA_256");
-            algos.add("HMAC_SHA_384");
-            algos.add("HMAC_SHA_512");
-        }
-        return algos;
-    }
-
-    /**
      * Key manager type: "AWS" (or "WAMS") or "CUSTOMER".
      * Derived from `origin` and custom key store presence.
      * <p>

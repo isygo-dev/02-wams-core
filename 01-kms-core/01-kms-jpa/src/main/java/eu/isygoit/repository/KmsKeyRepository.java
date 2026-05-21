@@ -30,9 +30,9 @@ public interface KmsKeyRepository extends JpaRepository<KmsKey, Long> {
     Optional<KmsKey> findByTenantAndPrimaryKeyAlias(String tenant, String keyAlias);
 
     /**
-     * Find key by tenant and keyWrn
+     * Find keys by tenant and status and rotation enabled
      */
-    Optional<KmsKey> findByTenantAndKeyWrn(String tenant, String keyWrn);
+    List<KmsKey> findByTenantAndKeyStatusAndRotationEnabled(String tenant, IEnumKeyStatus.Types status, boolean rotationEnabled);
 
     /**
      * List all keys for a tenant with pagination

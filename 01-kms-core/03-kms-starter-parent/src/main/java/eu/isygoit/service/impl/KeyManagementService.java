@@ -4,10 +4,7 @@ import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.dto.data.KeyPairMaterial;
 import eu.isygoit.enums.IEnumKeyOrigin;
 import eu.isygoit.enums.IEnumKeyStatus;
-import eu.isygoit.exception.CustomKeyStoreNotFoundException;
-import eu.isygoit.exception.InvalidKeyStateException;
-import eu.isygoit.exception.KeyNotFoundException;
-import eu.isygoit.exception.KmsKeyNotFoundException;
+import eu.isygoit.exception.*;
 import eu.isygoit.mapper.AlgorithmMapper;
 import eu.isygoit.model.*;
 import eu.isygoit.repository.*;
@@ -419,45 +416,70 @@ public class KeyManagementService implements IKeyManagementService {
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
+        if (IEnumKeyOrigin.Types.EXTERNAL.equals(key.getOrigin())) {
+            throw new OperationNotAllowedException(
+                    "Cannot rotate key with origin: " + key.getOrigin()
+            );
+        }
+
         if (!IEnumKeyStatus.Types.ENABLED.equals(key.getKeyStatus())) {
             throw new InvalidKeyStateException(
                     "Cannot rotate key with status: " + key.getKeyStatus()
             );
         }
 
-        String newVersionId = "v-" + UUID.randomUUID();
+        String versionId = "v-" + UUID.randomUUID();
         LocalDateTime now = LocalDateTime.now();
 
         try {
+            // Compute signing algorithm for the version (if applicable)
+            String signingAlgorithm = AlgorithmMapper.getDefaultAlgorithm(key.getKeySpec(), key.getKeyUsage());
+
+            // Calculate validTo for this version
+            LocalDateTime versionValidTo = null;
+            if (key.getOrigin() == IEnumKeyOrigin.Types.EXTERNAL && key.getValidTo() != null) {
+                // For BYOK keys, use the explicit expiration date from the request
+                versionValidTo = key.getValidTo();
+            } else if (Boolean.TRUE.equals(key.getRotationEnabled()) && key.getRotationPeriodInDays() != null) {
+                // For keys with rotation enabled, the version "expires" at the next rotation date
+                versionValidTo = LocalDateTime.now().plusDays(key.getRotationPeriodInDays());
+            } else {
+                versionValidTo = null; // No expiration
+            }
+
             // Generate new key material
-            KeyPairMaterial newKeyMaterial =
+            KeyPairMaterial keyMaterial =
                     cryptoService.generateKeyMaterial(key.getKeySpec());
 
             // Create new key version
-            KmsKeyVersion newVersion = KmsKeyVersion.builder()
+            KmsKeyVersion keyVersion = KmsKeyVersion.builder()
                     .tenant(tenant)
-                    .keyId(keyId)
-                    .versionId(newVersionId)
+                    .keyId(key.getKeyId())
+                    .versionId(versionId)
                     .keyStatus(IEnumKeyStatus.Types.ENABLED)
-                    .keyMaterial(newKeyMaterial.privateKey())
-                    .publicKey(newKeyMaterial.publicKey())
+                    .keyMaterial(keyMaterial.privateKey())
+                    .publicKey(keyMaterial.publicKey())
+                    .origin(key.getOrigin())
+                    .expirationModel(key.getExpirationModel())
+                    .validTo(versionValidTo)          // calculated as above
+                    .signingAlgorithm(signingAlgorithm)
                     .build();
 
-            kmsKeyVersionRepository.save(newVersion);
+            kmsKeyVersionRepository.save(keyVersion);
 
             // Update main key metadata
-            key.setCurrentVersionId(newVersionId);
+            key.setCurrentVersionId(versionId);
             key.setLastRotationDate(now);
 
             kmsKeyRepository.save(key);
 
             log.info("Key {} rotated successfully with new version {}",
                     keyId,
-                    newVersionId);
+                    versionId);
 
             return RotateKeyResponse.builder()
                     .keyId(keyId)
-                    .newVersionId(newVersionId)
+                    .newVersionId(versionId)
                     .rotationDate(now)
                     .build();
 
