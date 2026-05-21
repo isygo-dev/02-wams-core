@@ -73,10 +73,10 @@ public final class KmsDtos {
         @Schema(description = "IAM policy document as a JSON object")
         private Map<String, Object> policy;
 
-        @Schema(description = "Key expiration model")
+        @Schema(description = "For EXTERNAL origin: Key expiration model")
         private IEnumKeyExpirationModel.Types expirationModel;
 
-        @Schema(description = "Validity period for imported key material (required if expirationModel = KEY_MATERIAL_EXPIRES)")
+        @Schema(description = "For EXTERNAL origin: Validity period for imported key material (required if expirationModel = KEY_MATERIAL_EXPIRES)")
         private LocalDateTime validTo;
 
         @Data

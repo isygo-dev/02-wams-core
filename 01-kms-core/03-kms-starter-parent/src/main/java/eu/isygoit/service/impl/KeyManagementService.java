@@ -8,6 +8,7 @@ import eu.isygoit.exception.CustomKeyStoreNotFoundException;
 import eu.isygoit.exception.InvalidKeyStateException;
 import eu.isygoit.exception.KeyNotFoundException;
 import eu.isygoit.exception.KmsKeyNotFoundException;
+import eu.isygoit.mapper.AlgorithmMapper;
 import eu.isygoit.model.*;
 import eu.isygoit.repository.*;
 import eu.isygoit.service.ICryptoService;
@@ -82,6 +83,21 @@ public class KeyManagementService implements IKeyManagementService {
             // Generate key material
             KeyPairMaterial keyMaterial = cryptoService.generateKeyMaterial(request.getKeySpec());
 
+            // Compute signing algorithm for the version (if applicable)
+            String signingAlgorithm = AlgorithmMapper.getDefaultAlgorithm(request.getKeySpec(), request.getKeyUsage());
+
+            // Calculate validTo for this version
+            LocalDateTime versionValidTo = null;
+            if (request.getOrigin() == IEnumKeyOrigin.Types.EXTERNAL && request.getValidTo() != null) {
+                // For BYOK keys, use the explicit expiration date from the request
+                versionValidTo = request.getValidTo();
+            } else if (Boolean.TRUE.equals(request.getRotationEnabled()) && request.getRotationPeriodInDays() != null) {
+                // For keys with rotation enabled, the version "expires" at the next rotation date
+                versionValidTo = LocalDateTime.now().plusDays(request.getRotationPeriodInDays());
+            } else {
+                versionValidTo = null; // No expiration
+            }
+
             // Create and save KMS Key
             KmsKey key = KmsKey.builder()
                     .tenant(tenant)
@@ -100,7 +116,7 @@ public class KeyManagementService implements IKeyManagementService {
                     .keyMaterial(keyMaterial.privateKey())
                     .publicKey(keyMaterial.publicKey())
                     .expirationModel(request.getExpirationModel())
-                    .validTo(request.getValidTo())
+                    .validTo(versionValidTo)
                     .build();
 
             if (Boolean.TRUE.equals(request.getMultiRegion())) {
@@ -112,7 +128,7 @@ public class KeyManagementService implements IKeyManagementService {
 
             KmsKey savedKey = kmsKeyRepository.save(key);
 
-            // Create initial version
+            // Create initial version with extended fields
             KmsKeyVersion keyVersion = KmsKeyVersion.builder()
                     .tenant(tenant)
                     .keyId(savedKey.getKeyId())
@@ -120,6 +136,10 @@ public class KeyManagementService implements IKeyManagementService {
                     .keyStatus(IEnumKeyStatus.Types.ENABLED)
                     .keyMaterial(keyMaterial.privateKey())
                     .publicKey(keyMaterial.publicKey())
+                    .origin(request.getOrigin())
+                    .expirationModel(request.getExpirationModel())
+                    .validTo(versionValidTo)          // calculated as above
+                    .signingAlgorithm(signingAlgorithm)
                     .build();
 
             kmsKeyVersionRepository.save(keyVersion);
@@ -190,8 +210,6 @@ public class KeyManagementService implements IKeyManagementService {
                             .rotationEnabled(savedKey.getRotationEnabled())
                             .keySpec(savedKey.getKeySpec())
                             .keyUsage(savedKey.getKeyUsage())
-                            //.policy(...) // map if available
-                            //.tags(savedKey.getTags())   // deserialize JSON if needed
                             .currentVersion(savedKey.getCurrentVersionId())
                             .origin(savedKey.getOrigin())
                             .rotationEnabled(savedKey.getRotationEnabled())
@@ -206,8 +224,6 @@ public class KeyManagementService implements IKeyManagementService {
                                             ? savedKey.getKeySpec().name()
                                             : null
                             )
-                            //.encryptionAlgorithmSpecs(...)
-                            //.signingAlgorithms(...)
                             .keyManager(
                                     IEnumKeyOrigin.Types.EXTERNAL.equals(savedKey.getOrigin())
                                             ? "CUSTOMER"
