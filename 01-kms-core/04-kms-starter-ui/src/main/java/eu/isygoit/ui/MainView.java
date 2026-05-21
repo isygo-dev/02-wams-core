@@ -23,7 +23,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import eu.isygoit.dto.KmsDtos;
+import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.enums.IEnumKeyUsage;
@@ -60,13 +60,12 @@ public class MainView extends VerticalLayout {
     private DatePicker fromDatePicker;
     private DatePicker toDatePicker;
     private Button loadLogsButton;
-    private Grid<KmsDtos.AuditLogResponse.LogEntry> auditGrid;
+    private Grid<AuditLogResponse.LogEntry> auditGrid;
     private HorizontalLayout paginationBar;
     private Button prevButton;
     private Button nextButton;
     private Span pageInfoSpan;
-    private List<KmsDtos.AuditLogResponse.LogEntry> allLogs = new ArrayList<>();
-    private List<KmsDtos.AuditLogResponse.LogEntry> displayedLogs = new ArrayList<>();
+    private List<AuditLogResponse.LogEntry> allLogs = new ArrayList<>();
     private int currentPage = 0;
     private static final int PAGE_SIZE = 20;
 
@@ -88,11 +87,17 @@ public class MainView extends VerticalLayout {
 
         HorizontalLayout topBar = new HorizontalLayout();
         topBar.setWidthFull();
-        topBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+        topBar.setJustifyContentMode(JustifyContentMode.START);
+
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         refreshButton.addClickListener(e -> loadStatistics());
         topBar.add(refreshButton);
         add(topBar);
+
+        loadingBar.setIndeterminate(true);
+        loadingBar.setVisible(false);
+        loadingBar.setWidth("300px");
+        topBar.add(loadingBar);
 
         statsContainer = new HorizontalLayout();
         statsContainer.setWidthFull();
@@ -101,11 +106,6 @@ public class MainView extends VerticalLayout {
                 .set("flex-wrap", "wrap")
                 .set("gap", "16px");
         add(statsContainer);
-
-        loadingBar.setIndeterminate(true);
-        loadingBar.setVisible(false);
-        loadingBar.setWidth("200px");
-        add(loadingBar);
 
         // Add Audit Log Viewer section
         add(buildAuditLogViewer());
@@ -184,14 +184,14 @@ public class MainView extends VerticalLayout {
             Stats stats = new Stats();
             try {
                 log.info("Starting KMS statistics collection...");
-                ResponseEntity<KmsDtos.ListKeysResponse> keysResp = kmsApiService.listKeys(100, null);
-                KmsDtos.ListKeysResponse keys = keysResp.getBody();
+                ResponseEntity<ListKeysResponse> keysResp = kmsApiService.listKeys(100, null);
+                ListKeysResponse keys = keysResp.getBody();
                 if (keys != null && keys.getKeys() != null) {
                     stats.totalKeys = keys.getKeys().size();
-                    for (KmsDtos.ListKeysResponse.KeyEntry entry : keys.getKeys()) {
+                    for (ListKeysResponse.KeyEntry entry : keys.getKeys()) {
                         try {
-                            ResponseEntity<KmsDtos.DescribeKeyResponse> descResp = kmsApiService.describeKey(entry.getKeyId());
-                            KmsDtos.DescribeKeyResponse desc = descResp.getBody();
+                            ResponseEntity<DescribeKeyResponse> descResp = kmsApiService.describeKey(entry.getKeyId());
+                            DescribeKeyResponse desc = descResp.getBody();
                             if (desc != null && desc.getKeyMetadata() != null) {
                                 var meta = desc.getKeyMetadata();
                                 if (meta.getKeyStatus() == IEnumKeyStatus.Types.ENABLED) stats.activeKeys++;
@@ -212,7 +212,7 @@ public class MainView extends VerticalLayout {
                                     }
                                 }
                                 try {
-                                    ResponseEntity<KmsDtos.ListGrantsResponse> grantsResp = kmsApiService.listGrants(entry.getKeyId(), 1000, null, null, null);
+                                    ResponseEntity<ListGrantsResponse> grantsResp = kmsApiService.listGrants(entry.getKeyId(), 1000, null, null, null);
                                     if (grantsResp.getBody() != null && grantsResp.getBody().getGrants() != null)
                                         stats.totalGrants += grantsResp.getBody().getGrants().size();
                                 } catch (Exception e) { /* ignore */ }
@@ -221,12 +221,12 @@ public class MainView extends VerticalLayout {
                     }
                 }
                 try {
-                    ResponseEntity<KmsDtos.ListAliasesResponse> aliasesResp = kmsApiService.listAliases(100, null);
+                    ResponseEntity<ListAliasesResponse> aliasesResp = kmsApiService.listAliases(100, null);
                     if (aliasesResp.getBody() != null && aliasesResp.getBody().getAliases() != null)
                         stats.totalAliases = aliasesResp.getBody().getAliases().size();
                 } catch (Exception e) { /* ignore */ }
                 try {
-                    ResponseEntity<KmsDtos.ListCustomKeyStoresResponse> storesResp = kmsApiService.listCustomKeyStores(100, null);
+                    ResponseEntity<ListCustomKeyStoresResponse> storesResp = kmsApiService.listCustomKeyStores(100, null);
                     if (storesResp.getBody() != null && storesResp.getBody().getCustomKeyStores() != null)
                         stats.totalStores = storesResp.getBody().getCustomKeyStores().size();
                 } catch (Exception e) { /* ignore */ }
@@ -331,13 +331,13 @@ public class MainView extends VerticalLayout {
             String formatted = ts != null ? ts.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : "-";
             return new Span(formatted);
         })).setHeader("Timestamp").setSortable(true).setResizable(true);
-        auditGrid.addColumn(KmsDtos.AuditLogResponse.LogEntry::getAction).setHeader("Action").setSortable(true).setResizable(true);
-        auditGrid.addColumn(KmsDtos.AuditLogResponse.LogEntry::getKeyId).setHeader("Key ID").setSortable(true).setResizable(true);
-        auditGrid.addColumn(KmsDtos.AuditLogResponse.LogEntry::getPrincipal).setHeader("Principal").setSortable(true).setResizable(true);
-        auditGrid.addColumn(KmsDtos.AuditLogResponse.LogEntry::getIpAddress).setHeader("IP Address").setResizable(true);
-        auditGrid.addColumn(KmsDtos.AuditLogResponse.LogEntry::getStatus).setHeader("Status").setResizable(true);
-        auditGrid.addColumn(KmsDtos.AuditLogResponse.LogEntry::getErrorMessage).setHeader("Error Message").setResizable(true);
-        auditGrid.addColumn(KmsDtos.AuditLogResponse.LogEntry::getExecutionTimeMs)
+        auditGrid.addColumn(AuditLogResponse.LogEntry::getAction).setHeader("Action").setSortable(true).setResizable(true);
+        auditGrid.addColumn(AuditLogResponse.LogEntry::getKeyId).setHeader("Key ID").setSortable(true).setResizable(true);
+        auditGrid.addColumn(AuditLogResponse.LogEntry::getPrincipal).setHeader("Principal").setSortable(true).setResizable(true);
+        auditGrid.addColumn(AuditLogResponse.LogEntry::getIpAddress).setHeader("IP Address").setResizable(true);
+        auditGrid.addColumn(AuditLogResponse.LogEntry::getStatus).setHeader("Status").setResizable(true);
+        auditGrid.addColumn(AuditLogResponse.LogEntry::getErrorMessage).setHeader("Error Message").setResizable(true);
+        auditGrid.addColumn(AuditLogResponse.LogEntry::getExecutionTimeMs)
                 .setHeader("Exec Time (ms)").setResizable(true);
         layout.add(auditGrid);
 
@@ -367,7 +367,7 @@ public class MainView extends VerticalLayout {
 
     private void loadAuditKeyOptions() {
         try {
-            ResponseEntity<KmsDtos.ListKeysResponse> response = kmsApiService.listKeys(100, null);
+            ResponseEntity<ListKeysResponse> response = kmsApiService.listKeys(100, null);
             if (response.getBody() != null && response.getBody().getKeys() != null) {
                 keyOptions = response.getBody().getKeys().stream()
                         .map(entry -> new KeyOption(entry.getKeyId(), fetchAlias(entry.getKeyId())))
@@ -383,8 +383,8 @@ public class MainView extends VerticalLayout {
 
     private String fetchAlias(String keyId) {
         try {
-            ResponseEntity<KmsDtos.DescribeKeyResponse> response = kmsApiService.describeKey(keyId);
-            KmsDtos.DescribeKeyResponse desc = response.getBody();
+            ResponseEntity<DescribeKeyResponse> response = kmsApiService.describeKey(keyId);
+            DescribeKeyResponse desc = response.getBody();
             if (desc != null && desc.getKeyMetadata() != null && desc.getKeyMetadata().getKeyAlias() != null) {
                 return desc.getKeyMetadata().getKeyAlias();
             }
@@ -409,11 +409,10 @@ public class MainView extends VerticalLayout {
         LocalDateTime from = fromDatePicker.getValue() != null ? fromDatePicker.getValue().atStartOfDay() : null;
         LocalDateTime to = toDatePicker.getValue() != null ? toDatePicker.getValue().atTime(LocalTime.MAX) : null;
 
-        // Fetch logs – we can request up to 500 entries to support client-side pagination
         CompletableFuture.supplyAsync(() -> {
-            List<KmsDtos.AuditLogResponse.LogEntry> logs = new ArrayList<>();
+            List<AuditLogResponse.LogEntry> logs = new ArrayList<>();
             try {
-                ResponseEntity<KmsDtos.AuditLogResponse> response =
+                ResponseEntity<AuditLogResponse> response =
                         kmsApiService.getAuditLogs(selected.getKeyId(), from, to, 500);
                 if (response.getBody() != null && response.getBody().getLogs() != null) {
                     logs = response.getBody().getLogs();
@@ -465,7 +464,7 @@ public class MainView extends VerticalLayout {
         }
         int start = currentPage * PAGE_SIZE;
         int end = Math.min(start + PAGE_SIZE, allLogs.size());
-        List<KmsDtos.AuditLogResponse.LogEntry> pageItems = allLogs.subList(start, end);
+        List<AuditLogResponse.LogEntry> pageItems = allLogs.subList(start, end);
         auditGrid.setItems(pageItems);
 
         int totalPages = (int) Math.ceil((double) allLogs.size() / PAGE_SIZE);
