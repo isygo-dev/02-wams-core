@@ -44,6 +44,10 @@ public class MainView extends VerticalLayout {
     public MainView(KmsApiService kmsApiService) {
         this.kmsApiService = kmsApiService;
         this.ui = UI.getCurrent();
+
+        // Enable push to ensure UI updates are sent to client immediately
+        this.ui.getPushConfiguration().setPushMode(com.vaadin.flow.shared.communication.PushMode.AUTOMATIC);
+
         setSizeFull();
         setPadding(true);
         setSpacing(true);
@@ -207,28 +211,35 @@ public class MainView extends VerticalLayout {
                 return;
             }
             updateUi.access(() -> {
-                // Replace all cards with real statistics
-                statsContainer.removeAll();
-                statsContainer.add(
-                        createStatCard("Total Keys", String.valueOf(stats.totalKeys), VaadinIcon.KEY, "#1E88E5"),
-                        createStatCard("Active Keys", String.valueOf(stats.activeKeys), VaadinIcon.CHECK_CIRCLE, "#2E7D32"),
-                        createStatCard("Disabled Keys", String.valueOf(stats.disabledKeys), VaadinIcon.BAN, "#D32F2F"),
-                        createStatCard("Pending Deletion", String.valueOf(stats.pendingDeletion), VaadinIcon.CLOCK, "#F57C00"),
-                        createStatCard("Rotation Enabled", String.valueOf(stats.rotationEnabled), VaadinIcon.ROTATE_RIGHT, "#8E24AA"),
-                        createStatCard("Symmetric Keys", String.valueOf(stats.symmetricKeys), VaadinIcon.CIRCLE, "#43A047"),
-                        createStatCard("Asymmetric Keys", String.valueOf(stats.asymmetricKeys), VaadinIcon.LOCK, "#FB8C00"),
-                        createStatCard("Encrypt/Decrypt Keys", String.valueOf(stats.encryptUsage), VaadinIcon.LOCK, "#1E88E5"),
-                        createStatCard("Sign/Verify Keys", String.valueOf(stats.signUsage), VaadinIcon.PENCIL, "#8E24AA"),
-                        createStatCard("MAC Keys", String.valueOf(stats.macUsage), VaadinIcon.SIGNAL, "#D81B60"),
-                        createStatCard("Aliases", String.valueOf(stats.totalAliases), VaadinIcon.TAG, "#00ACC1"),
-                        createStatCard("Grants", String.valueOf(stats.totalGrants), VaadinIcon.SHARE, "#546E7A"),
-                        createStatCard("Custom Key Stores", String.valueOf(stats.totalStores), VaadinIcon.STORAGE, "#37474F")
-                );
-                loadingBar.setVisible(false);
-                refreshButton.setEnabled(true);
-                // Force a repaint by triggering a window resize event (workaround for Vaadin async rendering issue)
-                updateUi.getPage().executeJs("window.dispatchEvent(new Event('resize'));");
-                log.info("UI updated – forced repaint via resize event.");
+                try {
+                    // Replace all cards with real statistics
+                    statsContainer.removeAll();
+                    statsContainer.add(
+                            createStatCard("Total Keys", String.valueOf(stats.totalKeys), VaadinIcon.KEY, "#1E88E5"),
+                            createStatCard("Active Keys", String.valueOf(stats.activeKeys), VaadinIcon.CHECK_CIRCLE, "#2E7D32"),
+                            createStatCard("Disabled Keys", String.valueOf(stats.disabledKeys), VaadinIcon.BAN, "#D32F2F"),
+                            createStatCard("Pending Deletion", String.valueOf(stats.pendingDeletion), VaadinIcon.CLOCK, "#F57C00"),
+                            createStatCard("Rotation Enabled", String.valueOf(stats.rotationEnabled), VaadinIcon.ROTATE_RIGHT, "#8E24AA"),
+                            createStatCard("Symmetric Keys", String.valueOf(stats.symmetricKeys), VaadinIcon.CIRCLE, "#43A047"),
+                            createStatCard("Asymmetric Keys", String.valueOf(stats.asymmetricKeys), VaadinIcon.LOCK, "#FB8C00"),
+                            createStatCard("Encrypt/Decrypt Keys", String.valueOf(stats.encryptUsage), VaadinIcon.LOCK, "#1E88E5"),
+                            createStatCard("Sign/Verify Keys", String.valueOf(stats.signUsage), VaadinIcon.PENCIL, "#8E24AA"),
+                            createStatCard("MAC Keys", String.valueOf(stats.macUsage), VaadinIcon.SIGNAL, "#D81B60"),
+                            createStatCard("Aliases", String.valueOf(stats.totalAliases), VaadinIcon.TAG, "#00ACC1"),
+                            createStatCard("Grants", String.valueOf(stats.totalGrants), VaadinIcon.SHARE, "#546E7A"),
+                            createStatCard("Custom Key Stores", String.valueOf(stats.totalStores), VaadinIcon.STORAGE, "#37474F")
+                    );
+                    loadingBar.setVisible(false);
+                    refreshButton.setEnabled(true);
+                    log.info("UI updated with stats. Pushing changes to client.");
+                    // Push changes to the client immediately
+                    updateUi.push();
+                } catch (Exception e) {
+                    log.error("Error updating UI cards", e);
+                    loadingBar.setVisible(false);
+                    refreshButton.setEnabled(true);
+                    updateUi.push();
+                }
             });
         });
     }
