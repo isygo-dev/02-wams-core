@@ -3,6 +3,7 @@ package eu.isygoit.ui.views;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H2;
@@ -97,7 +98,7 @@ public class TagsView extends VerticalLayout {
         tagsGrid.setVisible(false);
         tagsGrid.setEmptyStateText("No tags found for this key.");
         add(tagsGrid);
-        setFlexGrow(1, tagsGrid); // make grid take all remaining space
+        setFlexGrow(1, tagsGrid);
 
         // Action buttons
         HorizontalLayout actionBar = new HorizontalLayout(addTagButton, removeTagButton);
@@ -105,7 +106,7 @@ public class TagsView extends VerticalLayout {
         addTagButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         removeTagButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
         addTagButton.addClickListener(e -> openAddTagDialog());
-        removeTagButton.addClickListener(e -> deleteSelectedTag());
+        removeTagButton.addClickListener(e -> confirmDeleteSelectedTag());
         add(actionBar);
 
         // Loading indicator
@@ -118,7 +119,7 @@ public class TagsView extends VerticalLayout {
         loadKeyOptions();
     }
 
-    // ----- Data loading -----
+    // ----- Data loading (unchanged) -----
     private void loadKeyOptions() {
         showLoading(true);
         try {
@@ -195,7 +196,7 @@ public class TagsView extends VerticalLayout {
         tagsGrid.setEnabled(!show);
     }
 
-    // ----- Add tag dialog -----
+    // ----- Add tag dialog (unchanged) -----
     private void openAddTagDialog() {
         if (selectedKeyId == null) {
             Notification.show("Please select a key first", 3000, Notification.Position.TOP_END)
@@ -250,8 +251,8 @@ public class TagsView extends VerticalLayout {
         dialog.open();
     }
 
-    // ----- Delete selected tag -----
-    private void deleteSelectedTag() {
+    // ----- Delete selected tag with confirmation -----
+    private void confirmDeleteSelectedTag() {
         KmsDtos.ListResourceTagsResponse.Tag selected = tagsGrid.asSingleSelect().getValue();
         if (selected == null) {
             Notification.show("No tag selected", 3000, Notification.Position.TOP_END)
@@ -263,10 +264,22 @@ public class TagsView extends VerticalLayout {
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
+
+        ConfirmDialog confirmDialog = new ConfirmDialog();
+        confirmDialog.setHeader("Remove tag");
+        confirmDialog.setText("Are you sure you want to remove the tag \"" + selected.getTagKey() + "\" from the key?");
+        confirmDialog.setCancelable(true);
+        confirmDialog.setConfirmText("Remove");
+        confirmDialog.setConfirmButtonTheme(ButtonVariant.LUMO_ERROR.getVariantName());
+        confirmDialog.addConfirmListener(event -> deleteSelectedTag(selected.getTagKey()));
+        confirmDialog.open();
+    }
+
+    private void deleteSelectedTag(String tagKey) {
         try {
             KmsDtos.UntagResourceRequest request = KmsDtos.UntagResourceRequest.builder()
                     .keyId(selectedKeyId)
-                    .tagKeys(List.of(selected.getTagKey()))
+                    .tagKeys(List.of(tagKey))
                     .build();
             kmsApiService.untagResource(selectedKeyId, request);
             Notification.show("Tag removed", 3000, Notification.Position.TOP_END)
@@ -278,7 +291,7 @@ public class TagsView extends VerticalLayout {
         }
     }
 
-    // Helper class for key selection
+    // Helper class for key selection (unchanged)
     private static class KeyOption {
         private final String keyId;
         private final String displayName;

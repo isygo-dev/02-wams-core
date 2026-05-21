@@ -1,5 +1,6 @@
 package eu.isygoit.ui.views;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -9,6 +10,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
@@ -67,11 +69,13 @@ public class ByokView extends VerticalLayout {
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         add(header);
 
-        // Key selection toolbar
+        // Responsive key selection toolbar
         HorizontalLayout keyLayout = new HorizontalLayout();
         keyLayout.setWidthFull();
-        keyLayout.setAlignItems(Alignment.CENTER);
+        keyLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         keyLayout.setSpacing(true);
+        keyLayout.getStyle().set("flex-wrap", "wrap");
+        keyLayout.addClassName("byok-key-layout");
 
         keyCombo.setPlaceholder("Select an EXTERNAL key...");
         keyCombo.setItemLabelGenerator(KeyOption::getDisplayName);
@@ -93,9 +97,11 @@ public class ByokView extends VerticalLayout {
         keyLayout.add(keyCombo, refreshKeysButton);
         add(keyLayout);
 
-        // Parameters buttons
+        // Responsive parameters buttons row
         HorizontalLayout paramLayout = new HorizontalLayout(getParamsButton, deleteMaterialButton);
         paramLayout.setSpacing(true);
+        paramLayout.getStyle().set("flex-wrap", "wrap");
+        paramLayout.addClassName("byok-param-layout");
         getParamsButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         deleteMaterialButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
         deleteMaterialButton.addClickListener(e -> deleteImportedMaterial());
@@ -135,8 +141,44 @@ public class ByokView extends VerticalLayout {
         getParamsButton.addClickListener(e -> generateParameters());
         importButton.addClickListener(e -> importKeyMaterial());
 
+        // Inject responsive CSS using JavaScript (fixes URL encoding issues)
+        injectResponsiveStyles();
+
         // Initial load
         loadKeyOptions();
+    }
+
+    private void injectResponsiveStyles() {
+        String css = """
+            .byok-key-layout,
+            .byok-param-layout {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--lumo-space-s);
+                align-items: center;
+            }
+            @media (max-width: 768px) {
+                .byok-key-layout,
+                .byok-param-layout {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+                .byok-key-layout > *,
+                .byok-param-layout > * {
+                    width: 100% !important;
+                }
+                .byok-key-layout > .vaadin-combo-box {
+                    width: 100% !important;
+                }
+                textarea {
+                    font-size: 14px;
+                }
+            }
+        """;
+        UI.getCurrent().getPage().executeJs(
+                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
+                css
+        );
     }
 
     private void loadKeyOptions() {

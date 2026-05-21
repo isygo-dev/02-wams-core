@@ -2,6 +2,7 @@ package eu.isygoit.ui.views;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
@@ -15,6 +16,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
@@ -34,7 +36,6 @@ import org.springframework.util.StringUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -72,11 +73,13 @@ public class GrantsView extends VerticalLayout {
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         add(header);
 
-        // Key selection toolbar
+        // Responsive key selection toolbar
         HorizontalLayout keyLayout = new HorizontalLayout();
         keyLayout.setWidthFull();
-        keyLayout.setAlignItems(Alignment.CENTER);
+        keyLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         keyLayout.setSpacing(true);
+        keyLayout.getStyle().set("flex-wrap", "wrap");
+        keyLayout.addClassName("grants-key-layout");
 
         keyCombo.setPlaceholder("Select a KMS key...");
         keyCombo.setItemLabelGenerator(KeyOption::getDisplayName);
@@ -99,18 +102,21 @@ public class GrantsView extends VerticalLayout {
         keyLayout.add(keyCombo, refreshKeysButton);
         add(keyLayout);
 
-        // Action bar
+        // Responsive action bar
         HorizontalLayout actionBar = new HorizontalLayout(refreshButton, createGrantButton, revokeGrantButton, retireGrantButton);
         actionBar.setSpacing(true);
+        actionBar.getStyle().set("flex-wrap", "wrap");
+        actionBar.addClassName("grants-action-bar");
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         createGrantButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         revokeGrantButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
         retireGrantButton.addThemeVariants(ButtonVariant.LUMO_WARNING);
         add(actionBar);
 
-        // Grants grid
+        // Grants grid – make horizontally scrollable on small screens
         grantsGrid.setWidthFull();
         grantsGrid.setHeight("500px");
+        grantsGrid.getStyle().set("overflow-x", "auto");
         grantsGrid.addColumn(KmsDtos.ListGrantsResponse.Grant::getGrantId).setHeader("Grant ID").setSortable(true);
         grantsGrid.addColumn(KmsDtos.ListGrantsResponse.Grant::getGranteePrincipal).setHeader("Grantee Principal").setSortable(true);
         grantsGrid.addColumn(KmsDtos.ListGrantsResponse.Grant::getRetiringPrincipal).setHeader("Retiring Principal");
@@ -163,8 +169,58 @@ public class GrantsView extends VerticalLayout {
         revokeGrantButton.addClickListener(e -> revokeSelectedGrant());
         retireGrantButton.addClickListener(e -> retireSelectedGrant());
 
+        // Inject responsive CSS using JavaScript (fixes URL encoding issues)
+        injectResponsiveStyles();
+
         // Initial load
         loadKeyOptions();
+    }
+
+    private void injectResponsiveStyles() {
+        String css = """
+            .grants-key-layout,
+            .grants-action-bar {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--lumo-space-s);
+                align-items: center;
+            }
+            @media (max-width: 768px) {
+                .grants-key-layout,
+                .grants-action-bar {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+                .grants-key-layout > *,
+                .grants-action-bar > * {
+                    width: 100% !important;
+                }
+                .grants-key-layout > .vaadin-combo-box {
+                    width: 100% !important;
+                }
+                /* Make grid horizontally scrollable */
+                .kms-grants-view vaadin-grid {
+                    overflow-x: auto;
+                }
+                .kms-grants-view vaadin-grid::part(table) {
+                    min-width: 900px;
+                }
+                /* Responsive dialog */
+                .grants-create-dialog {
+                    width: 90vw !important;
+                    max-width: 550px !important;
+                    margin: 0 auto;
+                }
+                .grants-create-dialog .vaadin-dialog-overlay {
+                    width: 90vw !important;
+                    max-width: 550px;
+                }
+            }
+        """;
+        UI.getCurrent().getPage().executeJs(
+                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
+                css
+        );
     }
 
     // ----- Data loading helpers -----
@@ -238,7 +294,7 @@ public class GrantsView extends VerticalLayout {
         keyCombo.setEnabled(!show);
     }
 
-    // ----- Create Grant Dialog -----
+    // ----- Create Grant Dialog (responsive width) -----
     private void openCreateGrantDialog() {
         if (selectedKeyId == null) {
             Notification.show("Please select a key first", 3000, Notification.Position.TOP_END)
@@ -247,7 +303,7 @@ public class GrantsView extends VerticalLayout {
         }
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Create Grant");
-        dialog.setWidth("550px");
+        dialog.addClassName("grants-create-dialog"); // Responsive CSS class
 
         FormLayout form = new FormLayout();
         TextField granteeField = new TextField("Grantee Principal");
@@ -258,7 +314,6 @@ public class GrantsView extends VerticalLayout {
         TextField retiringField = new TextField("Retiring Principal (optional)");
         retiringField.setPlaceholder("e.g., arn:aws:iam::123456789012:user/Admin");
 
-        // Operations – use checkboxes for common operations
         CheckboxGroup<String> operationsGroup = new CheckboxGroup<>("Operations");
         operationsGroup.setItems(
                 "Decrypt", "Encrypt", "GenerateDataKey", "GenerateDataKeyWithoutPlaintext",
@@ -268,7 +323,6 @@ public class GrantsView extends VerticalLayout {
         operationsGroup.setRequired(true);
         operationsGroup.setWidthFull();
 
-        // Constraints (encryption context)
         TextArea constraintsArea = new TextArea("Constraints (JSON)");
         constraintsArea.setPlaceholder("{\"encryptionContextSubset\": {\"key\":\"value\"}}");
         constraintsArea.setHeight("100px");
@@ -287,12 +341,10 @@ public class GrantsView extends VerticalLayout {
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return;
             }
-            // Parse constraints if provided
             KmsDtos.CreateGrantRequest.GrantConstraints constraints = null;
             if (StringUtils.hasText(constraintsArea.getValue())) {
                 try {
                     Map<String, Object> constraintsMap = objectMapper.readValue(constraintsArea.getValue(), new TypeReference<>() {});
-                    // Extract encryption context subset/equals if present
                     constraints = KmsDtos.CreateGrantRequest.GrantConstraints.builder()
                             .encryptionContextSubset((Map<String, String>) constraintsMap.get("encryptionContextSubset"))
                             .encryptionContextEquals((Map<String, String>) constraintsMap.get("encryptionContextEquals"))

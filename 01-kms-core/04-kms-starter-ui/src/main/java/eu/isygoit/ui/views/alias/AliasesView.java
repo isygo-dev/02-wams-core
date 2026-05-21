@@ -1,5 +1,6 @@
 package eu.isygoit.ui.views.alias;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
@@ -82,33 +83,89 @@ public class AliasesView extends VerticalLayout {
             filterCards();
         });
 
+        // Inject responsive CSS using JavaScript (fixes URL encoding issues)
+        injectResponsiveStyles();
+
         loadAliases();
     }
 
     private HorizontalLayout buildToolbar() {
         HorizontalLayout toolbar = new HorizontalLayout();
         toolbar.setWidthFull();
-        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
-        toolbar.getStyle().set("flex-wrap", "wrap");
-        toolbar.addClassName(LumoUtility.Padding.Bottom.MEDIUM);
+        toolbar.setPadding(false);
+        toolbar.setSpacing(false);
+        toolbar.addClassName("aliases-toolbar");
 
+        // Left group: search + refresh button
         HorizontalLayout leftGroup = new HorizontalLayout();
+        leftGroup.addClassName("toolbar-left-group");
         leftGroup.setAlignItems(FlexComponent.Alignment.END);
         leftGroup.setSpacing(true);
         searchField.setWidth("300px");
-        leftGroup.add(searchField);
-
-        HorizontalLayout rightGroup = new HorizontalLayout();
-        rightGroup.setSpacing(true);
-        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         refreshButton.setTooltipText("Refresh aliases");
-        rightGroup.add(createButton, refreshButton);
+        leftGroup.add(searchField, refreshButton);
+
+        // Right group: only create button (right aligned)
+        HorizontalLayout rightGroup = new HorizontalLayout();
+        rightGroup.addClassName("toolbar-right-group");
+        rightGroup.setSpacing(true);
+        rightGroup.setAlignItems(FlexComponent.Alignment.END);
+        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        rightGroup.add(createButton);
 
         toolbar.add(leftGroup, rightGroup);
-        toolbar.expand(leftGroup);
         return toolbar;
+    }
+
+    private void injectResponsiveStyles() {
+        String css = """
+            .aliases-toolbar {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--lumo-space-s);
+                align-items: flex-end;
+                justify-content: space-between;
+                width: 100%;
+                margin-bottom: var(--lumo-space-m);
+            }
+            .toolbar-left-group,
+            .toolbar-right-group {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--lumo-space-s);
+                align-items: flex-end;
+            }
+            @media (max-width: 768px) {
+                .aliases-toolbar {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+                .toolbar-left-group,
+                .toolbar-right-group {
+                    flex-direction: column;
+                    align-items: stretch;
+                    width: 100%;
+                }
+                .toolbar-left-group > *,
+                .toolbar-right-group > * {
+                    width: 100% !important;
+                }
+                /* Make search field full width */
+                .toolbar-left-group .vaadin-text-field {
+                    width: 100% !important;
+                }
+                /* Make buttons full width */
+                .toolbar-left-group .vaadin-button,
+                .toolbar-right-group .vaadin-button {
+                    width: 100% !important;
+                }
+            }
+        """;
+        UI.getCurrent().getPage().executeJs(
+                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
+                css
+        );
     }
 
     public void loadAliases() {
@@ -187,5 +244,4 @@ public class AliasesView extends VerticalLayout {
         }
         return keyIds;
     }
-
 }

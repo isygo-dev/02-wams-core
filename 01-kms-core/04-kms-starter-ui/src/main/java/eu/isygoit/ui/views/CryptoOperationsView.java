@@ -1,5 +1,6 @@
 package eu.isygoit.ui.views;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -8,6 +9,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
@@ -80,11 +82,13 @@ public class CryptoOperationsView extends VerticalLayout {
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         add(header);
 
-        // Key selection toolbar
+        // Responsive key selection toolbar
         HorizontalLayout keyLayout = new HorizontalLayout();
         keyLayout.setWidthFull();
-        keyLayout.setAlignItems(Alignment.CENTER);
+        keyLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         keyLayout.setSpacing(true);
+        keyLayout.getStyle().set("flex-wrap", "wrap");
+        keyLayout.addClassName("crypto-key-layout");
 
         keyCombo.setPlaceholder("Select a KMS key...");
         keyCombo.setItemLabelGenerator(KeyOption::getDisplayName);
@@ -115,13 +119,16 @@ public class CryptoOperationsView extends VerticalLayout {
         loadingBar.setWidth("200px");
         add(loadingBar);
 
-        // Tabs
+        // Tabs – make them scrollable on small screens
         tabs = new Tabs();
         encryptDecryptTabHeader = new Tab("Encrypt / Decrypt");
         signVerifyTabHeader = new Tab("Sign / Verify");
         dataKeyTabHeader = new Tab("Data Keys");
         macTabHeader = new Tab("MAC");
         tabs.add(encryptDecryptTabHeader, signVerifyTabHeader, dataKeyTabHeader, macTabHeader);
+        tabs.setWidthFull();
+        tabs.getStyle().set("overflow-x", "auto");
+        tabs.getStyle().set("white-space", "nowrap");
 
         encryptDecryptTab = createEncryptDecryptPanel();
         signVerifyTab = createSignVerifyPanel();
@@ -148,8 +155,59 @@ public class CryptoOperationsView extends VerticalLayout {
 
         add(tabs, encryptDecryptTab, signVerifyTab, dataKeyTab, macTab);
 
+        // Inject responsive CSS using JavaScript (fixes URL encoding issues)
+        injectResponsiveStyles();
+
         // Initial load
         loadKeyOptions();
+    }
+
+    private void injectResponsiveStyles() {
+        String css = """
+            .crypto-key-layout {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--lumo-space-s);
+                align-items: center;
+            }
+            @media (max-width: 768px) {
+                .crypto-key-layout {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+                .crypto-key-layout > * {
+                    width: 100% !important;
+                }
+                /* Make combo boxes and text fields full width */
+                .crypto-key-layout .vaadin-combo-box {
+                    width: 100% !important;
+                }
+                /* Make all algorithm combo boxes and context field full width */
+                .crypto-panel .vaadin-combo-box,
+                .crypto-panel .vaadin-text-field,
+                .crypto-panel .vaadin-text-area {
+                    width: 100% !important;
+                }
+                /* Button rows wrap and buttons become full width */
+                .crypto-button-row {
+                    flex-direction: column;
+                    width: 100%;
+                }
+                .crypto-button-row > * {
+                    width: 100% !important;
+                    margin-bottom: var(--lumo-space-xs);
+                }
+                /* Data key panel adjustments */
+                .crypto-data-key-panel .vaadin-combo-box,
+                .crypto-data-key-panel .vaadin-text-field {
+                    width: 100% !important;
+                }
+            }
+        """;
+        UI.getCurrent().getPage().executeJs(
+                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
+                css
+        );
     }
 
     // ========== Helper methods ==========
@@ -243,57 +301,83 @@ public class CryptoOperationsView extends VerticalLayout {
     }
 
     private void updateAlgorithmCombos() {
-        // Reset all combo boxes first
-        algorithmCombo.clear();
-        signAlgoCombo.clear();
-        macAlgoCombo.clear();
+        if (algorithmCombo != null) algorithmCombo.clear();
+        if (signAlgoCombo != null) signAlgoCombo.clear();
+        if (macAlgoCombo != null) macAlgoCombo.clear();
 
-        // Early exit if key usage or spec is missing
         if (selectedKeyUsage == null || selectedKeySpec == null) {
-            algorithmCombo.setEnabled(false);
-            signAlgoCombo.setEnabled(false);
-            macAlgoCombo.setEnabled(false);
+            if (algorithmCombo != null) algorithmCombo.setEnabled(false);
+            if (signAlgoCombo != null) signAlgoCombo.setEnabled(false);
+            if (macAlgoCombo != null) macAlgoCombo.setEnabled(false);
             return;
         }
 
-        // Determine if the combo should be read-only (when keySpec is non-null)
         boolean readOnly = selectedKeySpec != null;
 
-        // Update encryption combo
-        updateComboForUsage(selectedKeyUsage, selectedKeySpec, algorithmCombo,
-                usage -> usage == IEnumKeyUsage.Types.ENCRYPT_DECRYPT,
-                spec -> AlgorithmMapper.keySpecToEncryptionAlgo(spec).stream()
-                        .map(IEnumEncryptionAlgorithm::name)
-                        .collect(Collectors.toList()),
-                readOnly);
+        if (algorithmCombo != null) {
+            updateComboForUsage(selectedKeyUsage, selectedKeySpec, algorithmCombo,
+                    usage -> usage == IEnumKeyUsage.Types.ENCRYPT_DECRYPT,
+                    spec -> AlgorithmMapper.keySpecToEncryptionAlgo(spec).stream()
+                            .map(IEnumEncryptionAlgorithm::name)
+                            .collect(Collectors.toList()),
+                    readOnly);
+        }
 
-        // Update signing combo
-        updateComboForUsage(selectedKeyUsage, selectedKeySpec, signAlgoCombo,
-                usage -> usage == IEnumKeyUsage.Types.SIGN_VERIFY,
-                spec -> AlgorithmMapper.keySpecToSigningAlgo(spec).stream()
-                        .map(IEnumSignatureAlgorithm::name)
-                        .collect(Collectors.toList()),
-                readOnly);
+        if (signAlgoCombo != null) {
+            updateComboForUsage(selectedKeyUsage, selectedKeySpec, signAlgoCombo,
+                    usage -> usage == IEnumKeyUsage.Types.SIGN_VERIFY,
+                    spec -> AlgorithmMapper.keySpecToSigningAlgo(spec).stream()
+                            .map(IEnumSignatureAlgorithm::name)
+                            .collect(Collectors.toList()),
+                    readOnly);
+        }
 
-        // Update MAC combo
-        updateComboForUsage(selectedKeyUsage, selectedKeySpec, macAlgoCombo,
-                usage -> usage == IEnumKeyUsage.Types.GENERATE_VERIFY_MAC,
-                spec -> AlgorithmMapper.keySpecToMacAlgo(spec).stream()
-                        .map(IEnumMacAlgorithm::name)
-                        .collect(Collectors.toList()),
-                readOnly);
+        if (macAlgoCombo != null) {
+            updateComboForUsage(selectedKeyUsage, selectedKeySpec, macAlgoCombo,
+                    usage -> usage == IEnumKeyUsage.Types.GENERATE_VERIFY_MAC,
+                    spec -> AlgorithmMapper.keySpecToMacAlgo(spec).stream()
+                            .map(IEnumMacAlgorithm::name)
+                            .collect(Collectors.toList()),
+                    readOnly);
+        }
     }
 
-    /**
-     * Helper method to update a combo box based on key usage and spec.
-     *
-     * @param usage       the current key usage
-     * @param spec        the current key spec
-     * @param comboBox    the combo box to update
-     * @param usageCheck  predicate that checks if the usage matches the required type
-     * @param algoMapper  function that returns a list of algorithm names for the given spec
-     * @param readOnly    if true, the combo is disabled after setting the first algorithm
-     */
+    private String getDefaultAlgorithm(IEnumKeySpec.Types spec, IEnumKeyUsage.Types usage) {
+        if (spec == null) return null;
+        if (usage == IEnumKeyUsage.Types.ENCRYPT_DECRYPT) {
+            if (spec.name().startsWith("RSA")) return IEnumEncryptionAlgorithm.RSAES_OAEP_SHA_256.name();
+            if (spec == IEnumKeySpec.Types.SYMMETRIC_DEFAULT) return IEnumEncryptionAlgorithm.SYMMETRIC_DEFAULT.name();
+        } else if (usage == IEnumKeyUsage.Types.SIGN_VERIFY) {
+            if (spec.name().startsWith("RSA")) {
+                int size = spec.getKeySizeBits();
+                if (size == 2048) return IEnumSignatureAlgorithm.RSASSA_PKCS1_V1_5_SHA_256.name();
+                if (size == 3072) return IEnumSignatureAlgorithm.RSASSA_PKCS1_V1_5_SHA_384.name();
+                if (size == 4096) return IEnumSignatureAlgorithm.RSASSA_PKCS1_V1_5_SHA_512.name();
+                return IEnumSignatureAlgorithm.RSASSA_PKCS1_V1_5_SHA_256.name();
+            } else if (spec.name().startsWith("ECC") || spec == IEnumKeySpec.Types.ECC_NIST_P256 ||
+                    spec == IEnumKeySpec.Types.ECC_NIST_P384 || spec == IEnumKeySpec.Types.ECC_NIST_P521 ||
+                    spec == IEnumKeySpec.Types.ECC_SECG_P256K1) {
+                int size = spec.getKeySizeBits();
+                if (size == 256) return IEnumSignatureAlgorithm.ECDSA_SHA_256.name();
+                if (size == 384) return IEnumSignatureAlgorithm.ECDSA_SHA_384.name();
+                if (size == 521) return IEnumSignatureAlgorithm.ECDSA_SHA_512.name();
+                return IEnumSignatureAlgorithm.ECDSA_SHA_256.name();
+            } else if (spec == IEnumKeySpec.Types.SM2) {
+                return IEnumSignatureAlgorithm.SM2DSA.name();
+            }
+        } else if (usage == IEnumKeyUsage.Types.GENERATE_VERIFY_MAC) {
+            if (spec.name().startsWith("HMAC")) {
+                int size = spec.getKeySizeBits();
+                if (size == 224) return IEnumMacAlgorithm.HMAC_SHA_224.name();
+                if (size == 256) return IEnumMacAlgorithm.HMAC_SHA_256.name();
+                if (size == 384) return IEnumMacAlgorithm.HMAC_SHA_384.name();
+                if (size == 512) return IEnumMacAlgorithm.HMAC_SHA_512.name();
+                return IEnumMacAlgorithm.HMAC_SHA_256.name();
+            }
+        }
+        return null;
+    }
+
     private void updateComboForUsage(IEnumKeyUsage.Types usage,
                                      IEnumKeySpec.Types spec,
                                      ComboBox<String> comboBox,
@@ -305,14 +389,13 @@ public class CryptoOperationsView extends VerticalLayout {
             if (!algorithms.isEmpty()) {
                 comboBox.setItems(algorithms);
                 if (readOnly) {
-                    // Try to get the default algorithm for this spec/usage
-                    String defaultAlgo = AlgorithmMapper.getDefaultAlgorithm(spec, usage);
+                    String defaultAlgo = getDefaultAlgorithm(spec, usage);
                     if (defaultAlgo != null && algorithms.contains(defaultAlgo)) {
                         comboBox.setValue(defaultAlgo);
                     } else {
-                        comboBox.setValue(algorithms.get(0)); // fallback to first
+                        comboBox.setValue(algorithms.get(0));
                     }
-                    comboBox.setEnabled(false);  // read‑only
+                    comboBox.setEnabled(false);
                 } else {
                     comboBox.setValue(algorithms.get(0));
                     comboBox.setEnabled(true);
@@ -339,6 +422,7 @@ public class CryptoOperationsView extends VerticalLayout {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
         layout.setPadding(true);
+        layout.addClassName("crypto-panel");
 
         TextArea plaintextArea = new TextArea("Plaintext (UTF-8)");
         plaintextArea.setWidthFull();
@@ -361,6 +445,10 @@ public class CryptoOperationsView extends VerticalLayout {
         Button decryptBtn = new Button("Decrypt", new Icon(VaadinIcon.UNLOCK));
         encryptBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         decryptBtn.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+
+        HorizontalLayout buttonRow = new HorizontalLayout(encryptBtn, decryptBtn);
+        buttonRow.setSpacing(true);
+        buttonRow.addClassName("crypto-button-row");
 
         encryptBtn.addClickListener(e -> {
             if (selectedKeyId == null) {
@@ -446,7 +534,6 @@ public class CryptoOperationsView extends VerticalLayout {
             }
         });
 
-        HorizontalLayout buttonRow = new HorizontalLayout(encryptBtn, decryptBtn);
         layout.add(plaintextArea, ciphertextArea, algorithmCombo, contextField, buttonRow);
         return layout;
     }
@@ -456,6 +543,7 @@ public class CryptoOperationsView extends VerticalLayout {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
         layout.setPadding(true);
+        layout.addClassName("crypto-panel");
 
         TextArea messageArea = new TextArea("Message (UTF-8)");
         messageArea.setWidthFull();
@@ -473,6 +561,10 @@ public class CryptoOperationsView extends VerticalLayout {
         Button verifyBtn = new Button("Verify", new Icon(VaadinIcon.CHECK));
         signBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         verifyBtn.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+
+        HorizontalLayout buttonRow = new HorizontalLayout(signBtn, verifyBtn);
+        buttonRow.setSpacing(true);
+        buttonRow.addClassName("crypto-button-row");
 
         signBtn.addClickListener(e -> {
             if (selectedKeyId == null) {
@@ -568,7 +660,6 @@ public class CryptoOperationsView extends VerticalLayout {
             }
         });
 
-        HorizontalLayout buttonRow = new HorizontalLayout(signBtn, verifyBtn);
         layout.add(messageArea, signatureArea, signAlgoCombo, buttonRow);
         return layout;
     }
@@ -578,6 +669,7 @@ public class CryptoOperationsView extends VerticalLayout {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
         layout.setPadding(true);
+        layout.addClassName("crypto-data-key-panel");
 
         ComboBox<String> keySpecCombo = new ComboBox<>("Data Key Spec");
         keySpecCombo.setItems("AES_128", "AES_256");
@@ -645,6 +737,7 @@ public class CryptoOperationsView extends VerticalLayout {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
         layout.setPadding(true);
+        layout.addClassName("crypto-panel");
 
         TextArea messageArea = new TextArea("Message (UTF-8)");
         messageArea.setWidthFull();
@@ -662,6 +755,10 @@ public class CryptoOperationsView extends VerticalLayout {
         Button verifyBtn = new Button("Verify MAC", new Icon(VaadinIcon.CHECK));
         generateBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         verifyBtn.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+
+        HorizontalLayout buttonRow = new HorizontalLayout(generateBtn, verifyBtn);
+        buttonRow.setSpacing(true);
+        buttonRow.addClassName("crypto-button-row");
 
         generateBtn.addClickListener(e -> {
             if (selectedKeyId == null) {
@@ -755,7 +852,6 @@ public class CryptoOperationsView extends VerticalLayout {
             }
         });
 
-        HorizontalLayout buttonRow = new HorizontalLayout(generateBtn, verifyBtn);
         layout.add(messageArea, macArea, macAlgoCombo, buttonRow);
         return layout;
     }

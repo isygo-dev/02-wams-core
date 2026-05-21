@@ -1,16 +1,16 @@
 package eu.isygoit.ui.views;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
@@ -27,7 +27,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -64,11 +63,13 @@ public class PoliciesView extends VerticalLayout {
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         add(header);
 
-        // Key selection toolbar
+        // Responsive key selection toolbar
         HorizontalLayout keyLayout = new HorizontalLayout();
         keyLayout.setWidthFull();
-        keyLayout.setAlignItems(Alignment.CENTER);
+        keyLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         keyLayout.setSpacing(true);
+        keyLayout.getStyle().set("flex-wrap", "wrap");
+        keyLayout.addClassName("policies-key-layout");
 
         keyCombo.setPlaceholder("Select a KMS key...");
         keyCombo.setItemLabelGenerator(KeyOption::getDisplayName);
@@ -90,9 +91,11 @@ public class PoliciesView extends VerticalLayout {
         keyLayout.add(keyCombo, refreshKeysButton);
         add(keyLayout);
 
-        // Action bar
+        // Responsive action bar
         HorizontalLayout actionBar = new HorizontalLayout(loadButton, saveButton, formatButton);
         actionBar.setSpacing(true);
+        actionBar.getStyle().set("flex-wrap", "wrap");
+        actionBar.addClassName("policies-action-bar");
         loadButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         saveButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
         formatButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
@@ -116,8 +119,41 @@ public class PoliciesView extends VerticalLayout {
         saveButton.addClickListener(e -> savePolicy());
         formatButton.addClickListener(e -> formatPolicy());
 
+        // Inject responsive CSS using JavaScript (fixes URL encoding issues)
+        injectResponsiveStyles();
+
         // Initial load
         loadKeyOptions();
+    }
+
+    private void injectResponsiveStyles() {
+        String css = """
+            .policies-key-layout,
+            .policies-action-bar {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--lumo-space-s);
+                align-items: center;
+            }
+            @media (max-width: 768px) {
+                .policies-key-layout,
+                .policies-action-bar {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+                .policies-key-layout > *,
+                .policies-action-bar > * {
+                    width: 100% !important;
+                }
+                .policies-key-layout > .vaadin-combo-box {
+                    width: 100% !important;
+                }
+            }
+        """;
+        UI.getCurrent().getPage().executeJs(
+                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
+                css
+        );
     }
 
     private void loadKeyOptions() {
@@ -173,7 +209,6 @@ public class PoliciesView extends VerticalLayout {
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 String policy = objectMapper.writeValueAsString(response.getBody().getPolicy());
                 if (StringUtils.hasText(policy)) {
-                    // Pretty‑print the JSON
                     String prettyPolicy = prettyPrintJson(policy);
                     policyEditor.setValue(prettyPolicy);
                     Notification.show("Policy loaded", 3000, Notification.Position.TOP_END)
@@ -222,7 +257,7 @@ public class PoliciesView extends VerticalLayout {
             KmsDtos.PutKeyPolicyRequest request = KmsDtos.PutKeyPolicyRequest.builder()
                     .keyId(selectedKeyId)
                     .policy(policyMap)
-                    .bypassPolicyLockoutSafetyCheck(false) // optional checkbox could be added
+                    .bypassPolicyLockoutSafetyCheck(false)
                     .build();
             ResponseEntity<KmsDtos.PutKeyPolicyResponse> response = kmsApiService.putKeyPolicy(selectedKeyId, request);
             if (response.getStatusCode().is2xxSuccessful()) {

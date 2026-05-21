@@ -1,5 +1,6 @@
 package eu.isygoit.ui.views.keyStore;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
@@ -56,15 +57,11 @@ public class CustomKeyStoresView extends VerticalLayout {
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         add(header);
 
-        // Toolbar
-        HorizontalLayout toolbar = new HorizontalLayout(createButton, refreshButton);
-        toolbar.setWidthFull();
-        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        // Responsive toolbar
+        HorizontalLayout toolbar = buildToolbar();
         add(toolbar);
 
-        // Cards container
+        // Cards container (already responsive via StoreCard)
         cardsContainer.setWidthFull();
         cardsContainer.setPadding(false);
         cardsContainer.setSpacing(true);
@@ -79,7 +76,82 @@ public class CustomKeyStoresView extends VerticalLayout {
         createButton.addClickListener(e -> createCustomKeyStore());
         refreshButton.addClickListener(e -> loadStores());
 
+        // Inject responsive CSS using JavaScript (fixes URL encoding issues)
+        injectResponsiveStyles();
+
         loadStores();
+    }
+
+    private HorizontalLayout buildToolbar() {
+        HorizontalLayout toolbar = new HorizontalLayout();
+        toolbar.setWidthFull();
+        toolbar.setPadding(false);
+        toolbar.setSpacing(false);
+        toolbar.addClassName("custom-stores-toolbar");
+
+        // Left group: placeholder for future filters (empty for now)
+        HorizontalLayout leftGroup = new HorizontalLayout();
+        leftGroup.addClassName("toolbar-left-group");
+        leftGroup.setSpacing(true);
+
+        // Right group: create + refresh buttons
+        HorizontalLayout rightGroup = new HorizontalLayout();
+        rightGroup.addClassName("toolbar-right-group");
+        rightGroup.setSpacing(true);
+        rightGroup.setAlignItems(FlexComponent.Alignment.END);
+
+        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        refreshButton.setTooltipText("Refresh stores");
+        rightGroup.add(createButton, refreshButton);
+
+        toolbar.add(leftGroup, rightGroup);
+        return toolbar;
+    }
+
+    private void injectResponsiveStyles() {
+        String css = """
+            .custom-stores-toolbar {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--lumo-space-s);
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+                margin-bottom: var(--lumo-space-m);
+            }
+            .toolbar-left-group,
+            .toolbar-right-group {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--lumo-space-s);
+                align-items: center;
+            }
+            @media (max-width: 768px) {
+                .custom-stores-toolbar {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+                .toolbar-left-group,
+                .toolbar-right-group {
+                    flex-direction: column;
+                    align-items: stretch;
+                    width: 100%;
+                }
+                .toolbar-left-group > *,
+                .toolbar-right-group > * {
+                    width: 100% !important;
+                }
+                /* Ensure buttons in right group also become full width */
+                .toolbar-right-group .vaadin-button {
+                    width: 100% !important;
+                }
+            }
+        """;
+        UI.getCurrent().getPage().executeJs(
+                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
+                css
+        );
     }
 
     private void createCustomKeyStore() {
@@ -129,5 +201,4 @@ public class CustomKeyStoresView extends VerticalLayout {
         createButton.setEnabled(!show);
         refreshButton.setEnabled(!show);
     }
-
 }

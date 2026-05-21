@@ -1,5 +1,6 @@
 package eu.isygoit.ui.views.keyStore;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
@@ -8,6 +9,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -19,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 
 import java.time.format.DateTimeFormatter;
 
-// ========== Inner class: Store Card ==========
 class StoreCard extends VerticalLayout {
     private final CustomKeyStoresView parentView;
     private final KmsApiService kmsApiService;
@@ -45,6 +46,8 @@ class StoreCard extends VerticalLayout {
                 store.getCreateDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : "-";
         this.errorCode = store.getConnectionError();
         buildCard();
+        addClassName("store-card");
+        injectResponsiveStyles();
     }
 
     private void buildCard() {
@@ -60,18 +63,24 @@ class StoreCard extends VerticalLayout {
         // Header row: store name (left) and action buttons (right)
         HorizontalLayout headerRow = new HorizontalLayout();
         headerRow.setWidthFull();
-        headerRow.setJustifyContentMode(JustifyContentMode.BETWEEN);
-        headerRow.setAlignItems(Alignment.CENTER);
+        headerRow.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        headerRow.getStyle().set("flex-wrap", "wrap");
+        headerRow.setSpacing(true);
+        headerRow.addClassName("store-header-row");
 
-        // Left side: name only (type+status will be below)
+        // Left side: name
         Span nameSpan = new Span(storeName);
         nameSpan.addClassName(LumoUtility.FontWeight.BOLD);
         nameSpan.addClassName(LumoUtility.FontSize.MEDIUM);
+        nameSpan.getStyle().set("word-break", "break-word");
 
         // Right side: action buttons
         HorizontalLayout buttonBar = new HorizontalLayout();
         buttonBar.setSpacing(true);
         buttonBar.setPadding(false);
+        buttonBar.getStyle().set("flex-wrap", "wrap");
+        buttonBar.addClassName("store-button-bar");
 
         Button connectBtn = createIconButton(VaadinIcon.CONNECT, "Connect");
         connectBtn.addClickListener(e -> confirmConnect());
@@ -96,13 +105,15 @@ class StoreCard extends VerticalLayout {
 
         buttonBar.add(connectBtn, disconnectBtn, updateBtn, deleteBtn);
         headerRow.add(nameSpan, buttonBar);
-        headerRow.expand(nameSpan);
         add(headerRow);
 
-        // Type and status chips (same line)
+        // Type and status chips (same line, wrap allowed)
         HorizontalLayout typeStatusRow = new HorizontalLayout();
         typeStatusRow.setSpacing(true);
-        typeStatusRow.setAlignItems(Alignment.CENTER);
+        typeStatusRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        typeStatusRow.getStyle().set("flex-wrap", "wrap");
+        typeStatusRow.addClassName("store-type-status");
+
         Span typeChip = new Span(storeType);
         typeChip.addClassName(LumoUtility.FontSize.XSMALL);
         typeChip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
@@ -131,6 +142,9 @@ class StoreCard extends VerticalLayout {
         metaRow1.addClassName(LumoUtility.FontSize.XSMALL);
         metaRow1.addClassName(LumoUtility.TextColor.TERTIARY);
         metaRow1.getStyle().set("margin-top", "var(--lumo-space-xs)");
+        metaRow1.getStyle().set("flex-wrap", "wrap");
+        metaRow1.addClassName("store-meta-row");
+
         metaRow1.add(new Span("Created: " + creationDate));
         if (store.getUpdateDate() != null) {
             metaRow1.add(new Span("•"));
@@ -142,12 +156,13 @@ class StoreCard extends VerticalLayout {
         }
         add(metaRow1);
 
-        // Metadata row 2: CloudHSM or XKS specific details (ID and trust anchor NOT shown)
+        // Metadata row 2: CloudHSM or XKS specific details
         if (store.getCloudHsmClusterId() != null && !store.getCloudHsmClusterId().isEmpty()) {
             HorizontalLayout hsmRow = new HorizontalLayout();
             hsmRow.setSpacing(true);
             hsmRow.addClassName(LumoUtility.FontSize.XSMALL);
             hsmRow.addClassName(LumoUtility.TextColor.TERTIARY);
+            hsmRow.getStyle().set("flex-wrap", "wrap");
             hsmRow.add(new Span("CloudHSM: " + store.getCloudHsmClusterId()));
             add(hsmRow);
         } else if (store.getXksProxyUriEndpoint() != null && !store.getXksProxyUriEndpoint().isEmpty()) {
@@ -155,6 +170,7 @@ class StoreCard extends VerticalLayout {
             xksRow.setSpacing(true);
             xksRow.addClassName(LumoUtility.FontSize.XSMALL);
             xksRow.addClassName(LumoUtility.TextColor.TERTIARY);
+            xksRow.getStyle().set("flex-wrap", "wrap");
             xksRow.add(new Span("XKS Endpoint: " + store.getXksProxyUriEndpoint()));
             if (store.getXksProxyUriPath() != null && !store.getXksProxyUriPath().isEmpty()) {
                 xksRow.add(new Span("•"));
@@ -173,6 +189,8 @@ class StoreCard extends VerticalLayout {
         metaRow3.addClassName(LumoUtility.FontSize.XSMALL);
         metaRow3.addClassName(LumoUtility.TextColor.TERTIARY);
         metaRow3.getStyle().set("margin-top", "var(--lumo-space-xs)");
+        metaRow3.getStyle().set("flex-wrap", "wrap");
+        metaRow3.addClassName("store-meta-row");
 
         if (store.getHealthStatus() != null) {
             metaRow3.add(new Span("Health: " + store.getHealthStatus()));
@@ -195,13 +213,15 @@ class StoreCard extends VerticalLayout {
         }
         add(metaRow3);
 
-        // Metadata row 4: connection settings (timeout, health interval, auto‑reconnect)
+        // Metadata row 4: connection settings
         if (store.getConnectionTimeoutSeconds() != null || store.getHealthCheckIntervalSeconds() != null || store.getAutoReconnect() != null) {
             HorizontalLayout settingsRow = new HorizontalLayout();
             settingsRow.setSpacing(true);
             settingsRow.addClassName(LumoUtility.FontSize.XSMALL);
             settingsRow.addClassName(LumoUtility.TextColor.TERTIARY);
             settingsRow.getStyle().set("margin-top", "var(--lumo-space-xs)");
+            settingsRow.getStyle().set("flex-wrap", "wrap");
+            settingsRow.addClassName("store-meta-row");
 
             if (store.getConnectionTimeoutSeconds() != null) {
                 settingsRow.add(new Span("Timeout: " + store.getConnectionTimeoutSeconds() + "s"));
@@ -216,6 +236,62 @@ class StoreCard extends VerticalLayout {
             }
             add(settingsRow);
         }
+    }
+
+    private void injectResponsiveStyles() {
+        String css = """
+            .store-card .store-header-row {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--lumo-space-s);
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+            }
+            .store-card .store-button-bar {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--lumo-space-xs);
+            }
+            .store-card .store-type-status,
+            .store-card .store-meta-row {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--lumo-space-xs);
+                align-items: center;
+            }
+            @media (max-width: 640px) {
+                .store-card .store-header-row {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+                .store-card .store-button-bar {
+                    width: 100%;
+                    justify-content: flex-start;
+                }
+                .store-card .store-button-bar > * {
+                    flex: 1;
+                }
+                .store-card .store-type-status {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: var(--lumo-space-xs);
+                }
+                .store-card .store-meta-row {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: var(--lumo-space-xs);
+                }
+                .store-card .store-meta-row > span {
+                    white-space: normal;
+                    word-break: break-word;
+                }
+            }
+        """;
+        UI.getCurrent().getPage().executeJs(
+                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
+                css
+        );
     }
 
     private Button createIconButton(VaadinIcon icon, String tooltip) {

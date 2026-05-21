@@ -105,8 +105,87 @@ public class KeyManagementView extends VerticalLayout {
             filterCards();
         });
 
+        // Inject responsive CSS using JavaScript (fixes URL encoding issues)
+        injectResponsiveStyles();
+
         loadAliases();
         loadKeys();
+    }
+
+    private void injectResponsiveStyles() {
+        String css = """
+            .key-management-toolbar {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--lumo-space-s);
+                align-items: flex-end;
+                justify-content: space-between;
+                width: 100%;
+            }
+            .toolbar-left-group {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--lumo-space-s);
+                align-items: flex-end;
+            }
+            .toolbar-right-group {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--lumo-space-s);
+                align-items: flex-end;
+            }
+            @media (max-width: 768px) {
+                .key-management-toolbar {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+                .toolbar-left-group,
+                .toolbar-right-group {
+                    flex-direction: column;
+                    align-items: stretch;
+                    width: 100%;
+                }
+                .toolbar-left-group > *,
+                .toolbar-right-group > * {
+                    width: 100% !important;
+                }
+            }
+        """;
+        UI.getCurrent().getPage().executeJs(
+                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
+                css
+        );
+    }
+
+    private HorizontalLayout buildToolbar() {
+        HorizontalLayout toolbar = new HorizontalLayout();
+        toolbar.setWidthFull();
+        toolbar.setPadding(false);
+        toolbar.setSpacing(false);
+        toolbar.addClassName("key-management-toolbar");
+
+        // Left group: search + status filter + refresh button
+        HorizontalLayout leftGroup = new HorizontalLayout();
+        leftGroup.addClassName("toolbar-left-group");
+        leftGroup.setSpacing(true);
+        leftGroup.setAlignItems(FlexComponent.Alignment.END);
+        searchField.setWidth("280px");
+        statusFilter.setWidth("160px");
+        statusFilter.setPlaceholder("Filter by status");
+        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        refreshButton.setTooltipText("Refresh keys");
+        leftGroup.add(searchField, statusFilter, refreshButton);
+
+        // Right group: only create button (right aligned)
+        HorizontalLayout rightGroup = new HorizontalLayout();
+        rightGroup.addClassName("toolbar-right-group");
+        rightGroup.setSpacing(true);
+        rightGroup.setAlignItems(FlexComponent.Alignment.END);
+        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        rightGroup.add(createButton);
+
+        toolbar.add(leftGroup, rightGroup);
+        return toolbar;
     }
 
     public void loadAliasesAndKeys() {
@@ -130,34 +209,6 @@ public class KeyManagementView extends VerticalLayout {
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             existingAliases = new ArrayList<>();
         }
-    }
-
-    private HorizontalLayout buildToolbar() {
-        HorizontalLayout toolbar = new HorizontalLayout();
-        toolbar.setWidthFull();
-        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
-        toolbar.getStyle().set("flex-wrap", "wrap");
-        toolbar.addClassName(LumoUtility.Padding.Bottom.MEDIUM);
-
-        HorizontalLayout leftGroup = new HorizontalLayout();
-        leftGroup.setAlignItems(FlexComponent.Alignment.END);
-        leftGroup.setSpacing(true);
-        searchField.setWidth("280px");
-        statusFilter.setWidth("160px");
-        statusFilter.setPlaceholder("Filter by status");
-        leftGroup.add(searchField, statusFilter);
-
-        HorizontalLayout rightGroup = new HorizontalLayout();
-        rightGroup.setSpacing(true);
-        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText("Refresh keys");
-        rightGroup.add(createButton, refreshButton);
-
-        toolbar.add(leftGroup, rightGroup);
-        toolbar.expand(leftGroup);
-        return toolbar;
     }
 
     public void loadKeys() {
@@ -275,7 +326,6 @@ public class KeyManagementView extends VerticalLayout {
                         "});",
                 text
         );
-        // Optional: show a small notification
         Notification.show("Key ID copied to clipboard", 1500, Notification.Position.TOP_END)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }

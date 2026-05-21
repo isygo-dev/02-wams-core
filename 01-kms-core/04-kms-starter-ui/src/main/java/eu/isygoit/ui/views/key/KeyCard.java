@@ -1,6 +1,8 @@
 package eu.isygoit.ui.views.key;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
@@ -38,6 +40,13 @@ class KeyCard extends VerticalLayout {
     private final String statusText;
     private final ObjectMapper objectMapper;
 
+    // Responsive components that will be dynamically adjusted
+    private HorizontalLayout headerRow;
+    private HorizontalLayout metaRow1;
+    private HorizontalLayout metaRow2;
+    private HorizontalLayout leftPart;
+    private HorizontalLayout buttonBar;
+
     public KeyCard(KeyManagementView keyManagementView,
                    KmsApiService kmsApiService,
                    ObjectMapper objectMapper,
@@ -53,6 +62,9 @@ class KeyCard extends VerticalLayout {
         this.statusText = (metadata != null && metadata.getKeyStatus() != null)
                 ? metadata.getKeyStatus().name() : "UNKNOWN";
         buildCard();
+        addClassName("key-card");
+        setWidthFull();
+        setPadding(true);
     }
 
     public String getKeyId() { return keyId; }
@@ -74,13 +86,14 @@ class KeyCard extends VerticalLayout {
         titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
         titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
         titleSpan.addClassName(LumoUtility.TextColor.PRIMARY);
+        titleSpan.getStyle().set("word-break", "break-word");
 
         Span statusChip = new Span(statusText);
         statusChip.addClassName(LumoUtility.FontSize.XSMALL);
         statusChip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
         statusChip.addClassName(LumoUtility.Padding.Vertical.XSMALL);
         statusChip.addClassName(LumoUtility.BorderRadius.LARGE);
-        statusChip.getStyle().set("display", "inline-block");
+        statusChip.getStyle().set("display", "inline-block").set("white-space", "nowrap");
         switch (statusText.toUpperCase()) {
             case "ENABLED":
                 statusChip.getStyle().set("background-color", "#E3F7E5").set("color", "#1E7B2E");
@@ -116,14 +129,17 @@ class KeyCard extends VerticalLayout {
         versionLayout.setSpacing(false);
 
         // --- Left part of header (alias, status, version) ---
-        HorizontalLayout leftPart = new HorizontalLayout(titleSpan, statusChip, versionLayout);
+        leftPart = new HorizontalLayout(titleSpan, statusChip, versionLayout);
         leftPart.setAlignItems(FlexComponent.Alignment.CENTER);
         leftPart.setSpacing(true);
+        leftPart.getStyle().set("flex-wrap", "wrap");
 
         // --- Button bar (edit, info, rotation, more) ---
-        HorizontalLayout buttonBar = new HorizontalLayout();
+        buttonBar = new HorizontalLayout();
         buttonBar.setSpacing(true);
         buttonBar.setPadding(false);
+        buttonBar.getStyle().set("flex-wrap", "wrap");
+        buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
         Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit alias, description & tags");
         editBtn.addClickListener(e -> updateKey());
@@ -146,10 +162,12 @@ class KeyCard extends VerticalLayout {
         buttonBar.add(editBtn, describeBtn, rotationBtn, moreBtn);
 
         // --- Assemble header row ---
-        HorizontalLayout headerRow = new HorizontalLayout();
+        headerRow = new HorizontalLayout();
         headerRow.setWidthFull();
         headerRow.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        headerRow.getStyle().set("flex-wrap", "wrap");
+        headerRow.setSpacing(true);
         headerRow.add(leftPart, buttonBar);
         headerRow.expand(leftPart);
         add(headerRow);
@@ -161,15 +179,16 @@ class KeyCard extends VerticalLayout {
         descSpan.addClassName(LumoUtility.FontSize.SMALL);
         descSpan.addClassName(LumoUtility.TextColor.SECONDARY);
         descSpan.getStyle().set("margin-top", "var(--lumo-space-xs)");
-        descSpan.getStyle().set("display", "block");
+        descSpan.getStyle().set("display", "block").set("word-break", "break-word");
         add(descSpan);
 
         // First meta row: Spec, Usage, Creation date, Multi‑region
-        HorizontalLayout metaRow1 = new HorizontalLayout();
+        metaRow1 = new HorizontalLayout();
         metaRow1.setSpacing(true);
         metaRow1.addClassName(LumoUtility.FontSize.XSMALL);
         metaRow1.addClassName(LumoUtility.TextColor.TERTIARY);
         metaRow1.getStyle().set("margin-top", "var(--lumo-space-s)");
+        metaRow1.getStyle().set("flex-wrap", "wrap");
 
         String keySpec = (metadata != null && metadata.getKeySpec() != null) ? metadata.getKeySpec().name() : "N/A";
         String keyUsage = (metadata != null && metadata.getKeyUsage() != null) ? metadata.getKeyUsage().name() : "N/A";
@@ -187,12 +206,13 @@ class KeyCard extends VerticalLayout {
         metaRow1.add(new Span(multiRegion));
         add(metaRow1);
 
-        // Second meta row: Key ID, Origin, Rotation status (version removed)
-        HorizontalLayout metaRow2 = new HorizontalLayout();
+        // Second meta row: Key ID, Origin, Rotation status
+        metaRow2 = new HorizontalLayout();
         metaRow2.setSpacing(true);
         metaRow2.addClassName(LumoUtility.FontSize.XSMALL);
         metaRow2.addClassName(LumoUtility.TextColor.TERTIARY);
         metaRow2.getStyle().set("margin-top", "var(--lumo-space-xs)");
+        metaRow2.getStyle().set("flex-wrap", "wrap");
 
         String keyIdDisplay = keyId;
         if (keyIdDisplay != null) {
@@ -221,6 +241,64 @@ class KeyCard extends VerticalLayout {
         metaRow2.add(new Span(rotation));
 
         add(metaRow2);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        // Add responsive resize listener
+        UI.getCurrent().getPage().addBrowserWindowResizeListener(event -> {
+            int width = event.getWidth();
+            adjustForScreenWidth(width);
+        });
+        // Initial adjustment – get window width on attach
+        UI.getCurrent().getPage().executeJs("return window.innerWidth")
+                .then(Integer.class, width -> adjustForScreenWidth(width));
+    }
+
+    private void adjustForScreenWidth(int width) {
+        boolean isMobile = width < 768;
+        boolean isTablet = width >= 768 && width < 1024;
+
+        // Header row: on small screens stack vertically
+        if (isMobile) {
+            headerRow.getStyle().set("flex-direction", "column");
+            headerRow.setAlignItems(FlexComponent.Alignment.START);
+            headerRow.setSpacing(false);
+            buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.START);
+            buttonBar.getStyle().set("margin-top", "var(--lumo-space-s)");
+            leftPart.getStyle().set("margin-bottom", "0");
+        } else {
+            headerRow.getStyle().remove("flex-direction");
+            headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
+            headerRow.setSpacing(true);
+            buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+            buttonBar.getStyle().remove("margin-top");
+        }
+
+        // Meta rows: on mobile, reduce gap and font size
+        if (isMobile) {
+            metaRow1.setSpacing(false);
+            metaRow2.setSpacing(false);
+            metaRow1.addClassName(LumoUtility.FontSize.XXSMALL);
+            metaRow2.addClassName(LumoUtility.FontSize.XXSMALL);
+            metaRow1.getStyle().set("margin-bottom", "4px");
+        } else {
+            metaRow1.setSpacing(true);
+            metaRow2.setSpacing(true);
+            metaRow1.removeClassName(LumoUtility.FontSize.XXSMALL);
+            metaRow2.removeClassName(LumoUtility.FontSize.XXSMALL);
+            metaRow1.getStyle().remove("margin-bottom");
+        }
+
+        // For tablets, keep horizontal but ensure wrapping still works
+        if (isTablet) {
+            headerRow.getStyle().remove("flex-direction");
+            headerRow.setSpacing(true);
+            buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+            metaRow1.setSpacing(true);
+            metaRow2.setSpacing(true);
+        }
     }
 
     // ========== Helper methods ==========
@@ -306,7 +384,6 @@ class KeyCard extends VerticalLayout {
         layout.setSpacing(true);
         layout.setWidthFull();
 
-        // Enable/Disable button
         boolean isEnabled = metadata != null && metadata.getKeyStatus() == IEnumKeyStatus.Types.ENABLED;
         Button toggleStatusBtn = new Button(isEnabled ? "Disable key" : "Enable key", new Icon(isEnabled ? VaadinIcon.UNLOCK : VaadinIcon.LOCK));
         toggleStatusBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
@@ -321,7 +398,6 @@ class KeyCard extends VerticalLayout {
         });
         layout.add(toggleStatusBtn);
 
-        // Schedule deletion
         Button scheduleDeleteBtn = new Button("Schedule deletion", new Icon(VaadinIcon.CLOCK));
         scheduleDeleteBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         scheduleDeleteBtn.setWidthFull();
@@ -331,7 +407,6 @@ class KeyCard extends VerticalLayout {
         });
         layout.add(scheduleDeleteBtn);
 
-        // Cancel deletion (only if pending)
         if ("PENDING_DELETION".equalsIgnoreCase(statusText)) {
             Button cancelDeleteBtn = new Button("Cancel deletion", new Icon(VaadinIcon.REFRESH));
             cancelDeleteBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
@@ -343,7 +418,6 @@ class KeyCard extends VerticalLayout {
             layout.add(cancelDeleteBtn);
         }
 
-        // Permanent delete
         boolean isPendingDeletion = "PENDING_DELETION".equalsIgnoreCase(statusText);
         if (isPendingDeletion) {
             Button deleteBtn = new Button("Permanently delete", new Icon(VaadinIcon.TRASH));
@@ -376,19 +450,6 @@ class KeyCard extends VerticalLayout {
             }
         } catch (Exception e) { /* ignore */ }
         return new ArrayList<>();
-    }
-
-    private HorizontalLayout detailRow(String label, String value) {
-        HorizontalLayout row = new HorizontalLayout();
-        row.setWidthFull();
-        row.setSpacing(true);
-        Span labelSpan = new Span(label + ":");
-        labelSpan.addClassName(LumoUtility.FontWeight.BOLD);
-        labelSpan.setWidth("30%");
-        Span valueSpan = new Span(value != null ? value : "-");
-        valueSpan.setWidth("70%");
-        row.add(labelSpan, valueSpan);
-        return row;
     }
 
     private void toggleKeyStatus() {
