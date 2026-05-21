@@ -17,6 +17,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
 import eu.isygoit.dto.KmsDtos.ListResourceTagsResponse;
 import eu.isygoit.dto.KmsDtos.UpdateKeyRotationRequest;
@@ -47,6 +48,10 @@ class KeyCard extends VerticalLayout {
     private HorizontalLayout leftPart;
     private HorizontalLayout buttonBar;
 
+    // Version button
+    private Button versionsBtn;
+    private int versionCount = 0;
+
     public KeyCard(KeyManagementView keyManagementView,
                    KmsApiService kmsApiService,
                    ObjectMapper objectMapper,
@@ -65,6 +70,7 @@ class KeyCard extends VerticalLayout {
         addClassName("key-card");
         setWidthFull();
         setPadding(true);
+        loadVersionCount();
     }
 
     public String getKeyId() { return keyId; }
@@ -134,7 +140,7 @@ class KeyCard extends VerticalLayout {
         leftPart.setSpacing(true);
         leftPart.getStyle().set("flex-wrap", "wrap");
 
-        // --- Button bar (edit, info, rotation, more) ---
+        // --- Button bar (edit, info, rotation, more, versions) ---
         buttonBar = new HorizontalLayout();
         buttonBar.setSpacing(true);
         buttonBar.setPadding(false);
@@ -159,7 +165,12 @@ class KeyCard extends VerticalLayout {
         Button moreBtn = createIconButton(VaadinIcon.ELLIPSIS_DOTS_V, "More actions");
         moreBtn.addClickListener(e -> showContextMenu());
 
-        buttonBar.add(editBtn, describeBtn, rotationBtn, moreBtn);
+        // Versions button
+        versionsBtn = createIconButton(VaadinIcon.CUBE, "View key versions");
+        versionsBtn.addClickListener(e -> showVersionsDialog());
+        versionsBtn.setText("Versions (...)"); // will be updated later
+
+        buttonBar.add(editBtn, describeBtn, rotationBtn, versionsBtn, moreBtn);
 
         // --- Assemble header row ---
         headerRow = new HorizontalLayout();
@@ -308,6 +319,28 @@ class KeyCard extends VerticalLayout {
         btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         btn.setTooltipText(tooltip);
         return btn;
+    }
+
+    private void loadVersionCount() {
+        try {
+            ResponseEntity<ListKeyVersionsResponse> response =
+                    kmsApiService.listKeyVersions(keyId, 100, null);
+            if (response.getBody() != null && response.getBody().getVersions() != null) {
+                versionCount = response.getBody().getVersions().size();
+            } else {
+                versionCount = 0;
+            }
+        } catch (Exception e) {
+            versionCount = 0;
+        }
+        // Update button text on UI thread
+        getUI().ifPresent(ui -> ui.access(() ->
+                versionsBtn.setText("V (" + versionCount + ")")
+        ));
+    }
+
+    private void showVersionsDialog() {
+        new KeyVersionsDialog(kmsApiService, keyId, aliasOrId).open();
     }
 
     private void toggleRotation() {
