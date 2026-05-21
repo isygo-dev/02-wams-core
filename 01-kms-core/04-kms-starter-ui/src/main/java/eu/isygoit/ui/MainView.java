@@ -18,7 +18,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -50,12 +49,20 @@ public class MainView extends VerticalLayout {
     private static final Logger log = LoggerFactory.getLogger(MainView.class);
 
     private final KmsApiService kmsApiService;
-    private final ProgressBar loadingBar = new ProgressBar();
-    private final Button refreshButton = new Button("Refresh Stats", new Icon(VaadinIcon.REFRESH));
-    private HorizontalLayout statsContainer;
     private final UI ui;
 
-    // Audit log components
+    // ==================== Key Statistics ====================
+    private final ProgressBar statsLoadingBar = new ProgressBar();
+    private final Button refreshButton = new Button("Refresh Stats", new Icon(VaadinIcon.REFRESH));
+    private HorizontalLayout statsContainer;
+
+    // ==================== Key Usage Statistics ====================
+    private ComboBox<KeyOption> usageKeyCombo;
+    private Button loadUsageStatsButton;
+    private HorizontalLayout usageStatsContainer;
+    private final ProgressBar usageLoadingBar = new ProgressBar();
+
+    // ==================== Audit Logs ====================
     private ComboBox<KeyOption> auditKeyCombo;
     private DatePicker fromDatePicker;
     private DatePicker toDatePicker;
@@ -68,15 +75,18 @@ public class MainView extends VerticalLayout {
     private List<AuditLogResponse.LogEntry> allLogs = new ArrayList<>();
     private int currentPage = 0;
     private static final int PAGE_SIZE = 20;
+    private final ProgressBar auditLoadingBar = new ProgressBar();
 
+    // Shared key options
     private List<KeyOption> keyOptions = new ArrayList<>();
 
+    @Autowired
     public MainView(KmsApiService kmsApiService) {
         this.kmsApiService = kmsApiService;
         this.ui = UI.getCurrent();
 
-        // Enable push to ensure UI updates are sent to client immediately
-        this.ui.getPushConfiguration().setPushMode(com.vaadin.flow.shared.communication.PushMode.AUTOMATIC);
+        // Enable push for immediate UI updates
+        ui.getPushConfiguration().setPushMode(com.vaadin.flow.shared.communication.PushMode.AUTOMATIC);
 
         setSizeFull();
         setPadding(true);
@@ -85,36 +95,41 @@ public class MainView extends VerticalLayout {
 
         add(buildHeader());
 
-        HorizontalLayout topBar = new HorizontalLayout();
-        topBar.setWidthFull();
-        topBar.setJustifyContentMode(JustifyContentMode.START);
-
+        // === Key Statistics toolbar (inline with loading bar) ===
+        HorizontalLayout statsToolbar = new HorizontalLayout();
+        statsToolbar.setWidthFull();
+        statsToolbar.setJustifyContentMode(JustifyContentMode.START);
+        statsToolbar.setAlignItems(FlexComponent.Alignment.CENTER);
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         refreshButton.addClickListener(e -> loadStatistics());
-        topBar.add(refreshButton);
-        add(topBar);
+        statsToolbar.add(refreshButton);
+        statsLoadingBar.setIndeterminate(true);
+        statsLoadingBar.setVisible(false);
+        statsLoadingBar.setWidth("200px");
+        statsToolbar.add(statsLoadingBar);
+        add(statsToolbar);
 
-        loadingBar.setIndeterminate(true);
-        loadingBar.setVisible(false);
-        loadingBar.setWidth("300px");
-        topBar.add(loadingBar);
-
+        // Key Statistics cards section
+        H3 statsTitle = new H3("Key Statistics");
+        statsTitle.getStyle().set("margin-top", "16px");
+        add(statsTitle);
         statsContainer = new HorizontalLayout();
         statsContainer.setWidthFull();
         statsContainer.setSpacing(true);
-        statsContainer.getStyle()
-                .set("flex-wrap", "wrap")
-                .set("gap", "16px");
+        statsContainer.getStyle().set("flex-wrap", "wrap").set("gap", "16px");
         add(statsContainer);
 
-        // Add Audit Log Viewer section
+        // Key Usage Statistics section
+        add(buildKeyUsageStatsSection());
+
+        // Audit Logs section
         add(buildAuditLogViewer());
 
         add(buildQuickLinks());
 
         showPlaceholderCards();
         loadStatistics();
-        loadAuditKeyOptions();
+        loadKeyOptions();
     }
 
     private H2 buildHeader() {
@@ -177,7 +192,7 @@ public class MainView extends VerticalLayout {
     }
 
     private void loadStatistics() {
-        loadingBar.setVisible(true);
+        statsLoadingBar.setVisible(true);
         refreshButton.setEnabled(false);
 
         CompletableFuture.supplyAsync(() -> {
@@ -242,10 +257,7 @@ public class MainView extends VerticalLayout {
             return new Stats();
         }).thenAccept(stats -> {
             UI updateUi = ui != null ? ui : UI.getCurrent();
-            if (updateUi == null) {
-                log.error("UI is null – cannot update cards");
-                return;
-            }
+            if (updateUi == null) return;
             updateUi.access(() -> {
                 try {
                     statsContainer.removeAll();
@@ -264,13 +276,12 @@ public class MainView extends VerticalLayout {
                             createStatCard("Grants", String.valueOf(stats.totalGrants), VaadinIcon.SHARE, "#546E7A"),
                             createStatCard("Custom Key Stores", String.valueOf(stats.totalStores), VaadinIcon.STORAGE, "#37474F")
                     );
-                    loadingBar.setVisible(false);
+                    statsLoadingBar.setVisible(false);
                     refreshButton.setEnabled(true);
-                    log.info("UI updated with stats. Pushing changes to client.");
                     updateUi.push();
                 } catch (Exception e) {
                     log.error("Error updating UI cards", e);
-                    loadingBar.setVisible(false);
+                    statsLoadingBar.setVisible(false);
                     refreshButton.setEnabled(true);
                     updateUi.push();
                 }
@@ -279,7 +290,182 @@ public class MainView extends VerticalLayout {
     }
 
     // =========================================================================
-    // Audit Log Viewer (filtered by selected key)
+    // Key Usage Statistics (per key)
+    // =========================================================================
+
+    private VerticalLayout buildKeyUsageStatsSection() {
+        VerticalLayout layout = new VerticalLayout();
+        layout.setSpacing(true);
+        layout.setPadding(true);
+        layout.addClassName(LumoUtility.BorderRadius.LARGE);
+        layout.addClassName(LumoUtility.Background.BASE);
+        layout.getStyle().set("margin-top", "24px");
+
+        // Title row with progress bar immediately after the title (left aligned)
+        HorizontalLayout titleRow = new HorizontalLayout();
+        titleRow.setWidthFull();
+        titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        H3 usageTitle = new H3("Key Usage Statistics");
+        usageLoadingBar.setIndeterminate(true);
+        usageLoadingBar.setVisible(false);
+        usageLoadingBar.setWidth("200px");
+        titleRow.add(usageTitle, usageLoadingBar);
+        layout.add(titleRow);
+
+        // Filter bar
+        HorizontalLayout filterBar = new HorizontalLayout();
+        filterBar.setWidthFull();
+        filterBar.setAlignItems(FlexComponent.Alignment.END);
+        filterBar.setSpacing(true);
+        filterBar.getStyle().set("flex-wrap", "wrap");
+
+        usageKeyCombo = new ComboBox<>("Select Key");
+        usageKeyCombo.setPlaceholder("Choose a key");
+        usageKeyCombo.setItemLabelGenerator(KeyOption::getDisplayName);
+        usageKeyCombo.setWidth("300px");
+        usageKeyCombo.setRequired(true);
+
+        loadUsageStatsButton = new Button("Load Usage Stats", new Icon(VaadinIcon.CHART));
+        loadUsageStatsButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        loadUsageStatsButton.addClickListener(e -> loadKeyUsageStats());
+
+        filterBar.add(usageKeyCombo, loadUsageStatsButton);
+        layout.add(filterBar);
+
+        usageStatsContainer = new HorizontalLayout();
+        usageStatsContainer.setWidthFull();
+        usageStatsContainer.setSpacing(true);
+        usageStatsContainer.getStyle().set("flex-wrap", "wrap").set("gap", "16px");
+        usageStatsContainer.setVisible(false);
+        layout.add(usageStatsContainer);
+
+        return layout;
+    }
+
+    private void loadKeyOptions() {
+        try {
+            ResponseEntity<ListKeysResponse> response = kmsApiService.listKeys(100, null);
+            if (response.getBody() != null && response.getBody().getKeys() != null) {
+                keyOptions = response.getBody().getKeys().stream()
+                        .map(entry -> new KeyOption(entry.getKeyId(), fetchAlias(entry.getKeyId())))
+                        .collect(Collectors.toList());
+                usageKeyCombo.setItems(keyOptions);
+                auditKeyCombo.setItems(keyOptions);
+            }
+        } catch (Exception e) {
+            log.error("Failed to load key options", e);
+        }
+    }
+
+    private String fetchAlias(String keyId) {
+        try {
+            ResponseEntity<DescribeKeyResponse> response = kmsApiService.describeKey(keyId);
+            DescribeKeyResponse desc = response.getBody();
+            if (desc != null && desc.getKeyMetadata() != null && desc.getKeyMetadata().getKeyAlias() != null) {
+                return desc.getKeyMetadata().getKeyAlias();
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        return keyId;
+    }
+
+    private void loadKeyUsageStats() {
+        KeyOption selected = usageKeyCombo.getValue();
+        if (selected == null) {
+            Notification.show("Please select a key", 3000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_WARNING);
+            return;
+        }
+        usageStatsContainer.setVisible(false);
+        usageLoadingBar.setVisible(true);
+        loadUsageStatsButton.setEnabled(false);
+
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                ResponseEntity<KeyUsageStatsResponse> response = kmsApiService.getKeyUsageStats(selected.getKeyId());
+                if (response.getBody() != null) {
+                    return response.getBody();
+                }
+            } catch (Exception e) {
+                log.error("Failed to load usage stats for key {}", selected.getKeyId(), e);
+            }
+            return null;
+        }).thenAccept(stats -> {
+            UI updateUi = ui != null ? ui : UI.getCurrent();
+            if (updateUi == null) return;
+            updateUi.access(() -> {
+                usageLoadingBar.setVisible(false);
+                loadUsageStatsButton.setEnabled(true);
+                if (stats == null) {
+                    usageStatsContainer.removeAll();
+                    Span errorSpan = new Span("Failed to load statistics. Check server logs.");
+                    errorSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+                    usageStatsContainer.add(errorSpan);
+                    usageStatsContainer.setVisible(true);
+                    return;
+                }
+                usageStatsContainer.removeAll();
+                usageStatsContainer.add(
+                        createSmallStatCard("Encrypts", stats.getEncryptCount()),
+                        createSmallStatCard("Decrypts", stats.getDecryptCount()),
+                        createSmallStatCard("Signs", stats.getSignCount()),
+                        createSmallStatCard("Verifies", stats.getVerifyCount()),
+                        createSmallStatCard("Generate Data Keys", stats.getGenerateDataKeyCount()),
+                        createSmallStatCard("Re-Encrypts", stats.getReEncryptCount())
+                );
+                if (stats.getLastUsedDate() != null) {
+                    usageStatsContainer.add(
+                            createSmallStatCard("Last Used", stats.getLastUsedDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                    );
+                }
+                usageStatsContainer.setVisible(true);
+            });
+        }).exceptionally(ex -> {
+            UI updateUi = ui != null ? ui : UI.getCurrent();
+            if (updateUi != null) {
+                updateUi.access(() -> {
+                    usageLoadingBar.setVisible(false);
+                    loadUsageStatsButton.setEnabled(true);
+                    usageStatsContainer.removeAll();
+                    usageStatsContainer.add(new Span("Error loading statistics"));
+                    usageStatsContainer.setVisible(true);
+                });
+            }
+            return null;
+        });
+    }
+
+    private VerticalLayout createSmallStatCard(String label, Object value) {
+        VerticalLayout card = new VerticalLayout();
+        card.setSpacing(false);
+        card.setPadding(true);
+        card.setWidth("160px");
+        card.getStyle()
+                .set("border", "1px solid var(--lumo-contrast-20pct)")
+                .set("border-radius", "var(--lumo-border-radius-m)")
+                .set("box-shadow", "var(--lumo-box-shadow-xs)")
+                .set("align-items", "center")
+                .set("background-color", "var(--lumo-base-color)")
+                .set("text-align", "center");
+
+        Span valueSpan = new Span(value != null ? value.toString() : "0");
+        valueSpan.getStyle()
+                .set("font-size", "24px")
+                .set("font-weight", "bold");
+
+        Span labelSpan = new Span(label);
+        labelSpan.getStyle()
+                .set("color", "var(--lumo-secondary-text-color)")
+                .set("font-size", "var(--lumo-font-size-xs)");
+
+        card.add(valueSpan, labelSpan);
+        card.setAlignItems(FlexComponent.Alignment.CENTER);
+        return card;
+    }
+
+    // =========================================================================
+    // Audit Log Viewer
     // =========================================================================
 
     private VerticalLayout buildAuditLogViewer() {
@@ -290,8 +476,16 @@ public class MainView extends VerticalLayout {
         layout.addClassName(LumoUtility.Background.BASE);
         layout.getStyle().set("margin-top", "24px");
 
-        H3 title = new H3("Audit Logs");
-        layout.add(title);
+        // Title row with progress bar immediately after the title (left aligned)
+        HorizontalLayout titleRow = new HorizontalLayout();
+        titleRow.setWidthFull();
+        titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        H3 auditTitle = new H3("Audit Logs");
+        auditLoadingBar.setIndeterminate(true);
+        auditLoadingBar.setVisible(false);
+        auditLoadingBar.setWidth("200px");
+        titleRow.add(auditTitle, auditLoadingBar);
+        layout.add(titleRow);
 
         // Filter bar
         HorizontalLayout filterBar = new HorizontalLayout();
@@ -321,7 +515,6 @@ public class MainView extends VerticalLayout {
         filterBar.add(auditKeyCombo, fromDatePicker, toDatePicker, loadLogsButton);
         layout.add(filterBar);
 
-        // Grid for logs
         auditGrid = new Grid<>();
         auditGrid.setWidthFull();
         auditGrid.setHeight("400px");
@@ -341,7 +534,6 @@ public class MainView extends VerticalLayout {
                 .setHeader("Exec Time (ms)").setResizable(true);
         layout.add(auditGrid);
 
-        // Pagination controls
         paginationBar = new HorizontalLayout();
         paginationBar.setWidthFull();
         paginationBar.setJustifyContentMode(JustifyContentMode.END);
@@ -365,35 +557,6 @@ public class MainView extends VerticalLayout {
         return layout;
     }
 
-    private void loadAuditKeyOptions() {
-        try {
-            ResponseEntity<ListKeysResponse> response = kmsApiService.listKeys(100, null);
-            if (response.getBody() != null && response.getBody().getKeys() != null) {
-                keyOptions = response.getBody().getKeys().stream()
-                        .map(entry -> new KeyOption(entry.getKeyId(), fetchAlias(entry.getKeyId())))
-                        .collect(Collectors.toList());
-                auditKeyCombo.setItems(keyOptions);
-            }
-        } catch (Exception e) {
-            log.error("Failed to load keys for audit log selection", e);
-            Notification.show("Could not load keys for audit logs", 3000, Notification.Position.TOP_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-        }
-    }
-
-    private String fetchAlias(String keyId) {
-        try {
-            ResponseEntity<DescribeKeyResponse> response = kmsApiService.describeKey(keyId);
-            DescribeKeyResponse desc = response.getBody();
-            if (desc != null && desc.getKeyMetadata() != null && desc.getKeyMetadata().getKeyAlias() != null) {
-                return desc.getKeyMetadata().getKeyAlias();
-            }
-        } catch (Exception e) {
-            // ignore
-        }
-        return keyId;
-    }
-
     private void loadAuditLogs() {
         KeyOption selected = auditKeyCombo.getValue();
         if (selected == null) {
@@ -404,7 +567,7 @@ public class MainView extends VerticalLayout {
         loadLogsButton.setEnabled(false);
         auditGrid.setVisible(false);
         paginationBar.setVisible(false);
-        loadingBar.setVisible(true);
+        auditLoadingBar.setVisible(true);
 
         LocalDateTime from = fromDatePicker.getValue() != null ? fromDatePicker.getValue().atStartOfDay() : null;
         LocalDateTime to = toDatePicker.getValue() != null ? toDatePicker.getValue().atTime(LocalTime.MAX) : null;
@@ -430,7 +593,7 @@ public class MainView extends VerticalLayout {
                 updateAuditGrid();
                 auditGrid.setVisible(true);
                 paginationBar.setVisible(!logs.isEmpty());
-                loadingBar.setVisible(false);
+                auditLoadingBar.setVisible(false);
                 loadLogsButton.setEnabled(true);
                 if (logs.isEmpty()) {
                     Notification.show("No audit logs found for the selected criteria", 3000, Notification.Position.TOP_END)
@@ -446,7 +609,7 @@ public class MainView extends VerticalLayout {
                 updateUi.access(() -> {
                     Notification.show("Error loading audit logs", 3000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
-                    loadingBar.setVisible(false);
+                    auditLoadingBar.setVisible(false);
                     loadLogsButton.setEnabled(true);
                 });
             }
