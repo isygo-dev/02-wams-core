@@ -69,12 +69,7 @@ class KeyCard extends VerticalLayout {
         getStyle().set("transition", "all 0.2s ease-in-out");
         addClassName("hover:shadow-m");
 
-        HorizontalLayout headerRow = new HorizontalLayout();
-        headerRow.setWidthFull();
-        headerRow.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
-
-        // Title and status chip
+        // --- Title and status chip ---
         Span titleSpan = new Span(aliasOrId);
         titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
         titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
@@ -99,24 +94,43 @@ class KeyCard extends VerticalLayout {
             default:
                 statusChip.getStyle().set("background-color", "#F2F4F8").set("color", "#5E6C84");
         }
-        HorizontalLayout titleRow = new HorizontalLayout(titleSpan, statusChip);
-        titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        titleRow.setSpacing(true);
 
-        // ---- Compact button bar (Edit, Info, Rotation, More) ----
+        // --- Version with copy button ---
+        String versionFull = (metadata != null && metadata.getCurrentVersion() != null && !metadata.getCurrentVersion().isEmpty())
+                ? metadata.getCurrentVersion() : "N/A";
+        String versionDisplay = versionFull.length() > 12 ? versionFull.substring(0, 12) + "…" : versionFull;
+        Span versionSpan = new Span("v" + versionDisplay);
+        versionSpan.addClassName(LumoUtility.FontSize.XSMALL);
+        versionSpan.addClassName(LumoUtility.TextColor.TERTIARY);
+        versionSpan.getStyle().set("font-family", "monospace");
+
+        Button copyVersionBtn = new Button(new Icon(VaadinIcon.COPY_O));
+        copyVersionBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        copyVersionBtn.setTooltipText("Copy key version");
+        copyVersionBtn.setWidth("20px");
+        copyVersionBtn.setHeight("20px");
+        copyVersionBtn.addClickListener(e -> keyManagementView.copyToClipboard(versionFull));
+
+        HorizontalLayout versionLayout = new HorizontalLayout(versionSpan, copyVersionBtn);
+        versionLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        versionLayout.setSpacing(false);
+
+        // --- Left part of header (alias, status, version) ---
+        HorizontalLayout leftPart = new HorizontalLayout(titleSpan, statusChip, versionLayout);
+        leftPart.setAlignItems(FlexComponent.Alignment.CENTER);
+        leftPart.setSpacing(true);
+
+        // --- Button bar (edit, info, rotation, more) ---
         HorizontalLayout buttonBar = new HorizontalLayout();
         buttonBar.setSpacing(true);
         buttonBar.setPadding(false);
 
-        // Edit
         Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit alias, description & tags");
         editBtn.addClickListener(e -> updateKey());
 
-        // Info
         Button describeBtn = createIconButton(VaadinIcon.INFO_CIRCLE, "View details");
         describeBtn.addClickListener(e -> describeKey());
 
-        // Rotation toggle
         boolean rotationEnabled = metadata != null && metadata.getRotationEnabled() != null && metadata.getRotationEnabled();
         Button rotationBtn = createIconButton(VaadinIcon.ROTATE_RIGHT, rotationEnabled ? "Disable rotation" : "Enable rotation");
         if (rotationEnabled) {
@@ -126,15 +140,18 @@ class KeyCard extends VerticalLayout {
         }
         rotationBtn.addClickListener(e -> toggleRotation());
 
-        // More actions (three dots)
         Button moreBtn = createIconButton(VaadinIcon.ELLIPSIS_DOTS_V, "More actions");
         moreBtn.addClickListener(e -> showContextMenu());
 
         buttonBar.add(editBtn, describeBtn, rotationBtn, moreBtn);
-        // ========================================================
 
-        headerRow.add(titleRow, buttonBar);
-        headerRow.expand(titleRow);
+        // --- Assemble header row ---
+        HorizontalLayout headerRow = new HorizontalLayout();
+        headerRow.setWidthFull();
+        headerRow.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        headerRow.add(leftPart, buttonBar);
+        headerRow.expand(leftPart);
         add(headerRow);
 
         // Description
@@ -170,7 +187,7 @@ class KeyCard extends VerticalLayout {
         metaRow1.add(new Span(multiRegion));
         add(metaRow1);
 
-        // Second meta row: Key ID (if different from alias), Origin, Rotation status, Version
+        // Second meta row: Key ID, Origin, Rotation status (version removed)
         HorizontalLayout metaRow2 = new HorizontalLayout();
         metaRow2.setSpacing(true);
         metaRow2.addClassName(LumoUtility.FontSize.XSMALL);
@@ -178,23 +195,19 @@ class KeyCard extends VerticalLayout {
         metaRow2.getStyle().set("margin-top", "var(--lumo-space-xs)");
 
         String keyIdDisplay = keyId;
-        /*if (aliasOrId.equals(keyId)) {
-            keyIdDisplay = null;
-        }*/
         if (keyIdDisplay != null) {
-            // Instead of a plain Span, create a layout with copy button
             HorizontalLayout keyIdLayout = new HorizontalLayout();
             keyIdLayout.setSpacing(false);
             keyIdLayout.setAlignItems(FlexComponent.Alignment.CENTER);
             Span keyIdSpan = new Span("ID: " + keyIdDisplay);
             keyIdSpan.getStyle().set("margin-right", "4px");
-            Button copyBtn = new Button(new Icon(VaadinIcon.COPY_O));
-            copyBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-            copyBtn.setTooltipText("Copy key ID");
-            copyBtn.addClickListener(e -> keyManagementView.copyToClipboard(keyIdDisplay));
-            copyBtn.setWidth("24px");
-            copyBtn.setHeight("24px");
-            keyIdLayout.add(keyIdSpan, copyBtn);
+            Button copyIdBtn = new Button(new Icon(VaadinIcon.COPY_O));
+            copyIdBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+            copyIdBtn.setTooltipText("Copy key ID");
+            copyIdBtn.addClickListener(e -> keyManagementView.copyToClipboard(keyIdDisplay));
+            copyIdBtn.setWidth("24px");
+            copyIdBtn.setHeight("24px");
+            keyIdLayout.add(keyIdSpan, copyIdBtn);
             metaRow2.add(keyIdLayout);
             metaRow2.add(new Span("•"));
         }
@@ -207,11 +220,6 @@ class KeyCard extends VerticalLayout {
                 ? "✅ Rotation ON" : "❌ Rotation OFF";
         metaRow2.add(new Span(rotation));
 
-        String version = (metadata != null && metadata.getCurrentVersion() != null && !metadata.getCurrentVersion().isEmpty())
-                ? metadata.getCurrentVersion().length() > 12 ? metadata.getCurrentVersion().substring(0, 12) + "…" : metadata.getCurrentVersion()
-                : "N/A";
-        metaRow2.add(new Span("•"));
-        metaRow2.add(new Span("Ver: " + version));
         add(metaRow2);
     }
 
