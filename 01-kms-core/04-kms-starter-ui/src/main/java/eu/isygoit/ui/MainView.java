@@ -95,29 +95,8 @@ public class MainView extends VerticalLayout {
 
         add(buildHeader());
 
-        // === Key Statistics toolbar (inline with loading bar) ===
-        HorizontalLayout statsToolbar = new HorizontalLayout();
-        statsToolbar.setWidthFull();
-        statsToolbar.setJustifyContentMode(JustifyContentMode.START);
-        statsToolbar.setAlignItems(FlexComponent.Alignment.CENTER);
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.addClickListener(e -> loadStatistics());
-        statsToolbar.add(refreshButton);
-        statsLoadingBar.setIndeterminate(true);
-        statsLoadingBar.setVisible(false);
-        statsLoadingBar.setWidth("200px");
-        statsToolbar.add(statsLoadingBar);
-        add(statsToolbar);
-
-        // Key Statistics cards section
-        H3 statsTitle = new H3("Key Statistics");
-        statsTitle.getStyle().set("margin-top", "16px");
-        add(statsTitle);
-        statsContainer = new HorizontalLayout();
-        statsContainer.setWidthFull();
-        statsContainer.setSpacing(true);
-        statsContainer.getStyle().set("flex-wrap", "wrap").set("gap", "16px");
-        add(statsContainer);
+        // Global Key Statistics section
+        add(buildGlobalKeysStatistics());
 
         // Key Usage Statistics section
         add(buildKeyUsageStatsSection());
@@ -136,6 +115,38 @@ public class MainView extends VerticalLayout {
         H2 title = new H2("Key Management Service Dashboard");
         title.getStyle().set("margin-bottom", "10px");
         return title;
+    }
+
+    // =========================================================================
+    // Global Key Statistics
+    // =========================================================================
+
+    private VerticalLayout buildGlobalKeysStatistics() {
+        VerticalLayout layout = new VerticalLayout();
+        layout.setSpacing(true);
+        layout.setPadding(false);
+        layout.setWidthFull();
+
+        // Title row with refresh button and inline loading bar
+        HorizontalLayout titleRow = new HorizontalLayout();
+        titleRow.setWidthFull();
+        titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        H3 statsTitle = new H3("Key Statistics");
+        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        refreshButton.addClickListener(e -> loadStatistics());
+        statsLoadingBar.setIndeterminate(true);
+        statsLoadingBar.setVisible(false);
+        statsLoadingBar.setWidth("200px");
+        titleRow.add(statsTitle, refreshButton, statsLoadingBar);
+        layout.add(titleRow);
+
+        statsContainer = new HorizontalLayout();
+        statsContainer.setWidthFull();
+        statsContainer.setSpacing(true);
+        statsContainer.getStyle().set("flex-wrap", "wrap").set("gap", "16px");
+        layout.add(statsContainer);
+
+        return layout;
     }
 
     private VerticalLayout createStatCard(String label, String value, VaadinIcon icon, String color) {
@@ -301,7 +312,7 @@ public class MainView extends VerticalLayout {
         layout.addClassName(LumoUtility.Background.BASE);
         layout.getStyle().set("margin-top", "24px");
 
-        // Title row with progress bar immediately after the title (left aligned)
+        // Title row with progress bar immediately after the title
         HorizontalLayout titleRow = new HorizontalLayout();
         titleRow.setWidthFull();
         titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -476,7 +487,7 @@ public class MainView extends VerticalLayout {
         layout.addClassName(LumoUtility.Background.BASE);
         layout.getStyle().set("margin-top", "24px");
 
-        // Title row with progress bar immediately after the title (left aligned)
+        // Title row with progress bar immediately after the title
         HorizontalLayout titleRow = new HorizontalLayout();
         titleRow.setWidthFull();
         titleRow.setAlignItems(FlexComponent.Alignment.CENTER);

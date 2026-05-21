@@ -972,10 +972,11 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     .nextToken(internal.getNextToken())
                     .truncated(internal.getTruncated())
                     .build();
+
             auditService.logAction(
                     tenant,
                     IKmsActionType.Types.LIST_ALIASES,
-                    String.valueOf(null),
+                    null,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp()
             );
@@ -1516,7 +1517,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             auditService.logAction(
                     tenant,
                     IKmsActionType.Types.LIST_CUSTOM_KEY_STORE,
-                    String.valueOf(null),
+                    null,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp()
             );
@@ -1572,7 +1573,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             auditService.logAction(
                     tenant,
                     IKmsActionType.Types.GENERATE_RANDOM,
-                    String.valueOf(null),
+                    null,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp()
             );
