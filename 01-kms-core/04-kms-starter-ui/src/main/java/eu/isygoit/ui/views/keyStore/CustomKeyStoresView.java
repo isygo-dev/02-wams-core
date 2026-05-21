@@ -163,7 +163,7 @@ public class CustomKeyStoresView extends VerticalLayout {
         allCards.clear();
         cardsContainer.removeAll();
         try {
-            ResponseEntity<ListCustomKeyStoresResponse> response = kmsApiService.listCustomKeyStores(100, null, null, null);
+            ResponseEntity<ListCustomKeyStoresResponse> response = kmsApiService.listCustomKeyStores(100, null);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 List<DescribeCustomKeyStoreResponse.CustomKeyStore> stores = response.getBody().getCustomKeyStores();
                 if (stores != null) {

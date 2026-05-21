@@ -1,6 +1,6 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.dto.KmsDtos.AuditLogResponseDto;
+import eu.isygoit.dto.KmsDtos.AuditLogResponse;
 import eu.isygoit.enums.IKmsActionType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +47,7 @@ public class AuditServiceTest {
         LocalDateTime toDate = LocalDateTime.now();
         Integer limit = 100;
 
-        AuditLogResponseDto response = auditService.getAuditLogs(TENANT, KEY_ID, fromDate, toDate, limit);
+        AuditLogResponse response = auditService.getAuditLogs(TENANT, KEY_ID, fromDate, toDate, limit);
 
         assertNotNull(response);
         assertNotNull(response.getLogs());
@@ -56,7 +56,7 @@ public class AuditServiceTest {
 
     @Test
     void shouldReturnEmptyLogsWhenNoAuditData() {
-        AuditLogResponseDto response = auditService.getAuditLogs(TENANT, KEY_ID, LocalDateTime.now().minusDays(30), LocalDateTime.now(), 100);
+        AuditLogResponse response = auditService.getAuditLogs(TENANT, KEY_ID, LocalDateTime.now().minusDays(30), LocalDateTime.now(), 100);
 
         assertNotNull(response);
         assertNotNull(response.getLogs());
@@ -67,7 +67,7 @@ public class AuditServiceTest {
     @Test
     void shouldHandleNullFromDate() {
         LocalDateTime toDate = LocalDateTime.now();
-        AuditLogResponseDto response = auditService.getAuditLogs(TENANT, KEY_ID, null, toDate, 100);
+        AuditLogResponse response = auditService.getAuditLogs(TENANT, KEY_ID, null, toDate, 100);
 
         assertNotNull(response);
         assertNotNull(response.getLogs());
@@ -76,7 +76,7 @@ public class AuditServiceTest {
     @Test
     void shouldHandleNullToDate() {
         LocalDateTime fromDate = LocalDateTime.now().minusDays(7);
-        AuditLogResponseDto response = auditService.getAuditLogs(TENANT, KEY_ID, fromDate, null, 100);
+        AuditLogResponse response = auditService.getAuditLogs(TENANT, KEY_ID, fromDate, null, 100);
 
         assertNotNull(response);
         assertNotNull(response.getLogs());
@@ -84,7 +84,7 @@ public class AuditServiceTest {
 
     @Test
     void shouldHandleNullBothDates() {
-        AuditLogResponseDto response = auditService.getAuditLogs(TENANT, KEY_ID, null, null, 100);
+        AuditLogResponse response = auditService.getAuditLogs(TENANT, KEY_ID, null, null, 100);
 
         assertNotNull(response);
         assertNotNull(response.getLogs());
@@ -94,7 +94,7 @@ public class AuditServiceTest {
     void shouldHandleNullLimit() {
         LocalDateTime fromDate = LocalDateTime.now().minusDays(7);
         LocalDateTime toDate = LocalDateTime.now();
-        AuditLogResponseDto response = auditService.getAuditLogs(TENANT, KEY_ID, fromDate, toDate, null);
+        AuditLogResponse response = auditService.getAuditLogs(TENANT, KEY_ID, fromDate, toDate, null);
 
         assertNotNull(response);
         assertNotNull(response.getLogs());
@@ -102,7 +102,7 @@ public class AuditServiceTest {
 
     @Test
     void shouldHandleNullTenant() {
-        AuditLogResponseDto response = auditService.getAuditLogs(null, KEY_ID, LocalDateTime.now().minusDays(7), LocalDateTime.now(), 100);
+        AuditLogResponse response = auditService.getAuditLogs(null, KEY_ID, LocalDateTime.now().minusDays(7), LocalDateTime.now(), 100);
 
         assertNotNull(response);
         assertNotNull(response.getLogs());
@@ -110,7 +110,7 @@ public class AuditServiceTest {
 
     @Test
     void shouldHandleNullKeyId() {
-        AuditLogResponseDto response = auditService.getAuditLogs(TENANT, null, LocalDateTime.now().minusDays(7), LocalDateTime.now(), 100);
+        AuditLogResponse response = auditService.getAuditLogs(TENANT, null, LocalDateTime.now().minusDays(7), LocalDateTime.now(), 100);
 
         assertNotNull(response);
         assertNotNull(response.getLogs());
@@ -120,7 +120,7 @@ public class AuditServiceTest {
     void shouldHandleFutureFromDate() {
         LocalDateTime fromDate = LocalDateTime.now().plusDays(1);
         LocalDateTime toDate = LocalDateTime.now().plusDays(10);
-        AuditLogResponseDto response = auditService.getAuditLogs(TENANT, KEY_ID, fromDate, toDate, 100);
+        AuditLogResponse response = auditService.getAuditLogs(TENANT, KEY_ID, fromDate, toDate, 100);
 
         assertNotNull(response);
         assertNotNull(response.getLogs());
@@ -128,7 +128,7 @@ public class AuditServiceTest {
 
     @Test
     void shouldHandleLargeLimit() {
-        AuditLogResponseDto response = auditService.getAuditLogs(TENANT, KEY_ID, LocalDateTime.now().minusYears(1), LocalDateTime.now(), 10000);
+        AuditLogResponse response = auditService.getAuditLogs(TENANT, KEY_ID, LocalDateTime.now().minusYears(1), LocalDateTime.now(), 10000);
 
         assertNotNull(response);
         assertNotNull(response.getLogs());
@@ -136,7 +136,7 @@ public class AuditServiceTest {
 
     @Test
     void shouldHandleZeroLimit() {
-        AuditLogResponseDto response = auditService.getAuditLogs(TENANT, KEY_ID, LocalDateTime.now().minusDays(7), LocalDateTime.now(), 0);
+        AuditLogResponse response = auditService.getAuditLogs(TENANT, KEY_ID, LocalDateTime.now().minusDays(7), LocalDateTime.now(), 0);
 
         assertNotNull(response);
         assertNotNull(response.getLogs());
@@ -144,7 +144,7 @@ public class AuditServiceTest {
 
     @Test
     void shouldHandleEmptyStringTenant() {
-        AuditLogResponseDto response = auditService.getAuditLogs("", KEY_ID, LocalDateTime.now().minusDays(7), LocalDateTime.now(), 100);
+        AuditLogResponse response = auditService.getAuditLogs("", KEY_ID, LocalDateTime.now().minusDays(7), LocalDateTime.now(), 100);
 
         assertNotNull(response);
         assertNotNull(response.getLogs());
@@ -152,7 +152,7 @@ public class AuditServiceTest {
 
     @Test
     void shouldHandleEmptyStringKeyId() {
-        AuditLogResponseDto response = auditService.getAuditLogs(TENANT, "", LocalDateTime.now().minusDays(7), LocalDateTime.now(), 100);
+        AuditLogResponse response = auditService.getAuditLogs(TENANT, "", LocalDateTime.now().minusDays(7), LocalDateTime.now(), 100);
 
         assertNotNull(response);
         assertNotNull(response.getLogs());

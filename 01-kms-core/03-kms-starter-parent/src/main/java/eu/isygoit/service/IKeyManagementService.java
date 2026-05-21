@@ -126,7 +126,7 @@ public interface IKeyManagementService {
 
     ListKeyRotationsResponse listKeyRotations(String tenant, String keyId, Integer limit, String nextToken);
 
-    KeyUsageStatsResponseDto getKeyUsageStats(String tenant, String keyId);
+    KeyUsageStatsResponse getKeyUsageStats(String tenant, String keyId);
 
     /**
      * Registers a key as belonging to a specific custom key store.

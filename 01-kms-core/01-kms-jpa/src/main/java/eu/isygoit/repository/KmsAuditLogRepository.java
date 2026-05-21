@@ -12,55 +12,28 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-/**
- * Repository for KMS Audit Log entity
- */
 @Repository
 public interface KmsAuditLogRepository extends JpaRepository<KmsAuditLog, Long> {
 
-    /**
-     * Find audit logs by tenant and key
-     */
-    @Query("SELECT al FROM KmsAuditLog al WHERE al.tenant = :tenant AND al.keyId = :keyId ORDER BY al.timestamp DESC")
-    Page<KmsAuditLog> findByTenantAndKeyId(@Param("tenant") String tenant, @Param("keyId") String keyId, Pageable pageable);
+    // Basic filter: only keyId
+    Page<KmsAuditLog> findByTenantAndKeyId(String tenant, String keyId, Pageable pageable);
 
-    /**
-     * Count by action and keyId
-     */
+    // Filter: keyId + timestamp between from and to (both inclusive)
+    Page<KmsAuditLog> findByTenantAndKeyIdAndTimestampBetween(String tenant, String keyId,
+                                                              LocalDateTime from, LocalDateTime to,
+                                                              Pageable pageable);
+
+    // Filter: keyId + timestamp >= fromDate
+    Page<KmsAuditLog> findByTenantAndKeyIdAndTimestampGreaterThanEqual(String tenant, String keyId,
+                                                                       LocalDateTime from, Pageable pageable);
+
+    // Filter: keyId + timestamp <= toDate
+    Page<KmsAuditLog> findByTenantAndKeyIdAndTimestampLessThanEqual(String tenant, String keyId,
+                                                                    LocalDateTime to, Pageable pageable);
+
+    // Optional: count by action (unused in service but kept)
     long countByTenantAndActionAndKeyId(String tenant, IKmsActionType.Types action, String keyId);
 
-    /**
-     * Find first by keyId order by timestamp desc
-     */
+    // Latest log for a key
     Optional<KmsAuditLog> findFirstByTenantAndKeyIdOrderByTimestampDesc(String tenant, String keyId);
-
-    /**
-     * Find audit logs by tenant and action
-     */
-    Page<KmsAuditLog> findByTenantAndAction(String tenant, String action, Pageable pageable);
-
-    /**
-     * Find audit logs between dates
-     */
-    @Query("SELECT al FROM KmsAuditLog al WHERE al.tenant = :tenant AND al.timestamp BETWEEN :fromDate AND :toDate ORDER BY al.timestamp DESC")
-    Page<KmsAuditLog> findByTenantAndDateRange(@Param("tenant") String tenant, @Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate, Pageable pageable);
-
-    /**
-     * Complex query for audit logs
-     */
-    @Query("SELECT al FROM KmsAuditLog al WHERE al.tenant = :tenant " +
-            "AND (:keyId IS NULL OR al.keyId = :keyId) " +
-            "AND (:action IS NULL OR al.action = :action) " +
-            "AND (:fromDate IS NULL OR al.timestamp >= :fromDate) " +
-            "AND (:toDate IS NULL OR al.timestamp <= :toDate) " +
-            "ORDER BY al.timestamp DESC")
-    Page<KmsAuditLog> findByMultipleCriteria(
-            @Param("tenant") String tenant,
-            @Param("keyId") String keyId,
-            @Param("action") String action,
-            @Param("fromDate") LocalDateTime fromDate,
-            @Param("toDate") LocalDateTime toDate,
-            Pageable pageable);
-
 }
-

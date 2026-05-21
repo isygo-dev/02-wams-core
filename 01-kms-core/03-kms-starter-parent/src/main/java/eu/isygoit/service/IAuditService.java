@@ -1,6 +1,6 @@
 package eu.isygoit.service;
 
-import eu.isygoit.dto.KmsDtos.AuditLogResponseDto;
+import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.enums.IKmsActionType;
 
 import java.time.LocalDateTime;
@@ -20,7 +20,7 @@ public interface IAuditService {
      * @param limit    the limit
      * @return the audit log response dto
      */
-    AuditLogResponseDto getAuditLogs(String tenant, String keyId, LocalDateTime fromDate, LocalDateTime toDate, Integer limit);
+    AuditLogResponse getAuditLogs(String tenant, String keyId, LocalDateTime fromDate, LocalDateTime toDate, Integer limit);
 
     /**
      * Log action.

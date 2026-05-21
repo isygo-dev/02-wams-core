@@ -830,8 +830,8 @@ class KmsControllerTest {
 
     @Test
     void getAuditLogs_Success() throws Exception {
-        AuditLogResponseDto dto = AuditLogResponseDto.builder()
-                .logs(List.of(new AuditLogResponseDto.AuditLogEntryDto()))
+        AuditLogResponse dto = AuditLogResponse.builder()
+                .logs(List.of(new AuditLogResponse.LogEntry()))
                 .build();
         when(auditService.getAuditLogs(eq(TENANT), eq(KEY_ID), any(), any(), anyInt())).thenReturn(dto);
         when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
@@ -842,7 +842,7 @@ class KmsControllerTest {
 
     @Test
     void getKeyUsageStats_Success() throws Exception {
-        KeyUsageStatsResponseDto dto = KeyUsageStatsResponseDto.builder()
+        KeyUsageStatsResponse dto = KeyUsageStatsResponse.builder()
                 .keyId(KEY_ID)
                 .encryptCount(100L)
                 .build();

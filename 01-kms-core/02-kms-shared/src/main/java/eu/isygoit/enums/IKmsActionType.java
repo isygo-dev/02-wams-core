@@ -35,6 +35,7 @@ public interface IKmsActionType {
         GENERATE_DATA_KEY_PAIR("GenerateDataKeyPair"),
         GENERATE_DATA_KEY_PAIR_WITHOUT_PLAINTEXT("GenerateDataKeyPairWithoutPlaintext"),
         GENERATE_RANDOM("GenerateRandom"),
+        VALIDATE_KEY("ValidateKey"),
 
         // =========================================================================
         // Key management
@@ -64,6 +65,7 @@ public interface IKmsActionType {
         UPDATE_ALIAS("UpdateAlias"),
         DELETE_ALIAS("DeleteAlias"),
         LIST_ALIASES("ListAliases"),
+        LIST_ALIASES_FOR_KEY("ListAliasesForKey"),
 
         // =========================================================================
         // Tags
@@ -117,6 +119,7 @@ public interface IKmsActionType {
         DISCONNECT_CUSTOM_KEY_STORE("DisconnectCustomKeyStore"),
 
         DESCRIBE_CUSTOM_KEY_STORES("DescribeCustomKeyStores"),
+        LIST_CUSTOM_KEY_STORE("ListCustomKeyStores"),
 
         // =========================================================================
         // Multi-region keys

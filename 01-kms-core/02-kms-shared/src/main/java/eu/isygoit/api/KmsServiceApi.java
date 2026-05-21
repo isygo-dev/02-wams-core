@@ -723,11 +723,8 @@ public interface KmsServiceApi {
             @Parameter(description = "Maximum number of stores to return (1..1000)", example = "50")
             @RequestParam(value = "limit", required = false) Integer limit,
             @Parameter(description = "Pagination nextToken from previous response")
-            @RequestParam(value = "nextToken", required = false) String nextToken,
-            @Parameter(description = "Filter by custom key store ID")
-            @RequestParam(value = "customKeyStoreId", required = false) Long customKeyStoreId,
-            @Parameter(description = "Filter by custom key store name (exact match)")
-            @RequestParam(value = "customKeyStoreName", required = false) String customKeyStoreName);
+            @RequestParam(value = "nextToken", required = false) String nextToken
+    );
 
     @PostMapping(value = "/keys/{keyId}/validate", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(

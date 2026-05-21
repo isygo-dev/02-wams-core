@@ -1826,7 +1826,6 @@ public final class KmsDtos {
     // =========================================================================
     // Audit & Usage
     // =========================================================================
-
     @Data
     @Builder
     @NoArgsConstructor
@@ -1867,32 +1866,6 @@ public final class KmsDtos {
             @Schema(description = "Execution time in milliseconds")
             private Long executionTimeMs;
         }
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Schema(description = "Key usage statistics response")
-    public static class KeyUsageStatsResponse {
-        @Schema(description = "Key ID")
-        private String keyId;
-
-        @Schema(description = "Number of encrypt operations")
-        private Long encryptCount;
-
-        @Schema(description = "Number of decrypt operations")
-        private Long decryptCount;
-
-        @Schema(description = "Number of sign operations")
-        private Long signCount;
-
-        @Schema(description = "Number of verify operations")
-        private Long verifyCount;
-
-        @Schema(description = "Last used timestamp")
-        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-        private LocalDateTime lastUsedDate;
     }
 
     @Data
@@ -2408,39 +2381,6 @@ public final class KmsDtos {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    @Schema(description = "Audit log response DTO")
-    public static class AuditLogResponseDto {
-        @Schema(description = "List of audit entries")
-        private List<AuditLogEntryDto> logs;
-
-        @Data
-        @Builder
-        @NoArgsConstructor
-        @AllArgsConstructor
-        @Schema(description = "Audit log entry DTO")
-        public static class AuditLogEntryDto {
-            @Schema(description = "Action performed")
-            private String action;
-
-            @Schema(description = "Key ID")
-            private String keyId;
-
-            @Schema(description = "Timestamp")
-            @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-            private LocalDateTime timestamp;
-
-            @Schema(description = "Principal")
-            private String principal;
-
-            @Schema(description = "IP address")
-            private String ipAddress;
-        }
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
     @Schema(description = "Alias response DTO")
     public static class AliasResponseDto {
         @Schema(description = "Alias name")
@@ -2579,13 +2519,13 @@ public final class KmsDtos {
         @Schema(description = "Pagination token")
         private String nextToken;
     }
-
+    
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     @Schema(description = "Key usage stats response DTO")
-    public static class KeyUsageStatsResponseDto {
+    public static class KeyUsageStatsResponse {
         @Schema(description = "Key ID")
         private String keyId;
 

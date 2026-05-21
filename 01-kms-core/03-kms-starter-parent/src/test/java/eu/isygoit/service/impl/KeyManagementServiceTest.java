@@ -632,7 +632,7 @@ class KeyManagementServiceTest {
         when(cryptoService.getDecryptCount(TENANT, KEY_ID)).thenReturn(50L);
         when(cryptoService.getLastUsedDate(TENANT, KEY_ID)).thenReturn(LocalDateTime.now());
 
-        KeyUsageStatsResponseDto response =
+        KeyUsageStatsResponse response =
                 keyManagementService.getKeyUsageStats(TENANT, KEY_ID);
 
         assertEquals(100L, response.getEncryptCount());

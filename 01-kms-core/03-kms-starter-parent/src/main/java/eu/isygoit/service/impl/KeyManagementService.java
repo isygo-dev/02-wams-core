@@ -960,7 +960,7 @@ public class KeyManagementService implements IKeyManagementService {
     }
 
     @Override
-    public KeyUsageStatsResponseDto getKeyUsageStats(String tenant, String keyId) {
+    public KeyUsageStatsResponse getKeyUsageStats(String tenant, String keyId) {
         log.info("Getting key usage stats for tenant: {} keyId: {}", tenant, keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
@@ -971,7 +971,7 @@ public class KeyManagementService implements IKeyManagementService {
         long decryptCount = cryptoService.getDecryptCount(tenant, keyId);
         LocalDateTime lastUsed = cryptoService.getLastUsedDate(tenant, keyId);
 
-        return KeyUsageStatsResponseDto.builder()
+        return KeyUsageStatsResponse.builder()
                 .keyId(keyId)
                 .encryptCount(encryptCount)
                 .decryptCount(decryptCount)
