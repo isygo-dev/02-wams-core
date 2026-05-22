@@ -1,4 +1,4 @@
-package eu.isygoit.ui.views.crypto;
+package eu.isygoit.ui.views.crypto.panel;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -16,6 +16,7 @@ import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.mapper.AlgorithmMapper;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.views.crypto.CryptoPanelUtils;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
