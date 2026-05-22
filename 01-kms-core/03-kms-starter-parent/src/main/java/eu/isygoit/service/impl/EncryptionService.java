@@ -2,9 +2,9 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.enums.IEnumKeyUsage;
+import eu.isygoit.exception.*;
 import eu.isygoit.model.KmsKey;
 import eu.isygoit.model.KmsKeyVersion;
-import eu.isygoit.repository.KmsAliasRepository;
 import eu.isygoit.repository.KmsKeyRepository;
 import eu.isygoit.repository.KmsKeyVersionRepository;
 import eu.isygoit.service.ICryptoService;
@@ -27,7 +27,6 @@ public class EncryptionService implements IEncryptionService {
     private final KmsKeyRepository kmsKeyRepository;
     private final KmsKeyVersionRepository kmsKeyVersionRepository; // new
     private final ICryptoService cryptoService;
-    private final KmsAliasRepository kmsAliasRepository;
 
     @Override
     public EncryptResponse encrypt(String tenant, EncryptRequest request) {
@@ -35,43 +34,57 @@ public class EncryptionService implements IEncryptionService {
 
         KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(tenant, request.getKeyId())
                 .orElseThrow(() -> new RuntimeException("KMS Key not found"));
-        if (!kmsKey.isEnabled()) throw new RuntimeException("Key disabled");
-        if (kmsKey.getKeyUsage() != IEnumKeyUsage.Types.ENCRYPT_DECRYPT)
-            throw new RuntimeException("Key not allowed for encryption");
 
-        byte[] plaintext = Base64.getDecoder().decode(request.getPlaintext());
-
-        // Get the CURRENT version's key material
-        String versionId = kmsKey.getCurrentVersionId();
-        KmsKeyVersion version = kmsKeyVersionRepository
-                .findByTenantAndKeyIdAndVersionId(tenant, kmsKey.getKeyId(), versionId)
-                .orElseThrow(() -> new RuntimeException("Current version not found: " + versionId));
-
-        byte[] keyMaterial;
-        if (kmsKey.getKeySpec() != null && kmsKey.getKeySpec().isAsymmetric()) {
-            if (version.getPublicKey() == null)
-                throw new RuntimeException("Asymmetric key has no public key");
-            keyMaterial = version.getPublicKey(); // use public key from version
-        } else {
-            keyMaterial = version.getKeyMaterial();
+        if (!kmsKey.isEnabled()) {
+            throw new DisabledKeyException("KMS Key is not enabled");
         }
 
-        byte[] ciphertext = cryptoService.encryptData(
-                plaintext,
-                keyMaterial,
-                kmsKey.getKeySpec(),
-                request.getEncryptionAlgorithmSpec(),
-                request.getEncryptionContext()
-        );
+        if (kmsKey.getKeyUsage() != IEnumKeyUsage.Types.ENCRYPT_DECRYPT) {
+            throw new KeyNotAllowedForUsageException("KMS Key is not authorized for encryption");
+        }
 
-        // Wrap ciphertext with version ID
-        byte[] wrappedCiphertext = CiphertextEnvelope.wrap(versionId, ciphertext);
+        if (request.getEncryptionAlgorithmSpec() == null) {
+            throw new WrongAlgorithmException("Encryption algorithm is required");
+        }
 
-        return EncryptResponse.builder()
-                .ciphertextBlob(Base64.getEncoder().encodeToString(wrappedCiphertext))
-                .keyId(kmsKey.getKeyId())
-                .keyVersionId(versionId)
-                .build();
+        try {
+            byte[] plaintext = Base64.getDecoder().decode(request.getPlaintext());
+
+            // Get the CURRENT version's key material
+            String versionId = kmsKey.getCurrentVersionId();
+            KmsKeyVersion version = kmsKeyVersionRepository
+                    .findByTenantAndKeyIdAndVersionId(tenant, kmsKey.getKeyId(), versionId)
+                    .orElseThrow(() -> new RuntimeException("Current version not found: " + versionId));
+
+            byte[] keyMaterial;
+            if (kmsKey.getKeySpec() != null && kmsKey.getKeySpec().isAsymmetric()) {
+                if (version.getPublicKey() == null)
+                    throw new RuntimeException("Asymmetric key has no public key");
+                keyMaterial = version.getPublicKey(); // use public key from version
+            } else {
+                keyMaterial = version.getKeyMaterial();
+            }
+
+            byte[] ciphertext = cryptoService.encryptData(
+                    plaintext,
+                    keyMaterial,
+                    kmsKey.getKeySpec(),
+                    request.getEncryptionAlgorithmSpec(),
+                    request.getEncryptionContext()
+            );
+
+            // Wrap ciphertext with version ID
+            byte[] wrappedCiphertext = CiphertextEnvelope.wrap(versionId, ciphertext);
+
+            return EncryptResponse.builder()
+                    .ciphertextBlob(Base64.getEncoder().encodeToString(wrappedCiphertext))
+                    .keyId(kmsKey.getKeyId())
+                    .keyVersionId(versionId)
+                    .build();
+        } catch (Exception e) {
+            log.error("Encrypt failed", e);
+            throw new EncryptionException("Encrypt failed", e);
+        }
     }
 
     @Override
@@ -82,54 +95,70 @@ public class EncryptionService implements IEncryptionService {
 
         KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new RuntimeException("KMS Key not found"));
-        if (!kmsKey.isEnabled()) throw new RuntimeException("Key disabled");
 
-        byte[] wrappedCiphertext = Base64.getDecoder().decode(request.getCiphertextBlob());
-
-        // Extract version ID from envelope
-        String versionId = CiphertextEnvelope.unwrapVersionId(wrappedCiphertext);
-        byte[] ciphertext = CiphertextEnvelope.unwrapCiphertext(wrappedCiphertext);
-
-        KmsKeyVersion version = null;
-        if (versionId != null) {
-            version = kmsKeyVersionRepository
-                    .findByTenantAndKeyIdAndVersionId(tenant, keyId, versionId)
-                    .orElse(null);
+        if (!kmsKey.isEnabled()) {
+            throw new DisabledKeyException("KMS Key is not enabled");
         }
 
-        // Fallback: if version not found (or missing), try current version
-        if (version == null) {
-            version = kmsKeyVersionRepository
-                    .findByTenantAndKeyIdAndVersionId(tenant, keyId, kmsKey.getCurrentVersionId())
-                    .orElse(null);
+        if (kmsKey.getKeyUsage() != IEnumKeyUsage.Types.ENCRYPT_DECRYPT) {
+            throw new KeyNotAllowedForUsageException("KMS Key is not authorized for decryption");
         }
 
-        // If still not found, try all versions (desc order) – optional but safe
-        if (version == null) {
-            List<KmsKeyVersion> allVersions = kmsKeyVersionRepository
-                    .findByTenantAndKeyIdOrderByCreateDateDesc(tenant, keyId);
-            for (KmsKeyVersion v : allVersions) {
-                try {
-                    byte[] plain = tryDecryptWithVersion(v, ciphertext, kmsKey, request);
-                    return DecryptResponse.builder()
-                            .plaintext(Base64.getEncoder().encodeToString(plain))
-                            .keyId(kmsKey.getKeyId())
-                            .keyVersionId(v.getVersionId())
-                            .build();
-                } catch (Exception ignored) {
-                }
+        if (request.getEncryptionAlgorithmSpec() == null) {
+            throw new WrongAlgorithmException("Decryption algorithm is required");
+        }
+
+        try {
+            byte[] wrappedCiphertext = Base64.getDecoder().decode(request.getCiphertextBlob());
+
+            // Extract version ID from envelope
+            String versionId = CiphertextEnvelope.unwrapVersionId(wrappedCiphertext);
+            byte[] ciphertext = CiphertextEnvelope.unwrapCiphertext(wrappedCiphertext);
+
+            KmsKeyVersion version = null;
+            if (versionId != null) {
+                version = kmsKeyVersionRepository
+                        .findByTenantAndKeyIdAndVersionId(tenant, keyId, versionId)
+                        .orElse(null);
             }
-            throw new RuntimeException("No key version could decrypt the data");
+
+            // Fallback: if version not found (or missing), try current version
+            if (version == null) {
+                version = kmsKeyVersionRepository
+                        .findByTenantAndKeyIdAndVersionId(tenant, keyId, kmsKey.getCurrentVersionId())
+                        .orElse(null);
+            }
+
+            // If still not found, try all versions (desc order) – optional but safe
+            if (version == null) {
+                List<KmsKeyVersion> allVersions = kmsKeyVersionRepository
+                        .findByTenantAndKeyIdOrderByCreateDateDesc(tenant, keyId);
+                for (KmsKeyVersion v : allVersions) {
+                    try {
+                        byte[] plain = tryDecryptWithVersion(v, ciphertext, kmsKey, request);
+                        return DecryptResponse.builder()
+                                .plaintext(Base64.getEncoder().encodeToString(plain))
+                                .keyId(kmsKey.getKeyId())
+                                .keyVersionId(v.getVersionId())
+                                .build();
+                    } catch (Exception ignored) {
+                    }
+                }
+                throw new RuntimeException("No key version could decrypt the data");
+            }
+
+            // Decrypt with the resolved version
+            byte[] plaintext = decryptWithVersion(version, ciphertext, kmsKey, request);
+
+            return DecryptResponse.builder()
+                    .plaintext(Base64.getEncoder().encodeToString(plaintext))
+                    .keyId(kmsKey.getKeyId())
+                    .keyVersionId(version.getVersionId())
+                    .build();
+        } catch (Exception e) {
+            log.error("Decrypt failed", e);
+            throw new DecryptionException("Decrypt failed", e);
         }
-
-        // Decrypt with the resolved version
-        byte[] plaintext = decryptWithVersion(version, ciphertext, kmsKey, request);
-
-        return DecryptResponse.builder()
-                .plaintext(Base64.getEncoder().encodeToString(plaintext))
-                .keyId(kmsKey.getKeyId())
-                .keyVersionId(version.getVersionId())
-                .build();
     }
 
     private byte[] decryptWithVersion(KmsKeyVersion version, byte[] ciphertext,

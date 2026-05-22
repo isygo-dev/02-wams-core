@@ -2,6 +2,7 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.enums.IEnumKeyUsage;
+import eu.isygoit.exception.*;
 import eu.isygoit.model.KmsKey;
 import eu.isygoit.repository.KmsKeyRepository;
 import eu.isygoit.service.ICryptoService;
@@ -43,15 +44,15 @@ public class SigningService implements ISigningService {
                 .orElseThrow(() -> new RuntimeException("KMS Key not found"));
 
         if (!kmsKey.isEnabled()) {
-            throw new RuntimeException("KMS Key is not enabled");
+            throw new DisabledKeyException("KMS Key is not enabled");
         }
 
         if (kmsKey.getKeyUsage() != IEnumKeyUsage.Types.SIGN_VERIFY) {
-            throw new RuntimeException("KMS Key is not authorized for signing");
+            throw new KeyNotAllowedForUsageException("KMS Key is not authorized for signing");
         }
 
         if (request.getSigningAlgorithm() == null) {
-            throw new RuntimeException("Signing algorithm is required");
+            throw new WrongAlgorithmException("Signing algorithm is required");
         }
 
         byte[] message = Base64.getDecoder().decode(request.getMessage());
@@ -78,27 +79,36 @@ public class SigningService implements ISigningService {
                 .orElseThrow(() -> new RuntimeException("KMS Key not found"));
 
         if (!kmsKey.isEnabled()) {
-            throw new RuntimeException("KMS Key is not enabled");
+            throw new DisabledKeyException("KMS Key is not enabled");
+        }
+
+        if (kmsKey.getKeyUsage() != IEnumKeyUsage.Types.SIGN_VERIFY) {
+            throw new KeyNotAllowedForUsageException("KMS Key is not authorized for verifying");
         }
 
         if (request.getSigningAlgorithm() == null) {
-            throw new RuntimeException("Algorithm is required");
+            throw new WrongAlgorithmException("Signing algorithm is required");
         }
 
-        byte[] message = Base64.getDecoder().decode(request.getMessage());
-        byte[] signature = Base64.getDecoder().decode(request.getSignature());
+        try {
+            byte[] message = Base64.getDecoder().decode(request.getMessage());
+            byte[] signature = Base64.getDecoder().decode(request.getSignature());
 
-        boolean valid = cryptoService.verifySignature(
-                message,
-                signature,
-                kmsKey.getPublicKey(),
-                request.getSigningAlgorithm()
-        );
+            boolean valid = cryptoService.verifySignature(
+                    message,
+                    signature,
+                    kmsKey.getPublicKey(),
+                    request.getSigningAlgorithm()
+            );
 
-        return VerifyResponse.builder()
-                .valid(valid)
-                .keyId(kmsKey.getKeyId())
-                .build();
+            return VerifyResponse.builder()
+                    .valid(valid)
+                    .keyId(kmsKey.getKeyId())
+                    .build();
+        } catch (Exception e) {
+            log.error("Signature verification failed", e);
+            throw new SignatureVerificationException("Signature verification failed", e);
+        }
     }
 
     @Override
@@ -110,7 +120,15 @@ public class SigningService implements ISigningService {
                 .orElseThrow(() -> new RuntimeException("KMS Key not found"));
 
         if (!kmsKey.isEnabled()) {
-            throw new RuntimeException("KMS Key is not enabled");
+            throw new DisabledKeyException("KMS Key is not enabled");
+        }
+
+        if (kmsKey.getKeyUsage() != IEnumKeyUsage.Types.GENERATE_VERIFY_MAC) {
+            throw new KeyNotAllowedForUsageException("KMS Key is not authorized for generating MAC");
+        }
+
+        if (request.getMacAlgorithm() == null) {
+            throw new WrongAlgorithmException("Generate mac algorithm is required");
         }
 
         try {
@@ -131,7 +149,7 @@ public class SigningService implements ISigningService {
 
         } catch (Exception e) {
             log.error("MAC generation failed", e);
-            throw new RuntimeException("MAC generation failed", e);
+            throw new MacGenerationException("MAC generation failed", e);
         }
     }
 
@@ -144,7 +162,15 @@ public class SigningService implements ISigningService {
                 .orElseThrow(() -> new RuntimeException("KMS Key not found"));
 
         if (!kmsKey.isEnabled()) {
-            throw new RuntimeException("KMS Key is not enabled");
+            throw new DisabledKeyException("KMS Key is not enabled");
+        }
+
+        if (kmsKey.getKeyUsage() != IEnumKeyUsage.Types.GENERATE_VERIFY_MAC) {
+            throw new KeyNotAllowedForUsageException("KMS Key is not authorized for verifying MAC");
+        }
+
+        if (request.getMacAlgorithm() == null) {
+            throw new WrongAlgorithmException("Generate mac algorithm is required");
         }
 
         try {
@@ -169,7 +195,7 @@ public class SigningService implements ISigningService {
 
         } catch (Exception e) {
             log.error("MAC verification failed", e);
-            throw new RuntimeException("MAC verification failed", e);
+            throw new MacVerificationException("MAC verification failed", e);
         }
     }
 }

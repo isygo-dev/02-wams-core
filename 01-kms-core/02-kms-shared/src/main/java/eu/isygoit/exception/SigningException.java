@@ -5,7 +5,7 @@ import eu.isygoit.annotation.MsgLocale;
 /**
  * The type Signing exception.
  */
-@MsgLocale("tbd.exception")
+@MsgLocale("signing.exception")
 public class SigningException extends RuntimeException {
 
     /**

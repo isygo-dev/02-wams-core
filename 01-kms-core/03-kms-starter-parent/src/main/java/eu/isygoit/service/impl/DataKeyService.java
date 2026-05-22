@@ -36,11 +36,17 @@ public class DataKeyService implements IDataKeyService {
         KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(tenant, request.getKeyId())
                 .orElseThrow(() -> new KeyNotFoundException("KMS Key not found"));
 
-        if (!kmsKey.isEnabled())
-            throw new DisabledKeyException("Key disabled");
+        if (!kmsKey.isEnabled()) {
+            throw new DisabledKeyException("KMS Key is not enabled");
+        }
 
-        if (kmsKey.getKeyUsage() != IEnumKeyUsage.Types.ENCRYPT_DECRYPT)
-            throw new KeyNotAllowedForUsageException("Key not allowed for data key generation");
+        if (kmsKey.getKeyUsage() != IEnumKeyUsage.Types.ENCRYPT_DECRYPT) {
+            throw new KeyNotAllowedForUsageException("KMS Key is not authorized for encryption");
+        }
+
+        if (request.getEncryptionAlgorithmSpec() == null) {
+            throw new WrongAlgorithmException("Encryption algorithm is required");
+        }
 
         int keySize = (request.getKeySize() != null) ? request.getKeySize() : 256;
         byte[] plaintextKey = generateAesKey(keySize);

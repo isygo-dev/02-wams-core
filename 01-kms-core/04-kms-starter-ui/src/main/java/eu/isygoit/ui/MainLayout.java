@@ -9,8 +9,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import eu.isygoit.ui.views.*;
+import eu.isygoit.ui.views.ByokView;
+import eu.isygoit.ui.views.GrantsView;
+import eu.isygoit.ui.views.PoliciesView;
+import eu.isygoit.ui.views.TagsView;
 import eu.isygoit.ui.views.alias.AliasesView;
+import eu.isygoit.ui.views.crypto.CryptoOperationsView;
 import eu.isygoit.ui.views.key.KeyManagementView;
 import eu.isygoit.ui.views.keyStore.CustomKeyStoresView;
 

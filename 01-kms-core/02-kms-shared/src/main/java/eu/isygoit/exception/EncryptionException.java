@@ -5,7 +5,7 @@ import eu.isygoit.annotation.MsgLocale;
 /**
  * The type Encryption exception.
  */
-@MsgLocale("tbd.exception")
+@MsgLocale("encryption.exception")
 public class EncryptionException extends RuntimeException {
 
     /**

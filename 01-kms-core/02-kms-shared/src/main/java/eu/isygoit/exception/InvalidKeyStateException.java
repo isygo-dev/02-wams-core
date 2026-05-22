@@ -5,7 +5,7 @@ import eu.isygoit.annotation.MsgLocale;
 /**
  * The type Invalid key state exception.
  */
-@MsgLocale("tbd.exception")
+@MsgLocale("invalid.key.state.exception")
 public class InvalidKeyStateException extends RuntimeException {
 
     /**

@@ -5,7 +5,7 @@ import eu.isygoit.annotation.MsgLocale;
 /**
  * The type Grant not found exception.
  */
-@MsgLocale("tbd.exception")
+@MsgLocale("grant.not.foundexception")
 public class GrantNotFoundException extends RuntimeException {
 
     /**
