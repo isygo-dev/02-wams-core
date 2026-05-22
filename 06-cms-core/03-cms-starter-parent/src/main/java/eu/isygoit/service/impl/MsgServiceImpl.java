@@ -1,6 +1,6 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.api.MailMessageControllerApi;
+import eu.isygoit.api.MailMessageServiceApi;
 import eu.isygoit.com.camel.repository.ICamelRepository;
 import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.service.IMsgService;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 public class MsgServiceImpl implements IMsgService {
 
     @Autowired
-    private MailMessageControllerApi messageService;
+    private MailMessageServiceApi messageService;
 
     @Autowired
     private ICamelRepository camelRepository;

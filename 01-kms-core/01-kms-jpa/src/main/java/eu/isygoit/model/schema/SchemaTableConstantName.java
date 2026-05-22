@@ -54,4 +54,12 @@ public interface SchemaTableConstantName extends ComSchemaTableConstantName {
      * The constant T_RANDOM_KEY.
      */
     String T_RANDOM_KEY = "T_RANDOM_KEY";
+    String T_KMS_CUSTOM_KEY_STORE = "T_KMS_CUSTOM_KEY_STORE";
+    String T_KMS_ALIAS = "T_KMS_ALIAS";
+    String T_KMS_AUDIT_LOG = "T_KMS_AUDIT_LOG";
+    String T_KMS_KEY = "T_KMS_KEY";
+    String T_KMS_KEY_GRANT = "T_KMS_KEY_GRANT";
+    String T_KMS_KEY_POLICY = "T_KMS_KEY_POLICY";
+    String T_KMS_KEY_VERSION = "T_KMS_KEY_VERSION";
+    String T_KMS_TAG = "T_KMS_TAG";
 }

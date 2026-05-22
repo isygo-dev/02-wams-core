@@ -1,7 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectExceptionHandler;
-import eu.isygoit.api.PublicControllerApi;
+import eu.isygoit.api.PublicServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.config.AppProperties;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @InjectExceptionHandler(ImsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/public")
-public class PublicController extends ControllerExceptionHandler implements PublicControllerApi {
+public class PublicController extends ControllerExceptionHandler implements PublicServiceApi {
 
     private final AppProperties appProperties;
 

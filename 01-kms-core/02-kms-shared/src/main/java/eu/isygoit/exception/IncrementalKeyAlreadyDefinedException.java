@@ -18,4 +18,8 @@ public class IncrementalKeyAlreadyDefinedException extends ManagedException {
     public IncrementalKeyAlreadyDefinedException(String s) {
         super(s);
     }
+
+    public IncrementalKeyAlreadyDefinedException(String s, Throwable cause) {
+        super(s, cause);
+    }
 }

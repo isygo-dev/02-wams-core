@@ -18,4 +18,14 @@ public class PasswordConfigNotFoundException extends ManagedException {
     public PasswordConfigNotFoundException(String s) {
         super(s);
     }
+
+    /**
+     * Instantiates a new Password config not found exception.
+     *
+     * @param message the message
+     * @param cause   the cause
+     */
+    public PasswordConfigNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

@@ -1,7 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectExceptionHandler;
-import eu.isygoit.api.ObjectStorageControllerApi;
+import eu.isygoit.api.ObjectStorageServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 @RestController
 @InjectExceptionHandler(SmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/storage")
-public class ObjectStorageController extends ControllerExceptionHandler implements ObjectStorageControllerApi {
+public class ObjectStorageController extends ControllerExceptionHandler implements ObjectStorageServiceApi {
 
     @Autowired
     private StorageFactoryService storageFactoryService;

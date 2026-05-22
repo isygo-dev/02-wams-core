@@ -18,4 +18,14 @@ public class TokenConfigNotFoundException extends ManagedException {
     public TokenConfigNotFoundException(String s) {
         super(s);
     }
+
+    /**
+     * Instantiates a new Token config not found exception.
+     *
+     * @param message the message
+     * @param cause   the cause
+     */
+    public TokenConfigNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

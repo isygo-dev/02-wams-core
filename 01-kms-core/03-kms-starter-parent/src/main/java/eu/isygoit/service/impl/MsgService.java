@@ -1,0 +1,32 @@
+package eu.isygoit.service.impl;
+
+import eu.isygoit.api.MailMessageServiceApi;
+import eu.isygoit.com.camel.repository.ICamelRepository;
+import eu.isygoit.dto.data.MailMessageDto;
+import eu.isygoit.service.IMsgService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+/**
+ * The type Msg service.
+ */
+@Slf4j
+@Service
+public class MsgService implements IMsgService {
+
+    @Autowired
+    private MailMessageServiceApi messageService;
+
+    @Autowired
+    private ICamelRepository camelRepository;
+
+    @Override
+    public void sendMessage(String senderTenantName, MailMessageDto mailMessage, boolean async) {
+        if (async) {
+            camelRepository.asyncSendBody(ICamelRepository.send_email_queue, mailMessage);
+        } else {
+            this.messageService.sendMail(senderTenantName, mailMessage.getTemplateName(), mailMessage);
+        }
+    }
+}

@@ -18,4 +18,8 @@ public class DigestConfigNotFoundException extends ManagedException {
     public DigestConfigNotFoundException(String s) {
         super(s);
     }
+
+    public DigestConfigNotFoundException(String s, Throwable cause) {
+        super(s, cause);
+    }
 }

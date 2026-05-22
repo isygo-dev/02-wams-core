@@ -8,18 +8,15 @@ import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.service.IKeyService;
 import eu.isygoit.service.KeyServiceApi;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 
 /**
  * The type Key controller.
@@ -29,45 +26,34 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @InjectExceptionHandler(KmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/key")
+@Tag(name = "KMS Keys", description = "Key Management Service - All cryptographic operations and key management endpoints")
 public class KeyController extends ControllerExceptionHandler implements KeyServiceApi {
 
     @Autowired
     private IKeyService keyService;
 
-    @Operation(summary = "New random key Api",
-            description = "New random key")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Api executed successfully",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = String.class))})
-    })
     @Override
     public ResponseEntity<String> newRandomKey(
-            Integer length, IEnumCharSet.Types charSetType) {
+            @RequestParam Integer length,
+            @RequestParam IEnumCharSet.Types charSetType) {
         log.info("Call generateRandomKey");
         try {
-            return ResponseFactory.responseOk(keyService.getRandomKey(length, charSetType));
+            return ResponseFactory.responseOk(keyService.generateRandomKey(length, charSetType));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
         }
     }
 
-    @Operation(summary = "Renew random key Api",
-            description = "Renew random key")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Api executed successfully",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = String.class))})
-    })
     @Override
     public ResponseEntity<String> renewRandomKey(
-            String tenant, String keyName, Integer length, IEnumCharSet.Types charSetType) {
+            @RequestParam String tenant,
+            @PathVariable String keyName,
+            @RequestParam Integer length,
+            @RequestParam IEnumCharSet.Types charSetType) {
         log.info("Call generateRandomKeyName");
         try {
-            String keyValue = keyService.getRandomKey(length, charSetType);
+            String keyValue = keyService.generateRandomKey(length, charSetType);
             keyService.createOrUpdateKeyByName(tenant, keyName, keyValue);
             return ResponseFactory.responseOk(keyValue);
         } catch (Throwable e) {
@@ -76,20 +62,13 @@ public class KeyController extends ControllerExceptionHandler implements KeyServ
         }
     }
 
-    @Operation(summary = "Get random key Api",
-            description = "Get random key")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Api executed successfully",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = String.class))})
-    })
     @Override
     public ResponseEntity<String> getRandomKey(
-            String tenant, String keyName) {
+            @RequestParam String tenant,
+            @PathVariable String keyName) {
         log.info("Call getRandomKeyName");
         try {
-            return ResponseFactory.responseOk(keyService.getKeyByName(tenant, keyName).getValue());
+            return ResponseFactory.responseOk(keyService.getKeyByName(tenant, keyName));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

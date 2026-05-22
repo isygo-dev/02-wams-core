@@ -1,7 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectExceptionHandler;
-import eu.isygoit.api.WebSocketControllerApi;
+import eu.isygoit.api.WebSocketServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.dto.wsocket.WsMessageWrapperDto;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @InjectExceptionHandler(MmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/ws")
-public class WebSocketController extends ControllerExceptionHandler implements WebSocketControllerApi {
+public class WebSocketController extends ControllerExceptionHandler implements WebSocketServiceApi {
 
     @Autowired
     private IWebSocketService webSocketService;

@@ -40,23 +40,29 @@ public class PasswordInfo extends AuditableEntity<Long> {
 
     @Column(name = SchemaColumnConstantName.C_USER_ID, nullable = false, updatable = false)
     private Long userId;
+
     @Builder.Default
     @ColumnDefault("'PWD'")
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_AUTH_TYPE, length = IEnumEnabledBinaryStatus.STR_ENUM_SIZE, nullable = false)
     private IEnumAuth.Types authType = IEnumAuth.Types.PWD;
+
     @Column(name = SchemaColumnConstantName.C_USER_PASSWORD, length = SchemaConstantSize.PASS_WORD, nullable = false, updatable = false)
     private String password;
+
     @Builder.Default
     @ColumnDefault("'DEPRECATED'")
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_STATUS, length = IEnumPasswordStatus.STR_ENUM_SIZE, nullable = false)
     private IEnumPasswordStatus.Types status = IEnumPasswordStatus.Types.DEPRECATED;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = SchemaColumnConstantName.C_EXPIRY_DATE, nullable = false, updatable = false)
     private Date expiryDate;
+
     @Column(name = SchemaColumnConstantName.C_CRC16, nullable = false, updatable = false)
     private Long crc16;
+
     @Column(name = SchemaColumnConstantName.C_CRC32, nullable = false, updatable = false)
     private Long crc32;
 

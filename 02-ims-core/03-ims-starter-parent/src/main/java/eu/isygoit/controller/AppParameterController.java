@@ -1,7 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectMapperAndService;
-import eu.isygoit.api.AppParameterControllerApi;
+import eu.isygoit.api.AppParameterServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.dto.data.AppParameterDto;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @InjectMapperAndService(handler = ImsExceptionHandler.class, mapper = AppParameterMapper.class, minMapper = AppParameterMapper.class, service = AppParameterService.class)
 @RequestMapping(path = "/api/v1/private/appParameter")
 public class AppParameterController extends MappedCrudTenantController<Long, AppParameter, AppParameterDto, AppParameterDto, AppParameterService>
-        implements AppParameterControllerApi {
+        implements AppParameterServiceApi {
 
     @Override
     public ResponseEntity<String> getValueByTenantAndName(

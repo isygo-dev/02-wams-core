@@ -1,0 +1,781 @@
+package eu.isygoit.service.impl;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.isygoit.dto.KmsDtos;
+import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.exception.GrantNotFoundException;
+import eu.isygoit.model.KmsKeyGrant;
+import eu.isygoit.model.KmsKeyPolicy;
+import eu.isygoit.repository.KmsKeyGrantRepository;
+import eu.isygoit.repository.KmsKeyPolicyRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class KeyPolicyServiceTest {
+
+    private static final String TENANT = "tenant-1";
+    private static final String KEY_ID = "key-1";
+    private static final String POLICY_NAME = "Policy-1";
+    private static final String GRANT_ID = "grant-1";
+
+    @Mock
+    private KmsKeyPolicyRepository kmsKeyPolicyRepository;
+
+    @Mock
+    private KmsKeyGrantRepository kmsKeyGrantRepository;
+
+    @Mock
+    private ObjectMapper objectMapper;
+
+    @InjectMocks
+    private KeyPolicyService keyPolicyService;
+
+    private KmsKeyPolicy policy;
+    private KmsKeyGrant grant;
+    private String testTenant;
+    private String testKeyId;
+    private String testGrantId;
+    private String testPrincipal;
+
+    @BeforeEach
+    void setUp() {
+
+        policy = KmsKeyPolicy.builder()
+                .tenant(TENANT)
+                .keyId(KEY_ID)
+                .policyDocument("{\"Version\":\"2012-10-17\"}")
+                .build();
+
+        grant = KmsKeyGrant.builder()
+                .tenant(TENANT)
+                .keyId(KEY_ID)
+                .grantId(GRANT_ID)
+                .granteePrincipal("user-1")
+                .operations("Encrypt,Decrypt")
+                .build();
+
+        testTenant = "test-tenant";
+        testKeyId = "test-key-id";
+        testGrantId = "grant-12345";
+        testPrincipal = "wrn:wams:iam::123456789012:role/test-role";
+    }
+
+    @Test
+    void shouldSetKeyPolicySuccessfully() throws Exception {
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("Version", "2012-10-17");
+
+        SetKeyPolicyRequest request =
+                SetKeyPolicyRequest.builder()
+                        .policy(map)
+                        .build();
+
+        when(objectMapper.writeValueAsString(map))
+                .thenReturn("{\"Version\":\"2012-10-17\"}");
+
+        when(kmsKeyPolicyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(policy));
+
+        Map<String, Object> response =
+                keyPolicyService.setKeyPolicy(TENANT, KEY_ID, request);
+
+        assertNotNull(response);
+        assertEquals("2012-10-17", response.get("Version"));
+
+        verify(kmsKeyPolicyRepository).save(any(KmsKeyPolicy.class));
+    }
+
+    @Test
+    void shouldCreateNewPolicyWhenNotExists() throws Exception {
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("Version", "2012-10-17");
+
+        SetKeyPolicyRequest request =
+                SetKeyPolicyRequest.builder()
+                        .policy(map)
+                        .build();
+
+        when(objectMapper.writeValueAsString(any()))
+                .thenReturn("{\"Version\":\"2012-10-17\"}");
+
+        when(kmsKeyPolicyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.empty());
+
+        Map<String, Object> response =
+                keyPolicyService.setKeyPolicy(TENANT, KEY_ID, request);
+
+        assertNotNull(response);
+
+        verify(kmsKeyPolicyRepository).save(any(KmsKeyPolicy.class));
+    }
+
+    @Test
+    void shouldThrowWhenPolicySerializationFails() throws Exception {
+
+        SetKeyPolicyRequest request =
+                SetKeyPolicyRequest.builder()
+                        .policy(Map.of("k", "v"))
+                        .build();
+
+        when(objectMapper.writeValueAsString(any()))
+                .thenThrow(new JsonProcessingException("serialization error") {
+                });
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> keyPolicyService.setKeyPolicy(TENANT, KEY_ID, request)
+        );
+
+        assertEquals("Failed to serialize policy", exception.getMessage());
+    }
+
+    @Test
+    void shouldGetKeyPolicySuccessfully() throws Exception {
+
+        Map<String, Object> expected = new HashMap<>();
+        expected.put("Version", "2012-10-17");
+
+        when(kmsKeyPolicyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(policy));
+
+        when(objectMapper.readValue(
+                eq(policy.getPolicyDocument()),
+                any(TypeReference.class)))
+                .thenReturn(expected);
+
+        Map<String, Object> response =
+                keyPolicyService.getKeyPolicy(TENANT, KEY_ID);
+
+        assertNotNull(response);
+        assertEquals("2012-10-17", response.get("Version"));
+    }
+
+    @Test
+    void shouldReturnEmptyPolicyWhenPolicyNotFound() {
+
+        when(kmsKeyPolicyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.empty());
+
+        Map<String, Object> response =
+                keyPolicyService.getKeyPolicy(TENANT, KEY_ID);
+
+        assertNotNull(response);
+        assertEquals("2012-10-17", response.get("Version"));
+        assertTrue(response.containsKey("Statement"));
+    }
+
+    @Test
+    void shouldReturnEmptyMapWhenDeserializationFails() throws Exception {
+
+        when(kmsKeyPolicyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
+                .thenReturn(Optional.of(policy));
+
+        when(objectMapper.readValue(
+                anyString(),
+                any(TypeReference.class)))
+                .thenThrow(new JsonProcessingException("error") {
+                });
+
+        Map<String, Object> response =
+                keyPolicyService.getKeyPolicy(TENANT, KEY_ID);
+
+        assertNotNull(response);
+        assertTrue(response.isEmpty());
+    }
+
+    @Test
+    void shouldCreateGrantSuccessfully() {
+
+        CreateGrantRequest request =
+                CreateGrantRequest.builder()
+                        .granteePrincipal("user-1")
+                        .operations(List.of("Encrypt", "Decrypt"))
+                        .build();
+
+        GrantResponse response =
+                keyPolicyService.createGrant(TENANT, KEY_ID, request);
+
+        assertNotNull(response);
+        assertNotNull(response.getGrantId());
+        assertEquals(KEY_ID, response.getKeyId());
+
+        verify(kmsKeyGrantRepository).save(any(KmsKeyGrant.class));
+    }
+
+    @Test
+    void shouldRevokeGrantSuccessfully() {
+
+        when(kmsKeyGrantRepository.findByTenantAndGrantId(TENANT, GRANT_ID))
+                .thenReturn(Optional.of(grant));
+
+        String response =
+                keyPolicyService.revokeGrant(TENANT, KEY_ID, GRANT_ID);
+
+        assertEquals("REVOKED", response);
+        assertNotNull(grant.getRevocationDate());
+
+        verify(kmsKeyGrantRepository).save(grant);
+    }
+
+    @Test
+    void shouldThrowWhenRevokeGrantNotFound() {
+
+        when(kmsKeyGrantRepository.findByTenantAndGrantId(TENANT, GRANT_ID))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                GrantNotFoundException.class,
+                () -> keyPolicyService.revokeGrant(TENANT, KEY_ID, GRANT_ID)
+        );
+    }
+
+    @Test
+    void shouldListGrantsSuccessfully() {
+
+        Page<KmsKeyGrant> page =
+                new PageImpl<>(List.of(grant));
+
+        when(kmsKeyGrantRepository.findByTenantAndKeyId(
+                eq(TENANT),
+                eq(KEY_ID),
+                any(PageRequest.class)))
+                .thenReturn(page);
+
+        ListGrantsResponse response =
+                keyPolicyService.listGrants(TENANT, KEY_ID, 10, null);
+
+        assertNotNull(response);
+        assertEquals(1, response.getGrants().size());
+
+        ListGrantsResponse.Grant dto =
+                response.getGrants().get(0);
+
+        assertEquals(GRANT_ID, dto.getGrantId());
+        assertEquals("user-1", dto.getGranteePrincipal());
+        assertEquals(2, dto.getOperations().size());
+    }
+
+    @Test
+    void shouldReturnNextTokenWhenMorePagesExist() {
+
+        Page<KmsKeyGrant> page =
+                new PageImpl<>(
+                        List.of(grant),
+                        PageRequest.of(0, 1),
+                        2
+                );
+
+        when(kmsKeyGrantRepository.findByTenantAndKeyId(
+                eq(TENANT),
+                eq(KEY_ID),
+                any(PageRequest.class)))
+                .thenReturn(page);
+
+        ListGrantsResponse response =
+                keyPolicyService.listGrants(TENANT, KEY_ID, 1, null);
+
+        assertEquals("1", response.getNextToken());
+    }
+
+    @Test
+    void shouldRetireGrantSuccessfully() {
+
+        RetireGrantRequest request =
+                RetireGrantRequest.builder()
+                        .build();
+
+        when(kmsKeyGrantRepository.findByTenantAndGrantId(TENANT, GRANT_ID))
+                .thenReturn(Optional.of(grant));
+
+        KmsDtos.RetireGrantResponse response = keyPolicyService.retireGrant(TENANT, GRANT_ID, request);
+
+        assertEquals(KEY_ID, response.getKeyId());
+        assertNotNull(grant.getRevocationDate());
+
+        verify(kmsKeyGrantRepository).save(grant);
+    }
+
+    @Test
+    void shouldThrowWhenRetireGrantNotFound() {
+
+        RetireGrantRequest request =
+                RetireGrantRequest.builder()
+                        .build();
+
+        when(kmsKeyGrantRepository.findByTenantAndGrantId(TENANT, GRANT_ID))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                GrantNotFoundException.class,
+                () -> keyPolicyService.retireGrant(TENANT, GRANT_ID, request)
+        );
+    }
+
+    // =========================================================================
+    // SetKeyPolicy Tests
+    // =========================================================================
+
+    @Test
+    @DisplayName("Should set key policy successfully for new key")
+    void testSetKeyPolicyNewKey() throws Exception {
+        // Arrange
+        Map<String, Object> policy = new HashMap<>();
+        policy.put("Version", "2012-10-17");
+        policy.put("Statement", new ArrayList<>());
+
+        SetKeyPolicyRequest request = SetKeyPolicyRequest.builder()
+                .policy(policy)
+                .bypassPolicyLockoutSafetyCheck(false)
+                .build();
+
+        when(kmsKeyPolicyRepository.findByTenantAndKeyId(testTenant, testKeyId))
+                .thenReturn(Optional.empty());
+        when(objectMapper.writeValueAsString(policy))
+                .thenReturn("{\"Version\":\"2012-10-17\"}");
+
+        KmsKeyPolicy savedPolicy = KmsKeyPolicy.builder()
+                .id(1L)
+                .tenant(testTenant)
+                .keyId(testKeyId)
+                .policyDocument("{\"Version\":\"2012-10-17\"}")
+                .build();
+
+        when(kmsKeyPolicyRepository.save(any(KmsKeyPolicy.class))).thenReturn(savedPolicy);
+
+        // Act
+        Map<String, Object> result = keyPolicyService.setKeyPolicy(testTenant, testKeyId, request);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(policy, result);
+        verify(kmsKeyPolicyRepository, times(1)).findByTenantAndKeyId(testTenant, testKeyId);
+        verify(kmsKeyPolicyRepository, times(1)).save(any(KmsKeyPolicy.class));
+        verify(objectMapper, times(1)).writeValueAsString(policy);
+    }
+
+    @Test
+    @DisplayName("Should update existing key policy")
+    void testSetKeyPolicyExistingKey() throws Exception {
+        // Arrange
+        Map<String, Object> policy = new HashMap<>();
+        policy.put("Version", "2012-10-17");
+
+        SetKeyPolicyRequest request = SetKeyPolicyRequest.builder()
+                .policy(policy)
+                .build();
+
+        KmsKeyPolicy existingPolicy = KmsKeyPolicy.builder()
+                .id(1L)
+                .tenant(testTenant)
+                .keyId(testKeyId)
+                .policyDocument("{\"old\":\"policy\"}")
+                .build();
+
+        when(kmsKeyPolicyRepository.findByTenantAndKeyId(testTenant, testKeyId))
+                .thenReturn(Optional.of(existingPolicy));
+        when(objectMapper.writeValueAsString(policy))
+                .thenReturn("{\"Version\":\"2012-10-17\"}");
+        when(kmsKeyPolicyRepository.save(any(KmsKeyPolicy.class))).thenReturn(existingPolicy);
+
+        // Act
+        Map<String, Object> result = keyPolicyService.setKeyPolicy(testTenant, testKeyId, request);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(policy, result);
+        verify(kmsKeyPolicyRepository, times(1)).save(any(KmsKeyPolicy.class));
+    }
+
+    // =========================================================================
+    // GetKeyPolicy Tests
+    // =========================================================================
+
+    @Test
+    @DisplayName("Should get existing key policy")
+    void testGetKeyPolicySuccess() throws Exception {
+        // Arrange
+        String policyJson = "{\"Version\":\"2012-10-17\",\"Statement\":[]}";
+        Map<String, Object> expectedPolicy = new HashMap<>();
+        expectedPolicy.put("Version", "2012-10-17");
+        expectedPolicy.put("Statement", new ArrayList<>());
+
+        KmsKeyPolicy policy = KmsKeyPolicy.builder()
+                .id(1L)
+                .tenant(testTenant)
+                .keyId(testKeyId)
+                .policyDocument(policyJson)
+                .build();
+
+        when(kmsKeyPolicyRepository.findByTenantAndKeyId(testTenant, testKeyId))
+                .thenReturn(Optional.of(policy));
+        when(objectMapper.readValue(eq(policyJson), any(com.fasterxml.jackson.core.type.TypeReference.class)))
+                .thenReturn(expectedPolicy);
+
+        // Act
+        Map<String, Object> result = keyPolicyService.getKeyPolicy(testTenant, testKeyId);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(expectedPolicy, result);
+        verify(kmsKeyPolicyRepository, times(1)).findByTenantAndKeyId(testTenant, testKeyId);
+    }
+
+    @Test
+    @DisplayName("Should return default policy when key policy not found")
+    void testGetKeyPolicyNotFound() {
+        // Arrange
+        when(kmsKeyPolicyRepository.findByTenantAndKeyId(testTenant, testKeyId))
+                .thenReturn(Optional.empty());
+
+        // Act
+        Map<String, Object> result = keyPolicyService.getKeyPolicy(testTenant, testKeyId);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("2012-10-17", result.get("Version"));
+        assertNotNull(result.get("Statement"));
+    }
+
+    // =========================================================================
+    // CreateGrant Tests
+    // =========================================================================
+
+    @Test
+    @DisplayName("Should create grant successfully")
+    void testCreateGrantSuccess() {
+        // Arrange
+        List<String> operations = Arrays.asList("Encrypt", "Decrypt");
+
+        CreateGrantRequest request = CreateGrantRequest.builder()
+                .granteePrincipal(testPrincipal)
+                .operations(operations)
+                .build();
+
+        when(kmsKeyGrantRepository.save(any(KmsKeyGrant.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        GrantResponse result = keyPolicyService.createGrant(testTenant, testKeyId, request);
+
+        // Assert
+        assertNotNull(result);
+        assertNotNull(result.getGrantId());
+        assertTrue(result.getGrantId().startsWith("grant-"));
+        assertEquals(testKeyId, result.getKeyId());
+        verify(kmsKeyGrantRepository, times(1)).save(any(KmsKeyGrant.class));
+    }
+
+    @Test
+    @DisplayName("Should create multiple grants with different principals")
+    void testCreateMultipleGrants() {
+        // Arrange
+        CreateGrantRequest request1 = CreateGrantRequest.builder()
+                .granteePrincipal("wrn:wams:iam::123456789012:role/role1")
+                .operations(Arrays.asList("Encrypt"))
+                .build();
+
+        CreateGrantRequest request2 = CreateGrantRequest.builder()
+                .granteePrincipal("wrn:wams:iam::123456789012:role/role2")
+                .operations(Arrays.asList("Decrypt"))
+                .build();
+
+        when(kmsKeyGrantRepository.save(any(KmsKeyGrant.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        GrantResponse result1 = keyPolicyService.createGrant(testTenant, testKeyId, request1);
+        GrantResponse result2 = keyPolicyService.createGrant(testTenant, testKeyId, request2);
+
+        // Assert
+        assertNotNull(result1);
+        assertNotNull(result2);
+        assertNotEquals(result1.getGrantId(), result2.getGrantId());
+        verify(kmsKeyGrantRepository, times(2)).save(any(KmsKeyGrant.class));
+    }
+
+    // =========================================================================
+    // RevokeGrant Tests
+    // =========================================================================
+
+    @Test
+    @DisplayName("Should revoke grant successfully")
+    void testRevokeGrantSuccess() {
+        // Arrange
+        KmsKeyGrant grant = KmsKeyGrant.builder()
+                .id(1L)
+                .tenant(testTenant)
+                .keyId(testKeyId)
+                .grantId(testGrantId)
+                .granteePrincipal(testPrincipal)
+                .operations("Encrypt,Decrypt")
+                .build();
+
+        when(kmsKeyGrantRepository.findByTenantAndGrantId(testTenant, testGrantId))
+                .thenReturn(Optional.of(grant));
+        when(kmsKeyGrantRepository.save(any(KmsKeyGrant.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        String result = keyPolicyService.revokeGrant(testTenant, testKeyId, testGrantId);
+
+        // Assert
+        assertEquals("REVOKED", result);
+        verify(kmsKeyGrantRepository, times(1)).findByTenantAndGrantId(testTenant, testGrantId);
+        verify(kmsKeyGrantRepository, times(1)).save(any(KmsKeyGrant.class));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when revoking non-existent grant")
+    void testRevokeGrantNotFound() {
+        // Arrange
+        when(kmsKeyGrantRepository.findByTenantAndGrantId(testTenant, testGrantId))
+                .thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(GrantNotFoundException.class, () ->
+                keyPolicyService.revokeGrant(testTenant, testKeyId, testGrantId));
+    }
+
+    // =========================================================================
+    // ListGrants Tests
+    // =========================================================================
+
+    @Test
+    @DisplayName("Should list grants successfully")
+    void testListGrantsSuccess() {
+        // Arrange
+        KmsKeyGrant grant1 = KmsKeyGrant.builder()
+                .id(1L)
+                .tenant(testTenant)
+                .keyId(testKeyId)
+                .grantId("grant-1")
+                .granteePrincipal("wrn:wams:iam::123456789012:role/role1")
+                .operations("Encrypt,Decrypt")
+                .build();
+
+        KmsKeyGrant grant2 = KmsKeyGrant.builder()
+                .id(2L)
+                .tenant(testTenant)
+                .keyId(testKeyId)
+                .grantId("grant-2")
+                .granteePrincipal("wrn:wams:iam::123456789012:role/role2")
+                .operations("Sign")
+                .build();
+
+        Page<KmsKeyGrant> page = new PageImpl<>(Arrays.asList(grant1, grant2));
+
+        when(kmsKeyGrantRepository.findByTenantAndKeyId(eq(testTenant), eq(testKeyId), any(Pageable.class)))
+                .thenReturn(page);
+
+        // Act
+        ListGrantsResponse result = keyPolicyService.listGrants(testTenant, testKeyId, 100, null);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.getGrants().size());
+        assertEquals("grant-1", result.getGrants().get(0).getGrantId());
+        assertEquals("grant-2", result.getGrants().get(1).getGrantId());
+        verify(kmsKeyGrantRepository, times(1)).findByTenantAndKeyId(eq(testTenant), eq(testKeyId), any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("Should return empty list when no grants exist")
+    void testListGrantsEmpty() {
+        // Arrange
+        Page<KmsKeyGrant> page = new PageImpl<>(new ArrayList<>());
+
+        when(kmsKeyGrantRepository.findByTenantAndKeyId(eq(testTenant), eq(testKeyId), any(Pageable.class)))
+                .thenReturn(page);
+
+        // Act
+        ListGrantsResponse result = keyPolicyService.listGrants(testTenant, testKeyId, 100, null);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.getGrants().size());
+        assertNull(result.getNextToken());
+    }
+
+    @Test
+    @DisplayName("Should paginate grants correctly")
+    void testListGrantsPagination() {
+        // Arrange
+        List<KmsKeyGrant> firstPageGrants = Arrays.asList(
+                createMockGrant(1, "grant-1"),
+                createMockGrant(2, "grant-2")
+        );
+
+        Page<KmsKeyGrant> firstPage = new PageImpl<>(firstPageGrants, PageRequest.of(0, 2), 10);
+
+        when(kmsKeyGrantRepository.findByTenantAndKeyId(eq(testTenant), eq(testKeyId), any(Pageable.class)))
+                .thenReturn(firstPage);
+
+        // Act
+        ListGrantsResponse result = keyPolicyService.listGrants(testTenant, testKeyId, 2, null);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.getGrants().size());
+        assertNotNull(result.getNextToken());
+        assertEquals("1", result.getNextToken());
+    }
+
+    // =========================================================================
+    // RetireGrant Tests
+    // =========================================================================
+
+    @Test
+    @DisplayName("Should retire grant successfully")
+    void testRetireGrantSuccess() {
+        // Arrange
+        KmsKeyGrant grant = KmsKeyGrant.builder()
+                .id(1L)
+                .tenant(testTenant)
+                .keyId(testKeyId)
+                .grantId(testGrantId)
+                .granteePrincipal(testPrincipal)
+                .operations("Encrypt,Decrypt")
+                .build();
+
+        RetireGrantRequest request = RetireGrantRequest.builder()
+                .grantToken(testGrantId)
+                .build();
+
+        when(kmsKeyGrantRepository.findByTenantAndGrantId(testTenant, testGrantId))
+                .thenReturn(Optional.of(grant));
+        when(kmsKeyGrantRepository.save(any(KmsKeyGrant.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        RetireGrantResponse result = keyPolicyService.retireGrant(testTenant, testGrantId, request);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(testKeyId, result.getKeyId());
+        verify(kmsKeyGrantRepository, times(1)).findByTenantAndGrantId(testTenant, testGrantId);
+        verify(kmsKeyGrantRepository, times(1)).save(any(KmsKeyGrant.class));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when retiring non-existent grant")
+    void testRetireGrantNotFound() {
+        // Arrange
+        RetireGrantRequest request = RetireGrantRequest.builder()
+                .grantToken(testGrantId)
+                .build();
+
+        when(kmsKeyGrantRepository.findByTenantAndGrantId(testTenant, testGrantId))
+                .thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(GrantNotFoundException.class, () ->
+                keyPolicyService.retireGrant(testTenant, testGrantId, request));
+    }
+
+    // =========================================================================
+    // ListRetirableGrants Tests
+    // =========================================================================
+
+    @Test
+    @DisplayName("Should list retirable grants successfully")
+    void testListRetirableGrantsSuccess() {
+        // Arrange
+        KmsKeyGrant grant1 = createMockGrant(1, "grant-1");
+
+        KmsKeyGrant grant2 = createMockGrant(2, "grant-2");
+
+        Page<KmsKeyGrant> page = new PageImpl<>(Arrays.asList(grant1, grant2));
+
+        when(kmsKeyGrantRepository.findByTenantAndRetiringPrincipalAndRevocationDateIsNullAndRetirementDateIsNull(
+                eq(testTenant), eq(testPrincipal), any(Pageable.class)))
+                .thenReturn(page);
+
+        // Act
+        ListRetirableGrantsResponse result = keyPolicyService.listRetirableGrants(testTenant, testPrincipal, 100, null);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.getGrants().size());
+        assertFalse(result.getTruncated());
+        assertNull(result.getNextToken());
+    }
+
+    @Test
+    @DisplayName("Should return empty list when no retirable grants exist")
+    void testListRetirableGrantsEmpty() {
+        // Arrange
+        Page<KmsKeyGrant> page = new PageImpl<>(new ArrayList<>());
+
+        when(kmsKeyGrantRepository.findByTenantAndRetiringPrincipalAndRevocationDateIsNullAndRetirementDateIsNull(
+                eq(testTenant), eq(testPrincipal), any(Pageable.class)))
+                .thenReturn(page);
+
+        // Act
+        ListRetirableGrantsResponse result = keyPolicyService.listRetirableGrants(testTenant, testPrincipal, 100, null);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, result.getGrants().size());
+        assertFalse(result.getTruncated());
+    }
+
+    @Test
+    @DisplayName("Should paginate retirable grants correctly")
+    void testListRetirableGrantsPagination() {
+        // Arrange
+        List<KmsKeyGrant> firstPageGrants = Arrays.asList(
+                createMockGrant(1, "grant-1"),
+                createMockGrant(2, "grant-2")
+        );
+
+        Page<KmsKeyGrant> firstPage = new PageImpl<>(firstPageGrants, PageRequest.of(0, 2), 10);
+
+        when(kmsKeyGrantRepository.findByTenantAndRetiringPrincipalAndRevocationDateIsNullAndRetirementDateIsNull(
+                eq(testTenant), eq(testPrincipal), any(Pageable.class)))
+                .thenReturn(firstPage);
+
+        // Act
+        ListRetirableGrantsResponse result = keyPolicyService.listRetirableGrants(testTenant, testPrincipal, 2, null);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(2, result.getGrants().size());
+        assertTrue(result.getTruncated());
+        assertEquals("1", result.getNextToken());
+    }
+
+    // =========================================================================
+    // Helper Methods
+    // =========================================================================
+
+    private KmsKeyGrant createMockGrant(long id, String grantId) {
+        return KmsKeyGrant.builder()
+                .id(id)
+                .tenant(testTenant)
+                .keyId(testKeyId)
+                .grantId(grantId)
+                .granteePrincipal(testPrincipal)
+                .operations("Encrypt,Decrypt")
+                .build();
+    }
+}

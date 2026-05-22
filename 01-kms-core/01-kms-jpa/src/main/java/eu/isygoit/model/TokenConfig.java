@@ -63,6 +63,7 @@ public class TokenConfig extends AuditableEntity<Long> implements ITenantAssigna
     private String audience;
 
     @Builder.Default
+    @ColumnDefault("'RS256'")
     @Column(name = SchemaColumnConstantName.C_SIGNATURE_ALGORITHM, length = IEnumCharSet.STR_ENUM_SIZE, nullable = false)
     private String signatureAlgorithm = "RS256";
 
@@ -70,6 +71,7 @@ public class TokenConfig extends AuditableEntity<Long> implements ITenantAssigna
     private String secretKey = "sEcReTkEy";
 
     @Builder.Default
+    @ColumnDefault("14400000")
     @Column(name = SchemaColumnConstantName.C_LIFE_TIME_MS, nullable = false)
     private Integer lifeTimeInMs = 14400000;
 }

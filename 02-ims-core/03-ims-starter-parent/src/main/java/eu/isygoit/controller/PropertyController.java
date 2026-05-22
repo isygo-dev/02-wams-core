@@ -2,7 +2,7 @@ package eu.isygoit.controller;
 
 
 import eu.isygoit.annotation.InjectExceptionHandler;
-import eu.isygoit.api.PropertyControllerApi;
+import eu.isygoit.api.PropertyServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
@@ -28,7 +28,7 @@ import java.util.List;
 @RestController
 @InjectExceptionHandler(ImsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/property")
-public class PropertyController extends ControllerExceptionHandler implements PropertyControllerApi {
+public class PropertyController extends ControllerExceptionHandler implements PropertyServiceApi {
 
     @Autowired
     private IPropertyService propertyService;

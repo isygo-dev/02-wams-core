@@ -1,7 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectMapperAndService;
-import eu.isygoit.api.ChatMessageControllerApi;
+import eu.isygoit.api.ChatMessageServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.CrudControllerUtils;
@@ -33,7 +33,7 @@ import java.util.UUID;
 @RequestMapping(path = "/api/v1/private/chat")
 @InjectMapperAndService(handler = MmsExceptionHandler.class, mapper = ChatMessageMapper.class, minMapper = ChatMessageMapper.class, service = ChatMessageService.class)
 public class ChatMessageController extends CrudControllerUtils<UUID, ChatMessage, ChatMessageDto, ChatMessageDto, ChatMessageService>
-        implements ChatMessageControllerApi {
+        implements ChatMessageServiceApi {
 
     @Override
     public ResponseEntity<List<ChatMessageDto>> findByReceiverId(

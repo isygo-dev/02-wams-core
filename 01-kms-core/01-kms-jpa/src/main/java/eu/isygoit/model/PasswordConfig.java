@@ -44,31 +44,42 @@ public class PasswordConfig extends AuditableEntity<Long> implements ITenantAssi
     //@Convert(converter = LowerCaseConverter.class)
     @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;
+
     //@Convert(converter = LowerCaseConverter.class)
     @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
     @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
-    @ColumnDefault("'PWD'")
+
     @Builder.Default
+    @ColumnDefault("'PWD'")
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_TYPE, length = IEnumAuth.STR_ENUM_SIZE, updatable = false, nullable = false)
     private IEnumAuth.Types type = IEnumAuth.Types.PWD;
+
     @Column(name = SchemaColumnConstantName.C_PATTERN)
     private String pattern;
+
     @Builder.Default
     @ColumnDefault("'ALL'")
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_CHAR_SET_TYPE, length = IEnumCharSet.STR_ENUM_SIZE, nullable = false)
     private IEnumCharSet.Types charSetType = IEnumCharSet.Types.ALL;
+
     @Column(name = SchemaColumnConstantName.C_INITIAL, length = SchemaConstantSize.PASS_WORD)
     private String initial;
+
     @Builder.Default
+    @ColumnDefault("8")
     @Column(name = SchemaColumnConstantName.C_PWD_MIN_LENGTH, nullable = false)
     private Integer minLength = 8;
+
     @Builder.Default
+    @ColumnDefault("32")
     @Column(name = SchemaColumnConstantName.C_PWD_MAX_LENGTH, nullable = false)
     private Integer maxLength = 32;
+
     @Builder.Default
+    @ColumnDefault("90")
     @Column(name = SchemaColumnConstantName.C_LIFE_TIME, nullable = false)
     private Integer lifeTime = 90;
 }

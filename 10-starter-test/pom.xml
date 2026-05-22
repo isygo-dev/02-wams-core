@@ -29,7 +29,7 @@
     </properties>
 
     <modules>
-        <module>10-key-management</module>
+        <module>01-key-management</module>
         <module>20-identity-management</module>
         <module>30-messaging-management</module>
         <module>40-document-management</module>

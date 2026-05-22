@@ -1,6 +1,6 @@
 package eu.isygoit.async.camel.processor;
 
-import eu.isygoit.api.MailMessageControllerApi;
+import eu.isygoit.api.MailMessageServiceApi;
 import eu.isygoit.async.kafka.KafkaEmailSenderProducer;
 import eu.isygoit.com.camel.processor.AbstractCamelProcessor;
 import eu.isygoit.dto.data.MailMessageDto;
@@ -26,7 +26,7 @@ public class EmailSenderProcessor extends AbstractCamelProcessor<MailMessageDto>
     private KafkaEmailSenderProducer kafkaEmailSenderProducer;
 
     @Autowired
-    private MailMessageControllerApi messageService;
+    private MailMessageServiceApi messageService;
 
     @Override
     public void performProcessor(Exchange exchange, MailMessageDto mailMessageDto) throws Exception {
