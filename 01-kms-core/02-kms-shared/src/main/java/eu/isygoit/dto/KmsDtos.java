@@ -281,7 +281,7 @@ public final class KmsDtos {
         @Schema(description = "Pagination token for next page")
         private String nextToken;
 
-        @Schema(description = "Whether the result list is truncated")
+        @Schema(description = "Whether truncated")
         private Boolean truncated;
 
         @Data
@@ -290,11 +290,18 @@ public final class KmsDtos {
         @AllArgsConstructor
         @Schema(description = "Basic key entry")
         public static class KeyEntry {
+
             @Schema(description = "Key ID")
             private String keyId;
 
+            @Schema(description = "Primary alias")
+            private String alias;
+
             @Schema(description = "Key ARN")
             private String keyWrn;
+
+            @Schema(description = "Key status")
+            private IEnumKeyStatus.Types status;
         }
     }
 
@@ -529,7 +536,7 @@ public final class KmsDtos {
     @Schema(description = "Response containing key rotation history")
     public static class ListKeyRotationsResponse {
         @Schema(description = "List of rotations")
-        private List<RotationDto> rotations;
+        private List<Rotation> rotations;
 
         @Schema(description = "Pagination token")
         private String nextToken;
@@ -542,7 +549,7 @@ public final class KmsDtos {
         @NoArgsConstructor
         @AllArgsConstructor
         @Schema(description = "Single rotation entry")
-        public static class RotationDto {
+        public static class Rotation {
             @Schema(description = "Version ID")
             private String versionId;
 
@@ -650,84 +657,6 @@ public final class KmsDtos {
 
         public boolean isStateChange(boolean currentlyEnabled) {
             return !enableRotation.equals(currentlyEnabled);
-        }
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    @Schema(description = "Detailed key rotation status (full info)")
-    public static class KeyRotationStatusResponseDto {
-        @JsonProperty("keyId")
-        @Schema(description = "Key ID")
-        private String keyId;
-
-        @JsonProperty("keyWrn")
-        @Schema(description = "Key ARN")
-        private String keyWrn;
-
-        @JsonProperty("rotationEnabled")
-        @Schema(description = "Whether automatic rotation is enabled")
-        private Boolean rotationEnabled;
-
-        @JsonProperty("rotationPeriodInDays")
-        @Schema(description = "Rotation period in days")
-        private Integer rotationPeriodInDays;
-
-        @JsonProperty("lastRotationDate")
-        @Schema(description = "Date of last rotation")
-        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-        private LocalDateTime lastRotationDate;
-
-        @JsonProperty("nextRotationDate")
-        @Schema(description = "Date of next scheduled rotation")
-        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-        private LocalDateTime nextRotationDate;
-
-        @JsonProperty("versionCount")
-        @Schema(description = "Number of key versions")
-        private Integer versionCount;
-
-        @JsonProperty("keyCreateDate")
-        @Schema(description = "Key creation date")
-        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-        private LocalDateTime keyCreateDate;
-
-        @JsonProperty("keyState")
-        @Schema(description = "Current key state")
-        private String keyState;
-
-        @JsonProperty("isCustomerManagedKey")
-        @Schema(description = "Whether the key is customer managed")
-        private Boolean isCustomerManagedKey;
-
-        @JsonProperty("rotationDisabledReason")
-        @Schema(description = "Reason if rotation is disabled")
-        private String rotationDisabledReason;
-
-        @JsonProperty("daysUntilNextRotation")
-        @Schema(description = "Days until next rotation (-1 if disabled)")
-        private Integer daysUntilNextRotation;
-
-        @JsonProperty("lastRotationInitiatedBy")
-        @Schema(description = "Principal that initiated last rotation")
-        private String lastRotationInitiatedBy;
-
-        public void calculateDaysUntilNextRotation() {
-            if (Boolean.TRUE.equals(rotationEnabled) && nextRotationDate != null) {
-                this.daysUntilNextRotation = (int) java.time.temporal.ChronoUnit.DAYS.between(LocalDateTime.now(), nextRotationDate);
-            } else {
-                this.daysUntilNextRotation = -1;
-            }
-        }
-
-        public boolean isRotationOverdue() {
-            return Boolean.TRUE.equals(rotationEnabled) && nextRotationDate != null && LocalDateTime.now().isAfter(nextRotationDate);
-        }
-
-        public boolean rotatedWithinDays(int days) {
-            return lastRotationDate != null && lastRotationDate.isAfter(LocalDateTime.now().minusDays(days));
         }
     }
 
@@ -1365,7 +1294,7 @@ public final class KmsDtos {
 
             @Schema(description = "Last updated date")
             @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-            private String lastUpdatedDate;
+            private String updateDate;
         }
     }
 
@@ -1589,7 +1518,7 @@ public final class KmsDtos {
 
             @Schema(description = "Last updated date")
             @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-            private String lastUpdatedDate;
+            private String updateDate;
 
             @Schema(description = "Key ID")
             private String keyId;
@@ -2198,7 +2127,7 @@ public final class KmsDtos {
     @NoArgsConstructor
     @AllArgsConstructor
     @Schema(description = "Grant response (simple)")
-    public static class GrantResponseDto {
+    public static class GrantResponse {
         @Schema(description = "Grant ID")
         private String grantId;
 
@@ -2213,76 +2142,8 @@ public final class KmsDtos {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    @Schema(description = "List grants response DTO")
-    public static class ListGrantsResponseDto {
-        @Schema(description = "List of grants")
-        private List<GrantDto> grants;
-
-        @Schema(description = "Pagination token")
-        private String nextToken;
-
-        @Data
-        @Builder
-        @NoArgsConstructor
-        @AllArgsConstructor
-        @Schema(description = "Grant DTO")
-        public static class GrantDto {
-            @Schema(description = "Grant ID")
-            private String grantId;
-
-            @Schema(description = "Grantee principal")
-            private String granteePrincipal;
-
-            @Schema(description = "Retiring principal")
-            private String retiringPrincipal;
-
-            @Schema(description = "Operations")
-            private List<String> operations;
-
-            @Schema(description = "Constraints (JSON)")
-            private String constraints;
-
-            @Schema(description = "Creation date")
-            @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-            private LocalDateTime createDate;
-        }
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Schema(description = "List keys response DTO (basic summary)")
-    public static class ListKeysResponseDto {
-        @Schema(description = "List of key summaries")
-        private List<KeySummaryDto> keys;
-
-        @Schema(description = "Pagination token")
-        private String nextToken;
-
-        @Data
-        @Builder
-        @NoArgsConstructor
-        @AllArgsConstructor
-        @Schema(description = "Key summary")
-        public static class KeySummaryDto {
-            @Schema(description = "Key ID")
-            private String keyId;
-
-            @Schema(description = "Primary alias")
-            private String alias;
-
-            @Schema(description = "Key status")
-            private IEnumKeyStatus.Types status;
-        }
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
     @Schema(description = "Import parameters response DTO")
-    public static class ImportParametersResponseDto {
+    public static class ImportParametersResponse {
         @Schema(description = "Key ID")
         private String keyId;
 
@@ -2314,23 +2175,7 @@ public final class KmsDtos {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    @Schema(description = "List aliases response DTO")
-    public static class ListAliasesResponseDto {
-        @Schema(description = "List of aliases")
-        private List<AliasResponseDto> aliases;
-
-        @Schema(description = "Pagination token")
-        private String nextToken;
-
-        @Schema(description = "Whether truncated")
-        private Boolean truncated;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class TagDto {
+    public static class Tag {
         private String tagKey;
         private String tagValue;
     }
@@ -2340,9 +2185,9 @@ public final class KmsDtos {
     @NoArgsConstructor
     @AllArgsConstructor
     @Schema(description = "List tags response DTO")
-    public static class ListTagsResponseDto {
+    public static class ListTagsResponse {
         @Schema(description = "List of tags")
-        private List<TagDto> tags;
+        private List<Tag> tags;
     }
 
     @Data
@@ -2350,7 +2195,7 @@ public final class KmsDtos {
     @NoArgsConstructor
     @AllArgsConstructor
     @Schema(description = "Key description response DTO")
-    public static class KeyDescriptionResponseDto {
+    public static class KeyDescriptionResponse {
         @Schema(description = "Key ID")
         private String keyId;
 
@@ -2382,7 +2227,7 @@ public final class KmsDtos {
     @NoArgsConstructor
     @AllArgsConstructor
     @Schema(description = "Alias response DTO")
-    public static class AliasResponseDto {
+    public static class AliasResponse {
         @Schema(description = "Alias name")
         private String aliasName;
 
@@ -2406,7 +2251,7 @@ public final class KmsDtos {
     @NoArgsConstructor
     @AllArgsConstructor
     @Schema(description = "Set key policy request DTO")
-    public static class SetKeyPolicyRequestDto {
+    public static class SetKeyPolicyRequest {
         @NotNull
         @Schema(description = "Policy document", required = true)
         private Map<String, Object> policy;
@@ -2414,81 +2259,6 @@ public final class KmsDtos {
         @JsonProperty("BypassPolicyLockoutSafetyCheck")
         @Schema(description = "Bypass safety checks")
         private Boolean bypassPolicyLockoutSafetyCheck;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Schema(description = "Untag resource request DTO")
-    public static class UntagResourceRequestDto {
-        @NotEmpty
-        @Schema(description = "Tag keys to remove", required = true)
-        private List<String> tagKeys;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Schema(description = "Update primary region request DTO")
-    public static class UpdatePrimaryRegionRequestDto {
-        @Schema(description = "Key ID")
-        private String keyId;
-
-        @NotBlank
-        @Schema(description = "New primary region", required = true)
-        private String primaryRegion;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Schema(description = "Tag resource request DTO")
-    public static class TagResourceRequestDto {
-        @NotEmpty
-        @Schema(description = "Tags as map", required = true)
-        private Map<String, String> tags;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Schema(description = "Replicate key request DTO")
-    public static class ReplicateKeyRequestDto {
-        @NotBlank
-        @Schema(description = "Key ID", required = true)
-        private String keyId;
-
-        @NotBlank
-        @Schema(description = "Replica region", required = true)
-        private String replicaRegion;
-
-        @Schema(description = "Description for replica")
-        private String description;
-
-        @Schema(description = "Whether replica should be enabled")
-        private Boolean enabled;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Schema(description = "Create grant request DTO")
-    public static class CreateGrantRequestDto {
-        @NotBlank
-        @Schema(description = "Principal", required = true)
-        private String principal;
-
-        @Schema(description = "Grantee principal")
-        private String granteePrincipal;
-
-        @NotEmpty
-        @Schema(description = "Operations", required = true)
-        private List<String> operations;
     }
 
     @Data
@@ -2550,6 +2320,13 @@ public final class KmsDtos {
         @Schema(description = "Verify count")
         private Long verifyCount;
 
+        // NEW: MAC operation counts
+        @Schema(description = "Generate MAC count")
+        private Long generateMacCount;
+
+        @Schema(description = "Verify MAC count")
+        private Long verifyMacCount;
+
         @Schema(description = "Last used date")
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         private LocalDateTime lastUsedDate;
@@ -2576,64 +2353,5 @@ public final class KmsDtos {
         @Schema(description = "Tracking start date")
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         private LocalDateTime trackingStartDate;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Schema(description = "List key rotations request DTO")
-    public static class ListKeyRotationsRequestDto {
-        @Schema(description = "Key ID")
-        private String keyId;
-
-        @Schema(description = "Max results")
-        private Integer limit;
-
-        @Schema(description = "Pagination token")
-        private String nextToken;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Schema(description = "Active version request DTO")
-    public static class ActiveVersionRequestDto {
-        @Schema(description = "Key ID")
-        private String keyId;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Schema(description = "Validate key request")
-    public static class ValidateKeyRequest {
-        @Schema(description = "Key ID")
-        private String keyId;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Schema(description = "Key usage stats request")
-    public static class KeyUsageStatsRequest {
-        @Schema(description = "Key ID")
-        private String keyId;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Schema(description = "Error response")
-    public static class KmsErrorResponse {
-        @Schema(description = "Error type (e.g., NotFoundException)")
-        private String __type;
-
-        @Schema(description = "Error message")
-        private String message;
     }
 }

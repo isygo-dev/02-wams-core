@@ -84,8 +84,8 @@ class KeyPolicyServiceTest {
         Map<String, Object> map = new HashMap<>();
         map.put("Version", "2012-10-17");
 
-        SetKeyPolicyRequestDto request =
-                SetKeyPolicyRequestDto.builder()
+        SetKeyPolicyRequest request =
+                SetKeyPolicyRequest.builder()
                         .policy(map)
                         .build();
 
@@ -110,8 +110,8 @@ class KeyPolicyServiceTest {
         Map<String, Object> map = new HashMap<>();
         map.put("Version", "2012-10-17");
 
-        SetKeyPolicyRequestDto request =
-                SetKeyPolicyRequestDto.builder()
+        SetKeyPolicyRequest request =
+                SetKeyPolicyRequest.builder()
                         .policy(map)
                         .build();
 
@@ -132,8 +132,8 @@ class KeyPolicyServiceTest {
     @Test
     void shouldThrowWhenPolicySerializationFails() throws Exception {
 
-        SetKeyPolicyRequestDto request =
-                SetKeyPolicyRequestDto.builder()
+        SetKeyPolicyRequest request =
+                SetKeyPolicyRequest.builder()
                         .policy(Map.of("k", "v"))
                         .build();
 
@@ -206,13 +206,13 @@ class KeyPolicyServiceTest {
     @Test
     void shouldCreateGrantSuccessfully() {
 
-        CreateGrantRequestDto request =
-                CreateGrantRequestDto.builder()
-                        .principal("user-1")
+        CreateGrantRequest request =
+                CreateGrantRequest.builder()
+                        .granteePrincipal("user-1")
                         .operations(List.of("Encrypt", "Decrypt"))
                         .build();
 
-        GrantResponseDto response =
+        GrantResponse response =
                 keyPolicyService.createGrant(TENANT, KEY_ID, request);
 
         assertNotNull(response);
@@ -261,13 +261,13 @@ class KeyPolicyServiceTest {
                 any(PageRequest.class)))
                 .thenReturn(page);
 
-        ListGrantsResponseDto response =
+        ListGrantsResponse response =
                 keyPolicyService.listGrants(TENANT, KEY_ID, 10, null);
 
         assertNotNull(response);
         assertEquals(1, response.getGrants().size());
 
-        ListGrantsResponseDto.GrantDto dto =
+        ListGrantsResponse.Grant dto =
                 response.getGrants().get(0);
 
         assertEquals(GRANT_ID, dto.getGrantId());
@@ -291,7 +291,7 @@ class KeyPolicyServiceTest {
                 any(PageRequest.class)))
                 .thenReturn(page);
 
-        ListGrantsResponseDto response =
+        ListGrantsResponse response =
                 keyPolicyService.listGrants(TENANT, KEY_ID, 1, null);
 
         assertEquals("1", response.getNextToken());
@@ -343,7 +343,7 @@ class KeyPolicyServiceTest {
         policy.put("Version", "2012-10-17");
         policy.put("Statement", new ArrayList<>());
 
-        SetKeyPolicyRequestDto request = SetKeyPolicyRequestDto.builder()
+        SetKeyPolicyRequest request = SetKeyPolicyRequest.builder()
                 .policy(policy)
                 .bypassPolicyLockoutSafetyCheck(false)
                 .build();
@@ -380,7 +380,7 @@ class KeyPolicyServiceTest {
         Map<String, Object> policy = new HashMap<>();
         policy.put("Version", "2012-10-17");
 
-        SetKeyPolicyRequestDto request = SetKeyPolicyRequestDto.builder()
+        SetKeyPolicyRequest request = SetKeyPolicyRequest.builder()
                 .policy(policy)
                 .build();
 
@@ -466,8 +466,8 @@ class KeyPolicyServiceTest {
         // Arrange
         List<String> operations = Arrays.asList("Encrypt", "Decrypt");
 
-        CreateGrantRequestDto request = CreateGrantRequestDto.builder()
-                .principal(testPrincipal)
+        CreateGrantRequest request = CreateGrantRequest.builder()
+                .granteePrincipal(testPrincipal)
                 .operations(operations)
                 .build();
 
@@ -475,7 +475,7 @@ class KeyPolicyServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
-        GrantResponseDto result = keyPolicyService.createGrant(testTenant, testKeyId, request);
+        GrantResponse result = keyPolicyService.createGrant(testTenant, testKeyId, request);
 
         // Assert
         assertNotNull(result);
@@ -489,13 +489,13 @@ class KeyPolicyServiceTest {
     @DisplayName("Should create multiple grants with different principals")
     void testCreateMultipleGrants() {
         // Arrange
-        CreateGrantRequestDto request1 = CreateGrantRequestDto.builder()
-                .principal("wrn:wams:iam::123456789012:role/role1")
+        CreateGrantRequest request1 = CreateGrantRequest.builder()
+                .granteePrincipal("wrn:wams:iam::123456789012:role/role1")
                 .operations(Arrays.asList("Encrypt"))
                 .build();
 
-        CreateGrantRequestDto request2 = CreateGrantRequestDto.builder()
-                .principal("wrn:wams:iam::123456789012:role/role2")
+        CreateGrantRequest request2 = CreateGrantRequest.builder()
+                .granteePrincipal("wrn:wams:iam::123456789012:role/role2")
                 .operations(Arrays.asList("Decrypt"))
                 .build();
 
@@ -503,8 +503,8 @@ class KeyPolicyServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
-        GrantResponseDto result1 = keyPolicyService.createGrant(testTenant, testKeyId, request1);
-        GrantResponseDto result2 = keyPolicyService.createGrant(testTenant, testKeyId, request2);
+        GrantResponse result1 = keyPolicyService.createGrant(testTenant, testKeyId, request1);
+        GrantResponse result2 = keyPolicyService.createGrant(testTenant, testKeyId, request2);
 
         // Assert
         assertNotNull(result1);
@@ -588,7 +588,7 @@ class KeyPolicyServiceTest {
                 .thenReturn(page);
 
         // Act
-        ListGrantsResponseDto result = keyPolicyService.listGrants(testTenant, testKeyId, 100, null);
+        ListGrantsResponse result = keyPolicyService.listGrants(testTenant, testKeyId, 100, null);
 
         // Assert
         assertNotNull(result);
@@ -608,7 +608,7 @@ class KeyPolicyServiceTest {
                 .thenReturn(page);
 
         // Act
-        ListGrantsResponseDto result = keyPolicyService.listGrants(testTenant, testKeyId, 100, null);
+        ListGrantsResponse result = keyPolicyService.listGrants(testTenant, testKeyId, 100, null);
 
         // Assert
         assertNotNull(result);
@@ -631,7 +631,7 @@ class KeyPolicyServiceTest {
                 .thenReturn(firstPage);
 
         // Act
-        ListGrantsResponseDto result = keyPolicyService.listGrants(testTenant, testKeyId, 2, null);
+        ListGrantsResponse result = keyPolicyService.listGrants(testTenant, testKeyId, 2, null);
 
         // Assert
         assertNotNull(result);

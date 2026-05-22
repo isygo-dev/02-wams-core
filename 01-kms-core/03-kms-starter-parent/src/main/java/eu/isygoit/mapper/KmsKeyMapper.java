@@ -1,7 +1,7 @@
 package eu.isygoit.mapper;
 
-import eu.isygoit.dto.KmsDtos.KeyDescriptionResponseDto;
-import eu.isygoit.dto.KmsDtos.ListKeysResponseDto;
+import eu.isygoit.dto.KmsDtos.KeyDescriptionResponse;
+import eu.isygoit.dto.KmsDtos.ListKeysResponse;
 import eu.isygoit.model.KmsKey;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
@@ -20,21 +20,21 @@ public interface KmsKeyMapper {
     /**
      * Convert KmsKey entity to KeyMetadataResponseDto
      */
-    KeyDescriptionResponseDto toKeyMetadataResponseDto(KmsKey kmsKey);
+    KeyDescriptionResponse toKeyMetadataResponseDto(KmsKey kmsKey);
 
     /**
      * Convert Page of KmsKey entities to ListKeysResponseDto
      */
-    default ListKeysResponseDto toListKeysResponseDto(Page<KmsKey> page) {
-        List<ListKeysResponseDto.KeySummaryDto> keys = (List<ListKeysResponseDto.KeySummaryDto>) page.getContent().stream()
-                .map(key -> ListKeysResponseDto.KeySummaryDto.builder()
+    default ListKeysResponse toListKeysResponseDto(Page<KmsKey> page) {
+        List<ListKeysResponse.KeyEntry> keys = page.getContent().stream()
+                .map(key -> ListKeysResponse.KeyEntry.builder()
                         .keyId(key.getKeyId())
                         .alias(key.getPrimaryKeyAlias())
                         .status(key.getKeyStatus())
                         .build())
                 .toList();
 
-        return ListKeysResponseDto.builder()
+        return ListKeysResponse.builder()
                 .keys(keys)
                 .nextToken(page.hasNext() ? String.valueOf(page.getNumber() + 1) : null)
                 .build();

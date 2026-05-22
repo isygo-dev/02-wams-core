@@ -142,7 +142,7 @@ class KmsControllerTest {
     @Test
     void listKeys_Success() throws Exception {
         ListKeysResponse response = ListKeysResponse.builder()
-                .keys(List.of(new ListKeysResponse.KeyEntry(KEY_ID, "wrn:wams:kms:...")))
+                .keys(List.of(new ListKeysResponse.KeyEntry(KEY_ID, "alias:kms", "wrn:wams:kms:...", IEnumKeyStatus.Types.ENABLED)))
                 .nextToken(null)
                 .truncated(false)
                 .build();
@@ -555,8 +555,8 @@ class KmsControllerTest {
 
     @Test
     void listAliases_Success() throws Exception {
-        ListAliasesResponseDto dto = ListAliasesResponseDto.builder()
-                .aliases(List.of(AliasResponseDto.builder().aliasName(ALIAS_NAME).targetKeyId(KEY_ID).build()))
+        ListAliasesResponse dto = ListAliasesResponse.builder()
+                .aliases(List.of(ListAliasesResponse.AliasEntry.builder().aliasName(ALIAS_NAME).targetKeyId(KEY_ID).build()))
                 .nextToken(null)
                 .truncated(false)
                 .build();
@@ -569,7 +569,7 @@ class KmsControllerTest {
 
     @Test
     void listAliasesForKey_Success() throws Exception {
-        ListAliasesResponseDto dto = ListAliasesResponseDto.builder()
+        ListAliasesResponse dto = ListAliasesResponse.builder()
                 .aliases(List.of()).build();
         when(keyManagementService.listAliasesForKey(eq(TENANT), eq(KEY_ID), isNull(), isNull())).thenReturn(dto);
         when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
@@ -605,8 +605,8 @@ class KmsControllerTest {
 
     @Test
     void listResourceTags_Success() throws Exception {
-        ListTagsResponseDto dto = ListTagsResponseDto.builder()
-                .tags(List.of(new TagDto("env", "test")))
+        ListTagsResponse dto = ListTagsResponse.builder()
+                .tags(List.of(new Tag("env", "test")))
                 .build();
         when(keyManagementService.listResourceTags(eq(TENANT), eq(KEY_ID))).thenReturn(dto);
         when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
@@ -645,7 +645,7 @@ class KmsControllerTest {
         request.setGranteePrincipal("wrn:wams:iam::123:role/test");
         request.setOperations(List.of("Encrypt", "Decrypt"));
 
-        GrantResponseDto grantRes = GrantResponseDto.builder()
+        GrantResponse grantRes = GrantResponse.builder()
                 .grantId(GRANT_ID)
                 .grantToken("token-123")
                 .build();
@@ -660,8 +660,8 @@ class KmsControllerTest {
 
     @Test
     void listGrants_Success() throws Exception {
-        ListGrantsResponseDto dto = ListGrantsResponseDto.builder()
-                .grants(List.of(ListGrantsResponseDto.GrantDto.builder()
+        ListGrantsResponse dto = ListGrantsResponse.builder()
+                .grants(List.of(ListGrantsResponse.Grant.builder()
                         .grantId(GRANT_ID)
                         .granteePrincipal("test")
                         .build()))
@@ -717,7 +717,7 @@ class KmsControllerTest {
         GetParametersForImportRequest request = new GetParametersForImportRequest();
         request.setWrappingAlgorithm("RSAES_OAEP_SHA_256");
 
-        ImportParametersResponseDto internal = ImportParametersResponseDto.builder()
+        ImportParametersResponse internal = ImportParametersResponse.builder()
                 .keyId(KEY_ID)
                 .importToken(new byte[]{1, 2, 3})
                 .wrappingKey(new KeyPairMaterial(new byte[]{4, 5, 6}, new byte[]{7, 8, 9}))

@@ -506,6 +506,9 @@ public class KeyManagementService implements IKeyManagementService {
             key.setDescription(request.getDescription());
         }
 
+        key.setRotationEnabled(request.getRotationEnabled());
+        key.setRotationPeriodInDays(request.getRotationPeriodInDays());
+
         // 2. Update alias if provided
         String newAlias = request.getKeyAlias();
         String currentAlias = key.getPrimaryKeyAlias();
@@ -681,7 +684,7 @@ public class KeyManagementService implements IKeyManagementService {
     }
 
     @Override
-    public AliasResponseDto createAlias(String tenant, CreateAliasRequest request) {
+    public AliasResponse createAlias(String tenant, CreateAliasRequest request) {
         log.info("Creating alias: {} for tenant: {} keyId: {}",
                 request.getAliasName(), tenant, request.getTargetKeyId());
 
@@ -701,14 +704,14 @@ public class KeyManagementService implements IKeyManagementService {
 
         KmsAlias savedAlias = kmsAliasRepository.save(alias);
 
-        return AliasResponseDto.builder()
+        return AliasResponse.builder()
                 .aliasName(savedAlias.getAliasName())
                 .targetKeyId(savedAlias.getTargetKeyId())
                 .build();
     }
 
     @Override
-    public AliasResponseDto updateAlias(String tenant, String aliasName, UpdateAliasRequest request) {
+    public AliasResponse updateAlias(String tenant, String aliasName, UpdateAliasRequest request) {
         log.info("Updating alias: {} for tenant: {} to keyId: {}", aliasName, tenant, request.getTargetKeyId());
 
         KmsAlias alias = kmsAliasRepository.findByTenantAndAliasName(tenant, aliasName)
@@ -720,7 +723,7 @@ public class KeyManagementService implements IKeyManagementService {
         alias.setTargetKeyId(key.getKeyId());
         kmsAliasRepository.save(alias);
 
-        return AliasResponseDto.builder()
+        return AliasResponse.builder()
                 .aliasName(alias.getAliasName())
                 .targetKeyId(alias.getTargetKeyId())
                 .build();
@@ -737,18 +740,18 @@ public class KeyManagementService implements IKeyManagementService {
     }
 
     @Override
-    public ListAliasesResponseDto listAliases(String tenant, Integer limit, String nextToken) {
+    public ListAliasesResponse listAliases(String tenant, Integer limit, String nextToken) {
         log.info("Listing aliases for tenant: {} with limit: {}", tenant, limit);
 
         int pageSize = (limit != null && limit > 0) ? Math.min(limit, DEFAULT_PAGE_SIZE) : DEFAULT_PAGE_SIZE;
         int pageNum = (nextToken != null) ? Integer.parseInt(nextToken) : 0;
 
-        Pageable pageable = PageRequest.of(pageNum, pageSize);
+        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by("createDate"));
         Page<KmsAlias> aliasPage = kmsAliasRepository.findByTenant(tenant, pageable);
 
-        return ListAliasesResponseDto.builder()
+        return ListAliasesResponse.builder()
                 .aliases(aliasPage.getContent().stream()
-                        .map(alias -> AliasResponseDto.builder()
+                        .map(alias -> ListAliasesResponse.AliasEntry.builder()
                                 .aliasName(alias.getAliasName())
                                 .targetKeyId(alias.getTargetKeyId())
                                 .build())
@@ -758,16 +761,16 @@ public class KeyManagementService implements IKeyManagementService {
     }
 
     @Override
-    public ListAliasesResponseDto listAliasesForKey(String tenant, String keyId, Integer limit, String nextToken) {
+    public ListAliasesResponse listAliasesForKey(String tenant, String keyId, Integer limit, String nextToken) {
         log.info("Listing aliases for key: {} tenant: {}", keyId, tenant);
 
         Pageable pageable = RepoHelper.resolvePageable(limit, nextToken, "createDate");
 
         List<KmsAlias> aliases = kmsAliasRepository.findByTenantAndKeyId(tenant, keyId, pageable);
 
-        return ListAliasesResponseDto.builder()
+        return ListAliasesResponse.builder()
                 .aliases(aliases.stream()
-                        .map(alias -> AliasResponseDto.builder()
+                        .map(alias -> ListAliasesResponse.AliasEntry.builder()
                                 .aliasName(alias.getAliasName())
                                 .targetKeyId(alias.getTargetKeyId())
                                 .build())
@@ -777,18 +780,18 @@ public class KeyManagementService implements IKeyManagementService {
     }
 
     @Override
-    public Object tagResource(String tenant, String keyId, TagResourceRequestDto request) {
+    public Object tagResource(String tenant, String keyId, TagResourceRequest request) {
         log.info("Tagging resource for tenant: {} keyId: {}", tenant, keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
-        for (String tagKey : request.getTags().keySet()) {
+        for (ListResourceTagsResponse.Tag tag : request.getTags()) {
             KmsTag kmsTag = KmsTag.builder()
                     .tenant(tenant)
                     .keyId(keyId)
-                    .tagKey(tagKey)
-                    .tagValue(request.getTags().get(tagKey))
+                    .tagKey(tag.getTagKey())
+                    .tagValue(tag.getTagValue())
                     .build();
             kmsTagRepository.save(kmsTag);
         }
@@ -797,7 +800,7 @@ public class KeyManagementService implements IKeyManagementService {
     }
 
     @Override
-    public Object untagResource(String tenant, String keyId, UntagResourceRequestDto request) {
+    public Object untagResource(String tenant, String keyId, UntagResourceRequest request) {
         log.info("Untagging resource for tenant: {} keyId: {} tags: {}", tenant, keyId, request.getTagKeys());
 
         kmsTagRepository.deleteByTenantAndKeyIdAndTagKeyIn(tenant, keyId, request.getTagKeys());
@@ -806,14 +809,14 @@ public class KeyManagementService implements IKeyManagementService {
     }
 
     @Override
-    public ListTagsResponseDto listResourceTags(String tenant, String keyId) {
+    public ListTagsResponse listResourceTags(String tenant, String keyId) {
         log.info("Listing resource tags for tenant: {} keyId: {}", tenant, keyId);
 
         List<KmsTag> tags = kmsTagRepository.findByTenantAndKeyId(tenant, keyId);
 
-        return ListTagsResponseDto.builder()
+        return ListTagsResponse.builder()
                 .tags(tags.stream()
-                        .map(tag -> TagDto.builder()
+                        .map(tag -> Tag.builder()
                                 .tagKey(tag.getTagKey())
                                 .tagValue(tag.getTagValue())
                                 .build())
@@ -822,7 +825,7 @@ public class KeyManagementService implements IKeyManagementService {
     }
 
     @Override
-    public ImportParametersResponseDto getParametersForImport(String tenant, String keyId) {
+    public ImportParametersResponse getParametersForImport(String tenant, String keyId) {
         log.info("Getting import parameters for tenant: {} keyId: {}", tenant, keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
@@ -832,7 +835,7 @@ public class KeyManagementService implements IKeyManagementService {
         KeyPairMaterial wrappingKey = cryptoService.generateWrappingKey();
         byte[] importToken = cryptoService.generateImportToken();
 
-        return ImportParametersResponseDto.builder()
+        return ImportParametersResponse.builder()
                 .keyId(keyId)
                 .wrappingKey(wrappingKey)
                 .importToken(importToken)
@@ -841,7 +844,7 @@ public class KeyManagementService implements IKeyManagementService {
     }
 
     @Override
-    public KeyDescriptionResponseDto importKeyMaterial(String tenant, String keyId, ImportKeyMaterialRequest request) {
+    public KeyDescriptionResponse importKeyMaterial(String tenant, String keyId, ImportKeyMaterialRequest request) {
         log.info("Importing key material for tenant: {} keyId: {}", tenant, keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
@@ -859,14 +862,14 @@ public class KeyManagementService implements IKeyManagementService {
         key.setValidTo(request.getValidTo());
         kmsKeyRepository.save(key);
 
-        return KeyDescriptionResponseDto.builder()
+        return KeyDescriptionResponse.builder()
                 .keyId(key.getKeyId())
                 .status(key.getKeyStatus())
                 .build();
     }
 
     @Override
-    public KeyDescriptionResponseDto deleteImportedKeyMaterial(String tenant, String keyId) {
+    public KeyDescriptionResponse deleteImportedKeyMaterial(String tenant, String keyId) {
         log.info("Deleting imported key material for tenant: {} keyId: {}", tenant, keyId);
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
@@ -879,7 +882,7 @@ public class KeyManagementService implements IKeyManagementService {
         key.setKeyMaterial(null);
         kmsKeyRepository.save(key);
 
-        return KeyDescriptionResponseDto.builder()
+        return KeyDescriptionResponse.builder()
                 .keyId(key.getKeyId())
                 .status(key.getKeyStatus())
                 .build();
@@ -958,7 +961,7 @@ public class KeyManagementService implements IKeyManagementService {
         Pageable pageable = PageRequest.of(
                 pageNum,
                 pageSize,
-                Sort.by("rotationDate").descending()
+                Sort.by("createDate")
         );
 
         Page<KmsKeyVersion> versionPage =
@@ -970,7 +973,7 @@ public class KeyManagementService implements IKeyManagementService {
 
         return ListKeyRotationsResponse.builder()
                 .rotations(versionPage.getContent().stream()
-                        .map(version -> ListKeyRotationsResponse.RotationDto.builder()
+                        .map(version -> ListKeyRotationsResponse.Rotation.builder()
                                 .versionId(version.getVersionId())
                                 .rotationDate(version.getCreateDate())
                                 .build())

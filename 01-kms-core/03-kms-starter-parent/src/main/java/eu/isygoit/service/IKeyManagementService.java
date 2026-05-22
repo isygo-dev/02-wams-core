@@ -1,5 +1,6 @@
 package eu.isygoit.service;
 
+import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.dto.KmsDtos.*;
 import jakarta.validation.Valid;
 
@@ -98,27 +99,27 @@ public interface IKeyManagementService {
 
     GetPublicKeyResponse getPublicKey(String tenant, String keyId);
 
-    AliasResponseDto createAlias(String tenant, @Valid CreateAliasRequest request);
+    AliasResponse createAlias(String tenant, @Valid CreateAliasRequest request);
 
-    AliasResponseDto updateAlias(String tenant, String aliasName, @Valid UpdateAliasRequest request);
+    AliasResponse updateAlias(String tenant, String aliasName, @Valid UpdateAliasRequest request);
 
     void deleteAlias(String tenant, String aliasName);
 
-    ListAliasesResponseDto listAliases(String tenant, Integer limit, String nextToken);
+    ListAliasesResponse listAliases(String tenant, Integer limit, String nextToken);
 
-    ListAliasesResponseDto listAliasesForKey(String tenant, String keyId, Integer limit, String nextToken);
+    ListAliasesResponse listAliasesForKey(String tenant, String keyId, Integer limit, String nextToken);
 
-    Object tagResource(String tenant, String keyId, @Valid TagResourceRequestDto request);
+    Object tagResource(String tenant, String keyId, @Valid KmsDtos.TagResourceRequest request);
 
-    Object untagResource(String tenant, String keyId, @Valid UntagResourceRequestDto request);
+    Object untagResource(String tenant, String keyId, @Valid KmsDtos.UntagResourceRequest request);
 
-    ListTagsResponseDto listResourceTags(String tenant, String keyId);
+    ListTagsResponse listResourceTags(String tenant, String keyId);
 
-    ImportParametersResponseDto getParametersForImport(String tenant, String keyId);
+    ImportParametersResponse getParametersForImport(String tenant, String keyId);
 
-    KeyDescriptionResponseDto importKeyMaterial(String tenant, String keyId, @Valid ImportKeyMaterialRequest request);
+    KeyDescriptionResponse importKeyMaterial(String tenant, String keyId, @Valid ImportKeyMaterialRequest request);
 
-    KeyDescriptionResponseDto deleteImportedKeyMaterial(String tenant, String keyId);
+    KeyDescriptionResponse deleteImportedKeyMaterial(String tenant, String keyId);
 
     boolean isValidKey(String tenant, String keyId);
 

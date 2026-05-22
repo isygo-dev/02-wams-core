@@ -21,10 +21,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -338,7 +335,7 @@ class KeyManagementServiceTest {
 
         when(kmsAliasRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        AliasResponseDto response = keyManagementService.createAlias(TENANT, request);
+        AliasResponse response = keyManagementService.createAlias(TENANT, request);
 
         assertEquals("alias:test", response.getAliasName());
         assertEquals(KEY_ID, response.getTargetKeyId());
@@ -375,7 +372,7 @@ class KeyManagementServiceTest {
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.of(key));
 
-        AliasResponseDto response =
+        AliasResponse response =
                 keyManagementService.updateAlias(TENANT, "alias:test", request);
 
         assertEquals(KEY_ID, response.getTargetKeyId());
@@ -405,7 +402,7 @@ class KeyManagementServiceTest {
         when(kmsAliasRepository.findByTenant(eq(TENANT), any(Pageable.class)))
                 .thenReturn(page);
 
-        ListAliasesResponseDto response = keyManagementService.listAliases(TENANT, 10, "0");
+        ListAliasesResponse response = keyManagementService.listAliases(TENANT, 10, "0");
 
         assertEquals(1, response.getAliases().size());
     }
@@ -420,7 +417,7 @@ class KeyManagementServiceTest {
         when(kmsAliasRepository.findByTenantAndKeyId(eq(TENANT), eq(KEY_ID), any(Pageable.class)))
                 .thenReturn(List.of(alias));
 
-        ListAliasesResponseDto response =
+        ListAliasesResponse response =
                 keyManagementService.listAliasesForKey(TENANT, KEY_ID, 10, "0");
 
         assertEquals(1, response.getAliases().size());
@@ -428,11 +425,11 @@ class KeyManagementServiceTest {
 
     @Test
     void shouldTagResource() {
-        Map<String, String> tags = new HashMap<>();
-        tags.put("env", "prod");
-        tags.put("team", "security");
+        List<ListResourceTagsResponse.Tag> tags = new ArrayList<>();
+        tags.add(ListResourceTagsResponse.Tag.builder().tagKey("env").tagValue("prod").build());
+        tags.add(ListResourceTagsResponse.Tag.builder().tagKey("team").tagValue("security").build());
 
-        TagResourceRequestDto request = TagResourceRequestDto.builder()
+        TagResourceRequest request = TagResourceRequest.builder()
                 .tags(tags)
                 .build();
 
@@ -447,7 +444,7 @@ class KeyManagementServiceTest {
 
     @Test
     void shouldUntagResource() {
-        UntagResourceRequestDto request = UntagResourceRequestDto.builder()
+        UntagResourceRequest request = UntagResourceRequest.builder()
                 .tagKeys(List.of("env"))
                 .build();
 
@@ -469,7 +466,7 @@ class KeyManagementServiceTest {
         when(kmsTagRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(List.of(tag));
 
-        ListTagsResponseDto response = keyManagementService.listResourceTags(TENANT, KEY_ID);
+        ListTagsResponse response = keyManagementService.listResourceTags(TENANT, KEY_ID);
 
         assertEquals(1, response.getTags().size());
         assertEquals("env", response.getTags().get(0).getTagKey());
@@ -486,7 +483,7 @@ class KeyManagementServiceTest {
         when(cryptoService.generateImportToken())
                 .thenReturn(new byte[]{2});
 
-        ImportParametersResponseDto response =
+        ImportParametersResponse response =
                 keyManagementService.getParametersForImport(TENANT, KEY_ID);
 
         assertEquals(KEY_ID, response.getKeyId());
@@ -507,7 +504,7 @@ class KeyManagementServiceTest {
         when(cryptoService.decryptKeyMaterial(any(), any(), any()))
                 .thenReturn(new byte[]{9});
 
-        KeyDescriptionResponseDto response =
+        KeyDescriptionResponse response =
                 keyManagementService.importKeyMaterial(TENANT, KEY_ID, request);
 
         assertEquals(KEY_ID, response.getKeyId());
@@ -519,7 +516,7 @@ class KeyManagementServiceTest {
         when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(Optional.of(key));
 
-        KeyDescriptionResponseDto response =
+        KeyDescriptionResponse response =
                 keyManagementService.deleteImportedKeyMaterial(TENANT, KEY_ID);
 
         assertEquals(KEY_ID, response.getKeyId());

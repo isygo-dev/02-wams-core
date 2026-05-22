@@ -72,7 +72,7 @@ public class MainView extends VerticalLayout {
     private Span pageInfoSpan;
     private List<AuditLogResponse.LogEntry> allLogs = new ArrayList<>();
     private int currentPage = 0;
-    // Shared key options
+    // Shared key options (store both keyId and keyUsage for efficient filtering)
     private List<KeyOption> keyOptions = new ArrayList<>();
 
     @Autowired
@@ -297,7 +297,7 @@ public class MainView extends VerticalLayout {
     }
 
     // =========================================================================
-    // Key Usage Statistics (per key)
+    // Key Usage Statistics (per key, customized by key usage)
     // =========================================================================
 
     private VerticalLayout buildKeyUsageStatsSection() {
@@ -308,7 +308,7 @@ public class MainView extends VerticalLayout {
         layout.addClassName(LumoUtility.Background.BASE);
         layout.getStyle().set("margin-top", "24px");
 
-        // Title row with progress bar immediately after the title
+        // Title row with progress bar
         HorizontalLayout titleRow = new HorizontalLayout();
         titleRow.setWidthFull();
         titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -354,7 +354,12 @@ public class MainView extends VerticalLayout {
             ResponseEntity<ListKeysResponse> response = kmsApiService.listKeys(100, null);
             if (response.getBody() != null && response.getBody().getKeys() != null) {
                 keyOptions = response.getBody().getKeys().stream()
-                        .map(entry -> new KeyOption(entry.getKeyId(), fetchAlias(entry.getKeyId())))
+                        .map(entry -> {
+                            String keyId = entry.getKeyId();
+                            IEnumKeyUsage.Types usage = fetchKeyUsage(keyId);
+                            String alias = fetchAlias(keyId);
+                            return new KeyOption(keyId, alias, usage);
+                        })
                         .collect(Collectors.toList());
                 usageKeyCombo.setItems(keyOptions);
                 auditKeyCombo.setItems(keyOptions);
@@ -362,6 +367,19 @@ public class MainView extends VerticalLayout {
         } catch (Exception e) {
             log.error("Failed to load key options", e);
         }
+    }
+
+    private IEnumKeyUsage.Types fetchKeyUsage(String keyId) {
+        try {
+            ResponseEntity<DescribeKeyResponse> response = kmsApiService.describeKey(keyId);
+            DescribeKeyResponse desc = response.getBody();
+            if (desc != null && desc.getKeyMetadata() != null) {
+                return desc.getKeyMetadata().getKeyUsage();
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        return null;
     }
 
     private String fetchAlias(String keyId) {
@@ -388,59 +406,103 @@ public class MainView extends VerticalLayout {
         usageLoadingBar.setVisible(true);
         loadUsageStatsButton.setEnabled(false);
 
-        CompletableFuture.supplyAsync(() -> {
+        String keyId = selected.getKeyId();
+        IEnumKeyUsage.Types keyUsage = selected.getKeyUsage();  // already stored, no extra call
+
+        // 1. Fetch usage statistics (general counts)
+        CompletableFuture<KeyUsageStatsResponse> statsFuture = CompletableFuture.supplyAsync(() -> {
             try {
-                ResponseEntity<KeyUsageStatsResponse> response = kmsApiService.getKeyUsageStats(selected.getKeyId());
-                if (response.getBody() != null) {
-                    return response.getBody();
+                ResponseEntity<KeyUsageStatsResponse> response = kmsApiService.getKeyUsageStats(keyId);
+                return response.getBody();
+            } catch (Exception e) {
+                log.error("Failed to load usage stats for key {}", keyId, e);
+                return null;
+            }
+        });
+
+        // 2. Fetch key versions count (assuming listKeyRotations exists)
+        CompletableFuture<Integer> versionsFuture = CompletableFuture.supplyAsync(() -> {
+            try {
+                ResponseEntity<ListKeyRotationsResponse> response = kmsApiService.listKeyRotations(keyId, 1000, null);
+                ListKeyRotationsResponse body = response.getBody();
+                if (body != null && body.getRotations() != null) {
+                    return body.getRotations().size();
                 }
             } catch (Exception e) {
-                log.error("Failed to load usage stats for key {}", selected.getKeyId(), e);
+                log.error("Failed to load key versions for key {}", keyId, e);
             }
-            return null;
-        }).thenAccept(stats -> {
-            UI updateUi = ui != null ? ui : UI.getCurrent();
-            if (updateUi == null) return;
-            updateUi.access(() -> {
-                usageLoadingBar.setVisible(false);
-                loadUsageStatsButton.setEnabled(true);
-                if (stats == null) {
-                    usageStatsContainer.removeAll();
-                    Span errorSpan = new Span("Failed to load statistics. Check server logs.");
-                    errorSpan.getStyle().set("color", "var(--lumo-error-text-color)");
-                    usageStatsContainer.add(errorSpan);
-                    usageStatsContainer.setVisible(true);
-                    return;
-                }
-                usageStatsContainer.removeAll();
-                usageStatsContainer.add(
-                        createSmallStatCard("Encrypts", stats.getEncryptCount()),
-                        createSmallStatCard("Decrypts", stats.getDecryptCount()),
-                        createSmallStatCard("Signs", stats.getSignCount()),
-                        createSmallStatCard("Verifies", stats.getVerifyCount()),
-                        createSmallStatCard("Generate Data Keys", stats.getGenerateDataKeyCount()),
-                        createSmallStatCard("Re-Encrypts", stats.getReEncryptCount())
-                );
-                if (stats.getLastUsedDate() != null) {
-                    usageStatsContainer.add(
-                            createSmallStatCard("Last Used", stats.getLastUsedDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                    );
-                }
-                usageStatsContainer.setVisible(true);
-            });
-        }).exceptionally(ex -> {
-            UI updateUi = ui != null ? ui : UI.getCurrent();
-            if (updateUi != null) {
-                updateUi.access(() -> {
-                    usageLoadingBar.setVisible(false);
-                    loadUsageStatsButton.setEnabled(true);
-                    usageStatsContainer.removeAll();
-                    usageStatsContainer.add(new Span("Error loading statistics"));
-                    usageStatsContainer.setVisible(true);
-                });
-            }
-            return null;
+            return 0;
         });
+
+        CompletableFuture.allOf(statsFuture, versionsFuture)
+                .thenAccept(v -> {
+                    KeyUsageStatsResponse stats = statsFuture.join();
+                    Integer versionCount = versionsFuture.join();
+
+                    UI updateUi = ui != null ? ui : UI.getCurrent();
+                    if (updateUi == null) return;
+                    updateUi.access(() -> {
+                        usageLoadingBar.setVisible(false);
+                        loadUsageStatsButton.setEnabled(true);
+
+                        usageStatsContainer.removeAll();
+                        if (stats == null) {
+                            Span errorSpan = new Span("Failed to load statistics. Check server logs.");
+                            errorSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+                            usageStatsContainer.add(errorSpan);
+                            usageStatsContainer.setVisible(true);
+                            return;
+                        }
+
+                        // Add cards based on key usage
+                        if (keyUsage == IEnumKeyUsage.Types.ENCRYPT_DECRYPT) {
+                            usageStatsContainer.add(
+                                    createSmallStatCard("Encrypts", stats.getEncryptCount()),
+                                    createSmallStatCard("Decrypts", stats.getDecryptCount()),
+                                    createSmallStatCard("Generate Data Keys", stats.getGenerateDataKeyCount()),
+                                    createSmallStatCard("Re-Encrypts", stats.getReEncryptCount())
+                            );
+                        } else if (keyUsage == IEnumKeyUsage.Types.SIGN_VERIFY) {
+                            usageStatsContainer.add(
+                                    createSmallStatCard("Signs", stats.getSignCount()),
+                                    createSmallStatCard("Verifies", stats.getVerifyCount())
+                            );
+                        } else if (keyUsage == IEnumKeyUsage.Types.GENERATE_VERIFY_MAC) {
+                            // If your KeyUsageStatsResponse has getGenerateMacCount / getVerifyMacCount, use them.
+                            // Otherwise, you can map MAC operations to generic counts.
+                            long generateMacCount = (stats.getGenerateMacCount() != null) ? stats.getGenerateMacCount() : 0L;
+                            long verifyMacCount = (stats.getVerifyMacCount() != null) ? stats.getVerifyMacCount() : 0L;
+                            usageStatsContainer.add(
+                                    createSmallStatCard("Generate MAC", generateMacCount),
+                                    createSmallStatCard("Verify MAC", verifyMacCount)
+                            );
+                        }
+
+                        // Always show key versions
+                        usageStatsContainer.add(createSmallStatCard("Key Versions", versionCount));
+
+                        if (stats.getLastUsedDate() != null) {
+                            usageStatsContainer.add(
+                                    createSmallStatCard("Last Used", stats.getLastUsedDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                            );
+                        }
+
+                        usageStatsContainer.setVisible(true);
+                    });
+                })
+                .exceptionally(ex -> {
+                    UI updateUi = ui != null ? ui : UI.getCurrent();
+                    if (updateUi != null) {
+                        updateUi.access(() -> {
+                            usageLoadingBar.setVisible(false);
+                            loadUsageStatsButton.setEnabled(true);
+                            usageStatsContainer.removeAll();
+                            usageStatsContainer.add(new Span("Error loading statistics"));
+                            usageStatsContainer.setVisible(true);
+                        });
+                    }
+                    return null;
+                });
     }
 
     private VerticalLayout createSmallStatCard(String label, Object value) {
@@ -483,7 +545,7 @@ public class MainView extends VerticalLayout {
         layout.addClassName(LumoUtility.Background.BASE);
         layout.getStyle().set("margin-top", "24px");
 
-        // Title row with progress bar immediately after the title
+        // Title row with progress bar
         HorizontalLayout titleRow = new HorizontalLayout();
         titleRow.setWidthFull();
         titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -677,10 +739,12 @@ public class MainView extends VerticalLayout {
     private static class KeyOption {
         private final String keyId;
         private final String displayName;
+        private final IEnumKeyUsage.Types keyUsage;
 
-        KeyOption(String keyId, String aliasOrId) {
+        KeyOption(String keyId, String aliasOrId, IEnumKeyUsage.Types keyUsage) {
             this.keyId = keyId;
-            this.displayName = aliasOrId != null ? aliasOrId + " (" + keyId + ")" : keyId;
+            this.displayName = (aliasOrId != null && !aliasOrId.equals(keyId)) ? aliasOrId + " (" + keyId + ")" : keyId;
+            this.keyUsage = keyUsage;
         }
 
         String getKeyId() {
@@ -689,6 +753,10 @@ public class MainView extends VerticalLayout {
 
         String getDisplayName() {
             return displayName;
+        }
+
+        IEnumKeyUsage.Types getKeyUsage() {
+            return keyUsage;
         }
     }
 }

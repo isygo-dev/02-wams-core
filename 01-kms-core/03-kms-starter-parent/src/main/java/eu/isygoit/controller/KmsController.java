@@ -958,20 +958,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
 
         try {
-            ListAliasesResponseDto internal = keyManagementService.listAliases(tenant, limit, nextToken);
-            ListAliasesResponse response = ListAliasesResponse.builder()
-                    .aliases(internal.getAliases().stream()
-                            .map(a -> ListAliasesResponse.AliasEntry.builder()
-                                    .aliasName(a.getAliasName())
-                                    .aliasWrn(buildAliasWrn(a.getAliasName()))
-                                    .targetKeyId(a.getTargetKeyId())
-                                    .createDate(formatDate(a.getCreateDate()))
-                                    .lastUpdatedDate(formatDate(a.getUpdateDate()))
-                                    .build())
-                            .collect(Collectors.toList()))
-                    .nextToken(internal.getNextToken())
-                    .truncated(internal.getTruncated())
-                    .build();
+            ListAliasesResponse response = keyManagementService.listAliases(tenant, limit, nextToken);
 
             auditService.logAction(
                     tenant,
@@ -995,15 +982,15 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
-            ListAliasesResponseDto internal = keyManagementService.listAliasesForKey(tenant, keyId, limit, nextToken);
-            ListAliasesResponse response = ListAliasesResponse.builder()
+            ListAliasesResponse internal = keyManagementService.listAliasesForKey(tenant, keyId, limit, nextToken);
+            ListAliasesResponse response = eu.isygoit.dto.KmsDtos.ListAliasesResponse.builder()
                     .aliases(internal.getAliases().stream()
-                            .map(a -> ListAliasesResponse.AliasEntry.builder()
+                            .map(a -> eu.isygoit.dto.KmsDtos.ListAliasesResponse.AliasEntry.builder()
                                     .aliasName(a.getAliasName())
                                     .aliasWrn(buildAliasWrn(a.getAliasName()))
                                     .targetKeyId(a.getTargetKeyId())
-                                    .createDate(formatDate(a.getCreateDate()))
-                                    .lastUpdatedDate(formatDate(a.getUpdateDate()))
+                                    .createDate(a.getCreateDate())
+                                    .updateDate(a.getUpdateDate())
                                     .build())
                             .collect(Collectors.toList()))
                     .nextToken(internal.getNextToken())
@@ -1044,7 +1031,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
         try {
-            SetKeyPolicyRequestDto internal = SetKeyPolicyRequestDto.builder()
+            SetKeyPolicyRequest internal = SetKeyPolicyRequest.builder()
                     .policy(request.getPolicy())
                     .bypassPolicyLockoutSafetyCheck(request.getBypassPolicyLockoutSafetyCheck())
                     .build();
@@ -1097,13 +1084,13 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
         try {
-            CreateGrantRequestDto internal = CreateGrantRequestDto.builder()
-                    .principal(request.getGranteePrincipal())
+            CreateGrantRequest internal = CreateGrantRequest.builder()
                     .granteePrincipal(request.getGranteePrincipal())
+                    .retiringPrincipal(request.getRetiringPrincipal())
                     .operations(request.getOperations())
                     .build();
 
-            GrantResponseDto internalRes = keyPolicyService.createGrant(tenant, keyId, internal);
+            GrantResponse internalRes = keyPolicyService.createGrant(tenant, keyId, internal);
 
             auditService.logAction(tenant, IKmsActionType.Types.CREATE_GRANT, keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
@@ -1139,19 +1126,19 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
-            ListGrantsResponseDto internal = keyPolicyService.listGrants(tenant, keyId, limit, nextToken);
+            ListGrantsResponse internal = keyPolicyService.listGrants(tenant, keyId, limit, nextToken);
 
             String finalKeyId = keyId;
-            ListGrantsResponse response = ListGrantsResponse.builder()
+            ListGrantsResponse response = eu.isygoit.dto.KmsDtos.ListGrantsResponse.builder()
                     .grants(internal.getGrants().stream()
-                            .map(g -> ListGrantsResponse.Grant.builder()
+                            .map(g -> eu.isygoit.dto.KmsDtos.ListGrantsResponse.Grant.builder()
                                     .grantId(g.getGrantId())
                                     .granteePrincipal(g.getGranteePrincipal())
                                     .retiringPrincipal(g.getRetiringPrincipal())
                                     .operations(g.getOperations())
                                     .constraints(null)
                                     .createDate(g.getCreateDate())
-                                    .lastUpdatedDate(formatDate(g.getCreateDate()))
+                                    .updateDate(formatDate(g.getCreateDate()))
                                     .keyId(finalKeyId)
                                     .name(null)
                                     .build())
@@ -1241,13 +1228,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
         try {
-            TagResourceRequestDto internal = TagResourceRequestDto.builder()
-                    .tags(request.getTags().stream()
-                            .collect(Collectors.toMap(
-                                    ListResourceTagsResponse.Tag::getTagKey,
-                                    ListResourceTagsResponse.Tag::getTagValue)))
-                    .build();
-            keyManagementService.tagResource(tenant, keyId, internal);
+            keyManagementService.tagResource(tenant, keyId, request);
             auditService.logAction(tenant, IKmsActionType.Types.TAG_RESOURCE, keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());
@@ -1265,7 +1246,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
         try {
-            UntagResourceRequestDto internal = UntagResourceRequestDto.builder()
+            UntagResourceRequest internal = UntagResourceRequest.builder()
                     .tagKeys(request.getTagKeys())
                     .build();
             keyManagementService.untagResource(tenant, keyId, internal);
@@ -1287,7 +1268,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
-            ListTagsResponseDto internal = keyManagementService.listResourceTags(tenant, keyId);
+            ListTagsResponse internal = keyManagementService.listResourceTags(tenant, keyId);
             ListResourceTagsResponse response = ListResourceTagsResponse.builder()
                     .tags(internal.getTags().stream()
                             .map(t -> ListResourceTagsResponse.Tag.builder()
@@ -1323,7 +1304,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
-            ImportParametersResponseDto internal = keyManagementService.getParametersForImport(tenant, keyId);
+            ImportParametersResponse internal = keyManagementService.getParametersForImport(tenant, keyId);
             GetParametersForImportResponse response = GetParametersForImportResponse.builder()
                     .keyId(internal.getKeyId())
                     .importToken(Arrays.toString(internal.getImportToken()))

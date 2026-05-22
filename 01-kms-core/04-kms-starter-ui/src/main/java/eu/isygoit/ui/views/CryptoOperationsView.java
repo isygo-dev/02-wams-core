@@ -5,6 +5,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -47,7 +48,7 @@ public class CryptoOperationsView extends VerticalLayout {
     private final Button refreshKeysButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final ProgressBar loadingBar = new ProgressBar();
 
-    // Tabs and their headers
+    // Tabs
     private final Tabs tabs;
     private final Tab encryptDecryptTabHeader;
     private final Tab signVerifyTabHeader;
@@ -82,7 +83,7 @@ public class CryptoOperationsView extends VerticalLayout {
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         add(header);
 
-        // Responsive key selection toolbar
+        // Key selection toolbar
         HorizontalLayout keyLayout = new HorizontalLayout();
         keyLayout.setWidthFull();
         keyLayout.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -119,7 +120,7 @@ public class CryptoOperationsView extends VerticalLayout {
         loadingBar.setWidth("200px");
         add(loadingBar);
 
-        // Tabs – make them scrollable on small screens
+        // Tabs
         tabs = new Tabs();
         encryptDecryptTabHeader = new Tab("Encrypt / Decrypt");
         signVerifyTabHeader = new Tab("Sign / Verify");
@@ -155,10 +156,7 @@ public class CryptoOperationsView extends VerticalLayout {
 
         add(tabs, encryptDecryptTab, signVerifyTab, dataKeyTab, macTab);
 
-        // Inject responsive CSS using JavaScript (fixes URL encoding issues)
         injectResponsiveStyles();
-
-        // Initial load
         loadKeyOptions();
     }
 
@@ -178,17 +176,14 @@ public class CryptoOperationsView extends VerticalLayout {
                         .crypto-key-layout > * {
                             width: 100% !important;
                         }
-                        /* Make combo boxes and text fields full width */
                         .crypto-key-layout .vaadin-combo-box {
                             width: 100% !important;
                         }
-                        /* Make all algorithm combo boxes and context field full width */
                         .crypto-panel .vaadin-combo-box,
                         .crypto-panel .vaadin-text-field,
                         .crypto-panel .vaadin-text-area {
                             width: 100% !important;
                         }
-                        /* Button rows wrap and buttons become full width */
                         .crypto-button-row {
                             flex-direction: column;
                             width: 100%;
@@ -197,7 +192,6 @@ public class CryptoOperationsView extends VerticalLayout {
                             width: 100% !important;
                             margin-bottom: var(--lumo-space-xs);
                         }
-                        /* Data key panel adjustments */
                         .crypto-data-key-panel .vaadin-combo-box,
                         .crypto-data-key-panel .vaadin-text-field {
                             width: 100% !important;
@@ -208,6 +202,51 @@ public class CryptoOperationsView extends VerticalLayout {
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
                 css
         );
+    }
+
+    // Helper: create a labelled text area with copy button after the label
+    private VerticalLayout createLabelledTextArea(String labelText, TextArea textArea) {
+        VerticalLayout container = new VerticalLayout();
+        container.setPadding(false);
+        container.setSpacing(false);
+        container.setWidthFull();
+        container.addClassName("labelled-textarea-container");
+
+        // Header row: label and copy button side by side
+        HorizontalLayout header = new HorizontalLayout();
+        header.setWidthFull();
+        header.setAlignItems(FlexComponent.Alignment.CENTER);
+        header.setSpacing(true);
+        header.getStyle().set("margin-bottom", "var(--lumo-space-xs)");
+
+        Label label = new Label(labelText);
+        label.getStyle().set("font-weight", "500");
+        label.getStyle().set("font-size", "var(--lumo-font-size-s)");
+
+        Button copyButton = new Button(new Icon(VaadinIcon.COPY));
+        copyButton.setTooltipText("Copy to clipboard");
+        copyButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
+        copyButton.addClickListener(e -> {
+            String value = textArea.getValue();
+            if (StringUtils.hasText(value)) {
+                UI.getCurrent().getPage().executeJs(
+                        "navigator.clipboard.writeText($0).catch(e => console.error('Copy failed:', e));",
+                        value
+                );
+                Notification.show("Copied to clipboard", 2000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            } else {
+                Notification.show("Nothing to copy", 2000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
+            }
+        });
+
+        header.add(label, copyButton);
+        header.expand(label); // pushes button to the right
+
+        textArea.setWidthFull();
+        container.add(header, textArea);
+        return container;
     }
 
     // ========== Helper methods ==========
@@ -424,12 +463,9 @@ public class CryptoOperationsView extends VerticalLayout {
         layout.setPadding(true);
         layout.addClassName("crypto-panel");
 
-        TextArea plaintextArea = new TextArea("Plaintext (UTF-8)");
-        plaintextArea.setWidthFull();
+        TextArea plaintextArea = new TextArea();
         plaintextArea.setHeight("150px");
-
-        TextArea ciphertextArea = new TextArea("Ciphertext (Base64)");
-        ciphertextArea.setWidthFull();
+        TextArea ciphertextArea = new TextArea();
         ciphertextArea.setHeight("150px");
 
         algorithmCombo = new ComboBox<>("Algorithm");
@@ -534,7 +570,9 @@ public class CryptoOperationsView extends VerticalLayout {
             }
         });
 
-        layout.add(plaintextArea, ciphertextArea, algorithmCombo, contextField, buttonRow);
+        layout.add(createLabelledTextArea("Plaintext (UTF-8)", plaintextArea),
+                createLabelledTextArea("Ciphertext (Base64)", ciphertextArea),
+                algorithmCombo, contextField, buttonRow);
         return layout;
     }
 
@@ -545,12 +583,9 @@ public class CryptoOperationsView extends VerticalLayout {
         layout.setPadding(true);
         layout.addClassName("crypto-panel");
 
-        TextArea messageArea = new TextArea("Message (UTF-8)");
-        messageArea.setWidthFull();
+        TextArea messageArea = new TextArea();
         messageArea.setHeight("150px");
-
-        TextArea signatureArea = new TextArea("Signature (Base64)");
-        signatureArea.setWidthFull();
+        TextArea signatureArea = new TextArea();
         signatureArea.setHeight("150px");
 
         signAlgoCombo = new ComboBox<>("Signing Algorithm");
@@ -660,7 +695,9 @@ public class CryptoOperationsView extends VerticalLayout {
             }
         });
 
-        layout.add(messageArea, signatureArea, signAlgoCombo, buttonRow);
+        layout.add(createLabelledTextArea("Message (UTF-8)", messageArea),
+                createLabelledTextArea("Signature (Base64)", signatureArea),
+                signAlgoCombo, buttonRow);
         return layout;
     }
 
@@ -681,13 +718,10 @@ public class CryptoOperationsView extends VerticalLayout {
         Button generateBtn = new Button("Generate Data Key", new Icon(VaadinIcon.KEY));
         generateBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
-        TextArea plaintextKeyArea = new TextArea("Plaintext Data Key (Base64)");
-        plaintextKeyArea.setWidthFull();
+        TextArea plaintextKeyArea = new TextArea();
         plaintextKeyArea.setHeight("100px");
         plaintextKeyArea.setReadOnly(true);
-
-        TextArea ciphertextKeyArea = new TextArea("Encrypted Data Key (Base64)");
-        ciphertextKeyArea.setWidthFull();
+        TextArea ciphertextKeyArea = new TextArea();
         ciphertextKeyArea.setHeight("100px");
         ciphertextKeyArea.setReadOnly(true);
 
@@ -728,7 +762,9 @@ public class CryptoOperationsView extends VerticalLayout {
             }
         });
 
-        layout.add(keySpecCombo, keySizeField, generateBtn, plaintextKeyArea, ciphertextKeyArea);
+        layout.add(keySpecCombo, keySizeField, generateBtn,
+                createLabelledTextArea("Plaintext Data Key (Base64)", plaintextKeyArea),
+                createLabelledTextArea("Encrypted Data Key (Base64)", ciphertextKeyArea));
         return layout;
     }
 
@@ -739,12 +775,9 @@ public class CryptoOperationsView extends VerticalLayout {
         layout.setPadding(true);
         layout.addClassName("crypto-panel");
 
-        TextArea messageArea = new TextArea("Message (UTF-8)");
-        messageArea.setWidthFull();
+        TextArea messageArea = new TextArea();
         messageArea.setHeight("150px");
-
-        TextArea macArea = new TextArea("MAC (Base64)");
-        macArea.setWidthFull();
+        TextArea macArea = new TextArea();
         macArea.setHeight("100px");
 
         macAlgoCombo = new ComboBox<>("MAC Algorithm");
@@ -852,7 +885,9 @@ public class CryptoOperationsView extends VerticalLayout {
             }
         });
 
-        layout.add(messageArea, macArea, macAlgoCombo, buttonRow);
+        layout.add(createLabelledTextArea("Message (UTF-8)", messageArea),
+                createLabelledTextArea("MAC (Base64)", macArea),
+                macAlgoCombo, buttonRow);
         return layout;
     }
 

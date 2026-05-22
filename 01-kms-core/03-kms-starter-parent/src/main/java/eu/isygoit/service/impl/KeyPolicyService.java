@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.exception.GrantConstraintException;
 import eu.isygoit.exception.GrantNotFoundException;
 import eu.isygoit.model.KmsKeyGrant;
 import eu.isygoit.model.KmsKeyPolicy;
@@ -36,7 +37,7 @@ public class KeyPolicyService implements IKeyPolicyService {
     private final ObjectMapper objectMapper;
 
     @Override
-    public Map<String, Object> setKeyPolicy(String tenant, String keyId, SetKeyPolicyRequestDto request) {
+    public Map<String, Object> setKeyPolicy(String tenant, String keyId, SetKeyPolicyRequest request) {
         log.info("Setting key policy for tenant: {} keyId: {}", tenant, keyId);
 
         try {
@@ -80,21 +81,21 @@ public class KeyPolicyService implements IKeyPolicyService {
     }
 
     @Override
-    public GrantResponseDto createGrant(String tenant, String keyId, CreateGrantRequestDto request) {
-        log.info("Creating grant for tenant: {} keyId: {} principal: {}", tenant, keyId, request.getPrincipal());
+    public GrantResponse createGrant(String tenant, String keyId, CreateGrantRequest request) {
+        log.info("Creating grant for tenant: {} keyId: {} principal: {}", tenant, keyId, request.getGranteePrincipal());
 
         String grantId = "grant-" + UUID.randomUUID();
         KmsKeyGrant grant = KmsKeyGrant.builder()
                 .tenant(tenant)
                 .keyId(keyId)
                 .grantId(grantId)
-                .granteePrincipal(request.getPrincipal())
+                .granteePrincipal(request.getGranteePrincipal())
                 .operations(String.join(",", request.getOperations()))
                 .build();
 
         kmsKeyGrantRepository.save(grant);
 
-        return GrantResponseDto.builder()
+        return GrantResponse.builder()
                 .grantId(grantId)
                 .keyId(keyId)
                 .build();
@@ -127,23 +128,30 @@ public class KeyPolicyService implements IKeyPolicyService {
     }
 
     @Override
-    public ListGrantsResponseDto listGrants(String tenant, String keyId, Integer limit, String nextToken) {
+    public ListGrantsResponse listGrants(String tenant, String keyId, Integer limit, String nextToken) {
         log.info("Listing grants for tenant: {} keyId: {}", tenant, keyId);
 
         Pageable pageable = RepoHelper.resolvePageable(limit, nextToken, "createDate");
 
         Page<KmsKeyGrant> grantPage = kmsKeyGrantRepository.findByTenantAndKeyId(tenant, keyId, pageable);
 
-        return ListGrantsResponseDto.builder()
+        return ListGrantsResponse.builder()
                 .grants(grantPage.getContent().stream()
-                        .map(g -> ListGrantsResponseDto.GrantDto.builder()
-                                .grantId(g.getGrantId())
-                                .granteePrincipal(g.getGranteePrincipal())
-                                // retiringPrincipal field in DTO might not map directly to entity
-                                .operations(Arrays.asList(g.getOperations().split(",")))
-                                .constraints(g.getConstraints())
-                                .createDate(g.getCreateDate())
-                                .build())
+                        .map(g -> {
+                            try {
+                                return ListGrantsResponse.Grant.builder()
+                                        .grantId(g.getGrantId())
+                                        .granteePrincipal(g.getGranteePrincipal())
+                                        // retiringPrincipal field in DTO might not map directly to entity
+                                        .operations(Arrays.asList(g.getOperations().split(",")))
+                                        .constraints(objectMapper.readValue(g.getConstraints(), CreateGrantRequest.GrantConstraints.class))
+                                        .createDate(g.getCreateDate())
+                                        .build();
+                            } catch (JsonProcessingException e) {
+                                log.error("Failed to serialize grant", e);
+                                throw new GrantConstraintException("Failed to serialize grant", e);
+                            }
+                        })
                         .collect(Collectors.toList()))
                 .nextToken(grantPage.hasNext() ? String.valueOf(pageable.getPageNumber() + 1) : null)
                 .build();
