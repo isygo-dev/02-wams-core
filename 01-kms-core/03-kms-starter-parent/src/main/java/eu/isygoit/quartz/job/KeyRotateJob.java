@@ -77,7 +77,7 @@ public class KeyRotateJob extends AbstractQuartzJob {
 
         return quartzService.createJobTrigger(
                 keyRotateJobDetail,
-                "keyRotateJobTrigger",      // unique trigger name
+                triggerName,      // unique trigger name
                 KeyRotateJob.groupName,
                 scheduleBuilder,
                 null                        // start immediately (first midnight)

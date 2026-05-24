@@ -78,7 +78,7 @@ public class KeyDeletionJob extends AbstractQuartzJob {
 
         return quartzService.createJobTrigger(
                 keyDeletionJobDetail,
-                "keyDeletionJobTrigger",          // trigger name
+                triggerName,          // trigger name
                 KeyDeletionJob.groupName,         // group name
                 scheduleBuilder,
                 null                              // no start delay needed for cron

@@ -81,7 +81,7 @@ public class PasswordExpiredJob extends AbstractQuartzJob {
 
         return quartzService.createJobTrigger(
                 passwordExpiredJobDetail,
-                "passwordExpiredJobTrigger",          // trigger name (adjust as needed)
+                triggerName,          // trigger name (adjust as needed)
                 PasswordExpiredJob.groupName,
                 scheduleBuilder,
                 null                        // start immediately (first midnight)
