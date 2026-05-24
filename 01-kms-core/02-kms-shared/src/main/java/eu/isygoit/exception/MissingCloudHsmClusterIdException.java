@@ -2,7 +2,7 @@ package eu.isygoit.exception;
 
 import eu.isygoit.annotation.MsgLocale;
 
-@MsgLocale("MissingCloudHsmClusterIdException.exception")
+@MsgLocale("missing.cloud.hsm.cluster.id.exception.exception")
 public class MissingCloudHsmClusterIdException extends ManagedException {
 
     /**

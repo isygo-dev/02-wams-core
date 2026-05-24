@@ -2,15 +2,15 @@ package eu.isygoit.exception;
 
 import eu.isygoit.annotation.MsgLocale;
 
-@MsgLocale("missing.xks.proxy.path.exception.exception")
-public class MissingXksProxyPathException extends ManagedException {
+@MsgLocale("no.active.version.exception.exception")
+public class NoActiveVersionException extends ManagedException {
 
     /**
      * Instantiates a new Kms tenant update exception.
      *
      * @param s the s
      */
-    public MissingXksProxyPathException(String s) {
+    public NoActiveVersionException(String s) {
         super(s);
     }
 
@@ -20,7 +20,7 @@ public class MissingXksProxyPathException extends ManagedException {
      * @param message the message
      * @param cause   the cause
      */
-    public MissingXksProxyPathException(String message, Throwable cause) {
+    public NoActiveVersionException(String message, Throwable cause) {
         super(message, cause);
     }
 }

@@ -1,12 +1,31 @@
 package eu.isygoit.service;
 
-import eu.isygoit.dto.KmsDtos.ActiveVersionResponse;
-import eu.isygoit.dto.KmsDtos.ListKeyVersionsResponse;
+import eu.isygoit.dto.KmsDtos.*;
 
 /**
  * The interface Key version service.
  */
 public interface IKeyVersionService {
+
+    /**
+     * Disable key / version.
+     *
+     * @param tenant the tenant
+     * @param keyId  the key id
+     * @param keyVersionId the key version id
+     * @return the key metadata response dto
+     */
+    DisableKeyVersionResponse disableKeyVersion(String tenant, String keyId, String keyVersionId);
+
+    /**
+     * Enable key / version.
+     *
+     * @param tenant the tenant
+     * @param keyId  the key id
+     * @param keyVersionId the key version id
+     * @return the key metadata response dto
+     */
+    EnableKeyVersionResponse enableKeyVersion(String tenant, String keyId, String keyVersionId);
 
     /**
      * List key versions.

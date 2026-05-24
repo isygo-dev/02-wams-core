@@ -384,6 +384,38 @@ public final class KmsDtos {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    @Schema(description = "Response after disabling a key")
+    public static class DisableKeyVersionResponse {
+        @Schema(description = "Key ID")
+        private String keyId;
+
+        @Schema(description = "Key Version ID")
+        private String keyVersionId;
+
+        @Schema(description = "New key status (DISABLED)")
+        private IEnumKeyStatus.Types status;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Schema(description = "Response after enabling a key")
+    public static class EnableKeyVersionResponse {
+        @Schema(description = "Key ID")
+        private String keyId;
+
+        @Schema(description = "Key Version ID")
+        private String keyVersionId;
+
+        @Schema(description = "New key status (DISABLED)")
+        private IEnumKeyStatus.Types status;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Schema(description = "Request to update key description and/or alias")
     public static class UpdateKeyDescriptionRequest {
         @Schema(description = "Key ID")

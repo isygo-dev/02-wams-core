@@ -1,8 +1,9 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.dto.KmsDtos.ActiveVersionResponse;
-import eu.isygoit.dto.KmsDtos.ListKeyVersionsResponse;
+import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.enums.IEnumKeyStatus;
+import eu.isygoit.exception.InvalidKeyStateException;
+import eu.isygoit.exception.KeyNotFoundException;
 import eu.isygoit.model.KmsKeyVersion;
 import eu.isygoit.repository.KmsKeyVersionRepository;
 import eu.isygoit.service.IKeyVersionService;
@@ -27,6 +28,52 @@ import java.util.List;
 public class KeyVersionService implements IKeyVersionService {
 
     private final KmsKeyVersionRepository kmsKeyVersionRepository;
+
+    @Override
+    public DisableKeyVersionResponse disableKeyVersion(String tenant, String keyId, String keyVersionId) {
+        log.info("Disabling key: {} for tenant: {}", keyId, tenant);
+
+        KmsKeyVersion keyVersion = kmsKeyVersionRepository.findByTenantAndKeyIdAndVersionId(tenant, keyId, keyVersionId)
+                .orElseThrow(() -> new KeyNotFoundException(keyId));
+
+        if (IEnumKeyStatus.Types.DISABLED.equals(keyVersion.getKeyStatus())) {
+            throw new InvalidKeyStateException(
+                    "Key already disabled " + keyId + " v: " + keyVersionId
+            );
+        }
+
+        keyVersion.setKeyStatus(IEnumKeyStatus.Types.DISABLED);
+        kmsKeyVersionRepository.save(keyVersion);
+
+        return DisableKeyVersionResponse.builder()
+                .keyId(keyVersion.getKeyId())
+                .keyVersionId(keyVersion.getVersionId())
+                .status(keyVersion.getKeyStatus())
+                .build();
+    }
+
+    @Override
+    public EnableKeyVersionResponse enableKeyVersion(String tenant, String keyId, String keyVersionId) {
+        log.info("Enabling key: {} for tenant: {}", keyId, tenant);
+
+        KmsKeyVersion keyVersion = kmsKeyVersionRepository.findByTenantAndKeyIdAndVersionId(tenant, keyId, keyVersionId)
+                .orElseThrow(() -> new KeyNotFoundException(keyId));
+
+        if (IEnumKeyStatus.Types.ENABLED.equals(keyVersion.getKeyStatus())) {
+            throw new InvalidKeyStateException(
+                    "Key already enabled " + keyId + " v: " + keyVersionId
+            );
+        }
+
+        keyVersion.setKeyStatus(IEnumKeyStatus.Types.ENABLED);
+        kmsKeyVersionRepository.save(keyVersion);
+
+        return EnableKeyVersionResponse.builder()
+                .keyId(keyVersion.getKeyId())
+                .keyVersionId(keyVersion.getVersionId())
+                .status(keyVersion.getKeyStatus())
+                .build();
+    }
 
     @Override
     public ListKeyVersionsResponse listKeyVersions(

@@ -3,7 +3,7 @@ package eu.isygoit.exception;
 import eu.isygoit.annotation.MsgLocale;
 
 
-@MsgLocale("MissingXksProxyEndpointException.exception")
+@MsgLocale("missing.xks.proxy.endpoint.exception.exception")
 public class MissingXksProxyEndpointException extends ManagedException {
 
     /**

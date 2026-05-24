@@ -140,7 +140,9 @@ public interface IKmsActionType {
         UPDATE_KEY_ROTATION("UpdateKeyRotation"),
         LIST_KEY_VERSIONS("ListKeyVersions"),
         GET_KEY_VERSION("GetKeyVersion"),
-        DELETE_KEY("DeleteKey");
+        DELETE_KEY("DeleteKey"),
+        DISABLE_KEY_VERSION("DisableKeyVersion"),
+        ENABLE_KEY_VERSION("EnableKeyVersion");
 
         private final String meaning;
 

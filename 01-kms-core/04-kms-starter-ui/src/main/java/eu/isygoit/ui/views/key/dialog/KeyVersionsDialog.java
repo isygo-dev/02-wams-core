@@ -1,8 +1,10 @@
 package eu.isygoit.ui.views.key.dialog;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -92,10 +94,12 @@ public class KeyVersionsDialog extends BaseActionDialog {
             return chip;
         })).setHeader("Status").setSortable(true).setResizable(true);
 
-        // Creation date column
+        // Creation date column – simple string formatting, sortable
         grid.addColumn(version -> version.getCreateDate() != null ?
                         version.getCreateDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : "-")
-                .setHeader("Creation Date").setSortable(true).setResizable(true);
+                .setHeader("Creation Date")
+                .setSortable(true)
+                .setResizable(true);
 
         // Signing algorithm column
         grid.addColumn(KmsDtos.ListKeyVersionsResponse.KeyVersion::getSigningAlgorithm)
@@ -115,6 +119,41 @@ public class KeyVersionsDialog extends BaseActionDialog {
                         version.getValidTo().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : "-")
                 .setHeader("Expiry Date").setResizable(true);
 
+        // --- ACTIONS COLUMN with both Enable/Disable icon buttons ---
+        grid.addColumn(new ComponentRenderer<>(version -> {
+            IEnumKeyStatus.Types status = version.getStatus();
+            Button actionBtn = new Button();
+
+            if (status == IEnumKeyStatus.Types.ENABLED) {
+                // Disable button
+                actionBtn.setIcon(VaadinIcon.BAN.create());
+                actionBtn.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_TERTIARY);
+                actionBtn.setTooltipText("Disable this key version");
+                actionBtn.addClickListener(e -> {
+                    DisableKeyVersionDialog dialog = new DisableKeyVersionDialog(
+                            kmsApiService, keyId, version.getVersionId(), this::loadVersions);
+                    dialog.open();
+                });
+            } else if (status == IEnumKeyStatus.Types.DISABLED) {
+                // Enable button
+                actionBtn.setIcon(VaadinIcon.CHECK_CIRCLE.create());
+                actionBtn.addThemeVariants(ButtonVariant.LUMO_SUCCESS, ButtonVariant.LUMO_TERTIARY);
+                actionBtn.setTooltipText("Enable this key version");
+                actionBtn.addClickListener(e -> {
+                    EnableKeyVersionDialog dialog = new EnableKeyVersionDialog(
+                            kmsApiService, keyId, version.getVersionId(), this::loadVersions);
+                    dialog.open();
+                });
+            } else {
+                // PENDING_DELETION or other – no action possible
+                actionBtn.setIcon(VaadinIcon.MINUS_CIRCLE.create());
+                actionBtn.setEnabled(false);
+                actionBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+                actionBtn.setTooltipText("Cannot change status of this version");
+            }
+            return actionBtn;
+        })).setHeader("Actions").setResizable(false).setWidth("80px").setFlexGrow(0);
+
         layout.add(grid);
         add(layout);
     }
@@ -127,13 +166,8 @@ public class KeyVersionsDialog extends BaseActionDialog {
             if (response.getBody() != null && response.getBody().getVersions() != null) {
                 versions = response.getBody().getVersions();
             }
-            // Sort: active (ENABLED) first, then by creation date descending
+            // Default sort: newest first by creation date
             versions.sort((v1, v2) -> {
-                boolean isActive1 = v1.getStatus() == IEnumKeyStatus.Types.ENABLED;
-                boolean isActive2 = v2.getStatus() == IEnumKeyStatus.Types.ENABLED;
-                if (isActive1 && !isActive2) return -1;
-                if (!isActive1 && isActive2) return 1;
-                // If both active or both not, sort by creation date descending
                 if (v1.getCreateDate() == null && v2.getCreateDate() == null) return 0;
                 if (v1.getCreateDate() == null) return 1;
                 if (v2.getCreateDate() == null) return -1;

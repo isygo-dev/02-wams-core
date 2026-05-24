@@ -2,7 +2,7 @@ package eu.isygoit.exception;
 
 import eu.isygoit.annotation.MsgLocale;
 
-@MsgLocale("MissingTrustAnchorCertificateException.exception")
+@MsgLocale("missing.trust.anchor.certificate.exception.exception")
 public class MissingTrustAnchorCertificateException extends ManagedException {
 
     /**

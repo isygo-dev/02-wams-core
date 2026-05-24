@@ -37,5 +37,7 @@ public interface KmsKeyVersionRepository extends JpaRepository<KmsKeyVersion, Lo
     Optional<KmsKeyVersion> findByTenantAndKeyIdAndVersionId(String tenant, String keyId, String versionId);
 
     List<KmsKeyVersion> findByTenantAndKeyIdOrderByCreateDateDesc(String tenant, String keyId);
+
+    List<KmsKeyVersion> findByTenantAndKeyIdAndKeyStatusOrderByCreateDateDesc(String tenant, String keyId, IEnumKeyStatus.Types types);
 }
 

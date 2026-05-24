@@ -9,6 +9,7 @@ import eu.isygoit.quartz.service.QuartzService;
 import eu.isygoit.quartz.types.SingleJobData;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.quartz.CronScheduleBuilder;
 import org.quartz.JobDetail;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * The type Password expired job.
@@ -74,15 +76,15 @@ public class PasswordExpiredJob extends AbstractQuartzJob {
     @Bean
     public Trigger passwordExpiredJobTrigger(@Autowired QuartzService quartzService,
                                              @Autowired @Qualifier("passwordExpiredJobDetail") JobDetail passwordExpiredJobDetail) {
-        SimpleScheduleBuilder scheduleBuilder = SimpleScheduleBuilder
-                .simpleSchedule()
-                .withIntervalInHours(this.appProperties.getPwdExpiredCheckPeriodDay() * 24)
-                .repeatForever();
+        // Run at 00:00 every day
+        CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
 
-        return quartzService.createJobTrigger(passwordExpiredJobDetail
-                , triggerName
-                , PasswordExpiredJob.groupName
-                , scheduleBuilder
-                , DateHelper.toLegacyDate(LocalDateTime.now().plusMinutes(JobSchedulePovider.getStartDelay())));
+        return quartzService.createJobTrigger(
+                passwordExpiredJobDetail,
+                "passwordExpiredJobTrigger",          // trigger name (adjust as needed)
+                PasswordExpiredJob.groupName,
+                scheduleBuilder,
+                null                        // start immediately (first midnight)
+        );
     }
 }

@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.exception.*;
 import eu.isygoit.model.KmsKey;
@@ -50,11 +51,17 @@ public class EncryptionService implements IEncryptionService {
         try {
             byte[] plaintext = Base64.getDecoder().decode(request.getPlaintext());
 
-            // Get the CURRENT version's key material
-            String versionId = kmsKey.getCurrentVersionId();
             KmsKeyVersion version = kmsKeyVersionRepository
-                    .findByTenantAndKeyIdAndVersionId(tenant, kmsKey.getKeyId(), versionId)
-                    .orElseThrow(() -> new RuntimeException("Current version not found: " + versionId));
+                    .findByTenantAndKeyIdAndVersionId(tenant, kmsKey.getKeyId(), kmsKey.getCurrentVersionId())
+                    .orElseGet(() -> {
+                        log.warn("Current version {} not found for key {}, falling back to last active version",
+                                kmsKey.getCurrentVersionId(), kmsKey.getKeyId());
+                        KmsKeyVersion activeVersion = kmsKeyVersionRepository
+                                .findFirstByTenantAndKeyIdAndKeyStatusOrderByCreateDateDesc(tenant, kmsKey.getKeyId(), IEnumKeyStatus.Types.ENABLED)
+                                .orElseThrow(() -> new NoActiveVersionException(kmsKey.getKeyId()));
+                        log.info("Using last active version {} for key {}", activeVersion.getVersionId(), kmsKey.getKeyId());
+                        return activeVersion;
+                    });
 
             byte[] keyMaterial;
             if (kmsKey.getKeySpec() != null && kmsKey.getKeySpec().isAsymmetric()) {
@@ -74,12 +81,12 @@ public class EncryptionService implements IEncryptionService {
             );
 
             // Wrap ciphertext with version ID
-            byte[] wrappedCiphertext = CiphertextEnvelope.wrap(versionId, ciphertext);
+            byte[] wrappedCiphertext = CiphertextEnvelope.wrap(version.getVersionId(), ciphertext);
 
             return EncryptResponse.builder()
                     .ciphertextBlob(Base64.getEncoder().encodeToString(wrappedCiphertext))
                     .keyId(kmsKey.getKeyId())
-                    .keyVersionId(versionId)
+                    .keyVersionId(version.getVersionId())
                     .build();
         } catch (Exception e) {
             log.error("Encrypt failed", e);
@@ -122,17 +129,17 @@ public class EncryptionService implements IEncryptionService {
                         .orElse(null);
             }
 
-            // Fallback: if version not found (or missing), try current version
-            if (version == null) {
+            // Fallback: if version not found (or disabled), try current version
+            if (version == null || IEnumKeyStatus.Types.ENABLED != version.getKeyStatus()) {
                 version = kmsKeyVersionRepository
                         .findByTenantAndKeyIdAndVersionId(tenant, keyId, kmsKey.getCurrentVersionId())
                         .orElse(null);
             }
 
-            // If still not found, try all versions (desc order) – optional but safe
-            if (version == null) {
+            // If still not found or disabled, try all enabled versions (desc order) – optional but safe
+            if (version == null || IEnumKeyStatus.Types.ENABLED != version.getKeyStatus()) {
                 List<KmsKeyVersion> allVersions = kmsKeyVersionRepository
-                        .findByTenantAndKeyIdOrderByCreateDateDesc(tenant, keyId);
+                        .findByTenantAndKeyIdAndKeyStatusOrderByCreateDateDesc(tenant, keyId, IEnumKeyStatus.Types.ENABLED);
                 for (KmsKeyVersion v : allVersions) {
                     try {
                         byte[] plain = tryDecryptWithVersion(v, ciphertext, kmsKey, request);

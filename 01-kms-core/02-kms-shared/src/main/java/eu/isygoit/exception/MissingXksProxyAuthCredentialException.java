@@ -2,7 +2,7 @@ package eu.isygoit.exception;
 
 import eu.isygoit.annotation.MsgLocale;
 
-@MsgLocale("MissingXksProxyAuthCredentialException.exception")
+@MsgLocale("missing.xks.proxy.auth.credential.exception.exception")
 public class MissingXksProxyAuthCredentialException extends ManagedException {
 
     /**

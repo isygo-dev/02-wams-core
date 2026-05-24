@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
  */
 @Slf4j
 @Service
-public class KeyRotateJob extends AbstractQuartzJob {
+public class KeyDeletionJob extends AbstractQuartzJob {
 
     /**
      * The constant groupName.
@@ -31,20 +31,20 @@ public class KeyRotateJob extends AbstractQuartzJob {
     /**
      * The constant triggerName.
      */
-    public static final String triggerName = "key_rotate_job_trigger";
+    public static final String triggerName = "key_deletion_job_trigger";
 
     private final AppProperties appProperties;
 
     @Getter
     @Autowired
-    private KeyRotateService jobService;
+    private KeyDeletionService jobService;
 
     /**
      * Instantiates a new Password expired job.
      *
      * @param appProperties the app properties
      */
-    public KeyRotateJob(AppProperties appProperties) {
+    public KeyDeletionJob(AppProperties appProperties) {
         this.appProperties = appProperties;
     }
 
@@ -54,10 +54,10 @@ public class KeyRotateJob extends AbstractQuartzJob {
      * @param quartzService the quartz service
      * @return the job detail
      */
-    @Bean(name = "keyRotateJobDetail")
-    public JobDetail keyRotateJobDetail(@Autowired QuartzService quartzService) {
-        return quartzService.createJobDetail(KeyRotateJob.class,
-                "keyRotateJobDetail",
+    @Bean(name = "keyDeletionJobDetail")
+    public JobDetail keyDeletionJobDetail(@Autowired QuartzService quartzService) {
+        return quartzService.createJobDetail(KeyDeletionJob.class,
+                "keyDeletionJobDetail",
                 groupName,
                 new SingleJobData("name", "World"));
     }
@@ -66,21 +66,22 @@ public class KeyRotateJob extends AbstractQuartzJob {
      * Password expired job trigger trigger.
      *
      * @param quartzService            the quartz service
-     * @param keyRotateJobDetail the password expired job detail
+     * @param keyDeletionJobDetail the password expired job detail
      * @return the trigger
      */
     @Bean
-    public Trigger keyRotateJobTrigger(@Autowired QuartzService quartzService,
-                                       @Autowired @Qualifier("keyRotateJobDetail") JobDetail keyRotateJobDetail) {
-        // Run at 00:00 (midnight) every day
-        CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
+    public Trigger keyDeletionJobTrigger(@Autowired QuartzService quartzService,
+                                         @Autowired @Qualifier("keyDeletionJobDetail") JobDetail keyDeletionJobDetail) {
+        // Cron expression: run at 00:00 every day
+        CronScheduleBuilder scheduleBuilder = CronScheduleBuilder
+                .dailyAtHourAndMinute(0, 0); // midnight
 
         return quartzService.createJobTrigger(
-                keyRotateJobDetail,
-                "keyRotateJobTrigger",      // unique trigger name
-                KeyRotateJob.groupName,
+                keyDeletionJobDetail,
+                "keyDeletionJobTrigger",          // trigger name
+                KeyDeletionJob.groupName,         // group name
                 scheduleBuilder,
-                null                        // start immediately (first midnight)
+                null                              // no start delay needed for cron
         );
     }
 }

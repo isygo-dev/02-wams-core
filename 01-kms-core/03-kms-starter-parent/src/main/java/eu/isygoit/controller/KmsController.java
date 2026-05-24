@@ -260,6 +260,58 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     }
 
     @Override
+    public ResponseEntity<DisableKeyVersionResponse> disableKeyVersion(String keyId, String keyVersionId) {
+        log.info("Disabling key: {} v: {}", keyId, keyVersionId);
+
+        try {
+            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            keyId = dataKeyService.resolveKeyId(tenant, keyId);
+
+            DisableKeyVersionResponse response = keyVersionService.disableKeyVersion(tenant, keyId, keyVersionId);
+
+            auditService.logAction(
+                    tenant,
+                    IKmsActionType.Types.DISABLE_KEY_VERSION,
+                    keyId,
+                    requestContextService.getCurrentContext().getSenderUser(),
+                    requestContextService.getCurrentContext().getClientIp()
+            );
+
+            return ResponseFactory.responseOk(response);
+
+        } catch (Throwable e) {
+            log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
+            return getBackExceptionResponse(e);
+        }
+    }
+
+    @Override
+    public ResponseEntity<EnableKeyVersionResponse> enableKeyVersion(String keyId, String keyVersionId) {
+        log.info("Disabling key: {} v: {}", keyId, keyVersionId);
+
+        try {
+            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            keyId = dataKeyService.resolveKeyId(tenant, keyId);
+
+            EnableKeyVersionResponse response = keyVersionService.enableKeyVersion(tenant, keyId, keyVersionId);
+
+            auditService.logAction(
+                    tenant,
+                    IKmsActionType.Types.ENABLE_KEY_VERSION,
+                    keyId,
+                    requestContextService.getCurrentContext().getSenderUser(),
+                    requestContextService.getCurrentContext().getClientIp()
+            );
+
+            return ResponseFactory.responseOk(response);
+
+        } catch (Throwable e) {
+            log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
+            return getBackExceptionResponse(e);
+        }
+    }
+
+    @Override
     public ResponseEntity<ScheduleKeyDeletionResponse> scheduleKeyDeletion(
             String keyId,
             Integer pendingWindowInDays) {

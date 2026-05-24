@@ -164,6 +164,30 @@ public interface KmsServiceApi {
             @Parameter(description = "Unique identifier of the KMS key", required = true)
             @PathVariable("keyId") String keyId);
 
+    @PostMapping(value = "/keys/{keyId}/{keyVersionId}/disable", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+            summary = "Disable Key version",
+            description = "Disables a KMS key version, preventing all cryptographic operations.",
+            operationId = "disableKeyVersion"
+    )
+    ResponseEntity<DisableKeyVersionResponse> disableKeyVersion(
+            @Parameter(description = "Unique identifier of the KMS key", required = true)
+            @PathVariable("keyId") String keyId,
+            @Parameter(description = "key version identifier", required = true)
+            @PathVariable("keyVersionId") String keyVersionId);
+
+    @PostMapping(value = "/keys/{keyId}/{keyVersionId}/enable", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+            summary = "Enable Key version",
+            description = "Enables a KMS key version, preventing all cryptographic operations.",
+            operationId = "enableKeyVersion"
+    )
+    ResponseEntity<EnableKeyVersionResponse> enableKeyVersion(
+            @Parameter(description = "Unique identifier of the KMS key", required = true)
+            @PathVariable("keyId") String keyId,
+            @Parameter(description = "key version identifier", required = true)
+            @PathVariable("keyVersionId") String keyVersionId);
+
     @PatchMapping(value = "/keys/{keyId}/description", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Update Key Description",

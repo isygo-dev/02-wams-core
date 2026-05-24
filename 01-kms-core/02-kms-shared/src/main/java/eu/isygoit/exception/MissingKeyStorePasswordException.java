@@ -2,7 +2,7 @@ package eu.isygoit.exception;
 
 import eu.isygoit.annotation.MsgLocale;
 
-@MsgLocale("MissingKeyStorePasswordException.exception")
+@MsgLocale("missing.key.store.password.exception.exception")
 public class MissingKeyStorePasswordException extends ManagedException {
 
     /**
