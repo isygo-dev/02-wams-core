@@ -1,9 +1,7 @@
 package eu.isygoit.quartz.job;
 
 import eu.isygoit.config.AppProperties;
-import eu.isygoit.helper.DateHelper;
 import eu.isygoit.quartz.service.AbstractQuartzJob;
-import eu.isygoit.quartz.service.JobSchedulePovider;
 import eu.isygoit.quartz.service.PasswordExpiredService;
 import eu.isygoit.quartz.service.QuartzService;
 import eu.isygoit.quartz.types.SingleJobData;
@@ -11,15 +9,11 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobDetail;
-import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.Date;
 
 /**
  * The type Password expired job.

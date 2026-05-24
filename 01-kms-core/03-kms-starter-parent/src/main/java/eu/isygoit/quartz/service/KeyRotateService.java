@@ -2,7 +2,7 @@ package eu.isygoit.quartz.service;
 
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.model.KmsKey;
-import eu.isygoit.model.Tenant; // assuming Tenant entity exists
+import eu.isygoit.model.Tenant;
 import eu.isygoit.repository.KmsKeyRepository;
 import eu.isygoit.repository.TenantRepository;
 import eu.isygoit.service.IKeyManagementService;

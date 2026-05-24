@@ -1,6 +1,9 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.dto.KmsDtos.ActiveVersionResponse;
+import eu.isygoit.dto.KmsDtos.DisableKeyVersionResponse;
+import eu.isygoit.dto.KmsDtos.EnableKeyVersionResponse;
+import eu.isygoit.dto.KmsDtos.ListKeyVersionsResponse;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.exception.InvalidKeyStateException;
 import eu.isygoit.exception.KeyNotFoundException;

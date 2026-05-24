@@ -48,18 +48,16 @@ public class KeyManagementView extends VerticalLayout {
     private final Button createButton = new Button("Create key", new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
-    private final ComboBox<String> statusFilter = new ComboBox<>("Status");
+    private final ComboBox<String> statusFilter = new ComboBox<>();
     private final ProgressBar loadingBar = new ProgressBar();
-
-    // Pagination fields
-    private int currentPage = 1;
-    private int pageSize = 10;
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
     private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
     private final Span pageLabel = new Span();
-
     public List<String> existingAliases = new ArrayList<>();
+    // Pagination controls
+    private int currentPage = 1;
+    private int pageSize = 10;
     private List<KeyCard> allCards = new ArrayList<>();
     private String currentSearch = "";
     private String currentStatus = "All";
@@ -86,10 +84,6 @@ public class KeyManagementView extends VerticalLayout {
         cardsContainer.setSpacing(true);
         add(cardsContainer);
 
-        // Pagination bar
-        HorizontalLayout paginationBar = buildPaginationBar();
-        add(paginationBar);
-
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
         loadingBar.setWidth("200px");
@@ -111,13 +105,13 @@ public class KeyManagementView extends VerticalLayout {
 
         statusFilter.setItems("All", "Enabled", "Disabled", "PendingDeletion");
         statusFilter.setValue("All");
+        statusFilter.setPlaceholder("Status");
         statusFilter.addValueChangeListener(e -> {
             currentStatus = e.getValue();
             currentPage = 1;
             filterCards();
         });
 
-        // Page size selector
         pageSizeSelect.setItems(10, 20, 30, 40, 50);
         pageSizeSelect.setValue(10);
         pageSizeSelect.setPlaceholder("Per page");
@@ -148,22 +142,50 @@ public class KeyManagementView extends VerticalLayout {
         loadKeys();
     }
 
-    private HorizontalLayout buildPaginationBar() {
-        HorizontalLayout layout = new HorizontalLayout();
-        layout.setWidthFull();
-        layout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-        layout.setAlignItems(FlexComponent.Alignment.CENTER);
-        layout.setSpacing(true);
-        layout.setPadding(true);
-        layout.addClassName("pagination-bar");
+    private HorizontalLayout buildToolbar() {
+        HorizontalLayout toolbar = new HorizontalLayout();
+        toolbar.setWidthFull();
+        toolbar.setPadding(false);
+        toolbar.setSpacing(true);
+        toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
+        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        toolbar.addClassName("key-management-toolbar"); // add class for CSS
 
+        // Left group
+        HorizontalLayout leftGroup = new HorizontalLayout();
+        leftGroup.setSpacing(true);
+        leftGroup.setAlignItems(FlexComponent.Alignment.END);
+        searchField.setWidth("200px");
+        Span statusLabel = new Span("Status:");
+        statusLabel.getStyle().set("margin-right", "4px");
+        statusFilter.setWidth("140px");
+        HorizontalLayout statusLayout = new HorizontalLayout(statusLabel, statusFilter);
+        statusLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        statusLayout.setSpacing(false);
+        leftGroup.add(searchField, statusLayout);
+
+        // Center group
+        HorizontalLayout centerGroup = new HorizontalLayout();
+        centerGroup.setSpacing(true);
+        centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
+        centerGroup.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         pageSizeSelect.setWidth("120px");
-        pageLabel.getStyle().set("margin", "0 1rem");
+        pageLabel.getStyle().set("margin", "0 0.5rem");
+        centerGroup.add(prevButton, pageLabel, nextButton, pageSizeSelect);
 
-        layout.add(prevButton, pageLabel, nextButton, pageSizeSelect);
-        return layout;
+        // Right group
+        HorizontalLayout rightGroup = new HorizontalLayout();
+        rightGroup.setSpacing(true);
+        rightGroup.setAlignItems(FlexComponent.Alignment.END);
+        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        refreshButton.setTooltipText("Refresh keys");
+        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        rightGroup.add(refreshButton, createButton);
+
+        toolbar.add(leftGroup, centerGroup, rightGroup);
+        return toolbar;
     }
 
     private void updatePaginationDisplay(int totalItems) {
@@ -176,7 +198,7 @@ public class KeyManagementView extends VerticalLayout {
 
     private int getTotalPages() {
         int totalFiltered = (int) allCards.stream()
-                .filter(card -> matchesFilter(card))
+                .filter(this::matchesFilter)
                 .count();
         return (int) Math.ceil((double) totalFiltered / pageSize);
     }
@@ -196,83 +218,48 @@ public class KeyManagementView extends VerticalLayout {
 
     private void injectResponsiveStyles() {
         String css = """
+                /* Base toolbar: flex row, wrap, justify between */
+                .key-management-toolbar {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: var(--lumo-space-s);
+                    width: 100%;
+                }
+                /* On narrow screens, each group takes full width and centers its content */
+                @media (max-width: 768px) {
                     .key-management-toolbar {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: var(--lumo-space-s);
-                        align-items: flex-end;
-                        justify-content: space-between;
-                        width: 100%;
+                        flex-direction: column;
+                        align-items: stretch;
                     }
-                    .toolbar-left-group {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: var(--lumo-space-s);
-                        align-items: flex-end;
+                    .key-management-toolbar > * {
+                        width: 100% !important;
+                        justify-content: center;
                     }
-                    .toolbar-right-group {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: var(--lumo-space-s);
-                        align-items: flex-end;
+                    /* Keep inner elements inline (horizontal) */
+                    .key-management-toolbar > * > * {
+                        justify-content: center;
                     }
-                    .pagination-bar {
-                        flex-wrap: wrap;
-                    }
-                    @media (max-width: 768px) {
-                        .key-management-toolbar {
-                            flex-direction: column;
-                            align-items: stretch;
-                        }
-                        .toolbar-left-group,
-                        .toolbar-right-group {
-                            flex-direction: column;
-                            align-items: stretch;
-                            width: 100%;
-                        }
-                        .toolbar-left-group > *,
-                        .toolbar-right-group > * {
-                            width: 100% !important;
-                        }
-                        .pagination-bar {
-                            flex-direction: column;
-                            gap: var(--lumo-space-s);
-                        }
-                    }
+                }
                 """;
         UI.getCurrent().getPage().executeJs(
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
                 css
         );
+        // Add class to toolbar for CSS targeting
+        getElement().executeJs(
+                "const toolbar = document.querySelector('.key-management-toolbar'); if(toolbar) toolbar.classList.add('key-management-toolbar');"
+        );
     }
 
-    private HorizontalLayout buildToolbar() {
-        HorizontalLayout toolbar = new HorizontalLayout();
-        toolbar.setWidthFull();
-        toolbar.setPadding(false);
-        toolbar.setSpacing(false);
-        toolbar.addClassName("key-management-toolbar");
-
-        HorizontalLayout leftGroup = new HorizontalLayout();
-        leftGroup.addClassName("toolbar-left-group");
-        leftGroup.setSpacing(true);
-        leftGroup.setAlignItems(FlexComponent.Alignment.END);
-        searchField.setWidth("280px");
-        statusFilter.setWidth("160px");
-        statusFilter.setPlaceholder("Filter by status");
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText("Refresh keys");
-        leftGroup.add(searchField, statusFilter, refreshButton);
-
-        HorizontalLayout rightGroup = new HorizontalLayout();
-        rightGroup.addClassName("toolbar-right-group");
-        rightGroup.setSpacing(true);
-        rightGroup.setAlignItems(FlexComponent.Alignment.END);
-        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        rightGroup.add(createButton);
-
-        toolbar.add(leftGroup, rightGroup);
-        return toolbar;
+    // Helper to add class to the toolbar
+    @Override
+    protected void onAttach(com.vaadin.flow.component.AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        // The toolbar is already created; we can add class via element
+        getElement().getChildren()
+                .filter(child -> child.getAttribute("class") != null && child.getAttribute("class").contains("key-management-toolbar"))
+                .findFirst()
+                .ifPresent(toolbar -> toolbar.getClassList().add("key-management-toolbar"));
     }
 
     public void loadAliasesAndKeys() {
@@ -336,7 +323,6 @@ public class KeyManagementView extends VerticalLayout {
     private void filterCards() {
         cardsContainer.removeAll();
 
-        // Apply filters
         List<KeyCard> filtered = allCards.stream()
                 .filter(this::matchesFilter)
                 .collect(Collectors.toList());
@@ -344,12 +330,7 @@ public class KeyManagementView extends VerticalLayout {
         int totalFiltered = filtered.size();
         updatePaginationDisplay(totalFiltered);
 
-        // Paginate
-        int startIndex = (currentPage - 1) * pageSize;
-        int endIndex = Math.min(startIndex + pageSize, totalFiltered);
-        List<KeyCard> pageCards = filtered.subList(startIndex, endIndex);
-
-        if (pageCards.isEmpty()) {
+        if (totalFiltered == 0) {
             Div emptyState = new Div();
             emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
             emptyState.addClassName(LumoUtility.Padding.XLARGE);
@@ -361,9 +342,17 @@ public class KeyManagementView extends VerticalLayout {
             emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);
-        } else {
-            pageCards.forEach(cardsContainer::add);
+            return;
         }
+
+        int startIndex = (currentPage - 1) * pageSize;
+        if (startIndex >= totalFiltered) {
+            currentPage = (int) Math.ceil((double) totalFiltered / pageSize);
+            startIndex = (currentPage - 1) * pageSize;
+        }
+        int endIndex = Math.min(startIndex + pageSize, totalFiltered);
+        List<KeyCard> pageCards = filtered.subList(startIndex, endIndex);
+        pageCards.forEach(cardsContainer::add);
     }
 
     public void showLoading(boolean show) {
