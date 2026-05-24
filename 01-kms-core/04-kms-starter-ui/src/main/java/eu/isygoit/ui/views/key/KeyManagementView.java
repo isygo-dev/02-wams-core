@@ -5,10 +5,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H4;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -45,6 +42,7 @@ import java.util.stream.Collectors;
 public class KeyManagementView extends VerticalLayout {
 
     private final KmsApiService kmsApiService;
+    private final ObjectMapper objectMapper;
 
     private final VerticalLayout cardsContainer = new VerticalLayout();
     private final Button createButton = new Button("Create key", new Icon(VaadinIcon.PLUS_CIRCLE));
@@ -52,7 +50,15 @@ public class KeyManagementView extends VerticalLayout {
     private final TextField searchField = new TextField();
     private final ComboBox<String> statusFilter = new ComboBox<>("Status");
     private final ProgressBar loadingBar = new ProgressBar();
-    private final ObjectMapper objectMapper;
+
+    // Pagination fields
+    private int currentPage = 1;
+    private int pageSize = 10;
+    private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
+    private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
+    private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
+    private final Span pageLabel = new Span();
+
     public List<String> existingAliases = new ArrayList<>();
     private List<KeyCard> allCards = new ArrayList<>();
     private String currentSearch = "";
@@ -80,6 +86,10 @@ public class KeyManagementView extends VerticalLayout {
         cardsContainer.setSpacing(true);
         add(cardsContainer);
 
+        // Pagination bar
+        HorizontalLayout paginationBar = buildPaginationBar();
+        add(paginationBar);
+
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
         loadingBar.setWidth("200px");
@@ -95,6 +105,7 @@ public class KeyManagementView extends VerticalLayout {
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.addValueChangeListener(e -> {
             currentSearch = e.getValue();
+            currentPage = 1;
             filterCards();
         });
 
@@ -102,14 +113,85 @@ public class KeyManagementView extends VerticalLayout {
         statusFilter.setValue("All");
         statusFilter.addValueChangeListener(e -> {
             currentStatus = e.getValue();
+            currentPage = 1;
             filterCards();
         });
 
-        // Inject responsive CSS using JavaScript (fixes URL encoding issues)
-        injectResponsiveStyles();
+        // Page size selector
+        pageSizeSelect.setItems(10, 20, 30, 40, 50);
+        pageSizeSelect.setValue(10);
+        pageSizeSelect.setPlaceholder("Per page");
+        pageSizeSelect.addValueChangeListener(e -> {
+            if (e.getValue() != null) {
+                pageSize = e.getValue();
+                currentPage = 1;
+                filterCards();
+            }
+        });
 
+        prevButton.addClickListener(e -> {
+            if (currentPage > 1) {
+                currentPage--;
+                filterCards();
+            }
+        });
+        nextButton.addClickListener(e -> {
+            int totalPages = getTotalPages();
+            if (currentPage < totalPages) {
+                currentPage++;
+                filterCards();
+            }
+        });
+
+        injectResponsiveStyles();
         loadAliases();
         loadKeys();
+    }
+
+    private HorizontalLayout buildPaginationBar() {
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.setWidthFull();
+        layout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+        layout.setAlignItems(FlexComponent.Alignment.CENTER);
+        layout.setSpacing(true);
+        layout.setPadding(true);
+        layout.addClassName("pagination-bar");
+
+        prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        pageSizeSelect.setWidth("120px");
+        pageLabel.getStyle().set("margin", "0 1rem");
+
+        layout.add(prevButton, pageLabel, nextButton, pageSizeSelect);
+        return layout;
+    }
+
+    private void updatePaginationDisplay(int totalItems) {
+        int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+        if (totalPages == 0) totalPages = 1;
+        pageLabel.setText(String.format("Page %d of %d", currentPage, totalPages));
+        prevButton.setEnabled(currentPage > 1);
+        nextButton.setEnabled(currentPage < totalPages);
+    }
+
+    private int getTotalPages() {
+        int totalFiltered = (int) allCards.stream()
+                .filter(card -> matchesFilter(card))
+                .count();
+        return (int) Math.ceil((double) totalFiltered / pageSize);
+    }
+
+    private boolean matchesFilter(KeyCard card) {
+        if (!currentStatus.equals("All")) {
+            String status = card.getStatusText();
+            if (!status.equalsIgnoreCase(currentStatus)) return false;
+        }
+        if (currentSearch != null && !currentSearch.isEmpty()) {
+            String searchLower = currentSearch.toLowerCase();
+            return (card.getAliasOrId().toLowerCase().contains(searchLower) ||
+                    card.getKeyId().toLowerCase().contains(searchLower));
+        }
+        return true;
     }
 
     private void injectResponsiveStyles() {
@@ -134,6 +216,9 @@ public class KeyManagementView extends VerticalLayout {
                         gap: var(--lumo-space-s);
                         align-items: flex-end;
                     }
+                    .pagination-bar {
+                        flex-wrap: wrap;
+                    }
                     @media (max-width: 768px) {
                         .key-management-toolbar {
                             flex-direction: column;
@@ -148,6 +233,10 @@ public class KeyManagementView extends VerticalLayout {
                         .toolbar-left-group > *,
                         .toolbar-right-group > * {
                             width: 100% !important;
+                        }
+                        .pagination-bar {
+                            flex-direction: column;
+                            gap: var(--lumo-space-s);
                         }
                     }
                 """;
@@ -164,7 +253,6 @@ public class KeyManagementView extends VerticalLayout {
         toolbar.setSpacing(false);
         toolbar.addClassName("key-management-toolbar");
 
-        // Left group: search + status filter + refresh button
         HorizontalLayout leftGroup = new HorizontalLayout();
         leftGroup.addClassName("toolbar-left-group");
         leftGroup.setSpacing(true);
@@ -176,7 +264,6 @@ public class KeyManagementView extends VerticalLayout {
         refreshButton.setTooltipText("Refresh keys");
         leftGroup.add(searchField, statusFilter, refreshButton);
 
-        // Right group: only create button (right aligned)
         HorizontalLayout rightGroup = new HorizontalLayout();
         rightGroup.addClassName("toolbar-right-group");
         rightGroup.setSpacing(true);
@@ -248,22 +335,21 @@ public class KeyManagementView extends VerticalLayout {
 
     private void filterCards() {
         cardsContainer.removeAll();
+
+        // Apply filters
         List<KeyCard> filtered = allCards.stream()
-                .filter(card -> {
-                    if (!currentStatus.equals("All")) {
-                        String status = card.getStatusText();
-                        if (!status.equalsIgnoreCase(currentStatus)) return false;
-                    }
-                    if (currentSearch != null && !currentSearch.isEmpty()) {
-                        String searchLower = currentSearch.toLowerCase();
-                        return (card.getAliasOrId().toLowerCase().contains(searchLower) ||
-                                card.getKeyId().toLowerCase().contains(searchLower));
-                    }
-                    return true;
-                })
+                .filter(this::matchesFilter)
                 .collect(Collectors.toList());
 
-        if (filtered.isEmpty()) {
+        int totalFiltered = filtered.size();
+        updatePaginationDisplay(totalFiltered);
+
+        // Paginate
+        int startIndex = (currentPage - 1) * pageSize;
+        int endIndex = Math.min(startIndex + pageSize, totalFiltered);
+        List<KeyCard> pageCards = filtered.subList(startIndex, endIndex);
+
+        if (pageCards.isEmpty()) {
             Div emptyState = new Div();
             emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
             emptyState.addClassName(LumoUtility.Padding.XLARGE);
@@ -276,7 +362,7 @@ public class KeyManagementView extends VerticalLayout {
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);
         } else {
-            filtered.forEach(cardsContainer::add);
+            pageCards.forEach(cardsContainer::add);
         }
     }
 
@@ -287,9 +373,6 @@ public class KeyManagementView extends VerticalLayout {
         createButton.setEnabled(!show);
     }
 
-    // =========================================================================
-    // Create Key Dialog
-    // =========================================================================
     private void openCreateKeyDialog() {
         new CreateKeyDialog(this, kmsApiService, this::loadAliasesAndKeys, objectMapper).open();
     }
