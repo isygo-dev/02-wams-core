@@ -13,6 +13,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.MainView;
 import eu.isygoit.ui.views.alias.dialog.DeleteAliasDialog;
 import eu.isygoit.ui.views.alias.dialog.UpdateAliasDialog;
 
@@ -22,6 +23,7 @@ class AliasCard extends VerticalLayout {
     private final String aliasName;
     private final String targetKeyId;
     private final String aliasWrn;
+    private final Boolean primaryKey;
     private final String createDate;
 
     private HorizontalLayout headerRow;
@@ -39,6 +41,7 @@ class AliasCard extends VerticalLayout {
         this.targetKeyId = entry.getTargetKeyId();
         this.aliasWrn = entry.getAliasWrn();
         this.createDate = entry.getCreateDate();
+        this.primaryKey = entry.getPrimaryKey();
         buildCard();
         addClassName("alias-card");
     }
@@ -60,27 +63,48 @@ class AliasCard extends VerticalLayout {
         addClassName(LumoUtility.BoxShadow.XSMALL);
         getStyle().set("transition", "all 0.2s ease-in-out");
 
-        // Header row: alias name + button bar
-        headerRow = new HorizontalLayout();
-        headerRow.setWidthFull();
-        headerRow.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        headerRow.getStyle().set("flex-wrap", "wrap");
-        headerRow.setSpacing(true);
+        // Left side: alias name + copy + primary badge
+        HorizontalLayout leftSide = new HorizontalLayout();
+        leftSide.setAlignItems(FlexComponent.Alignment.CENTER);
+        leftSide.setSpacing(true);
 
         aliasSpan = new Span(aliasName);
         aliasSpan.addClassName(LumoUtility.FontWeight.BOLD);
         aliasSpan.addClassName(LumoUtility.FontSize.MEDIUM);
         aliasSpan.addClassName(LumoUtility.TextColor.PRIMARY);
         aliasSpan.getStyle().set("word-break", "break-word");
-        aliasSpan.getElement().setAttribute("title", aliasName);   // full alias name on hover
+        aliasSpan.getElement().setAttribute("title", aliasName);
+        leftSide.add(aliasSpan);
 
+        // Copy alias name button (compact)
+        leftSide.add(MainView.createCopyButton(VaadinIcon.COPY_O, aliasName, "Copy alias name"));
+
+        // Primary key warning and badge (no copy button for warning text)
+        if (Boolean.TRUE.equals(primaryKey)) {
+            Icon warningIcon = VaadinIcon.WARNING.create();
+            warningIcon.setColor("var(--lumo-error-color)");
+            warningIcon.setSize("18px");
+            warningIcon.setTooltipText("Primary key alias – this alias points to the default master key. " +
+                    "Deleting or reassigning it may affect key operations.");
+            leftSide.add(warningIcon);
+
+            Span primaryBadge = new Span("PRIMARY");
+            primaryBadge.getElement().getThemeList().add("badge");
+            primaryBadge.addClassName(LumoUtility.Background.ERROR_10);
+            primaryBadge.addClassName(LumoUtility.TextColor.ERROR);
+            primaryBadge.addClassName(LumoUtility.FontSize.XSMALL);
+            primaryBadge.addClassName(LumoUtility.Padding.Horizontal.SMALL);
+            primaryBadge.addClassName(LumoUtility.BorderRadius.MEDIUM);
+            leftSide.add(primaryBadge);
+        }
+
+        // Right side buttons
         buttonBar = new HorizontalLayout();
         buttonBar.setSpacing(true);
         buttonBar.getStyle().set("flex-wrap", "wrap");
         buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
-        Button updateBtn = createIconButton(VaadinIcon.EDIT, "Reassign this alias to another key");
+        Button updateBtn = createIconButton(VaadinIcon.EDIT, "Update alias (rename or reassign)");
         updateBtn.addClickListener(e -> updateAlias());
 
         Button deleteBtn = createIconButton(VaadinIcon.TRASH, "Delete this alias");
@@ -88,16 +112,43 @@ class AliasCard extends VerticalLayout {
         deleteBtn.addClickListener(e -> deleteAlias());
 
         buttonBar.add(updateBtn, deleteBtn);
-        headerRow.add(aliasSpan, buttonBar);
+
+        headerRow = new HorizontalLayout();
+        headerRow.setWidthFull();
+        headerRow.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        headerRow.getStyle().set("flex-wrap", "wrap");
+        headerRow.setSpacing(true);
+        headerRow.add(leftSide, buttonBar);
         add(headerRow);
 
-        // Target key info
+        // Target key row with copy button
+        HorizontalLayout targetRow = new HorizontalLayout();
+        targetRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        targetRow.setSpacing(true);
         targetSpan = new Span("Target key: " + targetKeyId);
         targetSpan.addClassName(LumoUtility.FontSize.SMALL);
         targetSpan.addClassName(LumoUtility.TextColor.SECONDARY);
         targetSpan.getStyle().set("word-break", "break-word");
         targetSpan.getElement().setAttribute("title", targetKeyId);
-        add(targetSpan);
+        targetRow.add(targetSpan);
+        targetRow.add(MainView.createCopyButton(VaadinIcon.COPY_O, targetKeyId, "Copy target key ID"));
+        add(targetRow);
+
+        // Alias WRN row with copy button (if present)
+        if (aliasWrn != null && !aliasWrn.isBlank()) {
+            HorizontalLayout wrnRow = new HorizontalLayout();
+            wrnRow.setAlignItems(FlexComponent.Alignment.CENTER);
+            wrnRow.setSpacing(true);
+            Span wrnSpan = new Span("WRN: " + aliasWrn);
+            wrnSpan.addClassName(LumoUtility.FontSize.SMALL);
+            wrnSpan.addClassName(LumoUtility.TextColor.SECONDARY);
+            wrnSpan.getStyle().set("word-break", "break-word");
+            wrnSpan.getElement().setAttribute("title", aliasWrn);
+            wrnRow.add(wrnSpan);
+            wrnRow.add(MainView.createCopyButton(VaadinIcon.COPY_O, aliasWrn, "Copy alias WRN"));
+            add(wrnRow);
+        }
 
         // Creation date (if present)
         if (createDate != null && !createDate.isEmpty()) {
@@ -106,6 +157,19 @@ class AliasCard extends VerticalLayout {
             dateSpan.addClassName(LumoUtility.TextColor.TERTIARY);
             dateSpan.getElement().setAttribute("title", createDate);
             add(dateSpan);
+        }
+
+        // Extra warning line for primary key (no copy button, matches KeyCard's extra info)
+        if (Boolean.TRUE.equals(primaryKey)) {
+            HorizontalLayout warningLine = new HorizontalLayout();
+            warningLine.setAlignItems(FlexComponent.Alignment.CENTER);
+            warningLine.setSpacing(true);
+            Span extraWarning = new Span("⚠️ This is the primary key alias. Handle with care.");
+            extraWarning.addClassName(LumoUtility.FontSize.XSMALL);
+            extraWarning.addClassName(LumoUtility.TextColor.ERROR);
+            extraWarning.getStyle().set("margin-top", "var(--lumo-space-xs)");
+            warningLine.add(extraWarning);
+            add(warningLine);
         }
 
         injectResponsiveStyles();
@@ -161,7 +225,7 @@ class AliasCard extends VerticalLayout {
     }
 
     private void deleteAlias() {
-        new DeleteAliasDialog(parentView, kmsApiService, parentView::resetPaginationAndLoad, aliasName).open();
+        new DeleteAliasDialog(parentView, kmsApiService, parentView::resetPaginationAndLoad, aliasName, primaryKey).open();
     }
 
     private void updateAlias() {

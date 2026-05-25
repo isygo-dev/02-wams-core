@@ -355,7 +355,21 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * </p>
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = SchemaColumnConstantName.C_KEY_STORE_ID, referencedColumnName = SchemaColumnConstantName.C_ID)
+    @JoinColumns(foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_KMS_KEY_REF_KMS_KEY_STORE),
+            value = {
+            @JoinColumn(
+                    name = SchemaColumnConstantName.C_TENANT,
+                    referencedColumnName = SchemaColumnConstantName.C_TENANT,
+                    insertable = false,
+                    updatable = false
+            ),
+            @JoinColumn(
+                    name = SchemaColumnConstantName.C_KEY_STORE_ID,
+                    referencedColumnName = SchemaColumnConstantName.C_ID,
+                    insertable = false,
+                    updatable = false
+            )
+    })
     private KmsCustomKeyStore customKeyStore;
 
     /**

@@ -67,4 +67,6 @@ public interface SchemaFkConstantName extends ComSchemaFkConstantName {
      * The constant FK_PASSWORD_INFO_REF_ACCOUNT.
      */
     String FK_PASSWORD_INFO_REF_ACCOUNT = "FK_PASSWORD_INFO_REF_ACCOUNT";
+    String FK_KMS_KEY_REF_KMS_KEY_STORE = "FK_KMS_KEY_REF_KMS_KEY_STORE";
+    String FK_KMS_ALIAS_REF_KMS_KEY_STORE = "FK_KMS_ALIAS_REF_KMS_KEY_STORE";
 }

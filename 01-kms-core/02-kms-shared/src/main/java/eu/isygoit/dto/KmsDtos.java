@@ -1,6 +1,7 @@
 package eu.isygoit.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.isygoit.annotation.ValidCreateCustomKeyStoreRequest;
 import eu.isygoit.dto.data.KeyPairMaterial;
@@ -1356,6 +1357,9 @@ public final class KmsDtos {
             @Schema(description = "Target key ID")
             private String targetKeyId;
 
+            @Schema(description = "Is primary key alias")
+            private Boolean primaryKey;
+
             @Schema(description = "Creation date")
             @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
             private String createDate;
@@ -1458,6 +1462,49 @@ public final class KmsDtos {
     // =========================================================================
     // Key Policies
     // =========================================================================
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public class KeyPolicy {
+
+        @JsonProperty("Version")
+        private String version; // "2012-10-17"
+
+        @JsonProperty("Id")
+        private String id; // optionnel
+
+        @JsonProperty("Statement")
+        private List<Statement> statements;
+
+        @Data
+        @Builder
+        @NoArgsConstructor
+        @AllArgsConstructor
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        public static class Statement {
+
+            @JsonProperty("Sid")
+            private String sid; // identifiant optionnel
+
+            @JsonProperty("Effect")
+            private String effect; // "Allow" ou "Deny"
+
+            @JsonProperty("Principal")
+            private Object principal; // peut être String, Map<String, String> ou "AWS": "arn:..."
+
+            @JsonProperty("Action")
+            private Object action; // String ou List<String>
+
+            @JsonProperty("Resource")
+            private Object resource; // String ou List<String>
+
+            @JsonProperty("Condition")
+            private Map<String, Map<String, String>> condition; // ex: { "Bool" : { "aws:MultiFactorAuthPresent": "true" } }
+        }
+    }
 
     @Data
     @Builder

@@ -1,66 +1,64 @@
 package eu.isygoit.ui.views.alias.dialog;
 
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.KmsDtos.DeleteAliasResponse;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.views.BaseActionDialog;
+import eu.isygoit.ui.views.PinBaseActionDialog;
 import eu.isygoit.ui.views.alias.AliasesView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
 /**
- * Dialog for deleting an alias with confirmation.
- * Extends BaseActionDialog to reuse standard Ok/Cancel buttons and error handling.
+ * Dialog for deleting an alias.
+ * If the alias is the primary key, a 9‑digit confirmation code is required.
+ * Otherwise, it behaves like a simple confirmation dialog.
  */
-public class DeleteAliasDialog extends BaseActionDialog {
+public class DeleteAliasDialog extends PinBaseActionDialog {
 
     private final AliasesView parentView;
     private final KmsApiService kmsApiService;
-    private final Runnable onSuccess;
-
     private final String aliasName;
 
     public DeleteAliasDialog(AliasesView parentView,
                              KmsApiService kmsApiService,
                              Runnable onSuccess,
-                             String aliasName) {
-        super("Delete alias", onSuccess);
+                             String aliasName,
+                             Boolean primaryKey) {
+        super("Delete alias",
+                primaryKey ? "WARNING: This is the primary key alias. Deleting it may affect default key operations."
+                        : "Are you sure you want to delete alias '" + aliasName + "'?",
+                onSuccess,
+                Boolean.TRUE.equals(primaryKey)); // only require PIN for primary key
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
         this.aliasName = aliasName;
-        this.onSuccess = onSuccess;
 
         setOkButtonText("Delete");
         addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
-
-        buildContent();
-        setWidth("450px");
-    }
-
-    private void buildContent() {
-        VerticalLayout layout = new VerticalLayout();
-        layout.setSpacing(true);
-        layout.setPadding(true);
-
-        layout.add(new Span("Are you sure you want to delete alias '" + aliasName + "'?"));
-        layout.add(new Span("The underlying KMS key will not be affected."));
-
-        // Add the content to the dialog (BaseActionDialog extends Dialog)
-        add(layout);
+        setWidth("500px");
     }
 
     @Override
     protected boolean onOk() {
         parentView.showLoading(true);
+
+        // Extra safety: validate PIN again (the base class already validated the button, but double-check)
+        if (!validatePin()) {
+            String errorMsg = "Invalid confirmation code. Deletion aborted.";
+            showError(errorMsg);
+            Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            parentView.showLoading(false);
+            return false;
+        }
+
         try {
             ResponseEntity<DeleteAliasResponse> response = kmsApiService.deleteAlias(aliasName);
             if (!response.getStatusCode().is2xxSuccessful()) {
                 String errorMsg = "Deletion failed: " + response.getStatusCode();
-                this.append(errorMsg);
+                showError(errorMsg);
                 Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return false;
@@ -69,22 +67,21 @@ public class DeleteAliasDialog extends BaseActionDialog {
             close();
             Notification.show("Alias deleted", 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-
             return true;
+
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
-            this.append(errorMsg);
+            showError(errorMsg);
             Notification.show("Deletion error: " + errorMsg, 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } catch (Exception ex) {
             String errorMsg = ex.getMessage();
-            this.append(errorMsg);
+            showError(errorMsg);
             Notification.show("Error: " + errorMsg, 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             parentView.showLoading(false);
         }
-
         return false;
     }
 }

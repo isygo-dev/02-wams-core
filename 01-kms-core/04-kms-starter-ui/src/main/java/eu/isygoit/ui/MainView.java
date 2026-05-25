@@ -759,4 +759,26 @@ public class MainView extends VerticalLayout {
             return keyUsage;
         }
     }
+
+    /**
+     * Creates a compact copy button consistent with KeyCard's style.
+     */
+    public static Button createCopyButton(VaadinIcon icon, String textToCopy, String tooltip) {
+        Button btn = new Button(new Icon(icon));
+        btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        btn.setTooltipText(tooltip);
+        btn.setWidth("20px");
+        btn.setHeight("20px");
+        btn.addClickListener(e -> MainView.copyToClipboard(textToCopy));
+        return btn;
+    }
+
+    public static void copyToClipboard(String text) {
+        UI.getCurrent().getPage().executeJs(
+                "navigator.clipboard.writeText($0).then(() => { $0.dispatchEvent(new Event('copy-success')); }).catch(() => { $0.dispatchEvent(new Event('copy-error')); });",
+                text
+        );
+        Notification.show("Key ID copied to clipboard", 1500, Notification.Position.TOP_END)
+                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+    }
 }

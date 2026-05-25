@@ -56,7 +56,8 @@ public class KmsAlias extends AuditableEntity<Long> implements ITenantAssignable
     private Boolean primaryKey = Boolean.FALSE;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
+    @JoinColumns(foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_KMS_ALIAS_REF_KMS_KEY_STORE),
+            value = {
             @JoinColumn(
                     name = SchemaColumnConstantName.C_TENANT,
                     referencedColumnName = SchemaColumnConstantName.C_TENANT,

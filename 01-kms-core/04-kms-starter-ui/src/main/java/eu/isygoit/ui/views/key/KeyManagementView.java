@@ -432,15 +432,6 @@ public class KeyManagementView extends VerticalLayout {
         });
     }
 
-    void copyToClipboard(String text) {
-        UI.getCurrent().getPage().executeJs(
-                "navigator.clipboard.writeText($0).then(() => { $0.dispatchEvent(new Event('copy-success')); }).catch(() => { $0.dispatchEvent(new Event('copy-error')); });",
-                text
-        );
-        Notification.show("Key ID copied to clipboard", 1500, Notification.Position.TOP_END)
-                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-    }
-
     public record KeyStatusOption(String label, IEnumKeyStatus.Types value) {
     }
 }

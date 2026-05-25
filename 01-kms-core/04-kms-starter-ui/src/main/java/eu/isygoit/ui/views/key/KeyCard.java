@@ -23,6 +23,7 @@ import eu.isygoit.dto.KmsDtos.ListResourceTagsResponse;
 import eu.isygoit.dto.KmsDtos.UpdateKeyRotationRequest;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.MainView;
 import eu.isygoit.ui.views.key.dialog.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -50,7 +51,6 @@ class KeyCard extends VerticalLayout {
     private Span titleSpan;
     private Span statusChip;
     private Span versionSpan;
-    private Button copyVersionBtn;
     private Span descSpan;
     private Button editBtn;
     private Button describeBtn;
@@ -124,19 +124,14 @@ class KeyCard extends VerticalLayout {
         statusChip.getElement().setAttribute("title", "Key status: " + statusText);
         updateStatusChipStyle();
 
-        // --- Version with copy button ---
+        // --- Version with copy button (using MainView.createCopyButton) ---
         versionSpan = new Span();
-        copyVersionBtn = new Button(new Icon(VaadinIcon.COPY_O));
-        copyVersionBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        copyVersionBtn.setTooltipText("Copy current key version");
-        copyVersionBtn.setWidth("20px");
-        copyVersionBtn.setHeight("20px");
-        copyVersionBtn.addClickListener(e -> {
-            String currentVersion = (metadata != null && metadata.getCurrentVersion() != null)
-                    ? metadata.getCurrentVersion() : "N/A";
-            keyManagementView.copyToClipboard(currentVersion);
-        });
         updateVersionDisplay();
+
+        // Copy button for version
+        Button copyVersionBtn = MainView.createCopyButton(VaadinIcon.COPY_O,
+                (metadata != null && metadata.getCurrentVersion() != null) ? metadata.getCurrentVersion() : "N/A",
+                "Copy current key version");
 
         // --- Left part of header (alias, status, version) ---
         HorizontalLayout versionLayout = new HorizontalLayout(versionSpan, copyVersionBtn);
@@ -286,12 +281,8 @@ class KeyCard extends VerticalLayout {
             Span keyIdSpan = new Span("ID: " + keyId);
             keyIdSpan.getStyle().set("margin-right", "4px");
             keyIdSpan.getElement().setAttribute("title", keyId);
-            Button copyIdBtn = new Button(new Icon(VaadinIcon.COPY_O));
-            copyIdBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-            copyIdBtn.setTooltipText("Copy full key ID");
-            copyIdBtn.addClickListener(e -> keyManagementView.copyToClipboard(keyId));
-            copyIdBtn.setWidth("24px");
-            copyIdBtn.setHeight("24px");
+            // Use MainView.createCopyButton for key ID
+            Button copyIdBtn = MainView.createCopyButton(VaadinIcon.COPY_O, keyId, "Copy full key ID");
             keyIdLayout.add(keyIdSpan, copyIdBtn);
             metaRow2.add(keyIdLayout);
             metaRow2.add(new Span("•"));
@@ -525,7 +516,7 @@ class KeyCard extends VerticalLayout {
         });
         layout.add(scheduleDeleteBtn);
 
-        // ✅ Rotate immediately button - only shown if automatic rotation is enabled
+        // Rotate immediately button - only shown if automatic rotation is enabled
         boolean rotationEnabled = metadata != null && metadata.getRotationEnabled() != null && metadata.getRotationEnabled();
         if (rotationEnabled) {
             Button rotateNowBtn = new Button("Rotate immediately", new Icon(VaadinIcon.REFRESH));
