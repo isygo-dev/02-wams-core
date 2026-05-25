@@ -202,7 +202,7 @@ public class ByokView extends VerticalLayout {
                 clearParameters();
             }
         } catch (Exception e) {
-            Notification.show("Failed to load keys: " + e.getMessage(), 5000, Notification.Position.TOP_END)
+            Notification.show("Failed to load keys: " + e.getMessage(), 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             showLoading(false);
@@ -227,7 +227,7 @@ public class ByokView extends VerticalLayout {
 
     private void generateParameters() {
         if (selectedKeyId == null) {
-            Notification.show("Please select a key first", 3000, Notification.Position.TOP_END)
+            Notification.show("Please select a key first", 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
@@ -244,14 +244,14 @@ public class ByokView extends VerticalLayout {
                 wrappedKeyDisplay.setValue(params.getPublicKey());
                 importTokenDisplay.setValue(params.getImportToken());
                 currentImportToken = params.getImportToken();
-                Notification.show("Parameters generated (valid until " + params.getValidTo() + ")", 5000, Notification.Position.TOP_END)
+                Notification.show("Parameters generated (valid until " + params.getValidTo() + ")", 8000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } else {
-                Notification.show("Failed to get import parameters", 3000, Notification.Position.TOP_END)
+                Notification.show("Failed to get import parameters", 8000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         } catch (Exception e) {
-            Notification.show("Error: " + e.getMessage(), 5000, Notification.Position.TOP_END)
+            Notification.show("Error: " + e.getMessage(), 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             showLoading(false);
@@ -260,17 +260,17 @@ public class ByokView extends VerticalLayout {
 
     private void importKeyMaterial() {
         if (selectedKeyId == null) {
-            Notification.show("Please select a key first", 3000, Notification.Position.TOP_END)
+            Notification.show("Please select a key first", 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
         if (!StringUtils.hasText(encryptedMaterialField.getValue())) {
-            Notification.show("Encrypted key material is required", 3000, Notification.Position.TOP_END)
+            Notification.show("Encrypted key material is required", 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
         if (currentImportToken == null) {
-            Notification.show("Please generate import parameters first (they expire after 24h)", 3000, Notification.Position.TOP_END)
+            Notification.show("Please generate import parameters first (they expire after 24h)", 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
@@ -293,15 +293,15 @@ public class ByokView extends VerticalLayout {
 
             ResponseEntity<KmsDtos.ImportKeyMaterialResponse> response = kmsApiService.importKeyMaterial(selectedKeyId, request);
             if (response.getStatusCode().is2xxSuccessful()) {
-                Notification.show("Key material imported successfully", 3000, Notification.Position.TOP_END)
+                Notification.show("Key material imported successfully", 8000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 clearParameters();
             } else {
-                Notification.show("Import failed", 3000, Notification.Position.TOP_END)
+                Notification.show("Import failed", 8000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         } catch (Exception e) {
-            Notification.show("Error: " + e.getMessage(), 5000, Notification.Position.TOP_END)
+            Notification.show("Error: " + e.getMessage(), 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             showLoading(false);
@@ -310,7 +310,7 @@ public class ByokView extends VerticalLayout {
 
     private void deleteImportedMaterial() {
         if (selectedKeyId == null) {
-            Notification.show("Please select a key first", 3000, Notification.Position.TOP_END)
+            Notification.show("Please select a key first", 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
@@ -319,15 +319,15 @@ public class ByokView extends VerticalLayout {
             ResponseEntity<KmsDtos.DeleteImportedKeyMaterialResponse> response =
                     kmsApiService.deleteImportedKeyMaterial(selectedKeyId);
             if (response.getStatusCode().is2xxSuccessful()) {
-                Notification.show("Imported key material deleted", 3000, Notification.Position.TOP_END)
+                Notification.show("Imported key material deleted", 8000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 clearParameters();
             } else {
-                Notification.show("Deletion failed", 3000, Notification.Position.TOP_END)
+                Notification.show("Deletion failed", 8000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         } catch (Exception e) {
-            Notification.show("Error: " + e.getMessage(), 5000, Notification.Position.TOP_END)
+            Notification.show("Error: " + e.getMessage(), 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             showLoading(false);

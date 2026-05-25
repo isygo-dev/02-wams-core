@@ -22,8 +22,8 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainLayout;
-import eu.isygoit.ui.MainView;
 import eu.isygoit.ui.views.keyPolicy.dialog.PolicyBuilderDialog;
+import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -50,9 +50,8 @@ public class PoliciesView extends VerticalLayout {
     private final Button loadButton = new Button("Load", new Icon(VaadinIcon.DOWNLOAD));
     private final Button saveButton = new Button("Save", new Icon(VaadinIcon.UPLOAD));
     private final Button formatButton = new Button("Format", new Icon(VaadinIcon.CODE));
-    private final Button copyButton = MainView.createCopyButton(VaadinIcon.COPY, "", "Copy policy JSON to clipboard");
+    private final Button copyButton = new Button(new Icon(VaadinIcon.COPY));
     private final Button builderButton = new Button("Policy Builder", new Icon(VaadinIcon.PUZZLE_PIECE));
-    private final Button loadFromEditorButton = new Button("Edit in Builder", new Icon(VaadinIcon.REFRESH));
 
     private String selectedKeyId = null;
     private List<KeyOption> keyOptions = new ArrayList<>();
@@ -126,25 +125,20 @@ public class PoliciesView extends VerticalLayout {
         configureButton(loadButton, "Load policy from selected key", ButtonVariant.LUMO_PRIMARY);
         configureButton(saveButton, "Save policy to selected key", ButtonVariant.LUMO_SUCCESS);
         configureButton(formatButton, "Pretty-format JSON", ButtonVariant.LUMO_TERTIARY);
+
+        // Custom copy button
         copyButton.setTooltipText("Copy policy JSON to clipboard");
-        copyButton.addClickListener(e -> {
-            String content = policyEditor.getValue();
-            if (StringUtils.hasText(content)) {
-                MainView.copyToClipboard(content);
-            } else {
-                showWarning("Nothing to copy – editor is empty");
-            }
-        });
-        configureButton(builderButton, "Open graphical policy builder", ButtonVariant.LUMO_CONTRAST);
-        configureButton(loadFromEditorButton, "Load current JSON into builder", ButtonVariant.LUMO_TERTIARY);
+        copyButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        copyButton.addClickListener(e -> copyPolicyToClipboard());
+
+        configureButton(builderButton, "Open graphical policy builder (creates new or edits existing)", ButtonVariant.LUMO_CONTRAST);
 
         loadButton.addClickListener(e -> loadPolicy());
         saveButton.addClickListener(e -> savePolicy());
         formatButton.addClickListener(e -> formatPolicy());
         builderButton.addClickListener(e -> openPolicyBuilder());
-        loadFromEditorButton.addClickListener(e -> loadFromEditorIntoBuilder());
 
-        actionBar.add(loadButton, saveButton, formatButton, copyButton, builderButton, loadFromEditorButton);
+        actionBar.add(loadButton, saveButton, formatButton, copyButton, builderButton);
         add(actionBar);
     }
 
@@ -205,8 +199,7 @@ public class PoliciesView extends VerticalLayout {
         saveButton.setEnabled(hasKey);
         formatButton.setEnabled(hasContent);
         copyButton.setEnabled(hasContent);
-        builderButton.setEnabled(hasContent);
-        loadFromEditorButton.setEnabled(hasKey && hasContent);
+        builderButton.setEnabled(true); // Always enabled – can create new policy or edit existing
     }
 
     private void loadKeyOptions() {
@@ -304,10 +297,12 @@ public class PoliciesView extends VerticalLayout {
             ResponseEntity<KmsDtos.PutKeyPolicyResponse> response = kmsApiService.putKeyPolicy(selectedKeyId, request);
             if (response.getStatusCode().is2xxSuccessful()) {
                 showSuccess("Policy saved successfully");
-                loadPolicy();
+                loadPolicy(); // reload to show the saved version
             } else {
                 showError("Save failed: " + response.getStatusCode());
             }
+        } catch (FeignException e) {
+            showError("Error saving policy: " + (e.status() == 500 ? e.contentUTF8() : e.getMessage()));
         } catch (Exception e) {
             showError("Error saving policy: " + e.getMessage());
         } finally {
@@ -326,14 +321,64 @@ public class PoliciesView extends VerticalLayout {
         }
     }
 
+    /**
+     * Custom copy-to-clipboard method for the policy editor.
+     * Uses the modern Clipboard API with explicit error handling.
+     */
+    private void copyPolicyToClipboard() {
+        String content = policyEditor.getValue();
+        if (!StringUtils.hasText(content)) {
+            showWarning("Nothing to copy – editor is empty");
+            return;
+        }
+        UI.getCurrent().getPage().executeJs(
+                "navigator.clipboard.writeText($0).then(() => { " +
+                        "  const notification = document.createElement('div'); " +
+                        "  notification.textContent = 'Policy JSON copied to clipboard'; " +
+                        "  notification.style.position = 'fixed'; " +
+                        "  notification.style.bottom = '20px'; " +
+                        "  notification.style.right = '20px'; " +
+                        "  notification.style.backgroundColor = '#4caf50'; " +
+                        "  notification.style.color = 'white'; " +
+                        "  notification.style.padding = '10px 20px'; " +
+                        "  notification.style.borderRadius = '4px'; " +
+                        "  notification.style.zIndex = '1000'; " +
+                        "  document.body.appendChild(notification); " +
+                        "  setTimeout(() => notification.remove(), 2000); " +
+                        "}).catch(() => { " +
+                        "  const notification = document.createElement('div'); " +
+                        "  notification.textContent = 'Failed to copy. Check clipboard permissions.'; " +
+                        "  notification.style.position = 'fixed'; " +
+                        "  notification.style.bottom = '20px'; " +
+                        "  notification.style.right = '20px'; " +
+                        "  notification.style.backgroundColor = '#f44336'; " +
+                        "  notification.style.color = 'white'; " +
+                        "  notification.style.padding = '10px 20px'; " +
+                        "  notification.style.borderRadius = '4px'; " +
+                        "  notification.style.zIndex = '1000'; " +
+                        "  document.body.appendChild(notification); " +
+                        "  setTimeout(() => notification.remove(), 3000); " +
+                        "});",
+                content
+        );
+    }
+
     private void openPolicyBuilder() {
         KmsDtos.KeyPolicy existingPolicy = null;
         String currentText = policyEditor.getValue();
         if (StringUtils.hasText(currentText)) {
             try {
                 existingPolicy = objectMapper.readValue(currentText, KmsDtos.KeyPolicy.class);
+                // Successfully parsed – use it
             } catch (Exception e) {
-                showWarning("Current policy is not valid JSON – starting with empty policy");
+                // Not valid JSON – ask user what to do
+                Notification.show(
+                        "Current editor content is not a valid KeyPolicy JSON.\nStarting with an empty policy.",
+                        5000,
+                        Notification.Position.TOP_END
+                ).addThemeVariants(NotificationVariant.LUMO_WARNING);
+                existingPolicy = null;
+                return;
             }
         }
         PolicyBuilderDialog dialog = new PolicyBuilderDialog(objectMapper, existingPolicy, newPolicy -> {
@@ -347,30 +392,6 @@ public class PoliciesView extends VerticalLayout {
             }
         });
         dialog.open();
-    }
-
-    private void loadFromEditorIntoBuilder() {
-        String currentText = policyEditor.getValue();
-        if (!StringUtils.hasText(currentText)) {
-            showWarning("Editor is empty");
-            return;
-        }
-        try {
-            KmsDtos.KeyPolicy policy = objectMapper.readValue(currentText, KmsDtos.KeyPolicy.class);
-            PolicyBuilderDialog dialog = new PolicyBuilderDialog(objectMapper, policy, newPolicy -> {
-                try {
-                    String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(newPolicy);
-                    policyEditor.setValue(json);
-                    showSuccess("Policy updated from builder");
-                    updateButtonsState();
-                } catch (Exception ex) {
-                    showError("Error generating JSON: " + ex.getMessage());
-                }
-            });
-            dialog.open();
-        } catch (Exception e) {
-            showError("Invalid JSON in editor: " + e.getMessage());
-        }
     }
 
     private String prettyPrintJson(String json) throws Exception {
@@ -387,7 +408,6 @@ public class PoliciesView extends VerticalLayout {
             formatButton.setEnabled(false);
             copyButton.setEnabled(false);
             builderButton.setEnabled(false);
-            loadFromEditorButton.setEnabled(false);
             policyEditor.setEnabled(false);
         } else {
             policyEditor.setEnabled(true);
@@ -396,17 +416,17 @@ public class PoliciesView extends VerticalLayout {
     }
 
     private void showSuccess(String msg) {
-        Notification.show(msg, 3000, Notification.Position.TOP_END)
+        Notification.show(msg, 8000, Notification.Position.TOP_END)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
     private void showError(String msg) {
-        Notification.show(msg, 5000, Notification.Position.TOP_END)
+        Notification.show(msg, 8000, Notification.Position.TOP_END)
                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 
     private void showWarning(String msg) {
-        Notification.show(msg, 3000, Notification.Position.TOP_END)
+        Notification.show(msg, 8000, Notification.Position.TOP_END)
                 .addThemeVariants(NotificationVariant.LUMO_WARNING);
     }
 

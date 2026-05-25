@@ -1071,11 +1071,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
         try {
-            SetKeyPolicyRequest internal = SetKeyPolicyRequest.builder()
-                    .policy(request.getPolicy())
-                    .bypassPolicyLockoutSafetyCheck(request.getBypassPolicyLockoutSafetyCheck())
-                    .build();
-            keyPolicyService.setKeyPolicy(tenant, keyId, internal);
+            keyPolicyService.setKeyPolicy(tenant, keyId, request);
             auditService.logAction(tenant, IKmsActionType.Types.PUT_KEY_POLICY, keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());

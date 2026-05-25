@@ -112,7 +112,7 @@ public class CryptoOperationsView extends VerticalLayout {
             Tab selected = event.getSelectedTab();
             boolean supported = isTabSupported(selected);
             if (!supported && selectedKeyId != null) {
-                Notification.show("The selected key does not support this operation.", 3000, Notification.Position.TOP_END)
+                Notification.show("The selected key does not support this operation.", 8000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
             }
             encryptDecryptPanel.setVisible(selected == encryptDecryptTabHeader);
@@ -224,7 +224,7 @@ public class CryptoOperationsView extends VerticalLayout {
                 updateTabBasedOnKey();
             }
         } catch (Exception e) {
-            Notification.show("Failed to load keys: " + e.getMessage(), 5000, Notification.Position.TOP_END)
+            Notification.show("Failed to load keys: " + e.getMessage(), 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             showLoading(false);
@@ -256,7 +256,7 @@ public class CryptoOperationsView extends VerticalLayout {
                 updateTabBasedOnKey();
             }
         } catch (Exception e) {
-            Notification.show("Failed to load key metadata", 3000, Notification.Position.TOP_END)
+            Notification.show("Failed to load key metadata", 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
         }
     }
@@ -275,10 +275,10 @@ public class CryptoOperationsView extends VerticalLayout {
             Tab supported = getFirstSupportedTab();
             if (supported != null) {
                 tabs.setSelectedTab(supported);
-                Notification.show("Switched to a supported operation for this key.", 3000, Notification.Position.TOP_END)
+                Notification.show("Switched to a supported operation for this key.", 8000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
             } else {
-                Notification.show("This key does not support any cryptographic operation.", 3000, Notification.Position.TOP_END)
+                Notification.show("This key does not support any cryptographic operation.", 8000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         }

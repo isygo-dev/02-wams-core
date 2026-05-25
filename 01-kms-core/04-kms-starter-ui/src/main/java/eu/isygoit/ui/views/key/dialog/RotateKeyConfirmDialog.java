@@ -42,13 +42,13 @@ public class RotateKeyConfirmDialog extends PinBaseActionDialog {
             if (!response.getStatusCode().is2xxSuccessful()) {
                 String errorMsg = "Rotation failed: " + response.getStatusCode();
                 this.append(errorMsg);
-                Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
+                Notification.show(errorMsg, 8000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return false;
             }
 
             close();
-            Notification.show("Key rotated successfully", 3000, Notification.Position.TOP_END)
+            Notification.show("Key rotated successfully", 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             if (onSuccess != null) onSuccess.run();
             return true;
@@ -56,13 +56,13 @@ public class RotateKeyConfirmDialog extends PinBaseActionDialog {
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Rotation error: " + errorMsg, 5000, Notification.Position.TOP_END)
+            Notification.show("Rotation error: " + errorMsg, 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             return false;
         } catch (Exception ex) {
             String errorMsg = ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Error: " + errorMsg, 5000, Notification.Position.TOP_END)
+            Notification.show("Error: " + errorMsg, 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             return false;
         } finally {

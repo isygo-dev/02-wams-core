@@ -66,7 +66,7 @@ public class CreateCustomKeyStoreDialog extends BaseActionDialog {
         if (!StringUtils.hasText(name)) {
             String errorMsg = "Store name is required";
             this.append(errorMsg);
-            Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
+            Notification.show(errorMsg, 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             return false;
         }
@@ -97,25 +97,25 @@ public class CreateCustomKeyStoreDialog extends BaseActionDialog {
             if (!response.getStatusCode().is2xxSuccessful()) {
                 String errorMsg = "Creation failed: " + response.getStatusCode();
                 this.append(errorMsg);
-                Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
+                Notification.show(errorMsg, 8000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return false;
             }
 
             close();
-            Notification.show("Custom key store created", 3000, Notification.Position.TOP_END)
+            Notification.show("Custom key store created", 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
             return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Creation error: " + errorMsg, 5000, Notification.Position.TOP_END)
+            Notification.show("Creation error: " + errorMsg, 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } catch (Exception ex) {
             String errorMsg = ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Error: " + errorMsg, 5000, Notification.Position.TOP_END)
+            Notification.show("Error: " + errorMsg, 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             parentView.showLoading(false);

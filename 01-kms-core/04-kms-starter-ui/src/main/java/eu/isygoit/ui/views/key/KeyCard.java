@@ -430,11 +430,11 @@ class KeyCard extends VerticalLayout {
                             .enableRotation(false)
                             .build();
                     kmsApiService.updateKeyRotation(keyId, request);
-                    Notification.show("Rotation disabled", 3000, Notification.Position.TOP_END)
+                    Notification.show("Rotation disabled", 8000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                     refresh();
                 } catch (Exception ex) {
-                    Notification.show("Failed to disable rotation: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
+                    Notification.show("Failed to disable rotation: " + ex.getMessage(), 8000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
             });
@@ -461,11 +461,11 @@ class KeyCard extends VerticalLayout {
                             .rotationPeriodInDays(period)
                             .build();
                     kmsApiService.updateKeyRotation(keyId, request);
-                    Notification.show("Rotation enabled with period " + period + " days", 3000, Notification.Position.TOP_END)
+                    Notification.show("Rotation enabled with period " + period + " days", 8000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                     refresh();
                 } catch (Exception ex) {
-                    Notification.show("Failed to enable rotation: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
+                    Notification.show("Failed to enable rotation: " + ex.getMessage(), 8000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
             });

@@ -2401,21 +2401,6 @@ public final class KmsDtos {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    @Schema(description = "Set key policy request DTO")
-    public static class SetKeyPolicyRequest {
-        @NotNull
-        @Schema(description = "Policy document", required = true)
-        private Map<String, Object> policy;
-
-        @JsonProperty("BypassPolicyLockoutSafetyCheck")
-        @Schema(description = "Bypass safety checks")
-        private Boolean bypassPolicyLockoutSafetyCheck;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
     @Schema(description = "List aliases request")
     public static class ListAliasesRequest {
         @Schema(description = "Max results")

@@ -84,8 +84,8 @@ class KeyPolicyServiceTest {
         Map<String, Object> map = new HashMap<>();
         map.put("Version", "2012-10-17");
 
-        SetKeyPolicyRequest request =
-                SetKeyPolicyRequest.builder()
+        PutKeyPolicyRequest request =
+                PutKeyPolicyRequest.builder()
                         .policy(map)
                         .build();
 
@@ -110,8 +110,8 @@ class KeyPolicyServiceTest {
         Map<String, Object> map = new HashMap<>();
         map.put("Version", "2012-10-17");
 
-        SetKeyPolicyRequest request =
-                SetKeyPolicyRequest.builder()
+        PutKeyPolicyRequest request =
+                PutKeyPolicyRequest.builder()
                         .policy(map)
                         .build();
 
@@ -132,8 +132,8 @@ class KeyPolicyServiceTest {
     @Test
     void shouldThrowWhenPolicySerializationFails() throws Exception {
 
-        SetKeyPolicyRequest request =
-                SetKeyPolicyRequest.builder()
+        PutKeyPolicyRequest request =
+                PutKeyPolicyRequest.builder()
                         .policy(Map.of("k", "v"))
                         .build();
 
@@ -343,7 +343,7 @@ class KeyPolicyServiceTest {
         policy.put("Version", "2012-10-17");
         policy.put("Statement", new ArrayList<>());
 
-        SetKeyPolicyRequest request = SetKeyPolicyRequest.builder()
+        PutKeyPolicyRequest request = PutKeyPolicyRequest.builder()
                 .policy(policy)
                 .bypassPolicyLockoutSafetyCheck(false)
                 .build();
@@ -380,7 +380,7 @@ class KeyPolicyServiceTest {
         Map<String, Object> policy = new HashMap<>();
         policy.put("Version", "2012-10-17");
 
-        SetKeyPolicyRequest request = SetKeyPolicyRequest.builder()
+        PutKeyPolicyRequest request = PutKeyPolicyRequest.builder()
                 .policy(policy)
                 .build();
 

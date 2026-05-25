@@ -244,7 +244,7 @@ public class GrantsView extends VerticalLayout {
                 grantsGrid.setItems(new ArrayList<>());
             }
         } catch (Exception e) {
-            Notification.show("Failed to load keys: " + e.getMessage(), 5000, Notification.Position.TOP_END)
+            Notification.show("Failed to load keys: " + e.getMessage(), 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             showLoading(false);
@@ -276,7 +276,7 @@ public class GrantsView extends VerticalLayout {
                 grantsGrid.setItems(new ArrayList<>());
             }
         } catch (Exception e) {
-            Notification.show("Failed to load grants: " + e.getMessage(), 5000, Notification.Position.TOP_END)
+            Notification.show("Failed to load grants: " + e.getMessage(), 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             grantsGrid.setItems(new ArrayList<>());
         } finally {
@@ -297,7 +297,7 @@ public class GrantsView extends VerticalLayout {
     // ----- Create Grant Dialog (responsive width) -----
     private void openCreateGrantDialog() {
         if (selectedKeyId == null) {
-            Notification.show("Please select a key first", 3000, Notification.Position.TOP_END)
+            Notification.show("Please select a key first", 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
@@ -337,7 +337,7 @@ public class GrantsView extends VerticalLayout {
             String grantee = granteeField.getValue();
             List<String> operations = new ArrayList<>(operationsGroup.getSelectedItems());
             if (!StringUtils.hasText(grantee) || operations.isEmpty()) {
-                Notification.show("Grantee principal and at least one operation are required", 3000, Notification.Position.TOP_END)
+                Notification.show("Grantee principal and at least one operation are required", 8000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return;
             }
@@ -351,7 +351,7 @@ public class GrantsView extends VerticalLayout {
                             .encryptionContextEquals((Map<String, String>) constraintsMap.get("encryptionContextEquals"))
                             .build();
                 } catch (Exception ex) {
-                    Notification.show("Invalid constraints JSON: " + ex.getMessage(), 4000, Notification.Position.TOP_END)
+                    Notification.show("Invalid constraints JSON: " + ex.getMessage(), 8000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                     return;
                 }
@@ -368,15 +368,15 @@ public class GrantsView extends VerticalLayout {
                         .build();
                 ResponseEntity<KmsDtos.CreateGrantResponse> response = kmsApiService.createGrant(selectedKeyId, request);
                 if (response.getStatusCode().is2xxSuccessful()) {
-                    Notification.show("Grant created", 3000, Notification.Position.TOP_END)
+                    Notification.show("Grant created", 8000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                     loadGrants();
                 } else {
-                    Notification.show("Creation failed: " + response.getStatusCode(), 3000, Notification.Position.TOP_END)
+                    Notification.show("Creation failed: " + response.getStatusCode(), 8000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 }
             } catch (Exception ex) {
-                Notification.show("Error: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
+                Notification.show("Error: " + ex.getMessage(), 8000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
@@ -391,18 +391,18 @@ public class GrantsView extends VerticalLayout {
     private void revokeSelectedGrant() {
         KmsDtos.ListGrantsResponse.Grant selected = grantsGrid.asSingleSelect().getValue();
         if (selected == null) {
-            Notification.show("No grant selected", 3000, Notification.Position.TOP_END)
+            Notification.show("No grant selected", 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
         if (selectedKeyId == null) return;
         try {
             kmsApiService.revokeGrant(selectedKeyId, selected.getGrantId());
-            Notification.show("Grant revoked", 3000, Notification.Position.TOP_END)
+            Notification.show("Grant revoked", 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             loadGrants();
         } catch (Exception e) {
-            Notification.show("Failed to revoke grant: " + e.getMessage(), 5000, Notification.Position.TOP_END)
+            Notification.show("Failed to revoke grant: " + e.getMessage(), 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }
@@ -410,7 +410,7 @@ public class GrantsView extends VerticalLayout {
     private void retireSelectedGrant() {
         KmsDtos.ListGrantsResponse.Grant selected = grantsGrid.asSingleSelect().getValue();
         if (selected == null) {
-            Notification.show("No grant selected", 3000, Notification.Position.TOP_END)
+            Notification.show("No grant selected", 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
@@ -421,11 +421,11 @@ public class GrantsView extends VerticalLayout {
                     .grantId(selected.getGrantId())
                     .build();
             kmsApiService.retireGrant(request);
-            Notification.show("Grant retired", 3000, Notification.Position.TOP_END)
+            Notification.show("Grant retired", 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             loadGrants();
         } catch (Exception e) {
-            Notification.show("Failed to retire grant: " + e.getMessage(), 5000, Notification.Position.TOP_END)
+            Notification.show("Failed to retire grant: " + e.getMessage(), 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }

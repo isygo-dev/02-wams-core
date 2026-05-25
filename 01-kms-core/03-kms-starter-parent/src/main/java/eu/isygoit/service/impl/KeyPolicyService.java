@@ -12,6 +12,7 @@ import eu.isygoit.repository.KmsKeyGrantRepository;
 import eu.isygoit.repository.KmsKeyPolicyRepository;
 import eu.isygoit.repository.RepoHelper;
 import eu.isygoit.service.IKeyPolicyService;
+import eu.isygoit.validator.KeyPolicyValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -32,16 +33,18 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class KeyPolicyService implements IKeyPolicyService {
 
+    private final KeyPolicyValidator keyPolicyValidator;
     private final KmsKeyPolicyRepository kmsKeyPolicyRepository;
     private final KmsKeyGrantRepository kmsKeyGrantRepository;
     private final ObjectMapper objectMapper;
 
     @Override
-    public Map<String, Object> setKeyPolicy(String tenant, String keyId, SetKeyPolicyRequest request) {
+    public Map<String, Object> setKeyPolicy(String tenant, String keyId, PutKeyPolicyRequest request) {
         log.info("Setting key policy for tenant: {} keyId: {}", tenant, keyId);
 
         try {
             String policyJson = objectMapper.writeValueAsString(request.getPolicy());
+            keyPolicyValidator.validatePolicyLockout(policyJson, request.getBypassPolicyLockoutSafetyCheck(), tenant);
             KmsKeyPolicy policy = kmsKeyPolicyRepository.findByTenantAndKeyId(tenant, keyId)
                     .orElse(KmsKeyPolicy.builder()
                             .tenant(tenant)

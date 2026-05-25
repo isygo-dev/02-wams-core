@@ -57,7 +57,7 @@ public class KeyManagementService implements IKeyManagementService {
     private KmsKeyPolicyRepository kmsKeyPolicyRepository;
 
     @Autowired
-    private KeyPolicyValidator policyValidator;
+    private KeyPolicyValidator keyPolicyValidator;
 
     @Override
     public CreateKeyResponse createKey(String tenant, CreateKeyRequest request) {
@@ -143,7 +143,7 @@ public class KeyManagementService implements IKeyManagementService {
 
             if (request.getPolicy() != null && !request.getPolicy().isEmpty()) {
                 String policyString = KmsKeyPolicy.serializePolicy(request.getPolicy());
-                policyValidator.validatePolicyLockout(policyString, request.getBypassPolicyLockoutSafetyCheck(), tenant);
+                keyPolicyValidator.validatePolicyLockout(policyString, request.getBypassPolicyLockoutSafetyCheck(), tenant);
                 KmsKeyPolicy keyPolicy = KmsKeyPolicy.builder()
                         .tenant(tenant)
                         .keyId(savedKey.getKeyId())

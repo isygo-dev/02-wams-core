@@ -150,7 +150,7 @@ public class PolicyBuilderDialog extends Dialog {
 
     private void savePolicy() {
         if (statements.isEmpty()) {
-            Notification.show("Policy must contain at least one statement", 3000, Notification.Position.TOP_END)
+            Notification.show("Policy must contain at least one statement", 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }

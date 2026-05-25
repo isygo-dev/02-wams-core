@@ -18,7 +18,7 @@ public interface IKeyPolicyService {
      * @param request the request
      * @return the map
      */
-    Map<String, Object> setKeyPolicy(String tenant, String keyId, SetKeyPolicyRequest request);
+    Map<String, Object> setKeyPolicy(String tenant, String keyId, PutKeyPolicyRequest request);
 
     /**
      * Get key policy.

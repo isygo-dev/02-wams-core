@@ -188,7 +188,7 @@ public class CustomKeyStoresView extends VerticalLayout {
                 allCards.forEach(cardsContainer::add);
             }
         } catch (Exception e) {
-            Notification.show("Failed to load custom key stores: " + e.getMessage(), 5000, Notification.Position.TOP_END)
+            Notification.show("Failed to load custom key stores: " + e.getMessage(), 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             showLoading(false);

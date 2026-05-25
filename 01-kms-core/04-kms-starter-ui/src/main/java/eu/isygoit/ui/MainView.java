@@ -115,7 +115,7 @@ public class MainView extends VerticalLayout {
         btn.setTooltipText(tooltip);
         btn.setWidth("20px");
         btn.setHeight("20px");
-        btn.addClickListener(e -> MainView.copyToClipboard(textToCopy));
+        btn.addClickListener(e -> MainView.copyToClipboard(textToCopy, String.format("Copied %s to clipboard", textToCopy)));
         return btn;
     }
 
@@ -123,12 +123,12 @@ public class MainView extends VerticalLayout {
     // Global Key Statistics
     // =========================================================================
 
-    public static void copyToClipboard(String text) {
+    public static void copyToClipboard(String text, String notificationText) {
         UI.getCurrent().getPage().executeJs(
                 "navigator.clipboard.writeText($0).then(() => { $0.dispatchEvent(new Event('copy-success')); }).catch(() => { $0.dispatchEvent(new Event('copy-error')); });",
                 text
         );
-        Notification.show("Key ID copied to clipboard", 1500, Notification.Position.TOP_END)
+        Notification.show(notificationText, 1500, Notification.Position.TOP_END)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
@@ -424,7 +424,7 @@ public class MainView extends VerticalLayout {
     private void loadKeyUsageStats() {
         KeyOption selected = usageKeyCombo.getValue();
         if (selected == null) {
-            Notification.show("Please select a key", 3000, Notification.Position.TOP_END)
+            Notification.show("Please select a key", 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
@@ -651,7 +651,7 @@ public class MainView extends VerticalLayout {
     private void loadAuditLogs() {
         KeyOption selected = auditKeyCombo.getValue();
         if (selected == null) {
-            Notification.show("Please select a KMS key", 3000, Notification.Position.TOP_END)
+            Notification.show("Please select a KMS key", 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
@@ -687,10 +687,10 @@ public class MainView extends VerticalLayout {
                 auditLoadingBar.setVisible(false);
                 loadLogsButton.setEnabled(true);
                 if (logs.isEmpty()) {
-                    Notification.show("No audit logs found for the selected criteria", 3000, Notification.Position.TOP_END)
+                    Notification.show("No audit logs found for the selected criteria", 8000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 } else {
-                    Notification.show("Loaded " + logs.size() + " log entries", 2000, Notification.Position.TOP_END)
+                    Notification.show("Loaded " + logs.size() + " log entries", 8000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 }
             });
@@ -698,7 +698,7 @@ public class MainView extends VerticalLayout {
             UI updateUi = ui != null ? ui : UI.getCurrent();
             if (updateUi != null) {
                 updateUi.access(() -> {
-                    Notification.show("Error loading audit logs", 3000, Notification.Position.TOP_END)
+                    Notification.show("Error loading audit logs", 8000, Notification.Position.TOP_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                     auditLoadingBar.setVisible(false);
                     loadLogsButton.setEnabled(true);

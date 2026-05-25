@@ -140,7 +140,7 @@ public class TagsView extends VerticalLayout {
                 tagsGrid.setVisible(false);
             }
         } catch (Exception e) {
-            Notification.show("Failed to load keys: " + e.getMessage(), 5000, Notification.Position.TOP_END)
+            Notification.show("Failed to load keys: " + e.getMessage(), 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             showLoading(false);
@@ -177,7 +177,7 @@ public class TagsView extends VerticalLayout {
             }
             tagsGrid.setVisible(true);
         } catch (Exception e) {
-            Notification.show("Failed to load tags: " + e.getMessage(), 5000, Notification.Position.TOP_END)
+            Notification.show("Failed to load tags: " + e.getMessage(), 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             tagsGrid.setItems(new ArrayList<>());
             tagsGrid.setVisible(true);
@@ -198,7 +198,7 @@ public class TagsView extends VerticalLayout {
     // ----- Add tag dialog (unchanged) -----
     private void openAddTagDialog() {
         if (selectedKeyId == null) {
-            Notification.show("Please select a key first", 3000, Notification.Position.TOP_END)
+            Notification.show("Please select a key first", 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
@@ -220,7 +220,7 @@ public class TagsView extends VerticalLayout {
             String tagKey = keyField.getValue();
             String tagValue = valueField.getValue();
             if (!StringUtils.hasText(tagKey) || !StringUtils.hasText(tagValue)) {
-                Notification.show("Both key and value are required", 3000, Notification.Position.TOP_END)
+                Notification.show("Both key and value are required", 8000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return;
             }
@@ -234,11 +234,11 @@ public class TagsView extends VerticalLayout {
                                 .build()))
                         .build();
                 kmsApiService.tagResource(selectedKeyId, request);
-                Notification.show("Tag added", 3000, Notification.Position.TOP_END)
+                Notification.show("Tag added", 8000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 loadTags();
             } catch (Exception ex) {
-                Notification.show("Failed to add tag: " + ex.getMessage(), 5000, Notification.Position.TOP_END)
+                Notification.show("Failed to add tag: " + ex.getMessage(), 8000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
@@ -254,12 +254,12 @@ public class TagsView extends VerticalLayout {
     private void confirmDeleteSelectedTag() {
         KmsDtos.ListResourceTagsResponse.Tag selected = tagsGrid.asSingleSelect().getValue();
         if (selected == null) {
-            Notification.show("No tag selected", 3000, Notification.Position.TOP_END)
+            Notification.show("No tag selected", 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
         if (selectedKeyId == null) {
-            Notification.show("Please select a key first", 3000, Notification.Position.TOP_END)
+            Notification.show("Please select a key first", 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
@@ -281,11 +281,11 @@ public class TagsView extends VerticalLayout {
                     .tagKeys(List.of(tagKey))
                     .build();
             kmsApiService.untagResource(selectedKeyId, request);
-            Notification.show("Tag removed", 3000, Notification.Position.TOP_END)
+            Notification.show("Tag removed", 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             loadTags();
         } catch (Exception e) {
-            Notification.show("Failed to remove tag: " + e.getMessage(), 5000, Notification.Position.TOP_END)
+            Notification.show("Failed to remove tag: " + e.getMessage(), 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }

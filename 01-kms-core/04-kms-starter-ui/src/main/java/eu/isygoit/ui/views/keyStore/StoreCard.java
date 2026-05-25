@@ -328,15 +328,15 @@ class StoreCard extends VerticalLayout {
         try {
             ResponseEntity<KmsDtos.ConnectCustomKeyStoreResponse> response = this.kmsApiService.connectCustomKeyStore(storeId);
             if (response.getStatusCode().is2xxSuccessful()) {
-                Notification.show("Connection initiated", 3000, Notification.Position.TOP_END)
+                Notification.show("Connection initiated", 8000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 parentView.loadStores();
             } else {
-                Notification.show("Connection failed", 3000, Notification.Position.TOP_END)
+                Notification.show("Connection failed", 8000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         } catch (Exception e) {
-            Notification.show("Error: " + e.getMessage(), 5000, Notification.Position.TOP_END)
+            Notification.show("Error: " + e.getMessage(), 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             parentView.showLoading(false);
@@ -348,15 +348,15 @@ class StoreCard extends VerticalLayout {
         try {
             ResponseEntity<KmsDtos.DisconnectCustomKeyStoreResponse> response = this.kmsApiService.disconnectCustomKeyStore(storeId);
             if (response.getStatusCode().is2xxSuccessful()) {
-                Notification.show("Disconnected", 3000, Notification.Position.TOP_END)
+                Notification.show("Disconnected", 8000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 parentView.loadStores();
             } else {
-                Notification.show("Disconnect failed", 3000, Notification.Position.TOP_END)
+                Notification.show("Disconnect failed", 8000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         } catch (Exception e) {
-            Notification.show("Error: " + e.getMessage(), 5000, Notification.Position.TOP_END)
+            Notification.show("Error: " + e.getMessage(), 8000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             parentView.showLoading(false);
