@@ -41,7 +41,7 @@ class KeyCard extends VerticalLayout {
     private String aliasOrId;
     private String statusText;
 
-    // Responsive components that will be dynamically adjusted
+    // Responsive components
     private HorizontalLayout headerRow;
     private HorizontalLayout metaRow1;
     private HorizontalLayout metaRow2;
@@ -93,8 +93,8 @@ class KeyCard extends VerticalLayout {
         return aliasOrId;
     }
 
-    public String getStatusText() {
-        return statusText;
+    public IEnumKeyStatus.Types getStatus() {
+        return this.metadata != null ? this.metadata.getKeyStatus() : null;
     }
 
     private void buildCard() {
@@ -113,7 +113,7 @@ class KeyCard extends VerticalLayout {
         titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
         titleSpan.addClassName(LumoUtility.TextColor.PRIMARY);
         titleSpan.getStyle().set("word-break", "break-word");
-        titleSpan.getElement().setAttribute("title", aliasOrId); // full alias or ID
+        titleSpan.getElement().setAttribute("title", aliasOrId);
 
         statusChip = new Span(statusText);
         statusChip.addClassName(LumoUtility.FontSize.XSMALL);
@@ -164,11 +164,12 @@ class KeyCard extends VerticalLayout {
         rotationBtn.addClickListener(e -> toggleRotation());
         updateRotationButton();
 
-        moreBtn = createIconButton(VaadinIcon.ELLIPSIS_DOTS_V, "More actions (enable/disable, schedule deletion, etc.)");
+        moreBtn = createIconButton(VaadinIcon.ELLIPSIS_DOTS_V, "More actions (enable/disable, schedule deletion, rotate immediately, etc.)");
         moreBtn.addClickListener(e -> showContextMenu());
 
         versionsBtn = createIconButton(VaadinIcon.CUBE, "View all key versions");
         versionsBtn.setText("Ver (...)"); // will be updated later
+        versionsBtn.addClickListener(e -> showVersionsDialog());
 
         buttonBar.add(editBtn, describeBtn, rotationBtn, versionsBtn, moreBtn);
 
@@ -297,7 +298,7 @@ class KeyCard extends VerticalLayout {
         }
         String origin = (metadata != null && metadata.getOrigin() != null) ? metadata.getOrigin().name() : "N/A";
         String rotation = (metadata != null && metadata.getRotationEnabled() != null && metadata.getRotationEnabled())
-                ? "✅ Rotation ON" : "❌ Rotation OFF";
+                ? "✅ Rotation ON (" + metadata.getRotationPeriodInDays() + " Days)" : "❌ Rotation OFF";
         Span originSpan = new Span("Origin: " + origin);
         Span rotationSpan = new Span(rotation);
         originSpan.getElement().setAttribute("title", origin);
@@ -524,6 +525,20 @@ class KeyCard extends VerticalLayout {
         });
         layout.add(scheduleDeleteBtn);
 
+        // ✅ Rotate immediately button - only shown if automatic rotation is enabled
+        boolean rotationEnabled = metadata != null && metadata.getRotationEnabled() != null && metadata.getRotationEnabled();
+        if (rotationEnabled) {
+            Button rotateNowBtn = new Button("Rotate immediately", new Icon(VaadinIcon.REFRESH));
+            rotateNowBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+            rotateNowBtn.setWidthFull();
+            rotateNowBtn.setTooltipText("Create a new key version immediately (manual rotation)");
+            rotateNowBtn.addClickListener(e -> {
+                menuDialog.close();
+                new RotateKeyConfirmDialog(keyManagementView, kmsApiService, keyId, this::refresh).open();
+            });
+            layout.add(rotateNowBtn);
+        }
+
         if ("PENDING_DELETION".equalsIgnoreCase(statusText)) {
             Button cancelDeleteBtn = new Button("Cancel deletion", new Icon(VaadinIcon.REFRESH));
             cancelDeleteBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
@@ -567,7 +582,9 @@ class KeyCard extends VerticalLayout {
             if (tagsResponse != null && tagsResponse.getTags() != null) {
                 return tagsResponse.getTags();
             }
-        } catch (Exception e) { /* ignore */ }
+        } catch (Exception e) {
+            // ignore
+        }
         return new ArrayList<>();
     }
 
@@ -604,7 +621,6 @@ class KeyCard extends VerticalLayout {
 
     private void confirmPermanentDelete() {
         new PermanentKeyDeleteDialog(keyManagementView, kmsApiService, () -> {
-            // Remove this card directly – no full refresh
             getUI().ifPresent(ui -> ui.access(() -> {
                 getParent().ifPresent(parent -> {
                     if (parent instanceof VerticalLayout) {

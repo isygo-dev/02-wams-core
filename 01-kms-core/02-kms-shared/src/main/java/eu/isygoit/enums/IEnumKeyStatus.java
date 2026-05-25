@@ -27,7 +27,7 @@ public interface IEnumKeyStatus {
         /**
          * The key is scheduled for deletion.
          */
-        PENDING_DELETION("PendingDeletion"),
+        PENDING_DELETION("Pending deletion"),
 
         /**
          * The key is being created.
@@ -42,12 +42,12 @@ public interface IEnumKeyStatus {
         /**
          * The key material is pending import.
          */
-        PENDING_IMPORT("PendingImport"),
+        PENDING_IMPORT("Pending import"),
 
         /**
          * Replica key is pending deletion (multi-region keys).
          */
-        PENDING_REPLICA_DELETION("PendingReplicaDeletion");
+        PENDING_REPLICA_DELETION("Pending replicaeletion");
 
         private final String meaning;
 

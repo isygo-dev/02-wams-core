@@ -17,6 +17,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public abstract class PinBaseActionDialog extends BaseActionDialog {
 
     protected final String confirmationCode;
+    private final String warning = "⚠️ ";
     protected TextField pinField;
 
     /**
@@ -30,7 +31,7 @@ public abstract class PinBaseActionDialog extends BaseActionDialog {
         super(title, onSuccess);
         this.confirmationCode = generateConfirmationCode();
         this.enableOkButton(false);
-        buildContent(warningMessage);
+        buildContent(this.warning + warningMessage);
     }
 
     /**

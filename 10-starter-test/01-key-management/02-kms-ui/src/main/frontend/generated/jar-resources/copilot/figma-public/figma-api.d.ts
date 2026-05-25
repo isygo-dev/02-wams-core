@@ -1,5 +1,6 @@
-import { NodeType, StackAlign, StackCounterAlign, StackJustify, StackMode, StackSize } from 'fig-kiwi/fig-kiwi';
-import { ComponentDefinition } from '../shared/flow-utils';
+import {NodeType, StackAlign, StackCounterAlign, StackJustify, StackMode, StackSize} from 'fig-kiwi/fig-kiwi';
+import {ComponentDefinition} from '../shared/flow-utils';
+
 export type SwappedInstance = {
     name: string | undefined;
     symbolDescription: string | undefined;
@@ -42,6 +43,7 @@ export type Importer = (node: FigmaNode, metadata: ImportMetadata) => ComponentD
 export type ImportMetadata = {
     target: 'java' | 'react';
 };
+
 /**
  * Registers a custom importer function that can be used to convert Figma nodes into Vaadin components.
  * <p>
@@ -89,14 +91,25 @@ export type ImportMetadata = {
  * @param importer the importer to register
  */
 export declare function _registerImporter(importer: Importer): void;
+
 export declare function _registerInternalImporter(importer: Importer): void;
+
 export declare function _getImporters(): Importer[];
+
 export declare function _getIcon(node: FigmaNode, enablerKey: string, iconKey: string, slot?: string | undefined): ComponentDefinition | undefined;
+
 export declare function renderNodesAs(htmlTag: string, nodes: Array<FigmaNode | undefined>, metadata: ImportMetadata): ComponentDefinition[];
+
 export declare function renderNodeAs(htmlTag: string, node: FigmaNode, metadata: ImportMetadata, customProperties?: Record<string, string>): ComponentDefinition | undefined;
+
 export declare function renderNodes(childNodes: FigmaNode[], metadata: ImportMetadata): ComponentDefinition[];
+
 export declare function renderNode(node: FigmaNode, metadata: ImportMetadata, customProperties?: Record<string, string>): ComponentDefinition | undefined;
+
 export declare function findChild(node: FigmaNode, matcher: (node: FigmaNode) => boolean): FigmaNode | undefined;
+
 export declare function findFirstChild(node: FigmaNode, name: string): FigmaNode | undefined;
+
 export declare function findAllChildren(node: FigmaNode, matcher: (node: FigmaNode) => boolean): FigmaNode[];
+
 export declare function _createChildrenDefinitions(node: FigmaNode, metadata: ImportMetadata, matcher: (n: FigmaNode) => boolean): ComponentDefinition[];

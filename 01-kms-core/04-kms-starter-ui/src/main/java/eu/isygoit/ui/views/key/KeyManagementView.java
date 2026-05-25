@@ -6,11 +6,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H4;
-import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -27,6 +23,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
 import eu.isygoit.dto.KmsDtos.ListAliasesResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
+import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainLayout;
 import eu.isygoit.ui.views.key.dialog.CreateKeyDialog;
@@ -54,28 +51,15 @@ public class KeyManagementView extends VerticalLayout {
     private final Button createButton = new Button("Create key", new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
-    private final ComboBox<String> statusFilter = new ComboBox<>();
+    private final ComboBox<KeyStatusOption> statusFilter = new ComboBox<>();
     private final ProgressBar loadingBar = new ProgressBar();
-
-    // Pagination controls for keys (server-side cursor-based)
-    private int pageSize = 10;
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
     private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
     private final Span pageInfoLabel = new Span();      // shows "Page X/Y : N keys"
     private final Span totalCountLabel = new Span();    // shows "TotalElements keys found"
-
     // Key pagination state
     private final Stack<String> previousTokens = new Stack<>();
-    private String currentNextToken = null;
-    private String currentToken = null;
-    private int currentPage = 1;
-    private int totalPages = 0;
-    private long totalElements = 0;
-    private int numberOfElements = 0;
-    private boolean truncated = false;
-    private List<KeyCard> currentPageCards = new ArrayList<>();
-
     // Alias browser components
     private final Button toggleAliasBrowser = new Button("Browse Aliases", new Icon(VaadinIcon.LIST));
     private final VerticalLayout aliasBrowserPanel = new VerticalLayout();
@@ -86,17 +70,24 @@ public class KeyManagementView extends VerticalLayout {
     private final Span aliasPageInfo = new Span();
     private final ComboBox<Integer> aliasPageSizeSelect = new ComboBox<>("Per page", 10, 20, 50);
     private final ProgressBar aliasLoading = new ProgressBar();
-
     // Alias pagination state (cursor-based)
     private final Stack<String> aliasPreviousTokens = new Stack<>();
+    // Pagination controls for keys (server-side cursor-based)
+    private int pageSize = 10;
+    private String currentNextToken = null;
+    private String currentToken = null;
+    private int currentPage = 1;
+    private int totalPages = 0;
+    private long totalElements = 0;
+    private int numberOfElements = 0;
+    private boolean truncated = false;
+    private List<KeyCard> currentPageCards = new ArrayList<>();
     private String aliasCurrentNextToken = null;
     private int aliasCurrentLimit = 10;
     private boolean aliasesLoaded = false;
-
     // Filters
     private String currentSearch = "";
-    private String currentStatus = "All";
-
+    private IEnumKeyStatus.Types currentStatus = null;
     @Autowired
     public KeyManagementView(KmsApiService kmsApiService, ObjectMapper objectMapper) {
         this.kmsApiService = kmsApiService;
@@ -139,12 +130,18 @@ public class KeyManagementView extends VerticalLayout {
             resetKeyPaginationAndLoad();
         });
 
-        statusFilter.setItems("All", "Enabled", "Disabled", "PendingDeletion");
-        statusFilter.setValue("All");
+        statusFilter.setItems(
+                new KeyStatusOption("All", null),
+                new KeyStatusOption(IEnumKeyStatus.Types.ENABLED.meaning(), IEnumKeyStatus.Types.ENABLED),
+                new KeyStatusOption(IEnumKeyStatus.Types.DISABLED.meaning(), IEnumKeyStatus.Types.DISABLED),
+                new KeyStatusOption(IEnumKeyStatus.Types.PENDING_DELETION.meaning(), IEnumKeyStatus.Types.PENDING_DELETION)
+        );
+        statusFilter.setItemLabelGenerator(option -> option.label());
+        statusFilter.setValue(new KeyStatusOption("All", null));
         statusFilter.setPlaceholder("Status");
         statusFilter.setTooltipText("Filter by key status");
         statusFilter.addValueChangeListener(e -> {
-            currentStatus = e.getValue();
+            currentStatus = e.getValue().value;
             resetKeyPaginationAndLoad();
         });
 
@@ -258,9 +255,9 @@ public class KeyManagementView extends VerticalLayout {
         cardsContainer.removeAll();
         List<KeyCard> filtered = currentPageCards.stream()
                 .filter(card -> {
-                    if (!currentStatus.equals("All")) {
-                        String status = card.getStatusText();
-                        if (!status.equalsIgnoreCase(currentStatus)) return false;
+                    if (currentStatus != null) {
+                        IEnumKeyStatus.Types status = card.getStatus();
+                        if (status != currentStatus) return false;
                     }
                     if (currentSearch != null && !currentSearch.isEmpty()) {
                         String searchLower = currentSearch.toLowerCase();
@@ -442,5 +439,8 @@ public class KeyManagementView extends VerticalLayout {
         );
         Notification.show("Key ID copied to clipboard", 1500, Notification.Position.TOP_END)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+    }
+
+    public record KeyStatusOption(String label, IEnumKeyStatus.Types value) {
     }
 }

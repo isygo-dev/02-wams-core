@@ -138,7 +138,7 @@ class CustomKeyStoreServiceTest {
         s2.setName("b");
         Pageable pageable = PageRequest.of(0, 2, Sort.by("createDate").descending());
         Page<KmsCustomKeyStore> mockPage = new PageImpl<>(List.of(s1, s2), pageable, 5);
-        when(customKeyStoreRepository.findByTenantOrderByIdAsc(TENANT,pageable))
+        when(customKeyStoreRepository.findByTenantOrderByIdAsc(TENANT, pageable))
                 .thenReturn(mockPage);
 
         ListCustomKeyStoresResponse resp = service.listCustomKeyStores(TENANT, 2, null);

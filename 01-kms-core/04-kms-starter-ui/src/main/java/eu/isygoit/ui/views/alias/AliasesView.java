@@ -4,11 +4,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H4;
-import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -47,17 +43,15 @@ public class AliasesView extends VerticalLayout {
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
     private final ProgressBar loadingBar = new ProgressBar();
-
-    // Pagination controls
-    private int pageSize = 10;
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
     private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
     private final Span pageInfoLabel = new Span();   // "Page X/Y : N aliases"
     private final Span totalCountLabel = new Span(); // "Total: N aliases"
-
     // Pagination state (cursor‑based)
     private final Stack<String> previousTokens = new Stack<>();
+    // Pagination controls
+    private int pageSize = 10;
     private String currentNextToken = null;
     private String currentToken = null;
     private int currentPage = 1;
@@ -138,8 +132,8 @@ public class AliasesView extends VerticalLayout {
         });
         nextButton.setTooltipText("Next page");
 
-        pageInfoLabel.getElement().setAttribute("title","Current page / total pages and number of aliases on this page");
-        totalCountLabel.getElement().setAttribute("title","Total number of aliases across all pages");
+        pageInfoLabel.getElement().setAttribute("title", "Current page / total pages and number of aliases on this page");
+        totalCountLabel.getElement().setAttribute("title", "Total number of aliases across all pages");
 
         injectResponsiveStyles();
 
