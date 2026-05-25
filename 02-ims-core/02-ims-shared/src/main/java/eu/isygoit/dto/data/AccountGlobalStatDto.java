@@ -17,7 +17,7 @@ import java.io.Serializable;
 @SuperBuilder
 public class AccountGlobalStatDto implements Serializable {
 
-    private Long totalCount;
+    private Long numberOfElements;
     private Long activeCount;
     private Long confirmedCount; // user has loggedIn at least one time
     private Long adminsCount;

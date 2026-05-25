@@ -2,8 +2,8 @@ package eu.isygoit.ui.views.key.dialog;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -25,9 +25,11 @@ import eu.isygoit.ui.views.BaseActionDialog;
 import eu.isygoit.ui.views.key.KeyManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class UpdateKeyDialog extends BaseActionDialog {
 
@@ -44,8 +46,7 @@ public class UpdateKeyDialog extends BaseActionDialog {
     private final Integer currentRotationPeriodInDays;
 
     // UI fields
-    private ComboBox<String> aliasCombo;
-    private TextField newAliasField;
+    private TextField aliasField;
     private TextArea descriptionField;
     private Checkbox rotationEnabledCheckbox;
     private IntegerField rotationPeriodField;
@@ -85,12 +86,16 @@ public class UpdateKeyDialog extends BaseActionDialog {
     protected boolean onOk() {
         parentView.showLoading(true);
 
-        String newAlias = null;
-        if (newAliasField.isVisible() && !newAliasField.getValue().isBlank()) {
-            newAlias = newAliasField.getValue();
-        } else if (aliasCombo.getValue() != null && !aliasCombo.getValue().isBlank()) {
-            newAlias = aliasCombo.getValue();
+        String newAlias = aliasField.getValue();
+        if (StringUtils.hasText(newAlias) && !newAlias.startsWith("alias:")) {
+            String errorMsg = "Alias must start with 'alias:' (e.g., alias:my-key)";
+            this.append(errorMsg);
+            Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            parentView.showLoading(false);
+            return false;
         }
+
         String newDescription = descriptionField.getValue();
 
         boolean newRotationEnabled = rotationEnabledCheckbox.getValue();
@@ -110,7 +115,7 @@ public class UpdateKeyDialog extends BaseActionDialog {
 
         UpdateKeyDescriptionRequest request = UpdateKeyDescriptionRequest.builder()
                 .keyId(keyId)
-                .keyAlias(newAlias)
+                .keyAlias(StringUtils.hasText(newAlias) ? newAlias : null)
                 .description(newDescription)
                 .rotationEnabled(newRotationEnabled)
                 .rotationPeriodInDays(newRotationPeriod)
@@ -124,6 +129,7 @@ public class UpdateKeyDialog extends BaseActionDialog {
                 this.append(errorMsg);
                 Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                parentView.showLoading(false);
                 return false;
             }
 
@@ -150,30 +156,11 @@ public class UpdateKeyDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        // Alias section
-        aliasCombo = new ComboBox<>("Alias");
-        aliasCombo.setItems(parentView.existingAliases);
-        aliasCombo.setPlaceholder("Select existing alias");
-        aliasCombo.setAllowCustomValue(true);
-        newAliasField = new TextField("New alias name");
-        newAliasField.setVisible(false);
-        newAliasField.setPlaceholder("alias:my-new-alias");
-
-        aliasCombo.setValue(currentAlias.isEmpty() ? null : currentAlias);
-
-        aliasCombo.addCustomValueSetListener(e -> {
-            newAliasField.setVisible(true);
-            newAliasField.setValue(e.getDetail());
-        });
-        aliasCombo.addValueChangeListener(e -> {
-            if (e.getValue() != null && !e.getValue().isEmpty() && !parentView.existingAliases.contains(e.getValue())) {
-                newAliasField.setVisible(true);
-                newAliasField.setValue(e.getValue());
-            } else {
-                newAliasField.setVisible(false);
-                newAliasField.clear();
-            }
-        });
+        // Alias field (simple text, no dropdown)
+        aliasField = new TextField("Alias (optional)");
+        aliasField.setPlaceholder("alias:my-key");
+        aliasField.setHelperText("Must start with 'alias:' if provided.");
+        aliasField.setValue(currentAlias);
 
         // Description
         descriptionField = new TextArea("Description");
@@ -201,32 +188,54 @@ public class UpdateKeyDialog extends BaseActionDialog {
             }
         });
 
-        // Tags editor
+        // Tags editor (self-contained)
         tagsContainer = new VerticalLayout();
         tagsContainer.setSpacing(true);
         tagsContainer.setPadding(false);
         tagRows = new ArrayList<>();
         for (ListResourceTagsResponse.Tag tag : currentTags) {
-            parentView.addTagRow(tagsContainer, tagRows, tag.getTagKey(), tag.getTagValue());
+            addTagRow(tag.getTagKey(), tag.getTagValue());
         }
+    }
+
+    private void addTagRow(String existingKey, String existingValue) {
+        String randomKey = (existingKey != null) ? existingKey : "tag-" + UUID.randomUUID().toString().substring(0, 8);
+        TextField keyField = new TextField();
+        keyField.setValue(randomKey);
+        keyField.setReadOnly(true);
+        keyField.setWidth("150px");
+        TextField valueField = new TextField();
+        valueField.setValue(existingValue != null ? existingValue : "");
+        valueField.setPlaceholder("Tag value");
+        valueField.setWidth("250px");
+        Button removeBtn = new Button(new Icon(VaadinIcon.TRASH));
+        removeBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR);
+        HorizontalLayout row = new HorizontalLayout(keyField, valueField, removeBtn);
+        row.setAlignItems(FlexComponent.Alignment.CENTER);
+        row.setSpacing(true);
+        tagRows.add(row);
+        tagsContainer.add(row);
+        removeBtn.addClickListener(e -> {
+            tagsContainer.remove(row);
+            tagRows.remove(row);
+        });
     }
 
     private FormLayout createFormLayout() {
         FormLayout form = new FormLayout();
 
-        // Build the tags header (label + add button) inline, so no scope issues
+        // Tags header with add button
         Button addTagButton = new Button("Add tag", new Icon(VaadinIcon.PLUS));
-        addTagButton.addClickListener(e -> parentView.addTagRow(tagsContainer, tagRows, null, null));
+        addTagButton.addClickListener(e -> addTagRow(null, null));
         HorizontalLayout tagsHeader = new HorizontalLayout(new Span("Tags"), addTagButton);
         tagsHeader.setAlignItems(FlexComponent.Alignment.BASELINE);
         tagsHeader.setSpacing(true);
 
-        // Combine header and container into one vertical section
         VerticalLayout tagsSection = new VerticalLayout(tagsHeader, tagsContainer);
         tagsSection.setPadding(false);
         tagsSection.setSpacing(false);
 
-        form.add(aliasCombo, newAliasField, descriptionField,
+        form.add(aliasField, descriptionField,
                 rotationEnabledCheckbox, rotationPeriodField,
                 tagsSection);
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));

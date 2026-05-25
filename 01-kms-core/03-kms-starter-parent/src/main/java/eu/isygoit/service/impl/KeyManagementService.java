@@ -304,19 +304,20 @@ public class KeyManagementService implements IKeyManagementService {
                 Sort.by("createDate").descending()
         );
 
-        Page<KmsKey> keyPage = kmsKeyRepository.findByTenant(tenant, pageable);
+        Page<KmsKey> page = kmsKeyRepository.findByTenant(tenant, pageable);
 
         return ListKeysResponse.builder()
-                .keys(keyPage.getContent().stream()
+                .keys(page.getContent().stream()
                         .map(key -> ListKeysResponse.KeyEntry.builder()
                                 .keyId(key.getKeyId())
                                 .keyWrn(key.getKeyWrn())
                                 .build())
                         .toList())
-                .nextToken(keyPage.hasNext()
-                        ? String.valueOf(pageNum + 1)
-                        : null)
-                .truncated(keyPage.hasNext())
+                .nextToken(page.hasNext() ? String.valueOf(pageable.getPageNumber() + 1) : null)
+                .numberOfElements(page.getNumberOfElements())
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+                .truncated(page.hasNext())
                 .build();
     }
 
@@ -747,16 +748,20 @@ public class KeyManagementService implements IKeyManagementService {
         int pageNum = (nextToken != null) ? Integer.parseInt(nextToken) : 0;
 
         Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by("createDate"));
-        Page<KmsAlias> aliasPage = kmsAliasRepository.findByTenant(tenant, pageable);
+        Page<KmsAlias> page = kmsAliasRepository.findByTenant(tenant, pageable);
 
         return ListAliasesResponse.builder()
-                .aliases(aliasPage.getContent().stream()
+                .aliases(page.getContent().stream()
                         .map(alias -> ListAliasesResponse.AliasEntry.builder()
                                 .aliasName(alias.getAliasName())
                                 .targetKeyId(alias.getTargetKeyId())
                                 .build())
                         .collect(Collectors.toList()))
-                .nextToken(aliasPage.hasNext() ? String.valueOf(pageNum + 1) : null)
+                .nextToken(page.hasNext() ? String.valueOf(pageable.getPageNumber() + 1) : null)
+                .numberOfElements(page.getNumberOfElements())
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+                .truncated(page.hasNext())
                 .build();
     }
 
@@ -766,16 +771,20 @@ public class KeyManagementService implements IKeyManagementService {
 
         Pageable pageable = RepoHelper.resolvePageable(limit, nextToken, "createDate");
 
-        List<KmsAlias> aliases = kmsAliasRepository.findByTenantAndKeyId(tenant, keyId, pageable);
+        Page<KmsAlias> page = kmsAliasRepository.findByTenantAndKeyId(tenant, keyId, pageable);
 
         return ListAliasesResponse.builder()
-                .aliases(aliases.stream()
+                .aliases(page.stream()
                         .map(alias -> ListAliasesResponse.AliasEntry.builder()
                                 .aliasName(alias.getAliasName())
                                 .targetKeyId(alias.getTargetKeyId())
                                 .build())
                         .collect(Collectors.toList()))
-                .nextToken(null)
+                .nextToken(page.hasNext() ? String.valueOf(pageable.getPageNumber() + 1) : null)
+                .numberOfElements(page.getNumberOfElements())
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+                .truncated(page.hasNext())
                 .build();
     }
 
@@ -964,7 +973,7 @@ public class KeyManagementService implements IKeyManagementService {
                 Sort.by("createDate")
         );
 
-        Page<KmsKeyVersion> versionPage =
+        Page<KmsKeyVersion> page =
                 kmsKeyVersionRepository.findByTenantAndKeyIdAndCreateDateIsNotNull(
                         tenant,
                         keyId,
@@ -972,15 +981,17 @@ public class KeyManagementService implements IKeyManagementService {
                 );
 
         return ListKeyRotationsResponse.builder()
-                .rotations(versionPage.getContent().stream()
+                .rotations(page.getContent().stream()
                         .map(version -> ListKeyRotationsResponse.Rotation.builder()
                                 .versionId(version.getVersionId())
                                 .rotationDate(version.getCreateDate())
                                 .build())
                         .collect(Collectors.toList()))
-                .nextToken(versionPage.hasNext()
-                        ? String.valueOf(pageNum + 1)
-                        : null)
+                .nextToken(page.hasNext() ? String.valueOf(pageable.getPageNumber() + 1) : null)
+                .numberOfElements(page.getNumberOfElements())
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+                .truncated(page.hasNext())
                 .build();
     }
 

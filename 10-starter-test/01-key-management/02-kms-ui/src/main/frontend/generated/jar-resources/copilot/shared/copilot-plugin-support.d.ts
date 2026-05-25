@@ -1,19 +1,15 @@
-import {IObservableValue} from 'mobx';
-import {TemplateResult} from 'lit';
-
+import { IObservableValue } from 'mobx';
+import { TemplateResult } from 'lit';
 /**
  * Plugin API for the dev tools window.
  */
 export interface CopilotInterface {
     send(command: string, data: any): void;
-
     addPanel(panel: PanelConfiguration): void;
 }
-
 export interface MessageHandler {
     handleMessage(message: ServerMessage): boolean;
 }
-
 export interface ServerMessage {
     /**
      * The command
@@ -24,9 +20,7 @@ export interface ServerMessage {
      */
     data: any;
 }
-
 export type Framework = 'flow' | 'hilla-lit' | 'hilla-react';
-
 export interface CopilotPlugin {
     /**
      * Called once to initialize the plugin.
@@ -35,13 +29,11 @@ export interface CopilotPlugin {
      */
     init(copilotInterface: CopilotInterface): void;
 }
-
 export declare enum MessageType {
     INFORMATION = "information",
     WARNING = "warning",
     ERROR = "error"
 }
-
 export interface Message {
     id: number;
     type: MessageType;
@@ -53,7 +45,6 @@ export interface Message {
     dontShowAgain: boolean;
     deleted: boolean;
 }
-
 export interface PanelConfiguration {
     header: string;
     expanded: boolean;
@@ -77,7 +68,6 @@ export interface PanelConfiguration {
      */
     eager?: boolean;
 }
-
 export interface FloatingPosition {
     top?: number;
     left?: number;

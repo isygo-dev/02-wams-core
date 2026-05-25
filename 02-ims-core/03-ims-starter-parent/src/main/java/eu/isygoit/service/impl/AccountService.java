@@ -432,7 +432,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
         AccountGlobalStatDto.AccountGlobalStatDtoBuilder builder = AccountGlobalStatDto.builder();
         switch (statType) {
             case TOTAL_COUNT:
-                builder.totalCount(stat_GetAccountsCount(requestContext));
+                builder.numberOfElements(stat_GetAccountsCount(requestContext));
                 break;
             case ACTIVE_COUNT:
                 builder.activeCount(stat_GetActiveAccountsCount(requestContext));

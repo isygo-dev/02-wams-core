@@ -91,11 +91,17 @@ public class KeyVersionService implements IKeyVersionService {
                 ? Math.min(limit, 1000)
                 : 100;
 
-        int page = (nextToken != null) ? Integer.parseInt(nextToken) : 0;
+        int pageNum = (nextToken != null)
+                ? Integer.parseInt(nextToken)
+                : 0;
 
-        Pageable pageable = PageRequest.of(page, pageSize, Sort.by("createDate").descending());
+        Pageable pageable = PageRequest.of(
+                pageNum,
+                pageSize,
+                Sort.by("createDate").descending()
+        );
 
-        Page<KmsKeyVersion> versionPage =
+        Page<KmsKeyVersion> page =
                 kmsKeyVersionRepository.findByTenantAndKeyId(
                         tenant,
                         keyId,
@@ -103,7 +109,7 @@ public class KeyVersionService implements IKeyVersionService {
                 );
 
         List<ListKeyVersionsResponse.KeyVersion> versions =
-                versionPage.getContent().stream()
+                page.getContent().stream()
                         .map(v -> ListKeyVersionsResponse.KeyVersion.builder()
                                 .keyId(String.valueOf(v.getKeyId()))
                                 .versionId(v.getVersionId())
@@ -120,8 +126,11 @@ public class KeyVersionService implements IKeyVersionService {
 
         return ListKeyVersionsResponse.builder()
                 .versions(versions)
-                .nextToken(versionPage.hasNext() ? String.valueOf(page + 1) : null)
-                .truncated(versionPage.hasNext())
+                .nextToken(page.hasNext() ? String.valueOf(pageable.getPageNumber() + 1) : null)
+                .numberOfElements(page.getNumberOfElements())
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+                .truncated(page.hasNext())
                 .build();
     }
 

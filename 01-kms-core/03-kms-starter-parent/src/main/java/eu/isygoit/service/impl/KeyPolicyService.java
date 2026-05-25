@@ -133,10 +133,10 @@ public class KeyPolicyService implements IKeyPolicyService {
 
         Pageable pageable = RepoHelper.resolvePageable(limit, nextToken, "createDate");
 
-        Page<KmsKeyGrant> grantPage = kmsKeyGrantRepository.findByTenantAndKeyId(tenant, keyId, pageable);
+        Page<KmsKeyGrant> page = kmsKeyGrantRepository.findByTenantAndKeyId(tenant, keyId, pageable);
 
         return ListGrantsResponse.builder()
-                .grants(grantPage.getContent().stream()
+                .grants(page.getContent().stream()
                         .map(g -> {
                             try {
                                 return ListGrantsResponse.Grant.builder()
@@ -153,7 +153,11 @@ public class KeyPolicyService implements IKeyPolicyService {
                             }
                         })
                         .collect(Collectors.toList()))
-                .nextToken(grantPage.hasNext() ? String.valueOf(pageable.getPageNumber() + 1) : null)
+                .nextToken(page.hasNext() ? String.valueOf(pageable.getPageNumber() + 1) : null)
+                .numberOfElements(page.getNumberOfElements())
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+                .truncated(page.hasNext())
                 .build();
     }
 
@@ -164,10 +168,10 @@ public class KeyPolicyService implements IKeyPolicyService {
         Pageable pageable = RepoHelper.resolvePageable(limit, nextToken, "createDate");
 
         // Find active grants that the principal can retire
-        Page<KmsKeyGrant> grantPage = kmsKeyGrantRepository.findByTenantAndRetiringPrincipalAndRevocationDateIsNullAndRetirementDateIsNull(
+        Page<KmsKeyGrant> page = kmsKeyGrantRepository.findByTenantAndRetiringPrincipalAndRevocationDateIsNullAndRetirementDateIsNull(
                 tenant, retiringPrincipal, pageable);
 
-        List<ListGrantsResponse.Grant> grants = grantPage.getContent().stream()
+        List<ListGrantsResponse.Grant> grants = page.getContent().stream()
                 .map(g -> eu.isygoit.dto.KmsDtos.ListGrantsResponse.Grant.builder()
                         .grantId(g.getGrantId())
                         .granteePrincipal(g.getGranteePrincipal())
@@ -182,8 +186,11 @@ public class KeyPolicyService implements IKeyPolicyService {
 
         return ListRetirableGrantsResponse.builder()
                 .grants(grants)
-                .nextToken(grantPage.hasNext() ? String.valueOf(pageable.getPageNumber() + 1) : null)
-                .truncated(grantPage.hasNext())
+                .nextToken(page.hasNext() ? String.valueOf(pageable.getPageNumber() + 1) : null)
+                .numberOfElements(page.getNumberOfElements())
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+                .truncated(page.hasNext())
                 .build();
     }
 }

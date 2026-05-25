@@ -281,6 +281,15 @@ public final class KmsDtos {
         @Schema(description = "Pagination token for next page")
         private String nextToken;
 
+        @Schema(description = "Number of elements in the current page")
+        private Integer numberOfElements;
+
+        @Schema(description = "Total number of pages")
+        private Integer totalPages;
+
+        @Schema(description = "Total number of items")
+        private Long totalElements;
+
         @Schema(description = "Whether truncated")
         private Boolean truncated;
 
@@ -519,6 +528,15 @@ public final class KmsDtos {
 
         @Schema(description = "Pagination token")
         private String nextToken;
+        
+         @Schema(description = "Number of elements in the current page")
+        private Integer numberOfElements;
+
+        @Schema(description = "Total number of pages")
+        private Integer totalPages;
+
+        @Schema(description = "Total number of items")
+        private Long totalElements;
 
         @Schema(description = "Whether truncated")
         private Boolean truncated;
@@ -572,9 +590,18 @@ public final class KmsDtos {
 
         @Schema(description = "Pagination token")
         private String nextToken;
+        
+         @Schema(description = "Number of elements in the current page")
+        private Integer numberOfElements;
 
-        @Schema(description = "Total number of rotations")
-        private Integer totalCount;
+        @Schema(description = "Total number of pages")
+        private Integer totalPages;
+
+        @Schema(description = "Total number of items")
+        private Long totalElements;
+
+        @Schema(description = "Whether truncated")
+        private Boolean truncated;
 
         @Data
         @Builder
@@ -1301,6 +1328,15 @@ public final class KmsDtos {
 
         @Schema(description = "Pagination token")
         private String nextToken;
+        
+         @Schema(description = "Number of elements in the current page")
+        private Integer numberOfElements;
+
+        @Schema(description = "Total number of pages")
+        private Integer totalPages;
+
+        @Schema(description = "Total number of items")
+        private Long totalElements;
 
         @Schema(description = "Whether truncated")
         private Boolean truncated;
@@ -1345,6 +1381,15 @@ public final class KmsDtos {
 
         @Schema(description = "Pagination token")
         private String nextToken;
+        
+         @Schema(description = "Number of elements in the current page")
+        private Integer numberOfElements;
+
+        @Schema(description = "Total number of pages")
+        private Integer totalPages;
+
+        @Schema(description = "Total number of items")
+        private Long totalElements;
 
         @Schema(description = "Whether truncated")
         private Boolean truncated;
@@ -1519,6 +1564,15 @@ public final class KmsDtos {
 
         @Schema(description = "Pagination token")
         private String nextToken;
+        
+         @Schema(description = "Number of elements in the current page")
+        private Integer numberOfElements;
+
+        @Schema(description = "Total number of pages")
+        private Integer totalPages;
+
+        @Schema(description = "Total number of items")
+        private Long totalElements;
 
         @Schema(description = "Whether truncated")
         private Boolean truncated;
@@ -1631,6 +1685,15 @@ public final class KmsDtos {
 
         @Schema(description = "Pagination token")
         private String nextToken;
+        
+         @Schema(description = "Number of elements in the current page")
+        private Integer numberOfElements;
+
+        @Schema(description = "Total number of pages")
+        private Integer totalPages;
+
+        @Schema(description = "Total number of items")
+        private Long totalElements;
 
         @Schema(description = "Whether truncated")
         private Boolean truncated;
@@ -2145,6 +2208,15 @@ public final class KmsDtos {
 
         @Schema(description = "Pagination token")
         private String nextToken;
+        
+         @Schema(description = "Number of elements in the current page")
+        private Integer numberOfElements;
+
+        @Schema(description = "Total number of pages")
+        private Integer totalPages;
+
+        @Schema(description = "Total number of items")
+        private Long totalElements;
 
         @Schema(description = "Whether truncated")
         private Boolean truncated;
@@ -2304,6 +2376,18 @@ public final class KmsDtos {
 
         @Schema(description = "Pagination token")
         private String nextToken;
+
+        @Schema(description = "Number of elements in the current page")
+        private Integer numberOfElements;
+
+        @Schema(description = "Total number of pages")
+        private Integer totalPages;
+
+        @Schema(description = "Total number of items")
+        private Long totalElements;
+
+        @Schema(description = "Whether truncated")
+        private Boolean truncated;
     }
 
     @Data
@@ -2320,6 +2404,18 @@ public final class KmsDtos {
 
         @Schema(description = "Pagination token")
         private String nextToken;
+        
+        @Schema(description = "Number of elements in the current page")
+        private Integer numberOfElements;
+
+        @Schema(description = "Total number of pages")
+        private Integer totalPages;
+
+        @Schema(description = "Total number of items")
+        private Long totalElements;
+
+        @Schema(description = "Whether truncated")
+        private Boolean truncated;
     }
 
     @Data

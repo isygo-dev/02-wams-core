@@ -38,18 +38,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class CreateKeyDialog extends BaseActionDialog {
 
     private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;
-    private final Runnable onSuccess;
-
     private final ObjectMapper objectMapper;
+    private final Consumer<CreateKeyResponse> onSuccess;
 
     // Form fields
-    private ComboBox<String> aliasCombo;
-    private TextField newAliasField;
+    private TextField aliasField;
     private TextArea descriptionField;
     private ComboBox<IEnumKeyUsage.Types> keyUsageCombo;
     private ComboBox<IEnumKeySpec.Types> keySpecCombo;
@@ -65,17 +64,16 @@ public class CreateKeyDialog extends BaseActionDialog {
     private TextArea policyField;
     private VerticalLayout tagsContainer;
     private List<HorizontalLayout> tagRows;
-    private HorizontalLayout tagsHeader;
 
     public CreateKeyDialog(KeyManagementView parentView,
                            KmsApiService kmsApiService,
-                           Runnable onSuccess,
-                           ObjectMapper objectMapper) {
-        super("Create new KMS key", onSuccess);
+                           ObjectMapper objectMapper,
+                           Consumer<CreateKeyResponse> onSuccess) {
+        super("Create new KMS key", null);
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
-        this.onSuccess = onSuccess;
         this.objectMapper = objectMapper;
+        this.onSuccess = onSuccess;
 
         setOkButtonText("Create");
         setWidth("700px");
@@ -88,12 +86,14 @@ public class CreateKeyDialog extends BaseActionDialog {
     protected boolean onOk() {
         parentView.showLoading(true);
 
-        String newAlias = null;
-        String existingSelectedAlias = null;
-        if (newAliasField.isVisible() && !newAliasField.getValue().isBlank()) {
-            newAlias = newAliasField.getValue();
-        } else if (aliasCombo.getValue() != null && !aliasCombo.getValue().isBlank()) {
-            existingSelectedAlias = aliasCombo.getValue();
+        String alias = aliasField.getValue();
+        if (StringUtils.hasText(alias) && !alias.startsWith("alias:")) {
+            String errorMsg = "Alias must start with 'alias:' (e.g., alias:my-key)";
+            this.append(errorMsg);
+            Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            parentView.showLoading(false);
+            return false;
         }
 
         List<CreateKeyRequest.Tag> tags = new ArrayList<>();
@@ -111,13 +111,13 @@ public class CreateKeyDialog extends BaseActionDialog {
         Map<String, Object> policyMap = null;
         if (!policyField.getValue().isBlank()) {
             try {
-                policyMap = objectMapper.readValue(policyField.getValue(), new TypeReference<>() {
-                });
+                policyMap = objectMapper.readValue(policyField.getValue(), new TypeReference<>() {});
             } catch (Exception ex) {
                 String errorMsg = "Invalid JSON in policy field: " + ex.getMessage();
                 this.append(errorMsg);
                 Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                parentView.showLoading(false);
                 return false;
             }
         }
@@ -130,7 +130,7 @@ public class CreateKeyDialog extends BaseActionDialog {
 
         try {
             CreateKeyRequest request = CreateKeyRequest.builder()
-                    .keyAlias(StringUtils.hasText(newAlias) ? newAlias : existingSelectedAlias)
+                    .keyAlias(StringUtils.hasText(alias) ? alias : null)
                     .description(descriptionField.getValue())
                     .keyUsage(keyUsageCombo.getValue())
                     .keySpec(keySpecCombo.getValue())
@@ -153,13 +153,16 @@ public class CreateKeyDialog extends BaseActionDialog {
                 this.append(errorMsg);
                 Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                parentView.showLoading(false);
                 return false;
             }
 
             close();
             Notification.show("Key created successfully", 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-
+            if (onSuccess != null) {
+                onSuccess.accept(response.getBody());
+            }
             return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
@@ -179,38 +182,19 @@ public class CreateKeyDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        // Alias section
-        aliasCombo = new ComboBox<>("Alias (optional)");
-        aliasCombo.setItems(parentView.existingAliases);
-        aliasCombo.setPlaceholder("Select existing or type new");
-        aliasCombo.setAllowCustomValue(true);
-        newAliasField = new TextField("New alias name");
-        newAliasField.setVisible(false);
-        newAliasField.setPlaceholder("alias:my-new-alias");
-        aliasCombo.addCustomValueSetListener(e -> {
-            newAliasField.setVisible(true);
-            newAliasField.setValue(e.getDetail());
-        });
-        aliasCombo.addValueChangeListener(e -> {
-            if (e.getValue() != null && !e.getValue().isEmpty() && !parentView.existingAliases.contains(e.getValue())) {
-                newAliasField.setVisible(true);
-                newAliasField.setValue(e.getValue());
-            } else {
-                newAliasField.setVisible(false);
-                newAliasField.clear();
-            }
-        });
+        // Simple alias text field (no lookup of existing aliases)
+        aliasField = new TextField("Alias (optional)");
+        aliasField.setPlaceholder("alias:my-key");
+        aliasField.setHelperText("Must start with 'alias:' if provided.");
 
         descriptionField = new TextArea("Description");
         descriptionField.setMaxLength(500);
 
-        // Key usage first (so it can filter key spec)
         keyUsageCombo = new ComboBox<>("Key usage");
         keyUsageCombo.setItems(IEnumKeyUsage.Types.values());
         keyUsageCombo.setValue(IEnumKeyUsage.Types.ENCRYPT_DECRYPT);
         keyUsageCombo.setRequiredIndicatorVisible(true);
 
-        // Key spec will be filtered based on selected usage
         keySpecCombo = new ComboBox<>("Key specification");
         keySpecCombo.setRequiredIndicatorVisible(true);
         updateKeySpecOptions(IEnumKeyUsage.Types.ENCRYPT_DECRYPT);
@@ -228,7 +212,6 @@ public class CreateKeyDialog extends BaseActionDialog {
         originCombo.setValue(IEnumKeyOrigin.Types.WAMS_KMS);
         originCombo.setRequiredIndicatorVisible(true);
 
-        // Multi‑region fields
         multiRegionCheckbox = new Checkbox("Multi-region key");
         primaryRegionField = new TextField("Primary region");
         primaryRegionField.setPlaceholder("e.g., us-east-1");
@@ -249,7 +232,6 @@ public class CreateKeyDialog extends BaseActionDialog {
 
         bypassPolicyCheckbox = new Checkbox("Bypass policy lockout safety check");
 
-        // Rotation settings
         rotationEnabledCheckbox = new Checkbox("Enable automatic rotation");
         rotationPeriodField = new IntegerField("Rotation period (days)");
         rotationPeriodField.setMin(90);
@@ -265,7 +247,6 @@ public class CreateKeyDialog extends BaseActionDialog {
             }
         });
 
-        // Expiration model for imported key material (BYOK) – initially hidden
         expirationModelCombo = new ComboBox<>("Expiration model (for imported key)");
         expirationModelCombo.setItems(IEnumKeyExpirationModel.Types.values());
         expirationModelCombo.setValue(IEnumKeyExpirationModel.Types.KEY_MATERIAL_DOES_NOT_EXPIRE);
@@ -277,7 +258,6 @@ public class CreateKeyDialog extends BaseActionDialog {
         validToPicker.setVisible(false);
         validToPicker.setHelperText("Date after which the key material becomes unusable");
 
-        // Listeners to toggle expiration fields based on origin
         originCombo.addValueChangeListener(e -> {
             boolean isExternal = e.getValue() == IEnumKeyOrigin.Types.EXTERNAL;
             expirationModelCombo.setVisible(isExternal);
@@ -305,14 +285,13 @@ public class CreateKeyDialog extends BaseActionDialog {
         policyField.setWidthFull();
         policyField.setHeight("150px");
 
-        // Tag editor
         tagsContainer = new VerticalLayout();
         tagsContainer.setSpacing(true);
         tagsContainer.setPadding(false);
         tagRows = new ArrayList<>();
         Button addTagButton = new Button("Add tag", new Icon(VaadinIcon.PLUS));
         addTagButton.addClickListener(e -> addTagRow(null, null));
-        tagsHeader = new HorizontalLayout(new Span("Tags (random key + value)"), addTagButton);
+        HorizontalLayout tagsHeader = new HorizontalLayout(new Span("Tags (random key + value)"), addTagButton);
         tagsHeader.setAlignItems(FlexComponent.Alignment.BASELINE);
         tagsHeader.setSpacing(true);
     }
@@ -361,14 +340,15 @@ public class CreateKeyDialog extends BaseActionDialog {
 
     private FormLayout createFormLayout() {
         FormLayout form = new FormLayout();
-        form.add(aliasCombo, newAliasField, descriptionField,
+        form.add(aliasField, descriptionField,
                 keyUsageCombo, keySpecCombo, originCombo,
                 multiRegionCheckbox, primaryRegionField, replicaRegionsField,
                 bypassPolicyCheckbox,
                 rotationEnabledCheckbox, rotationPeriodField,
                 expirationModelCombo, validToPicker,
                 policyField,
-                tagsHeader, tagsContainer);
+                new HorizontalLayout(new Span("Tags"), new Button("Add tag", new Icon(VaadinIcon.PLUS), e -> addTagRow(null, null))),
+                tagsContainer);
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
         return form;
     }

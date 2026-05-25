@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 /**
  * The type Password expired job.
  */
@@ -78,7 +80,7 @@ public class PasswordExpiredJob extends AbstractQuartzJob {
                 triggerName,          // trigger name (adjust as needed)
                 PasswordExpiredJob.groupName,
                 scheduleBuilder,
-                null                        // start immediately (first midnight)
+                new Date()                              // start immediately
         );
     }
 }

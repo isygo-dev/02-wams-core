@@ -18,6 +18,7 @@ import eu.isygoit.simulation.SoftwareHsmInstance;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -178,27 +179,26 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
 
         Pageable pageable = RepoHelper.resolvePageable(limit, nextToken, "createDate");
 
-        List<KmsCustomKeyStore> stores;
+        Page<KmsCustomKeyStore> page;
         String newNextToken = null;
 
         if (nextToken != null && !nextToken.isEmpty()) {
             Long lastId = decodeNextToken(nextToken);
-            stores = customKeyStoreRepository.findByTenantAndIdGreaterThanOrderByIdAsc(tenant, lastId, pageable);
+            page = customKeyStoreRepository.findByTenantAndIdGreaterThanOrderByIdAsc(tenant, lastId, pageable);
         } else {
-            stores = customKeyStoreRepository.findByTenantOrderByIdAsc(tenant, pageable);
+            page = customKeyStoreRepository.findByTenantOrderByIdAsc(tenant, pageable);
         }
 
-        if (stores.size() == pageable.getPageSize()) {
-            newNextToken = encodeNextToken(stores.get(stores.size() - 1).getId());
-        }
-
-        List<DescribeCustomKeyStoreResponse.CustomKeyStore> dtos = stores.stream()
+        List<DescribeCustomKeyStoreResponse.CustomKeyStore> dtos = page.stream()
                 .map(this::convertToResponseDto)
                 .collect(Collectors.toList());
         return ListCustomKeyStoresResponse.builder()
                 .customKeyStores(dtos)
-                .nextToken(newNextToken)
-                .truncated(newNextToken != null)
+                .nextToken(page.hasNext() ? String.valueOf(pageable.getPageNumber() + 1) : null)
+                .numberOfElements(page.getNumberOfElements())
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+                .truncated(page.hasNext())
                 .build();
     }
 

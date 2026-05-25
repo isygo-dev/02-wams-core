@@ -16,8 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -137,10 +136,11 @@ class CustomKeyStoreServiceTest {
         KmsCustomKeyStore s2 = new KmsCustomKeyStore();
         s2.setId(11L);
         s2.setName("b");
+        Pageable pageable = PageRequest.of(0, 2, Sort.by("createDate").descending());
+        Page<KmsCustomKeyStore> mockPage = new PageImpl<>(List.of(s1, s2), pageable, 5);
+        when(customKeyStoreRepository.findByTenantOrderByIdAsc(TENANT,pageable))
+                .thenReturn(mockPage);
 
-        when(customKeyStoreRepository.findByTenantOrderByIdAsc(TENANT,
-                PageRequest.of(0, 2, Sort.by("createDate").descending())))
-                .thenReturn(List.of(s1, s2));
         ListCustomKeyStoresResponse resp = service.listCustomKeyStores(TENANT, 2, null);
         assertNotNull(resp);
         assertEquals(2, resp.getCustomKeyStores().size());

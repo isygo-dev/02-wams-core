@@ -1034,20 +1034,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
-            ListAliasesResponse internal = keyManagementService.listAliasesForKey(tenant, keyId, limit, nextToken);
-            ListAliasesResponse response = eu.isygoit.dto.KmsDtos.ListAliasesResponse.builder()
-                    .aliases(internal.getAliases().stream()
-                            .map(a -> eu.isygoit.dto.KmsDtos.ListAliasesResponse.AliasEntry.builder()
-                                    .aliasName(a.getAliasName())
-                                    .aliasWrn(buildAliasWrn(a.getAliasName()))
-                                    .targetKeyId(a.getTargetKeyId())
-                                    .createDate(a.getCreateDate())
-                                    .updateDate(a.getUpdateDate())
-                                    .build())
-                            .collect(Collectors.toList()))
-                    .nextToken(internal.getNextToken())
-                    .truncated(internal.getTruncated())
-                    .build();
+            ListAliasesResponse response = keyManagementService.listAliasesForKey(tenant, keyId, limit, nextToken);
+
             auditService.logAction(
                     tenant,
                     IKmsActionType.Types.LIST_ALIASES_FOR_KEY,
@@ -1178,26 +1166,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
-            ListGrantsResponse internal = keyPolicyService.listGrants(tenant, keyId, limit, nextToken);
-
-            String finalKeyId = keyId;
-            ListGrantsResponse response = eu.isygoit.dto.KmsDtos.ListGrantsResponse.builder()
-                    .grants(internal.getGrants().stream()
-                            .map(g -> eu.isygoit.dto.KmsDtos.ListGrantsResponse.Grant.builder()
-                                    .grantId(g.getGrantId())
-                                    .granteePrincipal(g.getGranteePrincipal())
-                                    .retiringPrincipal(g.getRetiringPrincipal())
-                                    .operations(g.getOperations())
-                                    .constraints(null)
-                                    .createDate(g.getCreateDate())
-                                    .updateDate(formatDate(g.getCreateDate()))
-                                    .keyId(finalKeyId)
-                                    .name(null)
-                                    .build())
-                            .collect(Collectors.toList()))
-                    .nextToken(internal.getNextToken())
-                    .truncated(internal.getGrants().size() < (limit != null ? limit : Integer.MAX_VALUE))
-                    .build();
+            ListGrantsResponse response = keyPolicyService.listGrants(tenant, keyId, limit, nextToken);
 
             auditService.logAction(
                     tenant,

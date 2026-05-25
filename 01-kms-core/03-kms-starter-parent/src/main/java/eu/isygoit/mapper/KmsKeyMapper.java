@@ -37,6 +37,10 @@ public interface KmsKeyMapper {
         return ListKeysResponse.builder()
                 .keys(keys)
                 .nextToken(page.hasNext() ? String.valueOf(page.getNumber() + 1) : null)
+                .numberOfElements(page.getNumberOfElements())
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+                .truncated(page.hasNext())
                 .build();
     }
 

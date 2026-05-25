@@ -43,7 +43,7 @@ public interface KmsAliasRepository extends JpaRepository<KmsAlias, Long> {
      * @param keyId  the key ID
      * @return List of aliases
      */
-    List<KmsAlias> findByTenantAndKeyId(String tenant, String keyId, Pageable pageable);
+    Page<KmsAlias> findByTenantAndKeyId(String tenant, String keyId, Pageable pageable);
 
     /**
      * Delete all aliases for a specific key

@@ -16,9 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -415,9 +413,10 @@ class KeyManagementServiceTest {
                 .aliasName("alias:test")
                 .targetKeyId(KEY_ID)
                 .build();
-
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("createDate").descending());
+        Page<KmsAlias> mockPage = new PageImpl<>(List.of(alias), pageable, 1);
         when(kmsAliasRepository.findByTenantAndKeyId(eq(TENANT), eq(KEY_ID), any(Pageable.class)))
-                .thenReturn(List.of(alias));
+                .thenReturn(mockPage);
 
         ListAliasesResponse response =
                 keyManagementService.listAliasesForKey(TENANT, KEY_ID, 10, "0");
