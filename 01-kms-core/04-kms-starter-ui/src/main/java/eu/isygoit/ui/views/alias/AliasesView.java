@@ -3,10 +3,12 @@ package eu.isygoit.ui.views.alias;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -31,6 +33,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 @Route(value = "aliases", layout = MainLayout.class)
@@ -44,7 +47,27 @@ public class AliasesView extends VerticalLayout {
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
     private final ProgressBar loadingBar = new ProgressBar();
-    private List<AliasCard> allCards = new ArrayList<>();
+
+    // Pagination controls
+    private int pageSize = 10;
+    private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
+    private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
+    private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
+    private final Span pageInfoLabel = new Span();   // "Page X/Y : N aliases"
+    private final Span totalCountLabel = new Span(); // "Total: N aliases"
+
+    // Pagination state (cursor‑based)
+    private final Stack<String> previousTokens = new Stack<>();
+    private String currentNextToken = null;
+    private String currentToken = null;
+    private int currentPage = 1;
+    private int totalPages = 0;
+    private long totalElements = 0;
+    private int numberOfElements = 0;
+    private boolean truncated = false;
+    private List<AliasCard> currentPageCards = new ArrayList<>();
+
+    // Client‑side filter
     private String currentSearch = "";
 
     @Autowired
@@ -74,112 +97,97 @@ public class AliasesView extends VerticalLayout {
         add(loadingBar);
 
         createButton.addClickListener(e -> createAlias());
-        refreshButton.addClickListener(e -> loadAliases());
+        createButton.setTooltipText("Create a new alias for a KMS key");
+
+        refreshButton.addClickListener(e -> resetPaginationAndLoad());
+        refreshButton.setTooltipText("Refresh aliases from server");
+
         searchField.setPlaceholder("Search by alias name or target key ID");
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
+        searchField.setTooltipText("Filter aliases by name or target key ID");
         searchField.addValueChangeListener(e -> {
             currentSearch = e.getValue();
             filterCards();
         });
 
-        // Inject responsive CSS using JavaScript (fixes URL encoding issues)
+        pageSizeSelect.setItems(10, 20, 30, 40, 50);
+        pageSizeSelect.setValue(10);
+        pageSizeSelect.setPlaceholder("Per page");
+        pageSizeSelect.setTooltipText("Number of aliases per page");
+        pageSizeSelect.addValueChangeListener(e -> {
+            if (e.getValue() != null) {
+                pageSize = e.getValue();
+                resetPaginationAndLoad();
+            }
+        });
+
+        prevButton.addClickListener(e -> {
+            if (!previousTokens.isEmpty()) {
+                String prevToken = previousTokens.pop();
+                loadAliasesPage(prevToken);
+            }
+        });
+        prevButton.setTooltipText("Previous page");
+
+        nextButton.addClickListener(e -> {
+            if (truncated && currentNextToken != null) {
+                previousTokens.push(currentToken);
+                loadAliasesPage(currentNextToken);
+            }
+        });
+        nextButton.setTooltipText("Next page");
+
+        pageInfoLabel.getElement().setAttribute("title","Current page / total pages and number of aliases on this page");
+        totalCountLabel.getElement().setAttribute("title","Total number of aliases across all pages");
+
         injectResponsiveStyles();
 
-        loadAliases();
+        // Load first page
+        resetPaginationAndLoad();
     }
 
-    private HorizontalLayout buildToolbar() {
-        HorizontalLayout toolbar = new HorizontalLayout();
-        toolbar.setWidthFull();
-        toolbar.setPadding(false);
-        toolbar.setSpacing(false);
-        toolbar.addClassName("aliases-toolbar");
-
-        // Left group: search + refresh button
-        HorizontalLayout leftGroup = new HorizontalLayout();
-        leftGroup.addClassName("toolbar-left-group");
-        leftGroup.setAlignItems(FlexComponent.Alignment.END);
-        leftGroup.setSpacing(true);
-        searchField.setWidth("300px");
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText("Refresh aliases");
-        leftGroup.add(searchField, refreshButton);
-
-        // Right group: only create button (right aligned)
-        HorizontalLayout rightGroup = new HorizontalLayout();
-        rightGroup.addClassName("toolbar-right-group");
-        rightGroup.setSpacing(true);
-        rightGroup.setAlignItems(FlexComponent.Alignment.END);
-        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        rightGroup.add(createButton);
-
-        toolbar.add(leftGroup, rightGroup);
-        return toolbar;
+    void resetPaginationAndLoad() {
+        previousTokens.clear();
+        currentNextToken = null;
+        currentToken = null;
+        currentPage = 1;
+        totalPages = 0;
+        totalElements = 0;
+        numberOfElements = 0;
+        truncated = false;
+        loadAliasesPage(null);
     }
 
-    private void injectResponsiveStyles() {
-        String css = """
-                    .aliases-toolbar {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: var(--lumo-space-s);
-                        align-items: flex-end;
-                        justify-content: space-between;
-                        width: 100%;
-                        margin-bottom: var(--lumo-space-m);
-                    }
-                    .toolbar-left-group,
-                    .toolbar-right-group {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: var(--lumo-space-s);
-                        align-items: flex-end;
-                    }
-                    @media (max-width: 768px) {
-                        .aliases-toolbar {
-                            flex-direction: column;
-                            align-items: stretch;
-                        }
-                        .toolbar-left-group,
-                        .toolbar-right-group {
-                            flex-direction: column;
-                            align-items: stretch;
-                            width: 100%;
-                        }
-                        .toolbar-left-group > *,
-                        .toolbar-right-group > * {
-                            width: 100% !important;
-                        }
-                        /* Make search field full width */
-                        .toolbar-left-group .vaadin-text-field {
-                            width: 100% !important;
-                        }
-                        /* Make buttons full width */
-                        .toolbar-left-group .vaadin-button,
-                        .toolbar-right-group .vaadin-button {
-                            width: 100% !important;
-                        }
-                    }
-                """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
-    }
-
-    public void loadAliases() {
+    private void loadAliasesPage(String nextToken) {
         showLoading(true);
-        allCards.clear();
-        cardsContainer.removeAll();
         try {
-            ResponseEntity<ListAliasesResponse> response = kmsApiService.listAliases(100, null);
-            ListAliasesResponse aliasesResponse = response.getBody();
-            if (aliasesResponse != null && aliasesResponse.getAliases() != null) {
-                for (ListAliasesResponse.AliasEntry entry : aliasesResponse.getAliases()) {
-                    allCards.add(new AliasCard(this, kmsApiService, entry));
-                }
+            ResponseEntity<ListAliasesResponse> response = kmsApiService.listAliases(pageSize, nextToken);
+            ListAliasesResponse body = response.getBody();
+            List<ListAliasesResponse.AliasEntry> aliasEntries = (body != null && body.getAliases() != null)
+                    ? body.getAliases() : new ArrayList<>();
+
+            currentNextToken = (body != null) ? body.getNextToken() : null;
+            numberOfElements = (body != null && body.getNumberOfElements() != null)
+                    ? body.getNumberOfElements() : aliasEntries.size();
+            totalPages = (body != null && body.getTotalPages() != null) ? body.getTotalPages() : 0;
+            totalElements = (body != null && body.getTotalElements() != null) ? body.getTotalElements() : 0L;
+            truncated = (body != null && Boolean.TRUE.equals(body.getTruncated()));
+            currentToken = nextToken;
+
+            if (nextToken == null) {
+                currentPage = 1;
+            } else {
+                currentPage = previousTokens.size() + 1;
             }
+
+            // Build AliasCard list
+            List<AliasCard> cards = new ArrayList<>();
+            for (ListAliasesResponse.AliasEntry entry : aliasEntries) {
+                cards.add(new AliasCard(this, kmsApiService, entry));
+            }
+            currentPageCards = cards;
+            updatePaginationDisplay();
             filterCards();
         } catch (Exception e) {
             Notification.show("Failed to load aliases: " + e.getMessage(), 5000, Notification.Position.TOP_END)
@@ -189,9 +197,20 @@ public class AliasesView extends VerticalLayout {
         }
     }
 
+    private void updatePaginationDisplay() {
+        if (totalPages > 0) {
+            pageInfoLabel.setText(String.format("Page %d/%d : %d aliases", currentPage, totalPages, numberOfElements));
+        } else {
+            pageInfoLabel.setText(String.format("Page %d : %d aliases", currentPage, numberOfElements));
+        }
+        totalCountLabel.setText(String.format("%d aliases found", totalElements));
+        prevButton.setEnabled(!previousTokens.isEmpty());
+        nextButton.setEnabled(truncated && currentNextToken != null);
+    }
+
     private void filterCards() {
         cardsContainer.removeAll();
-        List<AliasCard> filtered = allCards.stream()
+        List<AliasCard> filtered = currentPageCards.stream()
                 .filter(card -> {
                     if (currentSearch == null || currentSearch.isEmpty()) return true;
                     String searchLower = currentSearch.toLowerCase();
@@ -217,6 +236,71 @@ public class AliasesView extends VerticalLayout {
         }
     }
 
+    private HorizontalLayout buildToolbar() {
+        HorizontalLayout toolbar = new HorizontalLayout();
+        toolbar.setWidthFull();
+        toolbar.setPadding(false);
+        toolbar.setSpacing(true);
+        toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
+        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        toolbar.addClassName("aliases-toolbar");
+
+        // Left group: search field + refresh
+        HorizontalLayout leftGroup = new HorizontalLayout();
+        leftGroup.setSpacing(true);
+        leftGroup.setAlignItems(FlexComponent.Alignment.END);
+        searchField.setWidth("200px");
+        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        leftGroup.add(searchField, refreshButton);
+
+        // Center group: pagination controls
+        HorizontalLayout centerGroup = new HorizontalLayout();
+        centerGroup.setSpacing(true);
+        centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
+        centerGroup.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+        prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        pageSizeSelect.setWidth("120px");
+        pageInfoLabel.getStyle().set("margin", "0 0.5rem");
+        totalCountLabel.getStyle().set("margin", "0 0.5rem");
+        centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
+
+        // Right group: create button
+        HorizontalLayout rightGroup = new HorizontalLayout();
+        rightGroup.setSpacing(true);
+        rightGroup.setAlignItems(FlexComponent.Alignment.END);
+        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        rightGroup.add(createButton);
+
+        toolbar.add(leftGroup, centerGroup, rightGroup);
+        return toolbar;
+    }
+
+    private void injectResponsiveStyles() {
+        String css = """
+                .aliases-toolbar {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: var(--lumo-space-s);
+                    width: 100%;
+                }
+                @media (max-width: 768px) {
+                    .aliases-toolbar {
+                        flex-direction: column;
+                        align-items: stretch;
+                    }
+                    .aliases-toolbar > * {
+                        width: 100% !important;
+                        justify-content: center;
+                    }
+                }
+                """;
+        UI.getCurrent().getPage().executeJs(
+                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
+                css
+        );
+    }
+
     public void showLoading(boolean show) {
         loadingBar.setVisible(show);
         cardsContainer.setVisible(!show);
@@ -225,12 +309,13 @@ public class AliasesView extends VerticalLayout {
     }
 
     private void createAlias() {
-        new CreateAliasDialog(this, kmsApiService, this::loadAliases).open();
+        new CreateAliasDialog(this, kmsApiService, this::resetPaginationAndLoad).open();
     }
 
     public List<String> fetchKeyIds() {
         List<String> keyIds = new ArrayList<>();
         try {
+            // Fetch up to 100 keys for the dropdown (simple, non‑paginated)
             ResponseEntity<ListKeysResponse> response = kmsApiService.listKeys(100, null);
             ListKeysResponse keys = response.getBody();
             if (keys != null && keys.getKeys() != null) {

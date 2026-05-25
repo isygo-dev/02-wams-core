@@ -114,29 +114,6 @@ public class KeyManagementView extends VerticalLayout {
         HorizontalLayout toolbar = buildToolbar();
         add(toolbar);
 
-        // Toggle button for alias browser
-        toggleAliasBrowser.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        toggleAliasBrowser.setTooltipText("Show/Hide alias browser");
-        toggleAliasBrowser.addClickListener(e -> {
-            if (aliasBrowserPanel.isVisible()) {
-                aliasBrowserPanel.setVisible(false);
-                toggleAliasBrowser.setIcon(new Icon(VaadinIcon.LIST));
-                toggleAliasBrowser.setText("Browse Aliases");
-            } else {
-                aliasBrowserPanel.setVisible(true);
-                toggleAliasBrowser.setIcon(new Icon(VaadinIcon.CLOSE));
-                toggleAliasBrowser.setText("Hide Aliases");
-                if (!aliasesLoaded) {
-                    loadAliasesPage(null);
-                }
-            }
-        });
-        add(toggleAliasBrowser);
-
-        buildAliasBrowser();
-        aliasBrowserPanel.setVisible(false);
-        add(aliasBrowserPanel);
-
         cardsContainer.setWidthFull();
         cardsContainer.setPadding(false);
         cardsContainer.setSpacing(true);
@@ -311,63 +288,6 @@ public class KeyManagementView extends VerticalLayout {
         }
     }
 
-    // Alias browser with full tooltips and grid cell tooltips
-    private void buildAliasBrowser() {
-        aliasBrowserPanel.setSpacing(true);
-        aliasBrowserPanel.setPadding(true);
-        aliasBrowserPanel.setWidthFull();
-
-        aliasLoading.setIndeterminate(true);
-        aliasLoading.setVisible(false);
-        aliasLoading.setWidth("100%");
-
-        aliasGrid.setWidthFull();
-        aliasGrid.setHeight("300px");
-
-        // Add columns with tooltips for full content
-        aliasGrid.addColumn(ListAliasesResponse.AliasEntry::getAliasName)
-                .setHeader("Alias Name")
-                .setTooltipGenerator(item -> item.getAliasName() != null ? item.getAliasName() : "");
-        aliasGrid.addColumn(ListAliasesResponse.AliasEntry::getTargetKeyId)
-                .setHeader("Target Key ID")
-                .setTooltipGenerator(item -> item.getTargetKeyId() != null ? item.getTargetKeyId() : "");
-        aliasGrid.setEmptyStateText("No aliases found.");
-
-        aliasPageSizeSelect.setValue(10);
-        aliasPageSizeSelect.setTooltipText("Number of aliases per page");
-        aliasPageSizeSelect.addValueChangeListener(e -> {
-            aliasCurrentLimit = e.getValue();
-            resetAliasPagination();
-            loadAliasesPage(null);
-        });
-
-        aliasPrevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        aliasNextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        aliasPrevButton.setTooltipText("Previous alias page");
-        aliasNextButton.setTooltipText("Next alias page");
-        aliasPrevButton.setEnabled(false);
-        aliasNextButton.setEnabled(false);
-
-        aliasPrevButton.addClickListener(e -> {
-            if (!aliasPreviousTokens.isEmpty()) {
-                String prevToken = aliasPreviousTokens.pop();
-                loadAliasesPage(prevToken);
-            }
-        });
-        aliasNextButton.addClickListener(e -> {
-            if (aliasCurrentNextToken != null) {
-                aliasPreviousTokens.push(aliasCurrentNextToken);
-                loadAliasesPage(aliasCurrentNextToken);
-            }
-        });
-
-        aliasPaginationLayout.add(aliasPrevButton, aliasPageInfo, aliasNextButton, aliasPageSizeSelect);
-        aliasPaginationLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        aliasPaginationLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-
-        aliasBrowserPanel.add(aliasLoading, aliasGrid, aliasPaginationLayout);
-    }
-
     private void resetAliasPagination() {
         aliasPreviousTokens.clear();
         aliasCurrentNextToken = null;
@@ -417,12 +337,12 @@ public class KeyManagementView extends VerticalLayout {
         leftGroup.setSpacing(true);
         leftGroup.setAlignItems(FlexComponent.Alignment.END);
         searchField.setWidth("200px");
-        Span statusLabel = new Span("Status:");
+        Span statusLabel = new Span("Status: ");
         statusLabel.getElement().setAttribute("title", "Filter by key status");
         statusFilter.setWidth("140px");
         HorizontalLayout statusLayout = new HorizontalLayout(statusLabel, statusFilter);
         statusLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        statusLayout.setSpacing(false);
+        statusLayout.setSpacing(true);
         leftGroup.add(searchField, statusLayout);
 
         // Center group

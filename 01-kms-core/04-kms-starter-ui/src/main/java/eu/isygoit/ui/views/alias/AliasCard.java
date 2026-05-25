@@ -16,9 +16,6 @@ import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.views.alias.dialog.DeleteAliasDialog;
 import eu.isygoit.ui.views.alias.dialog.UpdateAliasDialog;
 
-// -------------------------------------------------------------------------
-// Alias Card - Fully Responsive
-// -------------------------------------------------------------------------
 class AliasCard extends VerticalLayout {
     private final AliasesView parentView;
     private final KmsApiService kmsApiService;
@@ -30,6 +27,8 @@ class AliasCard extends VerticalLayout {
     private HorizontalLayout headerRow;
     private HorizontalLayout buttonBar;
     private Span aliasSpan;
+    private Span targetSpan;
+    private Span dateSpan;
 
     public AliasCard(AliasesView aliasesView,
                      KmsApiService kmsApiService,
@@ -60,7 +59,6 @@ class AliasCard extends VerticalLayout {
         addClassName(LumoUtility.Background.BASE);
         addClassName(LumoUtility.BoxShadow.XSMALL);
         getStyle().set("transition", "all 0.2s ease-in-out");
-        addClassName("hover:shadow-m");
 
         // Header row: alias name + button bar
         headerRow = new HorizontalLayout();
@@ -75,16 +73,17 @@ class AliasCard extends VerticalLayout {
         aliasSpan.addClassName(LumoUtility.FontSize.MEDIUM);
         aliasSpan.addClassName(LumoUtility.TextColor.PRIMARY);
         aliasSpan.getStyle().set("word-break", "break-word");
+        aliasSpan.getElement().setAttribute("title", aliasName);   // full alias name on hover
 
         buttonBar = new HorizontalLayout();
         buttonBar.setSpacing(true);
         buttonBar.getStyle().set("flex-wrap", "wrap");
         buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
-        Button updateBtn = createIconButton(VaadinIcon.EDIT, "Reassign alias");
+        Button updateBtn = createIconButton(VaadinIcon.EDIT, "Reassign this alias to another key");
         updateBtn.addClickListener(e -> updateAlias());
 
-        Button deleteBtn = createIconButton(VaadinIcon.TRASH, "Delete alias");
+        Button deleteBtn = createIconButton(VaadinIcon.TRASH, "Delete this alias");
         deleteBtn.addThemeVariants(ButtonVariant.LUMO_ERROR);
         deleteBtn.addClickListener(e -> deleteAlias());
 
@@ -93,21 +92,22 @@ class AliasCard extends VerticalLayout {
         add(headerRow);
 
         // Target key info
-        Span targetSpan = new Span("Target key: " + targetKeyId);
+        targetSpan = new Span("Target key: " + targetKeyId);
         targetSpan.addClassName(LumoUtility.FontSize.SMALL);
         targetSpan.addClassName(LumoUtility.TextColor.SECONDARY);
         targetSpan.getStyle().set("word-break", "break-word");
+        targetSpan.getElement().setAttribute("title", targetKeyId);
         add(targetSpan);
 
         // Creation date (if present)
         if (createDate != null && !createDate.isEmpty()) {
-            Span dateSpan = new Span("Created: " + createDate);
+            dateSpan = new Span("Created: " + createDate);
             dateSpan.addClassName(LumoUtility.FontSize.XSMALL);
             dateSpan.addClassName(LumoUtility.TextColor.TERTIARY);
+            dateSpan.getElement().setAttribute("title", createDate);
             add(dateSpan);
         }
 
-        // Inject responsive CSS using JavaScript (fixes URL encoding issues)
         injectResponsiveStyles();
     }
 
@@ -149,7 +149,6 @@ class AliasCard extends VerticalLayout {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        // Add class names for CSS targeting
         headerRow.addClassName("alias-header-row");
         buttonBar.addClassName("alias-button-bar");
     }
@@ -162,10 +161,10 @@ class AliasCard extends VerticalLayout {
     }
 
     private void deleteAlias() {
-        new DeleteAliasDialog(parentView, kmsApiService, parentView::loadAliases, aliasName).open();
+        new DeleteAliasDialog(parentView, kmsApiService, parentView::resetPaginationAndLoad, aliasName).open();
     }
 
     private void updateAlias() {
-        new UpdateAliasDialog(parentView, kmsApiService, parentView::loadAliases, aliasName, targetKeyId).open();
+        new UpdateAliasDialog(parentView, kmsApiService, parentView::resetPaginationAndLoad, aliasName, targetKeyId).open();
     }
 }
