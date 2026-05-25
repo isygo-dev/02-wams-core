@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -20,42 +21,17 @@ import java.util.Optional;
 @Repository
 public interface KmsKeyRepository extends JpaRepository<KmsKey, Long> {
 
-    /**
-     * Find key by tenant and keyId
-     */
     Optional<KmsKey> findByTenantAndKeyId(String tenant, String keyId);
 
-    /**
-     * Find key by tenant and keyAlias
-     */
-    Optional<KmsKey> findByTenantAndPrimaryKeyAlias(String tenant, String keyAlias);
-
-    /**
-     * Find keys by tenant and status and rotation enabled
-     */
     List<KmsKey> findByTenantAndKeyStatusAndRotationEnabled(String tenant, IEnumKeyStatus.Types status, boolean rotationEnabled);
 
-    /**
-     * List all keys for a tenant with pagination
-     */
     Page<KmsKey> findByTenant(String tenant, Pageable pageable);
 
-    /**
-     * Find keys by tenant and status
-     */
     List<KmsKey> findByTenantAndKeyStatusAndDeletionDateBefore(String tenant, IEnumKeyStatus.Types status, LocalDateTime deletionDateBefore);
 
-    /**
-     * List all keys for a tenant with specific status
-     */
-    Page<KmsKey> findByTenantAndKeyStatus(String tenant, IEnumKeyStatus.Types status, Pageable pageable);
-
-    /**
-     * Find active keys for a tenant
-     */
-    @Query("SELECT k FROM KmsKey k WHERE k.tenant = :tenant AND k.keyStatus = 'ENABLED'")
-    List<KmsKey> findActiveKeysByTenant(@Param("tenant") String tenant);
-
     boolean existsByTenantAndPrimaryKeyIdAndRegion(String tenant, String keyId, @NotBlank String replicaRegion);
+
+    @Modifying
+    void deleteByTenantAndKeyId(@Param("tenant") String tenant, @Param("keyId") String keyId);
 }
 

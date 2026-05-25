@@ -55,4 +55,6 @@ public interface KmsTagRepository extends JpaRepository<KmsTag, Long> {
     @Modifying
     @Transactional
     void deleteByTenantAndKeyIdAndTagKeyIn(String tenant, String keyId, List<String> tagKeys);
+
+    boolean existsByTenantAndKeyId(String tenant, String keyId);
 }

@@ -540,9 +540,9 @@ public class KeyManagementService implements IKeyManagementService {
         List<CreateKeyRequest.Tag> newTags = request.getTags();
         if (newTags != null) {
             // Remove all existing tags for this key
-            List<KmsTag> existingTags = kmsTagRepository.findByTenantAndKeyId(tenant, key.getKeyId());
-            if (!existingTags.isEmpty()) {
-                kmsTagRepository.deleteAll(existingTags);
+            if (kmsTagRepository.existsByTenantAndKeyId(tenant, keyId)) {
+                kmsTagRepository.deleteByTenantAndKeyId(tenant, keyId);
+                kmsKeyRepository.flush();
             }
             // Add new tags
             if (!newTags.isEmpty()) {
