@@ -1062,7 +1062,7 @@ terminates, the grant automatically expires, and the Lambda function can no long
 - Creates grant record linked to specified key
 - Grant token can be used immediately (eventual consistency)
 - Grant constraints limit operations (encryption context, etc.)
-- Grantee principal can be IAM user, role, or AWS account
+- Grantee principal can be IAM user, role, or WAMS account
 - Grants are evaluated AFTER key policy (both must allow)
 - Grants can be retired by grantee or revoked by key owner
 - Operations list cannot include permission management actions
@@ -1355,8 +1355,8 @@ maintaining full control of key material storage.
 
 | Term      | Definition                                                                           |
 |-----------|--------------------------------------------------------------------------------------|
-| CloudHSM  | AWS-managed HSM service providing single-tenant HSM instances.                       |
-| VPC       | Virtual Private Cloud - Isolated network segment within AWS cloud.                   |
+| CloudHSM  | WAMS-managed HSM service providing single-tenant HSM instances.                      |
+| VPC       | Virtual Private Cloud - Isolated network segment within WAMS cloud.                  |
 | TLS       | Transport Layer Security - Protocol for secure network communications.               |
 | XKS Proxy | External Key Store proxy - Interface between KMS and external key management system. |
 | CMDB      | Configuration Management Database - Repository of IT infrastructure assets.          |

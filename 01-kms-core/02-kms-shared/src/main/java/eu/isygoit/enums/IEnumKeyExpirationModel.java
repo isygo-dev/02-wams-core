@@ -1,19 +1,19 @@
 package eu.isygoit.enums;
 
 /**
- * AWS KMS Key Expiration Model alignment.
+ * WAMS KMS Key Expiration Model alignment.
  * <p>
  * Represents the expiration behavior for imported key material (BYOK).
  * </p>
  *
- * @see <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_GetParametersForImport.html#KMS-GetParametersForImport-request-ExpirationModel">AWS ExpirationModel</a>
+ * @see <a href="https://docs.wams.amazon.com/kms/latest/APIReference/API_GetParametersForImport.html#KMS-GetParametersForImport-request-ExpirationModel">WAMS ExpirationModel</a>
  */
 public interface IEnumKeyExpirationModel {
 
     int STR_ENUM_SIZE = 2;
 
     /**
-     * AWS KMS expiration model types for imported key material.
+     * WAMS KMS expiration model types for imported key material.
      */
     enum Types implements IEnum {
 

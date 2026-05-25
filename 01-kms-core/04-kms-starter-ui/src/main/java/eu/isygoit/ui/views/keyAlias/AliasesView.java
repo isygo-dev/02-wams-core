@@ -1,4 +1,4 @@
-package eu.isygoit.ui.views.alias;
+package eu.isygoit.ui.views.keyAlias;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -22,7 +22,7 @@ import eu.isygoit.dto.KmsDtos.ListAliasesResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainLayout;
-import eu.isygoit.ui.views.alias.dialog.CreateAliasDialog;
+import eu.isygoit.ui.views.keyAlias.dialog.CreateAliasDialog;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

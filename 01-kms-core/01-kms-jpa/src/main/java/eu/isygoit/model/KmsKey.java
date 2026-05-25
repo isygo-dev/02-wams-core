@@ -24,11 +24,11 @@ import java.util.Map;
 /**
  * KMS Key entity representing a Customer Master Key (CMK) in the Key Management Service.
  * <p>
- * This entity maps to the AWS KMS key model and stores all cryptographic key metadata,
+ * This entity maps to the WAMS KMS key model and stores all cryptographic key metadata,
  * key material (encrypted), rotation settings, multi‑region configuration, and import details.
  * </p>
  *
- * @see <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_KeyMetadata.html">AWS KeyMetadata</a>
+ * @see <a href="https://docs.wams.amazon.com/kms/latest/APIReference/API_KeyMetadata.html">WAMS KeyMetadata</a>
  */
 @Data
 @SuperBuilder
@@ -67,7 +67,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * Tenant (account/isolated namespace) that owns this key.
      * Defaults to "default" tenant.
      * <p>
-     * Maps to AWS: AccountId (via tenant abstraction).
+     * Maps to WAMS: AccountId (via tenant abstraction).
      * </p>
      */
     @Builder.Default
@@ -79,17 +79,17 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * Unique identifier of the KMS key (UUID format).
      * Immutable after creation.
      * <p>
-     * AWS equivalent: KeyId
+     * WAMS equivalent: KeyId
      * </p>
      */
     @Column(name = SchemaColumnConstantName.C_KEY_ID, updatable = false, nullable = false, length = 255)
     private String keyId;
 
     /**
-     * WAMS Resource Name (similar to AWS ARN).
+     * WAMS Resource Name (similar to WAMS WRN).
      * Format example: "wrn:wams:kms:us-east-1:123456789012:key/1234abcd-..."
      * <p>
-     * AWS equivalent: Arn
+     * WAMS equivalent: WRN
      * </p>
      */
     @Column(name = SchemaColumnConstantName.C_KEY_WRN, length = 255, nullable = false)
@@ -99,7 +99,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * WAMS region where this key resides (e.g., "us-east-1", "eu-west-3").
      * For multi‑region keys, this is the region of this specific replica or the primary.
      * <p>
-     * AWS equivalent: region
+     * WAMS equivalent: region
      * </p>
      */
     @Column(name = SchemaColumnConstantName.C_REGION, length = 100)
@@ -123,7 +123,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * </ul>
      * </p>
      * <p>
-     * AWS equivalent: KeySpec (in AWS API) or CustomerMasterKeySpec.
+     * WAMS equivalent: KeySpec (in WAMS API) or CustomerMasterKeySpec.
      * </p>
      */
     @Enumerated(EnumType.STRING)
@@ -141,7 +141,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * </ul>
      * </p>
      * <p>
-     * AWS equivalent: KeyUsage.
+     * WAMS equivalent: KeyUsage.
      * </p>
      */
     @Enumerated(EnumType.STRING)
@@ -154,12 +154,12 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
 
     /**
      * Friendly alias for the key (e.g., "alias:my-key").
-     * Aliases are separate resources in AWS but denormalized here for quick access.
+     * Aliases are separate resources in WAMS but denormalized here for quick access.
      * <p>
      * Note: A key can have multiple aliases; this field stores the primary/default alias.
      * </p>
      * <p>
-     * AWS equivalent: part of Alias API, not part of KeyMetadata.
+     * WAMS equivalent: part of Alias API, not part of KeyMetadata.
      * </p>
      */
     @Pattern(regexp = "^alias:.*", message = "alias.name.must.start.with.alias")
@@ -169,7 +169,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     /**
      * Human‑readable description of the key (max 1024 characters).
      * <p>
-     * AWS equivalent: Description.
+     * WAMS equivalent: Description.
      * </p>
      */
     @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = 1024)
@@ -191,7 +191,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * </ul>
      * </p>
      * <p>
-     * AWS equivalent: KeyState.
+     * WAMS equivalent: KeyState.
      * </p>
      */
     @Builder.Default
@@ -204,7 +204,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * Version ID of the current active key material.
      * Rotations create new versions; the primary version is stored here.
      * <p>
-     * AWS equivalent: CurrentVersion (from ListKeyVersions).
+     * WAMS equivalent: CurrentVersion (from ListKeyVersions).
      * </p>
      */
     @Column(name = SchemaColumnConstantName.C_CURRENT_VERSION_ID, length = 255)
@@ -218,7 +218,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * Whether automatic key rotation is enabled (symmetric keys only).
      * When true, KMS rotates the key material every `rotationPeriodInDays`.
      * <p>
-     * AWS equivalent: RotationEnabled (from GetKeyRotationStatus).
+     * WAMS equivalent: RotationEnabled (from GetKeyRotationStatus).
      * </p>
      */
     @Builder.Default
@@ -230,7 +230,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * Rotation period in days (default 365). Only meaningful if `rotationEnabled` is true.
      * Minimum 90 days, maximum 3650 days (10 years).
      * <p>
-     * AWS equivalent: RotationPeriodInDays.
+     * WAMS equivalent: RotationPeriodInDays.
      * </p>
      */
     @Column(name = SchemaColumnConstantName.C_ROTATION_PERIOD_DAYS)
@@ -239,7 +239,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     /**
      * Date and time of the last automatic or manual rotation.
      * <p>
-     * AWS equivalent: LastRotationDate.
+     * WAMS equivalent: LastRotationDate.
      * </p>
      */
     @Column(name = SchemaColumnConstantName.C_LAST_ROTATION_DATE)
@@ -253,7 +253,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * Date and time when the key is scheduled to be permanently deleted.
      * Only set when `keyStatus = PENDING_DELETION`.
      * <p>
-     * AWS equivalent: DeletionDate.
+     * WAMS equivalent: DeletionDate.
      * </p>
      */
     @Column(name = SchemaColumnConstantName.C_DELETION_DATE)
@@ -262,7 +262,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     /**
      * Waiting period in days before deletion (7‑30 days). Set during `scheduleKeyDeletion`.
      * <p>
-     * AWS equivalent: PendingWindowInDays.
+     * WAMS equivalent: PendingWindowInDays.
      * </p>
      */
     @Column(name = SchemaColumnConstantName.C_PENDING_DELETION_WINDOW_DAYS)
@@ -277,7 +277,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * Always encrypted using envelope encryption with a master key.
      * Never stored in plaintext.
      * <p>
-     * AWS equivalent: key material (not directly exposed by API).
+     * WAMS equivalent: key material (not directly exposed by API).
      * </p>
      */
     @Lob
@@ -291,7 +291,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     /**
      * Date when the key material was imported (for BYOK). Null for keys generated by KMS.
      * <p>
-     * AWS equivalent: not directly exposed, but used internally.
+     * WAMS equivalent: not directly exposed, but used internally.
      * </p>
      */
     @Column(name = SchemaColumnConstantName.C_IMPORT_DATE)
@@ -301,7 +301,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * Expiration date for imported key material. After this date the key becomes unusable.
      * Only applies to keys with origin = EXTERNAL (BYOK).
      * <p>
-     * AWS equivalent: ValidTo.
+     * WAMS equivalent: ValidTo.
      * </p>
      */
     @Column(name = SchemaColumnConstantName.C_EXPIRATION_DATE)
@@ -323,7 +323,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * </ul>
      * </p>
      * <p>
-     * AWS equivalent: Origin.
+     * WAMS equivalent: Origin.
      * </p>
      */
     @Enumerated(EnumType.STRING)
@@ -341,7 +341,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * </ul>
      * </p>
      * <p>
-     * AWS equivalent: ExpirationModel (from GetParametersForImport).
+     * WAMS equivalent: ExpirationModel (from GetParametersForImport).
      * </p>
      */
     @Enumerated(EnumType.STRING)
@@ -351,25 +351,25 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     /**
      * Custom key store backing this key (CloudHSM or XKS). Null for standard KMS keys.
      * <p>
-     * AWS equivalent: CustomKeyStoreId.
+     * WAMS equivalent: CustomKeyStoreId.
      * </p>
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns(foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_KMS_KEY_REF_KMS_KEY_STORE),
             value = {
-            @JoinColumn(
-                    name = SchemaColumnConstantName.C_TENANT,
-                    referencedColumnName = SchemaColumnConstantName.C_TENANT,
-                    insertable = false,
-                    updatable = false
-            ),
-            @JoinColumn(
-                    name = SchemaColumnConstantName.C_KEY_STORE_ID,
-                    referencedColumnName = SchemaColumnConstantName.C_ID,
-                    insertable = false,
-                    updatable = false
-            )
-    })
+                    @JoinColumn(
+                            name = SchemaColumnConstantName.C_TENANT,
+                            referencedColumnName = SchemaColumnConstantName.C_TENANT,
+                            insertable = false,
+                            updatable = false
+                    ),
+                    @JoinColumn(
+                            name = SchemaColumnConstantName.C_KEY_STORE_ID,
+                            referencedColumnName = SchemaColumnConstantName.C_ID,
+                            insertable = false,
+                            updatable = false
+                    )
+            })
     private KmsCustomKeyStore customKeyStore;
 
     /**
@@ -385,7 +385,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     /**
      * Whether this key is part of a multi‑region setup.
      * <p>
-     * AWS equivalent: MultiRegion (boolean).
+     * WAMS equivalent: MultiRegion (boolean).
      * </p>
      */
     @Builder.Default
@@ -397,7 +397,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * For replica keys: points to the primary key's `keyId`.
      * For primary keys: null.
      * <p>
-     * AWS equivalent: part of MultiRegionConfiguration (PrimaryKeyId).
+     * WAMS equivalent: part of MultiRegionConfiguration (PrimaryKeyId).
      * </p>
      */
     @Column(name = SchemaColumnConstantName.C_PRIMARY_KEY_ID, length = 255)
@@ -407,7 +407,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * For primary keys: the region where the primary key resides.
      * For replica keys: not used (the primary region is the region of the primary key).
      * <p>
-     * AWS equivalent: part of MultiRegionConfiguration (PrimaryRegion).
+     * WAMS equivalent: part of MultiRegionConfiguration (PrimaryRegion).
      * </p>
      */
     @Column(name = SchemaColumnConstantName.C_PRIMARY_REGION, length = 100)
@@ -417,7 +417,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * For primary keys: comma‑separated list of replica region names.
      * Example: "us-west-2,eu-west-1,ap-southeast-1"
      * <p>
-     * AWS equivalent: part of MultiRegionConfiguration (ReplicaRegions).
+     * WAMS equivalent: part of MultiRegionConfiguration (ReplicaRegions).
      * </p>
      */
     @Column(name = SchemaColumnConstantName.C_REPLICA_REGIONS, length = 500)
@@ -482,7 +482,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * For others: empty list.
      * </p>
      * <p>
-     * AWS equivalent: EncryptionAlgorithmSpecs.
+     * WAMS equivalent: EncryptionAlgorithmSpecs.
      * </p>
      */
     @Transient
@@ -501,16 +501,16 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     }
 
     /**
-     * Key manager type: "AWS" (or "WAMS") or "CUSTOMER".
+     * Key manager type: "WAMS" (or "WAMS") or "CUSTOMER".
      * Derived from `origin` and custom key store presence.
      * <p>
-     * AWS equivalent: KeyManager.
+     * WAMS equivalent: KeyManager.
      * </p>
      */
     @Transient
     public String getKeyManager() {
         if (origin == IEnumKeyOrigin.Types.EXTERNAL
-                || origin == IEnumKeyOrigin.Types.AWS_CLOUDHSM
+                || origin == IEnumKeyOrigin.Types.WAMS_CLOUDHSM
                 || origin == IEnumKeyOrigin.Types.EXTERNAL_KEY_STORE) {
             return "CUSTOMER";
         }
@@ -521,7 +521,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * Structured multi‑region configuration object.
      * Returns a map with fields: multiRegion, primaryKeyId, primaryRegion, replicaRegions (list).
      * <p>
-     * AWS equivalent: MultiRegionConfiguration.
+     * WAMS equivalent: MultiRegionConfiguration.
      * </p>
      */
     @Transient
@@ -538,7 +538,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     /**
      * Next scheduled rotation date (if rotation enabled and lastRotationDate known).
      * <p>
-     * AWS equivalent: NextRotationDate (from GetKeyRotationStatus).
+     * WAMS equivalent: NextRotationDate (from GetKeyRotationStatus).
      * </p>
      */
     @Transient
@@ -552,7 +552,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     /**
      * Returns true if the key material was imported (BYOK).
      * <p>
-     * AWS equivalent: origin == EXTERNAL.
+     * WAMS equivalent: origin == EXTERNAL.
      * </p>
      */
     @Transient

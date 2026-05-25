@@ -1,4 +1,4 @@
-package eu.isygoit.ui.views;
+package eu.isygoit.ui.views.keyPolicy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.UI;
@@ -22,6 +22,8 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainLayout;
+import eu.isygoit.ui.MainView;
+import eu.isygoit.ui.views.keyPolicy.dialog.PolicyBuilderDialog;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +50,7 @@ public class PoliciesView extends VerticalLayout {
     private final Button loadButton = new Button("Load", new Icon(VaadinIcon.DOWNLOAD));
     private final Button saveButton = new Button("Save", new Icon(VaadinIcon.UPLOAD));
     private final Button formatButton = new Button("Format", new Icon(VaadinIcon.CODE));
+    private final Button copyButton = MainView.createCopyButton(VaadinIcon.COPY, "", "Copy policy JSON to clipboard");
     private final Button builderButton = new Button("Policy Builder", new Icon(VaadinIcon.PUZZLE_PIECE));
     private final Button loadFromEditorButton = new Button("Edit in Builder", new Icon(VaadinIcon.REFRESH));
 
@@ -123,6 +126,15 @@ public class PoliciesView extends VerticalLayout {
         configureButton(loadButton, "Load policy from selected key", ButtonVariant.LUMO_PRIMARY);
         configureButton(saveButton, "Save policy to selected key", ButtonVariant.LUMO_SUCCESS);
         configureButton(formatButton, "Pretty-format JSON", ButtonVariant.LUMO_TERTIARY);
+        copyButton.setTooltipText("Copy policy JSON to clipboard");
+        copyButton.addClickListener(e -> {
+            String content = policyEditor.getValue();
+            if (StringUtils.hasText(content)) {
+                MainView.copyToClipboard(content);
+            } else {
+                showWarning("Nothing to copy – editor is empty");
+            }
+        });
         configureButton(builderButton, "Open graphical policy builder", ButtonVariant.LUMO_CONTRAST);
         configureButton(loadFromEditorButton, "Load current JSON into builder", ButtonVariant.LUMO_TERTIARY);
 
@@ -132,7 +144,7 @@ public class PoliciesView extends VerticalLayout {
         builderButton.addClickListener(e -> openPolicyBuilder());
         loadFromEditorButton.addClickListener(e -> loadFromEditorIntoBuilder());
 
-        actionBar.add(loadButton, saveButton, formatButton, builderButton, loadFromEditorButton);
+        actionBar.add(loadButton, saveButton, formatButton, copyButton, builderButton, loadFromEditorButton);
         add(actionBar);
     }
 
@@ -148,6 +160,7 @@ public class PoliciesView extends VerticalLayout {
         policyEditor.getStyle()
                 .set("font-family", "monospace")
                 .set("font-size", "13px");
+        policyEditor.addValueChangeListener(e -> updateButtonsState());
         add(policyEditor);
     }
 
@@ -185,16 +198,15 @@ public class PoliciesView extends VerticalLayout {
         );
     }
 
-    /**
-     * Enables or disables action buttons based on whether a key is selected.
-     */
     private void updateButtonsState() {
         boolean hasKey = selectedKeyId != null;
+        boolean hasContent = StringUtils.hasText(policyEditor.getValue());
         loadButton.setEnabled(hasKey);
         saveButton.setEnabled(hasKey);
-        formatButton.setEnabled(hasKey);
-        builderButton.setEnabled(hasKey);
-        loadFromEditorButton.setEnabled(hasKey && StringUtils.hasText(policyEditor.getValue()));
+        formatButton.setEnabled(hasContent);
+        copyButton.setEnabled(hasContent);
+        builderButton.setEnabled(hasContent);
+        loadFromEditorButton.setEnabled(hasKey && hasContent);
     }
 
     private void loadKeyOptions() {
@@ -216,7 +228,6 @@ public class PoliciesView extends VerticalLayout {
                 keyCombo.clear();
                 policyEditor.clear();
             }
-            // After loading, update button state
             updateButtonsState();
         } catch (Exception e) {
             showError("Failed to load keys: " + e.getMessage());
@@ -262,7 +273,7 @@ public class PoliciesView extends VerticalLayout {
             showError("Error loading policy: " + e.getMessage());
         } finally {
             showLoading(false);
-            updateButtonsState(); // Refresh Edit in Builder button state based on editor content
+            updateButtonsState();
         }
     }
 
@@ -293,7 +304,7 @@ public class PoliciesView extends VerticalLayout {
             ResponseEntity<KmsDtos.PutKeyPolicyResponse> response = kmsApiService.putKeyPolicy(selectedKeyId, request);
             if (response.getStatusCode().is2xxSuccessful()) {
                 showSuccess("Policy saved successfully");
-                loadPolicy(); // reload to show the saved version
+                loadPolicy();
             } else {
                 showError("Save failed: " + response.getStatusCode());
             }
@@ -330,7 +341,7 @@ public class PoliciesView extends VerticalLayout {
                 String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(newPolicy);
                 policyEditor.setValue(json);
                 showSuccess("Policy built and inserted into editor");
-                updateButtonsState(); // Refresh Edit in Builder button state
+                updateButtonsState();
             } catch (Exception ex) {
                 showError("Failed to generate JSON: " + ex.getMessage());
             }
@@ -370,12 +381,11 @@ public class PoliciesView extends VerticalLayout {
     private void showLoading(boolean show) {
         loadingBar.setVisible(show);
         keyCombo.setEnabled(!show);
-        // Buttons are controlled by updateButtonsState, but during loading we also disable them.
-        // We'll keep them enabled/disabled based on selection, but loading overrides.
         if (show) {
             loadButton.setEnabled(false);
             saveButton.setEnabled(false);
             formatButton.setEnabled(false);
+            copyButton.setEnabled(false);
             builderButton.setEnabled(false);
             loadFromEditorButton.setEnabled(false);
             policyEditor.setEnabled(false);
@@ -409,7 +419,12 @@ public class PoliciesView extends VerticalLayout {
             this.displayName = aliasOrId != null ? aliasOrId + " (" + keyId + ")" : keyId;
         }
 
-        String getKeyId() { return keyId; }
-        String getDisplayName() { return displayName; }
+        String getKeyId() {
+            return keyId;
+        }
+
+        String getDisplayName() {
+            return displayName;
+        }
     }
 }

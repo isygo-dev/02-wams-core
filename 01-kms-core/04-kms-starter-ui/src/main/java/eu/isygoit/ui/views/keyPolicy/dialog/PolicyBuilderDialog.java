@@ -1,4 +1,4 @@
-package eu.isygoit.ui.views;
+package eu.isygoit.ui.views.keyPolicy.dialog;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
@@ -14,7 +14,6 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.dto.KmsDtos.KeyPolicy;
 
 import java.util.ArrayList;
@@ -25,12 +24,11 @@ public class PolicyBuilderDialog extends Dialog {
 
     private final ObjectMapper objectMapper;
     private final Consumer<KeyPolicy> onSave;
-    private KeyPolicy policy;
     private final List<KeyPolicy.Statement> statements = new ArrayList<>();
-
     private final TextField versionField = new TextField("Policy Version");
     private final TextField idField = new TextField("Policy ID (optional)");
     private final Grid<KeyPolicy.Statement> statementGrid = new Grid<>();
+    private KeyPolicy policy;
 
     public PolicyBuilderDialog(ObjectMapper objectMapper, KeyPolicy existingPolicy, Consumer<KeyPolicy> onSave) {
         this.objectMapper = objectMapper;
@@ -63,7 +61,7 @@ public class PolicyBuilderDialog extends Dialog {
         String version = policy.getVersion();
         versionField.setValue(version != null ? version : "2012-10-17");
         versionField.setWidthFull();
-        versionField.setHelperText("Must be '2012-10-17' for AWS compatibility");
+        versionField.setHelperText("Must be '2012-10-17' for WAMS compatibility");
 
         // Policy ID field
         String policyId = policy.getId();

@@ -96,7 +96,7 @@ public final class AlgorithmMapper {
         // ----- ENCRYPTION -----
         if (usage == IEnumKeyUsage.Types.ENCRYPT_DECRYPT) {
             if (keySpec.name().startsWith("RSA")) {
-                // RSA encryption uses OAEP with SHA-256 regardless of key size (AWS KMS behaviour)
+                // RSA encryption uses OAEP with SHA-256 regardless of key size (WAMS KMS behaviour)
                 return IEnumEncryptionAlgorithm.RSAES_OAEP_SHA_256.name();
             } else if (keySpec == IEnumKeySpec.Types.SYMMETRIC_DEFAULT) {
                 return IEnumEncryptionAlgorithm.SYMMETRIC_DEFAULT.name();

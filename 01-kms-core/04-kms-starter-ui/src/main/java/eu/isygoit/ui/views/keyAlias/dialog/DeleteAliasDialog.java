@@ -1,4 +1,4 @@
-package eu.isygoit.ui.views.alias.dialog;
+package eu.isygoit.ui.views.keyAlias.dialog;
 
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.notification.Notification;
@@ -6,7 +6,7 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import eu.isygoit.dto.KmsDtos.DeleteAliasResponse;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.views.PinBaseActionDialog;
-import eu.isygoit.ui.views.alias.AliasesView;
+import eu.isygoit.ui.views.keyAlias.AliasesView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 

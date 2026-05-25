@@ -1,4 +1,4 @@
-package eu.isygoit.ui.views;
+package eu.isygoit.ui.views.keyPolicy.dialog;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,6 +14,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.KmsDtos.KeyPolicy;
+import eu.isygoit.enums.IKmsActionType;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -22,9 +23,8 @@ public class PolicyStatementEditorDialog extends Dialog {
 
     private final ObjectMapper objectMapper;
     private final Consumer<KeyPolicy.Statement> onDone;
-    private KeyPolicy.Statement statement;
-    private final String keyArnPlaceholder = "arn:aws:kms:us-east-1:123456789012:key/";
-
+    private final String keyArnPlaceholder = "wrn:wams:kms:us-east-1:123456789012:key/";
+    private final String aliasArnPlaceholder = "wrn:wams:kms:us-east-1:123456789012:alias/";
     private final TextField sidField = new TextField("SID (Statement ID)");
     private final ComboBox<String> effectCombo = new ComboBox<>("Effect");
     private final TextField principalField = new TextField("Principal");
@@ -32,6 +32,10 @@ public class PolicyStatementEditorDialog extends Dialog {
     private final TextArea resourcesArea = new TextArea("Resources");
     private final TextArea conditionArea = new TextArea("Condition (JSON)");
     private final Span resourcesPreview = new Span();
+    // Shortcut buttons
+    private final HorizontalLayout actionShortcuts = new HorizontalLayout();
+    private final HorizontalLayout resourceShortcuts = new HorizontalLayout();
+    private KeyPolicy.Statement statement;
 
     public PolicyStatementEditorDialog(ObjectMapper objectMapper, KeyPolicy.Statement existing, Consumer<KeyPolicy.Statement> onDone) {
         this.objectMapper = objectMapper;
@@ -39,7 +43,7 @@ public class PolicyStatementEditorDialog extends Dialog {
         this.statement = (existing != null) ? deepCopyStatement(existing) : createEmptyStatement();
 
         setHeaderTitle(existing == null ? "Add Statement" : "Edit Statement");
-        setWidth("800px");
+        setWidth("850px");
         setResizable(true);
         setCloseOnEsc(true);
 
@@ -81,7 +85,6 @@ public class PolicyStatementEditorDialog extends Dialog {
         layout.setPadding(true);
         layout.setWidthFull();
 
-        // All fields set width full
         sidField.setWidthFull();
         sidField.setHelperText("Optional unique identifier (e.g., 'AllowKeyAdmin')");
 
@@ -89,39 +92,71 @@ public class PolicyStatementEditorDialog extends Dialog {
         effectCombo.setWidthFull();
 
         principalField.setWidthFull();
-        principalField.setHelperText("Examples: '*' (everyone), 'arn:aws:iam::123456789012:root', or JSON like {\"AWS\": \"arn:aws:iam::123456789012:role/MyRole\"}");
+        principalField.setHelperText("Examples: '*' (everyone), 'wrn:wams:iam::123456789012:root', or JSON like {\"WAMS\": \"wrn:wams:iam::123456789012:role/MyRole\"}");
 
+        // ---- Actions section with shortcuts ----
         actionsArea.setWidthFull();
         actionsArea.setHeight("120px");
-        actionsArea.setHelperText("Enter actions separated by new lines or commas. Examples:\nkms:Encrypt\nkms:Decrypt\nkms:*");
+        actionsArea.setHelperText("Enter actions separated by new lines or commas. Click shortcuts to add.");
 
-        // Quick add buttons for actions
-        HorizontalLayout actionQuick = new HorizontalLayout();
-        actionQuick.setWidthFull();
-        Button addAllActions = new Button("All (kms:*)", e -> actionsArea.setValue("kms:*"));
-        Button addEncryptDecrypt = new Button("Encrypt/Decrypt", e -> actionsArea.setValue("kms:Encrypt\nkms:Decrypt\nkms:GenerateDataKey"));
-        addAllActions.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
-        addEncryptDecrypt.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
-        actionQuick.add(addAllActions, addEncryptDecrypt);
-        actionQuick.setSpacing(true);
+        // Build action shortcut buttons from IKmsActionType.Types (most important ones)
+        List<IKmsActionType.Types> importantActions = Arrays.asList(
+                IKmsActionType.Types.ENCRYPT,
+                IKmsActionType.Types.DECRYPT,
+                IKmsActionType.Types.RE_ENCRYPT,
+                IKmsActionType.Types.GENERATE_DATA_KEY,
+                IKmsActionType.Types.GENERATE_DATA_KEY_WITHOUT_PLAINTEXT,
+                IKmsActionType.Types.SIGN,
+                IKmsActionType.Types.VERIFY,
+                IKmsActionType.Types.GENERATE_MAC,
+                IKmsActionType.Types.VERIFY_MAC,
+                IKmsActionType.Types.DESCRIBE_KEY,
+                IKmsActionType.Types.GET_PUBLIC_KEY
+        );
+        actionShortcuts.setWidthFull();
+        actionShortcuts.setSpacing(true);
+        actionShortcuts.getStyle().set("flex-wrap", "wrap");
+        for (IKmsActionType.Types action : importantActions) {
+            String actionMeaning = action.meaning(); // e.g., "Encrypt"
+            Button btn = new Button(actionMeaning);
+            btn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
+            btn.addClickListener(e -> addToActionsArea("kms:" + actionMeaning));
+            actionShortcuts.add(btn);
+        }
+        // Add "All actions" button
+        Button allActionsBtn = new Button("All (kms:*)");
+        allActionsBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_SUCCESS);
+        allActionsBtn.addClickListener(e -> actionsArea.setValue("kms:*"));
+        actionShortcuts.add(allActionsBtn);
 
+        // ---- Resources section with shortcuts ----
         resourcesArea.setWidthFull();
         resourcesArea.setHeight("120px");
-        resourcesArea.setHelperText("Enter resource ARNs one per line or separated by commas. Use '*' for all resources under this key.");
+        resourcesArea.setHelperText("Enter resource ARNs one per line or separated by commas. Use '*' for all resources.");
 
-        // Quick add buttons for resources
-        HorizontalLayout resourceQuick = new HorizontalLayout();
-        resourceQuick.setWidthFull();
-        Button addAllResources = new Button("All resources (*)", e -> resourcesArea.setValue("*"));
-        Button addKeyArn = new Button("Key ARN placeholder", e -> {
-            String current = resourcesArea.getValue();
-            String arn = keyArnPlaceholder + "<key-id>";
-            resourcesArea.setValue(current.isEmpty() ? arn : current + "\n" + arn);
-        });
-        addAllResources.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
-        addKeyArn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
-        resourceQuick.add(addAllResources, addKeyArn);
-        resourceQuick.setSpacing(true);
+        resourceShortcuts.setWidthFull();
+        resourceShortcuts.setSpacing(true);
+        resourceShortcuts.getStyle().set("flex-wrap", "wrap");
+
+        Button allResourcesBtn = new Button("All resources (*)");
+        allResourcesBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
+        allResourcesBtn.addClickListener(e -> addToResourcesArea("*"));
+        resourceShortcuts.add(allResourcesBtn);
+
+        Button keyArnBtn = new Button("Key WRN");
+        keyArnBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
+        keyArnBtn.addClickListener(e -> addToResourcesArea(keyArnPlaceholder + "<key-id>"));
+        resourceShortcuts.add(keyArnBtn);
+
+        Button aliasArnBtn = new Button("Alias WRN");
+        aliasArnBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
+        aliasArnBtn.addClickListener(e -> addToResourcesArea(aliasArnPlaceholder + "<alias-name>"));
+        resourceShortcuts.add(aliasArnBtn);
+
+        Button accountRootBtn = new Button("Account root");
+        accountRootBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
+        accountRootBtn.addClickListener(e -> addToResourcesArea("wrn:wams:iam::*:root"));
+        resourceShortcuts.add(accountRootBtn);
 
         // Preview of how resources will be stored
         resourcesPreview.getStyle().set("font-family", "monospace").set("font-size", "small");
@@ -129,16 +164,35 @@ public class PolicyStatementEditorDialog extends Dialog {
         resourcesPreview.setText("→ Will be stored as: [\"*\"]");
         resourcesArea.addValueChangeListener(e -> updatePreview());
 
+        // Condition
         conditionArea.setWidthFull();
         conditionArea.setHeight("120px");
-        conditionArea.setHelperText("Optional JSON condition. Example:\n{\n  \"Bool\": {\n    \"aws:MultiFactorAuthPresent\": \"true\"\n  }\n}");
+        conditionArea.setHelperText("Optional JSON condition. Example:\n{\n  \"Bool\": {\n    \"wams:MultiFactorAuthPresent\": \"true\"\n  }\n}");
 
-        // Add all components
+        // Assemble layout
         layout.add(sidField, effectCombo, principalField,
-                new Span("Actions"), actionsArea, actionQuick,
-                new Span("Resources"), resourcesArea, resourceQuick, resourcesPreview,
+                new Span("Actions"), actionsArea, actionShortcuts,
+                new Span("Resources"), resourcesArea, resourceShortcuts, resourcesPreview,
                 new Span("Condition"), conditionArea);
         add(layout);
+    }
+
+    private void addToActionsArea(String action) {
+        String current = actionsArea.getValue();
+        if (current == null || current.isBlank()) {
+            actionsArea.setValue(action);
+        } else if (!current.contains(action)) {
+            actionsArea.setValue(current + "\n" + action);
+        }
+    }
+
+    private void addToResourcesArea(String resource) {
+        String current = resourcesArea.getValue();
+        if (current == null || current.isBlank()) {
+            resourcesArea.setValue(resource);
+        } else if (!current.contains(resource)) {
+            resourcesArea.setValue(current + "\n" + resource);
+        }
     }
 
     private void updatePreview() {
@@ -147,8 +201,8 @@ public class PolicyStatementEditorDialog extends Dialog {
             resourcesPreview.setText("→ Will be stored as: [\"*\"]");
             return;
         }
-        List<String> items = parseMultilineOrComma(text);
-        if (items.isEmpty()) items = Collections.singletonList("*");
+        List<String> items = new ArrayList<>(parseMultilineOrComma(text));
+        if (items.isEmpty()) items = new ArrayList<>(Collections.singletonList("*"));
         try {
             String json = objectMapper.writeValueAsString(items);
             resourcesPreview.setText("→ Will be stored as: " + json);
@@ -253,24 +307,26 @@ public class PolicyStatementEditorDialog extends Dialog {
         // Actions
         String actionsText = actionsArea.getValue().trim();
         if (actionsText.isEmpty()) actionsText = "kms:*";
+        List<String> actions;
         if (actionsText.contains("\n")) {
-            List<String> actions = Arrays.asList(actionsText.split("\\r?\\n"));
-            actions.removeIf(String::isBlank);
-            builder.action(actions);
+            actions = new ArrayList<>(Arrays.asList(actionsText.split("\\r?\\n")));
         } else if (actionsText.contains(",")) {
-            List<String> actions = Arrays.asList(actionsText.split(","));
-            actions.replaceAll(String::trim);
-            actions.removeIf(String::isEmpty);
-            builder.action(actions);
+            actions = new ArrayList<>(Arrays.asList(actionsText.split(",")));
         } else {
-            builder.action(actionsText);
+            actions = new ArrayList<>(Collections.singletonList(actionsText));
+        }
+        actions.removeIf(String::isBlank);
+        if (actions.size() == 1) {
+            builder.action(actions.get(0));
+        } else {
+            builder.action(actions);
         }
 
         // Resources
         String resourcesText = resourcesArea.getValue().trim();
         if (resourcesText.isEmpty()) resourcesText = "*";
-        List<String> resources = parseMultilineOrComma(resourcesText);
-        if (resources.isEmpty()) resources = Collections.singletonList("*");
+        List<String> resources = new ArrayList<>(parseMultilineOrComma(resourcesText));
+        if (resources.isEmpty()) resources = new ArrayList<>(Collections.singletonList("*"));
         resources.replaceAll(String::trim);
         resources.removeIf(String::isEmpty);
         if (resources.size() == 1) {

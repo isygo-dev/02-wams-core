@@ -1,12 +1,12 @@
 package eu.isygoit.enums;
 
 /**
- * AWS KMS Grant Status.
+ * WAMS KMS Grant Status.
  * <p>
  * Represents the lifecycle state of a grant.
  * </p>
  *
- * @see <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_GrantListEntry.html">AWS GrantListEntry</a>
+ * @see <a href="https://docs.wams.amazon.com/kms/latest/APIReference/API_GrantListEntry.html">WAMS GrantListEntry</a>
  */
 public interface IEnumGrantStatus {
 

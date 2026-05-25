@@ -308,11 +308,11 @@ public class GrantsView extends VerticalLayout {
         FormLayout form = new FormLayout();
         TextField granteeField = new TextField("Grantee Principal");
         granteeField.setRequired(true);
-        granteeField.setPlaceholder("e.g., arn:aws:iam::123456789012:role/ExampleRole");
+        granteeField.setPlaceholder("e.g., wrn:wams:iam::123456789012:role/ExampleRole");
         granteeField.setWidthFull();
 
         TextField retiringField = new TextField("Retiring Principal (optional)");
-        retiringField.setPlaceholder("e.g., arn:aws:iam::123456789012:user/Admin");
+        retiringField.setPlaceholder("e.g., wrn:wams:iam::123456789012:user/Admin");
 
         CheckboxGroup<String> operationsGroup = new CheckboxGroup<>("Operations");
         operationsGroup.setItems(

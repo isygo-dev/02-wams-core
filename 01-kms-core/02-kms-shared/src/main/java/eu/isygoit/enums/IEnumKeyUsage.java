@@ -1,19 +1,19 @@
 package eu.isygoit.enums;
 
 /**
- * AWS KMS Key Usage alignment.
+ * WAMS KMS Key Usage alignment.
  * <p>
  * Represents the intended use of the key material.
  * </p>
  *
- * @see <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_KeyMetadata.html#KMS-Type-KeyMetadata-KeyUsage">AWS KeyUsage</a>
+ * @see <a href="https://docs.wams.amazon.com/kms/latest/APIReference/API_KeyMetadata.html#KMS-Type-KeyMetadata-KeyUsage">WAMS KeyUsage</a>
  */
 public interface IEnumKeyUsage {
 
     int STR_ENUM_SIZE = 3;
 
     /**
-     * AWS KMS Key Usage types.
+     * WAMS KMS Key Usage types.
      */
     enum Types implements IEnum {
 

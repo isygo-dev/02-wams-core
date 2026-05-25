@@ -1,44 +1,45 @@
-package eu.isygoit.ui.views.alias.dialog;
+package eu.isygoit.ui.views.keyAlias.dialog;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.textfield.TextField;
+import eu.isygoit.dto.KmsDtos.CreateAliasRequest;
+import eu.isygoit.dto.KmsDtos.CreateAliasResponse;
 import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
-import eu.isygoit.dto.KmsDtos.UpdateAliasRequest;
-import eu.isygoit.dto.KmsDtos.UpdateAliasResponse;
+import eu.isygoit.dto.KmsDtos.ListKeysResponse;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.views.BaseActionDialog;
-import eu.isygoit.ui.views.alias.AliasesView;
+import eu.isygoit.ui.views.keyAlias.AliasesView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
- * Dialog for reassigning an alias to a different KMS key.
+ * Dialog for creating a new alias.
  */
-public class UpdateAliasDialog extends BaseActionDialog {
+public class CreateAliasDialog extends BaseActionDialog {
 
     private final AliasesView parentView;
     private final KmsApiService kmsApiService;
     private final Runnable onSuccess;
 
-    private final String aliasName;
-    private final String currentTargetKeyId;
+    private TextField aliasNameField;
     private ComboBox<String> targetKeyCombo;
 
-    public UpdateAliasDialog(AliasesView parentView,
+    public CreateAliasDialog(AliasesView parentView,
                              KmsApiService kmsApiService,
-                             Runnable onSuccess,
-                             String aliasName,
-                             String currentTargetKeyId) {
-        super("Reassign alias", onSuccess);
+                             Runnable onSuccess) {
+        super("Create alias", onSuccess);
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
-        this.aliasName = aliasName;
-        this.currentTargetKeyId = currentTargetKeyId;
         this.onSuccess = onSuccess;
 
-        setOkButtonText("Update");
+        setOkButtonText("Create");
         setWidth("500px");
 
         buildForm();
@@ -48,21 +49,32 @@ public class UpdateAliasDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         parentView.showLoading(true);
-        String newTargetId = targetKeyCombo.getValue();
-        if (newTargetId == null || newTargetId.isBlank()) {
-            String errorMsg = "Please select a target key";
+
+        String aliasName = aliasNameField.getValue();
+        String targetKeyId = targetKeyCombo.getValue();
+        if (aliasName == null || aliasName.isBlank()) {
+            String errorMsg = "Alias name is required";
             this.append(errorMsg);
             Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            return false;
         }
+        if (targetKeyId == null || targetKeyId.isBlank()) {
+            String errorMsg = "Target key is required";
+            this.append(errorMsg);
+            Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            return false;
+        }
+
         try {
-            UpdateAliasRequest request = UpdateAliasRequest.builder()
+            CreateAliasRequest request = CreateAliasRequest.builder()
                     .aliasName(aliasName)
-                    .targetKeyId(newTargetId)
+                    .targetKeyId(targetKeyId)
                     .build();
-            ResponseEntity<UpdateAliasResponse> response = kmsApiService.updateAlias(aliasName, request);
+            ResponseEntity<CreateAliasResponse> response = kmsApiService.createAlias(request);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                String errorMsg = "Update failed: " + response.getStatusCode();
+                String errorMsg = "Creation failed: " + response.getStatusCode();
                 this.append(errorMsg);
                 Notification.show(errorMsg, 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
@@ -70,14 +82,14 @@ public class UpdateAliasDialog extends BaseActionDialog {
             }
 
             close();
-            Notification.show("Alias reassigned", 3000, Notification.Position.TOP_END)
+            Notification.show("Alias created successfully", 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
             return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Update error: " + errorMsg, 5000, Notification.Position.TOP_END)
+            Notification.show("Creation error: " + errorMsg, 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } catch (Exception ex) {
             String errorMsg = ex.getMessage();
@@ -92,10 +104,14 @@ public class UpdateAliasDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        targetKeyCombo = new ComboBox<>("New target KMS key");
+        aliasNameField = new TextField("Alias name");
+        aliasNameField.setPlaceholder("alias:my-key-alias");
+        aliasNameField.setRequiredIndicatorVisible(true);
+
+        targetKeyCombo = new ComboBox<>("Target KMS key");
         targetKeyCombo.setRequiredIndicatorVisible(true);
         targetKeyCombo.setPlaceholder("Select a key...");
-        targetKeyCombo.setItems(parentView.fetchKeyIds());
+        targetKeyCombo.setItems(fetchKeyIds());
         targetKeyCombo.setItemLabelGenerator(keyId -> {
             try {
                 ResponseEntity<DescribeKeyResponse> desc = kmsApiService.describeKey(keyId);
@@ -108,13 +124,29 @@ public class UpdateAliasDialog extends BaseActionDialog {
             }
             return keyId;
         });
-        targetKeyCombo.setValue(currentTargetKeyId);
     }
 
     private FormLayout createFormLayout() {
         FormLayout form = new FormLayout();
-        form.add(targetKeyCombo);
+        form.add(aliasNameField, targetKeyCombo);
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
         return form;
+    }
+
+    private List<String> fetchKeyIds() {
+        List<String> keyIds = new ArrayList<>();
+        try {
+            ResponseEntity<ListKeysResponse> response = kmsApiService.listKeys(100, null);
+            ListKeysResponse keys = response.getBody();
+            if (keys != null && keys.getKeys() != null) {
+                keyIds = keys.getKeys().stream()
+                        .map(ListKeysResponse.KeyEntry::getKeyId)
+                        .collect(Collectors.toList());
+            }
+        } catch (Exception e) {
+            Notification.show("Could not load keys: " + e.getMessage(), 3000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        }
+        return keyIds;
     }
 }

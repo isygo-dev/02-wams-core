@@ -1,19 +1,19 @@
 package eu.isygoit.enums;
 
 /**
- * AWS KMS Key Origin alignment.
+ * WAMS KMS Key Origin alignment.
  * <p>
- * Represents the source of key material as defined by AWS KMS.
+ * Represents the source of key material as defined by WAMS KMS.
  * </p>
  *
- * @see <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_KeyMetadata.html#KMS-Type-KeyMetadata-Origin">AWS Origin</a>
+ * @see <a href="https://docs.wams.amazon.com/kms/latest/APIReference/API_KeyMetadata.html#KMS-Type-KeyMetadata-Origin">WAMS Origin</a>
  */
 public interface IEnumKeyOrigin {
 
     int STR_ENUM_SIZE = 4;
 
     /**
-     * AWS KMS key origin types.
+     * WAMS KMS key origin types.
      */
     enum Types implements IEnum {
 
@@ -28,9 +28,9 @@ public interface IEnumKeyOrigin {
         EXTERNAL("EXTERNAL"),
 
         /**
-         * Key material generated in an AWS CloudHSM custom key store.
+         * Key material generated in an WAMS CloudHSM custom key store.
          */
-        AWS_CLOUDHSM("AWS_CLOUDHSM"),
+        WAMS_CLOUDHSM("WAMS_CLOUDHSM"),
 
         /**
          * Key material managed in an external key store (XKS) proxy.

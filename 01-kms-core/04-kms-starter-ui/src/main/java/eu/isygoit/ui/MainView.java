@@ -106,15 +106,37 @@ public class MainView extends VerticalLayout {
         loadKeyOptions();
     }
 
-    private H2 buildHeader() {
-        H2 title = new H2("Key Management Service Dashboard");
-        title.getStyle().set("margin-bottom", "10px");
-        return title;
+    /**
+     * Creates a compact copy button consistent with KeyCard's style.
+     */
+    public static Button createCopyButton(VaadinIcon icon, String textToCopy, String tooltip) {
+        Button btn = new Button(new Icon(icon));
+        btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        btn.setTooltipText(tooltip);
+        btn.setWidth("20px");
+        btn.setHeight("20px");
+        btn.addClickListener(e -> MainView.copyToClipboard(textToCopy));
+        return btn;
     }
 
     // =========================================================================
     // Global Key Statistics
     // =========================================================================
+
+    public static void copyToClipboard(String text) {
+        UI.getCurrent().getPage().executeJs(
+                "navigator.clipboard.writeText($0).then(() => { $0.dispatchEvent(new Event('copy-success')); }).catch(() => { $0.dispatchEvent(new Event('copy-error')); });",
+                text
+        );
+        Notification.show("Key ID copied to clipboard", 1500, Notification.Position.TOP_END)
+                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+    }
+
+    private H2 buildHeader() {
+        H2 title = new H2("Key Management Service Dashboard");
+        title.getStyle().set("margin-bottom", "10px");
+        return title;
+    }
 
     private VerticalLayout buildGlobalKeysStatistics() {
         VerticalLayout layout = new VerticalLayout();
@@ -177,6 +199,10 @@ public class MainView extends VerticalLayout {
         card.setAlignItems(FlexComponent.Alignment.CENTER);
         return card;
     }
+
+    // =========================================================================
+    // Key Usage Statistics (per key, customized by key usage)
+    // =========================================================================
 
     private void showPlaceholderCards() {
         statsContainer.removeAll();
@@ -296,10 +322,6 @@ public class MainView extends VerticalLayout {
         });
     }
 
-    // =========================================================================
-    // Key Usage Statistics (per key, customized by key usage)
-    // =========================================================================
-
     private VerticalLayout buildKeyUsageStatsSection() {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
@@ -394,6 +416,10 @@ public class MainView extends VerticalLayout {
         }
         return keyId;
     }
+
+    // =========================================================================
+    // Audit Log Viewer
+    // =========================================================================
 
     private void loadKeyUsageStats() {
         KeyOption selected = usageKeyCombo.getValue();
@@ -532,10 +558,6 @@ public class MainView extends VerticalLayout {
         card.setAlignItems(FlexComponent.Alignment.CENTER);
         return card;
     }
-
-    // =========================================================================
-    // Audit Log Viewer
-    // =========================================================================
 
     private VerticalLayout buildAuditLogViewer() {
         VerticalLayout layout = new VerticalLayout();
@@ -686,6 +708,10 @@ public class MainView extends VerticalLayout {
         });
     }
 
+    // =========================================================================
+    // Quick Links
+    // =========================================================================
+
     private void updateAuditGrid() {
         if (allLogs.isEmpty()) {
             auditGrid.setItems(new ArrayList<>());
@@ -713,10 +739,6 @@ public class MainView extends VerticalLayout {
             updateAuditGrid();
         }
     }
-
-    // =========================================================================
-    // Quick Links
-    // =========================================================================
 
     private VerticalLayout buildQuickLinks() {
         VerticalLayout layout = new VerticalLayout();
@@ -758,27 +780,5 @@ public class MainView extends VerticalLayout {
         IEnumKeyUsage.Types getKeyUsage() {
             return keyUsage;
         }
-    }
-
-    /**
-     * Creates a compact copy button consistent with KeyCard's style.
-     */
-    public static Button createCopyButton(VaadinIcon icon, String textToCopy, String tooltip) {
-        Button btn = new Button(new Icon(icon));
-        btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        btn.setTooltipText(tooltip);
-        btn.setWidth("20px");
-        btn.setHeight("20px");
-        btn.addClickListener(e -> MainView.copyToClipboard(textToCopy));
-        return btn;
-    }
-
-    public static void copyToClipboard(String text) {
-        UI.getCurrent().getPage().executeJs(
-                "navigator.clipboard.writeText($0).then(() => { $0.dispatchEvent(new Event('copy-success')); }).catch(() => { $0.dispatchEvent(new Event('copy-error')); });",
-                text
-        );
-        Notification.show("Key ID copied to clipboard", 1500, Notification.Position.TOP_END)
-                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 }

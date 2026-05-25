@@ -18,8 +18,8 @@ public abstract class PinBaseActionDialog extends BaseActionDialog {
 
     protected final String confirmationCode;
     private final String warning = "⚠️ ";
-    protected TextField pinField;
     private final boolean requirePin;
+    protected TextField pinField;
 
     /**
      * Constructs a new PIN confirmation dialog.

@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Container class for all AWS KMS‑style DTOs (Requests and Responses).
+ * Container class for all WAMS KMS‑style DTOs (Requests and Responses).
  * Aligned with the internal entity model.
  */
 public final class KmsDtos {
@@ -115,7 +115,7 @@ public final class KmsDtos {
             @Schema(description = "Unique key identifier (UUID)")
             private String keyId;
 
-            @Schema(description = "Key ARN (WAMS Resource Name)")
+            @Schema(description = "Key WRN (WAMS Resource Name)")
             private String wrn;
 
             @Schema(description = "Whether the key is enabled")
@@ -162,7 +162,7 @@ public final class KmsDtos {
             @Schema(description = "Validity period for imported key material (required if expirationModel = KEY_MATERIAL_EXPIRES)")
             private LocalDateTime validTo;
 
-            @Schema(description = "Alias for keySpec (for AWS compatibility)")
+            @Schema(description = "Alias for keySpec (for WAMS compatibility)")
             private String customerMasterKeySpec;
 
             @Schema(description = "List of supported encryption algorithms (derived)")
@@ -203,7 +203,7 @@ public final class KmsDtos {
             @Schema(description = "Unique key identifier (UUID)")
             private String keyId;
 
-            @Schema(description = "Key ARN (WAMS Resource Name)")
+            @Schema(description = "Key WRN (WAMS Resource Name)")
             private String wrn;
 
             @Schema(description = "Whether the key is enabled")
@@ -250,7 +250,7 @@ public final class KmsDtos {
             @Schema(description = "Validity period for imported key material (required if expirationModel = KEY_MATERIAL_EXPIRES)")
             private LocalDateTime validTo;
 
-            @Schema(description = "Alias for keySpec (for AWS compatibility)")
+            @Schema(description = "Alias for keySpec (for WAMS compatibility)")
             private String customerMasterKeySpec;
 
             @Schema(description = "List of supported encryption algorithms (derived)")
@@ -307,7 +307,7 @@ public final class KmsDtos {
             @Schema(description = "Primary alias")
             private String alias;
 
-            @Schema(description = "Key ARN")
+            @Schema(description = "Key WRN")
             private String keyWrn;
 
             @Schema(description = "Key status")
@@ -1351,7 +1351,7 @@ public final class KmsDtos {
             @Schema(description = "Alias name")
             private String aliasName;
 
-            @Schema(description = "Alias ARN")
+            @Schema(description = "Alias WRN")
             private String aliasWrn;
 
             @Schema(description = "Target key ID")
@@ -1493,7 +1493,7 @@ public final class KmsDtos {
             private String effect; // "Allow" ou "Deny"
 
             @JsonProperty("Principal")
-            private Object principal; // peut être String, Map<String, String> ou "AWS": "arn:..."
+            private Object principal; // peut être String, Map<String, String> ou "WAMS": "wrn:..."
 
             @JsonProperty("Action")
             private Object action; // String ou List<String>
@@ -1502,7 +1502,7 @@ public final class KmsDtos {
             private Object resource; // String ou List<String>
 
             @JsonProperty("Condition")
-            private Map<String, Map<String, String>> condition; // ex: { "Bool" : { "aws:MultiFactorAuthPresent": "true" } }
+            private Map<String, Map<String, String>> condition; // ex: { "Bool" : { "wams:MultiFactorAuthPresent": "true" } }
         }
     }
 
@@ -2298,7 +2298,7 @@ public final class KmsDtos {
         @Schema(description = "Key ID")
         private String keyId;
 
-        @Schema(description = "Key ARN")
+        @Schema(description = "Key WRN")
         private String keyWrn;
 
         @Schema(description = "Wrapping key (public key)")
@@ -2385,7 +2385,7 @@ public final class KmsDtos {
         @Schema(description = "Target key ID")
         private String targetKeyId;
 
-        @Schema(description = "Target key ARN")
+        @Schema(description = "Target key WRN")
         private String targetKeyWrn;
 
         @Schema(description = "Creation timestamp")
@@ -2474,7 +2474,7 @@ public final class KmsDtos {
         @Schema(description = "Key ID")
         private String keyId;
 
-        @Schema(description = "Key ARN")
+        @Schema(description = "Key WRN")
         private String keyWrn;
 
         @Schema(description = "Encrypt count")

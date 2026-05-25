@@ -88,6 +88,7 @@ public class KeyManagementView extends VerticalLayout {
     // Filters
     private String currentSearch = "";
     private IEnumKeyStatus.Types currentStatus = null;
+
     @Autowired
     public KeyManagementView(KmsApiService kmsApiService, ObjectMapper objectMapper) {
         this.kmsApiService = kmsApiService;

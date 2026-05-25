@@ -1,4 +1,4 @@
-package eu.isygoit.ui.views.alias;
+package eu.isygoit.ui.views.keyAlias;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.UI;
@@ -14,8 +14,8 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainView;
-import eu.isygoit.ui.views.alias.dialog.DeleteAliasDialog;
-import eu.isygoit.ui.views.alias.dialog.UpdateAliasDialog;
+import eu.isygoit.ui.views.keyAlias.dialog.DeleteAliasDialog;
+import eu.isygoit.ui.views.keyAlias.dialog.UpdateAliasDialog;
 
 class AliasCard extends VerticalLayout {
     private final AliasesView parentView;

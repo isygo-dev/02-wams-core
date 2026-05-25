@@ -23,14 +23,14 @@ public interface IEnumKeySpec {
         HMAC_512("HMAC_512", "HmacSHA512", 512, false, IEnumKeyUsage.Types.GENERATE_VERIFY_MAC),
         SM2("SM2", "SM2", 256, true, IEnumKeyUsage.Types.ENCRYPT_DECRYPT, IEnumKeyUsage.Types.SIGN_VERIFY);
 
-        private final String awsName;
+        private final String wamsName;
         private final String javaAlgorithm;
         private final int keySizeBits;
         private final boolean asymmetric;
         private final List<IEnumKeyUsage.Types> allowedUsages;
 
-        Types(String awsName, String javaAlgorithm, int keySizeBits, boolean asymmetric, IEnumKeyUsage.Types... allowedUsages) {
-            this.awsName = awsName;
+        Types(String wamsName, String javaAlgorithm, int keySizeBits, boolean asymmetric, IEnumKeyUsage.Types... allowedUsages) {
+            this.wamsName = wamsName;
             this.javaAlgorithm = javaAlgorithm;
             this.keySizeBits = keySizeBits;
             this.asymmetric = asymmetric;
@@ -42,7 +42,7 @@ public interface IEnumKeySpec {
 
         @Override
         public String meaning() {
-            return awsName;
+            return wamsName;
         }
 
         public String getJavaAlgorithm() {
