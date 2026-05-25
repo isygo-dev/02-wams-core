@@ -6,6 +6,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -38,12 +39,17 @@ public class PoliciesView extends VerticalLayout {
 
     private final KmsApiService kmsApiService;
     private final ObjectMapper objectMapper;
-    private final ComboBox<KeyOption> keyCombo = new ComboBox<>("KMS Key");
-    private final TextArea policyEditor = new TextArea("Policy (JSON)");
-    private final Button loadButton = new Button("Load Policy", new Icon(VaadinIcon.DOWNLOAD));
-    private final Button saveButton = new Button("Save Policy", new Icon(VaadinIcon.UPLOAD));
-    private final Button formatButton = new Button("Format JSON", new Icon(VaadinIcon.CODE));
+
+    // UI components
+    private final ComboBox<KeyOption> keyCombo = new ComboBox<>("Select KMS Key");
+    private final TextArea policyEditor = new TextArea("Policy Document (JSON)");
     private final ProgressBar loadingBar = new ProgressBar();
+
+    private final Button loadButton = new Button("Load", new Icon(VaadinIcon.DOWNLOAD));
+    private final Button saveButton = new Button("Save", new Icon(VaadinIcon.UPLOAD));
+    private final Button formatButton = new Button("Format", new Icon(VaadinIcon.CODE));
+    private final Button builderButton = new Button("Policy Builder", new Icon(VaadinIcon.PUZZLE_PIECE));
+    private final Button loadFromEditorButton = new Button("Edit in Builder", new Icon(VaadinIcon.REFRESH));
 
     private String selectedKeyId = null;
     private List<KeyOption> keyOptions = new ArrayList<>();
@@ -56,104 +62,139 @@ public class PoliciesView extends VerticalLayout {
         setSizeFull();
         setPadding(true);
         setSpacing(true);
-        addClassName("kms-policies-view");
+        addClassName("policies-view");
 
+        buildHeader();
+        buildKeySelector();
+        buildActionBar();
+        buildPolicyEditor();
+        buildLoadingIndicator();
+        attachResponsiveStyles();
+
+        // Initial button state: disabled (no key selected)
+        updateButtonsState();
+        loadKeyOptions();
+    }
+
+    private void buildHeader() {
         H2 header = new H2("Key Policies");
-        header.addClassName(LumoUtility.FontSize.XXLARGE);
-        header.addClassName(LumoUtility.Margin.Bottom.NONE);
+        header.addClassNames(
+                LumoUtility.FontSize.XXLARGE,
+                LumoUtility.Margin.Bottom.NONE,
+                LumoUtility.Margin.Top.NONE
+        );
         add(header);
+        add(new Hr());
+    }
 
-        // Responsive key selection toolbar
+    private void buildKeySelector() {
         HorizontalLayout keyLayout = new HorizontalLayout();
         keyLayout.setWidthFull();
         keyLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         keyLayout.setSpacing(true);
         keyLayout.getStyle().set("flex-wrap", "wrap");
-        keyLayout.addClassName("policies-key-layout");
 
         keyCombo.setPlaceholder("Select a KMS key...");
         keyCombo.setItemLabelGenerator(KeyOption::getDisplayName);
         keyCombo.setWidth("400px");
         keyCombo.addValueChangeListener(e -> {
-            if (e.getValue() != null) {
-                selectedKeyId = e.getValue().getKeyId();
-            } else {
-                selectedKeyId = null;
+            selectedKeyId = e.getValue() != null ? e.getValue().getKeyId() : null;
+            if (selectedKeyId == null) {
                 policyEditor.clear();
             }
+            updateButtonsState();
         });
 
-        Button refreshKeysButton = new Button(new Icon(VaadinIcon.REFRESH));
-        refreshKeysButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshKeysButton.setTooltipText("Refresh key list");
-        refreshKeysButton.addClickListener(e -> loadKeyOptions());
+        Button refreshBtn = new Button(new Icon(VaadinIcon.REFRESH));
+        refreshBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        refreshBtn.setTooltipText("Refresh key list");
+        refreshBtn.addClickListener(e -> loadKeyOptions());
 
-        keyLayout.add(keyCombo, refreshKeysButton);
+        keyLayout.add(keyCombo, refreshBtn);
         add(keyLayout);
+    }
 
-        // Responsive action bar
-        HorizontalLayout actionBar = new HorizontalLayout(loadButton, saveButton, formatButton);
+    private void buildActionBar() {
+        HorizontalLayout actionBar = new HorizontalLayout();
         actionBar.setSpacing(true);
         actionBar.getStyle().set("flex-wrap", "wrap");
         actionBar.addClassName("policies-action-bar");
-        loadButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        saveButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
-        formatButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+
+        configureButton(loadButton, "Load policy from selected key", ButtonVariant.LUMO_PRIMARY);
+        configureButton(saveButton, "Save policy to selected key", ButtonVariant.LUMO_SUCCESS);
+        configureButton(formatButton, "Pretty-format JSON", ButtonVariant.LUMO_TERTIARY);
+        configureButton(builderButton, "Open graphical policy builder", ButtonVariant.LUMO_CONTRAST);
+        configureButton(loadFromEditorButton, "Load current JSON into builder", ButtonVariant.LUMO_TERTIARY);
+
+        loadButton.addClickListener(e -> loadPolicy());
+        saveButton.addClickListener(e -> savePolicy());
+        formatButton.addClickListener(e -> formatPolicy());
+        builderButton.addClickListener(e -> openPolicyBuilder());
+        loadFromEditorButton.addClickListener(e -> loadFromEditorIntoBuilder());
+
+        actionBar.add(loadButton, saveButton, formatButton, builderButton, loadFromEditorButton);
         add(actionBar);
+    }
 
-        // Policy editor
+    private void configureButton(Button button, String tooltip, ButtonVariant variant) {
+        button.setTooltipText(tooltip);
+        button.addThemeVariants(variant);
+    }
+
+    private void buildPolicyEditor() {
         policyEditor.setWidthFull();
-        policyEditor.setHeight("400px");
+        policyEditor.setHeight("500px");
         policyEditor.setPlaceholder("Policy JSON will appear here after loading...");
-        policyEditor.getStyle().set("font-family", "monospace");
+        policyEditor.getStyle()
+                .set("font-family", "monospace")
+                .set("font-size", "13px");
         add(policyEditor);
+    }
 
-        // Loading indicator
+    private void buildLoadingIndicator() {
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
         loadingBar.setWidth("200px");
         add(loadingBar);
-
-        // Event listeners
-        loadButton.addClickListener(e -> loadPolicy());
-        saveButton.addClickListener(e -> savePolicy());
-        formatButton.addClickListener(e -> formatPolicy());
-
-        // Inject responsive CSS using JavaScript (fixes URL encoding issues)
-        injectResponsiveStyles();
-
-        // Initial load
-        loadKeyOptions();
     }
 
-    private void injectResponsiveStyles() {
+    private void attachResponsiveStyles() {
         String css = """
-                    .policies-key-layout,
-                    .policies-action-bar {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: var(--lumo-space-s);
-                        align-items: center;
+                .policies-view .policies-action-bar {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: var(--lumo-space-s);
+                    align-items: center;
+                }
+                @media (max-width: 768px) {
+                    .policies-view .policies-action-bar {
+                        flex-direction: column;
+                        align-items: stretch;
                     }
-                    @media (max-width: 768px) {
-                        .policies-key-layout,
-                        .policies-action-bar {
-                            flex-direction: column;
-                            align-items: stretch;
-                        }
-                        .policies-key-layout > *,
-                        .policies-action-bar > * {
-                            width: 100% !important;
-                        }
-                        .policies-key-layout > .vaadin-combo-box {
-                            width: 100% !important;
-                        }
+                    .policies-view .policies-action-bar > * {
+                        width: 100%;
                     }
+                    .policies-view .vaadin-combo-box {
+                        width: 100%;
+                    }
+                }
                 """;
         UI.getCurrent().getPage().executeJs(
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
                 css
         );
+    }
+
+    /**
+     * Enables or disables action buttons based on whether a key is selected.
+     */
+    private void updateButtonsState() {
+        boolean hasKey = selectedKeyId != null;
+        loadButton.setEnabled(hasKey);
+        saveButton.setEnabled(hasKey);
+        formatButton.setEnabled(hasKey);
+        builderButton.setEnabled(hasKey);
+        loadFromEditorButton.setEnabled(hasKey && StringUtils.hasText(policyEditor.getValue()));
     }
 
     private void loadKeyOptions() {
@@ -167,18 +208,18 @@ public class PoliciesView extends VerticalLayout {
                         .collect(Collectors.toList());
                 keyCombo.setItems(keyOptions);
             } else {
-                keyOptions = new ArrayList<>();
+                keyOptions.clear();
                 keyCombo.setItems(keyOptions);
             }
-            // Clear selection if current key no longer exists
-            if (selectedKeyId != null && keyOptions.stream().noneMatch(opt -> opt.getKeyId().equals(selectedKeyId))) {
+            if (selectedKeyId != null && keyOptions.stream().noneMatch(k -> k.getKeyId().equals(selectedKeyId))) {
                 selectedKeyId = null;
                 keyCombo.clear();
                 policyEditor.clear();
             }
+            // After loading, update button state
+            updateButtonsState();
         } catch (Exception e) {
-            Notification.show("Failed to load keys: " + e.getMessage(), 5000, Notification.Position.TOP_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            showError("Failed to load keys: " + e.getMessage());
         } finally {
             showLoading(false);
         }
@@ -191,16 +232,14 @@ public class PoliciesView extends VerticalLayout {
             if (desc != null && desc.getKeyMetadata() != null && StringUtils.hasText(desc.getKeyMetadata().getKeyAlias())) {
                 return desc.getKeyMetadata().getKeyAlias();
             }
-        } catch (Exception e) {
-            // ignore
+        } catch (Exception ignored) {
         }
         return keyId;
     }
 
     private void loadPolicy() {
         if (selectedKeyId == null) {
-            Notification.show("Please select a key first", 3000, Notification.Position.TOP_END)
-                    .addThemeVariants(NotificationVariant.LUMO_WARNING);
+            showWarning("Please select a key first");
             return;
         }
         showLoading(true);
@@ -209,47 +248,39 @@ public class PoliciesView extends VerticalLayout {
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 String policy = objectMapper.writeValueAsString(response.getBody().getPolicy());
                 if (StringUtils.hasText(policy)) {
-                    String prettyPolicy = prettyPrintJson(policy);
-                    policyEditor.setValue(prettyPolicy);
-                    Notification.show("Policy loaded", 3000, Notification.Position.TOP_END)
-                            .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                    policyEditor.setValue(prettyPrintJson(policy));
+                    showSuccess("Policy loaded");
                 } else {
                     policyEditor.clear();
-                    Notification.show("Key has no policy (default will be applied on save?)", 3000, Notification.Position.TOP_END)
-                            .addThemeVariants(NotificationVariant.LUMO_WARNING);
+                    showWarning("Key has no policy");
                 }
             } else {
                 policyEditor.clear();
-                Notification.show("Failed to load policy: " + response.getStatusCode(), 3000, Notification.Position.TOP_END)
-                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                showError("Failed to load policy: " + response.getStatusCode());
             }
         } catch (Exception e) {
-            Notification.show("Error loading policy: " + e.getMessage(), 5000, Notification.Position.TOP_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            showError("Error loading policy: " + e.getMessage());
         } finally {
             showLoading(false);
+            updateButtonsState(); // Refresh Edit in Builder button state based on editor content
         }
     }
 
     private void savePolicy() {
         if (selectedKeyId == null) {
-            Notification.show("Please select a key first", 3000, Notification.Position.TOP_END)
-                    .addThemeVariants(NotificationVariant.LUMO_WARNING);
+            showWarning("Please select a key first");
             return;
         }
         String policyText = policyEditor.getValue();
         if (!StringUtils.hasText(policyText)) {
-            Notification.show("Policy cannot be empty", 3000, Notification.Position.TOP_END)
-                    .addThemeVariants(NotificationVariant.LUMO_WARNING);
+            showWarning("Policy cannot be empty");
             return;
         }
-        // Validate JSON before sending
         Map<String, Object> policyMap;
         try {
             policyMap = objectMapper.readValue(policyText, Map.class);
         } catch (Exception e) {
-            Notification.show("Invalid JSON format: " + e.getMessage(), 5000, Notification.Position.TOP_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            showError("Invalid JSON: " + e.getMessage());
             return;
         }
         showLoading(true);
@@ -261,17 +292,13 @@ public class PoliciesView extends VerticalLayout {
                     .build();
             ResponseEntity<KmsDtos.PutKeyPolicyResponse> response = kmsApiService.putKeyPolicy(selectedKeyId, request);
             if (response.getStatusCode().is2xxSuccessful()) {
-                Notification.show("Policy saved successfully", 3000, Notification.Position.TOP_END)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                // Re-load the policy to show the saved version (pretty-printed again)
-                loadPolicy();
+                showSuccess("Policy saved successfully");
+                loadPolicy(); // reload to show the saved version
             } else {
-                Notification.show("Failed to save policy: " + response.getStatusCode(), 3000, Notification.Position.TOP_END)
-                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                showError("Save failed: " + response.getStatusCode());
             }
         } catch (Exception e) {
-            Notification.show("Error saving policy: " + e.getMessage(), 5000, Notification.Position.TOP_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            showError("Error saving policy: " + e.getMessage());
         } finally {
             showLoading(false);
         }
@@ -281,31 +308,98 @@ public class PoliciesView extends VerticalLayout {
         String text = policyEditor.getValue();
         if (!StringUtils.hasText(text)) return;
         try {
-            String pretty = prettyPrintJson(text);
-            policyEditor.setValue(pretty);
-            Notification.show("Policy formatted", 2000, Notification.Position.TOP_END)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            policyEditor.setValue(prettyPrintJson(text));
+            showSuccess("Formatted");
         } catch (Exception e) {
-            Notification.show("Invalid JSON: " + e.getMessage(), 3000, Notification.Position.TOP_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            showError("Invalid JSON: " + e.getMessage());
+        }
+    }
+
+    private void openPolicyBuilder() {
+        KmsDtos.KeyPolicy existingPolicy = null;
+        String currentText = policyEditor.getValue();
+        if (StringUtils.hasText(currentText)) {
+            try {
+                existingPolicy = objectMapper.readValue(currentText, KmsDtos.KeyPolicy.class);
+            } catch (Exception e) {
+                showWarning("Current policy is not valid JSON – starting with empty policy");
+            }
+        }
+        PolicyBuilderDialog dialog = new PolicyBuilderDialog(objectMapper, existingPolicy, newPolicy -> {
+            try {
+                String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(newPolicy);
+                policyEditor.setValue(json);
+                showSuccess("Policy built and inserted into editor");
+                updateButtonsState(); // Refresh Edit in Builder button state
+            } catch (Exception ex) {
+                showError("Failed to generate JSON: " + ex.getMessage());
+            }
+        });
+        dialog.open();
+    }
+
+    private void loadFromEditorIntoBuilder() {
+        String currentText = policyEditor.getValue();
+        if (!StringUtils.hasText(currentText)) {
+            showWarning("Editor is empty");
+            return;
+        }
+        try {
+            KmsDtos.KeyPolicy policy = objectMapper.readValue(currentText, KmsDtos.KeyPolicy.class);
+            PolicyBuilderDialog dialog = new PolicyBuilderDialog(objectMapper, policy, newPolicy -> {
+                try {
+                    String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(newPolicy);
+                    policyEditor.setValue(json);
+                    showSuccess("Policy updated from builder");
+                    updateButtonsState();
+                } catch (Exception ex) {
+                    showError("Error generating JSON: " + ex.getMessage());
+                }
+            });
+            dialog.open();
+        } catch (Exception e) {
+            showError("Invalid JSON in editor: " + e.getMessage());
         }
     }
 
     private String prettyPrintJson(String json) throws Exception {
-        Object jsonObj = objectMapper.readValue(json, Object.class);
-        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObj);
+        Object obj = objectMapper.readValue(json, Object.class);
+        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
     }
 
     private void showLoading(boolean show) {
         loadingBar.setVisible(show);
         keyCombo.setEnabled(!show);
-        loadButton.setEnabled(!show);
-        saveButton.setEnabled(!show);
-        formatButton.setEnabled(!show);
-        policyEditor.setEnabled(!show);
+        // Buttons are controlled by updateButtonsState, but during loading we also disable them.
+        // We'll keep them enabled/disabled based on selection, but loading overrides.
+        if (show) {
+            loadButton.setEnabled(false);
+            saveButton.setEnabled(false);
+            formatButton.setEnabled(false);
+            builderButton.setEnabled(false);
+            loadFromEditorButton.setEnabled(false);
+            policyEditor.setEnabled(false);
+        } else {
+            policyEditor.setEnabled(true);
+            updateButtonsState();
+        }
     }
 
-    // Helper class for key selection
+    private void showSuccess(String msg) {
+        Notification.show(msg, 3000, Notification.Position.TOP_END)
+                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+    }
+
+    private void showError(String msg) {
+        Notification.show(msg, 5000, Notification.Position.TOP_END)
+                .addThemeVariants(NotificationVariant.LUMO_ERROR);
+    }
+
+    private void showWarning(String msg) {
+        Notification.show(msg, 3000, Notification.Position.TOP_END)
+                .addThemeVariants(NotificationVariant.LUMO_WARNING);
+    }
+
     private static class KeyOption {
         private final String keyId;
         private final String displayName;
@@ -315,12 +409,7 @@ public class PoliciesView extends VerticalLayout {
             this.displayName = aliasOrId != null ? aliasOrId + " (" + keyId + ")" : keyId;
         }
 
-        String getKeyId() {
-            return keyId;
-        }
-
-        String getDisplayName() {
-            return displayName;
-        }
+        String getKeyId() { return keyId; }
+        String getDisplayName() { return displayName; }
     }
 }

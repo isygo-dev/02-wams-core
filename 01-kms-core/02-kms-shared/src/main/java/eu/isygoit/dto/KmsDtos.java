@@ -1468,7 +1468,7 @@ public final class KmsDtos {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public class KeyPolicy {
+    public static class KeyPolicy {
 
         @JsonProperty("Version")
         private String version; // "2012-10-17"
@@ -1917,7 +1917,7 @@ public final class KmsDtos {
             private LocalDateTime timestamp;
 
             @Schema(description = "Action performed")
-            private String action;
+            private IKmsActionType.Types action;
 
             @Schema(description = "Key ID affected")
             private String keyId;

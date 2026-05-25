@@ -51,7 +51,7 @@ public class AuditServiceImpl implements IAuditService {
         List<LogEntry> entries = page.getContent().stream()
                 .map(log -> LogEntry.builder()
                         .timestamp(log.getTimestamp())
-                        .action(log.getAction() != null ? log.getAction().name() : null)
+                        .action(log.getAction())
                         .keyId(log.getKeyId())
                         .principal(log.getPrincipal())
                         .ipAddress(log.getIpAddress())
