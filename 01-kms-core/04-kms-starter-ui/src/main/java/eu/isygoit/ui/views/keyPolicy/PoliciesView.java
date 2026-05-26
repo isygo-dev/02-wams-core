@@ -30,6 +30,7 @@ import eu.isygoit.ui.MainLayout;
 import eu.isygoit.ui.views.keyPolicy.dialog.PolicyBuilderDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -37,6 +38,7 @@ import org.springframework.util.StringUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Route(value = "policies", layout = MainLayout.class)
 @PageTitle("Key Policies")
 @PermitAll
@@ -245,9 +247,12 @@ public class PoliciesView extends VerticalLayout {
             }
             updateButtonsState();
         } catch (FeignException ex) {
-            showError("Failed to load keys: " + (ex.status() == 500 ? ex.contentUTF8() : ex.getMessage()));
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            showError("Failed to load keys: " + errorMsg);
+            log.error("Failed to load keys: {}", errorMsg);
         } catch (Exception e) {
             showError("Failed to load keys: " + e.getMessage());
+            log.error("Failed to load keys: {}", e.getMessage());
         } finally {
             showLoading(false);
         }
@@ -286,8 +291,13 @@ public class PoliciesView extends VerticalLayout {
                 policyEditor.clear();
                 if (!silentFailure) showError("Failed to load policy: " + response.getStatusCode());
             }
+        } catch (FeignException ex) {
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            if (!silentFailure) showError("Error loading policy: " + errorMsg);
+            log.error("Failed to load policy for key {}: {}", selectedKeyId, errorMsg);
         } catch (Exception e) {
             if (!silentFailure) showError("Error loading policy: " + e.getMessage());
+            log.error("Failed to load policy for key {}: {}", selectedKeyId, e.getMessage());
         } finally {
             showLoading(false);
             updateButtonsState();
@@ -345,10 +355,13 @@ public class PoliciesView extends VerticalLayout {
             } else {
                 showError("Save failed: " + response.getStatusCode());
             }
-        } catch (FeignException e) {
-            showError("Error saving policy: " + (e.status() == 500 ? e.contentUTF8() : e.getMessage()));
+        } catch (FeignException ex) {
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            showError("Error saving policy: " + errorMsg);
+            log.error("Failed to save policy for key {}: {}", selectedKeyId, errorMsg);
         } catch (Exception e) {
             showError("Error saving policy: " + e.getMessage());
+            log.error("Failed to save policy for key {}: {}", selectedKeyId, e.getMessage());
         } finally {
             showLoading(false);
         }

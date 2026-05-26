@@ -30,7 +30,9 @@ import eu.isygoit.ui.views.keyGrants.dialog.CreateGrantDialog;
 import eu.isygoit.ui.views.keyGrants.dialog.GrantDetailsDialog;
 import eu.isygoit.ui.views.keyGrants.dialog.RetireGrantDialog;
 import eu.isygoit.ui.views.keyGrants.dialog.RevokeGrantDialog;
+import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -39,6 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Route(value = "grants", layout = MainLayout.class)
 @PageTitle("Grants")
 @PermitAll
@@ -285,8 +288,13 @@ public class GrantsView extends VerticalLayout {
                 allGrants.clear();
                 grantsGrid.setItems(new ArrayList<>());
             }
+        } catch (FeignException ex) {
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            showError("Failed to load keys: " + errorMsg);
+            log.error("Failed to load keys: {}", errorMsg);
         } catch (Exception e) {
             showError("Failed to load keys: " + e.getMessage());
+            log.error("Failed to load keys: {}", e.getMessage());
         } finally {
             showLoading(false);
         }
@@ -317,8 +325,15 @@ public class GrantsView extends VerticalLayout {
                 allGrants.clear();
                 grantsGrid.setItems(new ArrayList<>());
             }
+        } catch (FeignException ex) {
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            showError("Failed to load grants: " + errorMsg);
+            log.error("Failed to load grants for key {}: {}", selectedKeyId, errorMsg);
+            allGrants.clear();
+            grantsGrid.setItems(new ArrayList<>());
         } catch (Exception e) {
             showError("Failed to load grants: " + e.getMessage());
+            log.error("Failed to load grants for key {}: {}", selectedKeyId, e.getMessage());
             allGrants.clear();
             grantsGrid.setItems(new ArrayList<>());
         } finally {

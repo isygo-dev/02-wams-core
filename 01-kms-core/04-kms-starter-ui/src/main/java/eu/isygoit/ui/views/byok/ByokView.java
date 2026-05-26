@@ -486,8 +486,13 @@ public class ByokView extends VerticalLayout {
             } else {
                 showErrorNotification("Failed to generate import parameters");
             }
+        } catch (FeignException ex) {
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            showErrorNotification("Error: " + errorMsg);
+            log.error("Failed to generate import parameters for key {}: {}", selectedKeyId, errorMsg);
         } catch (Exception e) {
             showErrorNotification("Error: " + e.getMessage());
+            log.error("Failed to generate import parameters for key {}: {}", selectedKeyId, e.getMessage());
         } finally {
             showLoading(false);
         }
@@ -602,8 +607,13 @@ public class ByokView extends VerticalLayout {
             } else {
                 showErrorNotification("Deletion failed – key may not have imported material");
             }
+        } catch (FeignException ex) {
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            showErrorNotification("Error: " + errorMsg);
+            log.error("Failed to delete imported key material for {}: {}", selectedKeyId, errorMsg);
         } catch (Exception e) {
             showErrorNotification("Error: " + e.getMessage());
+            log.error("Failed to delete imported key material for {}: {}", selectedKeyId, e.getMessage());
         } finally {
             showLoading(false);
         }

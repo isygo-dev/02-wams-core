@@ -19,12 +19,15 @@ import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.views.keyStore.dialog.DeleteCustomKeyStoreDialog;
 import eu.isygoit.ui.views.keyStore.dialog.UpdateCustomKeyStoreDialog;
+import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
+@Slf4j
 class StoreCard extends VerticalLayout {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private final CustomKeyStoresView parentView;
@@ -392,9 +395,15 @@ class StoreCard extends VerticalLayout {
                 Notification.show("Connection failed", 6000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
+        } catch (FeignException ex) {
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            Notification.show("Error: " + errorMsg, 6000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            log.error("Failed to connect store {}: {}", storeId, errorMsg);
         } catch (Exception e) {
             Notification.show("Error: " + e.getMessage(), 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            log.error("Failed to connect store {}: {}", storeId, e.getMessage());
         } finally {
             parentView.showLoading(false);
         }
@@ -412,9 +421,15 @@ class StoreCard extends VerticalLayout {
                 Notification.show("Disconnect failed", 6000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
+        } catch (FeignException ex) {
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            Notification.show("Error: " + errorMsg, 6000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            log.error("Failed to disconnect store {}: {}", storeId, errorMsg);
         } catch (Exception e) {
             Notification.show("Error: " + e.getMessage(), 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            log.error("Failed to disconnect store {}: {}", storeId, e.getMessage());
         } finally {
             parentView.showLoading(false);
         }

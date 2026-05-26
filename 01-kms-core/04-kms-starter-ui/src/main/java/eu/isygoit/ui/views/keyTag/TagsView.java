@@ -21,7 +21,9 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainLayout;
+import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -30,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Route(value = "tags", layout = MainLayout.class)
 @PageTitle("Key Tagging")
 @PermitAll
@@ -139,9 +142,15 @@ public class TagsView extends VerticalLayout {
                 tagsGrid.setItems(new ArrayList<>());
                 tagsGrid.setVisible(false);
             }
+        } catch (FeignException ex) {
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            Notification.show("Failed to load keys: " + errorMsg, 6000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            log.error("Failed to load keys: {}", errorMsg);
         } catch (Exception e) {
             Notification.show("Failed to load keys: " + e.getMessage(), 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            log.error("Failed to load keys: {}", e.getMessage());
         } finally {
             showLoading(false);
         }
@@ -176,9 +185,17 @@ public class TagsView extends VerticalLayout {
                 tagsGrid.setItems(new ArrayList<>());
             }
             tagsGrid.setVisible(true);
+        } catch (FeignException ex) {
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            Notification.show("Failed to load tags: " + errorMsg, 6000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            log.error("Failed to load tags for key {}: {}", selectedKeyId, errorMsg);
+            tagsGrid.setItems(new ArrayList<>());
+            tagsGrid.setVisible(true);
         } catch (Exception e) {
             Notification.show("Failed to load tags: " + e.getMessage(), 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            log.error("Failed to load tags for key {}: {}", selectedKeyId, e.getMessage());
             tagsGrid.setItems(new ArrayList<>());
             tagsGrid.setVisible(true);
         } finally {
@@ -237,9 +254,15 @@ public class TagsView extends VerticalLayout {
                 Notification.show("Tag added", 6000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 loadTags();
+            } catch (FeignException ex) {
+                String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+                Notification.show("Failed to add tag: " + errorMsg, 6000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                log.error("Failed to add tag to key {}: {}", selectedKeyId, errorMsg);
             } catch (Exception ex) {
                 Notification.show("Failed to add tag: " + ex.getMessage(), 6000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                log.error("Failed to add tag to key {}: {}", selectedKeyId, ex.getMessage());
             }
         });
         saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -284,9 +307,15 @@ public class TagsView extends VerticalLayout {
             Notification.show("Tag removed", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             loadTags();
+        } catch (FeignException ex) {
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            Notification.show("Failed to remove tag: " + errorMsg, 6000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            log.error("Failed to remove tag from key {}: {}", selectedKeyId, errorMsg);
         } catch (Exception e) {
             Notification.show("Failed to remove tag: " + e.getMessage(), 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            log.error("Failed to remove tag from key {}: {}", selectedKeyId, e.getMessage());
         }
     }
 

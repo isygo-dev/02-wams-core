@@ -26,7 +26,9 @@ import eu.isygoit.dto.KmsDtos.ListCustomKeyStoresResponse;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainLayout;
 import eu.isygoit.ui.views.keyStore.dialog.CreateCustomKeyStoreDialog;
+import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -36,6 +38,7 @@ import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Route(value = "custom-key-stores", layout = MainLayout.class)
 @PageTitle("Custom Key Stores")
 @PermitAll
@@ -190,9 +193,18 @@ public class CustomKeyStoresView extends VerticalLayout {
             currentPageStores = stores;
             updatePaginationDisplay();
             applyFilter(); // apply client-side filter on the loaded page
+        } catch (FeignException ex) {
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            Notification.show("Failed to load stores: " + errorMsg, 6000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            log.error("Failed to load custom key stores: {}", errorMsg);
+            currentPageStores = new ArrayList<>();
+            updatePaginationDisplay();
+            showEmptyState();
         } catch (Exception e) {
             Notification.show("Failed to load stores: " + e.getMessage(), 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            log.error("Failed to load custom key stores: {}", e.getMessage());
             currentPageStores = new ArrayList<>();
             updatePaginationDisplay();
             showEmptyState();
