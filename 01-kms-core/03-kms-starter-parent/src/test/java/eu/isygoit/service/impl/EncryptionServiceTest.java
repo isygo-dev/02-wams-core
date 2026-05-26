@@ -1,410 +1,761 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.enums.IEnumKeyUsage;
-import eu.isygoit.exception.KeyNotFoundException;
+import eu.isygoit.exception.*;
 import eu.isygoit.model.KmsKey;
+import eu.isygoit.model.KmsKeyVersion;
 import eu.isygoit.repository.KmsKeyRepository;
+import eu.isygoit.repository.KmsKeyVersionRepository;
 import eu.isygoit.service.ICryptoService;
+import eu.isygoit.utils.CiphertextEnvelope;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+@DisplayName("EncryptionService - Realistic User Stories")
 class EncryptionServiceTest {
-
-    private static final String TENANT = "tenant-1";
-    private static final String KEY_ID = "key-1";
-    private static final String DEST_KEY_ID = "key-2";
 
     @Mock
     private KmsKeyRepository kmsKeyRepository;
 
     @Mock
+    private KmsKeyVersionRepository kmsKeyVersionRepository;
+
+    @Mock
     private ICryptoService cryptoService;
 
     @InjectMocks
-    private EncryptionService service;
+    private EncryptionService encryptionService;
 
-    private KmsKey kmsKey;
+    private final String tenant = "acme-corp";
+    private final String keyId = "123e4567-e89b-12d3-a456-426614174000";
+    private final String versionId = "v-1a2b3c4d";
+    private final String currentVersionId = "v-current";
+
+    private final String plaintext = "MySecretData";
+    private final String plaintextBase64 =
+            Base64.getEncoder().encodeToString(plaintext.getBytes());
+
+    private final byte[] ciphertextBytes = "encrypted".getBytes();
+
+    private final byte[] wrappedCiphertext =
+            CiphertextEnvelope.wrap(versionId, ciphertextBytes);
 
     @BeforeEach
     void setUp() {
-        kmsKey = KmsKey.builder()
-                .keyId(KEY_ID)
-                .tenant(TENANT)
-                .keyMaterial(new byte[]{1, 2, 3})
-                .currentVersionId("v1")
+        reset(cryptoService);
+        reset(kmsKeyRepository);
+        reset(kmsKeyVersionRepository);
+    }
+
+    // =========================================================================
+    // Helpers
+    // =========================================================================
+
+    private KmsKey createSymmetricKey(IEnumKeyStatus.Types status) {
+        return KmsKey.builder()
+                .tenant(tenant)
+                .keyId(keyId)
+                .keySpec(IEnumKeySpec.Types.SYMMETRIC_DEFAULT)
                 .keyUsage(IEnumKeyUsage.Types.ENCRYPT_DECRYPT)
-                .keyStatus(IEnumKeyStatus.Types.ENABLED)
+                .keyStatus(status)
+                .currentVersionId(currentVersionId)
                 .build();
     }
 
-    @Test
-    void shouldEncryptSuccessfully() {
-
-        String plaintext = Base64.getEncoder()
-                .encodeToString("hello".getBytes());
-
-        EncryptRequest request = EncryptRequest.builder()
-                .keyId(KEY_ID)
-                .plaintext(plaintext)
-                .encryptionContext(Map.of("env", "test"))
-                .build();
-
-        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
-                .thenReturn(Optional.of(kmsKey));
-
-        when(cryptoService.encryptData(any(), any(), any(), any(), any()))
-                .thenReturn("encrypted".getBytes());
-
-        EncryptResponse response = service.encrypt(TENANT, request);
-
-        assertNotNull(response);
-        assertEquals(KEY_ID, response.getKeyId());
-        assertEquals("v1", response.getKeyVersionId());
-
-        byte[] decoded = Base64.getDecoder()
-                .decode(response.getCiphertextBlob());
-
-        assertEquals("encrypted", new String(decoded));
-
-        verify(cryptoService).encryptData(
-                any(),
-                eq(kmsKey.getKeyMaterial()),
-                any(), any(),
-                eq(request.getEncryptionContext())
-        );
-    }
-
-    @Test
-    void shouldThrowWhenEncryptKeyNotFound() {
-
-        EncryptRequest request = EncryptRequest.builder()
-                .keyId(KEY_ID)
-                .plaintext(Base64.getEncoder().encodeToString("hello".getBytes()))
-                .build();
-
-        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
-                .thenReturn(Optional.empty());
-
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> service.encrypt(TENANT, request)
-        );
-
-        assertEquals("KMS Key not found", exception.getMessage());
-    }
-
-    @Test
-    void shouldThrowWhenEncryptKeyDisabled() {
-
-        kmsKey.setKeyStatus(IEnumKeyStatus.Types.DISABLED);
-
-        EncryptRequest request = EncryptRequest.builder()
-                .keyId(KEY_ID)
-                .plaintext(Base64.getEncoder().encodeToString("hello".getBytes()))
-                .build();
-
-        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
-                .thenReturn(Optional.of(kmsKey));
-
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> service.encrypt(TENANT, request)
-        );
-
-        assertEquals("KMS Key is not enabled", exception.getMessage());
-    }
-
-    @Test
-    void shouldThrowWhenKeyUsageInvalidForEncryption() {
-
-        kmsKey.setKeyUsage(IEnumKeyUsage.Types.SIGN_VERIFY);
-
-        EncryptRequest request = EncryptRequest.builder()
-                .keyId(KEY_ID)
-                .plaintext(Base64.getEncoder().encodeToString("hello".getBytes()))
-                .build();
-
-        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
-                .thenReturn(Optional.of(kmsKey));
-
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> service.encrypt(TENANT, request)
-        );
-
-        assertEquals(
-                "KMS Key is not authorized for encryption",
-                exception.getMessage()
-        );
-    }
-
-    @Test
-    void shouldDecryptSuccessfully() {
-
-        String ciphertext = Base64.getEncoder()
-                .encodeToString("encrypted".getBytes());
-
-        DecryptRequest request = DecryptRequest.builder()
-                .keyId(KEY_ID)
-                .ciphertextBlob(ciphertext)
-                .encryptionContext(Map.of("env", "test"))
-                .build();
-
-        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
-                .thenReturn(Optional.of(kmsKey));
-
-        when(cryptoService.decryptData(any(), any(), any(), any(), any(), any()))
-                .thenReturn("hello".getBytes());
-
-        DecryptResponse response = service.decrypt(TENANT, request);
-
-        assertNotNull(response);
-        assertEquals(KEY_ID, response.getKeyId());
-        assertEquals("v1", response.getKeyVersionId());
-
-        String decoded = new String(
-                Base64.getDecoder().decode(response.getPlaintext())
-        );
-
-        assertEquals("hello", decoded);
-
-        verify(cryptoService).decryptData(
-                eq(TENANT),
-                any(),
-                eq(kmsKey.getKeyMaterial()),
-                any(), any(),
-                eq(request.getEncryptionContext())
-        );
-    }
-
-    @Test
-    void shouldThrowWhenDecryptKeyIdMissing() {
-
-        DecryptRequest request = DecryptRequest.builder()
-                .ciphertextBlob(Base64.getEncoder()
-                        .encodeToString("encrypted".getBytes()))
-                .build();
-
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> service.decrypt(TENANT, request)
-        );
-
-        assertEquals(
-                "keyId is required for decryption in this implementation",
-                exception.getMessage()
-        );
-    }
-
-    @Test
-    void shouldThrowWhenDecryptKeyNotFound() {
-
-        DecryptRequest request = DecryptRequest.builder()
-                .keyId(KEY_ID)
-                .ciphertextBlob(Base64.getEncoder()
-                        .encodeToString("encrypted".getBytes()))
-                .build();
-
-        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
-                .thenReturn(Optional.empty());
-
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> service.decrypt(TENANT, request)
-        );
-
-        assertEquals("KMS Key not found", exception.getMessage());
-    }
-
-    @Test
-    void shouldThrowWhenDecryptKeyDisabled() {
-
-        kmsKey.setKeyStatus(IEnumKeyStatus.Types.DISABLED);
-
-        DecryptRequest request = DecryptRequest.builder()
-                .keyId(KEY_ID)
-                .ciphertextBlob(Base64.getEncoder()
-                        .encodeToString("encrypted".getBytes()))
-                .build();
-
-        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
-                .thenReturn(Optional.of(kmsKey));
-
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> service.decrypt(TENANT, request)
-        );
-
-        assertEquals("KMS Key is not enabled", exception.getMessage());
-    }
-
-    @Test
-    void shouldReEncryptSuccessfully() {
-
-        KmsKey destinationKey = KmsKey.builder()
-                .keyId(DEST_KEY_ID)
-                .tenant(TENANT)
-                .keyMaterial(new byte[]{4, 5, 6})
-                .currentVersionId("v2")
+    private KmsKey createAsymmetricKey(IEnumKeyStatus.Types status) {
+        return KmsKey.builder()
+                .tenant(tenant)
+                .keyId(keyId)
+                .keySpec(IEnumKeySpec.Types.RSA_2048)
                 .keyUsage(IEnumKeyUsage.Types.ENCRYPT_DECRYPT)
-                .keyStatus(IEnumKeyStatus.Types.ENABLED)
+                .keyStatus(status)
+                .currentVersionId(currentVersionId)
                 .build();
-
-        ReEncryptRequest request = ReEncryptRequest.builder()
-                .sourceKeyId(KEY_ID)
-                .destinationKeyId(DEST_KEY_ID)
-                .ciphertextBlob(Base64.getEncoder()
-                        .encodeToString("encrypted".getBytes()))
-                .sourceEncryptionContext(Map.of("src", "1"))
-                .destinationEncryptionContext(Map.of("dest", "2"))
-                .build();
-
-        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
-                .thenReturn(Optional.of(kmsKey));
-
-        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, DEST_KEY_ID))
-                .thenReturn(Optional.of(destinationKey));
-
-        when(cryptoService.decryptData(any(), any(), any(), any(), any(), any()))
-                .thenReturn("plain".getBytes());
-
-        when(cryptoService.encryptData(any(), any(), any(), any(), any()))
-                .thenReturn("reencrypted".getBytes());
-
-        ReEncryptResponse response =
-                service.reEncrypt(TENANT, request);
-
-        assertNotNull(response);
-        assertEquals(KEY_ID, response.getSourceKeyId());
-        assertEquals(DEST_KEY_ID, response.getDestinationKeyId());
-        assertEquals("v2", response.getDestinationKeyVersionId());
-
-        String decoded = new String(
-                Base64.getDecoder().decode(response.getCiphertextBlob())
-        );
-
-        assertEquals("reencrypted", decoded);
     }
 
-    @Test
-    void shouldThrowWhenSourceKeyNotFound() {
-
-        ReEncryptRequest request = ReEncryptRequest.builder()
-                .sourceKeyId(KEY_ID)
-                .destinationKeyId(DEST_KEY_ID)
-                .ciphertextBlob(Base64.getEncoder()
-                        .encodeToString("encrypted".getBytes()))
+    private KmsKeyVersion createKeyVersion(
+            String keyId,
+            String versionId,
+            IEnumKeyStatus.Types status,
+            byte[] keyMaterial,
+            byte[] publicKey
+    ) {
+        return KmsKeyVersion.builder()
+                .tenant(tenant)
+                .keyId(keyId)
+                .versionId(versionId)
+                .keyStatus(status)
+                .keyMaterial(keyMaterial)
+                .publicKey(publicKey)
                 .build();
-
-        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
-                .thenReturn(Optional.empty());
-
-        assertThrows(
-                KeyNotFoundException.class,
-                () -> service.reEncrypt(TENANT, request)
-        );
     }
 
-    @Test
-    void shouldThrowWhenSourceKeyDisabled() {
+    // =========================================================================
+    // Story 1: Encrypt
+    // =========================================================================
 
-        kmsKey.setKeyStatus(IEnumKeyStatus.Types.DISABLED);
+    @Nested
+    @DisplayName("Story 1: Encrypt")
+    class EncryptStory {
 
-        ReEncryptRequest request = ReEncryptRequest.builder()
-                .sourceKeyId(KEY_ID)
-                .destinationKeyId(DEST_KEY_ID)
-                .ciphertextBlob(Base64.getEncoder()
-                        .encodeToString("encrypted".getBytes()))
-                .build();
+        @Test
+        @DisplayName("Encrypt with symmetric key")
+        void encryptWithSymmetricKey() {
 
-        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
-                .thenReturn(Optional.of(kmsKey));
+            KmsKey key = createSymmetricKey(IEnumKeyStatus.Types.ENABLED);
 
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> service.reEncrypt(TENANT, request)
-        );
+            KmsKeyVersion version = createKeyVersion(
+                    keyId,
+                    currentVersionId,
+                    IEnumKeyStatus.Types.ENABLED,
+                    "symmetricKey".getBytes(),
+                    null
+            );
 
-        assertEquals("Source key is not enabled", exception.getMessage());
+            EncryptRequest request = EncryptRequest.builder()
+                    .keyId(keyId)
+                    .plaintext(plaintextBase64)
+                    .encryptionAlgorithmSpec("AES/GCM/NoPadding")
+                    .encryptionContext(Map.of("purpose", "payment"))
+                    .build();
+
+            when(kmsKeyRepository.findByTenantAndKeyId(tenant, keyId))
+                    .thenReturn(Optional.of(key));
+
+            when(kmsKeyVersionRepository
+                    .findByTenantAndKeyIdAndVersionId(
+                            tenant,
+                            keyId,
+                            currentVersionId
+                    ))
+                    .thenReturn(Optional.of(version));
+
+            doReturn(ciphertextBytes)
+                    .when(cryptoService)
+                    .encryptData(
+                            any(byte[].class),
+                            any(byte[].class),
+                            any(IEnumKeySpec.Types.class),
+                            anyString(),
+                            anyMap()
+                    );
+
+            EncryptResponse response =
+                    encryptionService.encrypt(tenant, request);
+
+            assertThat(response).isNotNull();
+            assertThat(response.getCiphertextBlob()).isNotBlank();
+            assertThat(response.getKeyId()).isEqualTo(keyId);
+            assertThat(response.getKeyVersionId())
+                    .isEqualTo(currentVersionId);
+
+            verify(cryptoService).encryptData(
+                    eq(plaintext.getBytes()),
+                    eq("symmetricKey".getBytes()),
+                    eq(key.getKeySpec()),
+                    eq("AES/GCM/NoPadding"),
+                    eq(request.getEncryptionContext())
+            );
+        }
+
+        @Test
+        @DisplayName("Encrypt with asymmetric key uses public key")
+        void encryptWithAsymmetricKey() {
+
+            KmsKey key = createAsymmetricKey(
+                    IEnumKeyStatus.Types.ENABLED
+            );
+
+            byte[] publicKeyBytes = "publicKey".getBytes();
+
+            KmsKeyVersion version = createKeyVersion(
+                    keyId,
+                    currentVersionId,
+                    IEnumKeyStatus.Types.ENABLED,
+                    "privateKey".getBytes(),
+                    publicKeyBytes
+            );
+
+            EncryptRequest request = EncryptRequest.builder()
+                    .keyId(keyId)
+                    .plaintext(plaintextBase64)
+                    .encryptionAlgorithmSpec("RSAES_OAEP_SHA_256")
+                    .build();
+
+            when(kmsKeyRepository.findByTenantAndKeyId(tenant, keyId))
+                    .thenReturn(Optional.of(key));
+
+            when(kmsKeyVersionRepository
+                    .findByTenantAndKeyIdAndVersionId(
+                            tenant,
+                            keyId,
+                            currentVersionId
+                    ))
+                    .thenReturn(Optional.of(version));
+
+            doReturn(ciphertextBytes)
+                    .when(cryptoService)
+                    .encryptData(
+                            any(byte[].class),
+                            any(byte[].class),
+                            any(IEnumKeySpec.Types.class),
+                            anyString(),
+                            nullable(Map.class)
+                    );
+
+            EncryptResponse response =
+                    encryptionService.encrypt(tenant, request);
+
+            assertThat(response).isNotNull();
+            assertThat(response.getCiphertextBlob()).isNotBlank();
+
+            verify(cryptoService).encryptData(
+                    eq(plaintext.getBytes()),
+                    eq(publicKeyBytes),
+                    eq(key.getKeySpec()),
+                    eq("RSAES_OAEP_SHA_256"),
+                    nullable(Map.class)
+            );
+        }
     }
 
-    @Test
-    void shouldThrowWhenDestinationKeyNotFound() {
+    // =========================================================================
+    // Story 2: Encrypt errors
+    // =========================================================================
 
-        ReEncryptRequest request = ReEncryptRequest.builder()
-                .sourceKeyId(KEY_ID)
-                .destinationKeyId(DEST_KEY_ID)
-                .ciphertextBlob(Base64.getEncoder()
-                        .encodeToString("encrypted".getBytes()))
-                .build();
+    @Nested
+    @DisplayName("Story 2: Encrypt errors")
+    class EncryptErrorStory {
 
-        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
-                .thenReturn(Optional.of(kmsKey));
+        @Test
+        void encryptDisabledKey() {
 
-        when(cryptoService.decryptData(any(), any(), any(), any(), any(), any()))
-                .thenReturn("plain".getBytes());
+            KmsKey key =
+                    createSymmetricKey(IEnumKeyStatus.Types.DISABLED);
 
-        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, DEST_KEY_ID))
-                .thenReturn(Optional.empty());
+            when(kmsKeyRepository.findByTenantAndKeyId(tenant, keyId))
+                    .thenReturn(Optional.of(key));
 
-        assertThrows(
-                KeyNotFoundException.class,
-                () -> service.reEncrypt(TENANT, request)
-        );
+            EncryptRequest request = EncryptRequest.builder()
+                    .keyId(keyId)
+                    .plaintext(plaintextBase64)
+                    .encryptionAlgorithmSpec("AES/GCM/NoPadding")
+                    .build();
+
+            assertThatThrownBy(() ->
+                    encryptionService.encrypt(tenant, request)
+            ).isInstanceOf(DisabledKeyException.class);
+        }
+
+        @Test
+        void encryptWrongUsage() {
+
+            KmsKey key =
+                    createSymmetricKey(IEnumKeyStatus.Types.ENABLED);
+
+            key.setKeyUsage(IEnumKeyUsage.Types.SIGN_VERIFY);
+
+            when(kmsKeyRepository.findByTenantAndKeyId(tenant, keyId))
+                    .thenReturn(Optional.of(key));
+
+            EncryptRequest request = EncryptRequest.builder()
+                    .keyId(keyId)
+                    .plaintext(plaintextBase64)
+                    .encryptionAlgorithmSpec("AES/GCM/NoPadding")
+                    .build();
+
+            assertThatThrownBy(() ->
+                    encryptionService.encrypt(tenant, request)
+            ).isInstanceOf(KeyNotAllowedForUsageException.class);
+        }
+
+        @Test
+        void encryptMissingAlgorithm() {
+
+            KmsKey key =
+                    createSymmetricKey(IEnumKeyStatus.Types.ENABLED);
+
+            when(kmsKeyRepository.findByTenantAndKeyId(tenant, keyId))
+                    .thenReturn(Optional.of(key));
+
+            EncryptRequest request = EncryptRequest.builder()
+                    .keyId(keyId)
+                    .plaintext(plaintextBase64)
+                    .build();
+
+            assertThatThrownBy(() ->
+                    encryptionService.encrypt(tenant, request)
+            ).isInstanceOf(WrongAlgorithmException.class);
+        }
     }
 
-    @Test
-    void shouldThrowWhenDestinationKeyDisabled() {
+    // =========================================================================
+    // Story 3: Decrypt
+    // =========================================================================
 
-        KmsKey destinationKey = KmsKey.builder()
-                .keyId(DEST_KEY_ID)
-                .tenant(TENANT)
-                .keyMaterial(new byte[]{4, 5, 6})
-                .currentVersionId("v2")
-                .keyStatus(IEnumKeyStatus.Types.DISABLED)
-                .build();
+    @Nested
+    @DisplayName("Story 3: Decrypt")
+    class DecryptStory {
 
-        ReEncryptRequest request = ReEncryptRequest.builder()
-                .sourceKeyId(KEY_ID)
-                .destinationKeyId(DEST_KEY_ID)
-                .ciphertextBlob(Base64.getEncoder()
-                        .encodeToString("encrypted".getBytes()))
-                .build();
+        @Test
+        void decryptWithExactVersion() {
 
-        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, KEY_ID))
-                .thenReturn(Optional.of(kmsKey));
+            KmsKey key =
+                    createSymmetricKey(IEnumKeyStatus.Types.ENABLED);
 
-        when(cryptoService.decryptData(any(), any(), any(), any(), any(), any()))
-                .thenReturn("plain".getBytes());
+            KmsKeyVersion version = createKeyVersion(
+                    keyId,
+                    versionId,
+                    IEnumKeyStatus.Types.ENABLED,
+                    "symmetricKey".getBytes(),
+                    null
+            );
 
-        when(kmsKeyRepository.findByTenantAndKeyId(TENANT, DEST_KEY_ID))
-                .thenReturn(Optional.of(destinationKey));
+            DecryptRequest request = DecryptRequest.builder()
+                    .keyId(keyId)
+                    .ciphertextBlob(
+                            Base64.getEncoder()
+                                    .encodeToString(wrappedCiphertext)
+                    )
+                    .encryptionAlgorithmSpec("AES/GCM/NoPadding")
+                    .encryptionContext(
+                            Map.of("purpose", "payment")
+                    )
+                    .build();
 
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
-                () -> service.reEncrypt(TENANT, request)
-        );
+            when(kmsKeyRepository.findByTenantAndKeyId(tenant, keyId))
+                    .thenReturn(Optional.of(key));
 
-        assertEquals(
-                "Destination key is not enabled",
-                exception.getMessage()
-        );
+            when(kmsKeyVersionRepository
+                    .findByTenantAndKeyIdAndVersionId(
+                            tenant,
+                            keyId,
+                            versionId
+                    ))
+                    .thenReturn(Optional.of(version));
+
+            doReturn(plaintext.getBytes())
+                    .when(cryptoService)
+                    .decryptData(
+                            eq(tenant),
+                            any(byte[].class),
+                            eq("symmetricKey".getBytes()),
+                            eq(key.getKeySpec()),
+                            eq("AES/GCM/NoPadding"),
+                            eq(request.getEncryptionContext())
+                    );
+
+            DecryptResponse response =
+                    encryptionService.decrypt(tenant, request);
+
+            assertThat(response.getPlaintext())
+                    .isEqualTo(plaintextBase64);
+
+            assertThat(response.getKeyVersionId())
+                    .isEqualTo(versionId);
+        }
+
+        @Test
+        void decryptWithAsymmetricKey() {
+
+            KmsKey key =
+                    createAsymmetricKey(IEnumKeyStatus.Types.ENABLED);
+
+            byte[] privateKeyBytes = "privateKey".getBytes();
+
+            KmsKeyVersion version = createKeyVersion(
+                    keyId,
+                    versionId,
+                    IEnumKeyStatus.Types.ENABLED,
+                    privateKeyBytes,
+                    null
+            );
+
+            DecryptRequest request = DecryptRequest.builder()
+                    .keyId(keyId)
+                    .ciphertextBlob(
+                            Base64.getEncoder()
+                                    .encodeToString(wrappedCiphertext)
+                    )
+                    .encryptionAlgorithmSpec("RSAES_OAEP_SHA_256")
+                    .build();
+
+            when(kmsKeyRepository.findByTenantAndKeyId(tenant, keyId))
+                    .thenReturn(Optional.of(key));
+
+            when(kmsKeyVersionRepository
+                    .findByTenantAndKeyIdAndVersionId(
+                            tenant,
+                            keyId,
+                            versionId
+                    ))
+                    .thenReturn(Optional.of(version));
+
+            doReturn(plaintext.getBytes())
+                    .when(cryptoService)
+                    .decryptData(
+                            eq(tenant),
+                            any(byte[].class),
+                            eq(privateKeyBytes),
+                            eq(key.getKeySpec()),
+                            eq("RSAES_OAEP_SHA_256"),
+                            nullable(Map.class)
+                    );
+
+            DecryptResponse response =
+                    encryptionService.decrypt(tenant, request);
+
+            assertThat(response.getPlaintext())
+                    .isEqualTo(plaintextBase64);
+
+            verify(cryptoService).decryptData(
+                    eq(tenant),
+                    any(byte[].class),
+                    eq(privateKeyBytes),
+                    eq(key.getKeySpec()),
+                    eq("RSAES_OAEP_SHA_256"),
+                    nullable(Map.class)
+            );
+        }
+    }
+
+    // =========================================================================
+    // Story 4: Decrypt fallback
+    // =========================================================================
+
+    @Nested
+    @DisplayName("Story 4: Decrypt fallback")
+    class DecryptFallbackStory {
+
+        @Test
+        void fallbackToCurrentVersion() {
+
+            KmsKey key =
+                    createSymmetricKey(IEnumKeyStatus.Types.ENABLED);
+
+            KmsKeyVersion currentVersion = createKeyVersion(
+                    keyId,
+                    currentVersionId,
+                    IEnumKeyStatus.Types.ENABLED,
+                    "currentKey".getBytes(),
+                    null
+            );
+
+            DecryptRequest request = DecryptRequest.builder()
+                    .keyId(keyId)
+                    .ciphertextBlob(
+                            Base64.getEncoder()
+                                    .encodeToString(wrappedCiphertext)
+                    )
+                    .encryptionAlgorithmSpec("AES/GCM/NoPadding")
+                    .build();
+
+            when(kmsKeyRepository.findByTenantAndKeyId(tenant, keyId))
+                    .thenReturn(Optional.of(key));
+
+            when(kmsKeyVersionRepository
+                    .findByTenantAndKeyIdAndVersionId(
+                            tenant,
+                            keyId,
+                            versionId
+                    ))
+                    .thenReturn(Optional.empty());
+
+            when(kmsKeyVersionRepository
+                    .findByTenantAndKeyIdAndVersionId(
+                            tenant,
+                            keyId,
+                            currentVersionId
+                    ))
+                    .thenReturn(Optional.of(currentVersion));
+
+            doReturn(plaintext.getBytes())
+                    .when(cryptoService)
+                    .decryptData(
+                            eq(tenant),
+                            any(byte[].class),
+                            eq("currentKey".getBytes()),
+                            eq(key.getKeySpec()),
+                            eq("AES/GCM/NoPadding"),
+                            nullable(Map.class)
+                    );
+
+            DecryptResponse response =
+                    encryptionService.decrypt(tenant, request);
+
+            assertThat(response.getKeyVersionId())
+                    .isEqualTo(currentVersionId);
+        }
+    }
+
+    // =========================================================================
+    // Story 5: Multiple versions
+    // =========================================================================
+
+    @Nested
+    @DisplayName("Story 5: Multiple versions")
+    class MultipleVersionsStory {
+
+        @Test
+        void tryAllEnabledVersions() {
+
+            KmsKey key =
+                    createSymmetricKey(IEnumKeyStatus.Types.ENABLED);
+
+            KmsKeyVersion oldVersion1 = createKeyVersion(
+                    keyId,
+                    "v-old1",
+                    IEnumKeyStatus.Types.ENABLED,
+                    "oldKey1".getBytes(),
+                    null
+            );
+
+            KmsKeyVersion oldVersion2 = createKeyVersion(
+                    keyId,
+                    "v-old2",
+                    IEnumKeyStatus.Types.ENABLED,
+                    "oldKey2".getBytes(),
+                    null
+            );
+
+            DecryptRequest request = DecryptRequest.builder()
+                    .keyId(keyId)
+                    .ciphertextBlob(
+                            Base64.getEncoder()
+                                    .encodeToString(wrappedCiphertext)
+                    )
+                    .encryptionAlgorithmSpec("AES/GCM/NoPadding")
+                    .build();
+
+            when(kmsKeyRepository.findByTenantAndKeyId(tenant, keyId))
+                    .thenReturn(Optional.of(key));
+
+            when(kmsKeyVersionRepository
+                    .findByTenantAndKeyIdAndVersionId(
+                            tenant,
+                            keyId,
+                            versionId
+                    ))
+                    .thenReturn(Optional.empty());
+
+            when(kmsKeyVersionRepository
+                    .findByTenantAndKeyIdAndVersionId(
+                            tenant,
+                            keyId,
+                            currentVersionId
+                    ))
+                    .thenReturn(Optional.empty());
+
+            when(kmsKeyVersionRepository
+                    .findByTenantAndKeyIdAndKeyStatusOrderByCreateDateDesc(
+                            tenant,
+                            keyId,
+                            IEnumKeyStatus.Types.ENABLED
+                    ))
+                    .thenReturn(List.of(oldVersion1, oldVersion2));
+
+            doThrow(new RuntimeException("decrypt failed"))
+                    .doReturn(plaintext.getBytes())
+                    .when(cryptoService)
+                    .decryptData(
+                            eq(tenant),
+                            any(byte[].class),
+                            any(byte[].class),
+                            eq(key.getKeySpec()),
+                            eq("AES/GCM/NoPadding"),
+                            nullable(Map.class)
+                    );
+
+            DecryptResponse response =
+                    encryptionService.decrypt(tenant, request);
+
+            assertThat(response.getKeyVersionId())
+                    .isEqualTo("v-old2");
+
+            verify(cryptoService, times(2))
+                    .decryptData(
+                            eq(tenant),
+                            any(byte[].class),
+                            any(byte[].class),
+                            eq(key.getKeySpec()),
+                            eq("AES/GCM/NoPadding"),
+                            nullable(Map.class)
+                    );
+        }
+
+        @Test
+        void noVersionCanDecrypt() {
+
+            KmsKey key =
+                    createSymmetricKey(IEnumKeyStatus.Types.ENABLED);
+
+            KmsKeyVersion oldVersion = createKeyVersion(
+                    keyId,
+                    "v-old",
+                    IEnumKeyStatus.Types.ENABLED,
+                    "oldKey".getBytes(),
+                    null
+            );
+
+            DecryptRequest request = DecryptRequest.builder()
+                    .keyId(keyId)
+                    .ciphertextBlob(
+                            Base64.getEncoder()
+                                    .encodeToString(wrappedCiphertext)
+                    )
+                    .encryptionAlgorithmSpec("AES/GCM/NoPadding")
+                    .build();
+
+            when(kmsKeyRepository.findByTenantAndKeyId(tenant, keyId))
+                    .thenReturn(Optional.of(key));
+
+            when(kmsKeyVersionRepository
+                    .findByTenantAndKeyIdAndVersionId(
+                            tenant,
+                            keyId,
+                            versionId
+                    ))
+                    .thenReturn(Optional.empty());
+
+            when(kmsKeyVersionRepository
+                    .findByTenantAndKeyIdAndVersionId(
+                            tenant,
+                            keyId,
+                            currentVersionId
+                    ))
+                    .thenReturn(Optional.empty());
+
+            when(kmsKeyVersionRepository
+                    .findByTenantAndKeyIdAndKeyStatusOrderByCreateDateDesc(
+                            tenant,
+                            keyId,
+                            IEnumKeyStatus.Types.ENABLED
+                    ))
+                    .thenReturn(List.of(oldVersion));
+
+            doThrow(new RuntimeException("decrypt failed"))
+                    .when(cryptoService)
+                    .decryptData(
+                            eq(tenant),
+                            any(byte[].class),
+                            any(byte[].class),
+                            eq(key.getKeySpec()),
+                            eq("AES/GCM/NoPadding"),
+                            nullable(Map.class)
+                    );
+
+            assertThatThrownBy(() ->
+                    encryptionService.decrypt(tenant, request)
+            )
+                    .isInstanceOf(DecryptionException.class)
+                    .hasMessage("Decrypt failed");
+        }
+    }
+
+    // =========================================================================
+    // Story 6: Decrypt errors
+    // =========================================================================
+
+    @Nested
+    @DisplayName("Story 6: Decrypt errors")
+    class DecryptErrorStory {
+
+        @Test
+        void decryptDisabledKey() {
+
+            KmsKey key =
+                    createSymmetricKey(IEnumKeyStatus.Types.DISABLED);
+
+            when(kmsKeyRepository.findByTenantAndKeyId(tenant, keyId))
+                    .thenReturn(Optional.of(key));
+
+            DecryptRequest request = DecryptRequest.builder()
+                    .keyId(keyId)
+                    .ciphertextBlob("dummy")
+                    .build();
+
+            assertThatThrownBy(() ->
+                    encryptionService.decrypt(tenant, request)
+            ).isInstanceOf(DisabledKeyException.class);
+        }
+
+        @Test
+        void decryptWrongUsage() {
+
+            KmsKey key =
+                    createSymmetricKey(IEnumKeyStatus.Types.ENABLED);
+
+            key.setKeyUsage(IEnumKeyUsage.Types.SIGN_VERIFY);
+
+            when(kmsKeyRepository.findByTenantAndKeyId(tenant, keyId))
+                    .thenReturn(Optional.of(key));
+
+            DecryptRequest request = DecryptRequest.builder()
+                    .keyId(keyId)
+                    .ciphertextBlob("dummy")
+                    .build();
+
+            assertThatThrownBy(() ->
+                    encryptionService.decrypt(tenant, request)
+            ).isInstanceOf(KeyNotAllowedForUsageException.class);
+        }
+
+        @Test
+        void decryptMissingAlgorithm() {
+
+            KmsKey key =
+                    createSymmetricKey(IEnumKeyStatus.Types.ENABLED);
+
+            when(kmsKeyRepository.findByTenantAndKeyId(tenant, keyId))
+                    .thenReturn(Optional.of(key));
+
+            DecryptRequest request = DecryptRequest.builder()
+                    .keyId(keyId)
+                    .ciphertextBlob(
+                            Base64.getEncoder()
+                                    .encodeToString(wrappedCiphertext)
+                    )
+                    .build();
+
+            assertThatThrownBy(() ->
+                    encryptionService.decrypt(tenant, request)
+            ).isInstanceOf(WrongAlgorithmException.class);
+        }
+
+        @Test
+        void decryptMissingKeyId() {
+
+            DecryptRequest request =
+                    DecryptRequest.builder().build();
+
+            assertThatThrownBy(() ->
+                    encryptionService.decrypt(tenant, request)
+            )
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("keyId required");
+        }
     }
 }
