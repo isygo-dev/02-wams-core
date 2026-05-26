@@ -384,7 +384,6 @@ class KmsControllerTest {
     void generateDataKey_Success() throws Exception {
         GenerateDataKeyRequest request = GenerateDataKeyRequest.builder()
                 .keyId(KEY_ID)
-                .keySpec("AES_256")
                 .build();
         when(dataKeyService.generateDataKey(eq(TENANT), any())).thenReturn(new GenerateDataKeyResponse());
 

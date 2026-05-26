@@ -203,7 +203,7 @@ public class DataKeyService implements IDataKeyService {
                 .build();
     }
 
-    private byte[] generateAesKey(int bits) {
+    byte[] generateAesKey(int bits) {
         try {
             KeyGenerator kg = KeyGenerator.getInstance("AES");
             kg.init(bits);

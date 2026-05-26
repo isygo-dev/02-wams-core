@@ -868,9 +868,6 @@ public final class KmsDtos {
         @Schema(description = "Key ID", required = true)
         private String keyId;
 
-        @Schema(description = "Key specification (e.g., AES_256)")
-        private String keySpec;
-
         @Schema(description = "Key size in bits (e.g., 256)")
         private Integer keySize;
 
