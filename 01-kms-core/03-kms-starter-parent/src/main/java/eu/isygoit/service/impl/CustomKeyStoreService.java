@@ -9,7 +9,6 @@ import eu.isygoit.enums.IEnumCustomKeyStoreType;
 import eu.isygoit.exception.*;
 import eu.isygoit.model.KmsCustomKeyStore;
 import eu.isygoit.repository.CustomKeyStoreRepository;
-import eu.isygoit.repository.RepoHelper;
 import eu.isygoit.service.ICustomKeyStoreService;
 import eu.isygoit.service.IKeyManagementService;
 import eu.isygoit.simulation.CustomKeyStoreConnection;
@@ -19,7 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -206,7 +207,11 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
 
     @Override
     public ListCustomKeyStoresResponse listCustomKeyStores(String tenant, Integer limit, String nextToken) {
-        Pageable pageable = RepoHelper.resolvePageable(limit, nextToken, "createDate");
+        // Use cursor-based pagination with last ID
+        int pageSize = (limit != null && limit > 0 && limit <= 1000) ? limit : 100;
+
+        Pageable pageable = PageRequest.of(0, pageSize, Sort.by("createDate").descending());
+
         Page<KmsCustomKeyStore> page;
         if (nextToken != null && !nextToken.isEmpty()) {
             Long lastId = decodeNextToken(nextToken);
@@ -214,12 +219,20 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         } else {
             page = customKeyStoreRepository.findByTenantOrderByIdAsc(tenant, pageable);
         }
-        List<DescribeCustomKeyStoreResponse.CustomKeyStore> dtos = page.stream()
+
+        List<DescribeCustomKeyStoreResponse.CustomKeyStore> dtos = page.getContent().stream()
                 .map(this::convertToResponseDto)
                 .collect(Collectors.toList());
+
+        String newNextToken = null;
+        if (page.hasNext() && !page.getContent().isEmpty()) {
+            Long lastId = page.getContent().get(page.getContent().size() - 1).getId();
+            newNextToken = encodeNextToken(lastId);
+        }
+
         return ListCustomKeyStoresResponse.builder()
                 .customKeyStores(dtos)
-                .nextToken(page.hasNext() ? encodeNextToken(page.getContent().get(page.getContent().size() - 1).getId()) : null)
+                .nextToken(newNextToken)
                 .numberOfElements(page.getNumberOfElements())
                 .totalPages(page.getTotalPages())
                 .totalElements(page.getTotalElements())
@@ -559,6 +572,10 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
                 .replace("\t", "\\t");
     }
 
+    // =========================================================================
+    // Pagination helpers (cursor-based)
+    // =========================================================================
+
     private String encodeNextToken(Long id) {
         return Base64.getEncoder().encodeToString(id.toString().getBytes());
     }
@@ -570,6 +587,10 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
             throw new InvalidPaginationTokenException("Invalid pagination token");
         }
     }
+
+    // =========================================================================
+    // DTO conversion with sensitive data masking
+    // =========================================================================
 
     private DescribeCustomKeyStoreResponse.CustomKeyStore convertToResponseDto(KmsCustomKeyStore store) {
         return DescribeCustomKeyStoreResponse.CustomKeyStore.builder()

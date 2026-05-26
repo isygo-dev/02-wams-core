@@ -113,7 +113,7 @@ public interface IKeyManagementService {
 
     Object untagResource(String tenant, String keyId, @Valid KmsDtos.UntagResourceRequest request);
 
-    ListTagsResponse listResourceTags(String tenant, String keyId);
+    ListResourceTagsResponse listResourceTags(String tenant, String keyId, Integer limit, String nextToken);
 
     ImportParametersResponse getParametersForImport(String tenant, String keyId);
 

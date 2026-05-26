@@ -820,18 +820,40 @@ public class KeyManagementService implements IKeyManagementService {
     }
 
     @Override
-    public ListTagsResponse listResourceTags(String tenant, String keyId) {
+    public ListResourceTagsResponse listResourceTags(String tenant,
+                                                     String keyId,
+                                                     Integer limit,
+                                                     String nextToken) {
         log.info("Listing resource tags for tenant: {} keyId: {}", tenant, keyId);
 
-        List<KmsTag> tags = kmsTagRepository.findByTenantAndKeyId(tenant, keyId);
+        int pageSize = (limit != null && limit > 0)
+                ? Math.min(limit, 1000)
+                : 100;
 
-        return ListTagsResponse.builder()
-                .tags(tags.stream()
-                        .map(tag -> Tag.builder()
+        int pageNum = (nextToken != null)
+                ? Integer.parseInt(nextToken)
+                : 0;
+
+        Pageable pageable = PageRequest.of(
+                pageNum,
+                pageSize,
+                Sort.by("createDate").descending()
+        );
+
+        Page<KmsTag> page = kmsTagRepository.findByTenantAndKeyId(tenant, keyId, pageable);
+
+        return ListResourceTagsResponse.builder()
+                .tags(page.stream()
+                        .map(tag -> ListResourceTagsResponse.Tag.builder()
                                 .tagKey(tag.getTagKey())
                                 .tagValue(tag.getTagValue())
                                 .build())
                         .collect(Collectors.toList()))
+                .nextToken(page.hasNext() ? String.valueOf(page.getNumber() + 1) : null)
+                .numberOfElements(page.getNumberOfElements())
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+                .truncated(page.hasNext())
                 .build();
     }
 

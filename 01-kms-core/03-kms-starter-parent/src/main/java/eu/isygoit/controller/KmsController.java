@@ -1273,7 +1273,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
-            ListTagsResponse internal = keyManagementService.listResourceTags(tenant, keyId);
+            ListResourceTagsResponse internal = keyManagementService.listResourceTags(tenant, keyId, limit, nextToken);
             ListResourceTagsResponse response = ListResourceTagsResponse.builder()
                     .tags(internal.getTags().stream()
                             .map(t -> ListResourceTagsResponse.Tag.builder()

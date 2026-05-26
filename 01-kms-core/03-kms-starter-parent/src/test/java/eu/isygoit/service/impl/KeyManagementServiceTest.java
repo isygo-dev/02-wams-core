@@ -467,7 +467,7 @@ class KeyManagementServiceTest {
         when(kmsTagRepository.findByTenantAndKeyId(TENANT, KEY_ID))
                 .thenReturn(List.of(tag));
 
-        ListTagsResponse response = keyManagementService.listResourceTags(TENANT, KEY_ID);
+        ListResourceTagsResponse response = keyManagementService.listResourceTags(TENANT, KEY_ID, 0, "100");
 
         assertEquals(1, response.getTags().size());
         assertEquals("env", response.getTags().get(0).getTagKey());

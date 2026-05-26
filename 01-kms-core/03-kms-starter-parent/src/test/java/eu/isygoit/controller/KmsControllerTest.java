@@ -605,10 +605,10 @@ class KmsControllerTest {
 
     @Test
     void listResourceTags_Success() throws Exception {
-        ListTagsResponse dto = ListTagsResponse.builder()
-                .tags(List.of(new Tag("env", "test")))
+        ListResourceTagsResponse dto = ListResourceTagsResponse.builder()
+                .tags(List.of(new ListResourceTagsResponse.Tag("env", "test")))
                 .build();
-        when(keyManagementService.listResourceTags(eq(TENANT), eq(KEY_ID))).thenReturn(dto);
+        when(keyManagementService.listResourceTags(eq(TENANT), eq(KEY_ID), 0, "100")).thenReturn(dto);
         when(dataKeyService.resolveKeyId(anyString(), anyString())).thenReturn(KEY_ID);
         mockMvc.perform(get("/api/v1/private/kms/keys/{keyId}/tags", KEY_ID))
                 .andExpect(status().isOk());
