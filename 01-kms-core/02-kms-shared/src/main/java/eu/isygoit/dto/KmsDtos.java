@@ -1378,6 +1378,16 @@ public final class KmsDtos {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    @Schema(description = "List tags response DTO")
+    public static class ListTagsResponse {
+        @Schema(description = "List of tags")
+        private List<Tag> tags;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Schema(description = "List tags response")
     public static class ListResourceTagsResponse {
         @Schema(description = "List of tags")
@@ -2329,16 +2339,6 @@ public final class KmsDtos {
     public static class Tag {
         private String tagKey;
         private String tagValue;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Schema(description = "List tags response DTO")
-    public static class ListTagsResponse {
-        @Schema(description = "List of tags")
-        private List<Tag> tags;
     }
 
     @Data

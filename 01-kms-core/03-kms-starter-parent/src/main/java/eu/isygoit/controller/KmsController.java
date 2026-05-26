@@ -1120,13 +1120,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
         try {
-            CreateGrantRequest internal = CreateGrantRequest.builder()
-                    .granteePrincipal(request.getGranteePrincipal())
-                    .retiringPrincipal(request.getRetiringPrincipal())
-                    .operations(request.getOperations())
-                    .build();
-
-            GrantResponse internalRes = keyPolicyService.createGrant(tenant, keyId, internal);
+            GrantResponse internalRes = keyPolicyService.createGrant(tenant, keyId, request);
 
             auditService.logAction(tenant, IKmsActionType.Types.CREATE_GRANT, keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
@@ -1201,10 +1195,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
         try {
-            RetireGrantRequest internal = RetireGrantRequest.builder()
-                    .grantToken(request != null ? request.getGrantToken() : null)
-                    .build();
-            keyPolicyService.retireGrant(tenant, request.getGrantId(), internal);
+            keyPolicyService.retireGrant(tenant, request.getGrantId(), request);
             auditService.logAction(tenant, IKmsActionType.Types.RETIRE_GRANT, request.getGrantId(),
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());
@@ -1263,10 +1254,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
         try {
-            UntagResourceRequest internal = UntagResourceRequest.builder()
-                    .tagKeys(request.getTagKeys())
-                    .build();
-            keyManagementService.untagResource(tenant, keyId, internal);
+            keyManagementService.untagResource(tenant, keyId, request);
             auditService.logAction(tenant, IKmsActionType.Types.UNTAG_RESOURCE, keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());
@@ -1351,13 +1339,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
         try {
-            ImportKeyMaterialRequest internal = ImportKeyMaterialRequest.builder()
-                    .importToken(request.getImportToken())
-                    .encryptedKeyMaterial(request.getEncryptedKeyMaterial())
-                    .validTo(request.getValidTo())
-                    .expirationModel(request.getExpirationModel())
-                    .build();
-            keyManagementService.importKeyMaterial(tenant, keyId, internal);
+            keyManagementService.importKeyMaterial(tenant, keyId, request);
             auditService.logAction(tenant, IKmsActionType.Types.IMPORT_KEY_MATERIAL, keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());
@@ -1394,18 +1376,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            CreateCustomKeyStoreRequest internal = CreateCustomKeyStoreRequest.builder()
-                    .customKeyStoreName(request.getCustomKeyStoreName())
-                    .cloudHsmClusterId(request.getCloudHsmClusterId())
-                    .keyStorePassword(request.getKeyStorePassword())
-                    .trustAnchorCertificate(request.getTrustAnchorCertificate())
-                    .customKeyStoreType(request.getCustomKeyStoreType())
-                    .xksProxyUriEndpoint(request.getXksProxyUriEndpoint())
-                    .xksProxyUriPath(request.getXksProxyUriPath())
-                    .xksProxyAuthenticationCredential(request.getXksProxyAuthenticationCredential())
-                    .xksProxyConnectivity(request.getXksProxyConnectivity())
-                    .build();
-            DescribeCustomKeyStoreResponse.CustomKeyStore internalRes = customKeyStoreService.createCustomKeyStore(tenant, internal);
+            DescribeCustomKeyStoreResponse.CustomKeyStore internalRes = customKeyStoreService.createCustomKeyStore(tenant, request);
             CreateCustomKeyStoreResponse response = CreateCustomKeyStoreResponse.builder()
                     .customKeyStoreId(internalRes.getCustomKeyStoreId())
                     .build();
@@ -1421,9 +1392,9 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            DescribeCustomKeyStoreResponse.CustomKeyStore internal = customKeyStoreService.describeCustomKeyStore(tenant, customKeyStoreId);
+            DescribeCustomKeyStoreResponse.CustomKeyStore customKeyStore = customKeyStoreService.describeCustomKeyStore(tenant, customKeyStoreId);
             DescribeCustomKeyStoreResponse response = DescribeCustomKeyStoreResponse.builder()
-                    .customKeyStore(internal)
+                    .customKeyStore(customKeyStore)
                     .build();
 
             auditService.logAction(
@@ -1447,16 +1418,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            UpdateCustomKeyStoreRequest internal = UpdateCustomKeyStoreRequest.builder()
-                    .newCustomKeyStoreName(request.getNewCustomKeyStoreName())
-                    .keyStorePassword(request.getKeyStorePassword())
-                    .cloudHsmClusterId(request.getCloudHsmClusterId())
-                    .xksProxyUriEndpoint(request.getXksProxyUriEndpoint())
-                    .xksProxyUriPath(request.getXksProxyUriPath())
-                    .xksProxyAuthenticationCredential(request.getXksProxyAuthenticationCredential())
-                    .xksProxyConnectivity(request.getXksProxyConnectivity())
-                    .build();
-            customKeyStoreService.updateCustomKeyStore(tenant, customKeyStoreId, internal);
+            customKeyStoreService.updateCustomKeyStore(tenant, customKeyStoreId, request);
             return ResponseFactory.responseOk(new UpdateCustomKeyStoreResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);

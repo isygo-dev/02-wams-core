@@ -1,5 +1,7 @@
 package eu.isygoit.ui.views.keyStore;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -18,8 +20,10 @@ import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.views.keyStore.dialog.DeleteCustomKeyStoreDialog;
 import eu.isygoit.ui.views.keyStore.dialog.UpdateCustomKeyStoreDialog;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 class StoreCard extends VerticalLayout {
     private final CustomKeyStoresView parentView;
@@ -32,6 +36,8 @@ class StoreCard extends VerticalLayout {
     private final String connectionState;
     private final String creationDate;
     private final String errorCode;
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public StoreCard(CustomKeyStoresView customKeyStoresView, KmsApiService kmsApiService, KmsDtos.DescribeCustomKeyStoreResponse.CustomKeyStore store) {
         this.parentView = customKeyStoresView;
@@ -69,13 +75,11 @@ class StoreCard extends VerticalLayout {
         headerRow.setSpacing(true);
         headerRow.addClassName("store-header-row");
 
-        // Left side: name
         Span nameSpan = new Span(storeName);
         nameSpan.addClassName(LumoUtility.FontWeight.BOLD);
         nameSpan.addClassName(LumoUtility.FontSize.MEDIUM);
         nameSpan.getStyle().set("word-break", "break-word");
 
-        // Right side: action buttons
         HorizontalLayout buttonBar = new HorizontalLayout();
         buttonBar.setSpacing(true);
         buttonBar.setPadding(false);
@@ -107,7 +111,7 @@ class StoreCard extends VerticalLayout {
         headerRow.add(nameSpan, buttonBar);
         add(headerRow);
 
-        // Type and status chips (same line, wrap allowed)
+        // Type and status chips
         HorizontalLayout typeStatusRow = new HorizontalLayout();
         typeStatusRow.setSpacing(true);
         typeStatusRow.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -183,7 +187,7 @@ class StoreCard extends VerticalLayout {
             add(xksRow);
         }
 
-        // Metadata row 3: health status, max keys, last successful connection, last connection attempt
+        // Metadata row 3: health status, max keys, last connection info
         HorizontalLayout metaRow3 = new HorizontalLayout();
         metaRow3.setSpacing(true);
         metaRow3.addClassName(LumoUtility.FontSize.XSMALL);
@@ -207,13 +211,12 @@ class StoreCard extends VerticalLayout {
             if (metaRow3.getComponentCount() > 0) metaRow3.add(new Span("•"));
             metaRow3.add(new Span("Last attempt: " + store.getLastConnectionAttempt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
         }
-
         if (metaRow3.getComponentCount() == 0) {
             metaRow3.add(new Span("No additional info"));
         }
         add(metaRow3);
 
-        // Metadata row 4: connection settings
+        // Metadata row 4: connection settings (timeout, health interval, auto-reconnect)
         if (store.getConnectionTimeoutSeconds() != null || store.getHealthCheckIntervalSeconds() != null || store.getAutoReconnect() != null) {
             HorizontalLayout settingsRow = new HorizontalLayout();
             settingsRow.setSpacing(true);
@@ -236,9 +239,62 @@ class StoreCard extends VerticalLayout {
             }
             add(settingsRow);
         }
+
+        // ===== NEW: Metadata (key-value pairs) display =====
+        if (StringUtils.hasText(store.getMetadata())) {
+            try {
+                Map<String, String> metadataMap = objectMapper.readValue(store.getMetadata(), new TypeReference<>() {});
+                if (metadataMap != null && !metadataMap.isEmpty()) {
+                    HorizontalLayout metadataRow = new HorizontalLayout();
+                    metadataRow.setSpacing(true);
+                    metadataRow.addClassName(LumoUtility.FontSize.XSMALL);
+                    metadataRow.addClassName(LumoUtility.TextColor.TERTIARY);
+                    metadataRow.getStyle().set("flex-wrap", "wrap");
+                    metadataRow.add(new Span("📝 Metadata:"));
+                    for (Map.Entry<String, String> entry : metadataMap.entrySet()) {
+                        Span tag = new Span(entry.getKey() + "=" + entry.getValue());
+                        tag.addClassName(LumoUtility.Background.CONTRAST_5);
+                        tag.addClassName(LumoUtility.Padding.Horizontal.SMALL);
+                        tag.addClassName(LumoUtility.Padding.Vertical.XSMALL);
+                        tag.addClassName(LumoUtility.BorderRadius.LARGE);
+                        metadataRow.add(tag);
+                    }
+                    add(metadataRow);
+                }
+            } catch (Exception e) {
+                // ignore parse errors
+            }
+        }
+
+        // ===== NEW: Tags display =====
+        if (StringUtils.hasText(store.getTags())) {
+            try {
+                Map<String, String> tagsMap = objectMapper.readValue(store.getTags(), new TypeReference<>() {});
+                if (tagsMap != null && !tagsMap.isEmpty()) {
+                    HorizontalLayout tagsRow = new HorizontalLayout();
+                    tagsRow.setSpacing(true);
+                    tagsRow.addClassName(LumoUtility.FontSize.XSMALL);
+                    tagsRow.addClassName(LumoUtility.TextColor.TERTIARY);
+                    tagsRow.getStyle().set("flex-wrap", "wrap");
+                    tagsRow.add(new Span("🏷️ Tags:"));
+                    for (Map.Entry<String, String> entry : tagsMap.entrySet()) {
+                        Span tag = new Span(entry.getKey() + "=" + entry.getValue());
+                        tag.addClassName(LumoUtility.Background.CONTRAST_5);
+                        tag.addClassName(LumoUtility.Padding.Horizontal.SMALL);
+                        tag.addClassName(LumoUtility.Padding.Vertical.XSMALL);
+                        tag.addClassName(LumoUtility.BorderRadius.LARGE);
+                        tagsRow.add(tag);
+                    }
+                    add(tagsRow);
+                }
+            } catch (Exception e) {
+                // ignore parse errors
+            }
+        }
     }
 
     private void injectResponsiveStyles() {
+        // (same as before, no changes)
         String css = """
                     .store-card .store-header-row {
                         display: flex;
@@ -364,10 +420,10 @@ class StoreCard extends VerticalLayout {
     }
 
     private void updateCustomKeyStore() {
-        (new UpdateCustomKeyStoreDialog(parentView, kmsApiService, parentView::loadStores, store)).open();
+        new UpdateCustomKeyStoreDialog(parentView, kmsApiService, parentView::loadStores, store).open();
     }
 
     private void confirmDelete() {
-        (new DeleteCustomKeyStoreDialog(parentView, kmsApiService, parentView::loadStores, store)).open();
+        new DeleteCustomKeyStoreDialog(parentView, kmsApiService, parentView::loadStores, store).open();
     }
 }

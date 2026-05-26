@@ -15,6 +15,8 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -26,9 +28,11 @@ import eu.isygoit.ui.views.keyStore.dialog.CreateCustomKeyStoreDialog;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Route(value = "custom-key-stores", layout = MainLayout.class)
 @PageTitle("Custom Key Stores")
@@ -40,8 +44,10 @@ public class CustomKeyStoresView extends VerticalLayout {
     private final Button createButton = new Button("Create Store", new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final ProgressBar loadingBar = new ProgressBar();
+    private final TextField filterField = new TextField();
+    private final Button clearFilterButton = new Button(new Icon(VaadinIcon.CLOSE));
 
-    private List<StoreCard> allCards = new ArrayList<>();
+    private List<DescribeCustomKeyStoreResponse.CustomKeyStore> allStores = new ArrayList<>();
 
     @Autowired
     public CustomKeyStoresView(KmsApiService kmsApiService) {
@@ -57,17 +63,14 @@ public class CustomKeyStoresView extends VerticalLayout {
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         add(header);
 
-        // Responsive toolbar
         HorizontalLayout toolbar = buildToolbar();
         add(toolbar);
 
-        // Cards container (already responsive via StoreCard)
         cardsContainer.setWidthFull();
         cardsContainer.setPadding(false);
         cardsContainer.setSpacing(true);
         add(cardsContainer);
 
-        // Loading indicator
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
         loadingBar.setWidth("200px");
@@ -76,7 +79,6 @@ public class CustomKeyStoresView extends VerticalLayout {
         createButton.addClickListener(e -> createCustomKeyStore());
         refreshButton.addClickListener(e -> loadStores());
 
-        // Inject responsive CSS using JavaScript (fixes URL encoding issues)
         injectResponsiveStyles();
 
         loadStores();
@@ -86,20 +88,35 @@ public class CustomKeyStoresView extends VerticalLayout {
         HorizontalLayout toolbar = new HorizontalLayout();
         toolbar.setWidthFull();
         toolbar.setPadding(false);
-        toolbar.setSpacing(false);
+        toolbar.setSpacing(true);
         toolbar.addClassName("custom-stores-toolbar");
 
-        // Left group: placeholder for future filters (empty for now)
+        // Left group: filter
         HorizontalLayout leftGroup = new HorizontalLayout();
         leftGroup.addClassName("toolbar-left-group");
         leftGroup.setSpacing(true);
+        leftGroup.setAlignItems(FlexComponent.Alignment.BASELINE);
+
+        filterField.setPlaceholder("Filter by name or type...");
+        filterField.setValueChangeMode(ValueChangeMode.LAZY);
+        filterField.setValueChangeTimeout(300);
+        filterField.setWidth("250px");
+        filterField.addValueChangeListener(e -> applyFilter());
+
+        clearFilterButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        clearFilterButton.setTooltipText("Clear filter");
+        clearFilterButton.setEnabled(false);
+        clearFilterButton.addClickListener(e -> {
+            filterField.clear();
+            applyFilter();
+        });
+
+        leftGroup.add(filterField, clearFilterButton);
 
         // Right group: create + refresh buttons
         HorizontalLayout rightGroup = new HorizontalLayout();
         rightGroup.addClassName("toolbar-right-group");
         rightGroup.setSpacing(true);
-        rightGroup.setAlignItems(FlexComponent.Alignment.END);
-
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         refreshButton.setTooltipText("Refresh stores");
@@ -142,10 +159,6 @@ public class CustomKeyStoresView extends VerticalLayout {
                         .toolbar-right-group > * {
                             width: 100% !important;
                         }
-                        /* Ensure buttons in right group also become full width */
-                        .toolbar-right-group .vaadin-button {
-                            width: 100% !important;
-                        }
                     }
                 """;
         UI.getCurrent().getPage().executeJs(
@@ -160,39 +173,61 @@ public class CustomKeyStoresView extends VerticalLayout {
 
     public void loadStores() {
         showLoading(true);
-        allCards.clear();
-        cardsContainer.removeAll();
         try {
             ResponseEntity<ListCustomKeyStoresResponse> response = kmsApiService.listCustomKeyStores(100, null);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                List<DescribeCustomKeyStoreResponse.CustomKeyStore> stores = response.getBody().getCustomKeyStores();
-                if (stores != null) {
-                    for (DescribeCustomKeyStoreResponse.CustomKeyStore store : stores) {
-                        allCards.add(new StoreCard(this, this.kmsApiService, store));
-                    }
-                }
-            }
-            if (allCards.isEmpty()) {
-                Div emptyState = new Div();
-                emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
-                emptyState.addClassName(LumoUtility.Padding.XLARGE);
-                Icon emptyIcon = VaadinIcon.STORAGE.create();
-                emptyIcon.setSize("48px");
-                emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-                H4 emptyTitle = new H4("No custom key stores found");
-                Span emptyDesc = new Span("Click 'Create Store' to add one.");
-                emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
-                emptyState.add(emptyIcon, emptyTitle, emptyDesc);
-                cardsContainer.add(emptyState);
+                allStores = response.getBody().getCustomKeyStores();
+                if (allStores == null) allStores = new ArrayList<>();
+                applyFilter();
             } else {
-                allCards.forEach(cardsContainer::add);
+                allStores = new ArrayList<>();
+                showEmptyState();
             }
         } catch (Exception e) {
-            Notification.show("Failed to load custom key stores: " + e.getMessage(), 6000, Notification.Position.TOP_END)
+            Notification.show("Failed to load stores: " + e.getMessage(), 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            showEmptyState();
         } finally {
             showLoading(false);
         }
+    }
+
+    private void applyFilter() {
+        String filter = filterField.getValue();
+        clearFilterButton.setEnabled(StringUtils.hasText(filter));
+        cardsContainer.removeAll();
+
+        List<DescribeCustomKeyStoreResponse.CustomKeyStore> filtered;
+        if (!StringUtils.hasText(filter)) {
+            filtered = allStores;
+        } else {
+            String lowerFilter = filter.toLowerCase();
+            filtered = allStores.stream()
+                    .filter(s -> (s.getName() != null && s.getName().toLowerCase().contains(lowerFilter)) ||
+                            (s.getCustomKeyStoreType() != null && s.getCustomKeyStoreType().toLowerCase().contains(lowerFilter)))
+                    .collect(Collectors.toList());
+        }
+
+        if (filtered.isEmpty()) {
+            showEmptyState();
+        } else {
+            filtered.forEach(s -> cardsContainer.add(new StoreCard(this, kmsApiService, s)));
+        }
+    }
+
+    private void showEmptyState() {
+        cardsContainer.removeAll();
+        Div emptyState = new Div();
+        emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
+        emptyState.addClassName(LumoUtility.Padding.XLARGE);
+        Icon emptyIcon = VaadinIcon.STORAGE.create();
+        emptyIcon.setSize("48px");
+        emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        H4 emptyTitle = new H4("No custom key stores found");
+        Span emptyDesc = new Span("Click 'Create Store' to add one.");
+        emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
+        emptyState.add(emptyIcon, emptyTitle, emptyDesc);
+        cardsContainer.add(emptyState);
     }
 
     public void showLoading(boolean show) {
@@ -200,5 +235,6 @@ public class CustomKeyStoresView extends VerticalLayout {
         cardsContainer.setVisible(!show);
         createButton.setEnabled(!show);
         refreshButton.setEnabled(!show);
+        filterField.setEnabled(!show);
     }
 }

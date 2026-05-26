@@ -89,8 +89,15 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         store.setStatus(IEnumCustomKeyStoreStatus.Types.DISCONNECTED);
         store.setMaxKeys(request.getMaxKeys() != null ? request.getMaxKeys() : defaultMaxKeys);
         store.setHealthStatus("UNKNOWN");
-        store.setMetadata(request.getMetadata() != null ? convertMapToJson(request.getMetadata()) : null);
-        store.setTags(request.getTags() != null ? convertMapToJson(request.getTags()) : null);
+
+        // Metadata & tags as JSON strings
+        store.setMetadata(convertMapToJson(request.getMetadata()));
+        store.setTags(convertMapToJson(request.getTags()));
+
+        // Connection settings (store-specific overrides)
+        store.setConnectionTimeoutSeconds(request.getConnectionTimeoutSeconds());
+        store.setHealthCheckIntervalSeconds(request.getHealthCheckIntervalSeconds());
+        store.setAutoReconnect(request.getAutoReconnect());
 
         // Type-specific configuration
         if (store.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
@@ -103,7 +110,11 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
             throw new UnsupportedCustomKeyStoreTypeException("Unsupported type: " + request.getCustomKeyStoreType());
         }
 
-        // Initialize underlying simulation
+        // Optional type-specific data
+        if (request.getCustomKeyStoreTypeSpecificData() != null) {
+            store.setCustomKeyStoreTypeSpecificData(request.getCustomKeyStoreTypeSpecificData());
+        }
+
         KmsCustomKeyStore saved = customKeyStoreRepository.save(store);
         log.info("Custom key store created with id: {}", saved.getId());
 
@@ -128,6 +139,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
             throw new CustomKeyStoreConnectedException("Cannot update while connected. Disconnect first.");
         }
 
+        // Basic fields
         if (request.getNewCustomKeyStoreName() != null && !request.getNewCustomKeyStoreName().isEmpty()) {
             if (!store.getName().equals(request.getNewCustomKeyStoreName()) &&
                     customKeyStoreRepository.existsByTenantAndName(tenant, request.getNewCustomKeyStoreName())) {
@@ -139,6 +151,8 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         if (request.getMaxKeys() != null) {
             store.setMaxKeys(request.getMaxKeys());
         }
+
+        // Metadata & tags (replace entirely)
         if (request.getMetadata() != null) {
             store.setMetadata(convertMapToJson(request.getMetadata()));
         }
@@ -146,11 +160,27 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
             store.setTags(convertMapToJson(request.getTags()));
         }
 
-        // Update type-specific credentials (always hashed)
+        // Connection settings (store-specific overrides)
+        if (request.getConnectionTimeoutSeconds() != null) {
+            store.setConnectionTimeoutSeconds(request.getConnectionTimeoutSeconds());
+        }
+        if (request.getHealthCheckIntervalSeconds() != null) {
+            store.setHealthCheckIntervalSeconds(request.getHealthCheckIntervalSeconds());
+        }
+        if (request.getAutoReconnect() != null) {
+            store.setAutoReconnect(request.getAutoReconnect());
+        }
+
+        // Type-specific configuration updates
         if (store.getType() == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
             updateCloudHsmStore(store, request);
         } else if (store.getType() == IEnumCustomKeyStoreType.Types.EXTERNAL_KEY_STORE) {
             updateExternalKeyStore(store, request);
+        }
+
+        // Optional type-specific data
+        if (request.getCustomKeyStoreTypeSpecificData() != null) {
+            store.setCustomKeyStoreTypeSpecificData(request.getCustomKeyStoreTypeSpecificData());
         }
 
         KmsCustomKeyStore updated = customKeyStoreRepository.save(store);
@@ -176,25 +206,20 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
 
     @Override
     public ListCustomKeyStoresResponse listCustomKeyStores(String tenant, Integer limit, String nextToken) {
-
         Pageable pageable = RepoHelper.resolvePageable(limit, nextToken, "createDate");
-
         Page<KmsCustomKeyStore> page;
-        String newNextToken = null;
-
         if (nextToken != null && !nextToken.isEmpty()) {
             Long lastId = decodeNextToken(nextToken);
             page = customKeyStoreRepository.findByTenantAndIdGreaterThanOrderByIdAsc(tenant, lastId, pageable);
         } else {
             page = customKeyStoreRepository.findByTenantOrderByIdAsc(tenant, pageable);
         }
-
         List<DescribeCustomKeyStoreResponse.CustomKeyStore> dtos = page.stream()
                 .map(this::convertToResponseDto)
                 .collect(Collectors.toList());
         return ListCustomKeyStoresResponse.builder()
                 .customKeyStores(dtos)
-                .nextToken(page.hasNext() ? String.valueOf(pageable.getPageNumber() + 1) : null)
+                .nextToken(page.hasNext() ? encodeNextToken(page.getContent().get(page.getContent().size() - 1).getId()) : null)
                 .numberOfElements(page.getNumberOfElements())
                 .totalPages(page.getTotalPages())
                 .totalElements(page.getTotalElements())
@@ -377,8 +402,6 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
     private void validateExternalKeyStoreRequest(CreateCustomKeyStoreRequest request) {
         if (request.getXksProxyUriEndpoint() == null || request.getXksProxyUriEndpoint().isEmpty())
             throw new MissingXksProxyEndpointException("xksProxyUriEndpoint required");
-        if (request.getXksProxyUriPath() == null || request.getXksProxyUriPath().isEmpty())
-            throw new MissingXksProxyPathException("xksProxyUriPath required");
         if (request.getXksProxyAuthenticationCredential() == null || request.getXksProxyAuthenticationCredential().isEmpty())
             throw new MissingXksProxyAuthCredentialException("xksProxyAuthenticationCredential required");
     }
@@ -395,12 +418,16 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         store.setXksProxyUriEndpoint(request.getXksProxyUriEndpoint());
         store.setXksProxyUriPath(request.getXksProxyUriPath());
         store.setXksProxyAuthenticationCredential(hashPassword(request.getXksProxyAuthenticationCredential()));
+        store.setXksProxyConnectivity(request.getXksProxyConnectivity());
         store.setCustomKeyStoreTypeSpecificData(
                 String.format("{\"endpoint\":\"%s\",\"path\":\"%s\",\"proxyType\":\"INTERNAL_SIMULATED\"}",
                         request.getXksProxyUriEndpoint(), request.getXksProxyUriPath()));
     }
 
     private void updateCloudHsmStore(KmsCustomKeyStore store, UpdateCustomKeyStoreRequest request) {
+        if (request.getCloudHsmClusterId() != null && !request.getCloudHsmClusterId().isEmpty()) {
+            store.setCloudHsmClusterId(request.getCloudHsmClusterId());
+        }
         if (request.getKeyStorePassword() != null && !request.getKeyStorePassword().isEmpty()) {
             store.setKeyStorePassword(hashPassword(request.getKeyStorePassword()));
         }
@@ -418,6 +445,9 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         }
         if (request.getXksProxyAuthenticationCredential() != null && !request.getXksProxyAuthenticationCredential().isEmpty()) {
             store.setXksProxyAuthenticationCredential(hashPassword(request.getXksProxyAuthenticationCredential()));
+        }
+        if (request.getXksProxyConnectivity() != null && !request.getXksProxyConnectivity().isEmpty()) {
+            store.setXksProxyConnectivity(request.getXksProxyConnectivity());
         }
     }
 
@@ -504,11 +534,29 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
         }
     }
 
+    /**
+     * Converts a map to a JSON string.
+     * Example: {"key1":"value1","key2":"value2"}
+     */
     private String convertMapToJson(Map<String, String> map) {
-        if (map == null) return null;
+        if (map == null || map.isEmpty()) {
+            return null;
+        }
         return map.entrySet().stream()
-                .map(e -> "\"" + e.getKey() + "\":\"" + e.getValue() + "\"")
+                .map(e -> "\"" + escapeJson(e.getKey()) + "\":\"" + escapeJson(e.getValue()) + "\"")
                 .collect(Collectors.joining(",", "{", "}"));
+    }
+
+    /**
+     * Escapes special characters for JSON strings.
+     */
+    private String escapeJson(String s) {
+        if (s == null) return "";
+        return s.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
     }
 
     private String encodeNextToken(Long id) {
@@ -557,20 +605,5 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
     private String maskSensitive(String data) {
         if (data == null || data.length() <= 8) return "***MASKED***";
         return data.substring(0, 4) + "***" + data.substring(data.length() - 4);
-    }
-
-    private Map<String, String> parseJsonToMap(String json) {
-        if (json == null || json.isEmpty()) return null;
-        Map<String, String> map = new HashMap<>();
-        String stripped = json.substring(1, json.length() - 1);
-        for (String pair : stripped.split(",")) {
-            String[] kv = pair.split(":", 2);
-            if (kv.length == 2) {
-                String key = kv[0].replace("\"", "");
-                String value = kv[1].replace("\"", "");
-                map.put(key, value);
-            }
-        }
-        return map;
     }
 }

@@ -9,9 +9,6 @@ import eu.isygoit.ui.views.keyStore.CustomKeyStoresView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-/**
- * Dialog for deleting a custom key store with a 9‑digit confirmation code.
- */
 public class DeleteCustomKeyStoreDialog extends PinBaseActionDialog {
 
     private final CustomKeyStoresView parentView;
@@ -28,44 +25,38 @@ public class DeleteCustomKeyStoreDialog extends PinBaseActionDialog {
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
         this.store = store;
-
         setOkButtonText("Delete permanently");
         setWidth("450px");
     }
 
     @Override
     protected boolean onOk() {
+        if (!validatePin()) {
+            append("Invalid confirmation code");
+            return false;
+        }
+
         parentView.showLoading(true);
         try {
             ResponseEntity<KmsDtos.DeleteCustomKeyStoreResponse> response =
                     kmsApiService.deleteCustomKeyStore(store.getCustomKeyStoreId());
             if (!response.getStatusCode().is2xxSuccessful()) {
-                String errorMsg = "Deletion failed: " + response.getStatusCode();
-                this.append(errorMsg);
-                Notification.show("Deletion error: " + errorMsg, 6000, Notification.Position.TOP_END)
-                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                append("Deletion failed: " + response.getStatusCode());
                 return false;
             }
 
-            close();
-            Notification.show("Store deleted", 6000, Notification.Position.TOP_END)
+            Notification.show("Custom key store deleted", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-
+            close();
             return true;
+
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
-            this.append(errorMsg);
-            Notification.show("Deletion error: " + errorMsg, 6000, Notification.Position.TOP_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            append("Server error: " + (ex.status() == 500 ? ex.contentUTF8() : ex.getMessage()));
         } catch (Exception ex) {
-            String errorMsg = ex.getMessage();
-            this.append(errorMsg);
-            Notification.show("Error: " + errorMsg, 6000, Notification.Position.TOP_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            append("Unexpected error: " + ex.getMessage());
         } finally {
             parentView.showLoading(false);
         }
-
         return false;
     }
 }
