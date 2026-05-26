@@ -228,9 +228,11 @@ public class CryptoOperationsView extends VerticalLayout {
             }
         } catch (FeignException e) {
             Notification.show("Failed to load keys: " + (e.status() == 500 ? e.contentUTF8() : e.getMessage()));
+            log.error("Failed to load keys: {}", e.getMessage());
         } catch (Exception e) {
             Notification.show("Failed to load keys: " + e.getMessage(), 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            log.error("Failed to load keys", e);
         } finally {
             showLoading(false);
         }
@@ -245,7 +247,9 @@ public class CryptoOperationsView extends VerticalLayout {
             }
         } catch (FeignException e) {
             Notification.show("Failed to fetch alias: " + (e.status() == 500 ? e.contentUTF8() : e.getMessage()));
+            log.error("Failed to fetch alias for keyId: {}", keyId, e);
         } catch (Exception e) {
+            Notification.show("Failed to fetch alias: " + e.getMessage());
             log.error("Failed to fetch alias for keyId: {}", keyId, e);
         }
         return keyId;
@@ -264,9 +268,11 @@ public class CryptoOperationsView extends VerticalLayout {
             }
         } catch (FeignException e) {
             Notification.show("Failed to load key metadata: " + (e.status() == 500 ? e.contentUTF8() : e.getMessage()));
+            log.error("Failed to load key metadata for keyId: {}", selectedKeyId, e);
         } catch (Exception e) {
             Notification.show("Failed to load key metadata", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
+            log.error("Failed to load key metadata for keyId: {}", selectedKeyId, e);
         }
     }
 

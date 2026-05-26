@@ -27,6 +27,7 @@ import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainLayout;
 import eu.isygoit.ui.views.key.dialog.CreateKeyDialog;
+import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -229,9 +230,14 @@ public class KeyManagementView extends VerticalLayout {
             currentPageCards = cards;
             updatePaginationDisplay();
             filterCards();
+        } catch (FeignException ex) {
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            Notification.show("Failed to load keys: " + errorMsg, 6000, Notification.Position.TOP_END);
+            log.error("Failed to load keys", ex.getMessage());
         } catch (Exception e) {
             Notification.show("Failed to load keys: " + e.getMessage(), 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            log.error("Failed to load keys", e);
         } finally {
             showLoading(false);
         }
@@ -313,6 +319,7 @@ public class KeyManagementView extends VerticalLayout {
         } catch (Exception e) {
             Notification.show("Failed to load aliases: " + e.getMessage(), 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            log.error("Failed to load aliases", e);
             aliasGrid.setItems(new ArrayList<>());
             aliasNextButton.setEnabled(false);
         } finally {

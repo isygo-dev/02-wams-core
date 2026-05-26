@@ -28,7 +28,9 @@ import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainLayout;
 import eu.isygoit.util.RsaEncryptionUtil;
+import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -41,6 +43,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Route(value = "byok", layout = MainLayout.class)
 @PageTitle("BYOK - Bring Your Own Key")
 @PermitAll
@@ -382,8 +385,13 @@ public class ByokView extends VerticalLayout {
                 clearParameters();
             }
             updateKeyStatus();
+        } catch (FeignException ex) {
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            showErrorNotification("Failed to load keys: " + errorMsg);
+            log.error("Failed to load keys: {}", errorMsg);
         } catch (Exception e) {
             showErrorNotification("Failed to load keys: " + e.getMessage());
+            log.error("Failed to load keys: {}", e.getMessage());
         } finally {
             showLoading(false);
         }
@@ -399,7 +407,14 @@ public class ByokView extends VerticalLayout {
                 boolean isExternal = origin == IEnumKeyOrigin.Types.EXTERNAL;
                 return new KeyOption(keyId, alias, isExternal);
             }
-        } catch (Exception e) { /* ignore */ }
+        } catch (FeignException ex) {
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            showErrorNotification("Error fetching key details: " + errorMsg);
+            log.error("Error fetching key details for {}: {}", keyId, errorMsg);
+        } catch (Exception e) {
+            showErrorNotification("Error fetching key details for " + keyId + ": " + e.getMessage());
+            log.error("Error fetching key details for {}: {}", keyId, e.getMessage());
+        }
         return new KeyOption(keyId, keyId, false);
     }
 
@@ -422,7 +437,13 @@ public class ByokView extends VerticalLayout {
                 keyStatusInfo.setText(statusText);
                 deleteMaterialButton.setVisible(hasImportedMaterial);
             }
+        } catch (FeignException ex) {
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            showErrorNotification("Error fetching key details: " + errorMsg);
+            log.error("Error fetching key details for {}: {}", selectedKeyId, ex.getMessage());
         } catch (Exception e) {
+            showErrorNotification("Error fetching key details for " + selectedKeyId + ": " + e.getMessage());
+            log.error("Error fetching key details for {}: {}", selectedKeyId, e.getMessage());
             keyStatusInfo.setText("");
             deleteMaterialButton.setVisible(false);
             hasImportedMaterial = false;
@@ -549,8 +570,13 @@ public class ByokView extends VerticalLayout {
             } else {
                 showErrorNotification("Import failed – check token validity and material format");
             }
+        } catch (FeignException ex) {
+            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            showErrorNotification("Import key material failed: " + errorMsg);
+            log.error("Import key material failed for {}: {}", selectedKeyId, errorMsg);
         } catch (Exception e) {
             showErrorNotification("Error: " + e.getMessage());
+            log.error("Import key material failed for {}: {}", selectedKeyId, e.getMessage());
         } finally {
             showLoading(false);
         }
