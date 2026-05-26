@@ -77,7 +77,7 @@ class AliasCard extends VerticalLayout {
         leftSide.add(aliasSpan);
 
         // Copy alias name button (compact)
-        leftSide.add(MainView.createCopyButton(VaadinIcon.COPY_O, aliasName, "Copy alias name"));
+        leftSide.add(MainView.createCopyButton(VaadinIcon.COPY, aliasName, "Copy alias name"));
 
         // Primary key warning and badge (no copy button for warning text)
         if (Boolean.TRUE.equals(primaryKey)) {
@@ -132,7 +132,7 @@ class AliasCard extends VerticalLayout {
         targetSpan.getStyle().set("word-break", "break-word");
         targetSpan.getElement().setAttribute("title", targetKeyId);
         targetRow.add(targetSpan);
-        targetRow.add(MainView.createCopyButton(VaadinIcon.COPY_O, targetKeyId, "Copy target key ID"));
+        targetRow.add(MainView.createCopyButton(VaadinIcon.COPY, targetKeyId, "Copy target key ID"));
         add(targetRow);
 
         // Alias WRN row with copy button (if present)
@@ -146,7 +146,7 @@ class AliasCard extends VerticalLayout {
             wrnSpan.getStyle().set("word-break", "break-word");
             wrnSpan.getElement().setAttribute("title", aliasWrn);
             wrnRow.add(wrnSpan);
-            wrnRow.add(MainView.createCopyButton(VaadinIcon.COPY_O, aliasWrn, "Copy alias WRN"));
+            wrnRow.add(MainView.createCopyButton(VaadinIcon.COPY, aliasWrn, "Copy alias WRN"));
             add(wrnRow);
         }
 

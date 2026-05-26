@@ -129,7 +129,7 @@ class KeyCard extends VerticalLayout {
         updateVersionDisplay();
 
         // Copy button for version
-        Button copyVersionBtn = MainView.createCopyButton(VaadinIcon.COPY_O,
+        Button copyVersionBtn = MainView.createCopyButton(VaadinIcon.COPY,
                 (metadata != null && metadata.getCurrentVersion() != null) ? metadata.getCurrentVersion() : "N/A",
                 "Copy current key version");
 
@@ -282,7 +282,7 @@ class KeyCard extends VerticalLayout {
             keyIdSpan.getStyle().set("margin-right", "4px");
             keyIdSpan.getElement().setAttribute("title", keyId);
             // Use MainView.createCopyButton for key ID
-            Button copyIdBtn = MainView.createCopyButton(VaadinIcon.COPY_O, keyId, "Copy full key ID");
+            Button copyIdBtn = MainView.createCopyButton(VaadinIcon.COPY, keyId, "Copy full key ID");
             keyIdLayout.add(keyIdSpan, copyIdBtn);
             metaRow2.add(keyIdLayout);
             metaRow2.add(new Span("•"));

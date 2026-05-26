@@ -10,13 +10,13 @@ import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.ui.views.byok.ByokView;
-import eu.isygoit.ui.views.keyGrants.GrantsView;
-import eu.isygoit.ui.views.keyTag.TagsView;
 import eu.isygoit.ui.views.crypto.CryptoOperationsView;
 import eu.isygoit.ui.views.key.KeyManagementView;
 import eu.isygoit.ui.views.keyAlias.AliasesView;
+import eu.isygoit.ui.views.keyGrants.GrantsView;
 import eu.isygoit.ui.views.keyPolicy.PoliciesView;
 import eu.isygoit.ui.views.keyStore.CustomKeyStoresView;
+import eu.isygoit.ui.views.keyTag.TagsView;
 
 public class MainLayout extends AppLayout {
 

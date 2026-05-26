@@ -35,6 +35,7 @@ public class MultiRegionService implements IMultiRegionService {
         }
 
         key.setPrimaryRegion(request.getPrimaryRegion());
+        key.validateBeforeSave();
         kmsKeyRepository.save(key);
 
         return UpdatePrimaryRegionResponse.builder().build();
@@ -80,6 +81,7 @@ public class MultiRegionService implements IMultiRegionService {
         replicaKey.setRotationEnabled(false);
         replicaKey.setKeyStoreId(primaryKey.getKeyStoreId());
 
+        replicaKey.validateBeforeSave();
         kmsKeyRepository.save(replicaKey);
 
         CreateKeyResponse.KeyMetadata replicaMetadata = CreateKeyResponse.KeyMetadata.builder()
@@ -145,6 +147,7 @@ public class MultiRegionService implements IMultiRegionService {
         // replicaKey.setDescription(primaryKey.getDescription()); // Uncomment if needed
 
         // Save the updated replica key
+        replicaKey.validateBeforeSave();
         kmsKeyRepository.save(replicaKey);
 
         log.info("Successfully synchronized replica key {} with primary key {}", keyId, primaryKey.getKeyId());

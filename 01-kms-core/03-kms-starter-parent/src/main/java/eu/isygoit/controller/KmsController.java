@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
+import java.util.Base64;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -1312,8 +1312,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             ImportParametersResponse internal = keyManagementService.getParametersForImport(tenant, keyId);
             GetParametersForImportResponse response = GetParametersForImportResponse.builder()
                     .keyId(internal.getKeyId())
-                    .importToken(Arrays.toString(internal.getImportToken()))
-                    .publicKey(Arrays.toString(internal.getWrappingKey().publicKey()))
+                    .importToken(Base64.getEncoder().encodeToString(internal.getImportToken()))   // ← Base64
+                    .publicKey(Base64.getEncoder().encodeToString(internal.getWrappingKey().publicKey())) // ← Base64
                     .validTo(internal.getValidTo())
                     .build();
 
@@ -1339,6 +1339,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
         try {
+            // The request already contains Base64 strings; the service layer expects Base64 strings
             keyManagementService.importKeyMaterial(tenant, keyId, request);
             auditService.logAction(tenant, IKmsActionType.Types.IMPORT_KEY_MATERIAL, keyId,
                     requestContextService.getCurrentContext().getSenderUser(),

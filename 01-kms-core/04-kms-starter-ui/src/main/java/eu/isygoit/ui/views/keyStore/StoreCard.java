@@ -26,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 class StoreCard extends VerticalLayout {
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     private final CustomKeyStoresView parentView;
     private final KmsApiService kmsApiService;
     private final KmsDtos.DescribeCustomKeyStoreResponse.CustomKeyStore store;
@@ -36,8 +37,6 @@ class StoreCard extends VerticalLayout {
     private final String connectionState;
     private final String creationDate;
     private final String errorCode;
-
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public StoreCard(CustomKeyStoresView customKeyStoresView, KmsApiService kmsApiService, KmsDtos.DescribeCustomKeyStoreResponse.CustomKeyStore store) {
         this.parentView = customKeyStoresView;
@@ -243,7 +242,8 @@ class StoreCard extends VerticalLayout {
         // ===== NEW: Metadata (key-value pairs) display =====
         if (StringUtils.hasText(store.getMetadata())) {
             try {
-                Map<String, String> metadataMap = objectMapper.readValue(store.getMetadata(), new TypeReference<>() {});
+                Map<String, String> metadataMap = objectMapper.readValue(store.getMetadata(), new TypeReference<>() {
+                });
                 if (metadataMap != null && !metadataMap.isEmpty()) {
                     HorizontalLayout metadataRow = new HorizontalLayout();
                     metadataRow.setSpacing(true);
@@ -269,7 +269,8 @@ class StoreCard extends VerticalLayout {
         // ===== NEW: Tags display =====
         if (StringUtils.hasText(store.getTags())) {
             try {
-                Map<String, String> tagsMap = objectMapper.readValue(store.getTags(), new TypeReference<>() {});
+                Map<String, String> tagsMap = objectMapper.readValue(store.getTags(), new TypeReference<>() {
+                });
                 if (tagsMap != null && !tagsMap.isEmpty()) {
                     HorizontalLayout tagsRow = new HorizontalLayout();
                     tagsRow.setSpacing(true);

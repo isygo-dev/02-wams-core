@@ -169,7 +169,8 @@ public class KeyPolicyService implements IKeyPolicyService {
                                 // Deserialize operations from JSON string to List<String>
                                 List<String> operations = null;
                                 if (g.getOperations() != null && !g.getOperations().isBlank()) {
-                                    operations = objectMapper.readValue(g.getOperations(), new TypeReference<List<String>>() {});
+                                    operations = objectMapper.readValue(g.getOperations(), new TypeReference<List<String>>() {
+                                    });
                                 }
 
                                 // Deserialize constraints from JSON string to GrantConstraints

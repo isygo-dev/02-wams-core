@@ -1,11 +1,14 @@
 package eu.isygoit.ui.views.byok;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -24,6 +27,7 @@ import eu.isygoit.enums.IEnumKeyOrigin;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainLayout;
+import eu.isygoit.util.RsaEncryptionUtil;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -46,9 +50,11 @@ public class ByokView extends VerticalLayout {
     private final ComboBox<KeyOption> keyCombo = new ComboBox<>("External KMS Key");
     private final Button refreshKeysButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button getParamsButton = new Button("Generate Import Parameters", new Icon(VaadinIcon.DOWNLOAD));
-    private final TextArea wrappedKeyDisplay = new TextArea("Public Wrapping Key (PEM / Base64)");
-    private final TextArea importTokenDisplay = new TextArea("Import Token");
-    private final TextArea encryptedMaterialField = new TextArea("Encrypted Key Material (Base64)");
+    private final TextArea wrappedKeyDisplay = new TextArea();
+    private final TextArea importTokenDisplay = new TextArea();
+    private final TextArea plainKeyMaterialField = new TextArea();
+    private final Button encryptNowButton = new Button("Encrypt Now", new Icon(VaadinIcon.LOCK));
+    private final TextArea encryptedMaterialField = new TextArea();
     private final DatePicker expirationDatePicker = new DatePicker("Expiration Date (optional)");
     private final Button importButton = new Button("Import Key Material", new Icon(VaadinIcon.UPLOAD));
     private final Button deleteMaterialButton = new Button("Delete Imported Material", new Icon(VaadinIcon.TRASH));
@@ -59,7 +65,9 @@ public class ByokView extends VerticalLayout {
     private String selectedKeyId = null;
     private String currentImportToken = null;
     private LocalDateTime parametersValidUntil = null;
+    private String currentPublicKey = null;
     private List<KeyOption> keyOptions = new ArrayList<>();
+    private boolean hasImportedMaterial = false;
 
     @Autowired
     public ByokView(KmsApiService kmsApiService) {
@@ -69,37 +77,53 @@ public class ByokView extends VerticalLayout {
         setPadding(true);
         setSpacing(true);
         addClassName("kms-byok-view");
+        setAlignItems(FlexComponent.Alignment.STRETCH);
 
         // Header
         H2 header = new H2("Bring Your Own Key (BYOK)");
         header.addClassName(LumoUtility.FontSize.XXLARGE);
-        header.addClassName(LumoUtility.Margin.Bottom.NONE);
+        header.addClassName(LumoUtility.Margin.Bottom.SMALL);
+        header.addClassName(LumoUtility.Margin.Top.NONE);
         add(header);
 
-        add(createHelpText());
+        // Step 1: Key selection + status + delete button
+        add(createStepCard("1. Select External KMS Key",
+                "Only keys with origin = EXTERNAL can be used",
+                buildKeySelectionSection(),
+                buildStatusAndDeleteRow()));
 
-        // Key selection section
-        HorizontalLayout keyLayout = buildKeySelectionSection();
-        add(keyLayout);
+        // Step 2: Generate parameters
+        VerticalLayout step2Content = new VerticalLayout();
+        step2Content.setSpacing(false);
+        step2Content.setPadding(false);
+        step2Content.add(buildParamButtons());
+        step2Content.add(createFieldRow("Public Wrapping Key (Base64)", wrappedKeyDisplay, "Copy public wrapping key"));
+        step2Content.add(createFieldRow("Import Token", importTokenDisplay, "Copy import token"));
+        step2Content.add(paramsExpiryInfo);
+        add(createStepCard("2. Generate Import Parameters",
+                "These parameters are valid for 24 hours. Generate them before encrypting your key material.",
+                step2Content));
 
-        // Key material status
-        add(keyStatusInfo);
+        // Step 3: Encrypt key material
+        VerticalLayout step3Content = new VerticalLayout();
+        step3Content.setSpacing(false);
+        step3Content.setPadding(false);
+        step3Content.add(createEncryptionSection());
+        step3Content.add(createFieldRow("Encrypted Key Material (Base64)", encryptedMaterialField, "Copy encrypted material"));
+        add(createStepCard("3. Encrypt Your Key Material",
+                "Paste your plain key material (Base64) and click 'Encrypt Now'.",
+                step3Content));
 
-        // Parameters section
-        HorizontalLayout paramButtons = buildParamButtons();
-        add(paramButtons);
-        add(wrappedKeyDisplay, importTokenDisplay);
-        add(paramsExpiryInfo);
+        // Step 4: Import
+        VerticalLayout step4Content = new VerticalLayout();
+        step4Content.setSpacing(false);
+        step4Content.setPadding(false);
+        step4Content.add(expirationDatePicker);
+        step4Content.add(buildImportSection());
+        add(createStepCard("4. Import Encrypted Material",
+                "The import token must be valid (not expired). Optionally set an expiration date for the key material.",
+                step4Content));
 
-        // Import section
-        HorizontalLayout importLayout = buildImportSection();
-        add(importLayout);
-        add(encryptedMaterialField, expirationDatePicker, importButton);
-
-        // Configure text areas for full width and larger height
-        configureTextAreas();
-
-        // Loading indicator
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
         loadingBar.setWidth("200px");
@@ -107,6 +131,7 @@ public class ByokView extends VerticalLayout {
 
         // Event handlers
         getParamsButton.addClickListener(e -> generateParameters());
+        encryptNowButton.addClickListener(e -> encryptWithPublicKey());
         importButton.addClickListener(e -> importKeyMaterial());
         deleteMaterialButton.addClickListener(e -> deleteImportedMaterial());
         refreshKeysButton.addClickListener(e -> loadKeyOptions());
@@ -116,37 +141,47 @@ public class ByokView extends VerticalLayout {
             updateKeyStatus();
         });
 
+        configureComponents();
         injectResponsiveStyles();
         loadKeyOptions();
     }
 
-    private void configureTextAreas() {
-        // Wrapping key – full width, readable height
-        wrappedKeyDisplay.setWidthFull();
-        wrappedKeyDisplay.setHeight("200px");
-        wrappedKeyDisplay.setReadOnly(true);
-        wrappedKeyDisplay.setPlaceholder("Wrapping key will appear here after generating parameters...");
+    // ---------- UI Helpers ----------
+    private VerticalLayout createStepCard(String title, String hint, Component... components) {
+        VerticalLayout card = new VerticalLayout();
+        card.setWidthFull();
+        card.addClassName(LumoUtility.Border.ALL);
+        card.addClassName(LumoUtility.BorderRadius.LARGE);
+        card.addClassName(LumoUtility.Padding.MEDIUM);
+        card.getStyle().set("margin-bottom", "var(--lumo-space-s)");
+        card.getStyle().set("background-color", "var(--lumo-base-color)");
 
-        // Import token – full width, compact height
-        importTokenDisplay.setWidthFull();
-        importTokenDisplay.setHeight("100px");
-        importTokenDisplay.setReadOnly(true);
-        importTokenDisplay.setPlaceholder("Import token will appear here...");
+        H3 stepTitle = new H3(title);
+        stepTitle.addClassName(LumoUtility.FontSize.MEDIUM);
+        stepTitle.addClassName(LumoUtility.Margin.Top.NONE);
+        stepTitle.addClassName(LumoUtility.Margin.Bottom.XSMALL);
+        card.add(stepTitle);
 
-        // Encrypted material – full width, large editable area
-        encryptedMaterialField.setWidthFull();
-        encryptedMaterialField.setHeight("180px");
-        encryptedMaterialField.setPlaceholder("Paste the Base64-encoded encrypted key material here");
-        encryptedMaterialField.setHelperText("Encrypt your key material using the public wrapping key above, then paste the result.");
+        if (StringUtils.hasText(hint)) {
+            Span hintSpan = new Span(hint);
+            hintSpan.addClassName(LumoUtility.FontSize.XSMALL);
+            hintSpan.addClassName(LumoUtility.TextColor.TERTIARY);
+            hintSpan.getStyle().set("margin-bottom", "var(--lumo-space-s)");
+            card.add(hintSpan);
+        }
+
+        for (Component comp : components) {
+            card.add(comp);
+        }
+        return card;
     }
 
     private HorizontalLayout buildKeySelectionSection() {
         HorizontalLayout keyLayout = new HorizontalLayout();
         keyLayout.setWidthFull();
-        keyLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        keyLayout.setAlignItems(FlexComponent.Alignment.BASELINE);
         keyLayout.setSpacing(true);
         keyLayout.getStyle().set("flex-wrap", "wrap");
-        keyLayout.addClassName("byok-key-layout");
 
         keyCombo.setPlaceholder("Select a key created with origin = EXTERNAL...");
         keyCombo.setItemLabelGenerator(KeyOption::getDisplayName);
@@ -160,59 +195,172 @@ public class ByokView extends VerticalLayout {
         return keyLayout;
     }
 
-    private HorizontalLayout buildParamButtons() {
-        HorizontalLayout paramLayout = new HorizontalLayout(getParamsButton, deleteMaterialButton);
-        paramLayout.setSpacing(true);
-        paramLayout.getStyle().set("flex-wrap", "wrap");
-        paramLayout.addClassName("byok-param-layout");
+    private HorizontalLayout buildStatusAndDeleteRow() {
+        HorizontalLayout row = new HorizontalLayout();
+        row.setWidthFull();
+        row.setAlignItems(FlexComponent.Alignment.CENTER);
+        row.setSpacing(true);
+        row.getStyle().set("flex-wrap", "wrap");
 
-        getParamsButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        getParamsButton.setTooltipText("Generate a new wrapping key and import token (valid for 24 hours)");
+        keyStatusInfo.addClassName(LumoUtility.FontSize.SMALL);
+        keyStatusInfo.getStyle().set("margin-top", "var(--lumo-space-xs)");
 
         deleteMaterialButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        deleteMaterialButton.setTooltipText("Delete previously imported key material (the key becomes unusable)");
+        deleteMaterialButton.setTooltipText("Delete imported key material");
+        deleteMaterialButton.setVisible(false); // initially hidden
 
+        row.add(keyStatusInfo, deleteMaterialButton);
+        return row;
+    }
+
+    private HorizontalLayout buildParamButtons() {
+        HorizontalLayout paramLayout = new HorizontalLayout(getParamsButton);
+        paramLayout.setSpacing(true);
+        getParamsButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        getParamsButton.setTooltipText("Generate a new wrapping key and import token (valid for 24 hours)");
         return paramLayout;
     }
 
     private HorizontalLayout buildImportSection() {
-        HorizontalLayout importLayout = new HorizontalLayout();
+        HorizontalLayout importLayout = new HorizontalLayout(importButton);
         importLayout.setWidthFull();
-        importLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+        importLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.START);
         importButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
         importButton.setTooltipText("Import the encrypted key material using the current import token");
         return importLayout;
     }
 
-    private VerticalLayout createHelpText() {
-        VerticalLayout helpLayout = new VerticalLayout();
-        helpLayout.setSpacing(false);
-        helpLayout.setPadding(false);
-        helpLayout.getStyle().set("margin-bottom", "var(--lumo-space-m)");
+    private VerticalLayout createEncryptionSection() {
+        VerticalLayout layout = new VerticalLayout();
+        layout.setSpacing(true);
+        layout.setPadding(false);
 
-        String[] lines = {
-                "Bring Your Own Key (BYOK) allows you to import your own key material into a KMS key.",
-                "Step 1: Create a KMS key with origin = EXTERNAL.",
-                "Step 2: Generate import parameters (wrapping key + import token).",
-                "Step 3: Encrypt your key material with the wrapping key (using OpenSSL or similar).",
-                "Step 4: Paste the Base64-encoded encrypted material and import it.",
-                "The import token expires after 24 hours."
-        };
+        layout.add(createPlainMaterialRow());
 
-        for (String line : lines) {
-            Span span = new Span(line);
-            span.addClassName(LumoUtility.FontSize.SMALL);
-            span.addClassName(LumoUtility.TextColor.SECONDARY);
-            span.getStyle()
-                    .set("white-space", "normal")
-                    .set("word-break", "break-word")
-                    .set("display", "block");
-            helpLayout.add(span);
-        }
+        HorizontalLayout buttonRow = new HorizontalLayout(encryptNowButton);
+        buttonRow.setWidthFull();
+        buttonRow.setJustifyContentMode(FlexComponent.JustifyContentMode.START);
+        encryptNowButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        encryptNowButton.setTooltipText("Encrypt your plain key material using the public wrapping key");
+        layout.add(buttonRow);
 
-        return helpLayout;
+        return layout;
     }
 
+    private VerticalLayout createPlainMaterialRow() {
+        VerticalLayout row = new VerticalLayout();
+        row.setWidthFull();
+        row.setSpacing(false);
+        row.setPadding(false);
+
+        HorizontalLayout headerRow = new HorizontalLayout();
+        headerRow.setWidthFull();
+        headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        headerRow.setSpacing(true);
+        Span labelSpan = new Span("Your Key Material (Base64)");
+        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+        labelSpan.addClassName(LumoUtility.FontSize.SMALL);
+        headerRow.add(labelSpan);
+        headerRow.getStyle().set("flex-wrap", "wrap");
+
+        plainKeyMaterialField.setWidthFull();
+        plainKeyMaterialField.setPlaceholder("Paste your plain key material as Base64 (e.g., `openssl rand -base64 32`)");
+        plainKeyMaterialField.setHelperText("The plaintext must be ≤ 190 bytes (RSA‑2048 limit).");
+
+        row.add(headerRow, plainKeyMaterialField);
+        return row;
+    }
+
+    private VerticalLayout createFieldRow(String label, TextArea textArea, String copyTooltip) {
+        VerticalLayout row = new VerticalLayout();
+        row.setWidthFull();
+        row.setSpacing(false);
+        row.setPadding(false);
+
+        HorizontalLayout headerRow = new HorizontalLayout();
+        headerRow.setWidthFull();
+        headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        headerRow.setSpacing(true);
+
+        Span labelSpan = new Span(label);
+        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+        labelSpan.addClassName(LumoUtility.FontSize.SMALL);
+
+        Button copyBtn = new Button(new Icon(VaadinIcon.COPY));
+        copyBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        copyBtn.setTooltipText(copyTooltip);
+        copyBtn.setWidth("32px");
+        copyBtn.addClickListener(e -> {
+            String value = textArea.getValue();
+            if (StringUtils.hasText(value)) {
+                copyToClipboard(value);
+                showSuccessNotification("Copied to clipboard");
+            } else {
+                showWarningNotification("Nothing to copy");
+            }
+        });
+
+        headerRow.add(labelSpan, copyBtn);
+        headerRow.getStyle().set("flex-wrap", "wrap");
+
+        textArea.setWidthFull();
+        textArea.setHeight("100px");
+
+        row.add(headerRow, textArea);
+        return row;
+    }
+
+    private void copyToClipboard(String text) {
+        UI.getCurrent().getPage().executeJs(
+                "navigator.clipboard.writeText($0).then(() => { " +
+                        "  const notification = document.createElement('div'); " +
+                        "  notification.textContent = 'Copied!'; " +
+                        "  notification.style.position = 'fixed'; " +
+                        "  notification.style.bottom = '20px'; " +
+                        "  notification.style.right = '20px'; " +
+                        "  notification.style.backgroundColor = '#4caf50'; " +
+                        "  notification.style.color = 'white'; " +
+                        "  notification.style.padding = '10px 20px'; " +
+                        "  notification.style.borderRadius = '4px'; " +
+                        "  notification.style.zIndex = '1000'; " +
+                        "  document.body.appendChild(notification); " +
+                        "  setTimeout(() => notification.remove(), 2000); " +
+                        "}).catch(() => { " +
+                        "  const notification = document.createElement('div'); " +
+                        "  notification.textContent = 'Copy failed. Check permissions.'; " +
+                        "  notification.style.position = 'fixed'; " +
+                        "  notification.style.bottom = '20px'; " +
+                        "  notification.style.right = '20px'; " +
+                        "  notification.style.backgroundColor = '#f44336'; " +
+                        "  notification.style.color = 'white'; " +
+                        "  notification.style.padding = '10px 20px'; " +
+                        "  notification.style.borderRadius = '4px'; " +
+                        "  notification.style.zIndex = '1000'; " +
+                        "  document.body.appendChild(notification); " +
+                        "  setTimeout(() => notification.remove(), 3000); " +
+                        "});", text);
+    }
+
+    private void configureComponents() {
+        int textAreaHeight = 100;
+        wrappedKeyDisplay.setHeight(textAreaHeight + "px");
+        wrappedKeyDisplay.setReadOnly(true);
+        wrappedKeyDisplay.setPlaceholder("Wrapping key will appear here after generating parameters...");
+
+        importTokenDisplay.setHeight(textAreaHeight + "px");
+        importTokenDisplay.setReadOnly(true);
+        importTokenDisplay.setPlaceholder("Import token will appear here...");
+
+        encryptedMaterialField.setHeight(textAreaHeight + "px");
+        encryptedMaterialField.setPlaceholder("Encrypted material will appear here after encryption");
+        encryptedMaterialField.setHelperText("This is the material to import.");
+
+        expirationDatePicker.setWidth("250px");
+        expirationDatePicker.setPlaceholder("YYYY-MM-DD");
+        expirationDatePicker.setHelperText("If set, key material expires on this date.");
+    }
+
+    // ---------- Data & API ----------
     private void loadKeyOptions() {
         showLoading(true);
         try {
@@ -251,38 +399,43 @@ public class ByokView extends VerticalLayout {
                 boolean isExternal = origin == IEnumKeyOrigin.Types.EXTERNAL;
                 return new KeyOption(keyId, alias, isExternal);
             }
-        } catch (Exception e) {
-            // ignore
-        }
+        } catch (Exception e) { /* ignore */ }
         return new KeyOption(keyId, keyId, false);
     }
 
     private void updateKeyStatus() {
         if (selectedKeyId == null) {
             keyStatusInfo.setText("");
+            deleteMaterialButton.setVisible(false);
+            hasImportedMaterial = false;
             return;
         }
         try {
             ResponseEntity<KmsDtos.DescribeKeyResponse> response = kmsApiService.describeKey(selectedKeyId);
             KmsDtos.DescribeKeyResponse desc = response.getBody();
             if (desc != null && desc.getKeyMetadata() != null) {
-                boolean hasImportedMaterial = desc.getKeyMetadata().getOrigin() == IEnumKeyOrigin.Types.EXTERNAL &&
+                hasImportedMaterial = desc.getKeyMetadata().getOrigin() == IEnumKeyOrigin.Types.EXTERNAL &&
                         desc.getKeyMetadata().getKeyStatus() != IEnumKeyStatus.Types.PENDING_IMPORT;
                 String statusText = hasImportedMaterial ?
-                        "✅ Key material imported" :
-                        "⚠️ No imported key material – ready for import";
+                        "✅ Key material imported. The key is ready to use. To replace or generate new import parameters, delete the existing material first." :
+                        "⚠️ No key material imported. Follow the steps above to import your own key material.";
                 keyStatusInfo.setText(statusText);
-                keyStatusInfo.addClassName(LumoUtility.FontSize.SMALL);
-                keyStatusInfo.getStyle().set("margin-top", "var(--lumo-space-xs)");
+                deleteMaterialButton.setVisible(hasImportedMaterial);
             }
         } catch (Exception e) {
             keyStatusInfo.setText("");
+            deleteMaterialButton.setVisible(false);
+            hasImportedMaterial = false;
         }
     }
 
     private void generateParameters() {
         if (selectedKeyId == null) {
             showWarningNotification("Please select an external KMS key first");
+            return;
+        }
+        if (hasImportedMaterial) {
+            showWarningNotification("Key already has imported material. Delete it first before generating new parameters.");
             return;
         }
         showLoading(true);
@@ -295,7 +448,8 @@ public class ByokView extends VerticalLayout {
                     kmsApiService.getParametersForImport(selectedKeyId, request);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 KmsDtos.GetParametersForImportResponse params = response.getBody();
-                wrappedKeyDisplay.setValue(params.getPublicKey());
+                currentPublicKey = params.getPublicKey();
+                wrappedKeyDisplay.setValue(currentPublicKey);
                 importTokenDisplay.setValue(params.getImportToken());
                 currentImportToken = params.getImportToken();
                 parametersValidUntil = params.getValidTo();
@@ -318,9 +472,41 @@ public class ByokView extends VerticalLayout {
         }
     }
 
+    private void encryptWithPublicKey() {
+        String publicKey = wrappedKeyDisplay.getValue();
+        if (!StringUtils.hasText(publicKey)) {
+            showWarningNotification("Please generate import parameters first");
+            return;
+        }
+        String plainBase64 = plainKeyMaterialField.getValue();
+        if (!StringUtils.hasText(plainBase64)) {
+            showWarningNotification("Please enter your plain key material (Base64)");
+            return;
+        }
+        if (!isValidBase64(plainBase64)) {
+            showErrorNotification("Invalid Base64 format for plain material");
+            return;
+        }
+
+        showLoading(true);
+        try {
+            String encryptedBase64 = RsaEncryptionUtil.encryptWithPublicKey(publicKey, plainBase64);
+            encryptedMaterialField.setValue(encryptedBase64);
+            showSuccessNotification("Encryption completed");
+        } catch (Exception e) {
+            showErrorNotification("Encryption failed: " + e.getMessage());
+        } finally {
+            showLoading(false);
+        }
+    }
+
     private void importKeyMaterial() {
         if (selectedKeyId == null) {
             showWarningNotification("Please select a key first");
+            return;
+        }
+        if (hasImportedMaterial) {
+            showWarningNotification("Key already has imported material. Delete it first.");
             return;
         }
         String encrypted = encryptedMaterialField.getValue();
@@ -348,7 +534,6 @@ public class ByokView extends VerticalLayout {
                     .importToken(currentImportToken)
                     .encryptedKeyMaterial(encrypted)
                     .build();
-
             if (expirationDatePicker.getValue() != null) {
                 LocalDateTime validTo = expirationDatePicker.getValue().atTime(LocalTime.MAX);
                 request.setValidTo(validTo);
@@ -356,7 +541,6 @@ public class ByokView extends VerticalLayout {
             } else {
                 request.setExpirationModel(IEnumKeyExpirationModel.Types.KEY_MATERIAL_DOES_NOT_EXPIRE);
             }
-
             ResponseEntity<KmsDtos.ImportKeyMaterialResponse> response = kmsApiService.importKeyMaterial(selectedKeyId, request);
             if (response.getStatusCode().is2xxSuccessful()) {
                 showSuccessNotification("Key material imported successfully");
@@ -375,6 +559,10 @@ public class ByokView extends VerticalLayout {
     private void deleteImportedMaterial() {
         if (selectedKeyId == null) {
             showWarningNotification("Please select a key first");
+            return;
+        }
+        if (!hasImportedMaterial) {
+            showWarningNotification("No imported material to delete");
             return;
         }
         showLoading(true);
@@ -407,11 +595,13 @@ public class ByokView extends VerticalLayout {
     private void clearParameters() {
         wrappedKeyDisplay.clear();
         importTokenDisplay.clear();
+        plainKeyMaterialField.clear();
         encryptedMaterialField.clear();
         expirationDatePicker.clear();
         paramsExpiryInfo.setText("");
         currentImportToken = null;
         parametersValidUntil = null;
+        currentPublicKey = null;
     }
 
     private void showLoading(boolean show) {
@@ -419,9 +609,11 @@ public class ByokView extends VerticalLayout {
         keyCombo.setEnabled(!show);
         refreshKeysButton.setEnabled(!show);
         getParamsButton.setEnabled(!show);
+        encryptNowButton.setEnabled(!show);
         importButton.setEnabled(!show);
-        deleteMaterialButton.setEnabled(!show);
+        deleteMaterialButton.setEnabled(!show); // keep enabled even when hidden, but visibility toggles
         encryptedMaterialField.setEnabled(!show);
+        plainKeyMaterialField.setEnabled(!show);
         expirationDatePicker.setEnabled(!show);
     }
 
@@ -442,24 +634,17 @@ public class ByokView extends VerticalLayout {
 
     private void injectResponsiveStyles() {
         String css = """
-                    .byok-key-layout, .byok-param-layout {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: var(--lumo-space-s);
-                        align-items: center;
+                .kms-byok-view {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                }
+                @media (max-width: 768px) {
+                    .kms-byok-view .byok-field-row,
+                    .kms-byok-view .byok-header-row {
+                        flex-direction: column;
+                        align-items: flex-start;
                     }
-                    @media (max-width: 768px) {
-                        .byok-key-layout, .byok-param-layout {
-                            flex-direction: column;
-                            align-items: stretch;
-                        }
-                        .byok-key-layout > *, .byok-param-layout > * {
-                            width: 100% !important;
-                        }
-                        textarea {
-                            font-size: 14px;
-                        }
-                    }
+                }
                 """;
         UI.getCurrent().getPage().executeJs(
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
@@ -467,7 +652,6 @@ public class ByokView extends VerticalLayout {
         );
     }
 
-    // Helper class
     private static class KeyOption {
         private final String keyId;
         private final String displayName;
@@ -479,8 +663,16 @@ public class ByokView extends VerticalLayout {
             this.isExternal = isExternal;
         }
 
-        String getKeyId() { return keyId; }
-        String getDisplayName() { return displayName; }
-        boolean isExternal() { return isExternal; }
+        String getKeyId() {
+            return keyId;
+        }
+
+        String getDisplayName() {
+            return displayName;
+        }
+
+        boolean isExternal() {
+            return isExternal;
+        }
     }
 }

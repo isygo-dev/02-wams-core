@@ -125,6 +125,7 @@ public class KeyManagementService implements IKeyManagementService {
                 key.setReplicaRegions(null); // or empty string
             }
 
+            key.validateBeforeSave();
             KmsKey savedKey = kmsKeyRepository.save(key);
 
             // Create initial version with extended fields
@@ -334,7 +335,7 @@ public class KeyManagementService implements IKeyManagementService {
         if (IEnumKeyStatus.Types.ENABLED.equals(key.getKeyStatus())) {
             log.warn("Key {} is already enabled", keyId);
         } else {
-            key.setKeyStatus(IEnumKeyStatus.Types.ENABLED);
+            key.validateBeforeSave();
             kmsKeyRepository.save(key);
         }
 
@@ -359,6 +360,8 @@ public class KeyManagementService implements IKeyManagementService {
         }
 
         key.setKeyStatus(IEnumKeyStatus.Types.DISABLED);
+
+        key.validateBeforeSave();
         kmsKeyRepository.save(key);
 
         return DisableKeyResponse.builder()
@@ -399,6 +402,14 @@ public class KeyManagementService implements IKeyManagementService {
         key.setPendingDeletionWindowDays(windowDays);
         key.setDeletionDate(LocalDateTime.now().plusDays(windowDays));
 
+        if (key.getOrigin() != IEnumKeyOrigin.Types.EXTERNAL) {
+            // Non‑external keys must have material generated
+            if (key.getKeyMaterial() == null) {
+                throw new IllegalStateException("Key material cannot be null for non‑external keys");
+            }
+        }
+
+        key.validateBeforeSave();
         kmsKeyRepository.save(key);
 
         return ScheduleKeyDeletionResponse.builder()
@@ -474,6 +485,7 @@ public class KeyManagementService implements IKeyManagementService {
             key.setCurrentVersionId(versionId);
             key.setLastRotationDate(now);
 
+            key.validateBeforeSave();
             kmsKeyRepository.save(key);
 
             log.info("Key {} rotated successfully with new version {}",
@@ -560,6 +572,7 @@ public class KeyManagementService implements IKeyManagementService {
             }
         }
 
+        key.validateBeforeSave();
         KmsKey updated = kmsKeyRepository.save(key);
 
         // Build response metadata
@@ -611,6 +624,7 @@ public class KeyManagementService implements IKeyManagementService {
         key.setPendingDeletionWindowDays(null);
         key.setDeletionDate(null);
 
+        key.validateBeforeSave();
         kmsKeyRepository.save(key);
 
         return CancelKeyDeletionResponse.builder()
@@ -639,6 +653,7 @@ public class KeyManagementService implements IKeyManagementService {
             key.setRotationPeriodInDays(request.getRotationPeriodInDays());
         }
 
+        key.validateBeforeSave();
         kmsKeyRepository.save(key);
 
         return UpdateKeyRotationResponse.builder()
@@ -884,6 +899,8 @@ public class KeyManagementService implements IKeyManagementService {
         key.setImportToken(importToken);
         key.setImportTokenValidTo(validTo);
         key.setPrivateWrappingKey(wrappingKey.privateKey());   // store the private part
+
+        key.validateBeforeSave();
         kmsKeyRepository.save(key);
 
         // 4. Return the public wrapping key and token (private key stays in DB)
@@ -943,6 +960,8 @@ public class KeyManagementService implements IKeyManagementService {
         key.setImportToken(null);
         key.setImportTokenValidTo(null);
         key.setPrivateWrappingKey(null);
+
+        key.validateBeforeSave();
         kmsKeyRepository.save(key);
 
         return KeyDescriptionResponse.builder()
@@ -950,6 +969,7 @@ public class KeyManagementService implements IKeyManagementService {
                 .status(key.getKeyStatus())
                 .build();
     }
+
     @Override
     public KeyDescriptionResponse deleteImportedKeyMaterial(String tenant, String keyId) {
         log.info("Deleting imported key material for tenant: {} keyId: {}", tenant, keyId);
@@ -961,7 +981,18 @@ public class KeyManagementService implements IKeyManagementService {
             throw new InvalidKeyStateException("Key material was not imported: " + keyId);
         }
 
+        // Remove key material and reset to PENDING_IMPORT state
         key.setKeyMaterial(null);
+        key.setValidTo(null);
+        key.setExpirationModel(null);
+        key.setImportDate(null);
+        key.setKeyStatus(IEnumKeyStatus.Types.PENDING_IMPORT);
+        // Clean up any leftover BYOK temporary fields
+        key.setImportToken(null);
+        key.setImportTokenValidTo(null);
+        key.setPrivateWrappingKey(null);
+
+        key.validateBeforeSave();
         kmsKeyRepository.save(key);
 
         return KeyDescriptionResponse.builder()
@@ -1109,7 +1140,9 @@ public class KeyManagementService implements IKeyManagementService {
         store.addKey(key);  // updates keyCount and the in‑memory list
 
         // Persist both sides (cascade is not configured, so save both)
+        key.validateBeforeSave();
         kmsKeyRepository.save(key);
+
         customKeyStoreRepository.save(store);
 
         log.info("Registered key {} in custom store {}/{}", keyId, tenant, keyStoreId);
@@ -1138,7 +1171,9 @@ public class KeyManagementService implements IKeyManagementService {
         store.removeKey(key);
 
         // Save changes
+        key.validateBeforeSave();
         kmsKeyRepository.save(key);
+
         customKeyStoreRepository.save(store);
 
         log.info("Unregistered key {} from custom store {}/{}", keyId, tenant, keyStoreId);

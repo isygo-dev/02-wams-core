@@ -281,7 +281,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * </p>
      */
     @Lob
-    @Column(name = SchemaColumnConstantName.C_KEY_MATERIAL, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_KEY_MATERIAL, nullable = true)
     private byte[] keyMaterial;
 
     @JdbcTypeCode(SqlTypes.VARBINARY)
@@ -610,5 +610,12 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     @Transient
     public Boolean getImported() {
         return IEnumKeyOrigin.Types.EXTERNAL.equals(origin);
+    }
+
+    public void validateBeforeSave() {
+        if (this.getOrigin() != IEnumKeyOrigin.Types.EXTERNAL && this.getKeyMaterial() == null) {
+            // Non‑external keys must have material generated
+            throw new IllegalStateException("Key material cannot be null for non‑external keys");
+        }
     }
 }
