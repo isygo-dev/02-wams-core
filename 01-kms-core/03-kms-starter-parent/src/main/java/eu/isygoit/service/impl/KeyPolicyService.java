@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.exception.GrantConstraintException;
 import eu.isygoit.exception.GrantNotFoundException;
+import eu.isygoit.exception.KeyGrantException;
 import eu.isygoit.model.KmsKeyGrant;
 import eu.isygoit.model.KmsKeyPolicy;
 import eu.isygoit.repository.KmsKeyGrantRepository;
@@ -88,12 +89,36 @@ public class KeyPolicyService implements IKeyPolicyService {
         log.info("Creating grant for tenant: {} keyId: {} principal: {}", tenant, keyId, request.getGranteePrincipal());
 
         String grantId = "grant-" + UUID.randomUUID();
+
+        // Serialize operations to JSON
+        String operationsJson = null;
+        if (request.getOperations() != null && !request.getOperations().isEmpty()) {
+            try {
+                operationsJson = objectMapper.writeValueAsString(request.getOperations());
+            } catch (Exception e) {
+                throw new KeyGrantException("Failed to serialize operations to JSON", e);
+            }
+        }
+
+        // Serialize constraints to JSON if present
+        String constraintsJson = null;
+        if (request.getConstraints() != null) {
+            try {
+                constraintsJson = objectMapper.writeValueAsString(request.getConstraints());
+            } catch (Exception e) {
+                throw new KeyGrantException("Failed to serialize constraints to JSON", e);
+            }
+        }
+
         KmsKeyGrant grant = KmsKeyGrant.builder()
                 .tenant(tenant)
                 .keyId(keyId)
                 .grantId(grantId)
                 .granteePrincipal(request.getGranteePrincipal())
-                .operations(String.join(",", request.getOperations()))
+                .retiringPrincipal(request.getRetiringPrincipal())
+                .operations(operationsJson)
+                .constraints(constraintsJson)
+                .name(request.getName())
                 .build();
 
         kmsKeyGrantRepository.save(grant);
@@ -124,7 +149,7 @@ public class KeyPolicyService implements IKeyPolicyService {
         KmsKeyGrant grant = kmsKeyGrantRepository.findByTenantAndGrantId(tenant, grantId)
                 .orElseThrow(() -> new GrantNotFoundException("Grant not found with id: " + grantId));
 
-        grant.setRevocationDate(LocalDateTime.now());
+        grant.setRetirementDate(LocalDateTime.now());
         kmsKeyGrantRepository.save(grant);
 
         return new RetireGrantResponse(grant.getKeyId());
@@ -135,24 +160,37 @@ public class KeyPolicyService implements IKeyPolicyService {
         log.info("Listing grants for tenant: {} keyId: {}", tenant, keyId);
 
         Pageable pageable = RepoHelper.resolvePageable(limit, nextToken, "createDate");
-
         Page<KmsKeyGrant> page = kmsKeyGrantRepository.findByTenantAndKeyId(tenant, keyId, pageable);
 
         return ListGrantsResponse.builder()
                 .grants(page.getContent().stream()
                         .map(g -> {
                             try {
+                                // Deserialize operations from JSON string to List<String>
+                                List<String> operations = null;
+                                if (g.getOperations() != null && !g.getOperations().isBlank()) {
+                                    operations = objectMapper.readValue(g.getOperations(), new TypeReference<List<String>>() {});
+                                }
+
+                                // Deserialize constraints from JSON string to GrantConstraints
+                                CreateGrantRequest.GrantConstraints constraints = null;
+                                if (g.getConstraints() != null && !g.getConstraints().isBlank()) {
+                                    constraints = objectMapper.readValue(g.getConstraints(), CreateGrantRequest.GrantConstraints.class);
+                                }
+
                                 return ListGrantsResponse.Grant.builder()
                                         .grantId(g.getGrantId())
                                         .granteePrincipal(g.getGranteePrincipal())
-                                        // retiringPrincipal field in DTO might not map directly to entity
-                                        .operations(Arrays.asList(g.getOperations().split(",")))
-                                        .constraints(objectMapper.readValue(g.getConstraints(), CreateGrantRequest.GrantConstraints.class))
+                                        .retiringPrincipal(g.getRetiringPrincipal())
+                                        .operations(operations)
+                                        .constraints(constraints)
+                                        .name(g.getName())
                                         .createDate(g.getCreateDate())
+                                        .status(g.getStatus() != null ? g.getStatus().name() : "ACTIVE")
                                         .build();
                             } catch (JsonProcessingException e) {
-                                log.error("Failed to serialize grant", e);
-                                throw new GrantConstraintException("Failed to serialize grant", e);
+                                log.error("Failed to deserialize grant {}: {}", g.getGrantId(), e.getMessage());
+                                throw new GrantConstraintException("Failed to deserialize grant", e);
                             }
                         })
                         .collect(Collectors.toList()))

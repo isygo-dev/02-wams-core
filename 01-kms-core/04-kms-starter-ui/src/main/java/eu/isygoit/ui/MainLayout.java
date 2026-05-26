@@ -10,7 +10,7 @@ import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.ui.views.ByokView;
-import eu.isygoit.ui.views.GrantsView;
+import eu.isygoit.ui.views.keyGrants.GrantsView;
 import eu.isygoit.ui.views.TagsView;
 import eu.isygoit.ui.views.crypto.CryptoOperationsView;
 import eu.isygoit.ui.views.key.KeyManagementView;

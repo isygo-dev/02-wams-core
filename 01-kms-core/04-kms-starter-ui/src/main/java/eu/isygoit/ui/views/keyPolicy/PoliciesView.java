@@ -248,6 +248,8 @@ public class PoliciesView extends VerticalLayout {
                 policyEditor.clear();
             }
             updateButtonsState();
+        } catch (FeignException ex) {
+            showError("Failed to load keys: " + (ex.status() == 500 ? ex.contentUTF8() : ex.getMessage()));
         } catch (Exception e) {
             showError("Failed to load keys: " + e.getMessage());
         } finally {
