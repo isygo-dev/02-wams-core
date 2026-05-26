@@ -6,8 +6,11 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.Pre;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -17,6 +20,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -31,6 +35,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +59,8 @@ public class PoliciesView extends VerticalLayout {
     private final Button formatButton = new Button("Format", new Icon(VaadinIcon.CODE));
     private final Button copyButton = new Button(new Icon(VaadinIcon.COPY));
     private final Button builderButton = new Button("Policy Builder", new Icon(VaadinIcon.PUZZLE_PIECE));
+    private final TextField actionField = new TextField("Action to check");
+    private final Button checkActionButton = new Button("Check Action", new Icon(VaadinIcon.SEARCH));
 
     private String selectedKeyId = null;
     private List<KeyOption> keyOptions = new ArrayList<>();
@@ -72,6 +79,7 @@ public class PoliciesView extends VerticalLayout {
         buildKeySelector();
         buildActionBar();
         buildPolicyEditor();
+        buildActionChecker();
         buildLoadingIndicator();
         attachResponsiveStyles();
 
@@ -127,17 +135,13 @@ public class PoliciesView extends VerticalLayout {
         configureButton(loadButton, "Load policy from selected key", ButtonVariant.LUMO_PRIMARY);
         configureButton(saveButton, "Save policy to selected key", ButtonVariant.LUMO_SUCCESS);
         configureButton(formatButton, "Pretty-format JSON", ButtonVariant.LUMO_TERTIARY);
-
-        // Custom copy button
-        copyButton.setTooltipText("Copy policy JSON to clipboard");
-        copyButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        copyButton.addClickListener(e -> copyPolicyToClipboard());
-
-        configureButton(builderButton, "Open graphical policy builder (creates new or edits existing)", ButtonVariant.LUMO_CONTRAST);
+        configureButton(copyButton, "Copy policy JSON to clipboard", ButtonVariant.LUMO_TERTIARY_INLINE);
+        configureButton(builderButton, "Open graphical policy builder", ButtonVariant.LUMO_CONTRAST);
 
         loadButton.addClickListener(e -> loadPolicy(false));
         saveButton.addClickListener(e -> savePolicy());
         formatButton.addClickListener(e -> formatPolicy());
+        copyButton.addClickListener(e -> copyPolicyToClipboard());
         builderButton.addClickListener(e -> openPolicyBuilder());
 
         actionBar.add(loadButton, saveButton, formatButton, copyButton, builderButton);
@@ -158,6 +162,25 @@ public class PoliciesView extends VerticalLayout {
                 .set("font-size", "13px");
         policyEditor.addValueChangeListener(e -> updateButtonsState());
         add(policyEditor);
+    }
+
+    private void buildActionChecker() {
+        HorizontalLayout checkerLayout = new HorizontalLayout();
+        checkerLayout.setWidthFull();
+        checkerLayout.setAlignItems(FlexComponent.Alignment.END);
+        checkerLayout.setSpacing(true);
+        checkerLayout.getStyle().set("flex-wrap", "wrap");
+
+        actionField.setPlaceholder("e.g., kms:Decrypt, kms:Encrypt, *");
+        actionField.setWidth("300px");
+        actionField.setClearButtonVisible(true);
+
+        checkActionButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        checkActionButton.setTooltipText("Evaluate if this action is allowed by the current policy");
+        checkActionButton.addClickListener(e -> checkActionAgainstPolicy());
+
+        checkerLayout.add(actionField, checkActionButton);
+        add(checkerLayout);
     }
 
     private void buildLoadingIndicator() {
@@ -201,7 +224,8 @@ public class PoliciesView extends VerticalLayout {
         saveButton.setEnabled(hasKey);
         formatButton.setEnabled(hasContent);
         copyButton.setEnabled(hasContent);
-        builderButton.setEnabled(true); // Always enabled – can create new policy or edit existing
+        builderButton.setEnabled(true);
+        checkActionButton.setEnabled(hasContent);
     }
 
     private void loadKeyOptions() {
@@ -279,7 +303,6 @@ public class PoliciesView extends VerticalLayout {
         }
         String policyText = policyEditor.getValue();
 
-        // Handle empty policy with confirmation
         if (!StringUtils.hasText(policyText)) {
             ConfirmDialog confirmDialog = new ConfirmDialog();
             confirmDialog.setHeader("Erase policy");
@@ -292,7 +315,6 @@ public class PoliciesView extends VerticalLayout {
             confirmDialog.setCancelText("Cancel");
             confirmDialog.setConfirmButtonTheme("error primary");
             confirmDialog.addConfirmListener(event -> {
-                // User confirmed – save an empty JSON object
                 Map<String, Object> emptyPolicy = new HashMap<>();
                 performSave(emptyPolicy, true);
             });
@@ -300,7 +322,6 @@ public class PoliciesView extends VerticalLayout {
             return;
         }
 
-        // Normal flow for non‑empty policy
         Map<String, Object> policyMap;
         try {
             policyMap = objectMapper.readValue(policyText, Map.class);
@@ -311,9 +332,6 @@ public class PoliciesView extends VerticalLayout {
         performSave(policyMap, false);
     }
 
-    /**
-     * Helper method that actually performs the save operation.
-     */
     private void performSave(Map<String, Object> policyMap, boolean bypassSafetyCheck) {
         showLoading(true);
         try {
@@ -325,7 +343,7 @@ public class PoliciesView extends VerticalLayout {
             ResponseEntity<KmsDtos.PutKeyPolicyResponse> response = kmsApiService.putKeyPolicy(selectedKeyId, request);
             if (response.getStatusCode().is2xxSuccessful()) {
                 showSuccess("Policy saved successfully");
-                loadPolicy(true); // reload to show the saved version
+                loadPolicy(true);
             } else {
                 showError("Save failed: " + response.getStatusCode());
             }
@@ -349,10 +367,6 @@ public class PoliciesView extends VerticalLayout {
         }
     }
 
-    /**
-     * Custom copy-to-clipboard method for the policy editor.
-     * Uses the modern Clipboard API with explicit error handling.
-     */
     private void copyPolicyToClipboard() {
         String content = policyEditor.getValue();
         if (!StringUtils.hasText(content)) {
@@ -397,9 +411,7 @@ public class PoliciesView extends VerticalLayout {
         if (StringUtils.hasText(currentText)) {
             try {
                 existingPolicy = objectMapper.readValue(currentText, KmsDtos.KeyPolicy.class);
-                // Successfully parsed – use it
             } catch (Exception e) {
-                // Not valid JSON – ask user what to do
                 Notification.show(
                         "Current editor content is not a valid KeyPolicy JSON.\nStarting with an empty policy.",
                         5000,
@@ -427,6 +439,264 @@ public class PoliciesView extends VerticalLayout {
         return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
     }
 
+    private void checkActionAgainstPolicy() {
+        String action = actionField.getValue();
+        if (!StringUtils.hasText(action)) {
+            showWarning("Please enter an action to check (e.g., kms:Decrypt)");
+            return;
+        }
+
+        String policyText = policyEditor.getValue();
+        if (!StringUtils.hasText(policyText)) {
+            showWarning("No policy loaded or editor is empty. Load or write a policy first.");
+            return;
+        }
+
+        Map<String, Object> policyMap;
+        try {
+            policyMap = objectMapper.readValue(policyText, Map.class);
+        } catch (Exception e) {
+            showError("Invalid policy JSON: " + e.getMessage());
+            return;
+        }
+
+        String keyArn = null;
+        if (selectedKeyId != null) {
+            keyArn = "wrn:wams:kms:*:*:key/" + selectedKeyId;
+        }
+
+        EvaluationResult result = evaluateAction(action, policyMap, keyArn);
+
+        // Build refined dialog
+        Dialog resultDialog = new Dialog();
+        resultDialog.setHeaderTitle("Action Evaluation: " + action);
+        resultDialog.setWidth("600px");
+        resultDialog.setResizable(true);
+
+        VerticalLayout content = new VerticalLayout();
+        content.setSpacing(true);
+        content.setPadding(true);
+
+        // Decision icon and text
+        HorizontalLayout decisionLayout = new HorizontalLayout();
+        decisionLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        decisionLayout.setSpacing(true);
+
+        Icon decisionIcon;
+        String decisionText;
+        String decisionColor;
+        if ("ALLOWED".equals(result.decision)) {
+            decisionIcon = VaadinIcon.CHECK_CIRCLE.create();
+            decisionIcon.setColor("#2e7d32");
+            decisionText = "ALLOWED";
+            decisionColor = "#2e7d32";
+        } else if ("DENIED".equals(result.decision)) {
+            decisionIcon = VaadinIcon.CLOSE_CIRCLE.create();
+            decisionIcon.setColor("#c62828");
+            decisionText = "DENIED";
+            decisionColor = "#c62828";
+        } else {
+            decisionIcon = VaadinIcon.EXCLAMATION_CIRCLE.create();
+            decisionIcon.setColor("#ef6c00");
+            decisionText = "UNCERTAIN";
+            decisionColor = "#ef6c00";
+        }
+
+        Span decisionSpan = new Span(decisionText);
+        decisionSpan.getStyle().set("font-weight", "bold");
+        decisionSpan.getStyle().set("color", decisionColor);
+        decisionSpan.getStyle().set("font-size", "1.2em");
+
+        decisionLayout.add(decisionIcon, decisionSpan);
+        content.add(decisionLayout);
+
+        // Reason
+        Span reasonSpan = new Span("Reason: " + result.reason);
+        reasonSpan.getStyle().set("font-style", "italic");
+        content.add(reasonSpan);
+
+        // Sid and Principal
+        if (result.sid != null && !result.sid.isEmpty()) {
+            HorizontalLayout sidLayout = new HorizontalLayout();
+            sidLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+            sidLayout.setSpacing(true);
+            Span sidLabel = new Span("🆔 Sid:");
+            sidLabel.getStyle().set("font-weight", "bold");
+            Span sidValue = new Span(result.sid);
+            sidLayout.add(sidLabel, sidValue);
+            content.add(sidLayout);
+        }
+
+        if (result.principal != null && !result.principal.isEmpty()) {
+            HorizontalLayout principalLayout = new HorizontalLayout();
+            principalLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+            principalLayout.setSpacing(true);
+            Span principalLabel = new Span("👤 Principal:");
+            principalLabel.getStyle().set("font-weight", "bold");
+            Span principalValue = new Span(result.principal);
+            principalLayout.add(principalLabel, principalValue);
+            content.add(principalLayout);
+        }
+
+        // Key context
+        if (selectedKeyId == null) {
+            Span warningSpan = new Span("⚠️ No KMS key selected. Resource matching assumed '*' (any key).");
+            warningSpan.getStyle().set("color", "#ef6c00");
+            warningSpan.getStyle().set("font-size", "0.9em");
+            content.add(warningSpan);
+        } else {
+            Span resourceSpan = new Span("🔑 Evaluated with key ARN: " + keyArn);
+            resourceSpan.getStyle().set("font-size", "0.9em");
+            content.add(resourceSpan);
+        }
+
+        // Matched statement (full JSON)
+        if (result.matchedStatement != null && !result.matchedStatement.isEmpty()) {
+            Span matchedHeader = new Span("📄 Matched statement:");
+            matchedHeader.getStyle().set("font-weight", "bold");
+            content.add(matchedHeader);
+
+            Pre pre = new Pre();
+            pre.setText(result.matchedStatement);
+            pre.getStyle().set("background-color", "#f5f5f5");
+            pre.getStyle().set("padding", "8px");
+            pre.getStyle().set("border-radius", "4px");
+            pre.getStyle().set("font-size", "12px");
+            pre.getStyle().set("overflow-x", "auto");
+            pre.setWidthFull();
+            content.add(pre);
+        }
+
+        // Help tip
+        Span helpSpan = new Span("💡 Tip: Explicit Deny overrides any Allow. If no Allow matches, the action is Denied by default.");
+        helpSpan.getStyle().set("font-size", "0.85em");
+        helpSpan.getStyle().set("color", "#666");
+        content.add(helpSpan);
+
+        Button closeBtn = new Button("Close", e -> resultDialog.close());
+        closeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        resultDialog.getFooter().add(closeBtn);
+        resultDialog.add(content);
+        resultDialog.open();
+    }
+
+    private EvaluationResult evaluateAction(String action, Map<String, Object> policyMap, String keyArn) {
+        boolean explicitlyAllowed = false;
+        String matchedStatementJson = null;
+        String matchedSid = null;
+        String matchedPrincipal = null;
+        String reason = "No matching statement allowed the action.";
+
+        Object statementsObj = policyMap.get("Statement");
+        if (!(statementsObj instanceof Collection)) {
+            return new EvaluationResult("DENIED", "Policy has no valid Statement array.", null, null, null);
+        }
+        Collection<?> statements = (Collection<?>) statementsObj;
+
+        for (Object stmtObj : statements) {
+            if (!(stmtObj instanceof Map)) continue;
+            Map<?, ?> stmt = (Map<?, ?>) stmtObj;
+
+            String effect = stmt.get("Effect") != null ? stmt.get("Effect").toString() : null;
+            if (!"Allow".equals(effect) && !"Deny".equals(effect)) continue;
+
+            Object actionObj = stmt.get("Action");
+            boolean actionMatches = actionMatches(actionObj, action);
+            if (!actionMatches) continue;
+
+            Object resourceObj = stmt.get("Resource");
+            boolean resourceMatches = resourceMatches(resourceObj, keyArn);
+            if (resourceObj != null && !resourceMatches) continue;
+
+            // Extract Sid and Principal
+            String sid = stmt.get("Sid") != null ? stmt.get("Sid").toString() : null;
+            Object principalObj = stmt.get("Principal");
+            String principal = null;
+            if (principalObj != null) {
+                if (principalObj instanceof String) {
+                    principal = (String) principalObj;
+                } else if (principalObj instanceof Map) {
+                    try {
+                        principal = objectMapper.writeValueAsString(principalObj);
+                    } catch (Exception e) {
+                        principal = principalObj.toString();
+                    }
+                } else {
+                    principal = principalObj.toString();
+                }
+            }
+
+            String statementStr = statementToString(stmt);
+
+            if ("Deny".equals(effect)) {
+                return new EvaluationResult("DENIED", "Explicit Deny statement matches.", statementStr, sid, principal);
+            } else if ("Allow".equals(effect)) {
+                explicitlyAllowed = true;
+                matchedStatementJson = statementStr;
+                matchedSid = sid;
+                matchedPrincipal = principal;
+                reason = "Explicit Allow statement matches.";
+            }
+        }
+
+        if (explicitlyAllowed) {
+            return new EvaluationResult("ALLOWED", reason, matchedStatementJson, matchedSid, matchedPrincipal);
+        } else {
+            return new EvaluationResult("DENIED", reason, null, null, null);
+        }
+    }
+
+    private boolean actionMatches(Object actionObj, String action) {
+        if (actionObj == null) return false;
+        if (actionObj instanceof String) {
+            String pattern = (String) actionObj;
+            return matchActionPattern(pattern, action);
+        }
+        if (actionObj instanceof Collection) {
+            Collection<?> actions = (Collection<?>) actionObj;
+            for (Object a : actions) {
+                if (a instanceof String && matchActionPattern((String) a, action)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean matchActionPattern(String pattern, String action) {
+        if (pattern.equals("*")) return true;
+        if (pattern.equals("kms:*") && action.startsWith("kms:")) return true;
+        return pattern.equals(action);
+    }
+
+    private boolean resourceMatches(Object resourceObj, String keyArn) {
+        if (keyArn == null) {
+            return resourceObj == null || "*".equals(resourceObj);
+        }
+        if (resourceObj == null) return true;
+        if (resourceObj instanceof String) {
+            String res = (String) resourceObj;
+            if (res.equals("*")) return true;
+            if (selectedKeyId != null && res.contains(selectedKeyId)) return true;
+            return res.equals(keyArn);
+        }
+        if (resourceObj instanceof Collection) {
+            Collection<?> resources = (Collection<?>) resourceObj;
+            for (Object r : resources) {
+                if (r instanceof String && resourceMatches(r, keyArn)) return true;
+            }
+        }
+        return false;
+    }
+
+    private String statementToString(Map<?, ?> stmt) {
+        try {
+            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(stmt);
+        } catch (Exception e) {
+            return stmt.toString();
+        }
+    }
+
     private void showLoading(boolean show) {
         loadingBar.setVisible(show);
         keyCombo.setEnabled(!show);
@@ -436,6 +706,7 @@ public class PoliciesView extends VerticalLayout {
             formatButton.setEnabled(false);
             copyButton.setEnabled(false);
             builderButton.setEnabled(false);
+            checkActionButton.setEnabled(false);
             policyEditor.setEnabled(false);
         } else {
             policyEditor.setEnabled(true);
@@ -473,6 +744,22 @@ public class PoliciesView extends VerticalLayout {
 
         String getDisplayName() {
             return displayName;
+        }
+    }
+
+    private static class EvaluationResult {
+        final String decision;
+        final String reason;
+        final String matchedStatement;
+        final String sid;
+        final String principal;
+
+        EvaluationResult(String decision, String reason, String matchedStatement, String sid, String principal) {
+            this.decision = decision;
+            this.reason = reason;
+            this.matchedStatement = matchedStatement;
+            this.sid = sid;
+            this.principal = principal;
         }
     }
 }
