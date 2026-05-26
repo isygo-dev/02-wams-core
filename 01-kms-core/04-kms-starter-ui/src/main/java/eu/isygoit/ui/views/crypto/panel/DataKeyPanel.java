@@ -87,7 +87,6 @@ public class DataKeyPanel extends VerticalLayout {
         try {
             KmsDtos.GenerateDataKeyRequest request = KmsDtos.GenerateDataKeyRequest.builder()
                     .keyId(keyId)
-                    .keySpec(keySpecCombo.getValue())
                     .keySize(StringUtils.hasText(keySizeField.getValue()) ? Integer.parseInt(keySizeField.getValue()) : null)
                     .build();
             ResponseEntity<KmsDtos.GenerateDataKeyResponse> response = kmsApiService.generateDataKey(request);
