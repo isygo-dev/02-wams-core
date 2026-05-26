@@ -104,7 +104,9 @@ public class KeyManagementService implements IKeyManagementService {
                     .keyUsage(request.getKeyUsage())
                     .primaryKeyAlias(request.getKeyAlias())
                     .description(request.getDescription())
-                    .keyStatus(IEnumKeyStatus.Types.ENABLED)
+                    .keyStatus(request.getOrigin() == IEnumKeyOrigin.Types.EXTERNAL
+                            ? IEnumKeyStatus.Types.PENDING_IMPORT
+                            : IEnumKeyStatus.Types.ENABLED) // BYOK keys start as PENDING_IMPORT by default
                     .origin(request.getOrigin())
                     .multiRegion(request.getMultiRegion())
                     .currentVersionId(versionId)
@@ -859,40 +861,88 @@ public class KeyManagementService implements IKeyManagementService {
 
     @Override
     public ImportParametersResponse getParametersForImport(String tenant, String keyId) {
-        log.info("Getting import parameters for tenant: {} keyId: {}", tenant, keyId);
-
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
-        // Generate import parameters (wrapping key and token)
-        KeyPairMaterial wrappingKey = cryptoService.generateWrappingKey();
-        byte[] importToken = cryptoService.generateImportToken();
+        // 1. Verify key is suitable for BYOK
+        if (key.getOrigin() != IEnumKeyOrigin.Types.EXTERNAL) {
+            throw new IllegalKeyOriginException("Key origin must be EXTERNAL for BYOK");
+        }
+        if (key.getKeyStatus() == IEnumKeyStatus.Types.PENDING_DELETION) {
+            throw new DisabledKeyException("Key is pending deletion");
+        }
+        if (key.hasImportedMaterial()) {
+            throw new ImportedMaterialExistsException("Key already has imported material. Delete it first.");
+        }
 
+        // 2. Generate parameters
+        KeyPairMaterial wrappingKey = cryptoService.generateWrappingKey(); // RSA 2048 key pair
+        byte[] importToken = cryptoService.generateImportToken();         // 32 random bytes
+        LocalDateTime validTo = LocalDateTime.now().plusHours(24);
+
+        // 3. Store token, its expiration, and the private wrapping key
+        key.setImportToken(importToken);
+        key.setImportTokenValidTo(validTo);
+        key.setPrivateWrappingKey(wrappingKey.privateKey());   // store the private part
+        kmsKeyRepository.save(key);
+
+        // 4. Return the public wrapping key and token (private key stays in DB)
         return ImportParametersResponse.builder()
                 .keyId(keyId)
-                .wrappingKey(wrappingKey)
+                .wrappingKey(wrappingKey)   // includes public key only
                 .importToken(importToken)
-                .validityPeriodHours(24)
+                .validTo(validTo)
                 .build();
     }
 
     @Override
     public KeyDescriptionResponse importKeyMaterial(String tenant, String keyId, ImportKeyMaterialRequest request) {
-        log.info("Importing key material for tenant: {} keyId: {}", tenant, keyId);
-
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
-        // Decrypt the imported key material
-        byte[] decryptedMaterial = cryptoService.decryptKeyMaterial(
-                tenant,
-                request.getEncryptedKeyMaterial().getBytes(),
-                request.getImportToken().getBytes()
-        );
+        // 1. Validate key state
+        if (key.getOrigin() != IEnumKeyOrigin.Types.EXTERNAL) {
+            throw new IllegalKeyOriginException("Key origin must be EXTERNAL for BYOK");
+        }
+        if (key.getKeyStatus() == IEnumKeyStatus.Types.PENDING_DELETION) {
+            throw new DisabledKeyException("Key is pending deletion");
+        }
+        if (key.hasImportedMaterial()) {
+            throw new ImportedMaterialExistsException("Key already has imported material. Delete it first.");
+        }
 
+        // 2. Validate import token
+        byte[] requestToken = Base64.getDecoder().decode(request.getImportToken());
+        if (key.getImportToken() == null || !Arrays.equals(key.getImportToken(), requestToken)) {
+            throw new InvalidImportTokenException("Invalid or missing import token");
+        }
+        if (key.getImportTokenValidTo().isBefore(LocalDateTime.now())) {
+            throw new ExpiredImportTokenException("Import token has expired. Generate new parameters.");
+        }
+
+        // 3. Decrypt the key material using the stored private wrapping key
+        byte[] encryptedMaterial = Base64.getDecoder().decode(request.getEncryptedKeyMaterial());
+        byte[] privateWrappingKey = key.getPrivateWrappingKey();
+        if (privateWrappingKey == null) {
+            throw new InvalidImportTokenException("No private wrapping key found for this key.");
+        }
+        byte[] decryptedMaterial;
+        try {
+            decryptedMaterial = cryptoService.decryptWithPrivateKey(privateWrappingKey, encryptedMaterial);
+        } catch (Exception e) {
+            log.error("Decryption of key material failed", e);
+            throw new ImportKeyMaterialException("Failed to decrypt key material: " + e.getMessage(), e);
+        }
+
+        // 4. Set the key material and clear import parameters
         key.setKeyMaterial(decryptedMaterial);
         key.setImportDate(LocalDateTime.now());
         key.setValidTo(request.getValidTo());
+        key.setKeyStatus(IEnumKeyStatus.Types.ENABLED);
+        // Invalidate the import token and private wrapping key
+        key.setImportToken(null);
+        key.setImportTokenValidTo(null);
+        key.setPrivateWrappingKey(null);
         kmsKeyRepository.save(key);
 
         return KeyDescriptionResponse.builder()
@@ -900,7 +950,6 @@ public class KeyManagementService implements IKeyManagementService {
                 .status(key.getKeyStatus())
                 .build();
     }
-
     @Override
     public KeyDescriptionResponse deleteImportedKeyMaterial(String tenant, String keyId) {
         log.info("Deleting imported key material for tenant: {} keyId: {}", tenant, keyId);

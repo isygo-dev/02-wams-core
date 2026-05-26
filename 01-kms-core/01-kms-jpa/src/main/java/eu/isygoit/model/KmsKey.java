@@ -424,6 +424,44 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     private String replicaRegions;
 
     // =========================================================================
+    // BYOK (Bring Your Own Key) temporary fields
+    // =========================================================================
+
+    /**
+     * Import token generated during getParametersForImport.
+     * Must be stored to validate the subsequent importKeyMaterial request.
+     * After successful import, this field should be cleared (set to null).
+     * <p>
+     * This field is only used for keys with origin = EXTERNAL and status = PENDING_IMPORT.
+     * </p>
+     */
+    @Lob
+    @Column(name = SchemaColumnConstantName.C_IMPORT_TOKEN)
+    private byte[] importToken;
+
+    /**
+     * Expiration timestamp for the import token.
+     * After this date, the token is considered invalid and a new one must be generated.
+     * <p>
+     * Should be set to `now + 24 hours` when generating parameters.
+     * </p>
+     */
+    @Column(name = SchemaColumnConstantName.C_IMPORT_TOKEN_VALID_TO)
+    private LocalDateTime importTokenValidTo;
+
+    /**
+     * Private part of the ephemeral RSA wrapping key pair.
+     * Generated during getParametersForImport, used to decrypt the imported key material.
+     * Must be stored encrypted at rest (e.g., using a master key) and cleared after import.
+     * <p>
+     * This field is only used for keys with origin = EXTERNAL and status = PENDING_IMPORT.
+     * </p>
+     */
+    @Lob
+    @Column(name = SchemaColumnConstantName.C_PRIVATE_WRAPPING_KEY)
+    private byte[] privateWrappingKey;
+
+    // =========================================================================
     // Helper methods (derived fields)
     // =========================================================================
 
@@ -456,6 +494,13 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     }
 
     /**
+     * Returns true if the key is in `PENDING_IMPORT` state (awaiting BYOK material).
+     */
+    public boolean isPendingImport() {
+        return IEnumKeyStatus.Types.PENDING_IMPORT.equals(keyStatus);
+    }
+
+    /**
      * Returns true if this is a multi‑region primary key.
      */
     public boolean isPrimaryKey() {
@@ -467,6 +512,13 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      */
     public boolean isReplicaKey() {
         return Boolean.TRUE.equals(multiRegion) && primaryKeyId != null;
+    }
+
+    /**
+     * Returns true if the key has already been imported (BYOK) and the import token is no longer needed.
+     */
+    public boolean hasImportedMaterial() {
+        return IEnumKeyOrigin.Types.EXTERNAL.equals(origin) && keyMaterial != null && importToken == null;
     }
 
     // =========================================================================

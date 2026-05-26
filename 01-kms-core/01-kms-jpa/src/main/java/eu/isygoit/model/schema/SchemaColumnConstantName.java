@@ -234,4 +234,7 @@ public interface SchemaColumnConstantName extends ComSchemaColumnConstantName {
     String C_IS_PRIMARY = "IS_PRIMARY";
     String C_XKS_PROXY_CONNECTIVITY = "XKS_PROXY_CONNECTIVITY";
     String C_PUBLIC_KEY = "PUBLIC_KEY";
+    String C_IMPORT_TOKEN = "IMPORT_TOKEN";
+    String C_IMPORT_TOKEN_VALID_TO = "IMPORT_TOKEN_VALID_TO";
+    String C_PRIVATE_WRAPPING_KEY = "PRIVATE_WRAPPING_KEY";
 }

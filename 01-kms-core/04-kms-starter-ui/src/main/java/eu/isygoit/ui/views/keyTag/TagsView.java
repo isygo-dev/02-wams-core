@@ -1,4 +1,4 @@
-package eu.isygoit.ui.views;
+package eu.isygoit.ui.views.keyTag;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;

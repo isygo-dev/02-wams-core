@@ -508,6 +508,21 @@ public class CryptoService implements ICryptoService {
     }
 
     @Override
+    public byte[] decryptWithPrivateKey(byte[] privateKeyDer, byte[] ciphertext) throws Exception {
+        try {
+            PrivateKey privateKey = KeyFactory.getInstance("RSA")
+                    .generatePrivate(new PKCS8EncodedKeySpec(privateKeyDer));
+            // Use OAEP with SHA-256 (matches the wrapping encryption)
+            Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            return cipher.doFinal(ciphertext);
+        } catch (Exception e) {
+            log.error("Failed to decrypt with private wrapping key", e);
+            throw new CryptSecurityException("Private key decryption failed", e);
+        }
+    }
+
+    @Override
     public long getEncryptCount(String tenant, String keyId) {
         return kmsAuditLogRepository.countByTenantAndActionAndKeyId(tenant, IKmsActionType.Types.ENCRYPT, keyId);
     }

@@ -130,4 +130,14 @@ public interface ICryptoService {
     LocalDateTime getLastUsedDate(String tenant, String keyId);
 
     boolean validateKeyIntegrity(byte[] keyMaterial, IEnumKeySpec.Types keySpec);
+
+    /**
+     * Decrypt data using an RSA private key (PKCS#8 encoded).
+     *
+     * @param privateKeyDer the private key in DER format (PKCS#8)
+     * @param ciphertext    the ciphertext to decrypt
+     * @return the decrypted plaintext
+     * @throws Exception if decryption fails
+     */
+    byte[] decryptWithPrivateKey(byte[] privateKeyDer, byte[] ciphertext) throws Exception;
 }
