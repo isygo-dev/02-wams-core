@@ -184,19 +184,33 @@ public class ByokView extends VerticalLayout {
         return importLayout;
     }
 
-    private Paragraph createHelpText() {
-        Paragraph help = new Paragraph(
-                "Bring Your Own Key (BYOK) allows you to import your own key material into a KMS key.\n" +
-                        "Step 1: Create a KMS key with origin = EXTERNAL.\n" +
-                        "Step 2: Generate import parameters (wrapping key + import token).\n" +
-                        "Step 3: Encrypt your key material with the wrapping key (using OpenSSL or similar).\n" +
-                        "Step 4: Paste the Base64-encoded encrypted material and import it.\n" +
-                        "The import token expires after 24 hours."
-        );
-        help.addClassName(LumoUtility.FontSize.SMALL);
-        help.addClassName(LumoUtility.TextColor.SECONDARY);
-        help.getStyle().set("margin-bottom", "var(--lumo-space-m)");
-        return help;
+    private VerticalLayout createHelpText() {
+        VerticalLayout helpLayout = new VerticalLayout();
+        helpLayout.setSpacing(false);
+        helpLayout.setPadding(false);
+        helpLayout.getStyle().set("margin-bottom", "var(--lumo-space-m)");
+
+        String[] lines = {
+                "Bring Your Own Key (BYOK) allows you to import your own key material into a KMS key.",
+                "Step 1: Create a KMS key with origin = EXTERNAL.",
+                "Step 2: Generate import parameters (wrapping key + import token).",
+                "Step 3: Encrypt your key material with the wrapping key (using OpenSSL or similar).",
+                "Step 4: Paste the Base64-encoded encrypted material and import it.",
+                "The import token expires after 24 hours."
+        };
+
+        for (String line : lines) {
+            Span span = new Span(line);
+            span.addClassName(LumoUtility.FontSize.SMALL);
+            span.addClassName(LumoUtility.TextColor.SECONDARY);
+            span.getStyle()
+                    .set("white-space", "normal")
+                    .set("word-break", "break-word")
+                    .set("display", "block");
+            helpLayout.add(span);
+        }
+
+        return helpLayout;
     }
 
     private void loadKeyOptions() {
