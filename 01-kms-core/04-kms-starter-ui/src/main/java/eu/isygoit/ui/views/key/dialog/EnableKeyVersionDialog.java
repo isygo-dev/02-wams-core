@@ -39,13 +39,13 @@ public class EnableKeyVersionDialog extends PinBaseActionDialog {
             if (!response.getStatusCode().is2xxSuccessful()) {
                 String errorMsg = "Enable failed: " + response.getStatusCode();
                 this.append(errorMsg);
-                Notification.show("Error: " + errorMsg, 8000, Notification.Position.TOP_END)
+                Notification.show("Error: " + errorMsg, 6000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return false;
             }
 
             close();
-            Notification.show("Key version enabled", 8000, Notification.Position.TOP_END)
+            Notification.show("Key version enabled", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             if (onSuccess != null) {
                 onSuccess.run();
@@ -54,12 +54,12 @@ public class EnableKeyVersionDialog extends PinBaseActionDialog {
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Enable error: " + errorMsg, 8000, Notification.Position.TOP_END)
+            Notification.show("Enable error: " + errorMsg, 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } catch (Exception ex) {
             String errorMsg = ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Error: " + errorMsg, 8000, Notification.Position.TOP_END)
+            Notification.show("Error: " + errorMsg, 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
         return false;

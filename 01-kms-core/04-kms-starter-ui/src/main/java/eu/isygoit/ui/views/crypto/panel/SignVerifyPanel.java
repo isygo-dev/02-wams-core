@@ -197,14 +197,14 @@ public class SignVerifyPanel extends VerticalLayout {
     }
 
     private void notifyWarning(String msg) {
-        Notification.show(msg, 8000, Notification.Position.TOP_END).addThemeVariants(NotificationVariant.LUMO_WARNING);
+        Notification.show(msg, 6000, Notification.Position.TOP_END).addThemeVariants(NotificationVariant.LUMO_WARNING);
     }
 
     private void notifySuccess(String msg) {
-        Notification.show(msg, 8000, Notification.Position.TOP_END).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        Notification.show(msg, 6000, Notification.Position.TOP_END).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
     private void notifyError(String msg) {
-        Notification.show(msg, 8000, Notification.Position.TOP_END).addThemeVariants(NotificationVariant.LUMO_ERROR);
+        Notification.show(msg, 6000, Notification.Position.TOP_END).addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 }

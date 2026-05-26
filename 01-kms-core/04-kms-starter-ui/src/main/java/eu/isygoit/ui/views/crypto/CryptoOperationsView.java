@@ -27,7 +27,9 @@ import eu.isygoit.ui.views.crypto.panel.DataKeyPanel;
 import eu.isygoit.ui.views.crypto.panel.EncryptDecryptPanel;
 import eu.isygoit.ui.views.crypto.panel.MacPanel;
 import eu.isygoit.ui.views.crypto.panel.SignVerifyPanel;
+import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -36,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Route(value = "crypto", layout = MainLayout.class)
 @PageTitle("Cryptographic Operations")
 @PermitAll
@@ -112,7 +115,7 @@ public class CryptoOperationsView extends VerticalLayout {
             Tab selected = event.getSelectedTab();
             boolean supported = isTabSupported(selected);
             if (!supported && selectedKeyId != null) {
-                Notification.show("The selected key does not support this operation.", 8000, Notification.Position.TOP_END)
+                Notification.show("The selected key does not support this operation.", 6000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
             }
             encryptDecryptPanel.setVisible(selected == encryptDecryptTabHeader);
@@ -223,8 +226,10 @@ public class CryptoOperationsView extends VerticalLayout {
                 updatePanels();
                 updateTabBasedOnKey();
             }
+        } catch (FeignException e) {
+            Notification.show("Failed to load keys: " + (e.status() == 500 ? e.contentUTF8() : e.getMessage()));
         } catch (Exception e) {
-            Notification.show("Failed to load keys: " + e.getMessage(), 8000, Notification.Position.TOP_END)
+            Notification.show("Failed to load keys: " + e.getMessage(), 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             showLoading(false);
@@ -238,8 +243,10 @@ public class CryptoOperationsView extends VerticalLayout {
             if (desc != null && desc.getKeyMetadata() != null && StringUtils.hasText(desc.getKeyMetadata().getKeyAlias())) {
                 return desc.getKeyMetadata().getKeyAlias();
             }
+        } catch (FeignException e) {
+            Notification.show("Failed to fetch alias: " + (e.status() == 500 ? e.contentUTF8() : e.getMessage()));
         } catch (Exception e) {
-            // ignore
+            log.error("Failed to fetch alias for keyId: {}", keyId, e);
         }
         return keyId;
     }
@@ -255,8 +262,10 @@ public class CryptoOperationsView extends VerticalLayout {
                 updatePanels();
                 updateTabBasedOnKey();
             }
+        } catch (FeignException e) {
+            Notification.show("Failed to load key metadata: " + (e.status() == 500 ? e.contentUTF8() : e.getMessage()));
         } catch (Exception e) {
-            Notification.show("Failed to load key metadata", 8000, Notification.Position.TOP_END)
+            Notification.show("Failed to load key metadata", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
         }
     }
@@ -275,10 +284,10 @@ public class CryptoOperationsView extends VerticalLayout {
             Tab supported = getFirstSupportedTab();
             if (supported != null) {
                 tabs.setSelectedTab(supported);
-                Notification.show("Switched to a supported operation for this key.", 8000, Notification.Position.TOP_END)
+                Notification.show("Switched to a supported operation for this key.", 6000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
             } else {
-                Notification.show("This key does not support any cryptographic operation.", 8000, Notification.Position.TOP_END)
+                Notification.show("This key does not support any cryptographic operation.", 6000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         }

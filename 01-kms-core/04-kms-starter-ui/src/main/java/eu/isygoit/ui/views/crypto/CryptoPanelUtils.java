@@ -47,10 +47,10 @@ public final class CryptoPanelUtils {
                         "navigator.clipboard.writeText($0).catch(e => console.error('Copy failed:', e));",
                         value
                 );
-                Notification.show("Copied to clipboard", 8000, Notification.Position.TOP_END)
+                Notification.show("Copied to clipboard", 6000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } else {
-                Notification.show("Nothing to copy", 8000, Notification.Position.TOP_END)
+                Notification.show("Nothing to copy", 6000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
             }
         });

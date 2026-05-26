@@ -158,25 +158,25 @@ public class UpdateCustomKeyStoreDialog extends BaseActionDialog {
             if (!response.getStatusCode().is2xxSuccessful()) {
                 String errorMsg = "Key store update error: " + response.getStatusCode();
                 this.append(errorMsg);
-                Notification.show("Key store update error: " + errorMsg, 8000, Notification.Position.TOP_END)
+                Notification.show("Key store update error: " + errorMsg, 6000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return false;
             }
 
             close();
-            Notification.show("Key store updated", 8000, Notification.Position.TOP_END)
+            Notification.show("Key store updated", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
             return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Creation error: " + errorMsg, 8000, Notification.Position.TOP_END)
+            Notification.show("Creation error: " + errorMsg, 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } catch (Exception ex) {
             String errorMsg = ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Error: " + errorMsg, 8000, Notification.Position.TOP_END)
+            Notification.show("Error: " + errorMsg, 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             parentView.showLoading(false);

@@ -50,25 +50,25 @@ public class ScheduleKeyDeletionDialog extends BaseActionDialog {
             if (!response.getStatusCode().is2xxSuccessful()) {
                 String errorMsg = "Schedule deletion error: " + response.getStatusCode();
                 this.append(errorMsg);
-                Notification.show(errorMsg, 8000, Notification.Position.TOP_END)
+                Notification.show(errorMsg, 6000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return false;
             }
 
             close();
-            Notification.show("Deletion scheduled in " + days + " days", 8000, Notification.Position.TOP_END)
+            Notification.show("Deletion scheduled in " + days + " days", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
             return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Schedule deletion error: " + errorMsg, 8000, Notification.Position.TOP_END)
+            Notification.show("Schedule deletion error: " + errorMsg, 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } catch (Exception ex) {
             String errorMsg = ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Schedule deletion error: " + errorMsg, 8000, Notification.Position.TOP_END)
+            Notification.show("Schedule deletion error: " + errorMsg, 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             parentView.showLoading(false);

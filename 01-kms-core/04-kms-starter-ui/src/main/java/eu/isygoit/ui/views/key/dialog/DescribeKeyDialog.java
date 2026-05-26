@@ -187,7 +187,7 @@ public class DescribeKeyDialog extends Dialog {
                 return tagsResponse.getTags();
             }
         } catch (Exception e) {
-            // ignore
+            log.error("Failed to load tags for key {}", keyId, e);
         }
         return List.of();
     }

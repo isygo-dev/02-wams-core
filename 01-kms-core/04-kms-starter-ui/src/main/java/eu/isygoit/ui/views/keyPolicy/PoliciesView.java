@@ -5,6 +5,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.icon.Icon;
@@ -30,6 +31,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -133,7 +135,7 @@ public class PoliciesView extends VerticalLayout {
 
         configureButton(builderButton, "Open graphical policy builder (creates new or edits existing)", ButtonVariant.LUMO_CONTRAST);
 
-        loadButton.addClickListener(e -> loadPolicy());
+        loadButton.addClickListener(e -> loadPolicy(false));
         saveButton.addClickListener(e -> savePolicy());
         formatButton.addClickListener(e -> formatPolicy());
         builderButton.addClickListener(e -> openPolicyBuilder());
@@ -241,9 +243,9 @@ public class PoliciesView extends VerticalLayout {
         return keyId;
     }
 
-    private void loadPolicy() {
+    private void loadPolicy(boolean silentFailure) {
         if (selectedKeyId == null) {
-            showWarning("Please select a key first");
+            if (!silentFailure) showWarning("Please select a key first");
             return;
         }
         showLoading(true);
@@ -253,17 +255,17 @@ public class PoliciesView extends VerticalLayout {
                 String policy = objectMapper.writeValueAsString(response.getBody().getPolicy());
                 if (StringUtils.hasText(policy)) {
                     policyEditor.setValue(prettyPrintJson(policy));
-                    showSuccess("Policy loaded");
+                    if (!silentFailure) showSuccess("Policy loaded");
                 } else {
                     policyEditor.clear();
-                    showWarning("Key has no policy");
+                    if (!silentFailure) showWarning("Key has no policy");
                 }
             } else {
                 policyEditor.clear();
-                showError("Failed to load policy: " + response.getStatusCode());
+                if (!silentFailure) showError("Failed to load policy: " + response.getStatusCode());
             }
         } catch (Exception e) {
-            showError("Error loading policy: " + e.getMessage());
+            if (!silentFailure) showError("Error loading policy: " + e.getMessage());
         } finally {
             showLoading(false);
             updateButtonsState();
@@ -276,10 +278,29 @@ public class PoliciesView extends VerticalLayout {
             return;
         }
         String policyText = policyEditor.getValue();
+
+        // Handle empty policy with confirmation
         if (!StringUtils.hasText(policyText)) {
-            showWarning("Policy cannot be empty");
+            ConfirmDialog confirmDialog = new ConfirmDialog();
+            confirmDialog.setHeader("Erase policy");
+            confirmDialog.setText(
+                    "The policy editor is empty.\n" +
+                            "Saving will erase the current policy from the key.\n" +
+                            "Are you sure you want to proceed?"
+            );
+            confirmDialog.setConfirmText("Erase policy");
+            confirmDialog.setCancelText("Cancel");
+            confirmDialog.setConfirmButtonTheme("error primary");
+            confirmDialog.addConfirmListener(event -> {
+                // User confirmed – save an empty JSON object
+                Map<String, Object> emptyPolicy = new HashMap<>();
+                performSave(emptyPolicy, true);
+            });
+            confirmDialog.open();
             return;
         }
+
+        // Normal flow for non‑empty policy
         Map<String, Object> policyMap;
         try {
             policyMap = objectMapper.readValue(policyText, Map.class);
@@ -287,17 +308,24 @@ public class PoliciesView extends VerticalLayout {
             showError("Invalid JSON: " + e.getMessage());
             return;
         }
+        performSave(policyMap, false);
+    }
+
+    /**
+     * Helper method that actually performs the save operation.
+     */
+    private void performSave(Map<String, Object> policyMap, boolean bypassSafetyCheck) {
         showLoading(true);
         try {
             KmsDtos.PutKeyPolicyRequest request = KmsDtos.PutKeyPolicyRequest.builder()
                     .keyId(selectedKeyId)
                     .policy(policyMap)
-                    .bypassPolicyLockoutSafetyCheck(false)
+                    .bypassPolicyLockoutSafetyCheck(bypassSafetyCheck)
                     .build();
             ResponseEntity<KmsDtos.PutKeyPolicyResponse> response = kmsApiService.putKeyPolicy(selectedKeyId, request);
             if (response.getStatusCode().is2xxSuccessful()) {
                 showSuccess("Policy saved successfully");
-                loadPolicy(); // reload to show the saved version
+                loadPolicy(true); // reload to show the saved version
             } else {
                 showError("Save failed: " + response.getStatusCode());
             }
@@ -416,17 +444,17 @@ public class PoliciesView extends VerticalLayout {
     }
 
     private void showSuccess(String msg) {
-        Notification.show(msg, 8000, Notification.Position.TOP_END)
+        Notification.show(msg, 6000, Notification.Position.TOP_END)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
     private void showError(String msg) {
-        Notification.show(msg, 8000, Notification.Position.TOP_END)
+        Notification.show(msg, 6000, Notification.Position.TOP_END)
                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 
     private void showWarning(String msg) {
-        Notification.show(msg, 8000, Notification.Position.TOP_END)
+        Notification.show(msg, 6000, Notification.Position.TOP_END)
                 .addThemeVariants(NotificationVariant.LUMO_WARNING);
     }
 

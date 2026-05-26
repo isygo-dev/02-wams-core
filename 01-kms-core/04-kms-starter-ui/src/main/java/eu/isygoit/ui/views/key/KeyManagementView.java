@@ -230,7 +230,7 @@ public class KeyManagementView extends VerticalLayout {
             updatePaginationDisplay();
             filterCards();
         } catch (Exception e) {
-            Notification.show("Failed to load keys: " + e.getMessage(), 8000, Notification.Position.TOP_END)
+            Notification.show("Failed to load keys: " + e.getMessage(), 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             showLoading(false);
@@ -311,7 +311,7 @@ public class KeyManagementView extends VerticalLayout {
             aliasPageInfo.getElement().setAttribute("title", info);
             aliasesLoaded = true;
         } catch (Exception e) {
-            Notification.show("Failed to load aliases: " + e.getMessage(), 8000, Notification.Position.TOP_END)
+            Notification.show("Failed to load aliases: " + e.getMessage(), 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             aliasGrid.setItems(new ArrayList<>());
             aliasNextButton.setEnabled(false);

@@ -51,25 +51,25 @@ public class CancelKeyDeletionDialog extends BaseActionDialog {
             if (!response.getStatusCode().is2xxSuccessful()) {
                 String errorMsg = "Failed to cancel deletion: " + response.getStatusCode();
                 this.append(errorMsg);
-                Notification.show(errorMsg, 8000, Notification.Position.TOP_END)
+                Notification.show(errorMsg, 6000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return false;
             }
 
             close();
-            Notification.show("Deletion cancelled", 8000, Notification.Position.TOP_END)
+            Notification.show("Deletion cancelled", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
             return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Update error: " + errorMsg, 8000, Notification.Position.TOP_END)
+            Notification.show("Update error: " + errorMsg, 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } catch (Exception ex) {
             String errorMsg = ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Error: " + errorMsg, 8000, Notification.Position.TOP_END)
+            Notification.show("Error: " + errorMsg, 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             parentView.showLoading(false);

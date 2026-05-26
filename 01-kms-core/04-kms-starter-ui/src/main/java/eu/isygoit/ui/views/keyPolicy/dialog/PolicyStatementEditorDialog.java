@@ -354,7 +354,7 @@ public class PolicyStatementEditorDialog extends Dialog {
     }
 
     private void showError(String msg) {
-        Notification.show(msg, 8000, Notification.Position.TOP_END)
+        Notification.show(msg, 6000, Notification.Position.TOP_END)
                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 }

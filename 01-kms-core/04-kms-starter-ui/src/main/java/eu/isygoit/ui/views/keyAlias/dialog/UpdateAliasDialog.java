@@ -11,11 +11,13 @@ import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.views.BaseActionDialog;
 import eu.isygoit.ui.views.keyAlias.AliasesView;
 import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 
 /**
  * Dialog for reassigning an alias to a different KMS key.
  */
+@Slf4j
 public class UpdateAliasDialog extends BaseActionDialog {
 
     private final AliasesView parentView;
@@ -52,7 +54,7 @@ public class UpdateAliasDialog extends BaseActionDialog {
         if (newTargetId == null || newTargetId.isBlank()) {
             String errorMsg = "Please select a target key";
             this.append(errorMsg);
-            Notification.show(errorMsg, 8000, Notification.Position.TOP_END)
+            Notification.show(errorMsg, 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
         try {
@@ -64,25 +66,25 @@ public class UpdateAliasDialog extends BaseActionDialog {
             if (!response.getStatusCode().is2xxSuccessful()) {
                 String errorMsg = "Update failed: " + response.getStatusCode();
                 this.append(errorMsg);
-                Notification.show(errorMsg, 8000, Notification.Position.TOP_END)
+                Notification.show(errorMsg, 6000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return false;
             }
 
             close();
-            Notification.show("Alias reassigned", 8000, Notification.Position.TOP_END)
+            Notification.show("Alias reassigned", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
             return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Update error: " + errorMsg, 8000, Notification.Position.TOP_END)
+            Notification.show("Update error: " + errorMsg, 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } catch (Exception ex) {
             String errorMsg = ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Error: " + errorMsg, 8000, Notification.Position.TOP_END)
+            Notification.show("Error: " + errorMsg, 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             parentView.showLoading(false);
@@ -105,6 +107,7 @@ public class UpdateAliasDialog extends BaseActionDialog {
                     if (alias != null && !alias.isEmpty()) return alias + " (" + keyId + ")";
                 }
             } catch (Exception ignored) {
+                log.error("Failed to fetch key metadata for keyId: {}", keyId, ignored);
             }
             return keyId;
         });
