@@ -3,6 +3,7 @@ package eu.isygoit.ui.views.keyStore;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H4;
@@ -32,6 +33,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 @Route(value = "custom-key-stores", layout = MainLayout.class)
@@ -47,7 +49,29 @@ public class CustomKeyStoresView extends VerticalLayout {
     private final TextField filterField = new TextField();
     private final Button clearFilterButton = new Button(new Icon(VaadinIcon.CLOSE));
 
-    private List<DescribeCustomKeyStoreResponse.CustomKeyStore> allStores = new ArrayList<>();
+    // Pagination controls
+    private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
+    private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
+    private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
+    private final Span pageInfoLabel = new Span();      // shows "Page X/Y : N stores"
+    private final Span totalCountLabel = new Span();    // shows "Total stores"
+
+    // Pagination state (cursor-based)
+    private final Stack<String> previousTokens = new Stack<>();
+    private int pageSize = 10;
+    private String currentNextToken = null;
+    private String currentToken = null;
+    private int currentPage = 1;
+    private int totalPages = 0;
+    private long totalElements = 0;
+    private int numberOfElements = 0;
+    private boolean truncated = false;
+
+    // Filter state
+    private String currentFilter = "";
+
+    // Store data for current page (unfiltered)
+    private List<DescribeCustomKeyStoreResponse.CustomKeyStore> currentPageStores = new ArrayList<>();
 
     @Autowired
     public CustomKeyStoresView(KmsApiService kmsApiService) {
@@ -59,8 +83,7 @@ public class CustomKeyStoresView extends VerticalLayout {
         addClassName("kms-custom-stores-view");
 
         H2 header = new H2("Custom Key Stores");
-        header.addClassName(LumoUtility.FontSize.XXLARGE);
-        header.addClassName(LumoUtility.Margin.Bottom.NONE);
+        header.addClassNames(LumoUtility.FontSize.XXLARGE, LumoUtility.Margin.Bottom.NONE);
         add(header);
 
         HorizontalLayout toolbar = buildToolbar();
@@ -77,136 +100,135 @@ public class CustomKeyStoresView extends VerticalLayout {
         add(loadingBar);
 
         createButton.addClickListener(e -> createCustomKeyStore());
-        refreshButton.addClickListener(e -> loadStores());
-
-        injectResponsiveStyles();
-
-        loadStores();
-    }
-
-    private HorizontalLayout buildToolbar() {
-        HorizontalLayout toolbar = new HorizontalLayout();
-        toolbar.setWidthFull();
-        toolbar.setPadding(false);
-        toolbar.setSpacing(true);
-        toolbar.addClassName("custom-stores-toolbar");
-
-        // Left group: filter
-        HorizontalLayout leftGroup = new HorizontalLayout();
-        leftGroup.addClassName("toolbar-left-group");
-        leftGroup.setSpacing(true);
-        leftGroup.setAlignItems(FlexComponent.Alignment.BASELINE);
+        refreshButton.addClickListener(e -> resetPaginationAndLoad());
 
         filterField.setPlaceholder("Filter by name or type...");
         filterField.setValueChangeMode(ValueChangeMode.LAZY);
         filterField.setValueChangeTimeout(300);
         filterField.setWidth("250px");
-        filterField.addValueChangeListener(e -> applyFilter());
+        filterField.addValueChangeListener(e -> {
+            currentFilter = e.getValue();
+            applyFilter(); // only filters the already loaded page, does not reload
+        });
 
         clearFilterButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         clearFilterButton.setTooltipText("Clear filter");
         clearFilterButton.setEnabled(false);
         clearFilterButton.addClickListener(e -> {
             filterField.clear();
+            currentFilter = "";
             applyFilter();
         });
 
-        leftGroup.add(filterField, clearFilterButton);
+        // Pagination initialisation
+        pageSizeSelect.setItems(5, 10, 20, 50);
+        pageSizeSelect.setValue(10);
+        pageSizeSelect.setPlaceholder("Per page");
+        pageSizeSelect.addValueChangeListener(e -> {
+            if (e.getValue() != null) {
+                pageSize = e.getValue();
+                resetPaginationAndLoad();
+            }
+        });
 
-        // Right group: create + refresh buttons
-        HorizontalLayout rightGroup = new HorizontalLayout();
-        rightGroup.addClassName("toolbar-right-group");
-        rightGroup.setSpacing(true);
-        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText("Refresh stores");
-        rightGroup.add(createButton, refreshButton);
+        prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        prevButton.addClickListener(e -> {
+            if (!previousTokens.isEmpty()) {
+                String prevToken = previousTokens.pop();
+                loadStoresPage(prevToken);
+            }
+        });
 
-        toolbar.add(leftGroup, rightGroup);
-        return toolbar;
+        nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        nextButton.addClickListener(e -> {
+            if (truncated && currentNextToken != null) {
+                previousTokens.push(currentToken);
+                loadStoresPage(currentNextToken);
+            }
+        });
+
+        injectResponsiveStyles();
+
+        // Initial load
+        resetPaginationAndLoad();
     }
 
-    private void injectResponsiveStyles() {
-        String css = """
-                    .custom-stores-toolbar {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: var(--lumo-space-s);
-                        align-items: center;
-                        justify-content: space-between;
-                        width: 100%;
-                        margin-bottom: var(--lumo-space-m);
-                    }
-                    .toolbar-left-group,
-                    .toolbar-right-group {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: var(--lumo-space-s);
-                        align-items: center;
-                    }
-                    @media (max-width: 768px) {
-                        .custom-stores-toolbar {
-                            flex-direction: column;
-                            align-items: stretch;
-                        }
-                        .toolbar-left-group,
-                        .toolbar-right-group {
-                            flex-direction: column;
-                            align-items: stretch;
-                            width: 100%;
-                        }
-                        .toolbar-left-group > *,
-                        .toolbar-right-group > * {
-                            width: 100% !important;
-                        }
-                    }
-                """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
+    private void resetPaginationAndLoad() {
+        previousTokens.clear();
+        currentNextToken = null;
+        currentToken = null;
+        currentPage = 1;
+        totalPages = 0;
+        totalElements = 0;
+        numberOfElements = 0;
+        truncated = false;
+        loadStoresPage(null);
     }
 
-    private void createCustomKeyStore() {
-        new CreateCustomKeyStoreDialog(this, kmsApiService, this::loadStores).open();
-    }
-
-    public void loadStores() {
+    private void loadStoresPage(String nextToken) {
         showLoading(true);
         try {
-            ResponseEntity<ListCustomKeyStoresResponse> response = kmsApiService.listCustomKeyStores(100, null);
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                allStores = response.getBody().getCustomKeyStores();
-                if (allStores == null) allStores = new ArrayList<>();
-                applyFilter();
+            ResponseEntity<ListCustomKeyStoresResponse> response = kmsApiService.listCustomKeyStores(pageSize, nextToken);
+            ListCustomKeyStoresResponse body = response.getBody();
+            List<DescribeCustomKeyStoreResponse.CustomKeyStore> stores = (body != null && body.getCustomKeyStores() != null)
+                    ? body.getCustomKeyStores() : new ArrayList<>();
+
+            currentNextToken = (body != null) ? body.getNextToken() : null;
+            numberOfElements = (body != null && body.getNumberOfElements() != null) ? body.getNumberOfElements() : stores.size();
+            totalPages = (body != null && body.getTotalPages() != null) ? body.getTotalPages() : 0;
+            totalElements = (body != null && body.getTotalElements() != null) ? body.getTotalElements() : 0L;
+            truncated = (body != null && Boolean.TRUE.equals(body.getTruncated()));
+            currentToken = nextToken;
+
+            // Compute current page
+            if (nextToken == null) {
+                currentPage = 1;
             } else {
-                allStores = new ArrayList<>();
-                showEmptyState();
+                currentPage = previousTokens.size() + 1;
             }
+
+            currentPageStores = stores;
+            updatePaginationDisplay();
+            applyFilter(); // apply client-side filter on the loaded page
         } catch (Exception e) {
             Notification.show("Failed to load stores: " + e.getMessage(), 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            currentPageStores = new ArrayList<>();
+            updatePaginationDisplay();
             showEmptyState();
         } finally {
             showLoading(false);
         }
     }
 
+    private void updatePaginationDisplay() {
+        if (totalPages > 0) {
+            pageInfoLabel.setText(String.format("Page %d/%d : %d stores", currentPage, totalPages, numberOfElements));
+        } else {
+            pageInfoLabel.setText(String.format("Page %d : %d stores", currentPage, numberOfElements));
+        }
+        totalCountLabel.setText(String.format("%d stores total", totalElements));
+
+        prevButton.setEnabled(!previousTokens.isEmpty());
+        nextButton.setEnabled(truncated && currentNextToken != null);
+    }
+
     private void applyFilter() {
-        String filter = filterField.getValue();
-        clearFilterButton.setEnabled(StringUtils.hasText(filter));
         cardsContainer.removeAll();
 
-        List<DescribeCustomKeyStoreResponse.CustomKeyStore> filtered;
-        if (!StringUtils.hasText(filter)) {
-            filtered = allStores;
-        } else {
-            String lowerFilter = filter.toLowerCase();
-            filtered = allStores.stream()
-                    .filter(s -> (s.getName() != null && s.getName().toLowerCase().contains(lowerFilter)) ||
-                            (s.getCustomKeyStoreType() != null && s.getCustomKeyStoreType().toLowerCase().contains(lowerFilter)))
-                    .collect(Collectors.toList());
-        }
+        List<DescribeCustomKeyStoreResponse.CustomKeyStore> filtered = currentPageStores.stream()
+                .filter(s -> {
+                    if (StringUtils.hasText(currentFilter)) {
+                        String lower = currentFilter.toLowerCase();
+                        boolean nameMatch = s.getName() != null && s.getName().toLowerCase().contains(lower);
+                        boolean typeMatch = s.getCustomKeyStoreType() != null && s.getCustomKeyStoreType().toLowerCase().contains(lower);
+                        return nameMatch || typeMatch;
+                    }
+                    return true;
+                })
+                .collect(Collectors.toList());
+
+        clearFilterButton.setEnabled(StringUtils.hasText(currentFilter));
 
         if (filtered.isEmpty()) {
             showEmptyState();
@@ -230,11 +252,84 @@ public class CustomKeyStoresView extends VerticalLayout {
         cardsContainer.add(emptyState);
     }
 
+    private HorizontalLayout buildToolbar() {
+        HorizontalLayout toolbar = new HorizontalLayout();
+        toolbar.setWidthFull();
+        toolbar.setPadding(false);
+        toolbar.setSpacing(true);
+        toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
+        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        toolbar.addClassName("custom-stores-toolbar");
+
+        // Left group: filter
+        HorizontalLayout leftGroup = new HorizontalLayout();
+        leftGroup.setSpacing(true);
+        leftGroup.setAlignItems(FlexComponent.Alignment.BASELINE);
+        leftGroup.add(filterField, clearFilterButton);
+
+        // Center group: pagination
+        HorizontalLayout centerGroup = new HorizontalLayout();
+        centerGroup.setSpacing(true);
+        centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
+        pageSizeSelect.setWidth("120px");
+        centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
+
+        // Right group: create + refresh
+        HorizontalLayout rightGroup = new HorizontalLayout();
+        rightGroup.setSpacing(true);
+        rightGroup.setAlignItems(FlexComponent.Alignment.END);
+        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        refreshButton.setTooltipText("Refresh stores");
+        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        createButton.setTooltipText("Create a new custom key store");
+        rightGroup.add(refreshButton, createButton);
+
+        toolbar.add(leftGroup, centerGroup, rightGroup);
+        return toolbar;
+    }
+
+    private void injectResponsiveStyles() {
+        String css = """
+                    .custom-stores-toolbar {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: var(--lumo-space-s);
+                        width: 100%;
+                    }
+                    @media (max-width: 768px) {
+                        .custom-stores-toolbar {
+                            flex-direction: column;
+                            align-items: stretch;
+                        }
+                        .custom-stores-toolbar > * {
+                            width: 100% !important;
+                            justify-content: center;
+                        }
+                    }
+                """;
+        UI.getCurrent().getPage().executeJs(
+                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
+                css
+        );
+    }
+
+    private void createCustomKeyStore() {
+        new CreateCustomKeyStoreDialog(this, kmsApiService, this::resetPaginationAndLoad).open();
+    }
+
     public void showLoading(boolean show) {
         loadingBar.setVisible(show);
         cardsContainer.setVisible(!show);
         createButton.setEnabled(!show);
         refreshButton.setEnabled(!show);
         filterField.setEnabled(!show);
+        prevButton.setEnabled(!show && !previousTokens.isEmpty());
+        nextButton.setEnabled(!show && (truncated && currentNextToken != null));
+        pageSizeSelect.setEnabled(!show);
+    }
+
+    // Called by dialogs to refresh the list after changes
+    public void loadStores() {
+        resetPaginationAndLoad();
     }
 }
