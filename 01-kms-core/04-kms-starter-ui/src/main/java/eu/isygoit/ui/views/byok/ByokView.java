@@ -96,6 +96,9 @@ public class ByokView extends VerticalLayout {
         add(importLayout);
         add(encryptedMaterialField, expirationDatePicker, importButton);
 
+        // Configure text areas for full width and larger height
+        configureTextAreas();
+
         // Loading indicator
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
@@ -115,6 +118,26 @@ public class ByokView extends VerticalLayout {
 
         injectResponsiveStyles();
         loadKeyOptions();
+    }
+
+    private void configureTextAreas() {
+        // Wrapping key – full width, readable height
+        wrappedKeyDisplay.setWidthFull();
+        wrappedKeyDisplay.setHeight("200px");
+        wrappedKeyDisplay.setReadOnly(true);
+        wrappedKeyDisplay.setPlaceholder("Wrapping key will appear here after generating parameters...");
+
+        // Import token – full width, compact height
+        importTokenDisplay.setWidthFull();
+        importTokenDisplay.setHeight("100px");
+        importTokenDisplay.setReadOnly(true);
+        importTokenDisplay.setPlaceholder("Import token will appear here...");
+
+        // Encrypted material – full width, large editable area
+        encryptedMaterialField.setWidthFull();
+        encryptedMaterialField.setHeight("180px");
+        encryptedMaterialField.setPlaceholder("Paste the Base64-encoded encrypted key material here");
+        encryptedMaterialField.setHelperText("Encrypt your key material using the public wrapping key above, then paste the result.");
     }
 
     private HorizontalLayout buildKeySelectionSection() {
