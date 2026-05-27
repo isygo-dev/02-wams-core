@@ -19,6 +19,7 @@ import java.util.Date;
 
 /**
  * The type Password expired job.
+ * Purges keys that are past their deletion_pending date, after a standard safety waiting period (e.g., 7-30 days).
  */
 @Slf4j
 @Service

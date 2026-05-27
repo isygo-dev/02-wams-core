@@ -1,16 +1,13 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.KmsDtos.*;
-import eu.isygoit.enums.IEnumKeySpec;
-import eu.isygoit.enums.IEnumKeyStatus;
-import eu.isygoit.enums.IEnumKeyUsage;
-import eu.isygoit.enums.IEnumMacAlgorithm;
-import eu.isygoit.enums.IEnumSignatureAlgorithm;
-import eu.isygoit.exception.*;
+import eu.isygoit.enums.*;
+import eu.isygoit.exception.DisabledKeyException;
+import eu.isygoit.exception.KeyNotAllowedForUsageException;
+import eu.isygoit.exception.WrongAlgorithmException;
 import eu.isygoit.model.KmsKey;
 import eu.isygoit.repository.KmsKeyRepository;
 import eu.isygoit.service.ICryptoService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -21,27 +18,20 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("SigningService - Realistic User Stories")
 class SigningServiceTest {
-
-    @Mock
-    private KmsKeyRepository kmsKeyRepository;
-    @Mock
-    private ICryptoService cryptoService;
-
-    @InjectMocks
-    private SigningService signingService;
 
     private final String tenant = "acme-corp";
     private final String keyId = "sign-key-123";
@@ -49,6 +39,12 @@ class SigningServiceTest {
     private final String messageBase64 = Base64.getEncoder().encodeToString(message.getBytes());
     private final String signatureBase64 = Base64.getEncoder().encodeToString("fakeSignature".getBytes());
     private final String macBase64 = Base64.getEncoder().encodeToString("fakeMac".getBytes());
+    @Mock
+    private KmsKeyRepository kmsKeyRepository;
+    @Mock
+    private ICryptoService cryptoService;
+    @InjectMocks
+    private SigningService signingService;
 
     private KmsKey createSigningKey(IEnumKeyStatus.Types status) {
         return KmsKey.builder()

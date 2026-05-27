@@ -1,10 +1,16 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.dto.KmsDtos.DecryptRequest;
+import eu.isygoit.dto.KmsDtos.DecryptResponse;
+import eu.isygoit.dto.KmsDtos.EncryptRequest;
+import eu.isygoit.dto.KmsDtos.EncryptResponse;
 import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.enums.IEnumKeyUsage;
-import eu.isygoit.exception.*;
+import eu.isygoit.exception.DecryptionException;
+import eu.isygoit.exception.DisabledKeyException;
+import eu.isygoit.exception.KeyNotAllowedForUsageException;
+import eu.isygoit.exception.WrongAlgorithmException;
 import eu.isygoit.model.KmsKey;
 import eu.isygoit.model.KmsKeyVersion;
 import eu.isygoit.repository.KmsKeyRepository;
@@ -37,31 +43,24 @@ import static org.mockito.Mockito.*;
 @DisplayName("EncryptionService - Realistic User Stories")
 class EncryptionServiceTest {
 
-    @Mock
-    private KmsKeyRepository kmsKeyRepository;
-
-    @Mock
-    private KmsKeyVersionRepository kmsKeyVersionRepository;
-
-    @Mock
-    private ICryptoService cryptoService;
-
-    @InjectMocks
-    private EncryptionService encryptionService;
-
     private final String tenant = "acme-corp";
     private final String keyId = "123e4567-e89b-12d3-a456-426614174000";
     private final String versionId = "v-1a2b3c4d";
     private final String currentVersionId = "v-current";
-
     private final String plaintext = "MySecretData";
     private final String plaintextBase64 =
             Base64.getEncoder().encodeToString(plaintext.getBytes());
-
     private final byte[] ciphertextBytes = "encrypted".getBytes();
-
     private final byte[] wrappedCiphertext =
             CiphertextEnvelope.wrap(versionId, ciphertextBytes);
+    @Mock
+    private KmsKeyRepository kmsKeyRepository;
+    @Mock
+    private KmsKeyVersionRepository kmsKeyVersionRepository;
+    @Mock
+    private ICryptoService cryptoService;
+    @InjectMocks
+    private EncryptionService encryptionService;
 
     @BeforeEach
     void setUp() {

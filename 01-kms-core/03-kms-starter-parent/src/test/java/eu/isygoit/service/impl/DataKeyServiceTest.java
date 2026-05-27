@@ -35,20 +35,18 @@ import static org.mockito.Mockito.*;
 @DisplayName("DataKeyService - Realistic User Stories")
 class DataKeyServiceTest {
 
+    private final String tenant = "acme-corp";
+    private final String keyId = "master-key-123";
+    private final byte[] fakeAesKey = "0123456789abcdef".getBytes(); // 16 bytes
     @Mock
     private KmsKeyRepository kmsKeyRepository;
     @Mock
     private KmsAliasRepository kmsAliasRepository;
     @Mock
     private ICryptoService cryptoService;
-
     @Spy
     @InjectMocks
     private DataKeyService dataKeyService;
-
-    private final String tenant = "acme-corp";
-    private final String keyId = "master-key-123";
-    private final byte[] fakeAesKey = "0123456789abcdef".getBytes(); // 16 bytes
 
     @BeforeEach
     void setUp() {

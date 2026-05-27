@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
@@ -18,6 +17,46 @@ class CiphertextEnvelopeTest {
 
     // =========================================================================
     //  wrap() tests
+    // =========================================================================
+
+    @Test
+    @DisplayName("wrap throws NPE when versionId is null (documented behaviour)")
+    void testWrapNullVersionId() {
+        assertThrows(NullPointerException.class, () -> CiphertextEnvelope.wrap(null, new byte[0]));
+    }
+
+    // =========================================================================
+    //  unwrapVersionId() tests
+    // =========================================================================
+
+    @Test
+    @DisplayName("wrap throws NPE when ciphertext is null")
+    void testWrapNullCiphertext() {
+        assertThrows(NullPointerException.class, () -> CiphertextEnvelope.wrap("v1", null));
+    }
+
+    // =========================================================================
+    //  unwrapCiphertext() tests
+    // =========================================================================
+
+    @Test
+    @DisplayName("unwrapVersionId throws NPE when wrapped is null")
+    void testUnwrapVersionIdNull() {
+        assertThrows(NullPointerException.class, () -> CiphertextEnvelope.unwrapVersionId(null));
+    }
+
+    // =========================================================================
+    //  Round‑trip consistency tests
+    // =========================================================================
+
+    @Test
+    @DisplayName("unwrapCiphertext throws NPE when wrapped is null")
+    void testUnwrapCiphertextNull() {
+        assertThrows(NullPointerException.class, () -> CiphertextEnvelope.unwrapCiphertext(null));
+    }
+
+    // =========================================================================
+    //  Additional edge cases: very large data (not exhaustive, just sanity)
     // =========================================================================
 
     @Nested
@@ -84,7 +123,8 @@ class CiphertextEnvelopeTest {
     }
 
     // =========================================================================
-    //  unwrapVersionId() tests
+    //  Null handling – not defined by the original class; tests assume inputs are non‑null
+    //  If null is passed, the methods will throw NPE (acceptable).
     // =========================================================================
 
     @Nested
@@ -126,10 +166,6 @@ class CiphertextEnvelopeTest {
             assertEquals(versionId, extracted);
         }
     }
-
-    // =========================================================================
-    //  unwrapCiphertext() tests
-    // =========================================================================
 
     @Nested
     @DisplayName("unwrapCiphertext()")
@@ -197,10 +233,6 @@ class CiphertextEnvelopeTest {
         }
     }
 
-    // =========================================================================
-    //  Round‑trip consistency tests
-    // =========================================================================
-
     @Nested
     @DisplayName("Round trip")
     class RoundTripTest {
@@ -227,10 +259,6 @@ class CiphertextEnvelopeTest {
         }
     }
 
-    // =========================================================================
-    //  Additional edge cases: very large data (not exhaustive, just sanity)
-    // =========================================================================
-
     @Nested
     @DisplayName("Large data handling")
     class LargeDataTest {
@@ -251,34 +279,5 @@ class CiphertextEnvelopeTest {
             assertEquals(versionId, extractedVersion);
             assertArrayEquals(ciphertext, extractedCipher);
         }
-    }
-
-    // =========================================================================
-    //  Null handling – not defined by the original class; tests assume inputs are non‑null
-    //  If null is passed, the methods will throw NPE (acceptable).
-    // =========================================================================
-
-    @Test
-    @DisplayName("wrap throws NPE when versionId is null (documented behaviour)")
-    void testWrapNullVersionId() {
-        assertThrows(NullPointerException.class, () -> CiphertextEnvelope.wrap(null, new byte[0]));
-    }
-
-    @Test
-    @DisplayName("wrap throws NPE when ciphertext is null")
-    void testWrapNullCiphertext() {
-        assertThrows(NullPointerException.class, () -> CiphertextEnvelope.wrap("v1", null));
-    }
-
-    @Test
-    @DisplayName("unwrapVersionId throws NPE when wrapped is null")
-    void testUnwrapVersionIdNull() {
-        assertThrows(NullPointerException.class, () -> CiphertextEnvelope.unwrapVersionId(null));
-    }
-
-    @Test
-    @DisplayName("unwrapCiphertext throws NPE when wrapped is null")
-    void testUnwrapCiphertextNull() {
-        assertThrows(NullPointerException.class, () -> CiphertextEnvelope.unwrapCiphertext(null));
     }
 }

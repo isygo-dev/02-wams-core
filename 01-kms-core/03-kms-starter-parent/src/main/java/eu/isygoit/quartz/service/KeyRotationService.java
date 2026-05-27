@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class KeyRotateService extends AbstractJobService {
+public class KeyRotationService extends AbstractJobService {
 
     @Autowired
     private KmsKeyRepository kmsKeyRepository;

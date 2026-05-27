@@ -12,18 +12,16 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("Key Policy Validator - Functional Tests")
 class KeyPolicyValidatorTest {
 
-    private KeyPolicyValidator validator;
-    private ObjectMapper objectMapper;
-
     private static final String ROOT_PRINCIPAL = "wrn:wams:admin::123456789012:root";
     private static final String USER_PRINCIPAL = "wrn:wams:user::123456789012:alice";
     private static final String VALID_KEY_RESOURCE = "wrn:wams:kms::123456789012:key/abc-123";
+    private KeyPolicyValidator validator;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
@@ -640,16 +638,16 @@ class KeyPolicyValidatorTest {
         @DisplayName("should accept valid KMS key WRN formats")
         void testValidWrns(String wrn) {
             String policy = """
-            {
-              "Version": "2012-10-17",
-              "Statement": {
-                "Effect": "Allow",
-                "Principal": "*",
-                "Action": "kms:ListKeys",
-                "Resource": "%s"
-              }
-            }
-            """.formatted(wrn);
+                    {
+                      "Version": "2012-10-17",
+                      "Statement": {
+                        "Effect": "Allow",
+                        "Principal": "*",
+                        "Action": "kms:ListKeys",
+                        "Resource": "%s"
+                      }
+                    }
+                    """.formatted(wrn);
             validator.validateFullPolicy(policy);
         }
     }

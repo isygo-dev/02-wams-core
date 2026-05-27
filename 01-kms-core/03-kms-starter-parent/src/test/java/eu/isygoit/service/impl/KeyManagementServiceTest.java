@@ -3,17 +3,16 @@ package eu.isygoit.service.impl;
 import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.dto.data.KeyPairMaterial;
 import eu.isygoit.enums.*;
-import eu.isygoit.exception.*;
+import eu.isygoit.exception.InvalidKeyStateException;
+import eu.isygoit.exception.OperationNotAllowedException;
 import eu.isygoit.model.*;
 import eu.isygoit.repository.*;
 import eu.isygoit.service.ICryptoService;
 import eu.isygoit.validator.KeyPolicyValidator;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -33,6 +32,8 @@ import static org.mockito.Mockito.*;
 @DisplayName("KeyManagementService - Realistic User Stories")
 class KeyManagementServiceTest {
 
+    private final String tenant = "acme-corp";
+    private final String keyId = "123e4567-e89b-12d3-a456-426614174000";
     @Mock
     private KmsKeyRepository kmsKeyRepository;
     @Mock
@@ -49,12 +50,8 @@ class KeyManagementServiceTest {
     private ICryptoService cryptoService;
     @Mock
     private KeyPolicyValidator keyPolicyValidator;
-
     @InjectMocks
     private KeyManagementService keyManagementService;
-
-    private final String tenant = "acme-corp";
-    private final String keyId = "123e4567-e89b-12d3-a456-426614174000";
 
     private KmsKey createMockKey(IEnumKeyStatus.Types status, IEnumKeyOrigin.Types origin) {
         return KmsKey.builder()

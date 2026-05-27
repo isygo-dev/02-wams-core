@@ -73,7 +73,7 @@ public class PasswordExpiredJob extends AbstractQuartzJob {
     public Trigger passwordExpiredJobTrigger(@Autowired QuartzService quartzService,
                                              @Autowired @Qualifier("passwordExpiredJobDetail") JobDetail passwordExpiredJobDetail) {
         // Run at 00:00 every day
-        CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
+        CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.dailyAtHourAndMinute(3, 0);
 
         return quartzService.createJobTrigger(
                 passwordExpiredJobDetail,

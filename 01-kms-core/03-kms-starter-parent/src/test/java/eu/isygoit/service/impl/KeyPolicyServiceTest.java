@@ -1,6 +1,5 @@
 package eu.isygoit.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.isygoit.dto.KmsDtos.*;
@@ -37,6 +36,8 @@ import static org.mockito.Mockito.*;
 @DisplayName("KeyPolicyService - Realistic User Stories")
 class KeyPolicyServiceTest {
 
+    private final String tenant = "acme-corp";
+    private final String keyId = "123e4567-e89b-12d3-a456-426614174000";
     @Mock
     private KeyPolicyValidator keyPolicyValidator;
     @Mock
@@ -45,12 +46,8 @@ class KeyPolicyServiceTest {
     private KmsKeyGrantRepository kmsKeyGrantRepository;
     @Mock
     private ObjectMapper objectMapper;
-
     @InjectMocks
     private KeyPolicyService keyPolicyService;
-
-    private final String tenant = "acme-corp";
-    private final String keyId = "123e4567-e89b-12d3-a456-426614174000";
 
     // =========================================================================
     // User Story 1: Set a key policy (IAM-style policy) with validation

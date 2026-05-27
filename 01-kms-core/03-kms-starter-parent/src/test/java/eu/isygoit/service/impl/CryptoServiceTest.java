@@ -55,6 +55,22 @@ class CryptoServiceTest {
     // User Story 1: Symmetric encryption (AES-256)
     // ========================================================================
 
+    @Test
+    @DisplayName("Validate key integrity returns true for valid symmetric key")
+    void validateKeyIntegrity() {
+        IEnumKeySpec.Types spec = IEnumKeySpec.Types.SYMMETRIC_DEFAULT;
+        KeyPairMaterial material = cryptoService.generateKeyMaterial(spec);
+        byte[] validKey = material.privateKey();
+        assertThat(cryptoService.validateKeyIntegrity(validKey, spec)).isTrue();
+
+        assertThat(cryptoService.validateKeyIntegrity(null, spec)).isFalse();
+        assertThat(cryptoService.validateKeyIntegrity(new byte[0], spec)).isFalse();
+    }
+
+    // ========================================================================
+    // User Story 2: Asymmetric signing (RSA-2048)
+    // ========================================================================
+
     @Nested
     @DisplayName("Story 1: Symmetric encryption (AES-256)")
     class SymmetricEncryptionStory {
@@ -84,7 +100,7 @@ class CryptoServiceTest {
     }
 
     // ========================================================================
-    // User Story 2: Asymmetric signing (RSA-2048)
+    // User Story 3: Envelope encryption – generate and wrap a data key
     // ========================================================================
 
     @Nested
@@ -113,7 +129,7 @@ class CryptoServiceTest {
     }
 
     // ========================================================================
-    // User Story 3: Envelope encryption – generate and wrap a data key
+    // User Story 4: Audit trail – usage counters and last used date
     // ========================================================================
 
     @Nested
@@ -144,7 +160,7 @@ class CryptoServiceTest {
     }
 
     // ========================================================================
-    // User Story 4: Audit trail – usage counters and last used date
+    // Additional validation: key integrity check
     // ========================================================================
 
     @Nested
@@ -174,21 +190,5 @@ class CryptoServiceTest {
             assertThat(decryptCount).isEqualTo(7L);
             assertThat(lastUsedDate).isEqualTo(lastUsed);
         }
-    }
-
-    // ========================================================================
-    // Additional validation: key integrity check
-    // ========================================================================
-
-    @Test
-    @DisplayName("Validate key integrity returns true for valid symmetric key")
-    void validateKeyIntegrity() {
-        IEnumKeySpec.Types spec = IEnumKeySpec.Types.SYMMETRIC_DEFAULT;
-        KeyPairMaterial material = cryptoService.generateKeyMaterial(spec);
-        byte[] validKey = material.privateKey();
-        assertThat(cryptoService.validateKeyIntegrity(validKey, spec)).isTrue();
-
-        assertThat(cryptoService.validateKeyIntegrity(null, spec)).isFalse();
-        assertThat(cryptoService.validateKeyIntegrity(new byte[0], spec)).isFalse();
     }
 }

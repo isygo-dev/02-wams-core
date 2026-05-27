@@ -1,5 +1,6 @@
 package eu.isygoit.repository;
 
+import eu.isygoit.enums.IEnumKeyExpirationModel;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.model.KmsKey;
 import jakarta.validation.constraints.NotBlank;
@@ -32,5 +33,7 @@ public interface KmsKeyRepository extends JpaRepository<KmsKey, Long> {
 
     @Modifying
     void deleteByTenantAndKeyId(@Param("tenant") String tenant, @Param("keyId") String keyId);
+
+    List<KmsKey> findByTenantAndExpirationModelAndValidToBefore(String tenant, IEnumKeyExpirationModel.Types expirationModel, LocalDateTime validToBefore);
 }
 

@@ -1,6 +1,9 @@
 package eu.isygoit.service.impl;
 
-import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.dto.KmsDtos.ActiveVersionResponse;
+import eu.isygoit.dto.KmsDtos.DisableKeyVersionResponse;
+import eu.isygoit.dto.KmsDtos.EnableKeyVersionResponse;
+import eu.isygoit.dto.KmsDtos.ListKeyVersionsResponse;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.exception.InvalidKeyStateException;
 import eu.isygoit.exception.KeyNotFoundException;
@@ -31,16 +34,14 @@ import static org.mockito.Mockito.*;
 @DisplayName("KeyVersionService - Realistic User Stories")
 class KeyVersionServiceTest {
 
-    @Mock
-    private KmsKeyVersionRepository kmsKeyVersionRepository;
-
-    @InjectMocks
-    private KeyVersionService keyVersionService;
-
     private final String tenant = "acme-corp";
     private final String keyId = "123e4567-e89b-12d3-a456-426614174000";
     private final String versionId = "v-1a2b3c4d";
     private final String anotherVersionId = "v-5e6f7g8h";
+    @Mock
+    private KmsKeyVersionRepository kmsKeyVersionRepository;
+    @InjectMocks
+    private KeyVersionService keyVersionService;
 
     // Helper: create a mock KmsKeyVersion
     private KmsKeyVersion createMockVersion(String keyId, String versionId, IEnumKeyStatus.Types status) {
