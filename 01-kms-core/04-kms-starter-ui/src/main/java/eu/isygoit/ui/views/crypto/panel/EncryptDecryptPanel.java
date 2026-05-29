@@ -18,6 +18,7 @@ import eu.isygoit.mapper.AlgorithmMapper;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.views.crypto.CryptoPanelUtils;
 import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class EncryptDecryptPanel extends VerticalLayout {
 
     private final KmsApiService kmsApiService;
@@ -150,11 +152,14 @@ public class EncryptDecryptPanel extends VerticalLayout {
                 ciphertextArea.setValue(response.getBody().getCiphertextBlob());
                 notifySuccess("Encryption successful");
             } else {
+                log.error("Encryption failed: {}", response.getBody());
                 notifyError("Encryption failed");
             }
         } catch (FeignException ex) {
+            log.error("Encryption error: {}", ex.status() == 500 ? ex.contentUTF8() : ex.getMessage());
             notifyError("Encryption error: " + (ex.status() == 500 ? ex.contentUTF8() : ex.getMessage()));
         } catch (Exception ex) {
+            log.error("Encryption error: {}", ex.getMessage());
             notifyError("Encryption error: " + ex.getMessage());
         }
     }
@@ -185,11 +190,14 @@ public class EncryptDecryptPanel extends VerticalLayout {
                 plaintextArea.setValue(plainText);
                 notifySuccess("Decryption successful");
             } else {
+                log.error("Decryption failed: {}", response.getBody());
                 notifyError("Decryption failed");
             }
         } catch (FeignException ex) {
+            log.error("Decryption error: {}", ex.status() == 500 ? ex.contentUTF8() : ex.getMessage());
             notifyError("Decryption error: " + (ex.status() == 500 ? ex.contentUTF8() : ex.getMessage()));
         } catch (Exception ex) {
+            log.error("Decryption error: {}", ex.getMessage());
             notifyError("Decryption error: " + ex.getMessage());
         }
     }

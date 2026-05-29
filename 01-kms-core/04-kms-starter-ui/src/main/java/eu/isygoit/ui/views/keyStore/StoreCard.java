@@ -14,6 +14,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
+import eu.isygoit.helper.DateHelper;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.views.AbstractKmsCard;
 import eu.isygoit.ui.views.keyStore.dialog.DeleteCustomKeyStoreDialog;
@@ -23,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +54,7 @@ class StoreCard extends AbstractKmsCard<CustomKeyStoresView> {
         this.storeStatus = store.getStatus() != null ? store.getStatus().name() : "UNKNOWN";
         this.connectionState = store.getConnectionState();
         this.creationDate = store.getCreateDate() != null
-                ? store.getCreateDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : "-";
+                ? DateHelper.formatToHumanReadable(store.getCreateDate()) : "-";
         this.errorCode = store.getConnectionError();
         initCard();
     }
@@ -111,7 +111,7 @@ class StoreCard extends AbstractKmsCard<CustomKeyStoresView> {
 
         // Meta row 1: created, updated, error
         String updated = store.getUpdateDate() != null
-                ? "Updated: " + store.getUpdateDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : null;
+                ? "Updated: " + DateHelper.formatToHumanReadable(store.getUpdateDate()) : null;
         String error = (errorCode != null && !errorCode.isEmpty()) ? "Error: " + errorCode : null;
         addMetaRow("Created: " + creationDate, updated, error);
 
@@ -130,9 +130,9 @@ class StoreCard extends AbstractKmsCard<CustomKeyStoresView> {
         String health = store.getHealthStatus() != null ? "Health: " + store.getHealthStatus() : null;
         String maxKeys = store.getMaxKeys() != null ? "Max keys: " + store.getMaxKeys() : null;
         String lastConn = store.getLastSuccessfulConnection() != null
-                ? "Last connected: " + store.getLastSuccessfulConnection().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : null;
+                ? "Last connected: " + DateHelper.formatToHumanReadable(store.getLastSuccessfulConnection()) : null;
         String lastAttempt = store.getLastConnectionAttempt() != null
-                ? "Last attempt: " + store.getLastConnectionAttempt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : null;
+                ? "Last attempt: " + DateHelper.formatToHumanReadable(store.getLastConnectionAttempt()) : null;
         addMetaRow(health, maxKeys, lastConn, lastAttempt);
 
         // Meta row 4: connection settings

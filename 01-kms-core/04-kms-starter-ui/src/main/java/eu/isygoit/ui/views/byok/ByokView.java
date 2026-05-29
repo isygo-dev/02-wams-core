@@ -25,6 +25,7 @@ import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.enums.IEnumKeyExpirationModel;
 import eu.isygoit.enums.IEnumKeyOrigin;
 import eu.isygoit.enums.IEnumKeyStatus;
+import eu.isygoit.helper.DateHelper;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainLayout;
 import eu.isygoit.util.RsaEncryptionUtil;
@@ -37,7 +38,6 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -476,7 +476,7 @@ public class ByokView extends VerticalLayout {
                 parametersValidUntil = params.getValidTo();
 
                 String expiryMsg = parametersValidUntil != null ?
-                        "Parameters valid until: " + parametersValidUntil.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) :
+                        "Parameters valid until: " + DateHelper.formatToHumanReadable(parametersValidUntil) :
                         "Parameters generated (no expiry provided)";
                 paramsExpiryInfo.setText(expiryMsg);
                 paramsExpiryInfo.addClassName(LumoUtility.FontSize.XSMALL);

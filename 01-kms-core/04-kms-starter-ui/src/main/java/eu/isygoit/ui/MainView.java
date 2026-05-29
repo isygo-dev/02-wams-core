@@ -26,6 +26,7 @@ import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.enums.IEnumKeyUsage;
+import eu.isygoit.helper.DateHelper;
 import eu.isygoit.remote.kms.KmsApiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,6 @@ import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -509,7 +509,7 @@ public class MainView extends VerticalLayout {
 
                         if (stats.getLastUsedDate() != null) {
                             usageStatsContainer.add(
-                                    createSmallStatCard("Last Used", stats.getLastUsedDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                                    createSmallStatCard("Last Used", DateHelper.formatToHumanReadable(stats.getLastUsedDate()))
                             );
                         }
 
@@ -612,7 +612,7 @@ public class MainView extends VerticalLayout {
         auditGrid.setVisible(false);
         auditGrid.addColumn(new ComponentRenderer<>(entry -> {
             LocalDateTime ts = entry.getTimestamp();
-            String formatted = ts != null ? ts.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : "-";
+            String formatted = ts != null ? DateHelper.formatToHumanReadable(ts) : "-";
             return new Span(formatted);
         })).setHeader("Timestamp").setSortable(true).setResizable(true);
         auditGrid.addColumn(AuditLogResponse.LogEntry::getAction).setHeader("Action").setSortable(true).setResizable(true);

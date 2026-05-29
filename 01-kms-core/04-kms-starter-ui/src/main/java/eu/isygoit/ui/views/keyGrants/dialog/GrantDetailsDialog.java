@@ -6,8 +6,7 @@ import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.KmsDtos;
-
-import java.time.format.DateTimeFormatter;
+import eu.isygoit.helper.DateHelper;
 
 public class GrantDetailsDialog extends Dialog {
 
@@ -26,7 +25,7 @@ public class GrantDetailsDialog extends Dialog {
         content.add(createDetailRow("Name", grant.getName()));
         content.add(createDetailRow("Status", grant.getStatus()));
         if (grant.getCreateDate() != null) {
-            content.add(createDetailRow("Creation Date", grant.getCreateDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
+            content.add(createDetailRow("Creation Date", DateHelper.formatToHumanReadable(grant.getCreateDate())));
         }
         if (grant.getOperations() != null) {
             content.add(createDetailRow("Operations", String.join(", ", grant.getOperations())));

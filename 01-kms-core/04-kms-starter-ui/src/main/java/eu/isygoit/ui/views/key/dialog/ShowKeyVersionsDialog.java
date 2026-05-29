@@ -10,11 +10,11 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.enums.IEnumKeyStatus;
+import eu.isygoit.helper.DateHelper;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.views.BaseActionDialog;
 import org.springframework.http.ResponseEntity;
 
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -98,7 +98,7 @@ public class ShowKeyVersionsDialog extends BaseActionDialog {
 
         // Creation date column – simple string formatting, sortable
         grid.addColumn(version -> version.getCreateDate() != null ?
-                        version.getCreateDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : "-")
+                        DateHelper.formatToHumanReadable(version.getCreateDate()) : "-")
                 .setHeader("Creation Date")
                 .setSortable(true)
                 .setResizable(true);
@@ -113,12 +113,13 @@ public class ShowKeyVersionsDialog extends BaseActionDialog {
 
         // Deactivation date column
         grid.addColumn(version -> version.getDeactivationDate() != null ?
-                        version.getDeactivationDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : "-")
+                        DateHelper.formatToHumanReadable(version.getDeactivationDate()) : "-")
                 .setHeader("Deactivation Date").setResizable(true);
 
+        ;
         // Expiry date column
         grid.addColumn(version -> version.getValidTo() != null ?
-                        version.getValidTo().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : "-")
+                        DateHelper.formatToHumanReadable(version.getValidTo().toLocalDate()) : "-")
                 .setHeader("Expiry Date").setResizable(true);
 
         // --- ACTIONS COLUMN with both Enable/Disable icon buttons ---
