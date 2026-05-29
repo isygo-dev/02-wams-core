@@ -269,7 +269,10 @@ public final class KmsDtos {
             private Object multiRegionConfiguration;
 
             @Schema(description = "Pending deletion window in days (if key is pending deletion)")
-            private Integer pendingDeletionWindowDays;;
+            private Integer pendingDeletionWindowDays;
+
+            @Schema(description = "Date when the key will be permanently deleted (if key is pending deletion)")
+            private LocalDateTime deletionDate;
         }
     }
 

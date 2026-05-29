@@ -35,7 +35,7 @@ public class ScheduleKeyDeletionDialog extends BaseActionDialog {
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
         this.parentView = parentView;
-        this.days = days!=null ? days : 30; // default to 30 if not provided
+        this.days = days != null ? days : 30; // default to 30 if not provided
 
         setOkButtonText("Schedule");
         setWidth("400px");

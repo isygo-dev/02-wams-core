@@ -280,6 +280,7 @@ public class KeyManagementService implements IKeyManagementService {
                 .multiRegion(key.getMultiRegion())
                 .enabled(IEnumKeyStatus.Types.ENABLED.equals(key.getKeyStatus()))
                 .pendingDeletionWindowDays(key.getPendingDeletionWindowDays())
+                .deletionDate(key.getDeletionDate())
                 .build();
 
         return DescribeKeyResponse.builder().keyMetadata(metadata).build();

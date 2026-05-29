@@ -5,12 +5,9 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -18,14 +15,16 @@ import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
 import eu.isygoit.dto.KmsDtos.ListKeyVersionsResponse;
 import eu.isygoit.dto.KmsDtos.ListResourceTagsResponse;
 import eu.isygoit.enums.IEnumKeyStatus;
+import eu.isygoit.helper.DateHelper;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainView;
 import eu.isygoit.ui.views.AbstractKmsCard;
 import eu.isygoit.ui.views.key.dialog.*;
-import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +49,9 @@ class KeyCard extends AbstractKmsCard<KeyManagementView> {
     private Button versionsBtn;
     private Button moreBtn;
     private int versionCount = 0;
+
+    // Deletion warning banner (appears on card when key is pending deletion)
+    private Span deletionWarningSpan;
 
     // Context menu reference to avoid duplicate attachments
     private ContextMenu currentContextMenu;
@@ -162,6 +164,11 @@ class KeyCard extends AbstractKmsCard<KeyManagementView> {
         metaRow2.getStyle().set("margin-top", "var(--lumo-space-xs)").set("flex-wrap", "wrap");
         updateMetaRow2();
         add(metaRow2);
+
+        // Deletion warning banner (initially hidden, shown if pending deletion)
+        createDeletionWarningSpan();
+        updateDeletionWarning();
+        add(deletionWarningSpan);
     }
 
     @Override
@@ -195,6 +202,7 @@ class KeyCard extends AbstractKmsCard<KeyManagementView> {
                     updateMetaRow1();
                     updateMetaRow2();
                     updateRotationButton();
+                    updateDeletionWarning();   // show/hide warning based on pending status
                     loadVersionCount();
                     // Refresh the context menu to reflect updated key state
                     attachContextMenu(moreBtn);
@@ -205,13 +213,66 @@ class KeyCard extends AbstractKmsCard<KeyManagementView> {
         }));
     }
 
+    // ── Deletion warning banner (on card) ─────────────────────────────────────
+
+    private void createDeletionWarningSpan() {
+        deletionWarningSpan = new Span();
+        deletionWarningSpan.addClassName(LumoUtility.Background.ERROR_10);
+        deletionWarningSpan.addClassName(LumoUtility.TextColor.ERROR);
+        deletionWarningSpan.addClassName(LumoUtility.Padding.SMALL);
+        deletionWarningSpan.addClassName(LumoUtility.BorderRadius.MEDIUM);
+        deletionWarningSpan.getStyle()
+                .set("display", "flex")
+                .set("align-items", "center")
+                .set("gap", "var(--lumo-space-s)")
+                .set("margin-top", "var(--lumo-space-m)");
+        deletionWarningSpan.setVisible(false);
+    }
+
+    private void updateDeletionWarning() {
+        if (deletionWarningSpan == null) return;
+
+        boolean isPending = "PENDING_DELETION".equalsIgnoreCase(statusText);
+        if (isPending) {
+            String warningText = buildDeletionWarning();
+            deletionWarningSpan.removeAll();
+            deletionWarningSpan.add(VaadinIcon.EXCLAMATION_CIRCLE.create());
+            deletionWarningSpan.add(new Span(warningText));
+            deletionWarningSpan.setVisible(true);
+        } else {
+            deletionWarningSpan.setVisible(false);
+        }
+    }
+
+    /**
+     * Builds a warning message for pending deletion.
+     * If deletionDate is available, shows remaining days; otherwise falls back to pendingDeletionWindowDays.
+     */
+    private String buildDeletionWarning() {
+        if (metadata == null) return "Key is scheduled for deletion";
+
+        LocalDateTime deletionDate = metadata.getDeletionDate();
+        if (deletionDate != null) {
+            long daysRemaining = ChronoUnit.DAYS.between(LocalDateTime.now(), deletionDate);
+            if (daysRemaining > 0) {
+                return "Key will be deleted in " + daysRemaining + " days";
+            } else if (daysRemaining == 0) {
+                return "Key will be deleted today";
+            } else {
+                return "Key deletion is overdue";
+            }
+        }
+
+        return "Key is scheduled for deletion";
+    }
+
     // ── Context menu helper (refreshes on every call) ────────────────────────
 
     private void attachContextMenu(Button button) {
         // Remove existing context menu if any
         if (currentContextMenu != null) {
-            currentContextMenu.setTarget(null); // detach from button
-            currentContextMenu.removeAll(); // clear items
+            currentContextMenu.setTarget(null);
+            currentContextMenu.removeAll();
         }
         // Create new context menu
         ContextMenu contextMenu = new ContextMenu();
@@ -222,7 +283,6 @@ class KeyCard extends AbstractKmsCard<KeyManagementView> {
     }
 
     private void populateContextMenu(ContextMenu contextMenu) {
-        // Clear any existing items (double safety)
         contextMenu.getItems().clear();
 
         // ---------- Enable / Disable key ----------
@@ -252,11 +312,13 @@ class KeyCard extends AbstractKmsCard<KeyManagementView> {
         // ---------- Cancellation / permanent deletion (only if pending) ----------
         boolean isPending = "PENDING_DELETION".equalsIgnoreCase(statusText);
         if (isPending) {
+            // Cancel deletion
             HorizontalLayout cancelItem = new HorizontalLayout(VaadinIcon.REFRESH.create(), new Span("Cancel deletion"));
             cancelItem.setSpacing(true);
             cancelItem.setAlignItems(FlexComponent.Alignment.CENTER);
             contextMenu.addItem(cancelItem, e -> cancelDeletion());
 
+            // Permanently delete
             HorizontalLayout deleteItem = new HorizontalLayout(VaadinIcon.TRASH.create(), new Span("Permanently delete"));
             deleteItem.setSpacing(true);
             deleteItem.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -268,7 +330,8 @@ class KeyCard extends AbstractKmsCard<KeyManagementView> {
             disabledItem.setSpacing(true);
             disabledItem.setAlignItems(FlexComponent.Alignment.CENTER);
             disabledItem.getStyle().set("opacity", "0.5");
-            contextMenu.addItem(disabledItem, e -> {}); // empty listener does nothing
+            contextMenu.addItem(disabledItem, e -> {
+            });
         }
     }
 
@@ -308,7 +371,7 @@ class KeyCard extends AbstractKmsCard<KeyManagementView> {
         String keySpec = metadata != null && metadata.getKeySpec() != null ? metadata.getKeySpec().name() : "N/A";
         String keyUsage = metadata != null && metadata.getKeyUsage() != null ? metadata.getKeyUsage().name() : "N/A";
         String created = metadata != null && metadata.getCreateDate() != null
-                ? metadata.getCreateDate().toLocalDate().toString() : "Unknown";
+                ? DateHelper.formatToHumanReadable(metadata.getCreateDate().toLocalDate()) : "Unknown";
         String region = metadata != null && Boolean.TRUE.equals(metadata.getMultiRegion())
                 ? "🌍 Multi-region" : "📍 Single-region";
 
