@@ -239,15 +239,14 @@ public class AliasesView extends VerticalLayout {
         toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         toolbar.addClassName("aliases-toolbar");
 
-        // Left group: search field + refresh
+        // Left group: search field only (no status filter for aliases)
         HorizontalLayout leftGroup = new HorizontalLayout();
         leftGroup.setSpacing(true);
         leftGroup.setAlignItems(FlexComponent.Alignment.END);
         searchField.setWidth("200px");
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        leftGroup.add(searchField, refreshButton);
+        leftGroup.add(searchField);
 
-        // Center group: pagination controls
+        // Center group: pagination controls (identical to KeyManagementView)
         HorizontalLayout centerGroup = new HorizontalLayout();
         centerGroup.setSpacing(true);
         centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -259,12 +258,14 @@ public class AliasesView extends VerticalLayout {
         totalCountLabel.getStyle().set("margin", "0 0.5rem");
         centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
 
-        // Right group: create button
+        // Right group: refresh + create button (refresh moved from left to right)
         HorizontalLayout rightGroup = new HorizontalLayout();
         rightGroup.setSpacing(true);
         rightGroup.setAlignItems(FlexComponent.Alignment.END);
+        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        refreshButton.setTooltipText("Refresh aliases");
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        rightGroup.add(createButton);
+        rightGroup.add(refreshButton, createButton);
 
         toolbar.add(leftGroup, centerGroup, rightGroup);
         return toolbar;
@@ -309,7 +310,6 @@ public class AliasesView extends VerticalLayout {
     public List<String> fetchKeyIds() {
         List<String> keyIds = new ArrayList<>();
         try {
-            // Fetch up to 100 keys for the dropdown (simple, non‑paginated)
             ResponseEntity<ListKeysResponse> response = kmsApiService.listKeys(100, null);
             ListKeysResponse keys = response.getBody();
             if (keys != null && keys.getKeys() != null) {
