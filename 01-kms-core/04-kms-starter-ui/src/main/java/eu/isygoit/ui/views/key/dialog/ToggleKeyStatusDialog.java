@@ -19,7 +19,7 @@ public class ToggleKeyStatusDialog extends BaseActionDialog {
 
     private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;
-    private final Runnable onSuccess;
+
 
     private final String keyId;
     private final boolean currentlyEnabled;
@@ -27,12 +27,11 @@ public class ToggleKeyStatusDialog extends BaseActionDialog {
 
     public ToggleKeyStatusDialog(KeyManagementView parentView,
                                  KmsApiService kmsApiService,
-                                 Runnable onSuccess,
                                  String keyId,
-                                 boolean currentlyEnabled) {
+                                 boolean currentlyEnabled,
+                                 Runnable onSuccess) {
         super(currentlyEnabled ? "Disable key" : "Enable key", onSuccess);
         this.kmsApiService = kmsApiService;
-        this.onSuccess = onSuccess;
         this.keyId = keyId;
         this.currentlyEnabled = currentlyEnabled;
         this.parentView = parentView;

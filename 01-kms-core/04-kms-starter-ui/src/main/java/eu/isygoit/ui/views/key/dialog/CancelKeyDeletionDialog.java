@@ -18,23 +18,20 @@ public class CancelKeyDeletionDialog extends BaseActionDialog {
 
     private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;
-    private final Runnable onSuccess;
 
     private final String keyId;
     private final String keyAliasOrId;
 
-
     public CancelKeyDeletionDialog(KeyManagementView parentView,
                                    KmsApiService kmsApiService,
-                                   Runnable onSuccess,
                                    String keyId,
-                                   String keyAliasOrId) {
+                                   String keyAliasOrId,
+                                   Runnable onSuccess) {
         super("Cancel deletion", onSuccess);
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
         this.keyAliasOrId = keyAliasOrId;
         this.parentView = parentView;
-        this.onSuccess = onSuccess;
 
         setOkButtonText("Yes, cancel");
         setWidth("450px");

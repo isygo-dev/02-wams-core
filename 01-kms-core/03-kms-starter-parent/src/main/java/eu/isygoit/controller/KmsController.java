@@ -515,12 +515,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
-            UpdateKeyRotationRequest internalRequest = UpdateKeyRotationRequest.builder()
-                    .enableRotation(true)
-                    .rotationPeriodInDays(365)
-                    .applyImmediately(true)
-                    .build();
-            keyManagementService.updateKeyRotation(tenant, keyId, internalRequest);
+            keyManagementService.enableKeyRotation(tenant, keyId);
             auditService.logAction(tenant, IKmsActionType.Types.UPDATE_KEY_ROTATION, keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());
@@ -535,11 +530,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
-            UpdateKeyRotationRequest internalRequest = UpdateKeyRotationRequest.builder()
-                    .enableRotation(false)
-                    .applyImmediately(true)
-                    .build();
-            keyManagementService.updateKeyRotation(tenant, keyId, internalRequest);
+            keyManagementService.disableKeyRotation(tenant, keyId);
             auditService.logAction(tenant, IKmsActionType.Types.UPDATE_KEY_ROTATION, keyId,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());
@@ -954,11 +945,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<CreateAliasResponse> createAlias(CreateAliasRequest request) {
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            CreateAliasRequest internalReq = CreateAliasRequest.builder()
-                    .aliasName(request.getAliasName())
-                    .targetKeyId(request.getTargetKeyId())
-                    .build();
-            keyManagementService.createAlias(tenant, internalReq);
+            keyManagementService.createAlias(tenant, request);
             auditService.logAction(tenant, IKmsActionType.Types.CREATE_ALIAS, request.getTargetKeyId(),
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());
@@ -975,10 +962,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {
-            UpdateAliasRequest internalReq = UpdateAliasRequest.builder()
-                    .targetKeyId(request.getTargetKeyId())
-                    .build();
-            keyManagementService.updateAlias(tenant, aliasName, internalReq);
+            keyManagementService.updateAlias(tenant, aliasName, request);
             auditService.logAction(tenant, IKmsActionType.Types.UPDATE_ALIAS, aliasName,
                     requestContextService.getCurrentContext().getSenderUser(),
                     requestContextService.getCurrentContext().getClientIp());

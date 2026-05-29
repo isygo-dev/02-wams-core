@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KeyVersionsDialog extends BaseActionDialog {
+public class ShowKeyVersionsDialog extends BaseActionDialog {
 
     private final KmsApiService kmsApiService;
     private final String keyId;
@@ -26,8 +26,10 @@ public class KeyVersionsDialog extends BaseActionDialog {
     private final Grid<KmsDtos.ListKeyVersionsResponse.KeyVersion> grid = new Grid<>();
     private final ProgressBar loadingBar = new ProgressBar();
 
-    public KeyVersionsDialog(KmsApiService kmsApiService, String keyId, String aliasOrId) {
-        super("Key Versions: " + aliasOrId, null);
+    public ShowKeyVersionsDialog(KmsApiService kmsApiService,
+                                 String keyId,
+                                 String aliasOrId) {
+        super("Key Versions: " + aliasOrId);
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
         this.aliasOrId = aliasOrId;

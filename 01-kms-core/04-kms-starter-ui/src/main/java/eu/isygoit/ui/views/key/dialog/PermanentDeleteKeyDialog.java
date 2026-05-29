@@ -9,16 +9,16 @@ import eu.isygoit.ui.views.key.KeyManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class PermanentKeyDeleteDialog extends PinBaseActionDialog {
+public class PermanentDeleteKeyDialog extends PinBaseActionDialog {
 
     private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;
     private final String keyId;
 
-    public PermanentKeyDeleteDialog(KeyManagementView parentView,
+    public PermanentDeleteKeyDialog(KeyManagementView parentView,
                                     KmsApiService kmsApiService,
-                                    Runnable onSuccess,
-                                    String keyId) {
+                                    String keyId,
+                                    Runnable onSuccess) {
         super("Permanently delete key",
                 "This action is irreversible. The key will be permanently removed.",
                 onSuccess);

@@ -227,7 +227,9 @@ public class CryptoOperationsView extends VerticalLayout {
                 updateTabBasedOnKey();
             }
         } catch (FeignException e) {
-            Notification.show("Failed to load keys: " + (e.status() == 500 ? e.contentUTF8() : e.getMessage()));
+            Notification.show("Failed to load keys: " + (e.status() == 500 ? e.contentUTF8() : e.getMessage()))
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            ;
             log.error("Failed to load keys: {}", e.getMessage());
         } catch (Exception e) {
             Notification.show("Failed to load keys: " + e.getMessage(), 6000, Notification.Position.TOP_END)
@@ -267,7 +269,9 @@ public class CryptoOperationsView extends VerticalLayout {
                 updateTabBasedOnKey();
             }
         } catch (FeignException e) {
-            Notification.show("Failed to load key metadata: " + (e.status() == 500 ? e.contentUTF8() : e.getMessage()));
+            Notification.show("Failed to load key metadata: " + (e.status() == 500 ? e.contentUTF8() : e.getMessage()))
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            ;
             log.error("Failed to load key metadata for keyId: {}", selectedKeyId, e);
         } catch (Exception e) {
             Notification.show("Failed to load key metadata", 6000, Notification.Position.TOP_END)

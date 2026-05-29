@@ -2,21 +2,20 @@ package eu.isygoit.ui.views.keyStore;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.views.AbstractKmsCard;
 import eu.isygoit.ui.views.keyStore.dialog.DeleteCustomKeyStoreDialog;
 import eu.isygoit.ui.views.keyStore.dialog.UpdateCustomKeyStoreDialog;
 import feign.FeignException;
@@ -25,13 +24,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
-class StoreCard extends VerticalLayout {
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-    private final CustomKeyStoresView parentView;
-    private final KmsApiService kmsApiService;
+class StoreCard extends AbstractKmsCard<CustomKeyStoresView> {
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
     private final KmsDtos.DescribeCustomKeyStoreResponse.CustomKeyStore store;
     private final Long storeId;
     private final String storeName;
@@ -41,53 +41,39 @@ class StoreCard extends VerticalLayout {
     private final String creationDate;
     private final String errorCode;
 
-    public StoreCard(CustomKeyStoresView customKeyStoresView, KmsApiService kmsApiService, KmsDtos.DescribeCustomKeyStoreResponse.CustomKeyStore store) {
-        this.parentView = customKeyStoresView;
-        this.kmsApiService = kmsApiService;
+    // ── Constructor ───────────────────────────────────────────────────────────
+
+    StoreCard(CustomKeyStoresView customKeyStoresView,
+              KmsApiService kmsApiService,
+              KmsDtos.DescribeCustomKeyStoreResponse.CustomKeyStore store) {
+        super(customKeyStoresView, kmsApiService);
         this.store = store;
         this.storeId = store.getCustomKeyStoreId();
         this.storeName = store.getName();
         this.storeType = store.getCustomKeyStoreType();
         this.storeStatus = store.getStatus() != null ? store.getStatus().name() : "UNKNOWN";
         this.connectionState = store.getConnectionState();
-        this.creationDate = store.getCreateDate() != null ?
-                store.getCreateDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : "-";
+        this.creationDate = store.getCreateDate() != null
+                ? store.getCreateDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : "-";
         this.errorCode = store.getConnectionError();
-        buildCard();
-        addClassName("store-card");
-        injectResponsiveStyles();
+        initCard();
     }
 
-    private void buildCard() {
-        setWidthFull();
-        setMargin(false);
-        setPadding(true);
-        addClassName(LumoUtility.BorderRadius.LARGE);
-        addClassName(LumoUtility.Background.BASE);
-        addClassName(LumoUtility.BoxShadow.XSMALL);
-        getStyle().set("transition", "all 0.2s ease-in-out");
-        addClassName("hover:shadow-m");
+    // ── AbstractKmsCard contract ──────────────────────────────────────────────
 
-        // Header row: store name (left) and action buttons (right)
-        HorizontalLayout headerRow = new HorizontalLayout();
-        headerRow.setWidthFull();
-        headerRow.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        headerRow.getStyle().set("flex-wrap", "wrap");
-        headerRow.setSpacing(true);
-        headerRow.addClassName("store-header-row");
+    @Override
+    protected String cardCssClassName() {
+        return "store-card";
+    }
 
-        Span nameSpan = new Span(storeName);
-        nameSpan.addClassName(LumoUtility.FontWeight.BOLD);
-        nameSpan.addClassName(LumoUtility.FontSize.MEDIUM);
-        nameSpan.getStyle().set("word-break", "break-word");
+    @Override
+    protected Component buildTitle() {
+        // For StoreCard the title is just the name span; chips are added in buildBodyRows
+        return buildTitleSpan(storeName, storeName);
+    }
 
-        HorizontalLayout buttonBar = new HorizontalLayout();
-        buttonBar.setSpacing(true);
-        buttonBar.setPadding(false);
-        buttonBar.getStyle().set("flex-wrap", "wrap");
-        buttonBar.addClassName("store-button-bar");
-
+    @Override
+    protected List<Button> buildActionButtons() {
         Button connectBtn = createIconButton(VaadinIcon.CONNECT, "Connect");
         connectBtn.addClickListener(e -> confirmConnect());
         if ("CONNECTED".equalsIgnoreCase(connectionState)) {
@@ -105,305 +91,157 @@ class StoreCard extends VerticalLayout {
         Button updateBtn = createIconButton(VaadinIcon.EDIT, "Update store");
         updateBtn.addClickListener(e -> updateCustomKeyStore());
 
-        Button deleteBtn = createIconButton(VaadinIcon.TRASH, "Delete store");
-        deleteBtn.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, "Delete store");
         deleteBtn.addClickListener(e -> confirmDelete());
 
-        buttonBar.add(connectBtn, disconnectBtn, updateBtn, deleteBtn);
-        headerRow.add(nameSpan, buttonBar);
-        add(headerRow);
+        return List.of(connectBtn, disconnectBtn, updateBtn, deleteBtn);
+    }
 
-        // Type and status chips
+    @Override
+    protected void buildBodyRows() {
+        // Type + connection-state chips
         HorizontalLayout typeStatusRow = new HorizontalLayout();
         typeStatusRow.setSpacing(true);
         typeStatusRow.setAlignItems(FlexComponent.Alignment.CENTER);
         typeStatusRow.getStyle().set("flex-wrap", "wrap");
-        typeStatusRow.addClassName("store-type-status");
 
-        Span typeChip = new Span(storeType);
-        typeChip.addClassName(LumoUtility.FontSize.XSMALL);
-        typeChip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
-        typeChip.addClassName(LumoUtility.Padding.Vertical.XSMALL);
-        typeChip.addClassName(LumoUtility.BorderRadius.LARGE);
-        typeChip.getStyle().set("background-color", "#E9ECEF").set("color", "#495057");
-
-        Span statusChip = new Span(storeStatus);
-        statusChip.addClassName(LumoUtility.FontSize.XSMALL);
-        statusChip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
-        statusChip.addClassName(LumoUtility.Padding.Vertical.XSMALL);
-        statusChip.addClassName(LumoUtility.BorderRadius.LARGE);
-        if ("CONNECTED".equalsIgnoreCase(storeStatus)) {
-            statusChip.getStyle().set("background-color", "#E3F7E5").set("color", "#1E7B2E");
-        } else if ("DISCONNECTED".equalsIgnoreCase(storeStatus)) {
-            statusChip.getStyle().set("background-color", "#F2F4F8").set("color", "#5E6C84");
-        } else {
-            statusChip.getStyle().set("background-color", "#FEF3F2").set("color", "#C73A2B");
-        }
-        typeStatusRow.add(typeChip, statusChip);
+        typeStatusRow.add(buildStatusChip(storeType, ChipColor.INFO));
+        typeStatusRow.add(buildStatusChip(connectionState != null ? connectionState : storeStatus, storeStatus));
         add(typeStatusRow);
 
-        // Metadata row 1: creation date, error code, update date
-        HorizontalLayout metaRow1 = new HorizontalLayout();
-        metaRow1.setSpacing(true);
-        metaRow1.addClassName(LumoUtility.FontSize.XSMALL);
-        metaRow1.addClassName(LumoUtility.TextColor.TERTIARY);
-        metaRow1.getStyle().set("margin-top", "var(--lumo-space-xs)");
-        metaRow1.getStyle().set("flex-wrap", "wrap");
-        metaRow1.addClassName("store-meta-row");
+        // Meta row 1: created, updated, error
+        String updated = store.getUpdateDate() != null
+                ? "Updated: " + store.getUpdateDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : null;
+        String error = (errorCode != null && !errorCode.isEmpty()) ? "Error: " + errorCode : null;
+        addMetaRow("Created: " + creationDate, updated, error);
 
-        metaRow1.add(new Span("Created: " + creationDate));
-        if (store.getUpdateDate() != null) {
-            metaRow1.add(new Span("•"));
-            metaRow1.add(new Span("Updated: " + store.getUpdateDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
-        }
-        if (errorCode != null && !errorCode.isEmpty()) {
-            metaRow1.add(new Span("•"));
-            metaRow1.add(new Span("Error: " + errorCode));
-        }
-        add(metaRow1);
-
-        // Metadata row 2: CloudHSM or XKS specific details
+        // CloudHSM or XKS details
         if (store.getCloudHsmClusterId() != null && !store.getCloudHsmClusterId().isEmpty()) {
-            HorizontalLayout hsmRow = new HorizontalLayout();
-            hsmRow.setSpacing(true);
-            hsmRow.addClassName(LumoUtility.FontSize.XSMALL);
-            hsmRow.addClassName(LumoUtility.TextColor.TERTIARY);
-            hsmRow.getStyle().set("flex-wrap", "wrap");
-            hsmRow.add(new Span("CloudHSM: " + store.getCloudHsmClusterId()));
-            add(hsmRow);
+            addMetaRow("CloudHSM: " + store.getCloudHsmClusterId());
         } else if (store.getXksProxyUriEndpoint() != null && !store.getXksProxyUriEndpoint().isEmpty()) {
-            HorizontalLayout xksRow = new HorizontalLayout();
-            xksRow.setSpacing(true);
-            xksRow.addClassName(LumoUtility.FontSize.XSMALL);
-            xksRow.addClassName(LumoUtility.TextColor.TERTIARY);
-            xksRow.getStyle().set("flex-wrap", "wrap");
-            xksRow.add(new Span("XKS Endpoint: " + store.getXksProxyUriEndpoint()));
-            if (store.getXksProxyUriPath() != null && !store.getXksProxyUriPath().isEmpty()) {
-                xksRow.add(new Span("•"));
-                xksRow.add(new Span("Path: " + store.getXksProxyUriPath()));
-            }
-            if (store.getXksProxyConnectivity() != null && !store.getXksProxyConnectivity().isEmpty()) {
-                xksRow.add(new Span("•"));
-                xksRow.add(new Span("Connectivity: " + store.getXksProxyConnectivity()));
-            }
-            add(xksRow);
+            String path = (store.getXksProxyUriPath() != null && !store.getXksProxyUriPath().isEmpty())
+                    ? "Path: " + store.getXksProxyUriPath() : null;
+            String conn = (store.getXksProxyConnectivity() != null && !store.getXksProxyConnectivity().isEmpty())
+                    ? "Connectivity: " + store.getXksProxyConnectivity() : null;
+            addMetaRow("XKS Endpoint: " + store.getXksProxyUriEndpoint(), path, conn);
         }
 
-        // Metadata row 3: health status, max keys, last connection info
-        HorizontalLayout metaRow3 = new HorizontalLayout();
-        metaRow3.setSpacing(true);
-        metaRow3.addClassName(LumoUtility.FontSize.XSMALL);
-        metaRow3.addClassName(LumoUtility.TextColor.TERTIARY);
-        metaRow3.getStyle().set("margin-top", "var(--lumo-space-xs)");
-        metaRow3.getStyle().set("flex-wrap", "wrap");
-        metaRow3.addClassName("store-meta-row");
+        // Meta row 3: health, max keys, last connected, last attempt
+        String health = store.getHealthStatus() != null ? "Health: " + store.getHealthStatus() : null;
+        String maxKeys = store.getMaxKeys() != null ? "Max keys: " + store.getMaxKeys() : null;
+        String lastConn = store.getLastSuccessfulConnection() != null
+                ? "Last connected: " + store.getLastSuccessfulConnection().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : null;
+        String lastAttempt = store.getLastConnectionAttempt() != null
+                ? "Last attempt: " + store.getLastConnectionAttempt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : null;
+        addMetaRow(health, maxKeys, lastConn, lastAttempt);
 
-        if (store.getHealthStatus() != null) {
-            metaRow3.add(new Span("Health: " + store.getHealthStatus()));
-        }
-        if (store.getMaxKeys() != null) {
-            if (metaRow3.getComponentCount() > 0) metaRow3.add(new Span("•"));
-            metaRow3.add(new Span("Max keys: " + store.getMaxKeys()));
-        }
-        if (store.getLastSuccessfulConnection() != null) {
-            if (metaRow3.getComponentCount() > 0) metaRow3.add(new Span("•"));
-            metaRow3.add(new Span("Last connected: " + store.getLastSuccessfulConnection().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
-        }
-        if (store.getLastConnectionAttempt() != null) {
-            if (metaRow3.getComponentCount() > 0) metaRow3.add(new Span("•"));
-            metaRow3.add(new Span("Last attempt: " + store.getLastConnectionAttempt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
-        }
-        if (metaRow3.getComponentCount() == 0) {
-            metaRow3.add(new Span("No additional info"));
-        }
-        add(metaRow3);
+        // Meta row 4: connection settings
+        String timeout = store.getConnectionTimeoutSeconds() != null
+                ? "Timeout: " + store.getConnectionTimeoutSeconds() + "s" : null;
+        String interval = store.getHealthCheckIntervalSeconds() != null
+                ? "Health interval: " + store.getHealthCheckIntervalSeconds() + "s" : null;
+        String autoRec = store.getAutoReconnect() != null
+                ? "Auto‑reconnect: " + (store.getAutoReconnect() ? "ON" : "OFF") : null;
+        addMetaRow(timeout, interval, autoRec);
 
-        // Metadata row 4: connection settings (timeout, health interval, auto-reconnect)
-        if (store.getConnectionTimeoutSeconds() != null || store.getHealthCheckIntervalSeconds() != null || store.getAutoReconnect() != null) {
-            HorizontalLayout settingsRow = new HorizontalLayout();
-            settingsRow.setSpacing(true);
-            settingsRow.addClassName(LumoUtility.FontSize.XSMALL);
-            settingsRow.addClassName(LumoUtility.TextColor.TERTIARY);
-            settingsRow.getStyle().set("margin-top", "var(--lumo-space-xs)");
-            settingsRow.getStyle().set("flex-wrap", "wrap");
-            settingsRow.addClassName("store-meta-row");
+        // Metadata key-value tags
+        addKeyValueRow("📝 Metadata:", store.getMetadata());
 
-            if (store.getConnectionTimeoutSeconds() != null) {
-                settingsRow.add(new Span("Timeout: " + store.getConnectionTimeoutSeconds() + "s"));
-            }
-            if (store.getHealthCheckIntervalSeconds() != null) {
-                if (settingsRow.getComponentCount() > 0) settingsRow.add(new Span("•"));
-                settingsRow.add(new Span("Health interval: " + store.getHealthCheckIntervalSeconds() + "s"));
-            }
-            if (store.getAutoReconnect() != null) {
-                if (settingsRow.getComponentCount() > 0) settingsRow.add(new Span("•"));
-                settingsRow.add(new Span("Auto‑reconnect: " + (store.getAutoReconnect() ? "ON" : "OFF")));
-            }
-            add(settingsRow);
-        }
-
-        // ===== NEW: Metadata (key-value pairs) display =====
-        if (StringUtils.hasText(store.getMetadata())) {
-            try {
-                Map<String, String> metadataMap = objectMapper.readValue(store.getMetadata(), new TypeReference<>() {
-                });
-                if (metadataMap != null && !metadataMap.isEmpty()) {
-                    HorizontalLayout metadataRow = new HorizontalLayout();
-                    metadataRow.setSpacing(true);
-                    metadataRow.addClassName(LumoUtility.FontSize.XSMALL);
-                    metadataRow.addClassName(LumoUtility.TextColor.TERTIARY);
-                    metadataRow.getStyle().set("flex-wrap", "wrap");
-                    metadataRow.add(new Span("📝 Metadata:"));
-                    for (Map.Entry<String, String> entry : metadataMap.entrySet()) {
-                        Span tag = new Span(entry.getKey() + "=" + entry.getValue());
-                        tag.addClassName(LumoUtility.Background.CONTRAST_5);
-                        tag.addClassName(LumoUtility.Padding.Horizontal.SMALL);
-                        tag.addClassName(LumoUtility.Padding.Vertical.XSMALL);
-                        tag.addClassName(LumoUtility.BorderRadius.LARGE);
-                        metadataRow.add(tag);
-                    }
-                    add(metadataRow);
-                }
-            } catch (Exception e) {
-                // ignore parse errors
-            }
-        }
-
-        // ===== NEW: Tags display =====
-        if (StringUtils.hasText(store.getTags())) {
-            try {
-                Map<String, String> tagsMap = objectMapper.readValue(store.getTags(), new TypeReference<>() {
-                });
-                if (tagsMap != null && !tagsMap.isEmpty()) {
-                    HorizontalLayout tagsRow = new HorizontalLayout();
-                    tagsRow.setSpacing(true);
-                    tagsRow.addClassName(LumoUtility.FontSize.XSMALL);
-                    tagsRow.addClassName(LumoUtility.TextColor.TERTIARY);
-                    tagsRow.getStyle().set("flex-wrap", "wrap");
-                    tagsRow.add(new Span("🏷️ Tags:"));
-                    for (Map.Entry<String, String> entry : tagsMap.entrySet()) {
-                        Span tag = new Span(entry.getKey() + "=" + entry.getValue());
-                        tag.addClassName(LumoUtility.Background.CONTRAST_5);
-                        tag.addClassName(LumoUtility.Padding.Horizontal.SMALL);
-                        tag.addClassName(LumoUtility.Padding.Vertical.XSMALL);
-                        tag.addClassName(LumoUtility.BorderRadius.LARGE);
-                        tagsRow.add(tag);
-                    }
-                    add(tagsRow);
-                }
-            } catch (Exception e) {
-                // ignore parse errors
-            }
-        }
+        // Tags
+        addKeyValueRow("🏷️ Tags:", store.getTags());
     }
 
-    private void injectResponsiveStyles() {
-        // (same as before, no changes)
-        String css = """
-                    .store-card .store-header-row {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: var(--lumo-space-s);
-                        align-items: center;
-                        justify-content: space-between;
-                        width: 100%;
+    @Override
+    protected String buildExtraStyles() {
+        return """
+                .store-card .store-card__type-status,
+                .store-card .store-card__meta-row {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: var(--lumo-space-xs);
+                    align-items: center;
+                }
+                @media (max-width: 640px) {
+                    .store-card .store-card__type-status {
+                        flex-direction: column;
+                        align-items: flex-start;
                     }
-                    .store-card .store-button-bar {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: var(--lumo-space-xs);
-                    }
-                    .store-card .store-type-status,
-                    .store-card .store-meta-row {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: var(--lumo-space-xs);
-                        align-items: center;
-                    }
-                    @media (max-width: 640px) {
-                        .store-card .store-header-row {
-                            flex-direction: column;
-                            align-items: flex-start;
-                        }
-                        .store-card .store-button-bar {
-                            width: 100%;
-                            justify-content: flex-start;
-                        }
-                        .store-card .store-button-bar > * {
-                            flex: 1;
-                        }
-                        .store-card .store-type-status {
-                            flex-direction: column;
-                            align-items: flex-start;
-                            gap: var(--lumo-space-xs);
-                        }
-                        .store-card .store-meta-row {
-                            flex-direction: column;
-                            align-items: flex-start;
-                            gap: var(--lumo-space-xs);
-                        }
-                        .store-card .store-meta-row > span {
-                            white-space: normal;
-                            word-break: break-word;
-                        }
-                    }
+                }
                 """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
     }
 
-    private Button createIconButton(VaadinIcon icon, String tooltip) {
-        Button btn = new Button(new Icon(icon));
-        btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        btn.setTooltipText(tooltip);
-        return btn;
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /**
+     * Parses a JSON string as {@code Map<String,String>} and renders pill chips.
+     */
+    private void addKeyValueRow(String label, String json) {
+        if (!StringUtils.hasText(json)) return;
+        try {
+            Map<String, String> map = MAPPER.readValue(json, new TypeReference<>() {
+            });
+            if (map == null || map.isEmpty()) return;
+
+            HorizontalLayout row = new HorizontalLayout();
+            row.setSpacing(true);
+            row.addClassName(LumoUtility.FontSize.XSMALL);
+            row.addClassName(LumoUtility.TextColor.TERTIARY);
+            row.getStyle().set("flex-wrap", "wrap");
+            row.add(new Span(label));
+
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                Span chip = new Span(entry.getKey() + "=" + entry.getValue());
+                chip.addClassName(LumoUtility.Background.CONTRAST_5);
+                chip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
+                chip.addClassName(LumoUtility.Padding.Vertical.XSMALL);
+                chip.addClassName(LumoUtility.BorderRadius.LARGE);
+                row.add(chip);
+            }
+            add(row);
+        } catch (Exception e) {
+            // silently ignore malformed JSON
+        }
     }
+
+    // ── Actions ───────────────────────────────────────────────────────────────
 
     private void confirmConnect() {
-        ConfirmDialog confirm = new ConfirmDialog();
-        confirm.setHeader("Connect to store");
-        confirm.setText("Are you sure you want to connect to the custom key store '" + storeName + "'?");
-        confirm.setCancelable(true);
-        confirm.setConfirmText("Connect");
-        confirm.setConfirmButtonTheme(ButtonVariant.LUMO_SUCCESS.getVariantName());
-        confirm.addConfirmListener(event -> connectStore());
-        confirm.open();
+        ConfirmDialog dlg = new ConfirmDialog();
+        dlg.setHeader("Connect to store");
+        dlg.setText("Are you sure you want to connect to the custom key store '" + storeName + "'?");
+        dlg.setCancelable(true);
+        dlg.setConfirmText("Connect");
+        dlg.setConfirmButtonTheme(ButtonVariant.LUMO_SUCCESS.getVariantName());
+        dlg.addConfirmListener(e -> connectStore());
+        dlg.open();
     }
 
     private void confirmDisconnect() {
-        ConfirmDialog confirm = new ConfirmDialog();
-        confirm.setHeader("Disconnect from store");
-        confirm.setText("Disconnecting the store may make any keys hosted in this store temporarily unusable.\nAre you sure you want to disconnect?");
-        confirm.setCancelable(true);
-        confirm.setConfirmText("Disconnect");
-        confirm.setConfirmButtonTheme(ButtonVariant.LUMO_WARNING.getVariantName());
-        confirm.addConfirmListener(event -> disconnectStore());
-        confirm.open();
+        ConfirmDialog dlg = new ConfirmDialog();
+        dlg.setHeader("Disconnect from store");
+        dlg.setText("Disconnecting may make keys hosted here temporarily unusable. Are you sure?");
+        dlg.setCancelable(true);
+        dlg.setConfirmText("Disconnect");
+        dlg.setConfirmButtonTheme(ButtonVariant.LUMO_WARNING.getVariantName());
+        dlg.addConfirmListener(e -> disconnectStore());
+        dlg.open();
     }
 
     private void connectStore() {
         parentView.showLoading(true);
         try {
-            ResponseEntity<KmsDtos.ConnectCustomKeyStoreResponse> response = this.kmsApiService.connectCustomKeyStore(storeId);
-            if (response.getStatusCode().is2xxSuccessful()) {
-                Notification.show("Connection initiated", 6000, Notification.Position.TOP_END)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                parentView.loadStores();
-            } else {
-                Notification.show("Connection failed", 6000, Notification.Position.TOP_END)
-                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            }
+            ResponseEntity<KmsDtos.ConnectCustomKeyStoreResponse> resp =
+                    kmsApiService.connectCustomKeyStore(storeId);
+            boolean ok = resp.getStatusCode().is2xxSuccessful();
+            Notification.show(ok ? "Connection initiated" : "Connection failed", 6000, Notification.Position.TOP_END)
+                    .addThemeVariants(ok ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
+            if (ok) parentView.loadStores();
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
-            Notification.show("Error: " + errorMsg, 6000, Notification.Position.TOP_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            log.error("Failed to connect store {}: {}", storeId, errorMsg);
-        } catch (Exception e) {
-            Notification.show("Error: " + e.getMessage(), 6000, Notification.Position.TOP_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            log.error("Failed to connect store {}: {}", storeId, e.getMessage());
+            notify("Error: " + (ex.status() == 500 ? ex.contentUTF8() : ex.getMessage()), false);
+            log.error("Failed to connect store {}", storeId, ex);
+        } catch (Exception ex) {
+            notify("Error: " + ex.getMessage(), false);
+            log.error("Failed to connect store {}", storeId, ex);
         } finally {
             parentView.showLoading(false);
         }
@@ -412,24 +250,18 @@ class StoreCard extends VerticalLayout {
     private void disconnectStore() {
         parentView.showLoading(true);
         try {
-            ResponseEntity<KmsDtos.DisconnectCustomKeyStoreResponse> response = this.kmsApiService.disconnectCustomKeyStore(storeId);
-            if (response.getStatusCode().is2xxSuccessful()) {
-                Notification.show("Disconnected", 6000, Notification.Position.TOP_END)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                parentView.loadStores();
-            } else {
-                Notification.show("Disconnect failed", 6000, Notification.Position.TOP_END)
-                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            }
+            ResponseEntity<KmsDtos.DisconnectCustomKeyStoreResponse> resp =
+                    kmsApiService.disconnectCustomKeyStore(storeId);
+            boolean ok = resp.getStatusCode().is2xxSuccessful();
+            Notification.show(ok ? "Disconnected" : "Disconnect failed", 6000, Notification.Position.TOP_END)
+                    .addThemeVariants(ok ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
+            if (ok) parentView.loadStores();
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
-            Notification.show("Error: " + errorMsg, 6000, Notification.Position.TOP_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            log.error("Failed to disconnect store {}: {}", storeId, errorMsg);
-        } catch (Exception e) {
-            Notification.show("Error: " + e.getMessage(), 6000, Notification.Position.TOP_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            log.error("Failed to disconnect store {}: {}", storeId, e.getMessage());
+            notify("Error: " + (ex.status() == 500 ? ex.contentUTF8() : ex.getMessage()), false);
+            log.error("Failed to disconnect store {}", storeId, ex);
+        } catch (Exception ex) {
+            notify("Error: " + ex.getMessage(), false);
+            log.error("Failed to disconnect store {}", storeId, ex);
         } finally {
             parentView.showLoading(false);
         }
@@ -441,5 +273,10 @@ class StoreCard extends VerticalLayout {
 
     private void confirmDelete() {
         new DeleteCustomKeyStoreDialog(parentView, kmsApiService, parentView::loadStores, store).open();
+    }
+
+    private void notify(String msg, boolean success) {
+        Notification.show(msg, 6000, Notification.Position.TOP_END)
+                .addThemeVariants(success ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
     }
 }

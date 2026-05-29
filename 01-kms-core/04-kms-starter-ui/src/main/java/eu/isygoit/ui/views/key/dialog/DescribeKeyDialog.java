@@ -29,7 +29,7 @@ public class DescribeKeyDialog extends Dialog {
 
     private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;
-    private final Runnable onSuccess;
+
 
     private final ObjectMapper objectMapper;
     private final String keyId;
@@ -37,18 +37,16 @@ public class DescribeKeyDialog extends Dialog {
 
     public DescribeKeyDialog(KeyManagementView parentView,
                              KmsApiService kmsApiService,
-                             Runnable onSuccess,
                              ObjectMapper objectMapper,
                              String keyId,
                              DescribeKeyResponse.KeyMetadata metadata) {
+        super("Key details");
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
-        this.onSuccess = onSuccess;
         this.objectMapper = objectMapper;
         this.keyId = keyId;
         this.metadata = metadata;
 
-        setHeaderTitle("Key details");
         setWidth("750px");
         setCloseOnEsc(true);
         setCloseOnOutsideClick(true);

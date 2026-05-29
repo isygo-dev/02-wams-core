@@ -665,7 +665,7 @@ public final class KmsDtos {
         private Boolean enableRotation;
 
         @JsonProperty("rotationPeriodInDays")
-        @Schema(description = "Custom rotation period in days (90‑3650)", minimum = "90", maximum = "3650")
+        @Schema(description = "Custom rotation period in days (90‑365)", minimum = "90", maximum = "365")
         private Integer rotationPeriodInDays;
 
         @JsonProperty("reason")
@@ -692,8 +692,8 @@ public final class KmsDtos {
         }
 
         public static UpdateKeyRotationRequest withCustomPeriod(Integer periodDays) {
-            if (periodDays < 90 || periodDays > 3650) {
-                throw new IllegalArgumentException("Rotation period must be between 90 and 3650 days");
+            if (periodDays < 90 || periodDays > 365) {
+                throw new IllegalArgumentException("Rotation period must be between 90 and 365 days");
             }
             return UpdateKeyRotationRequest.builder()
                     .enableRotation(true)
@@ -704,8 +704,8 @@ public final class KmsDtos {
 
         public void validate() {
             if (enableRotation == null) throw new IllegalArgumentException("enableRotation is required");
-            if (enableRotation && rotationPeriodInDays != null && (rotationPeriodInDays < 90 || rotationPeriodInDays > 3650)) {
-                throw new IllegalArgumentException("Rotation period must be between 90 and 3650 days");
+            if (enableRotation && rotationPeriodInDays != null && (rotationPeriodInDays < 90 || rotationPeriodInDays > 365)) {
+                throw new IllegalArgumentException("Rotation period must be between 90 and 365 days");
             }
             if (reason != null && reason.length() > 512)
                 throw new IllegalArgumentException("Reason too long (max 512)");
@@ -1258,6 +1258,10 @@ public final class KmsDtos {
         @NotNull
         @Schema(description = "Target key ID", required = true)
         private String targetKeyId;
+
+        @NotNull
+        @Schema(description = "Set alias as primary")
+        private Boolean primary;
     }
 
     @Data

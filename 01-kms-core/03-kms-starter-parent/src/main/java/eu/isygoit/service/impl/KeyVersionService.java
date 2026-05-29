@@ -46,6 +46,7 @@ public class KeyVersionService implements IKeyVersionService {
         }
 
         keyVersion.setKeyStatus(IEnumKeyStatus.Types.DISABLED);
+        keyVersion.setDeactivationDate(java.time.LocalDateTime.now());
         kmsKeyVersionRepository.save(keyVersion);
 
         return DisableKeyVersionResponse.builder()
@@ -69,6 +70,7 @@ public class KeyVersionService implements IKeyVersionService {
         }
 
         keyVersion.setKeyStatus(IEnumKeyStatus.Types.ENABLED);
+        keyVersion.setDeactivationDate(null);
         kmsKeyVersionRepository.save(keyVersion);
 
         return EnableKeyVersionResponse.builder()

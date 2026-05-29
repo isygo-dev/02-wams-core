@@ -1,5 +1,6 @@
 package eu.isygoit.service.impl;
 
+import eu.isygoit.builder.WrnBuilder;
 import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.dto.data.KeyPairMaterial;
 import eu.isygoit.enums.IEnumKeyOrigin;
@@ -67,11 +68,11 @@ public class KeyManagementService implements IKeyManagementService {
 
         UUID keyId = UUID.randomUUID();
 
-        String wrn = String.format(
-                "wrn:kms:service:%s:key:%s",
-                tenant,
-                keyId
-        );
+        String keyWrn = WrnBuilder.builder()
+                .region(WrnBuilder.REGION_NORTH)
+                .accountId(tenant)
+                .resource("key", keyId.toString())
+                .build();
 
         String versionId = "v-" + UUID.randomUUID();
         LocalDateTime now = LocalDateTime.now();
@@ -99,7 +100,7 @@ public class KeyManagementService implements IKeyManagementService {
             KmsKey key = KmsKey.builder()
                     .tenant(tenant)
                     .keyId(keyId.toString())
-                    .keyWrn(wrn)
+                    .keyWrn(keyWrn)
                     .keySpec(request.getKeySpec())
                     .keyUsage(request.getKeyUsage())
                     .primaryKeyAlias(request.getKeyAlias())
@@ -182,7 +183,7 @@ public class KeyManagementService implements IKeyManagementService {
 
             log.info("Key created successfully: keyId={}, wrn={}",
                     keyVersion.getKeyId(),
-                    wrn);
+                    keyWrn);
 
             Map<String, Object> multiRegionConfig = null;
             if (Boolean.TRUE.equals(savedKey.getMultiRegion())) {
@@ -336,6 +337,7 @@ public class KeyManagementService implements IKeyManagementService {
             log.warn("Key {} is already enabled", keyId);
         } else {
             key.validateBeforeSave();
+            key.setKeyStatus(IEnumKeyStatus.Types.ENABLED);
             kmsKeyRepository.save(key);
         }
 
@@ -359,10 +361,13 @@ public class KeyManagementService implements IKeyManagementService {
             );
         }
 
-        key.setKeyStatus(IEnumKeyStatus.Types.DISABLED);
-
-        key.validateBeforeSave();
-        kmsKeyRepository.save(key);
+        if (IEnumKeyStatus.Types.DISABLED.equals(key.getKeyStatus())) {
+            log.warn("Key {} is already disabled", keyId);
+        } else {
+            key.validateBeforeSave();
+            key.setKeyStatus(IEnumKeyStatus.Types.DISABLED);
+            kmsKeyRepository.save(key);
+        }
 
         return DisableKeyResponse.builder()
                 .keyId(key.getKeyId())
@@ -647,11 +652,69 @@ public class KeyManagementService implements IKeyManagementService {
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
+        if (key.getRotationEnabled() == request.getEnableRotation()) {
+            throw new KeyRotationException(
+                    "Key rotation is already " + (request.getEnableRotation() ? "enabled" : "disabled") + " for key: " + keyId
+            );
+        }
+
         key.setRotationEnabled(request.getEnableRotation());
 
-        if (request.getRotationPeriodInDays() != null) {
+        if (request.getEnableRotation() != null && request.getEnableRotation() && request.getRotationPeriodInDays() != null) {
             key.setRotationPeriodInDays(request.getRotationPeriodInDays());
+        } else if (request.getEnableRotation() != null && !request.getEnableRotation() && key.getRotationPeriodInDays() == null) {
+            throw new KeyRotationException(
+                    "Key rotation period is required for key: " + keyId
+            );
         }
+
+        key.validateBeforeSave();
+        kmsKeyRepository.save(key);
+
+        if (request.getEnableRotation() != null && request.getEnableRotation()) {
+            this.rotateKey(tenant, keyId);
+        }
+
+        return UpdateKeyRotationResponse.builder()
+                .keyId(key.getKeyId())
+                .rotationEnabled(key.getRotationEnabled())
+                .rotationPeriodInDays(key.getRotationPeriodInDays())
+                .lastRotationDate(key.getLastRotationDate())
+                .build();
+    }
+
+    @Override
+    public UpdateKeyRotationResponse enableKeyRotation(String tenant, String keyId) {
+        log.info("Enable key rotation for tenant: {} keyId: {}",
+                tenant,
+                keyId);
+
+        KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
+                .orElseThrow(() -> new KeyNotFoundException(keyId));
+
+        key.setRotationEnabled(true);
+
+        key.validateBeforeSave();
+        kmsKeyRepository.save(key);
+
+        return UpdateKeyRotationResponse.builder()
+                .keyId(key.getKeyId())
+                .rotationEnabled(key.getRotationEnabled())
+                .rotationPeriodInDays(key.getRotationPeriodInDays())
+                .lastRotationDate(key.getLastRotationDate())
+                .build();
+    }
+
+    @Override
+    public UpdateKeyRotationResponse disableKeyRotation(String tenant, String keyId) {
+        log.info("Disable key rotation for tenant: {} keyId: {}",
+                tenant,
+                keyId);
+
+        KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
+                .orElseThrow(() -> new KeyNotFoundException(keyId));
+
+        key.setRotationEnabled(false);
 
         key.validateBeforeSave();
         kmsKeyRepository.save(key);
@@ -718,7 +781,18 @@ public class KeyManagementService implements IKeyManagementService {
                 .tenant(tenant)
                 .aliasName(request.getAliasName())
                 .targetKeyId(key.getKeyId())
+                .primaryKey(request.getPrimary() != null ? request.getPrimary() : false)
                 .build();
+
+        // If primary alias, mark existing primary alias as non-primary
+        if (request.getPrimary() != null && request.getPrimary()) {
+            kmsAliasRepository.findByTenantAndAliasName(key.getTenant(), key.getPrimaryKeyAlias()).ifPresent(existingAlias -> {
+                existingAlias.setPrimaryKey(false);
+                kmsAliasRepository.save(existingAlias);
+            });
+            key.setPrimaryKeyAlias(request.getAliasName());
+            kmsKeyRepository.save(key);
+        }
 
         KmsAlias savedAlias = kmsAliasRepository.save(alias);
 

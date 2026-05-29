@@ -38,14 +38,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 public class CreateKeyDialog extends BaseActionDialog {
 
     private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;
     private final ObjectMapper objectMapper;
-    private final Consumer<CreateKeyResponse> onSuccess;
 
     // Form fields
     private TextField aliasField;
@@ -68,12 +66,11 @@ public class CreateKeyDialog extends BaseActionDialog {
     public CreateKeyDialog(KeyManagementView parentView,
                            KmsApiService kmsApiService,
                            ObjectMapper objectMapper,
-                           Consumer<CreateKeyResponse> onSuccess) {
-        super("Create new KMS key", null);
+                           Runnable onSuccess) {
+        super("Create new KMS key", onSuccess);
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
         this.objectMapper = objectMapper;
-        this.onSuccess = onSuccess;
 
         setOkButtonText("Create");
         setWidth("700px");
@@ -161,9 +158,6 @@ public class CreateKeyDialog extends BaseActionDialog {
             close();
             Notification.show("Key created successfully", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            if (onSuccess != null) {
-                onSuccess.accept(response.getBody());
-            }
             return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
@@ -236,10 +230,10 @@ public class CreateKeyDialog extends BaseActionDialog {
         rotationEnabledCheckbox = new Checkbox("Enable automatic rotation");
         rotationPeriodField = new IntegerField("Rotation period (days)");
         rotationPeriodField.setMin(90);
-        rotationPeriodField.setMax(3650);
+        rotationPeriodField.setMax(365);
         rotationPeriodField.setValue(365);
         rotationPeriodField.setVisible(false);
-        rotationPeriodField.setHelperText("Default 365 days, min 90, max 3650");
+        rotationPeriodField.setHelperText("Default 365 days, min 90, max 365");
         rotationEnabledCheckbox.addValueChangeListener(e -> {
             boolean enabled = e.getValue();
             rotationPeriodField.setVisible(enabled);

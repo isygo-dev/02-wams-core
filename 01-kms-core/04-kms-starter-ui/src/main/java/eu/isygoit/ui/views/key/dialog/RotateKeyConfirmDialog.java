@@ -14,7 +14,7 @@ public class RotateKeyConfirmDialog extends PinBaseActionDialog {
     private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;
     private final String keyId;
-    private final Runnable onSuccess;
+
 
     public RotateKeyConfirmDialog(KeyManagementView parentView,
                                   KmsApiService kmsApiService,
@@ -28,7 +28,6 @@ public class RotateKeyConfirmDialog extends PinBaseActionDialog {
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
-        this.onSuccess = onSuccess;
         setOkButtonText("Rotate");
         addThemeVariantsOkButton(com.vaadin.flow.component.button.ButtonVariant.LUMO_WARNING);
         setWidth("450px");
@@ -50,9 +49,7 @@ public class RotateKeyConfirmDialog extends PinBaseActionDialog {
             close();
             Notification.show("Key rotated successfully", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            if (onSuccess != null) onSuccess.run();
             return true;
-
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
             this.append(errorMsg);

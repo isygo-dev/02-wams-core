@@ -22,7 +22,7 @@ public class UpdateAliasDialog extends BaseActionDialog {
 
     private final AliasesView parentView;
     private final KmsApiService kmsApiService;
-    private final Runnable onSuccess;
+
 
     private final String aliasName;
     private final String currentTargetKeyId;
@@ -38,7 +38,6 @@ public class UpdateAliasDialog extends BaseActionDialog {
         this.kmsApiService = kmsApiService;
         this.aliasName = aliasName;
         this.currentTargetKeyId = currentTargetKeyId;
-        this.onSuccess = onSuccess;
 
         setOkButtonText("Update");
         setWidth("500px");

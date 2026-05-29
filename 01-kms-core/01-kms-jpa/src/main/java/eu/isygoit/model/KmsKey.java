@@ -2,6 +2,7 @@ package eu.isygoit.model;
 
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.*;
+import eu.isygoit.exception.KeyValidationException;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.*;
 import jakarta.persistence.*;
@@ -228,7 +229,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
 
     /**
      * Rotation period in days (default 365). Only meaningful if `rotationEnabled` is true.
-     * Minimum 90 days, maximum 3650 days (10 years).
+     * Minimum 90 days, maximum 365 days (10 years).
      * <p>
      * WAMS equivalent: RotationPeriodInDays.
      * </p>
@@ -612,10 +613,152 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
         return IEnumKeyOrigin.Types.EXTERNAL.equals(origin);
     }
 
+    /**
+     * Comprehensive business logic validation before saving/updating the entity.
+     * <p>
+     * This method should be called by the service layer before persisting any changes.
+     * </p>
+     * <p>
+     * Validations performed:
+     * <ul>
+     *   <li>Key material presence for non‑external keys</li>
+     *   <li>Rotation disabled for external keys</li>
+     *   <li>Rotation period range (90‑365) when rotation is enabled</li>
+     *   <li>Key ID and key WRN not blank</li>
+     *   <li>Key WRN format (starts with "wrn:wams:kms:")</li>
+     *   <li>Multi‑region consistency (region and primaryRegion constraints)</li>
+     *   <li>Pending deletion window (7‑30 days) when keyStatus = PENDING_DELETION</li>
+     *   <li>Expiration model and validTo consistency for external keys</li>
+     * </ul>
+     * </p>
+     */
     public void validateBeforeSave() {
-        if (this.getOrigin() != IEnumKeyOrigin.Types.EXTERNAL && this.getKeyMaterial() == null) {
-            // Non‑external keys must have material generated
-            throw new IllegalStateException("Key material cannot be null for non‑external keys");
+        // 1. Basic required fields
+        if (keyId == null || keyId.isBlank()) {
+            throw new KeyValidationException("Key ID cannot be null or blank");
+        }
+        if (keyWrn == null || keyWrn.isBlank()) {
+            throw new KeyValidationException("Key WRN cannot be null or blank");
+        }
+        if (!keyWrn.startsWith("wrn:wams:kms:")) {
+            throw new KeyValidationException("Key WRN must start with 'wrn:wams:kms:'");
+        }
+
+        // 2. Key material: non‑external keys must have material
+        if (origin != IEnumKeyOrigin.Types.EXTERNAL && (keyMaterial == null || keyMaterial.length == 0)) {
+            throw new KeyValidationException("Key material cannot be null or empty for non‑external keys");
+        }
+
+        // 3. Rotation not allowed for external keys (BYOK cannot be rotated automatically)
+        if (origin == IEnumKeyOrigin.Types.EXTERNAL && Boolean.TRUE.equals(rotationEnabled)) {
+            throw new KeyValidationException("Automatic rotation is not supported for external (imported) keys");
+        }
+
+        // 4. Rotation period validation
+        if (Boolean.TRUE.equals(rotationEnabled)) {
+            if (rotationPeriodInDays == null) {
+                throw new KeyValidationException("Rotation period must be specified when rotation is enabled");
+            }
+            if (rotationPeriodInDays < 90 || rotationPeriodInDays > 365) {
+                throw new KeyValidationException("Rotation period must be between 90 and 365 days");
+            }
+        }
+
+        // 5. Multi‑region consistency
+        if (Boolean.TRUE.equals(multiRegion)) {
+            if (region == null || region.isBlank()) {
+                throw new KeyValidationException("Region is required for multi‑region keys");
+            }
+            if (isPrimaryKey()) {
+                if (primaryRegion == null || primaryRegion.isBlank()) {
+                    throw new KeyValidationException("Primary region must be set for multi‑region primary key");
+                }
+                // primaryRegion must equal region for primary key? Usually yes, but not always? Let's enforce.
+                if (!primaryRegion.equals(region)) {
+                    throw new KeyValidationException("Primary region must match the key's region for a primary multi‑region key");
+                }
+            }
+            if (isReplicaKey()) {
+                if (primaryKeyId == null || primaryKeyId.isBlank()) {
+                    throw new KeyValidationException("Primary key ID is required for replica keys");
+                }
+                // replica region must be set (already checked region not blank above)
+            }
+        }
+
+        // 6. Pending deletion state consistency
+        if (keyStatus == IEnumKeyStatus.Types.PENDING_DELETION) {
+            if (deletionDate == null) {
+                throw new KeyValidationException("Deletion date must be set when key is in PENDING_DELETION state");
+            }
+            if (pendingDeletionWindowDays == null || pendingDeletionWindowDays < 7 || pendingDeletionWindowDays > 30) {
+                throw new KeyValidationException("Pending deletion window days must be between 7 and 30");
+            }
+            if (deletionDate.isBefore(LocalDateTime.now())) {
+                throw new KeyValidationException("Deletion date cannot be in the past");
+            }
+        } else {
+            // Cleanse fields if not in pending deletion
+            if (deletionDate != null) deletionDate = null;
+            if (pendingDeletionWindowDays != null) pendingDeletionWindowDays = null;
+        }
+
+        // 7. External key import/expiration consistency
+        if (origin == IEnumKeyOrigin.Types.EXTERNAL) {
+            if (keyStatus == IEnumKeyStatus.Types.PENDING_IMPORT) {
+                // When waiting for import, material should be null, token and private key should be present
+                if (keyMaterial != null && keyMaterial.length > 0) {
+                    throw new KeyValidationException("Key material must be null while key is in PENDING_IMPORT state");
+                }
+                if (importToken == null || importToken.length == 0) {
+                    throw new KeyValidationException("Import token must be set for keys in PENDING_IMPORT state");
+                }
+                if (privateWrappingKey == null || privateWrappingKey.length == 0) {
+                    throw new KeyValidationException("Private wrapping key must be set for keys in PENDING_IMPORT state");
+                }
+                if (importTokenValidTo == null || importTokenValidTo.isBefore(LocalDateTime.now())) {
+                    throw new KeyValidationException("Import token validTo must be in the future");
+                }
+            } else if (hasImportedMaterial()) {
+                // After successful import, token/privateKey should be cleared
+                if (importToken != null || privateWrappingKey != null) {
+                    // Not critical but good practice
+                }
+            }
+
+            // Expiration model & validTo
+            if (expirationModel == IEnumKeyExpirationModel.Types.KEY_MATERIAL_EXPIRES) {
+                if (validTo == null) {
+                    throw new KeyValidationException("validTo must be set when expirationModel = KEY_MATERIAL_EXPIRES");
+                }
+                if (validTo.isBefore(LocalDateTime.now())) {
+                    throw new KeyValidationException("validTo date cannot be in the past");
+                }
+            }
+        } else {
+            // For non‑external keys, these should be null
+            if (importToken != null) importToken = null;
+            if (privateWrappingKey != null) privateWrappingKey = null;
+            if (importTokenValidTo != null) importTokenValidTo = null;
+            if (expirationModel != null) expirationModel = null;
+            if (validTo != null) validTo = null;
+        }
+
+        // 8. Key usage vs spec compatibility (simple check)
+        if (keySpec != null && keyUsage != null) {
+            if (keySpec == IEnumKeySpec.Types.SYMMETRIC_DEFAULT && keyUsage != IEnumKeyUsage.Types.ENCRYPT_DECRYPT) {
+                throw new KeyValidationException("SYMMETRIC_DEFAULT keys can only be used for ENCRYPT_DECRYPT");
+            }
+            if (keySpec.name().startsWith("HMAC") && keyUsage != IEnumKeyUsage.Types.GENERATE_VERIFY_MAC) {
+                throw new KeyValidationException("HMAC keys can only be used for GENERATE_VERIFY_MAC");
+            }
+            if ((keySpec.name().startsWith("RSA") || keySpec.name().startsWith("ECC") || keySpec.name().startsWith("SM2"))
+                    && keyUsage == IEnumKeyUsage.Types.ENCRYPT_DECRYPT && !keySpec.name().startsWith("RSA")) {
+                // Only RSA supports ENCRYPT_DECRYPT, ECC does not
+                if (keySpec.name().startsWith("ECC") || keySpec.name().startsWith("SM2")) {
+                    throw new KeyValidationException("ECC and SM2 keys cannot be used for ENCRYPT_DECRYPT, use SIGN_VERIFY instead");
+                }
+            }
         }
     }
 }

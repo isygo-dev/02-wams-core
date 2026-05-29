@@ -13,7 +13,7 @@ public class DisableKeyVersionDialog extends PinBaseActionDialog {
     private final KmsApiService kmsApiService;
     private final String keyId;
     private final String versionId;
-    private final Runnable onSuccess;
+
 
     public DisableKeyVersionDialog(KmsApiService kmsApiService,
                                    String keyId,
@@ -25,7 +25,6 @@ public class DisableKeyVersionDialog extends PinBaseActionDialog {
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
         this.versionId = versionId;
-        this.onSuccess = onSuccess;
 
         setOkButtonText("Disable permanently");
         setWidth("450px");
@@ -48,9 +47,6 @@ public class DisableKeyVersionDialog extends PinBaseActionDialog {
             close();
             Notification.show("Key version disabled", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            if (onSuccess != null) {
-                onSuccess.run();
-            }
             return true;
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();

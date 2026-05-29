@@ -232,7 +232,9 @@ public class KeyManagementView extends VerticalLayout {
             filterCards();
         } catch (FeignException ex) {
             String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
-            Notification.show("Failed to load keys: " + errorMsg, 6000, Notification.Position.TOP_END);
+            Notification.show("Failed to load keys: " + errorMsg, 6000, Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            ;
             log.error("Failed to load keys", ex.getMessage());
         } catch (Exception e) {
             Notification.show("Failed to load keys: " + e.getMessage(), 6000, Notification.Position.TOP_END)
@@ -408,9 +410,7 @@ public class KeyManagementView extends VerticalLayout {
     }
 
     private void openCreateKeyDialog() {
-        new CreateKeyDialog(this, kmsApiService, objectMapper, response -> {
-            resetKeyPaginationAndLoad();
-        }).open();
+        new CreateKeyDialog(this, kmsApiService, objectMapper, () -> resetKeyPaginationAndLoad()).open();
     }
 
     // Utility method for tag rows in other dialogs (kept for compatibility)

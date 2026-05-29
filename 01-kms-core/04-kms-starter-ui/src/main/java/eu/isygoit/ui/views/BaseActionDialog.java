@@ -15,12 +15,10 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
  */
 public abstract class BaseActionDialog extends Dialog {
 
-    private final Runnable onSuccess;
-
     private final Span errorSpan;
     private final Button okButton;
     private final Button cancelButton;
-
+    private Runnable onSuccess;
     private StringBuilder errorMsgBuilder = new StringBuilder();
 
     /**
@@ -30,6 +28,23 @@ public abstract class BaseActionDialog extends Dialog {
      */
     public BaseActionDialog(String title, Runnable onSuccess) {
         this.onSuccess = onSuccess;
+        setHeaderTitle(title);
+        setCloseOnEsc(false);
+        setCloseOnOutsideClick(false);
+
+        this.errorSpan = createErrorSpan();
+        this.okButton = createOkButton();
+        this.cancelButton = createCancelButton();
+
+        buildFooter();
+    }
+
+    /**
+     * Constructs a new dialog with the given header title.
+     *
+     * @param title the dialog header title
+     */
+    public BaseActionDialog(String title) {
         setHeaderTitle(title);
         setCloseOnEsc(false);
         setCloseOnOutsideClick(false);

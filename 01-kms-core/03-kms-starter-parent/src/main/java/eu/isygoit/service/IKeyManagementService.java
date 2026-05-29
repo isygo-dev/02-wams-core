@@ -93,6 +93,14 @@ public interface IKeyManagementService {
             String keyId,
             UpdateKeyRotationRequest request);
 
+    UpdateKeyRotationResponse enableKeyRotation(
+            String tenant,
+            String keyId);
+
+    UpdateKeyRotationResponse disableKeyRotation(
+            String tenant,
+            String keyId);
+
     GetKeyRotationStatusResponse getKeyRotationStatus(
             String tenant,
             String keyId);

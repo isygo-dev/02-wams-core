@@ -18,7 +18,7 @@ public class ScheduleKeyDeletionDialog extends BaseActionDialog {
 
     private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;
-    private final Runnable onSuccess;
+
 
     private final String keyId;
 
@@ -27,10 +27,9 @@ public class ScheduleKeyDeletionDialog extends BaseActionDialog {
 
     public ScheduleKeyDeletionDialog(KeyManagementView parentView,
                                      KmsApiService kmsApiService,
-                                     Runnable onSuccess,
-                                     String keyId) {
+                                     String keyId,
+                                     Runnable onSuccess) {
         super("Schedule key deletion", onSuccess);
-        this.onSuccess = onSuccess;
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
         this.parentView = parentView;

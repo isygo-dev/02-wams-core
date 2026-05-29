@@ -1,5 +1,6 @@
 package eu.isygoit.ui.views.keyAlias.dialog;
 
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.notification.Notification;
@@ -26,10 +27,11 @@ public class CreateAliasDialog extends BaseActionDialog {
 
     private final AliasesView parentView;
     private final KmsApiService kmsApiService;
-    private final Runnable onSuccess;
+
 
     private TextField aliasNameField;
     private ComboBox<String> targetKeyCombo;
+    private Checkbox primaryCheckbox;
 
     public CreateAliasDialog(AliasesView parentView,
                              KmsApiService kmsApiService,
@@ -37,7 +39,6 @@ public class CreateAliasDialog extends BaseActionDialog {
         super("Create alias", onSuccess);
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
-        this.onSuccess = onSuccess;
 
         setOkButtonText("Create");
         setWidth("500px");
@@ -71,6 +72,7 @@ public class CreateAliasDialog extends BaseActionDialog {
             CreateAliasRequest request = CreateAliasRequest.builder()
                     .aliasName(aliasName)
                     .targetKeyId(targetKeyId)
+                    .primary(primaryCheckbox.getValue())  // set primary flag from checkbox
                     .build();
             ResponseEntity<CreateAliasResponse> response = kmsApiService.createAlias(request);
             if (!response.getStatusCode().is2xxSuccessful()) {
@@ -124,11 +126,14 @@ public class CreateAliasDialog extends BaseActionDialog {
             }
             return keyId;
         });
+
+        primaryCheckbox = new Checkbox("Set as primary alias");
+        primaryCheckbox.setValue(false); // default to not primary
     }
 
     private FormLayout createFormLayout() {
         FormLayout form = new FormLayout();
-        form.add(aliasNameField, targetKeyCombo);
+        form.add(aliasNameField, targetKeyCombo, primaryCheckbox);
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
         return form;
     }

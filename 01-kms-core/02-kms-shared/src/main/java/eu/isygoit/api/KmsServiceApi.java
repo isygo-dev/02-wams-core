@@ -136,7 +136,7 @@ public interface KmsServiceApi {
     @PatchMapping(value = "/keys/{keyId}/rotation", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Update Key Rotation",
-            description = "Enables/disables automatic key rotation with optional custom period (90-3650 days).",
+            description = "Enables/disables automatic key rotation with optional custom period (90-365 days).",
             operationId = "updateKeyRotation"
     )
     ResponseEntity<UpdateKeyRotationResponse> updateKeyRotation(

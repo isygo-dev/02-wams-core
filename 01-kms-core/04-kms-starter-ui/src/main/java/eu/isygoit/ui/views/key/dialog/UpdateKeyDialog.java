@@ -35,7 +35,7 @@ public class UpdateKeyDialog extends BaseActionDialog {
 
     private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;
-    private final Runnable onSuccess;
+
 
     private final ObjectMapper objectMapper;
     private final String keyId;
@@ -55,18 +55,17 @@ public class UpdateKeyDialog extends BaseActionDialog {
 
     public UpdateKeyDialog(KeyManagementView parentView,
                            KmsApiService kmsApiService,
-                           Runnable onSuccess,
                            ObjectMapper objectMapper,
                            String keyId,
                            String currentAlias,
                            String currentDesc,
                            List<ListResourceTagsResponse.Tag> currentTags,
                            Boolean currentRotationEnabled,
-                           Integer currentRotationPeriodInDays) {
+                           Integer currentRotationPeriodInDays,
+                           Runnable onSuccess) {
         super("Edit key", onSuccess);
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
-        this.onSuccess = onSuccess;
         this.objectMapper = objectMapper;
         this.keyId = keyId;
         this.currentAlias = currentAlias != null ? currentAlias : "";
@@ -172,8 +171,8 @@ public class UpdateKeyDialog extends BaseActionDialog {
         rotationEnabledCheckbox = new Checkbox("Enable automatic rotation");
         rotationPeriodField = new IntegerField("Rotation period (days)");
         rotationPeriodField.setMin(90);
-        rotationPeriodField.setMax(3650);
-        rotationPeriodField.setHelperText("Default 365 days, min 90, max 3650");
+        rotationPeriodField.setMax(365);
+        rotationPeriodField.setHelperText("Default 365 days, min 90, max 365");
 
         rotationEnabledCheckbox.setValue(currentRotationEnabled);
         if (currentRotationEnabled && currentRotationPeriodInDays != null) {
