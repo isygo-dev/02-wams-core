@@ -21,6 +21,7 @@ public class ScheduleKeyDeletionDialog extends BaseActionDialog {
 
 
     private final String keyId;
+    private final int days;
 
 
     private IntegerField daysField;
@@ -28,11 +29,13 @@ public class ScheduleKeyDeletionDialog extends BaseActionDialog {
     public ScheduleKeyDeletionDialog(KeyManagementView parentView,
                                      KmsApiService kmsApiService,
                                      String keyId,
+                                     Integer days,
                                      Runnable onSuccess) {
         super("Schedule key deletion", onSuccess);
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
         this.parentView = parentView;
+        this.days = days!=null ? days : 30; // default to 30 if not provided
 
         setOkButtonText("Schedule");
         setWidth("400px");
@@ -84,7 +87,7 @@ public class ScheduleKeyDeletionDialog extends BaseActionDialog {
         daysField = new IntegerField("Pending window (days)");
         daysField.setMin(7);
         daysField.setMax(30);
-        daysField.setValue(30);
+        daysField.setValue(days);
         daysField.setStepButtonsVisible(true);
         daysField.setWidthFull();
 

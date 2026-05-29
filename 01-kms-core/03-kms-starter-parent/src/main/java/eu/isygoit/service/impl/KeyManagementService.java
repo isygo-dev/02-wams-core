@@ -236,7 +236,7 @@ public class KeyManagementService implements IKeyManagementService {
                     .build();
         } catch (Exception e) {
             log.error("Error creating key for tenant: {}", tenant, e);
-            throw new RuntimeException(
+            throw new CreateKeyException(
                     "Failed to create key: " + e.getMessage(),
                     e
             );
@@ -279,6 +279,7 @@ public class KeyManagementService implements IKeyManagementService {
                 .expirationModel(key.getExpirationModel())
                 .multiRegion(key.getMultiRegion())
                 .enabled(IEnumKeyStatus.Types.ENABLED.equals(key.getKeyStatus()))
+                .pendingDeletionWindowDays(key.getPendingDeletionWindowDays())
                 .build();
 
         return DescribeKeyResponse.builder().keyMetadata(metadata).build();
@@ -394,7 +395,7 @@ public class KeyManagementService implements IKeyManagementService {
                 : MIN_DELETION_WINDOW_DAYS;
 
         if (windowDays < MIN_DELETION_WINDOW_DAYS || windowDays > MAX_DELETION_WINDOW_DAYS) {
-            throw new IllegalArgumentException(
+            throw new KeyDeletionException(
                     String.format(
                             "Pending window must be between %d and %d days",
                             MIN_DELETION_WINDOW_DAYS,
@@ -410,7 +411,7 @@ public class KeyManagementService implements IKeyManagementService {
         if (key.getOrigin() != IEnumKeyOrigin.Types.EXTERNAL) {
             // Non‑external keys must have material generated
             if (key.getKeyMaterial() == null) {
-                throw new IllegalStateException("Key material cannot be null for non‑external keys");
+                throw new KeyDeletionException("Key material cannot be null for non‑external keys");
             }
         }
 
@@ -442,7 +443,7 @@ public class KeyManagementService implements IKeyManagementService {
         }
 
         if (!IEnumKeyStatus.Types.ENABLED.equals(key.getKeyStatus())) {
-            throw new InvalidKeyStateException(
+            throw new KeyRotationException(
                     "Cannot rotate key with status: " + key.getKeyStatus()
             );
         }
@@ -506,7 +507,7 @@ public class KeyManagementService implements IKeyManagementService {
         } catch (Exception e) {
             log.error("Error rotating key: {}", keyId, e);
 
-            throw new RuntimeException(
+            throw new KeyRotationException(
                     "Failed to rotate key: " + e.getMessage(),
                     e
             );
@@ -620,7 +621,7 @@ public class KeyManagementService implements IKeyManagementService {
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
         if (!IEnumKeyStatus.Types.PENDING_DELETION.equals(key.getKeyStatus())) {
-            throw new InvalidKeyStateException(
+            throw new KeyDeletionException(
                     "Key is not pending deletion: " + keyId
             );
         }
@@ -771,7 +772,7 @@ public class KeyManagementService implements IKeyManagementService {
 
         // Check if alias already exists
         if (kmsAliasRepository.findByTenantAndAliasName(tenant, request.getAliasName()).isPresent()) {
-            throw new IllegalArgumentException("Alias already exists: " + request.getAliasName());
+            throw new KeyAliasNotFoundException("Alias already exists: " + request.getAliasName());
         }
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, request.getTargetKeyId())

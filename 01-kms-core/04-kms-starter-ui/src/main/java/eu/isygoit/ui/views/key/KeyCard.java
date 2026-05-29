@@ -6,9 +6,11 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -20,6 +22,7 @@ import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainView;
 import eu.isygoit.ui.views.AbstractKmsCard;
 import eu.isygoit.ui.views.key.dialog.*;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 
@@ -45,7 +48,11 @@ class KeyCard extends AbstractKmsCard<KeyManagementView> {
     private HorizontalLayout metaRow2;
     private Button rotationBtn;
     private Button versionsBtn;
+    private Button moreBtn;
     private int versionCount = 0;
+
+    // Context menu reference to avoid duplicate attachments
+    private ContextMenu currentContextMenu;
 
     // ── Constructor ───────────────────────────────────────────────────────────
 
@@ -121,12 +128,12 @@ class KeyCard extends AbstractKmsCard<KeyManagementView> {
         updateRotationButton();
 
         versionsBtn = createIconButton(VaadinIcon.CUBE, "View all key versions");
-        versionsBtn.setText("Ver (...)");
+        versionsBtn.setText("Ver (...)"); // will be updated later
         versionsBtn.addClickListener(e -> showVersionsDialog());
 
-        Button moreBtn = createIconButton(VaadinIcon.ELLIPSIS_DOTS_V,
+        moreBtn = createIconButton(VaadinIcon.ELLIPSIS_DOTS_V,
                 "More actions (enable/disable, schedule deletion, rotate immediately, etc.)");
-        moreBtn.addClickListener(e -> showContextMenu());
+        attachContextMenu(moreBtn);
 
         return List.of(editBtn, describeBtn, rotationBtn, versionsBtn, moreBtn);
     }
@@ -189,11 +196,80 @@ class KeyCard extends AbstractKmsCard<KeyManagementView> {
                     updateMetaRow2();
                     updateRotationButton();
                     loadVersionCount();
+                    // Refresh the context menu to reflect updated key state
+                    attachContextMenu(moreBtn);
                 }
             } catch (Exception e) {
                 log.error("Failed to refresh key card for {}", keyId, e);
             }
         }));
+    }
+
+    // ── Context menu helper (refreshes on every call) ────────────────────────
+
+    private void attachContextMenu(Button button) {
+        // Remove existing context menu if any
+        if (currentContextMenu != null) {
+            currentContextMenu.setTarget(null); // detach from button
+            currentContextMenu.removeAll(); // clear items
+        }
+        // Create new context menu
+        ContextMenu contextMenu = new ContextMenu();
+        contextMenu.setTarget(button);
+        contextMenu.setOpenOnClick(true);
+        populateContextMenu(contextMenu);
+        currentContextMenu = contextMenu;
+    }
+
+    private void populateContextMenu(ContextMenu contextMenu) {
+        // Clear any existing items (double safety)
+        contextMenu.getItems().clear();
+
+        // ---------- Enable / Disable key ----------
+        boolean isEnabled = metadata != null && metadata.getKeyStatus() == IEnumKeyStatus.Types.ENABLED;
+        String toggleLabel = isEnabled ? "Disable key" : "Enable key";
+        VaadinIcon toggleIcon = isEnabled ? VaadinIcon.UNLOCK : VaadinIcon.LOCK;
+        HorizontalLayout toggleItem = new HorizontalLayout(toggleIcon.create(), new Span(toggleLabel));
+        toggleItem.setSpacing(true);
+        toggleItem.setAlignItems(FlexComponent.Alignment.CENTER);
+        contextMenu.addItem(toggleItem, e -> toggleKeyStatus());
+
+        // ---------- Schedule deletion ----------
+        HorizontalLayout scheduleItem = new HorizontalLayout(VaadinIcon.CLOCK.create(), new Span("Schedule deletion"));
+        scheduleItem.setSpacing(true);
+        scheduleItem.setAlignItems(FlexComponent.Alignment.CENTER);
+        contextMenu.addItem(scheduleItem, e -> scheduleDeletion());
+
+        // ---------- Rotate immediately (only if rotation enabled) ----------
+        if (metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled())) {
+            HorizontalLayout rotateItem = new HorizontalLayout(VaadinIcon.REFRESH.create(), new Span("Rotate immediately"));
+            rotateItem.setSpacing(true);
+            rotateItem.setAlignItems(FlexComponent.Alignment.CENTER);
+            contextMenu.addItem(rotateItem, e ->
+                    new RotateKeyConfirmDialog(parentView, kmsApiService, keyId, this::refresh).open());
+        }
+
+        // ---------- Cancellation / permanent deletion (only if pending) ----------
+        boolean isPending = "PENDING_DELETION".equalsIgnoreCase(statusText);
+        if (isPending) {
+            HorizontalLayout cancelItem = new HorizontalLayout(VaadinIcon.REFRESH.create(), new Span("Cancel deletion"));
+            cancelItem.setSpacing(true);
+            cancelItem.setAlignItems(FlexComponent.Alignment.CENTER);
+            contextMenu.addItem(cancelItem, e -> cancelDeletion());
+
+            HorizontalLayout deleteItem = new HorizontalLayout(VaadinIcon.TRASH.create(), new Span("Permanently delete"));
+            deleteItem.setSpacing(true);
+            deleteItem.setAlignItems(FlexComponent.Alignment.CENTER);
+            deleteItem.getStyle().set("color", "var(--lumo-error-color)");
+            contextMenu.addItem(deleteItem, e -> confirmPermanentDelete());
+        } else {
+            // Non‑interactive item (disabled look)
+            HorizontalLayout disabledItem = new HorizontalLayout(VaadinIcon.BAN.create(), new Span("Permanently delete (not pending)"));
+            disabledItem.setSpacing(true);
+            disabledItem.setAlignItems(FlexComponent.Alignment.CENTER);
+            disabledItem.getStyle().set("opacity", "0.5");
+            contextMenu.addItem(disabledItem, e -> {}); // empty listener does nothing
+        }
     }
 
     // ── Derived-field helpers ─────────────────────────────────────────────────
@@ -350,101 +426,13 @@ class KeyCard extends AbstractKmsCard<KeyManagementView> {
         new ShowKeyVersionsDialog(kmsApiService, keyId, aliasOrId).open();
     }
 
-    private void showContextMenu() {
-        Dialog menu = new Dialog();
-        menu.setHeaderTitle("Key actions");
-        menu.setWidth("280px");
-        menu.setCloseOnOutsideClick(true);
-        menu.setCloseOnEsc(true);
-
-        var layout = new com.vaadin.flow.component.orderedlayout.VerticalLayout();
-        layout.setPadding(true);
-        layout.setSpacing(true);
-        layout.setWidthFull();
-
-        boolean isEnabled = metadata != null && metadata.getKeyStatus() == IEnumKeyStatus.Types.ENABLED;
-        Button toggleStatusBtn = new Button(
-                isEnabled ? "Disable key" : "Enable key",
-                new com.vaadin.flow.component.icon.Icon(isEnabled ? VaadinIcon.UNLOCK : VaadinIcon.LOCK));
-        toggleStatusBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        toggleStatusBtn.setWidthFull();
-        boolean canToggle = "ENABLED".equalsIgnoreCase(statusText) || "DISABLED".equalsIgnoreCase(statusText);
-        toggleStatusBtn.setEnabled(canToggle);
-        toggleStatusBtn.setTooltipText(isEnabled ? "Disable this key" : "Enable this key");
-        toggleStatusBtn.addClickListener(e -> {
-            menu.close();
-            toggleKeyStatus();
-        });
-        layout.add(toggleStatusBtn);
-
-        Button scheduleDeleteBtn = new Button("Schedule deletion",
-                new com.vaadin.flow.component.icon.Icon(VaadinIcon.CLOCK));
-        scheduleDeleteBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        scheduleDeleteBtn.setWidthFull();
-        scheduleDeleteBtn.setTooltipText("Schedule key deletion after a waiting period");
-        scheduleDeleteBtn.addClickListener(e -> {
-            menu.close();
-            scheduleDeletion();
-        });
-        layout.add(scheduleDeleteBtn);
-
-        boolean rotationEnabled = metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled());
-        if (rotationEnabled) {
-            Button rotateNowBtn = new Button("Rotate immediately",
-                    new com.vaadin.flow.component.icon.Icon(VaadinIcon.REFRESH));
-            rotateNowBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-            rotateNowBtn.setWidthFull();
-            rotateNowBtn.setTooltipText("Create a new key version immediately (manual rotation)");
-            rotateNowBtn.addClickListener(e -> {
-                menu.close();
-                new RotateKeyConfirmDialog(parentView, kmsApiService, keyId, this::refresh).open();
-            });
-            layout.add(rotateNowBtn);
-        }
-
-        boolean isPending = "PENDING_DELETION".equalsIgnoreCase(statusText);
-        if (isPending) {
-            Button cancelDeleteBtn = new Button("Cancel deletion",
-                    new com.vaadin.flow.component.icon.Icon(VaadinIcon.REFRESH));
-            cancelDeleteBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-            cancelDeleteBtn.setWidthFull();
-            cancelDeleteBtn.addClickListener(e -> {
-                menu.close();
-                cancelDeletion();
-            });
-            layout.add(cancelDeleteBtn);
-
-            Button deleteBtn = new Button("Permanently delete",
-                    new com.vaadin.flow.component.icon.Icon(VaadinIcon.TRASH));
-            deleteBtn.addThemeVariants(ButtonVariant.LUMO_ERROR);
-            deleteBtn.setWidthFull();
-            deleteBtn.setTooltipText("Immediately delete the key (cannot be undone)");
-            deleteBtn.addClickListener(e -> {
-                menu.close();
-                confirmPermanentDelete();
-            });
-            layout.add(deleteBtn);
-        } else {
-            Button disabledDeleteBtn = new Button("Permanently delete (not pending)",
-                    new com.vaadin.flow.component.icon.Icon(VaadinIcon.BAN));
-            disabledDeleteBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-            disabledDeleteBtn.setEnabled(false);
-            disabledDeleteBtn.setTooltipText("Key can only be permanently deleted when it is in PENDING_DELETION state.");
-            disabledDeleteBtn.setWidthFull();
-            layout.add(disabledDeleteBtn);
-        }
-
-        menu.add(layout);
-        menu.open();
-    }
-
     private void toggleKeyStatus() {
         new ToggleKeyStatusDialog(parentView, kmsApiService, keyId,
                 metadata != null && metadata.getKeyStatus() == IEnumKeyStatus.Types.ENABLED, this::refresh).open();
     }
 
     private void scheduleDeletion() {
-        new ScheduleKeyDeletionDialog(parentView, kmsApiService, keyId, this::refresh).open();
+        new ScheduleKeyDeletionDialog(parentView, kmsApiService, keyId, metadata.getPendingDeletionWindowDays(), this::refresh).open();
     }
 
     private void cancelDeletion() {
