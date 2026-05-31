@@ -16,7 +16,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.views.AbstractKmsCard;
+import eu.isygoit.ui.views.BaseCard;
 import eu.isygoit.ui.views.keyStore.dialog.DeleteCustomKeyStoreDialog;
 import eu.isygoit.ui.views.keyStore.dialog.UpdateCustomKeyStoreDialog;
 import feign.FeignException;
@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-class StoreCard extends AbstractKmsCard<CustomKeyStoresView> {
+class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -231,7 +231,7 @@ class StoreCard extends AbstractKmsCard<CustomKeyStoresView> {
         parentView.showLoading(true);
         try {
             ResponseEntity<KmsDtos.ConnectCustomKeyStoreResponse> resp =
-                    kmsApiService.connectCustomKeyStore(storeId);
+                    objectService.connectCustomKeyStore(storeId);
             boolean ok = resp.getStatusCode().is2xxSuccessful();
             Notification.show(ok ? "Connection initiated" : "Connection failed", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(ok ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
@@ -251,7 +251,7 @@ class StoreCard extends AbstractKmsCard<CustomKeyStoresView> {
         parentView.showLoading(true);
         try {
             ResponseEntity<KmsDtos.DisconnectCustomKeyStoreResponse> resp =
-                    kmsApiService.disconnectCustomKeyStore(storeId);
+                    objectService.disconnectCustomKeyStore(storeId);
             boolean ok = resp.getStatusCode().is2xxSuccessful();
             Notification.show(ok ? "Disconnected" : "Disconnect failed", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(ok ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
@@ -268,11 +268,11 @@ class StoreCard extends AbstractKmsCard<CustomKeyStoresView> {
     }
 
     private void updateCustomKeyStore() {
-        new UpdateCustomKeyStoreDialog(parentView, kmsApiService, parentView::loadStores, store).open();
+        new UpdateCustomKeyStoreDialog(parentView, objectService, parentView::loadStores, store).open();
     }
 
     private void confirmDelete() {
-        new DeleteCustomKeyStoreDialog(parentView, kmsApiService, parentView::loadStores, store).open();
+        new DeleteCustomKeyStoreDialog(parentView, objectService, parentView::loadStores, store).open();
     }
 
     private void notify(String msg, boolean success) {

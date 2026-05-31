@@ -18,7 +18,7 @@ import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainView;
-import eu.isygoit.ui.views.AbstractKmsCard;
+import eu.isygoit.ui.views.BaseCard;
 import eu.isygoit.ui.views.key.dialog.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-class KeyCard extends AbstractKmsCard<KeyManagementView> {
+class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
 
     private final String keyId;
     private final ObjectMapper objectMapper;
@@ -184,7 +184,7 @@ class KeyCard extends AbstractKmsCard<KeyManagementView> {
     public void refresh() {
         getUI().ifPresent(ui -> ui.access(() -> {
             try {
-                ResponseEntity<DescribeKeyResponse> response = kmsApiService.describeKey(keyId);
+                ResponseEntity<DescribeKeyResponse> response = objectService.describeKey(keyId);
                 if (response.getBody() != null && response.getBody().getKeyMetadata() != null) {
                     this.metadata = response.getBody().getKeyMetadata();
                     updateDerivedFields();
@@ -306,7 +306,7 @@ class KeyCard extends AbstractKmsCard<KeyManagementView> {
             rotateItem.setSpacing(true);
             rotateItem.setAlignItems(FlexComponent.Alignment.CENTER);
             contextMenu.addItem(rotateItem, e ->
-                    new RotateKeyConfirmDialog(parentView, kmsApiService, keyId, this::refresh).open());
+                    new RotateKeyConfirmDialog(parentView, objectService, keyId, this::refresh).open());
         }
 
         // ---------- Cancellation / permanent deletion (only if pending) ----------
@@ -422,7 +422,7 @@ class KeyCard extends AbstractKmsCard<KeyManagementView> {
 
     private void loadVersionCount() {
         try {
-            ResponseEntity<ListKeyVersionsResponse> resp = kmsApiService.listKeyVersions(keyId, 100, null);
+            ResponseEntity<ListKeyVersionsResponse> resp = objectService.listKeyVersions(keyId, 100, null);
             versionCount = resp.getBody() != null && resp.getBody().getVersions() != null
                     ? resp.getBody().getVersions().size() : 0;
         } catch (Exception e) {
@@ -469,37 +469,37 @@ class KeyCard extends AbstractKmsCard<KeyManagementView> {
         List<ListResourceTagsResponse.Tag> tags = fetchKeyTags();
         boolean rotationEnabled = metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled());
         Integer rotationPeriod = metadata != null ? metadata.getRotationPeriodInDays() : null;
-        new UpdateKeyDialog(parentView, kmsApiService, objectMapper, keyId,
+        new UpdateKeyDialog(parentView, objectService, objectMapper, keyId,
                 metadata != null ? metadata.getKeyAlias() : null,
                 metadata != null ? metadata.getDescription() : null,
                 tags, rotationEnabled, rotationPeriod, this::refresh).open();
     }
 
     private void describeKey() {
-        new DescribeKeyDialog(parentView, kmsApiService, objectMapper, keyId, metadata).open();
+        new DescribeKeyDialog(parentView, objectService, objectMapper, keyId, metadata).open();
     }
 
     private void toggleRotation() {
         boolean currentlyEnabled = metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled());
         Integer currentPeriod = metadata != null ? metadata.getRotationPeriodInDays() : null;
-        new ToggleRotationDialog(parentView, kmsApiService, keyId, currentlyEnabled, currentPeriod, this::refresh).open();
+        new ToggleRotationDialog(parentView, objectService, keyId, currentlyEnabled, currentPeriod, this::refresh).open();
     }
 
     private void showVersionsDialog() {
-        new ShowKeyVersionsDialog(kmsApiService, keyId, aliasOrId).open();
+        new ShowKeyVersionsDialog(objectService, keyId, aliasOrId).open();
     }
 
     private void toggleKeyStatus() {
-        new ToggleKeyStatusDialog(parentView, kmsApiService, keyId,
+        new ToggleKeyStatusDialog(parentView, objectService, keyId,
                 metadata != null && metadata.getKeyStatus() == IEnumKeyStatus.Types.ENABLED, this::refresh).open();
     }
 
     private void scheduleDeletion() {
-        new ScheduleKeyDeletionDialog(parentView, kmsApiService, keyId, metadata.getPendingDeletionWindowDays(), this::refresh).open();
+        new ScheduleKeyDeletionDialog(parentView, objectService, keyId, metadata.getPendingDeletionWindowDays(), this::refresh).open();
     }
 
     private void cancelDeletion() {
-        new CancelKeyDeletionDialog(parentView, kmsApiService, keyId, aliasOrId, this::refresh).open();
+        new CancelKeyDeletionDialog(parentView, objectService, keyId, aliasOrId, this::refresh).open();
     }
 
     private void confirmPermanentDelete() {
@@ -508,13 +508,13 @@ class KeyCard extends AbstractKmsCard<KeyManagementView> {
                     if (p instanceof com.vaadin.flow.component.orderedlayout.VerticalLayout vl) vl.remove(this);
                 })
         ));
-        new PermanentDeleteKeyDialog(parentView, kmsApiService, keyId, onConfirm).open();
+        new PermanentDeleteKeyDialog(parentView, objectService, keyId, onConfirm).open();
     }
 
     private List<ListResourceTagsResponse.Tag> fetchKeyTags() {
         try {
             ResponseEntity<eu.isygoit.dto.KmsDtos.ListResourceTagsResponse> resp =
-                    kmsApiService.listResourceTags(keyId, 100, null);
+                    objectService.listResourceTags(keyId, 100, null);
             if (resp.getBody() != null && resp.getBody().getTags() != null) return resp.getBody().getTags();
         } catch (Exception e) { /* ignore */ }
         return new ArrayList<>();

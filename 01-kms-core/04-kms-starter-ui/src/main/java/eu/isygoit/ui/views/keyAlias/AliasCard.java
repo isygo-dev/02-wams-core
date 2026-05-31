@@ -11,13 +11,13 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainView;
-import eu.isygoit.ui.views.AbstractKmsCard;
+import eu.isygoit.ui.views.BaseCard;
 import eu.isygoit.ui.views.keyAlias.dialog.DeleteAliasDialog;
 import eu.isygoit.ui.views.keyAlias.dialog.UpdateAliasDialog;
 
 import java.util.List;
 
-class AliasCard extends AbstractKmsCard<AliasesView> {
+class AliasCard extends BaseCard<AliasesView, KmsApiService> {
 
     private final String aliasName;
     private final String targetKeyId;
@@ -154,12 +154,12 @@ class AliasCard extends AbstractKmsCard<AliasesView> {
     // ── Actions ───────────────────────────────────────────────────────────────
 
     private void deleteAlias() {
-        new DeleteAliasDialog(parentView, kmsApiService, parentView::resetPaginationAndLoad,
+        new DeleteAliasDialog(parentView, objectService, parentView::resetPaginationAndLoad,
                 aliasName, primaryKey).open();
     }
 
     private void updateAlias() {
-        new UpdateAliasDialog(parentView, kmsApiService, parentView::resetPaginationAndLoad,
+        new UpdateAliasDialog(parentView, objectService, parentView::resetPaginationAndLoad,
                 aliasName, targetKeyId).open();
     }
 }

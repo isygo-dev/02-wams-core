@@ -23,4 +23,5 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api/v1/private/config/token")
 @InjectMapperAndService(handler = KmsExceptionHandler.class, mapper = TokenConfigMapper.class, minMapper = TokenConfigMapper.class, service = TokenConfigService.class)
 public class TokenConfigController extends MappedCrudTenantController<Long, TokenConfig, TokenConfigDto, TokenConfigDto, TokenConfigService> {
+
 }

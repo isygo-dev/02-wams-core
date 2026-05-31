@@ -12,7 +12,6 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import eu.isygoit.remote.kms.KmsApiService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +41,7 @@ import java.util.List;
  *
  * @param <V> the parent view type
  */
-public abstract class AbstractKmsCard<V extends Component> extends VerticalLayout {
+public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
 
     // ── Infrastructure ────────────────────────────────────────────────────────
 
@@ -54,7 +53,7 @@ public abstract class AbstractKmsCard<V extends Component> extends VerticalLayou
     /**
      * Shared API service.
      */
-    protected final KmsApiService kmsApiService;
+    protected final S objectService;
 
     // ── Layout components exposed to subclasses ───────────────────────────────
 
@@ -75,9 +74,9 @@ public abstract class AbstractKmsCard<V extends Component> extends VerticalLayou
 
     // ── Constructor ───────────────────────────────────────────────────────────
 
-    protected AbstractKmsCard(V parentView, KmsApiService kmsApiService) {
+    protected BaseCard(V parentView, S objectService) {
         this.parentView = parentView;
-        this.kmsApiService = kmsApiService;
+        this.objectService = objectService;
     }
 
     // ── Template method – must be called by subclass constructor ─────────────

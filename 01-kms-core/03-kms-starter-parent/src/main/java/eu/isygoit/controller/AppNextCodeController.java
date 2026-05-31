@@ -23,4 +23,5 @@ import org.springframework.web.bind.annotation.RestController;
 @InjectMapperAndService(handler = KmsExceptionHandler.class, mapper = AppNextCodeMapper.class, minMapper = AppNextCodeMapper.class, service = AppNextCodeService.class)
 @RequestMapping(path = "/api/v1/private/code")
 public class AppNextCodeController extends MappedCrudTenantController<Long, AppNextCode, NextCodeDto, NextCodeDto, AppNextCodeService> {
+
 }

@@ -23,4 +23,5 @@ import org.springframework.web.bind.annotation.RestController;
 @InjectMapperAndService(handler = KmsExceptionHandler.class, mapper = PasswordConfigMapper.class, minMapper = PasswordConfigMapper.class, service = PasswordConfigService.class)
 @RequestMapping(path = "/api/v1/private/config/password")
 public class PasswordConfigController extends MappedCrudTenantController<Long, PasswordConfig, PasswordConfigDto, PasswordConfigDto, PasswordConfigService> {
+
 }

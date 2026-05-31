@@ -23,4 +23,5 @@ import org.springframework.web.bind.annotation.RestController;
 @InjectMapperAndService(handler = KmsExceptionHandler.class, mapper = DigestConfigMapper.class, minMapper = DigestConfigMapper.class, service = DigestConfigService.class)
 @RequestMapping(path = "/api/v1/private/config/digest")
 public class DigestConfigController extends MappedCrudTenantController<Long, DigestConfig, DigestConfigDto, DigestConfigDto, DigestConfigService> {
+
 }
