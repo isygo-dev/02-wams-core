@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.Icon;
@@ -15,12 +14,13 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.KmsDtos.KeyPolicy;
+import eu.isygoit.ui.views.BaseActionDialog;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class PolicyBuilderDialog extends Dialog {
+public class PolicyBuilderDialog extends BaseActionDialog {
 
     private final ObjectMapper objectMapper;
     private final Consumer<KeyPolicy> onSave;
@@ -31,18 +31,16 @@ public class PolicyBuilderDialog extends Dialog {
     private KeyPolicy policy;
 
     public PolicyBuilderDialog(ObjectMapper objectMapper, KeyPolicy existingPolicy, Consumer<KeyPolicy> onSave) {
+        super("Key Policy Builder", null);
         this.objectMapper = objectMapper;
         this.onSave = onSave;
         this.policy = (existingPolicy != null) ? existingPolicy : createDefaultPolicy();
 
-        setHeaderTitle("Key Policy Builder");
+        setOkButtonText("Apply Policy");
         setWidth("1000px");
         setResizable(true);
-        setCloseOnEsc(true);
-        setCloseOnOutsideClick(false);
 
         buildContent();
-        getFooter().add(createFooterButtons());
     }
 
     private KeyPolicy createDefaultPolicy() {
@@ -57,13 +55,11 @@ public class PolicyBuilderDialog extends Dialog {
         mainLayout.setSpacing(true);
         mainLayout.setPadding(true);
 
-        // Version field
         String version = policy.getVersion();
         versionField.setValue(version != null ? version : "2012-10-17");
         versionField.setWidthFull();
         versionField.setHelperText("Must be '2012-10-17' for WAMS compatibility");
 
-        // Policy ID field
         String policyId = policy.getId();
         idField.setValue(policyId != null ? policyId : "");
         idField.setWidthFull();
@@ -72,14 +68,12 @@ public class PolicyBuilderDialog extends Dialog {
         mainLayout.add(versionField, idField);
         mainLayout.add(new H3("Statements"));
 
-        // Statement toolbar
         HorizontalLayout toolbar = new HorizontalLayout();
         Button addStatementBtn = new Button("Add Statement", new Icon(VaadinIcon.PLUS));
         addStatementBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
         toolbar.add(addStatementBtn);
         mainLayout.add(toolbar);
 
-        // Statements grid
         statementGrid.setItems(statements);
         statementGrid.addColumn(KeyPolicy.Statement::getSid)
                 .setHeader("SID")
@@ -93,7 +87,6 @@ public class PolicyBuilderDialog extends Dialog {
         statementGrid.setHeight("350px");
         mainLayout.add(statementGrid);
 
-        // Load existing statements
         if (policy.getStatements() != null) {
             statements.addAll(policy.getStatements());
             refreshStatementGrid();
@@ -141,24 +134,24 @@ public class PolicyBuilderDialog extends Dialog {
         editor.open();
     }
 
-    private HorizontalLayout createFooterButtons() {
-        Button saveBtn = new Button("Apply Policy", e -> savePolicy());
-        saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        Button cancelBtn = new Button("Cancel", e -> close());
-        return new HorizontalLayout(cancelBtn, saveBtn);
-    }
-
-    private void savePolicy() {
+    @Override
+    protected boolean onOk() {
         if (statements.isEmpty()) {
-            Notification.show("Policy must contain at least one statement", 6000, Notification.Position.TOP_END)
+            String errorMsg = "Policy must contain at least one statement";
+            append(errorMsg);
+            Notification.show(errorMsg, 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
-            return;
+            return false;
         }
+
         policy.setVersion(versionField.getValue());
         String idValue = idField.getValue();
         policy.setId(idValue != null && !idValue.isEmpty() ? idValue : null);
         policy.setStatements(statements);
-        onSave.accept(policy);
 
+        if (onSave != null) {
+            onSave.accept(policy);
+        }
+        return true;
     }
 }

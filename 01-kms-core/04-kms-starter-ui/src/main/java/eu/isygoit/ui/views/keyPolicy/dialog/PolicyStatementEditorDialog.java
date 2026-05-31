@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -15,16 +14,19 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.KmsDtos.KeyPolicy;
 import eu.isygoit.enums.IKmsActionType;
+import eu.isygoit.ui.views.BaseActionDialog;
 
 import java.util.*;
 import java.util.function.Consumer;
 
-public class PolicyStatementEditorDialog extends Dialog {
+public class PolicyStatementEditorDialog extends BaseActionDialog {
 
     private final ObjectMapper objectMapper;
     private final Consumer<KeyPolicy.Statement> onDone;
     private final String keyArnPlaceholder = "wrn:wams:kms:us-east-1:123456789012:key/";
     private final String aliasArnPlaceholder = "wrn:wams:kms:us-east-1:123456789012:alias/";
+
+    // Form fields
     private final TextField sidField = new TextField("SID (Statement ID)");
     private final ComboBox<String> effectCombo = new ComboBox<>("Effect");
     private final TextField principalField = new TextField("Principal");
@@ -32,24 +34,25 @@ public class PolicyStatementEditorDialog extends Dialog {
     private final TextArea resourcesArea = new TextArea("Resources");
     private final TextArea conditionArea = new TextArea("Condition (JSON)");
     private final Span resourcesPreview = new Span();
+
     // Shortcut buttons
     private final HorizontalLayout actionShortcuts = new HorizontalLayout();
     private final HorizontalLayout resourceShortcuts = new HorizontalLayout();
+
     private KeyPolicy.Statement statement;
 
     public PolicyStatementEditorDialog(ObjectMapper objectMapper, KeyPolicy.Statement existing, Consumer<KeyPolicy.Statement> onDone) {
+        super(existing == null ? "Add Statement" : "Edit Statement", null);
         this.objectMapper = objectMapper;
         this.onDone = onDone;
         this.statement = (existing != null) ? deepCopyStatement(existing) : createEmptyStatement();
 
-        setHeaderTitle(existing == null ? "Add Statement" : "Edit Statement");
+        setOkButtonText("Save Statement");
         setWidth("850px");
         setResizable(true);
-        setCloseOnEsc(true);
 
         buildForm();
         bindData();
-        getFooter().add(createFooterButtons());
     }
 
     private KeyPolicy.Statement createEmptyStatement() {
@@ -99,7 +102,6 @@ public class PolicyStatementEditorDialog extends Dialog {
         actionsArea.setHeight("120px");
         actionsArea.setHelperText("Enter actions separated by new lines or commas. Click shortcuts to add.");
 
-        // Build action shortcut buttons from IKmsActionType.Types (most important ones)
         List<IKmsActionType.Types> importantActions = Arrays.asList(
                 IKmsActionType.Types.ENCRYPT,
                 IKmsActionType.Types.DECRYPT,
@@ -117,13 +119,12 @@ public class PolicyStatementEditorDialog extends Dialog {
         actionShortcuts.setSpacing(true);
         actionShortcuts.getStyle().set("flex-wrap", "wrap");
         for (IKmsActionType.Types action : importantActions) {
-            String actionMeaning = action.meaning(); // e.g., "Encrypt"
+            String actionMeaning = action.meaning();
             Button btn = new Button(actionMeaning);
             btn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
             btn.addClickListener(e -> addToActionsArea("kms:" + actionMeaning));
             actionShortcuts.add(btn);
         }
-        // Add "All actions" button
         Button allActionsBtn = new Button("All (kms:*)");
         allActionsBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_SUCCESS);
         allActionsBtn.addClickListener(e -> actionsArea.setValue("kms:*"));
@@ -158,18 +159,15 @@ public class PolicyStatementEditorDialog extends Dialog {
         accountRootBtn.addClickListener(e -> addToResourcesArea("wrn:wams:iam::*:root"));
         resourceShortcuts.add(accountRootBtn);
 
-        // Preview of how resources will be stored
         resourcesPreview.getStyle().set("font-family", "monospace").set("font-size", "small");
         resourcesPreview.getStyle().set("color", "var(--lumo-secondary-text-color)");
         resourcesPreview.setText("→ Will be stored as: [\"*\"]");
         resourcesArea.addValueChangeListener(e -> updatePreview());
 
-        // Condition
         conditionArea.setWidthFull();
         conditionArea.setHeight("120px");
         conditionArea.setHelperText("Optional JSON condition. Example:\n{\n  \"Bool\": {\n    \"wams:MultiFactorAuthPresent\": \"true\"\n  }\n}");
 
-        // Assemble layout
         layout.add(sidField, effectCombo, principalField,
                 new Span("Actions"), actionsArea, actionShortcuts,
                 new Span("Resources"), resourcesArea, resourceShortcuts, resourcesPreview,
@@ -215,7 +213,6 @@ public class PolicyStatementEditorDialog extends Dialog {
         sidField.setValue(statement.getSid() != null ? statement.getSid() : "");
         effectCombo.setValue(statement.getEffect());
 
-        // Principal
         Object principal = statement.getPrincipal();
         if (principal instanceof String) {
             principalField.setValue((String) principal);
@@ -229,7 +226,6 @@ public class PolicyStatementEditorDialog extends Dialog {
             principalField.setValue("*");
         }
 
-        // Actions
         Object action = statement.getAction();
         if (action instanceof String) {
             actionsArea.setValue((String) action);
@@ -239,7 +235,6 @@ public class PolicyStatementEditorDialog extends Dialog {
             actionsArea.setValue("");
         }
 
-        // Resources
         Object resource = statement.getResource();
         if (resource instanceof String) {
             resourcesArea.setValue((String) resource);
@@ -250,7 +245,6 @@ public class PolicyStatementEditorDialog extends Dialog {
         }
         updatePreview();
 
-        // Condition
         if (statement.getCondition() != null) {
             try {
                 conditionArea.setValue(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(statement.getCondition()));
@@ -275,18 +269,15 @@ public class PolicyStatementEditorDialog extends Dialog {
         }
     }
 
-    private HorizontalLayout createFooterButtons() {
-        Button saveBtn = new Button("Save Statement", e -> save());
-        saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        Button cancelBtn = new Button("Cancel", e -> close());
-        return new HorizontalLayout(cancelBtn, saveBtn);
-    }
-
-    private void save() {
+    @Override
+    protected boolean onOk() {
         KeyPolicy.Statement.StatementBuilder builder = KeyPolicy.Statement.builder();
 
         String sid = sidField.getValue().trim();
-        builder.sid(sid.isEmpty() ? null : sid);
+        if (sid.isEmpty()) {
+            sid = "stmt-" + UUID.randomUUID().toString();
+        }
+        builder.sid(sid);
         builder.effect(effectCombo.getValue());
 
         // Principal
@@ -297,8 +288,11 @@ public class PolicyStatementEditorDialog extends Dialog {
                 Map<String, Object> principalMap = objectMapper.readValue(principalStr, Map.class);
                 builder.principal(principalMap);
             } catch (Exception e) {
-                showError("Invalid Principal JSON: " + e.getMessage());
-                return;
+                String errorMsg = "Invalid Principal JSON: " + e.getMessage();
+                append(errorMsg);
+                Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                return false;
             }
         } else {
             builder.principal(principalStr);
@@ -342,19 +336,20 @@ public class PolicyStatementEditorDialog extends Dialog {
                 Map<String, Map<String, String>> conditionMap = objectMapper.readValue(conditionText, Map.class);
                 builder.condition(conditionMap);
             } catch (Exception e) {
-                showError("Invalid Condition JSON: " + e.getMessage());
-                return;
+                String errorMsg = "Invalid Condition JSON: " + e.getMessage();
+                append(errorMsg);
+                Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                return false;
             }
         } else {
             builder.condition(null);
         }
 
-        onDone.accept(builder.build());
-
-    }
-
-    private void showError(String msg) {
-        Notification.show(msg, 6000, Notification.Position.TOP_END)
-                .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        KeyPolicy.Statement newStatement = builder.build();
+        if (onDone != null) {
+            onDone.accept(newStatement);
+        }
+        return true;
     }
 }

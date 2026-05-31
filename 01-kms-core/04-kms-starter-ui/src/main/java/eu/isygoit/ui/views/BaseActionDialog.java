@@ -133,10 +133,12 @@ public abstract class BaseActionDialog extends Dialog {
         button.addClickListener(e -> {
             clearError();
             boolean ok = onOk();
-            if (ok && onSuccess != null) {
+            if (ok) {
                 this.close();
-                onSuccess.run();
-            } else {
+                if (onSuccess != null) {
+                    onSuccess.run();
+                }
+            }  else {
                 showError(errorMsgBuilder.toString());
             }
         });
