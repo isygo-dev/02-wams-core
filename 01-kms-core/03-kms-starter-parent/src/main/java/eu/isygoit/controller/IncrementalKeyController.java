@@ -9,6 +9,7 @@ import eu.isygoit.dto.common.NextCodeDto;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.model.AppNextCode;
 import eu.isygoit.service.IKeyService;
+import eu.isygoit.service.RequestContextService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,9 +31,12 @@ public class IncrementalKeyController extends ControllerExceptionHandler impleme
     @Autowired
     private IKeyService keyService;
 
+    @Autowired
+    private RequestContextService requestContextService;
+
     @Override
-    public ResponseEntity<String> generateNextCode(
-            String tenant, String entity, String attribute) {
+    public ResponseEntity<String> generateNextCode(String entity, String attribute) {
+        String tenant = requestContextService.getCurrentContext().getSenderTenant();
         log.info("Call generate next code for: {}/{}/{}", tenant, entity, attribute);
         try {
             return ResponseFactory.responseOk(keyService.getIncrementalKey(tenant, entity, attribute));
@@ -43,8 +47,8 @@ public class IncrementalKeyController extends ControllerExceptionHandler impleme
     }
 
     @Override
-    public ResponseEntity<String> subscribeNextCode(
-            String tenant, NextCodeDto incrementalConfig) {
+    public ResponseEntity<String> subscribeNextCode(NextCodeDto incrementalConfig) {
+        String tenant = requestContextService.getCurrentContext().getSenderTenant();
         log.info("Call subscribe next code generator for: {}/{}", tenant, incrementalConfig);
         try {
             keyService.subscribeIncrementalKeyGenerator(AppNextCode.builder()

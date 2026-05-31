@@ -11,6 +11,7 @@ import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.ui.views.byok.ByokView;
 import eu.isygoit.ui.views.crypto.CryptoOperationsView;
+import eu.isygoit.ui.views.incremental.IncrementalKeyView;
 import eu.isygoit.ui.views.key.KeyManagementView;
 import eu.isygoit.ui.views.keyAlias.AliasesView;
 import eu.isygoit.ui.views.keyGrants.GrantsView;
@@ -99,6 +100,13 @@ public class MainLayout extends AppLayout {
                 VaadinIcon.LOCK.create()
         );
 
+        // ================= INCREMENTAL KEY =================
+        SideNavItem incrementalKey = new SideNavItem(
+                "Incremental Key",
+                IncrementalKeyView.class,
+                VaadinIcon.CLOCK.create()
+        );
+
         nav.addItem(
                 home,
                 keyMgmt,
@@ -108,7 +116,8 @@ public class MainLayout extends AppLayout {
                 grants,
                 byok,
                 stores,
-                crypto
+                crypto,
+                incrementalKey
         );
 
         Scroller scroller = new Scroller(nav);
