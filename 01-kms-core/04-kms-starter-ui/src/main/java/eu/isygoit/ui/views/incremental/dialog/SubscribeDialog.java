@@ -112,6 +112,7 @@ public class SubscribeDialog extends BaseActionDialog {
             if (response.getStatusCode().is2xxSuccessful()) {
                 Notification.show("Subscription successful", 3000, Notification.Position.MIDDLE)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                close();
                 return true;
             } else {
                 String errorMsg = "Subscription failed: " + response.getStatusCode();

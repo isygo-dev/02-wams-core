@@ -20,7 +20,7 @@ import java.util.List;
 
 public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeService> {
 
-    private final NextCodeDto dto;
+    private NextCodeDto dto;
     private final Runnable deleteCallback;
     private final java.util.function.BiFunction<String, String, String> generateCallback;
 
@@ -38,6 +38,18 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
         this.deleteCallback = deleteCallback;
         this.generateCallback = generateCallback;
         initCard();
+    }
+
+    public NextCodeDto getDto() {
+        return dto;
+    }
+
+    /**
+     * Updates the card with new DTO data (called after generation or refresh).
+     */
+    public void updateDto(NextCodeDto newDto) {
+        this.dto = newDto;
+        refreshDisplay();
     }
 
     @Override
@@ -161,7 +173,8 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
             String generated = generateCallback.apply(dto.getEntity(), dto.getAttribute());
             Notification.show("Generated code: " + generated, 3000, Notification.Position.MIDDLE)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            parentView.loadNextCodes(); // reload the whole list to get updated values
+            // Refresh only this card, preserving page order
+            parentView.refreshCard(this);
         } catch (Exception e) {
             Notification.show("Error generating code: " + e.getMessage(), 5000,
                             Notification.Position.MIDDLE)
@@ -178,5 +191,10 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
     private void updateCodeValueDisplay() {
         long val = dto.getCodeValue() != null ? dto.getCodeValue() : 0L;
         codeValueSpan.setText(String.valueOf(val));
+    }
+
+    private void refreshDisplay() {
+        updateFormattedCodeDisplay();
+        updateCodeValueDisplay();
     }
 }

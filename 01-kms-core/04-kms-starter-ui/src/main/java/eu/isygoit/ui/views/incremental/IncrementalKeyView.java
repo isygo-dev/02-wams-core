@@ -150,11 +150,9 @@ public class IncrementalKeyView extends Composite<VerticalLayout> {
         toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         toolbar.addClassName("incremental-toolbar");
 
-        // Left group
         HorizontalLayout leftGroup = new HorizontalLayout(searchField);
         searchField.setWidth("250px");
 
-        // Center group
         HorizontalLayout centerGroup = new HorizontalLayout();
         centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
         prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
@@ -164,7 +162,6 @@ public class IncrementalKeyView extends Composite<VerticalLayout> {
         totalCountLabel.getStyle().set("margin", "0 0.5rem");
         centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
 
-        // Right group
         HorizontalLayout rightGroup = new HorizontalLayout(refreshButton, subscribeButton);
         rightGroup.setSpacing(true);
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
@@ -248,6 +245,34 @@ public class IncrementalKeyView extends Composite<VerticalLayout> {
                     this::generateCodeForConfig
             );
             cardsContainer.add(card);
+        }
+    }
+
+    /**
+     * Refreshes a single card after code generation or other updates.
+     */
+    public void refreshCard(NextCodeCard card) {
+        try {
+            ResponseEntity<NextCodeDto> response = nextCodeService.findById(card.getDto().getId());
+            NextCodeDto updated = response.getBody();
+            if (updated != null) {
+                card.updateDto(updated);
+                // Keep the in‑memory list consistent
+                for (int i = 0; i < currentPageContent.size(); i++) {
+                    if (currentPageContent.get(i).getId().equals(updated.getId())) {
+                        currentPageContent.set(i, updated);
+                        break;
+                    }
+                }
+            } else {
+                // If not found, remove the card and reload the page
+                cardsContainer.remove(card);
+                loadNextCodes();
+            }
+        } catch (Exception e) {
+            Notification.show("Failed to refresh card: " + e.getMessage(), 3000,
+                            Notification.Position.TOP_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }
 
