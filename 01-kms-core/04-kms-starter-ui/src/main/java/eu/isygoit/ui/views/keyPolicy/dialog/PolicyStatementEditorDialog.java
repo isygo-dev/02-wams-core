@@ -350,7 +350,7 @@ public class PolicyStatementEditorDialog extends Dialog {
         }
 
         onDone.accept(builder.build());
-        close();
+
     }
 
     private void showError(String msg) {

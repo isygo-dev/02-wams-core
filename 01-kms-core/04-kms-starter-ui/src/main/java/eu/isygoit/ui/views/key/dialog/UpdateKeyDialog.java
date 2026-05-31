@@ -132,7 +132,7 @@ public class UpdateKeyDialog extends BaseActionDialog {
                 return false;
             }
 
-            close();
+
             Notification.show("Key updated successfully", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 

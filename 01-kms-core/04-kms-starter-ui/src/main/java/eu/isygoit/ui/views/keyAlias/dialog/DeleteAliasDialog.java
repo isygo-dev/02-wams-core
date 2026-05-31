@@ -64,7 +64,7 @@ public class DeleteAliasDialog extends PinBaseActionDialog {
                 return false;
             }
 
-            close();
+
             Notification.show("Alias deleted", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             return true;

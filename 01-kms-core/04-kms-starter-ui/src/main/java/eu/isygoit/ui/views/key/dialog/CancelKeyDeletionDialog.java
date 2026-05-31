@@ -53,7 +53,7 @@ public class CancelKeyDeletionDialog extends BaseActionDialog {
                 return false;
             }
 
-            close();
+
             Notification.show("Deletion cancelled", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 

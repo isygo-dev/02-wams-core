@@ -5,7 +5,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
@@ -26,6 +25,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.MainLayout;
+import eu.isygoit.ui.views.keyTag.dialog.AddTagDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
@@ -334,57 +334,7 @@ public class TagsView extends VerticalLayout {
             showWarning("Please select a key first");
             return;
         }
-        Dialog dialog = new Dialog();
-        dialog.setHeaderTitle("Add tag");
-        dialog.setWidth("400px");
-
-        TextField keyField = new TextField("Tag key");
-        keyField.setRequired(true);
-        keyField.setMaxLength(128);
-        keyField.setPlaceholder("e.g., Environment");
-        keyField.setTooltipText("Tag key (max 128 characters)");
-
-        TextField valueField = new TextField("Tag value");
-        valueField.setRequired(true);
-        valueField.setMaxLength(256);
-        valueField.setPlaceholder("e.g., Production");
-        valueField.setTooltipText("Tag value (max 256 characters)");
-
-        Button saveBtn = new Button("Add", e -> {
-            String tagKey = keyField.getValue();
-            String tagValue = valueField.getValue();
-            if (!StringUtils.hasText(tagKey) || !StringUtils.hasText(tagValue)) {
-                showError("Both key and value are required");
-                return;
-            }
-            dialog.close();
-            try {
-                KmsDtos.TagResourceRequest request = KmsDtos.TagResourceRequest.builder()
-                        .keyId(selectedKeyId)
-                        .tags(List.of(KmsDtos.ListResourceTagsResponse.Tag.builder()
-                                .tagKey(tagKey)
-                                .tagValue(tagValue)
-                                .build()))
-                        .build();
-                kmsApiService.tagResource(selectedKeyId, request);
-                showSuccess("Tag added");
-                loadTags();
-            } catch (FeignException ex) {
-                String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
-                showError("Failed to add tag: " + errorMsg);
-                log.error("Failed to add tag to key {}: {}", selectedKeyId, errorMsg);
-            } catch (Exception ex) {
-                showError("Failed to add tag: " + ex.getMessage());
-                log.error("Failed to add tag to key {}: {}", selectedKeyId, ex.getMessage());
-            }
-        });
-        saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        Button cancelBtn = new Button("Cancel", e -> dialog.close());
-        cancelBtn.setTooltipText("Cancel adding tag");
-
-        dialog.getFooter().add(cancelBtn, saveBtn);
-        dialog.add(keyField, valueField);
-        dialog.open();
+        new AddTagDialog(kmsApiService, selectedKeyId, this::loadTags).open();
     }
 
     // ----- Delete tag (per row) -----

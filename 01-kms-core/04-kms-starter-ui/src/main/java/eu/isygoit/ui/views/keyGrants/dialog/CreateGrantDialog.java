@@ -134,7 +134,7 @@ public class CreateGrantDialog extends BaseActionDialog {
                     .build();
             ResponseEntity<KmsDtos.CreateGrantResponse> response = kmsApiService.createGrant(keyId, request);
             if (response.getStatusCode().is2xxSuccessful()) {
-                close();
+
                 Notification.show("Grant created successfully", 6000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 return true;

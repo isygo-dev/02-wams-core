@@ -37,7 +37,7 @@ public class RetireGrantDialog extends PinBaseActionDialog {
                     .grantId(grant.getGrantId())
                     .build();
             kmsApiService.retireGrant(request);
-            close();
+
             Notification.show("Grant retired successfully", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             return true;

@@ -92,7 +92,7 @@ public class SubscribeDialog extends BaseActionDialog {
         String attribute = attributeField.getValue();
 
         if (entity == null || entity.isBlank() || attribute == null || attribute.isBlank()) {
-            Notification.show("Entity and Attribute are required", 3000, Notification.Position.MIDDLE)
+            Notification.show("Entity and Attribute are required", 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             return false;
         }
@@ -110,21 +110,21 @@ public class SubscribeDialog extends BaseActionDialog {
         try {
             ResponseEntity<NextCodeDto> response = nextCodeService.create(dto);
             if (response.getStatusCode().is2xxSuccessful()) {
-                Notification.show("Subscription successful", 3000, Notification.Position.MIDDLE)
+                Notification.show("Subscription successful", 3000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                close();
+
                 return true;
             } else {
                 String errorMsg = "Subscription failed: " + response.getStatusCode();
                 showError(errorMsg);
-                Notification.show(errorMsg, 5000, Notification.Position.MIDDLE)
+                Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return false;
             }
         } catch (Exception e) {
             String errorMsg = "Error: " + e.getMessage();
             showError(errorMsg);
-            Notification.show(errorMsg, 5000, Notification.Position.MIDDLE)
+            Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             return false;
         }

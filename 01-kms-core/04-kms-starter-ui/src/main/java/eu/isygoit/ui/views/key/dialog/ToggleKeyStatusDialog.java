@@ -76,7 +76,6 @@ public class ToggleKeyStatusDialog extends BaseActionDialog {
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             }
 
-            close();
 
             return true;
         } catch (FeignException ex) {

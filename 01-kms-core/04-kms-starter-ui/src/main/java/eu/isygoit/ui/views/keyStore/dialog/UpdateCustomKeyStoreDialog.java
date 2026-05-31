@@ -101,7 +101,7 @@ public class UpdateCustomKeyStoreDialog extends BaseActionDialog {
 
             Notification.show("Custom key store updated", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            close();
+
             return true;
 
         } catch (FeignException ex) {

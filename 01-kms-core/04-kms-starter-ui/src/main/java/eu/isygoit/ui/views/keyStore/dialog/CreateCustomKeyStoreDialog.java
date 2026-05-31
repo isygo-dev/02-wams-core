@@ -136,7 +136,7 @@ public class CreateCustomKeyStoreDialog extends BaseActionDialog {
 
             Notification.show("Custom key store created", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            close();
+
             return true;
 
         } catch (FeignException ex) {

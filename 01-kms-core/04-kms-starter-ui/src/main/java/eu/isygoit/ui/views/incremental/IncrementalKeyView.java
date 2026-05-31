@@ -178,7 +178,7 @@ public class IncrementalKeyView extends Composite<VerticalLayout> {
             if (currentSearch == null || currentSearch.isBlank()) {
                 response = nextCodeService.findAll(currentPage, pageSize);
             } else {
-                String criteria = "entity~" + currentSearch + ",OR attribute~" + currentSearch;
+                String criteria = "entity ~ '" + currentSearch + "' | attribute ~ '" + currentSearch + "'";
                 response = nextCodeService.findAllFilteredByCriteria(criteria, currentPage, pageSize);
             }
 
@@ -280,7 +280,7 @@ public class IncrementalKeyView extends Composite<VerticalLayout> {
         try {
             nextCodeService.delete(id);
             Notification.show("Configuration deleted successfully", 3000,
-                            Notification.Position.MIDDLE)
+                            Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             loadNextCodes(); // reload current page
         } catch (Exception e) {

@@ -20,10 +20,9 @@ import java.util.List;
 
 public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeService> {
 
-    private NextCodeDto dto;
     private final Runnable deleteCallback;
     private final java.util.function.BiFunction<String, String, String> generateCallback;
-
+    private NextCodeDto dto;
     private Span formattedCodeSpan;
     private Span codeValueSpan;
     private Button generateButton;
@@ -171,13 +170,13 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
         generateButton.setEnabled(false);
         try {
             String generated = generateCallback.apply(dto.getEntity(), dto.getAttribute());
-            Notification.show("Generated code: " + generated, 3000, Notification.Position.MIDDLE)
+            Notification.show("Generated code: " + generated, 3000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             // Refresh only this card, preserving page order
             parentView.refreshCard(this);
         } catch (Exception e) {
             Notification.show("Error generating code: " + e.getMessage(), 5000,
-                            Notification.Position.MIDDLE)
+                            Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             generateButton.setEnabled(true);

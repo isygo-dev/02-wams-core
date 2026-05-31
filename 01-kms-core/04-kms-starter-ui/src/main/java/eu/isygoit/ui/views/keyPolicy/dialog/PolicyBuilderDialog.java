@@ -159,6 +159,6 @@ public class PolicyBuilderDialog extends Dialog {
         policy.setId(idValue != null && !idValue.isEmpty() ? idValue : null);
         policy.setStatements(statements);
         onSave.accept(policy);
-        close();
+
     }
 }

@@ -46,7 +46,7 @@ public class ShowKeyVersionsDialog extends BaseActionDialog {
 
     @Override
     protected boolean onOk() {
-        close();
+
         return true;
     }
 

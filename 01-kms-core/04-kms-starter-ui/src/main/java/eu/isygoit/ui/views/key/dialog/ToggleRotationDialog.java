@@ -116,7 +116,7 @@ public class ToggleRotationDialog extends PinBaseActionDialog {
                     : "Rotation enabled with period " + periodField.getValue() + " days. A new key version has been created.";
             Notification.show(successMsg, 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            close();
+
             return true;
 
         } catch (FeignException ex) {

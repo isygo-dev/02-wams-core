@@ -33,7 +33,7 @@ public class RevokeGrantDialog extends PinBaseActionDialog {
         }
         try {
             kmsApiService.revokeGrant(keyId, grant.getGrantId());
-            close();
+
             Notification.show("Grant revoked successfully", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             return true;

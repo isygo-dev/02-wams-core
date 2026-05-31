@@ -44,7 +44,7 @@ public class DisableKeyVersionDialog extends PinBaseActionDialog {
                 return false;
             }
 
-            close();
+
             Notification.show("Key version disabled", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             return true;

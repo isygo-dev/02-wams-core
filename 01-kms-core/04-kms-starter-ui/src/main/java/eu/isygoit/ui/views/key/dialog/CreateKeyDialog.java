@@ -155,7 +155,7 @@ public class CreateKeyDialog extends BaseActionDialog {
                 return false;
             }
 
-            close();
+
             Notification.show("Key created successfully", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             return true;

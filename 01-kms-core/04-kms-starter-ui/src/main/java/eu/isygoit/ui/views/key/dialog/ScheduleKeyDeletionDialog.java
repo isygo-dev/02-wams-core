@@ -57,7 +57,7 @@ public class ScheduleKeyDeletionDialog extends BaseActionDialog {
                 return false;
             }
 
-            close();
+
             Notification.show("Deletion scheduled in " + days + " days", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 

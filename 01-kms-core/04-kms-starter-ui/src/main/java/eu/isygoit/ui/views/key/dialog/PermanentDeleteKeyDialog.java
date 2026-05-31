@@ -43,7 +43,7 @@ public class PermanentDeleteKeyDialog extends PinBaseActionDialog {
                 return false;
             }
 
-            close();
+
             Notification.show("Key permanently deleted", 6000, Notification.Position.TOP_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
