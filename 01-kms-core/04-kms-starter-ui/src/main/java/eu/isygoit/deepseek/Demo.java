@@ -12,8 +12,7 @@ import java.time.Duration;
 public class Demo {
     public static void main(String[] args) {
         //Get your key from : https://openrouter.ai/workspaces/default/keys
-        String openRouterKey = "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"; //System.getenv("OPENROUTER_API_KEY");
-        //String openRouterKey = System.getenv("OPENROUTER_API_KEY");
+        String openRouterKey = System.getenv("OPENROUTER_API_KEY");
         if (openRouterKey == null || openRouterKey.isBlank()) {
             System.err.println("Please set OPENROUTER_API_KEY environment variable.\n" +
                     "** Get your key from : https://openrouter.ai/keys");
