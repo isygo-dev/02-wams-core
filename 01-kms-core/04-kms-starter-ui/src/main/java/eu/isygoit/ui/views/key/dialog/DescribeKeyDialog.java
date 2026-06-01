@@ -14,6 +14,7 @@ import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
 import eu.isygoit.dto.KmsDtos.GetKeyPolicyResponse;
 import eu.isygoit.dto.KmsDtos.ListResourceTagsResponse;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.views.NoActionDialog;
 import eu.isygoit.ui.views.key.KeyManagementView;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ import java.util.Map;
  * Dialog displaying detailed information about a KMS key, including metadata, tags, and policy.
  */
 @Slf4j
-public class DescribeKeyDialog extends Dialog {
+public class DescribeKeyDialog extends NoActionDialog {
 
     private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;

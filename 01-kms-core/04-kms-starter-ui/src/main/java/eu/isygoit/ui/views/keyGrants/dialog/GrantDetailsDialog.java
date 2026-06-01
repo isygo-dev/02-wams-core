@@ -7,11 +7,12 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.helper.DateHelper;
+import eu.isygoit.ui.views.NoActionDialog;
 
-public class GrantDetailsDialog extends Dialog {
+public class GrantDetailsDialog extends NoActionDialog {
 
     public GrantDetailsDialog(KmsDtos.ListGrantsResponse.Grant grant, ObjectMapper objectMapper) {
-        setHeaderTitle("Grant Details");
+        super("Grant Details");
         setWidth("600px");
         setResizable(true);
 
