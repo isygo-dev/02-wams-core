@@ -8,6 +8,7 @@ import eu.isygoit.dto.data.TokenRequestDto;
 import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.service.ITokenBuilderService;
+import eu.isygoit.service.RequestContextService;
 import eu.isygoit.service.TokenServiceApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -37,6 +38,9 @@ public class TokenController extends ControllerExceptionHandler implements Token
     @Autowired
     private ITokenBuilderService tokenService;
 
+    @Autowired
+    private RequestContextService requestContextService;
+
     @Operation(summary = "Build token by tenant Api",
             description = "Build token by tenant")
     @ApiResponses(value = {
@@ -47,12 +51,12 @@ public class TokenController extends ControllerExceptionHandler implements Token
     })
     @Override
     public ResponseEntity<TokenResponseDto> buildTokenByTenant(
-            String tenant,
             String application,
             IEnumToken.Types tokenType,
             TokenRequestDto tokenRequestDto) {
         log.info("Call create Token By Tenant");
         try {
+            String tenant = requestContextService.getCurrentContext().getSenderTenant();
             return ResponseFactory.responseOk(tokenService.buildTokenAndSave(tenant, application, tokenType, tokenRequestDto.getSubject(), tokenRequestDto.getClaims()));
         } catch (Throwable e) {
             log.error("<Error>: create Token By Tenant: {} ", e);
@@ -70,13 +74,13 @@ public class TokenController extends ControllerExceptionHandler implements Token
     })
     @Override
     public ResponseEntity<Boolean> isTokenValid(
-            String tenant,
             String application,
             IEnumToken.Types tokenType,
             String token,
             String subject) {
         log.info("Call is Token Valid");
         try {
+            String tenant = requestContextService.getCurrentContext().getSenderTenant();
             return ResponseFactory.responseOk(tokenService.isTokenValid(tenant, application, tokenType, token, subject));
         } catch (Throwable e) {
             log.error("<Error>: Invalid token: {} ", e);

@@ -148,7 +148,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
 
     // ── Header assembly ───────────────────────────────────────────────────────
 
-    private void buildHeader() {
+    protected void buildHeader() {
         // Left cluster
         headerLeft = new HorizontalLayout();
         headerLeft.setAlignItems(FlexComponent.Alignment.CENTER);
