@@ -4,14 +4,10 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.TokenConfigDto;
-import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
 import eu.isygoit.ui.MainView;
 import eu.isygoit.ui.views.BaseCard;
@@ -22,9 +18,8 @@ import java.util.List;
 
 public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigService> {
 
-    private TokenConfigDto dto;
     private final Runnable onDeleteRefresh;
-
+    private TokenConfigDto dto;
     private Span titleSpan;
     private Span typeChip;
 

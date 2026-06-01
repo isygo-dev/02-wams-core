@@ -59,10 +59,12 @@ public class Demo {
                 public void onToken(String token) {
                     System.out.print(token);
                 }
+
                 @Override
                 public void onComplete() {
                     System.out.println("\n[Done]");
                 }
+
                 @Override
                 public void onError(Throwable t) {
                     System.err.println("Stream error: " + t.getMessage());

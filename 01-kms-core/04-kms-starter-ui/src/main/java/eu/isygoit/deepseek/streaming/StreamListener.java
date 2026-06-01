@@ -15,12 +15,14 @@ public interface StreamListener {
     /**
      * Called when the stream completes successfully.
      */
-    default void onComplete() {}
+    default void onComplete() {
+    }
 
     /**
      * Called when an error occurs during streaming.
      *
      * @param throwable the error that occurred
      */
-    default void onError(Throwable throwable) {}
+    default void onError(Throwable throwable) {
+    }
 }

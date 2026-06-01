@@ -20,7 +20,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.TokenConfigDto;
-import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
 import eu.isygoit.ui.MainLayout;
 import eu.isygoit.ui.views.tokenizer.dialog.CreateTokenConfigDialog;

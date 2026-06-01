@@ -36,6 +36,20 @@ class DeepSeekClientImpl implements DeepSeekClient {
                 .build();
     }
 
+    private static DeepSeekException mapStatusCodeToException(int statusCode, String responseBody) {
+        String message = String.format("HTTP %d: %s", statusCode, responseBody);
+        return switch (statusCode) {
+            case 401 -> new AuthenticationException(message);
+            case 429 -> new RateLimitException(message);
+            case 400 -> new InvalidRequestException(message);
+            default -> new ApiServerException(message, statusCode);
+        };
+    }
+
+    private static boolean isRetryable(DeepSeekException e) {
+        return e instanceof RateLimitException || e instanceof ApiServerException;
+    }
+
     @Override
     public ChatResponse chat(ChatRequest request) throws DeepSeekException {
         // Force stream = false
@@ -179,19 +193,5 @@ class DeepSeekClientImpl implements DeepSeekClient {
         } catch (Exception e) {
             throw new DeepSeekIoException("Failed to initiate stream: " + e.getMessage(), e);
         }
-    }
-
-    private static DeepSeekException mapStatusCodeToException(int statusCode, String responseBody) {
-        String message = String.format("HTTP %d: %s", statusCode, responseBody);
-        return switch (statusCode) {
-            case 401 -> new AuthenticationException(message);
-            case 429 -> new RateLimitException(message);
-            case 400 -> new InvalidRequestException(message);
-            default -> new ApiServerException(message, statusCode);
-        };
-    }
-
-    private static boolean isRetryable(DeepSeekException e) {
-        return e instanceof RateLimitException || e instanceof ApiServerException;
     }
 }

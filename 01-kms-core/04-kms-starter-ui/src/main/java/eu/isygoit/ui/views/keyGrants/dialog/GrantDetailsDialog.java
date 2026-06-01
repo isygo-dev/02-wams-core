@@ -1,7 +1,6 @@
 package eu.isygoit.ui.views.keyGrants.dialog;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;

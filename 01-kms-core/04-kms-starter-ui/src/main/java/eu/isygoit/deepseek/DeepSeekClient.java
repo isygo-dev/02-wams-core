@@ -13,5 +13,6 @@ public interface DeepSeekClient {
     }
 
     ChatResponse chat(ChatRequest request) throws DeepSeekException;
+
     void chatStream(ChatRequest request, StreamListener listener) throws DeepSeekException;
 }

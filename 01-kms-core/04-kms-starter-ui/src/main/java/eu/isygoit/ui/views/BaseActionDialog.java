@@ -138,7 +138,7 @@ public abstract class BaseActionDialog extends Dialog {
                 if (onSuccess != null) {
                     onSuccess.run();
                 }
-            }  else {
+            } else {
                 showError(errorMsgBuilder.toString());
             }
         });
