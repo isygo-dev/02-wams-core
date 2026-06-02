@@ -47,7 +47,7 @@ public class TokenBuilderView extends VerticalLayout {
 
     // Build token components
     private final ComboBox<IEnumToken.Types> tokenTypeCombo = new ComboBox<>("Token type");
-    private final TextField buildApplicationField = new TextField("Application");
+    private final TextField buildAudienceField = new TextField("Audience");
     private final TextField subjectField = new TextField("Subject");
     private final TextArea claimsArea = new TextArea("Claims (JSON)");
     private final Button buildButton = new Button("Build Token", new Icon(VaadinIcon.COG));
@@ -60,7 +60,7 @@ public class TokenBuilderView extends VerticalLayout {
 
     // Validate token components
     private final ComboBox<IEnumToken.Types> validateTokenTypeCombo = new ComboBox<>("Token type");
-    private final TextField validateApplicationField = new TextField("Application");
+    private final TextField validateAudienceField = new TextField("Audience");
     private final TextField validateTokenField = new TextField("Token");
     private final TextField validateSubjectField = new TextField("Subject");
     private final Button validateButton = new Button("Validate Token", new Icon(VaadinIcon.SEARCH));
@@ -88,7 +88,7 @@ public class TokenBuilderView extends VerticalLayout {
                 LumoUtility.Margin.Bottom.NONE,
                 LumoUtility.Margin.Top.NONE
         );
-        Span subtitle = new Span("Manage JSON Web Tokens (JWT) – build and validate tokens for your applications");
+        Span subtitle = new Span("Manage JSON Web Tokens (JWT) – build and validate tokens for your audiences");
         subtitle.addClassName(LumoUtility.TextColor.SECONDARY);
         subtitle.addClassName(LumoUtility.FontSize.SMALL);
         add(header, subtitle);
@@ -117,10 +117,10 @@ public class TokenBuilderView extends VerticalLayout {
         tokenTypeCombo.setRequired(true);
         tokenTypeCombo.setWidthFull();
 
-        buildApplicationField.setRequired(true);
-        buildApplicationField.setPlaceholder("e.g., kms-console");
-        buildApplicationField.setTooltipText("Application name (required)");
-        buildApplicationField.setWidthFull();
+        buildAudienceField.setRequired(true);
+        buildAudienceField.setPlaceholder("e.g., kms-console");
+        buildAudienceField.setTooltipText("Audience name (required)");
+        buildAudienceField.setWidthFull();
 
         subjectField.setRequired(true);
         subjectField.setPlaceholder("e.g., user@example.com or service-account");
@@ -131,7 +131,7 @@ public class TokenBuilderView extends VerticalLayout {
         claimsArea.setPlaceholder("Optional JSON claims:\n{\n  \"role\": \"admin\",\n  \"scope\": \"read write\"\n}");
         claimsArea.setHelperText("Valid JSON object with extra claims");
 
-        form.add(tokenTypeCombo, buildApplicationField, subjectField, claimsArea);
+        form.add(tokenTypeCombo, buildAudienceField, subjectField, claimsArea);
         form.setColspan(claimsArea, 2);
         card.add(form);
 
@@ -213,8 +213,8 @@ public class TokenBuilderView extends VerticalLayout {
         validateTokenTypeCombo.setValue(IEnumToken.Types.ACCESS);
         validateTokenTypeCombo.setRequired(true);
 
-        validateApplicationField.setRequired(true);
-        validateApplicationField.setPlaceholder("e.g., kms-console");
+        validateAudienceField.setRequired(true);
+        validateAudienceField.setPlaceholder("e.g., kms-console");
 
         validateTokenField.setRequired(true);
         validateTokenField.setPlaceholder("Paste the JWT token here");
@@ -223,7 +223,7 @@ public class TokenBuilderView extends VerticalLayout {
         validateSubjectField.setRequired(true);
         validateSubjectField.setPlaceholder("Subject expected in token");
 
-        form.add(validateTokenTypeCombo, validateApplicationField, validateTokenField, validateSubjectField);
+        form.add(validateTokenTypeCombo, validateAudienceField, validateTokenField, validateSubjectField);
         form.setColspan(validateTokenField, 2);
         card.add(form);
 
@@ -239,13 +239,13 @@ public class TokenBuilderView extends VerticalLayout {
     }
 
     private void buildToken() {
-        String application = buildApplicationField.getValue();
+        String audience = buildAudienceField.getValue();
         IEnumToken.Types tokenType = tokenTypeCombo.getValue();
         String subject = subjectField.getValue();
         String claimsJson = claimsArea.getValue();
 
-        if (!StringUtils.hasText(application)) {
-            showError("Application is required");
+        if (!StringUtils.hasText(audience)) {
+            showError("Audience is required");
             return;
         }
         if (tokenType == null) {
@@ -274,7 +274,7 @@ public class TokenBuilderView extends VerticalLayout {
                     .claims(claims)
                     .build();
 
-            ResponseEntity<TokenResponseDto> response = tokenService.buildToken(application, tokenType, request);
+            ResponseEntity<TokenResponseDto> response = tokenService.buildToken(audience, tokenType, request);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 TokenResponseDto tokenResponse = response.getBody();
@@ -334,13 +334,13 @@ public class TokenBuilderView extends VerticalLayout {
     }
 
     private void validateToken() {
-        String application = validateApplicationField.getValue();
+        String audience = validateAudienceField.getValue();
         IEnumToken.Types tokenType = validateTokenTypeCombo.getValue();
         String token = validateTokenField.getValue();
         String subject = validateSubjectField.getValue();
 
-        if (!StringUtils.hasText(application)) {
-            showError("Application is required for validation");
+        if (!StringUtils.hasText(audience)) {
+            showError("Audience is required for validation");
             return;
         }
         if (tokenType == null) {
@@ -358,7 +358,7 @@ public class TokenBuilderView extends VerticalLayout {
 
         showLoading(true);
         try {
-            ResponseEntity<Boolean> response = tokenService.isTokenValid(application, tokenType, token, subject);
+            ResponseEntity<Boolean> response = tokenService.isTokenValid(audience, tokenType, token, subject);
             validationResultSpan.setVisible(true);
             if (response.getStatusCode().is2xxSuccessful() && Boolean.TRUE.equals(response.getBody())) {
                 validationResultSpan.setText(" ✅ Token is VALID");
