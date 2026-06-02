@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.AppParameterConstants;
 import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
-import eu.isygoit.dto.common.UserContextRequestDto;
 import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.dto.response.AccessKeyResponseDto;
 import eu.isygoit.enums.*;
@@ -340,39 +339,34 @@ public class PasswordService implements IPasswordService {
             throws TokenInvalidException {
         Optional<String> optional = jwtService.extractSubject(resetPwdViaTokenRequestDto.getToken());
         if (optional.isPresent()) {
-            String userContextString = optional.get();
-            if (StringUtils.hasText(userContextString)) {
-                String[] split = userContextString.split("@");
+            String tokenSubject = optional.get();
+            if (StringUtils.hasText(tokenSubject)) {
+                String[] split = tokenSubject.split("@");
                 if (split.length >= 2 && !StringUtils.hasText(split[0]) || !StringUtils.hasText(split[1])) {
                     throw new TokenInvalidException("Invalid JWT: subject format invalid");
                 }
 
-                String userName = split[0];
+                String accountCode = split[0];
                 String tenant = split[1];
 
-                AccessToken accessToken = accessTokenService.findByApplicationAndAccountCodeAndTokenAndTokenType(resetPwdViaTokenRequestDto.getApplication(),
-                        userName,
-                        resetPwdViaTokenRequestDto.getToken(),
+                Long crc16 = CRC16Helper.calculate(resetPwdViaTokenRequestDto.getToken().getBytes());
+                Long crc32 = CRC32Helper.calculate(resetPwdViaTokenRequestDto.getToken().getBytes());
+
+                AccessToken accessToken = accessTokenService.findAccessToken(resetPwdViaTokenRequestDto.getApplication(),
+                        accountCode, crc16, crc32,
                         IEnumToken.Types.RSTPWD
                 );
 
-                if (accessToken != null
-                        && StringUtils.hasText(accessToken.getToken())
-                        && accessToken.getToken().equals(resetPwdViaTokenRequestDto.getToken())) {
-                    UserContextRequestDto userContext = UserContextRequestDto.builder()
-                            .tenant(tenant)
-                            .userName(userName)
-                            .build();
-                    TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(userContext.getTenant(), IEnumToken.Types.RSTPWD);
+                if (accessToken != null && !accessToken.isExpired()) {
+                    TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, IEnumToken.Types.RSTPWD);
                     jwtService.validateToken(resetPwdViaTokenRequestDto.getToken(),
-                            userContextString,
+                            tokenSubject,
                             tenant,
                             resetPwdViaTokenRequestDto.getApplication(),
                             tokenConfig.getSecretKey(),
                             tokenConfig.getPublicKey()
                     );
-                    this.forceChangePassword(userContext.getTenant(), userContext.getUserName()
-                            , resetPwdViaTokenRequestDto.getPassword());
+                    this.forceChangePassword(tenant, accountCode, resetPwdViaTokenRequestDto.getPassword());
                 } else {
                     throw new TokenInvalidException("Invalid JWT:malformed");
                 }

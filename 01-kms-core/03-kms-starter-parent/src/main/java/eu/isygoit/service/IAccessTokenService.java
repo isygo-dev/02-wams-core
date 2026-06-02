@@ -14,19 +14,17 @@ public interface IAccessTokenService extends ICrudServiceOperations<Long, Access
      *
      * @param application the application
      * @param accountCode the account code
-     * @param token       the token
      * @param tokenType   the token type
      * @return the access token
      */
-    AccessToken findByApplicationAndAccountCodeAndTokenAndTokenType(String application, String accountCode, String token, IEnumToken.Types tokenType);
+    AccessToken findAccessToken(String application, String accountCode, Long crc16, Long crc32, IEnumToken.Types tokenType);
 
     /**
      * Find by account code and token and token type access token.
      *
      * @param accountCode the account code
-     * @param token       the token
      * @param tokenType   the token type
      * @return the access token
      */
-    AccessToken findByAccountCodeAndTokenAndTokenType(String accountCode, String token, IEnumToken.Types tokenType);
+    AccessToken findAccessToken(String accountCode, Long crc16, Long crc32, IEnumToken.Types tokenType);
 }

@@ -34,8 +34,12 @@ public class AccessTokenService extends CrudService<Long, AccessToken, AccessTok
     }
 
     //@Cacheable(cacheNames = SchemaTableConstantName.T_ACCESS_TOKEN, key = "{#application, #accountCode, #token, #tokenType}")
-    public AccessToken findByApplicationAndAccountCodeAndTokenAndTokenType(String application, String accountCode, String token, IEnumToken.Types tokenType) {
-        Optional<AccessToken> optional = repository().findFirstByApplicationAndAccountCodeIgnoreCaseAndTokenAndTokenTypeAndDeprecatedFalseOrderByCreateDateDesc(application, accountCode, token, tokenType);
+    public AccessToken findAccessToken(String application, String accountCode,
+                                       Long crc16, Long crc32,
+                                       IEnumToken.Types tokenType) {
+        Optional<AccessToken> optional =
+                repository().findFirstByApplicationAndAccountCodeIgnoreCaseAndCrc16AndCrc32AndTokenTypeAndDeprecatedFalseOrderByCreateDateDesc(
+                        application, accountCode, crc16, crc32, tokenType);
         if (optional.isPresent()) {
             return optional.get();
         }
@@ -43,8 +47,12 @@ public class AccessTokenService extends CrudService<Long, AccessToken, AccessTok
     }
 
     @Override
-    public AccessToken findByAccountCodeAndTokenAndTokenType(String accountCode, String token, IEnumToken.Types tokenType) {
-        Optional<AccessToken> optional = repository().findFirstByAccountCodeIgnoreCaseAndTokenAndTokenTypeAndDeprecatedFalseOrderByCreateDateDesc(accountCode, token, tokenType);
+    public AccessToken findAccessToken(String accountCode,
+                                       Long crc16, Long crc32,
+                                       IEnumToken.Types tokenType) {
+        Optional<AccessToken> optional =
+                repository().findFirstByAccountCodeIgnoreCaseAndCrc16AndCrc32AndTokenTypeAndDeprecatedFalseOrderByCreateDateDesc(
+                        accountCode, crc16, crc32, tokenType);
         if (optional.isPresent()) {
             return optional.get();
         }

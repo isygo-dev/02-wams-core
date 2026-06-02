@@ -11,6 +11,8 @@ import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.exception.TokenConfigNotFoundException;
 import eu.isygoit.exception.TokenInvalidException;
 import eu.isygoit.exception.UserNotFoundException;
+import eu.isygoit.helper.CRC16Helper;
+import eu.isygoit.helper.CRC32Helper;
 import eu.isygoit.jwt.JwtService;
 import eu.isygoit.model.AccessToken;
 import eu.isygoit.model.Account;
@@ -66,7 +68,7 @@ public class TokenService implements ITokenBuilderService {
     }
 
     @Override
-    public TokenResponseDto buildTokenAndSave(String tenant /*senderTenant*/, String application, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
+    public TokenResponseDto buildTokenAndSave(String tenant, String application, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
         //Get Token config configured by tenant and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
@@ -84,11 +86,15 @@ public class TokenService implements ITokenBuilderService {
                     algorithm,
                     tokenConfig.getSecretKey(),
                     tokenConfig.getLifeTimeInMs());
+
+            Long crc16 = CRC16Helper.calculate(token.getToken().getBytes());
+            Long crc32 = CRC32Helper.calculate(token.getToken().getBytes());
             //Save generated token
             AccessToken accessToken = AccessToken.builder()
                     .tokenType(tokenType)
                     .application(application)
-                    .token(token.getToken())
+                    .crc16(crc16)
+                    .crc32(crc32)
                     .expiryDate(token.getExpiryDate())
                     .accountCode(subject)
                     .deprecated(Boolean.FALSE)
@@ -140,8 +146,16 @@ public class TokenService implements ITokenBuilderService {
         }
 
         // Validate token existence
-        String[] userNameArray = subject.split("@");
-        AccessToken accessToken = accessTokenService.findByAccountCodeAndTokenAndTokenType(userNameArray[0], token, tokenType);
+        String[] subjectArray = subject.split("@");
+        if (subjectArray.length != 2) {
+            log.error("Invalid subject format in token: {} / {}", tenant, tokenType.name());
+            throw new TokenInvalidException("Invalid JWT: subject format is invalid");
+        }
+        String tenantFromToken = subjectArray[1];
+        String accountCodeFromToken = subjectArray[0];
+        Long crc16 = CRC16Helper.calculate(token.getBytes());
+        Long crc32 = CRC32Helper.calculate(token.getBytes());
+        AccessToken accessToken = accessTokenService.findAccessToken(accountCodeFromToken, crc16, crc32, tokenType);
         if (accessToken == null) {
             log.error("Token not found or deprecated for tenant: {} / {}", tenant, tokenType.name());
             throw new TokenInvalidException("Invalid JWT: not found or deprecated");

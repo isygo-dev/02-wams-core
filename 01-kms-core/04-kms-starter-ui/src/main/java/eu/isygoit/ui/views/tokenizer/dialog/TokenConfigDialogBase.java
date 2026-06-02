@@ -18,18 +18,12 @@ import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.ui.views.BaseActionDialog;
 import feign.FeignException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.MacAlgorithm;
-import io.jsonwebtoken.security.SecureDigestAlgorithm;
-import io.jsonwebtoken.security.SignatureAlgorithm;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.ECGenParameterSpec;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -206,17 +200,47 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
             String ecCurve = null;
 
             switch (algorithm) {
-                case "RS256": jcaAlgorithm = "RSA"; keySize = 2048; break;
-                case "RS384": jcaAlgorithm = "RSA"; keySize = 3072; break;
-                case "RS512": jcaAlgorithm = "RSA"; keySize = 4096; break;
-                case "PS256": jcaAlgorithm = "RSASSA-PSS"; keySize = 2048; break;
-                case "PS384": jcaAlgorithm = "RSASSA-PSS"; keySize = 3072; break;
-                case "PS512": jcaAlgorithm = "RSASSA-PSS"; keySize = 4096; break;
-                case "ES256": jcaAlgorithm = "EC"; ecCurve = "secp256r1"; break;
-                case "ES384": jcaAlgorithm = "EC"; ecCurve = "secp384r1"; break;
-                case "ES512": jcaAlgorithm = "EC"; ecCurve = "secp521r1"; break;
-                case "EdDSA": jcaAlgorithm = "Ed25519"; break;
-                default: throw new IllegalArgumentException("Unsupported asymmetric algorithm: " + algorithm);
+                case "RS256":
+                    jcaAlgorithm = "RSA";
+                    keySize = 2048;
+                    break;
+                case "RS384":
+                    jcaAlgorithm = "RSA";
+                    keySize = 3072;
+                    break;
+                case "RS512":
+                    jcaAlgorithm = "RSA";
+                    keySize = 4096;
+                    break;
+                case "PS256":
+                    jcaAlgorithm = "RSASSA-PSS";
+                    keySize = 2048;
+                    break;
+                case "PS384":
+                    jcaAlgorithm = "RSASSA-PSS";
+                    keySize = 3072;
+                    break;
+                case "PS512":
+                    jcaAlgorithm = "RSASSA-PSS";
+                    keySize = 4096;
+                    break;
+                case "ES256":
+                    jcaAlgorithm = "EC";
+                    ecCurve = "secp256r1";
+                    break;
+                case "ES384":
+                    jcaAlgorithm = "EC";
+                    ecCurve = "secp384r1";
+                    break;
+                case "ES512":
+                    jcaAlgorithm = "EC";
+                    ecCurve = "secp521r1";
+                    break;
+                case "EdDSA":
+                    jcaAlgorithm = "Ed25519";
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported asymmetric algorithm: " + algorithm);
             }
 
             KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(jcaAlgorithm);
@@ -321,6 +345,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
 
     // Abstract methods
     protected abstract void bindData();
+
     protected abstract void onSaveSuccess();
 
     // ================================
