@@ -70,7 +70,7 @@ public class ToggleRotationDialog extends PinBaseActionDialog {
         if (!validatePin()) {
             String errorMsg = "Invalid confirmation code";
             this.append(errorMsg);
-            Notification.show(errorMsg, 6000, Notification.Position.TOP_END)
+            Notification.show(errorMsg, 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             return false;
         }
@@ -90,7 +90,7 @@ public class ToggleRotationDialog extends PinBaseActionDialog {
                 if (period < 90 || period > 365) {
                     String errorMsg = "Rotation period must be between 90 and 365 days";
                     this.append(errorMsg);
-                    Notification.show(errorMsg, 6000, Notification.Position.TOP_END)
+                    Notification.show(errorMsg, 6000, Notification.Position.BOTTOM_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                     parentView.showLoading(false);
                     return false;
@@ -106,7 +106,7 @@ public class ToggleRotationDialog extends PinBaseActionDialog {
                 String errorMsg = "Update key rotation failed: " +
                         (response.getBody() != null ? response.getBody().toString() : "unknown error");
                 this.append(errorMsg);
-                Notification.show(errorMsg, 6000, Notification.Position.TOP_END)
+                Notification.show(errorMsg, 6000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return false;
             }
@@ -114,20 +114,20 @@ public class ToggleRotationDialog extends PinBaseActionDialog {
             String successMsg = currentlyEnabled
                     ? "Rotation disabled"
                     : "Rotation enabled with period " + periodField.getValue() + " days. A new key version has been created.";
-            Notification.show(successMsg, 6000, Notification.Position.TOP_END)
+            Notification.show(successMsg, 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
             return true;
 
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Failed to update rotation: " + errorMsg, 6000, Notification.Position.TOP_END)
+            Notification.show("Failed to update rotation: " + errorMsg, 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } catch (Exception ex) {
             String errorMsg = ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Error: " + errorMsg, 6000, Notification.Position.TOP_END)
+            Notification.show("Error: " + errorMsg, 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             parentView.showLoading(false);

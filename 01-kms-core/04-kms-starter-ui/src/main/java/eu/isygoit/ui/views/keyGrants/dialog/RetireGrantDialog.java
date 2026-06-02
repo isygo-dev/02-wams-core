@@ -38,11 +38,11 @@ public class RetireGrantDialog extends PinBaseActionDialog {
                     .build();
             kmsApiService.retireGrant(request);
 
-            Notification.show("Grant retired successfully", 6000, Notification.Position.TOP_END)
+            Notification.show("Grant retired successfully", 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             return true;
         } catch (FeignException ex) {
-            append("Failed to retire grant: " + (ex.status() == 500 ? ex.contentUTF8() : ex.getMessage()));
+            append("Failed to retire grant: " + ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage()));
             return false;
         } catch (Exception e) {
             append("Failed to retire grant: " + e.getMessage());

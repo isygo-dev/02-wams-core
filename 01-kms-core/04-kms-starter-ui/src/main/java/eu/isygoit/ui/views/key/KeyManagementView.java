@@ -231,13 +231,13 @@ public class KeyManagementView extends VerticalLayout {
             updatePaginationDisplay();
             filterCards();
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
-            Notification.show("Failed to load keys: " + errorMsg, 6000, Notification.Position.TOP_END)
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
+            Notification.show("Failed to load keys: " + errorMsg, 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             ;
             log.error("Failed to load keys", ex.getMessage());
         } catch (Exception e) {
-            Notification.show("Failed to load keys: " + e.getMessage(), 6000, Notification.Position.TOP_END)
+            Notification.show("Failed to load keys: " + e.getMessage(), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load keys", e);
         } finally {
@@ -319,7 +319,7 @@ public class KeyManagementView extends VerticalLayout {
             aliasPageInfo.getElement().setAttribute("title", info);
             aliasesLoaded = true;
         } catch (Exception e) {
-            Notification.show("Failed to load aliases: " + e.getMessage(), 6000, Notification.Position.TOP_END)
+            Notification.show("Failed to load aliases: " + e.getMessage(), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load aliases", e);
             aliasGrid.setItems(new ArrayList<>());

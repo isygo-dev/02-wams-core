@@ -343,14 +343,34 @@ public class PasswordService implements IPasswordService {
             String userContextString = optional.get();
             if (StringUtils.hasText(userContextString)) {
                 String[] split = userContextString.split("@");
-                AccessToken accessToken = accessTokenService.findByApplicationAndAccountCodeAndTokenAndTokenType(resetPwdViaTokenRequestDto.getApplication(), split[0], resetPwdViaTokenRequestDto.getToken(), IEnumToken.Types.RSTPWD);
-                if (split.length >= 2 && accessToken != null && StringUtils.hasText(accessToken.getToken()) && accessToken.getToken().equals(resetPwdViaTokenRequestDto.getToken())) {
+                if (split.length >= 2 && !StringUtils.hasText(split[0]) || !StringUtils.hasText(split[1])) {
+                    throw new TokenInvalidException("Invalid JWT: subject format invalid");
+                }
+
+                String userName = split[0];
+                String tenant = split[1];
+
+                AccessToken accessToken = accessTokenService.findByApplicationAndAccountCodeAndTokenAndTokenType(resetPwdViaTokenRequestDto.getApplication(),
+                        userName,
+                        resetPwdViaTokenRequestDto.getToken(),
+                        IEnumToken.Types.RSTPWD
+                );
+
+                if (accessToken != null
+                        && StringUtils.hasText(accessToken.getToken())
+                        && accessToken.getToken().equals(resetPwdViaTokenRequestDto.getToken())) {
                     UserContextRequestDto userContext = UserContextRequestDto.builder()
-                            .tenant(split[1])
-                            .userName(split[0])
+                            .tenant(tenant)
+                            .userName(userName)
                             .build();
                     TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(userContext.getTenant(), IEnumToken.Types.RSTPWD);
-                    jwtService.validateToken(resetPwdViaTokenRequestDto.getToken(), userContextString, tokenConfig.getSecretKey());
+                    jwtService.validateToken(resetPwdViaTokenRequestDto.getToken(),
+                            userContextString,
+                            tenant,
+                            resetPwdViaTokenRequestDto.getApplication(),
+                            tokenConfig.getSecretKey(),
+                            tokenConfig.getPublicKey()
+                    );
                     this.forceChangePassword(userContext.getTenant(), userContext.getUserName()
                             , resetPwdViaTokenRequestDto.getPassword());
                 } else {

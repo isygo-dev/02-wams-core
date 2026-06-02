@@ -29,13 +29,13 @@ public class DeleteNextCodeDialog extends PinBaseActionDialog {
     protected boolean onOk() {
         try {
             nextCodeService.delete(configId);
-            Notification.show("Configuration deleted successfully", 3000, Notification.Position.TOP_END)
+            Notification.show("Configuration deleted successfully", 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             return true;
         } catch (Exception e) {
             String errorMsg = "Delete failed: " + e.getMessage();
             showError(errorMsg);
-            Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
+            Notification.show(errorMsg, 5000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             return false;
         }

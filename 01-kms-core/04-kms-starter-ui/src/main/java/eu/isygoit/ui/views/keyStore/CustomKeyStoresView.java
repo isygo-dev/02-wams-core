@@ -194,15 +194,15 @@ public class CustomKeyStoresView extends VerticalLayout {
             updatePaginationDisplay();
             applyFilter(); // apply client-side filter on the loaded page
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
-            Notification.show("Failed to load stores: " + errorMsg, 6000, Notification.Position.TOP_END)
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
+            Notification.show("Failed to load stores: " + errorMsg, 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load custom key stores: {}", errorMsg);
             currentPageStores = new ArrayList<>();
             updatePaginationDisplay();
             showEmptyState();
         } catch (Exception e) {
-            Notification.show("Failed to load stores: " + e.getMessage(), 6000, Notification.Position.TOP_END)
+            Notification.show("Failed to load stores: " + e.getMessage(), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load custom key stores: {}", e.getMessage());
             currentPageStores = new ArrayList<>();

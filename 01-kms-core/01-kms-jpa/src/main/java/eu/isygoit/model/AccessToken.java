@@ -44,7 +44,8 @@ public class AccessToken extends AuditableEntity<Long> {
     @Column(name = SchemaColumnConstantName.C_APPLICATION, nullable = false)
     private String application;
 
-    @Column(name = SchemaColumnConstantName.C_TOKEN, length = SchemaConstantSize.S_TOKEN, nullable = false)
+    @Lob
+    @Column(name = SchemaColumnConstantName.C_TOKEN, nullable = false)
     private String token;
 
     @Builder.Default

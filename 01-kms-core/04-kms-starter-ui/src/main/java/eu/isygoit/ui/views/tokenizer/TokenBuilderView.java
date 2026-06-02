@@ -286,7 +286,7 @@ public class TokenBuilderView extends VerticalLayout {
                 showError("Failed to generate token: " + response.getStatusCode());
             }
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? extractErrorMessage(ex.contentUTF8()) : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? extractErrorMessage(ex.contentUTF8()) : ex.getMessage();
             showError("Build error: " + errorMsg);
         } catch (Exception e) {
             showError("Error: " + e.getMessage());
@@ -373,7 +373,7 @@ public class TokenBuilderView extends VerticalLayout {
                 showWarning("Token is invalid");
             }
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? extractErrorMessage(ex.contentUTF8()) : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? extractErrorMessage(ex.contentUTF8()) : ex.getMessage();
             showError("Validation error: " + errorMsg);
             validationResultSpan.setVisible(true);
             validationResultSpan.setText("❌ Validation failed: " + errorMsg);
@@ -404,17 +404,17 @@ public class TokenBuilderView extends VerticalLayout {
     }
 
     private void showSuccess(String msg) {
-        Notification.show(msg, 4000, Notification.Position.TOP_END)
+        Notification.show(msg, 4000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
     private void showError(String msg) {
-        Notification.show(msg, 5000, Notification.Position.TOP_END)
+        Notification.show(msg, 5000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 
     private void showWarning(String msg) {
-        Notification.show(msg, 4000, Notification.Position.TOP_END)
+        Notification.show(msg, 4000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_WARNING);
     }
 

@@ -247,7 +247,7 @@ public class PoliciesView extends VerticalLayout {
             }
             updateButtonsState();
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             showError("Failed to load keys: " + errorMsg);
             log.error("Failed to load keys: {}", errorMsg);
         } catch (Exception e) {
@@ -292,7 +292,7 @@ public class PoliciesView extends VerticalLayout {
                 if (!silentFailure) showError("Failed to load policy: " + response.getStatusCode());
             }
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             if (!silentFailure) showError("Error loading policy: " + errorMsg);
             log.error("Failed to load policy for key {}: {}", selectedKeyId, errorMsg);
         } catch (Exception e) {
@@ -356,7 +356,7 @@ public class PoliciesView extends VerticalLayout {
                 showError("Save failed: " + response.getStatusCode());
             }
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             showError("Error saving policy: " + errorMsg);
             log.error("Failed to save policy for key {}: {}", selectedKeyId, errorMsg);
         } catch (Exception e) {
@@ -426,7 +426,7 @@ public class PoliciesView extends VerticalLayout {
                 Notification.show(
                         "Current editor content is not a valid KeyPolicy JSON.\nStarting with an empty policy.",
                         5000,
-                        Notification.Position.TOP_END
+                        Notification.Position.BOTTOM_END
                 ).addThemeVariants(NotificationVariant.LUMO_WARNING);
                 existingPolicy = null;
                 return;
@@ -726,17 +726,17 @@ public class PoliciesView extends VerticalLayout {
     }
 
     private void showSuccess(String msg) {
-        Notification.show(msg, 6000, Notification.Position.TOP_END)
+        Notification.show(msg, 6000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
     private void showError(String msg) {
-        Notification.show(msg, 6000, Notification.Position.TOP_END)
+        Notification.show(msg, 6000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 
     private void showWarning(String msg) {
-        Notification.show(msg, 6000, Notification.Position.TOP_END)
+        Notification.show(msg, 6000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_WARNING);
     }
 

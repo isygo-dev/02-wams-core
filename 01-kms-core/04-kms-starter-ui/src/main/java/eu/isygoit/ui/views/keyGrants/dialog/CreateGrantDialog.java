@@ -135,7 +135,7 @@ public class CreateGrantDialog extends BaseActionDialog {
             ResponseEntity<KmsDtos.CreateGrantResponse> response = kmsApiService.createGrant(keyId, request);
             if (response.getStatusCode().is2xxSuccessful()) {
 
-                Notification.show("Grant created successfully", 6000, Notification.Position.TOP_END)
+                Notification.show("Grant created successfully", 6000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 return true;
             } else {
@@ -143,7 +143,7 @@ public class CreateGrantDialog extends BaseActionDialog {
                 return false;
             }
         } catch (FeignException ex) {
-            append("Failed to create grant: " + (ex.status() == 500 ? ex.contentUTF8() : ex.getMessage()));
+            append("Failed to create grant: " + ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage()));
             return false;
         } catch (Exception e) {
             append("Failed to create grant: " + e.getMessage());

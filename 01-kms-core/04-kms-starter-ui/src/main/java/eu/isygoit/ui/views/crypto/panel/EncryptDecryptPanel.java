@@ -156,8 +156,8 @@ public class EncryptDecryptPanel extends VerticalLayout {
                 notifyError("Encryption failed");
             }
         } catch (FeignException ex) {
-            log.error("Encryption error: {}", ex.status() == 500 ? ex.contentUTF8() : ex.getMessage());
-            notifyError("Encryption error: " + (ex.status() == 500 ? ex.contentUTF8() : ex.getMessage()));
+            log.error("Encryption error: {}", (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
+            notifyError("Encryption error: " + ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage()));
         } catch (Exception ex) {
             log.error("Encryption error: {}", ex.getMessage());
             notifyError("Encryption error: " + ex.getMessage());
@@ -194,8 +194,8 @@ public class EncryptDecryptPanel extends VerticalLayout {
                 notifyError("Decryption failed");
             }
         } catch (FeignException ex) {
-            log.error("Decryption error: {}", ex.status() == 500 ? ex.contentUTF8() : ex.getMessage());
-            notifyError("Decryption error: " + (ex.status() == 500 ? ex.contentUTF8() : ex.getMessage()));
+            log.error("Decryption error: {}", (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
+            notifyError("Decryption error: " + ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage()));
         } catch (Exception ex) {
             log.error("Decryption error: {}", ex.getMessage());
             notifyError("Decryption error: " + ex.getMessage());
@@ -216,14 +216,14 @@ public class EncryptDecryptPanel extends VerticalLayout {
     }
 
     private void notifyWarning(String msg) {
-        Notification.show(msg, 6000, Notification.Position.TOP_END).addThemeVariants(NotificationVariant.LUMO_WARNING);
+        Notification.show(msg, 6000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_WARNING);
     }
 
     private void notifySuccess(String msg) {
-        Notification.show(msg, 6000, Notification.Position.TOP_END).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        Notification.show(msg, 6000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
     private void notifyError(String msg) {
-        Notification.show(msg, 6000, Notification.Position.TOP_END).addThemeVariants(NotificationVariant.LUMO_ERROR);
+        Notification.show(msg, 6000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 }

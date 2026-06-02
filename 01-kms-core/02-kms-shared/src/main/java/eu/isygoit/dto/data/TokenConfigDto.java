@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.util.List;
+
 
 /**
  * The type Token config dto.
@@ -22,7 +24,8 @@ public class TokenConfigDto extends AuditableDto<Long> {
     private String code;
     private IEnumToken.Types tokenType;
     private String issuer;
-    private String audience;
+    private List<String> audience;
     private String signatureAlgorithm;
     private String secretKey;
+    private String publicKey;
 }

@@ -170,13 +170,13 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
         generateButton.setEnabled(false);
         try {
             String generated = generateCallback.apply(dto.getEntity(), dto.getAttribute());
-            Notification.show("Generated code: " + generated, 3000, Notification.Position.TOP_END)
+            Notification.show("Generated code: " + generated, 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             // Refresh only this card, preserving page order
             parentView.refreshCard(this);
         } catch (Exception e) {
             Notification.show("Error generating code: " + e.getMessage(), 5000,
-                            Notification.Position.TOP_END)
+                            Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             generateButton.setEnabled(true);

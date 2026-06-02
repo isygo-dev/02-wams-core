@@ -54,7 +54,7 @@ public class AddTagDialog extends BaseActionDialog {
         String tagValue = valueField.getValue();
 
         if (!StringUtils.hasText(tagKey) || !StringUtils.hasText(tagValue)) {
-            Notification.show("Both key and value are required", 3000, Notification.Position.MIDDLE)
+            Notification.show("Both key and value are required", 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             return false;
         }
@@ -68,13 +68,13 @@ public class AddTagDialog extends BaseActionDialog {
                             .build()))
                     .build();
             kmsApiService.tagResource(keyId, request);
-            Notification.show("Tag added successfully", 3000, Notification.Position.MIDDLE)
+            Notification.show("Tag added successfully", 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             return true;
         } catch (Exception e) {
             String errorMsg = "Failed to add tag: " + e.getMessage();
             showError(errorMsg);
-            Notification.show(errorMsg, 5000, Notification.Position.MIDDLE)
+            Notification.show(errorMsg, 5000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             return false;
         }

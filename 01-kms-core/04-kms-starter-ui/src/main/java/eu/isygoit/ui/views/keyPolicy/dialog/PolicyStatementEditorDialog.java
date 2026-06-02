@@ -290,7 +290,7 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
             } catch (Exception e) {
                 String errorMsg = "Invalid Principal JSON: " + e.getMessage();
                 append(errorMsg);
-                Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
+                Notification.show(errorMsg, 5000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return false;
             }
@@ -338,7 +338,7 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
             } catch (Exception e) {
                 String errorMsg = "Invalid Condition JSON: " + e.getMessage();
                 append(errorMsg);
-                Notification.show(errorMsg, 5000, Notification.Position.TOP_END)
+                Notification.show(errorMsg, 5000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return false;
             }

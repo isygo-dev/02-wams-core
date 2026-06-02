@@ -201,7 +201,7 @@ public class IncrementalKeyView extends Composite<VerticalLayout> {
             renderCards();
         } catch (Exception e) {
             Notification.show("Failed to load configurations: " + e.getMessage(), 5000,
-                            Notification.Position.TOP_END)
+                            Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             showLoading(false);
@@ -271,7 +271,7 @@ public class IncrementalKeyView extends Composite<VerticalLayout> {
             }
         } catch (Exception e) {
             Notification.show("Failed to refresh card: " + e.getMessage(), 3000,
-                            Notification.Position.TOP_END)
+                            Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }
@@ -280,12 +280,12 @@ public class IncrementalKeyView extends Composite<VerticalLayout> {
         try {
             nextCodeService.delete(id);
             Notification.show("Configuration deleted successfully", 3000,
-                            Notification.Position.TOP_END)
+                            Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             loadNextCodes(); // reload current page
         } catch (Exception e) {
             Notification.show("Delete failed: " + e.getMessage(), 5000,
-                            Notification.Position.TOP_END)
+                            Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }

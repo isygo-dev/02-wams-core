@@ -289,7 +289,7 @@ public class GrantsView extends VerticalLayout {
                 grantsGrid.setItems(new ArrayList<>());
             }
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             showError("Failed to load keys: " + errorMsg);
             log.error("Failed to load keys: {}", errorMsg);
         } catch (Exception e) {
@@ -326,7 +326,7 @@ public class GrantsView extends VerticalLayout {
                 grantsGrid.setItems(new ArrayList<>());
             }
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             showError("Failed to load grants: " + errorMsg);
             log.error("Failed to load grants for key {}: {}", selectedKeyId, errorMsg);
             allGrants.clear();
@@ -415,17 +415,17 @@ public class GrantsView extends VerticalLayout {
     }
 
     private void showSuccess(String msg) {
-        Notification.show(msg, 6000, Notification.Position.TOP_END)
+        Notification.show(msg, 6000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
     private void showError(String msg) {
-        Notification.show(msg, 6000, Notification.Position.TOP_END)
+        Notification.show(msg, 6000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 
     private void showWarning(String msg) {
-        Notification.show(msg, 6000, Notification.Position.TOP_END)
+        Notification.show(msg, 6000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_WARNING);
     }
 

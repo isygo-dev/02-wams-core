@@ -241,7 +241,7 @@ public class TagsView extends VerticalLayout {
                 clearTagsGrid();
             }
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             showError("Failed to load keys: " + errorMsg);
             log.error("Failed to load keys: {}", errorMsg);
         } catch (Exception e) {
@@ -285,7 +285,7 @@ public class TagsView extends VerticalLayout {
             searchField.setEnabled(true);
             filterTags(); // apply any existing filter
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             showError("Failed to load tags: " + errorMsg);
             log.error("Failed to load tags for key {}: {}", selectedKeyId, errorMsg);
             tagsGrid.setItems(new ArrayList<>());
@@ -314,17 +314,17 @@ public class TagsView extends VerticalLayout {
     }
 
     private void showError(String message) {
-        Notification.show(message, 6000, Notification.Position.TOP_END)
+        Notification.show(message, 6000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 
     private void showSuccess(String message) {
-        Notification.show(message, 6000, Notification.Position.TOP_END)
+        Notification.show(message, 6000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
     private void showWarning(String message) {
-        Notification.show(message, 6000, Notification.Position.TOP_END)
+        Notification.show(message, 6000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_WARNING);
     }
 
@@ -359,7 +359,7 @@ public class TagsView extends VerticalLayout {
             showSuccess("Tag removed");
             loadTags();
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             showError("Failed to remove tag: " + errorMsg);
             log.error("Failed to remove tag from key {}: {}", selectedKeyId, errorMsg);
         } catch (Exception e) {

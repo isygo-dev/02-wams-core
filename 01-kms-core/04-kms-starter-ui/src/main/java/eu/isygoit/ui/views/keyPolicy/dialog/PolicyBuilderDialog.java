@@ -139,7 +139,7 @@ public class PolicyBuilderDialog extends BaseActionDialog {
         if (statements.isEmpty()) {
             String errorMsg = "Policy must contain at least one statement";
             append(errorMsg);
-            Notification.show(errorMsg, 6000, Notification.Position.TOP_END)
+            Notification.show(errorMsg, 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return false;
         }

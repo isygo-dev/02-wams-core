@@ -233,11 +233,11 @@ class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
             ResponseEntity<KmsDtos.ConnectCustomKeyStoreResponse> resp =
                     objectService.connectCustomKeyStore(storeId);
             boolean ok = resp.getStatusCode().is2xxSuccessful();
-            Notification.show(ok ? "Connection initiated" : "Connection failed", 6000, Notification.Position.TOP_END)
+            Notification.show(ok ? "Connection initiated" : "Connection failed", 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(ok ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
             if (ok) parentView.loadStores();
         } catch (FeignException ex) {
-            notify("Error: " + (ex.status() == 500 ? ex.contentUTF8() : ex.getMessage()), false);
+            notify("Error: " + ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage()), false);
             log.error("Failed to connect store {}", storeId, ex);
         } catch (Exception ex) {
             notify("Error: " + ex.getMessage(), false);
@@ -253,11 +253,11 @@ class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
             ResponseEntity<KmsDtos.DisconnectCustomKeyStoreResponse> resp =
                     objectService.disconnectCustomKeyStore(storeId);
             boolean ok = resp.getStatusCode().is2xxSuccessful();
-            Notification.show(ok ? "Disconnected" : "Disconnect failed", 6000, Notification.Position.TOP_END)
+            Notification.show(ok ? "Disconnected" : "Disconnect failed", 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(ok ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
             if (ok) parentView.loadStores();
         } catch (FeignException ex) {
-            notify("Error: " + (ex.status() == 500 ? ex.contentUTF8() : ex.getMessage()), false);
+            notify("Error: " + ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage()), false);
             log.error("Failed to disconnect store {}", storeId, ex);
         } catch (Exception ex) {
             notify("Error: " + ex.getMessage(), false);
@@ -276,7 +276,7 @@ class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
     }
 
     private void notify(String msg, boolean success) {
-        Notification.show(msg, 6000, Notification.Position.TOP_END)
+        Notification.show(msg, 6000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(success ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR);
     }
 }

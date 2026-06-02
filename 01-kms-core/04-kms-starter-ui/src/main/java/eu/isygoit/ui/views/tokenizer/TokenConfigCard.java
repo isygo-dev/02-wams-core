@@ -15,6 +15,7 @@ import eu.isygoit.ui.views.tokenizer.dialog.DeleteTokenConfigDialog;
 import eu.isygoit.ui.views.tokenizer.dialog.UpdateTokenConfigDialog;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigService> {
 
@@ -78,9 +79,15 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
 
     @Override
     protected void buildBodyRows() {
+        // Format audience list as comma-separated string or "—"
+        String audienceDisplay = "—";
+        if (dto.getAudience() != null && !dto.getAudience().isEmpty()) {
+            audienceDisplay = dto.getAudience().stream().collect(Collectors.joining(", "));
+        }
+
         addMetaRow(
                 "Issuer: " + (dto.getIssuer() != null ? dto.getIssuer() : "—"),
-                "Audience: " + (dto.getAudience() != null ? dto.getAudience() : "—")
+                "Audience: " + audienceDisplay
         );
         addMetaRow(
                 "Signature: " + (dto.getSignatureAlgorithm() != null ? dto.getSignatureAlgorithm() : "—")
@@ -108,9 +115,11 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
         titleSpan.setText(dto.getCode());
         titleSpan.getElement().setAttribute("title", dto.getCode());
         typeChip.setText(dto.getTokenType() != null ? dto.getTokenType().meaning() : "UNKNOWN");
-        // For simplicity, we rebuild the body rows (or just update the necessary parts)
-        // A more optimized approach would update individual components, but we'll refresh the whole card.
+        // Rebuild the body rows
         getUI().ifPresent(ui -> ui.access(() -> {
+            // Remove all body rows (assume they are the last components added after the header)
+            // A simpler approach: remove and re‑add all children except the header.
+            // For brevity, we rebuild the whole card.
             removeAll();
             buildHeader();
             buildBodyRows();

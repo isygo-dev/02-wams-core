@@ -184,7 +184,7 @@ public class AliasesView extends VerticalLayout {
             updatePaginationDisplay();
             filterCards();
         } catch (Exception e) {
-            Notification.show("Failed to load aliases: " + e.getMessage(), 6000, Notification.Position.TOP_END)
+            Notification.show("Failed to load aliases: " + e.getMessage(), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             showLoading(false);
@@ -318,7 +318,7 @@ public class AliasesView extends VerticalLayout {
                         .collect(Collectors.toList());
             }
         } catch (Exception e) {
-            Notification.show("Could not load keys: " + e.getMessage(), 6000, Notification.Position.TOP_END)
+            Notification.show("Could not load keys: " + e.getMessage(), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
         return keyIds;

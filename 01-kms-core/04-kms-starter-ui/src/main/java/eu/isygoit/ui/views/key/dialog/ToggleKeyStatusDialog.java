@@ -55,38 +55,38 @@ public class ToggleKeyStatusDialog extends BaseActionDialog {
                 if (!response.getStatusCode().is2xxSuccessful()) {
                     String errorMsg = "Disable key failed: " + (response.getBody() != null ? response.getBody().toString() : "unknown error");
                     this.append(errorMsg);
-                    Notification.show(errorMsg, 6000, Notification.Position.TOP_END)
+                    Notification.show(errorMsg, 6000, Notification.Position.BOTTOM_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                     return false;
                 }
 
-                Notification.show("Key disabled successfully", 6000, Notification.Position.TOP_END)
+                Notification.show("Key disabled successfully", 6000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } else {
                 ResponseEntity<KmsDtos.EnableKeyResponse> response = kmsApiService.enableKey(keyId);
                 if (!response.getStatusCode().is2xxSuccessful()) {
                     String errorMsg = "Enable key failed: " + (response.getBody() != null ? response.getBody().toString() : "unknown error");
                     this.append(errorMsg);
-                    Notification.show(errorMsg, 6000, Notification.Position.TOP_END)
+                    Notification.show(errorMsg, 6000, Notification.Position.BOTTOM_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                     return false;
                 }
 
-                Notification.show("Key enabled successfully", 6000, Notification.Position.TOP_END)
+                Notification.show("Key enabled successfully", 6000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             }
 
 
             return true;
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Update error: " + errorMsg, 6000, Notification.Position.TOP_END)
+            Notification.show("Update error: " + errorMsg, 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } catch (Exception ex) {
             String errorMsg = ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Error: " + errorMsg, 6000, Notification.Position.TOP_END)
+            Notification.show("Error: " + errorMsg, 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
 

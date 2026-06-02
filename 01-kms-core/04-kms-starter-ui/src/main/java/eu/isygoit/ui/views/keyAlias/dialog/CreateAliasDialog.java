@@ -56,14 +56,14 @@ public class CreateAliasDialog extends BaseActionDialog {
         if (aliasName == null || aliasName.isBlank()) {
             String errorMsg = "Alias name is required";
             this.append(errorMsg);
-            Notification.show(errorMsg, 6000, Notification.Position.TOP_END)
+            Notification.show(errorMsg, 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             return false;
         }
         if (targetKeyId == null || targetKeyId.isBlank()) {
             String errorMsg = "Target key is required";
             this.append(errorMsg);
-            Notification.show(errorMsg, 6000, Notification.Position.TOP_END)
+            Notification.show(errorMsg, 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             return false;
         }
@@ -78,25 +78,25 @@ public class CreateAliasDialog extends BaseActionDialog {
             if (!response.getStatusCode().is2xxSuccessful()) {
                 String errorMsg = "Creation failed: " + response.getStatusCode();
                 this.append(errorMsg);
-                Notification.show(errorMsg, 6000, Notification.Position.TOP_END)
+                Notification.show(errorMsg, 6000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return false;
             }
 
 
-            Notification.show("Alias created successfully", 6000, Notification.Position.TOP_END)
+            Notification.show("Alias created successfully", 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
             return true;
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Creation error: " + errorMsg, 6000, Notification.Position.TOP_END)
+            Notification.show("Creation error: " + errorMsg, 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } catch (Exception ex) {
             String errorMsg = ex.getMessage();
             this.append(errorMsg);
-            Notification.show("Error: " + errorMsg, 6000, Notification.Position.TOP_END)
+            Notification.show("Error: " + errorMsg, 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             parentView.showLoading(false);
@@ -149,7 +149,7 @@ public class CreateAliasDialog extends BaseActionDialog {
                         .collect(Collectors.toList());
             }
         } catch (Exception e) {
-            Notification.show("Could not load keys: " + e.getMessage(), 6000, Notification.Position.TOP_END)
+            Notification.show("Could not load keys: " + e.getMessage(), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
         return keyIds;

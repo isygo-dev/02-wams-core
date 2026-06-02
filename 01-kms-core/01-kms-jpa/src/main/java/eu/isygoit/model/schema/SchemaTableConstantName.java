@@ -62,4 +62,5 @@ public interface SchemaTableConstantName extends ComSchemaTableConstantName {
     String T_KMS_KEY_POLICY = "T_KMS_KEY_POLICY";
     String T_KMS_KEY_VERSION = "T_KMS_KEY_VERSION";
     String T_KMS_TAG = "T_KMS_TAG";
+    String T_TOKEN_AUDIENCE = "T_TOKEN_AUDIENCE";
 }

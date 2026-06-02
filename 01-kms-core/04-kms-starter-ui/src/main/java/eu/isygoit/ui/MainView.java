@@ -128,7 +128,7 @@ public class MainView extends VerticalLayout {
                 "navigator.clipboard.writeText($0).then(() => { $0.dispatchEvent(new Event('copy-success')); }).catch(() => { $0.dispatchEvent(new Event('copy-error')); });",
                 text
         );
-        Notification.show(notificationText, 1500, Notification.Position.TOP_END)
+        Notification.show(notificationText, 1500, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
@@ -424,7 +424,7 @@ public class MainView extends VerticalLayout {
     private void loadKeyUsageStats() {
         KeyOption selected = usageKeyCombo.getValue();
         if (selected == null) {
-            Notification.show("Please select a key", 6000, Notification.Position.TOP_END)
+            Notification.show("Please select a key", 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
@@ -651,7 +651,7 @@ public class MainView extends VerticalLayout {
     private void loadAuditLogs() {
         KeyOption selected = auditKeyCombo.getValue();
         if (selected == null) {
-            Notification.show("Please select a KMS key", 6000, Notification.Position.TOP_END)
+            Notification.show("Please select a KMS key", 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
@@ -687,10 +687,10 @@ public class MainView extends VerticalLayout {
                 auditLoadingBar.setVisible(false);
                 loadLogsButton.setEnabled(true);
                 if (logs.isEmpty()) {
-                    Notification.show("No audit logs found for the selected criteria", 6000, Notification.Position.TOP_END)
+                    Notification.show("No audit logs found for the selected criteria", 6000, Notification.Position.BOTTOM_END)
                             .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 } else {
-                    Notification.show("Loaded " + logs.size() + " log entries", 6000, Notification.Position.TOP_END)
+                    Notification.show("Loaded " + logs.size() + " log entries", 6000, Notification.Position.BOTTOM_END)
                             .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 }
             });
@@ -698,7 +698,7 @@ public class MainView extends VerticalLayout {
             UI updateUi = ui != null ? ui : UI.getCurrent();
             if (updateUi != null) {
                 updateUi.access(() -> {
-                    Notification.show("Error loading audit logs", 6000, Notification.Position.TOP_END)
+                    Notification.show("Error loading audit logs", 6000, Notification.Position.BOTTOM_END)
                             .addThemeVariants(NotificationVariant.LUMO_ERROR);
                     auditLoadingBar.setVisible(false);
                     loadLogsButton.setEnabled(true);

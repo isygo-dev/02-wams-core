@@ -48,7 +48,7 @@ public class DeleteAliasDialog extends PinBaseActionDialog {
         if (!validatePin()) {
             String errorMsg = "Invalid confirmation code. Deletion aborted.";
             showError(errorMsg);
-            Notification.show(errorMsg, 6000, Notification.Position.TOP_END)
+            Notification.show(errorMsg, 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             parentView.showLoading(false);
             return false;
@@ -59,25 +59,25 @@ public class DeleteAliasDialog extends PinBaseActionDialog {
             if (!response.getStatusCode().is2xxSuccessful()) {
                 String errorMsg = "Deletion failed: " + response.getStatusCode();
                 showError(errorMsg);
-                Notification.show(errorMsg, 6000, Notification.Position.TOP_END)
+                Notification.show(errorMsg, 6000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return false;
             }
 
 
-            Notification.show("Alias deleted", 6000, Notification.Position.TOP_END)
+            Notification.show("Alias deleted", 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             return true;
 
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             showError(errorMsg);
-            Notification.show("Deletion error: " + errorMsg, 6000, Notification.Position.TOP_END)
+            Notification.show("Deletion error: " + errorMsg, 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } catch (Exception ex) {
             String errorMsg = ex.getMessage();
             showError(errorMsg);
-            Notification.show("Error: " + errorMsg, 6000, Notification.Position.TOP_END)
+            Notification.show("Error: " + errorMsg, 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             parentView.showLoading(false);

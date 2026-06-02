@@ -72,7 +72,7 @@ public class TokenService implements ITokenBuilderService {
         if (tokenConfig != null) {
             // Convert string algorithm to SecureDigestAlgorithm safely
             String sigAlgo = tokenConfig.getSignatureAlgorithm().toUpperCase();
-            SecureDigestAlgorithm<SecretKey, ?> algorithm = (SecureDigestAlgorithm<SecretKey, ?>) Jwts.SIG.get().get(sigAlgo);
+            SecureDigestAlgorithm<?, ?> algorithm = (SecureDigestAlgorithm<SecretKey, ?>) Jwts.SIG.get().get(sigAlgo);
             if (algorithm == null) {
                 throw new IllegalArgumentException("Unsupported signature algorithm: " + sigAlgo);
             }
@@ -128,23 +128,22 @@ public class TokenService implements ITokenBuilderService {
     }
 
     @Override
-    public boolean isTokenValid(String tenant /*senderTenant*/, String application, IEnumToken.Types tokenType, String token, String subject) {
-        //Get Token config configured by tenant and type, otherwise, default one
+    public boolean isTokenValid(String tenant, String application, IEnumToken.Types tokenType, String token, String subject) {
+        // Get Token config configured by tenant and type
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
-            //Validate token content
-            jwtService.validateToken(token, subject, tokenConfig.getSecretKey());
+            // Validate token content – pass both keys (the validate method will choose based on algorithm)
+            jwtService.validateToken(token, subject, tenant, application, tokenConfig.getSecretKey(), tokenConfig.getPublicKey());
         } else {
-            log.error("Token config not found for tenant: " + tenant + "/" + tokenType.name());
+            log.error("Token config not found for tenant: {} / {}", tenant, tokenType.name());
             throw new TokenConfigNotFoundException("for tenant: " + tenant + "/" + tokenType.name());
         }
 
-        //Validate token existance
+        // Validate token existence
         String[] userNameArray = subject.split("@");
-        //TEMP COMMENTED: AccessToken accessToken = accessTokenService.findByApplicationAndAccountCodeAndTokenAndTokenType(application, userNameArray[0], token, tokenType);
         AccessToken accessToken = accessTokenService.findByAccountCodeAndTokenAndTokenType(userNameArray[0], token, tokenType);
         if (accessToken == null) {
-            log.error("Token not found for tenant: " + tenant + "/" + tokenType.name());
+            log.error("Token not found or deprecated for tenant: {} / {}", tenant, tokenType.name());
             throw new TokenInvalidException("Invalid JWT: not found or deprecated");
         }
         return true;

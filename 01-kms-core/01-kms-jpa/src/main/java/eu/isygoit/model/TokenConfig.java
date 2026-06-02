@@ -4,10 +4,7 @@ import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.model.jakarta.AuditableEntity;
-import eu.isygoit.model.schema.SchemaColumnConstantName;
-import eu.isygoit.model.schema.SchemaConstantSize;
-import eu.isygoit.model.schema.SchemaTableConstantName;
-import eu.isygoit.model.schema.SchemaUcConstantName;
+import eu.isygoit.model.schema.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +13,8 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
+
+import java.util.List;
 
 /**
  * The type Token config.
@@ -59,8 +58,13 @@ public class TokenConfig extends AuditableEntity<Long> implements ITenantAssigna
     @Column(name = SchemaColumnConstantName.C_TOKEN_TYPE, length = IEnumToken.STR_ENUM_SIZE, nullable = false)
     private IEnumToken.Types tokenType = IEnumToken.Types.ACCESS;
 
-    @Column(name = SchemaColumnConstantName.C_AUDIENCE, updatable = false, nullable = false)
-    private String audience;
+    @ElementCollection
+    @CollectionTable(name = SchemaTableConstantName.T_TOKEN_AUDIENCE
+            , joinColumns = @JoinColumn(name = SchemaColumnConstantName.C_TOKEN_CONFIG,
+            referencedColumnName = SchemaColumnConstantName.C_CODE,
+            foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_AUDIENCE_REF_TOKEN_CONFIG)))
+    @Column(name = SchemaColumnConstantName.C_AUDIENCE)
+    private List<String> audience;
 
     @Builder.Default
     @ColumnDefault("'RS256'")
@@ -70,6 +74,10 @@ public class TokenConfig extends AuditableEntity<Long> implements ITenantAssigna
     @Lob
     @Column(name = SchemaColumnConstantName.C_SECRET_KEY, nullable = false)
     private String secretKey = "sEcReTkEy";
+
+    @Lob
+    @Column(name = SchemaColumnConstantName.C_PUBLIC_KEY, nullable = true)
+    private String publicKey = "pUbLiCkEy";
 
     @Builder.Default
     @ColumnDefault("14400000")

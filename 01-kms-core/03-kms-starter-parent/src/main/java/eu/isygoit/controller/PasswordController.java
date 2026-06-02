@@ -180,7 +180,9 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                                     .append("@")
                                     .append(accessRequest.getTenant().trim().toLowerCase())
                                     .toString(),
-                            tokenConfig.getSecretKey());
+                            accessRequest.getTenant(),
+                            accessRequest.getApplication(),
+                            tokenConfig.getSecretKey(), tokenConfig.getPublicKey());
                 } catch (Exception e) {
                     return ResponseFactory.responseOk(AccessTokenResponseDto.builder()
                             .status(IEnumPasswordStatus.Types.UNAUTHORIZED)

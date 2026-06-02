@@ -147,7 +147,7 @@ public class SignVerifyPanel extends VerticalLayout {
                 notifyError("Signing failed");
             }
         } catch (FeignException ex) {
-            notifyError("Signing error: " + (ex.status() == 500 ? ex.contentUTF8() : ex.getMessage()));
+            notifyError("Signing error: " + ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage()));
         } catch (Exception ex) {
             notifyError("Signing error: " + ex.getMessage());
         }
@@ -190,21 +190,21 @@ public class SignVerifyPanel extends VerticalLayout {
                 notifyError("Verification failed");
             }
         } catch (FeignException ex) {
-            notifyError("Verification error: " + (ex.status() == 500 ? ex.contentUTF8() : ex.getMessage()));
+            notifyError("Verification error: " + ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage()));
         } catch (Exception ex) {
             notifyError("Verification error: " + ex.getMessage());
         }
     }
 
     private void notifyWarning(String msg) {
-        Notification.show(msg, 6000, Notification.Position.TOP_END).addThemeVariants(NotificationVariant.LUMO_WARNING);
+        Notification.show(msg, 6000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_WARNING);
     }
 
     private void notifySuccess(String msg) {
-        Notification.show(msg, 6000, Notification.Position.TOP_END).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        Notification.show(msg, 6000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
     private void notifyError(String msg) {
-        Notification.show(msg, 6000, Notification.Position.TOP_END).addThemeVariants(NotificationVariant.LUMO_ERROR);
+        Notification.show(msg, 6000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 }

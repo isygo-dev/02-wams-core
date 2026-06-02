@@ -386,7 +386,7 @@ public class ByokView extends VerticalLayout {
             }
             updateKeyStatus();
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             showErrorNotification("Failed to load keys: " + errorMsg);
             log.error("Failed to load keys: {}", errorMsg);
         } catch (Exception e) {
@@ -408,7 +408,7 @@ public class ByokView extends VerticalLayout {
                 return new KeyOption(keyId, alias, isExternal);
             }
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             showErrorNotification("Error fetching key details: " + errorMsg);
             log.error("Error fetching key details for {}: {}", keyId, errorMsg);
         } catch (Exception e) {
@@ -438,7 +438,7 @@ public class ByokView extends VerticalLayout {
                 deleteMaterialButton.setVisible(hasImportedMaterial);
             }
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             showErrorNotification("Error fetching key details: " + errorMsg);
             log.error("Error fetching key details for {}: {}", selectedKeyId, ex.getMessage());
         } catch (Exception e) {
@@ -487,7 +487,7 @@ public class ByokView extends VerticalLayout {
                 showErrorNotification("Failed to generate import parameters");
             }
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             showErrorNotification("Error: " + errorMsg);
             log.error("Failed to generate import parameters for key {}: {}", selectedKeyId, errorMsg);
         } catch (Exception e) {
@@ -576,7 +576,7 @@ public class ByokView extends VerticalLayout {
                 showErrorNotification("Import failed – check token validity and material format");
             }
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             showErrorNotification("Import key material failed: " + errorMsg);
             log.error("Import key material failed for {}: {}", selectedKeyId, errorMsg);
         } catch (Exception e) {
@@ -608,7 +608,7 @@ public class ByokView extends VerticalLayout {
                 showErrorNotification("Deletion failed – key may not have imported material");
             }
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             showErrorNotification("Error: " + errorMsg);
             log.error("Failed to delete imported key material for {}: {}", selectedKeyId, errorMsg);
         } catch (Exception e) {
@@ -654,17 +654,17 @@ public class ByokView extends VerticalLayout {
     }
 
     private void showSuccessNotification(String msg) {
-        Notification.show(msg, 6000, Notification.Position.TOP_END)
+        Notification.show(msg, 6000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
     private void showErrorNotification(String msg) {
-        Notification.show(msg, 6000, Notification.Position.TOP_END)
+        Notification.show(msg, 6000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 
     private void showWarningNotification(String msg) {
-        Notification.show(msg, 6000, Notification.Position.TOP_END)
+        Notification.show(msg, 6000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_WARNING);
     }
 

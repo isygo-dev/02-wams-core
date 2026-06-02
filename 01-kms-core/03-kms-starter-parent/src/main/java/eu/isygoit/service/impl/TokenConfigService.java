@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -57,7 +58,7 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
         //Build token config secified by system properties
         return TokenConfig.builder()
                 .issuer(tenant)
-                .audience(tenant)
+                .audience(List.copyOf(List.of(tenant)))
                 .signatureAlgorithm(jwtProperties.getSignatureAlgorithm().name())
                 .secretKey(jwtProperties.getSecretKey())
                 .lifeTimeInMs(jwtProperties.getLifeTimeInMs())

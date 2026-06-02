@@ -45,13 +45,13 @@ public class DeleteCustomKeyStoreDialog extends PinBaseActionDialog {
                 return false;
             }
 
-            Notification.show("Custom key store deleted", 6000, Notification.Position.TOP_END)
+            Notification.show("Custom key store deleted", 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
             return true;
 
         } catch (FeignException ex) {
-            append("Server error: " + (ex.status() == 500 ? ex.contentUTF8() : ex.getMessage()));
+            append("Server error: " + ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage()));
         } catch (Exception ex) {
             append("Unexpected error: " + ex.getMessage());
         } finally {

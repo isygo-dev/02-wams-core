@@ -191,7 +191,7 @@ public class TokenConfigView extends VerticalLayout {
             updatePaginationDisplay();
             renderCards();
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             showError("Failed to load configurations: " + errorMsg);
         } catch (Exception e) {
             showError("Failed to load configurations: " + e.getMessage());
@@ -273,7 +273,7 @@ public class TokenConfigView extends VerticalLayout {
     }
 
     private void showError(String msg) {
-        Notification.show(msg, 5000, Notification.Position.TOP_END)
+        Notification.show(msg, 5000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 
