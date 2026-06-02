@@ -35,14 +35,6 @@ public class PublicPasswordController extends ControllerExceptionHandler impleme
     @Autowired
     private ITokenBuilderService tokenService;
 
-    @Operation(summary = "Generate forgot password access token Api",
-            description = "Generate forgot password access token")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Api executed successfully",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Boolean.class))})
-    })
     @Override
     public ResponseEntity<Boolean> generateForgotPasswordAccessToken(UserContextRequestDto userContextDto) {
         log.info("Call generateForgotPasswordAccessToken " + userContextDto.toString());

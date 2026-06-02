@@ -32,5 +32,4 @@ public interface PublicPasswordServiceApi {
     })
     @PostMapping(path = "/access-token")
     ResponseEntity<Boolean> generateForgotPasswordAccessToken(@Valid @RequestBody UserContextRequestDto userContextDto);
-
 }

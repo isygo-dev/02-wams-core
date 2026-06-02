@@ -41,16 +41,8 @@ public class TokenController extends ControllerExceptionHandler implements Token
     @Autowired
     private RequestContextService requestContextService;
 
-    @Operation(summary = "Build token by tenant Api",
-            description = "Build token by tenant")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Api executed successfully",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = TokenResponseDto.class))})
-    })
     @Override
-    public ResponseEntity<TokenResponseDto> buildTokenByTenant(
+    public ResponseEntity<TokenResponseDto> buildToken(
             String application,
             IEnumToken.Types tokenType,
             TokenRequestDto tokenRequestDto) {
@@ -64,14 +56,6 @@ public class TokenController extends ControllerExceptionHandler implements Token
         }
     }
 
-    @Operation(summary = "Is token valid Api",
-            description = "Is token valid")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Api executed successfully",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Boolean.class))})
-    })
     @Override
     public ResponseEntity<Boolean> isTokenValid(
             String application,

@@ -274,7 +274,7 @@ public class TokenBuilderView extends VerticalLayout {
                     .claims(claims)
                     .build();
 
-            ResponseEntity<TokenResponseDto> response = tokenService.buildTokenByTenant(application, tokenType, request);
+            ResponseEntity<TokenResponseDto> response = tokenService.buildToken(application, tokenType, request);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 TokenResponseDto tokenResponse = response.getBody();

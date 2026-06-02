@@ -21,6 +21,7 @@ import eu.isygoit.types.EmailSubjects;
 import eu.isygoit.types.MsgTemplateVariables;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.MacAlgorithm;
+import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import javax.crypto.SecretKey;
 import java.util.List;
 import java.util.Map;
 
@@ -68,20 +70,18 @@ public class TokenService implements ITokenBuilderService {
         //Get Token config configured by tenant and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
-            // Convert string algorithm to MacAlgorithm safely
-            MacAlgorithm macAlgorithm = switch (tokenConfig.getSignatureAlgorithm().toUpperCase()) {
-                case "HS256" -> Jwts.SIG.HS256;
-                case "HS384" -> Jwts.SIG.HS384;
-                case "HS512" -> Jwts.SIG.HS512;
-                default -> throw new IllegalArgumentException("Unsupported signature algorithm: "
-                        + tokenConfig.getSignatureAlgorithm());
-            };
+            // Convert string algorithm to SecureDigestAlgorithm safely
+            String sigAlgo = tokenConfig.getSignatureAlgorithm().toUpperCase();
+            SecureDigestAlgorithm<SecretKey, ?> algorithm = (SecureDigestAlgorithm<SecretKey, ?>) Jwts.SIG.get().get(sigAlgo);
+            if (algorithm == null) {
+                throw new IllegalArgumentException("Unsupported signature algorithm: " + sigAlgo);
+            }
 
             TokenResponseDto token = jwtService.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(tenant).toString(),
                     claims,
                     tokenConfig.getIssuer(),
                     tokenConfig.getAudience(),
-                    macAlgorithm,
+                    algorithm,
                     tokenConfig.getSecretKey(),
                     tokenConfig.getLifeTimeInMs());
             //Save generated token
