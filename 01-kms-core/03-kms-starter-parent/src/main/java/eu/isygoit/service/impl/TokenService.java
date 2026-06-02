@@ -8,9 +8,7 @@ import eu.isygoit.dto.common.TokenResponseDto;
 import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.enums.IEnumToken;
-import eu.isygoit.exception.TokenConfigNotFoundException;
-import eu.isygoit.exception.TokenInvalidException;
-import eu.isygoit.exception.UserNotFoundException;
+import eu.isygoit.exception.*;
 import eu.isygoit.helper.CRC16Helper;
 import eu.isygoit.helper.CRC32Helper;
 import eu.isygoit.jwt.JwtService;
@@ -76,7 +74,7 @@ public class TokenService implements ITokenBuilderService {
             String sigAlgo = tokenConfig.getSignatureAlgorithm().toUpperCase();
             SecureDigestAlgorithm<?, ?> algorithm = (SecureDigestAlgorithm<SecretKey, ?>) Jwts.SIG.get().get(sigAlgo);
             if (algorithm == null) {
-                throw new IllegalArgumentException("Unsupported signature algorithm: " + sigAlgo);
+                throw new SignaturAlgorithmNotSupportedException("Unsupported signature algorithm: " + sigAlgo);
             }
 
             TokenResponseDto token = jwtService.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(tenant).toString(),
@@ -116,7 +114,7 @@ public class TokenService implements ITokenBuilderService {
                 case "HS256" -> Jwts.SIG.HS256;
                 case "HS384" -> Jwts.SIG.HS384;
                 case "HS512" -> Jwts.SIG.HS512;
-                default -> throw new IllegalArgumentException("Unsupported signature algorithm: "
+                default -> throw new SignaturAlgorithmNotSupportedException("Unsupported signature algorithm: "
                         + tokenConfig.getSignatureAlgorithm());
             };
 
@@ -149,7 +147,7 @@ public class TokenService implements ITokenBuilderService {
         String[] subjectArray = subject.split("@");
         if (subjectArray.length != 2) {
             log.error("Invalid subject format in token: {} / {}", tenant, tokenType.name());
-            throw new TokenInvalidException("Invalid JWT: subject format is invalid");
+            throw new TokenSubjectException("Invalid JWT: subject format is invalid");
         }
         String tenantFromToken = subjectArray[1];
         String accountCodeFromToken = subjectArray[0];
@@ -158,7 +156,7 @@ public class TokenService implements ITokenBuilderService {
         AccessToken accessToken = accessTokenService.findAccessToken(accountCodeFromToken, crc16, crc32, tokenType);
         if (accessToken == null) {
             log.error("Token not found or deprecated for tenant: {} / {}", tenant, tokenType.name());
-            throw new TokenInvalidException("Invalid JWT: not found or deprecated");
+            throw new TokenNotFoundException("Invalid JWT: not found or deprecated");
         }
         return true;
     }
