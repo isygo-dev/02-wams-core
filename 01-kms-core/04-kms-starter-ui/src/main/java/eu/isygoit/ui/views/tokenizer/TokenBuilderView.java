@@ -359,16 +359,13 @@ public class TokenBuilderView extends VerticalLayout {
         showLoading(true);
         try {
             ResponseEntity<Boolean> response = tokenService.isTokenValid(application, tokenType, token, subject);
-
-            boolean isValid = response.getStatusCode().is2xxSuccessful() && Boolean.TRUE.equals(response.getBody());
-
             validationResultSpan.setVisible(true);
-            if (isValid) {
-                validationResultSpan.setText("✅ Token is VALID");
+            if (response.getStatusCode().is2xxSuccessful() && Boolean.TRUE.equals(response.getBody())) {
+                validationResultSpan.setText(" ✅ Token is VALID");
                 validationResultSpan.getStyle().set("color", "var(--lumo-success-text-color)");
                 showSuccess("Token is valid");
             } else {
-                validationResultSpan.setText("❌ Token is INVALID");
+                validationResultSpan.setText(" ❌ Token is INVALID");
                 validationResultSpan.getStyle().set("color", "var(--lumo-error-text-color)");
                 showWarning("Token is invalid");
             }
@@ -376,7 +373,7 @@ public class TokenBuilderView extends VerticalLayout {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? extractErrorMessage(ex.contentUTF8()) : ex.getMessage();
             showError("Validation error: " + errorMsg);
             validationResultSpan.setVisible(true);
-            validationResultSpan.setText("❌ Validation failed: " + errorMsg);
+            validationResultSpan.setText(" ❌ Validation failed: " + errorMsg);
             validationResultSpan.getStyle().set("color", "var(--lumo-error-text-color)");
         } catch (Exception e) {
             showError("Error: " + e.getMessage());
