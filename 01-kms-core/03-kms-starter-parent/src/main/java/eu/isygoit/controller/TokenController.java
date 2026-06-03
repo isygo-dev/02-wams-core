@@ -18,6 +18,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Set;
+
 
 /**
  * The type Token controller.
@@ -38,13 +40,13 @@ public class TokenController extends ControllerExceptionHandler implements Token
 
     @Override
     public ResponseEntity<TokenResponseDto> buildToken(
-            String application,
+            Set<String> audience,
             IEnumToken.Types tokenType,
             TokenRequestDto tokenRequestDto) {
         log.info("Call create Token By Tenant");
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
-            return ResponseFactory.responseOk(tokenService.buildTokenAndSave(tenant, application, tokenType, tokenRequestDto.getSubject(), tokenRequestDto.getClaims()));
+            return ResponseFactory.responseOk(tokenService.buildTokenAndSave(tenant, audience, tokenType, tokenRequestDto.getSubject(), tokenRequestDto.getClaims()));
         } catch (Throwable e) {
             log.error("<Error>: create Token By Tenant: {} ", e);
             return getBackExceptionResponse(e);
@@ -53,14 +55,14 @@ public class TokenController extends ControllerExceptionHandler implements Token
 
     @Override
     public ResponseEntity<Boolean> isTokenValid(
-            String application,
+            Set<String> audience,
             IEnumToken.Types tokenType,
             String token,
             String subject) {
         log.info("Call is Token Valid");
         try {
             String tenant = requestContextService.getCurrentContext().getSenderTenant();
-            return ResponseFactory.responseOk(tokenService.isTokenValid(tenant, application, tokenType, token, subject));
+            return ResponseFactory.responseOk(tokenService.isTokenValid(tenant, audience, tokenType, token, subject));
         } catch (Throwable e) {
             log.error("<Error>: Invalid token: {} ", e);
             return getBackExceptionResponse(e);

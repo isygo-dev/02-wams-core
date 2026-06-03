@@ -15,8 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * The type Token config service.
@@ -43,7 +43,7 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
 
 
     @Override
-    public TokenConfig buildTokenConfig(String tenant /*senderTenant*/, IEnumToken.Types tokenType) {
+    public TokenConfig buildTokenConfig(String tenant, IEnumToken.Types tokenType) {
         //Serach for token config configured for the domein by type
         Optional<TokenConfig> optional = tokenConfigRepository.findByTenantIgnoreCaseAndTokenType(tenant, tokenType);
         if (!optional.isPresent()) {
@@ -58,7 +58,7 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
         //Build token config secified by system properties
         return TokenConfig.builder()
                 .issuer(tenant)
-                .audience(List.copyOf(List.of(tenant)))
+                .audience(Set.of("*"))
                 .signatureAlgorithm(jwtProperties.getSignatureAlgorithm().name())
                 .secretKey(jwtProperties.getSecretKey())
                 .lifeTimeInMs(jwtProperties.getLifeTimeInMs())

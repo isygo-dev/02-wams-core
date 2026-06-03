@@ -16,6 +16,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Set;
+
 /**
  * The type Public password controller.
  */
@@ -35,7 +37,7 @@ public class PublicPasswordController extends ControllerExceptionHandler impleme
         log.info("Call generateForgotPasswordAccessToken " + userContextDto.toString());
         try {
             tokenService.buildForgotPasswordAccessToken(userContextDto.getTenant(),
-                    userContextDto.getApplication(),
+                    Set.of(userContextDto.getApplication()),
                     userContextDto.getUserName());
             return ResponseFactory.responseOk(true);
         } catch (Throwable e) {

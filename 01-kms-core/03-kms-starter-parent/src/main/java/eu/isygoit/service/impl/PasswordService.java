@@ -28,10 +28,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * The type Password service.
@@ -362,7 +359,7 @@ public class PasswordService implements IPasswordService {
                     jwtService.validateToken(resetPwdViaTokenRequestDto.getToken(),
                             tokenSubject,
                             tenant,
-                            resetPwdViaTokenRequestDto.getApplication(),
+                            Set.of(resetPwdViaTokenRequestDto.getApplication()),
                             tokenConfig.getSecretKey(),
                             tokenConfig.getPublicKey()
                     );

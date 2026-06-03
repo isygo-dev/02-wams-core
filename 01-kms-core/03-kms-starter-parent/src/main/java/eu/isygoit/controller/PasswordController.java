@@ -32,6 +32,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Set;
+
 /**
  * The type Password controller.
  */
@@ -181,7 +183,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                                     .append(accessRequest.getTenant().trim().toLowerCase())
                                     .toString(),
                             accessRequest.getTenant(),
-                            accessRequest.getApplication(),
+                            Set.of(accessRequest.getApplication()),
                             tokenConfig.getSecretKey(), tokenConfig.getPublicKey());
                 } catch (Exception e) {
                     return ResponseFactory.responseOk(AccessTokenResponseDto.builder()
@@ -193,16 +195,16 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                         .status(IEnumPasswordStatus.Types.VALID)
                         .tokenType(IEnumWebToken.Types.Bearer)
                         .accessToken(tokenService.buildAccessToken(accessRequest.getTenant().trim().toLowerCase(),
-                                        accessRequest.getApplication(),
+                                        Set.of(accessRequest.getApplication()),
                                         accessRequest.getUserName().trim().toLowerCase(),
                                         accessRequest.getIsAdmin())
                                 .getToken())
                         .refreshToken(tokenService.buildRefreshToken(accessRequest.getTenant().trim().toLowerCase(),
-                                        accessRequest.getApplication(),
+                                        Set.of(accessRequest.getApplication()),
                                         accessRequest.getUserName().trim().toLowerCase())
                                 .getToken())
                         .authorityToken(tokenService.buildAuthorityToken(accessRequest.getTenant().trim().toLowerCase(),
-                                        accessRequest.getApplication(),
+                                        Set.of(accessRequest.getApplication()),
                                         accessRequest.getUserName().trim().toLowerCase(),
                                         accessRequest.getAuthorities())
                                 .getToken())
@@ -215,14 +217,14 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
                                 , accessRequest.getAuthType()))
                         .tokenType(IEnumWebToken.Types.Bearer)
                         .accessToken(tokenService.buildAccessToken(accessRequest.getTenant().trim().toLowerCase(),
-                                accessRequest.getApplication(),
+                                Set.of(accessRequest.getApplication()),
                                 accessRequest.getUserName().trim().toLowerCase(),
                                 accessRequest.getIsAdmin()).getToken())
                         .refreshToken(tokenService.buildRefreshToken(accessRequest.getTenant().trim().toLowerCase(),
-                                accessRequest.getApplication(),
+                                Set.of(accessRequest.getApplication()),
                                 accessRequest.getUserName().trim().toLowerCase()).getToken())
                         .authorityToken(tokenService.buildAuthorityToken(accessRequest.getTenant().trim().toLowerCase(),
-                                accessRequest.getApplication(),
+                                Set.of(accessRequest.getApplication()),
                                 accessRequest.getUserName().trim().toLowerCase(),
                                 accessRequest.getAuthorities()).getToken())
                         .build());

@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.AppParameterConstants;
 import eu.isygoit.constants.JwtConstants;
@@ -32,6 +33,7 @@ import org.springframework.util.StringUtils;
 import javax.crypto.SecretKey;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The type Token service.
@@ -55,6 +57,8 @@ public class TokenService implements ITokenBuilderService {
     private IAccessTokenService accessTokenService;
     @Autowired
     private ImsAppParameterService imsAppParameterService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     /**
      * Instantiates a new Token service.
@@ -66,7 +70,7 @@ public class TokenService implements ITokenBuilderService {
     }
 
     @Override
-    public TokenResponseDto buildTokenAndSave(String tenant, String application, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
+    public TokenResponseDto buildTokenAndSave(String tenant, Set<String> audience, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
         //Get Token config configured by tenant and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
@@ -88,15 +92,20 @@ public class TokenService implements ITokenBuilderService {
             Long crc16 = CRC16Helper.calculate(token.getToken().getBytes());
             Long crc32 = CRC32Helper.calculate(token.getToken().getBytes());
             //Save generated token
-            AccessToken accessToken = AccessToken.builder()
-                    .tokenType(tokenType)
-                    .application(application)
-                    .crc16(crc16)
-                    .crc32(crc32)
-                    .expiryDate(token.getExpiryDate())
-                    .accountCode(subject)
-                    .deprecated(Boolean.FALSE)
-                    .build();
+            AccessToken accessToken = null;
+            try {
+                accessToken = AccessToken.builder()
+                        .tokenType(tokenType)
+                        .application(objectMapper.writeValueAsString(audience))
+                        .crc16(crc16)
+                        .crc32(crc32)
+                        .expiryDate(token.getExpiryDate())
+                        .accountCode(subject)
+                        .deprecated(Boolean.FALSE)
+                        .build();
+            } catch (JsonProcessingException e) {
+                throw new TokenAudienceException("Error occurred while processing token audience", e);
+            }
             accessTokenService.create(accessToken);
             return token;
         } else {
@@ -105,7 +114,7 @@ public class TokenService implements ITokenBuilderService {
     }
 
     @Override
-    public TokenResponseDto buildToken(String tenant /*senderTenant*/, String application, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
+    public TokenResponseDto buildToken(String tenant, Set<String> audience, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
         //Get Token config configured by tenant and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
@@ -132,12 +141,12 @@ public class TokenService implements ITokenBuilderService {
     }
 
     @Override
-    public boolean isTokenValid(String tenant, String application, IEnumToken.Types tokenType, String token, String subject) {
+    public boolean isTokenValid(String tenant, Set<String> audience, IEnumToken.Types tokenType, String token, String subject) {
         // Get Token config configured by tenant and type
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
             // Validate token content – pass both keys (the validate method will choose based on algorithm)
-            jwtService.validateToken(token, subject, tenant, application, tokenConfig.getSecretKey(), tokenConfig.getPublicKey());
+            jwtService.validateToken(token, subject, tenant, audience, tokenConfig.getSecretKey(), tokenConfig.getPublicKey());
         } else {
             log.error("Token config not found for tenant: {} / {}", tenant, tokenType.name());
             throw new TokenConfigNotFoundException("for tenant: " + tenant + "/" + tokenType.name());
@@ -162,7 +171,7 @@ public class TokenService implements ITokenBuilderService {
     }
 
     @Override
-    public void buildForgotPasswordAccessToken(String tenant /*senderTenant*/, String application, String accountCode) throws JsonProcessingException {
+    public void buildForgotPasswordAccessToken(String tenant, Set<String> audience, String accountCode) throws JsonProcessingException {
         //Get the account
         Account account = tenantService.checkAccountIfExists(tenant, null, null, accountCode, null, false);
         if (account == null) {
@@ -171,13 +180,13 @@ public class TokenService implements ITokenBuilderService {
         }
 
         //Generate reset password token
-        TokenResponseDto token = this.buildTokenAndSave(tenant, application, IEnumToken.Types.RSTPWD, accountCode,
+        TokenResponseDto token = this.buildTokenAndSave(tenant, audience, IEnumToken.Types.RSTPWD, accountCode,
                 Map.of(JwtConstants.JWT_SENDER_TENANT, tenant,
                         JwtConstants.JWT_SENDER_USER, accountCode,
-                        JwtConstants.JWT_LOG_APP, application));
+                        JwtConstants.JWT_LOG_APP, "application"));
 
         //Send reset password email
-        sendForgotPasswordEmail(tenant, application, account, token);
+        sendForgotPasswordEmail(tenant, "application", account, token);
     }
 
     private void sendForgotPasswordEmail(String tenant /*senderTenant*/, String application, Account account, TokenResponseDto token) throws JsonProcessingException {
@@ -213,32 +222,32 @@ public class TokenService implements ITokenBuilderService {
     }
 
     @Override
-    public TokenResponseDto buildAccessToken(String tenant /*senderTenant*/, String application, String userName, Boolean isAdmin) {
-        TokenResponseDto token = this.buildTokenAndSave(tenant, application, IEnumToken.Types.ACCESS, userName,
+    public TokenResponseDto buildAccessToken(String tenant, Set<String> audience, String userName, Boolean isAdmin) {
+        TokenResponseDto token = this.buildTokenAndSave(tenant, audience, IEnumToken.Types.ACCESS, userName,
                 Map.of(JwtConstants.JWT_SENDER_TENANT, tenant,
                         JwtConstants.JWT_SENDER_USER, userName,
-                        JwtConstants.JWT_LOG_APP, application,
+                        JwtConstants.JWT_LOG_APP, "application",
                         JwtConstants.JWT_IS_ADMIN, isAdmin)
         );
         return token;
     }
 
     @Override
-    public TokenResponseDto buildRefreshToken(String tenant /*senderTenant*/, String application, String userName) {
-        TokenResponseDto token = this.buildTokenAndSave(tenant, application, IEnumToken.Types.REFRESH, userName,
+    public TokenResponseDto buildRefreshToken(String tenant, Set<String> audience, String userName) {
+        TokenResponseDto token = this.buildTokenAndSave(tenant, audience, IEnumToken.Types.REFRESH, userName,
                 Map.of(JwtConstants.JWT_SENDER_TENANT, tenant,
                         JwtConstants.JWT_SENDER_USER, userName,
-                        JwtConstants.JWT_LOG_APP, application)
+                        JwtConstants.JWT_LOG_APP, "application")
         );
         return token;
     }
 
     @Override
-    public TokenResponseDto buildAuthorityToken(String tenant /*senderTenant*/, String application, String userName, List<String> authorities) {
-        TokenResponseDto token = this.buildToken(tenant, application, IEnumToken.Types.AUTHORITY, userName,
+    public TokenResponseDto buildAuthorityToken(String tenant, Set<String> audience, String userName, List<String> authorities) {
+        TokenResponseDto token = this.buildToken(tenant, audience, IEnumToken.Types.AUTHORITY, userName,
                 Map.of(JwtConstants.JWT_SENDER_TENANT, tenant,
                         JwtConstants.JWT_SENDER_USER, userName,
-                        JwtConstants.JWT_LOG_APP, application,
+                        JwtConstants.JWT_LOG_APP, "application",
                         JwtConstants.JWT_GRANTED_AUTHORITY, authorities)
         );
         return token;

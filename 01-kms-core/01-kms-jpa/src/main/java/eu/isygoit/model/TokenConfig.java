@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * The type Token config.
@@ -64,7 +64,7 @@ public class TokenConfig extends AuditableEntity<Long> implements ITenantAssigna
             referencedColumnName = SchemaColumnConstantName.C_CODE,
             foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_AUDIENCE_REF_TOKEN_CONFIG)))
     @Column(name = SchemaColumnConstantName.C_AUDIENCE)
-    private List<String> audience;
+    private Set<String> audience;
 
     @Builder.Default
     @ColumnDefault("'RS256'")
