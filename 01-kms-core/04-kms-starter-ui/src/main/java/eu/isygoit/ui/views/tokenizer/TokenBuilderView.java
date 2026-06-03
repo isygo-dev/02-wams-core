@@ -1,6 +1,5 @@
 package eu.isygoit.ui.views.tokenizer;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -8,7 +7,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
@@ -28,15 +26,19 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.TokenResponseDto;
 import eu.isygoit.dto.data.TokenRequestDto;
 import eu.isygoit.enums.IEnumToken;
+import eu.isygoit.helper.DateHelper;
 import eu.isygoit.remote.kms.KmsTokenService;
 import eu.isygoit.ui.MainLayout;
+import eu.isygoit.ui.views.tokenizer.dialog.ClaimsBuilderDialog;
+import eu.isygoit.ui.views.tokenizer.dialog.DecodeJwtDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 @Route(value = "tokenizer", layout = MainLayout.class)
 @PageTitle("Tokenizer – JWT Management")
@@ -54,6 +56,7 @@ public class TokenBuilderView extends VerticalLayout {
     private final AudienceInput audienceInputBuilder = new AudienceInput();
     private final TextField subjectField = new TextField();
     private final TextArea claimsArea = new TextArea();
+    private final Button buildClaimsButton = new Button("Build Claims", new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button buildButton = new Button("Generate Token", new Icon(VaadinIcon.COG));
     private final VerticalLayout buildResultPanel = new VerticalLayout();
 
@@ -121,19 +124,28 @@ public class TokenBuilderView extends VerticalLayout {
         tokenTypeCombo.setValue(IEnumToken.Types.ACCESS);
         tokenTypeCombo.setRequired(true);
 
-        // AudienceInput already contains its own label inside the row
         audienceInputBuilder.setLabelText("Audiences (at least one)");
 
         subjectField.setLabel("Subject");
         subjectField.setPlaceholder("user@domain.com or service‑name");
         subjectField.setRequired(true);
 
-        claimsArea.setLabel("Custom claims (JSON)");
+        // Claims area with a button to open builder
+        HorizontalLayout claimsHeader = new HorizontalLayout();
+        claimsHeader.setAlignItems(FlexComponent.Alignment.CENTER);
+        claimsHeader.setSpacing(true);
+        Span claimsLabel = new Span("Custom claims (JSON)");
+        claimsLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+        buildClaimsButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
+        buildClaimsButton.addClickListener(e -> openClaimsBuilderDialog());
+        claimsHeader.add(claimsLabel, buildClaimsButton);
+        claimsHeader.expand(claimsLabel);
+
         claimsArea.setHeight("200px");
         claimsArea.setPlaceholder("{\n  \"role\": \"admin\",\n  \"scope\": \"read write\"\n}");
-        claimsArea.setHelperText("Optional – must be valid JSON");
+        claimsArea.setHelperText("Optional – must be valid JSON. Use the builder to create claims easily.");
 
-        form.add(tokenTypeCombo, audienceInputBuilder, subjectField, claimsArea);
+        form.add(tokenTypeCombo, audienceInputBuilder, subjectField, claimsHeader, claimsArea);
         buildCard.add(titleRow, form);
 
         buildButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_CONTRAST);
@@ -177,7 +189,7 @@ public class TokenBuilderView extends VerticalLayout {
         validateSubjectField.setPlaceholder("Subject that must match the token's 'sub' claim");
         validateSubjectField.setRequired(true);
 
-        form.add(validateTokenTypeCombo, audienceInputValidator, validateTokenField, validateSubjectField);
+        form.add(validateTokenTypeCombo, audienceInputValidator, validateSubjectField, validateTokenField);
         validateCard.add(titleRow, form);
 
         validateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_CONTRAST);
@@ -188,6 +200,21 @@ public class TokenBuilderView extends VerticalLayout {
         validationResultSpan.setVisible(false);
         validationResultSpan.addClassName(LumoUtility.FontWeight.BOLD);
         validateCard.add(validationResultSpan);
+    }
+
+    // ========================================================================
+    // Claims Builder Dialog - extracted
+    // ========================================================================
+    private void openClaimsBuilderDialog() {
+        new ClaimsBuilderDialog(objectMapper, claimsArea.getValue(),
+                prettyJson -> claimsArea.setValue(prettyJson)).open();
+    }
+
+    // ========================================================================
+    // Decode JWT Dialog - extracted
+    // ========================================================================
+    private void showDecodeDialog(String jwtToken) {
+        new DecodeJwtDialog(objectMapper, jwtToken).open();
     }
 
     // ========================================================================
@@ -283,66 +310,11 @@ public class TokenBuilderView extends VerticalLayout {
         expiryLine.setSpacing(true);
         Span expiryLabel = new Span("📅 Expires:");
         expiryLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        Span expiryValue = new Span(formatDate(tokenResponse.getExpiryDate()));
+        Span expiryValue = new Span(DateHelper.formatToHumanReadable(DateHelper.toLocalDateTime(tokenResponse.getExpiryDate())));
         expiryValue.getStyle().set("font-family", "monospace");
         expiryLine.add(expiryLabel, expiryValue);
 
         buildResultPanel.add(tokenLine, expiryLine);
-    }
-
-    private void showDecodeDialog(String jwtToken) {
-        Dialog dialog = new Dialog();
-        dialog.setHeaderTitle("Decoded JWT");
-        dialog.setWidth("600px");
-        dialog.setResizable(true);
-
-        VerticalLayout content = new VerticalLayout();
-        content.setSpacing(true);
-        content.setPadding(true);
-
-        try {
-            String[] parts = jwtToken.split("\\.");
-            if (parts.length != 3) {
-                content.add(new Span("Invalid JWT format – expected three parts."));
-                dialog.add(content);
-                dialog.open();
-                return;
-            }
-
-            String headerJson = new String(Base64.getUrlDecoder().decode(parts[0]));
-            String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]));
-
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode headerNode = mapper.readTree(headerJson);
-            JsonNode payloadNode = mapper.readTree(payloadJson);
-
-            String prettyHeader = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(headerNode);
-            String prettyPayload = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(payloadNode);
-
-            content.add(new Span("Header:"));
-            TextArea headerArea = new TextArea();
-            headerArea.setValue(prettyHeader);
-            headerArea.setReadOnly(true);
-            headerArea.setWidthFull();
-            headerArea.setHeight("150px");
-            headerArea.getStyle().set("font-family", "monospace");
-
-            content.add(new Span("Payload:"));
-            TextArea payloadArea = new TextArea();
-            payloadArea.setValue(prettyPayload);
-            payloadArea.setReadOnly(true);
-            payloadArea.setWidthFull();
-            payloadArea.setHeight("200px");
-            payloadArea.getStyle().set("font-family", "monospace");
-
-            content.add(headerArea, payloadArea);
-        } catch (Exception e) {
-            content.add(new Span("Failed to decode JWT: " + e.getMessage()));
-        }
-
-        Button closeBtn = new Button("Close", e -> dialog.close());
-        dialog.add(content, closeBtn);
-        dialog.open();
     }
 
     // ========================================================================
@@ -446,14 +418,9 @@ public class TokenBuilderView extends VerticalLayout {
         try {
             Map<String, Object> errorMap = objectMapper.readValue(responseBody, Map.class);
             if (errorMap.containsKey("message")) return errorMap.get("message").toString();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return responseBody.length() > 200 ? responseBody.substring(0, 200) + "…" : responseBody;
-    }
-
-    private String formatDate(Date date) {
-        if (date == null) return "N/A";
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
-        return sdf.format(date);
     }
 
     private void showSuccess(String msg) {
@@ -472,7 +439,45 @@ public class TokenBuilderView extends VerticalLayout {
     }
 
     // ========================================================================
-    // Improved AudienceInput: label, input, add button in one row, chips below
+    // Responsive CSS
+    // ========================================================================
+    private void attachResponsiveStyles() {
+        String css = """
+                .tokenizer-view .compact-card {
+                    flex: 1;
+                    min-width: 280px;
+                    padding: var(--lumo-space-m);
+                    transition: all 0.2s ease;
+                }
+                .tokenizer-view .compact-card .form-layout {
+                    margin-top: var(--lumo-space-m);
+                }
+                .tokenizer-view .result-panel {
+                    margin-top: var(--lumo-space-m);
+                    padding: var(--lumo-space-s);
+                    background: var(--lumo-contrast-5pct);
+                    border-radius: var(--lumo-border-radius-m);
+                }
+                .tokenizer-view .chip-remove {
+                    width: 16px;
+                    height: 16px;
+                    padding: 0;
+                }
+                @media (max-width: 768px) {
+                    .tokenizer-view .compact-card {
+                        min-width: 100%;
+                        margin-bottom: var(--lumo-space-m);
+                    }
+                }
+                """;
+        UI.getCurrent().getPage().executeJs(
+                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
+                css
+        );
+    }
+
+    // ========================================================================
+    // AudienceInput component (unchanged)
     // ========================================================================
     private static class AudienceInput extends VerticalLayout {
         private final TextField inputField;
@@ -484,7 +489,6 @@ public class TokenBuilderView extends VerticalLayout {
             setSpacing(false);
             setWidthFull();
 
-            // Label (Span) on the left, input field, add button
             Span labelSpan = new Span();
             labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
             labelSpan.getStyle().set("margin-right", "var(--lumo-space-s)");
@@ -519,13 +523,13 @@ public class TokenBuilderView extends VerticalLayout {
         private void addAudience() {
             String value = inputField.getValue();
             if (value == null || value.isBlank()) {
-                Notification.show("Audience cannot be empty", 2000, Notification.Position.MIDDLE)
+                Notification.show("Audience cannot be empty", 2000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
             }
             value = value.trim();
             if (getAudiences().contains(value)) {
-                Notification.show("Audience already added", 2000, Notification.Position.MIDDLE)
+                Notification.show("Audience already added", 2000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
             }
@@ -567,43 +571,5 @@ public class TokenBuilderView extends VerticalLayout {
         public void clear() {
             chipsContainer.removeAll();
         }
-    }
-
-    // ========================================================================
-    // Responsive CSS
-    // ========================================================================
-    private void attachResponsiveStyles() {
-        String css = """
-                .tokenizer-view .compact-card {
-                    flex: 1;
-                    min-width: 280px;
-                    padding: var(--lumo-space-m);
-                    transition: all 0.2s ease;
-                }
-                .tokenizer-view .compact-card .form-layout {
-                    margin-top: var(--lumo-space-m);
-                }
-                .tokenizer-view .result-panel {
-                    margin-top: var(--lumo-space-m);
-                    padding: var(--lumo-space-s);
-                    background: var(--lumo-contrast-5pct);
-                    border-radius: var(--lumo-border-radius-m);
-                }
-                .tokenizer-view .chip-remove {
-                    width: 16px;
-                    height: 16px;
-                    padding: 0;
-                }
-                @media (max-width: 768px) {
-                    .tokenizer-view .compact-card {
-                        min-width: 100%;
-                        margin-bottom: var(--lumo-space-m);
-                    }
-                }
-                """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
     }
 }

@@ -18,13 +18,11 @@ public class CreateTokenConfigDialog extends TokenConfigDialogBase {
     public CreateTokenConfigDialog(KmsTokenConfigService tokenConfigService, Runnable onSuccess) {
         super("Create Token Configuration", onSuccess);
         this.tokenConfigService = tokenConfigService;
-
         setOkButtonText("Create");
         buildCommonForm();
         addCommonFieldsToLayout();
         add(formLayout);
         setupAlgorithmChangeListener();
-        // Default to HMAC view
         updateFieldsForAlgorithm("HS256");
         bindData();
     }
@@ -33,11 +31,13 @@ public class CreateTokenConfigDialog extends TokenConfigDialogBase {
     protected void bindData() {
         tokenTypeCombo.setValue(IEnumToken.Types.ACCESS);
         issuerField.clear();
-        setAudienceList(List.of());    // clear audiences
+        setAudienceList(List.of());
         signatureAlgorithmCombo.setValue("HS256");
         secretKeyField.clear();
         privateKeyArea.clear();
         publicKeyArea.clear();
+        lifeTimeValueField.setValue(1);
+        lifeTimeUnitCombo.setValue("Hours");
     }
 
     @Override
@@ -75,16 +75,20 @@ public class CreateTokenConfigDialog extends TokenConfigDialogBase {
             return false;
         }
 
+        Integer lifeTime = getLifeTimeInMs();
+        if (lifeTime == null) return false;
+
         String generatedCode = "TC_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
 
         TokenConfigDto dto = TokenConfigDto.builder()
                 .code(generatedCode)
                 .tokenType(tokenType)
                 .issuer(issuerField.getValue())
-                .audience(getAudienceList())      // list of audiences
+                .audience(getAudienceList())
                 .signatureAlgorithm(signatureAlgorithm)
                 .secretKey(secretOrPrivateKey)
                 .publicKey(publicKeyArea.getValue())
+                .lifeTimeInMs(lifeTime)
                 .build();
 
         try {

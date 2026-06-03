@@ -13,8 +13,10 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.ui.views.BaseActionDialog;
 import feign.FeignException;
@@ -31,7 +33,6 @@ import java.util.stream.Collectors;
 
 public abstract class TokenConfigDialogBase extends BaseActionDialog {
 
-    // Algorithm groups
     protected static final List<String> HMAC_ALGORITHMS = List.of("HS256", "HS384", "HS512");
     protected static final List<String> ASYMMETRIC_ALGORITHMS = List.of(
             "RS256", "RS384", "RS512",
@@ -50,8 +51,13 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
     // Common UI components
     protected ComboBox<IEnumToken.Types> tokenTypeCombo;
     protected TextField issuerField;
-    protected AudienceInput audienceInput;          // replaces simple TextField
+    protected AudienceInput audienceInput;
     protected ComboBox<String> signatureAlgorithmCombo;
+
+    // Lifetime components – all on one line
+    protected IntegerField lifeTimeValueField;
+    protected ComboBox<String> lifeTimeUnitCombo;
+    protected HorizontalLayout lifetimeRow;
 
     // HMAC field
     protected TextField secretKeyField;
@@ -88,6 +94,31 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         signatureAlgorithmCombo.setItems(SUPPORTED_ALGORITHMS);
         signatureAlgorithmCombo.setRequired(true);
         signatureAlgorithmCombo.setRequiredIndicatorVisible(true);
+
+        // ========== Lifetime input (custom label, inline) ==========
+        lifeTimeValueField = new IntegerField();
+        lifeTimeValueField.setPlaceholder("e.g., 1");
+        lifeTimeValueField.setValue(1);
+        lifeTimeValueField.setWidth("60%");
+        lifeTimeValueField.setRequired(true);
+        lifeTimeValueField.setStepButtonsVisible(true);
+        lifeTimeValueField.setMin(1);
+
+        lifeTimeUnitCombo = new ComboBox<>();
+        lifeTimeUnitCombo.setItems("Seconds", "Minutes", "Hours", "Days");
+        lifeTimeUnitCombo.setValue("Hours");
+        lifeTimeUnitCombo.setWidth("30%");
+        lifeTimeUnitCombo.setRequired(true);
+
+        Span lifetimeLabel = new Span("Lifetime:");
+        lifetimeLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+        lifetimeLabel.getStyle().set("margin-right", "var(--lumo-space-s)");
+
+        lifetimeRow = new HorizontalLayout(lifetimeLabel, lifeTimeValueField, lifeTimeUnitCombo);
+        lifetimeRow.setWidthFull();
+        lifetimeRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        lifetimeRow.setFlexGrow(1, lifeTimeValueField);
+        lifetimeRow.setSpacing(true);
 
         // HMAC field
         secretKeyField = new TextField("Secret key (Base64)");
@@ -147,6 +178,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         formLayout.add(tokenTypeCombo, signatureAlgorithmCombo);
         formLayout.add(issuerField, 2);
         formLayout.add(audienceInput, 2);
+        formLayout.add(lifetimeRow, 2);   // one-line lifetime row
     }
 
     protected void setupAlgorithmChangeListener() {
@@ -188,7 +220,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
     protected void generateKeyPair() {
         String algorithm = signatureAlgorithmCombo.getValue();
         if (algorithm == null || !ASYMMETRIC_ALGORITHMS.contains(algorithm)) {
-            Notification.show("Select an asymmetric algorithm first", 3000, Notification.Position.MIDDLE)
+            Notification.show("Select an asymmetric algorithm first", 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
@@ -262,17 +294,17 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
             privateKeyArea.setValue(privateKeyPem);
             publicKeyArea.setValue(publicKeyPem);
 
-            Notification.show("Key pair generated successfully", 3000, Notification.Position.MIDDLE)
+            Notification.show("Key pair generated successfully", 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         } catch (Exception e) {
-            Notification.show("Failed to generate key pair: " + e.getMessage(), 5000, Notification.Position.MIDDLE)
+            Notification.show("Failed to generate key pair: " + e.getMessage(), 5000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }
 
     protected void copyToClipboard(String text) {
         if (text == null || text.isBlank()) {
-            Notification.show("Nothing to copy", 2000, Notification.Position.MIDDLE)
+            Notification.show("Nothing to copy", 2000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
@@ -316,7 +348,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
     }
 
     protected void showError(String message) {
-        Notification.show(message, 5000, Notification.Position.MIDDLE)
+        Notification.show(message, 5000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 
@@ -334,7 +366,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 
-    // Methods for audience list management
+    // Audience list management
     protected List<String> getAudienceList() {
         return audienceInput.getAudiences();
     }
@@ -343,13 +375,70 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         audienceInput.setAudiences(audiences);
     }
 
+    // Lifetime management
+    protected Integer getLifeTimeInMs() {
+        Integer value = lifeTimeValueField.getValue();
+        if (value == null || value <= 0) {
+            showError("Lifetime value must be a positive number");
+            return null;
+        }
+        String unit = lifeTimeUnitCombo.getValue();
+        if (unit == null) {
+            showError("Please select a time unit");
+            return null;
+        }
+        int ms;
+        switch (unit) {
+            case "Seconds":
+                ms = value * 1000;
+                break;
+            case "Minutes":
+                ms = value * 60 * 1000;
+                break;
+            case "Hours":
+                ms = value * 60 * 60 * 1000;
+                break;
+            case "Days":
+                ms = value * 24 * 60 * 60 * 1000;
+                break;
+            default:
+                throw new IllegalStateException("Unknown unit: " + unit);
+        }
+        return ms;
+    }
+
+    protected void setLifeTimeFromMs(Integer ms) {
+        if (ms == null || ms <= 0) {
+            lifeTimeValueField.setValue(1);
+            lifeTimeUnitCombo.setValue("Hours");
+            return;
+        }
+        if (ms % (24 * 60 * 60 * 1000) == 0 && ms >= (24 * 60 * 60 * 1000)) {
+            lifeTimeValueField.setValue(ms / (24 * 60 * 60 * 1000));
+            lifeTimeUnitCombo.setValue("Days");
+        } else if (ms % (60 * 60 * 1000) == 0) {
+            lifeTimeValueField.setValue(ms / (60 * 60 * 1000));
+            lifeTimeUnitCombo.setValue("Hours");
+        } else if (ms % (60 * 1000) == 0) {
+            lifeTimeValueField.setValue(ms / (60 * 1000));
+            lifeTimeUnitCombo.setValue("Minutes");
+        } else {
+            lifeTimeValueField.setValue(ms / 1000);
+            lifeTimeUnitCombo.setValue("Seconds");
+            if (ms % 1000 != 0) {
+                Notification.show("Lifetime millisecond precision lost, rounded to seconds", 3000, Notification.Position.BOTTOM_END)
+                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
+            }
+        }
+    }
+
     // Abstract methods
     protected abstract void bindData();
 
     protected abstract void onSaveSuccess();
 
     // ================================
-    // Inner class: AudienceInput (chips)
+    // AudienceInput (chips)
     // ================================
     protected static class AudienceInput extends VerticalLayout {
         private final TextField inputField;
@@ -382,13 +471,13 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         private void addAudience() {
             String value = inputField.getValue();
             if (value == null || value.isBlank()) {
-                Notification.show("Audience cannot be empty", 2000, Notification.Position.MIDDLE)
+                Notification.show("Audience cannot be empty", 2000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
             }
             value = value.trim();
             if (getAudiences().contains(value)) {
-                Notification.show("Audience already added", 2000, Notification.Position.MIDDLE)
+                Notification.show("Audience already added", 2000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
             }
@@ -419,11 +508,8 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
             for (Component component : chipsContainer.getChildren().collect(Collectors.toList())) {
                 if (component instanceof Span) {
                     String text = ((Span) component).getText();
-                    // Remove the close icon character (✕) if present
                     text = text.replace("✕", "").trim();
-                    if (!text.isEmpty()) {
-                        list.add(text);
-                    }
+                    if (!text.isEmpty()) list.add(text);
                 }
             }
             return list;

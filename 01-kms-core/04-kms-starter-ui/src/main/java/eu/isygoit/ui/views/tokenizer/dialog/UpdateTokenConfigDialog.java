@@ -15,8 +15,7 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
 
     private final KmsTokenConfigService tokenConfigService;
     private final TokenConfigDto original;
-
-    private TextField codeField; // only in update dialog
+    private TextField codeField;
 
     public UpdateTokenConfigDialog(KmsTokenConfigService tokenConfigService, TokenConfigDto dto, Runnable onSuccess) {
         super("Edit Token Configuration", onSuccess);
@@ -37,19 +36,16 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
         codeField = new TextField("Code");
         codeField.setReadOnly(true);
         codeField.setWidthFull();
-        // Insert code field at the top, before token type and algorithm
         formLayout.add(codeField, 2);
-        // tokenTypeCombo and signatureAlgorithmCombo will be added later by addCommonFieldsToLayout()
     }
 
     @Override
     protected void bindData() {
         codeField.setValue(original.getCode());
         tokenTypeCombo.setValue(original.getTokenType());
-        tokenTypeCombo.setReadOnly(true); // cannot change token type
+        tokenTypeCombo.setReadOnly(true);
         issuerField.setValue(original.getIssuer() != null ? original.getIssuer() : "");
 
-        // Load existing audience list
         if (original.getAudience() != null && !original.getAudience().isEmpty()) {
             setAudienceList(original.getAudience());
         } else {
@@ -57,6 +53,9 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
         }
 
         signatureAlgorithmCombo.setValue(original.getSignatureAlgorithm());
+
+        Integer lifetimeMs = original.getLifeTimeInMs();
+        setLifeTimeFromMs(lifetimeMs);
 
         String storedKey = original.getSecretKey();
         if (HMAC_ALGORITHMS.contains(original.getSignatureAlgorithm())) {
@@ -103,15 +102,19 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
             return false;
         }
 
+        Integer lifeTime = getLifeTimeInMs();
+        if (lifeTime == null) return false;
+
         TokenConfigDto updated = TokenConfigDto.builder()
                 .id(original.getId())
                 .code(original.getCode())
                 .tokenType(tokenType)
                 .issuer(issuerField.getValue())
-                .audience(getAudienceList())    // list of audiences
+                .audience(getAudienceList())
                 .signatureAlgorithm(signatureAlgorithm)
                 .secretKey(secretOrPrivateKey)
                 .publicKey(publicKeyArea.getValue())
+                .lifeTimeInMs(lifeTime)
                 .build();
 
         try {

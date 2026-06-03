@@ -28,4 +28,5 @@ public class TokenConfigDto extends AuditableDto<Long> {
     private String signatureAlgorithm;
     private String secretKey;
     private String publicKey;
+    private Integer lifeTimeInMs;
 }

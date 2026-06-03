@@ -3,19 +3,18 @@ package eu.isygoit.ui.views.tokenizer;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.TokenConfigDto;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
-import eu.isygoit.ui.MainView;
 import eu.isygoit.ui.views.BaseCard;
 import eu.isygoit.ui.views.tokenizer.dialog.DeleteTokenConfigDialog;
 import eu.isygoit.ui.views.tokenizer.dialog.UpdateTokenConfigDialog;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigService> {
 
@@ -48,6 +47,7 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
         return "token-config-card";
     }
 
+    // ========== Title (left side of header) ==========
     @Override
     protected Component buildTitle() {
         HorizontalLayout left = new HorizontalLayout();
@@ -57,6 +57,7 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
 
         titleSpan = buildTitleSpan(dto.getCode(), dto.getCode());
 
+        // Token type chip (coloured by type)
         typeChip = buildStatusChip(
                 dto.getTokenType() != null ? dto.getTokenType().meaning() : "UNKNOWN",
                 dto.getTokenType() != null ? dto.getTokenType().name() : "UNKNOWN"
@@ -66,6 +67,7 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
         return left;
     }
 
+    // ========== Action buttons (right side of header) ==========
     @Override
     protected List<Button> buildActionButtons() {
         Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit configuration");
@@ -77,56 +79,127 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
         return List.of(editBtn, deleteBtn);
     }
 
+    // ========== Body rows (non‑sensitive metadata) ==========
     @Override
     protected void buildBodyRows() {
-        // Format audience list as comma-separated string or "—"
-        String audienceDisplay = "—";
-        if (dto.getAudience() != null && !dto.getAudience().isEmpty()) {
-            audienceDisplay = dto.getAudience().stream().collect(Collectors.joining(", "));
-        }
+        // ---- Issuer row ----
+        HorizontalLayout issuerRow = createIconRow(VaadinIcon.BUILDING, "Issuer",
+                dto.getIssuer() != null ? dto.getIssuer() : "—");
 
-        addMetaRow(
-                "Issuer: " + (dto.getIssuer() != null ? dto.getIssuer() : "—"),
-                "Audience: " + audienceDisplay
-        );
-        addMetaRow(
-                "Signature: " + (dto.getSignatureAlgorithm() != null ? dto.getSignatureAlgorithm() : "—")
-        );
+        // ---- Audience row (chip‑like list) ----
+        HorizontalLayout audienceRow = createIconRow(VaadinIcon.GROUP, "Audience",
+                formatAudienceList());
 
-        // Secret key (masked) with copy button
-        HorizontalLayout secretRow = new HorizontalLayout();
-        secretRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        secretRow.setSpacing(true);
-        Span secretLabel = new Span("Secret key:");
-        secretLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        secretLabel.addClassName(LumoUtility.FontSize.SMALL);
-        String secret = dto.getSecretKey() != null ? dto.getSecretKey() : "";
-        String maskedSecret = secret.isEmpty() ? "—" : secret.substring(0, Math.min(4, secret.length())) + "..." + secret.substring(Math.max(0, secret.length() - 4));
-        Span secretValue = new Span(maskedSecret);
-        secretValue.getStyle().set("font-family", "monospace");
-        secretValue.addClassName(LumoUtility.FontSize.XSMALL);
-        secretValue.getElement().setAttribute("title", secret);
-        Button copySecretBtn = MainView.createCopyButton(VaadinIcon.COPY, secret, "Copy full secret key");
-        secretRow.add(secretLabel, secretValue, copySecretBtn);
-        add(secretRow);
+        // ---- Signature algorithm row ----
+        HorizontalLayout algoRow = createIconRow(VaadinIcon.CODE, "Algorithm",
+                dto.getSignatureAlgorithm() != null ? dto.getSignatureAlgorithm() : "—");
+
+        // ---- Lifetime row (human readable) ----
+        HorizontalLayout lifetimeRow = createIconRow(VaadinIcon.CLOCK, "Lifetime",
+                formatLifetime(dto.getLifeTimeInMs()));
+
+        add(issuerRow, audienceRow, algoRow, lifetimeRow);
     }
 
+    // ========== Helper methods ==========
+    private String formatAudienceList() {
+        if (dto.getAudience() == null || dto.getAudience().isEmpty()) {
+            return "—";
+        }
+        return String.join(", ", dto.getAudience());
+    }
+
+    private String formatLifetime(Integer lifeTimeInMs) {
+        if (lifeTimeInMs == null || lifeTimeInMs <= 0) {
+            return "—";
+        }
+        long seconds = lifeTimeInMs / 1000;
+        if (seconds < 60) return seconds + " second" + (seconds != 1 ? "s" : "");
+        long minutes = seconds / 60;
+        if (minutes < 60) return minutes + " minute" + (minutes != 1 ? "s" : "");
+        long hours = minutes / 60;
+        if (hours < 24) return hours + " hour" + (hours != 1 ? "s" : "");
+        long days = hours / 24;
+        return days + " day" + (days != 1 ? "s" : "");
+    }
+
+    private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
+        HorizontalLayout row = new HorizontalLayout();
+        row.setAlignItems(FlexComponent.Alignment.CENTER);
+        row.setSpacing(true);
+        row.setWidthFull();
+        row.getStyle().set("margin-top", "var(--lumo-space-xs)");
+        row.addClassName("meta-row");
+
+        Icon iconComponent = icon.create();
+        iconComponent.setSize("16px");
+        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
+
+        Span labelSpan = new Span(label + ":");
+        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+        labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
+        labelSpan.getStyle().set("min-width", "80px");
+
+        Span valueSpan = new Span(value);
+        valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
+        valueSpan.getStyle().set("font-family", "monospace");
+        valueSpan.getStyle().set("word-break", "break-all");
+        valueSpan.getStyle().set("flex", "1");
+
+        row.add(iconComponent, labelSpan, valueSpan);
+        row.expand(valueSpan);
+        return row;
+    }
+
+    // ========== Refresh UI after update ==========
     private void refreshDisplay() {
         titleSpan.setText(dto.getCode());
         titleSpan.getElement().setAttribute("title", dto.getCode());
         typeChip.setText(dto.getTokenType() != null ? dto.getTokenType().meaning() : "UNKNOWN");
-        // Rebuild the body rows
+
         getUI().ifPresent(ui -> ui.access(() -> {
-            // Remove all body rows (assume they are the last components added after the header)
-            // A simpler approach: remove and re‑add all children except the header.
-            // For brevity, we rebuild the whole card.
-            removeAll();
-            buildHeader();
+            // Remove all body rows (everything after the header row)
+            List<Component> children = new java.util.ArrayList<>(getChildren().toList());
+            boolean headerRemoved = false;
+            for (Component child : children) {
+                if (child == headerRow) {
+                    headerRemoved = true;
+                    continue;
+                }
+                if (headerRemoved) {
+                    remove(child);
+                }
+            }
             buildBodyRows();
         }));
     }
 
     private void openEditDialog() {
         new UpdateTokenConfigDialog(objectService, dto, () -> parentView.refreshCard(this)).open();
+    }
+
+    // ========== Extra CSS for card layout ==========
+    @Override
+    protected String buildExtraStyles() {
+        return """
+                .token-config-card {
+                    transition: all 0.2s ease;
+                }
+                .token-config-card .meta-row {
+                    border-bottom: 1px solid var(--lumo-contrast-10pct);
+                    padding-bottom: var(--lumo-space-xs);
+                }
+                .token-config-card .meta-row:last-child {
+                    border-bottom: none;
+                }
+                @media (max-width: 640px) {
+                    .token-config-card .meta-row {
+                        flex-wrap: wrap;
+                    }
+                    .token-config-card .meta-row > :not(:first-child) {
+                        margin-left: 28px;
+                    }
+                }
+                """;
     }
 }
