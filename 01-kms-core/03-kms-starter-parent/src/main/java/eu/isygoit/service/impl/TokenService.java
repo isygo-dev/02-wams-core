@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
@@ -74,6 +75,11 @@ public class TokenService implements ITokenBuilderService {
         //Get Token config configured by tenant and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
+            if(CollectionUtils.isEmpty(tokenConfig.getAudience()) || !tokenConfig.getAudience().containsAll(audience)){
+                log.error("Token audience is invalid for tenant: {} / {}", tenant, tokenType.name());
+                throw new TokenAudienceException("Invalid token audience");
+            }
+
             // Convert string algorithm to SecureDigestAlgorithm safely
             String sigAlgo = tokenConfig.getSignatureAlgorithm().toUpperCase();
             SecureDigestAlgorithm<?, ?> algorithm = (SecureDigestAlgorithm<SecretKey, ?>) Jwts.SIG.get().get(sigAlgo);
@@ -146,7 +152,7 @@ public class TokenService implements ITokenBuilderService {
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
             // Validate token content – pass both keys (the validate method will choose based on algorithm)
-            jwtService.validateToken(token, subject, tenant, audience, tokenConfig.getSecretKey(), tokenConfig.getPublicKey());
+            jwtService.validateToken(token, subject, tokenConfig.getIssuer(), audience, tokenConfig.getSecretKey(), tokenConfig.getPublicKey());
         } else {
             log.error("Token config not found for tenant: {} / {}", tenant, tokenType.name());
             throw new TokenConfigNotFoundException("for tenant: " + tenant + "/" + tokenType.name());

@@ -1,15 +1,14 @@
 package eu.isygoit.ui.views.tokenizer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -34,8 +33,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 @Route(value = "tokenizer", layout = MainLayout.class)
 @PageTitle("Tokenizer - JWT Management")
@@ -47,7 +45,7 @@ public class TokenBuilderView extends VerticalLayout {
 
     // Build token components
     private final ComboBox<IEnumToken.Types> tokenTypeCombo = new ComboBox<>("Token type");
-    private final TextField buildAudienceField = new TextField("Audience");
+    private final AudienceInput buildAudienceInput = new AudienceInput();
     private final TextField subjectField = new TextField("Subject");
     private final TextArea claimsArea = new TextArea("Claims (JSON)");
     private final Button buildButton = new Button("Build Token", new Icon(VaadinIcon.COG));
@@ -60,7 +58,7 @@ public class TokenBuilderView extends VerticalLayout {
 
     // Validate token components
     private final ComboBox<IEnumToken.Types> validateTokenTypeCombo = new ComboBox<>("Token type");
-    private final TextField validateAudienceField = new TextField("Audience");
+    private final AudienceInput validateAudienceInput = new AudienceInput();
     private final TextField validateTokenField = new TextField("Token");
     private final TextField validateSubjectField = new TextField("Subject");
     private final Button validateButton = new Button("Validate Token", new Icon(VaadinIcon.SEARCH));
@@ -81,6 +79,95 @@ public class TokenBuilderView extends VerticalLayout {
         attachResponsiveStyles();
     }
 
+    // ========================================================================
+    // Inner class: Chips‑based audience input (reusable)
+    // ========================================================================
+    private static class AudienceInput extends VerticalLayout {
+        private final TextField inputField;
+        private final Button addButton;
+        private final HorizontalLayout chipsContainer;
+
+        public AudienceInput() {
+            setPadding(false);
+            setSpacing(false);
+
+            inputField = new TextField();
+            inputField.setPlaceholder("Enter audience (e.g., https://api.example.com)");
+            inputField.setWidthFull();
+
+            addButton = new Button("Add", new Icon(VaadinIcon.PLUS));
+            addButton.addClickListener(e -> addAudience());
+
+            HorizontalLayout inputRow = new HorizontalLayout(inputField, addButton);
+            inputRow.setWidthFull();
+            inputRow.setFlexGrow(1, inputField);
+
+            chipsContainer = new HorizontalLayout();
+            chipsContainer.setSpacing(true);
+            chipsContainer.setWidthFull();
+            chipsContainer.getStyle().set("flex-wrap", "wrap");
+
+            add(inputRow, chipsContainer);
+        }
+
+        private void addAudience() {
+            String value = inputField.getValue();
+            if (value == null || value.isBlank()) {
+                Notification.show("Audience cannot be empty", 2000, Notification.Position.MIDDLE)
+                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
+                return;
+            }
+            value = value.trim();
+            if (getAudiences().contains(value)) {
+                Notification.show("Audience already added", 2000, Notification.Position.MIDDLE)
+                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
+                return;
+            }
+            addChip(value);
+            inputField.clear();
+        }
+
+        private void addChip(String audience) {
+            Span chip = new Span(audience);
+            chip.getStyle()
+                    .set("background-color", "#e0e0e0")
+                    .set("border-radius", "16px")
+                    .set("padding", "4px 12px")
+                    .set("font-size", "var(--lumo-font-size-s)")
+                    .set("display", "inline-flex")
+                    .set("align-items", "center")
+                    .set("gap", "8px");
+
+            Button removeButton = new Button(new Icon(VaadinIcon.CLOSE_SMALL));
+            removeButton.addThemeName("tertiary-inline");
+            removeButton.addClickListener(e -> chipsContainer.remove(chip));
+            chip.add(removeButton);
+            chipsContainer.add(chip);
+        }
+
+        public Set<String> getAudiences() {
+            Set<String> set = new LinkedHashSet<>();
+            for (Component component : chipsContainer.getChildren().toList()) {
+                if (component instanceof Span) {
+                    String text = ((Span) component).getText();
+                    // Remove the close icon character (✕) if present
+                    text = text.replace("✕", "").trim();
+                    if (!text.isEmpty()) {
+                        set.add(text);
+                    }
+                }
+            }
+            return set;
+        }
+
+        public void clear() {
+            chipsContainer.removeAll();
+        }
+    }
+
+    // ========================================================================
+    // UI construction
+    // ========================================================================
     private void buildHeader() {
         H2 header = new H2("Tokenizer");
         header.addClassNames(
@@ -117,10 +204,8 @@ public class TokenBuilderView extends VerticalLayout {
         tokenTypeCombo.setRequired(true);
         tokenTypeCombo.setWidthFull();
 
-        buildAudienceField.setRequired(true);
-        buildAudienceField.setPlaceholder("e.g., kms-console");
-        buildAudienceField.setTooltipText("Audience name (required)");
-        buildAudienceField.setWidthFull();
+        buildAudienceInput.setWidthFull();
+        // No setRequired – manual validation checks if audience set is empty
 
         subjectField.setRequired(true);
         subjectField.setPlaceholder("e.g., user@example.com or service-account");
@@ -131,7 +216,8 @@ public class TokenBuilderView extends VerticalLayout {
         claimsArea.setPlaceholder("Optional JSON claims:\n{\n  \"role\": \"admin\",\n  \"scope\": \"read write\"\n}");
         claimsArea.setHelperText("Valid JSON object with extra claims");
 
-        form.add(tokenTypeCombo, buildAudienceField, subjectField, claimsArea);
+        form.add(tokenTypeCombo, buildAudienceInput, subjectField, claimsArea);
+        form.setColspan(buildAudienceInput, 2);
         form.setColspan(claimsArea, 2);
         card.add(form);
 
@@ -144,14 +230,12 @@ public class TokenBuilderView extends VerticalLayout {
         loadingBar.setWidth("200px");
         card.add(loadingBar);
 
-        // Result card (initially hidden)
         resultCard.setVisible(false);
         resultCard.addClassName("result-card");
         resultCard.getStyle().set("margin-top", "var(--lumo-space-m)");
         resultCard.getStyle().set("background-color", "var(--lumo-contrast-5pct)");
         resultCard.getStyle().set("border-radius", "var(--lumo-border-radius-m)");
 
-        // Token line with copy button on the right
         HorizontalLayout tokenLine = new HorizontalLayout();
         tokenLine.setAlignItems(FlexComponent.Alignment.CENTER);
         tokenLine.setSpacing(true);
@@ -174,7 +258,6 @@ public class TokenBuilderView extends VerticalLayout {
         tokenLine.add(tokenLabel, tokenResultSpan, copyTokenButton);
         tokenLine.expand(tokenResultSpan);
 
-        // Expiry line (no copy)
         HorizontalLayout expiryLine = new HorizontalLayout();
         expiryLine.setAlignItems(FlexComponent.Alignment.CENTER);
         expiryLine.setSpacing(true);
@@ -213,8 +296,8 @@ public class TokenBuilderView extends VerticalLayout {
         validateTokenTypeCombo.setValue(IEnumToken.Types.ACCESS);
         validateTokenTypeCombo.setRequired(true);
 
-        validateAudienceField.setRequired(true);
-        validateAudienceField.setPlaceholder("e.g., kms-console");
+        validateAudienceInput.setWidthFull();
+        // No setRequired – manual validation checks if audience set is empty
 
         validateTokenField.setRequired(true);
         validateTokenField.setPlaceholder("Paste the JWT token here");
@@ -223,7 +306,8 @@ public class TokenBuilderView extends VerticalLayout {
         validateSubjectField.setRequired(true);
         validateSubjectField.setPlaceholder("Subject expected in token");
 
-        form.add(validateTokenTypeCombo, validateAudienceField, validateTokenField, validateSubjectField);
+        form.add(validateTokenTypeCombo, validateAudienceInput, validateTokenField, validateSubjectField);
+        form.setColspan(validateAudienceInput, 2);
         form.setColspan(validateTokenField, 2);
         card.add(form);
 
@@ -238,14 +322,17 @@ public class TokenBuilderView extends VerticalLayout {
         add(card);
     }
 
+    // ========================================================================
+    // Business logic
+    // ========================================================================
     private void buildToken() {
-        String audience = buildAudienceField.getValue();
+        Set<String> audiences = buildAudienceInput.getAudiences();
         IEnumToken.Types tokenType = tokenTypeCombo.getValue();
         String subject = subjectField.getValue();
         String claimsJson = claimsArea.getValue();
 
-        if (!StringUtils.hasText(audience)) {
-            showError("Audience is required");
+        if (audiences.isEmpty()) {
+            showError("At least one audience is required");
             return;
         }
         if (tokenType == null) {
@@ -274,7 +361,7 @@ public class TokenBuilderView extends VerticalLayout {
                     .claims(claims)
                     .build();
 
-            ResponseEntity<TokenResponseDto> response = tokenService.buildToken(audience, tokenType, request);
+            ResponseEntity<TokenResponseDto> response = tokenService.buildToken(audiences, tokenType, request);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 TokenResponseDto tokenResponse = response.getBody();
@@ -288,6 +375,55 @@ public class TokenBuilderView extends VerticalLayout {
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? extractErrorMessage(ex.contentUTF8()) : ex.getMessage();
             showError("Build error: " + errorMsg);
+        } catch (Exception e) {
+            showError("Error: " + e.getMessage());
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    private void validateToken() {
+        Set<String> audiences = validateAudienceInput.getAudiences();
+        IEnumToken.Types tokenType = validateTokenTypeCombo.getValue();
+        String token = validateTokenField.getValue();
+        String subject = validateSubjectField.getValue();
+
+        if (audiences.isEmpty()) {
+            showError("At least one audience is required for validation");
+            return;
+        }
+        if (tokenType == null) {
+            showError("Token type is required for validation");
+            return;
+        }
+        if (!StringUtils.hasText(token)) {
+            showError("Token is required");
+            return;
+        }
+        if (!StringUtils.hasText(subject)) {
+            showError("Subject is required for validation");
+            return;
+        }
+
+        showLoading(true);
+        try {
+            ResponseEntity<Boolean> response = tokenService.isTokenValid(audiences, tokenType, token, subject);
+            validationResultSpan.setVisible(true);
+            if (response.getStatusCode().is2xxSuccessful() && Boolean.TRUE.equals(response.getBody())) {
+                validationResultSpan.setText(" ✅ Token is VALID");
+                validationResultSpan.getStyle().set("color", "var(--lumo-success-text-color)");
+                showSuccess("Token is valid");
+            } else {
+                validationResultSpan.setText(" ❌ Token is INVALID");
+                validationResultSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+                showWarning("Token is invalid");
+            }
+        } catch (FeignException ex) {
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? extractErrorMessage(ex.contentUTF8()) : ex.getMessage();
+            showError("Validation error: " + errorMsg);
+            validationResultSpan.setVisible(true);
+            validationResultSpan.setText(" ❌ Validation failed: " + errorMsg);
+            validationResultSpan.getStyle().set("color", "var(--lumo-error-text-color)");
         } catch (Exception e) {
             showError("Error: " + e.getMessage());
         } finally {
@@ -331,55 +467,6 @@ public class TokenBuilderView extends VerticalLayout {
                         "});",
                 token
         );
-    }
-
-    private void validateToken() {
-        String audience = validateAudienceField.getValue();
-        IEnumToken.Types tokenType = validateTokenTypeCombo.getValue();
-        String token = validateTokenField.getValue();
-        String subject = validateSubjectField.getValue();
-
-        if (!StringUtils.hasText(audience)) {
-            showError("Audience is required for validation");
-            return;
-        }
-        if (tokenType == null) {
-            showError("Token type is required for validation");
-            return;
-        }
-        if (!StringUtils.hasText(token)) {
-            showError("Token is required");
-            return;
-        }
-        if (!StringUtils.hasText(subject)) {
-            showError("Subject is required for validation");
-            return;
-        }
-
-        showLoading(true);
-        try {
-            ResponseEntity<Boolean> response = tokenService.isTokenValid(audience, tokenType, token, subject);
-            validationResultSpan.setVisible(true);
-            if (response.getStatusCode().is2xxSuccessful() && Boolean.TRUE.equals(response.getBody())) {
-                validationResultSpan.setText(" ✅ Token is VALID");
-                validationResultSpan.getStyle().set("color", "var(--lumo-success-text-color)");
-                showSuccess("Token is valid");
-            } else {
-                validationResultSpan.setText(" ❌ Token is INVALID");
-                validationResultSpan.getStyle().set("color", "var(--lumo-error-text-color)");
-                showWarning("Token is invalid");
-            }
-        } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? extractErrorMessage(ex.contentUTF8()) : ex.getMessage();
-            showError("Validation error: " + errorMsg);
-            validationResultSpan.setVisible(true);
-            validationResultSpan.setText(" ❌ Validation failed: " + errorMsg);
-            validationResultSpan.getStyle().set("color", "var(--lumo-error-text-color)");
-        } catch (Exception e) {
-            showError("Error: " + e.getMessage());
-        } finally {
-            showLoading(false);
-        }
     }
 
     private String extractErrorMessage(String responseBody) {
