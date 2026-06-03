@@ -1,5 +1,6 @@
 package eu.isygoit.ui.views.tokenizer;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -7,8 +8,10 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -36,31 +39,30 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Route(value = "tokenizer", layout = MainLayout.class)
-@PageTitle("Tokenizer - JWT Management")
+@PageTitle("Tokenizer – JWT Management")
 @PermitAll
 public class TokenBuilderView extends VerticalLayout {
 
     private final KmsTokenService tokenService;
     private final ObjectMapper objectMapper;
 
-    // Build token components
-    private final ComboBox<IEnumToken.Types> tokenTypeCombo = new ComboBox<>("Token type");
-    private final AudienceInput buildAudienceInput = new AudienceInput();
-    private final TextField subjectField = new TextField("Subject");
-    private final TextArea claimsArea = new TextArea("Claims (JSON)");
-    private final Button buildButton = new Button("Build Token", new Icon(VaadinIcon.COG));
-    private final ProgressBar loadingBar = new ProgressBar();
+    private final ProgressBar globalLoadingBar = new ProgressBar();
 
-    // Result display
-    private final Card resultCard = new Card();
-    private final Span tokenResultSpan = new Span();
-    private final Span expiryResultSpan = new Span();
+    // Build section
+    private final Card buildCard = new Card();
+    private final ComboBox<IEnumToken.Types> tokenTypeCombo = new ComboBox<>();
+    private final AudienceInput audienceInputBuilder = new AudienceInput();
+    private final TextField subjectField = new TextField();
+    private final TextArea claimsArea = new TextArea();
+    private final Button buildButton = new Button("Generate Token", new Icon(VaadinIcon.COG));
+    private final VerticalLayout buildResultPanel = new VerticalLayout();
 
-    // Validate token components
-    private final ComboBox<IEnumToken.Types> validateTokenTypeCombo = new ComboBox<>("Token type");
-    private final AudienceInput validateAudienceInput = new AudienceInput();
-    private final TextField validateTokenField = new TextField("Token");
-    private final TextField validateSubjectField = new TextField("Subject");
+    // Validate section
+    private final Card validateCard = new Card();
+    private final ComboBox<IEnumToken.Types> validateTokenTypeCombo = new ComboBox<>();
+    private final AudienceInput audienceInputValidator = new AudienceInput();
+    private final TextArea validateTokenField = new TextArea();
+    private final TextField validateSubjectField = new TextField();
     private final Button validateButton = new Button("Validate Token", new Icon(VaadinIcon.SEARCH));
     private final Span validationResultSpan = new Span();
 
@@ -73,260 +75,126 @@ public class TokenBuilderView extends VerticalLayout {
         setSpacing(true);
         addClassName("tokenizer-view");
 
+        globalLoadingBar.setIndeterminate(true);
+        globalLoadingBar.setVisible(false);
+        globalLoadingBar.setWidthFull();
+        add(globalLoadingBar);
+
         buildHeader();
-        buildBuildTokenSection();
-        buildValidateTokenSection();
+        buildBuildCard();
+        buildValidateCard();
+
+        HorizontalLayout cardsRow = new HorizontalLayout(buildCard, validateCard);
+        cardsRow.setWidthFull();
+        cardsRow.setSpacing(true);
+        cardsRow.getStyle().set("flex-wrap", "wrap");
+        cardsRow.setJustifyContentMode(FlexComponent.JustifyContentMode.START);
+        add(cardsRow);
+
         attachResponsiveStyles();
     }
 
-    // ========================================================================
-    // Inner class: Chips‑based audience input (reusable)
-    // ========================================================================
-    private static class AudienceInput extends VerticalLayout {
-        private final TextField inputField;
-        private final Button addButton;
-        private final HorizontalLayout chipsContainer;
-
-        public AudienceInput() {
-            setPadding(false);
-            setSpacing(false);
-
-            inputField = new TextField();
-            inputField.setPlaceholder("Enter audience (e.g., https://api.example.com)");
-            inputField.setWidthFull();
-
-            addButton = new Button("Add", new Icon(VaadinIcon.PLUS));
-            addButton.addClickListener(e -> addAudience());
-
-            HorizontalLayout inputRow = new HorizontalLayout(inputField, addButton);
-            inputRow.setWidthFull();
-            inputRow.setFlexGrow(1, inputField);
-
-            chipsContainer = new HorizontalLayout();
-            chipsContainer.setSpacing(true);
-            chipsContainer.setWidthFull();
-            chipsContainer.getStyle().set("flex-wrap", "wrap");
-
-            add(inputRow, chipsContainer);
-        }
-
-        private void addAudience() {
-            String value = inputField.getValue();
-            if (value == null || value.isBlank()) {
-                Notification.show("Audience cannot be empty", 2000, Notification.Position.MIDDLE)
-                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
-                return;
-            }
-            value = value.trim();
-            if (getAudiences().contains(value)) {
-                Notification.show("Audience already added", 2000, Notification.Position.MIDDLE)
-                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
-                return;
-            }
-            addChip(value);
-            inputField.clear();
-        }
-
-        private void addChip(String audience) {
-            Span chip = new Span(audience);
-            chip.getStyle()
-                    .set("background-color", "#e0e0e0")
-                    .set("border-radius", "16px")
-                    .set("padding", "4px 12px")
-                    .set("font-size", "var(--lumo-font-size-s)")
-                    .set("display", "inline-flex")
-                    .set("align-items", "center")
-                    .set("gap", "8px");
-
-            Button removeButton = new Button(new Icon(VaadinIcon.CLOSE_SMALL));
-            removeButton.addThemeName("tertiary-inline");
-            removeButton.addClickListener(e -> chipsContainer.remove(chip));
-            chip.add(removeButton);
-            chipsContainer.add(chip);
-        }
-
-        public Set<String> getAudiences() {
-            Set<String> set = new LinkedHashSet<>();
-            for (Component component : chipsContainer.getChildren().toList()) {
-                if (component instanceof Span) {
-                    String text = ((Span) component).getText();
-                    // Remove the close icon character (✕) if present
-                    text = text.replace("✕", "").trim();
-                    if (!text.isEmpty()) {
-                        set.add(text);
-                    }
-                }
-            }
-            return set;
-        }
-
-        public void clear() {
-            chipsContainer.removeAll();
-        }
-    }
-
-    // ========================================================================
-    // UI construction
-    // ========================================================================
     private void buildHeader() {
-        H2 header = new H2("Tokenizer");
-        header.addClassNames(
-                LumoUtility.FontSize.XXLARGE,
-                LumoUtility.Margin.Bottom.NONE,
-                LumoUtility.Margin.Top.NONE
-        );
-        Span subtitle = new Span("Manage JSON Web Tokens (JWT) – build and validate tokens for your audiences");
+        H2 header = new H2("JWT Tokenizer");
+        header.addClassNames(LumoUtility.FontSize.XXLARGE, LumoUtility.Margin.Bottom.NONE, LumoUtility.Margin.Top.NONE);
+        Span subtitle = new Span("Generate and validate signed JSON Web Tokens");
         subtitle.addClassName(LumoUtility.TextColor.SECONDARY);
         subtitle.addClassName(LumoUtility.FontSize.SMALL);
         add(header, subtitle);
     }
 
-    private void buildBuildTokenSection() {
-        Card card = new Card();
-        card.addClassName("build-card");
-        card.setWidthFull();
+    private void buildBuildCard() {
+        buildCard.setWidthFull();
+        buildCard.addClassNames("compact-card");
 
-        HorizontalLayout headerLayout = new HorizontalLayout();
-        headerLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        headerLayout.setSpacing(true);
-        Icon buildIcon = VaadinIcon.COG.create();
-        buildIcon.getStyle().set("color", "var(--lumo-primary-color)");
-        H3 title = new H3("Generate new token");
-        title.addClassName(LumoUtility.Margin.NONE);
-        headerLayout.add(buildIcon, title);
-        card.add(headerLayout);
+        HorizontalLayout titleRow = new HorizontalLayout(new Icon(VaadinIcon.COG), new Span("Generate Token"));
+        titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        titleRow.setSpacing(true);
+        titleRow.addClassName(LumoUtility.FontWeight.BOLD);
 
         FormLayout form = new FormLayout();
-        form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 2));
+        form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
+        form.setMaxWidth("100%");
 
+        tokenTypeCombo.setLabel("Token type");
         tokenTypeCombo.setItems(IEnumToken.Types.values());
         tokenTypeCombo.setValue(IEnumToken.Types.ACCESS);
         tokenTypeCombo.setRequired(true);
-        tokenTypeCombo.setWidthFull();
 
-        buildAudienceInput.setWidthFull();
-        // No setRequired – manual validation checks if audience set is empty
+        // AudienceInput already contains its own label inside the row
+        audienceInputBuilder.setLabelText("Audiences (at least one)");
 
+        subjectField.setLabel("Subject");
+        subjectField.setPlaceholder("user@domain.com or service‑name");
         subjectField.setRequired(true);
-        subjectField.setPlaceholder("e.g., user@example.com or service-account");
-        subjectField.setTooltipText("Token subject (required)");
-        subjectField.setWidthFull();
 
-        claimsArea.setHeight("120px");
-        claimsArea.setPlaceholder("Optional JSON claims:\n{\n  \"role\": \"admin\",\n  \"scope\": \"read write\"\n}");
-        claimsArea.setHelperText("Valid JSON object with extra claims");
+        claimsArea.setLabel("Custom claims (JSON)");
+        claimsArea.setHeight("200px");
+        claimsArea.setPlaceholder("{\n  \"role\": \"admin\",\n  \"scope\": \"read write\"\n}");
+        claimsArea.setHelperText("Optional – must be valid JSON");
 
-        form.add(tokenTypeCombo, buildAudienceInput, subjectField, claimsArea);
-        form.setColspan(buildAudienceInput, 2);
-        form.setColspan(claimsArea, 2);
-        card.add(form);
+        form.add(tokenTypeCombo, audienceInputBuilder, subjectField, claimsArea);
+        buildCard.add(titleRow, form);
 
-        buildButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        buildButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_CONTRAST);
+        buildButton.setWidthFull();
         buildButton.addClickListener(e -> buildToken());
-        card.add(buildButton);
+        buildCard.add(buildButton);
 
-        loadingBar.setIndeterminate(true);
-        loadingBar.setVisible(false);
-        loadingBar.setWidth("200px");
-        card.add(loadingBar);
-
-        resultCard.setVisible(false);
-        resultCard.addClassName("result-card");
-        resultCard.getStyle().set("margin-top", "var(--lumo-space-m)");
-        resultCard.getStyle().set("background-color", "var(--lumo-contrast-5pct)");
-        resultCard.getStyle().set("border-radius", "var(--lumo-border-radius-m)");
-
-        HorizontalLayout tokenLine = new HorizontalLayout();
-        tokenLine.setAlignItems(FlexComponent.Alignment.CENTER);
-        tokenLine.setSpacing(true);
-        tokenLine.setWidthFull();
-        tokenLine.getStyle().set("flex-wrap", "wrap");
-
-        Span tokenLabel = new Span("🔑 Token:");
-        tokenLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-
-        tokenResultSpan.getStyle().set("font-family", "monospace");
-        tokenResultSpan.getStyle().set("font-size", "var(--lumo-font-size-xs)");
-        tokenResultSpan.getStyle().set("word-break", "break-all");
-        tokenResultSpan.getStyle().set("flex", "1");
-
-        Button copyTokenButton = new Button(new Icon(VaadinIcon.COPY));
-        copyTokenButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
-        copyTokenButton.setTooltipText("Copy token");
-        copyTokenButton.addClickListener(e -> copyTokenToClipboard());
-
-        tokenLine.add(tokenLabel, tokenResultSpan, copyTokenButton);
-        tokenLine.expand(tokenResultSpan);
-
-        HorizontalLayout expiryLine = new HorizontalLayout();
-        expiryLine.setAlignItems(FlexComponent.Alignment.CENTER);
-        expiryLine.setSpacing(true);
-        Span expiryLabel = new Span("📅 Expires:");
-        expiryLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        expiryResultSpan.getStyle().set("font-family", "monospace");
-        expiryResultSpan.getStyle().set("font-size", "var(--lumo-font-size-xs)");
-        expiryLine.add(expiryLabel, expiryResultSpan);
-
-        resultCard.add(tokenLine, expiryLine);
-        card.add(resultCard);
-
-        add(card);
+        buildResultPanel.setVisible(false);
+        buildResultPanel.setPadding(false);
+        buildResultPanel.setSpacing(false);
+        buildResultPanel.addClassName("result-panel");
+        buildCard.add(buildResultPanel);
     }
 
-    private void buildValidateTokenSection() {
-        Card card = new Card();
-        card.addClassName("validate-card");
-        card.setWidthFull();
-        card.getStyle().set("margin-top", "var(--lumo-space-l)");
+    private void buildValidateCard() {
+        validateCard.setWidthFull();
+        validateCard.addClassNames("compact-card");
 
-        HorizontalLayout headerLayout = new HorizontalLayout();
-        headerLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        headerLayout.setSpacing(true);
-        Icon validateIcon = VaadinIcon.SEARCH.create();
-        validateIcon.getStyle().set("color", "var(--lumo-primary-color)");
-        H3 title = new H3("Validate token");
-        title.addClassName(LumoUtility.Margin.NONE);
-        headerLayout.add(validateIcon, title);
-        card.add(headerLayout);
+        HorizontalLayout titleRow = new HorizontalLayout(new Icon(VaadinIcon.SEARCH), new Span("Validate Token"));
+        titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        titleRow.setSpacing(true);
+        titleRow.addClassName(LumoUtility.FontWeight.BOLD);
 
         FormLayout form = new FormLayout();
-        form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 2));
+        form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
+        form.setMaxWidth("100%");
 
+        validateTokenTypeCombo.setLabel("Token type");
         validateTokenTypeCombo.setItems(IEnumToken.Types.values());
         validateTokenTypeCombo.setValue(IEnumToken.Types.ACCESS);
         validateTokenTypeCombo.setRequired(true);
 
-        validateAudienceInput.setWidthFull();
-        // No setRequired – manual validation checks if audience set is empty
+        audienceInputValidator.setLabelText("Expected audiences");
 
+        validateTokenField.setLabel("JWT token");
+        validateTokenField.setPlaceholder("Paste the full JWT string here");
+        validateTokenField.setHeight("120px");
         validateTokenField.setRequired(true);
-        validateTokenField.setPlaceholder("Paste the JWT token here");
-        validateTokenField.setWidthFull();
 
+        validateSubjectField.setLabel("Expected subject");
+        validateSubjectField.setPlaceholder("Subject that must match the token's 'sub' claim");
         validateSubjectField.setRequired(true);
-        validateSubjectField.setPlaceholder("Subject expected in token");
 
-        form.add(validateTokenTypeCombo, validateAudienceInput, validateTokenField, validateSubjectField);
-        form.setColspan(validateAudienceInput, 2);
-        form.setColspan(validateTokenField, 2);
-        card.add(form);
+        form.add(validateTokenTypeCombo, audienceInputValidator, validateTokenField, validateSubjectField);
+        validateCard.add(titleRow, form);
 
-        validateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        validateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_CONTRAST);
+        validateButton.setWidthFull();
         validateButton.addClickListener(e -> validateToken());
-        card.add(validateButton);
+        validateCard.add(validateButton);
 
         validationResultSpan.setVisible(false);
         validationResultSpan.addClassName(LumoUtility.FontWeight.BOLD);
-        card.add(validationResultSpan);
-
-        add(card);
+        validateCard.add(validationResultSpan);
     }
 
     // ========================================================================
-    // Business logic
+    // Build token logic
     // ========================================================================
     private void buildToken() {
-        Set<String> audiences = buildAudienceInput.getAudiences();
+        Set<String> audiences = audienceInputBuilder.getAudiences();
         IEnumToken.Types tokenType = tokenTypeCombo.getValue();
         String subject = subjectField.getValue();
         String claimsJson = claimsArea.getValue();
@@ -354,36 +222,134 @@ public class TokenBuilderView extends VerticalLayout {
             }
         }
 
-        showLoading(true);
+        showGlobalLoading(true);
+        buildButton.setEnabled(false);
         try {
-            TokenRequestDto request = TokenRequestDto.builder()
-                    .subject(subject)
-                    .claims(claims)
-                    .build();
-
+            TokenRequestDto request = TokenRequestDto.builder().subject(subject).claims(claims).build();
             ResponseEntity<TokenResponseDto> response = tokenService.buildToken(audiences, tokenType, request);
-
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                TokenResponseDto tokenResponse = response.getBody();
-                tokenResultSpan.setText(tokenResponse.getToken());
-                expiryResultSpan.setText(formatDate(tokenResponse.getExpiryDate()));
-                resultCard.setVisible(true);
+                displayBuildResult(response.getBody());
                 showSuccess("Token generated successfully");
             } else {
-                showError("Failed to generate token: " + response.getStatusCode());
+                showError("Token generation failed: " + response.getStatusCode());
             }
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? extractErrorMessage(ex.contentUTF8()) : ex.getMessage();
             showError("Build error: " + errorMsg);
+            buildResultPanel.setVisible(false);
         } catch (Exception e) {
-            showError("Error: " + e.getMessage());
+            showError("Unexpected error: " + e.getMessage());
+            buildResultPanel.setVisible(false);
         } finally {
-            showLoading(false);
+            showGlobalLoading(false);
+            buildButton.setEnabled(true);
         }
     }
 
+    private void displayBuildResult(TokenResponseDto tokenResponse) {
+        buildResultPanel.removeAll();
+        buildResultPanel.setVisible(true);
+
+        HorizontalLayout tokenLine = new HorizontalLayout();
+        tokenLine.setAlignItems(FlexComponent.Alignment.CENTER);
+        tokenLine.setSpacing(true);
+        tokenLine.setWidthFull();
+        tokenLine.getStyle().set("flex-wrap", "wrap");
+
+        Span tokenLabel = new Span("🔑 Token:");
+        tokenLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+
+        Span tokenValue = new Span(tokenResponse.getToken());
+        tokenValue.getStyle().set("font-family", "monospace");
+        tokenValue.getStyle().set("font-size", "var(--lumo-font-size-xs)");
+        tokenValue.getStyle().set("word-break", "break-all");
+        tokenValue.getStyle().set("flex", "1");
+
+        Button copyBtn = new Button(new Icon(VaadinIcon.COPY));
+        copyBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
+        copyBtn.setTooltipText("Copy token");
+        copyBtn.addClickListener(e -> copyToClipboard(tokenResponse.getToken()));
+
+        Button decryptBtn = new Button(new Icon(VaadinIcon.EYE));
+        decryptBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
+        decryptBtn.setTooltipText("Decode JWT");
+        decryptBtn.addClickListener(e -> showDecodeDialog(tokenResponse.getToken()));
+
+        tokenLine.add(tokenLabel, tokenValue, copyBtn, decryptBtn);
+        tokenLine.expand(tokenValue);
+
+        HorizontalLayout expiryLine = new HorizontalLayout();
+        expiryLine.setAlignItems(FlexComponent.Alignment.CENTER);
+        expiryLine.setSpacing(true);
+        Span expiryLabel = new Span("📅 Expires:");
+        expiryLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+        Span expiryValue = new Span(formatDate(tokenResponse.getExpiryDate()));
+        expiryValue.getStyle().set("font-family", "monospace");
+        expiryLine.add(expiryLabel, expiryValue);
+
+        buildResultPanel.add(tokenLine, expiryLine);
+    }
+
+    private void showDecodeDialog(String jwtToken) {
+        Dialog dialog = new Dialog();
+        dialog.setHeaderTitle("Decoded JWT");
+        dialog.setWidth("600px");
+        dialog.setResizable(true);
+
+        VerticalLayout content = new VerticalLayout();
+        content.setSpacing(true);
+        content.setPadding(true);
+
+        try {
+            String[] parts = jwtToken.split("\\.");
+            if (parts.length != 3) {
+                content.add(new Span("Invalid JWT format – expected three parts."));
+                dialog.add(content);
+                dialog.open();
+                return;
+            }
+
+            String headerJson = new String(Base64.getUrlDecoder().decode(parts[0]));
+            String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]));
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode headerNode = mapper.readTree(headerJson);
+            JsonNode payloadNode = mapper.readTree(payloadJson);
+
+            String prettyHeader = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(headerNode);
+            String prettyPayload = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(payloadNode);
+
+            content.add(new Span("Header:"));
+            TextArea headerArea = new TextArea();
+            headerArea.setValue(prettyHeader);
+            headerArea.setReadOnly(true);
+            headerArea.setWidthFull();
+            headerArea.setHeight("150px");
+            headerArea.getStyle().set("font-family", "monospace");
+
+            content.add(new Span("Payload:"));
+            TextArea payloadArea = new TextArea();
+            payloadArea.setValue(prettyPayload);
+            payloadArea.setReadOnly(true);
+            payloadArea.setWidthFull();
+            payloadArea.setHeight("200px");
+            payloadArea.getStyle().set("font-family", "monospace");
+
+            content.add(headerArea, payloadArea);
+        } catch (Exception e) {
+            content.add(new Span("Failed to decode JWT: " + e.getMessage()));
+        }
+
+        Button closeBtn = new Button("Close", e -> dialog.close());
+        dialog.add(content, closeBtn);
+        dialog.open();
+    }
+
+    // ========================================================================
+    // Validate token logic
+    // ========================================================================
     private void validateToken() {
-        Set<String> audiences = validateAudienceInput.getAudiences();
+        Set<String> audiences = audienceInputValidator.getAudiences();
         IEnumToken.Types tokenType = validateTokenTypeCombo.getValue();
         String token = validateTokenField.getValue();
         String subject = validateSubjectField.getValue();
@@ -393,7 +359,7 @@ public class TokenBuilderView extends VerticalLayout {
             return;
         }
         if (tokenType == null) {
-            showError("Token type is required for validation");
+            showError("Token type is required");
             return;
         }
         if (!StringUtils.hasText(token)) {
@@ -401,20 +367,21 @@ public class TokenBuilderView extends VerticalLayout {
             return;
         }
         if (!StringUtils.hasText(subject)) {
-            showError("Subject is required for validation");
+            showError("Subject is required");
             return;
         }
 
-        showLoading(true);
+        showGlobalLoading(true);
+        validateButton.setEnabled(false);
         try {
             ResponseEntity<Boolean> response = tokenService.isTokenValid(audiences, tokenType, token, subject);
             validationResultSpan.setVisible(true);
             if (response.getStatusCode().is2xxSuccessful() && Boolean.TRUE.equals(response.getBody())) {
-                validationResultSpan.setText(" ✅ Token is VALID");
+                validationResultSpan.setText("✅ Token is VALID");
                 validationResultSpan.getStyle().set("color", "var(--lumo-success-text-color)");
                 showSuccess("Token is valid");
             } else {
-                validationResultSpan.setText(" ❌ Token is INVALID");
+                validationResultSpan.setText("❌ Token is INVALID");
                 validationResultSpan.getStyle().set("color", "var(--lumo-error-text-color)");
                 showWarning("Token is invalid");
             }
@@ -422,73 +389,75 @@ public class TokenBuilderView extends VerticalLayout {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? extractErrorMessage(ex.contentUTF8()) : ex.getMessage();
             showError("Validation error: " + errorMsg);
             validationResultSpan.setVisible(true);
-            validationResultSpan.setText(" ❌ Validation failed: " + errorMsg);
+            validationResultSpan.setText("❌ Validation failed: " + errorMsg);
             validationResultSpan.getStyle().set("color", "var(--lumo-error-text-color)");
         } catch (Exception e) {
             showError("Error: " + e.getMessage());
         } finally {
-            showLoading(false);
+            showGlobalLoading(false);
+            validateButton.setEnabled(true);
         }
     }
 
-    private void copyTokenToClipboard() {
-        String token = tokenResultSpan.getText();
-        if (!StringUtils.hasText(token)) {
-            showWarning("No token to copy");
-            return;
-        }
+    // ========================================================================
+    // Utility methods
+    // ========================================================================
+    private void showGlobalLoading(boolean show) {
+        globalLoadingBar.setVisible(show);
+        buildButton.setEnabled(!show);
+        validateButton.setEnabled(!show);
+    }
+
+    private void copyToClipboard(String text) {
+        if (!StringUtils.hasText(text)) return;
         UI.getCurrent().getPage().executeJs(
-                "navigator.clipboard.writeText($0).then(() => { " +
-                        "  const notification = document.createElement('div'); " +
-                        "  notification.textContent = 'Token copied to clipboard'; " +
-                        "  notification.style.position = 'fixed'; " +
-                        "  notification.style.bottom = '20px'; " +
-                        "  notification.style.right = '20px'; " +
-                        "  notification.style.backgroundColor = '#4caf50'; " +
-                        "  notification.style.color = 'white'; " +
-                        "  notification.style.padding = '10px 20px'; " +
-                        "  notification.style.borderRadius = '4px'; " +
-                        "  notification.style.zIndex = '1000'; " +
-                        "  document.body.appendChild(notification); " +
-                        "  setTimeout(() => notification.remove(), 2000); " +
-                        "}).catch(() => { " +
-                        "  const notification = document.createElement('div'); " +
-                        "  notification.textContent = 'Failed to copy token'; " +
-                        "  notification.style.position = 'fixed'; " +
-                        "  notification.style.bottom = '20px'; " +
-                        "  notification.style.right = '20px'; " +
-                        "  notification.style.backgroundColor = '#f44336'; " +
-                        "  notification.style.color = 'white'; " +
-                        "  notification.style.padding = '10px 20px'; " +
-                        "  notification.style.borderRadius = '4px'; " +
-                        "  notification.style.zIndex = '1000'; " +
-                        "  document.body.appendChild(notification); " +
-                        "  setTimeout(() => notification.remove(), 3000); " +
+                "navigator.clipboard.writeText($0).then(() => {" +
+                        "  const notification = document.createElement('div');" +
+                        "  notification.textContent = 'Copied to clipboard';" +
+                        "  notification.style.position = 'fixed';" +
+                        "  notification.style.bottom = '20px';" +
+                        "  notification.style.right = '20px';" +
+                        "  notification.style.backgroundColor = '#4caf50';" +
+                        "  notification.style.color = 'white';" +
+                        "  notification.style.padding = '8px 16px';" +
+                        "  notification.style.borderRadius = '4px';" +
+                        "  notification.style.zIndex = '1000';" +
+                        "  document.body.appendChild(notification);" +
+                        "  setTimeout(() => notification.remove(), 2000);" +
+                        "}).catch(() => {" +
+                        "  const notification = document.createElement('div');" +
+                        "  notification.textContent = 'Failed to copy';" +
+                        "  notification.style.backgroundColor = '#f44336';" +
+                        "  notification.style.color = 'white';" +
+                        "  notification.style.padding = '8px 16px';" +
+                        "  notification.style.borderRadius = '4px';" +
+                        "  notification.style.position = 'fixed';" +
+                        "  notification.style.bottom = '20px';" +
+                        "  notification.style.right = '20px';" +
+                        "  notification.style.zIndex = '1000';" +
+                        "  document.body.appendChild(notification);" +
+                        "  setTimeout(() => notification.remove(), 2000);" +
                         "});",
-                token
-        );
+                text);
     }
 
     private String extractErrorMessage(String responseBody) {
         if (responseBody == null) return "Unknown error";
         try {
             Map<String, Object> errorMap = objectMapper.readValue(responseBody, Map.class);
-            if (errorMap.containsKey("message")) {
-                return errorMap.get("message").toString();
-            }
-        } catch (Exception ignored) {
-        }
+            if (errorMap.containsKey("message")) return errorMap.get("message").toString();
+        } catch (Exception ignored) {}
         return responseBody.length() > 200 ? responseBody.substring(0, 200) + "…" : responseBody;
     }
 
-    private void showLoading(boolean show) {
-        loadingBar.setVisible(show);
-        buildButton.setEnabled(!show);
-        validateButton.setEnabled(!show);
+    private String formatDate(Date date) {
+        if (date == null) return "N/A";
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+        return sdf.format(date);
     }
 
     private void showSuccess(String msg) {
-        Notification.show(msg, 4000, Notification.Position.BOTTOM_END)
+        Notification.show(msg, 3000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
@@ -502,28 +471,133 @@ public class TokenBuilderView extends VerticalLayout {
                 .addThemeVariants(NotificationVariant.LUMO_WARNING);
     }
 
-    private String formatDate(Date date) {
-        if (date == null) return "N/A";
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
-        return sdf.format(date);
+    // ========================================================================
+    // Improved AudienceInput: label, input, add button in one row, chips below
+    // ========================================================================
+    private static class AudienceInput extends VerticalLayout {
+        private final TextField inputField;
+        private final HorizontalLayout mainRow;
+        private final HorizontalLayout chipsContainer;
+
+        public AudienceInput() {
+            setPadding(false);
+            setSpacing(false);
+            setWidthFull();
+
+            // Label (Span) on the left, input field, add button
+            Span labelSpan = new Span();
+            labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+            labelSpan.getStyle().set("margin-right", "var(--lumo-space-s)");
+
+            inputField = new TextField();
+            inputField.setPlaceholder("Enter audience (e.g., https://api.example.com)");
+            inputField.setWidthFull();
+
+            Button addButton = new Button(new Icon(VaadinIcon.PLUS));
+            addButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+            addButton.addClickListener(e -> addAudience());
+
+            mainRow = new HorizontalLayout(labelSpan, inputField, addButton);
+            mainRow.setAlignItems(FlexComponent.Alignment.CENTER);
+            mainRow.setSpacing(true);
+            mainRow.setWidthFull();
+            mainRow.expand(inputField);
+
+            chipsContainer = new HorizontalLayout();
+            chipsContainer.setSpacing(true);
+            chipsContainer.setWidthFull();
+            chipsContainer.getStyle().set("flex-wrap", "wrap");
+
+            add(mainRow, chipsContainer);
+        }
+
+        public void setLabelText(String text) {
+            Span labelSpan = (Span) mainRow.getComponentAt(0);
+            labelSpan.setText(text);
+        }
+
+        private void addAudience() {
+            String value = inputField.getValue();
+            if (value == null || value.isBlank()) {
+                Notification.show("Audience cannot be empty", 2000, Notification.Position.MIDDLE)
+                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
+                return;
+            }
+            value = value.trim();
+            if (getAudiences().contains(value)) {
+                Notification.show("Audience already added", 2000, Notification.Position.MIDDLE)
+                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
+                return;
+            }
+            addChip(value);
+            inputField.clear();
+        }
+
+        private void addChip(String audience) {
+            Span chip = new Span(audience);
+            chip.getStyle()
+                    .set("background-color", "var(--lumo-contrast-10pct)")
+                    .set("border-radius", "16px")
+                    .set("padding", "4px 12px")
+                    .set("font-size", "var(--lumo-font-size-xs)")
+                    .set("display", "inline-flex")
+                    .set("align-items", "center")
+                    .set("gap", "8px");
+
+            Button removeButton = new Button(new Icon(VaadinIcon.CLOSE_SMALL));
+            removeButton.addThemeName("tertiary-inline");
+            removeButton.addClassName("chip-remove");
+            removeButton.addClickListener(e -> chipsContainer.remove(chip));
+            chip.add(removeButton);
+            chipsContainer.add(chip);
+        }
+
+        public Set<String> getAudiences() {
+            Set<String> set = new LinkedHashSet<>();
+            for (Component component : chipsContainer.getChildren().toList()) {
+                if (component instanceof Span) {
+                    String text = ((Span) component).getText();
+                    text = text.replace("✕", "").trim();
+                    if (!text.isEmpty()) set.add(text);
+                }
+            }
+            return set;
+        }
+
+        public void clear() {
+            chipsContainer.removeAll();
+        }
     }
 
+    // ========================================================================
+    // Responsive CSS
+    // ========================================================================
     private void attachResponsiveStyles() {
         String css = """
-                .tokenizer-view .build-card,
-                .tokenizer-view .validate-card {
+                .tokenizer-view .compact-card {
+                    flex: 1;
+                    min-width: 280px;
+                    padding: var(--lumo-space-m);
                     transition: all 0.2s ease;
                 }
-                .tokenizer-view .result-card {
-                    transition: all 0.2s ease;
+                .tokenizer-view .compact-card .form-layout {
+                    margin-top: var(--lumo-space-m);
+                }
+                .tokenizer-view .result-panel {
+                    margin-top: var(--lumo-space-m);
+                    padding: var(--lumo-space-s);
+                    background: var(--lumo-contrast-5pct);
+                    border-radius: var(--lumo-border-radius-m);
+                }
+                .tokenizer-view .chip-remove {
+                    width: 16px;
+                    height: 16px;
+                    padding: 0;
                 }
                 @media (max-width: 768px) {
-                    .tokenizer-view .vaadin-form-layout {
-                        flex-direction: column;
-                    }
-                    .tokenizer-view .result-card .token-line {
-                        flex-direction: column;
-                        align-items: flex-start;
+                    .tokenizer-view .compact-card {
+                        min-width: 100%;
+                        margin-bottom: var(--lumo-space-m);
                     }
                 }
                 """;
