@@ -9,17 +9,17 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import eu.isygoit.ui.views.byok.ByokView;
-import eu.isygoit.ui.views.crypto.CryptoOperationsView;
-import eu.isygoit.ui.views.incremental.IncrementalKeyView;
-import eu.isygoit.ui.views.key.KeyManagementView;
-import eu.isygoit.ui.views.keyAlias.AliasesView;
-import eu.isygoit.ui.views.keyGrants.GrantsView;
-import eu.isygoit.ui.views.keyPolicy.PoliciesView;
-import eu.isygoit.ui.views.keyStore.CustomKeyStoresView;
-import eu.isygoit.ui.views.keyTag.TagsView;
-import eu.isygoit.ui.views.tokenizer.TokenBuilderView;
-import eu.isygoit.ui.views.tokenizer.TokenConfigView;
+import eu.isygoit.ui.views.cryptography.byok.ByokView;
+import eu.isygoit.ui.views.cryptography.crypto.CryptoOperationsView;
+import eu.isygoit.ui.views.cryptography.incremental.IncrementalKeyView;
+import eu.isygoit.ui.views.cryptography.key.KeyManagementView;
+import eu.isygoit.ui.views.cryptography.keyAlias.AliasesView;
+import eu.isygoit.ui.views.cryptography.keyGrants.GrantsView;
+import eu.isygoit.ui.views.cryptography.keyPolicy.PoliciesView;
+import eu.isygoit.ui.views.cryptography.keyStore.CustomKeyStoresView;
+import eu.isygoit.ui.views.cryptography.keyTag.TagsView;
+import eu.isygoit.ui.views.tokenizer.builder.TokenBuilderView;
+import eu.isygoit.ui.views.tokenizer.config.TokenConfigView;
 // import eu.isygoit.ui.views.tokenizer.TokenManagementView; // to be implemented
 
 public class MainLayout extends AppLayout {
