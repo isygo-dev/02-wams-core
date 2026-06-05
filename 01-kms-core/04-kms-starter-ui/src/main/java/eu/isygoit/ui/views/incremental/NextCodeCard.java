@@ -2,8 +2,9 @@ package eu.isygoit.ui.views.incremental;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -39,13 +40,11 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
         initCard();
     }
 
+    // ✅ Public getter for the DTO (used by parent view's refreshCard method)
     public NextCodeDto getDto() {
         return dto;
     }
 
-    /**
-     * Updates the card with new DTO data (called after generation or refresh).
-     */
     public void updateDto(NextCodeDto newDto) {
         this.dto = newDto;
         refreshDisplay();
@@ -62,7 +61,6 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
         left.setAlignItems(FlexComponent.Alignment.CENTER);
         left.setSpacing(true);
         left.getStyle().set("flex-wrap", "wrap");
-
         Span titleSpan = buildTitleSpan(dto.getEntity() + " : " + dto.getAttribute(), null);
         left.add(titleSpan);
         return left;
@@ -74,11 +72,8 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
         generateButton.addClickListener(e -> generateNextCode());
 
         Button deleteButton = createDangerIconButton(VaadinIcon.TRASH, "Delete configuration");
-        deleteButton.addClickListener(e -> {
-            new DeleteNextCodeDialog(objectService, dto.getId(),
-                    dto.getEntity(), dto.getAttribute(),
-                    deleteCallback).open();
-        });
+        deleteButton.addClickListener(e -> new DeleteNextCodeDialog(objectService, dto.getId(),
+                dto.getEntity(), dto.getAttribute(), deleteCallback).open());
 
         return List.of(generateButton, deleteButton);
     }
@@ -86,19 +81,21 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
     @Override
     protected void buildBodyRows() {
         // Formatted code preview
-        Div codePreview = new Div();
-        codePreview.addClassName(LumoUtility.Display.FLEX);
-        codePreview.addClassName(LumoUtility.AlignItems.CENTER);
-        codePreview.getStyle()
-                .set("gap", "var(--lumo-space-s)")
-                .set("margin-top", "var(--lumo-space-s)")
-                .set("background-color", "var(--lumo-contrast-5pct)")
-                .set("padding", "var(--lumo-space-s)")
-                .set("border-radius", "var(--lumo-border-radius-m)");
+        HorizontalLayout codePreviewRow = new HorizontalLayout();
+        codePreviewRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        codePreviewRow.setSpacing(true);
+        codePreviewRow.setWidthFull();
+        codePreviewRow.getStyle().set("margin-top", "var(--lumo-space-xs)");
+        codePreviewRow.addClassName("meta-row");
 
-        Span previewLabel = new Span("Next code:");
-        previewLabel.addClassName(LumoUtility.FontSize.SMALL);
-        previewLabel.addClassName(LumoUtility.TextColor.SECONDARY);
+        Icon codeIcon = VaadinIcon.CODE.create();
+        codeIcon.setSize("16px");
+        codeIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
+
+        Span codeLabel = new Span("Next code:");
+        codeLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+        codeLabel.addClassName(LumoUtility.FontSize.XSMALL);
+        codeLabel.getStyle().set("min-width", "100px");
 
         formattedCodeSpan = new Span();
         formattedCodeSpan.addClassName(LumoUtility.FontSize.LARGE);
@@ -107,63 +104,76 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
         updateFormattedCodeDisplay();
 
         Button copyFormattedBtn = MainView.createCopyButton(VaadinIcon.COPY, dto.getCode(), "Copy formatted code");
-        codePreview.add(previewLabel, formattedCodeSpan, copyFormattedBtn);
-        add(codePreview);
+        copyFormattedBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
 
-        // Details grid
-        Div detailsGrid = new Div();
-        detailsGrid.addClassName(LumoUtility.Display.GRID);
-        detailsGrid.getStyle()
-                .set("grid-template-columns", "repeat(2, 1fr)")
-                .set("gap", "var(--lumo-space-s)")
-                .set("margin-top", "var(--lumo-space-s)");
+        codePreviewRow.add(codeIcon, codeLabel, formattedCodeSpan, copyFormattedBtn);
+        codePreviewRow.expand(formattedCodeSpan);
+        add(codePreviewRow);
 
-        addDetailPair(detailsGrid, "Prefix", dto.getPrefix() != null ? dto.getPrefix() : "—");
-        addDetailPair(detailsGrid, "Suffix", dto.getSuffix() != null ? dto.getSuffix() : "—");
-        addDetailPair(detailsGrid, "Value Length", String.valueOf(dto.getValueLength() != null ? dto.getValueLength() : 6));
-        addDetailPair(detailsGrid, "Increment", String.valueOf(dto.getIncrement()));
+        // Details as icon rows
+        add(createIconRow(VaadinIcon.FILE_TEXT, "Entity", dto.getEntity()));
+        add(createIconRow(VaadinIcon.TAG, "Attribute", dto.getAttribute()));
+        add(createIconRow(VaadinIcon.ALIGN_LEFT, "Prefix", dto.getPrefix() != null ? dto.getPrefix() : "—"));
+        add(createIconRow(VaadinIcon.ALIGN_RIGHT, "Suffix", dto.getSuffix() != null ? dto.getSuffix() : "—"));
+        add(createIconRow(VaadinIcon.HASH, "Value length", String.valueOf(dto.getValueLength() != null ? dto.getValueLength() : 6)));
+        add(createIconRow(VaadinIcon.ARROW_UP, "Increment", String.valueOf(dto.getIncrement())));
 
-        // Current numeric value row (span both columns)
+        // Current numeric value row (with copy)
         HorizontalLayout currentRow = new HorizontalLayout();
         currentRow.setAlignItems(FlexComponent.Alignment.CENTER);
         currentRow.setSpacing(true);
-        Span currentLabel = new Span("Current numeric value:");
-        currentLabel.addClassName(LumoUtility.FontSize.SMALL);
-        currentLabel.addClassName(LumoUtility.TextColor.SECONDARY);
+        currentRow.setWidthFull();
+        currentRow.getStyle().set("margin-top", "var(--lumo-space-xs)");
+        currentRow.addClassName("meta-row");
+
+        Icon currentIcon = VaadinIcon.CALC.create();
+        currentIcon.setSize("16px");
+        currentIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
+
+        Span currentLabel = new Span("Current value:");
+        currentLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+        currentLabel.addClassName(LumoUtility.FontSize.XSMALL);
+        currentLabel.getStyle().set("min-width", "100px");
+
         codeValueSpan = new Span();
         codeValueSpan.addClassName(LumoUtility.FontWeight.BOLD);
         codeValueSpan.getStyle().set("font-family", "monospace");
         updateCodeValueDisplay();
-        Button copyCodeBtn = MainView.createCopyButton(VaadinIcon.COPY, String.valueOf(dto.getCodeValue()), "Copy numeric value");
-        currentRow.add(currentLabel, codeValueSpan, copyCodeBtn);
-        currentRow.addClassName("full-width-row");
-        detailsGrid.add(currentRow);
 
-        add(detailsGrid);
+        Button copyCurrentBtn = MainView.createCopyButton(VaadinIcon.COPY, String.valueOf(dto.getCodeValue()), "Copy numeric value");
+        copyCurrentBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
 
-        // Inject CSS for full-width row
-        getUI().ifPresent(ui -> ui.getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = '.full-width-row { grid-column: span 2; }'; document.head.appendChild(style);"
-        ));
+        currentRow.add(currentIcon, currentLabel, codeValueSpan, copyCurrentBtn);
+        currentRow.expand(codeValueSpan);
+        add(currentRow);
     }
 
-    private void addDetailPair(Div container, String label, String value) {
-        Div pair = new Div();
-        pair.addClassName(LumoUtility.Display.FLEX);
-        pair.addClassName(LumoUtility.JustifyContent.BETWEEN);
-        pair.addClassName(LumoUtility.AlignItems.CENTER);
-        pair.getStyle().set("gap", "var(--lumo-space-xs)");
+    private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
+        HorizontalLayout row = new HorizontalLayout();
+        row.setAlignItems(FlexComponent.Alignment.CENTER);
+        row.setSpacing(true);
+        row.setWidthFull();
+        row.getStyle().set("margin-top", "var(--lumo-space-xs)");
+        row.addClassName("meta-row");
+
+        Icon iconComponent = icon.create();
+        iconComponent.setSize("16px");
+        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
 
         Span labelSpan = new Span(label + ":");
-        labelSpan.addClassName(LumoUtility.FontSize.SMALL);
-        labelSpan.addClassName(LumoUtility.TextColor.SECONDARY);
+        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+        labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
+        labelSpan.getStyle().set("min-width", "100px");
 
-        Span valueSpan = new Span(value);
-        valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.addClassName(LumoUtility.FontWeight.MEDIUM);
+        Span valueSpan = new Span(value != null ? value : "—");
+        valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
+        valueSpan.getStyle().set("font-family", "monospace");
+        valueSpan.getStyle().set("word-break", "break-all");
+        valueSpan.getStyle().set("flex", "1");
 
-        pair.add(labelSpan, valueSpan);
-        container.add(pair);
+        row.add(iconComponent, labelSpan, valueSpan);
+        row.expand(valueSpan);
+        return row;
     }
 
     private void generateNextCode() {
@@ -172,11 +182,9 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
             String generated = generateCallback.apply(dto.getEntity(), dto.getAttribute());
             Notification.show("Generated code: " + generated, 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            // Refresh only this card, preserving page order
             parentView.refreshCard(this);
         } catch (Exception e) {
-            Notification.show("Error generating code: " + e.getMessage(), 5000,
-                            Notification.Position.BOTTOM_END)
+            Notification.show("Error generating code: " + e.getMessage(), 5000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             generateButton.setEnabled(true);
@@ -195,5 +203,26 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
     private void refreshDisplay() {
         updateFormattedCodeDisplay();
         updateCodeValueDisplay();
+    }
+
+    @Override
+    protected String buildExtraStyles() {
+        return """
+                .next-code-card .meta-row {
+                    border-bottom: 1px solid var(--lumo-contrast-10pct);
+                    padding-bottom: var(--lumo-space-xs);
+                }
+                .next-code-card .meta-row:last-child {
+                    border-bottom: none;
+                }
+                @media (max-width: 640px) {
+                    .next-code-card .meta-row {
+                        flex-wrap: wrap;
+                    }
+                    .next-code-card .meta-row > :not(:first-child) {
+                        margin-left: 28px;
+                    }
+                }
+                """;
     }
 }

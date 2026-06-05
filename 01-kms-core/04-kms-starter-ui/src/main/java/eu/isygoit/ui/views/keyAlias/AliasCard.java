@@ -2,6 +2,7 @@ package eu.isygoit.ui.views.keyAlias;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -25,8 +26,6 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
     private final Boolean primaryKey;
     private final String createDate;
 
-    // ── Constructor ───────────────────────────────────────────────────────────
-
     AliasCard(AliasesView aliasesView,
               KmsApiService kmsApiService,
               KmsDtos.ListAliasesResponse.AliasEntry entry) {
@@ -39,8 +38,7 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
         initCard();
     }
 
-    // ── Public accessors ──────────────────────────────────────────────────────
-
+    // ── Public accessors (used by parent view) ───────────────────────────────
     public String getAliasName() {
         return aliasName;
     }
@@ -49,8 +47,7 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
         return targetKeyId;
     }
 
-    // ── AbstractKmsCard contract ──────────────────────────────────────────────
-
+    // ── BaseCard implementation ───────────────────────────────────────────────
     @Override
     protected String cardCssClassName() {
         return "alias-card";
@@ -62,18 +59,15 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
         left.setAlignItems(FlexComponent.Alignment.CENTER);
         left.setSpacing(true);
 
-        // Alias name + copy
         Span aliasSpan = buildTitleSpan(aliasName, aliasName);
         left.add(aliasSpan);
         left.add(MainView.createCopyButton(VaadinIcon.COPY, aliasName, "Copy alias name"));
 
-        // PRIMARY badge + warning icon
         if (Boolean.TRUE.equals(primaryKey)) {
             Icon warningIcon = VaadinIcon.WARNING.create();
             warningIcon.setColor("var(--lumo-error-color)");
             warningIcon.setSize("18px");
-            warningIcon.setTooltipText("Primary key alias – this alias points to the default master key. " +
-                    "Deleting or reassigning it may affect key operations.");
+            warningIcon.setTooltipText("Primary key alias – handle with care.");
             left.add(warningIcon);
 
             Span primaryBadge = new Span("PRIMARY");
@@ -81,20 +75,17 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
             primaryBadge.addClassName(LumoUtility.Background.ERROR_10);
             primaryBadge.addClassName(LumoUtility.TextColor.ERROR);
             primaryBadge.addClassName(LumoUtility.FontSize.XSMALL);
-            primaryBadge.addClassName(LumoUtility.Padding.Horizontal.SMALL);
-            primaryBadge.addClassName(LumoUtility.BorderRadius.MEDIUM);
             left.add(primaryBadge);
         }
-
         return left;
     }
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button updateBtn = createIconButton(VaadinIcon.EDIT, "Update alias (rename or reassign)");
+        Button updateBtn = createIconButton(VaadinIcon.EDIT, "Update alias");
         updateBtn.addClickListener(e -> updateAlias());
 
-        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, "Delete this alias");
+        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, "Delete alias");
         deleteBtn.addClickListener(e -> deleteAlias());
 
         return List.of(updateBtn, deleteBtn);
@@ -102,57 +93,79 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
 
     @Override
     protected void buildBodyRows() {
-        // Target key row with copy button
-        HorizontalLayout targetRow = new HorizontalLayout();
-        targetRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        targetRow.setSpacing(true);
-
-        Span targetSpan = new Span("Target key: " + targetKeyId);
-        targetSpan.addClassName(LumoUtility.FontSize.SMALL);
-        targetSpan.addClassName(LumoUtility.TextColor.SECONDARY);
-        targetSpan.getStyle().set("word-break", "break-word");
-        targetSpan.getElement().setAttribute("title", targetKeyId);
-
-        targetRow.add(targetSpan, MainView.createCopyButton(VaadinIcon.COPY, targetKeyId, "Copy target key ID"));
-        add(targetRow);
-
-        // WRN row (optional)
+        add(createIconRowWithCopy(VaadinIcon.KEY, "Target key", targetKeyId, targetKeyId));
         if (aliasWrn != null && !aliasWrn.isBlank()) {
-            HorizontalLayout wrnRow = new HorizontalLayout();
-            wrnRow.setAlignItems(FlexComponent.Alignment.CENTER);
-            wrnRow.setSpacing(true);
-
-            Span wrnSpan = new Span("WRN: " + aliasWrn);
-            wrnSpan.addClassName(LumoUtility.FontSize.SMALL);
-            wrnSpan.addClassName(LumoUtility.TextColor.SECONDARY);
-            wrnSpan.getStyle().set("word-break", "break-word");
-            wrnSpan.getElement().setAttribute("title", aliasWrn);
-
-            wrnRow.add(wrnSpan, MainView.createCopyButton(VaadinIcon.COPY, aliasWrn, "Copy alias WRN"));
-            add(wrnRow);
+            add(createIconRowWithCopy(VaadinIcon.TAG, "WRN", aliasWrn, aliasWrn));
         }
-
-        // Creation date (optional)
-        if (createDate != null && !createDate.isEmpty()) {
-            Span dateSpan = new Span("Created: " + createDate);
-            dateSpan.addClassName(LumoUtility.FontSize.XSMALL);
-            dateSpan.addClassName(LumoUtility.TextColor.TERTIARY);
-            dateSpan.getElement().setAttribute("title", createDate);
-            add(dateSpan);
+        if (createDate != null && !createDate.isBlank()) {
+            add(createIconRow(VaadinIcon.CALENDAR, "Created", createDate));
         }
-
-        // Extra warning line for primary key
         if (Boolean.TRUE.equals(primaryKey)) {
-            Span extraWarning = new Span("⚠️ This is the primary key alias. Handle with care.");
-            extraWarning.addClassName(LumoUtility.FontSize.XSMALL);
-            extraWarning.addClassName(LumoUtility.TextColor.ERROR);
-            extraWarning.getStyle().set("margin-top", "var(--lumo-space-xs)");
-            add(extraWarning);
+            add(createIconRow(VaadinIcon.EXCLAMATION_CIRCLE, "Note", "This is the primary key alias. Handle with care."));
         }
     }
 
-    // ── Actions ───────────────────────────────────────────────────────────────
+    // ── Helper row builders (identical to previous version) ──────────────────
+    private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
+        HorizontalLayout row = new HorizontalLayout();
+        row.setAlignItems(FlexComponent.Alignment.CENTER);
+        row.setSpacing(true);
+        row.setWidthFull();
+        row.getStyle().set("margin-top", "var(--lumo-space-xs)");
+        row.addClassName("meta-row");
 
+        Icon iconComponent = icon.create();
+        iconComponent.setSize("16px");
+        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
+
+        Span labelSpan = new Span(label + ":");
+        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+        labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
+        labelSpan.getStyle().set("min-width", "100px");
+
+        Span valueSpan = new Span(value != null ? value : "—");
+        valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
+        valueSpan.getStyle().set("font-family", "monospace");
+        valueSpan.getStyle().set("word-break", "break-all");
+        valueSpan.getStyle().set("flex", "1");
+
+        row.add(iconComponent, labelSpan, valueSpan);
+        row.expand(valueSpan);
+        return row;
+    }
+
+    private HorizontalLayout createIconRowWithCopy(VaadinIcon icon, String label, String value, String copyValue) {
+        HorizontalLayout row = new HorizontalLayout();
+        row.setAlignItems(FlexComponent.Alignment.CENTER);
+        row.setSpacing(true);
+        row.setWidthFull();
+        row.getStyle().set("margin-top", "var(--lumo-space-xs)");
+        row.addClassName("meta-row");
+
+        Icon iconComponent = icon.create();
+        iconComponent.setSize("16px");
+        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
+
+        Span labelSpan = new Span(label + ":");
+        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+        labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
+        labelSpan.getStyle().set("min-width", "100px");
+
+        Span valueSpan = new Span(value != null ? value : "—");
+        valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
+        valueSpan.getStyle().set("font-family", "monospace");
+        valueSpan.getStyle().set("word-break", "break-all");
+        valueSpan.getStyle().set("flex", "1");
+
+        Button copyBtn = MainView.createCopyButton(VaadinIcon.COPY, copyValue, "Copy");
+        copyBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
+
+        row.add(iconComponent, labelSpan, valueSpan, copyBtn);
+        row.expand(valueSpan);
+        return row;
+    }
+
+    // ── Actions ───────────────────────────────────────────────────────────────
     private void deleteAlias() {
         new DeleteAliasDialog(parentView, objectService, parentView::resetPaginationAndLoad,
                 aliasName, primaryKey).open();
@@ -161,5 +174,27 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
     private void updateAlias() {
         new UpdateAliasDialog(parentView, objectService, parentView::resetPaginationAndLoad,
                 aliasName, targetKeyId).open();
+    }
+
+    // ── Extra CSS (responsive) ────────────────────────────────────────────────
+    @Override
+    protected String buildExtraStyles() {
+        return """
+                .alias-card .meta-row {
+                    border-bottom: 1px solid var(--lumo-contrast-10pct);
+                    padding-bottom: var(--lumo-space-xs);
+                }
+                .alias-card .meta-row:last-child {
+                    border-bottom: none;
+                }
+                @media (max-width: 640px) {
+                    .alias-card .meta-row {
+                        flex-wrap: wrap;
+                    }
+                    .alias-card .meta-row > :not(:first-child) {
+                        margin-left: 28px;
+                    }
+                }
+                """;
     }
 }

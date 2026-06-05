@@ -3,10 +3,11 @@ package eu.isygoit.ui.views.key;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -38,41 +39,33 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
     private String aliasOrId;
     private String statusText;
 
-    // Mutable UI refs for in-place refresh
-    private Span titleSpan;
+    // Container for dynamic body components (both rows and warning)
+    private final List<Component> bodyComponents = new ArrayList<>();
     private Span statusChip;
     private Span versionSpan;
-    private Span descSpan;
-    private HorizontalLayout metaRow1;
-    private HorizontalLayout metaRow2;
     private Button rotationBtn;
     private Button versionsBtn;
     private Button moreBtn;
+    private Span deletionWarningSpan;
+    private ContextMenu currentContextMenu;
+    // UI components
+    private Span titleSpan;
     private int versionCount = 0;
 
-    // Deletion warning banner (appears on card when key is pending deletion)
-    private Span deletionWarningSpan;
-
-    // Context menu reference to avoid duplicate attachments
-    private ContextMenu currentContextMenu;
-
-    // ── Constructor ───────────────────────────────────────────────────────────
-
-    KeyCard(KeyManagementView keyManagementView,
-            KmsApiService kmsApiService,
-            ObjectMapper objectMapper,
-            String keyId,
-            DescribeKeyResponse.KeyMetadata metadata) {
-        super(keyManagementView, kmsApiService);
+    public KeyCard(KeyManagementView parentView,
+                   KmsApiService kmsApiService,
+                   ObjectMapper objectMapper,
+                   String keyId,
+                   DescribeKeyResponse.KeyMetadata metadata) {
+        super(parentView, kmsApiService);
         this.objectMapper = objectMapper;
         this.keyId = keyId;
         this.metadata = metadata;
         updateDerivedFields();
-        initCard();          // assembles shell + header + body via template methods
+        initCard();
     }
 
-    // ── Public accessors ──────────────────────────────────────────────────────
-
+    // Public accessors
     public String getKeyId() {
         return keyId;
     }
@@ -85,8 +78,45 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         return metadata != null ? metadata.getKeyStatus() : null;
     }
 
-    // ── AbstractKmsCard contract ──────────────────────────────────────────────
+    // Refresh method
+    public void refresh() {
+        getUI().ifPresent(ui -> ui.access(() -> {
+            try {
+                ResponseEntity<DescribeKeyResponse> response = objectService.describeKey(keyId);
+                if (response.getBody() != null && response.getBody().getKeyMetadata() != null) {
+                    this.metadata = response.getBody().getKeyMetadata();
+                    updateDerivedFields();
 
+                    // Update header
+                    titleSpan.setText(aliasOrId);
+                    titleSpan.getElement().setAttribute("title", aliasOrId);
+                    ChipColor color = ChipColor.fromStatus(statusText);
+                    statusChip.setText(statusText);
+                    statusChip.getStyle()
+                            .set("background-color", color.background())
+                            .set("color", color.foreground());
+                    statusChip.getElement().setAttribute("title", statusText);
+
+                    updateVersionDisplay();
+                    updateRotationButton();
+                    updateDeletionWarning();
+
+                    // Rebuild body
+                    rebuildBody();
+
+                    // Refresh context menu
+                    attachContextMenu(moreBtn);
+
+                    // Reload version count
+                    loadVersionCount();
+                }
+            } catch (Exception e) {
+                log.error("Failed to refresh key card for {}", keyId, e);
+            }
+        }));
+    }
+
+    // BaseCard implementation
     @Override
     protected String cardCssClassName() {
         return "key-card";
@@ -100,7 +130,6 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         left.getStyle().set("flex-wrap", "wrap");
 
         titleSpan = buildTitleSpan(aliasOrId, aliasOrId);
-
         statusChip = buildStatusChip(statusText, statusText);
 
         versionSpan = new Span();
@@ -108,6 +137,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         String currentVer = metadata != null && metadata.getCurrentVersion() != null
                 ? metadata.getCurrentVersion() : "N/A";
         Button copyVersionBtn = MainView.createCopyButton(VaadinIcon.COPY, currentVer, "Copy current key version");
+        copyVersionBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
 
         HorizontalLayout versionLayout = new HorizontalLayout(versionSpan, copyVersionBtn);
         versionLayout.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -119,7 +149,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit alias, description, tags, and rotation settings");
+        Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit alias, description, tags, rotation");
         editBtn.addClickListener(e -> updateKey());
 
         Button describeBtn = createIconButton(VaadinIcon.INFO_CIRCLE, "View full key details");
@@ -130,11 +160,9 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         updateRotationButton();
 
         versionsBtn = createIconButton(VaadinIcon.CUBE, "View all key versions");
-        versionsBtn.setText("Ver (...)"); // will be updated later
         versionsBtn.addClickListener(e -> showVersionsDialog());
 
-        moreBtn = createIconButton(VaadinIcon.ELLIPSIS_DOTS_V,
-                "More actions (enable/disable, schedule deletion, rotate immediately, etc.)");
+        moreBtn = createIconButton(VaadinIcon.ELLIPSIS_DOTS_V, "More actions");
         attachContextMenu(moreBtn);
 
         return List.of(editBtn, describeBtn, rotationBtn, versionsBtn, moreBtn);
@@ -142,205 +170,89 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
 
     @Override
     protected void buildBodyRows() {
-        // Description
-        descSpan = new Span();
-        updateDescription();
-        add(descSpan);
+        // Clear previous components
+        bodyComponents.clear();
 
-        // Meta row 1: spec, usage, created, region
-        metaRow1 = new HorizontalLayout();
-        metaRow1.setSpacing(true);
-        metaRow1.addClassName(LumoUtility.FontSize.XSMALL);
-        metaRow1.addClassName(LumoUtility.TextColor.TERTIARY);
-        metaRow1.getStyle().set("margin-top", "var(--lumo-space-s)").set("flex-wrap", "wrap");
-        updateMetaRow1();
-        add(metaRow1);
+        // Description row (using FILE_TEXT icon)
+        HorizontalLayout descRow = createIconRow(VaadinIcon.FILE_TEXT, "Description",
+                metadata != null && metadata.getDescription() != null ? metadata.getDescription() : "No description");
+        bodyComponents.add(descRow);
 
-        // Meta row 2: ID (with copy), origin, rotation
-        metaRow2 = new HorizontalLayout();
-        metaRow2.setSpacing(true);
-        metaRow2.addClassName(LumoUtility.FontSize.XSMALL);
-        metaRow2.addClassName(LumoUtility.TextColor.TERTIARY);
-        metaRow2.getStyle().set("margin-top", "var(--lumo-space-xs)").set("flex-wrap", "wrap");
-        updateMetaRow2();
-        add(metaRow2);
+        // Key spec & usage
+        String keySpec = metadata != null && metadata.getKeySpec() != null ? metadata.getKeySpec().name() : "N/A";
+        String keyUsage = metadata != null && metadata.getKeyUsage() != null ? metadata.getKeyUsage().name() : "N/A";
+        bodyComponents.add(createIconRow(VaadinIcon.COG, "Key spec", keySpec));
+        bodyComponents.add(createIconRow(VaadinIcon.SHIELD, "Key usage", keyUsage));
 
-        // Deletion warning banner (initially hidden, shown if pending deletion)
+        // Created & region
+        String created = metadata != null && metadata.getCreateDate() != null
+                ? DateHelper.formatToHumanReadable(metadata.getCreateDate()) : "Unknown";
+        String region = metadata != null && Boolean.TRUE.equals(metadata.getMultiRegion())
+                ? "Multi-region" : "Single-region";
+        bodyComponents.add(createIconRow(VaadinIcon.CALENDAR, "Created", created));
+        bodyComponents.add(createIconRow(VaadinIcon.GLOBE, "Region", region));
+
+        // Key ID with copy
+        bodyComponents.add(createIconRowWithCopy(VaadinIcon.KEY, "Key ID", keyId, keyId));
+
+        // Origin & rotation
+        String origin = metadata != null && metadata.getOrigin() != null ? metadata.getOrigin().name() : "N/A";
+        String rotation = metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled())
+                ? "ON (" + metadata.getRotationPeriodInDays() + " days)" : "OFF";
+        bodyComponents.add(createIconRow(VaadinIcon.CLOUD, "Origin", origin));
+        bodyComponents.add(createIconRow(VaadinIcon.REFRESH, "Rotation", rotation));
+
+        // Deletion warning (Span)
         createDeletionWarningSpan();
         updateDeletionWarning();
-        add(deletionWarningSpan);
+        bodyComponents.add(deletionWarningSpan);
+
+        // Add all components to the card
+        bodyComponents.forEach(this::add);
     }
 
-    @Override
-    protected void onCardAttach(AttachEvent event) {
-        UI.getCurrent().getPage().addBrowserWindowResizeListener(e -> adjustForScreenWidth(e.getWidth()));
-        UI.getCurrent().getPage().executeJs("return window.innerWidth")
-                .then(Integer.class, this::adjustForScreenWidth);
-        loadVersionCount();
+    // Helper: standard icon row
+    private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
+        HorizontalLayout row = new HorizontalLayout();
+        row.setAlignItems(FlexComponent.Alignment.CENTER);
+        row.setSpacing(true);
+        row.setWidthFull();
+        row.getStyle().set("margin-top", "var(--lumo-space-xs)");
+        row.addClassName("meta-row");
+
+        Icon iconComponent = icon.create();
+        iconComponent.setSize("16px");
+        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
+
+        Span labelSpan = new Span(label + ":");
+        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+        labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
+        labelSpan.getStyle().set("min-width", "100px");
+
+        Span valueSpan = new Span(value);
+        valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
+        valueSpan.getStyle().set("font-family", "monospace");
+        valueSpan.getStyle().set("word-break", "break-all");
+        valueSpan.getStyle().set("flex", "1");
+
+        row.add(iconComponent, labelSpan, valueSpan);
+        row.expand(valueSpan);
+        return row;
     }
 
-    // ── Refresh / in-place update ─────────────────────────────────────────────
-
-    public void refresh() {
-        getUI().ifPresent(ui -> ui.access(() -> {
-            try {
-                ResponseEntity<DescribeKeyResponse> response = objectService.describeKey(keyId);
-                if (response.getBody() != null && response.getBody().getKeyMetadata() != null) {
-                    this.metadata = response.getBody().getKeyMetadata();
-                    updateDerivedFields();
-                    titleSpan.setText(aliasOrId);
-                    titleSpan.getElement().setAttribute("title", aliasOrId);
-                    // Re-apply chip colour
-                    ChipColor color = ChipColor.fromStatus(statusText);
-                    statusChip.setText(statusText);
-                    statusChip.getStyle()
-                            .set("background-color", color.background())
-                            .set("color", color.foreground());
-                    statusChip.getElement().setAttribute("title", statusText);
-                    updateVersionDisplay();
-                    updateDescription();
-                    updateMetaRow1();
-                    updateMetaRow2();
-                    updateRotationButton();
-                    updateDeletionWarning();   // show/hide warning based on pending status
-                    loadVersionCount();
-                    // Refresh the context menu to reflect updated key state
-                    attachContextMenu(moreBtn);
-                }
-            } catch (Exception e) {
-                log.error("Failed to refresh key card for {}", keyId, e);
-            }
-        }));
+    private HorizontalLayout createIconRowWithCopy(VaadinIcon icon, String label, String value, String copyValue) {
+        HorizontalLayout row = createIconRow(icon, label, value);
+        Button copyBtn = MainView.createCopyButton(VaadinIcon.COPY, copyValue, "Copy");
+        copyBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
+        row.add(copyBtn);
+        return row;
     }
 
-    // ── Deletion warning banner (on card) ─────────────────────────────────────
-
-    private void createDeletionWarningSpan() {
-        deletionWarningSpan = new Span();
-        deletionWarningSpan.addClassName(LumoUtility.Background.ERROR_10);
-        deletionWarningSpan.addClassName(LumoUtility.TextColor.ERROR);
-        deletionWarningSpan.addClassName(LumoUtility.Padding.SMALL);
-        deletionWarningSpan.addClassName(LumoUtility.BorderRadius.MEDIUM);
-        deletionWarningSpan.getStyle()
-                .set("display", "flex")
-                .set("align-items", "center")
-                .set("gap", "var(--lumo-space-s)")
-                .set("margin-top", "var(--lumo-space-m)");
-        deletionWarningSpan.setVisible(false);
-    }
-
-    private void updateDeletionWarning() {
-        if (deletionWarningSpan == null) return;
-
-        boolean isPending = "PENDING_DELETION".equalsIgnoreCase(statusText);
-        if (isPending) {
-            String warningText = buildDeletionWarning();
-            deletionWarningSpan.removeAll();
-            deletionWarningSpan.add(VaadinIcon.EXCLAMATION_CIRCLE.create());
-            deletionWarningSpan.add(new Span(warningText));
-            deletionWarningSpan.setVisible(true);
-        } else {
-            deletionWarningSpan.setVisible(false);
-        }
-    }
-
-    /**
-     * Builds a warning message for pending deletion.
-     * If deletionDate is available, shows remaining days; otherwise falls back to pendingDeletionWindowDays.
-     */
-    private String buildDeletionWarning() {
-        if (metadata == null) return "Key is scheduled for deletion";
-
-        LocalDateTime deletionDate = metadata.getDeletionDate();
-        if (deletionDate != null) {
-            long daysRemaining = ChronoUnit.DAYS.between(LocalDateTime.now(), deletionDate);
-            if (daysRemaining > 0) {
-                return "Key will be deleted in " + daysRemaining + " days";
-            } else if (daysRemaining == 0) {
-                return "Key will be deleted today";
-            } else {
-                return "Key deletion is overdue";
-            }
-        }
-
-        return "Key is scheduled for deletion";
-    }
-
-    // ── Context menu helper (refreshes on every call) ────────────────────────
-
-    private void attachContextMenu(Button button) {
-        // Remove existing context menu if any
-        if (currentContextMenu != null) {
-            currentContextMenu.setTarget(null);
-            currentContextMenu.removeAll();
-        }
-        // Create new context menu
-        ContextMenu contextMenu = new ContextMenu();
-        contextMenu.setTarget(button);
-        contextMenu.setOpenOnClick(true);
-        populateContextMenu(contextMenu);
-        currentContextMenu = contextMenu;
-    }
-
-    private void populateContextMenu(ContextMenu contextMenu) {
-        contextMenu.getItems().clear();
-
-        // ---------- Enable / Disable key ----------
-        boolean isEnabled = metadata != null && metadata.getKeyStatus() == IEnumKeyStatus.Types.ENABLED;
-        String toggleLabel = isEnabled ? "Disable key" : "Enable key";
-        VaadinIcon toggleIcon = isEnabled ? VaadinIcon.UNLOCK : VaadinIcon.LOCK;
-        HorizontalLayout toggleItem = new HorizontalLayout(toggleIcon.create(), new Span(toggleLabel));
-        toggleItem.setSpacing(true);
-        toggleItem.setAlignItems(FlexComponent.Alignment.CENTER);
-        contextMenu.addItem(toggleItem, e -> toggleKeyStatus());
-
-        // ---------- Schedule deletion ----------
-        HorizontalLayout scheduleItem = new HorizontalLayout(VaadinIcon.CLOCK.create(), new Span("Schedule deletion"));
-        scheduleItem.setSpacing(true);
-        scheduleItem.setAlignItems(FlexComponent.Alignment.CENTER);
-        contextMenu.addItem(scheduleItem, e -> scheduleDeletion());
-
-        // ---------- Rotate immediately (only if rotation enabled) ----------
-        if (metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled())) {
-            HorizontalLayout rotateItem = new HorizontalLayout(VaadinIcon.REFRESH.create(), new Span("Rotate immediately"));
-            rotateItem.setSpacing(true);
-            rotateItem.setAlignItems(FlexComponent.Alignment.CENTER);
-            contextMenu.addItem(rotateItem, e ->
-                    new RotateKeyConfirmDialog(parentView, objectService, keyId, this::refresh).open());
-        }
-
-        // ---------- Cancellation / permanent deletion (only if pending) ----------
-        boolean isPending = "PENDING_DELETION".equalsIgnoreCase(statusText);
-        if (isPending) {
-            // Cancel deletion
-            HorizontalLayout cancelItem = new HorizontalLayout(VaadinIcon.REFRESH.create(), new Span("Cancel deletion"));
-            cancelItem.setSpacing(true);
-            cancelItem.setAlignItems(FlexComponent.Alignment.CENTER);
-            contextMenu.addItem(cancelItem, e -> cancelDeletion());
-
-            // Permanently delete
-            HorizontalLayout deleteItem = new HorizontalLayout(VaadinIcon.TRASH.create(), new Span("Permanently delete"));
-            deleteItem.setSpacing(true);
-            deleteItem.setAlignItems(FlexComponent.Alignment.CENTER);
-            deleteItem.getStyle().set("color", "var(--lumo-error-color)");
-            contextMenu.addItem(deleteItem, e -> confirmPermanentDelete());
-        } else {
-            // Non‑interactive item (disabled look)
-            HorizontalLayout disabledItem = new HorizontalLayout(VaadinIcon.BAN.create(), new Span("Permanently delete (not pending)"));
-            disabledItem.setSpacing(true);
-            disabledItem.setAlignItems(FlexComponent.Alignment.CENTER);
-            disabledItem.getStyle().set("opacity", "0.5");
-            contextMenu.addItem(disabledItem, e -> {
-            });
-        }
-    }
-
-    // ── Derived-field helpers ─────────────────────────────────────────────────
-
+    // Internal update helpers
     private void updateDerivedFields() {
-        this.aliasOrId = (metadata != null && metadata.getKeyAlias() != null && !metadata.getKeyAlias().isEmpty())
+        aliasOrId = (metadata != null && metadata.getKeyAlias() != null && !metadata.getKeyAlias().isEmpty())
                 ? metadata.getKeyAlias() : keyId;
-        this.statusText = (metadata != null && metadata.getKeyStatus() != null)
+        statusText = (metadata != null && metadata.getKeyStatus() != null)
                 ? metadata.getKeyStatus().name() : "UNKNOWN";
     }
 
@@ -355,69 +267,62 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         versionSpan.getElement().setAttribute("title", "Current key version: " + full);
     }
 
-    private void updateDescription() {
-        String text = (metadata != null && metadata.getDescription() != null && !metadata.getDescription().isEmpty())
-                ? metadata.getDescription() : "No description provided";
-        descSpan.setText(text);
-        descSpan.addClassName(LumoUtility.FontSize.SMALL);
-        descSpan.addClassName(LumoUtility.TextColor.SECONDARY);
-        descSpan.getStyle().set("margin-top", "var(--lumo-space-xs)")
-                .set("display", "block").set("word-break", "break-word");
-        descSpan.getElement().setAttribute("title", text);
-    }
-
-    private void updateMetaRow1() {
-        metaRow1.removeAll();
-        String keySpec = metadata != null && metadata.getKeySpec() != null ? metadata.getKeySpec().name() : "N/A";
-        String keyUsage = metadata != null && metadata.getKeyUsage() != null ? metadata.getKeyUsage().name() : "N/A";
-        String created = metadata != null && metadata.getCreateDate() != null
-                ? DateHelper.formatToHumanReadable(metadata.getCreateDate().toLocalDate()) : "Unknown";
-        String region = metadata != null && Boolean.TRUE.equals(metadata.getMultiRegion())
-                ? "🌍 Multi-region" : "📍 Single-region";
-
-        Span specSpan = new Span("Spec: " + keySpec);
-        Span usageSpan = new Span("Usage: " + keyUsage);
-        Span createdSpan = new Span("Created: " + created);
-        Span regionSpan = new Span(region);
-
-        specSpan.getElement().setAttribute("title", keySpec);
-        usageSpan.getElement().setAttribute("title", keyUsage);
-        createdSpan.getElement().setAttribute("title", created);
-        regionSpan.getElement().setAttribute("title", region);
-
-        metaRow1.add(specSpan, new Span("•"), usageSpan, new Span("•"), createdSpan, new Span("•"), regionSpan);
-    }
-
-    private void updateMetaRow2() {
-        metaRow2.removeAll();
-        if (keyId != null) {
-            HorizontalLayout keyIdLayout = new HorizontalLayout();
-            keyIdLayout.setSpacing(false);
-            keyIdLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-            Span keyIdSpan = new Span("ID: " + keyId);
-            keyIdSpan.getStyle().set("margin-right", "4px");
-            keyIdSpan.getElement().setAttribute("title", keyId);
-            keyIdLayout.add(keyIdSpan, MainView.createCopyButton(VaadinIcon.COPY, keyId, "Copy full key ID"));
-            metaRow2.add(keyIdLayout, new Span("•"));
-        }
-        String origin = metadata != null && metadata.getOrigin() != null ? metadata.getOrigin().name() : "N/A";
-        String rotation = metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled())
-                ? "✅ Rotation ON (" + metadata.getRotationPeriodInDays() + " Days)" : "❌ Rotation OFF";
-
-        Span originSpan = new Span("Origin: " + origin);
-        Span rotationSpan = new Span(rotation);
-        originSpan.getElement().setAttribute("title", origin);
-        rotationSpan.getElement().setAttribute("title", rotation);
-
-        metaRow2.add(originSpan, new Span("•"), rotationSpan);
-    }
-
     private void updateRotationButton() {
         boolean on = metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled());
         rotationBtn.setTooltipText(on ? "Disable automatic rotation" : "Enable automatic rotation");
         rotationBtn.getStyle().set("color", on
                 ? "var(--lumo-success-color)"
                 : "var(--lumo-tertiary-text-color)");
+    }
+
+    private void createDeletionWarningSpan() {
+        deletionWarningSpan = new Span();
+        deletionWarningSpan.addClassName(LumoUtility.Background.ERROR_10);
+        deletionWarningSpan.addClassName(LumoUtility.TextColor.ERROR);
+        deletionWarningSpan.addClassName(LumoUtility.Padding.SMALL);
+        deletionWarningSpan.addClassName(LumoUtility.BorderRadius.MEDIUM);
+        deletionWarningSpan.getStyle()
+                .set("display", "flex")
+                .set("align-items", "center")
+                .set("gap", "var(--lumo-space-s)")
+                .set("margin-top", "var(--lumo-space-xs)");
+        deletionWarningSpan.setVisible(false);
+    }
+
+    private void updateDeletionWarning() {
+        if (deletionWarningSpan == null) return;
+        boolean isPending = "PENDING_DELETION".equalsIgnoreCase(statusText);
+        if (isPending) {
+            String warningText = buildDeletionWarning();
+            deletionWarningSpan.removeAll();
+            deletionWarningSpan.add(VaadinIcon.EXCLAMATION_CIRCLE.create());
+            deletionWarningSpan.add(new Span(warningText));
+            deletionWarningSpan.setVisible(true);
+        } else {
+            deletionWarningSpan.setVisible(false);
+        }
+    }
+
+    private String buildDeletionWarning() {
+        if (metadata == null) return "Key is scheduled for deletion";
+        LocalDateTime deletionDate = metadata.getDeletionDate();
+        if (deletionDate != null) {
+            long daysRemaining = ChronoUnit.DAYS.between(LocalDateTime.now(), deletionDate);
+            if (daysRemaining > 0) return "Key will be deleted in " + daysRemaining + " days";
+            if (daysRemaining == 0) return "Key will be deleted today";
+            return "Key deletion is overdue";
+        }
+        return "Key is scheduled for deletion";
+    }
+
+    private void rebuildBody() {
+        // Remove all current body components
+        bodyComponents.forEach(comp -> {
+            if (comp.getParent().isPresent()) remove(comp);
+        });
+        bodyComponents.clear();
+        // Rebuild
+        buildBodyRows();
     }
 
     private void loadVersionCount() {
@@ -434,37 +339,66 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         }));
     }
 
-    // ── Responsive layout ─────────────────────────────────────────────────────
+    // Context menu (unchanged)
+    private void attachContextMenu(Button button) {
+        if (currentContextMenu != null) {
+            currentContextMenu.setTarget(null);
+            currentContextMenu.removeAll();
+        }
+        ContextMenu contextMenu = new ContextMenu();
+        contextMenu.setTarget(button);
+        contextMenu.setOpenOnClick(true);
+        populateContextMenu(contextMenu);
+        currentContextMenu = contextMenu;
+    }
 
-    private void adjustForScreenWidth(int width) {
-        boolean mobile = width < 768;
-        if (mobile) {
-            headerRow.getStyle().set("flex-direction", "column");
-            headerRow.setAlignItems(FlexComponent.Alignment.START);
-            headerRow.setSpacing(false);
-            buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.START);
-            buttonBar.getStyle().set("margin-top", "var(--lumo-space-s)");
-            metaRow1.setSpacing(false);
-            metaRow2.setSpacing(false);
-            metaRow1.addClassName(LumoUtility.FontSize.XXSMALL);
-            metaRow2.addClassName(LumoUtility.FontSize.XXSMALL);
-            metaRow1.getStyle().set("margin-bottom", "4px");
+    private void populateContextMenu(ContextMenu contextMenu) {
+        contextMenu.getItems().clear();
+
+        boolean isEnabled = metadata != null && metadata.getKeyStatus() == IEnumKeyStatus.Types.ENABLED;
+        String toggleLabel = isEnabled ? "Disable key" : "Enable key";
+        VaadinIcon toggleIcon = isEnabled ? VaadinIcon.UNLOCK : VaadinIcon.LOCK;
+        HorizontalLayout toggleItem = new HorizontalLayout(toggleIcon.create(), new Span(toggleLabel));
+        toggleItem.setSpacing(true);
+        toggleItem.setAlignItems(FlexComponent.Alignment.CENTER);
+        contextMenu.addItem(toggleItem, e -> toggleKeyStatus());
+
+        HorizontalLayout scheduleItem = new HorizontalLayout(VaadinIcon.CLOCK.create(), new Span("Schedule deletion"));
+        scheduleItem.setSpacing(true);
+        scheduleItem.setAlignItems(FlexComponent.Alignment.CENTER);
+        contextMenu.addItem(scheduleItem, e -> scheduleDeletion());
+
+        if (metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled())) {
+            HorizontalLayout rotateItem = new HorizontalLayout(VaadinIcon.REFRESH.create(), new Span("Rotate immediately"));
+            rotateItem.setSpacing(true);
+            rotateItem.setAlignItems(FlexComponent.Alignment.CENTER);
+            contextMenu.addItem(rotateItem, e ->
+                    new RotateKeyConfirmDialog(parentView, objectService, keyId, this::refresh).open());
+        }
+
+        boolean isPending = "PENDING_DELETION".equalsIgnoreCase(statusText);
+        if (isPending) {
+            HorizontalLayout cancelItem = new HorizontalLayout(VaadinIcon.REFRESH.create(), new Span("Cancel deletion"));
+            cancelItem.setSpacing(true);
+            cancelItem.setAlignItems(FlexComponent.Alignment.CENTER);
+            contextMenu.addItem(cancelItem, e -> cancelDeletion());
+
+            HorizontalLayout deleteItem = new HorizontalLayout(VaadinIcon.TRASH.create(), new Span("Permanently delete"));
+            deleteItem.setSpacing(true);
+            deleteItem.setAlignItems(FlexComponent.Alignment.CENTER);
+            deleteItem.getStyle().set("color", "var(--lumo-error-color)");
+            contextMenu.addItem(deleteItem, e -> confirmPermanentDelete());
         } else {
-            headerRow.getStyle().remove("flex-direction");
-            headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
-            headerRow.setSpacing(true);
-            buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-            buttonBar.getStyle().remove("margin-top");
-            metaRow1.setSpacing(true);
-            metaRow2.setSpacing(true);
-            metaRow1.removeClassName(LumoUtility.FontSize.XXSMALL);
-            metaRow2.removeClassName(LumoUtility.FontSize.XXSMALL);
-            metaRow1.getStyle().remove("margin-bottom");
+            HorizontalLayout disabledItem = new HorizontalLayout(VaadinIcon.BAN.create(), new Span("Permanently delete (not pending)"));
+            disabledItem.setSpacing(true);
+            disabledItem.setAlignItems(FlexComponent.Alignment.CENTER);
+            disabledItem.getStyle().set("opacity", "0.5");
+            contextMenu.addItem(disabledItem, e -> {
+            });
         }
     }
 
-    // ── Actions ───────────────────────────────────────────────────────────────
-
+    // Actions (all call refresh on completion)
     private void updateKey() {
         List<ListResourceTagsResponse.Tag> tags = fetchKeyTags();
         boolean rotationEnabled = metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled());
@@ -495,7 +429,8 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
     }
 
     private void scheduleDeletion() {
-        new ScheduleKeyDeletionDialog(parentView, objectService, keyId, metadata.getPendingDeletionWindowDays(), this::refresh).open();
+        new ScheduleKeyDeletionDialog(parentView, objectService, keyId,
+                metadata != null ? metadata.getPendingDeletionWindowDays() : null, this::refresh).open();
     }
 
     private void cancelDeletion() {
@@ -513,10 +448,35 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
 
     private List<ListResourceTagsResponse.Tag> fetchKeyTags() {
         try {
-            ResponseEntity<eu.isygoit.dto.KmsDtos.ListResourceTagsResponse> resp =
-                    objectService.listResourceTags(keyId, 100, null);
+            ResponseEntity<ListResourceTagsResponse> resp = objectService.listResourceTags(keyId, 100, null);
             if (resp.getBody() != null && resp.getBody().getTags() != null) return resp.getBody().getTags();
         } catch (Exception e) { /* ignore */ }
         return new ArrayList<>();
+    }
+
+    @Override
+    protected void onCardAttach(AttachEvent event) {
+        loadVersionCount();
+    }
+
+    @Override
+    protected String buildExtraStyles() {
+        return """
+                .key-card .meta-row {
+                    border-bottom: 1px solid var(--lumo-contrast-10pct);
+                    padding-bottom: var(--lumo-space-xs);
+                }
+                .key-card .meta-row:last-child {
+                    border-bottom: none;
+                }
+                @media (max-width: 640px) {
+                    .key-card .meta-row {
+                        flex-wrap: wrap;
+                    }
+                    .key-card .meta-row > :not(:first-child) {
+                        margin-left: 28px;
+                    }
+                }
+                """;
     }
 }

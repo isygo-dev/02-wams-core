@@ -51,7 +51,6 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
         return "token-config-card";
     }
 
-    // ========== Title (left side of header) ==========
     @Override
     protected Component buildTitle() {
         HorizontalLayout left = new HorizontalLayout();
@@ -61,7 +60,6 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
 
         titleSpan = buildTitleSpan(dto.getCode(), dto.getCode());
 
-        // Token type chip (coloured by type)
         typeChip = buildStatusChip(
                 dto.getTokenType() != null ? dto.getTokenType().meaning() : "UNKNOWN",
                 dto.getTokenType() != null ? dto.getTokenType().name() : "UNKNOWN"
@@ -71,7 +69,6 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
         return left;
     }
 
-    // ========== Action buttons (right side of header) ==========
     @Override
     protected List<Button> buildActionButtons() {
         Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit configuration");
@@ -83,48 +80,12 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
         return List.of(editBtn, deleteBtn);
     }
 
-    // ========== Body rows (non‑sensitive metadata) ==========
     @Override
     protected void buildBodyRows() {
-        // ---- Issuer row ----
-        HorizontalLayout issuerRow = createIconRow(VaadinIcon.BUILDING, "Issuer",
-                dto.getIssuer() != null ? dto.getIssuer() : "—");
-
-        // ---- Audience row (chip‑like list) ----
-        HorizontalLayout audienceRow = createIconRow(VaadinIcon.GROUP, "Audience",
-                formatAudienceList());
-
-        // ---- Signature algorithm row ----
-        HorizontalLayout algoRow = createIconRow(VaadinIcon.CODE, "Algorithm",
-                dto.getSignatureAlgorithm() != null ? dto.getSignatureAlgorithm() : "—");
-
-        // ---- Lifetime row (human readable) ----
-        HorizontalLayout lifetimeRow = createIconRow(VaadinIcon.CLOCK, "Lifetime",
-                formatLifetime(dto.getLifeTimeInMs()));
-
-        add(issuerRow, audienceRow, algoRow, lifetimeRow);
-    }
-
-    // ========== Helper methods ==========
-    private String formatAudienceList() {
-        if (dto.getAudience() == null || dto.getAudience().isEmpty()) {
-            return "—";
-        }
-        return String.join(", ", dto.getAudience());
-    }
-
-    private String formatLifetime(Integer lifeTimeInMs) {
-        if (lifeTimeInMs == null || lifeTimeInMs <= 0) {
-            return "—";
-        }
-        long seconds = lifeTimeInMs / 1000;
-        if (seconds < 60) return seconds + " second" + (seconds != 1 ? "s" : "");
-        long minutes = seconds / 60;
-        if (minutes < 60) return minutes + " minute" + (minutes != 1 ? "s" : "");
-        long hours = minutes / 60;
-        if (hours < 24) return hours + " hour" + (hours != 1 ? "s" : "");
-        long days = hours / 24;
-        return days + " day" + (days != 1 ? "s" : "");
+        add(createIconRow(VaadinIcon.BUILDING, "Issuer", dto.getIssuer() != null ? dto.getIssuer() : "—"));
+        add(createIconRow(VaadinIcon.GROUP, "Audience", formatAudienceList()));
+        add(createIconRow(VaadinIcon.CODE, "Algorithm", dto.getSignatureAlgorithm() != null ? dto.getSignatureAlgorithm() : "—"));
+        add(createIconRow(VaadinIcon.CLOCK, "Lifetime", formatLifetime(dto.getLifeTimeInMs())));
     }
 
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
@@ -155,14 +116,28 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
         return row;
     }
 
-    // ========== Refresh UI after update ==========
+    private String formatAudienceList() {
+        if (dto.getAudience() == null || dto.getAudience().isEmpty()) return "—";
+        return String.join(", ", dto.getAudience());
+    }
+
+    private String formatLifetime(Integer lifeTimeInMs) {
+        if (lifeTimeInMs == null || lifeTimeInMs <= 0) return "—";
+        long seconds = lifeTimeInMs / 1000;
+        if (seconds < 60) return seconds + " second" + (seconds != 1 ? "s" : "");
+        long minutes = seconds / 60;
+        if (minutes < 60) return minutes + " minute" + (minutes != 1 ? "s" : "");
+        long hours = minutes / 60;
+        if (hours < 24) return hours + " hour" + (hours != 1 ? "s" : "");
+        long days = hours / 24;
+        return days + " day" + (days != 1 ? "s" : "");
+    }
+
     private void refreshDisplay() {
         titleSpan.setText(dto.getCode());
         titleSpan.getElement().setAttribute("title", dto.getCode());
         typeChip.setText(dto.getTokenType() != null ? dto.getTokenType().meaning() : "UNKNOWN");
-
         getUI().ifPresent(ui -> ui.access(() -> {
-            // Remove all body rows (everything after the header row)
             List<Component> children = new java.util.ArrayList<>(getChildren().toList());
             boolean headerRemoved = false;
             for (Component child : children) {
@@ -170,9 +145,7 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
                     headerRemoved = true;
                     continue;
                 }
-                if (headerRemoved) {
-                    remove(child);
-                }
+                if (headerRemoved) remove(child);
             }
             buildBodyRows();
         }));
@@ -182,13 +155,9 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
         new UpdateTokenConfigDialog(objectService, kmsApiService, dto, () -> parentView.refreshCard(this)).open();
     }
 
-    // ========== Extra CSS for card layout ==========
     @Override
     protected String buildExtraStyles() {
         return """
-                .token-config-card {
-                    transition: all 0.2s ease;
-                }
                 .token-config-card .meta-row {
                     border-bottom: 1px solid var(--lumo-contrast-10pct);
                     padding-bottom: var(--lumo-space-xs);
