@@ -19,12 +19,8 @@ public class CreateTokenConfigDialog extends TokenConfigDialogBase {
         super("Create Token Configuration", onSuccess);
         this.tokenConfigService = tokenConfigService;
         setOkButtonText("Create");
-        buildCommonForm();
-        addCommonFieldsToLayout();
-        add(formLayout);
-        setupAlgorithmChangeListener();
-        updateFieldsForAlgorithm("HS256");
-        bindData();
+        initUI();               // builds the two‑card layout
+        bindData();            // set default values
     }
 
     @Override
@@ -38,6 +34,7 @@ public class CreateTokenConfigDialog extends TokenConfigDialogBase {
         publicKeyArea.clear();
         lifeTimeValueField.setValue(1);
         lifeTimeUnitCombo.setValue("Hours");
+        // The algorithm change listener will automatically update the crypto section.
     }
 
     @Override

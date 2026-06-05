@@ -2,6 +2,7 @@ package eu.isygoit.ui.views.tokenizer.dialog;
 
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.TokenConfigDto;
 import eu.isygoit.enums.IEnumToken;
@@ -21,22 +22,22 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
         super("Edit Token Configuration", onSuccess);
         this.tokenConfigService = tokenConfigService;
         this.original = dto;
-
         setOkButtonText("Save");
-        buildCommonForm();
-        addUpdateSpecificFields();
-        addCommonFieldsToLayout();
-        add(formLayout);
-        setupAlgorithmChangeListener();
+        initUI();
+        addCodeFieldToMetadataCard();
         bindData();
-        updateFieldsForAlgorithm(original.getSignatureAlgorithm());
+        // Force crypto section update because algorithm combo is set after listener may have fired
+        updateCryptographySection(original.getSignatureAlgorithm());
     }
 
-    private void addUpdateSpecificFields() {
+    private void addCodeFieldToMetadataCard() {
         codeField = new TextField("Code");
         codeField.setReadOnly(true);
         codeField.setWidthFull();
-        formLayout.add(codeField, 2);
+        // The metadata card's second child is the VerticalLayout containing the form fields.
+        // We add the code field at the top of that layout.
+        VerticalLayout metaForm = (VerticalLayout) metadataCard.getChildren().toArray()[1];
+        metaForm.addComponentAsFirst(codeField);
     }
 
     @Override
@@ -45,17 +46,20 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
         tokenTypeCombo.setValue(original.getTokenType());
         tokenTypeCombo.setReadOnly(true);
         issuerField.setValue(original.getIssuer() != null ? original.getIssuer() : "");
-
         if (original.getAudience() != null && !original.getAudience().isEmpty()) {
             setAudienceList(original.getAudience());
         } else {
             setAudienceList(List.of());
         }
-
         signatureAlgorithmCombo.setValue(original.getSignatureAlgorithm());
 
         Integer lifetimeMs = original.getLifeTimeInMs();
-        setLifeTimeFromMs(lifetimeMs);
+        if (lifetimeMs == null) {
+            lifeTimeValueField.setValue(1);
+            lifeTimeUnitCombo.setValue("Hours");
+        } else {
+            setLifeTimeFromMs(lifetimeMs);
+        }
 
         String storedKey = original.getSecretKey();
         if (HMAC_ALGORITHMS.contains(original.getSignatureAlgorithm())) {
