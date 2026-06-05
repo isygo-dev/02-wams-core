@@ -9,6 +9,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.TokenConfigDto;
+import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
 import eu.isygoit.ui.views.BaseCard;
 import eu.isygoit.ui.views.tokenizer.dialog.DeleteTokenConfigDialog;
@@ -18,6 +19,7 @@ import java.util.List;
 
 public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigService> {
 
+    private final KmsApiService kmsApiService;
     private final Runnable onDeleteRefresh;
     private TokenConfigDto dto;
     private Span titleSpan;
@@ -25,9 +27,11 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
 
     public TokenConfigCard(TokenConfigView parentView,
                            KmsTokenConfigService tokenConfigService,
+                           KmsApiService kmsApiService,
                            TokenConfigDto dto,
                            Runnable onDeleteRefresh) {
         super(parentView, tokenConfigService);
+        this.kmsApiService = kmsApiService;
         this.dto = dto;
         this.onDeleteRefresh = onDeleteRefresh;
         initCard();
@@ -175,7 +179,7 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
     }
 
     private void openEditDialog() {
-        new UpdateTokenConfigDialog(objectService, dto, () -> parentView.refreshCard(this)).open();
+        new UpdateTokenConfigDialog(objectService, kmsApiService, dto, () -> parentView.refreshCard(this)).open();
     }
 
     // ========== Extra CSS for card layout ==========

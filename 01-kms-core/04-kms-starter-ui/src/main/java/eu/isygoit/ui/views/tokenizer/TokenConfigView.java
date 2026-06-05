@@ -20,6 +20,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.TokenConfigDto;
+import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
 import eu.isygoit.ui.MainLayout;
 import eu.isygoit.ui.views.tokenizer.dialog.CreateTokenConfigDialog;
@@ -37,6 +38,7 @@ import java.util.List;
 public class TokenConfigView extends VerticalLayout {
 
     private final KmsTokenConfigService tokenConfigService;
+    private final KmsApiService kmsApiService;  // for dialogs
 
     private final VerticalLayout cardsContainer = new VerticalLayout();
     private final TextField searchField = new TextField();
@@ -59,8 +61,9 @@ public class TokenConfigView extends VerticalLayout {
     private String currentSearch = "";
 
     @Autowired
-    public TokenConfigView(KmsTokenConfigService tokenConfigService) {
+    public TokenConfigView(KmsTokenConfigService tokenConfigService, KmsApiService kmsApiService) {
         this.tokenConfigService = tokenConfigService;
+        this.kmsApiService = kmsApiService;
         buildUI();
         loadConfigs();
     }
@@ -232,6 +235,7 @@ public class TokenConfigView extends VerticalLayout {
             TokenConfigCard card = new TokenConfigCard(
                     this,
                     tokenConfigService,
+                    kmsApiService,
                     dto,
                     () -> loadConfigs()  // refresh after delete
             );
@@ -262,7 +266,7 @@ public class TokenConfigView extends VerticalLayout {
     }
 
     private void openCreateDialog() {
-        new CreateTokenConfigDialog(tokenConfigService, this::loadConfigs).open();
+        new CreateTokenConfigDialog(tokenConfigService, kmsApiService, this::loadConfigs).open();
     }
 
     private void showLoading(boolean show) {

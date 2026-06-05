@@ -5,16 +5,21 @@ import eu.isygoit.annotation.InjectRepository;
 import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.config.JwtProperties;
 import eu.isygoit.constants.TenantConstants;
+import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumToken;
+import eu.isygoit.exception.KmsKeyNotFoundException;
 import eu.isygoit.model.AppNextCode;
+import eu.isygoit.model.KmsKey;
 import eu.isygoit.model.TokenConfig;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
+import eu.isygoit.repository.KmsKeyRepository;
 import eu.isygoit.repository.TokenConfigRepository;
 import eu.isygoit.service.ITokenConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Base64;
 import java.util.Optional;
 import java.util.Set;
 
@@ -31,6 +36,9 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
 
     @Autowired
     private TokenConfigRepository tokenConfigRepository;
+
+    @Autowired
+    private KmsKeyRepository kmsKeyRepository;
 
     /**
      * Instantiates a new Token config service.
@@ -76,5 +84,91 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
                 .codeValue(1L)
                 .increment(1)
                 .build();
+    }
+
+    @Override
+    public TokenConfig beforeCreate(String tenant, TokenConfig tokenConfig) {
+        if (tokenConfig.getKmsKeyId() != null) {
+            fillWithSelectedKmsKey(tenant, tokenConfig);
+        }
+        return super.beforeCreate(tenant, tokenConfig);
+    }
+
+    @Override
+    public TokenConfig beforeUpdate(String tenant, TokenConfig tokenConfig) {
+        if (tokenConfig.getKmsKeyId() != null) {
+            fillWithSelectedKmsKey(tenant, tokenConfig);
+        }
+        return super.beforeUpdate(tenant, tokenConfig);
+    }
+
+    private void fillWithSelectedKmsKey(String tenant, TokenConfig tokenConfig) {
+        KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(tenant, tokenConfig.getKmsKeyId())
+                .orElseThrow(() -> new KmsKeyNotFoundException("KMS Key with ID " + tokenConfig.getKmsKeyId() + " not found for tenant " + tenant));
+
+        // Derive signature algorithm from the key spec
+        String algorithm = mapKeySpecToJwtAlgorithm(kmsKey.getKeySpec());
+        tokenConfig.setSignatureAlgorithm(algorithm);
+
+        // Determine key type and set appropriate fields
+        if (!kmsKey.getKeySpec().isAsymmetric()) {
+            // Symmetric key: store as Base64
+            String secretKeyBase64 = Base64.getEncoder().encodeToString(kmsKey.getKeyMaterial());
+            tokenConfig.setSecretKey(secretKeyBase64);
+            tokenConfig.setPublicKey(null);   // not used for symmetric
+        } else {
+            // Asymmetric key: store private key as Base64, public key as Base64
+            String privateKeyBase64 = Base64.getEncoder().encodeToString(kmsKey.getKeyMaterial());
+            String publicKeyBase64 = Base64.getEncoder().encodeToString(kmsKey.getPublicKey());
+            tokenConfig.setSecretKey(privateKeyBase64);
+            tokenConfig.setPublicKey(publicKeyBase64);
+        }
+    }
+
+    private String mapKeySpecToJwtAlgorithm(IEnumKeySpec.Types keySpec) {
+        switch (keySpec) {
+            // Symmetric (AES) – JJWT does not support AES for signing; only HMAC.
+            // If a symmetric key is used for signing, it must be an HMAC key spec (HMAC_xxx).
+            // SYMMETRIC_DEFAULT is for encryption only, so we throw an exception.
+            case SYMMETRIC_DEFAULT:
+                throw new IllegalArgumentException("SYMMETRIC_DEFAULT is not a valid key spec for JWT signing. Use HMAC_256, HMAC_384, or HMAC_512.");
+
+                // RSA – map based on key size
+            case RSA_2048:
+                return "RS256";
+            case RSA_3072:
+                return "RS384";
+            case RSA_4096:
+                return "RS512";
+
+            // HMAC – only HMAC_256, 384, 512 are supported by JJWT
+            case HMAC_224:
+                throw new IllegalArgumentException("HMAC_224 is not supported by JJWT. Use HS256, HS384, or HS512.");
+            case HMAC_256:
+                return "HS256";
+            case HMAC_384:
+                return "HS384";
+            case HMAC_512:
+                return "HS512";
+
+            // ECC (NIST curves) – map to ES algorithms
+            case ECC_NIST_P256:
+                return "ES256";
+            case ECC_NIST_P384:
+                return "ES384";
+            case ECC_NIST_P521:
+                return "ES512";
+
+            // ECC (SECG curve secp256k1) – supported as ES256K in JJWT
+            case ECC_SECG_P256K1:
+                return "ES256K";
+
+            // SM2 – not natively supported; throw exception
+            case SM2:
+                throw new IllegalArgumentException("SM2 is not supported by JJWT. Use RSA or EC (NIST) instead.");
+
+            default:
+                throw new IllegalArgumentException("Unsupported key spec for JWT signing: " + keySpec);
+        }
     }
 }

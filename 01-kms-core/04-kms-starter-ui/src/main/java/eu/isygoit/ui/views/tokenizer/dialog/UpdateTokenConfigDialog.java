@@ -6,9 +6,11 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.TokenConfigDto;
 import eu.isygoit.enums.IEnumToken;
+import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -18,24 +20,20 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
     private final TokenConfigDto original;
     private TextField codeField;
 
-    public UpdateTokenConfigDialog(KmsTokenConfigService tokenConfigService, TokenConfigDto dto, Runnable onSuccess) {
-        super("Edit Token Configuration", onSuccess);
+    public UpdateTokenConfigDialog(KmsTokenConfigService tokenConfigService, KmsApiService kmsApiService, TokenConfigDto dto, Runnable onSuccess) {
+        super("Edit Token Configuration", onSuccess, kmsApiService);
         this.tokenConfigService = tokenConfigService;
         this.original = dto;
         setOkButtonText("Save");
         initUI();
         addCodeFieldToMetadataCard();
         bindData();
-        // Force crypto section update because algorithm combo is set after listener may have fired
-        updateCryptographySection(original.getSignatureAlgorithm());
     }
 
     private void addCodeFieldToMetadataCard() {
         codeField = new TextField("Code");
         codeField.setReadOnly(true);
         codeField.setWidthFull();
-        // The metadata card's second child is the VerticalLayout containing the form fields.
-        // We add the code field at the top of that layout.
         VerticalLayout metaForm = (VerticalLayout) metadataCard.getChildren().toArray()[1];
         metaForm.addComponentAsFirst(codeField);
     }
@@ -51,23 +49,32 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
         } else {
             setAudienceList(List.of());
         }
-        signatureAlgorithmCombo.setValue(original.getSignatureAlgorithm());
+        setLifeTimeFromMs(original.getLifeTimeInMs());
 
-        Integer lifetimeMs = original.getLifeTimeInMs();
-        if (lifetimeMs == null) {
-            lifeTimeValueField.setValue(1);
-            lifeTimeUnitCombo.setValue("Hours");
+        // Handle key source selection
+        if (StringUtils.hasText(original.getKmsKeyId())) {
+            keySourceGroup.setValue("Use existing KMS key");
+            if (availableKeyOptions != null) {
+                KeyOption selected = availableKeyOptions.stream()
+                        .filter(opt -> opt.getKeyId().equals(original.getKmsKeyId()))
+                        .findFirst()
+                        .orElse(null);
+                kmsKeyCombo.setValue(selected);
+            }
+            // No custom key fields to populate
         } else {
-            setLifeTimeFromMs(lifetimeMs);
-        }
-
-        String storedKey = original.getSecretKey();
-        if (HMAC_ALGORITHMS.contains(original.getSignatureAlgorithm())) {
-            secretKeyField.setValue(storedKey != null ? storedKey : "");
-        } else if (ASYMMETRIC_ALGORITHMS.contains(original.getSignatureAlgorithm())) {
-            privateKeyArea.setValue(storedKey != null ? storedKey : "");
-            publicKeyArea.setValue(original.getPublicKey() != null ? original.getPublicKey() :
-                    "(Not stored – generate new pair to see public key)");
+            keySourceGroup.setValue("Define custom key");
+            signatureAlgorithmCombo.setValue(original.getSignatureAlgorithm());
+            String storedKey = original.getSecretKey();
+            if (HMAC_ALGORITHMS.contains(original.getSignatureAlgorithm())) {
+                secretKeyField.setValue(storedKey != null ? storedKey : "");
+                updateCryptographySection(original.getSignatureAlgorithm());
+            } else if (ASYMMETRIC_ALGORITHMS.contains(original.getSignatureAlgorithm())) {
+                privateKeyArea.setValue(storedKey != null ? storedKey : "");
+                publicKeyArea.setValue(original.getPublicKey() != null ? original.getPublicKey() :
+                        "(Not stored – generate new pair to see public key)");
+                updateCryptographySection(original.getSignatureAlgorithm());
+            }
         }
     }
 
@@ -79,47 +86,62 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
             return false;
         }
 
-        String signatureAlgorithm = signatureAlgorithmCombo.getValue();
-        if (signatureAlgorithm == null || signatureAlgorithm.isBlank()) {
-            showError("Signature algorithm is required");
-            return false;
-        }
-
-        String secretOrPrivateKey;
-        if (HMAC_ALGORITHMS.contains(signatureAlgorithm)) {
-            String secretKey = secretKeyField.getValue();
-            if (secretKey == null || secretKey.isBlank()) {
-                showError("Secret key is required for " + signatureAlgorithm);
-                return false;
-            }
-            if (!validateHmacKey(signatureAlgorithm, secretKey)) return false;
-            secretOrPrivateKey = secretKey;
-        } else if (ASYMMETRIC_ALGORITHMS.contains(signatureAlgorithm)) {
-            String privateKey = privateKeyArea.getValue();
-            if (privateKey == null || privateKey.isBlank()) {
-                showError("Private key is required for " + signatureAlgorithm);
-                return false;
-            }
-            secretOrPrivateKey = privateKey;
-        } else {
-            showError("Unsupported signature algorithm: " + signatureAlgorithm);
-            return false;
-        }
-
         Integer lifeTime = getLifeTimeInMs();
         if (lifeTime == null) return false;
 
-        TokenConfigDto updated = TokenConfigDto.builder()
+        TokenConfigDto.TokenConfigDtoBuilder builder = TokenConfigDto.builder()
                 .id(original.getId())
                 .code(original.getCode())
                 .tokenType(tokenType)
                 .issuer(issuerField.getValue())
                 .audience(getAudienceList())
-                .signatureAlgorithm(signatureAlgorithm)
-                .secretKey(secretOrPrivateKey)
-                .publicKey(publicKeyArea.getValue())
-                .lifeTimeInMs(lifeTime)
-                .build();
+                .lifeTimeInMs(lifeTime);
+
+        boolean useKmsKey = "Use existing KMS key".equals(keySourceGroup.getValue());
+        if (useKmsKey) {
+            KeyOption selected = kmsKeyCombo.getValue();
+            if (selected == null) {
+                showError("Please select a KMS key");
+                return false;
+            }
+            builder.kmsKeyId(selected.getKeyId())
+                    .secretKey(null)
+                    .publicKey(null)
+                    .signatureAlgorithm(null);
+        } else {
+            String signatureAlgorithm = signatureAlgorithmCombo.getValue();
+            if (signatureAlgorithm == null || signatureAlgorithm.isBlank()) {
+                showError("Signature algorithm is required");
+                return false;
+            }
+            builder.signatureAlgorithm(signatureAlgorithm);
+            String secretOrPrivateKey;
+            if (HMAC_ALGORITHMS.contains(signatureAlgorithm)) {
+                String secretKey = secretKeyField.getValue();
+                if (secretKey == null || secretKey.isBlank()) {
+                    showError("Secret key is required for " + signatureAlgorithm);
+                    return false;
+                }
+                if (!validateHmacKey(signatureAlgorithm, secretKey)) return false;
+                secretOrPrivateKey = secretKey;
+                builder.publicKey(null);
+            } else if (ASYMMETRIC_ALGORITHMS.contains(signatureAlgorithm)) {
+                String privateKey = privateKeyArea.getValue();
+                if (privateKey == null || privateKey.isBlank()) {
+                    showError("Private key is required for " + signatureAlgorithm);
+                    return false;
+                }
+                secretOrPrivateKey = privateKey;
+                builder.publicKey(publicKeyArea.getValue());
+            } else {
+                showError("Unsupported signature algorithm: " + signatureAlgorithm);
+                return false;
+            }
+            builder.secretKey(secretOrPrivateKey)
+                    .kmsKeyId(null);
+        }
+
+        TokenConfigDto updated = builder.build();
 
         try {
             ResponseEntity<TokenConfigDto> response = tokenConfigService.update(original.getId(), updated);
@@ -127,7 +149,6 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
                 onSaveSuccess();
                 return true;
             } else {
-                showError("Update failed: " + response.getStatusCode());
                 return false;
             }
         } catch (FeignException ex) {

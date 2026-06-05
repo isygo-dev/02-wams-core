@@ -4,6 +4,8 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -103,6 +105,9 @@ public abstract class BaseActionDialog extends Dialog {
     protected void showError(String message) {
         errorSpan.setText(message);
         errorSpan.setVisible(true);
+
+        Notification.show(message, 5000, Notification.Position.BOTTOM_END)
+                .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 
     /**

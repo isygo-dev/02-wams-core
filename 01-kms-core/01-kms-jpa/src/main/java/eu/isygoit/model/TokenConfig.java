@@ -76,11 +76,14 @@ public class TokenConfig extends AuditableEntity<Long> implements ITenantAssigna
     private String secretKey = "sEcReTkEy";
 
     @Lob
-    @Column(name = SchemaColumnConstantName.C_PUBLIC_KEY, nullable = true)
+    @Column(name = SchemaColumnConstantName.C_PUBLIC_KEY)
     private String publicKey = "pUbLiCkEy";
 
     @Builder.Default
     @ColumnDefault("14400000")
     @Column(name = SchemaColumnConstantName.C_LIFE_TIME_MS, nullable = false)
     private Integer lifeTimeInMs = 14400000;
+
+    @Column(name = SchemaColumnConstantName.C_KMS_KEY_ID)
+    private String kmsKeyId;
 }

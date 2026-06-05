@@ -237,4 +237,5 @@ public interface SchemaColumnConstantName extends ComSchemaColumnConstantName {
     String C_IMPORT_TOKEN = "IMPORT_TOKEN";
     String C_IMPORT_TOKEN_VALID_TO = "IMPORT_TOKEN_VALID_TO";
     String C_PRIVATE_WRAPPING_KEY = "PRIVATE_WRAPPING_KEY";
+    String C_KMS_KEY_ID = "KMS_KEY_ID";
 }

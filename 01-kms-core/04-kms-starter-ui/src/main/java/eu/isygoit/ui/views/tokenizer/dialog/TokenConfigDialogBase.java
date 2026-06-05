@@ -14,13 +14,18 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.enums.IEnumToken;
+import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.views.BaseActionDialog;
 import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -32,6 +37,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 public abstract class TokenConfigDialogBase extends BaseActionDialog {
 
     protected static final List<String> HMAC_ALGORITHMS = List.of("HS256", "HS384", "HS512");
@@ -49,8 +55,17 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
             "EdDSA"
     );
 
-    // ========== UI components (accessible to subclasses) ==========
-    // First card (metadata)
+    // KMS API service
+    protected final KmsApiService kmsApiService;
+    protected List<KeyOption> availableKeyOptions = new ArrayList<>();
+
+    // Radio group for key source
+    protected RadioButtonGroup<String> keySourceGroup;
+    protected ComboBox<KeyOption> kmsKeyCombo;
+    protected VerticalLayout kmsKeyLayout;
+    protected VerticalLayout customKeyLayout;
+
+    // First card: metadata
     protected Card metadataCard;
     protected ComboBox<IEnumToken.Types> tokenTypeCombo;
     protected TextField issuerField;
@@ -59,9 +74,11 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
     protected ComboBox<String> lifeTimeUnitCombo;
     protected HorizontalLayout lifetimeRow;
 
-    // Second card (crypto)
+    // Second card: crypto
     protected Card cryptoCard;
-    protected VerticalLayout cryptoCardContent;  // dynamic content container
+    protected VerticalLayout cryptoCardContent;
+
+    // Custom key components
     protected ComboBox<String> signatureAlgorithmCombo;
     protected TextField secretKeyField;
     protected TextArea privateKeyArea;
@@ -70,26 +87,25 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
     protected Button copyPublicKeyButton;
     protected VerticalLayout publicKeyComponent;
 
-    protected TokenConfigDialogBase(String title, Runnable onSuccess) {
+    protected TokenConfigDialogBase(String title, Runnable onSuccess, KmsApiService kmsApiService) {
         super(title, onSuccess);
+        this.kmsApiService = kmsApiService;
         setWidth("850px");
     }
 
-    /**
-     * Call this method in subclass constructor after building the base form.
-     * It builds the two-card layout and sets up the algorithm change listener.
-     */
     protected void initUI() {
         buildComponents();
         VerticalLayout mainLayout = new VerticalLayout(metadataCard, cryptoCard);
         mainLayout.setSpacing(true);
         mainLayout.setPadding(false);
         add(mainLayout);
+        setupKeySourceListener();
         setupAlgorithmChangeListener();
+        loadKmsKeys();
     }
 
     private void buildComponents() {
-        // ---- First card: Metadata ----
+        // ---- Metadata Card ----
         metadataCard = new Card();
         metadataCard.addClassName("config-metadata-card");
         metadataCard.setWidthFull();
@@ -111,7 +127,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         audienceInput = new AudienceInput();
         audienceInput.setWidthFull();
 
-        // Lifetime row (inline label, numeric field, unit)
+        // Lifetime row
         lifeTimeValueField = new IntegerField();
         lifeTimeValueField.setPlaceholder("e.g., 1");
         lifeTimeValueField.setValue(1);
@@ -142,7 +158,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         metaForm.add(tokenTypeCombo, issuerField, audienceInput, lifetimeRow);
         metadataCard.add(metaTitle, metaForm);
 
-        // ---- Second card: Cryptography ----
+        // ---- Crypto Card ----
         cryptoCard = new Card();
         cryptoCard.addClassName("config-crypto-card");
         cryptoCard.setWidthFull();
@@ -156,16 +172,42 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         cryptoCardContent.setSpacing(true);
         cryptoCard.add(cryptoCardContent);
 
-        // Add algorithm selector (always visible)
+        // Key source radio group
+        keySourceGroup = new RadioButtonGroup<>();
+        keySourceGroup.setLabel("Key source");
+        keySourceGroup.setItems("Use existing KMS key", "Define custom key");
+        keySourceGroup.setValue("Define custom key");
+        keySourceGroup.setWidthFull();
+        cryptoCardContent.add(keySourceGroup);
+
+        // KMS key selection layout
+        kmsKeyLayout = new VerticalLayout();
+        kmsKeyLayout.setPadding(false);
+        kmsKeyLayout.setSpacing(true);
+        kmsKeyLayout.setVisible(false);
+        Span kmsKeyLabel = new Span("Select KMS key:");
+        kmsKeyLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+        kmsKeyCombo = new ComboBox<>();
+        kmsKeyCombo.setPlaceholder("Choose a KMS key...");
+        kmsKeyCombo.setItemLabelGenerator(KeyOption::getDisplayName);
+        kmsKeyCombo.setWidthFull();
+        kmsKeyCombo.setRequired(true);
+        kmsKeyLayout.add(kmsKeyLabel, kmsKeyCombo);
+        cryptoCardContent.add(kmsKeyLayout);
+
+        // Custom key layout
+        customKeyLayout = new VerticalLayout();
+        customKeyLayout.setPadding(false);
+        customKeyLayout.setSpacing(true);
+
         signatureAlgorithmCombo = new ComboBox<>("Signature algorithm");
         signatureAlgorithmCombo.setItems(SUPPORTED_ALGORITHMS);
         signatureAlgorithmCombo.setRequired(true);
         signatureAlgorithmCombo.setRequiredIndicatorVisible(true);
         signatureAlgorithmCombo.setValue("HS256");
         signatureAlgorithmCombo.setWidthFull();
-        cryptoCardContent.add(signatureAlgorithmCombo);
+        customKeyLayout.add(signatureAlgorithmCombo);
 
-        // Pre‑create HMAC and asymmetric fields (will be moved in/out)
         secretKeyField = new TextField("Secret key (Base64)");
         secretKeyField.setRequired(true);
         secretKeyField.setRequiredIndicatorVisible(true);
@@ -191,8 +233,8 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
 
         publicKeyComponent = createPublicKeyComponent();
 
-        // Initially add HMAC field (default algorithm HS256)
-        cryptoCardContent.add(secretKeyField);
+        customKeyLayout.add(secretKeyField); // initially HMAC (default HS256)
+        cryptoCardContent.add(customKeyLayout);
     }
 
     private VerticalLayout createPublicKeyComponent() {
@@ -218,21 +260,73 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         return wrapper;
     }
 
+    private void setupKeySourceListener() {
+        keySourceGroup.addValueChangeListener(event -> {
+            String value = event.getValue();
+            if ("Use existing KMS key".equals(value)) {
+                kmsKeyLayout.setVisible(true);
+                customKeyLayout.setVisible(false);
+                secretKeyField.clear();
+                privateKeyArea.clear();
+                publicKeyArea.clear();
+                signatureAlgorithmCombo.setRequired(false);
+            } else {
+                kmsKeyLayout.setVisible(false);
+                customKeyLayout.setVisible(true);
+                kmsKeyCombo.clear();
+                signatureAlgorithmCombo.setRequired(true);
+                updateCryptographySection(signatureAlgorithmCombo.getValue());
+            }
+        });
+    }
+
+    protected void loadKmsKeys() {
+        if (kmsApiService == null) return;
+        try {
+            ResponseEntity<KmsDtos.ListKeysResponse> response = kmsApiService.listKeys(100, null);
+            KmsDtos.ListKeysResponse keys = response.getBody();
+            if (keys != null && keys.getKeys() != null) {
+                availableKeyOptions = keys.getKeys().stream()
+                        .map(entry -> new KeyOption(entry.getKeyId(), fetchAlias(entry.getKeyId())))
+                        .collect(Collectors.toList());
+                kmsKeyCombo.setItems(availableKeyOptions);
+            } else {
+                availableKeyOptions = new ArrayList<>();
+                kmsKeyCombo.setItems(availableKeyOptions);
+            }
+        } catch (FeignException ex) {
+            log.error("Failed to load KMS keys: {}", ex.getMessage());
+            Notification.show("Could not load KMS keys: " + ex.getMessage(), 5000, Notification.Position.BOTTOM_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        } catch (Exception e) {
+            log.error("Failed to load KMS keys", e);
+        }
+    }
+
+    private String fetchAlias(String keyId) {
+        try {
+            ResponseEntity<KmsDtos.DescribeKeyResponse> response = kmsApiService.describeKey(keyId);
+            KmsDtos.DescribeKeyResponse desc = response.getBody();
+            if (desc != null && desc.getKeyMetadata() != null && desc.getKeyMetadata().getKeyAlias() != null) {
+                return desc.getKeyMetadata().getKeyAlias();
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        return keyId;
+    }
+
     protected void setupAlgorithmChangeListener() {
         signatureAlgorithmCombo.addValueChangeListener(event -> {
             String alg = event.getValue();
-            if (alg != null) {
+            if (alg != null && customKeyLayout.isVisible()) {
                 updateCryptographySection(alg);
             }
         });
     }
 
-    /**
-     * Protected so subclasses can call it if needed (e.g., after setting combo value in bindData).
-     */
     protected void updateCryptographySection(String algorithm) {
-        // Remove all dynamic fields from cryptoCardContent (keep only the algorithm selector)
-        cryptoCardContent.remove(secretKeyField, privateKeyArea, publicKeyComponent, generateKeyPairButton);
+        customKeyLayout.remove(secretKeyField, privateKeyArea, publicKeyComponent, generateKeyPairButton);
 
         if (HMAC_ALGORITHMS.contains(algorithm)) {
             int minBytes = switch (algorithm) {
@@ -242,17 +336,16 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
                 default -> 32;
             };
             secretKeyField.setHelperText("For " + algorithm + " the secret key must be at least " + minBytes + " bytes (Base64 encoded)");
-            cryptoCardContent.add(secretKeyField);
+            customKeyLayout.add(secretKeyField);
         } else if (ASYMMETRIC_ALGORITHMS.contains(algorithm)) {
             privateKeyArea.clear();
             publicKeyArea.clear();
-            cryptoCardContent.add(privateKeyArea);
-            cryptoCardContent.add(publicKeyComponent);
-            cryptoCardContent.add(generateKeyPairButton);
+            customKeyLayout.add(privateKeyArea);
+            customKeyLayout.add(publicKeyComponent);
+            customKeyLayout.add(generateKeyPairButton);
         }
     }
 
-    // ========== Key generation (unchanged) ==========
     protected void generateKeyPair() {
         String algorithm = signatureAlgorithmCombo.getValue();
         if (algorithm == null || !ASYMMETRIC_ALGORITHMS.contains(algorithm)) {
@@ -268,17 +361,47 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
             String ecCurve = null;
 
             switch (algorithm) {
-                case "RS256": jcaAlgorithm = "RSA"; keySize = 2048; break;
-                case "RS384": jcaAlgorithm = "RSA"; keySize = 3072; break;
-                case "RS512": jcaAlgorithm = "RSA"; keySize = 4096; break;
-                case "PS256": jcaAlgorithm = "RSASSA-PSS"; keySize = 2048; break;
-                case "PS384": jcaAlgorithm = "RSASSA-PSS"; keySize = 3072; break;
-                case "PS512": jcaAlgorithm = "RSASSA-PSS"; keySize = 4096; break;
-                case "ES256": jcaAlgorithm = "EC"; ecCurve = "secp256r1"; break;
-                case "ES384": jcaAlgorithm = "EC"; ecCurve = "secp384r1"; break;
-                case "ES512": jcaAlgorithm = "EC"; ecCurve = "secp521r1"; break;
-                case "EdDSA": jcaAlgorithm = "Ed25519"; break;
-                default: throw new IllegalArgumentException("Unsupported asymmetric algorithm: " + algorithm);
+                case "RS256":
+                    jcaAlgorithm = "RSA";
+                    keySize = 2048;
+                    break;
+                case "RS384":
+                    jcaAlgorithm = "RSA";
+                    keySize = 3072;
+                    break;
+                case "RS512":
+                    jcaAlgorithm = "RSA";
+                    keySize = 4096;
+                    break;
+                case "PS256":
+                    jcaAlgorithm = "RSASSA-PSS";
+                    keySize = 2048;
+                    break;
+                case "PS384":
+                    jcaAlgorithm = "RSASSA-PSS";
+                    keySize = 3072;
+                    break;
+                case "PS512":
+                    jcaAlgorithm = "RSASSA-PSS";
+                    keySize = 4096;
+                    break;
+                case "ES256":
+                    jcaAlgorithm = "EC";
+                    ecCurve = "secp256r1";
+                    break;
+                case "ES384":
+                    jcaAlgorithm = "EC";
+                    ecCurve = "secp384r1";
+                    break;
+                case "ES512":
+                    jcaAlgorithm = "EC";
+                    ecCurve = "secp521r1";
+                    break;
+                case "EdDSA":
+                    jcaAlgorithm = "Ed25519";
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported asymmetric algorithm: " + algorithm);
             }
 
             KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(jcaAlgorithm);
@@ -308,7 +431,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         }
     }
 
-    // ========== Clipboard, validation, error handling ==========
+    // ========== Utility Methods ==========
     protected void copyToClipboard(String text) {
         if (text == null || text.isBlank()) {
             Notification.show("Nothing to copy", 2000, Notification.Position.BOTTOM_END)
@@ -354,26 +477,17 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         }
     }
 
-    protected void showError(String message) {
-        Notification.show(message, 5000, Notification.Position.BOTTOM_END)
-                .addThemeVariants(NotificationVariant.LUMO_ERROR);
-    }
-
     protected void handleFeignException(FeignException ex) {
-        String errorMsg = ex.status() == 500 ? ex.contentUTF8() : ex.getMessage();
-        this.append(errorMsg);
-        Notification.show("Error: " + errorMsg, 6000, Notification.Position.TOP_END)
-                .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        String errorMsg = ex.status() == 500 || ex.status() == 400 ? ex.contentUTF8() : ex.getMessage();
+        this.append(errorMsg);   // optional – keep for logging
     }
 
     protected void handleGenericException(Exception ex) {
         String errorMsg = ex.getMessage();
         this.append(errorMsg);
-        Notification.show("Error: " + errorMsg, 6000, Notification.Position.TOP_END)
-                .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 
-    // ========== Audience management ==========
+    // ========== Audience Management ==========
     protected List<String> getAudienceList() {
         return audienceInput.getAudiences();
     }
@@ -382,7 +496,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         audienceInput.setAudiences(audiences);
     }
 
-    // ========== Lifetime management ==========
+    // ========== Lifetime Management ==========
     protected Integer getLifeTimeInMs() {
         Integer value = lifeTimeValueField.getValue();
         if (value == null || value <= 0) {
@@ -396,11 +510,20 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         }
         int ms;
         switch (unit) {
-            case "Seconds": ms = value * 1000; break;
-            case "Minutes": ms = value * 60 * 1000; break;
-            case "Hours":   ms = value * 60 * 60 * 1000; break;
-            case "Days":    ms = value * 24 * 60 * 60 * 1000; break;
-            default: throw new IllegalStateException("Unknown unit: " + unit);
+            case "Seconds":
+                ms = value * 1000;
+                break;
+            case "Minutes":
+                ms = value * 60 * 1000;
+                break;
+            case "Hours":
+                ms = value * 60 * 60 * 1000;
+                break;
+            case "Days":
+                ms = value * 24 * 60 * 60 * 1000;
+                break;
+            default:
+                throw new IllegalStateException("Unknown unit: " + unit);
         }
         return ms;
     }
@@ -430,11 +553,31 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         }
     }
 
-    // ========== Abstract methods ==========
+    // ========== Abstract Methods ==========
     protected abstract void bindData();
+
     protected abstract void onSaveSuccess();
 
-    // ========== Inner AudienceInput (with public getters/setters) ==========
+    // ========== KeyOption Inner Class ==========
+    protected static class KeyOption {
+        private final String keyId;
+        private final String displayName;
+
+        KeyOption(String keyId, String aliasOrId) {
+            this.keyId = keyId;
+            this.displayName = aliasOrId != null ? aliasOrId + " (" + keyId + ")" : keyId;
+        }
+
+        public String getKeyId() {
+            return keyId;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+    }
+
+    // ========== AudienceInput Inner Class ==========
     protected static class AudienceInput extends VerticalLayout {
         private final TextField inputField;
         private final Button addButton;
