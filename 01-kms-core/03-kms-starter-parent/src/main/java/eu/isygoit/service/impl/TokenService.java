@@ -108,14 +108,9 @@ public class TokenService implements ITokenBuilderService {
                 throw new SignaturAlgorithmNotSupportedException("Unsupported signature algorithm: " + sigAlgo);
             }
 
-            if (CollectionUtils.isEmpty(claims)) {
-                claims = new HashMap<>();
-            }
-            if (!claims.containsKey(JwtConstants.JWT_KMS_KEY_VERSION_ID)) {
-                claims.put(JwtConstants.JWT_KMS_KEY_VERSION_ID, tokenConfig.getKmsKeyVersion());
-            }
             TokenResponseDto token = jwtService.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(tenant).toString(),
                     claims,
+                    Map.of(JwtConstants.KID_VERSION, tokenConfig.getKmsKeyVersion()),
                     tokenConfig.getIssuer(),
                     tokenConfig.getAudience(),
                     algorithm,
@@ -131,7 +126,7 @@ public class TokenService implements ITokenBuilderService {
     @Override
     public boolean isTokenValid(String tenant, Set<String> audience, IEnumToken.Types tokenType, String token, String subject) {
         // Get Token config configured by tenant and type, otherwise, default one
-        Optional<String> versionIdOpt = jwtService.extractClaim(token, JwtConstants.JWT_KMS_KEY_VERSION_ID, String.class);
+        Optional<String> versionIdOpt = jwtService.extractKmsKeyVersionId(token);
         TokenConfig tokenConfig = tokenConfigService.prepareTokenConfig(tenant, tokenType, versionIdOpt.orElse(null));
         if (tokenConfig != null) {
             // Validate token content – pass both keys (the validate method will choose based on algorithm)

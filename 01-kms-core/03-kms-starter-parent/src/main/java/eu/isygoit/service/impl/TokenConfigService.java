@@ -6,6 +6,7 @@ import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.config.JwtProperties;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumKeySpec;
+import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.exception.KmsKeyNotFoundException;
 import eu.isygoit.exception.NoActiveVersionException;
@@ -164,7 +165,7 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
             kmsKeyVersionId = kmsKey.getCurrentVersionId();
         }
         KmsKeyVersion activeVersion = kmsKeyVersionRepository
-                .findByTenantAndKeyIdAndVersionId(tenant, kmsKey.getKeyId(), kmsKeyVersionId)
+                .findByTenantAndKeyIdAndVersionIdAndKeyStatus(tenant, kmsKey.getKeyId(), kmsKeyVersionId, IEnumKeyStatus.Types.ENABLED)
                 .orElseThrow(() -> new NoActiveVersionException("No active version found for KMS key " + kmsKey.getKeyId()));
 
         // Derive signature algorithm from the key spec

@@ -34,7 +34,10 @@ public interface KmsKeyVersionRepository extends JpaRepository<KmsKeyVersion, Lo
 
     void deleteByTenantAndKeyId(String tenant, String keyId);
 
+    //TO BE REMOVED
     Optional<KmsKeyVersion> findByTenantAndKeyIdAndVersionId(String tenant, String keyId, String versionId);
+
+    Optional<KmsKeyVersion> findByTenantAndKeyIdAndVersionIdAndKeyStatus(String tenant, String keyId, String versionId, IEnumKeyStatus.Types keyStatus);
 
     List<KmsKeyVersion> findByTenantAndKeyIdOrderByCreateDateDesc(String tenant, String keyId);
 
