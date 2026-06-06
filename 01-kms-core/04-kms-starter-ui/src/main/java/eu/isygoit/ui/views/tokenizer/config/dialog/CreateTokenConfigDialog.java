@@ -103,10 +103,10 @@ public class CreateTokenConfigDialog extends TokenConfigDialogBase {
                     .kmsKeyId(null);
         }
 
-        TokenConfigDto dto = builder.build();
+        TokenConfigDto tokenConfig = builder.build();
 
         try {
-            ResponseEntity<TokenConfigDto> response = tokenConfigService.create(dto);
+            ResponseEntity<TokenConfigDto> response = tokenConfigService.create(tokenConfig);
             if (response.getStatusCode().is2xxSuccessful()) {
                 onSaveSuccess();
                 return true;

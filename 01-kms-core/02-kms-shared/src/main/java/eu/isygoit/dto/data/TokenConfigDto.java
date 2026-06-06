@@ -29,13 +29,8 @@ public class TokenConfigDto extends AuditableDto<Long> {
     private String issuer;
     private List<String> audience;
     private String signatureAlgorithm;
-
-    @JsonProperty(access = WRITE_ONLY)
     private String secretKey;
-    @JsonProperty(access = WRITE_ONLY)
     private String publicKey;
-
     private Integer lifeTimeInMs;
-
     private String kmsKeyId;
 }
