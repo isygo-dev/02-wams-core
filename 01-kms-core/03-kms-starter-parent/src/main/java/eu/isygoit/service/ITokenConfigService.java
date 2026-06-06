@@ -16,5 +16,7 @@ public interface ITokenConfigService extends ICrudTenantServiceOperations<Long, 
      * @param tokenType the token type
      * @return the token config
      */
-    TokenConfig buildTokenConfig(String tenant /*senderTenant*/, IEnumToken.Types tokenType);
+    TokenConfig buildTokenConfig(String tenant, IEnumToken.Types tokenType);
+
+    TokenConfig fillSecretsWithSelectedKmsKey(String tenant, TokenConfig tokenConfig);
 }

@@ -15,9 +15,11 @@ import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.repository.KmsKeyRepository;
 import eu.isygoit.repository.TokenConfigRepository;
 import eu.isygoit.service.ITokenConfigService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.Base64;
 import java.util.Optional;
@@ -26,6 +28,8 @@ import java.util.Set;
 /**
  * The type Token config service.
  */
+
+@Slf4j
 @Service
 @Transactional
 @InjectCodeGen(value = NextCodeService.class)
@@ -89,7 +93,7 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
     @Override
     public TokenConfig beforeCreate(String tenant, TokenConfig tokenConfig) {
         if (tokenConfig.getKmsKeyId() != null) {
-            fillWithSelectedKmsKey(tenant, tokenConfig);
+            fillSecretsWithSelectedKmsKey(tenant, tokenConfig);
         }
         return super.beforeCreate(tenant, tokenConfig);
     }
@@ -97,32 +101,38 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
     @Override
     public TokenConfig beforeUpdate(String tenant, TokenConfig tokenConfig) {
         if (tokenConfig.getKmsKeyId() != null) {
-            fillWithSelectedKmsKey(tenant, tokenConfig);
+            fillSecretsWithSelectedKmsKey(tenant, tokenConfig);
         }
         return super.beforeUpdate(tenant, tokenConfig);
     }
 
-    private void fillWithSelectedKmsKey(String tenant, TokenConfig tokenConfig) {
-        KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(tenant, tokenConfig.getKmsKeyId())
-                .orElseThrow(() -> new KmsKeyNotFoundException("KMS Key with ID " + tokenConfig.getKmsKeyId() + " not found for tenant " + tenant));
+    public TokenConfig fillSecretsWithSelectedKmsKey(String tenant, TokenConfig tokenConfig) {
+        if(!StringUtils.isEmpty(tokenConfig.getKmsKeyId())) {
+            KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(tenant, tokenConfig.getKmsKeyId())
+                    .orElseThrow(() -> new KmsKeyNotFoundException("KMS Key with ID " + tokenConfig.getKmsKeyId() + " not found for tenant " + tenant));
 
-        // Derive signature algorithm from the key spec
-        String algorithm = mapKeySpecToJwtAlgorithm(kmsKey.getKeySpec());
-        tokenConfig.setSignatureAlgorithm(algorithm);
+            // Derive signature algorithm from the key spec
+            String algorithm = mapKeySpecToJwtAlgorithm(kmsKey.getKeySpec());
+            tokenConfig.setSignatureAlgorithm(algorithm);
 
-        // Determine key type and set appropriate fields
-        if (!kmsKey.getKeySpec().isAsymmetric()) {
-            // Symmetric key: store as Base64
-            String secretKeyBase64 = Base64.getEncoder().encodeToString(kmsKey.getKeyMaterial());
-            tokenConfig.setSecretKey(secretKeyBase64);
-            tokenConfig.setPublicKey(null);   // not used for symmetric
+            // Determine key type and set appropriate fields
+            if (!kmsKey.getKeySpec().isAsymmetric()) {
+                // Symmetric key: store as Base64
+                String secretKeyBase64 = Base64.getEncoder().encodeToString(kmsKey.getKeyMaterial());
+                tokenConfig.setSecretKey(secretKeyBase64);
+                tokenConfig.setPublicKey(null);   // not used for symmetric
+            } else {
+                // Asymmetric key: store private key as Base64, public key as Base64
+                String privateKeyBase64 = Base64.getEncoder().encodeToString(kmsKey.getKeyMaterial());
+                String publicKeyBase64 = Base64.getEncoder().encodeToString(kmsKey.getPublicKey());
+                tokenConfig.setSecretKey(privateKeyBase64);
+                tokenConfig.setPublicKey(publicKeyBase64);
+            }
         } else {
-            // Asymmetric key: store private key as Base64, public key as Base64
-            String privateKeyBase64 = Base64.getEncoder().encodeToString(kmsKey.getKeyMaterial());
-            String publicKeyBase64 = Base64.getEncoder().encodeToString(kmsKey.getPublicKey());
-            tokenConfig.setSecretKey(privateKeyBase64);
-            tokenConfig.setPublicKey(publicKeyBase64);
+            log.warn("TokenConfig with ID {} does not have a KMS Key ID specified. Skipping key material population.", tokenConfig.getId());
         }
+
+        return tokenConfig;
     }
 
     private String mapKeySpecToJwtAlgorithm(IEnumKeySpec.Types keySpec) {
@@ -133,7 +143,7 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
             case SYMMETRIC_DEFAULT:
                 throw new IllegalArgumentException("SYMMETRIC_DEFAULT is not a valid key spec for JWT signing. Use HMAC_256, HMAC_384, or HMAC_512.");
 
-                // RSA – map based on key size
+            // RSA – map based on key size
             case RSA_2048:
                 return "RS256";
             case RSA_3072:

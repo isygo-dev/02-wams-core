@@ -17,6 +17,7 @@ import eu.isygoit.model.AccessToken;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.TokenConfig;
 import eu.isygoit.remote.ims.ImsAppParameterService;
+import eu.isygoit.repository.KmsKeyRepository;
 import eu.isygoit.service.*;
 import eu.isygoit.types.EmailSubjects;
 import eu.isygoit.types.MsgTemplateVariables;
@@ -72,28 +73,7 @@ public class TokenService implements ITokenBuilderService {
 
     @Override
     public TokenResponseDto buildTokenAndSave(String tenant, Set<String> audience, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
-        //Get Token config configured by tenant and type, otherwise, default one
-        TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
-        if (tokenConfig != null) {
-            if (CollectionUtils.isEmpty(tokenConfig.getAudience()) || !tokenConfig.getAudience().containsAll(audience)) {
-                log.error("Token audience is invalid for tenant: {} / {}", tenant, tokenType.name());
-                throw new TokenAudienceException("Invalid token audience");
-            }
-
-            // Convert string algorithm to SecureDigestAlgorithm safely
-            String sigAlgo = tokenConfig.getSignatureAlgorithm().toUpperCase();
-            SecureDigestAlgorithm<?, ?> algorithm = (SecureDigestAlgorithm<SecretKey, ?>) Jwts.SIG.get().get(sigAlgo);
-            if (algorithm == null) {
-                throw new SignaturAlgorithmNotSupportedException("Unsupported signature algorithm: " + sigAlgo);
-            }
-
-            TokenResponseDto token = jwtService.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(tenant).toString(),
-                    claims,
-                    tokenConfig.getIssuer(),
-                    tokenConfig.getAudience(),
-                    algorithm,
-                    tokenConfig.getSecretKey(),
-                    tokenConfig.getLifeTimeInMs());
+            TokenResponseDto token = this.buildToken(tenant, audience, tokenType, subject, claims);
 
             Long crc16 = CRC16Helper.calculate(token.getToken().getBytes());
             Long crc32 = CRC32Helper.calculate(token.getToken().getBytes());
@@ -114,9 +94,6 @@ public class TokenService implements ITokenBuilderService {
             }
             accessTokenService.create(accessToken);
             return token;
-        } else {
-            throw new TokenConfigNotFoundException("for tenant: " + tenant + "/" + tokenType.name());
-        }
     }
 
     @Override
@@ -124,22 +101,30 @@ public class TokenService implements ITokenBuilderService {
         //Get Token config configured by tenant and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
-            // Convert string algorithm to MacAlgorithm safely
-            MacAlgorithm macAlgorithm = switch (tokenConfig.getSignatureAlgorithm().toUpperCase()) {
-                case "HS256" -> Jwts.SIG.HS256;
-                case "HS384" -> Jwts.SIG.HS384;
-                case "HS512" -> Jwts.SIG.HS512;
-                default -> throw new SignaturAlgorithmNotSupportedException("Unsupported signature algorithm: "
-                        + tokenConfig.getSignatureAlgorithm());
-            };
+            if (CollectionUtils.isEmpty(tokenConfig.getAudience()) || !tokenConfig.getAudience().containsAll(audience)) {
+                log.error("Token audience is invalid for tenant: {} / {}", tenant, tokenType.name());
+                throw new TokenAudienceException("Invalid token audience");
+            }
+
+            if(!StringUtils.isEmpty(tokenConfig.getKmsKeyId())) {
+                tokenConfig = tokenConfigService.fillSecretsWithSelectedKmsKey(tenant, tokenConfig);
+            }
+
+            // Convert string algorithm to SecureDigestAlgorithm safely
+            String sigAlgo = tokenConfig.getSignatureAlgorithm().toUpperCase();
+            SecureDigestAlgorithm<?, ?> algorithm = Jwts.SIG.get().get(sigAlgo);
+            if (algorithm == null) {
+                throw new SignaturAlgorithmNotSupportedException("Unsupported signature algorithm: " + sigAlgo);
+            }
 
             TokenResponseDto token = jwtService.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(tenant).toString(),
                     claims,
                     tokenConfig.getIssuer(),
                     tokenConfig.getAudience(),
-                    macAlgorithm,
+                    algorithm,
                     tokenConfig.getSecretKey(),
                     tokenConfig.getLifeTimeInMs());
+
             return token;
         } else {
             throw new TokenConfigNotFoundException("for tenant: " + tenant + "/" + tokenType.name());
