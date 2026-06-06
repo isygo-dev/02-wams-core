@@ -21,11 +21,17 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.dto.common.NextCodeDto;
+import eu.isygoit.dto.common.PaginatedResponseDto;
+import eu.isygoit.dto.data.TokenConfigDto;
 import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.enums.IEnumKeyUsage;
+import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.remote.kms.KmsAppNextCodeService;
+import eu.isygoit.remote.kms.KmsTokenConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,21 +53,27 @@ public class MainView extends VerticalLayout {
     private static final Logger log = LoggerFactory.getLogger(MainView.class);
     private static final int PAGE_SIZE = 20;
     private final KmsApiService kmsApiService;
+    private final KmsTokenConfigService tokenConfigService;
+    private final KmsAppNextCodeService nextCodeService;
     private final UI ui;
 
-    // Statistics
+    // Key Statistics
     private final ProgressBar statsLoadingBar = new ProgressBar();
     private final Button refreshButton = new Button("Refresh Stats", new Icon(VaadinIcon.REFRESH));
-    private final ProgressBar usageLoadingBar = new ProgressBar();
-    private final ProgressBar auditLoadingBar = new ProgressBar();
     private HorizontalLayout statsContainer;
 
+    // Token Configuration Statistics
+    private final ProgressBar tokenStatsLoadingBar = new ProgressBar();
+    private HorizontalLayout tokenStatsContainer;
+
     // Key Usage Statistics
+    private final ProgressBar usageLoadingBar = new ProgressBar();
     private ComboBox<KeyOption> usageKeyCombo;
     private Button loadUsageStatsButton;
     private HorizontalLayout usageStatsContainer;
 
     // Audit Logs
+    private final ProgressBar auditLoadingBar = new ProgressBar();
     private ComboBox<KeyOption> auditKeyCombo;
     private DatePicker fromDatePicker;
     private DatePicker toDatePicker;
@@ -77,8 +89,12 @@ public class MainView extends VerticalLayout {
     private List<KeyOption> keyOptions = new ArrayList<>();
 
     @Autowired
-    public MainView(KmsApiService kmsApiService) {
+    public MainView(KmsApiService kmsApiService,
+                    KmsTokenConfigService tokenConfigService,
+                    KmsAppNextCodeService nextCodeService) {
         this.kmsApiService = kmsApiService;
+        this.tokenConfigService = tokenConfigService;
+        this.nextCodeService = nextCodeService;
         this.ui = UI.getCurrent();
 
         ui.getPushConfiguration().setPushMode(com.vaadin.flow.shared.communication.PushMode.AUTOMATIC);
@@ -90,18 +106,23 @@ public class MainView extends VerticalLayout {
 
         add(buildHeader());
         add(buildGlobalKeysStatistics());
+        add(buildTokenConfigStatistics());
         add(buildKeyUsageStatsSection());
         add(buildAuditLogViewer());
         add(buildQuickLinks());
 
-        // Inject responsive CSS
         injectResponsiveStyles();
 
         showPlaceholderCards();
+        showTokenPlaceholderCards();
         loadStatistics();
+        loadTokenStatistics();
         loadKeyOptions();
     }
 
+    // =========================================================================
+    // Helper methods (copy to clipboard)
+    // =========================================================================
     public static Button createCopyButton(VaadinIcon icon, String textToCopy, String tooltip) {
         Button btn = new Button(new Icon(icon));
         btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
@@ -121,6 +142,9 @@ public class MainView extends VerticalLayout {
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
+    // =========================================================================
+    // Header
+    // =========================================================================
     private H2 buildHeader() {
         H2 title = new H2("Key Management Service Dashboard");
         title.getStyle().set("margin-bottom", "10px");
@@ -128,6 +152,9 @@ public class MainView extends VerticalLayout {
         return title;
     }
 
+    // =========================================================================
+    // Global Key Statistics (including NextCode)
+    // =========================================================================
     private VerticalLayout buildGlobalKeysStatistics() {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
@@ -155,7 +182,7 @@ public class MainView extends VerticalLayout {
         return layout;
     }
 
-    private VerticalLayout createStatCard(String label, String value, VaadinIcon icon, String color) {
+    private VerticalLayout createStatCard(String label, String value, VaadinIcon icon, String color, String tooltip) {
         VerticalLayout card = new VerticalLayout();
         card.setSpacing(false);
         card.setPadding(true);
@@ -170,6 +197,7 @@ public class MainView extends VerticalLayout {
                 .set("text-align", "center")
                 .set("transition", "all 0.2s ease");
         card.addClassName("stat-card");
+        card.getElement().setAttribute("title", tooltip);
 
         Icon iconElement = icon.create();
         iconElement.setSize("32px");
@@ -193,27 +221,22 @@ public class MainView extends VerticalLayout {
 
     private void showPlaceholderCards() {
         statsContainer.removeAll();
-        String[] labels = {
-                "Total Keys", "Active Keys", "Disabled Keys", "Pending Deletion",
-                "Rotation Enabled", "Symmetric Keys", "Asymmetric Keys",
-                "Encrypt/Decrypt Keys", "Sign/Verify Keys", "MAC Keys",
-                "Aliases", "Grants", "Custom Key Stores"
-        };
-        VaadinIcon[] icons = {
-                VaadinIcon.KEY, VaadinIcon.CHECK_CIRCLE, VaadinIcon.BAN, VaadinIcon.CLOCK,
-                VaadinIcon.ROTATE_RIGHT, VaadinIcon.CIRCLE, VaadinIcon.LOCK,
-                VaadinIcon.LOCK, VaadinIcon.PENCIL, VaadinIcon.SIGNAL,
-                VaadinIcon.TAG, VaadinIcon.SHARE, VaadinIcon.STORAGE
-        };
-        String[] colors = {
-                "#1E88E5", "#2E7D32", "#D32F2F", "#F57C00",
-                "#8E24AA", "#43A047", "#FB8C00",
-                "#1E88E5", "#8E24AA", "#D81B60",
-                "#00ACC1", "#546E7A", "#37474F"
-        };
-        for (int i = 0; i < labels.length; i++) {
-            statsContainer.add(createStatCard(labels[i], "…", icons[i], colors[i]));
-        }
+        statsContainer.add(
+                createStatCard("Total Keys", "…", VaadinIcon.KEY, "#1E88E5", "Total number of KMS keys in your account"),
+                createStatCard("Active Keys", "…", VaadinIcon.CHECK_CIRCLE, "#2E7D32", "Keys that are enabled and usable for cryptographic operations"),
+                createStatCard("Disabled Keys", "…", VaadinIcon.BAN, "#D32F2F", "Keys that are disabled and cannot be used"),
+                createStatCard("Pending Deletion", "…", VaadinIcon.CLOCK, "#F57C00", "Keys that have been scheduled for deletion"),
+                createStatCard("Rotation Enabled", "…", VaadinIcon.ROTATE_RIGHT, "#8E24AA", "Keys with automatic key rotation enabled"),
+                createStatCard("Symmetric Keys", "…", VaadinIcon.CIRCLE, "#43A047", "AES or HMAC keys (same key for encryption and decryption)"),
+                createStatCard("Asymmetric Keys", "…", VaadinIcon.LOCK, "#FB8C00", "RSA or EC keys (different keys for signing/verification)"),
+                createStatCard("Encrypt/Decrypt Keys", "…", VaadinIcon.LOCK, "#1E88E5", "Keys intended for encryption and decryption operations"),
+                createStatCard("Sign/Verify Keys", "…", VaadinIcon.PENCIL, "#8E24AA", "Keys intended for digital signature and verification"),
+                createStatCard("MAC Keys", "…", VaadinIcon.SIGNAL, "#D81B60", "Keys used for Message Authentication Code (HMAC) operations"),
+                createStatCard("Aliases", "…", VaadinIcon.TAG, "#00ACC1", "Total number of friendly aliases pointing to keys"),
+                createStatCard("Grants", "…", VaadinIcon.SHARE, "#546E7A", "Total number of access grants across all keys"),
+                createStatCard("Custom Key Stores", "…", VaadinIcon.STORAGE, "#37474F", "Number of configured custom key stores (CloudHSM or external)"),
+                createStatCard("NextCode Configs", "…", VaadinIcon.CODE, "#607D8B", "Number of incremental code generator configurations")
+        );
     }
 
     private void loadStatistics() {
@@ -271,9 +294,16 @@ public class MainView extends VerticalLayout {
                     if (storesResp.getBody() != null && storesResp.getBody().getCustomKeyStores() != null)
                         stats.totalStores = storesResp.getBody().getCustomKeyStores().size();
                 } catch (Exception e) { /* ignore */ }
-                log.info("Stats collected: totalKeys={}, activeKeys={}, symmetricKeys={}, asymmetricKeys={}, encryptUsage={}, signUsage={}, macUsage={}, aliases={}, grants={}, stores={}",
-                        stats.totalKeys, stats.activeKeys, stats.symmetricKeys, stats.asymmetricKeys,
-                        stats.encryptUsage, stats.signUsage, stats.macUsage, stats.totalAliases, stats.totalGrants, stats.totalStores);
+                // NextCode configs count
+                try {
+                    ResponseEntity<PaginatedResponseDto<NextCodeDto>> nextCodeResp = nextCodeService.findAll(0, 1);
+                    PaginatedResponseDto<NextCodeDto> nextCodeBody = nextCodeResp.getBody();
+                    if (nextCodeBody != null) {
+                        stats.nextCodeTotal = nextCodeBody.getTotalElements();
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to load NextCode statistics", e);
+                }
             } catch (Exception e) {
                 log.error("Error in statistics collection", e);
             }
@@ -287,19 +317,20 @@ public class MainView extends VerticalLayout {
             updateUi.access(() -> {
                 statsContainer.removeAll();
                 statsContainer.add(
-                        createStatCard("Total Keys", String.valueOf(stats.totalKeys), VaadinIcon.KEY, "#1E88E5"),
-                        createStatCard("Active Keys", String.valueOf(stats.activeKeys), VaadinIcon.CHECK_CIRCLE, "#2E7D32"),
-                        createStatCard("Disabled Keys", String.valueOf(stats.disabledKeys), VaadinIcon.BAN, "#D32F2F"),
-                        createStatCard("Pending Deletion", String.valueOf(stats.pendingDeletion), VaadinIcon.CLOCK, "#F57C00"),
-                        createStatCard("Rotation Enabled", String.valueOf(stats.rotationEnabled), VaadinIcon.ROTATE_RIGHT, "#8E24AA"),
-                        createStatCard("Symmetric Keys", String.valueOf(stats.symmetricKeys), VaadinIcon.CIRCLE, "#43A047"),
-                        createStatCard("Asymmetric Keys", String.valueOf(stats.asymmetricKeys), VaadinIcon.LOCK, "#FB8C00"),
-                        createStatCard("Encrypt/Decrypt Keys", String.valueOf(stats.encryptUsage), VaadinIcon.LOCK, "#1E88E5"),
-                        createStatCard("Sign/Verify Keys", String.valueOf(stats.signUsage), VaadinIcon.PENCIL, "#8E24AA"),
-                        createStatCard("MAC Keys", String.valueOf(stats.macUsage), VaadinIcon.SIGNAL, "#D81B60"),
-                        createStatCard("Aliases", String.valueOf(stats.totalAliases), VaadinIcon.TAG, "#00ACC1"),
-                        createStatCard("Grants", String.valueOf(stats.totalGrants), VaadinIcon.SHARE, "#546E7A"),
-                        createStatCard("Custom Key Stores", String.valueOf(stats.totalStores), VaadinIcon.STORAGE, "#37474F")
+                        createStatCard("Total Keys", String.valueOf(stats.totalKeys), VaadinIcon.KEY, "#1E88E5", "Total number of KMS keys in your account"),
+                        createStatCard("Active Keys", String.valueOf(stats.activeKeys), VaadinIcon.CHECK_CIRCLE, "#2E7D32", "Keys that are enabled and usable for cryptographic operations"),
+                        createStatCard("Disabled Keys", String.valueOf(stats.disabledKeys), VaadinIcon.BAN, "#D32F2F", "Keys that are disabled and cannot be used"),
+                        createStatCard("Pending Deletion", String.valueOf(stats.pendingDeletion), VaadinIcon.CLOCK, "#F57C00", "Keys that have been scheduled for deletion"),
+                        createStatCard("Rotation Enabled", String.valueOf(stats.rotationEnabled), VaadinIcon.ROTATE_RIGHT, "#8E24AA", "Keys with automatic key rotation enabled"),
+                        createStatCard("Symmetric Keys", String.valueOf(stats.symmetricKeys), VaadinIcon.CIRCLE, "#43A047", "AES or HMAC keys (same key for encryption and decryption)"),
+                        createStatCard("Asymmetric Keys", String.valueOf(stats.asymmetricKeys), VaadinIcon.LOCK, "#FB8C00", "RSA or EC keys (different keys for signing/verification)"),
+                        createStatCard("Encrypt/Decrypt Keys", String.valueOf(stats.encryptUsage), VaadinIcon.LOCK, "#1E88E5", "Keys intended for encryption and decryption operations"),
+                        createStatCard("Sign/Verify Keys", String.valueOf(stats.signUsage), VaadinIcon.PENCIL, "#8E24AA", "Keys intended for digital signature and verification"),
+                        createStatCard("MAC Keys", String.valueOf(stats.macUsage), VaadinIcon.SIGNAL, "#D81B60", "Keys used for Message Authentication Code (HMAC) operations"),
+                        createStatCard("Aliases", String.valueOf(stats.totalAliases), VaadinIcon.TAG, "#00ACC1", "Total number of friendly aliases pointing to keys"),
+                        createStatCard("Grants", String.valueOf(stats.totalGrants), VaadinIcon.SHARE, "#546E7A", "Total number of access grants across all keys"),
+                        createStatCard("Custom Key Stores", String.valueOf(stats.totalStores), VaadinIcon.STORAGE, "#37474F", "Number of configured custom key stores (CloudHSM or external)"),
+                        createStatCard("NextCode Configs", String.valueOf(stats.nextCodeTotal), VaadinIcon.CODE, "#607D8B", "Number of incremental code generator configurations")
                 );
                 statsLoadingBar.setVisible(false);
                 refreshButton.setEnabled(true);
@@ -308,6 +339,93 @@ public class MainView extends VerticalLayout {
         });
     }
 
+    // =========================================================================
+    // Token Configuration Statistics
+    // =========================================================================
+    private VerticalLayout buildTokenConfigStatistics() {
+        VerticalLayout layout = new VerticalLayout();
+        layout.setSpacing(true);
+        layout.setPadding(false);
+        layout.setWidthFull();
+
+        HorizontalLayout titleRow = new HorizontalLayout();
+        titleRow.setWidthFull();
+        titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        H3 tokenStatsTitle = new H3("Token Configuration Statistics");
+        tokenStatsLoadingBar.setIndeterminate(true);
+        tokenStatsLoadingBar.setVisible(false);
+        tokenStatsLoadingBar.setWidth("200px");
+        titleRow.add(tokenStatsTitle, tokenStatsLoadingBar);
+        layout.add(titleRow);
+
+        tokenStatsContainer = new HorizontalLayout();
+        tokenStatsContainer.setWidthFull();
+        tokenStatsContainer.setSpacing(true);
+        tokenStatsContainer.getStyle().set("flex-wrap", "wrap").set("gap", "16px");
+        layout.add(tokenStatsContainer);
+
+        return layout;
+    }
+
+    private void showTokenPlaceholderCards() {
+        tokenStatsContainer.removeAll();
+        tokenStatsContainer.add(
+                createStatCard("Total Configs", "…", VaadinIcon.COG, "#607D8B", "Total number of JWT token configurations"),
+                createStatCard("ACCESS", "…", VaadinIcon.KEY, "#1E88E5", "Configurations for access tokens (used for API authorization)"),
+                createStatCard("REFRESH", "…", VaadinIcon.REFRESH, "#43A047", "Configurations for refresh tokens (used to obtain new access tokens)"),
+                createStatCard("RSTPWD", "…", VaadinIcon.LOCK, "#F57C00", "Configurations for password reset tokens"),
+                createStatCard("AUTHORITY", "…", VaadinIcon.USER, "#8E24AA", "Configurations for authority tokens (granting specific permissions)")
+        );
+    }
+
+    private void loadTokenStatistics() {
+        tokenStatsLoadingBar.setVisible(true);
+        CompletableFuture.supplyAsync(() -> {
+            TokenStats stats = new TokenStats();
+            try {
+                // Get total count via pagination
+                ResponseEntity<PaginatedResponseDto<TokenConfigDto>> totalResp = tokenConfigService.findAll(0, 1);
+                PaginatedResponseDto<TokenConfigDto> totalBody = totalResp.getBody();
+                if (totalBody != null) {
+                    stats.total = totalBody.getTotalElements();
+                }
+                // Fetch up to 500 configs to compute per-type counts (acceptable for dashboard)
+                ResponseEntity<PaginatedResponseDto<TokenConfigDto>> listResp = tokenConfigService.findAll(0, 500);
+                if (listResp.getBody() != null && listResp.getBody().getContent() != null) {
+                    List<TokenConfigDto> configs = listResp.getBody().getContent();
+                    stats.access = configs.stream().filter(c -> c.getTokenType() == IEnumToken.Types.ACCESS).count();
+                    stats.refresh = configs.stream().filter(c -> c.getTokenType() == IEnumToken.Types.REFRESH).count();
+                    stats.rstpwd = configs.stream().filter(c -> c.getTokenType() == IEnumToken.Types.RSTPWD).count();
+                    stats.authority = configs.stream().filter(c -> c.getTokenType() == IEnumToken.Types.AUTHORITY).count();
+                }
+            } catch (Exception e) {
+                log.error("Error fetching token configuration statistics", e);
+            }
+            return stats;
+        }).orTimeout(30, TimeUnit.SECONDS).exceptionally(ex -> {
+            log.error("Token stats timeout/failure", ex);
+            return new TokenStats();
+        }).thenAccept(stats -> {
+            UI updateUi = ui != null ? ui : UI.getCurrent();
+            if (updateUi == null) return;
+            updateUi.access(() -> {
+                tokenStatsContainer.removeAll();
+                tokenStatsContainer.add(
+                        createStatCard("Total Configs", String.valueOf(stats.total), VaadinIcon.COG, "#607D8B", "Total number of JWT token configurations"),
+                        createStatCard("ACCESS", String.valueOf(stats.access), VaadinIcon.KEY, "#1E88E5", "Configurations for access tokens (used for API authorization)"),
+                        createStatCard("REFRESH", String.valueOf(stats.refresh), VaadinIcon.REFRESH, "#43A047", "Configurations for refresh tokens (used to obtain new access tokens)"),
+                        createStatCard("RSTPWD", String.valueOf(stats.rstpwd), VaadinIcon.LOCK, "#F57C00", "Configurations for password reset tokens"),
+                        createStatCard("AUTHORITY", String.valueOf(stats.authority), VaadinIcon.USER, "#8E24AA", "Configurations for authority tokens (granting specific permissions)")
+                );
+                tokenStatsLoadingBar.setVisible(false);
+                updateUi.push();
+            });
+        });
+    }
+
+    // =========================================================================
+    // Key Usage Statistics
+    // =========================================================================
     private VerticalLayout buildKeyUsageStatsSection() {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
@@ -341,6 +459,7 @@ public class MainView extends VerticalLayout {
 
         loadUsageStatsButton = new Button("Load Usage Stats", new Icon(VaadinIcon.CHART));
         loadUsageStatsButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        loadUsageStatsButton.addClickListener(e -> loadKeyUsageStats());
 
         filterBar.add(usageKeyCombo, loadUsageStatsButton);
         layout.add(filterBar);
@@ -351,8 +470,6 @@ public class MainView extends VerticalLayout {
         usageStatsContainer.getStyle().set("flex-wrap", "wrap").set("gap", "16px");
         usageStatsContainer.setVisible(false);
         layout.add(usageStatsContainer);
-
-        loadUsageStatsButton.addClickListener(e -> loadKeyUsageStats());
 
         return layout;
     }
@@ -536,6 +653,9 @@ public class MainView extends VerticalLayout {
         return card;
     }
 
+    // =========================================================================
+    // Audit Logs
+    // =========================================================================
     private VerticalLayout buildAuditLogViewer() {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
@@ -577,6 +697,7 @@ public class MainView extends VerticalLayout {
 
         loadLogsButton = new Button("Load Logs", new Icon(VaadinIcon.SEARCH));
         loadLogsButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        loadLogsButton.addClickListener(e -> loadAuditLogs());
 
         filterBar.add(auditKeyCombo, fromDatePicker, toDatePicker, loadLogsButton);
         layout.add(filterBar);
@@ -620,8 +741,6 @@ public class MainView extends VerticalLayout {
 
         paginationBar.add(prevButton, pageInfoSpan, nextButton);
         layout.add(paginationBar);
-
-        loadLogsButton.addClickListener(e -> loadAuditLogs());
 
         return layout;
     }
@@ -714,6 +833,9 @@ public class MainView extends VerticalLayout {
         }
     }
 
+    // =========================================================================
+    // Quick Links
+    // =========================================================================
     private VerticalLayout buildQuickLinks() {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
@@ -727,6 +849,9 @@ public class MainView extends VerticalLayout {
         return layout;
     }
 
+    // =========================================================================
+    // Responsive CSS
+    // =========================================================================
     private void injectResponsiveStyles() {
         String css = """
                 .kms-dashboard .stat-card {
@@ -774,10 +899,22 @@ public class MainView extends VerticalLayout {
         );
     }
 
+    // =========================================================================
+    // Inner classes for statistics
+    // =========================================================================
     private static class Stats {
         long totalKeys = 0, activeKeys = 0, disabledKeys = 0, pendingDeletion = 0, rotationEnabled = 0,
                 symmetricKeys = 0, asymmetricKeys = 0, encryptUsage = 0, signUsage = 0, macUsage = 0,
                 totalAliases = 0, totalGrants = 0, totalStores = 0;
+        long nextCodeTotal = 0;
+    }
+
+    private static class TokenStats {
+        long total = 0;
+        long access = 0;
+        long refresh = 0;
+        long rstpwd = 0;
+        long authority = 0;
     }
 
     private static class KeyOption {
