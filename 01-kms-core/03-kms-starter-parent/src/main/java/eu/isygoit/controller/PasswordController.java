@@ -175,7 +175,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
 
             if (IEnumAuth.Types.TOKEN == accessRequest.getAuthType()) {
                 try {
-                    TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(accessRequest.getTenant().trim().toLowerCase(),
+                    TokenConfig tokenConfig = tokenConfigService.prepareTokenConfig(accessRequest.getTenant().trim().toLowerCase(),
                             IEnumToken.Types.ACCESS);
                     jwtService.validateToken(accessRequest.getPassword(),
                             new StringBuilder(accessRequest.getUserName().trim().toLowerCase())

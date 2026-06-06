@@ -355,7 +355,7 @@ public class PasswordService implements IPasswordService {
                 );
 
                 if (accessToken != null && !accessToken.isExpired()) {
-                    TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, IEnumToken.Types.RSTPWD);
+                    TokenConfig tokenConfig = tokenConfigService.prepareTokenConfig(tenant, IEnumToken.Types.RSTPWD);
                     jwtService.validateToken(resetPwdViaTokenRequestDto.getToken(),
                             tokenSubject,
                             tenant,

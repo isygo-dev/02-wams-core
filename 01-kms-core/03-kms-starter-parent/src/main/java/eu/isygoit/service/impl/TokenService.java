@@ -17,12 +17,10 @@ import eu.isygoit.model.AccessToken;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.TokenConfig;
 import eu.isygoit.remote.ims.ImsAppParameterService;
-import eu.isygoit.repository.KmsKeyRepository;
 import eu.isygoit.service.*;
 import eu.isygoit.types.EmailSubjects;
 import eu.isygoit.types.MsgTemplateVariables;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.MacAlgorithm;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import javax.crypto.SecretKey;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -99,15 +96,11 @@ public class TokenService implements ITokenBuilderService {
     @Override
     public TokenResponseDto buildToken(String tenant, Set<String> audience, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
         //Get Token config configured by tenant and type, otherwise, default one
-        TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
+        TokenConfig tokenConfig = tokenConfigService.prepareTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
             if (CollectionUtils.isEmpty(tokenConfig.getAudience()) || !tokenConfig.getAudience().containsAll(audience)) {
                 log.error("Token audience is invalid for tenant: {} / {}", tenant, tokenType.name());
                 throw new TokenAudienceException("Invalid token audience");
-            }
-
-            if(!StringUtils.isEmpty(tokenConfig.getKmsKeyId())) {
-                tokenConfig = tokenConfigService.fillSecretsWithSelectedKmsKey(tenant, tokenConfig);
             }
 
             // Convert string algorithm to SecureDigestAlgorithm safely
@@ -134,7 +127,7 @@ public class TokenService implements ITokenBuilderService {
     @Override
     public boolean isTokenValid(String tenant, Set<String> audience, IEnumToken.Types tokenType, String token, String subject) {
         // Get Token config configured by tenant and type
-        TokenConfig tokenConfig = tokenConfigService.buildTokenConfig(tenant, tokenType);
+        TokenConfig tokenConfig = tokenConfigService.prepareTokenConfig(tenant, tokenType);
         if (tokenConfig != null) {
             // Validate token content – pass both keys (the validate method will choose based on algorithm)
             jwtService.validateToken(token, subject, tokenConfig.getIssuer(), audience, tokenConfig.getSecretKey(), tokenConfig.getPublicKey());

@@ -55,7 +55,7 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
 
 
     @Override
-    public TokenConfig buildTokenConfig(String tenant, IEnumToken.Types tokenType) {
+    public TokenConfig prepareTokenConfig(String tenant, IEnumToken.Types tokenType) {
         //Serach for token config configured for the domein by type
         Optional<TokenConfig> optional = tokenConfigRepository.findByTenantIgnoreCaseAndTokenType(tenant, tokenType);
         if (!optional.isPresent()) {
@@ -64,7 +64,11 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
         }
 
         if (optional.isPresent()) {
-            return optional.get();
+            TokenConfig tokenConfig = optional.get();
+            if(!StringUtils.isEmpty(tokenConfig.getKmsKeyId())) {
+                tokenConfig = this.fillSecretsWithSelectedKmsKey(tenant, tokenConfig);
+            }
+            return tokenConfig;
         }
 
         //Build token config secified by system properties
