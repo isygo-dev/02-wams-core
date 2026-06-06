@@ -6,9 +6,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -50,17 +48,20 @@ public class MainView extends VerticalLayout {
     private static final int PAGE_SIZE = 20;
     private final KmsApiService kmsApiService;
     private final UI ui;
-    // ==================== Key Statistics ====================
+
+    // Statistics
     private final ProgressBar statsLoadingBar = new ProgressBar();
     private final Button refreshButton = new Button("Refresh Stats", new Icon(VaadinIcon.REFRESH));
     private final ProgressBar usageLoadingBar = new ProgressBar();
     private final ProgressBar auditLoadingBar = new ProgressBar();
     private HorizontalLayout statsContainer;
-    // ==================== Key Usage Statistics ====================
+
+    // Key Usage Statistics
     private ComboBox<KeyOption> usageKeyCombo;
     private Button loadUsageStatsButton;
     private HorizontalLayout usageStatsContainer;
-    // ==================== Audit Logs ====================
+
+    // Audit Logs
     private ComboBox<KeyOption> auditKeyCombo;
     private DatePicker fromDatePicker;
     private DatePicker toDatePicker;
@@ -72,7 +73,7 @@ public class MainView extends VerticalLayout {
     private Span pageInfoSpan;
     private List<AuditLogResponse.LogEntry> allLogs = new ArrayList<>();
     private int currentPage = 0;
-    // Shared key options (store both keyId and keyUsage for efficient filtering)
+
     private List<KeyOption> keyOptions = new ArrayList<>();
 
     @Autowired
@@ -80,7 +81,6 @@ public class MainView extends VerticalLayout {
         this.kmsApiService = kmsApiService;
         this.ui = UI.getCurrent();
 
-        // Enable push for immediate UI updates
         ui.getPushConfiguration().setPushMode(com.vaadin.flow.shared.communication.PushMode.AUTOMATIC);
 
         setSizeFull();
@@ -89,39 +89,28 @@ public class MainView extends VerticalLayout {
         addClassName("kms-dashboard");
 
         add(buildHeader());
-
-        // Global Key Statistics section
         add(buildGlobalKeysStatistics());
-
-        // Key Usage Statistics section
         add(buildKeyUsageStatsSection());
-
-        // Audit Logs section
         add(buildAuditLogViewer());
-
         add(buildQuickLinks());
+
+        // Inject responsive CSS
+        injectResponsiveStyles();
 
         showPlaceholderCards();
         loadStatistics();
         loadKeyOptions();
     }
 
-    /**
-     * Creates a compact copy button consistent with KeyCard's style.
-     */
     public static Button createCopyButton(VaadinIcon icon, String textToCopy, String tooltip) {
         Button btn = new Button(new Icon(icon));
         btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         btn.setTooltipText(tooltip);
         btn.setWidth("20px");
         btn.setHeight("20px");
-        btn.addClickListener(e -> MainView.copyToClipboard(textToCopy, String.format("Copied %s to clipboard", textToCopy)));
+        btn.addClickListener(e -> copyToClipboard(textToCopy, "Copied " + textToCopy + " to clipboard"));
         return btn;
     }
-
-    // =========================================================================
-    // Global Key Statistics
-    // =========================================================================
 
     public static void copyToClipboard(String text, String notificationText) {
         UI.getCurrent().getPage().executeJs(
@@ -135,6 +124,7 @@ public class MainView extends VerticalLayout {
     private H2 buildHeader() {
         H2 title = new H2("Key Management Service Dashboard");
         title.getStyle().set("margin-bottom", "10px");
+        title.addClassName(LumoUtility.FontSize.XXLARGE);
         return title;
     }
 
@@ -144,7 +134,6 @@ public class MainView extends VerticalLayout {
         layout.setPadding(false);
         layout.setWidthFull();
 
-        // Title row with refresh button and inline loading bar
         HorizontalLayout titleRow = new HorizontalLayout();
         titleRow.setWidthFull();
         titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -170,7 +159,7 @@ public class MainView extends VerticalLayout {
         VerticalLayout card = new VerticalLayout();
         card.setSpacing(false);
         card.setPadding(true);
-        card.setWidth("220px");
+        card.setWidthFull();
         card.getStyle()
                 .set("border", "1px solid var(--lumo-contrast-20pct)")
                 .set("border-radius", "var(--lumo-border-radius-l)")
@@ -178,7 +167,9 @@ public class MainView extends VerticalLayout {
                 .set("align-items", "center")
                 .set("flex", "1 1 180px")
                 .set("background-color", "var(--lumo-base-color)")
-                .set("text-align", "center");
+                .set("text-align", "center")
+                .set("transition", "all 0.2s ease");
+        card.addClassName("stat-card");
 
         Icon iconElement = icon.create();
         iconElement.setSize("32px");
@@ -200,27 +191,29 @@ public class MainView extends VerticalLayout {
         return card;
     }
 
-    // =========================================================================
-    // Key Usage Statistics (per key, customized by key usage)
-    // =========================================================================
-
     private void showPlaceholderCards() {
         statsContainer.removeAll();
-        statsContainer.add(
-                createStatCard("Total Keys", "…", VaadinIcon.KEY, "#1E88E5"),
-                createStatCard("Active Keys", "…", VaadinIcon.CHECK_CIRCLE, "#2E7D32"),
-                createStatCard("Disabled Keys", "…", VaadinIcon.BAN, "#D32F2F"),
-                createStatCard("Pending Deletion", "…", VaadinIcon.CLOCK, "#F57C00"),
-                createStatCard("Rotation Enabled", "…", VaadinIcon.ROTATE_RIGHT, "#8E24AA"),
-                createStatCard("Symmetric Keys", "…", VaadinIcon.CIRCLE, "#43A047"),
-                createStatCard("Asymmetric Keys", "…", VaadinIcon.LOCK, "#FB8C00"),
-                createStatCard("Encrypt/Decrypt Keys", "…", VaadinIcon.LOCK, "#1E88E5"),
-                createStatCard("Sign/Verify Keys", "…", VaadinIcon.PENCIL, "#8E24AA"),
-                createStatCard("MAC Keys", "…", VaadinIcon.SIGNAL, "#D81B60"),
-                createStatCard("Aliases", "…", VaadinIcon.TAG, "#00ACC1"),
-                createStatCard("Grants", "…", VaadinIcon.SHARE, "#546E7A"),
-                createStatCard("Custom Key Stores", "…", VaadinIcon.STORAGE, "#37474F")
-        );
+        String[] labels = {
+                "Total Keys", "Active Keys", "Disabled Keys", "Pending Deletion",
+                "Rotation Enabled", "Symmetric Keys", "Asymmetric Keys",
+                "Encrypt/Decrypt Keys", "Sign/Verify Keys", "MAC Keys",
+                "Aliases", "Grants", "Custom Key Stores"
+        };
+        VaadinIcon[] icons = {
+                VaadinIcon.KEY, VaadinIcon.CHECK_CIRCLE, VaadinIcon.BAN, VaadinIcon.CLOCK,
+                VaadinIcon.ROTATE_RIGHT, VaadinIcon.CIRCLE, VaadinIcon.LOCK,
+                VaadinIcon.LOCK, VaadinIcon.PENCIL, VaadinIcon.SIGNAL,
+                VaadinIcon.TAG, VaadinIcon.SHARE, VaadinIcon.STORAGE
+        };
+        String[] colors = {
+                "#1E88E5", "#2E7D32", "#D32F2F", "#F57C00",
+                "#8E24AA", "#43A047", "#FB8C00",
+                "#1E88E5", "#8E24AA", "#D81B60",
+                "#00ACC1", "#546E7A", "#37474F"
+        };
+        for (int i = 0; i < labels.length; i++) {
+            statsContainer.add(createStatCard(labels[i], "…", icons[i], colors[i]));
+        }
     }
 
     private void loadStatistics() {
@@ -292,32 +285,25 @@ public class MainView extends VerticalLayout {
             UI updateUi = ui != null ? ui : UI.getCurrent();
             if (updateUi == null) return;
             updateUi.access(() -> {
-                try {
-                    statsContainer.removeAll();
-                    statsContainer.add(
-                            createStatCard("Total Keys", String.valueOf(stats.totalKeys), VaadinIcon.KEY, "#1E88E5"),
-                            createStatCard("Active Keys", String.valueOf(stats.activeKeys), VaadinIcon.CHECK_CIRCLE, "#2E7D32"),
-                            createStatCard("Disabled Keys", String.valueOf(stats.disabledKeys), VaadinIcon.BAN, "#D32F2F"),
-                            createStatCard("Pending Deletion", String.valueOf(stats.pendingDeletion), VaadinIcon.CLOCK, "#F57C00"),
-                            createStatCard("Rotation Enabled", String.valueOf(stats.rotationEnabled), VaadinIcon.ROTATE_RIGHT, "#8E24AA"),
-                            createStatCard("Symmetric Keys", String.valueOf(stats.symmetricKeys), VaadinIcon.CIRCLE, "#43A047"),
-                            createStatCard("Asymmetric Keys", String.valueOf(stats.asymmetricKeys), VaadinIcon.LOCK, "#FB8C00"),
-                            createStatCard("Encrypt/Decrypt Keys", String.valueOf(stats.encryptUsage), VaadinIcon.LOCK, "#1E88E5"),
-                            createStatCard("Sign/Verify Keys", String.valueOf(stats.signUsage), VaadinIcon.PENCIL, "#8E24AA"),
-                            createStatCard("MAC Keys", String.valueOf(stats.macUsage), VaadinIcon.SIGNAL, "#D81B60"),
-                            createStatCard("Aliases", String.valueOf(stats.totalAliases), VaadinIcon.TAG, "#00ACC1"),
-                            createStatCard("Grants", String.valueOf(stats.totalGrants), VaadinIcon.SHARE, "#546E7A"),
-                            createStatCard("Custom Key Stores", String.valueOf(stats.totalStores), VaadinIcon.STORAGE, "#37474F")
-                    );
-                    statsLoadingBar.setVisible(false);
-                    refreshButton.setEnabled(true);
-                    updateUi.push();
-                } catch (Exception e) {
-                    log.error("Error updating UI cards", e);
-                    statsLoadingBar.setVisible(false);
-                    refreshButton.setEnabled(true);
-                    updateUi.push();
-                }
+                statsContainer.removeAll();
+                statsContainer.add(
+                        createStatCard("Total Keys", String.valueOf(stats.totalKeys), VaadinIcon.KEY, "#1E88E5"),
+                        createStatCard("Active Keys", String.valueOf(stats.activeKeys), VaadinIcon.CHECK_CIRCLE, "#2E7D32"),
+                        createStatCard("Disabled Keys", String.valueOf(stats.disabledKeys), VaadinIcon.BAN, "#D32F2F"),
+                        createStatCard("Pending Deletion", String.valueOf(stats.pendingDeletion), VaadinIcon.CLOCK, "#F57C00"),
+                        createStatCard("Rotation Enabled", String.valueOf(stats.rotationEnabled), VaadinIcon.ROTATE_RIGHT, "#8E24AA"),
+                        createStatCard("Symmetric Keys", String.valueOf(stats.symmetricKeys), VaadinIcon.CIRCLE, "#43A047"),
+                        createStatCard("Asymmetric Keys", String.valueOf(stats.asymmetricKeys), VaadinIcon.LOCK, "#FB8C00"),
+                        createStatCard("Encrypt/Decrypt Keys", String.valueOf(stats.encryptUsage), VaadinIcon.LOCK, "#1E88E5"),
+                        createStatCard("Sign/Verify Keys", String.valueOf(stats.signUsage), VaadinIcon.PENCIL, "#8E24AA"),
+                        createStatCard("MAC Keys", String.valueOf(stats.macUsage), VaadinIcon.SIGNAL, "#D81B60"),
+                        createStatCard("Aliases", String.valueOf(stats.totalAliases), VaadinIcon.TAG, "#00ACC1"),
+                        createStatCard("Grants", String.valueOf(stats.totalGrants), VaadinIcon.SHARE, "#546E7A"),
+                        createStatCard("Custom Key Stores", String.valueOf(stats.totalStores), VaadinIcon.STORAGE, "#37474F")
+                );
+                statsLoadingBar.setVisible(false);
+                refreshButton.setEnabled(true);
+                updateUi.push();
             });
         });
     }
@@ -330,7 +316,6 @@ public class MainView extends VerticalLayout {
         layout.addClassName(LumoUtility.Background.BASE);
         layout.getStyle().set("margin-top", "24px");
 
-        // Title row with progress bar
         HorizontalLayout titleRow = new HorizontalLayout();
         titleRow.setWidthFull();
         titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -341,12 +326,12 @@ public class MainView extends VerticalLayout {
         titleRow.add(usageTitle, usageLoadingBar);
         layout.add(titleRow);
 
-        // Filter bar
         HorizontalLayout filterBar = new HorizontalLayout();
         filterBar.setWidthFull();
         filterBar.setAlignItems(FlexComponent.Alignment.END);
         filterBar.setSpacing(true);
         filterBar.getStyle().set("flex-wrap", "wrap");
+        filterBar.addClassName("stats-filter-bar");
 
         usageKeyCombo = new ComboBox<>("Select Key");
         usageKeyCombo.setPlaceholder("Choose a key");
@@ -356,7 +341,6 @@ public class MainView extends VerticalLayout {
 
         loadUsageStatsButton = new Button("Load Usage Stats", new Icon(VaadinIcon.CHART));
         loadUsageStatsButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        loadUsageStatsButton.addClickListener(e -> loadKeyUsageStats());
 
         filterBar.add(usageKeyCombo, loadUsageStatsButton);
         layout.add(filterBar);
@@ -367,6 +351,8 @@ public class MainView extends VerticalLayout {
         usageStatsContainer.getStyle().set("flex-wrap", "wrap").set("gap", "16px");
         usageStatsContainer.setVisible(false);
         layout.add(usageStatsContainer);
+
+        loadUsageStatsButton.addClickListener(e -> loadKeyUsageStats());
 
         return layout;
     }
@@ -417,10 +403,6 @@ public class MainView extends VerticalLayout {
         return keyId;
     }
 
-    // =========================================================================
-    // Audit Log Viewer
-    // =========================================================================
-
     private void loadKeyUsageStats() {
         KeyOption selected = usageKeyCombo.getValue();
         if (selected == null) {
@@ -433,9 +415,8 @@ public class MainView extends VerticalLayout {
         loadUsageStatsButton.setEnabled(false);
 
         String keyId = selected.getKeyId();
-        IEnumKeyUsage.Types keyUsage = selected.getKeyUsage();  // already stored, no extra call
+        IEnumKeyUsage.Types keyUsage = selected.getKeyUsage();
 
-        // 1. Fetch usage statistics (general counts)
         CompletableFuture<KeyUsageStatsResponse> statsFuture = CompletableFuture.supplyAsync(() -> {
             try {
                 ResponseEntity<KeyUsageStatsResponse> response = kmsApiService.getKeyUsageStats(keyId);
@@ -446,7 +427,6 @@ public class MainView extends VerticalLayout {
             }
         });
 
-        // 2. Fetch key versions count (assuming listKeyRotations exists)
         CompletableFuture<Integer> versionsFuture = CompletableFuture.supplyAsync(() -> {
             try {
                 ResponseEntity<ListKeyRotationsResponse> response = kmsApiService.listKeyRotations(keyId, 1000, null);
@@ -480,7 +460,6 @@ public class MainView extends VerticalLayout {
                             return;
                         }
 
-                        // Add cards based on key usage
                         if (keyUsage == IEnumKeyUsage.Types.ENCRYPT_DECRYPT) {
                             usageStatsContainer.add(
                                     createSmallStatCard("Encrypts", stats.getEncryptCount()),
@@ -494,8 +473,6 @@ public class MainView extends VerticalLayout {
                                     createSmallStatCard("Verifies", stats.getVerifyCount())
                             );
                         } else if (keyUsage == IEnumKeyUsage.Types.GENERATE_VERIFY_MAC) {
-                            // If your KeyUsageStatsResponse has getGenerateMacCount / getVerifyMacCount, use them.
-                            // Otherwise, you can map MAC operations to generic counts.
                             long generateMacCount = (stats.getGenerateMacCount() != null) ? stats.getGenerateMacCount() : 0L;
                             long verifyMacCount = (stats.getVerifyMacCount() != null) ? stats.getVerifyMacCount() : 0L;
                             usageStatsContainer.add(
@@ -504,7 +481,6 @@ public class MainView extends VerticalLayout {
                             );
                         }
 
-                        // Always show key versions
                         usageStatsContainer.add(createSmallStatCard("Key Versions", versionCount));
 
                         if (stats.getLastUsedDate() != null) {
@@ -542,7 +518,8 @@ public class MainView extends VerticalLayout {
                 .set("box-shadow", "var(--lumo-box-shadow-xs)")
                 .set("align-items", "center")
                 .set("background-color", "var(--lumo-base-color)")
-                .set("text-align", "center");
+                .set("text-align", "center")
+                .set("flex", "1 1 auto");
 
         Span valueSpan = new Span(value != null ? value.toString() : "0");
         valueSpan.getStyle()
@@ -567,7 +544,6 @@ public class MainView extends VerticalLayout {
         layout.addClassName(LumoUtility.Background.BASE);
         layout.getStyle().set("margin-top", "24px");
 
-        // Title row with progress bar
         HorizontalLayout titleRow = new HorizontalLayout();
         titleRow.setWidthFull();
         titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -578,12 +554,12 @@ public class MainView extends VerticalLayout {
         titleRow.add(auditTitle, auditLoadingBar);
         layout.add(titleRow);
 
-        // Filter bar
         HorizontalLayout filterBar = new HorizontalLayout();
         filterBar.setWidthFull();
         filterBar.setAlignItems(FlexComponent.Alignment.END);
         filterBar.setSpacing(true);
         filterBar.getStyle().set("flex-wrap", "wrap");
+        filterBar.addClassName("audit-filter-bar");
 
         auditKeyCombo = new ComboBox<>("KMS Key");
         auditKeyCombo.setPlaceholder("Select a key");
@@ -601,7 +577,6 @@ public class MainView extends VerticalLayout {
 
         loadLogsButton = new Button("Load Logs", new Icon(VaadinIcon.SEARCH));
         loadLogsButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        loadLogsButton.addClickListener(e -> loadAuditLogs());
 
         filterBar.add(auditKeyCombo, fromDatePicker, toDatePicker, loadLogsButton);
         layout.add(filterBar);
@@ -610,6 +585,7 @@ public class MainView extends VerticalLayout {
         auditGrid.setWidthFull();
         auditGrid.setHeight("400px");
         auditGrid.setVisible(false);
+        auditGrid.addClassName("audit-grid");
         auditGrid.addColumn(new ComponentRenderer<>(entry -> {
             LocalDateTime ts = entry.getTimestamp();
             String formatted = ts != null ? DateHelper.formatToHumanReadable(ts) : "-";
@@ -644,6 +620,8 @@ public class MainView extends VerticalLayout {
 
         paginationBar.add(prevButton, pageInfoSpan, nextButton);
         layout.add(paginationBar);
+
+        loadLogsButton.addClickListener(e -> loadAuditLogs());
 
         return layout;
     }
@@ -708,10 +686,6 @@ public class MainView extends VerticalLayout {
         });
     }
 
-    // =========================================================================
-    // Quick Links
-    // =========================================================================
-
     private void updateAuditGrid() {
         if (allLogs.isEmpty()) {
             auditGrid.setItems(new ArrayList<>());
@@ -746,10 +720,58 @@ public class MainView extends VerticalLayout {
         layout.getStyle().set("gap", "10px").set("margin-top", "24px");
         H2 title = new H2("Quick Actions");
         title.addClassName(LumoUtility.FontSize.MEDIUM);
-        Span actions = new Span("• Create Key\n• Encrypt / Decrypt\n• Manage Aliases\n• Configure Policies\n• Manage Grants");
+        Div actions = new Div();
+        actions.add(new Span("• Create Key\n• Encrypt / Decrypt\n• Manage Aliases\n• Configure Policies\n• Manage Grants"));
         actions.getStyle().set("white-space", "pre-line");
         layout.add(title, actions);
         return layout;
+    }
+
+    private void injectResponsiveStyles() {
+        String css = """
+                .kms-dashboard .stat-card {
+                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                }
+                .kms-dashboard .stat-card:hover {
+                    transform: translateY(-4px);
+                    box-shadow: var(--lumo-box-shadow-m);
+                }
+                .kms-dashboard .stats-filter-bar,
+                .kms-dashboard .audit-filter-bar {
+                    background: var(--lumo-base-color);
+                    padding: var(--lumo-space-s);
+                    border-radius: var(--lumo-border-radius-m);
+                    margin-bottom: var(--lumo-space-s);
+                }
+                .kms-dashboard .audit-grid {
+                    overflow-x: auto;
+                }
+                @media (max-width: 768px) {
+                    .kms-dashboard .stats-filter-bar,
+                    .kms-dashboard .audit-filter-bar {
+                        flex-direction: column;
+                        align-items: stretch;
+                    }
+                    .kms-dashboard .stats-filter-bar > *,
+                    .kms-dashboard .audit-filter-bar > * {
+                        width: 100% !important;
+                        margin-bottom: var(--lumo-space-xs);
+                    }
+                    .kms-dashboard .audit-grid .vaadin-grid-table {
+                        min-width: 800px;
+                    }
+                    .kms-dashboard .stat-card {
+                        flex-basis: calc(50% - 16px);
+                    }
+                    .kms-dashboard .stat-card .vaadin-button {
+                        width: auto;
+                    }
+                }
+                """;
+        UI.getCurrent().getPage().executeJs(
+                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
+                css
+        );
     }
 
     private static class Stats {
@@ -769,16 +791,8 @@ public class MainView extends VerticalLayout {
             this.keyUsage = keyUsage;
         }
 
-        String getKeyId() {
-            return keyId;
-        }
-
-        String getDisplayName() {
-            return displayName;
-        }
-
-        IEnumKeyUsage.Types getKeyUsage() {
-            return keyUsage;
-        }
+        String getKeyId() { return keyId; }
+        String getDisplayName() { return displayName; }
+        IEnumKeyUsage.Types getKeyUsage() { return keyUsage; }
     }
 }
