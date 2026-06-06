@@ -15,10 +15,9 @@ import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.enums.IEnumWebToken;
 import eu.isygoit.exception.AccountAuthenticationException;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
-import eu.isygoit.jwt.IJwtService;
 import eu.isygoit.mapper.AccountMapper;
-import eu.isygoit.model.TokenConfig;
 import eu.isygoit.service.*;
+import eu.isygoit.service.impl.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -54,9 +53,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     @Autowired
     private IPasswordService passwordService;
     @Autowired
-    private ITokenBuilderService tokenService;
-    @Autowired
-    private IJwtService jwtService;
+    private TokenService tokenService;
     @Autowired
     private ITokenConfigService tokenConfigService;
     @Autowired
@@ -175,16 +172,14 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
 
             if (IEnumAuth.Types.TOKEN == accessRequest.getAuthType()) {
                 try {
-                    TokenConfig tokenConfig = tokenConfigService.prepareTokenConfig(accessRequest.getTenant().trim().toLowerCase(),
-                            IEnumToken.Types.ACCESS);
-                    jwtService.validateToken(accessRequest.getPassword(),
+                    tokenService.isTokenValid(accessRequest.getTenant(),
+                            Set.of(accessRequest.getApplication()),
+                            IEnumToken.Types.ACCESS,
+                            accessRequest.getPassword(),
                             new StringBuilder(accessRequest.getUserName().trim().toLowerCase())
                                     .append("@")
                                     .append(accessRequest.getTenant().trim().toLowerCase())
-                                    .toString(),
-                            accessRequest.getTenant(),
-                            Set.of(accessRequest.getApplication()),
-                            tokenConfig.getSecretKey(), tokenConfig.getPublicKey());
+                                    .toString());
                 } catch (Exception e) {
                     return ResponseFactory.responseOk(AccessTokenResponseDto.builder()
                             .status(IEnumPasswordStatus.Types.UNAUTHORIZED)

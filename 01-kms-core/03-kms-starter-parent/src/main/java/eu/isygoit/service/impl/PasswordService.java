@@ -11,7 +11,10 @@ import eu.isygoit.exception.*;
 import eu.isygoit.helper.CRC16Helper;
 import eu.isygoit.helper.CRC32Helper;
 import eu.isygoit.jwt.IJwtService;
-import eu.isygoit.model.*;
+import eu.isygoit.model.AccessToken;
+import eu.isygoit.model.Account;
+import eu.isygoit.model.PasswordConfig;
+import eu.isygoit.model.PasswordInfo;
 import eu.isygoit.remote.ims.ImsAppParameterService;
 import eu.isygoit.repository.PasswordConfigRepository;
 import eu.isygoit.repository.PasswordInfoRepository;
@@ -52,6 +55,8 @@ public class PasswordService implements IPasswordService {
     private ICryptoService cryptoService;
     @Autowired
     private IJwtService jwtService;
+    @Autowired
+    private TokenService tokenService;
     @Autowired
     private ITokenConfigService tokenConfigService;
     @Autowired
@@ -355,13 +360,11 @@ public class PasswordService implements IPasswordService {
                 );
 
                 if (accessToken != null && !accessToken.isExpired()) {
-                    TokenConfig tokenConfig = tokenConfigService.prepareTokenConfig(tenant, IEnumToken.Types.RSTPWD);
-                    jwtService.validateToken(resetPwdViaTokenRequestDto.getToken(),
-                            tokenSubject,
-                            tenant,
+                    tokenService.isTokenValid(tenant,
                             Set.of(resetPwdViaTokenRequestDto.getApplication()),
-                            tokenConfig.getSecretKey(),
-                            tokenConfig.getPublicKey()
+                            IEnumToken.Types.RSTPWD,
+                            resetPwdViaTokenRequestDto.getToken(),
+                            tokenSubject
                     );
                     this.forceChangePassword(tenant, accountCode, resetPwdViaTokenRequestDto.getPassword());
                 } else {

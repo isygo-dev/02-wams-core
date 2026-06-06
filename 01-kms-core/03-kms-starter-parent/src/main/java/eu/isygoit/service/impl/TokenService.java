@@ -30,9 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * The type Token service.
@@ -70,33 +68,33 @@ public class TokenService implements ITokenBuilderService {
 
     @Override
     public TokenResponseDto buildTokenAndSave(String tenant, Set<String> audience, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
-            TokenResponseDto token = this.buildToken(tenant, audience, tokenType, subject, claims);
+        TokenResponseDto token = this.buildToken(tenant, audience, tokenType, subject, claims);
 
-            Long crc16 = CRC16Helper.calculate(token.getToken().getBytes());
-            Long crc32 = CRC32Helper.calculate(token.getToken().getBytes());
-            //Save generated token
-            AccessToken accessToken = null;
-            try {
-                accessToken = AccessToken.builder()
-                        .tokenType(tokenType)
-                        .application(objectMapper.writeValueAsString(audience))
-                        .crc16(crc16)
-                        .crc32(crc32)
-                        .expiryDate(token.getExpiryDate())
-                        .accountCode(subject)
-                        .deprecated(Boolean.FALSE)
-                        .build();
-            } catch (JsonProcessingException e) {
-                throw new TokenAudienceException("Error occurred while processing token audience", e);
-            }
-            accessTokenService.create(accessToken);
-            return token;
+        Long crc16 = CRC16Helper.calculate(token.getToken().getBytes());
+        Long crc32 = CRC32Helper.calculate(token.getToken().getBytes());
+        //Save generated token
+        AccessToken accessToken = null;
+        try {
+            accessToken = AccessToken.builder()
+                    .tokenType(tokenType)
+                    .application(objectMapper.writeValueAsString(audience))
+                    .crc16(crc16)
+                    .crc32(crc32)
+                    .expiryDate(token.getExpiryDate())
+                    .accountCode(subject)
+                    .deprecated(Boolean.FALSE)
+                    .build();
+        } catch (JsonProcessingException e) {
+            throw new TokenAudienceException("Error occurred while processing token audience", e);
+        }
+        accessTokenService.create(accessToken);
+        return token;
     }
 
     @Override
     public TokenResponseDto buildToken(String tenant, Set<String> audience, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
         //Get Token config configured by tenant and type, otherwise, default one
-        TokenConfig tokenConfig = tokenConfigService.prepareTokenConfig(tenant, tokenType);
+        TokenConfig tokenConfig = tokenConfigService.prepareTokenConfig(tenant, tokenType, null);
         if (tokenConfig != null) {
             if (CollectionUtils.isEmpty(tokenConfig.getAudience()) || !tokenConfig.getAudience().containsAll(audience)) {
                 log.error("Token audience is invalid for tenant: {} / {}", tenant, tokenType.name());
@@ -110,6 +108,12 @@ public class TokenService implements ITokenBuilderService {
                 throw new SignaturAlgorithmNotSupportedException("Unsupported signature algorithm: " + sigAlgo);
             }
 
+            if (CollectionUtils.isEmpty(claims)) {
+                claims = new HashMap<>();
+            }
+            if (!claims.containsKey(JwtConstants.JWT_KMS_KEY_VERSION_ID)) {
+                claims.put(JwtConstants.JWT_KMS_KEY_VERSION_ID, tokenConfig.getKmsKeyVersion());
+            }
             TokenResponseDto token = jwtService.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(tenant).toString(),
                     claims,
                     tokenConfig.getIssuer(),
@@ -126,8 +130,9 @@ public class TokenService implements ITokenBuilderService {
 
     @Override
     public boolean isTokenValid(String tenant, Set<String> audience, IEnumToken.Types tokenType, String token, String subject) {
-        // Get Token config configured by tenant and type
-        TokenConfig tokenConfig = tokenConfigService.prepareTokenConfig(tenant, tokenType);
+        // Get Token config configured by tenant and type, otherwise, default one
+        Optional<String> versionIdOpt = jwtService.extractClaim(token, JwtConstants.JWT_KMS_KEY_VERSION_ID, String.class);
+        TokenConfig tokenConfig = tokenConfigService.prepareTokenConfig(tenant, tokenType, versionIdOpt.orElse(null));
         if (tokenConfig != null) {
             // Validate token content – pass both keys (the validate method will choose based on algorithm)
             jwtService.validateToken(token, subject, tokenConfig.getIssuer(), audience, tokenConfig.getSecretKey(), tokenConfig.getPublicKey());

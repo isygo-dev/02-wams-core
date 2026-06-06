@@ -6,7 +6,10 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -60,20 +63,17 @@ public class MainView extends VerticalLayout {
     // Key Statistics
     private final ProgressBar statsLoadingBar = new ProgressBar();
     private final Button refreshButton = new Button("Refresh Stats", new Icon(VaadinIcon.REFRESH));
-    private HorizontalLayout statsContainer;
-
     // Token Configuration Statistics
     private final ProgressBar tokenStatsLoadingBar = new ProgressBar();
-    private HorizontalLayout tokenStatsContainer;
-
     // Key Usage Statistics
     private final ProgressBar usageLoadingBar = new ProgressBar();
+    // Audit Logs
+    private final ProgressBar auditLoadingBar = new ProgressBar();
+    private HorizontalLayout statsContainer;
+    private HorizontalLayout tokenStatsContainer;
     private ComboBox<KeyOption> usageKeyCombo;
     private Button loadUsageStatsButton;
     private HorizontalLayout usageStatsContainer;
-
-    // Audit Logs
-    private final ProgressBar auditLoadingBar = new ProgressBar();
     private ComboBox<KeyOption> auditKeyCombo;
     private DatePicker fromDatePicker;
     private DatePicker toDatePicker;
@@ -928,8 +928,16 @@ public class MainView extends VerticalLayout {
             this.keyUsage = keyUsage;
         }
 
-        String getKeyId() { return keyId; }
-        String getDisplayName() { return displayName; }
-        IEnumKeyUsage.Types getKeyUsage() { return keyUsage; }
+        String getKeyId() {
+            return keyId;
+        }
+
+        String getDisplayName() {
+            return displayName;
+        }
+
+        IEnumKeyUsage.Types getKeyUsage() {
+            return keyUsage;
+        }
     }
 }

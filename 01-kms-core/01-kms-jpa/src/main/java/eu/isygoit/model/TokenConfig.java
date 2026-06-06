@@ -86,4 +86,10 @@ public class TokenConfig extends AuditableEntity<Long> implements ITenantAssigna
 
     @Column(name = SchemaColumnConstantName.C_KMS_KEY_ID)
     private String kmsKeyId;
+
+    /*
+     For setting the used version of the KmsKey when a KMS key is linked to the token config. Not persisted, only for runtime use.
+     */
+    @Transient
+    private String kmsKeyVersion;
 }
