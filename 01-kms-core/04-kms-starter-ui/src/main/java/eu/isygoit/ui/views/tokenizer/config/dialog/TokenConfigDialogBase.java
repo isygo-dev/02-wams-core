@@ -5,6 +5,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.card.Card;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -40,6 +41,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class TokenConfigDialogBase extends BaseActionDialog {
 
+    // Algorithm groups
     protected static final List<String> HMAC_ALGORITHMS = List.of("HS256", "HS384", "HS512");
     protected static final List<String> ASYMMETRIC_ALGORITHMS = List.of(
             "RS256", "RS384", "RS512",
@@ -55,30 +57,29 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
             "EdDSA"
     );
 
-    // KMS API service
+    // Services
     protected final KmsApiService kmsApiService;
     protected List<KeyOption> availableKeyOptions = new ArrayList<>();
 
-    // Radio group for key source
+    // UI components
     protected RadioButtonGroup<String> keySourceGroup;
     protected ComboBox<KeyOption> kmsKeyCombo;
     protected VerticalLayout kmsKeyLayout;
     protected VerticalLayout customKeyLayout;
-
-    // First card: metadata
     protected Card metadataCard;
+    protected Card cryptoCard;
+    protected VerticalLayout cryptoCardContent;
+
+    // Metadata fields
     protected ComboBox<IEnumToken.Types> tokenTypeCombo;
     protected TextField issuerField;
     protected AudienceInput audienceInput;
     protected IntegerField lifeTimeValueField;
     protected ComboBox<String> lifeTimeUnitCombo;
+    protected Checkbox noExpirationCheckbox;
     protected HorizontalLayout lifetimeRow;
 
-    // Second card: crypto
-    protected Card cryptoCard;
-    protected VerticalLayout cryptoCardContent;
-
-    // Custom key components
+    // Custom key fields
     protected ComboBox<String> signatureAlgorithmCombo;
     protected TextField secretKeyField;
     protected TextArea privateKeyArea;
@@ -105,7 +106,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
     }
 
     private void buildComponents() {
-        // ---- Metadata Card ----
+        // ---------- Metadata Card ----------
         metadataCard = new Card();
         metadataCard.addClassName("config-metadata-card");
         metadataCard.setWidthFull();
@@ -113,40 +114,60 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         metaTitle.addClassName(LumoUtility.FontWeight.BOLD);
         metaTitle.addClassName(LumoUtility.FontSize.MEDIUM);
 
+        // Token type
         tokenTypeCombo = new ComboBox<>("Token type");
         tokenTypeCombo.setItems(IEnumToken.Types.values());
         tokenTypeCombo.setRequired(true);
         tokenTypeCombo.setRequiredIndicatorVisible(true);
         tokenTypeCombo.setValue(IEnumToken.Types.ACCESS);
         tokenTypeCombo.setWidthFull();
+        tokenTypeCombo.setTooltipText("Type of token: ACCESS (short-lived) or REFRESH (longer-lived).");
 
+        // Issuer
         issuerField = new TextField("Issuer");
         issuerField.setPlaceholder("e.g., https://kms.isygoit.eu");
         issuerField.setWidthFull();
+        issuerField.setTooltipText("The 'iss' claim – typically the base URL of your token issuer.");
 
+        // Audience input (custom component)
         audienceInput = new AudienceInput();
         audienceInput.setWidthFull();
+        audienceInput.setTooltipText("The intended recipient(s) of the token ('aud' claim). Add one or more URLs or identifiers.");
 
-        // Lifetime row
+        // Lifetime row with "No expiration" checkbox
+        noExpirationCheckbox = new Checkbox("No expiration");
+        noExpirationCheckbox.setTooltipText("If checked, the token will never expire (lifeTimeInMs = null).");
+        noExpirationCheckbox.addValueChangeListener(e -> {
+            boolean noExp = e.getValue();
+            lifeTimeValueField.setEnabled(!noExp);
+            lifeTimeUnitCombo.setEnabled(!noExp);
+            if (noExp) {
+                lifeTimeValueField.setValue(1);
+                lifeTimeUnitCombo.setValue("Hours");
+            }
+        });
+
         lifeTimeValueField = new IntegerField();
         lifeTimeValueField.setPlaceholder("e.g., 1");
         lifeTimeValueField.setValue(1);
-        lifeTimeValueField.setWidth("60%");
-        lifeTimeValueField.setRequired(true);
+        lifeTimeValueField.setWidth("50%");
         lifeTimeValueField.setStepButtonsVisible(true);
         lifeTimeValueField.setMin(1);
+        lifeTimeValueField.setEnabled(true);
+        lifeTimeValueField.setTooltipText("Numeric value of the lifetime.");
 
         lifeTimeUnitCombo = new ComboBox<>();
         lifeTimeUnitCombo.setItems("Seconds", "Minutes", "Hours", "Days");
         lifeTimeUnitCombo.setValue("Hours");
         lifeTimeUnitCombo.setWidth("30%");
-        lifeTimeUnitCombo.setRequired(true);
+        lifeTimeUnitCombo.setEnabled(true);
+        lifeTimeUnitCombo.setTooltipText("Unit of the lifetime value.");
 
         Span lifetimeLabel = new Span("Lifetime:");
         lifetimeLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         lifetimeLabel.getStyle().set("margin-right", "var(--lumo-space-s)");
 
-        lifetimeRow = new HorizontalLayout(lifetimeLabel, lifeTimeValueField, lifeTimeUnitCombo);
+        lifetimeRow = new HorizontalLayout(lifetimeLabel, lifeTimeValueField, lifeTimeUnitCombo, noExpirationCheckbox);
         lifetimeRow.setWidthFull();
         lifetimeRow.setAlignItems(FlexComponent.Alignment.CENTER);
         lifetimeRow.setFlexGrow(1, lifeTimeValueField);
@@ -158,7 +179,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         metaForm.add(tokenTypeCombo, issuerField, audienceInput, lifetimeRow);
         metadataCard.add(metaTitle, metaForm);
 
-        // ---- Crypto Card ----
+        // ---------- Crypto Card ----------
         cryptoCard = new Card();
         cryptoCard.addClassName("config-crypto-card");
         cryptoCard.setWidthFull();
@@ -172,12 +193,13 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         cryptoCardContent.setSpacing(true);
         cryptoCard.add(cryptoCardContent);
 
-        // Key source radio group
+        // Key source selection
         keySourceGroup = new RadioButtonGroup<>();
         keySourceGroup.setLabel("Key source");
         keySourceGroup.setItems("Use existing KMS key", "Define custom key");
         keySourceGroup.setValue("Define custom key");
         keySourceGroup.setWidthFull();
+        keySourceGroup.setTooltipText("Choose whether to reference an existing KMS key or provide custom cryptographic material.");
         cryptoCardContent.add(keySourceGroup);
 
         // KMS key selection layout
@@ -192,10 +214,11 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         kmsKeyCombo.setItemLabelGenerator(KeyOption::getDisplayName);
         kmsKeyCombo.setWidthFull();
         kmsKeyCombo.setRequired(true);
+        kmsKeyCombo.setTooltipText("Existing key stored in the KMS. The token will be signed using that key.");
         kmsKeyLayout.add(kmsKeyLabel, kmsKeyCombo);
         cryptoCardContent.add(kmsKeyLayout);
 
-        // Custom key layout
+        // Custom key layout (dynamic)
         customKeyLayout = new VerticalLayout();
         customKeyLayout.setPadding(false);
         customKeyLayout.setSpacing(true);
@@ -206,12 +229,14 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         signatureAlgorithmCombo.setRequiredIndicatorVisible(true);
         signatureAlgorithmCombo.setValue("HS256");
         signatureAlgorithmCombo.setWidthFull();
+        signatureAlgorithmCombo.setTooltipText("JWS algorithm used to sign the token. HS* = HMAC (shared secret), RS*/PS*/ES*/EdDSA = asymmetric key pair.");
         customKeyLayout.add(signatureAlgorithmCombo);
 
         secretKeyField = new TextField("Secret key (Base64)");
         secretKeyField.setRequired(true);
         secretKeyField.setRequiredIndicatorVisible(true);
         secretKeyField.setWidthFull();
+        secretKeyField.setTooltipText("Base64-encoded secret key for HMAC algorithms. Minimum length depends on algorithm: HS256=32B, HS384=48B, HS512=64B.");
 
         privateKeyArea = new TextArea("Private key (PEM)");
         privateKeyArea.setRequired(true);
@@ -220,20 +245,23 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         privateKeyArea.setHeight("150px");
         privateKeyArea.setPlaceholder("-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----");
         privateKeyArea.addClassName("no-copy");
+        privateKeyArea.setTooltipText("PEM-encoded private key for asymmetric algorithms. Can be generated with the 'Generate Key Pair' button.");
 
         publicKeyArea = new TextArea();
         publicKeyArea.setReadOnly(true);
         publicKeyArea.setWidthFull();
         publicKeyArea.setHeight("100px");
         publicKeyArea.setPlaceholder("Generate a key pair to see the public key");
+        publicKeyArea.setTooltipText("Corresponding public key (PEM). Not stored on the server – used for verification only.");
 
         generateKeyPairButton = new Button("Generate Key Pair", event -> generateKeyPair());
         generateKeyPairButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         generateKeyPairButton.setWidthFull();
+        generateKeyPairButton.setTooltipText("Generate a new RSA/EC/EdDSA key pair matching the selected algorithm. Private key will be filled; public key is displayed for reference.");
 
         publicKeyComponent = createPublicKeyComponent();
 
-        customKeyLayout.add(secretKeyField); // initially HMAC (default HS256)
+        customKeyLayout.add(secretKeyField); // initially HMAC (HS256)
         cryptoCardContent.add(customKeyLayout);
     }
 
@@ -245,7 +273,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
 
         copyPublicKeyButton = new Button(new Icon(VaadinIcon.COPY));
         copyPublicKeyButton.addClickListener(e -> copyToClipboard(publicKeyArea.getValue()));
-        copyPublicKeyButton.setTooltipText("Copy public key");
+        copyPublicKeyButton.setTooltipText("Copy public key to clipboard");
         copyPublicKeyButton.getStyle().set("margin-left", "auto");
         copyPublicKeyButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
 
@@ -361,47 +389,17 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
             String ecCurve = null;
 
             switch (algorithm) {
-                case "RS256":
-                    jcaAlgorithm = "RSA";
-                    keySize = 2048;
-                    break;
-                case "RS384":
-                    jcaAlgorithm = "RSA";
-                    keySize = 3072;
-                    break;
-                case "RS512":
-                    jcaAlgorithm = "RSA";
-                    keySize = 4096;
-                    break;
-                case "PS256":
-                    jcaAlgorithm = "RSASSA-PSS";
-                    keySize = 2048;
-                    break;
-                case "PS384":
-                    jcaAlgorithm = "RSASSA-PSS";
-                    keySize = 3072;
-                    break;
-                case "PS512":
-                    jcaAlgorithm = "RSASSA-PSS";
-                    keySize = 4096;
-                    break;
-                case "ES256":
-                    jcaAlgorithm = "EC";
-                    ecCurve = "secp256r1";
-                    break;
-                case "ES384":
-                    jcaAlgorithm = "EC";
-                    ecCurve = "secp384r1";
-                    break;
-                case "ES512":
-                    jcaAlgorithm = "EC";
-                    ecCurve = "secp521r1";
-                    break;
-                case "EdDSA":
-                    jcaAlgorithm = "Ed25519";
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unsupported asymmetric algorithm: " + algorithm);
+                case "RS256": jcaAlgorithm = "RSA"; keySize = 2048; break;
+                case "RS384": jcaAlgorithm = "RSA"; keySize = 3072; break;
+                case "RS512": jcaAlgorithm = "RSA"; keySize = 4096; break;
+                case "PS256": jcaAlgorithm = "RSASSA-PSS"; keySize = 2048; break;
+                case "PS384": jcaAlgorithm = "RSASSA-PSS"; keySize = 3072; break;
+                case "PS512": jcaAlgorithm = "RSASSA-PSS"; keySize = 4096; break;
+                case "ES256": jcaAlgorithm = "EC"; ecCurve = "secp256r1"; break;
+                case "ES384": jcaAlgorithm = "EC"; ecCurve = "secp384r1"; break;
+                case "ES512": jcaAlgorithm = "EC"; ecCurve = "secp521r1"; break;
+                case "EdDSA": jcaAlgorithm = "Ed25519"; break;
+                default: throw new IllegalArgumentException("Unsupported asymmetric algorithm: " + algorithm);
             }
 
             KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(jcaAlgorithm);
@@ -431,7 +429,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         }
     }
 
-    // ========== Utility Methods ==========
+    // ---------- Utility Methods ----------
     protected void copyToClipboard(String text) {
         if (text == null || text.isBlank()) {
             Notification.show("Nothing to copy", 2000, Notification.Position.BOTTOM_END)
@@ -478,16 +476,15 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
     }
 
     protected void handleFeignException(FeignException ex) {
-        String errorMsg = ex.status() == 500 || ex.status() == 400 ? ex.contentUTF8() : ex.getMessage();
-        this.append(errorMsg);   // optional – keep for logging
-    }
-
-    protected void handleGenericException(Exception ex) {
-        String errorMsg = ex.getMessage();
+        String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
         this.append(errorMsg);
     }
 
-    // ========== Audience Management ==========
+    protected void handleGenericException(Exception ex) {
+        this.append(ex.getMessage());
+    }
+
+    // ---------- Audience Management ----------
     protected List<String> getAudienceList() {
         return audienceInput.getAudiences();
     }
@@ -496,8 +493,11 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         audienceInput.setAudiences(audiences);
     }
 
-    // ========== Lifetime Management ==========
+    // ---------- Lifetime Management (with optional expiration) ----------
     protected Integer getLifeTimeInMs() {
+        if (noExpirationCheckbox.getValue()) {
+            return null;   // no expiration
+        }
         Integer value = lifeTimeValueField.getValue();
         if (value == null || value <= 0) {
             showError("Lifetime value must be a positive number");
@@ -510,30 +510,31 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         }
         int ms;
         switch (unit) {
-            case "Seconds":
-                ms = value * 1000;
-                break;
-            case "Minutes":
-                ms = value * 60 * 1000;
-                break;
-            case "Hours":
-                ms = value * 60 * 60 * 1000;
-                break;
-            case "Days":
-                ms = value * 24 * 60 * 60 * 1000;
-                break;
-            default:
-                throw new IllegalStateException("Unknown unit: " + unit);
+            case "Seconds": ms = value * 1000; break;
+            case "Minutes": ms = value * 60 * 1000; break;
+            case "Hours":   ms = value * 60 * 60 * 1000; break;
+            case "Days":    ms = value * 24 * 60 * 60 * 1000; break;
+            default: throw new IllegalStateException("Unknown unit: " + unit);
         }
         return ms;
     }
 
     protected void setLifeTimeFromMs(Integer ms) {
         if (ms == null || ms <= 0) {
+            // No expiration
+            noExpirationCheckbox.setValue(true);
+            lifeTimeValueField.setEnabled(false);
+            lifeTimeUnitCombo.setEnabled(false);
+            // Placeholder values (won't be used)
             lifeTimeValueField.setValue(1);
             lifeTimeUnitCombo.setValue("Hours");
             return;
         }
+        noExpirationCheckbox.setValue(false);
+        lifeTimeValueField.setEnabled(true);
+        lifeTimeUnitCombo.setEnabled(true);
+
+        // Determine best unit
         if (ms % (24 * 60 * 60 * 1000) == 0 && ms >= (24 * 60 * 60 * 1000)) {
             lifeTimeValueField.setValue(ms / (24 * 60 * 60 * 1000));
             lifeTimeUnitCombo.setValue("Days");
@@ -553,31 +554,25 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         }
     }
 
-    // ========== Abstract Methods ==========
+    // ---------- Abstract methods to be implemented by concrete dialogs ----------
     protected abstract void bindData();
-
     protected abstract void onSaveSuccess();
 
-    // ========== KeyOption Inner Class ==========
+    // ---------- Inner classes ----------
     protected static class KeyOption {
         private final String keyId;
         private final String displayName;
 
         KeyOption(String keyId, String aliasOrId) {
             this.keyId = keyId;
-            this.displayName = aliasOrId != null ? aliasOrId + " (" + keyId + ")" : keyId;
+            this.displayName = (aliasOrId != null && !aliasOrId.equals(keyId)) ? aliasOrId + " (" + keyId + ")" : keyId;
         }
 
-        public String getKeyId() {
-            return keyId;
-        }
-
-        public String getDisplayName() {
-            return displayName;
-        }
+        public String getKeyId() { return keyId; }
+        public String getDisplayName() { return displayName; }
     }
 
-    // ========== AudienceInput Inner Class ==========
+    // Custom audience input component (unchanged, but added tooltip support)
     protected static class AudienceInput extends VerticalLayout {
         private final TextField inputField;
         private final Button addButton;
@@ -604,6 +599,10 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
             chipsContainer.getStyle().set("flex-wrap", "wrap");
 
             add(inputRow, chipsContainer);
+        }
+
+        public void setTooltipText(String tooltip) {
+            inputField.setTooltipText(tooltip);
         }
 
         private void addAudience() {

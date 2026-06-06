@@ -34,6 +34,9 @@ import java.util.Set;
 })
 public class TokenConfig extends AuditableEntity<Long> implements ITenantAssignable, ICodeAssignable {
 
+    public static final String ALL_AUDIENCES = "KMS.*";
+    public static final String ISSUER_PREFIX = "KMS.";
+
     @Id
     @SequenceGenerator(name = "token_config_sequence_generator", sequenceName = "token_config_sequence", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "token_config_sequence_generator")
@@ -73,16 +76,14 @@ public class TokenConfig extends AuditableEntity<Long> implements ITenantAssigna
 
     @Lob
     @Column(name = SchemaColumnConstantName.C_SECRET_KEY, nullable = false)
-    private String secretKey = "sEcReTkEy";
+    private String secretKey;
 
     @Lob
     @Column(name = SchemaColumnConstantName.C_PUBLIC_KEY)
-    private String publicKey = "pUbLiCkEy";
+    private String publicKey;
 
-    @Builder.Default
-    @ColumnDefault("14400000")
-    @Column(name = SchemaColumnConstantName.C_LIFE_TIME_MS, nullable = false)
-    private Integer lifeTimeInMs = 14400000;
+    @Column(name = SchemaColumnConstantName.C_LIFE_TIME_MS)
+    private Integer lifeTimeInMs;
 
     @Column(name = SchemaColumnConstantName.C_KMS_KEY_ID)
     private String kmsKeyId;

@@ -56,7 +56,7 @@ public class AccessToken extends AuditableEntity<Long> {
     private Boolean deprecated = Boolean.FALSE;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = SchemaColumnConstantName.C_EXPIRY_DATE, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_EXPIRY_DATE)
     private Date expiryDate;
 
     /**

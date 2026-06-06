@@ -96,9 +96,16 @@ public class TokenService implements ITokenBuilderService {
         //Get Token config configured by tenant and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.prepareTokenConfig(tenant, tokenType, null);
         if (tokenConfig != null) {
-            if (CollectionUtils.isEmpty(tokenConfig.getAudience()) || !tokenConfig.getAudience().containsAll(audience)) {
-                log.error("Token audience is invalid for tenant: {} / {}", tenant, tokenType.name());
-                throw new TokenAudienceException("Invalid token audience");
+            if (CollectionUtils.isEmpty(tokenConfig.getAudience())) {
+                log.error("Bad Token config: audience is required for tenant: {} / {}", tenant, tokenType.name());
+                throw new TokenAudienceException("Bad Token config: audience is required");
+            }
+
+            if(!tokenConfig.getAudience().contains(TokenConfig.ALL_AUDIENCES)) {
+                if (!tokenConfig.getAudience().containsAll(audience)) {
+                    log.error("Token audience is invalid for tenant: {} / {}", tenant, tokenType.name());
+                    throw new TokenAudienceException("Token audience is invalid");
+                }
             }
 
             // Convert string algorithm to SecureDigestAlgorithm safely
@@ -110,7 +117,7 @@ public class TokenService implements ITokenBuilderService {
 
             TokenResponseDto token = jwtService.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(tenant).toString(),
                     claims,
-                    Map.of(JwtConstants.KID_VERSION, tokenConfig.getKmsKeyVersion()),
+                    StringUtils.hasText(tokenConfig.getKmsKeyVersion()) ? Map.of(JwtConstants.KID_VERSION, tokenConfig.getKmsKeyVersion()) : Collections.emptyMap(),
                     tokenConfig.getIssuer(),
                     tokenConfig.getAudience(),
                     algorithm,

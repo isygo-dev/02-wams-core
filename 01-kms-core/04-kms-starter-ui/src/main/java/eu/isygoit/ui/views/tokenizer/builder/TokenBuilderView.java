@@ -310,7 +310,9 @@ public class TokenBuilderView extends VerticalLayout {
         expiryLine.setSpacing(true);
         Span expiryLabel = new Span("📅 Expires:");
         expiryLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        Span expiryValue = new Span(DateHelper.formatToHumanReadable(DateHelper.toLocalDateTime(tokenResponse.getExpiryDate())));
+        Span expiryValue = new Span(tokenResponse.getExpiryDate() != null ?
+                DateHelper.formatToHumanReadable(DateHelper.toLocalDateTime(tokenResponse.getExpiryDate()))
+                : "Never");
         expiryValue.getStyle().set("font-family", "monospace");
         expiryLine.add(expiryLabel, expiryValue);
 

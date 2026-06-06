@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Base64;
@@ -130,6 +131,14 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
 
     @Override
     public TokenConfig beforeCreate(String tenant, TokenConfig tokenConfig) {
+        if(!StringUtils.hasText(tokenConfig.getIssuer())) {
+            tokenConfig.setIssuer(TokenConfig.ISSUER_PREFIX + tenant);
+        }
+
+        if(CollectionUtils.isEmpty(tokenConfig.getAudience())) {
+            tokenConfig.setAudience(Set.of(TokenConfig.ALL_AUDIENCES));
+        }
+
         if (tokenConfig.getKmsKeyId() != null) {
             // At creation time, store a snapshot using the current active version
             fillSecretsWithCurrentKmsKeyVersion(tenant, tokenConfig, null);
@@ -139,6 +148,14 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
 
     @Override
     public TokenConfig beforeUpdate(String tenant, TokenConfig tokenConfig) {
+        if(!StringUtils.hasText(tokenConfig.getIssuer())) {
+            tokenConfig.setIssuer(TokenConfig.ISSUER_PREFIX + tenant);
+        }
+
+        if(CollectionUtils.isEmpty(tokenConfig.getAudience())) {
+            tokenConfig.setAudience(Set.of(TokenConfig.ALL_AUDIENCES));
+        }
+
         if (tokenConfig.getKmsKeyId() != null) {
             // When updating, also refresh to the current active version
             fillSecretsWithCurrentKmsKeyVersion(tenant, tokenConfig, null);

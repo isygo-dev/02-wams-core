@@ -1,6 +1,7 @@
 package eu.isygoit.dto.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import eu.isygoit.annotation.ExcludeOnResponse;
 import eu.isygoit.dto.extendable.AuditableDto;
 import eu.isygoit.enums.IEnumToken;
 import lombok.AllArgsConstructor;
@@ -29,8 +30,11 @@ public class TokenConfigDto extends AuditableDto<Long> {
     private String issuer;
     private List<String> audience;
     private String signatureAlgorithm;
-    private String secretKey;
-    private String publicKey;
     private Integer lifeTimeInMs;
     private String kmsKeyId;
+
+    @ExcludeOnResponse
+    private String secretKey;
+    @ExcludeOnResponse
+    private String publicKey;
 }

@@ -48,7 +48,6 @@ public class CreateTokenConfigDialog extends TokenConfigDialogBase {
         }
 
         Integer lifeTime = getLifeTimeInMs();
-        if (lifeTime == null) return false;
 
         String generatedCode = "TC_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
 

@@ -87,7 +87,6 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
         }
 
         Integer lifeTime = getLifeTimeInMs();
-        if (lifeTime == null) return false;
 
         TokenConfigDto.TokenConfigDtoBuilder builder = TokenConfigDto.builder()
                 .id(original.getId())
