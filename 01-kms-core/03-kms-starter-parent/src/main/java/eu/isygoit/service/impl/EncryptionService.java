@@ -52,7 +52,9 @@ public class EncryptionService implements IEncryptionService {
             byte[] plaintext = Base64.getDecoder().decode(request.getPlaintext());
 
             KmsKeyVersion version = kmsKeyVersionRepository
-                    .findByTenantAndKeyIdAndVersionId(tenant, kmsKey.getKeyId(), kmsKey.getCurrentVersionId())
+                    .findByTenantAndKeyIdAndVersionIdAndKeyStatus(tenant, kmsKey.getKeyId(),
+                            kmsKey.getCurrentVersionId(),
+                            IEnumKeyStatus.Types.ENABLED)
                     .orElseGet(() -> {
                         log.warn("Current version {} not found for key {}, falling back to last active version",
                                 kmsKey.getCurrentVersionId(), kmsKey.getKeyId());
@@ -125,14 +127,14 @@ public class EncryptionService implements IEncryptionService {
             KmsKeyVersion version = null;
             if (versionId != null) {
                 version = kmsKeyVersionRepository
-                        .findByTenantAndKeyIdAndVersionId(tenant, keyId, versionId)
+                        .findByTenantAndKeyIdAndVersionIdAndKeyStatus(tenant, keyId, versionId, IEnumKeyStatus.Types.ENABLED)
                         .orElse(null);
             }
 
             // Fallback: if version not found (or disabled), try current version
-            if (version == null || IEnumKeyStatus.Types.ENABLED != version.getKeyStatus()) {
+            if (version == null && kmsKey.getCurrentVersionId() != null) {
                 version = kmsKeyVersionRepository
-                        .findByTenantAndKeyIdAndVersionId(tenant, keyId, kmsKey.getCurrentVersionId())
+                        .findByTenantAndKeyIdAndVersionIdAndKeyStatus(tenant, keyId, kmsKey.getCurrentVersionId(), IEnumKeyStatus.Types.ENABLED)
                         .orElse(null);
             }
 

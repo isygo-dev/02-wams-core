@@ -145,10 +145,11 @@ class EncryptionServiceTest {
                     .thenReturn(Optional.of(key));
 
             when(kmsKeyVersionRepository
-                    .findByTenantAndKeyIdAndVersionId(
+                    .findByTenantAndKeyIdAndVersionIdAndKeyStatus(
                             tenant,
                             keyId,
-                            currentVersionId
+                            currentVersionId,
+                            IEnumKeyStatus.Types.ENABLED
                     ))
                     .thenReturn(Optional.of(version));
 
@@ -208,10 +209,11 @@ class EncryptionServiceTest {
                     .thenReturn(Optional.of(key));
 
             when(kmsKeyVersionRepository
-                    .findByTenantAndKeyIdAndVersionId(
+                    .findByTenantAndKeyIdAndVersionIdAndKeyStatus(
                             tenant,
                             keyId,
-                            currentVersionId
+                            currentVersionId,
+                            IEnumKeyStatus.Types.ENABLED
                     ))
                     .thenReturn(Optional.of(version));
 
@@ -349,10 +351,11 @@ class EncryptionServiceTest {
                     .thenReturn(Optional.of(key));
 
             when(kmsKeyVersionRepository
-                    .findByTenantAndKeyIdAndVersionId(
+                    .findByTenantAndKeyIdAndVersionIdAndKeyStatus(
                             tenant,
                             keyId,
-                            versionId
+                            versionId,
+                            IEnumKeyStatus.Types.ENABLED
                     ))
                     .thenReturn(Optional.of(version));
 
@@ -406,10 +409,11 @@ class EncryptionServiceTest {
                     .thenReturn(Optional.of(key));
 
             when(kmsKeyVersionRepository
-                    .findByTenantAndKeyIdAndVersionId(
+                    .findByTenantAndKeyIdAndVersionIdAndKeyStatus(
                             tenant,
                             keyId,
-                            versionId
+                            versionId,
+                            IEnumKeyStatus.Types.ENABLED
                     ))
                     .thenReturn(Optional.of(version));
 
@@ -476,18 +480,20 @@ class EncryptionServiceTest {
                     .thenReturn(Optional.of(key));
 
             when(kmsKeyVersionRepository
-                    .findByTenantAndKeyIdAndVersionId(
+                    .findByTenantAndKeyIdAndVersionIdAndKeyStatus(
                             tenant,
                             keyId,
-                            versionId
+                            versionId,
+                            IEnumKeyStatus.Types.ENABLED
                     ))
                     .thenReturn(Optional.empty());
 
             when(kmsKeyVersionRepository
-                    .findByTenantAndKeyIdAndVersionId(
+                    .findByTenantAndKeyIdAndVersionIdAndKeyStatus(
                             tenant,
                             keyId,
-                            currentVersionId
+                            currentVersionId,
+                            IEnumKeyStatus.Types.ENABLED
                     ))
                     .thenReturn(Optional.of(currentVersion));
 
@@ -553,18 +559,20 @@ class EncryptionServiceTest {
                     .thenReturn(Optional.of(key));
 
             when(kmsKeyVersionRepository
-                    .findByTenantAndKeyIdAndVersionId(
+                    .findByTenantAndKeyIdAndVersionIdAndKeyStatus(
                             tenant,
                             keyId,
-                            versionId
+                            versionId,
+                            IEnumKeyStatus.Types.ENABLED
                     ))
                     .thenReturn(Optional.empty());
 
             when(kmsKeyVersionRepository
-                    .findByTenantAndKeyIdAndVersionId(
+                    .findByTenantAndKeyIdAndVersionIdAndKeyStatus(
                             tenant,
                             keyId,
-                            currentVersionId
+                            currentVersionId,
+                            IEnumKeyStatus.Types.ENABLED
                     ))
                     .thenReturn(Optional.empty());
 
@@ -632,18 +640,20 @@ class EncryptionServiceTest {
                     .thenReturn(Optional.of(key));
 
             when(kmsKeyVersionRepository
-                    .findByTenantAndKeyIdAndVersionId(
+                    .findByTenantAndKeyIdAndVersionIdAndKeyStatus(
                             tenant,
                             keyId,
-                            versionId
+                            versionId,
+                            IEnumKeyStatus.Types.ENABLED
                     ))
                     .thenReturn(Optional.empty());
 
             when(kmsKeyVersionRepository
-                    .findByTenantAndKeyIdAndVersionId(
+                    .findByTenantAndKeyIdAndVersionIdAndKeyStatus(
                             tenant,
                             keyId,
-                            currentVersionId
+                            currentVersionId,
+                            IEnumKeyStatus.Types.ENABLED
                     ))
                     .thenReturn(Optional.empty());
 

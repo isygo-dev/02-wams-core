@@ -111,7 +111,7 @@ class KeyVersionServiceTest {
         void disableEnabledVersion() {
             // Given
             KmsKeyVersion version = createMockVersion(keyId, versionId, IEnumKeyStatus.Types.ENABLED);
-            when(kmsKeyVersionRepository.findByTenantAndKeyIdAndVersionId(tenant, keyId, versionId))
+            when(kmsKeyVersionRepository.findByTenantAndKeyIdAndVersionIdAndKeyStatus(tenant, keyId, versionId, IEnumKeyStatus.Types.ENABLED))
                     .thenReturn(Optional.of(version));
             when(kmsKeyVersionRepository.save(any(KmsKeyVersion.class))).thenReturn(version);
 
@@ -129,7 +129,7 @@ class KeyVersionServiceTest {
         @DisplayName("Throw exception when trying to disable an already disabled version")
         void disableAlreadyDisabledVersion() {
             KmsKeyVersion version = createMockVersion(keyId, versionId, IEnumKeyStatus.Types.DISABLED);
-            when(kmsKeyVersionRepository.findByTenantAndKeyIdAndVersionId(tenant, keyId, versionId))
+            when(kmsKeyVersionRepository.findByTenantAndKeyIdAndVersionIdAndKeyStatus(tenant, keyId, versionId, IEnumKeyStatus.Types.ENABLED))
                     .thenReturn(Optional.of(version));
 
             assertThatThrownBy(() -> keyVersionService.disableKeyVersion(tenant, keyId, versionId))
@@ -141,7 +141,7 @@ class KeyVersionServiceTest {
         @Test
         @DisplayName("Throw exception when version does not exist")
         void disableNonExistentVersion() {
-            when(kmsKeyVersionRepository.findByTenantAndKeyIdAndVersionId(tenant, keyId, versionId))
+            when(kmsKeyVersionRepository.findByTenantAndKeyIdAndVersionIdAndKeyStatus(tenant, keyId, versionId, IEnumKeyStatus.Types.ENABLED))
                     .thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> keyVersionService.disableKeyVersion(tenant, keyId, versionId))
@@ -161,7 +161,7 @@ class KeyVersionServiceTest {
         @DisplayName("Enable a disabled version successfully")
         void enableDisabledVersion() {
             KmsKeyVersion version = createMockVersion(keyId, versionId, IEnumKeyStatus.Types.DISABLED);
-            when(kmsKeyVersionRepository.findByTenantAndKeyIdAndVersionId(tenant, keyId, versionId))
+            when(kmsKeyVersionRepository.findByTenantAndKeyIdAndVersionIdAndKeyStatus(tenant, keyId, versionId, IEnumKeyStatus.Types.ENABLED))
                     .thenReturn(Optional.of(version));
             when(kmsKeyVersionRepository.save(any(KmsKeyVersion.class))).thenReturn(version);
 
@@ -175,7 +175,7 @@ class KeyVersionServiceTest {
         @DisplayName("Throw exception when trying to enable an already enabled version")
         void enableAlreadyEnabledVersion() {
             KmsKeyVersion version = createMockVersion(keyId, versionId, IEnumKeyStatus.Types.ENABLED);
-            when(kmsKeyVersionRepository.findByTenantAndKeyIdAndVersionId(tenant, keyId, versionId))
+            when(kmsKeyVersionRepository.findByTenantAndKeyIdAndVersionIdAndKeyStatus(tenant, keyId, versionId, IEnumKeyStatus.Types.ENABLED))
                     .thenReturn(Optional.of(version));
 
             assertThatThrownBy(() -> keyVersionService.enableKeyVersion(tenant, keyId, versionId))
@@ -241,7 +241,7 @@ class KeyVersionServiceTest {
             assertThat(active.getVersionId()).isEqualTo("v1");
 
             // 2. Security team disables the old version v1 (e.g., due to compromise suspicion)
-            when(kmsKeyVersionRepository.findByTenantAndKeyIdAndVersionId(tenant, keyId, "v1"))
+            when(kmsKeyVersionRepository.findByTenantAndKeyIdAndVersionIdAndKeyStatus(tenant, keyId, "v1", IEnumKeyStatus.Types.ENABLED))
                     .thenReturn(Optional.of(v1));
             when(kmsKeyVersionRepository.save(any())).thenReturn(v1);
             DisableKeyVersionResponse disableResp = keyVersionService.disableKeyVersion(tenant, keyId, "v1");
@@ -249,7 +249,7 @@ class KeyVersionServiceTest {
 
             // 3. After investigation, the version is cleared and re-enabled
             v1.setKeyStatus(IEnumKeyStatus.Types.DISABLED);
-            when(kmsKeyVersionRepository.findByTenantAndKeyIdAndVersionId(tenant, keyId, "v1"))
+            when(kmsKeyVersionRepository.findByTenantAndKeyIdAndVersionIdAndKeyStatus(tenant, keyId, "v1", IEnumKeyStatus.Types.ENABLED))
                     .thenReturn(Optional.of(v1));
             EnableKeyVersionResponse enableResp = keyVersionService.enableKeyVersion(tenant, keyId, "v1");
             assertThat(enableResp.getStatus()).isEqualTo(IEnumKeyStatus.Types.ENABLED);

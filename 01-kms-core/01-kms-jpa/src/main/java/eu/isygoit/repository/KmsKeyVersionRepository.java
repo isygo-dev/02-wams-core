@@ -28,19 +28,28 @@ public interface KmsKeyVersionRepository extends JpaRepository<KmsKeyVersion, Lo
     /**
      * List all versions for a key with pagination
      */
-    Page<KmsKeyVersion> findByTenantAndKeyId(String tenant, String keyId, Pageable pageable);
+    Page<KmsKeyVersion> findByTenantAndKeyId(String tenant,
+                                             String keyId,
+                                             Pageable pageable);
 
-    Page<KmsKeyVersion> findByTenantAndKeyIdAndCreateDateIsNotNull(String tenant, String keyId, Pageable pageable);
+    Page<KmsKeyVersion> findByTenantAndKeyIdAndCreateDateIsNotNull(String tenant,
+                                                                   String keyId,
+                                                                   Pageable pageable);
 
-    void deleteByTenantAndKeyId(String tenant, String keyId);
+    void deleteByTenantAndKeyId(String tenant,
+                                String keyId);
 
-    //TO BE REMOVED
-    Optional<KmsKeyVersion> findByTenantAndKeyIdAndVersionId(String tenant, String keyId, String versionId);
+    Optional<KmsKeyVersion> findByTenantAndKeyIdAndVersionId(String tenant,
+                                                             String keyId,
+                                                             String versionId);
 
-    Optional<KmsKeyVersion> findByTenantAndKeyIdAndVersionIdAndKeyStatus(String tenant, String keyId, String versionId, IEnumKeyStatus.Types keyStatus);
+    Optional<KmsKeyVersion> findByTenantAndKeyIdAndVersionIdAndKeyStatus(String tenant,
+                                                                         String keyId,
+                                                                         String versionId,
+                                                                         IEnumKeyStatus.Types keyStatus);
 
-    List<KmsKeyVersion> findByTenantAndKeyIdOrderByCreateDateDesc(String tenant, String keyId);
-
-    List<KmsKeyVersion> findByTenantAndKeyIdAndKeyStatusOrderByCreateDateDesc(String tenant, String keyId, IEnumKeyStatus.Types types);
+    List<KmsKeyVersion> findByTenantAndKeyIdAndKeyStatusOrderByCreateDateDesc(String tenant,
+                                                                              String keyId,
+                                                                              IEnumKeyStatus.Types types);
 }
 
