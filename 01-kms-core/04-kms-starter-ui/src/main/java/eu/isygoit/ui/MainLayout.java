@@ -18,10 +18,9 @@ import eu.isygoit.ui.views.cryptography.keyGrants.GrantsView;
 import eu.isygoit.ui.views.cryptography.keyPolicy.PoliciesView;
 import eu.isygoit.ui.views.cryptography.keyStore.CustomKeyStoresView;
 import eu.isygoit.ui.views.cryptography.keyTag.TagsView;
-import eu.isygoit.ui.views.cryptography.random.RandomKeyView;  // ✅ ADD THIS IMPORT
+import eu.isygoit.ui.views.cryptography.random.RandomKeyView;
 import eu.isygoit.ui.views.tokenizer.builder.TokenBuilderView;
 import eu.isygoit.ui.views.tokenizer.config.TokenConfigView;
-// import eu.isygoit.ui.views.tokenizer.TokenManagementView; // to be implemented
 
 public class MainLayout extends AppLayout {
 
@@ -39,33 +38,43 @@ public class MainLayout extends AppLayout {
     private void createDrawer() {
         SideNav nav = new SideNav();
 
-        // ================= HOME =================
-        SideNavItem home = new SideNavItem("Home", "home", VaadinIcon.HOME.create());
+        // ========== DASHBOARD ==========
+        SideNavItem dashboard = new SideNavItem("Dashboard", "home", VaadinIcon.HOME.create());
 
-        // ================= CRYPTOGRAPHY (parent) =================
-        SideNavItem cryptoParent = new SideNavItem("Cryptography");
-        cryptoParent.setPrefixComponent(VaadinIcon.LOCK.create());
+        // ========== KEY MANAGEMENT ==========
+        SideNavItem keyMgmt = new SideNavItem("Key Management");
+        keyMgmt.setPrefixComponent(VaadinIcon.KEY.create());
 
-        cryptoParent.addItem(new SideNavItem("Key Management", KeyManagementView.class, VaadinIcon.KEY.create()));
-        cryptoParent.addItem(new SideNavItem("Key Aliases", AliasesView.class, VaadinIcon.LINK.create()));
-        cryptoParent.addItem(new SideNavItem("Key Tagging", TagsView.class, VaadinIcon.TAGS.create()));
-        cryptoParent.addItem(new SideNavItem("Key Policies", PoliciesView.class, VaadinIcon.DIPLOMA.create()));
-        cryptoParent.addItem(new SideNavItem("Grants", GrantsView.class, VaadinIcon.SHIELD.create()));
-        cryptoParent.addItem(new SideNavItem("BYOK", ByokView.class, VaadinIcon.DOWNLOAD_ALT.create()));
-        cryptoParent.addItem(new SideNavItem("Custom Key Stores", CustomKeyStoresView.class, VaadinIcon.DATABASE.create()));
-        cryptoParent.addItem(new SideNavItem("Cryptographic Operations", CryptoOperationsView.class, VaadinIcon.LOCK.create()));
-        cryptoParent.addItem(new SideNavItem("Incremental Key", IncrementalKeyView.class, VaadinIcon.CLOCK.create()));
-        cryptoParent.addItem(new SideNavItem("Random Keys", RandomKeyView.class, VaadinIcon.RANDOM.create()));
+        keyMgmt.addItem(new SideNavItem("Keys", KeyManagementView.class, VaadinIcon.KEY.create()));
+        keyMgmt.addItem(new SideNavItem("Aliases", AliasesView.class, VaadinIcon.LINK.create()));
+        keyMgmt.addItem(new SideNavItem("Tags", TagsView.class, VaadinIcon.TAGS.create()));
+        keyMgmt.addItem(new SideNavItem("Policies", PoliciesView.class, VaadinIcon.DIPLOMA.create()));
+        keyMgmt.addItem(new SideNavItem("Grants", GrantsView.class, VaadinIcon.SHIELD.create()));
+        keyMgmt.addItem(new SideNavItem("Custom Key Stores", CustomKeyStoresView.class, VaadinIcon.DATABASE.create()));
+        keyMgmt.addItem(new SideNavItem("BYOK", ByokView.class, VaadinIcon.DOWNLOAD_ALT.create())); // moved here
 
-        // ================= TOKENIZER (parent) =================
-        SideNavItem tokenParent = new SideNavItem("Tokenizer");
-        tokenParent.setPrefixComponent(VaadinIcon.CODE.create());
+        // ========== CRYPTO OPERATIONS ==========
+        SideNavItem cryptoOps = new SideNavItem("Crypto Operations");
+        cryptoOps.setPrefixComponent(VaadinIcon.LOCK.create());
 
-        tokenParent.addItem(new SideNavItem("Token Configurations", TokenConfigView.class, VaadinIcon.TABLE.create()));
-        tokenParent.addItem(new SideNavItem("Token Builder", TokenBuilderView.class, VaadinIcon.COG.create()));
+        cryptoOps.addItem(new SideNavItem("E/D & S/V", CryptoOperationsView.class, VaadinIcon.LOCK.create()));
+
+        // ========== KEY VALUE GENERATORS ==========
+        SideNavItem valueGen = new SideNavItem("Key Value Generators");
+        valueGen.setPrefixComponent(VaadinIcon.HASH.create()); // or VaadinIcon.CODE
+
+        valueGen.addItem(new SideNavItem("Random Keys", RandomKeyView.class, VaadinIcon.RANDOM.create()));
+        valueGen.addItem(new SideNavItem("Incremental Key", IncrementalKeyView.class, VaadinIcon.CLOCK.create()));
+
+        // ========== TOKENIZER ==========
+        SideNavItem tokenizer = new SideNavItem("Tokenizer");
+        tokenizer.setPrefixComponent(VaadinIcon.CODE.create());
+
+        tokenizer.addItem(new SideNavItem("Token Configurations", TokenConfigView.class, VaadinIcon.TABLE.create()));
+        tokenizer.addItem(new SideNavItem("Token Builder", TokenBuilderView.class, VaadinIcon.COG.create()));
 
         // Assemble main navigation
-        nav.addItem(home, cryptoParent, tokenParent);
+        nav.addItem(dashboard, keyMgmt, cryptoOps, valueGen, tokenizer);
 
         Scroller scroller = new Scroller(nav);
         VerticalLayout layout = new VerticalLayout(scroller);
