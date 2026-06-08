@@ -1,6 +1,6 @@
 package eu.isygoit.dto.data;
 
-import eu.isygoit.dto.extendable.AuditableDto;
+import eu.isygoit.dto.extendable.AuditableIdAssignableDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +15,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class ConnectionTrackingDto extends AuditableDto<Long> {
+public class ConnectionTrackingDto extends AuditableIdAssignableDto<Long> {
 
     private Long id;
     private String browser;

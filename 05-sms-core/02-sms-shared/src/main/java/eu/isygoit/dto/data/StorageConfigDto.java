@@ -1,6 +1,6 @@
 package eu.isygoit.dto.data;
 
-import eu.isygoit.dto.extendable.AuditableDto;
+import eu.isygoit.dto.extendable.AuditableIdAssignableDto;
 import eu.isygoit.enums.IEnumStorage;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class StorageConfigDto extends AuditableDto<Long> {
+public class StorageConfigDto extends AuditableIdAssignableDto<Long> {
 
     private Long id;
     private String tenant;

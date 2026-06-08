@@ -97,7 +97,7 @@ class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
 
     @Override
     protected void buildBodyRows() {
-        add(createIconRow(VaadinIcon.CALENDAR, "Created", creationDate));
+        add(createIconRow(VaadinIcon.CALENDAR, "Created", creationDate!=null? DateHelper.formatToHumanReadable(store.getCreateDate()) : "-"));
         if (store.getUpdateDate() != null) {
             add(createIconRow(VaadinIcon.REFRESH, "Updated", DateHelper.formatToHumanReadable(store.getUpdateDate())));
         }

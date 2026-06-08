@@ -2,7 +2,7 @@ package eu.isygoit.dto.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.isygoit.annotation.ExcludeOnResponse;
-import eu.isygoit.dto.extendable.AuditableDto;
+import eu.isygoit.dto.extendable.AuditableIdAssignableDto;
 import eu.isygoit.enums.IEnumToken;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,7 +21,7 @@ import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class TokenConfigDto extends AuditableDto<Long> {
+public class TokenConfigDto extends AuditableIdAssignableDto<Long> {
 
     private Long id;
     private String tenant;

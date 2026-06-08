@@ -1,6 +1,6 @@
 package eu.isygoit.dto.data;
 
-import eu.isygoit.dto.extendable.AuditableDto;
+import eu.isygoit.dto.extendable.AuditableIdAssignableDto;
 import eu.isygoit.enums.IEnumRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class RolePermissionDto extends AuditableDto<Long> {
+public class RolePermissionDto extends AuditableIdAssignableDto<Long> {
 
     private Long id;
     private String serviceName;

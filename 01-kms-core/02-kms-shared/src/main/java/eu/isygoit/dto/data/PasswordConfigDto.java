@@ -1,6 +1,6 @@
 package eu.isygoit.dto.data;
 
-import eu.isygoit.dto.extendable.AuditableDto;
+import eu.isygoit.dto.extendable.AuditableIdAssignableDto;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.enums.IEnumCharSet;
 import lombok.AllArgsConstructor;
@@ -16,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class PasswordConfigDto extends AuditableDto<Long> {
+public class PasswordConfigDto extends AuditableIdAssignableDto<Long> {
 
     private Long id;
     private String code;

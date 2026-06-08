@@ -10,6 +10,7 @@ import eu.isygoit.constants.AppParameterConstants;
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.common.ContextRequestDto;
+import eu.isygoit.dto.common.TokenRequestDto;
 import eu.isygoit.dto.common.TokenResponseDto;
 import eu.isygoit.dto.data.*;
 import eu.isygoit.dto.request.AccountAuthTypeRequest;

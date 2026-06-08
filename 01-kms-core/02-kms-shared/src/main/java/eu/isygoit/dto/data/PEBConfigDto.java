@@ -1,6 +1,6 @@
 package eu.isygoit.dto.data;
 
-import eu.isygoit.dto.extendable.AuditableDto;
+import eu.isygoit.dto.extendable.AuditableIdAssignableDto;
 import eu.isygoit.enums.IEnumAlgoPEBConfig;
 import eu.isygoit.enums.IEnumIvGenerator;
 import eu.isygoit.enums.IEnumSaltGenerator;
@@ -17,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class PEBConfigDto extends AuditableDto<Long> {
+public class PEBConfigDto extends AuditableIdAssignableDto<Long> {
 
     private Long id;
     private String tenant;

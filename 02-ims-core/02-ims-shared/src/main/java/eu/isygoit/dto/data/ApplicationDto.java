@@ -2,7 +2,7 @@ package eu.isygoit.dto.data;
 
 import eu.isygoit.dto.IImageUploadDto;
 import eu.isygoit.dto.common.TokenResponseDto;
-import eu.isygoit.dto.extendable.AuditableDto;
+import eu.isygoit.dto.extendable.AuditableIdAssignableDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
@@ -18,7 +18,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class ApplicationDto extends AuditableDto<Long> implements IImageUploadDto {
+public class ApplicationDto extends AuditableIdAssignableDto<Long> implements IImageUploadDto {
 
     private Long id;
     private String tenant;

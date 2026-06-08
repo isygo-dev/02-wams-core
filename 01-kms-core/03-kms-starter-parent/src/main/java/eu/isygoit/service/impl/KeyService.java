@@ -1,6 +1,8 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.constants.TenantConstants;
+import eu.isygoit.dto.common.PaginatedResponseDto;
+import eu.isygoit.dto.common.RandomKeyDto;
 import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.exception.IncrementalConfigNotFoundException;
 import eu.isygoit.model.AppNextCode;
@@ -10,6 +12,10 @@ import eu.isygoit.repository.RandomKeyRepository;
 import eu.isygoit.service.IKeyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -108,5 +114,21 @@ public class KeyService implements IKeyService {
         }
         appNextCodeRepository.increment(senderTenant, entityName, appNextCode.getIncrement());
         return appNextCode.getCode();
+    }
+
+    @Override
+    public Page<RandomKey> listRandomKeys(String tenant, int page, int size) {
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by("createDate").descending()
+        );
+
+        return randomKeyRepository.findByTenantIgnoreCase(tenant, pageable);
+    }
+
+    @Override
+    public void deleteByTenantAndName(String tenant, String keyName) {
+        randomKeyRepository.deleteByTenantIgnoreCaseAndName(tenant, keyName);
     }
 }

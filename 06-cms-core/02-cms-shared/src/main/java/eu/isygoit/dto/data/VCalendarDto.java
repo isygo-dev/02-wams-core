@@ -1,7 +1,7 @@
 package eu.isygoit.dto.data;
 
 
-import eu.isygoit.dto.extendable.AuditableDto;
+import eu.isygoit.dto.extendable.AuditableIdAssignableDto;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class VCalendarDto extends AuditableDto<Long> {
+public class VCalendarDto extends AuditableIdAssignableDto<Long> {
 
     private Long id;
     @NotEmpty

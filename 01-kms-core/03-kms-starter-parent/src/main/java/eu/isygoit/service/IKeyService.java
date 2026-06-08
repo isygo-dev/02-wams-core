@@ -1,8 +1,12 @@
 package eu.isygoit.service;
 
+import eu.isygoit.dto.common.PaginatedResponseDto;
+import eu.isygoit.dto.common.RandomKeyDto;
 import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.exception.IncrementalConfigNotFoundException;
 import eu.isygoit.model.AppNextCode;
+import eu.isygoit.model.RandomKey;
+import org.springframework.data.domain.Page;
 
 /**
  * The interface Key service.
@@ -40,7 +44,7 @@ public interface IKeyService {
      * @param value  the value
      * @return the random key
      */
-    String createOrUpdateKeyByName(String tenant /*senderTenant*/, String name, String value);
+    String createOrUpdateKeyByName(String tenant, String name, String value);
 
     /**
      * Gets key by name.
@@ -68,4 +72,8 @@ public interface IKeyService {
      * @throws IncrementalConfigNotFoundException the incremental config not found exception
      */
     String getIncrementalKey(String tenant /*senderTenant*/, String entityName, String attribute) throws IncrementalConfigNotFoundException;
+
+    Page<RandomKey> listRandomKeys(String tenant, int page, int size);
+
+    void deleteByTenantAndName(String tenant, String keyName);
 }

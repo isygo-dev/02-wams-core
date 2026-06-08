@@ -97,7 +97,7 @@ integration testing.
 │       │   └── KeyController.java                ✅ All 20 endpoints
 │       └── service/
 │           ├── I[Service]Service.java (7)        ✅ Service interfaces
-│           ├── KeyServiceApi.java                ✅ Legacy support
+│           ├── RandomKeyServiceApi.java                ✅ Legacy support
 │           └── impl/
 │               └── [Service]ServiceImpl.java (7)  ✅ Mock implementations
 │

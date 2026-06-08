@@ -1,6 +1,6 @@
 package eu.isygoit.dto.data;
 
-import eu.isygoit.dto.extendable.AuditableDto;
+import eu.isygoit.dto.extendable.AuditableIdAssignableDto;
 import eu.isygoit.enums.IEnumWorkflow;
 import eu.isygoit.enums.IEnumWorkflowCategory;
 import lombok.AllArgsConstructor;
@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class WorkflowDto extends AuditableDto<Long> {
+public class WorkflowDto extends AuditableIdAssignableDto<Long> {
 
     private Long id;
     private String tenant;

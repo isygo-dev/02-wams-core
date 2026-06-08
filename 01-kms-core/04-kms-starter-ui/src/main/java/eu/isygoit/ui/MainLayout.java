@@ -18,6 +18,7 @@ import eu.isygoit.ui.views.cryptography.keyGrants.GrantsView;
 import eu.isygoit.ui.views.cryptography.keyPolicy.PoliciesView;
 import eu.isygoit.ui.views.cryptography.keyStore.CustomKeyStoresView;
 import eu.isygoit.ui.views.cryptography.keyTag.TagsView;
+import eu.isygoit.ui.views.cryptography.random.RandomKeyView;  // ✅ ADD THIS IMPORT
 import eu.isygoit.ui.views.tokenizer.builder.TokenBuilderView;
 import eu.isygoit.ui.views.tokenizer.config.TokenConfigView;
 // import eu.isygoit.ui.views.tokenizer.TokenManagementView; // to be implemented
@@ -54,6 +55,7 @@ public class MainLayout extends AppLayout {
         cryptoParent.addItem(new SideNavItem("Custom Key Stores", CustomKeyStoresView.class, VaadinIcon.DATABASE.create()));
         cryptoParent.addItem(new SideNavItem("Cryptographic Operations", CryptoOperationsView.class, VaadinIcon.LOCK.create()));
         cryptoParent.addItem(new SideNavItem("Incremental Key", IncrementalKeyView.class, VaadinIcon.CLOCK.create()));
+        cryptoParent.addItem(new SideNavItem("Random Keys", RandomKeyView.class, VaadinIcon.RANDOM.create()));
 
         // ================= TOKENIZER (parent) =================
         SideNavItem tokenParent = new SideNavItem("Tokenizer");

@@ -1,7 +1,7 @@
 package eu.isygoit.dto.data;
 
 
-import eu.isygoit.dto.extendable.AuditableDto;
+import eu.isygoit.dto.extendable.AuditableIdAssignableDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class AppParameterDto extends AuditableDto<Long> {
+public class AppParameterDto extends AuditableIdAssignableDto<Long> {
 
     private Long id;
     private String name;

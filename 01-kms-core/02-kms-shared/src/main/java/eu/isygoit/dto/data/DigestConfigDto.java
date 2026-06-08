@@ -1,6 +1,6 @@
 package eu.isygoit.dto.data;
 
-import eu.isygoit.dto.extendable.AuditableDto;
+import eu.isygoit.dto.extendable.AuditableIdAssignableDto;
 import eu.isygoit.enums.IEnumAlgoDigestConfig;
 import eu.isygoit.enums.IEnumSaltGenerator;
 import eu.isygoit.enums.IEnumStringOutputType;
@@ -16,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class DigestConfigDto extends AuditableDto<Long> {
+public class DigestConfigDto extends AuditableIdAssignableDto<Long> {
 
     private Long id;
     private String tenant;
