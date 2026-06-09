@@ -268,7 +268,7 @@ public class PasswordService implements IPasswordService {
     }
 
     @Override
-    public IEnumPasswordStatus.Types matches(String tenant /*senderTenant*/, String userName, String plainPassword, IEnumAuth.Types authType)
+    public IEnumPasswordStatus.Types matches(String tenant, String userName, String plainPassword, IEnumAuth.Types authType)
             throws UserPasswordNotFoundException, UserNotFoundException {
         Account account = tenantService.checkAccountIfExists(tenant, null, null, userName, null, false);
         if (account != null) {

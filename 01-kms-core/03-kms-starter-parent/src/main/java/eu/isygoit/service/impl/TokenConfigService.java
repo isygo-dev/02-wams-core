@@ -131,11 +131,11 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
 
     @Override
     public TokenConfig beforeCreate(String tenant, TokenConfig tokenConfig) {
-        if(!StringUtils.hasText(tokenConfig.getIssuer())) {
+        if (!StringUtils.hasText(tokenConfig.getIssuer())) {
             tokenConfig.setIssuer(TokenConfig.ISSUER_PREFIX + tenant);
         }
 
-        if(CollectionUtils.isEmpty(tokenConfig.getAudience())) {
+        if (CollectionUtils.isEmpty(tokenConfig.getAudience())) {
             tokenConfig.setAudience(Set.of(TokenConfig.ALL_AUDIENCES));
         }
 
@@ -148,11 +148,11 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
 
     @Override
     public TokenConfig beforeUpdate(String tenant, TokenConfig tokenConfig) {
-        if(!StringUtils.hasText(tokenConfig.getIssuer())) {
+        if (!StringUtils.hasText(tokenConfig.getIssuer())) {
             tokenConfig.setIssuer(TokenConfig.ISSUER_PREFIX + tenant);
         }
 
-        if(CollectionUtils.isEmpty(tokenConfig.getAudience())) {
+        if (CollectionUtils.isEmpty(tokenConfig.getAudience())) {
             tokenConfig.setAudience(Set.of(TokenConfig.ALL_AUDIENCES));
         }
 

@@ -19,6 +19,9 @@ import eu.isygoit.ui.views.cryptography.keyPolicy.PoliciesView;
 import eu.isygoit.ui.views.cryptography.keyStore.CustomKeyStoresView;
 import eu.isygoit.ui.views.cryptography.keyTag.TagsView;
 import eu.isygoit.ui.views.cryptography.random.RandomKeyView;
+import eu.isygoit.ui.views.secrets.config.digest.DigestConfigView;
+import eu.isygoit.ui.views.secrets.config.password.PasswordConfigView;
+import eu.isygoit.ui.views.secrets.config.peb.PEBConfigView;
 import eu.isygoit.ui.views.tokenizer.builder.TokenBuilderView;
 import eu.isygoit.ui.views.tokenizer.config.TokenConfigView;
 
@@ -44,37 +47,39 @@ public class MainLayout extends AppLayout {
         // ========== KEY MANAGEMENT ==========
         SideNavItem keyMgmt = new SideNavItem("Key Management");
         keyMgmt.setPrefixComponent(VaadinIcon.KEY.create());
-
         keyMgmt.addItem(new SideNavItem("Keys", KeyManagementView.class, VaadinIcon.KEY.create()));
         keyMgmt.addItem(new SideNavItem("Aliases", AliasesView.class, VaadinIcon.LINK.create()));
         keyMgmt.addItem(new SideNavItem("Tags", TagsView.class, VaadinIcon.TAGS.create()));
         keyMgmt.addItem(new SideNavItem("Policies", PoliciesView.class, VaadinIcon.DIPLOMA.create()));
         keyMgmt.addItem(new SideNavItem("Grants", GrantsView.class, VaadinIcon.SHIELD.create()));
         keyMgmt.addItem(new SideNavItem("Custom Key Stores", CustomKeyStoresView.class, VaadinIcon.DATABASE.create()));
-        keyMgmt.addItem(new SideNavItem("BYOK", ByokView.class, VaadinIcon.DOWNLOAD_ALT.create())); // moved here
+        keyMgmt.addItem(new SideNavItem("BYOK", ByokView.class, VaadinIcon.DOWNLOAD_ALT.create()));
 
         // ========== CRYPTO OPERATIONS ==========
         SideNavItem cryptoOps = new SideNavItem("Crypto Operations");
         cryptoOps.setPrefixComponent(VaadinIcon.LOCK.create());
-
         cryptoOps.addItem(new SideNavItem("E/D & S/V", CryptoOperationsView.class, VaadinIcon.LOCK.create()));
 
         // ========== KEY VALUE GENERATORS ==========
         SideNavItem valueGen = new SideNavItem("Key Value Generators");
-        valueGen.setPrefixComponent(VaadinIcon.HASH.create()); // or VaadinIcon.CODE
-
+        valueGen.setPrefixComponent(VaadinIcon.HASH.create());
         valueGen.addItem(new SideNavItem("Random Keys", RandomKeyView.class, VaadinIcon.RANDOM.create()));
         valueGen.addItem(new SideNavItem("Incremental Key", IncrementalKeyView.class, VaadinIcon.CLOCK.create()));
+
+        // ========== PASSWORD CONFIGURATIONS ==========
+        SideNavItem passwordMenu = new SideNavItem("Password");
+        passwordMenu.setPrefixComponent(VaadinIcon.LOCK.create());
+        passwordMenu.addItem(new SideNavItem("PEB Config", PEBConfigView.class, VaadinIcon.COG.create()));
+        passwordMenu.addItem(new SideNavItem("Digest Config", DigestConfigView.class, VaadinIcon.DIPLOMA.create()));
+        passwordMenu.addItem(new SideNavItem("Password Config", PasswordConfigView.class, VaadinIcon.USER.create()));
 
         // ========== TOKENIZER ==========
         SideNavItem tokenizer = new SideNavItem("Tokenizer");
         tokenizer.setPrefixComponent(VaadinIcon.CODE.create());
-
         tokenizer.addItem(new SideNavItem("Token Configurations", TokenConfigView.class, VaadinIcon.TABLE.create()));
         tokenizer.addItem(new SideNavItem("Token Builder", TokenBuilderView.class, VaadinIcon.COG.create()));
 
-        // Assemble main navigation
-        nav.addItem(dashboard, keyMgmt, cryptoOps, valueGen, tokenizer);
+        nav.addItem(dashboard, keyMgmt, cryptoOps, valueGen, passwordMenu, tokenizer);
 
         Scroller scroller = new Scroller(nav);
         VerticalLayout layout = new VerticalLayout(scroller);

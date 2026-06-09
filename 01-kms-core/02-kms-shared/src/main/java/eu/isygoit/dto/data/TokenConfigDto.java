@@ -1,6 +1,5 @@
 package eu.isygoit.dto.data;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.isygoit.annotation.ExcludeOnResponse;
 import eu.isygoit.dto.extendable.AuditableIdAssignableDto;
 import eu.isygoit.enums.IEnumToken;
@@ -10,8 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
-
-import static com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY;
 
 
 /**

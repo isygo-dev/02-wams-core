@@ -306,9 +306,17 @@ public class ClaimsBuilderDialog extends NoActionDialog {
             layout.add(keyWrapper, valueWrapper, removeButton);
         }
 
-        public HorizontalLayout getLayout() { return layout; }
-        public String getKey() { return keyField.getValue(); }
-        public String getValue() { return valueArea.getValue(); }
+        public HorizontalLayout getLayout() {
+            return layout;
+        }
+
+        public String getKey() {
+            return keyField.getValue();
+        }
+
+        public String getValue() {
+            return valueArea.getValue();
+        }
 
         public void setKeyError(String error) {
             if (error == null) {

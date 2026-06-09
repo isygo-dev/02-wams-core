@@ -13,7 +13,8 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
-import eu.isygoit.dto.KmsDtos.*;
+import eu.isygoit.dto.KmsDtos.KeyUsageStatsResponse;
+import eu.isygoit.dto.KmsDtos.ListKeyRotationsResponse;
 import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.remote.kms.KmsApiService;
@@ -21,10 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class KeyUsageStatsPanel extends VerticalLayout {
 
@@ -212,8 +211,17 @@ public class KeyUsageStatsPanel extends VerticalLayout {
             this.displayName = (aliasOrId != null && !aliasOrId.equals(keyId)) ? aliasOrId + " (" + keyId + ")" : keyId;
             this.keyUsage = keyUsage;
         }
-        public String getKeyId() { return keyId; }
-        public String getDisplayName() { return displayName; }
-        public IEnumKeyUsage.Types getKeyUsage() { return keyUsage; }
+
+        public String getKeyId() {
+            return keyId;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        public IEnumKeyUsage.Types getKeyUsage() {
+            return keyUsage;
+        }
     }
 }

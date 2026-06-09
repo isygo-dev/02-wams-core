@@ -14,8 +14,14 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import eu.isygoit.remote.kms.*;
-import eu.isygoit.ui.views.dashbord.*;
+import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.remote.kms.KmsAppNextCodeService;
+import eu.isygoit.remote.kms.KmsTokenConfigService;
+import eu.isygoit.remote.kms.RandomKeyService;
+import eu.isygoit.ui.views.dashbord.AuditLogPanel;
+import eu.isygoit.ui.views.dashbord.KeyStatisticsPanel;
+import eu.isygoit.ui.views.dashbord.KeyUsageStatsPanel;
+import eu.isygoit.ui.views.dashbord.TokenStatisticsPanel;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -68,6 +74,25 @@ public class MainView extends VerticalLayout {
 
         injectResponsiveStyles();
         loadKeyOptions();
+    }
+
+    public static Button createCopyButton(VaadinIcon icon, String textToCopy, String tooltip) {
+        Button btn = new Button(new Icon(icon));
+        btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        btn.setTooltipText(tooltip);
+        btn.setWidth("20px");
+        btn.setHeight("20px");
+        btn.addClickListener(e -> copyToClipboard(textToCopy, "Copied " + textToCopy + " to clipboard"));
+        return btn;
+    }
+
+    public static void copyToClipboard(String text, String notificationText) {
+        UI.getCurrent().getPage().executeJs(
+                "navigator.clipboard.writeText($0).then(() => { $0.dispatchEvent(new Event('copy-success')); }).catch(() => { $0.dispatchEvent(new Event('copy-error')); });",
+                text
+        );
+        Notification.show(notificationText, 1500, Notification.Position.BOTTOM_END)
+                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
     private H2 buildHeader() {
@@ -178,25 +203,8 @@ public class MainView extends VerticalLayout {
 
     // Helper Span class for quick links
     private static class Span extends com.vaadin.flow.component.html.Span {
-        public Span(String text) { super(text); }
-    }
-
-    public static Button createCopyButton(VaadinIcon icon, String textToCopy, String tooltip) {
-        Button btn = new Button(new Icon(icon));
-        btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        btn.setTooltipText(tooltip);
-        btn.setWidth("20px");
-        btn.setHeight("20px");
-        btn.addClickListener(e -> copyToClipboard(textToCopy, "Copied " + textToCopy + " to clipboard"));
-        return btn;
-    }
-
-    public static void copyToClipboard(String text, String notificationText) {
-        UI.getCurrent().getPage().executeJs(
-                "navigator.clipboard.writeText($0).then(() => { $0.dispatchEvent(new Event('copy-success')); }).catch(() => { $0.dispatchEvent(new Event('copy-error')); });",
-                text
-        );
-        Notification.show(notificationText, 1500, Notification.Position.BOTTOM_END)
-                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        public Span(String text) {
+            super(text);
+        }
     }
 }

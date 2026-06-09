@@ -24,10 +24,10 @@ import java.util.Base64;
 
 public class DecodeJwtDialog extends NoActionDialog {
 
-    private final ObjectMapper objectMapper;
-    private final String jwtToken;
     private static final DateTimeFormatter DATE_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'UTC'").withZone(ZoneId.of("UTC"));
+    private final ObjectMapper objectMapper;
+    private final String jwtToken;
 
     public DecodeJwtDialog(ObjectMapper objectMapper, String jwtToken) {
         super("Decoded JWT");

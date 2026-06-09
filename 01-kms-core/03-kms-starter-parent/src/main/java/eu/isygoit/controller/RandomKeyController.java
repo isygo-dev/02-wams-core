@@ -6,7 +6,6 @@ import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.common.RandomKeyDto;
-import eu.isygoit.dto.data.ApplicationDto;
 import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.mapper.RandomKeyMapper;
@@ -20,9 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -44,7 +41,7 @@ public class RandomKeyController extends ControllerExceptionHandler implements R
     private RequestContextService requestContextService;
 
     /*
-    * Create new random key without saving
+     * Create new random key without saving
      */
     @Override
     public ResponseEntity<String> newRandomKey(Integer length, IEnumCharSet.Types charSetType) {
@@ -59,11 +56,11 @@ public class RandomKeyController extends ControllerExceptionHandler implements R
     }
 
     /*
-    * Create new random key by name for tenant and saving
-    */
+     * Create new random key by name for tenant and saving
+     */
     @Override
     public ResponseEntity<String> renewRandomKey(String keyName,
-            Integer length, IEnumCharSet.Types charSetType) {
+                                                 Integer length, IEnumCharSet.Types charSetType) {
         log.info("Call generateRandomKeyName");
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         try {

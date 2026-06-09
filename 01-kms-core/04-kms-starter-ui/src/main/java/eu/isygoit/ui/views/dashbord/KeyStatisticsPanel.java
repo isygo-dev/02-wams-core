@@ -94,7 +94,8 @@ public class KeyStatisticsPanel extends VerticalLayout {
                                 var meta = desc.getKeyMetadata();
                                 if (meta.getKeyStatus() == IEnumKeyStatus.Types.ENABLED) stats.activeKeys++;
                                 else if (meta.getKeyStatus() == IEnumKeyStatus.Types.DISABLED) stats.disabledKeys++;
-                                else if (meta.getKeyStatus() == IEnumKeyStatus.Types.PENDING_DELETION) stats.pendingDeletion++;
+                                else if (meta.getKeyStatus() == IEnumKeyStatus.Types.PENDING_DELETION)
+                                    stats.pendingDeletion++;
                                 if (Boolean.TRUE.equals(meta.getRotationEnabled())) stats.rotationEnabled++;
                                 IEnumKeySpec.Types spec = meta.getKeySpec();
                                 if (spec != null) {
@@ -133,13 +134,17 @@ public class KeyStatisticsPanel extends VerticalLayout {
                     ResponseEntity<PaginatedResponseDto<NextCodeDto>> nextCodeResp = nextCodeService.findAll(0, 1);
                     PaginatedResponseDto<NextCodeDto> nextCodeBody = nextCodeResp.getBody();
                     if (nextCodeBody != null) stats.nextCodeTotal = nextCodeBody.getTotalElements();
-                } catch (Exception e) { log.error("Failed to load Incremental Key statistics", e); }
+                } catch (Exception e) {
+                    log.error("Failed to load Incremental Key statistics", e);
+                }
                 // Random Keys
                 try {
                     ResponseEntity<PaginatedResponseDto<RandomKeyDto>> randomResp = randomKeyService.listRandomKeys(0, 1);
                     PaginatedResponseDto<RandomKeyDto> randomBody = randomResp.getBody();
                     if (randomBody != null) stats.randomKeysTotal = randomBody.getTotalElements();
-                } catch (Exception e) { log.error("Failed to load Random Keys statistics", e); }
+                } catch (Exception e) {
+                    log.error("Failed to load Random Keys statistics", e);
+                }
             } catch (Exception e) {
                 log.error("Error in statistics collection", e);
             }

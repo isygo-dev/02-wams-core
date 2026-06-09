@@ -101,7 +101,7 @@ public class TokenService implements ITokenBuilderService {
                 throw new TokenAudienceException("Bad Token config: audience is required");
             }
 
-            if(!tokenConfig.getAudience().contains(TokenConfig.ALL_AUDIENCES)) {
+            if (!tokenConfig.getAudience().contains(TokenConfig.ALL_AUDIENCES)) {
                 if (!tokenConfig.getAudience().containsAll(audience)) {
                     log.error("Token audience is invalid for tenant: {} / {}", tenant, tokenType.name());
                     throw new TokenAudienceException("Token audience is invalid");

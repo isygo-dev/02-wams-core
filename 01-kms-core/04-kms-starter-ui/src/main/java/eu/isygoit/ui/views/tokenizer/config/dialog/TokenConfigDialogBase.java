@@ -389,17 +389,47 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
             String ecCurve = null;
 
             switch (algorithm) {
-                case "RS256": jcaAlgorithm = "RSA"; keySize = 2048; break;
-                case "RS384": jcaAlgorithm = "RSA"; keySize = 3072; break;
-                case "RS512": jcaAlgorithm = "RSA"; keySize = 4096; break;
-                case "PS256": jcaAlgorithm = "RSASSA-PSS"; keySize = 2048; break;
-                case "PS384": jcaAlgorithm = "RSASSA-PSS"; keySize = 3072; break;
-                case "PS512": jcaAlgorithm = "RSASSA-PSS"; keySize = 4096; break;
-                case "ES256": jcaAlgorithm = "EC"; ecCurve = "secp256r1"; break;
-                case "ES384": jcaAlgorithm = "EC"; ecCurve = "secp384r1"; break;
-                case "ES512": jcaAlgorithm = "EC"; ecCurve = "secp521r1"; break;
-                case "EdDSA": jcaAlgorithm = "Ed25519"; break;
-                default: throw new IllegalArgumentException("Unsupported asymmetric algorithm: " + algorithm);
+                case "RS256":
+                    jcaAlgorithm = "RSA";
+                    keySize = 2048;
+                    break;
+                case "RS384":
+                    jcaAlgorithm = "RSA";
+                    keySize = 3072;
+                    break;
+                case "RS512":
+                    jcaAlgorithm = "RSA";
+                    keySize = 4096;
+                    break;
+                case "PS256":
+                    jcaAlgorithm = "RSASSA-PSS";
+                    keySize = 2048;
+                    break;
+                case "PS384":
+                    jcaAlgorithm = "RSASSA-PSS";
+                    keySize = 3072;
+                    break;
+                case "PS512":
+                    jcaAlgorithm = "RSASSA-PSS";
+                    keySize = 4096;
+                    break;
+                case "ES256":
+                    jcaAlgorithm = "EC";
+                    ecCurve = "secp256r1";
+                    break;
+                case "ES384":
+                    jcaAlgorithm = "EC";
+                    ecCurve = "secp384r1";
+                    break;
+                case "ES512":
+                    jcaAlgorithm = "EC";
+                    ecCurve = "secp521r1";
+                    break;
+                case "EdDSA":
+                    jcaAlgorithm = "Ed25519";
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported asymmetric algorithm: " + algorithm);
             }
 
             KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(jcaAlgorithm);
@@ -510,11 +540,20 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         }
         int ms;
         switch (unit) {
-            case "Seconds": ms = value * 1000; break;
-            case "Minutes": ms = value * 60 * 1000; break;
-            case "Hours":   ms = value * 60 * 60 * 1000; break;
-            case "Days":    ms = value * 24 * 60 * 60 * 1000; break;
-            default: throw new IllegalStateException("Unknown unit: " + unit);
+            case "Seconds":
+                ms = value * 1000;
+                break;
+            case "Minutes":
+                ms = value * 60 * 1000;
+                break;
+            case "Hours":
+                ms = value * 60 * 60 * 1000;
+                break;
+            case "Days":
+                ms = value * 24 * 60 * 60 * 1000;
+                break;
+            default:
+                throw new IllegalStateException("Unknown unit: " + unit);
         }
         return ms;
     }
@@ -556,6 +595,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
 
     // ---------- Abstract methods to be implemented by concrete dialogs ----------
     protected abstract void bindData();
+
     protected abstract void onSaveSuccess();
 
     // ---------- Inner classes ----------
@@ -568,8 +608,13 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
             this.displayName = (aliasOrId != null && !aliasOrId.equals(keyId)) ? aliasOrId + " (" + keyId + ")" : keyId;
         }
 
-        public String getKeyId() { return keyId; }
-        public String getDisplayName() { return displayName; }
+        public String getKeyId() {
+            return keyId;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
     }
 
     // Custom audience input component (unchanged, but added tooltip support)
