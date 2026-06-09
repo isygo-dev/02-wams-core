@@ -23,7 +23,7 @@ import eu.isygoit.dto.common.NextCodeDto;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.remote.kms.KmsAppNextCodeService;
 import eu.isygoit.remote.kms.KmsIncrementalKeyService;
-import eu.isygoit.ui.MainLayout;
+import eu.isygoit.ui.KmsMainLayout;
 import eu.isygoit.ui.views.cryptography.incremental.dialog.SubscribeDialog;
 import jakarta.annotation.security.PermitAll;
 import lombok.Getter;
@@ -33,7 +33,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-@Route(value = "incremental-key", layout = MainLayout.class)
+@Route(value = "incremental-key", layout = KmsMainLayout.class)
 @PageTitle("Incremental Key Configurations")
 @PermitAll
 public class IncrementalKeyView extends Composite<VerticalLayout> {

@@ -24,7 +24,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.MainLayout;
+import eu.isygoit.ui.KmsMainLayout;
 import eu.isygoit.ui.views.cryptography.keyTag.dialog.AddTagDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Route(value = "tags", layout = MainLayout.class)
+@Route(value = "tags", layout = KmsMainLayout.class)
 @PageTitle("Key Tagging")
 @PermitAll
 public class TagsView extends VerticalLayout {

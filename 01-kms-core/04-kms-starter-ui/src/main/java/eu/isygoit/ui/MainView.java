@@ -27,8 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@RouteAlias(value = "", layout = MainLayout.class)
-@Route(value = "home", layout = MainLayout.class)
+@RouteAlias(value = "kms/home", layout = KmsMainLayout.class)
+@Route(value = "kms", layout = KmsMainLayout.class)
 @PageTitle("KMS Dashboard")
 public class MainView extends VerticalLayout {
 

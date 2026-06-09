@@ -21,7 +21,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.PEBConfigDto;
 import eu.isygoit.remote.kms.PEBConfigService;
-import eu.isygoit.ui.MainLayout;
+import eu.isygoit.ui.KmsMainLayout;
 import eu.isygoit.ui.views.secrets.config.peb.dialog.CreatePEBConfigDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
@@ -31,7 +31,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-@Route(value = "peb-configs", layout = MainLayout.class)
+@Route(value = "peb-configs", layout = KmsMainLayout.class)
 @PageTitle("PEB Configurations")
 @PermitAll
 public class PEBConfigView extends VerticalLayout {

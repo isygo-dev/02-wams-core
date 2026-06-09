@@ -4,6 +4,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import eu.isygoit.remote.kms.PEBConfigService;
 import eu.isygoit.ui.views.common.dialog.PinBaseActionDialog;
+import feign.FeignException;
 
 public class DeletePEBConfigDialog extends PinBaseActionDialog {
 
@@ -28,10 +29,17 @@ public class DeletePEBConfigDialog extends PinBaseActionDialog {
             Notification.show("Configuration deleted successfully", 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             return true;
+        } catch (FeignException ex) {
+            handleFeignException(ex);
+            return false;
         } catch (Exception e) {
-            String errorMsg = "Delete failed: " + e.getMessage();
-            append(errorMsg);
+            this.append("Delete failed: " + e.getMessage());
             return false;
         }
+    }
+
+    private void handleFeignException(FeignException ex) {
+        String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
+        this.append(errorMsg);
     }
 }

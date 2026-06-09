@@ -21,7 +21,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.PasswordConfigDto;
 import eu.isygoit.remote.kms.PasswordConfigService;
-import eu.isygoit.ui.MainLayout;
+import eu.isygoit.ui.KmsMainLayout;
 import eu.isygoit.ui.views.secrets.config.password.dialog.CreatePasswordConfigDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
@@ -31,7 +31,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-@Route(value = "password-configs", layout = MainLayout.class)
+@Route(value = "password-configs", layout = KmsMainLayout.class)
 @PageTitle("Password Configurations")
 @PermitAll
 public class PasswordConfigView extends VerticalLayout {

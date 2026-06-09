@@ -28,7 +28,7 @@ import eu.isygoit.dto.common.TokenResponseDto;
 import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.remote.kms.KmsTokenService;
-import eu.isygoit.ui.MainLayout;
+import eu.isygoit.ui.KmsMainLayout;
 import eu.isygoit.ui.views.tokenizer.builder.dialog.ClaimsBuilderDialog;
 import eu.isygoit.ui.views.tokenizer.builder.dialog.DecodeJwtDialog;
 import feign.FeignException;
@@ -40,7 +40,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-@Route(value = "tokenizer", layout = MainLayout.class)
+@Route(value = "tokenizer", layout = KmsMainLayout.class)
 @PageTitle("Tokenizer – JWT Management")
 @PermitAll
 public class TokenBuilderView extends VerticalLayout {

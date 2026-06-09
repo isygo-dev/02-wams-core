@@ -21,7 +21,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.DigestConfigDto;
 import eu.isygoit.remote.kms.DigestConfigService;
-import eu.isygoit.ui.MainLayout;
+import eu.isygoit.ui.KmsMainLayout;
 import eu.isygoit.ui.views.secrets.config.digest.dialog.CreateDigestConfigDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
@@ -31,7 +31,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-@Route(value = "digest-configs", layout = MainLayout.class)
+@Route(value = "digest-configs", layout = KmsMainLayout.class)
 @PageTitle("Digest Configurations")
 @PermitAll
 public class DigestConfigView extends VerticalLayout {

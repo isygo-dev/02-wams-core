@@ -25,7 +25,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.MainLayout;
+import eu.isygoit.ui.KmsMainLayout;
 import eu.isygoit.ui.views.cryptography.keyGrants.dialog.CreateGrantDialog;
 import eu.isygoit.ui.views.cryptography.keyGrants.dialog.GrantDetailsDialog;
 import eu.isygoit.ui.views.cryptography.keyGrants.dialog.RetireGrantDialog;
@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Route(value = "grants", layout = MainLayout.class)
+@Route(value = "grants", layout = KmsMainLayout.class)
 @PageTitle("Grants")
 @PermitAll
 public class GrantsView extends VerticalLayout {

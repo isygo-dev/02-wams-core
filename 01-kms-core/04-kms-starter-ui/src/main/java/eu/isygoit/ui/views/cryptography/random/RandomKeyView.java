@@ -22,7 +22,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.common.RandomKeyDto;
 import eu.isygoit.remote.kms.RandomKeyService;
-import eu.isygoit.ui.MainLayout;
+import eu.isygoit.ui.KmsMainLayout;
 import eu.isygoit.ui.views.cryptography.random.dialog.CreateRandomKeyDialog;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Route(value = "random-keys", layout = MainLayout.class)
+@Route(value = "random-keys", layout = KmsMainLayout.class)
 @PageTitle("Random Keys")
 @PermitAll
 public class RandomKeyView extends Composite<VerticalLayout> {

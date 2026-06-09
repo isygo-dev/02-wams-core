@@ -24,7 +24,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.DescribeCustomKeyStoreResponse;
 import eu.isygoit.dto.KmsDtos.ListCustomKeyStoresResponse;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.MainLayout;
+import eu.isygoit.ui.KmsMainLayout;
 import eu.isygoit.ui.views.cryptography.keyStore.dialog.CreateCustomKeyStoreDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
@@ -39,7 +39,7 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Route(value = "custom-key-stores", layout = MainLayout.class)
+@Route(value = "custom-key-stores", layout = KmsMainLayout.class)
 @PageTitle("Custom Key Stores")
 @PermitAll
 public class CustomKeyStoresView extends VerticalLayout {

@@ -27,7 +27,7 @@ import eu.isygoit.enums.IEnumKeyOrigin;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.MainLayout;
+import eu.isygoit.ui.KmsMainLayout;
 import eu.isygoit.util.RsaEncryptionUtil;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Route(value = "byok", layout = MainLayout.class)
+@Route(value = "byok", layout = KmsMainLayout.class)
 @PageTitle("BYOK - Bring Your Own Key")
 @PermitAll
 public class ByokView extends VerticalLayout {

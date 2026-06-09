@@ -149,7 +149,7 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 return true;
             } else {
-                showError("Creation failed: " + response.getStatusCode());
+                this.append("Creation failed: " + response.getStatusCode());
                 return false;
             }
         } catch (FeignException ex) {
@@ -167,7 +167,7 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
     }
 
     private void handleGenericException(Exception ex) {
-        String errorMsg = ex.getMessage();
+        String errorMsg = "Creation failed: " + ex.getMessage();
         this.append(errorMsg);
     }
 }

@@ -25,9 +25,9 @@ import eu.isygoit.ui.views.secrets.config.peb.PEBConfigView;
 import eu.isygoit.ui.views.tokenizer.builder.TokenBuilderView;
 import eu.isygoit.ui.views.tokenizer.config.TokenConfigView;
 
-public class MainLayout extends AppLayout {
+public class KmsMainLayout extends AppLayout {
 
-    public MainLayout() {
+    public KmsMainLayout() {
         createHeader();
         createDrawer();
     }

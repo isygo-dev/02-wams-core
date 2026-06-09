@@ -142,7 +142,7 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 return true;
             } else {
-                showError("Update failed: " + response.getStatusCode());
+                this.append("Update failed: " + response.getStatusCode());
                 return false;
             }
         } catch (FeignException ex) {
@@ -160,7 +160,7 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
     }
 
     private void handleGenericException(Exception ex) {
-        String errorMsg = ex.getMessage();
+        String errorMsg = "Update failed: " + ex.getMessage();
         this.append(errorMsg);
     }
 }

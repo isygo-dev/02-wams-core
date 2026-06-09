@@ -22,7 +22,7 @@ import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.TokenConfigDto;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
-import eu.isygoit.ui.MainLayout;
+import eu.isygoit.ui.KmsMainLayout;
 import eu.isygoit.ui.views.tokenizer.config.dialog.CreateTokenConfigDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
@@ -32,7 +32,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-@Route(value = "token-configs", layout = MainLayout.class)
+@Route(value = "token-configs", layout = KmsMainLayout.class)
 @PageTitle("Token Configurations")
 @PermitAll
 public class TokenConfigView extends VerticalLayout {

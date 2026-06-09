@@ -26,7 +26,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.MainLayout;
+import eu.isygoit.ui.KmsMainLayout;
 import eu.isygoit.ui.views.cryptography.keyPolicy.dialog.PolicyBuilderDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
@@ -39,7 +39,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Route(value = "policies", layout = MainLayout.class)
+@Route(value = "policies", layout = KmsMainLayout.class)
 @PageTitle("Key Policies")
 @PermitAll
 public class PoliciesView extends VerticalLayout {

@@ -25,7 +25,7 @@ import eu.isygoit.dto.KmsDtos.ListAliasesResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.MainLayout;
+import eu.isygoit.ui.KmsMainLayout;
 import eu.isygoit.ui.views.cryptography.key.dialog.CreateKeyDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
@@ -40,7 +40,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Route(value = "keys", layout = MainLayout.class)
+@Route(value = "keys", layout = KmsMainLayout.class)
 @PageTitle("Key Management")
 @PermitAll
 public class KeyManagementView extends VerticalLayout {

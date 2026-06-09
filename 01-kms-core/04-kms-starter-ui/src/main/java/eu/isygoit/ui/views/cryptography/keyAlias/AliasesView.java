@@ -21,7 +21,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.ListAliasesResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.MainLayout;
+import eu.isygoit.ui.KmsMainLayout;
 import eu.isygoit.ui.views.cryptography.keyAlias.dialog.CreateAliasDialog;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
-@Route(value = "aliases", layout = MainLayout.class)
+@Route(value = "aliases", layout = KmsMainLayout.class)
 @PageTitle("Key Aliases")
 @PermitAll
 public class AliasesView extends VerticalLayout {

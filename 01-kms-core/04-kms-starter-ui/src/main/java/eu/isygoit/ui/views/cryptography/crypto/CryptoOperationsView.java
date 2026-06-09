@@ -22,7 +22,7 @@ import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.MainLayout;
+import eu.isygoit.ui.KmsMainLayout;
 import eu.isygoit.ui.views.cryptography.crypto.panel.DataKeyPanel;
 import eu.isygoit.ui.views.cryptography.crypto.panel.EncryptDecryptPanel;
 import eu.isygoit.ui.views.cryptography.crypto.panel.MacPanel;
@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Route(value = "crypto", layout = MainLayout.class)
+@Route(value = "crypto", layout = KmsMainLayout.class)
 @PageTitle("Cryptographic Operations")
 @PermitAll
 public class CryptoOperationsView extends VerticalLayout {
