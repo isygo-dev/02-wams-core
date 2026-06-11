@@ -13,6 +13,7 @@ import eu.isygoit.dto.data.MinAccountDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.ims.views.account.dialog.AccountDetailsDialog;
 import eu.isygoit.ui.ims.views.account.dialog.DeleteAccountDialog;
 import eu.isygoit.ui.ims.views.account.dialog.EnableDisableAccountDialog;
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +64,10 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
 
     @Override
     protected List<Button> buildActionButtons() {
+        // New details button
+        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, "View full account details");
+        detailsBtn.addClickListener(e -> new AccountDetailsDialog(parentView, objectService, minAccount.getId()).open());
+
         Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit account details");
         editBtn.addClickListener(e -> parentView.openUpdateAccountDialog(minAccount.getId(), this::refresh));
 
@@ -78,39 +83,32 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
         Button deleteBtn = createIconButton(VaadinIcon.TRASH, "Delete account");
         deleteBtn.addClickListener(e -> new DeleteAccountDialog(parentView, objectService, minAccount.getId(), this::refresh).open());
 
-        return List.of(editBtn, resetPwdBtn, toggleStatusBtn, deleteBtn);
+        return List.of(detailsBtn, editBtn, resetPwdBtn, toggleStatusBtn, deleteBtn);
     }
 
     @Override
     protected void buildBodyRows() {
-        // Email row
         add(createIconRow(VaadinIcon.MAILBOX, "Email", minAccount.getEmail()));
 
-        // Tenant
         if (minAccount.getTenant() != null) {
             add(createIconRow(VaadinIcon.BUILDING, "Tenant", minAccount.getTenant()));
         }
 
-        // Full name (if different from email)
         if (minAccount.getFullName() != null && !minAccount.getFullName().equals(minAccount.getEmail())) {
             add(createIconRow(VaadinIcon.USER, "Full name", minAccount.getFullName()));
         }
 
-        // Role / function
         if (minAccount.getFunctionRole() != null && !minAccount.getFunctionRole().isBlank()) {
             add(createIconRow(VaadinIcon.COG, "Function role", minAccount.getFunctionRole()));
         }
 
-        // Admin flag
         String adminFlag = Boolean.TRUE.equals(minAccount.getIsAdmin()) ? "Yes" : "No";
         add(createIconRow(VaadinIcon.SHIELD, "Admin", adminFlag));
 
-        // Account type
         if (minAccount.getAccountType() != null && !minAccount.getAccountType().isBlank()) {
             add(createIconRow(VaadinIcon.TAGS, "Account type", minAccount.getAccountType()));
         }
 
-        // Last connection (if available)
         if (minAccount.getLastConnectionDate() != null) {
             add(createIconRow(VaadinIcon.CLOCK, "Last login", minAccount.getLastConnectionDate().toString()));
         }

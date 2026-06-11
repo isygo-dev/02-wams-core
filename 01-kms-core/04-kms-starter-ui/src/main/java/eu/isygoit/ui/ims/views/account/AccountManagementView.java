@@ -45,7 +45,7 @@ public class AccountManagementView extends VerticalLayout {
 
     private final AccountService accountService;
 
-    private final VerticalLayout cardsContainer = new VerticalLayout();
+    private final Div cardsContainer = new Div();  // Changed to Div for CSS Grid
     private final Button createButton = new Button("Create account", new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
@@ -64,7 +64,6 @@ public class AccountManagementView extends VerticalLayout {
     private int totalPages = 0;
     private long totalElements = 0;
     private List<MinAccountDto> currentPageAccounts = new ArrayList<>();
-    private final List<AccountCard> currentPageCards = new ArrayList<>();
 
     // Filters
     private String currentSearch = "";
@@ -88,8 +87,7 @@ public class AccountManagementView extends VerticalLayout {
         add(toolbar);
 
         cardsContainer.setWidthFull();
-        cardsContainer.setPadding(false);
-        cardsContainer.setSpacing(true);
+        cardsContainer.addClassName("account-cards-grid");
         add(cardsContainer);
 
         loadingBar.setIndeterminate(true);
@@ -204,7 +202,6 @@ public class AccountManagementView extends VerticalLayout {
                 .collect(Collectors.toList());
 
         cardsContainer.removeAll();
-        currentPageCards.clear();
 
         if (filtered.isEmpty()) {
             Div emptyState = new Div();
@@ -220,9 +217,7 @@ public class AccountManagementView extends VerticalLayout {
             cardsContainer.add(emptyState);
         } else {
             for (MinAccountDto acc : filtered) {
-                AccountCard card = new AccountCard(this, accountService, acc);
-                currentPageCards.add(card);
-                cardsContainer.add(card);
+                cardsContainer.add(new AccountCard(this, accountService, acc));
             }
         }
     }
@@ -305,6 +300,12 @@ public class AccountManagementView extends VerticalLayout {
                     gap: var(--lumo-space-s);
                     width: 100%;
                 }
+                .account-cards-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+                    gap: var(--lumo-space-m);
+                    padding: var(--lumo-space-s);
+                }
                 @media (max-width: 768px) {
                     .account-management-toolbar {
                         flex-direction: column;
@@ -313,6 +314,9 @@ public class AccountManagementView extends VerticalLayout {
                     .account-management-toolbar > * {
                         width: 100% !important;
                         justify-content: center;
+                    }
+                    .account-cards-grid {
+                        grid-template-columns: 1fr;
                     }
                 }
                 """;

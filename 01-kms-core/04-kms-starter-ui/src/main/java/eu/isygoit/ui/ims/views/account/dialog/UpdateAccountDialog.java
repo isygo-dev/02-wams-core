@@ -6,6 +6,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.AccountDto;
+import eu.isygoit.dto.data.AccountDetailsDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.remote.ims.AccountService;
@@ -23,7 +24,8 @@ public class UpdateAccountDialog extends BaseActionDialog {
 
     private TextField tenantField;
     private EmailField emailField;
-    private TextField fullNameField;
+    private TextField firstNameField;
+    private TextField lastNameField;
     private TextField phoneNumberField;
     private ComboBox<IEnumLanguage.Types> languageCombo;
     private TextField functionRoleField;
@@ -57,7 +59,8 @@ public class UpdateAccountDialog extends BaseActionDialog {
         tenantField.setRequiredIndicatorVisible(true);
         emailField = new EmailField("Email");
         emailField.setRequiredIndicatorVisible(true);
-        fullNameField = new TextField("Full name");
+        firstNameField = new TextField("First name");
+        lastNameField = new TextField("Last name");
         phoneNumberField = new TextField("Phone number");
         languageCombo = new ComboBox<>("Language");
         languageCombo.setItems(IEnumLanguage.Types.values());
@@ -71,9 +74,9 @@ public class UpdateAccountDialog extends BaseActionDialog {
     private FormLayout buildFormLayout() {
         FormLayout form = new FormLayout();
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
-        form.add(tenantField, emailField, fullNameField, phoneNumberField,
-                languageCombo, functionRoleField, isAdminCheckbox,
-                adminStatusCombo, accountTypeField);
+        form.add(tenantField, emailField, firstNameField, lastNameField,
+                phoneNumberField, languageCombo, functionRoleField,
+                isAdminCheckbox, adminStatusCombo, accountTypeField);
         return form;
     }
 
@@ -102,7 +105,10 @@ public class UpdateAccountDialog extends BaseActionDialog {
     private void populateFields() {
         tenantField.setValue(currentAccount.getTenant() != null ? currentAccount.getTenant() : "");
         emailField.setValue(currentAccount.getEmail() != null ? currentAccount.getEmail() : "");
-        fullNameField.setValue(currentAccount.getFullName() != null ? currentAccount.getFullName() : "");
+        if (currentAccount.getAccountDetails() != null) {
+            firstNameField.setValue(currentAccount.getAccountDetails().getFirstName() != null ? currentAccount.getAccountDetails().getFirstName() : "");
+            lastNameField.setValue(currentAccount.getAccountDetails().getLastName() != null ? currentAccount.getAccountDetails().getLastName() : "");
+        }
         phoneNumberField.setValue(currentAccount.getPhoneNumber() != null ? currentAccount.getPhoneNumber() : "");
         languageCombo.setValue(currentAccount.getLanguage());
         functionRoleField.setValue(currentAccount.getFunctionRole() != null ? currentAccount.getFunctionRole() : "");
@@ -126,13 +132,18 @@ public class UpdateAccountDialog extends BaseActionDialog {
         try {
             currentAccount.setTenant(tenantField.getValue());
             currentAccount.setEmail(emailField.getValue());
-            currentAccount.setFullName(fullNameField.getValue());
             currentAccount.setPhoneNumber(phoneNumberField.getValue());
             currentAccount.setLanguage(languageCombo.getValue());
             currentAccount.setFunctionRole(functionRoleField.getValue());
             currentAccount.setIsAdmin(isAdminCheckbox.getValue());
             currentAccount.setAdminStatus(adminStatusCombo.getValue());
             currentAccount.setAccountType(accountTypeField.getValue());
+
+            if (currentAccount.getAccountDetails() == null) {
+                currentAccount.setAccountDetails(new AccountDetailsDto());
+            }
+            currentAccount.getAccountDetails().setFirstName(firstNameField.getValue());
+            currentAccount.getAccountDetails().setLastName(lastNameField.getValue());
 
             ResponseEntity<AccountDto> response = accountService.update(accountId, currentAccount);
             if (!response.getStatusCode().is2xxSuccessful()) {
