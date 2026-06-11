@@ -12,6 +12,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.ui.KmsMainView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,7 @@ import java.util.List;
  *   <li>Header row layout (left title area + right button bar)</li>
  *   <li>Status / type chip factory and colour mapping</li>
  *   <li>Meta-row builder with bullet separators</li>
- *   <li>Copy-button wiring (delegates to {@link eu.isygoit.ui.MainView#createCopyButton})</li>
+ *   <li>Copy-button wiring (delegates to {@link KmsMainView#createCopyButton})</li>
  *   <li>Icon-button factory</li>
  *   <li>Responsive CSS injection (one template, one variable per card type)</li>
  * </ul>

@@ -205,7 +205,6 @@ public interface AccountServiceApi extends IMappedCrudApi<Long, MinAccountDto, A
     /**
      * Reset password via token response entity.
      *
-     * @param requestContext               the request context
      * @param resetPasswordViaTokenRequest the reset password via token request
      * @return the response entity
      */

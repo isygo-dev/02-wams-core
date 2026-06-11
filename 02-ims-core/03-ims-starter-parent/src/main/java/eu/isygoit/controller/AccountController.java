@@ -56,13 +56,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     @Autowired
     private ITenantService tenantService;
     @Autowired
-    private JwtService jwtService;
-    @Autowired
     private MinAccountMapper minAccountMapper;
-    @Autowired
-    private IThemeService themeService;
-    @Autowired
-    private ThemeMapper themeMapper;
 
     @Override
     public AccountDto beforeUpdate(Long id, AccountDto account) {
