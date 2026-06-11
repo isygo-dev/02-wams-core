@@ -17,10 +17,9 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class TenantDto extends TenantModelDto<Long> implements ITenantAssignable, IImageUploadDto {
+public class TenantDto extends TenantModelDto<Long> implements IImageUploadDto {
 
     private Long id;
-    private String tenant;
     private String code;
     private String email;
     private String phone;

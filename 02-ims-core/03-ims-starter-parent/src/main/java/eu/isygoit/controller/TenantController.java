@@ -4,6 +4,7 @@ import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.api.TenantServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
+import eu.isygoit.com.rest.controller.impl.MappedCrudController;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.dto.data.KmsTenantDto;
 import eu.isygoit.dto.data.TenantDto;
@@ -31,7 +32,7 @@ import java.util.List;
 @RestController
 @InjectMapperAndService(handler = ImsExceptionHandler.class, mapper = TenantMapper.class, minMapper = TenantMapper.class, service = TenantService.class)
 @RequestMapping(path = "/api/v1/private/tenant")
-public class TenantController extends MappedCrudTenantController<Long, Tenant, TenantDto, TenantDto, TenantService>
+public class TenantController extends MappedCrudController<Long, Tenant, TenantDto, TenantDto, TenantService>
         implements TenantServiceApi {
 
     @Autowired

@@ -4,6 +4,8 @@ import eu.isygoit.annotation.InjectMapperAndService;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedImageTenantController;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.request.UpdateAccountRequestDto;
+import eu.isygoit.exception.UpdateKmsAccountException;
+import eu.isygoit.exception.UpdateKmsTenantException;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.mapper.AccountMapper;
 import eu.isygoit.model.Account;
@@ -30,7 +32,7 @@ public class AccountImageController extends MappedImageTenantController<Long, Ac
     private KmsPasswordService kmsPasswordService;
 
     @Override
-    public AccountDto beforeUpdate(AccountDto account) throws Exception {
+    public AccountDto beforeUpdate(AccountDto account) {
         try {
             ResponseEntity<Boolean> result = kmsPasswordService.updateAccount(
                     UpdateAccountRequestDto.builder()
@@ -44,7 +46,7 @@ public class AccountImageController extends MappedImageTenantController<Long, Ac
             }
         } catch (Exception e) {
             log.error("Remote feign call failed : ", e);
-            //throw new RemoteCallFailedException(e);
+            throw new UpdateKmsAccountException("Failed to update KMS account password", e);
         }
 
         return super.beforeUpdate(account);

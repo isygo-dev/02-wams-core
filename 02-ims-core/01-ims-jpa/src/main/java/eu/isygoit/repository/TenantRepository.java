@@ -13,7 +13,7 @@ import java.util.Optional;
 /**
  * The interface Tenant repository.
  */
-public interface TenantRepository extends JpaPagingAndSortingTenantAndCodeAssignableRepository<Tenant, Long> {
+public interface TenantRepository extends JpaPagingAndSortingCodeAssignableRepository<Tenant, Long> {
 
     /**
      * Update admin status by id int.

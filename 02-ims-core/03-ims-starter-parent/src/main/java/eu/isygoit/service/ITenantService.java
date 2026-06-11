@@ -1,6 +1,8 @@
 package eu.isygoit.service;
 
 import eu.isygoit.com.rest.controller.impl.tenancy.IImageTenantServiceOperations;
+import eu.isygoit.com.rest.service.ICrudServiceOperations;
+import eu.isygoit.com.rest.service.media.IImageServiceOperations;
 import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceOperations;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Tenant;
@@ -10,7 +12,7 @@ import java.util.List;
 /**
  * The interface Tenant service.
  */
-public interface ITenantService extends ICrudTenantServiceOperations<Long, Tenant>, IImageTenantServiceOperations<Long, Tenant> {
+public interface ITenantService extends ICrudServiceOperations<Long, Tenant>, IImageServiceOperations<Long, Tenant> {
 
     /**
      * Gets all tenant names.

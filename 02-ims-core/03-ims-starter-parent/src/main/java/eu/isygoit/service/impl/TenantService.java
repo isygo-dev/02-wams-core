@@ -3,6 +3,7 @@ package eu.isygoit.service.impl;
 import eu.isygoit.annotation.InjectCodeGen;
 import eu.isygoit.annotation.InjectCodeGenKms;
 import eu.isygoit.annotation.InjectRepository;
+import eu.isygoit.com.rest.service.media.ImageService;
 import eu.isygoit.com.rest.service.tenancy.ImageTenantService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.TenantConstants;
@@ -29,7 +30,7 @@ import java.util.Optional;
 @InjectCodeGen(value = NextCodeService.class)
 @InjectCodeGenKms(value = KmsIncrementalKeyService.class)
 @InjectRepository(value = TenantRepository.class)
-public class TenantService extends ImageTenantService<Long, Tenant, TenantRepository> implements ITenantService {
+public class TenantService extends ImageService<Long, Tenant, TenantRepository> implements ITenantService {
 
     private final AppProperties appProperties;
 
@@ -113,7 +114,7 @@ public class TenantService extends ImageTenantService<Long, Tenant, TenantReposi
             break;
         }
 
-        return this.update(tenant, tenantToUpdate);
+        return this.update(tenantToUpdate);
     }
 
     @Override
