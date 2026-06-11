@@ -18,11 +18,11 @@ import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsAppNextCodeService;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
 import eu.isygoit.remote.kms.RandomKeyService;
-import eu.isygoit.ui.layout.KmsMainLayout;
-import eu.isygoit.ui.views.kms.dashbord.AuditLogPanel;
-import eu.isygoit.ui.views.kms.dashbord.KeyStatisticsPanel;
-import eu.isygoit.ui.views.kms.dashbord.KeyUsageStatsPanel;
-import eu.isygoit.ui.views.kms.dashbord.TokenStatisticsPanel;
+import eu.isygoit.ui.kms.layout.KmsMainLayout;
+import eu.isygoit.ui.kms.views.dashbord.AuditLogPanel;
+import eu.isygoit.ui.kms.views.dashbord.KeyStatisticsPanel;
+import eu.isygoit.ui.kms.views.dashbord.KeyUsageStatsPanel;
+import eu.isygoit.ui.kms.views.dashbord.TokenStatisticsPanel;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -39,10 +39,10 @@ public class KmsMainView extends VerticalLayout {
     private final RandomKeyService randomKeyService;
     private final UI ui;
 
-    private KeyStatisticsPanel keyStatsPanel;
-    private TokenStatisticsPanel tokenStatsPanel;
-    private KeyUsageStatsPanel usageStatsPanel;
-    private AuditLogPanel auditLogPanel;
+    private final KeyStatisticsPanel keyStatsPanel;
+    private final TokenStatisticsPanel tokenStatsPanel;
+    private final KeyUsageStatsPanel usageStatsPanel;
+    private final AuditLogPanel auditLogPanel;
 
     @Autowired
     public KmsMainView(KmsApiService kmsApiService,

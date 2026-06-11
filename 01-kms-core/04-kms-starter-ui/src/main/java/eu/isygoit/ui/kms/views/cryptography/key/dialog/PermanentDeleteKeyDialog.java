@@ -1,0 +1,60 @@
+package eu.isygoit.ui.kms.views.cryptography.key.dialog;
+
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
+import eu.isygoit.dto.KmsDtos;
+import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.kms.views.cryptography.key.KeyManagementView;
+import feign.FeignException;
+import org.springframework.http.ResponseEntity;
+
+public class PermanentDeleteKeyDialog extends PinBaseActionDialog {
+
+    private final KeyManagementView parentView;
+    private final KmsApiService kmsApiService;
+    private final String keyId;
+
+    public PermanentDeleteKeyDialog(KeyManagementView parentView,
+                                    KmsApiService kmsApiService,
+                                    String keyId,
+                                    Runnable onSuccess) {
+        super("Permanently delete key",
+                "This action is irreversible. The key will be permanently removed.",
+                onSuccess);
+        this.parentView = parentView;
+        this.kmsApiService = kmsApiService;
+        this.keyId = keyId;
+
+        setOkButtonText("Delete permanently");
+        setWidth("450px");
+    }
+
+    @Override
+    protected boolean onOk() {
+        parentView.showLoading(true);
+        try {
+            ResponseEntity<KmsDtos.DeleteKeyResponse> response = kmsApiService.deleteKey(keyId);
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                String errorMsg = "Deletion failed: " + response.getStatusCode();
+                this.append(errorMsg);
+                return false;
+            }
+
+            Notification.show("Key permanently deleted", 6000, Notification.Position.BOTTOM_END)
+                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+
+            return true;
+        } catch (FeignException ex) {
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
+            this.append(errorMsg);
+        } catch (Exception e) {
+            String errorMsg = "Failed operation: " + e.getMessage();
+            this.append(errorMsg);
+        } finally {
+            parentView.showLoading(false);
+        }
+
+        return false;
+    }
+}
