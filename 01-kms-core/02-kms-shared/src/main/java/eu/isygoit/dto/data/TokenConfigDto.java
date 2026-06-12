@@ -15,9 +15,9 @@ import java.util.List;
  * The type Token config dto.
  */
 @Data
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@SuperBuilder
 public class TokenConfigDto extends AuditableIdAssignableDto<Long> {
 
     private Long id;

@@ -21,8 +21,6 @@ public class TenantDto extends TenantModelDto<Long> implements IImageUploadDto {
 
     private Long id;
     private String code;
-    private String email;
-    private String phone;
     private String lnk_facebook;
     private String lnk_linkedin;
     private String lnk_xing;

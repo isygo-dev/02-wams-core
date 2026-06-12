@@ -44,6 +44,9 @@ public class TenantController extends MappedCrudController<Long, Tenant, TenantD
             ResponseEntity<Boolean> result = kmsTenantService.updateTenant(
                     KmsTenantDto.builder()
                             .name(tenant.getName())
+                            .email(tenant.getEmail())
+                            .phone(tenant.getPhone())
+                            .industry(tenant.getIndustry())
                             .description(tenant.getDescription())
                             .url(tenant.getUrl())
                             .adminStatus(tenant.getAdminStatus())

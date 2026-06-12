@@ -13,9 +13,9 @@ import lombok.experimental.SuperBuilder;
  * The type Password config dto.
  */
 @Data
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@SuperBuilder
 public class PasswordConfigDto extends AuditableIdAssignableDto<Long> {
 
     private Long id;

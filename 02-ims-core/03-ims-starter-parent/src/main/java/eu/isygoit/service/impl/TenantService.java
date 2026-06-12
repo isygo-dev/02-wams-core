@@ -123,7 +123,7 @@ public class TenantService extends ImageService<Long, Tenant, TenantRepository> 
                 .tenant(TenantConstants.DEFAULT_TENANT_NAME)
                 .entity(Tenant.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
-                .prefix("DOM")
+                .prefix("TEN")
                 .valueLength(6L)
                 .codeValue(1L)
                 .increment(1)

@@ -3,6 +3,7 @@ package eu.isygoit.model;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaTableConstantName;
 import eu.isygoit.model.schema.SchemaUcConstantName;
+import eu.isygoit.model.tenancy.TenantModel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,7 +24,7 @@ import org.hibernate.annotations.DynamicUpdate;
         , uniqueConstraints = {@UniqueConstraint(name = SchemaUcConstantName.UC_TENANT_NAME,
         columnNames = {SchemaColumnConstantName.C_NAME})
 })
-public class Tenant extends eu.isygoit.model.tenancy.TenantModel<Long> {
+public class Tenant extends TenantModel<Long> {
 
     @Id
     @SequenceGenerator(name = "tenant_sequence_generator", sequenceName = "tenant_sequence", allocationSize = 1)

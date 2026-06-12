@@ -13,9 +13,9 @@ import lombok.experimental.SuperBuilder;
  * The type Digest config dto.
  */
 @Data
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@SuperBuilder
 public class DigestConfigDto extends AuditableIdAssignableDto<Long> {
 
     private Long id;

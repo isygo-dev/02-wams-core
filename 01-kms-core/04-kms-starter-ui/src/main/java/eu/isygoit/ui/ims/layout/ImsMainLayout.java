@@ -15,7 +15,7 @@ import eu.isygoit.ui.ims.views.ApplicationView;
 import eu.isygoit.ui.ims.views.CustomerView;
 import eu.isygoit.ui.ims.views.RoleView;
 import eu.isygoit.ui.ims.views.account.AccountManagementView;
-import eu.isygoit.ui.views.TenantView;
+import eu.isygoit.ui.ims.views.tenant.TenantManagementView;
 
 public class ImsMainLayout extends AppLayout {
 
@@ -40,7 +40,7 @@ public class ImsMainLayout extends AppLayout {
         SideNavItem accounts = new SideNavItem("Accounts", AccountManagementView.class, VaadinIcon.USER.create());
 
         // Tenants
-        SideNavItem tenants = new SideNavItem("Tenants", TenantView.class, VaadinIcon.BUILDING.create());
+        SideNavItem tenants = new SideNavItem("Tenants", TenantManagementView.class, VaadinIcon.BUILDING.create());
 
         // Applications
         SideNavItem applications = new SideNavItem("Applications", ApplicationView.class, VaadinIcon.PAPERCLIP.create());

@@ -14,9 +14,9 @@ import lombok.experimental.SuperBuilder;
  * The type Peb config dto.
  */
 @Data
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@SuperBuilder
 public class PEBConfigDto extends AuditableIdAssignableDto<Long> {
 
     private Long id;

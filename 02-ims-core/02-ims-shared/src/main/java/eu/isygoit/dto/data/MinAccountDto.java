@@ -14,6 +14,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -31,7 +32,7 @@ public class MinAccountDto extends AccountModelDto<Long> {
     private String imagePath;
     private String functionRole;
     private Boolean isAdmin;
-    private Date lastConnectionDate;
+    private LocalDateTime lastConnectionDate;
     @Builder.Default
     private IEnumEnabledBinaryStatus.Types adminStatus = IEnumEnabledBinaryStatus.Types.ENABLED;
     @Builder.Default
