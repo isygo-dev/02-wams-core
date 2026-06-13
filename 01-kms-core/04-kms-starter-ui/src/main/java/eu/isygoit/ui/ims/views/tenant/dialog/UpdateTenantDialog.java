@@ -90,7 +90,10 @@ public class UpdateTenantDialog extends BaseActionDialog {
         imageThumbnail.setWidth("60px");
         imageThumbnail.setHeight("60px");
         imageThumbnail.setVisible(false);
-        imageThumbnail.getStyle().set("border-radius", "50%").set("object-fit", "cover");
+        imageThumbnail.getStyle()
+                .set("border-radius", "50%")
+                .set("object-fit", "cover")
+                .set("border", "2px solid var(--lumo-contrast-20pct)");
 
         imagePlaceholder = new Div();
         imagePlaceholder.setWidth("60px");

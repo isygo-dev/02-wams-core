@@ -85,7 +85,8 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
         tenantImage.getStyle()
                 .set("border-radius", "50%")
                 .set("object-fit", "cover")
-                .set("background", "var(--lumo-contrast-10pct)");
+                .set("background", "var(--lumo-contrast-10pct)")
+                .set("border", "2px solid var(--lumo-contrast-20pct)");
         tenantImage.setSrc(getSvgPlaceholder());
 
         // Action buttons (built by the abstract method)

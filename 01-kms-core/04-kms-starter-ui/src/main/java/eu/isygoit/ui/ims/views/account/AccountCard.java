@@ -88,7 +88,8 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
         accountImage.getStyle()
                 .set("border-radius", "50%")
                 .set("object-fit", "cover")
-                .set("background", "var(--lumo-contrast-10pct)");
+                .set("background", "var(--lumo-contrast-10pct)")
+                .set("border", "2px solid var(--lumo-contrast-20pct)");
         accountImage.setSrc(getSvgPlaceholder());
 
         buttonBar = new HorizontalLayout();
