@@ -1,22 +1,37 @@
 package eu.isygoit.ui.ims.views.tenant.dialog;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
+import eu.isygoit.remote.ims.TenantImageService;
 import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import eu.isygoit.ui.ims.views.tenant.TenantManagementView;
+import eu.isygoit.ui.common.dialog.ImageCropperDialog;
 import feign.FeignException;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 
 public class UpdateTenantDialog extends BaseActionDialog {
 
     private final TenantManagementView parentView;
     private final TenantService tenantService;
+    private final TenantImageService tenantImageService;
     private final TenantDto tenant;
     private final Runnable onSuccess;
 
@@ -29,22 +44,32 @@ public class UpdateTenantDialog extends BaseActionDialog {
     private TextArea descriptionField;
     private ComboBox<IEnumEnabledBinaryStatus.Types> adminStatusCombo;
 
+    private Image imageThumbnail;
+    private Div imagePlaceholder;
+    private MultipartFile newImageFile;
+    private Button changeImageButton;
+    private boolean imageChanged = false;
+
     public UpdateTenantDialog(TenantManagementView parentView,
                               TenantService tenantService,
+                              TenantImageService tenantImageService,
                               TenantDto tenant,
                               Runnable onSuccess) {
         super("Edit Tenant");
         this.parentView = parentView;
         this.tenantService = tenantService;
+        this.tenantImageService = tenantImageService;
         this.tenant = tenant;
         this.onSuccess = onSuccess;
 
         setOkButtonText("Save");
-        setWidth("600px");
+        setWidth("90%");
+        getElement().getStyle().set("max-width", "700px");
 
         buildForm();
-        add(buildFormLayout());
+        add(buildLayout());
         populateFields();
+        loadExistingImage();
     }
 
     private void buildForm() {
@@ -60,14 +85,102 @@ public class UpdateTenantDialog extends BaseActionDialog {
         descriptionField = new TextArea("Description");
         adminStatusCombo = new ComboBox<>("Admin status");
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
+
+        imageThumbnail = new Image();
+        imageThumbnail.setWidth("60px");
+        imageThumbnail.setHeight("60px");
+        imageThumbnail.setVisible(false);
+        imageThumbnail.getStyle().set("border-radius", "50%").set("object-fit", "cover");
+
+        imagePlaceholder = new Div();
+        imagePlaceholder.setWidth("60px");
+        imagePlaceholder.setHeight("60px");
+        imagePlaceholder.getStyle()
+                .set("background", "#f0f0f0")
+                .set("border-radius", "50%")
+                .set("display", "flex")
+                .set("align-items", "center")
+                .set("justify-content", "center");
+        imagePlaceholder.add(new Icon(VaadinIcon.CAMERA));
+
+        changeImageButton = new Button("Change Image", e -> openCropperDialog());
+        changeImageButton.setIcon(new Icon(VaadinIcon.UPLOAD));
+    }
+
+    private void openCropperDialog() {
+        ImageCropperDialog cropperDialog = new ImageCropperDialog(croppedImage -> {
+            if (croppedImage != null) {
+                newImageFile = croppedImage;
+                imageChanged = true;
+                updateImageThumbnail(croppedImage);
+            }
+        });
+        cropperDialog.open();
+    }
+
+    private void updateImageThumbnail(MultipartFile imageFile) {
+        try {
+            String base64 = "data:" + imageFile.getContentType() + ";base64," +
+                    java.util.Base64.getEncoder().encodeToString(imageFile.getBytes());
+            imageThumbnail.setSrc(base64);
+            imageThumbnail.setVisible(true);
+            imagePlaceholder.setVisible(false);
+        } catch (Exception e) {
+            // ignore
+        }
+    }
+
+    private void loadExistingImage() {
+        try {
+            ResponseEntity<Resource> response = tenantImageService.downloadImage(tenant.getId());
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                Resource resource = response.getBody();
+                byte[] imageBytes = toByteArray(resource);
+                String base64 = "data:image/jpeg;base64," + java.util.Base64.getEncoder().encodeToString(imageBytes);
+                imageThumbnail.setSrc(base64);
+                imageThumbnail.setVisible(true);
+                imagePlaceholder.setVisible(false);
+            }
+        } catch (Exception e) {
+            // No existing image or error – keep placeholder
+        }
+    }
+
+    private byte[] toByteArray(Resource resource) throws Exception {
+        try (InputStream is = resource.getInputStream();
+             ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[4096];
+            int len;
+            while ((len = is.read(buffer)) != -1) {
+                baos.write(buffer, 0, len);
+            }
+            return baos.toByteArray();
+        }
     }
 
     private FormLayout buildFormLayout() {
         FormLayout form = new FormLayout();
-        form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
+        form.setResponsiveSteps(
+                new FormLayout.ResponsiveStep("0", 1),
+                new FormLayout.ResponsiveStep("600px", 2)
+        );
         form.add(nameField, codeField, emailField, phoneField,
                 industryField, urlField, descriptionField, adminStatusCombo);
+        form.setColspan(descriptionField, 2);
         return form;
+    }
+
+    private HorizontalLayout buildImageRow() {
+        HorizontalLayout imageRow = new HorizontalLayout(imagePlaceholder, imageThumbnail, changeImageButton);
+        imageRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        imageRow.setSpacing(true);
+        return imageRow;
+    }
+
+    private Div buildLayout() {
+        Div main = new Div();
+        main.add(buildFormLayout(), buildImageRow());
+        return main;
     }
 
     private void populateFields() {
@@ -111,6 +224,14 @@ public class UpdateTenantDialog extends BaseActionDialog {
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
                 append("Update failed: " + (response.getBody() != null ? response.getBody() : "no response body"));
                 return false;
+            }
+
+            if (imageChanged && newImageFile != null) {
+                ResponseEntity<TenantDto> uploadResponse = tenantImageService.uploadImage(tenant.getId(), newImageFile);
+                if (!uploadResponse.getStatusCode().is2xxSuccessful()) {
+                    append("Tenant updated but image upload failed: HTTP " + uploadResponse.getStatusCodeValue());
+                    return false;
+                }
             }
 
             append("Tenant updated successfully");

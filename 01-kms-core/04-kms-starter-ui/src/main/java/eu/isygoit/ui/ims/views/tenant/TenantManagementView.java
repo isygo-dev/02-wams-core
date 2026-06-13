@@ -21,6 +21,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
+import eu.isygoit.remote.ims.TenantImageService;
 import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.ims.layout.ImsMainLayout;
 import eu.isygoit.ui.ims.views.tenant.dialog.CreateTenantDialog;
@@ -42,6 +43,7 @@ import java.util.stream.Collectors;
 public class TenantManagementView extends VerticalLayout {
 
     private final TenantService tenantService;
+    private final TenantImageService tenantImageService;
 
     private final Div cardsContainer = new Div();
     private final Button createButton = new Button("Create tenant", new Icon(VaadinIcon.PLUS_CIRCLE));
@@ -68,8 +70,9 @@ public class TenantManagementView extends VerticalLayout {
     private IEnumEnabledBinaryStatus.Types currentAdminStatus = null;
 
     @Autowired
-    public TenantManagementView(TenantService tenantService) {
+    public TenantManagementView(TenantService tenantService, TenantImageService tenantImageService) {
         this.tenantService = tenantService;
+        this.tenantImageService = tenantImageService;
         setSizeFull();
         setPadding(true);
         setSpacing(true);
@@ -200,7 +203,7 @@ public class TenantManagementView extends VerticalLayout {
             cardsContainer.add(emptyState);
         } else {
             for (TenantDto tenant : filtered) {
-                cardsContainer.add(new TenantCard(this, tenantService, tenant, this::loadPageZero));
+                cardsContainer.add(new TenantCard(this, tenantService, tenantImageService, tenant, this::loadPageZero));
             }
         }
     }
@@ -249,11 +252,11 @@ public class TenantManagementView extends VerticalLayout {
     }
 
     private void openCreateTenantDialog() {
-        new CreateTenantDialog(this, tenantService, this::loadPageZero).open();
+        new CreateTenantDialog(this, tenantService, tenantImageService, this::loadPageZero).open();
     }
 
     public void openUpdateTenantDialog(TenantDto tenant, Runnable onSuccess) {
-        new UpdateTenantDialog(this, tenantService, tenant, onSuccess).open();
+        new UpdateTenantDialog(this, tenantService, tenantImageService, tenant, onSuccess).open();
     }
 
     public void loadPageZero() {
