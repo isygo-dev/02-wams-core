@@ -39,6 +39,7 @@ public class MinAccountDto extends AccountModelDto<Long> {
     private IEnumAccountSystemStatus.Types systemStatus = IEnumAccountSystemStatus.Types.IDLE;
 
     private IEnumAuth.Types authType;
+
     @Builder.Default
     private String accountType = AccountTypeConstants.TENANT_USER;
 

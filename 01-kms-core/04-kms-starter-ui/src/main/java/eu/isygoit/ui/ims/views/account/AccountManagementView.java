@@ -22,6 +22,7 @@ import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.MinAccountDto;
 import eu.isygoit.enums.IEnumAccountSystemStatus;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
+import eu.isygoit.remote.ims.AccountImageService;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.ui.ims.layout.ImsMainLayout;
 import eu.isygoit.ui.ims.views.account.dialog.CreateAccountDialog;
@@ -44,8 +45,9 @@ import java.util.stream.Collectors;
 public class AccountManagementView extends VerticalLayout {
 
     private final AccountService accountService;
+    private final AccountImageService accountImageService;
 
-    private final Div cardsContainer = new Div();  // Changed to Div for CSS Grid
+    private final Div cardsContainer = new Div();
     private final Button createButton = new Button("Create account", new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
@@ -71,8 +73,10 @@ public class AccountManagementView extends VerticalLayout {
     private IEnumAccountSystemStatus.Types currentSystemStatus = null;
 
     @Autowired
-    public AccountManagementView(AccountService accountService) {
+    public AccountManagementView(AccountService accountService,
+                                 AccountImageService accountImageService) {
         this.accountService = accountService;
+        this.accountImageService = accountImageService;
         setSizeFull();
         setPadding(true);
         setSpacing(true);
@@ -217,7 +221,8 @@ public class AccountManagementView extends VerticalLayout {
             cardsContainer.add(emptyState);
         } else {
             for (MinAccountDto acc : filtered) {
-                cardsContainer.add(new AccountCard(this, accountService, acc));
+                // Pass AccountImageService and a refresh callback that reloads the current page
+                cardsContainer.add(new AccountCard(this, accountService, accountImageService, acc, this::loadPageZero));
             }
         }
     }
@@ -267,11 +272,11 @@ public class AccountManagementView extends VerticalLayout {
     }
 
     private void openCreateAccountDialog() {
-        new CreateAccountDialog(this, accountService, this::loadPageZero).open();
+        new CreateAccountDialog(this, accountService, accountImageService, this::loadPageZero).open();
     }
 
     public void openUpdateAccountDialog(Long accountId, Runnable onSuccess) {
-        new UpdateAccountDialog(this, accountService, accountId, onSuccess).open();
+        new UpdateAccountDialog(this, accountService, accountImageService, accountId, onSuccess).open();
     }
 
     public void openResetPasswordDialog(Long accountId, String email) {

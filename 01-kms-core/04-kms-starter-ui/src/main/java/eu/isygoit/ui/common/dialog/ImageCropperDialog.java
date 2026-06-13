@@ -14,11 +14,9 @@ import java.util.function.Consumer;
 public class ImageCropperDialog extends Dialog {
 
     private final ImageCropper imageCropper;
-    private final Consumer<MultipartFile> onImageCropped;
+    private final Button applyButton;
 
     public ImageCropperDialog(Consumer<MultipartFile> onImageCropped) {
-        this.onImageCropped = onImageCropped;
-
         setHeaderTitle("Crop Image");
         setWidth("90%");
         setMaxWidth("500px");
@@ -28,8 +26,8 @@ public class ImageCropperDialog extends Dialog {
         imageCropper = new ImageCropper();
         imageCropper.setWidthFull();
 
-        Button cancelButton = new Button("Cancel", e -> close());
-        Button applyButton = new Button("Apply", e -> {
+        // Initially disable Apply – user must crop first
+        applyButton = new Button("Apply", e -> {
             MultipartFile cropped = imageCropper.getValue();
             if (cropped != null && onImageCropped != null) {
                 onImageCropped.accept(cropped);
@@ -37,6 +35,14 @@ public class ImageCropperDialog extends Dialog {
             close();
         });
         applyButton.addClassName("primary");
+        applyButton.setEnabled(false);
+
+        // Enable Apply only when a crop has been performed (value is non-null)
+        imageCropper.addValueChangeListener(event -> {
+            applyButton.setEnabled(event.getValue() != null);
+        });
+
+        Button cancelButton = new Button("Cancel", e -> close());
 
         HorizontalLayout buttons = new HorizontalLayout(cancelButton, applyButton);
         buttons.setSpacing(true);

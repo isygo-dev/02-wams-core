@@ -10,6 +10,7 @@ import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.mapper.AccountMapper;
 import eu.isygoit.model.Account;
 import eu.isygoit.remote.kms.KmsPasswordService;
+import eu.isygoit.service.RequestContextService;
 import eu.isygoit.service.impl.AccountService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ public class AccountImageController extends MappedImageTenantController<Long, Ac
 
     @Autowired
     private KmsPasswordService kmsPasswordService;
+
+    @Autowired
+    private RequestContextService requestContextService;
 
     @Override
     public AccountDto beforeUpdate(AccountDto account) {

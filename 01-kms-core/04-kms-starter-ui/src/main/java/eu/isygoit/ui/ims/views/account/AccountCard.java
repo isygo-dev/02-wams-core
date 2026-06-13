@@ -3,35 +3,56 @@ package eu.isygoit.ui.ims.views.account;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.data.MinAccountDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
+import eu.isygoit.remote.ims.AccountImageService;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.ims.views.account.dialog.AccountDetailsDialog;
 import eu.isygoit.ui.ims.views.account.dialog.DeleteAccountDialog;
 import eu.isygoit.ui.ims.views.account.dialog.EnableDisableAccountDialog;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 public class AccountCard extends BaseCard<AccountManagementView, AccountService> {
 
     private final MinAccountDto minAccount;
+    private final AccountImageService accountImageService;
+    private final Runnable onRefresh;
+
+    private Image accountImage;
     private Span adminStatusChip;
     private Span systemStatusChip;
+    private Button toggleStatusBtn;
 
     public AccountCard(AccountManagementView parentView,
                        AccountService accountService,
-                       MinAccountDto minAccount) {
+                       AccountImageService accountImageService,
+                       MinAccountDto minAccount,
+                       Runnable onRefresh) {
         super(parentView, accountService);
         this.minAccount = minAccount;
+        this.accountImageService = accountImageService;
+        this.onRefresh = onRefresh;
         initCard();
     }
 
@@ -40,12 +61,55 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
         return "account-card";
     }
 
+    // Dummy implementation – not used because we override buildHeader()
     @Override
     protected Component buildTitle() {
-        HorizontalLayout left = new HorizontalLayout();
-        left.setAlignItems(FlexComponent.Alignment.CENTER);
-        left.setSpacing(true);
-        left.getStyle().set("flex-wrap", "wrap");
+        return new Div();
+    }
+
+    /**
+     * Custom header layout:
+     * Row 1: image (left) + action buttons (right)
+     * Row 2: full name/email + status chips (admin + system)
+     */
+    @Override
+    protected void buildHeader() {
+        // Row 1: image and action buttons
+        HorizontalLayout row1 = new HorizontalLayout();
+        row1.setWidthFull();
+        row1.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        row1.setAlignItems(FlexComponent.Alignment.CENTER);
+        row1.setSpacing(true);
+        row1.getStyle().set("flex-wrap", "wrap");
+
+        accountImage = new Image();
+        accountImage.setWidth("48px");
+        accountImage.setHeight("48px");
+        accountImage.getStyle()
+                .set("border-radius", "50%")
+                .set("object-fit", "cover")
+                .set("background", "var(--lumo-contrast-10pct)");
+        accountImage.setSrc(getSvgPlaceholder());
+
+        buttonBar = new HorizontalLayout();
+        buttonBar.setSpacing(true);
+        buttonBar.setPadding(false);
+        buttonBar.getStyle().set("flex-wrap", "wrap");
+        buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+        buttonBar.addClassName(cardCssClassName() + "__button-bar");
+
+        List<Button> buttons = buildActionButtons();
+        buttons.forEach(buttonBar::add);
+
+        row1.add(accountImage, buttonBar);
+        row1.expand(buttonBar); // push buttons to the right
+
+        // Row 2: name/email + status chips
+        HorizontalLayout row2 = new HorizontalLayout();
+        row2.setAlignItems(FlexComponent.Alignment.CENTER);
+        row2.setSpacing(true);
+        row2.getStyle().set("flex-wrap", "wrap");
+        row2.getStyle().set("margin-top", "var(--lumo-space-s)");
 
         String displayName = minAccount.getFullName() != null ? minAccount.getFullName() : minAccount.getEmail();
         Span titleSpan = buildTitleSpan(displayName, minAccount.getEmail());
@@ -57,93 +121,57 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
                 minAccount.getSystemStatus() != null ? minAccount.getSystemStatus().name() : "UNKNOWN",
                 minAccount.getSystemStatus() != null ? minAccount.getSystemStatus().name() : "UNKNOWN"
         );
+        row2.add(titleSpan, adminStatusChip, systemStatusChip);
 
-        left.add(titleSpan, adminStatusChip, systemStatusChip);
-        return left;
+        add(row1, row2);
     }
 
     @Override
     protected List<Button> buildActionButtons() {
-        // New details button
         Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, "View full account details");
         detailsBtn.addClickListener(e -> new AccountDetailsDialog(parentView, objectService, minAccount.getId()).open());
 
         Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit account details");
-        editBtn.addClickListener(e -> parentView.openUpdateAccountDialog(minAccount.getId(), this::refresh));
+        editBtn.addClickListener(e -> parentView.openUpdateAccountDialog(minAccount.getId(), () -> {
+            if (onRefresh != null) onRefresh.run();
+        }));
 
         Button resetPwdBtn = createIconButton(VaadinIcon.KEY, "Reset password");
         resetPwdBtn.addClickListener(e -> parentView.openResetPasswordDialog(minAccount.getId(), minAccount.getEmail()));
 
-        Button toggleStatusBtn = createIconButton(
+        toggleStatusBtn = createIconButton(
                 minAccount.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED ? VaadinIcon.LOCK : VaadinIcon.UNLOCK,
                 minAccount.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED ? "Disable account" : "Enable account"
         );
-        toggleStatusBtn.addClickListener(e -> new EnableDisableAccountDialog(parentView, objectService, minAccount.getId(), this::refresh).open());
+        toggleStatusBtn.addClickListener(e -> openToggleStatusDialog());
 
         Button deleteBtn = createIconButton(VaadinIcon.TRASH, "Delete account");
-        deleteBtn.addClickListener(e -> new DeleteAccountDialog(parentView, objectService, minAccount.getId(), this::refresh).open());
+        deleteBtn.addClickListener(e -> new DeleteAccountDialog(parentView, objectService, minAccount.getId(), () -> {
+            if (onRefresh != null) onRefresh.run();
+        }).open());
 
         return List.of(detailsBtn, editBtn, resetPwdBtn, toggleStatusBtn, deleteBtn);
     }
 
-    @Override
-    protected void buildBodyRows() {
-        add(createIconRow(VaadinIcon.MAILBOX, "Email", minAccount.getEmail()));
-
-        if (minAccount.getTenant() != null) {
-            add(createIconRow(VaadinIcon.BUILDING, "Tenant", minAccount.getTenant()));
-        }
-
-        if (minAccount.getFullName() != null && !minAccount.getFullName().equals(minAccount.getEmail())) {
-            add(createIconRow(VaadinIcon.USER, "Full name", minAccount.getFullName()));
-        }
-
-        if (minAccount.getFunctionRole() != null && !minAccount.getFunctionRole().isBlank()) {
-            add(createIconRow(VaadinIcon.COG, "Function role", minAccount.getFunctionRole()));
-        }
-
-        String adminFlag = Boolean.TRUE.equals(minAccount.getIsAdmin()) ? "Yes" : "No";
-        add(createIconRow(VaadinIcon.SHIELD, "Admin", adminFlag));
-
-        if (minAccount.getAccountType() != null && !minAccount.getAccountType().isBlank()) {
-            add(createIconRow(VaadinIcon.TAGS, "Account type", minAccount.getAccountType()));
-        }
-
-        if (minAccount.getLastConnectionDate() != null) {
-            add(createIconRow(VaadinIcon.CLOCK, "Last login", minAccount.getLastConnectionDate().toString()));
-        }
+    private void openToggleStatusDialog() {
+        new EnableDisableAccountDialog(parentView, objectService, minAccount.getId(), () -> {
+            refreshAccountData();
+            if (onRefresh != null) onRefresh.run();
+        }).open();
     }
 
-    private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
-        HorizontalLayout row = new HorizontalLayout();
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.setSpacing(true);
-        row.setWidthFull();
-        row.getStyle().set("margin-top", "var(--lumo-space-xs)");
-        row.addClassName("meta-row");
-
-        Icon iconComponent = icon.create();
-        iconComponent.setSize("16px");
-        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
-
-        Span labelSpan = new Span(label + ":");
-        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        labelSpan.getStyle().set("min-width", "100px");
-
-        Span valueSpan = new Span(value != null ? value : "—");
-        valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        valueSpan.getStyle().set("word-break", "break-all");
-        valueSpan.getStyle().set("flex", "1");
-
-        row.add(iconComponent, labelSpan, valueSpan);
-        row.expand(valueSpan);
-        return row;
-    }
-
-    @Override
-    protected void onCardAttach(AttachEvent event) {
-        updateStatusChips();
+    private void refreshAccountData() {
+        try {
+            ResponseEntity<AccountDto> response = objectService.findById(minAccount.getId());
+            if (response.getBody() != null) {
+                minAccount.setAdminStatus(response.getBody().getAdminStatus());
+                minAccount.setSystemStatus(response.getBody().getSystemStatus());
+                updateStatusChips();
+                updateToggleButtonIcon();
+            }
+        } catch (Exception e) {
+            log.error("Failed to refresh account data", e);
+        }
     }
 
     private void updateStatusChips() {
@@ -167,28 +195,129 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
         }
     }
 
-    public void refresh() {
-        getUI().ifPresent(ui -> ui.access(() -> {
+    private void updateToggleButtonIcon() {
+        if (toggleStatusBtn != null) {
+            boolean enabled = minAccount.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED;
+            toggleStatusBtn.setIcon(enabled ? VaadinIcon.LOCK.create() : VaadinIcon.UNLOCK.create());
+            toggleStatusBtn.setTooltipText(enabled ? "Disable account" : "Enable account");
+        }
+    }
+
+    @Override
+    protected void buildBodyRows() {
+        VerticalLayout body = new VerticalLayout();
+        body.setSpacing(false);
+        body.setPadding(false);
+        body.getStyle().set("margin-top", "var(--lumo-space-s)");
+
+        body.add(createIconRow(VaadinIcon.MAILBOX, "Email", minAccount.getEmail()));
+
+        if (minAccount.getTenant() != null) {
+            body.add(createIconRow(VaadinIcon.BUILDING, "Tenant", minAccount.getTenant()));
+        }
+
+        if (minAccount.getFullName() != null && !minAccount.getFullName().equals(minAccount.getEmail())) {
+            body.add(createIconRow(VaadinIcon.USER, "Full name", minAccount.getFullName()));
+        }
+
+        if (minAccount.getFunctionRole() != null && !minAccount.getFunctionRole().isBlank()) {
+            body.add(createIconRow(VaadinIcon.COG, "Function role", minAccount.getFunctionRole()));
+        }
+
+        String adminFlag = Boolean.TRUE.equals(minAccount.getIsAdmin()) ? "Yes" : "No";
+        body.add(createIconRow(VaadinIcon.SHIELD, "Admin", adminFlag));
+
+        if (minAccount.getAccountType() != null && !minAccount.getAccountType().isBlank()) {
+            body.add(createIconRow(VaadinIcon.TAGS, "Account type", minAccount.getAccountType()));
+        }
+
+        if (minAccount.getLastConnectionDate() != null) {
+            body.add(createIconRow(VaadinIcon.CLOCK, "Last login", minAccount.getLastConnectionDate().toString()));
+        }
+
+        add(body);
+    }
+
+    private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
+        HorizontalLayout row = new HorizontalLayout();
+        row.setAlignItems(FlexComponent.Alignment.CENTER);
+        row.setSpacing(true);
+        row.setWidthFull();
+        row.addClassName("meta-row");
+
+        Icon iconComponent = icon.create();
+        iconComponent.setSize("14px");
+        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
+
+        Span labelSpan = new Span(label + ":");
+        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+        labelSpan.addClassName(LumoUtility.FontSize.XXSMALL);
+        labelSpan.getStyle().set("min-width", "80px");
+
+        Span valueSpan = new Span(value != null ? value : "—");
+        valueSpan.addClassName(LumoUtility.FontSize.XXSMALL);
+        valueSpan.getStyle().set("word-break", "break-all");
+        valueSpan.getStyle().set("flex", "1");
+
+        row.add(iconComponent, labelSpan, valueSpan);
+        row.expand(valueSpan);
+        return row;
+    }
+
+    @Override
+    protected void onCardAttach(AttachEvent event) {
+        updateStatusChips();
+        loadAccountImage();
+    }
+
+    private void loadAccountImage() {
+        CompletableFuture.supplyAsync(() -> {
             try {
-                var response = objectService.findById(minAccount.getId());
-                if (response.getBody() != null) {
-                    parentView.loadPageZero();
+                ResponseEntity<Resource> response = accountImageService.downloadImage(minAccount.getId());
+                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                    return response.getBody().getContentAsByteArray();
                 }
-            } catch (Exception e) {
-                log.error("Failed to refresh account card", e);
+            } catch (FeignException ex) {
+                if (ex.status() == 404) {
+                    log.debug("No image found for account {}", minAccount.getId());
+                } else {
+                    log.warn("Failed to load image for account {}: {}", minAccount.getId(), ex.getMessage());
+                }
+            } catch (IOException e) {
+                log.error("Error reading image stream for account {}", minAccount.getId(), e);
             }
-        }));
+            return null;
+        }).thenAccept(imageBytes -> {
+            getUI().ifPresent(ui -> ui.access(() -> {
+                if (imageBytes != null && imageBytes.length > 0) {
+                    StreamResource resource = new StreamResource("account_" + minAccount.getId() + ".jpg",
+                            () -> new ByteArrayInputStream(imageBytes));
+                    accountImage.setSrc(resource);
+                } else {
+                    accountImage.setSrc(getSvgPlaceholder());
+                }
+            }));
+        });
+    }
+
+    private String getSvgPlaceholder() {
+        return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'%3E%3C/circle%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3C/svg%3E";
     }
 
     @Override
     protected String buildExtraStyles() {
         return """
+                .account-card {
+                    padding: var(--lumo-space-s) var(--lumo-space-m);
+                }
                 .account-card .meta-row {
                     border-bottom: 1px solid var(--lumo-contrast-10pct);
                     padding-bottom: var(--lumo-space-xs);
+                    margin-bottom: var(--lumo-space-xs);
                 }
                 .account-card .meta-row:last-child {
                     border-bottom: none;
+                    margin-bottom: 0;
                 }
                 @media (max-width: 640px) {
                     .account-card .meta-row {
@@ -196,6 +325,10 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
                     }
                     .account-card .meta-row > :not(:first-child) {
                         margin-left: 28px;
+                    }
+                    .account-card .account-card__button-bar {
+                        width: 100%;
+                        justify-content: flex-start;
                     }
                 }
                 """;
