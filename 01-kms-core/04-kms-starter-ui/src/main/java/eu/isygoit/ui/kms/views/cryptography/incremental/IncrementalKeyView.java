@@ -33,7 +33,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-@Route(value = "incremental-key", layout = KmsMainLayout.class)
+@Route(value = "kms/incremental-key", layout = KmsMainLayout.class)
 @PageTitle("Incremental Key Configurations")
 @PermitAll
 public class IncrementalKeyView extends Composite<VerticalLayout> {

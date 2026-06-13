@@ -31,7 +31,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-@Route(value = "digest-configs", layout = KmsMainLayout.class)
+@Route(value = "kms/digest-configs", layout = KmsMainLayout.class)
 @PageTitle("Digest Configurations")
 @PermitAll
 public class DigestConfigView extends VerticalLayout {

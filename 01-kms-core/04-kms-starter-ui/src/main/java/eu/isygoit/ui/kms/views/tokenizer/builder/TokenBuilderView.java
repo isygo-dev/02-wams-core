@@ -40,7 +40,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-@Route(value = "tokenizer", layout = KmsMainLayout.class)
+@Route(value = "kms/token-builder", layout = KmsMainLayout.class)
 @PageTitle("Tokenizer – JWT Management")
 @PermitAll
 public class TokenBuilderView extends VerticalLayout {

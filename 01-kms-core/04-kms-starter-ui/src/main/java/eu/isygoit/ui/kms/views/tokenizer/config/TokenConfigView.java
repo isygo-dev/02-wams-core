@@ -32,7 +32,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-@Route(value = "token-configs", layout = KmsMainLayout.class)
+@Route(value = "kms/token-configs", layout = KmsMainLayout.class)
 @PageTitle("Token Configurations")
 @PermitAll
 public class TokenConfigView extends VerticalLayout {

@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Route(value = "tags", layout = KmsMainLayout.class)
+@Route(value = "kms/tags", layout = KmsMainLayout.class)
 @PageTitle("Key Tagging")
 @PermitAll
 public class TagsView extends VerticalLayout {

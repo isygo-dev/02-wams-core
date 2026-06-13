@@ -39,7 +39,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Route(value = "policies", layout = KmsMainLayout.class)
+@Route(value = "kms/policies", layout = KmsMainLayout.class)
 @PageTitle("Key Policies")
 @PermitAll
 public class PoliciesView extends VerticalLayout {

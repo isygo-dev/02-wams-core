@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Route(value = "random-keys", layout = KmsMainLayout.class)
+@Route(value = "kms/random-keys", layout = KmsMainLayout.class)
 @PageTitle("Random Keys")
 @PermitAll
 public class RandomKeyView extends Composite<VerticalLayout> {

@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Route(value = "grants", layout = KmsMainLayout.class)
+@Route(value = "kms/grants", layout = KmsMainLayout.class)
 @PageTitle("Grants")
 @PermitAll
 public class GrantsView extends VerticalLayout {

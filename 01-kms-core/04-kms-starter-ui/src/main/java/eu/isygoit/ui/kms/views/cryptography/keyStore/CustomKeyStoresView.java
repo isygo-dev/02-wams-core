@@ -39,7 +39,7 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Route(value = "custom-key-stores", layout = KmsMainLayout.class)
+@Route(value = "kms/custom-key-stores", layout = KmsMainLayout.class)
 @PageTitle("Custom Key Stores")
 @PermitAll
 public class CustomKeyStoresView extends VerticalLayout {

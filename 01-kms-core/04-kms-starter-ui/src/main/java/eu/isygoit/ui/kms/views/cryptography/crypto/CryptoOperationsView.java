@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Route(value = "crypto", layout = KmsMainLayout.class)
+@Route(value = "kms/crypto", layout = KmsMainLayout.class)
 @PageTitle("Cryptographic Operations")
 @PermitAll
 public class CryptoOperationsView extends VerticalLayout {

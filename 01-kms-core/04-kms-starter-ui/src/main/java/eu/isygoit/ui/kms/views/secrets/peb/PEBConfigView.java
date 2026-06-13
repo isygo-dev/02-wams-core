@@ -31,7 +31,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-@Route(value = "peb-configs", layout = KmsMainLayout.class)
+@Route(value = "kms/peb-configs", layout = KmsMainLayout.class)
 @PageTitle("PEB Configurations")
 @PermitAll
 public class PEBConfigView extends VerticalLayout {

@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Route(value = "accounts", layout = ImsMainLayout.class)
+@Route(value = "ims/accounts", layout = ImsMainLayout.class)
 @PageTitle("Account Management")
 @PermitAll
 public class AccountManagementView extends VerticalLayout {

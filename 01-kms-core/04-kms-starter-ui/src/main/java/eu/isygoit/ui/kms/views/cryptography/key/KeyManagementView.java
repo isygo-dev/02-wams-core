@@ -40,7 +40,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Route(value = "keys", layout = KmsMainLayout.class)
+@Route(value = "kms/keys", layout = KmsMainLayout.class)
 @PageTitle("Key Management")
 @PermitAll
 public class KeyManagementView extends VerticalLayout {

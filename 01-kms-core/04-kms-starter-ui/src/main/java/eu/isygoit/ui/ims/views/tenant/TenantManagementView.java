@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Route(value = "tenants", layout = ImsMainLayout.class)
+@Route(value = "ims/tenants", layout = ImsMainLayout.class)
 @PageTitle("Tenant Management")
 @PermitAll
 public class TenantManagementView extends VerticalLayout {

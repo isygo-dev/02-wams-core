@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Route(value = "byok", layout = KmsMainLayout.class)
+@Route(value = "kms/byok", layout = KmsMainLayout.class)
 @PageTitle("BYOK - Bring Your Own Key")
 @PermitAll
 public class ByokView extends VerticalLayout {

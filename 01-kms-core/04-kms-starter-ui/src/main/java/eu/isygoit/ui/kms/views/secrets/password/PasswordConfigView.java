@@ -31,7 +31,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-@Route(value = "password-configs", layout = KmsMainLayout.class)
+@Route(value = "kms/password-configs", layout = KmsMainLayout.class)
 @PageTitle("Password Configurations")
 @PermitAll
 public class PasswordConfigView extends VerticalLayout {

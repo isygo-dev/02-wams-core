@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
-@Route(value = "aliases", layout = KmsMainLayout.class)
+@Route(value = "kms/aliases", layout = KmsMainLayout.class)
 @PageTitle("Key Aliases")
 @PermitAll
 public class AliasesView extends VerticalLayout {
