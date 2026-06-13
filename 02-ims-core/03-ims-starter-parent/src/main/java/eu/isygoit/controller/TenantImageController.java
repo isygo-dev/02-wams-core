@@ -28,7 +28,7 @@ import javax.security.auth.login.AccountException;
 @RestController
 @InjectMapperAndService(handler = ImsExceptionHandler.class, mapper = TenantMapper.class, minMapper = TenantMapper.class, service = TenantService.class)
 @RequestMapping(path = "/api/v1/private/tenant")
-public class TenantImageController extends MappedImageController<Long, Tenant, TenantDto, TenantDto, TenantService> {
+public class TenantImageController extends MappedImageTenantController<Long, Tenant, TenantDto, TenantDto, TenantService> {
 
     @Autowired
     private KmsTenantService kmsTenantService;

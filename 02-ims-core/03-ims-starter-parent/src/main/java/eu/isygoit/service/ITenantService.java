@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * The interface Tenant service.
  */
-public interface ITenantService extends ICrudServiceOperations<Long, Tenant>, IImageServiceOperations<Long, Tenant> {
+public interface ITenantService extends ICrudTenantServiceOperations<Long, Tenant>, IImageTenantServiceOperations<Long, Tenant> {
 
     /**
      * Gets all tenant names.

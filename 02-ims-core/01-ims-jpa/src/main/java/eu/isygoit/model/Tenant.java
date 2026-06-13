@@ -28,13 +28,18 @@ import org.hibernate.annotations.Where;
 })
 @SQLDelete(sql = "update " + SchemaTableConstantName.T_TENANT + " set " + SchemaColumnConstantName.C_CHECK_CANCEL + "= true , " + SchemaColumnConstantName.C_CANCEL_DATE + " = current_timestamp WHERE id = ?")
 @Where(clause = SchemaColumnConstantName.C_CHECK_CANCEL + "=false")
-public class Tenant extends TenantModel<Long> implements IImageEntity, ICodeAssignable {
+public class Tenant extends TenantModel<Long> implements ITenantAssignable, IImageEntity, ICodeAssignable {
 
     @Id
     @SequenceGenerator(name = "tenant_sequence_generator", sequenceName = "tenant_sequence", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tenant_sequence_generator")
     @Column(name = SchemaColumnConstantName.C_ID, updatable = false, nullable = false)
     private Long id;
+
+    //@Convert(converter = LowerCaseConverter.class)
+    @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
+    @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
+    private String tenant;
 
     @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;

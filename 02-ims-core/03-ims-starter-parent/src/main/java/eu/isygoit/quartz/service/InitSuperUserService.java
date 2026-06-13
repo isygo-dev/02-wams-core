@@ -48,7 +48,7 @@ public class InitSuperUserService extends AbstractJobService {
         //Check default tenant existence
         Tenant defaultTenant = tenantService.findByName(TenantConstants.DEFAULT_TENANT_NAME);
         if (defaultTenant == null) {
-            defaultTenant = tenantService.create(
+            defaultTenant = tenantService.create(TenantConstants.SUPER_TENANT_NAME,
                     Tenant.builder()
                             .name(TenantConstants.DEFAULT_TENANT_NAME)
                             .description(TenantConstants.DEFAULT_TENANT_NAME)
@@ -59,7 +59,7 @@ public class InitSuperUserService extends AbstractJobService {
         //Check super tenant existence
         Tenant superTenant = tenantService.findByName(TenantConstants.SUPER_TENANT_NAME);
         if (superTenant == null) {
-            superTenant = tenantService.create(
+            superTenant = tenantService.create(TenantConstants.SUPER_TENANT_NAME,
                     Tenant.builder()
                             .name(TenantConstants.SUPER_TENANT_NAME)
                             .description(TenantConstants.SUPER_TENANT_NAME)

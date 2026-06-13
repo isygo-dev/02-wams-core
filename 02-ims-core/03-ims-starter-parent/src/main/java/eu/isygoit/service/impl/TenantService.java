@@ -30,7 +30,7 @@ import java.util.Optional;
 @InjectCodeGen(value = NextCodeService.class)
 @InjectCodeGenKms(value = KmsIncrementalKeyService.class)
 @InjectRepository(value = TenantRepository.class)
-public class TenantService extends ImageService<Long, Tenant, TenantRepository> implements ITenantService {
+public class TenantService extends ImageTenantService<Long, Tenant, TenantRepository> implements ITenantService {
 
     private final AppProperties appProperties;
 
@@ -114,7 +114,7 @@ public class TenantService extends ImageService<Long, Tenant, TenantRepository> 
             break;
         }
 
-        return this.update(tenantToUpdate);
+        return this.update(tenant, tenantToUpdate);
     }
 
     @Override
