@@ -17,8 +17,8 @@ import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.remote.ims.TenantImageService;
 import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
-import eu.isygoit.ui.ims.views.tenant.TenantManagementView;
 import eu.isygoit.ui.common.dialog.ImageCropperDialog;
+import eu.isygoit.ui.ims.views.tenant.TenantManagementView;
 import feign.FeignException;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -251,7 +251,8 @@ public class UpdateTenantDialog extends BaseActionDialog {
         try {
             if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank())
                 return ex.contentUTF8();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return ex.getMessage();
     }
 }

@@ -1,7 +1,6 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectMapperAndService;
-import eu.isygoit.com.rest.controller.impl.media.MappedImageController;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedImageTenantController;
 import eu.isygoit.dto.data.KmsTenantDto;
 import eu.isygoit.dto.data.TenantDto;
@@ -17,8 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.security.auth.login.AccountException;
 
 /**
  * The type Tenant image controller.
@@ -44,7 +41,7 @@ public class TenantImageController extends MappedImageTenantController<Long, Ten
                         .build());
         if (result.getStatusCode().is2xxSuccessful() && result.hasBody() && result.getBody()) {
             log.error("Update Kms tenant failed : ");
-             throw new UpdateKmsTenantException("for tenant id: " + tenant.getId());
+            throw new UpdateKmsTenantException("for tenant id: " + tenant.getId());
         }
 
         return super.afterUpdate(tenant);

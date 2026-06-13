@@ -1,6 +1,7 @@
 package eu.isygoit.ui.ims.views.tenant.dialog;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
@@ -11,14 +12,13 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.combobox.ComboBox;
 import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.remote.ims.TenantImageService;
 import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
-import eu.isygoit.ui.ims.views.tenant.TenantManagementView;
 import eu.isygoit.ui.common.dialog.ImageCropperDialog;
+import eu.isygoit.ui.ims.views.tenant.TenantManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -228,7 +228,8 @@ public class CreateTenantDialog extends BaseActionDialog {
         try {
             if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank())
                 return ex.contentUTF8();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return ex.getMessage();
     }
 }

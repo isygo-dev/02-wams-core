@@ -1,6 +1,5 @@
 package eu.isygoit.ui.common.component;
 
-import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.HasValue;
@@ -24,41 +23,15 @@ import java.util.List;
 public class ImageCropper extends VerticalLayout
         implements HasValue<ImageCropper.ImageValueChangeEvent, MultipartFile> {
 
-    public static class ImageValueChangeEvent
-            extends ComponentEvent<ImageCropper>
-            implements HasValue.ValueChangeEvent<MultipartFile> {
-
-        private final MultipartFile oldValue;
-        private final MultipartFile value;
-        private final boolean fromClient;
-
-        public ImageValueChangeEvent(ImageCropper source,
-                                     MultipartFile oldValue,
-                                     MultipartFile value,
-                                     boolean fromClient) {
-            super(source, fromClient);
-            this.oldValue = oldValue;
-            this.value = value;
-            this.fromClient = fromClient;
-        }
-
-        @Override public HasValue<ImageValueChangeEvent, MultipartFile> getHasValue() { return getSource(); }
-        @Override public boolean isFromClient() { return fromClient; }
-        @Override public MultipartFile getOldValue() { return oldValue; }
-        @Override public MultipartFile getValue()    { return value; }
-    }
-
     private final Image previewImage = new Image();
     private final Div cropperContainer = new Div();
     private final Upload upload;
     private final MemoryBuffer buffer = new MemoryBuffer();
     private final Button cropButton;
-
+    private final List<ValueChangeListener<? super ImageValueChangeEvent>> listeners = new ArrayList<>();
     private MultipartFile currentCroppedFile;
     private boolean readOnly = false;
     private boolean requiredIndicatorVisible = false;
-
-    private final List<ValueChangeListener<? super ImageValueChangeEvent>> listeners = new ArrayList<>();
 
     public ImageCropper() {
         setWidthFull();
@@ -181,13 +154,18 @@ public class ImageCropper extends VerticalLayout
     }
 
     @Override
+    public MultipartFile getValue() {
+        return currentCroppedFile;
+    }
+
+    @Override
     public void setValue(MultipartFile value) {
         this.currentCroppedFile = value;
     }
 
     @Override
-    public MultipartFile getValue() {
-        return currentCroppedFile;
+    public boolean isReadOnly() {
+        return readOnly;
     }
 
     @Override
@@ -198,8 +176,8 @@ public class ImageCropper extends VerticalLayout
     }
 
     @Override
-    public boolean isReadOnly() {
-        return readOnly;
+    public boolean isRequiredIndicatorVisible() {
+        return requiredIndicatorVisible;
     }
 
     @Override
@@ -207,9 +185,43 @@ public class ImageCropper extends VerticalLayout
         this.requiredIndicatorVisible = visible;
     }
 
-    @Override
-    public boolean isRequiredIndicatorVisible() {
-        return requiredIndicatorVisible;
+    public static class ImageValueChangeEvent
+            extends ComponentEvent<ImageCropper>
+            implements HasValue.ValueChangeEvent<MultipartFile> {
+
+        private final MultipartFile oldValue;
+        private final MultipartFile value;
+        private final boolean fromClient;
+
+        public ImageValueChangeEvent(ImageCropper source,
+                                     MultipartFile oldValue,
+                                     MultipartFile value,
+                                     boolean fromClient) {
+            super(source, fromClient);
+            this.oldValue = oldValue;
+            this.value = value;
+            this.fromClient = fromClient;
+        }
+
+        @Override
+        public HasValue<ImageValueChangeEvent, MultipartFile> getHasValue() {
+            return getSource();
+        }
+
+        @Override
+        public boolean isFromClient() {
+            return fromClient;
+        }
+
+        @Override
+        public MultipartFile getOldValue() {
+            return oldValue;
+        }
+
+        @Override
+        public MultipartFile getValue() {
+            return value;
+        }
     }
 
     private static class Base64MultipartFile implements MultipartFile {
@@ -223,13 +235,43 @@ public class ImageCropper extends VerticalLayout
             this.contentType = contentType;
         }
 
-        @Override public String getName() { return name; }
-        @Override public String getOriginalFilename() { return name; }
-        @Override public String getContentType() { return contentType; }
-        @Override public boolean isEmpty() { return content.length == 0; }
-        @Override public long getSize() { return content.length; }
-        @Override public byte[] getBytes() { return content; }
-        @Override public InputStream getInputStream() { return new ByteArrayInputStream(content); }
-        @Override public void transferTo(java.io.File dest) throws IOException { }
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String getOriginalFilename() {
+            return name;
+        }
+
+        @Override
+        public String getContentType() {
+            return contentType;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return content.length == 0;
+        }
+
+        @Override
+        public long getSize() {
+            return content.length;
+        }
+
+        @Override
+        public byte[] getBytes() {
+            return content;
+        }
+
+        @Override
+        public InputStream getInputStream() {
+            return new ByteArrayInputStream(content);
+        }
+
+        @Override
+        public void transferTo(java.io.File dest) throws IOException {
+        }
     }
 }

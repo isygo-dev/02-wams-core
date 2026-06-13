@@ -24,6 +24,7 @@ import eu.isygoit.enums.IEnumAccountSystemStatus;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.remote.ims.AccountImageService;
 import eu.isygoit.remote.ims.AccountService;
+import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.ims.layout.ImsMainLayout;
 import eu.isygoit.ui.ims.views.account.dialog.CreateAccountDialog;
 import eu.isygoit.ui.ims.views.account.dialog.ResetPasswordDialog;
@@ -46,6 +47,7 @@ public class AccountManagementView extends VerticalLayout {
 
     private final AccountService accountService;
     private final AccountImageService accountImageService;
+    private final TenantService tenantService;
 
     private final Div cardsContainer = new Div();
     private final Button createButton = new Button("Create account", new Icon(VaadinIcon.PLUS_CIRCLE));
@@ -74,9 +76,10 @@ public class AccountManagementView extends VerticalLayout {
 
     @Autowired
     public AccountManagementView(AccountService accountService,
-                                 AccountImageService accountImageService) {
+                                 AccountImageService accountImageService, TenantService tenantService) {
         this.accountService = accountService;
         this.accountImageService = accountImageService;
+        this.tenantService = tenantService;
         setSizeFull();
         setPadding(true);
         setSpacing(true);
@@ -272,11 +275,11 @@ public class AccountManagementView extends VerticalLayout {
     }
 
     private void openCreateAccountDialog() {
-        new CreateAccountDialog(this, accountService, accountImageService, this::loadPageZero).open();
+        new CreateAccountDialog(this, accountService, accountImageService, tenantService, this::loadPageZero).open();
     }
 
     public void openUpdateAccountDialog(Long accountId, Runnable onSuccess) {
-        new UpdateAccountDialog(this, accountService, accountImageService, accountId, onSuccess).open();
+        new UpdateAccountDialog(this, accountService, accountImageService, tenantService, accountId, onSuccess).open();
     }
 
     public void openResetPasswordDialog(Long accountId, String email) {

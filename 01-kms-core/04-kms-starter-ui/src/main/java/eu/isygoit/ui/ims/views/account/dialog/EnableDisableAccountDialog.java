@@ -49,7 +49,8 @@ public class EnableDisableAccountDialog extends PinBaseActionDialog {
             if (response.getBody() != null) {
                 return response.getBody().getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED;
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return true; // default
     }
 
@@ -94,7 +95,8 @@ public class EnableDisableAccountDialog extends PinBaseActionDialog {
             if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank()) {
                 return ex.contentUTF8();
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return ex.getMessage();
     }
 }

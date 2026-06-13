@@ -21,7 +21,6 @@ import eu.isygoit.ui.ims.views.account.AccountManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class AccountDetailsDialog extends NoActionDialog {
@@ -225,7 +224,8 @@ public class AccountDetailsDialog extends NoActionDialog {
         try {
             if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank())
                 return ex.contentUTF8();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return ex.getMessage();
     }
 }

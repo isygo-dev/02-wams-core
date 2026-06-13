@@ -2,7 +2,6 @@ package eu.isygoit.ui.ims.views.tenant.dialog;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -195,7 +194,8 @@ public class TenantDetailsDialog extends NoActionDialog {
         try {
             if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank())
                 return ex.contentUTF8();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return ex.getMessage();
     }
 }

@@ -78,9 +78,9 @@ public class TokenStatisticsPanel extends VerticalLayout {
                 PaginatedResponseDto<TokenConfigDto> totalBody = totalResp.getBody();
                 if (totalBody != null) stats.total = totalBody.getTotalElements();
 
-                ResponseEntity<PaginatedResponseDto<TokenConfigDto>> listResp = tokenConfigService.findAll(0, 500);
-                if (listResp.getBody() != null && listResp.getBody().getContent() != null) {
-                    List<TokenConfigDto> configs = listResp.getBody().getContent();
+                ResponseEntity<List<TokenConfigDto>> listResp = tokenConfigService.findAllList();
+                if (listResp.getBody() != null && listResp.getBody() != null) {
+                    List<TokenConfigDto> configs = listResp.getBody();
                     stats.access = configs.stream().filter(c -> c.getTokenType() == IEnumToken.Types.ACCESS).count();
                     stats.refresh = configs.stream().filter(c -> c.getTokenType() == IEnumToken.Types.REFRESH).count();
                     stats.rstpwd = configs.stream().filter(c -> c.getTokenType() == IEnumToken.Types.RSTPWD).count();

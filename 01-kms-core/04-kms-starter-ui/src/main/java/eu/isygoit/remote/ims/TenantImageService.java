@@ -1,6 +1,5 @@
 package eu.isygoit.remote.ims;
 
-import eu.isygoit.com.rest.api.IMappedCrudApi;
 import eu.isygoit.com.rest.api.IMappedImageApi;
 import eu.isygoit.config.FeignConfig;
 import eu.isygoit.dto.data.TenantDto;

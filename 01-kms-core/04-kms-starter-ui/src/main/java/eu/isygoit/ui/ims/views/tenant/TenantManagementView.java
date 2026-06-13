@@ -309,7 +309,8 @@ public class TenantManagementView extends VerticalLayout {
             if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank()) {
                 return ex.contentUTF8();
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return ex.getMessage();
     }
 }

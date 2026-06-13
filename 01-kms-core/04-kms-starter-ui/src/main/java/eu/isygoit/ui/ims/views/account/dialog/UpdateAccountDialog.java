@@ -12,12 +12,16 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
-import eu.isygoit.dto.data.AccountDto;
+import eu.isygoit.constants.AccountTypeConstants;
+import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.AccountDetailsDto;
+import eu.isygoit.dto.data.AccountDto;
+import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.remote.ims.AccountImageService;
 import eu.isygoit.remote.ims.AccountService;
+import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import eu.isygoit.ui.common.dialog.ImageCropperDialog;
 import eu.isygoit.ui.ims.views.account.AccountManagementView;
@@ -28,16 +32,21 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class UpdateAccountDialog extends BaseActionDialog {
 
     private final AccountManagementView parentView;
     private final AccountService accountService;
     private final AccountImageService accountImageService;
+    private final TenantService tenantService;
     private final Long accountId;
     private final Runnable onSuccess;
 
-    private TextField tenantField;
+    private ComboBox<String> tenantCombo;
+    private ComboBox<String> accountTypeCombo;
     private EmailField emailField;
     private TextField firstNameField;
     private TextField lastNameField;
@@ -46,7 +55,6 @@ public class UpdateAccountDialog extends BaseActionDialog {
     private TextField functionRoleField;
     private Checkbox isAdminCheckbox;
     private ComboBox<IEnumEnabledBinaryStatus.Types> adminStatusCombo;
-    private TextField accountTypeField;
 
     // Image related
     private Image imageThumbnail;
@@ -56,16 +64,19 @@ public class UpdateAccountDialog extends BaseActionDialog {
     private boolean imageChanged = false;
 
     private AccountDto currentAccount;
+    private List<TenantDto> tenants = new ArrayList<>();
 
     public UpdateAccountDialog(AccountManagementView parentView,
                                AccountService accountService,
                                AccountImageService accountImageService,
+                               TenantService tenantService,
                                Long accountId,
                                Runnable onSuccess) {
         super("Edit Account");
         this.parentView = parentView;
         this.accountService = accountService;
         this.accountImageService = accountImageService;
+        this.tenantService = tenantService;
         this.accountId = accountId;
         this.onSuccess = onSuccess;
 
@@ -75,12 +86,29 @@ public class UpdateAccountDialog extends BaseActionDialog {
 
         buildForm();
         add(buildLayout());
+        loadTenants();
         loadAccountData();
     }
 
     private void buildForm() {
-        tenantField = new TextField("Tenant *");
-        tenantField.setRequiredIndicatorVisible(true);
+        tenantCombo = new ComboBox<>("Tenant *");
+        tenantCombo.setReadOnly(true);
+        tenantCombo.setRequiredIndicatorVisible(true);
+        tenantCombo.setItemLabelGenerator(item -> {
+            TenantDto tenant = findTenantByCode(item);
+            return tenant != null ? tenant.getName() + " (" + tenant.getCode() + ")" : item;
+        });
+        tenantCombo.setAllowCustomValue(false);
+
+        accountTypeCombo = new ComboBox<>("Account type *");
+        accountTypeCombo.setRequiredIndicatorVisible(true);
+        accountTypeCombo.setItems(
+                AccountTypeConstants.SUPER_ADMIN,
+                AccountTypeConstants.TENANT_ADMIN,
+                AccountTypeConstants.TENANT_USER
+        );
+        accountTypeCombo.setAllowCustomValue(true);
+        accountTypeCombo.setPlaceholder("Select or type account type");
 
         emailField = new EmailField("Email *");
         emailField.setRequiredIndicatorVisible(true);
@@ -94,7 +122,6 @@ public class UpdateAccountDialog extends BaseActionDialog {
         isAdminCheckbox = new Checkbox("Is administrator");
         adminStatusCombo = new ComboBox<>("Admin status");
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
-        accountTypeField = new TextField("Account type");
 
         // Image thumbnail + change button
         imageThumbnail = new Image();
@@ -116,6 +143,27 @@ public class UpdateAccountDialog extends BaseActionDialog {
 
         changeImageButton = new Button("Change Image", e -> openCropperDialog());
         changeImageButton.setIcon(new Icon(VaadinIcon.UPLOAD));
+    }
+
+    private void loadTenants() {
+        parentView.showLoading(true);
+        try {
+            ResponseEntity<List<TenantDto>> response = tenantService.findAllList();
+            if (response.getBody() != null && response.getBody() != null) {
+                tenants = response.getBody();
+                tenantCombo.setItems(tenants.stream().map(TenantDto::getCode).collect(Collectors.toList()));
+            }
+        } catch (FeignException ex) {
+            append("Failed to load tenants: " + extractErrorMessage(ex));
+        } catch (Exception e) {
+            append("Failed to load tenants: " + e.getMessage());
+        } finally {
+            parentView.showLoading(false);
+        }
+    }
+
+    private TenantDto findTenantByCode(String code) {
+        return tenants.stream().filter(t -> t.getCode().equals(code)).findFirst().orElse(null);
     }
 
     private void openCropperDialog() {
@@ -152,7 +200,7 @@ public class UpdateAccountDialog extends BaseActionDialog {
                 imagePlaceholder.setVisible(false);
             }
         } catch (Exception e) {
-            // No existing image or error – keep placeholder
+            // No existing image – keep placeholder
         }
     }
 
@@ -174,9 +222,9 @@ public class UpdateAccountDialog extends BaseActionDialog {
                 new FormLayout.ResponsiveStep("0", 1),
                 new FormLayout.ResponsiveStep("600px", 2)
         );
-        form.add(tenantField, emailField, firstNameField, lastNameField,
-                phoneNumberField, languageCombo, functionRoleField,
-                isAdminCheckbox, adminStatusCombo, accountTypeField);
+        form.add(tenantCombo, accountTypeCombo, emailField, firstNameField,
+                lastNameField, phoneNumberField, languageCombo, functionRoleField,
+                isAdminCheckbox, adminStatusCombo);
         return form;
     }
 
@@ -217,7 +265,8 @@ public class UpdateAccountDialog extends BaseActionDialog {
     }
 
     private void populateFields() {
-        tenantField.setValue(currentAccount.getTenant() != null ? currentAccount.getTenant() : "");
+        tenantCombo.setValue(currentAccount.getTenant());
+        accountTypeCombo.setValue(currentAccount.getAccountType());
         emailField.setValue(currentAccount.getEmail() != null ? currentAccount.getEmail() : "");
         if (currentAccount.getAccountDetails() != null) {
             firstNameField.setValue(currentAccount.getAccountDetails().getFirstName() != null ? currentAccount.getAccountDetails().getFirstName() : "");
@@ -228,13 +277,16 @@ public class UpdateAccountDialog extends BaseActionDialog {
         functionRoleField.setValue(currentAccount.getFunctionRole() != null ? currentAccount.getFunctionRole() : "");
         isAdminCheckbox.setValue(Boolean.TRUE.equals(currentAccount.getIsAdmin()));
         adminStatusCombo.setValue(currentAccount.getAdminStatus());
-        accountTypeField.setValue(currentAccount.getAccountType() != null ? currentAccount.getAccountType() : "");
     }
 
     @Override
     protected boolean onOk() {
-        if (tenantField.getValue().isBlank()) {
+        if (tenantCombo.getValue() == null || tenantCombo.getValue().isBlank()) {
             append("Tenant is required");
+            return false;
+        }
+        if (accountTypeCombo.getValue() == null || accountTypeCombo.getValue().isBlank()) {
+            append("Account type is required");
             return false;
         }
         if (emailField.getValue().isBlank()) {
@@ -244,14 +296,14 @@ public class UpdateAccountDialog extends BaseActionDialog {
 
         parentView.showLoading(true);
         try {
-            currentAccount.setTenant(tenantField.getValue());
+            currentAccount.setTenant(tenantCombo.getValue());
+            currentAccount.setAccountType(accountTypeCombo.getValue());
             currentAccount.setEmail(emailField.getValue());
             currentAccount.setPhoneNumber(phoneNumberField.getValue());
             currentAccount.setLanguage(languageCombo.getValue());
             currentAccount.setFunctionRole(functionRoleField.getValue());
             currentAccount.setIsAdmin(isAdminCheckbox.getValue());
             currentAccount.setAdminStatus(adminStatusCombo.getValue());
-            currentAccount.setAccountType(accountTypeField.getValue());
 
             if (currentAccount.getAccountDetails() == null) {
                 currentAccount.setAccountDetails(new AccountDetailsDto());
@@ -290,7 +342,8 @@ public class UpdateAccountDialog extends BaseActionDialog {
         try {
             if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank())
                 return ex.contentUTF8();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return ex.getMessage();
     }
 }

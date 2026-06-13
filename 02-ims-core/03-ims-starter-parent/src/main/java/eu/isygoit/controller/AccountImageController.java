@@ -5,7 +5,6 @@ import eu.isygoit.com.rest.controller.impl.tenancy.MappedImageTenantController;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.request.UpdateAccountRequestDto;
 import eu.isygoit.exception.UpdateKmsAccountException;
-import eu.isygoit.exception.UpdateKmsTenantException;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.mapper.AccountMapper;
 import eu.isygoit.model.Account;

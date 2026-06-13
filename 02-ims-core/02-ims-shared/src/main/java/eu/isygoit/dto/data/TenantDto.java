@@ -4,7 +4,6 @@ package eu.isygoit.dto.data;
 import eu.isygoit.dto.AddressDto;
 import eu.isygoit.dto.IImageUploadDto;
 import eu.isygoit.dto.extendable.TenantModelDto;
-import eu.isygoit.model.ITenantAssignable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

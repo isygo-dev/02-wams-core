@@ -73,6 +73,7 @@ public class KeyManagementView extends VerticalLayout {
     private final ProgressBar aliasLoading = new ProgressBar();
     // Alias pagination state (cursor-based)
     private final Stack<String> aliasPreviousTokens = new Stack<>();
+    private final int aliasCurrentLimit = 10;
     // Pagination controls for keys (server-side cursor-based)
     private int pageSize = 10;
     private String currentNextToken = null;
@@ -84,7 +85,6 @@ public class KeyManagementView extends VerticalLayout {
     private boolean truncated = false;
     private List<KeyCard> currentPageCards = new ArrayList<>();
     private String aliasCurrentNextToken = null;
-    private final int aliasCurrentLimit = 10;
     private boolean aliasesLoaded = false;
     // Filters
     private String currentSearch = "";

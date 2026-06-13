@@ -13,12 +13,16 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
-import eu.isygoit.dto.data.AccountDto;
+import eu.isygoit.constants.AccountTypeConstants;
+import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.AccountDetailsDto;
+import eu.isygoit.dto.data.AccountDto;
+import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.remote.ims.AccountImageService;
 import eu.isygoit.remote.ims.AccountService;
+import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import eu.isygoit.ui.common.dialog.ImageCropperDialog;
 import eu.isygoit.ui.ims.views.account.AccountManagementView;
@@ -27,15 +31,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class CreateAccountDialog extends BaseActionDialog {
 
     private final AccountManagementView parentView;
     private final AccountService accountService;
     private final AccountImageService accountImageService;
+    private final TenantService tenantService;
     private final Runnable onSuccess;
 
-    private TextField tenantField;
+    private ComboBox<String> tenantCombo;
+    private ComboBox<String> accountTypeCombo;
     private EmailField emailField;
     private TextField firstNameField;
     private TextField lastNameField;
@@ -44,7 +52,6 @@ public class CreateAccountDialog extends BaseActionDialog {
     private TextField functionRoleField;
     private Checkbox isAdminCheckbox;
     private ComboBox<IEnumEnabledBinaryStatus.Types> adminStatusCombo;
-    private TextField accountTypeField;
     private PasswordField passwordField;
 
     // Image related
@@ -53,14 +60,18 @@ public class CreateAccountDialog extends BaseActionDialog {
     private MultipartFile selectedImageFile;
     private Button uploadImageButton;
 
+    private List<TenantDto> tenants = new ArrayList<>();
+
     public CreateAccountDialog(AccountManagementView parentView,
                                AccountService accountService,
                                AccountImageService accountImageService,
+                               TenantService tenantService,
                                Runnable onSuccess) {
         super("Create Account");
         this.parentView = parentView;
         this.accountService = accountService;
         this.accountImageService = accountImageService;
+        this.tenantService = tenantService;
         this.onSuccess = onSuccess;
 
         setOkButtonText("Create");
@@ -69,12 +80,31 @@ public class CreateAccountDialog extends BaseActionDialog {
 
         buildForm();
         add(buildLayout());
+        loadTenants();
     }
 
     private void buildForm() {
-        tenantField = new TextField("Tenant *");
-        tenantField.setRequiredIndicatorVisible(true);
-        tenantField.setPlaceholder("acme-corp");
+        // Tenant selection
+        tenantCombo = new ComboBox<>("Tenant *");
+        tenantCombo.setRequiredIndicatorVisible(true);
+        tenantCombo.setPlaceholder("Select tenant");
+        tenantCombo.setItemLabelGenerator(item -> {
+            TenantDto tenant = findTenantByCode(item);
+            return tenant != null ? tenant.getName() + " (" + tenant.getCode() + ")" : item;
+        });
+        tenantCombo.setAllowCustomValue(false); // must select existing tenant
+
+        // Account type (editable with suggestions)
+        accountTypeCombo = new ComboBox<>("Account type *");
+        accountTypeCombo.setRequiredIndicatorVisible(true);
+        accountTypeCombo.setItems(
+                AccountTypeConstants.SUPER_ADMIN,
+                AccountTypeConstants.TENANT_ADMIN,
+                AccountTypeConstants.TENANT_USER
+        );
+        accountTypeCombo.setAllowCustomValue(true); // allow free text
+        accountTypeCombo.setPlaceholder("Select or type account type");
+        accountTypeCombo.setValue(AccountTypeConstants.TENANT_USER);
 
         emailField = new EmailField("Email *");
         emailField.setRequiredIndicatorVisible(true);
@@ -102,10 +132,6 @@ public class CreateAccountDialog extends BaseActionDialog {
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
         adminStatusCombo.setValue(IEnumEnabledBinaryStatus.Types.ENABLED);
 
-        accountTypeField = new TextField("Account type");
-        accountTypeField.setValue("TENANT_USER");
-        accountTypeField.setReadOnly(true);
-
         passwordField = new PasswordField("Initial password *");
         passwordField.setRequiredIndicatorVisible(true);
         passwordField.setPlaceholder("••••••••");
@@ -130,6 +156,30 @@ public class CreateAccountDialog extends BaseActionDialog {
 
         uploadImageButton = new Button("Upload Image", e -> openCropperDialog());
         uploadImageButton.setIcon(new Icon(VaadinIcon.UPLOAD));
+    }
+
+    private void loadTenants() {
+        parentView.showLoading(true);
+        try {
+            ResponseEntity<List<TenantDto>> response = tenantService.findAllList();
+            if (response.getBody() != null && response.getBody() != null) {
+                tenants = response.getBody();
+                tenantCombo.setItems(tenants.stream().map(TenantDto::getCode).collect(Collectors.toList()));
+            }
+        } catch (FeignException ex) {
+            append("Failed to load tenants: " + extractErrorMessage(ex));
+        } catch (Exception e) {
+            append("Failed to load tenants: " + e.getMessage());
+        } finally {
+            parentView.showLoading(false);
+        }
+    }
+
+    private TenantDto findTenantByCode(String code) {
+        return tenants.stream()
+                .filter(t -> t.getCode().equals(code))
+                .findFirst()
+                .orElse(null);
     }
 
     private void openCropperDialog() {
@@ -160,10 +210,10 @@ public class CreateAccountDialog extends BaseActionDialog {
                 new FormLayout.ResponsiveStep("0", 1),
                 new FormLayout.ResponsiveStep("600px", 2)
         );
-        form.add(tenantField, emailField, firstNameField, lastNameField,
-                phoneNumberField, languageCombo, functionRoleField,
-                isAdminCheckbox, adminStatusCombo, accountTypeField, passwordField);
-        // Make password field span full width on larger screens for better UX
+        form.add(tenantCombo, accountTypeCombo, emailField, firstNameField,
+                lastNameField, phoneNumberField, languageCombo, functionRoleField,
+                isAdminCheckbox, adminStatusCombo, passwordField);
+        // Make password span both columns for better visibility
         form.setColspan(passwordField, 2);
         return form;
     }
@@ -183,8 +233,12 @@ public class CreateAccountDialog extends BaseActionDialog {
 
     @Override
     protected boolean onOk() {
-        if (tenantField.getValue().isBlank()) {
+        if (tenantCombo.getValue() == null || tenantCombo.getValue().isBlank()) {
             append("Tenant is required");
+            return false;
+        }
+        if (accountTypeCombo.getValue() == null || accountTypeCombo.getValue().isBlank()) {
+            append("Account type is required");
             return false;
         }
         if (emailField.getValue().isBlank()) {
@@ -203,14 +257,14 @@ public class CreateAccountDialog extends BaseActionDialog {
         parentView.showLoading(true);
         try {
             AccountDto newAccount = new AccountDto();
-            newAccount.setTenant(tenantField.getValue());
+            newAccount.setTenant(tenantCombo.getValue());
+            newAccount.setAccountType(accountTypeCombo.getValue());
             newAccount.setEmail(emailField.getValue());
             newAccount.setPhoneNumber(phoneNumberField.getValue());
             newAccount.setLanguage(languageCombo.getValue());
             newAccount.setFunctionRole(functionRoleField.getValue());
             newAccount.setIsAdmin(isAdminCheckbox.getValue());
             newAccount.setAdminStatus(adminStatusCombo.getValue());
-            newAccount.setAccountType(accountTypeField.getValue());
 
             AccountDetailsDto details = new AccountDetailsDto();
             details.setFirstName(firstNameField.getValue());
@@ -218,9 +272,6 @@ public class CreateAccountDialog extends BaseActionDialog {
             newAccount.setAccountDetails(details);
             newAccount.setRoleInfo(new ArrayList<>());
 
-            // Note: Password is not part of AccountDto. The backend might require a separate DTO.
-            // Assuming the service endpoint used for creation also accepts password via AccountDto
-            // or we need to call a different method. If not, adjust accordingly.
             ResponseEntity<AccountDto> createResponse = accountService.create(newAccount);
             if (!createResponse.getStatusCode().is2xxSuccessful() || createResponse.getBody() == null) {
                 append("Account creation failed: HTTP " + createResponse.getStatusCodeValue());
@@ -233,7 +284,6 @@ public class CreateAccountDialog extends BaseActionDialog {
                 return false;
             }
 
-            // Upload image
             ResponseEntity<AccountDto> uploadResponse = accountImageService.uploadImage(accountId, selectedImageFile);
             if (!uploadResponse.getStatusCode().is2xxSuccessful()) {
                 append("Account created but image upload failed: HTTP " + uploadResponse.getStatusCodeValue());
@@ -258,7 +308,8 @@ public class CreateAccountDialog extends BaseActionDialog {
         try {
             if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank())
                 return ex.contentUTF8();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return ex.getMessage();
     }
 }
