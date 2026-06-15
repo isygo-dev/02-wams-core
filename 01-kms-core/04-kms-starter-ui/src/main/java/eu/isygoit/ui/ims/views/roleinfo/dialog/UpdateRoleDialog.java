@@ -18,6 +18,8 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.ApplicationDto;
@@ -49,15 +51,15 @@ public class UpdateRoleDialog extends BaseActionDialog {
     private IntegerField levelField;
     private TextArea descriptionField;
 
-    // All applications grid with checkboxes
+    // Applications grid (all apps with checkbox)
     private Grid<ApplicationDto> applicationsGrid;
     private TextField appsSearchField;
     private Span appsCountLabel;
     private List<ApplicationDto> allApplications = new ArrayList<>();
     private Set<Long> allowedApplicationIds = new HashSet<>();
 
-    // Permissions – full matrix from backend
-    private Grid<RolePermissionDto> permissionsGrid;
+    // Permissions TreeGrid (full matrix from backend)
+    private TreeGrid<Object> permissionsTree;
     private List<RolePermissionDto> allPermissions = new ArrayList<>();
     private TextField permSearchField;
 
@@ -110,6 +112,9 @@ public class UpdateRoleDialog extends BaseActionDialog {
         descriptionField.setHeight("80px");
     }
 
+    // ------------------------------------------------------------------------
+    // Applications grid (all apps with checkboxes)
+    // ------------------------------------------------------------------------
     private void buildApplicationsGrid() {
         applicationsGrid = new Grid<>();
         applicationsGrid.addComponentColumn(app -> {
@@ -156,54 +161,107 @@ public class UpdateRoleDialog extends BaseActionDialog {
         appsSearchField.clear();
     }
 
+    // ------------------------------------------------------------------------
+    // Permissions TreeGrid (grouped by service) – full matrix, no add/remove
+    // ------------------------------------------------------------------------
     private void buildPermissionsGrid() {
-        permissionsGrid = new Grid<>();
-        permissionsGrid.addColumn(RolePermissionDto::getServiceName).setHeader("Service").setAutoWidth(true);
-        permissionsGrid.addColumn(RolePermissionDto::getObjectName).setHeader("Object").setAutoWidth(true);
-        permissionsGrid.addComponentColumn(perm -> {
-            Checkbox readChk = new Checkbox(perm.getRead() != null && perm.getRead());
-            readChk.addValueChangeListener(e -> perm.setRead(e.getValue()));
-            return readChk;
+        permissionsTree = new TreeGrid<>();
+        permissionsTree.addHierarchyColumn(item -> {
+            if (item instanceof String) return (String) item;
+            if (item instanceof RolePermissionDto) return ((RolePermissionDto) item).getObjectName();
+            return "";
+        }).setHeader("Service / Object").setAutoWidth(true);
+
+        permissionsTree.addComponentColumn(item -> {
+            if (item instanceof RolePermissionDto) {
+                Checkbox chk = new Checkbox(((RolePermissionDto) item).getRead());
+                chk.addValueChangeListener(e -> ((RolePermissionDto) item).setRead(e.getValue()));
+                return chk;
+            }
+            return new Span();
         }).setHeader("Read").setWidth("70px").setFlexGrow(0);
-        permissionsGrid.addComponentColumn(perm -> {
-            Checkbox writeChk = new Checkbox(perm.getWrite() != null && perm.getWrite());
-            writeChk.addValueChangeListener(e -> perm.setWrite(e.getValue()));
-            return writeChk;
+
+        permissionsTree.addComponentColumn(item -> {
+            if (item instanceof RolePermissionDto) {
+                Checkbox chk = new Checkbox(((RolePermissionDto) item).getWrite());
+                chk.addValueChangeListener(e -> ((RolePermissionDto) item).setWrite(e.getValue()));
+                return chk;
+            }
+            return new Span();
         }).setHeader("Write").setWidth("70px").setFlexGrow(0);
-        permissionsGrid.addComponentColumn(perm -> {
-            Checkbox deleteChk = new Checkbox(perm.getDelete() != null && perm.getDelete());
-            deleteChk.addValueChangeListener(e -> perm.setDelete(e.getValue()));
-            return deleteChk;
+
+        permissionsTree.addComponentColumn(item -> {
+            if (item instanceof RolePermissionDto) {
+                Checkbox chk = new Checkbox(((RolePermissionDto) item).getDelete());
+                chk.addValueChangeListener(e -> ((RolePermissionDto) item).setDelete(e.getValue()));
+                return chk;
+            }
+            return new Span();
         }).setHeader("Delete").setWidth("70px").setFlexGrow(0);
-        permissionsGrid.addThemeVariants(GridVariant.LUMO_COMPACT, GridVariant.LUMO_NO_BORDER);
-        permissionsGrid.setHeight("350px");
+
+        // No remove button in update dialog – the matrix is fixed
+
+        permissionsTree.addThemeVariants(GridVariant.LUMO_COMPACT, GridVariant.LUMO_NO_BORDER);
+        permissionsTree.setHeight("350px");
+
+        refreshPermissionsTree();
 
         permSearchField = new TextField();
         permSearchField.setPlaceholder("Filter permissions...");
         permSearchField.setClearButtonVisible(true);
         permSearchField.setValueChangeMode(ValueChangeMode.LAZY);
-        permSearchField.addValueChangeListener(e -> filterPermissions());
+        permSearchField.addValueChangeListener(e -> filterPermissionsTree());
     }
 
-    private void filterPermissions() {
+    private void refreshPermissionsTree() {
+        TreeData<Object> treeData = new TreeData<>();
+        // Group by service name, preserve order
+        Map<String, List<RolePermissionDto>> grouped = allPermissions.stream()
+                .collect(Collectors.groupingBy(RolePermissionDto::getServiceName,
+                        LinkedHashMap::new, Collectors.toList()));
+        for (Map.Entry<String, List<RolePermissionDto>> entry : grouped.entrySet()) {
+            String serviceName = entry.getKey();
+            treeData.addItem(null, serviceName);
+            for (RolePermissionDto perm : entry.getValue()) {
+                treeData.addItem(serviceName, perm);
+            }
+        }
+        permissionsTree.setTreeData(treeData);
+    }
+
+    private void filterPermissionsTree() {
         String term = permSearchField.getValue().toLowerCase();
-        List<RolePermissionDto> filtered = allPermissions.stream()
-                .filter(p -> term.isEmpty() ||
-                        (p.getServiceName() != null && p.getServiceName().toLowerCase().contains(term)) ||
-                        (p.getObjectName() != null && p.getObjectName().toLowerCase().contains(term)))
-                .collect(Collectors.toList());
-        permissionsGrid.setItems(filtered);
+        if (term.isEmpty()) {
+            refreshPermissionsTree();
+            return;
+        }
+        TreeData<Object> filtered = new TreeData<>();
+        Map<String, List<RolePermissionDto>> grouped = allPermissions.stream()
+                .collect(Collectors.groupingBy(RolePermissionDto::getServiceName));
+        for (Map.Entry<String, List<RolePermissionDto>> entry : grouped.entrySet()) {
+            String svc = entry.getKey();
+            List<RolePermissionDto> matching = entry.getValue().stream()
+                    .filter(p -> p.getServiceName().toLowerCase().contains(term) ||
+                            p.getObjectName().toLowerCase().contains(term))
+                    .collect(Collectors.toList());
+            if (!matching.isEmpty() || svc.toLowerCase().contains(term)) {
+                filtered.addItem(null, svc);
+                List<RolePermissionDto> children = matching.isEmpty() ? entry.getValue() : matching;
+                for (RolePermissionDto p : children) {
+                    filtered.addItem(svc, p);
+                }
+            }
+        }
+        permissionsTree.setTreeData(filtered);
     }
 
-    private void refreshPermissionsGrid() {
-        permissionsGrid.setItems(allPermissions);
-        permSearchField.clear();
-    }
-
+    // ------------------------------------------------------------------------
+    // Data loading
+    // ------------------------------------------------------------------------
     private void loadDataAndPopulate() {
         parentView.showLoading(true);
         try {
-            // Fetch full role details (includes full permission matrix via afterFindById)
+            // Fetch role details (full permission matrix from afterFindById)
             ResponseEntity<RoleInfoDto> fullRoleResp = roleService.findById(role.getId());
             if (fullRoleResp.getBody() == null) {
                 append("Role not found");
@@ -224,28 +282,26 @@ public class UpdateRoleDialog extends BaseActionDialog {
                         .map(ApplicationDto::getId)
                         .filter(Objects::nonNull)
                         .collect(Collectors.toSet());
-                log.info("Loaded {} allowed applications", allowedApplicationIds.size());
             }
 
-            // Load all applications (with fallback)
+            // Load all applications
             allApplications = fetchAllApplications();
             if (allApplications.isEmpty()) {
-                Notification.show("No applications found. Please check the application service.", 5000, Notification.Position.BOTTOM_END);
+                Notification.show("No applications found.", 5000, Notification.Position.BOTTOM_END);
                 applicationsGrid.setItems(Collections.emptyList());
                 appsCountLabel.setText("0 applications found");
             } else {
-                log.info("Loaded {} total applications", allApplications.size());
                 refreshApplicationsGrid();
             }
 
-            // Permissions – full matrix is already in rolePermission
+            // Permissions – full matrix
             if (fullRole.getRolePermission() != null && !fullRole.getRolePermission().isEmpty()) {
                 allPermissions = fullRole.getRolePermission();
-                log.info("Loaded {} permissions", allPermissions.size());
+                refreshPermissionsTree();
             } else {
                 allPermissions = new ArrayList<>();
+                refreshPermissionsTree();
             }
-            refreshPermissionsGrid();
 
         } catch (Exception e) {
             log.error("Error loading data", e);
@@ -256,7 +312,7 @@ public class UpdateRoleDialog extends BaseActionDialog {
     }
 
     private List<ApplicationDto> fetchAllApplications() {
-        // Try 1: findAllListFull()
+        // Try findAllListFull()
         try {
             ResponseEntity<List<ApplicationDto>> response = applicationService.findAllListFull();
             if (response.getBody() != null && !response.getBody().isEmpty()) {
@@ -266,7 +322,7 @@ public class UpdateRoleDialog extends BaseActionDialog {
             log.debug("findAllListFull failed: {}", e.getMessage());
         }
 
-        // Try 2: findAll(0, 1000) paginated
+        // Fallback to paginated findAll
         try {
             ResponseEntity<PaginatedResponseDto<ApplicationDto>> paginated = applicationService.findAll(0, 1000);
             if (paginated.getBody() != null && paginated.getBody().getContent() != null) {
@@ -276,7 +332,7 @@ public class UpdateRoleDialog extends BaseActionDialog {
             log.debug("paginated findAll failed: {}", e.getMessage());
         }
 
-        // Try 3: findAllList() via reflection (if exists)
+        // Fallback to findAllList via reflection
         try {
             var method = applicationService.getClass().getMethod("findAllList");
             @SuppressWarnings("unchecked")
@@ -310,6 +366,9 @@ public class UpdateRoleDialog extends BaseActionDialog {
         }
     }
 
+    // ------------------------------------------------------------------------
+    // Tab & layout
+    // ------------------------------------------------------------------------
     private void buildTabs() {
         tabs = new Tabs();
         tabContent = new VerticalLayout();
@@ -339,21 +398,18 @@ public class UpdateRoleDialog extends BaseActionDialog {
                 VerticalLayout appsLayout = new VerticalLayout();
                 appsLayout.setPadding(false);
                 appsLayout.setSpacing(false);
-
                 Button refreshAppsBtn = new Button("Refresh", VaadinIcon.REFRESH.create());
                 refreshAppsBtn.addThemeVariants(ButtonVariant.LUMO_SMALL);
                 refreshAppsBtn.addClickListener(e -> refreshApplications());
-
                 HorizontalLayout topBar = new HorizontalLayout(appsSearchField, refreshAppsBtn, appsCountLabel);
                 topBar.setWidthFull();
                 topBar.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
                 topBar.expand(appsSearchField);
-
                 appsLayout.add(topBar, applicationsGrid);
                 tabContent.add(appsLayout);
                 break;
             case 2:
-                VerticalLayout permsLayout = new VerticalLayout(permSearchField, permissionsGrid);
+                VerticalLayout permsLayout = new VerticalLayout(permSearchField, permissionsTree);
                 permsLayout.setPadding(false);
                 permsLayout.setSpacing(false);
                 permsLayout.setHeightFull();
@@ -373,15 +429,8 @@ public class UpdateRoleDialog extends BaseActionDialog {
     private void injectResponsiveStyles() {
         String css = """
                 @media (max-width: 600px) {
-                    .allowed-apps-layout {
-                        flex-direction: column !important;
-                    }
-                    .allowed-apps-layout > vaadin-horizontal-layout {
-                        flex-direction: column !important;
-                    }
-                    .button-column {
-                        flex-direction: row !important;
-                        justify-content: center;
+                    .apps-filter-bar {
+                        flex-direction: column;
                         gap: 8px;
                     }
                 }
@@ -449,8 +498,7 @@ public class UpdateRoleDialog extends BaseActionDialog {
         try {
             if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank())
                 return ex.contentUTF8();
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
         return ex.getMessage();
     }
 }
