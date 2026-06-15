@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectMapperAndService;
+import eu.isygoit.api.ApplicationServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
@@ -39,27 +40,13 @@ import java.util.List;
 @RestController
 @InjectMapperAndService(handler = ImsExceptionHandler.class, mapper = ApplicationMapper.class, minMapper = ApplicationMapper.class, service = ApplicationService.class)
 @RequestMapping(path = "/api/v1/private/application")
-public class AppController extends MappedCrudTenantController<Long, Application, ApplicationDto, ApplicationDto, ApplicationService> {
+public class ApplicationController extends MappedCrudTenantController<Long, Application, ApplicationDto, ApplicationDto, ApplicationService>
+        implements ApplicationServiceApi {
 
     @Autowired
     private IAccountService accountService;
 
-    /**
-     * Update status response entity.
-     *
-     * @param id        the id
-     * @param newStatus the new status
-     * @return the response entity
-     */
-    @Operation(summary = "Update application status Api",
-            description = "Update application status")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Api executed successfully",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ApplicationDto.class))})
-    })
-    @PutMapping(path = "/update-status")
+    @Override
     public ResponseEntity<ApplicationDto> updateStatus(
             @RequestParam(name = RestApiConstants.ID) Long id,
             @RequestParam(name = RestApiConstants.NEW_STATUS) IEnumEnabledBinaryStatus.Types newStatus) {

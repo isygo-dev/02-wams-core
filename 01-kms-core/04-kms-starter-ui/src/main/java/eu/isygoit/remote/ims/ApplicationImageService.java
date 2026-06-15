@@ -6,5 +6,5 @@ import eu.isygoit.dto.data.ApplicationDto;
 import org.springframework.cloud.openfeign.FeignClient;
 
 @FeignClient(configuration = FeignConfig.class, name = "identity-service", contextId = "application-image", path = "/api/v1/private/application")
-public interface AppImageService extends IMappedImageApi<Long, ApplicationDto> {
+public interface ApplicationImageService extends IMappedImageApi<Long, ApplicationDto> {
 }

@@ -31,7 +31,8 @@ import java.util.List;
 @RestController
 @InjectMapperAndService(handler = ImsExceptionHandler.class, mapper = TenantMapper.class, minMapper = TenantMapper.class, service = TenantService.class)
 @RequestMapping(path = "/api/v1/private/tenant")
-public class TenantController extends MappedCrudTenantController<Long, Tenant, TenantDto, TenantDto, TenantService> implements TenantServiceApi {
+public class TenantController extends MappedCrudTenantController<Long, Tenant, TenantDto, TenantDto, TenantService>
+        implements TenantServiceApi {
 
     @Autowired
     private KmsTenantService kmsTenantService;

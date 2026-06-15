@@ -19,6 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @InjectMapperAndService(handler = ImsExceptionHandler.class, mapper = ApplicationMapper.class, minMapper = ApplicationMapper.class, service = ApplicationService.class)
 @RequestMapping(path = "/api/v1/private/application")
-public class AppImageController extends eu.isygoit.com.rest.controller.impl.tenancy.MappedImageTenantController<Long, Application, ApplicationDto, ApplicationDto, ApplicationService> {
+public class ApplicationImageController extends eu.isygoit.com.rest.controller.impl.tenancy.MappedImageTenantController<Long, Application, ApplicationDto, ApplicationDto, ApplicationService> {
 
 }

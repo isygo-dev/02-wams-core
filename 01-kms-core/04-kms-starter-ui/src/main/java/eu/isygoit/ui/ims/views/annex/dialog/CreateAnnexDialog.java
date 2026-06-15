@@ -1,0 +1,133 @@
+package eu.isygoit.ui.ims.views.annex.dialog;
+
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
+import eu.isygoit.dto.data.AnnexDto;
+import eu.isygoit.enums.IEnumLanguage;
+import eu.isygoit.remote.ims.AnnexService;
+import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.ims.views.annex.AnnexManagementView;
+import feign.FeignException;
+import org.springframework.http.ResponseEntity;
+
+public class CreateAnnexDialog extends BaseActionDialog {
+
+    private final AnnexManagementView parentView;
+    private final AnnexService annexService;
+    private final Runnable onSuccess;
+
+    private TextField tableCodeField;
+    private ComboBox<IEnumLanguage.Types> languageCombo;
+    private TextField valueField;
+    private TextArea descriptionArea;
+    private TextField referenceField;
+    private IntegerField orderField;
+
+    public CreateAnnexDialog(AnnexManagementView parentView,
+                             AnnexService annexService,
+                             Runnable onSuccess) {
+        super("Create Annex");
+        this.parentView = parentView;
+        this.annexService = annexService;
+        this.onSuccess = onSuccess;
+
+        setOkButtonText("Create");
+        setWidth("600px");
+
+        buildForm();
+        add(buildFormLayout());
+    }
+
+    private void buildForm() {
+        tableCodeField = new TextField("Table code *");
+        tableCodeField.setRequiredIndicatorVisible(true);
+        tableCodeField.setPlaceholder("e.g., COUNTRY");
+
+        languageCombo = new ComboBox<>("Language *");
+        languageCombo.setItems(IEnumLanguage.Types.values());
+        languageCombo.setRequiredIndicatorVisible(true);
+        languageCombo.setPlaceholder("Select language");
+
+        valueField = new TextField("Value *");
+        valueField.setRequiredIndicatorVisible(true);
+        valueField.setPlaceholder("Display value");
+
+        descriptionArea = new TextArea("Description");
+        descriptionArea.setPlaceholder("Optional description");
+
+        referenceField = new TextField("Reference");
+        referenceField.setPlaceholder("Optional reference code");
+
+        orderField = new IntegerField("Order");
+        orderField.setPlaceholder("Display order");
+    }
+
+    private FormLayout buildFormLayout() {
+        FormLayout form = new FormLayout();
+        form.setResponsiveSteps(
+                new FormLayout.ResponsiveStep("0", 1),
+                new FormLayout.ResponsiveStep("500px", 2)
+        );
+        form.add(tableCodeField, languageCombo, valueField,
+                descriptionArea, referenceField, orderField);
+        form.setColspan(descriptionArea, 2);
+        return form;
+    }
+
+    @Override
+    protected boolean onOk() {
+        if (tableCodeField.getValue().isBlank()) {
+            append("Table code is required");
+            return false;
+        }
+        if (languageCombo.getValue() == null) {
+            append("Language is required");
+            return false;
+        }
+        if (valueField.getValue().isBlank()) {
+            append("Value is required");
+            return false;
+        }
+
+        parentView.showLoading(true);
+        try {
+            AnnexDto newAnnex = AnnexDto.builder()
+                    .tableCode(tableCodeField.getValue())
+                    .language(languageCombo.getValue())
+                    .value(valueField.getValue())
+                    .description(descriptionArea.getValue())
+                    .reference(referenceField.getValue())
+                    .annexOrder(orderField.getValue())
+                    .build();
+
+            ResponseEntity<AnnexDto> response = annexService.create(newAnnex);
+            if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+                append("Creation failed: HTTP " + response.getStatusCodeValue());
+                return false;
+            }
+
+            append("Annex created successfully");
+            if (onSuccess != null) onSuccess.run();
+            return true;
+        } catch (FeignException ex) {
+            append(extractErrorMessage(ex));
+        } catch (Exception e) {
+            append("Failed operation: " + e.getMessage());
+        } finally {
+            parentView.showLoading(false);
+        }
+        return false;
+    }
+
+    private String extractErrorMessage(FeignException ex) {
+        try {
+            if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank())
+                return ex.contentUTF8();
+        } catch (Exception ignored) {
+        }
+        return ex.getMessage();
+    }
+}

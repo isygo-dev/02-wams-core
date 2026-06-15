@@ -27,7 +27,7 @@ public class ImsMainView extends VerticalLayout {
 
     private final AccountService accountService;
     private final TenantService tenantService;
-    private final AppService appService;
+    private final ApplicationService applicationService;
     private final CustomerService customerService;
     private final RoleInfoService roleInfoService;
     private final UI ui;
@@ -35,12 +35,12 @@ public class ImsMainView extends VerticalLayout {
     @Autowired
     public ImsMainView(AccountService accountService,
                        TenantService tenantService,
-                       AppService appService,
+                       ApplicationService applicationService,
                        CustomerService customerService,
                        RoleInfoService roleInfoService) {
         this.accountService = accountService;
         this.tenantService = tenantService;
-        this.appService = appService;
+        this.applicationService = applicationService;
         this.customerService = customerService;
         this.roleInfoService = roleInfoService;
         this.ui = UI.getCurrent();

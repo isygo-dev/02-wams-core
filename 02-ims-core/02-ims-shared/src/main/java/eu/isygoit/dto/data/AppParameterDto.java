@@ -17,8 +17,10 @@ import lombok.experimental.SuperBuilder;
 public class AppParameterDto extends AuditableIdAssignableDto<Long> {
 
     private Long id;
+
+    private String tenant;
+
     private String name;
     private String value;
-    private String tenant;
     private String description;
 }

@@ -22,11 +22,15 @@ public class ImsMainLayout extends BaseMainLayout {
         SideNavItem accounts = new SideNavItem("Accounts", "ims/accounts", VaadinIcon.USER.create());
         SideNavItem tenants = new SideNavItem("Tenants", "ims/tenants", VaadinIcon.BUILDING.create());
         SideNavItem applications = new SideNavItem("Applications", "ims/applications", VaadinIcon.PAPERCLIP.create());
-        SideNavItem customers = new SideNavItem("Customers", "ims/customers", VaadinIcon.GROUP.create());
-        SideNavItem roles = new SideNavItem("Roles", "ims/roles", VaadinIcon.SHIELD.create());
-        SideNavItem annexes = new SideNavItem("Annexes", "ims/annexes", VaadinIcon.FOLDER_OPEN.create());
 
-        nav.addItem(dashboard, accounts, tenants, applications, customers, roles, annexes);
+        SideNavItem roles = new SideNavItem("Roles", "ims/roles", VaadinIcon.SHIELD.create());
+
+        SideNavItem annexes = new SideNavItem("Annexes", "ims/annexes", VaadinIcon.FOLDER_OPEN.create());
+        SideNavItem parameters = new SideNavItem("Parameters", "ims/parameters", VaadinIcon.KEYBOARD.create());
+
+        SideNavItem customers = new SideNavItem("Customers", "ims/customers", VaadinIcon.GROUP.create());
+
+        nav.addItem(dashboard, accounts, tenants, applications, roles, annexes, parameters, customers);
 
         Scroller scroller = new Scroller(nav);
         VerticalLayout layout = new VerticalLayout(scroller);
