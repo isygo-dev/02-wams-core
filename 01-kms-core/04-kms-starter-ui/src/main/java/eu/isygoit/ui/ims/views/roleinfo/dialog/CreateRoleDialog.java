@@ -1,13 +1,16 @@
 package eu.isygoit.ui.ims.views.roleinfo.dialog;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
@@ -15,8 +18,7 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.theme.lumo.LumoUtility;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.ApplicationDto;
 import eu.isygoit.dto.data.RoleInfoDto;
@@ -26,14 +28,13 @@ import eu.isygoit.remote.ims.RoleInfoService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import eu.isygoit.ui.ims.views.roleinfo.RoleManagementView;
 import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class CreateRoleDialog extends BaseActionDialog {
 
     private final RoleManagementView parentView;
@@ -47,15 +48,17 @@ public class CreateRoleDialog extends BaseActionDialog {
     private IntegerField levelField;
     private TextArea descriptionField;
 
-    // Allowed applications
-    private Grid<ApplicationDto> availableAppsGrid;
-    private Grid<ApplicationDto> assignedAppsGrid;
+    // All applications grid with checkboxes
+    private Grid<ApplicationDto> applicationsGrid;
+    private TextField appsSearchField;
+    private Span appsCountLabel;
     private List<ApplicationDto> allApplications = new ArrayList<>();
-    private Set<ApplicationDto> assignedApplications = new HashSet<>();
+    private Set<Long> allowedApplicationIds = new HashSet<>(); // store IDs of allowed apps
 
-    // Permissions (RolePermissionDto)
+    // Permissions
     private Grid<RolePermissionDto> permissionsGrid;
     private List<RolePermissionDto> permissions = new ArrayList<>();
+    private TextField permSearchField;
 
     private Tabs tabs;
     private VerticalLayout tabContent;
@@ -71,17 +74,20 @@ public class CreateRoleDialog extends BaseActionDialog {
         this.onSuccess = onSuccess;
 
         setOkButtonText("Create");
-        setWidth("90%");
+        setWidth("95%");
         getElement().getStyle().set("max-width", "1100px");
-        setHeight("75vh");
+        setHeight("85vh");
+        setResizable(true);
+        setDraggable(true);
 
         buildBasicForm();
         buildApplicationsGrid();
         buildPermissionsGrid();
         buildTabs();
-
         add(createMainLayout());
         loadApplications();
+
+        injectResponsiveStyles();
     }
 
     private void buildBasicForm() {
@@ -99,93 +105,169 @@ public class CreateRoleDialog extends BaseActionDialog {
 
         descriptionField = new TextArea("Description");
         descriptionField.setWidthFull();
+        descriptionField.setHeight("80px");
     }
 
     private void buildApplicationsGrid() {
-        availableAppsGrid = new Grid<>();
-        availableAppsGrid.addColumn(ApplicationDto::getName).setHeader("Name");
-        availableAppsGrid.addColumn(ApplicationDto::getTitle).setHeader("Title");
-        availableAppsGrid.addComponentColumn(app -> {
-            Button addBtn = new Button(VaadinIcon.PLUS.create());
-            addBtn.addClickListener(e -> {
-                assignedApplications.add(app);
-                refreshAppsGrids();
+        applicationsGrid = new Grid<>();
+        applicationsGrid.addComponentColumn(app -> {
+            Checkbox cb = new Checkbox(allowedApplicationIds.contains(app.getId()));
+            cb.addValueChangeListener(e -> {
+                if (Boolean.TRUE.equals(e.getValue())) {
+                    allowedApplicationIds.add(app.getId());
+                } else {
+                    allowedApplicationIds.remove(app.getId());
+                }
             });
-            return addBtn;
-        }).setHeader("Add").setWidth("70px");
+            return cb;
+        }).setHeader("Allow").setWidth("70px").setFlexGrow(0);
+        applicationsGrid.addColumn(ApplicationDto::getName).setHeader("Name").setAutoWidth(true);
+        applicationsGrid.addColumn(ApplicationDto::getTitle).setHeader("Title").setAutoWidth(true);
+        applicationsGrid.addThemeVariants(GridVariant.LUMO_COMPACT, GridVariant.LUMO_NO_BORDER);
+        applicationsGrid.setHeight("350px");
 
-        assignedAppsGrid = new Grid<>();
-        assignedAppsGrid.addColumn(ApplicationDto::getName).setHeader("Name");
-        assignedAppsGrid.addColumn(ApplicationDto::getTitle).setHeader("Title");
-        assignedAppsGrid.addComponentColumn(app -> {
-            Button removeBtn = new Button(VaadinIcon.MINUS.create());
-            removeBtn.addClickListener(e -> {
-                assignedApplications.remove(app);
-                refreshAppsGrids();
-            });
-            return removeBtn;
-        }).setHeader("Remove").setWidth("70px");
+        appsSearchField = new TextField();
+        appsSearchField.setPlaceholder("Search applications...");
+        appsSearchField.setClearButtonVisible(true);
+        appsSearchField.setValueChangeMode(ValueChangeMode.LAZY);
+        appsSearchField.addValueChangeListener(e -> filterApplicationsGrid());
+
+        appsCountLabel = new Span();
+        appsCountLabel.getStyle().set("font-size", "var(--lumo-font-size-xs)");
+        appsCountLabel.getStyle().set("color", "var(--lumo-secondary-text-color)");
+    }
+
+    private void filterApplicationsGrid() {
+        String term = appsSearchField.getValue() == null ? "" : appsSearchField.getValue().toLowerCase();
+        List<ApplicationDto> filtered = allApplications.stream()
+                .filter(app -> term.isEmpty() ||
+                        app.getName().toLowerCase().contains(term) ||
+                        app.getTitle().toLowerCase().contains(term))
+                .collect(Collectors.toList());
+        applicationsGrid.setItems(filtered);
+        appsCountLabel.setText(filtered.size() + " applications shown");
+    }
+
+    private void refreshApplicationsGrid() {
+        applicationsGrid.setItems(allApplications);
+        appsCountLabel.setText(allApplications.size() + " total applications");
+        appsSearchField.clear();
     }
 
     private void buildPermissionsGrid() {
         permissionsGrid = new Grid<>();
-        permissionsGrid.addColumn(RolePermissionDto::getServiceName).setHeader("Service");
-        permissionsGrid.addColumn(RolePermissionDto::getObjectName).setHeader("Object");
+        permissionsGrid.addColumn(RolePermissionDto::getServiceName).setHeader("Service").setAutoWidth(true);
+        permissionsGrid.addColumn(RolePermissionDto::getObjectName).setHeader("Object").setAutoWidth(true);
         permissionsGrid.addComponentColumn(perm -> {
             Checkbox readChk = new Checkbox(perm.getRead());
             readChk.addValueChangeListener(e -> perm.setRead(e.getValue()));
             return readChk;
-        }).setHeader("Read (GET)").setWidth("100px");
-
+        }).setHeader("Read").setWidth("70px").setFlexGrow(0);
         permissionsGrid.addComponentColumn(perm -> {
             Checkbox writeChk = new Checkbox(perm.getWrite());
             writeChk.addValueChangeListener(e -> perm.setWrite(e.getValue()));
             return writeChk;
-        }).setHeader("Write (POST/PUT)").setWidth("120px");
-
+        }).setHeader("Write").setWidth("70px").setFlexGrow(0);
         permissionsGrid.addComponentColumn(perm -> {
             Checkbox deleteChk = new Checkbox(perm.getDelete());
             deleteChk.addValueChangeListener(e -> perm.setDelete(e.getValue()));
             return deleteChk;
-        }).setHeader("Delete (DELETE)").setWidth("100px");
-
+        }).setHeader("Delete").setWidth("70px").setFlexGrow(0);
         permissionsGrid.addComponentColumn(perm -> {
             Button removeBtn = new Button(VaadinIcon.TRASH.create());
+            removeBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
             removeBtn.addClickListener(e -> {
                 permissions.remove(perm);
                 refreshPermissionsGrid();
             });
             return removeBtn;
-        }).setHeader("Actions").setWidth("80px");
+        }).setHeader("").setWidth("60px").setFlexGrow(0);
+        permissionsGrid.addThemeVariants(GridVariant.LUMO_COMPACT, GridVariant.LUMO_NO_BORDER);
+        permissionsGrid.setHeight("300px");
 
-        permissionsGrid.setItems(permissions);
+        permSearchField = new TextField();
+        permSearchField.setPlaceholder("Filter permissions...");
+        permSearchField.setClearButtonVisible(true);
+        permSearchField.setValueChangeMode(ValueChangeMode.LAZY);
+        permSearchField.addValueChangeListener(e -> filterPermissions());
     }
 
-    private void refreshAppsGrids() {
-        List<ApplicationDto> available = allApplications.stream()
-                .filter(app -> !assignedApplications.contains(app))
+    private void filterPermissions() {
+        String term = permSearchField.getValue().toLowerCase();
+        List<RolePermissionDto> filtered = permissions.stream()
+                .filter(p -> term.isEmpty() ||
+                        (p.getServiceName() != null && p.getServiceName().toLowerCase().contains(term)) ||
+                        (p.getObjectName() != null && p.getObjectName().toLowerCase().contains(term)))
                 .collect(Collectors.toList());
-        availableAppsGrid.setItems(available);
-        assignedAppsGrid.setItems(new ArrayList<>(assignedApplications));
+        permissionsGrid.setItems(filtered);
     }
 
     private void refreshPermissionsGrid() {
         permissionsGrid.setItems(new ArrayList<>(permissions));
+        permSearchField.clear();
     }
 
     private void loadApplications() {
         parentView.showLoading(true);
         try {
-            ResponseEntity<PaginatedResponseDto<ApplicationDto>> response = applicationService.findAll(0, 100);
-            if (response.getBody() != null && response.getBody().getContent() != null) {
-                allApplications = response.getBody().getContent();
-                refreshAppsGrids();
+            allApplications = fetchAllApplications();
+            if (allApplications.isEmpty()) {
+                String msg = "No applications found. Check backend services.";
+                log.warn(msg);
+                Notification.show(msg, 5000, Notification.Position.BOTTOM_END);
+                applicationsGrid.setItems(Collections.emptyList());
+                appsCountLabel.setText("0 applications found");
+            } else {
+                log.info("Loaded {} applications", allApplications.size());
+                refreshApplicationsGrid();
             }
         } catch (Exception e) {
+            log.error("Failed to load applications", e);
             append("Failed to load applications: " + e.getMessage());
+            Notification.show("Error loading applications: " + e.getMessage(), 5000, Notification.Position.BOTTOM_END);
         } finally {
             parentView.showLoading(false);
         }
+    }
+
+    private List<ApplicationDto> fetchAllApplications() {
+        // Try 1: findAllListFull()
+        try {
+            ResponseEntity<List<ApplicationDto>> response = applicationService.findAllListFull();
+            if (response.getBody() != null && !response.getBody().isEmpty()) {
+                return response.getBody();
+            }
+        } catch (Exception e) {
+            log.debug("findAllListFull failed: {}", e.getMessage());
+        }
+
+        // Try 2: findAll(0, 1000) paginated
+        try {
+            ResponseEntity<PaginatedResponseDto<ApplicationDto>> paginated = applicationService.findAll(0, 1000);
+            if (paginated.getBody() != null && paginated.getBody().getContent() != null) {
+                return paginated.getBody().getContent();
+            }
+        } catch (Exception e) {
+            log.debug("paginated findAll failed: {}", e.getMessage());
+        }
+
+        // Try 3: findAllList() via reflection (if exists)
+        try {
+            var method = applicationService.getClass().getMethod("findAllList");
+            @SuppressWarnings("unchecked")
+            ResponseEntity<List<ApplicationDto>> listResp = (ResponseEntity<List<ApplicationDto>>) method.invoke(applicationService);
+            if (listResp.getBody() != null && !listResp.getBody().isEmpty()) {
+                return listResp.getBody();
+            }
+        } catch (Exception e) {
+            log.debug("findAllList failed: {}", e.getMessage());
+        }
+
+        return new ArrayList<>();
+    }
+
+    private void refreshApplications() {
+        loadApplications();
     }
 
     private void buildTabs() {
@@ -193,14 +275,14 @@ public class CreateRoleDialog extends BaseActionDialog {
         tabContent = new VerticalLayout();
         tabContent.setPadding(false);
         tabContent.setSpacing(false);
+        tabContent.setSizeFull();
 
         Tab basicTab = new Tab("Basic Info");
-        Tab appsTab = new Tab("Allowed Applications");
+        Tab appsTab = new Tab("Applications");
         Tab permsTab = new Tab("Permissions");
 
         tabs.add(basicTab, appsTab, permsTab);
         tabs.addSelectedChangeListener(event -> updateTabContent(tabs.getSelectedIndex()));
-
         updateTabContent(0);
     }
 
@@ -210,57 +292,47 @@ public class CreateRoleDialog extends BaseActionDialog {
             case 0:
                 VerticalLayout basicLayout = new VerticalLayout(nameField, codeField, levelField, descriptionField);
                 basicLayout.setPadding(false);
+                basicLayout.setSpacing(false);
                 tabContent.add(basicLayout);
                 break;
             case 1:
-                HorizontalLayout appsLayout = new HorizontalLayout(availableAppsGrid, assignedAppsGrid);
-                appsLayout.setSizeFull();
-                availableAppsGrid.setSizeFull();
-                assignedAppsGrid.setSizeFull();
+                VerticalLayout appsLayout = new VerticalLayout();
+                appsLayout.setPadding(false);
+                appsLayout.setSpacing(false);
+
+                Button refreshAppsBtn = new Button("Refresh", VaadinIcon.REFRESH.create());
+                refreshAppsBtn.addThemeVariants(ButtonVariant.LUMO_SMALL);
+                refreshAppsBtn.addClickListener(e -> refreshApplications());
+
+                HorizontalLayout topBar = new HorizontalLayout(appsSearchField, refreshAppsBtn, appsCountLabel);
+                topBar.setWidthFull();
+                topBar.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
+                topBar.expand(appsSearchField);
+
+                appsLayout.add(topBar, applicationsGrid);
                 tabContent.add(appsLayout);
                 break;
             case 2:
                 VerticalLayout permsLayout = new VerticalLayout();
                 Button addPermBtn = new Button("Add Permission", VaadinIcon.PLUS.create());
-                addPermBtn.addClickListener(e -> showAddPermissionDialog());
-                permsLayout.add(addPermBtn, permissionsGrid);
+                addPermBtn.addThemeVariants(ButtonVariant.LUMO_SMALL);
+                addPermBtn.addClickListener(e -> {
+                    permissions.add(RolePermissionDto.builder()
+                            .serviceName("")
+                            .objectName("")
+                            .read(false)
+                            .write(false)
+                            .delete(false)
+                            .build());
+                    refreshPermissionsGrid();
+                });
+                permsLayout.add(addPermBtn, permSearchField, permissionsGrid);
                 permsLayout.setPadding(false);
+                permsLayout.setSpacing(false);
                 permsLayout.setHeightFull();
-                permissionsGrid.setHeight("400px");
                 tabContent.add(permsLayout);
                 break;
         }
-    }
-
-    private void showAddPermissionDialog() {
-        Dialog dialog = new Dialog();
-        dialog.setHeaderTitle("Add Permission");
-
-        TextField serviceField = new TextField("Service name");
-        TextField objectField = new TextField("Object name");
-        Checkbox readChk = new Checkbox("Read (GET)");
-        Checkbox writeChk = new Checkbox("Write (POST/PUT)");
-        Checkbox deleteChk = new Checkbox("Delete (DELETE)");
-
-        Button saveBtn = new Button("Add", e -> {
-            RolePermissionDto newPerm = RolePermissionDto.builder()
-                    .serviceName(serviceField.getValue())
-                    .objectName(objectField.getValue())
-                    .read(readChk.getValue())
-                    .write(writeChk.getValue())
-                    .delete(deleteChk.getValue())
-                    .build();
-            permissions.add(newPerm);
-            refreshPermissionsGrid();
-            dialog.close();
-        });
-        Button cancelBtn = new Button("Cancel", e -> dialog.close());
-
-        VerticalLayout layout = new VerticalLayout(serviceField, objectField, readChk, writeChk, deleteChk);
-        layout.setSpacing(true);
-        dialog.add(layout);
-        dialog.getFooter().add(cancelBtn, saveBtn);
-        dialog.open();
     }
 
     private Component createMainLayout() {
@@ -269,6 +341,28 @@ public class CreateRoleDialog extends BaseActionDialog {
         main.setPadding(false);
         main.setSpacing(false);
         return main;
+    }
+
+    private void injectResponsiveStyles() {
+        String css = """
+                @media (max-width: 600px) {
+                    .allowed-apps-layout {
+                        flex-direction: column !important;
+                    }
+                    .allowed-apps-layout > vaadin-horizontal-layout {
+                        flex-direction: column !important;
+                    }
+                    .button-column {
+                        flex-direction: row !important;
+                        justify-content: center;
+                        gap: 8px;
+                    }
+                }
+                """;
+        UI.getCurrent().getPage().executeJs(
+                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
+                css
+        );
     }
 
     @Override
@@ -284,13 +378,21 @@ public class CreateRoleDialog extends BaseActionDialog {
 
         parentView.showLoading(true);
         try {
+            // Build allowed tools list from IDs
+            List<ApplicationDto> allowedTools = allApplications.stream()
+                    .filter(app -> allowedApplicationIds.contains(app.getId()))
+                    .collect(Collectors.toList());
+
             RoleInfoDto newRole = RoleInfoDto.builder()
                     .name(nameField.getValue())
                     .code(codeField.getValue())
                     .level(levelField.getValue())
                     .description(descriptionField.getValue())
-                    .allowedTools(new ArrayList<>(assignedApplications))
-                    .rolePermission(permissions)
+                    .allowedTools(allowedTools)
+                    .rolePermission(permissions.stream()
+                            .filter(p -> p.getServiceName() != null && !p.getServiceName().isBlank()
+                                    && p.getObjectName() != null && !p.getObjectName().isBlank())
+                            .collect(Collectors.toList()))
                     .build();
 
             ResponseEntity<RoleInfoDto> response = roleService.create(newRole);
@@ -298,7 +400,6 @@ public class CreateRoleDialog extends BaseActionDialog {
                 append("Creation failed: HTTP " + response.getStatusCodeValue());
                 return false;
             }
-
             append("Role created successfully");
             if (onSuccess != null) onSuccess.run();
             return true;

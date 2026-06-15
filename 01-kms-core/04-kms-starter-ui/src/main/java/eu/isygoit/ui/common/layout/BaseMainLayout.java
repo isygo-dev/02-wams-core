@@ -34,9 +34,6 @@ public abstract class BaseMainLayout extends AppLayout {
     private final AccountImageService accountImageService;
     private Div rightSlot; // container for profile
 
-    protected abstract String getTitle();
-    protected abstract void createDrawer();
-
     public BaseMainLayout() {
         // Retrieve services statically (layout is not a Spring bean)
         this.accountService = SpringContextUtil.getBean(AccountService.class);
@@ -45,6 +42,10 @@ public abstract class BaseMainLayout extends AppLayout {
         createHeader();
         createDrawer();
     }
+
+    protected abstract String getTitle();
+
+    protected abstract void createDrawer();
 
     private void createHeader() {
         H1 title = new H1(getTitle());

@@ -13,7 +13,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.constants.AccountTypeConstants;
-import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.AccountDetailsDto;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.data.TenantDto;

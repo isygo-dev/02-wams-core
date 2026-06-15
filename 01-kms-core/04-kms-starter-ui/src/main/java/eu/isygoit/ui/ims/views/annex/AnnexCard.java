@@ -11,11 +11,10 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.AnnexDto;
-import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.remote.ims.AnnexService;
 import eu.isygoit.ui.common.card.BaseCard;
-import eu.isygoit.ui.ims.views.annex.dialog.DeleteAnnexDialog;
 import eu.isygoit.ui.ims.views.annex.dialog.AnnexDetailsDialog;
+import eu.isygoit.ui.ims.views.annex.dialog.DeleteAnnexDialog;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
