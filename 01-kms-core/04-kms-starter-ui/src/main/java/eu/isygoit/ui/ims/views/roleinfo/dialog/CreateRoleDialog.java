@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 public class CreateRoleDialog extends BaseActionDialog {
 
     private final RoleManagementView parentView;
-    private final RoleInfoService roleService;
+    private final RoleInfoService roleInfoService;
     private final ApplicationService applicationService;
     private final Runnable onSuccess;
 
@@ -66,12 +66,12 @@ public class CreateRoleDialog extends BaseActionDialog {
     private VerticalLayout tabContent;
 
     public CreateRoleDialog(RoleManagementView parentView,
-                            RoleInfoService roleService,
+                            RoleInfoService roleInfoService,
                             ApplicationService applicationService,
                             Runnable onSuccess) {
         super("Create Role");
         this.parentView = parentView;
-        this.roleService = roleService;
+        this.roleInfoService = roleInfoService;
         this.applicationService = applicationService;
         this.onSuccess = onSuccess;
 
@@ -445,7 +445,7 @@ public class CreateRoleDialog extends BaseActionDialog {
                             .collect(Collectors.toList()))
                     .build();
 
-            ResponseEntity<RoleInfoDto> response = roleService.create(newRole);
+            ResponseEntity<RoleInfoDto> response = roleInfoService.create(newRole);
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
                 append("Creation failed: HTTP " + response.getStatusCodeValue());
                 return false;

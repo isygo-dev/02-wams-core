@@ -22,7 +22,6 @@ import java.util.List;
 public class RoleInfoDto extends AuditableIdAssignableDto<Long> {
 
     private Long id;
-    @NotEmpty
     private String tenant;
     private String templateCode;
     private String code;
