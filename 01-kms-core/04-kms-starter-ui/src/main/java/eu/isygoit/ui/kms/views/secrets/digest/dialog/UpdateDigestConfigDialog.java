@@ -9,12 +9,16 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.DigestConfigDto;
 import eu.isygoit.enums.IEnumAlgoDigestConfig;
+import eu.isygoit.enums.IEnumProviderClassName;
 import eu.isygoit.enums.IEnumSaltGenerator;
 import eu.isygoit.enums.IEnumStringOutputType;
 import eu.isygoit.remote.kms.DigestConfigService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class UpdateDigestConfigDialog extends BaseActionDialog {
 
@@ -26,7 +30,7 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
     private IntegerField iterationsField;
     private IntegerField saltSizeField;
     private ComboBox<IEnumSaltGenerator.Types> saltGeneratorCombo;
-    private TextField providerClassField;
+    private ComboBox<String> providerClassCombo; // free-text ComboBox
     private TextField providerNameField;
     private Checkbox invertSaltPositionCheckbox;
     private Checkbox invertPlainSaltCheckbox;
@@ -67,7 +71,17 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
         saltGeneratorCombo = new ComboBox<>("Salt generator");
         saltGeneratorCombo.setItems(IEnumSaltGenerator.Types.values());
 
-        providerClassField = new TextField("Provider class");
+        // Provider class – ComboBox with free-text input
+        providerClassCombo = new ComboBox<>("Provider class");
+        providerClassCombo.setAllowCustomValue(true);
+        providerClassCombo.setItems(
+                Arrays.stream(IEnumProviderClassName.Types.values())
+                        .map(IEnumProviderClassName.Types::getClassPath)
+                        .collect(Collectors.toList())
+        );
+        providerClassCombo.setPlaceholder("Select or type a provider class");
+        providerClassCombo.setClearButtonVisible(true);
+
         providerNameField = new TextField("Provider name");
 
         invertSaltPositionCheckbox = new Checkbox("Invert position of salt in message before digesting");
@@ -92,7 +106,8 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
         iterationsField.setValue(original.getIterations());
         saltSizeField.setValue(original.getSaltSizeBytes());
         saltGeneratorCombo.setValue(original.getSaltGenerator());
-        providerClassField.setValue(original.getProviderClassName());
+        // Bind provider class – set combo value to the class path (custom or selected)
+        providerClassCombo.setValue(original.getProviderClassName());
         providerNameField.setValue(original.getProviderName());
         invertSaltPositionCheckbox.setValue(original.getInvertPositionOfSaltInMessageBeforeDigesting());
         invertPlainSaltCheckbox.setValue(original.getInvertPositionOfPlainSaltInEncryptionResults());
@@ -108,9 +123,10 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
         FormLayout form = new FormLayout();
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
         form.add(codeField, algorithmCombo, iterationsField, saltSizeField, saltGeneratorCombo,
-                providerClassField, providerNameField, invertSaltPositionCheckbox, invertPlainSaltCheckbox,
-                lenientSaltCheckbox, poolSizeField, unicodeIgnoreCheckbox, outputTypeCombo,
-                prefixField, suffixField);
+                providerClassCombo, providerNameField,
+                invertSaltPositionCheckbox, invertPlainSaltCheckbox,
+                lenientSaltCheckbox, poolSizeField, unicodeIgnoreCheckbox,
+                outputTypeCombo, prefixField, suffixField);
         return form;
     }
 
@@ -123,7 +139,7 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
                 .iterations(iterationsField.getValue())
                 .saltSizeBytes(saltSizeField.getValue())
                 .saltGenerator(saltGeneratorCombo.getValue())
-                .providerClassName(providerClassField.getValue())
+                .providerClassName(providerClassCombo.getValue()) // free-text or selected
                 .providerName(providerNameField.getValue())
                 .invertPositionOfSaltInMessageBeforeDigesting(invertSaltPositionCheckbox.getValue())
                 .invertPositionOfPlainSaltInEncryptionResults(invertPlainSaltCheckbox.getValue())

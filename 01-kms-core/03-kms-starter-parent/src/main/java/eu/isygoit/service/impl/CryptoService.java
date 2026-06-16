@@ -111,9 +111,24 @@ public class CryptoService implements ICryptoService {
         config.setAlgorithm(digestConfig.getAlgorithm().name().replace("_", "-"));
         config.setIterations(digestConfig.getIterations());
         config.setSaltSizeBytes(digestConfig.getSaltSizeBytes());
-        config.setSaltGeneratorClassName("org.jasypt.iv." + digestConfig.getSaltGenerator().name());
+
+        String className = "org.jasypt.iv." + digestConfig.getSaltGenerator().name();
+        try {
+            // Validate that the class exists
+            Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            className = "org.jasypt.salt." + digestConfig.getSaltGenerator().name();
+             try {
+                 Class.forName(className);
+             } catch (ClassNotFoundException ex) {
+                 log.error("Invalid salt generator class for digest config: {}", className, ex);
+                 throw new DigestConfigCompositionException("Invalid salt generator: " + className);
+             }
+        }
+        config.setSaltGeneratorClassName(className);
+
         config.setProviderName(digestConfig.getProviderName());
-        config.setProviderClassName(digestConfig.getProviderClassName());
+        config.setProviderClassName(StringUtils.hasText(digestConfig.getProviderClassName())? digestConfig.getProviderClassName() : null);
         config.setInvertPositionOfSaltInMessageBeforeDigesting(digestConfig.getInvertPositionOfSaltInMessageBeforeDigesting());
         config.setInvertPositionOfPlainSaltInEncryptionResults(digestConfig.getInvertPositionOfPlainSaltInEncryptionResults());
         config.setUseLenientSaltSizeCheck(digestConfig.getUseLenientSaltSizeCheck());

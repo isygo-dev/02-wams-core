@@ -9,6 +9,7 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.DigestConfigDto;
 import eu.isygoit.enums.IEnumAlgoDigestConfig;
+import eu.isygoit.enums.IEnumProviderClassName;
 import eu.isygoit.enums.IEnumSaltGenerator;
 import eu.isygoit.enums.IEnumStringOutputType;
 import eu.isygoit.remote.kms.DigestConfigService;
@@ -16,6 +17,9 @@ import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class CreateDigestConfigDialog extends BaseActionDialog {
 
@@ -26,7 +30,7 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
     private IntegerField iterationsField;
     private IntegerField saltSizeField;
     private ComboBox<IEnumSaltGenerator.Types> saltGeneratorCombo;
-    private TextField providerClassField;
+    private ComboBox<String> providerClassCombo; // ComboBox with free-text
     private TextField providerNameField;
     private Checkbox invertSaltPositionCheckbox;
     private Checkbox invertPlainSaltCheckbox;
@@ -70,7 +74,17 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
         saltGeneratorCombo.setItems(IEnumSaltGenerator.Types.values());
         saltGeneratorCombo.setValue(IEnumSaltGenerator.Types.RandomSaltGenerator);
 
-        providerClassField = new TextField("Provider class");
+        // Provider class – ComboBox with free-text input
+        providerClassCombo = new ComboBox<>("Provider class");
+        providerClassCombo.setAllowCustomValue(true);
+        providerClassCombo.setItems(
+                Arrays.stream(IEnumProviderClassName.Types.values())
+                        .map(IEnumProviderClassName.Types::getClassPath)
+                        .collect(Collectors.toList())
+        );
+        providerClassCombo.setPlaceholder("Select or type a provider class (e.g., org.bouncycastle.jce.provider.BouncyCastleProvider)");
+        providerClassCombo.setClearButtonVisible(true);
+
         providerNameField = new TextField("Provider name");
 
         invertSaltPositionCheckbox = new Checkbox("Invert position of salt in message before digesting");
@@ -95,9 +109,10 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
         FormLayout form = new FormLayout();
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
         form.add(codeField, algorithmCombo, iterationsField, saltSizeField, saltGeneratorCombo,
-                providerClassField, providerNameField, invertSaltPositionCheckbox, invertPlainSaltCheckbox,
-                lenientSaltCheckbox, poolSizeField, unicodeIgnoreCheckbox, outputTypeCombo,
-                prefixField, suffixField);
+                providerClassCombo, providerNameField,
+                invertSaltPositionCheckbox, invertPlainSaltCheckbox,
+                lenientSaltCheckbox, poolSizeField, unicodeIgnoreCheckbox,
+                outputTypeCombo, prefixField, suffixField);
         return form;
     }
 
@@ -130,7 +145,7 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
                 .iterations(iterations)
                 .saltSizeBytes(saltSize)
                 .saltGenerator(saltGeneratorCombo.getValue())
-                .providerClassName(providerClassField.getValue())
+                .providerClassName(providerClassCombo.getValue()) // free-text or selected
                 .providerName(providerNameField.getValue())
                 .invertPositionOfSaltInMessageBeforeDigesting(invertSaltPositionCheckbox.getValue())
                 .invertPositionOfPlainSaltInEncryptionResults(invertPlainSaltCheckbox.getValue())
