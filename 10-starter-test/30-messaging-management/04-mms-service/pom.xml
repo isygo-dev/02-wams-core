@@ -87,8 +87,8 @@
                 <filtering>true</filtering>
                 <excludes>
                     <exclude>uploads/**/*.*</exclude>
-                    <exclude>camel/**/*.*</exclude>
-                    <exclude>templates/**/*.*</exclude>
+<!--                    <exclude>camel/**/*.*</exclude>-->
+                    <exclude>template/**/*.*</exclude>
                 </excludes>
             </resource>
             <resource>
@@ -96,15 +96,15 @@
                 <filtering>true</filtering>
                 <targetPath>../uploads</targetPath>
             </resource>
-            <resource>
+            <!--<resource>
                 <directory>src/main/resources/camel</directory>
                 <filtering>true</filtering>
                 <targetPath>../camel</targetPath>
-            </resource>
+            </resource>-->
             <resource>
-                <directory>src/main/resources/templates</directory>
+                <directory>src/main/resources/template</directory>
                 <filtering>true</filtering>
-                <targetPath>../templates</targetPath>
+                <targetPath>../template</targetPath>
             </resource>
         </resources>
 
@@ -125,7 +125,7 @@
                     <additionalClasspathElements>
                         <additionalClasspathElement>../uploads/</additionalClasspathElement>
                         <additionalClasspathElement>../camel/</additionalClasspathElement>
-                        <additionalClasspathElement>../templates/</additionalClasspathElement>
+                        <additionalClasspathElement>../template/</additionalClasspathElement>
                     </additionalClasspathElements>
                 </configuration>
             </plugin>
