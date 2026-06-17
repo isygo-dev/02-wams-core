@@ -1,4 +1,4 @@
-package eu.isygoit.ui;
+package eu.isygoit.ui.ims;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;

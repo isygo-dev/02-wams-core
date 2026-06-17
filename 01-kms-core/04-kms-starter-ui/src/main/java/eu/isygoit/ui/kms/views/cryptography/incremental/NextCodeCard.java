@@ -13,8 +13,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.NextCodeDto;
 import eu.isygoit.remote.kms.KmsAppNextCodeService;
-import eu.isygoit.ui.KmsMainView;
 import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.kms.KmsMainView;
 import eu.isygoit.ui.kms.views.cryptography.incremental.dialog.DeleteNextCodeDialog;
 
 import java.util.List;

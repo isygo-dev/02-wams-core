@@ -12,7 +12,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import eu.isygoit.ui.KmsMainView;
+import eu.isygoit.ui.kms.KmsMainView;
 
 import java.util.ArrayList;
 import java.util.List;

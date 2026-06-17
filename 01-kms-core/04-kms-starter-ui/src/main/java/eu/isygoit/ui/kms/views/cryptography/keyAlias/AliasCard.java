@@ -11,8 +11,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.KmsMainView;
 import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.kms.KmsMainView;
 import eu.isygoit.ui.kms.views.cryptography.keyAlias.dialog.DeleteAliasDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyAlias.dialog.UpdateAliasDialog;
 

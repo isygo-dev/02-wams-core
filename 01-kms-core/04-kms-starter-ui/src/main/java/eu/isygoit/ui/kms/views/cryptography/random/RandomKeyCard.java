@@ -12,8 +12,8 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.RandomKeyDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.remote.kms.RandomKeyService;
-import eu.isygoit.ui.KmsMainView;
 import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.kms.KmsMainView;
 import eu.isygoit.ui.kms.views.cryptography.random.dialog.DeleteRandomKeyDialog;
 import eu.isygoit.ui.kms.views.cryptography.random.dialog.RenewRandomKeyDialog;
 

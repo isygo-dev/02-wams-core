@@ -1,4 +1,4 @@
-package eu.isygoit.ui;
+package eu.isygoit.ui.kms;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
