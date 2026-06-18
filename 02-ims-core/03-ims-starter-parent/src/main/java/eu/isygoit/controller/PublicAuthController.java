@@ -48,7 +48,7 @@ import java.util.List;
 @Validated
 @RestController
 @InjectExceptionHandler(ImsExceptionHandler.class)
-@RequestMapping(path = "/api/v1/public/user")
+@RequestMapping(path = "/api/v1/public/auth")
 public class PublicAuthController extends ControllerExceptionHandler implements PublicAuthServiceApi {
 
     private final AppProperties appProperties;
