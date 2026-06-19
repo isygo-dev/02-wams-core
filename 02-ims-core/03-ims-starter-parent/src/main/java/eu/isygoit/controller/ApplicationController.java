@@ -7,7 +7,7 @@ import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.constants.TenantConstants;
-import eu.isygoit.dto.common.ContextRequestDto;
+import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.ApplicationDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
@@ -55,7 +55,7 @@ public class ApplicationController extends MappedCrudTenantController<Long, Appl
 
 
     @Override
-    public ResponseEntity<PaginatedResponseDto<ApplicationDto>> performFindAll(ContextRequestDto requestContext, Integer page, Integer size) {
+    public ResponseEntity<PaginatedResponseDto<ApplicationDto>> performFindAll(RequestContextDto requestContext, Integer page, Integer size) {
         if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return super.performFindAll(requestContext, page, size);
         } else {
@@ -78,7 +78,7 @@ public class ApplicationController extends MappedCrudTenantController<Long, Appl
     }
 
     @Override
-    public ResponseEntity<PaginatedResponseDto<ApplicationDto>> performFindAllFull(ContextRequestDto requestContext, Integer page, Integer size) {
+    public ResponseEntity<PaginatedResponseDto<ApplicationDto>> performFindAllFull(RequestContextDto requestContext, Integer page, Integer size) {
         if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return super.performFindAllFull(requestContext, page, size);
         } else {

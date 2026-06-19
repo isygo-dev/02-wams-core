@@ -4,37 +4,58 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.dto.request.AuthenticationRequestDto;
+import eu.isygoit.dto.response.AuthResponseDto;
+import eu.isygoit.enums.IEnumAuth;
+import eu.isygoit.remote.ims.PublicAuthService;
 import jakarta.annotation.security.PermitAll;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Component
+@UIScope //(or @VaadinSessionScope)
 @Route(value = "login/otp")
 @PageTitle("OTP Login")
 @PermitAll
 public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver {
 
     private final TextField usernameField = new TextField("Username");
-    private final TextField otpField = new TextField("One-Time Password");
+    private final HorizontalLayout otpFieldsLayout = new HorizontalLayout();
     private final Button requestOtpButton = new Button("Request OTP", new Icon(VaadinIcon.ENVELOPE));
     private final Button loginButton = new Button("Sign in", new Icon(VaadinIcon.SIGN_IN));
     private final Div errorContainer = new Div();
+    private boolean stylesInjected = false;
 
-    private String generatedOtp = null;
+    private String tenant;
+    private String username;
+    private int otpLength = 6; // default, will be overridden
+    private List<TextField> digitFields = new ArrayList<>();
+
+    @Autowired
+    private PublicAuthService authService;
 
     public OtpLoginView() {
         setSizeFull();
@@ -56,15 +77,15 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
         title.addClassName(LumoUtility.Margin.NONE);
         brand.add(logo, title);
 
-        // Username field
+        // Username field (prefilled, read-only)
         usernameField.setWidthFull();
-        usernameField.setPlaceholder("Enter your username");
+        usernameField.setReadOnly(true);
 
-        // OTP field
-        otpField.setWidthFull();
-        otpField.setPlaceholder("6-digit code");
-        otpField.setEnabled(false);
-        otpField.setPrefixComponent(new Icon(VaadinIcon.CODE));
+        // OTP fields container – will be populated dynamically
+        otpFieldsLayout.setSpacing(true);
+        otpFieldsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+        otpFieldsLayout.setWidthFull();
+        otpFieldsLayout.addClassName("otp-fields");
 
         // Buttons
         requestOtpButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
@@ -91,7 +112,7 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
         footer.addClassName(LumoUtility.Margin.Top.MEDIUM);
 
         VerticalLayout wrapper = new VerticalLayout(brand, usernameField, requestOtpButton,
-                otpField, loginButton, errorContainer, backToLogin, footer);
+                otpFieldsLayout, loginButton, errorContainer, backToLogin, footer);
         wrapper.setAlignItems(FlexComponent.Alignment.CENTER);
         wrapper.setMaxWidth("400px");
         wrapper.setWidthFull();
@@ -100,42 +121,131 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
         wrapper.addClassName("otp-wrapper");
 
         add(wrapper);
-        injectResponsiveStyles();
+
+        addAttachListener(event -> {
+            if (!stylesInjected) {
+                injectResponsiveStyles();
+                stylesInjected = true;
+            }
+        });
+    }
+
+    private void buildOtpFields(int length) {
+        otpFieldsLayout.removeAll();
+        digitFields.clear();
+
+        for (int i = 0; i < length; i++) {
+            TextField field = new TextField();
+            // No explicit width – let CSS handle sizing
+            field.setMaxLength(1);
+            field.setPattern("[0-9]");
+            field.setPlaceholder("•");
+            field.setValueChangeMode(ValueChangeMode.EAGER);
+            final int index = i;
+            field.addValueChangeListener(e -> {
+                String val = e.getValue();
+                if (!val.isEmpty()) {
+                    // Move to next field if available
+                    if (index < digitFields.size() - 1) {
+                        digitFields.get(index + 1).focus();
+                    }
+                }
+                updateLoginButtonState();
+            });
+            // Allow backspace to move to previous field
+            field.addKeyDownListener(e -> {
+                if (e.getKey().equals(com.vaadin.flow.component.Key.BACKSPACE) &&
+                        field.getValue().isEmpty() && index > 0) {
+                    digitFields.get(index - 1).focus();
+                }
+            });
+            digitFields.add(field);
+            otpFieldsLayout.add(field);
+        }
+        // Enable all fields from the start
+        digitFields.forEach(f -> f.setEnabled(true));
+        // Focus the first field
+        if (!digitFields.isEmpty()) {
+            digitFields.get(0).focus();
+        }
+        // Clear any previous values
+        digitFields.forEach(TextField::clear);
+        loginButton.setEnabled(false);
+    }
+
+    private void updateLoginButtonState() {
+        boolean allFilled = digitFields.stream().allMatch(f -> !f.getValue().isEmpty());
+        loginButton.setEnabled(allFilled);
+    }
+
+    private String getOtpFromFields() {
+        return digitFields.stream().map(TextField::getValue).collect(Collectors.joining());
     }
 
     private void requestOtp() {
-        String username = usernameField.getValue();
-        if (username.isBlank()) {
-            showError("Please enter your username");
-            return;
+        // Clear previous OTP fields and focus first
+        digitFields.forEach(f -> f.clear());
+        if (!digitFields.isEmpty()) {
+            digitFields.get(0).focus();
         }
-
-        generatedOtp = String.format("%06d", (int) (Math.random() * 1000000));
-        Notification.show("OTP sent to your registered email: " + generatedOtp,
-                        5000, Notification.Position.BOTTOM_END)
-                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-
-        otpField.setEnabled(true);
-        loginButton.setEnabled(true);
-        requestOtpButton.setEnabled(false);
+        loginButton.setEnabled(false);
         errorContainer.setVisible(false);
+
+        // Here we would call the backend to send the OTP.
+        // For demonstration, we simulate success.
+        // In production, uncomment the real call:
+        /*
+        UserContextRequestDto request = UserContextRequestDto.builder()
+                .tenant(tenant)
+                .userName(username)
+                .build();
+        try {
+            ResponseEntity<Boolean> response = authService.generateForgotPWDToken(request);
+            if (response.getStatusCode().is2xxSuccessful() && Boolean.TRUE.equals(response.getBody())) {
+                Notification.show("OTP sent to your registered email.", 4000, Notification.Position.BOTTOM_END)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            } else {
+                showError("Failed to send OTP. Please try again.");
+            }
+        } catch (Exception ex) {
+            showError("Service error. Please try again.");
+        }
+        */
+        // Demo:
+        Notification.show("OTP sent to your registered email.", 4000, Notification.Position.BOTTOM_END)
+                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
     private void handleOtpLogin() {
-        String otp = otpField.getValue();
-        if (otp.isBlank()) {
-            showError("Please enter the OTP");
-            return;
-        }
-        if (!otp.equals(generatedOtp)) {
-            showError("Invalid OTP. Please try again.");
+        String otp = getOtpFromFields();
+        if (otp.length() != otpLength) {
+            showError("Please enter the complete OTP.");
             return;
         }
 
-        VaadinSession.getCurrent().setAttribute("user", usernameField.getValue());
-        Notification.show("Welcome " + usernameField.getValue() + "!", 2000, Notification.Position.BOTTOM_END)
-                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-        UI.getCurrent().navigate("ims");
+        AuthenticationRequestDto authRequest = AuthenticationRequestDto.builder()
+                .tenant(tenant)
+                .application("default")
+                .userName(username)
+                .password(otp)
+                .authType(IEnumAuth.Types.OTP)
+                .build();
+
+        try {
+            ResponseEntity<AuthResponseDto> response = authService.authenticate(authRequest);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                AuthResponseDto authResponse = response.getBody();
+                VaadinSession.getCurrent().setAttribute("user", username);
+                VaadinSession.getCurrent().setAttribute("accessToken", authResponse.getAccessToken());
+                Notification.show("Welcome " + username + "!", 2000, Notification.Position.BOTTOM_END)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                UI.getCurrent().navigate("ims");
+            } else {
+                showError("Invalid OTP. Please try again.");
+            }
+        } catch (Exception ex) {
+            showError("Authentication error. Please try again.");
+        }
     }
 
     private void showError(String message) {
@@ -147,15 +257,28 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        if (VaadinSession.getCurrent().getAttribute("user") != null) {
-            event.forwardTo("ims");
+        Optional<String> tenantOpt = event.getLocation().getQueryParameters().getSingleParameter("tenant");
+        Optional<String> usernameOpt = event.getLocation().getQueryParameters().getSingleParameter("username");
+        Optional<String> otpLengthOpt = event.getLocation().getQueryParameters().getSingleParameter("otpLength");
+
+        if (tenantOpt.isEmpty() || usernameOpt.isEmpty() || otpLengthOpt.isEmpty()) {
+            UI.getCurrent().navigate("login");
+            return;
         }
+
+        tenant = tenantOpt.get();
+        username = usernameOpt.get();
+        try {
+            otpLength = Integer.parseInt(otpLengthOpt.get());
+        } catch (NumberFormatException e) {
+            otpLength = 6; // fallback
+        }
+
+        usernameField.setValue(username);
         errorContainer.setVisible(false);
-        generatedOtp = null;
-        otpField.setEnabled(false);
-        loginButton.setEnabled(false);
-        requestOtpButton.setEnabled(true);
-        otpField.clear();
+
+        // Build and enable OTP fields
+        buildOtpFields(otpLength);
     }
 
     private void injectResponsiveStyles() {
@@ -186,6 +309,26 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
                 .otp-login-view vaadin-text-field {
                     width: 100%;
                 }
+                .otp-login-view .otp-fields vaadin-text-field {
+                    width: 2.8em !important;
+                    height: 2.8em !important;
+                    text-align: center;
+                    font-size: 1.2em;
+                    --lumo-text-field-size: 2.8em;
+                }
+                .otp-login-view .otp-fields vaadin-text-field input {
+                    text-align: center;
+                    padding: 0;
+                    font-size: 1em;
+                }
+                .otp-login-view .otp-fields vaadin-text-field::placeholder {
+                    font-size: 0.8em;
+                    color: var(--lumo-tertiary-text-color);
+                }
+                .otp-login-view .otp-fields {
+                    gap: 0.4em;
+                    margin: var(--lumo-space-s) 0;
+                }
                 .otp-login-view .error-container {
                     background: var(--lumo-error-color-10pct);
                     color: var(--lumo-error-text-color);
@@ -206,8 +349,13 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
                         border-radius: var(--lumo-border-radius-l);
                         margin: var(--lumo-space-m);
                     }
-                    .otp-login-view .brand h2 {
-                        font-size: var(--lumo-font-size-l);
+                    .otp-login-view .otp-fields vaadin-text-field {
+                        width: 2.2em !important;
+                        height: 2.2em !important;
+                        font-size: 1em;
+                    }
+                    .otp-login-view .otp-fields {
+                        gap: 0.3em;
                     }
                 }
                 """;

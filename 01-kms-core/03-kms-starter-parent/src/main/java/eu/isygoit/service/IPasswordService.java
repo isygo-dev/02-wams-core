@@ -94,7 +94,7 @@ public interface IPasswordService {
      * @throws UserPasswordNotFoundException the user password not found exception
      * @throws UserNotFoundException         the user not found exception
      */
-    Boolean isExpired(String tenant /*senderTenant*/, String email, String userName, IEnumAuth.Types authType) throws UserPasswordNotFoundException, UserNotFoundException;
+    Boolean isExpired(String tenant, String email, String userName, IEnumAuth.Types authType) throws UserPasswordNotFoundException, UserNotFoundException;
 
     /**
      * Reset password via token.

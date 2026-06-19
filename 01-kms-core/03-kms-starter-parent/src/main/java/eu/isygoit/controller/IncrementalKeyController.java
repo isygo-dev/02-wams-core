@@ -5,6 +5,7 @@ import eu.isygoit.api.IncrementalKeyServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.common.NextCodeDto;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.model.AppNextCode;
@@ -13,6 +14,7 @@ import eu.isygoit.service.RequestContextService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,7 +54,7 @@ public class IncrementalKeyController extends ControllerExceptionHandler impleme
         log.info("Call subscribe next code generator for: {}/{}", tenant, incrementalConfig);
         try {
             keyService.subscribeIncrementalKeyGenerator(AppNextCode.builder()
-                    .tenant(tenant)
+                    .tenant(StringUtils.hasText(tenant) ? tenant : TenantConstants.DEFAULT_TENANT_NAME)
                     .entity(incrementalConfig.getEntity())
                     .attribute(incrementalConfig.getAttribute())
                     .prefix(incrementalConfig.getPrefix())

@@ -29,6 +29,11 @@ import eu.isygoit.model.Account;
 import eu.isygoit.model.Tenant;
 import eu.isygoit.remote.kms.KmsPublicPasswordService;
 import eu.isygoit.service.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -87,28 +93,25 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
         this.jwtProperties = jwtProperties;
     }
 
-    public ResponseEntity<AuthResponseDto> authenticate(HttpServletRequest request, HttpServletResponse response,
-                                                        AuthenticationRequestDto authRequestDto) {
+    @Override
+    public ResponseEntity<AuthResponseDto> authenticate(AuthenticationRequestDto authRequestDto) {
         try {
             //Remove left & right spaces
             authRequestDto.setTenant(authRequestDto.getTenant().trim().toLowerCase());
             authRequestDto.setUserName(authRequestDto.getUserName().trim().toLowerCase());
             authRequestDto.setPassword(authRequestDto.getPassword().trim());
 
-            AuthResponseDto authenticate = authService.authenticate(RequestTrackingDto.getFromRequest(request),
+            AuthResponseDto authenticate = authService.authenticate(RequestTrackingDto.builder()
+                            .device(requestContextService.getCurrentContext().getDevice())
+                            .appOrigin(requestContextService.getCurrentContext().getAppOrigin())
+                            .ipOrigin(requestContextService.getCurrentContext().getIpOrigin())
+                            .browser(requestContextService.getCurrentContext().getBrowser())
+                            .build(),
                     authRequestDto.getTenant(),
                     authRequestDto.getUserName(),
                     authRequestDto.getApplication(),
                     authRequestDto.getPassword(),
                     authRequestDto.getAuthType());
-
-            if (jwtProperties.getJwtStorageType() == IEnumJwtStorage.Types.COOKIE) {
-                response.addCookie(this.createCookie("token_type", IEnumWebToken.Types.Bearer.meaning()));
-                response.addCookie(this.createCookie("access_token", authenticate.getAccessToken()));
-                response.addCookie(this.createCookie("refresh_token", authenticate.getRefreshToken()));
-                return ResponseFactory.responseOk(AuthResponseDto.builder()
-                        .build());
-            }
 
             Account account = accountService.findByTenantAndUserName(authRequestDto.getTenant(), authRequestDto.getUserName());
             Tenant tenant = tenantService.findByName(authRequestDto.getTenant());
@@ -210,7 +213,8 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     public ResponseEntity<Boolean> switchAuthType(
             AccountAuthTypeRequest accountAuthTypeRequest) {
         try {
-            return ResponseFactory.responseOk(accountService.switchAuthType(requestContextService.getCurrentContext().getSenderTenant(), accountAuthTypeRequest));
+            return ResponseFactory.responseOk(accountService.switchAuthType(requestContextService.getCurrentContext().getSenderTenant(),
+                    accountAuthTypeRequest));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

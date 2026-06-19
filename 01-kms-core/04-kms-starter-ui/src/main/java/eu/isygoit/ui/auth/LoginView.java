@@ -2,35 +2,46 @@ package eu.isygoit.ui.auth;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.login.LoginForm;
-import com.vaadin.flow.component.login.LoginI18n;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.dto.request.AccountAuthTypeRequest;
+import eu.isygoit.dto.response.UserContext;
+import eu.isygoit.enums.IEnumAuth;
+import eu.isygoit.remote.ims.PublicAuthService;
 import jakarta.annotation.security.PermitAll;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
+@Component
+@UIScope //(or @VaadinSessionScope)
 @Route(value = "login")
 @PageTitle("Sign In")
 @PermitAll
 public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
-    private static final String DEMO_USERNAME = "admin";
-    private static final String DEMO_PASSWORD = "admin";
-
-    private final LoginForm loginForm = new LoginForm();
+    private final TextField tenantField = new TextField("Organisation");
+    private final TextField usernameField = new TextField("Login");
+    private final Button continueButton = new Button("Continue", VaadinIcon.ARROW_RIGHT.create());
     private final Div errorContainer = new Div();
+    private boolean stylesInjected = false;
+
+    @Autowired
+    private PublicAuthService authService;
 
     public LoginView() {
         setSizeFull();
@@ -40,7 +51,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         setJustifyContentMode(JustifyContentMode.CENTER);
         addClassName("login-view");
 
-        // --- Brand / Logo ---
+        // Brand
         Div brand = new Div();
         brand.addClassName("brand");
         Avatar logo = new Avatar("KMS/IMS");
@@ -55,46 +66,36 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         subtitle.addClassName(LumoUtility.FontSize.SMALL);
         brand.add(logo, title, subtitle);
 
-        // --- Login Form ---
-        LoginI18n i18n = LoginI18n.createDefault();
-        i18n.setHeader(new LoginI18n.Header());
-        i18n.getHeader().setTitle("Welcome back");
-        i18n.getHeader().setDescription("Sign in to your account");
-        i18n.setAdditionalInformation(null);
-        loginForm.setI18n(i18n);
-        loginForm.setAction("");
-        loginForm.setForgotPasswordButtonVisible(false);
-        loginForm.addClassName("login-form");
+        // Tenant + Login fields
+        tenantField.setWidthFull();
+        tenantField.setPlaceholder("Your organisation");
+        tenantField.setPrefixComponent(VaadinIcon.BUILDING.create());
+        usernameField.setWidthFull();
+        usernameField.setPlaceholder("Username");
+        usernameField.setPrefixComponent(VaadinIcon.USER.create());
+
+        // Continue button
+        continueButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        continueButton.setWidthFull();
+        continueButton.addClickListener(e -> handleContinue());
 
         // Error container
         errorContainer.addClassName("error-container");
         errorContainer.setVisible(false);
 
-        loginForm.addLoginListener(e -> handleLogin(e.getUsername(), e.getPassword()));
-
-        // --- Alternative login methods ---
-        HorizontalLayout altMethods = new HorizontalLayout();
-        altMethods.addClassName("alt-methods");
-        Anchor otpLink = new Anchor("login/otp", "OTP Login");
-        otpLink.addClassName("alt-link");
-        Anchor qrLink = new Anchor("login/qr", "QR Login");
-        qrLink.addClassName("alt-link");
-        altMethods.add(otpLink, qrLink);
-        altMethods.setSpacing(true);
-        altMethods.setJustifyContentMode(JustifyContentMode.CENTER);
-
-        // --- Register link ---
+        // Register link
         Anchor registerLink = new Anchor("register", "Create an account");
         registerLink.addClassName("register-link");
 
-        // --- Footer ---
+        // Footer
         Paragraph footer = new Paragraph("© 2026 KMS/IMS Platform");
         footer.addClassName(LumoUtility.TextColor.TERTIARY);
         footer.addClassName(LumoUtility.FontSize.XXSMALL);
         footer.addClassName(LumoUtility.Margin.Top.MEDIUM);
 
-        // --- Main wrapper ---
-        VerticalLayout wrapper = new VerticalLayout(brand, loginForm, errorContainer, altMethods, registerLink, footer);
+        // Main wrapper
+        VerticalLayout wrapper = new VerticalLayout(brand, tenantField, usernameField,
+                continueButton, errorContainer, registerLink, footer);
         wrapper.setAlignItems(FlexComponent.Alignment.CENTER);
         wrapper.setMaxWidth("400px");
         wrapper.setWidthFull();
@@ -103,22 +104,78 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         wrapper.addClassName("login-wrapper");
 
         add(wrapper);
-        injectResponsiveStyles();
+
+        addAttachListener(event -> {
+            if (!stylesInjected) {
+                injectResponsiveStyles();
+                stylesInjected = true;
+            }
+        });
     }
 
-    private void handleLogin(String username, String password) {
-        if (DEMO_USERNAME.equals(username) && DEMO_PASSWORD.equals(password)) {
-            VaadinSession.getCurrent().setAttribute("user", username);
-            Notification.show("Welcome " + username + "!", 2000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            UI.getCurrent().navigate("ims");
-        } else {
-            errorContainer.setText("Invalid username or password. Try admin/admin");
-            errorContainer.setVisible(true);
-            loginForm.setError(true);
-            Notification.show("Invalid credentials", 3000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+    private void handleContinue() {
+        String tenant = tenantField.getValue().trim().toLowerCase();
+        String username = usernameField.getValue().trim().toLowerCase();
+
+        if (tenant.isEmpty() || username.isEmpty()) {
+            showError("Organisation and Login are required");
+            return;
         }
+
+        AccountAuthTypeRequest request = AccountAuthTypeRequest.builder()
+                .tenant(tenant)
+                .userName(username)
+                .build();
+
+        try {
+            ResponseEntity<UserContext> response = authService.getAuthenticationType(request);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                UserContext userContext = response.getBody();
+                IEnumAuth.Types authType = userContext.getAuthTypeMode();
+
+                String targetView;
+                switch (authType) {
+                    case PWD:
+                        targetView = "login/password";
+                        break;
+                    case OTP:
+                        targetView = "login/otp";
+                        // Pass the OTP length as a query parameter
+                        int otpLength = userContext.getOtpLength();
+                        UI.getCurrent().navigate(targetView +
+                                "?tenant=" + tenant +
+                                "&username=" + username +
+                                "&otpLength=" + otpLength);
+                        return; // return to avoid double navigation
+                    case QRC:
+                        targetView = "login/qr";
+                        break;
+                    case TOKEN:
+                        Notification.show("Token-based login is not supported in UI yet.", 3000,
+                                Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_WARNING);
+                        return;
+                    default:
+                        showError("Unsupported authentication type: " + authType);
+                        return;
+                }
+
+                // For PWD and QRC, navigate with only tenant and username
+                UI.getCurrent().navigate(targetView +
+                        "?tenant=" + tenant +
+                        "&username=" + username);
+            } else {
+                showError("Unable to determine authentication method. Please check your credentials.");
+            }
+        } catch (Exception ex) {
+            showError("Service unavailable. Please try again later.");
+        }
+    }
+
+    private void showError(String message) {
+        errorContainer.setText(message);
+        errorContainer.setVisible(true);
+        Notification.show(message, 3000, Notification.Position.BOTTOM_END)
+                .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 
     @Override
@@ -126,11 +183,11 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         if (VaadinSession.getCurrent().getAttribute("user") != null) {
             event.forwardTo("ims");
         }
-        loginForm.setError(false);
         errorContainer.setVisible(false);
     }
 
     private void injectResponsiveStyles() {
+        // ... (same as before, omitted for brevity)
         String css = """
                 .login-view {
                     background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
@@ -155,7 +212,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
                     font-size: var(--lumo-font-size-xxl);
                     letter-spacing: -0.5px;
                 }
-                .login-view .login-form {
+                .login-view vaadin-text-field {
                     width: 100%;
                 }
                 .login-view .error-container {
@@ -166,23 +223,6 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
                     font-size: var(--lumo-font-size-xs);
                     width: 100%;
                     text-align: center;
-                }
-                .login-view .alt-methods {
-                    gap: var(--lumo-space-s);
-                    margin: var(--lumo-space-s) 0;
-                }
-                .login-view .alt-link {
-                    color: var(--lumo-primary-text-color);
-                    font-size: var(--lumo-font-size-xs);
-                    text-decoration: none;
-                    padding: var(--lumo-space-xs) var(--lumo-space-s);
-                    border: 1px solid var(--lumo-contrast-20pct);
-                    border-radius: var(--lumo-border-radius-m);
-                    transition: all 0.2s;
-                }
-                .login-view .alt-link:hover {
-                    background: var(--lumo-primary-color-10pct);
-                    border-color: var(--lumo-primary-color);
                 }
                 .login-view .register-link {
                     color: var(--lumo-primary-text-color);
@@ -197,9 +237,6 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
                     }
                     .login-view .brand h2 {
                         font-size: var(--lumo-font-size-xl);
-                    }
-                    .login-view .brand {
-                        margin-bottom: var(--lumo-space-s);
                     }
                 }
                 """;

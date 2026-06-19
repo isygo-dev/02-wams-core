@@ -3,7 +3,7 @@ package eu.isygoit.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.dto.KmsDtos.*;
-import eu.isygoit.dto.common.ContextRequestDto;
+import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.KeyPairMaterial;
 import eu.isygoit.enums.*;
 import eu.isygoit.service.*;
@@ -65,10 +65,10 @@ class KmsControllerTest {
 
     @BeforeEach
     void setUp() {
-        ContextRequestDto context = ContextRequestDto.builder()
+        RequestContextDto context = RequestContextDto.builder()
                 .senderTenant(TENANT)
                 .senderUser(USER)
-                .clientIp(IP)
+                .ipOrigin(IP)
                 .build();
         when(requestContextService.getCurrentContext()).thenReturn(context);
 

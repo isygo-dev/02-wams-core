@@ -10,17 +10,27 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.dto.request.AccountAuthTypeRequest;
+import eu.isygoit.dto.request.AuthenticationRequestDto;
+import eu.isygoit.dto.response.AuthResponseDto;
+import eu.isygoit.dto.response.UserContext;
+import eu.isygoit.enums.IEnumAuth;
+import eu.isygoit.remote.ims.PublicAuthService;
 import jakarta.annotation.security.PermitAll;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
+@Component
+@UIScope //(or @VaadinSessionScope)
 @Route(value = "login/qr")
 @PageTitle("QR Code Login")
 @PermitAll
@@ -29,7 +39,14 @@ public class QrCodeLoginView extends VerticalLayout implements BeforeEnterObserv
     private final Image qrImage = new Image();
     private final Button refreshQrButton = new Button("Refresh QR", VaadinIcon.REFRESH.create());
     private final Div statusContainer = new Div();
-    private boolean qrScanned = false;
+    private boolean stylesInjected = false;
+
+    private String tenant;
+    private String username;
+    private String qrCodeToken;
+
+    @Autowired
+    private PublicAuthService authService;
 
     public QrCodeLoginView() {
         setSizeFull();
@@ -55,11 +72,9 @@ public class QrCodeLoginView extends VerticalLayout implements BeforeEnterObserv
         qrImage.setWidth("200px");
         qrImage.setHeight("200px");
         qrImage.getStyle().set("border-radius", "var(--lumo-border-radius-m)");
-        generateQrCode();
 
         // Status text
         statusContainer.addClassName("status-text");
-        statusContainer.setText("Scan the QR code with your authenticator app");
         statusContainer.getStyle()
                 .set("font-size", "var(--lumo-font-size-s)")
                 .set("color", "var(--lumo-secondary-text-color)")
@@ -91,45 +106,88 @@ public class QrCodeLoginView extends VerticalLayout implements BeforeEnterObserv
 
         add(wrapper);
 
-        // Simulate QR scan after 5 seconds (for demo)
-        UI.getCurrent().getPage().executeJs(
-                "setTimeout(() => { $0.dispatchEvent(new Event('qr-scanned')); }, 5000);",
-                getElement()
-        );
-        getElement().addEventListener("qr-scanned", e -> handleQrScan());
-
-        injectResponsiveStyles();
+        addAttachListener(event -> {
+            if (!stylesInjected) {
+                injectResponsiveStyles();
+                stylesInjected = true;
+            }
+            // Defer QR scan simulation until after attach
+            UI.getCurrent().getPage().executeJs(
+                    "setTimeout(() => { $0.dispatchEvent(new Event('qr-scanned')); }, 5000);",
+                    getElement()
+            );
+            getElement().addEventListener("qr-scanned", e -> handleQrScan());
+        });
     }
 
     private void generateQrCode() {
-        String payload = "kms-login:" + java.util.UUID.randomUUID().toString();
-        String encoded = URLEncoder.encode(payload, StandardCharsets.UTF_8);
-        String qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encoded;
-        qrImage.setSrc(qrUrl);
-        statusContainer.setText("QR code refreshed. Scan with your authenticator app.");
-        qrScanned = false;
+        AccountAuthTypeRequest request = AccountAuthTypeRequest.builder()
+                .tenant(tenant)
+                .userName(username)
+                .build();
+
+        try {
+            ResponseEntity<UserContext> response = authService.getAuthenticationType(request);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                UserContext userContext = response.getBody();
+                qrCodeToken = userContext.getQrCodeToken();
+                if (qrCodeToken == null || qrCodeToken.isEmpty()) {
+                    statusContainer.setText("QR code not available. Please use another method.");
+                    return;
+                }
+                String encoded = URLEncoder.encode(qrCodeToken, StandardCharsets.UTF_8);
+                String qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encoded;
+                qrImage.setSrc(qrUrl);
+                statusContainer.setText("Scan the QR code with your authenticator app");
+                statusContainer.getStyle().set("color", "var(--lumo-secondary-text-color)");
+            } else {
+                statusContainer.setText("Failed to retrieve QR token.");
+            }
+        } catch (Exception ex) {
+            statusContainer.setText("Service error. Please try again.");
+        }
     }
 
     private void handleQrScan() {
-        if (qrScanned) return;
-        qrScanned = true;
-        statusContainer.setText("✅ QR code scanned! Logging in...");
-        statusContainer.getStyle().set("color", "var(--lumo-success-text-color)");
+        AuthenticationRequestDto authRequest = AuthenticationRequestDto.builder()
+                .tenant(tenant)
+                .application("default")
+                .userName(username)
+                .password(qrCodeToken != null ? qrCodeToken : "")
+                .authType(IEnumAuth.Types.QRC)
+                .build();
 
-        VaadinSession.getCurrent().setAttribute("user", "qr-user");
-        Notification.show("Logged in via QR code!", 2000, Notification.Position.BOTTOM_END)
-                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-        UI.getCurrent().navigate("ims");
+        try {
+            ResponseEntity<AuthResponseDto> response = authService.authenticate(authRequest);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                AuthResponseDto authResponse = response.getBody();
+                VaadinSession.getCurrent().setAttribute("user", username);
+                VaadinSession.getCurrent().setAttribute("accessToken", authResponse.getAccessToken());
+                Notification.show("Logged in via QR code!", 2000, Notification.Position.BOTTOM_END)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                UI.getCurrent().navigate("ims");
+            } else {
+                statusContainer.setText("QR authentication failed. Please try again.");
+                statusContainer.getStyle().set("color", "var(--lumo-error-text-color)");
+            }
+        } catch (Exception ex) {
+            statusContainer.setText("Authentication error. Please try again.");
+            statusContainer.getStyle().set("color", "var(--lumo-error-text-color)");
+        }
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        if (VaadinSession.getCurrent().getAttribute("user") != null) {
-            event.forwardTo("ims");
+        Optional<String> tenantOpt = event.getLocation().getQueryParameters().getSingleParameter("tenant");
+        Optional<String> usernameOpt = event.getLocation().getQueryParameters().getSingleParameter("username");
+
+        if (tenantOpt.isEmpty() || usernameOpt.isEmpty()) {
+            UI.getCurrent().navigate("login");
+            return;
         }
-        qrScanned = false;
-        statusContainer.setText("Scan the QR code with your authenticator app");
-        statusContainer.getStyle().set("color", "var(--lumo-secondary-text-color)");
+
+        tenant = tenantOpt.get();
+        username = usernameOpt.get();
         generateQrCode();
     }
 
