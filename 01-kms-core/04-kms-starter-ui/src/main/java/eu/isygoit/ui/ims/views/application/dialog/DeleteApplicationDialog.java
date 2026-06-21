@@ -1,5 +1,6 @@
 package eu.isygoit.ui.ims.views.application.dialog;
 
+import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.remote.ims.ApplicationService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.application.ApplicationManagementView;
@@ -23,11 +24,17 @@ public class DeleteApplicationDialog extends PinBaseActionDialog {
         this.applicationId = applicationId;
 
         setOkButtonText("Delete permanently");
+        addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
 
     @Override
     protected boolean onOk() {
+        if (!validatePin()) {
+            append("Invalid confirmation code");
+            return false;
+        }
+
         parentView.showLoading(true);
         try {
             applicationService.delete(applicationId);

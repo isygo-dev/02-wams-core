@@ -2,8 +2,6 @@ package eu.isygoit.ui.kms.views.cryptography.key.dialog;
 
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
@@ -12,18 +10,12 @@ import eu.isygoit.ui.kms.views.cryptography.key.KeyManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-/**
- * Dialog to confirm enabling or disabling a KMS key.
- */
 public class ToggleKeyStatusDialog extends BaseActionDialog {
 
     private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;
-
-
     private final String keyId;
     private final boolean currentlyEnabled;
-
 
     public ToggleKeyStatusDialog(KeyManagementView parentView,
                                  KmsApiService kmsApiService,
@@ -43,46 +35,35 @@ public class ToggleKeyStatusDialog extends BaseActionDialog {
             addThemeVariantsOkButton(ButtonVariant.LUMO_SUCCESS);
         }
         setWidth("450px");
-
         buildContent();
     }
 
     @Override
     protected boolean onOk() {
+        parentView.showLoading(true);
         try {
             if (currentlyEnabled) {
                 ResponseEntity<KmsDtos.DisableKeyResponse> response = kmsApiService.disableKey(keyId);
                 if (!response.getStatusCode().is2xxSuccessful()) {
-                    String errorMsg = "Disable key failed: " + (response.getBody() != null ? response.getBody().toString() : "unknown error");
-                    this.append(errorMsg);
+                    append("Disable key failed: " + (response.getBody() != null ? response.getBody().toString() : "unknown error"));
                     return false;
                 }
-
-                Notification.show("Key disabled successfully", 6000, Notification.Position.BOTTOM_END)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } else {
                 ResponseEntity<KmsDtos.EnableKeyResponse> response = kmsApiService.enableKey(keyId);
                 if (!response.getStatusCode().is2xxSuccessful()) {
-                    String errorMsg = "Enable key failed: " + (response.getBody() != null ? response.getBody().toString() : "unknown error");
-                    this.append(errorMsg);
+                    append("Enable key failed: " + (response.getBody() != null ? response.getBody().toString() : "unknown error"));
                     return false;
                 }
-
-                Notification.show("Key enabled successfully", 6000, Notification.Position.BOTTOM_END)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             }
-
+            append(currentlyEnabled ? "Key disabled" : "Key enabled");
             return true;
         } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            this.append(errorMsg);
+            append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            String errorMsg = "Failed operation: " + e.getMessage();
-            this.append(errorMsg);
+            append("Failed operation: " + e.getMessage());
         } finally {
             parentView.showLoading(false);
         }
-
         return false;
     }
 
@@ -93,6 +74,6 @@ public class ToggleKeyStatusDialog extends BaseActionDialog {
         layout.add(new Span(currentlyEnabled
                 ? "Disabling the key prevents any cryptographic operations. Are you sure?"
                 : "Enabling the key will restore its ability to perform cryptographic operations."));
-        add(layout);
+        addContent(layout);
     }
 }

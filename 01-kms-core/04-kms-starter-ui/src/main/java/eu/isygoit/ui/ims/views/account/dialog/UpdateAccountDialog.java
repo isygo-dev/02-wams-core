@@ -71,7 +71,7 @@ public class UpdateAccountDialog extends BaseActionDialog {
                                TenantService tenantService,
                                Long accountId,
                                Runnable onSuccess) {
-        super("Edit Account");
+        super("Edit Account", onSuccess);
         this.parentView = parentView;
         this.accountService = accountService;
         this.accountImageService = accountImageService;
@@ -80,11 +80,11 @@ public class UpdateAccountDialog extends BaseActionDialog {
         this.onSuccess = onSuccess;
 
         setOkButtonText("Save");
-        setWidth("90%");
-        getElement().getStyle().set("max-width", "700px");
+        setWidth("700px");
+        setMaxWidth("95%");
 
         buildForm();
-        add(buildLayout());
+        addContent(buildLayout());
         loadTenants();
         loadAccountData();
     }
@@ -98,6 +98,7 @@ public class UpdateAccountDialog extends BaseActionDialog {
             return tenant != null ? tenant.getName() + " (" + tenant.getCode() + ")" : item;
         });
         tenantCombo.setAllowCustomValue(false);
+        tenantCombo.setWidthFull();
 
         accountTypeCombo = new ComboBox<>("Account type *");
         accountTypeCombo.setRequiredIndicatorVisible(true);
@@ -108,19 +109,34 @@ public class UpdateAccountDialog extends BaseActionDialog {
         );
         accountTypeCombo.setAllowCustomValue(true);
         accountTypeCombo.setPlaceholder("Select or type account type");
+        accountTypeCombo.setWidthFull();
 
         emailField = new EmailField("Email *");
         emailField.setRequiredIndicatorVisible(true);
+        emailField.setWidthFull();
 
         firstNameField = new TextField("First name");
+        firstNameField.setWidthFull();
+
         lastNameField = new TextField("Last name");
+        lastNameField.setWidthFull();
+
         phoneNumberField = new TextField("Phone number");
+        phoneNumberField.setWidthFull();
+
         languageCombo = new ComboBox<>("Language");
         languageCombo.setItems(IEnumLanguage.Types.values());
+        languageCombo.setWidthFull();
+
         functionRoleField = new TextField("Function role");
+        functionRoleField.setWidthFull();
+
         isAdminCheckbox = new Checkbox("Is administrator");
+        isAdminCheckbox.setWidthFull();
+
         adminStatusCombo = new ComboBox<>("Admin status");
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
+        adminStatusCombo.setWidthFull();
 
         // Image thumbnail + change button
         imageThumbnail = new Image();

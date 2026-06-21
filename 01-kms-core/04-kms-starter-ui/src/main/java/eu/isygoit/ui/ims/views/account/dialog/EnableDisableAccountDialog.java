@@ -21,7 +21,8 @@ public class EnableDisableAccountDialog extends PinBaseActionDialog {
                                       Runnable onSuccess) {
         super(determineTitle(accountService, accountId),
                 determineWarning(accountService, accountId),
-                onSuccess); // requirePin = false (simple confirmation)
+                onSuccess,
+                false); // requirePin = false (simple confirmation)
         this.parentView = parentView;
         this.accountService = accountService;
         this.accountId = accountId;

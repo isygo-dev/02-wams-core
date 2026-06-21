@@ -33,6 +33,7 @@ public class TenantDetailsDialog extends NoActionDialog {
         this.tenantId = tenantId;
 
         setWidth("700px");
+        setMaxWidth("95%");
         setModal(true);
         setDraggable(true);
         setResizable(true);
@@ -49,7 +50,7 @@ public class TenantDetailsDialog extends NoActionDialog {
                 buildContent(response.getBody());
             } else {
                 add(new Span("Tenant not found"));
-                addCloseButton(); // also add close button on error
+                addCloseButton();
             }
         } catch (FeignException ex) {
             add(new Span("Failed to load details: " + extractErrorMessage(ex)));

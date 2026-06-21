@@ -1,7 +1,6 @@
 package eu.isygoit.ui.kms.views.cryptography.keyTag.dialog;
 
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
@@ -30,7 +29,7 @@ public class AddTagDialog extends BaseActionDialog {
         setWidth("400px");
 
         buildForm();
-        add(keyField, valueField);
+        addContent(keyField, valueField);
     }
 
     private void buildForm() {
@@ -40,6 +39,7 @@ public class AddTagDialog extends BaseActionDialog {
         keyField.setMaxLength(128);
         keyField.setPlaceholder("e.g., Environment");
         keyField.setHelperText("Tag key (max 128 characters)");
+        keyField.setWidthFull();
 
         valueField = new TextField("Tag value");
         valueField.setRequired(true);
@@ -47,6 +47,7 @@ public class AddTagDialog extends BaseActionDialog {
         valueField.setMaxLength(256);
         valueField.setPlaceholder("e.g., Production");
         valueField.setHelperText("Tag value (max 256 characters)");
+        valueField.setWidthFull();
     }
 
     @Override
@@ -68,15 +69,12 @@ public class AddTagDialog extends BaseActionDialog {
                             .build()))
                     .build();
             kmsApiService.tagResource(keyId, request);
-            Notification.show("Tag added successfully", 3000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            append("Tag added successfully");
             return true;
         } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            this.append(errorMsg);
+            append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            String errorMsg = "Failed to add tag: " + e.getMessage();
-            append(errorMsg);
+            append("Failed to add tag: " + e.getMessage());
         }
 
         return false;

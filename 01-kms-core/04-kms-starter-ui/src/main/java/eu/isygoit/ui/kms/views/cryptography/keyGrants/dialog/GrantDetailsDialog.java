@@ -13,11 +13,15 @@ public class GrantDetailsDialog extends NoActionDialog {
     public GrantDetailsDialog(KmsDtos.ListGrantsResponse.Grant grant, ObjectMapper objectMapper) {
         super("Grant Details");
         setWidth("600px");
+        setMaxWidth("95%");
         setResizable(true);
+        setCloseOnEsc(true);
+        setCloseOnOutsideClick(true);
 
         VerticalLayout content = new VerticalLayout();
         content.setSpacing(true);
         content.setPadding(true);
+        content.setWidthFull();
 
         content.add(createDetailRow("Grant ID", grant.getGrantId()));
         content.add(createDetailRow("Grantee Principal", grant.getGranteePrincipal()));
@@ -43,8 +47,6 @@ public class GrantDetailsDialog extends NoActionDialog {
         }
 
         add(content);
-        setCloseOnEsc(true);
-        setCloseOnOutsideClick(true);
     }
 
     private Span createDetailRow(String label, String value) {

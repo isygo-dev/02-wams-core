@@ -13,6 +13,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.CreateKeyRequest;
 import eu.isygoit.dto.KmsDtos.CreateKeyResponse;
 import eu.isygoit.enums.IEnumKeyExpirationModel;
@@ -35,7 +36,6 @@ public class CreateKeyDialog extends KeyDialogBase {
 
     private final ObjectMapper objectMapper;
 
-    // Additional fields for create only
     private ComboBox<IEnumKeyUsage.Types> keyUsageCombo;
     private ComboBox<IEnumKeySpec.Types> keySpecCombo;
     private ComboBox<IEnumKeyOrigin.Types> originCombo;
@@ -154,9 +154,6 @@ public class CreateKeyDialog extends KeyDialogBase {
     }
 
     private FormLayout createFullFormLayout() {
-        FormLayout form = createCommonFormLayout();
-        // Insert create-specific fields after the common ones (or at specific positions)
-        // For simplicity, we create a new FormLayout and add all fields in order.
         FormLayout fullForm = new FormLayout();
         fullForm.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
         fullForm.add(aliasField, descriptionField,
@@ -183,8 +180,6 @@ public class CreateKeyDialog extends KeyDialogBase {
 
     @Override
     protected void prefillData() {
-        // No prefill for create; add one empty tag row by default
-        // (already done in base constructor, but ensure at least one row)
         if (tagRows.isEmpty()) addTagRow(null, null);
         rotationEnabledCheckbox.setValue(false);
         rotationPeriodField.setValue(365);
@@ -192,10 +187,9 @@ public class CreateKeyDialog extends KeyDialogBase {
 
     @Override
     protected boolean onOk() {
-
         String alias = getAliasOrNull();
         if (alias == null && !aliasField.getValue().isBlank()) {
-            return false; // error already shown
+            return false;
         }
 
         List<CreateKeyRequest.Tag> tags = getTagsFromRows();
@@ -203,8 +197,7 @@ public class CreateKeyDialog extends KeyDialogBase {
         Map<String, Object> policyMap = null;
         if (StringUtils.hasText(policyField.getValue())) {
             try {
-                policyMap = objectMapper.readValue(policyField.getValue(), new TypeReference<>() {
-                });
+                policyMap = objectMapper.readValue(policyField.getValue(), new TypeReference<>() {});
             } catch (Exception ex) {
                 append("Invalid JSON in policy");
                 return false;
@@ -246,15 +239,12 @@ public class CreateKeyDialog extends KeyDialogBase {
             append("Key created successfully");
             return true;
         } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            this.append(errorMsg);
+            append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            String errorMsg = "Failed operation: " + e.getMessage();
-            this.append(errorMsg);
+            append("Failed operation: " + e.getMessage());
         } finally {
             parentView.showLoading(false);
         }
-
         return false;
     }
 }

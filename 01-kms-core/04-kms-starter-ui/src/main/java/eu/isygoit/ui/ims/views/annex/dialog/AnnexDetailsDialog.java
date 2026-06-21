@@ -33,6 +33,7 @@ public class AnnexDetailsDialog extends NoActionDialog {
         this.annexId = annexId;
 
         setWidth("700px");
+        setMaxWidth("95%");
         setModal(true);
         setDraggable(true);
         setResizable(true);

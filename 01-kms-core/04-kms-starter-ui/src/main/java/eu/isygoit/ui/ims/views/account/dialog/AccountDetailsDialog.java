@@ -36,6 +36,7 @@ public class AccountDetailsDialog extends NoActionDialog {
         this.accountId = accountId;
 
         setWidth("750px");
+        setMaxWidth("95%");
         setModal(true);
         setDraggable(true);
         setResizable(true);

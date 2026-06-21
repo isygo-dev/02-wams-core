@@ -3,8 +3,6 @@ package eu.isygoit.ui.kms.views.secrets.digest.dialog;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.DigestConfigDto;
@@ -32,8 +30,8 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
     private IntegerField iterationsField;
     private IntegerField saltSizeField;
     private ComboBox<IEnumSaltGenerator.Types> saltGeneratorCombo;
-    private ComboBox<String> providerClassCombo;       // free-text ComboBox
-    private ComboBox<String> providerNameCombo;         // free-text ComboBox
+    private ComboBox<String> providerClassCombo;
+    private ComboBox<String> providerNameCombo;
     private Checkbox invertSaltPositionCheckbox;
     private Checkbox invertPlainSaltCheckbox;
     private Checkbox lenientSaltCheckbox;
@@ -43,8 +41,7 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
     private TextField prefixField;
     private TextField suffixField;
 
-    // Map to quickly look up provider name from class path
-    private Map<String, String> classToProviderNameMap = new HashMap<>();
+    private final Map<String, String> classToProviderNameMap = new HashMap<>();
 
     public UpdateDigestConfigDialog(DigestConfigService configService, DigestConfigDto dto, Runnable onSuccess) {
         super("Edit Digest Configuration", onSuccess);
@@ -53,7 +50,7 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
         setOkButtonText("Save");
         setWidth("700px");
         buildForm();
-        add(createFormLayout());
+        addContent(createFormLayout());
         bindData();
     }
 
@@ -65,23 +62,25 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
         algorithmCombo = new ComboBox<>("Algorithm");
         algorithmCombo.setItems(IEnumAlgoDigestConfig.Types.values());
         algorithmCombo.setRequired(true);
+        algorithmCombo.setWidthFull();
 
         iterationsField = new IntegerField("Iterations");
         iterationsField.setRequired(true);
         iterationsField.setMin(1);
+        iterationsField.setWidthFull();
 
         saltSizeField = new IntegerField("Salt size (bytes)");
         saltSizeField.setMin(0);
+        saltSizeField.setWidthFull();
 
         saltGeneratorCombo = new ComboBox<>("Salt generator");
         saltGeneratorCombo.setItems(IEnumSaltGenerator.Types.values());
+        saltGeneratorCombo.setWidthFull();
 
-        // Build mapping from class path to provider name
         for (IEnumProviderClassName.Types type : IEnumProviderClassName.Types.values()) {
             classToProviderNameMap.put(type.getClassPath(), type.getProviderName());
         }
 
-        // Provider class – ComboBox with free-text input
         providerClassCombo = new ComboBox<>("Provider class");
         providerClassCombo.setAllowCustomValue(true);
         providerClassCombo.setItems(
@@ -91,7 +90,7 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
         );
         providerClassCombo.setPlaceholder("Select or type a provider class");
         providerClassCombo.setClearButtonVisible(true);
-        // Auto-populate provider name when a class is selected
+        providerClassCombo.setWidthFull();
         providerClassCombo.addValueChangeListener(e -> {
             String selectedClass = e.getValue();
             if (selectedClass != null && classToProviderNameMap.containsKey(selectedClass)) {
@@ -99,7 +98,6 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
             }
         });
 
-        // Provider name – ComboBox with free-text input
         providerNameCombo = new ComboBox<>("Provider name");
         providerNameCombo.setAllowCustomValue(true);
         providerNameCombo.setItems(
@@ -107,8 +105,9 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
                         .map(IEnumProviderClassName.Types::getProviderName)
                         .collect(Collectors.toList())
         );
-        providerNameCombo.setPlaceholder("Select or type a provider name (e.g., BC, SunJCE)");
+        providerNameCombo.setPlaceholder("Select or type a provider name");
         providerNameCombo.setClearButtonVisible(true);
+        providerNameCombo.setWidthFull();
 
         invertSaltPositionCheckbox = new Checkbox("Invert position of salt in message before digesting");
         invertPlainSaltCheckbox = new Checkbox("Invert position of plain salt in encryption results");
@@ -116,14 +115,19 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
 
         poolSizeField = new IntegerField("Pool size");
         poolSizeField.setMin(1);
+        poolSizeField.setWidthFull();
 
         unicodeIgnoreCheckbox = new Checkbox("Ignore Unicode normalization");
 
         outputTypeCombo = new ComboBox<>("Output type");
         outputTypeCombo.setItems(IEnumStringOutputType.Types.values());
+        outputTypeCombo.setWidthFull();
 
         prefixField = new TextField("Prefix");
+        prefixField.setWidthFull();
+
         suffixField = new TextField("Suffix");
+        suffixField.setWidthFull();
     }
 
     private void bindData() {
@@ -157,12 +161,28 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
 
     @Override
     protected boolean onOk() {
+        IEnumAlgoDigestConfig.Types algo = algorithmCombo.getValue();
+        if (algo == null) {
+            append("Algorithm is required");
+            return false;
+        }
+        Integer iterations = iterationsField.getValue();
+        if (iterations == null || iterations < 1) {
+            append("Iterations must be at least 1");
+            return false;
+        }
+        Integer saltSize = saltSizeField.getValue();
+        if (saltSize == null || saltSize < 0) {
+            append("Salt size must be >= 0");
+            return false;
+        }
+
         DigestConfigDto updated = DigestConfigDto.builder()
                 .id(original.getId())
                 .code(original.getCode())
-                .algorithm(algorithmCombo.getValue())
-                .iterations(iterationsField.getValue())
-                .saltSizeBytes(saltSizeField.getValue())
+                .algorithm(algo)
+                .iterations(iterations)
+                .saltSizeBytes(saltSize)
                 .saltGenerator(saltGeneratorCombo.getValue())
                 .providerClassName(providerClassCombo.getValue())
                 .providerName(providerNameCombo.getValue())
@@ -179,29 +199,18 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
         try {
             ResponseEntity<DigestConfigDto> response = configService.update(original.getId(), updated);
             if (response.getStatusCode().is2xxSuccessful()) {
-                Notification.show("Configuration updated successfully", 3000, Notification.Position.BOTTOM_END)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                append("Configuration updated successfully");
                 return true;
             } else {
-                this.append("Update failed: " + response.getStatusCode());
+                append("Update failed: " + response.getStatusCode());
                 return false;
             }
         } catch (FeignException ex) {
-            handleFeignException(ex);
+            append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
             return false;
         } catch (Exception ex) {
-            handleGenericException(ex);
+            append("Update failed: " + ex.getMessage());
             return false;
         }
-    }
-
-    private void handleFeignException(FeignException ex) {
-        String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-        this.append(errorMsg);
-    }
-
-    private void handleGenericException(Exception ex) {
-        String errorMsg = "Update failed: " + ex.getMessage();
-        this.append(errorMsg);
     }
 }

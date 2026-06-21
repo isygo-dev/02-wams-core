@@ -47,6 +47,7 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
 
         setOkButtonText("Save Statement");
         setWidth("850px");
+        setMaxWidth("95%");
         setResizable(true);
 
         buildForm();
@@ -286,8 +287,7 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
                 Map<String, Object> principalMap = objectMapper.readValue(principalStr, Map.class);
                 builder.principal(principalMap);
             } catch (Exception e) {
-                String errorMsg = "Invalid Principal JSON: " + e.getMessage();
-                append(errorMsg);
+                append("Invalid Principal JSON: " + e.getMessage());
                 return false;
             }
         } else {
@@ -332,8 +332,7 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
                 Map<String, Map<String, String>> conditionMap = objectMapper.readValue(conditionText, Map.class);
                 builder.condition(conditionMap);
             } catch (Exception e) {
-                String errorMsg = "Invalid Condition JSON: " + e.getMessage();
-                append(errorMsg);
+                append("Invalid Condition JSON: " + e.getMessage());
                 return false;
             }
         } else {

@@ -29,40 +29,47 @@ public class CreateAnnexDialog extends BaseActionDialog {
     public CreateAnnexDialog(AnnexManagementView parentView,
                              AnnexService annexService,
                              Runnable onSuccess) {
-        super("Create Annex");
+        super("Create Annex", onSuccess);
         this.parentView = parentView;
         this.annexService = annexService;
         this.onSuccess = onSuccess;
 
         setOkButtonText("Create");
         setWidth("600px");
+        setMaxWidth("95%");
 
         buildForm();
-        add(buildFormLayout());
+        addContent(buildFormLayout());
     }
 
     private void buildForm() {
         tableCodeField = new TextField("Table code *");
         tableCodeField.setRequiredIndicatorVisible(true);
         tableCodeField.setPlaceholder("e.g., COUNTRY");
+        tableCodeField.setWidthFull();
 
         languageCombo = new ComboBox<>("Language *");
         languageCombo.setItems(IEnumLanguage.Types.values());
         languageCombo.setRequiredIndicatorVisible(true);
         languageCombo.setPlaceholder("Select language");
+        languageCombo.setWidthFull();
 
         valueField = new TextField("Value *");
         valueField.setRequiredIndicatorVisible(true);
         valueField.setPlaceholder("Display value");
+        valueField.setWidthFull();
 
         descriptionArea = new TextArea("Description");
         descriptionArea.setPlaceholder("Optional description");
+        descriptionArea.setWidthFull();
 
         referenceField = new TextField("Reference");
         referenceField.setPlaceholder("Optional reference code");
+        referenceField.setWidthFull();
 
         orderField = new IntegerField("Order");
         orderField.setPlaceholder("Display order");
+        orderField.setWidthFull();
     }
 
     private FormLayout buildFormLayout() {

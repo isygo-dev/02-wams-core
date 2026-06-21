@@ -25,7 +25,8 @@ public class ToggleTenantStatusDialog extends PinBaseActionDialog {
                 currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED
                         ? "This will deactivate the tenant. All associated users will lose access. Are you sure?"
                         : "This will reactivate the tenant and restore full access. Are you sure?",
-                onSuccess
+                onSuccess,
+                false // simple confirmation, no PIN
         );
         this.parentView = parentView;
         this.tenantService = tenantService;

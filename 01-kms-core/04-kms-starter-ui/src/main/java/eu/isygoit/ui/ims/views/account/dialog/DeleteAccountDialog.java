@@ -24,11 +24,17 @@ public class DeleteAccountDialog extends PinBaseActionDialog {
         this.accountId = accountId;
 
         setOkButtonText("Delete permanently");
+        addThemeVariantsOkButton(com.vaadin.flow.component.button.ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
 
     @Override
     protected boolean onOk() {
+        if (!validatePin()) {
+            append("Invalid confirmation code");
+            return false;
+        }
+
         parentView.showLoading(true);
         try {
             ResponseEntity<?> response = accountService.delete(accountId);

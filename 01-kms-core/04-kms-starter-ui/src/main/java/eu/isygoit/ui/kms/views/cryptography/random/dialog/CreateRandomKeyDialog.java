@@ -2,8 +2,6 @@ package eu.isygoit.ui.kms.views.cryptography.random.dialog;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.enums.IEnumCharSet;
@@ -27,7 +25,7 @@ public class CreateRandomKeyDialog extends BaseActionDialog {
         setOkButtonText("Create");
         setWidth("550px");
         buildForm();
-        add(createFormLayout());
+        addContent(createFormLayout());
     }
 
     private void buildForm() {
@@ -35,6 +33,7 @@ public class CreateRandomKeyDialog extends BaseActionDialog {
         nameField.setRequired(true);
         nameField.setRequiredIndicatorVisible(true);
         nameField.setPlaceholder("e.g., my-api-secret");
+        nameField.setWidthFull();
 
         lengthField = new IntegerField("Length (bytes)");
         lengthField.setValue(32);
@@ -42,12 +41,14 @@ public class CreateRandomKeyDialog extends BaseActionDialog {
         lengthField.setMax(4096);
         lengthField.setStepButtonsVisible(true);
         lengthField.setHelperText("Number of random bytes to generate");
+        lengthField.setWidthFull();
 
         charSetCombo = new ComboBox<>("Character set");
         charSetCombo.setItems(IEnumCharSet.Types.values());
         charSetCombo.setValue(IEnumCharSet.Types.ALL);
         charSetCombo.setRequired(true);
         charSetCombo.setHelperText("Allowed characters for the random string");
+        charSetCombo.setWidthFull();
     }
 
     private FormLayout createFormLayout() {
@@ -78,8 +79,7 @@ public class CreateRandomKeyDialog extends BaseActionDialog {
         try {
             ResponseEntity<String> response = keyService.renewRandomKey(name, length, charSet);
             if (response.getStatusCode().is2xxSuccessful()) {
-                Notification.show("Random key created", 3000, Notification.Position.BOTTOM_END)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                append("Random key created");
                 return true;
             } else {
                 append("Creation failed: " + response.getStatusCode());

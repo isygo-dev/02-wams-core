@@ -22,6 +22,7 @@ public class DeleteNextCodeDialog extends PinBaseActionDialog {
         this.nextCodeService = nextCodeService;
         this.configId = configId;
         setOkButtonText("Delete permanently");
+        addThemeVariantsOkButton(com.vaadin.flow.component.button.ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
 
@@ -29,12 +30,10 @@ public class DeleteNextCodeDialog extends PinBaseActionDialog {
     protected boolean onOk() {
         try {
             nextCodeService.delete(configId);
-            Notification.show("Configuration deleted successfully", 3000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            append("Configuration deleted successfully");
             return true;
         } catch (Exception e) {
-            String errorMsg = "Delete failed: " + e.getMessage();
-            append(errorMsg);
+            append("Delete failed: " + e.getMessage());
             return false;
         }
     }

@@ -49,11 +49,9 @@ public class UpdateKeyDialog extends KeyDialogBase {
         }
         rotationPeriodField.setVisible(currentRotationEnabled);
 
-        // Load existing tags
         for (ListResourceTagsResponse.Tag tag : currentTags) {
             addTagRow(tag.getTagKey(), tag.getTagValue());
         }
-        // Ensure at least one empty row
         if (tagRows.isEmpty()) {
             addTagRow(null, null);
         }
@@ -61,7 +59,7 @@ public class UpdateKeyDialog extends KeyDialogBase {
 
     @Override
     protected void prefillData() {
-        // Not used; we have a custom prefill method.
+        // not used
     }
 
     @Override
@@ -73,10 +71,8 @@ public class UpdateKeyDialog extends KeyDialogBase {
         }
 
         String newDescription = getDescriptionOrNull();
-
         Boolean newRotationEnabled = rotationEnabledCheckbox.getValue();
         Integer newRotationPeriod = getRotationPeriodOrNull();
-
         List<CreateKeyRequest.Tag> newTags = getTagsFromRows();
 
         parentView.showLoading(true);
@@ -99,15 +95,12 @@ public class UpdateKeyDialog extends KeyDialogBase {
             append("Key updated successfully");
             return true;
         } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            this.append(errorMsg);
+            append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            String errorMsg = "Failed operation: " + e.getMessage();
-            this.append(errorMsg);
+            append("Failed operation: " + e.getMessage());
         } finally {
             parentView.showLoading(false);
         }
-
         return false;
     }
 }

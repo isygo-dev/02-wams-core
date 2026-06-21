@@ -33,6 +33,7 @@ public class ParameterDetailsDialog extends NoActionDialog {
         this.parameterId = parameterId;
 
         setWidth("700px");
+        setMaxWidth("95%");
         setModal(true);
         setDraggable(true);
         setResizable(true);

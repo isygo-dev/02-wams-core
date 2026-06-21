@@ -31,7 +31,7 @@ public class UpdateAnnexDialog extends BaseActionDialog {
                              AnnexService annexService,
                              AnnexDto annex,
                              Runnable onSuccess) {
-        super("Edit Annex");
+        super("Edit Annex", onSuccess);
         this.parentView = parentView;
         this.annexService = annexService;
         this.annex = annex;
@@ -39,26 +39,35 @@ public class UpdateAnnexDialog extends BaseActionDialog {
 
         setOkButtonText("Save");
         setWidth("600px");
+        setMaxWidth("95%");
 
         buildForm();
-        add(buildFormLayout());
+        addContent(buildFormLayout());
         populateFields();
     }
 
     private void buildForm() {
         tableCodeField = new TextField("Table code *");
         tableCodeField.setRequiredIndicatorVisible(true);
+        tableCodeField.setWidthFull();
 
         languageCombo = new ComboBox<>("Language *");
         languageCombo.setItems(IEnumLanguage.Types.values());
         languageCombo.setRequiredIndicatorVisible(true);
+        languageCombo.setWidthFull();
 
         valueField = new TextField("Value *");
         valueField.setRequiredIndicatorVisible(true);
+        valueField.setWidthFull();
 
         descriptionArea = new TextArea("Description");
+        descriptionArea.setWidthFull();
+
         referenceField = new TextField("Reference");
+        referenceField.setWidthFull();
+
         orderField = new IntegerField("Order");
+        orderField.setWidthFull();
     }
 
     private FormLayout buildFormLayout() {

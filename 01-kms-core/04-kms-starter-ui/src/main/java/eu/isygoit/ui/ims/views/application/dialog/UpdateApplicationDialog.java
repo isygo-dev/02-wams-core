@@ -55,7 +55,7 @@ public class UpdateApplicationDialog extends BaseActionDialog {
                                    ApplicationImageService applicationImageService,
                                    ApplicationDto application,
                                    Runnable onSuccess) {
-        super("Edit Application");
+        super("Edit Application", onSuccess);
         this.parentView = parentView;
         this.applicationService = applicationService;
         this.applicationImageService = applicationImageService;
@@ -63,11 +63,11 @@ public class UpdateApplicationDialog extends BaseActionDialog {
         this.onSuccess = onSuccess;
 
         setOkButtonText("Save");
-        setWidth("90%");
-        getElement().getStyle().set("max-width", "700px");
+        setWidth("700px");
+        setMaxWidth("95%");
 
         buildForm();
-        add(buildLayout());
+        addContent(buildLayout());
         populateFields();
         loadExistingImage();
     }
@@ -75,16 +75,31 @@ public class UpdateApplicationDialog extends BaseActionDialog {
     private void buildForm() {
         nameField = new TextField("Name *");
         nameField.setRequiredIndicatorVisible(true);
+        nameField.setWidthFull();
+
         titleField = new TextField("Title *");
         titleField.setRequiredIndicatorVisible(true);
+        titleField.setWidthFull();
+
         codeField = new TextField("Code");
+        codeField.setWidthFull();
+
         categoryField = new TextField("Category");
+        categoryField.setWidthFull();
+
         urlField = new TextField("URL *");
         urlField.setRequiredIndicatorVisible(true);
+        urlField.setWidthFull();
+
         orderField = new IntegerField("Display Order");
+        orderField.setWidthFull();
+
         descriptionField = new TextArea("Description");
+        descriptionField.setWidthFull();
+
         adminStatusCombo = new ComboBox<>("Admin status");
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
+        adminStatusCombo.setWidthFull();
 
         imageThumbnail = new Image();
         imageThumbnail.setWidth("60px");

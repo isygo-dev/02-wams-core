@@ -28,7 +28,6 @@ public class CreateAliasDialog extends BaseActionDialog {
     private final AliasesView parentView;
     private final KmsApiService kmsApiService;
 
-
     private TextField aliasNameField;
     private ComboBox<String> targetKeyCombo;
     private Checkbox primaryCheckbox;
@@ -52,13 +51,11 @@ public class CreateAliasDialog extends BaseActionDialog {
         String aliasName = aliasNameField.getValue();
         String targetKeyId = targetKeyCombo.getValue();
         if (aliasName == null || aliasName.isBlank()) {
-            String errorMsg = "Alias name is required";
-            this.append(errorMsg);
+            append("Alias name is required");
             return false;
         }
         if (targetKeyId == null || targetKeyId.isBlank()) {
-            String errorMsg = "Target key is required";
-            this.append(errorMsg);
+            append("Target key is required");
             return false;
         }
 
@@ -67,25 +64,20 @@ public class CreateAliasDialog extends BaseActionDialog {
             CreateAliasRequest request = CreateAliasRequest.builder()
                     .aliasName(aliasName)
                     .targetKeyId(targetKeyId)
-                    .primary(primaryCheckbox.getValue())  // set primary flag from checkbox
+                    .primary(primaryCheckbox.getValue())
                     .build();
             ResponseEntity<CreateAliasResponse> response = kmsApiService.createAlias(request);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                String errorMsg = "Creation failed: " + response.getStatusCode();
-                this.append(errorMsg);
+                append("Creation failed: " + response.getStatusCode());
                 return false;
             }
 
-            Notification.show("Alias created successfully", 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-
+            append("Alias created successfully");
             return true;
         } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            this.append(errorMsg);
+            append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            String errorMsg = "Failed operation: " + e.getMessage();
-            this.append(errorMsg);
+            append("Failed operation: " + e.getMessage());
         } finally {
             parentView.showLoading(false);
         }
@@ -111,12 +103,13 @@ public class CreateAliasDialog extends BaseActionDialog {
                     if (alias != null && !alias.isEmpty()) return alias + " (" + keyId + ")";
                 }
             } catch (Exception ignored) {
+                // fall through
             }
             return keyId;
         });
 
         primaryCheckbox = new Checkbox("Set as primary alias");
-        primaryCheckbox.setValue(false); // default to not primary
+        primaryCheckbox.setValue(false);
     }
 
     private FormLayout createFormLayout() {

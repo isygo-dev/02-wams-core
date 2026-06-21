@@ -1,7 +1,6 @@
 package eu.isygoit.ui.kms.views.cryptography.keyGrants.dialog;
 
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
@@ -22,7 +21,8 @@ public class RevokeGrantDialog extends PinBaseActionDialog {
         this.grant = grant;
         this.kmsApiService = kmsApiService;
         setOkButtonText("Revoke");
-        addThemeVariantsOkButton(com.vaadin.flow.component.button.ButtonVariant.LUMO_ERROR);
+        addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
+        setWidth("500px");
     }
 
     @Override
@@ -34,15 +34,12 @@ public class RevokeGrantDialog extends PinBaseActionDialog {
         try {
             kmsApiService.revokeGrant(keyId, grant.getGrantId());
 
-            Notification.show("Grant revoked successfully", 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            append("Grant revoked successfully");
             return true;
         } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            this.append(errorMsg);
+            append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            String errorMsg = "Failed operation: " + e.getMessage();
-            this.append(errorMsg);
+            append("Failed operation: " + e.getMessage());
         }
 
         return false;

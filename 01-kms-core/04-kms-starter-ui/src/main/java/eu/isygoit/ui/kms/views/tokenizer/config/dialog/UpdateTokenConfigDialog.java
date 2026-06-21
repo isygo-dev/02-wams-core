@@ -1,7 +1,5 @@
 package eu.isygoit.ui.kms.views.tokenizer.config.dialog;
 
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.TokenConfigDto;
@@ -148,22 +146,20 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
                 onSaveSuccess();
                 return true;
             } else {
+                append("Update failed with status: " + response.getStatusCode());
                 return false;
             }
         } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            this.append(errorMsg);
+            handleFeignException(ex);
+            return false;
         } catch (Exception e) {
-            String errorMsg = "Failed operation: " + e.getMessage();
-            this.append(errorMsg);
+            handleGenericException(e);
+            return false;
         }
-
-        return false;
     }
 
     @Override
     protected void onSaveSuccess() {
-        Notification.show("Configuration updated successfully", 3000, Notification.Position.BOTTOM_END)
-                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        append("Configuration updated successfully");
     }
 }

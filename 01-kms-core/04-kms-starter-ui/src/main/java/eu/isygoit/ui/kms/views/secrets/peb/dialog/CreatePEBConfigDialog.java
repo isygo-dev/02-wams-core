@@ -2,8 +2,6 @@ package eu.isygoit.ui.kms.views.secrets.peb.dialog;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.PEBConfigDto;
@@ -37,7 +35,7 @@ public class CreatePEBConfigDialog extends BaseActionDialog {
         setOkButtonText("Create");
         setWidth("700px");
         buildForm();
-        add(createFormLayout());
+        addContent(createFormLayout());
     }
 
     private void buildForm() {
@@ -45,38 +43,47 @@ public class CreatePEBConfigDialog extends BaseActionDialog {
         codeField.setRequired(true);
         codeField.setRequiredIndicatorVisible(true);
         codeField.setPlaceholder("e.g., PEB_PROD");
+        codeField.setWidthFull();
 
         algorithmCombo = new ComboBox<>("Algorithm");
         algorithmCombo.setItems(IEnumAlgoPEBConfig.Types.values());
         algorithmCombo.setRequired(true);
         algorithmCombo.setRequiredIndicatorVisible(true);
+        algorithmCombo.setWidthFull();
 
         iterationsField = new IntegerField("Iterations");
         iterationsField.setValue(10000);
         iterationsField.setRequired(true);
         iterationsField.setMin(1);
+        iterationsField.setWidthFull();
 
         saltGeneratorCombo = new ComboBox<>("Salt generator");
         saltGeneratorCombo.setItems(IEnumSaltGenerator.Types.values());
         saltGeneratorCombo.setRequired(true);
+        saltGeneratorCombo.setWidthFull();
 
         ivGeneratorCombo = new ComboBox<>("IV generator");
         ivGeneratorCombo.setItems(IEnumIvGenerator.Types.values());
         ivGeneratorCombo.setRequired(true);
+        ivGeneratorCombo.setWidthFull();
 
         providerClassField = new TextField("Provider class");
         providerClassField.setPlaceholder("e.g., org.bouncycastle.jce.provider.BouncyCastleProvider");
+        providerClassField.setWidthFull();
 
         providerNameField = new TextField("Provider name");
         providerNameField.setPlaceholder("e.g., BC");
+        providerNameField.setWidthFull();
 
         poolSizeField = new IntegerField("Pool size");
         poolSizeField.setValue(10);
         poolSizeField.setMin(1);
+        poolSizeField.setWidthFull();
 
         outputTypeCombo = new ComboBox<>("Output type");
         outputTypeCombo.setItems(IEnumStringOutputType.Types.values());
         outputTypeCombo.setValue(IEnumStringOutputType.Types.Base64);
+        outputTypeCombo.setWidthFull();
     }
 
     private FormLayout createFormLayout() {
@@ -91,27 +98,27 @@ public class CreatePEBConfigDialog extends BaseActionDialog {
     protected boolean onOk() {
         String code = codeField.getValue();
         if (!StringUtils.hasText(code)) {
-            showError("Code is required");
+            append("Code is required");
             return false;
         }
         IEnumAlgoPEBConfig.Types algo = algorithmCombo.getValue();
         if (algo == null) {
-            showError("Algorithm is required");
+            append("Algorithm is required");
             return false;
         }
         Integer iterations = iterationsField.getValue();
         if (iterations == null || iterations <= 0) {
-            showError("Iterations must be a positive number");
+            append("Iterations must be a positive number");
             return false;
         }
         IEnumSaltGenerator.Types saltGen = saltGeneratorCombo.getValue();
         if (saltGen == null) {
-            showError("Salt generator is required");
+            append("Salt generator is required");
             return false;
         }
         IEnumIvGenerator.Types ivGen = ivGeneratorCombo.getValue();
         if (ivGen == null) {
-            showError("IV generator is required");
+            append("IV generator is required");
             return false;
         }
 
@@ -130,29 +137,18 @@ public class CreatePEBConfigDialog extends BaseActionDialog {
         try {
             ResponseEntity<PEBConfigDto> response = configService.create(dto);
             if (response.getStatusCode().is2xxSuccessful()) {
-                Notification.show("Configuration created successfully", 3000, Notification.Position.BOTTOM_END)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                append("Configuration created successfully");
                 return true;
             } else {
-                this.append("Creation failed: " + response.getStatusCode());
+                append("Creation failed: " + response.getStatusCode());
                 return false;
             }
         } catch (FeignException ex) {
-            handleFeignException(ex);
+            append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
             return false;
         } catch (Exception ex) {
-            handleGenericException(ex);
+            append("Creation failed: " + ex.getMessage());
             return false;
         }
-    }
-
-    private void handleFeignException(FeignException ex) {
-        String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-        this.append(errorMsg);
-    }
-
-    private void handleGenericException(Exception ex) {
-        String errorMsg = "Creation failed: " + ex.getMessage();
-        this.append(errorMsg);
     }
 }

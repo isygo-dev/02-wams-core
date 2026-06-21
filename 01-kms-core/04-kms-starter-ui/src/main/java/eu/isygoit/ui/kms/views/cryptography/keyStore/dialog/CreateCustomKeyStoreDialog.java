@@ -52,6 +52,8 @@ public class CreateCustomKeyStoreDialog extends BaseActionDialog {
         this.kmsApiService = kmsApiService;
         setOkButtonText("Create");
         setWidth("700px");
+        setMaxWidth("95%");
+        setResizable(true);
         buildForm();
         add(createFormLayout());
     }
@@ -134,17 +136,13 @@ public class CreateCustomKeyStoreDialog extends BaseActionDialog {
                 return false;
             }
 
-            Notification.show("Custom key store created", 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-
+            append("Custom key store created");
             return true;
 
         } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            this.append(errorMsg);
+            append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            String errorMsg = "Failed operation: " + e.getMessage();
-            this.append(errorMsg);
+            append("Failed operation: " + e.getMessage());
         } finally {
             parentView.showLoading(false);
         }
@@ -246,7 +244,6 @@ public class CreateCustomKeyStoreDialog extends BaseActionDialog {
 
     private Map<String, String> parseJsonToMap(String json) {
         if (!StringUtils.hasText(json)) return null;
-        // Remove the literal string "null" if present
         if ("null".equalsIgnoreCase(json.trim())) return null;
         Map<String, String> map = new HashMap<>();
         try {

@@ -28,7 +28,7 @@ public class RenewRandomKeyDialog extends PinBaseActionDialog {
         setOkButtonText("Renew");
         setWidth("500px");
         buildForm();
-        add(createFormLayout());
+        addContent(createFormLayout());
     }
 
     private void buildForm() {
@@ -37,11 +37,13 @@ public class RenewRandomKeyDialog extends PinBaseActionDialog {
         lengthField.setMin(1);
         lengthField.setMax(4096);
         lengthField.setStepButtonsVisible(true);
+        lengthField.setWidthFull();
         lengthField.addValueChangeListener(e -> length = e.getValue());
 
         charSetCombo = new ComboBox<>("Character set");
         charSetCombo.setItems(IEnumCharSet.Types.values());
         charSetCombo.setValue(charSet);
+        charSetCombo.setWidthFull();
         charSetCombo.addValueChangeListener(e -> charSet = e.getValue());
     }
 
@@ -54,6 +56,11 @@ public class RenewRandomKeyDialog extends PinBaseActionDialog {
 
     @Override
     protected boolean onOk() {
+        if (!validatePin()) {
+            append("Invalid confirmation code");
+            return false;
+        }
+
         if (length == null || length <= 0) {
             append("Length must be positive");
             return false;
@@ -62,9 +69,11 @@ public class RenewRandomKeyDialog extends PinBaseActionDialog {
             append("Character set is required");
             return false;
         }
+
         try {
             ResponseEntity<String> response = keyService.renewRandomKey(keyName, length, charSet);
             if (response.getStatusCode().is2xxSuccessful()) {
+                append("Key renewed");
                 return true;
             } else {
                 append("Renew failed: " + response.getStatusCode());

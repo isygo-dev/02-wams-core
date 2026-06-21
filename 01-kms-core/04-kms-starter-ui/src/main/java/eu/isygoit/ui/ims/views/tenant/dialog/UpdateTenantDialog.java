@@ -55,7 +55,7 @@ public class UpdateTenantDialog extends BaseActionDialog {
                               TenantImageService tenantImageService,
                               TenantDto tenant,
                               Runnable onSuccess) {
-        super("Edit Tenant");
+        super("Edit Tenant", onSuccess);
         this.parentView = parentView;
         this.tenantService = tenantService;
         this.tenantImageService = tenantImageService;
@@ -63,11 +63,11 @@ public class UpdateTenantDialog extends BaseActionDialog {
         this.onSuccess = onSuccess;
 
         setOkButtonText("Save");
-        setWidth("90%");
-        getElement().getStyle().set("max-width", "700px");
+        setWidth("700px");
+        setMaxWidth("95%");
 
         buildForm();
-        add(buildLayout());
+        addContent(buildLayout());
         populateFields();
         loadExistingImage();
     }
@@ -75,16 +75,31 @@ public class UpdateTenantDialog extends BaseActionDialog {
     private void buildForm() {
         nameField = new TextField("Name *");
         nameField.setRequiredIndicatorVisible(true);
+        nameField.setWidthFull();
+
         codeField = new TextField("Code");
+        codeField.setWidthFull();
+
         emailField = new EmailField("Email *");
         emailField.setRequiredIndicatorVisible(true);
+        emailField.setWidthFull();
+
         phoneField = new TextField("Phone *");
         phoneField.setRequiredIndicatorVisible(true);
+        phoneField.setWidthFull();
+
         industryField = new TextField("Industry");
+        industryField.setWidthFull();
+
         urlField = new TextField("Website URL");
+        urlField.setWidthFull();
+
         descriptionField = new TextArea("Description");
+        descriptionField.setWidthFull();
+
         adminStatusCombo = new ComboBox<>("Admin status");
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
+        adminStatusCombo.setWidthFull();
 
         imageThumbnail = new Image();
         imageThumbnail.setWidth("60px");
@@ -225,7 +240,7 @@ public class UpdateTenantDialog extends BaseActionDialog {
 
             ResponseEntity<TenantDto> response = tenantService.update(tenant.getId(), tenant);
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                append("Update failed: " + (response.getBody() != null ? response.getBody() : "no response body"));
+                append("Update failed: HTTP " + response.getStatusCodeValue());
                 return false;
             }
 

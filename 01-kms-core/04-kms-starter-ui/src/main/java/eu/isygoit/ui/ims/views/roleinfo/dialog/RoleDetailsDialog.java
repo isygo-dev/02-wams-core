@@ -36,6 +36,7 @@ public class RoleDetailsDialog extends NoActionDialog {
         this.roleId = roleId;
 
         setWidth("900px");
+        setMaxWidth("95%");
         setModal(true);
         setDraggable(true);
         setResizable(true);

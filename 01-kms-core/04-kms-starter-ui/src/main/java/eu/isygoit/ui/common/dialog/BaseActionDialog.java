@@ -1,5 +1,7 @@
 package eu.isygoit.ui.common.dialog;
 
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -9,11 +11,11 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 
 /**
- * Abstract base dialog that provides a standard header, footer with error span,
- * and Ok/Cancel buttons. Subclasses must implement {@link #onOk()} to definee
- * the ok action. The Cancel button closes the dialog by default.
+ * Modern, compact base dialog with a header, a content area, and a footer
+ * with Ok/Cancel buttons. Subclasses must implement {@link #onOk()}.
  */
 public abstract class BaseActionDialog extends Dialog {
 
@@ -21,35 +23,20 @@ public abstract class BaseActionDialog extends Dialog {
     private final Button okButton;
     private final Button cancelButton;
     private Runnable onSuccess;
-    private StringBuilder msgBuilder = new StringBuilder();
+    private final StringBuilder msgBuilder = new StringBuilder();
 
-    /**
-     * Constructs a new dialog with the given header title.
-     *
-     * @param title the dialog header title
-     */
     public BaseActionDialog(String title, Runnable onSuccess) {
+        this(title);
         this.onSuccess = onSuccess;
-        setHeaderTitle(title);
-        setCloseOnEsc(false);
-        setCloseOnOutsideClick(false);
-
-        this.errorSpan = createErrorSpan();
-        this.okButton = createOkButton();
-        this.cancelButton = createCancelButton();
-
-        buildFooter();
     }
 
-    /**
-     * Constructs a new dialog with the given header title.
-     *
-     * @param title the dialog header title
-     */
     public BaseActionDialog(String title) {
         setHeaderTitle(title);
-        setCloseOnEsc(false);
-        setCloseOnOutsideClick(false);
+        setCloseOnEsc(true);
+        setCloseOnOutsideClick(true);
+        setWidth("500px");
+        setMaxWidth("90%");
+        setResizable(false);
 
         this.errorSpan = createErrorSpan();
         this.okButton = createOkButton();
@@ -71,41 +58,23 @@ public abstract class BaseActionDialog extends Dialog {
     }
 
     /**
-     * Hook method for the ok action. Called when the Ok button is clicked.
-     * Implementations should perform the actual ok/creation logic and may call
-     * {@link #showError(String)} to display an error.
+     * Implement this method to perform the action. Return {@code true} on success,
+     * {@code false} on failure. Use {@link #append(String)} to collect error messages.
      */
     protected abstract boolean onOk();
 
-    /**
-     * Sets the text of the Ok button.
-     *
-     * @param text the button label (e.g., "Create", "Update")
-     */
     protected void setOkButtonText(String text) {
         okButton.setText(text);
     }
 
-    /**
-     * Optionally overrides the Cancel button's click listener. The default behaviour
-     * is to close the dialog.
-     *
-     * @param listener the new click listener for the Cancel button
-     */
-    protected void setCancelButtonClickListener(com.vaadin.flow.component.ComponentEventListener<
-            com.vaadin.flow.component.ClickEvent<Button>> listener) {
+    protected void setCancelButtonClickListener(
+            ComponentEventListener<ClickEvent<Button>> listener) {
         cancelButton.addClickListener(listener);
     }
 
-    /**
-     * Displays an error message in the footer.
-     *
-     * @param message the error text (will be visible and styled in red)
-     */
     protected void showError(String message) {
         errorSpan.setText(message);
         errorSpan.setVisible(true);
-
         Notification.show(message, 5000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
@@ -113,28 +82,24 @@ public abstract class BaseActionDialog extends Dialog {
     protected void showSuccess(String message) {
         errorSpan.setText(null);
         errorSpan.setVisible(false);
-
         Notification.show(message, 5000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
-    /**
-     * Clears any displayed error message.
-     */
     protected void clearError() {
-        msgBuilder = new StringBuilder();
+        msgBuilder.setLength(0);
         errorSpan.setText("");
         errorSpan.setVisible(false);
     }
 
     // ------------------------------------------------------------------------
-    //  Private helper methods
+    // Private helpers
     // ------------------------------------------------------------------------
 
     private Span createErrorSpan() {
         Span span = new Span();
-        span.getStyle().set("color", "var(--lumo-error-text-color)");
-        span.getStyle().set("font-size", "var(--lumo-font-size-xs)");
+        span.addClassName(LumoUtility.TextColor.ERROR);
+        span.addClassName(LumoUtility.FontSize.SMALL);
         span.getStyle().set("margin-right", "auto");
         span.setVisible(false);
         return span;
@@ -147,10 +112,8 @@ public abstract class BaseActionDialog extends Dialog {
             clearError();
             boolean ok = onOk();
             if (ok) {
-                this.close();
-                if (onSuccess != null) {
-                    onSuccess.run();
-                }
+                close();
+                if (onSuccess != null) onSuccess.run();
                 showSuccess(msgBuilder.toString());
             } else {
                 showError(msgBuilder.toString());
@@ -161,6 +124,7 @@ public abstract class BaseActionDialog extends Dialog {
 
     private Button createCancelButton() {
         Button button = new Button("Cancel");
+        button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         button.addClickListener(e -> close());
         return button;
     }
@@ -171,11 +135,9 @@ public abstract class BaseActionDialog extends Dialog {
         footerLayout.setSpacing(true);
         footerLayout.setPadding(false);
 
-        // Error span takes full width
         errorSpan.setWidthFull();
         footerLayout.add(errorSpan);
 
-        // Buttons aligned to the right
         HorizontalLayout buttonLayout = new HorizontalLayout(cancelButton, okButton);
         buttonLayout.setSpacing(true);
         buttonLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
@@ -184,5 +146,16 @@ public abstract class BaseActionDialog extends Dialog {
 
         getFooter().removeAll();
         getFooter().add(footerLayout);
+    }
+
+    /**
+     * Convenience method to add content with consistent padding.
+     */
+    protected void addContent(com.vaadin.flow.component.Component... components) {
+        VerticalLayout content = new VerticalLayout(components);
+        content.setPadding(true);
+        content.setSpacing(true);
+        content.setWidthFull();
+        add(content);
     }
 }

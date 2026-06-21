@@ -2,8 +2,6 @@ package eu.isygoit.ui.kms.views.secrets.peb.dialog;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.PEBConfigDto;
@@ -38,7 +36,7 @@ public class UpdatePEBConfigDialog extends BaseActionDialog {
         setOkButtonText("Save");
         setWidth("700px");
         buildForm();
-        add(createFormLayout());
+        addContent(createFormLayout());
         bindData();
     }
 
@@ -50,26 +48,36 @@ public class UpdatePEBConfigDialog extends BaseActionDialog {
         algorithmCombo = new ComboBox<>("Algorithm");
         algorithmCombo.setItems(IEnumAlgoPEBConfig.Types.values());
         algorithmCombo.setRequired(true);
+        algorithmCombo.setWidthFull();
 
         iterationsField = new IntegerField("Iterations");
         iterationsField.setRequired(true);
         iterationsField.setMin(1);
+        iterationsField.setWidthFull();
 
         saltGeneratorCombo = new ComboBox<>("Salt generator");
         saltGeneratorCombo.setItems(IEnumSaltGenerator.Types.values());
         saltGeneratorCombo.setRequired(true);
+        saltGeneratorCombo.setWidthFull();
 
         ivGeneratorCombo = new ComboBox<>("IV generator");
         ivGeneratorCombo.setItems(IEnumIvGenerator.Types.values());
         ivGeneratorCombo.setRequired(true);
+        ivGeneratorCombo.setWidthFull();
 
         providerClassField = new TextField("Provider class");
+        providerClassField.setWidthFull();
+
         providerNameField = new TextField("Provider name");
+        providerNameField.setWidthFull();
+
         poolSizeField = new IntegerField("Pool size");
         poolSizeField.setMin(1);
+        poolSizeField.setWidthFull();
 
         outputTypeCombo = new ComboBox<>("Output type");
         outputTypeCombo.setItems(IEnumStringOutputType.Types.values());
+        outputTypeCombo.setWidthFull();
     }
 
     private void bindData() {
@@ -94,13 +102,34 @@ public class UpdatePEBConfigDialog extends BaseActionDialog {
 
     @Override
     protected boolean onOk() {
+        IEnumAlgoPEBConfig.Types algo = algorithmCombo.getValue();
+        if (algo == null) {
+            append("Algorithm is required");
+            return false;
+        }
+        Integer iterations = iterationsField.getValue();
+        if (iterations == null || iterations <= 0) {
+            append("Iterations must be a positive number");
+            return false;
+        }
+        IEnumSaltGenerator.Types saltGen = saltGeneratorCombo.getValue();
+        if (saltGen == null) {
+            append("Salt generator is required");
+            return false;
+        }
+        IEnumIvGenerator.Types ivGen = ivGeneratorCombo.getValue();
+        if (ivGen == null) {
+            append("IV generator is required");
+            return false;
+        }
+
         PEBConfigDto updated = PEBConfigDto.builder()
                 .id(original.getId())
                 .code(original.getCode())
-                .algorithm(algorithmCombo.getValue())
-                .keyObtentionIterations(iterationsField.getValue())
-                .saltGenerator(saltGeneratorCombo.getValue())
-                .ivGenerator(ivGeneratorCombo.getValue())
+                .algorithm(algo)
+                .keyObtentionIterations(iterations)
+                .saltGenerator(saltGen)
+                .ivGenerator(ivGen)
                 .providerClassName(providerClassField.getValue())
                 .providerName(providerNameField.getValue())
                 .poolSize(poolSizeField.getValue())
@@ -110,29 +139,18 @@ public class UpdatePEBConfigDialog extends BaseActionDialog {
         try {
             ResponseEntity<PEBConfigDto> response = configService.update(original.getId(), updated);
             if (response.getStatusCode().is2xxSuccessful()) {
-                Notification.show("Configuration updated successfully", 3000, Notification.Position.BOTTOM_END)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                append("Configuration updated successfully");
                 return true;
             } else {
-                this.append("Update failed: " + response.getStatusCode());
+                append("Update failed: " + response.getStatusCode());
                 return false;
             }
         } catch (FeignException ex) {
-            handleFeignException(ex);
+            append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
             return false;
         } catch (Exception ex) {
-            handleGenericException(ex);
+            append("Update failed: " + ex.getMessage());
             return false;
         }
-    }
-
-    private void handleFeignException(FeignException ex) {
-        String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-        this.append(errorMsg);
-    }
-
-    private void handleGenericException(Exception ex) {
-        String errorMsg = "Update failed: " + ex.getMessage();
-        this.append(errorMsg);
     }
 }

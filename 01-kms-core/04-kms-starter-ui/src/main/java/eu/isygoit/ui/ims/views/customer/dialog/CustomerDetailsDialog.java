@@ -34,6 +34,7 @@ public class CustomerDetailsDialog extends NoActionDialog {
         this.customerId = customerId;
 
         setWidth("800px");
+        setMaxWidth("95%");
         setModal(true);
         setDraggable(true);
         setResizable(true);

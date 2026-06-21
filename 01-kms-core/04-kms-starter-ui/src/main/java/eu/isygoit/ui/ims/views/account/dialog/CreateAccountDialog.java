@@ -66,7 +66,7 @@ public class CreateAccountDialog extends BaseActionDialog {
                                AccountImageService accountImageService,
                                TenantService tenantService,
                                Runnable onSuccess) {
-        super("Create Account");
+        super("Create Account", onSuccess);
         this.parentView = parentView;
         this.accountService = accountService;
         this.accountImageService = accountImageService;
@@ -74,11 +74,11 @@ public class CreateAccountDialog extends BaseActionDialog {
         this.onSuccess = onSuccess;
 
         setOkButtonText("Create");
-        setWidth("90%");
-        getElement().getStyle().set("max-width", "700px");
+        setWidth("700px");
+        setMaxWidth("95%");
 
         buildForm();
-        add(buildLayout());
+        addContent(buildLayout());
         loadTenants();
     }
 
@@ -91,9 +91,9 @@ public class CreateAccountDialog extends BaseActionDialog {
             TenantDto tenant = findTenantByCode(item);
             return tenant != null ? tenant.getName() + " (" + tenant.getCode() + ")" : item;
         });
-        tenantCombo.setAllowCustomValue(false); // must select existing tenant
+        tenantCombo.setAllowCustomValue(false);
+        tenantCombo.setWidthFull();
 
-        // Account type (editable with suggestions)
         accountTypeCombo = new ComboBox<>("Account type *");
         accountTypeCombo.setRequiredIndicatorVisible(true);
         accountTypeCombo.setItems(
@@ -101,39 +101,49 @@ public class CreateAccountDialog extends BaseActionDialog {
                 AccountTypeConstants.TENANT_ADMIN,
                 AccountTypeConstants.TENANT_USER
         );
-        accountTypeCombo.setAllowCustomValue(true); // allow free text
+        accountTypeCombo.setAllowCustomValue(true);
         accountTypeCombo.setPlaceholder("Select or type account type");
         accountTypeCombo.setValue(AccountTypeConstants.TENANT_USER);
+        accountTypeCombo.setWidthFull();
 
         emailField = new EmailField("Email *");
         emailField.setRequiredIndicatorVisible(true);
         emailField.setPlaceholder("user@example.com");
+        emailField.setWidthFull();
 
         firstNameField = new TextField("First name");
         firstNameField.setPlaceholder("John");
+        firstNameField.setWidthFull();
 
         lastNameField = new TextField("Last name");
         lastNameField.setPlaceholder("Doe");
+        lastNameField.setWidthFull();
 
         phoneNumberField = new TextField("Phone number");
         phoneNumberField.setPlaceholder("+1 234 567 8900");
+        phoneNumberField.setWidthFull();
 
         languageCombo = new ComboBox<>("Language");
         languageCombo.setItems(IEnumLanguage.Types.values());
         languageCombo.setValue(IEnumLanguage.Types.EN);
+        languageCombo.setWidthFull();
 
         functionRoleField = new TextField("Function role");
         functionRoleField.setPlaceholder("e.g., ADMIN, USER");
+        functionRoleField.setWidthFull();
 
         isAdminCheckbox = new Checkbox("Is administrator");
+        isAdminCheckbox.setWidthFull();
 
         adminStatusCombo = new ComboBox<>("Admin status");
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
         adminStatusCombo.setValue(IEnumEnabledBinaryStatus.Types.ENABLED);
+        adminStatusCombo.setWidthFull();
 
         passwordField = new PasswordField("Initial password *");
         passwordField.setRequiredIndicatorVisible(true);
         passwordField.setPlaceholder("••••••••");
+        passwordField.setWidthFull();
 
         // Image thumbnail + upload button
         imageThumbnail = new Image();
@@ -215,7 +225,6 @@ public class CreateAccountDialog extends BaseActionDialog {
         form.add(tenantCombo, accountTypeCombo, emailField, firstNameField,
                 lastNameField, phoneNumberField, languageCombo, functionRoleField,
                 isAdminCheckbox, adminStatusCombo, passwordField);
-        // Make password span both columns for better visibility
         form.setColspan(passwordField, 2);
         return form;
     }

@@ -63,7 +63,7 @@ public class UpdateCustomerDialog extends BaseActionDialog {
                                 CustomerImageService customerImageService,
                                 CustomerDto customer,
                                 Runnable onSuccess) {
-        super("Edit Customer");
+        super("Edit Customer", onSuccess);
         this.parentView = parentView;
         this.customerService = customerService;
         this.customerImageService = customerImageService;
@@ -71,11 +71,11 @@ public class UpdateCustomerDialog extends BaseActionDialog {
         this.onSuccess = onSuccess;
 
         setOkButtonText("Save");
-        setWidth("90%");
-        getElement().getStyle().set("max-width", "800px");
+        setWidth("800px");
+        setMaxWidth("95%");
 
         buildForm();
-        add(buildLayout());
+        addContent(buildLayout());
         populateFields();
         loadExistingImage();
     }
@@ -83,21 +83,43 @@ public class UpdateCustomerDialog extends BaseActionDialog {
     private void buildForm() {
         nameField = new TextField("Name *");
         nameField.setRequiredIndicatorVisible(true);
+        nameField.setWidthFull();
+
         emailField = new EmailField("Email *");
         emailField.setRequiredIndicatorVisible(true);
+        emailField.setWidthFull();
+
         phoneField = new TextField("Phone number *");
         phoneField.setRequiredIndicatorVisible(true);
+        phoneField.setWidthFull();
+
         urlField = new TextField("Website URL");
+        urlField.setWidthFull();
+
         descriptionField = new TextArea("Description");
+        descriptionField.setWidthFull();
+
         adminStatusCombo = new ComboBox<>("Admin status");
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
+        adminStatusCombo.setWidthFull();
 
         countryField = new TextField("Country");
+        countryField.setWidthFull();
+
         stateField = new TextField("State/Province");
+        stateField.setWidthFull();
+
         cityField = new TextField("City");
+        cityField.setWidthFull();
+
         streetField = new TextField("Street");
+        streetField.setWidthFull();
+
         zipCodeField = new TextField("Zip code");
+        zipCodeField.setWidthFull();
+
         additionalInfoField = new TextField("Additional info");
+        additionalInfoField.setWidthFull();
 
         imageThumbnail = new Image();
         imageThumbnail.setWidth("60px");

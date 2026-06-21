@@ -44,8 +44,7 @@ public class DeleteAliasDialog extends PinBaseActionDialog {
     protected boolean onOk() {
         // Extra safety: validate PIN again (the base class already validated the button, but double-check)
         if (!validatePin()) {
-            String errorMsg = "Invalid confirmation code. Deletion aborted.";
-            append(errorMsg);
+            append("Invalid confirmation code. Deletion aborted.");
             parentView.showLoading(false);
             return false;
         }
@@ -54,21 +53,16 @@ public class DeleteAliasDialog extends PinBaseActionDialog {
         try {
             ResponseEntity<DeleteAliasResponse> response = kmsApiService.deleteAlias(aliasName);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                String errorMsg = "Deletion failed: " + response.getStatusCode();
-                append(errorMsg);
+                append("Deletion failed: " + response.getStatusCode());
                 return false;
             }
 
-            Notification.show("Alias deleted", 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-
+            append("Alias deleted");
             return true;
         } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            this.append(errorMsg);
+            append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            String errorMsg = "Failed operation: " + e.getMessage();
-            this.append(errorMsg);
+            append("Failed operation: " + e.getMessage());
         } finally {
             parentView.showLoading(false);
         }

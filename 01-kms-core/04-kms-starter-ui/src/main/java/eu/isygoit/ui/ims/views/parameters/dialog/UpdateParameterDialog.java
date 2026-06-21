@@ -26,7 +26,7 @@ public class UpdateParameterDialog extends BaseActionDialog {
                                  AppParameterService parameterService,
                                  AppParameterDto parameter,
                                  Runnable onSuccess) {
-        super("Edit Parameter");
+        super("Edit Parameter", onSuccess);
         this.parentView = parentView;
         this.parameterService = parameterService;
         this.parameter = parameter;
@@ -34,23 +34,28 @@ public class UpdateParameterDialog extends BaseActionDialog {
 
         setOkButtonText("Save");
         setWidth("600px");
+        setMaxWidth("95%");
 
         buildForm();
-        add(buildFormLayout());
+        addContent(buildFormLayout());
         populateFields();
     }
 
     private void buildForm() {
         nameField = new TextField("Name *");
         nameField.setRequiredIndicatorVisible(true);
+        nameField.setWidthFull();
 
         valueField = new TextField("Value *");
         valueField.setRequiredIndicatorVisible(true);
+        valueField.setWidthFull();
 
         tenantField = new TextField("Tenant");
         tenantField.setPlaceholder("Leave empty for global parameter");
+        tenantField.setWidthFull();
 
         descriptionArea = new TextArea("Description");
+        descriptionArea.setWidthFull();
     }
 
     private FormLayout buildFormLayout() {

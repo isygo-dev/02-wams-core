@@ -10,6 +10,7 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -69,7 +70,7 @@ public class CreateRoleDialog extends BaseActionDialog {
                             RoleInfoService roleInfoService,
                             ApplicationService applicationService,
                             Runnable onSuccess) {
-        super("Create Role");
+        super("Create Role", onSuccess);
         this.parentView = parentView;
         this.roleInfoService = roleInfoService;
         this.applicationService = applicationService;
@@ -77,7 +78,7 @@ public class CreateRoleDialog extends BaseActionDialog {
 
         setOkButtonText("Create");
         setWidth("95%");
-        getElement().getStyle().set("max-width", "1100px");
+        setMaxWidth("1100px");
         setHeight("85vh");
         setResizable(true);
         setDraggable(true);
@@ -86,7 +87,7 @@ public class CreateRoleDialog extends BaseActionDialog {
         buildApplicationsGrid();
         buildPermissionsGrid();
         buildTabs();
-        add(createMainLayout());
+        addContent(createMainLayout());
         loadApplications();
 
         injectResponsiveStyles();
@@ -224,7 +225,6 @@ public class CreateRoleDialog extends BaseActionDialog {
 
     private void refreshPermissionsTree() {
         TreeData<Object> treeData = new TreeData<>();
-        // Group by service name, preserve order
         Map<String, List<RolePermissionDto>> grouped = permissions.stream()
                 .collect(Collectors.groupingBy(RolePermissionDto::getServiceName,
                         LinkedHashMap::new, Collectors.toList()));
@@ -272,7 +272,8 @@ public class CreateRoleDialog extends BaseActionDialog {
         try {
             allApplications = fetchAllApplications();
             if (allApplications.isEmpty()) {
-                Notification.show("No applications found. Check backend services.", 5000, Notification.Position.BOTTOM_END);
+                Notification.show("No applications found. Check backend services.", 5000, Notification.Position.BOTTOM_END)
+                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 applicationsGrid.setItems(Collections.emptyList());
                 appsCountLabel.setText("0 applications found");
             } else {
@@ -281,7 +282,6 @@ public class CreateRoleDialog extends BaseActionDialog {
         } catch (Exception e) {
             log.error("Failed to load applications", e);
             append("Failed to load applications: " + e.getMessage());
-            Notification.show("Error loading applications: " + e.getMessage(), 5000, Notification.Position.BOTTOM_END);
         } finally {
             parentView.showLoading(false);
         }

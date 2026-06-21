@@ -35,6 +35,7 @@ public class DecodeJwtDialog extends NoActionDialog {
         this.jwtToken = jwtToken;
 
         setWidth("750px");
+        setMaxWidth("95%");
         setResizable(true);
         setDraggable(true);
 
@@ -45,7 +46,7 @@ public class DecodeJwtDialog extends NoActionDialog {
         VerticalLayout mainLayout = new VerticalLayout();
         mainLayout.setSpacing(true);
         mainLayout.setPadding(true);
-        mainLayout.setMargin(false);
+        mainLayout.setWidthFull();
 
         try {
             String[] parts = jwtToken.split("\\.");
@@ -72,7 +73,7 @@ public class DecodeJwtDialog extends NoActionDialog {
 
             mainLayout.add(headerCard, payloadCard);
 
-            // Additional info (optional: signature preview)
+            // Signature info
             if (parts[2] != null && !parts[2].isEmpty()) {
                 String signature = parts[2];
                 Span sigInfo = new Span("Signature (base64url encoded): " + signature.substring(0, Math.min(20, signature.length())) + "...");

@@ -1,8 +1,6 @@
 package eu.isygoit.ui.kms.views.cryptography.key.dialog;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -29,8 +27,6 @@ public class DescribeKeyDialog extends NoActionDialog {
 
     private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;
-
-
     private final ObjectMapper objectMapper;
     private final String keyId;
     private final DescribeKeyResponse.KeyMetadata metadata;
@@ -48,17 +44,19 @@ public class DescribeKeyDialog extends NoActionDialog {
         this.metadata = metadata;
 
         setWidth("750px");
+        setMaxWidth("95%");
+        setResizable(true);
         setCloseOnEsc(true);
         setCloseOnOutsideClick(true);
 
         buildContent();
-        addFooter();
     }
 
     private void buildContent() {
         VerticalLayout content = new VerticalLayout();
-        content.setSpacing(true);
         content.setPadding(true);
+        content.setSpacing(true);
+        content.setWidthFull();
 
         // Basic metadata
         content.add(detailRow("Key ID", metadata.getKeyId()),
@@ -158,16 +156,11 @@ public class DescribeKeyDialog extends NoActionDialog {
         add(content);
     }
 
-    private void addFooter() {
-        Button closeBtn = new Button("Close", e -> close());
-        closeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        getFooter().add(closeBtn);
-    }
-
     private HorizontalLayout detailRow(String label, String value) {
         HorizontalLayout row = new HorizontalLayout();
         row.setWidthFull();
         row.setSpacing(true);
+        row.getStyle().set("margin-bottom", "var(--lumo-space-xs)");
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.BOLD);
         labelSpan.setWidth("30%");

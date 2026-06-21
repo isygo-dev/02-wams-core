@@ -24,32 +24,37 @@ public class CreateParameterDialog extends BaseActionDialog {
     public CreateParameterDialog(ParameterManagementView parentView,
                                  AppParameterService parameterService,
                                  Runnable onSuccess) {
-        super("Create Parameter");
+        super("Create Parameter", onSuccess);
         this.parentView = parentView;
         this.parameterService = parameterService;
         this.onSuccess = onSuccess;
 
         setOkButtonText("Create");
         setWidth("600px");
+        setMaxWidth("95%");
 
         buildForm();
-        add(buildFormLayout());
+        addContent(buildFormLayout());
     }
 
     private void buildForm() {
         nameField = new TextField("Name *");
         nameField.setRequiredIndicatorVisible(true);
         nameField.setPlaceholder("e.g., app.timeout");
+        nameField.setWidthFull();
 
         valueField = new TextField("Value *");
         valueField.setRequiredIndicatorVisible(true);
         valueField.setPlaceholder("e.g., 30000");
+        valueField.setWidthFull();
 
         tenantField = new TextField("Tenant");
         tenantField.setPlaceholder("Leave empty for global parameter");
+        tenantField.setWidthFull();
 
         descriptionArea = new TextArea("Description");
         descriptionArea.setPlaceholder("Optional description");
+        descriptionArea.setWidthFull();
     }
 
     private FormLayout buildFormLayout() {

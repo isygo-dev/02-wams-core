@@ -92,13 +92,16 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         super(title, onSuccess);
         this.kmsApiService = kmsApiService;
         setWidth("850px");
+        setMaxWidth("95%");
+        setResizable(true);
     }
 
     protected void initUI() {
         buildComponents();
         VerticalLayout mainLayout = new VerticalLayout(metadataCard, cryptoCard);
         mainLayout.setSpacing(true);
-        mainLayout.setPadding(false);
+        mainLayout.setPadding(true);
+        mainLayout.setWidthFull();
         add(mainLayout);
         setupKeySourceListener();
         setupAlgorithmChangeListener();
@@ -495,12 +498,12 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
                 default -> 32;
             };
             if (keyBytes.length < requiredMinBytes) {
-                showError("Secret key for " + algorithm + " must be at least " + requiredMinBytes + " bytes (Base64 decoded length)");
+                append("Secret key for " + algorithm + " must be at least " + requiredMinBytes + " bytes (Base64 decoded length)");
                 return false;
             }
             return true;
         } catch (IllegalArgumentException e) {
-            showError("Secret key must be valid Base64");
+            append("Secret key must be valid Base64");
             return false;
         }
     }
@@ -530,12 +533,12 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         }
         Integer value = lifeTimeValueField.getValue();
         if (value == null || value <= 0) {
-            showError("Lifetime value must be a positive number");
+            append("Lifetime value must be a positive number");
             return null;
         }
         String unit = lifeTimeUnitCombo.getValue();
         if (unit == null) {
-            showError("Please select a time unit");
+            append("Please select a time unit");
             return null;
         }
         int ms;
@@ -670,7 +673,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         private void addChip(String audience) {
             Span chip = new Span(audience);
             chip.getStyle()
-                    .set("background-color", "#e0e0e0")
+                    .set("background-color", "var(--lumo-contrast-10pct)")
                     .set("border-radius", "16px")
                     .set("padding", "4px 12px")
                     .set("font-size", "var(--lumo-font-size-s)")

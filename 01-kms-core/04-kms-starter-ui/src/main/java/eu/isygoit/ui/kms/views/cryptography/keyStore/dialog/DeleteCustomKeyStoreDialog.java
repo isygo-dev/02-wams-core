@@ -1,7 +1,5 @@
 package eu.isygoit.ui.kms.views.cryptography.keyStore.dialog;
 
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
@@ -26,6 +24,7 @@ public class DeleteCustomKeyStoreDialog extends PinBaseActionDialog {
         this.kmsApiService = kmsApiService;
         this.store = store;
         setOkButtonText("Delete permanently");
+        addThemeVariantsOkButton(com.vaadin.flow.component.button.ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
 
@@ -45,17 +44,13 @@ public class DeleteCustomKeyStoreDialog extends PinBaseActionDialog {
                 return false;
             }
 
-            Notification.show("Custom key store deleted", 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-
+            append("Custom key store deleted");
             return true;
 
         } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            this.append(errorMsg);
+            append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            String errorMsg = "Failed operation: " + e.getMessage();
-            this.append(errorMsg);
+            append("Failed operation: " + e.getMessage());
         } finally {
             parentView.showLoading(false);
         }

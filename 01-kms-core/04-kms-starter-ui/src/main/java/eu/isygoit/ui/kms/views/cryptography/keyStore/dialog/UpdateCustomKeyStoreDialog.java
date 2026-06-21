@@ -52,6 +52,8 @@ public class UpdateCustomKeyStoreDialog extends BaseActionDialog {
         this.store = store;
         setOkButtonText("Update");
         setWidth("700px");
+        setMaxWidth("95%");
+        setResizable(true);
         buildForm();
         add(createFormLayout());
     }
@@ -99,17 +101,13 @@ public class UpdateCustomKeyStoreDialog extends BaseActionDialog {
                 return false;
             }
 
-            Notification.show("Custom key store updated", 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-
+            append("Custom key store updated");
             return true;
 
         } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            this.append(errorMsg);
+            append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            String errorMsg = "Failed operation: " + e.getMessage();
-            this.append(errorMsg);
+            append("Failed operation: " + e.getMessage());
         } finally {
             parentView.showLoading(false);
         }

@@ -3,6 +3,7 @@ package eu.isygoit.ui.ims.views.customer.dialog;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import eu.isygoit.dto.data.CustomerDto;
 import eu.isygoit.dto.data.MinAccountDto;
 import eu.isygoit.remote.ims.AccountService;
@@ -31,7 +32,7 @@ public class LinkCustomerAccountDialog extends BaseActionDialog {
                                      AccountService accountService,
                                      Long customerId,
                                      Runnable onSuccess) {
-        super("Link to Account");
+        super("Link to Account", onSuccess);
         this.parentView = parentView;
         this.customerService = customerService;
         this.accountService = accountService;
@@ -40,9 +41,10 @@ public class LinkCustomerAccountDialog extends BaseActionDialog {
 
         setOkButtonText("Link");
         setWidth("500px");
+        setMaxWidth("95%");
 
         buildForm();
-        add(buildLayout());
+        addContent(buildLayout());
         loadAccounts();
     }
 
@@ -70,15 +72,16 @@ public class LinkCustomerAccountDialog extends BaseActionDialog {
                 availableAccounts = response.getBody();
                 accountCombo.setItems(availableAccounts);
                 if (availableAccounts.isEmpty()) {
-                    Notification.show("No accounts available to link.", 3000, Notification.Position.BOTTOM_END);
+                    Notification.show("No accounts available to link.", 3000, Notification.Position.BOTTOM_END)
+                            .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 }
             } else {
-                Notification.show("Failed to load accounts list.", 3000, Notification.Position.BOTTOM_END);
+                append("Failed to load accounts list.");
             }
         } catch (FeignException ex) {
-            Notification.show("Error loading accounts: " + extractErrorMessage(ex), 5000, Notification.Position.BOTTOM_END);
+            append("Error loading accounts: " + extractErrorMessage(ex));
         } catch (Exception e) {
-            Notification.show("Unexpected error: " + e.getMessage(), 5000, Notification.Position.BOTTOM_END);
+            append("Unexpected error: " + e.getMessage());
         } finally {
             parentView.showLoading(false);
         }

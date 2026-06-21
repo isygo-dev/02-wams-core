@@ -3,8 +3,7 @@ package eu.isygoit.ui.kms.views.secrets.digest.dialog;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.DigestConfigDto;
@@ -32,8 +31,8 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
     private IntegerField iterationsField;
     private IntegerField saltSizeField;
     private ComboBox<IEnumSaltGenerator.Types> saltGeneratorCombo;
-    private ComboBox<String> providerClassCombo;      // free-text ComboBox for class name
-    private ComboBox<String> providerNameCombo;        // free-text ComboBox for provider name
+    private ComboBox<String> providerClassCombo;
+    private ComboBox<String> providerNameCombo;
     private Checkbox invertSaltPositionCheckbox;
     private Checkbox invertPlainSaltCheckbox;
     private Checkbox lenientSaltCheckbox;
@@ -43,8 +42,7 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
     private TextField prefixField;
     private TextField suffixField;
 
-    // Map to quickly look up provider name from class path
-    private Map<String, String> classToProviderNameMap = new HashMap<>();
+    private final Map<String, String> classToProviderNameMap = new HashMap<>();
 
     public CreateDigestConfigDialog(DigestConfigService configService, Runnable onSuccess) {
         super("Create Digest Configuration", onSuccess);
@@ -52,7 +50,7 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
         setOkButtonText("Create");
         setWidth("700px");
         buildForm();
-        add(createFormLayout());
+        addContent(createFormLayout());
     }
 
     private void buildForm() {
@@ -60,31 +58,34 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
         codeField.setRequired(true);
         codeField.setRequiredIndicatorVisible(true);
         codeField.setPlaceholder("e.g., DIGEST_PROD");
+        codeField.setWidthFull();
 
         algorithmCombo = new ComboBox<>("Algorithm");
         algorithmCombo.setItems(IEnumAlgoDigestConfig.Types.values());
         algorithmCombo.setRequired(true);
+        algorithmCombo.setWidthFull();
 
         iterationsField = new IntegerField("Iterations");
         iterationsField.setValue(1);
         iterationsField.setMin(1);
         iterationsField.setRequired(true);
+        iterationsField.setWidthFull();
 
         saltSizeField = new IntegerField("Salt size (bytes)");
         saltSizeField.setValue(16);
         saltSizeField.setMin(0);
         saltSizeField.setHelperText("0 = no salt");
+        saltSizeField.setWidthFull();
 
         saltGeneratorCombo = new ComboBox<>("Salt generator");
         saltGeneratorCombo.setItems(IEnumSaltGenerator.Types.values());
         saltGeneratorCombo.setValue(IEnumSaltGenerator.Types.RandomSaltGenerator);
+        saltGeneratorCombo.setWidthFull();
 
-        // Build mapping from class path to provider name
         for (IEnumProviderClassName.Types type : IEnumProviderClassName.Types.values()) {
             classToProviderNameMap.put(type.getClassPath(), type.getProviderName());
         }
 
-        // Provider class – ComboBox with free-text input
         providerClassCombo = new ComboBox<>("Provider class");
         providerClassCombo.setAllowCustomValue(true);
         providerClassCombo.setItems(
@@ -94,7 +95,7 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
         );
         providerClassCombo.setPlaceholder("Select or type a provider class");
         providerClassCombo.setClearButtonVisible(true);
-        // Auto-populate provider name when a class is selected
+        providerClassCombo.setWidthFull();
         providerClassCombo.addValueChangeListener(e -> {
             String selectedClass = e.getValue();
             if (selectedClass != null && classToProviderNameMap.containsKey(selectedClass)) {
@@ -102,7 +103,6 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
             }
         });
 
-        // Provider name – ComboBox with free-text input
         providerNameCombo = new ComboBox<>("Provider name");
         providerNameCombo.setAllowCustomValue(true);
         providerNameCombo.setItems(
@@ -112,6 +112,7 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
         );
         providerNameCombo.setPlaceholder("Select or type a provider name (e.g., BC, SunJCE)");
         providerNameCombo.setClearButtonVisible(true);
+        providerNameCombo.setWidthFull();
 
         invertSaltPositionCheckbox = new Checkbox("Invert position of salt in message before digesting");
         invertPlainSaltCheckbox = new Checkbox("Invert position of plain salt in encryption results");
@@ -120,15 +121,20 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
         poolSizeField = new IntegerField("Pool size");
         poolSizeField.setValue(10);
         poolSizeField.setMin(1);
+        poolSizeField.setWidthFull();
 
         unicodeIgnoreCheckbox = new Checkbox("Ignore Unicode normalization");
 
         outputTypeCombo = new ComboBox<>("Output type");
         outputTypeCombo.setItems(IEnumStringOutputType.Types.values());
         outputTypeCombo.setValue(IEnumStringOutputType.Types.Base64);
+        outputTypeCombo.setWidthFull();
 
         prefixField = new TextField("Prefix");
+        prefixField.setWidthFull();
+
         suffixField = new TextField("Suffix");
+        suffixField.setWidthFull();
     }
 
     private FormLayout createFormLayout() {
@@ -171,8 +177,8 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
                 .iterations(iterations)
                 .saltSizeBytes(saltSize)
                 .saltGenerator(saltGeneratorCombo.getValue())
-                .providerClassName(providerClassCombo.getValue())      // free-text or selected
-                .providerName(providerNameCombo.getValue())            // free-text or selected
+                .providerClassName(providerClassCombo.getValue())
+                .providerName(providerNameCombo.getValue())
                 .invertPositionOfSaltInMessageBeforeDigesting(invertSaltPositionCheckbox.getValue())
                 .invertPositionOfPlainSaltInEncryptionResults(invertPlainSaltCheckbox.getValue())
                 .useLenientSaltSizeCheck(lenientSaltCheckbox.getValue())
@@ -186,29 +192,18 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
         try {
             ResponseEntity<DigestConfigDto> response = configService.create(dto);
             if (response.getStatusCode().is2xxSuccessful()) {
-                Notification.show("Configuration created successfully", 3000, Notification.Position.BOTTOM_END)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                append("Configuration created successfully");
                 return true;
             } else {
-                this.append("Creation failed: " + response.getStatusCode());
+                append("Creation failed: " + response.getStatusCode());
                 return false;
             }
         } catch (FeignException ex) {
-            handleFeignException(ex);
+            append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
             return false;
         } catch (Exception ex) {
-            handleGenericException(ex);
+            append("Creation failed: " + ex.getMessage());
             return false;
         }
-    }
-
-    private void handleFeignException(FeignException ex) {
-        String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-        this.append(errorMsg);
-    }
-
-    private void handleGenericException(Exception ex) {
-        String errorMsg = "Creation failed: " + ex.getMessage();
-        this.append(errorMsg);
     }
 }

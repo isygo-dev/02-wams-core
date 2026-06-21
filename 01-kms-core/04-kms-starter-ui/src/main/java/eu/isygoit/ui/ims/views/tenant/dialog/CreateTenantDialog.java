@@ -48,48 +48,56 @@ public class CreateTenantDialog extends BaseActionDialog {
                               TenantService tenantService,
                               TenantImageService tenantImageService,
                               Runnable onSuccess) {
-        super("Create Tenant");
+        super("Create Tenant", onSuccess);
         this.parentView = parentView;
         this.tenantService = tenantService;
         this.tenantImageService = tenantImageService;
         this.onSuccess = onSuccess;
 
         setOkButtonText("Create");
-        setWidth("90%");
-        getElement().getStyle().set("max-width", "700px");
+        setWidth("700px");
+        setMaxWidth("95%");
 
         buildForm();
-        add(buildLayout());
+        addContent(buildLayout());
     }
 
     private void buildForm() {
         nameField = new TextField("Name *");
         nameField.setRequiredIndicatorVisible(true);
         nameField.setPlaceholder("Acme Corporation");
+        nameField.setWidthFull();
 
         codeField = new TextField("Code (unique)");
         codeField.setPlaceholder("acme-corp");
+        codeField.setWidthFull();
 
         emailField = new EmailField("Email *");
         emailField.setRequiredIndicatorVisible(true);
         emailField.setPlaceholder("contact@acme.com");
+        emailField.setWidthFull();
 
         phoneField = new TextField("Phone *");
         phoneField.setRequiredIndicatorVisible(true);
         phoneField.setPlaceholder("+1 234 567 8900");
+        phoneField.setWidthFull();
 
         industryField = new TextField("Industry");
         industryField.setPlaceholder("Technology");
+        industryField.setWidthFull();
 
         urlField = new TextField("Website URL");
         urlField.setPlaceholder("https://acme.com");
+        urlField.setWidthFull();
 
         descriptionField = new TextArea("Description");
         descriptionField.setPlaceholder("Brief description of the tenant");
+        descriptionField.setWidthFull();
 
         adminStatusCombo = new ComboBox<>("Admin status");
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
         adminStatusCombo.setValue(IEnumEnabledBinaryStatus.Types.ENABLED);
+        adminStatusCombo.setWidthFull();
 
         // Image thumbnail + upload button
         imageThumbnail = new Image();

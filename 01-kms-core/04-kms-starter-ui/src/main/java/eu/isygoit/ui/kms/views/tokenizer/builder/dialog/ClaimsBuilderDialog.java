@@ -42,6 +42,7 @@ public class ClaimsBuilderDialog extends NoActionDialog {
         this.callback = callback;
 
         setWidth("750px");
+        setMaxWidth("95%");
         setResizable(true);
         setDraggable(true);
 
@@ -52,7 +53,7 @@ public class ClaimsBuilderDialog extends NoActionDialog {
         VerticalLayout mainLayout = new VerticalLayout();
         mainLayout.setSpacing(true);
         mainLayout.setPadding(true);
-        mainLayout.setMargin(false);
+        mainLayout.setWidthFull();
 
         // Header
         Span titleHint = new Span("Add extra claims to the JWT payload (standard claims like iss, sub, exp are generated automatically).");
@@ -65,19 +66,19 @@ public class ClaimsBuilderDialog extends NoActionDialog {
         rowsContainer.setPadding(false);
         rowsContainer.setWidthFull();
 
-        // Claim counter (compact)
+        // Claim counter
         claimCounter = new Span();
         claimCounter.addClassName(LumoUtility.FontSize.XSMALL);
         claimCounter.addClassName(LumoUtility.TextColor.TERTIARY);
         claimCounter.getStyle().set("margin-top", "0");
 
-        // Validation hint (init later but before loading)
+        // Validation hint
         validationHint = new Span();
         validationHint.addClassName(LumoUtility.FontSize.XSMALL);
         validationHint.addClassName(LumoUtility.TextColor.ERROR);
         validationHint.setVisible(false);
 
-        // Load existing claims (creates rows)
+        // Load existing claims
         loadExistingClaims();
 
         // Add row button
@@ -284,7 +285,7 @@ public class ClaimsBuilderDialog extends NoActionDialog {
             });
             removeButton.setTooltipText("Remove this claim");
 
-            // Error labels (compact, only appear when needed)
+            // Error labels
             keyErrorLabel = new Span();
             keyErrorLabel.addClassName(LumoUtility.FontSize.XSMALL);
             keyErrorLabel.addClassName(LumoUtility.TextColor.ERROR);

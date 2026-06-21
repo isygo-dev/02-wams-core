@@ -36,6 +36,7 @@ public class PolicyBuilderDialog extends BaseActionDialog {
 
         setOkButtonText("Apply Policy");
         setWidth("1000px");
+        setMaxWidth("95%");
         setResizable(true);
 
         buildContent();
@@ -52,6 +53,7 @@ public class PolicyBuilderDialog extends BaseActionDialog {
         VerticalLayout mainLayout = new VerticalLayout();
         mainLayout.setSpacing(true);
         mainLayout.setPadding(true);
+        mainLayout.setWidthFull();
 
         String version = policy.getVersion();
         versionField.setValue(version != null ? version : "2012-10-17");
@@ -135,8 +137,7 @@ public class PolicyBuilderDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (statements.isEmpty()) {
-            String errorMsg = "Policy must contain at least one statement";
-            append(errorMsg);
+            append("Policy must contain at least one statement");
             return false;
         }
 

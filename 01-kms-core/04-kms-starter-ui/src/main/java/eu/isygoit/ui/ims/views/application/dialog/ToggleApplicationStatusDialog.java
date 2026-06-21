@@ -1,5 +1,6 @@
 package eu.isygoit.ui.ims.views.application.dialog;
 
+import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.dto.data.ApplicationDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.remote.ims.ApplicationService;
@@ -25,7 +26,8 @@ public class ToggleApplicationStatusDialog extends PinBaseActionDialog {
                 currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED
                         ? "This will deactivate the application. Users will not see it in the store. Are you sure?"
                         : "This will reactivate the application and make it visible in the store. Are you sure?",
-                onSuccess
+                onSuccess,
+                false // requirePin = false (simple confirmation)
         );
         this.parentView = parentView;
         this.applicationService = applicationService;

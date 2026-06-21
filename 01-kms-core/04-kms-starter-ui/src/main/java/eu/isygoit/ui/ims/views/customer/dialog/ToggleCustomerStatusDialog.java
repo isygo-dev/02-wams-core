@@ -25,7 +25,8 @@ public class ToggleCustomerStatusDialog extends PinBaseActionDialog {
                 currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED
                         ? "This will deactivate the customer. Are you sure?"
                         : "This will reactivate the customer. Are you sure?",
-                onSuccess
+                onSuccess,
+                false // simple confirmation, no PIN
         );
         this.parentView = parentView;
         this.customerService = customerService;

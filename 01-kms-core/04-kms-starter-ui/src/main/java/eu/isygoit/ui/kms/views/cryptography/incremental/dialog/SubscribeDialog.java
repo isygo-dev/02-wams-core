@@ -1,8 +1,7 @@
 package eu.isygoit.ui.kms.views.cryptography.incremental.dialog;
 
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.common.NextCodeDto;
@@ -28,7 +27,7 @@ public class SubscribeDialog extends BaseActionDialog {
         setOkButtonText("Subscribe");
         setWidth("600px");
         buildForm();
-        add(createFormLayout());
+        addContent(createFormLayout());
     }
 
     private void buildForm() {
@@ -69,7 +68,12 @@ public class SubscribeDialog extends BaseActionDialog {
         startValueField.setHelperText("Initial numeric value");
     }
 
-    private FormLayout createFormLayout() {
+    private VerticalLayout createFormLayout() {
+        VerticalLayout layout = new VerticalLayout();
+        layout.setPadding(false);
+        layout.setSpacing(true);
+        layout.setWidthFull();
+
         FormLayout form = new FormLayout();
         form.add(entityField, attributeField,
                 prefixField, suffixField,
@@ -83,7 +87,10 @@ public class SubscribeDialog extends BaseActionDialog {
         form.setColspan(valueLengthField, 1);
         form.setColspan(incrementField, 1);
         form.setColspan(startValueField, 2);
-        return form;
+        form.setWidthFull();
+
+        layout.add(form);
+        return layout;
     }
 
     @Override
@@ -109,18 +116,14 @@ public class SubscribeDialog extends BaseActionDialog {
 
             ResponseEntity<NextCodeDto> response = nextCodeService.create(dto);
             if (response.getStatusCode().is2xxSuccessful()) {
-                Notification.show("Subscription successful", 3000, Notification.Position.BOTTOM_END)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-
+                append("Subscription successful");
                 return true;
             } else {
-                String errorMsg = "Subscription failed: " + response.getStatusCode();
-                append(errorMsg);
+                append("Subscription failed: " + response.getStatusCode());
                 return false;
             }
         } catch (Exception e) {
-            String errorMsg = "Error: " + e.getMessage();
-            append(errorMsg);
+            append("Error: " + e.getMessage());
             return false;
         }
     }

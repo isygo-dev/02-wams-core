@@ -1,6 +1,7 @@
 package eu.isygoit.ui.common.dialog;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -22,11 +23,12 @@ public class ImageCropperDialog extends Dialog {
         setMaxWidth("500px");
         setDraggable(false);
         setResizable(false);
+        setCloseOnEsc(true);
+        setCloseOnOutsideClick(true);
 
         imageCropper = new ImageCropper();
         imageCropper.setWidthFull();
 
-        // Initially disable Apply – user must crop first
         applyButton = new Button("Apply", e -> {
             MultipartFile cropped = imageCropper.getValue();
             if (cropped != null && onImageCropped != null) {
@@ -34,23 +36,25 @@ public class ImageCropperDialog extends Dialog {
             }
             close();
         });
-        applyButton.addClassName("primary");
+        applyButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         applyButton.setEnabled(false);
 
-        // Enable Apply only when a crop has been performed (value is non-null)
         imageCropper.addValueChangeListener(event -> {
             applyButton.setEnabled(event.getValue() != null);
         });
 
         Button cancelButton = new Button("Cancel", e -> close());
+        cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
-        HorizontalLayout buttons = new HorizontalLayout(cancelButton, applyButton);
-        buttons.setSpacing(true);
+        HorizontalLayout buttonLayout = new HorizontalLayout(cancelButton, applyButton);
+        buttonLayout.setSpacing(true);
+        buttonLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+        buttonLayout.setWidthFull();
 
-        VerticalLayout layout = new VerticalLayout(imageCropper, buttons);
+        VerticalLayout layout = new VerticalLayout(imageCropper, buttonLayout);
         layout.setPadding(true);
         layout.setSpacing(true);
-        layout.setAlignItems(FlexComponent.Alignment.CENTER);
+        layout.setWidthFull();
 
         Div content = new Div(layout);
         content.getStyle().set("overflow", "auto");

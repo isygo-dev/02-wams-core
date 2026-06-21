@@ -5,54 +5,37 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Base dialog that optionally provides a 9‑digit confirmation code, a PIN input field,
- * automatic validation, and a custom warning message.
- * <p>
- * Subclasses must implement {@link #onOk()} to perform the actual action.
+ * Base dialog that adds a 9‑digit PIN confirmation for destructive actions.
  */
 public abstract class PinBaseActionDialog extends BaseActionDialog {
 
     protected final String confirmationCode;
-    private final String warning = "⚠️ ";
     private final boolean requirePin;
     protected TextField pinField;
 
-    /**
-     * Constructs a new PIN confirmation dialog.
-     *
-     * @param title          dialog header title
-     * @param warningMessage the warning text to display (e.g., "This action is irreversible...")
-     * @param onSuccess      callback executed after successful {@link #onOk()}
-     * @param requirePin     if true, a 9‑digit code is required; if false, the dialog behaves like a simple BaseActionDialog
-     */
     public PinBaseActionDialog(String title, String warningMessage, Runnable onSuccess, boolean requirePin) {
         super(title, onSuccess);
         this.requirePin = requirePin;
         if (requirePin) {
             this.confirmationCode = generateConfirmationCode();
-            this.enableOkButton(false);
-            buildContent(this.warning + warningMessage);
+            enableOkButton(false);
+            buildContentWithPin(warningMessage);
         } else {
             this.confirmationCode = null;
             buildContentSimple(warningMessage);
         }
     }
 
-    /**
-     * Legacy constructor – defaults to requirePin = true.
-     */
     public PinBaseActionDialog(String title, String warningMessage, Runnable onSuccess) {
         this(title, warningMessage, onSuccess, true);
     }
 
-    /**
-     * Builds the dialog content with PIN challenge.
-     */
-    private void buildContent(String warningMessage) {
+    private void buildContentWithPin(String warningMessage) {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
         layout.setPadding(true);
@@ -66,32 +49,28 @@ public abstract class PinBaseActionDialog extends BaseActionDialog {
         layout.add(pinField);
         setupPinValidation();
 
-        add(layout);
+        addContent(layout);
     }
 
-    /**
-     * Builds simple content without PIN (just the warning).
-     */
     private void buildContentSimple(String warningMessage) {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
         layout.setPadding(true);
         layout.add(new Span(warningMessage));
-        add(layout);
+        addContent(layout);
     }
 
     protected Div createCodeDisplay(String code) {
         Span codeSpan = new Span(code);
+        codeSpan.addClassName(LumoUtility.FontWeight.BOLD);
         codeSpan.getStyle()
-                .set("font-weight", "bold")
                 .set("font-size", "28px")
                 .set("font-family", "monospace")
-                .set("background-color", "#f0f0f0")
+                .set("background-color", "var(--lumo-contrast-5pct)")
                 .set("padding", "12px 20px")
                 .set("border-radius", "8px")
                 .set("text-align", "center")
                 .set("letter-spacing", "4px");
-
         Div codeDiv = new Div(codeSpan);
         codeDiv.getStyle().set("text-align", "center");
         return codeDiv;
@@ -122,13 +101,9 @@ public abstract class PinBaseActionDialog extends BaseActionDialog {
         return String.valueOf(code);
     }
 
-    /**
-     * Override this to perform additional validation if needed.
-     * The base implementation does nothing.
-     */
     protected boolean validatePin() {
         if (!requirePin) return true;
-        String enteredPin = pinField.getValue();
-        return enteredPin != null && enteredPin.equals(confirmationCode);
+        String entered = pinField.getValue();
+        return entered != null && entered.equals(confirmationCode);
     }
 }

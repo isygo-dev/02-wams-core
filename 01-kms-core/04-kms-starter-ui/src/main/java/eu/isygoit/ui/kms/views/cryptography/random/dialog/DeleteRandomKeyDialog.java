@@ -20,8 +20,14 @@ public class DeleteRandomKeyDialog extends PinBaseActionDialog {
 
     @Override
     protected boolean onOk() {
+        if (!validatePin()) {
+            append("Invalid confirmation code");
+            return false;
+        }
+
         try {
             keyService.deleteRandomKey(keyName);
+            append("Key deleted");
             return true;
         } catch (Exception e) {
             append("Delete failed: " + e.getMessage());

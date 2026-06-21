@@ -10,6 +10,7 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -71,7 +72,7 @@ public class UpdateRoleDialog extends BaseActionDialog {
                             ApplicationService applicationService,
                             RoleInfoDto role,
                             Runnable onSuccess) {
-        super("Edit Role");
+        super("Edit Role", onSuccess);
         this.parentView = parentView;
         this.roleService = roleService;
         this.applicationService = applicationService;
@@ -80,7 +81,7 @@ public class UpdateRoleDialog extends BaseActionDialog {
 
         setOkButtonText("Save");
         setWidth("95%");
-        getElement().getStyle().set("max-width", "1100px");
+        setMaxWidth("1100px");
         setHeight("85vh");
         setResizable(true);
         setDraggable(true);
@@ -89,7 +90,7 @@ public class UpdateRoleDialog extends BaseActionDialog {
         buildApplicationsGrid();
         buildPermissionsGrid();
         buildTabs();
-        add(createMainLayout());
+        addContent(createMainLayout());
         loadDataAndPopulate();
 
         injectResponsiveStyles();
@@ -215,7 +216,6 @@ public class UpdateRoleDialog extends BaseActionDialog {
 
     private void refreshPermissionsTree() {
         TreeData<Object> treeData = new TreeData<>();
-        // Group by service name, preserve order
         Map<String, List<RolePermissionDto>> grouped = allPermissions.stream()
                 .collect(Collectors.groupingBy(RolePermissionDto::getServiceName,
                         LinkedHashMap::new, Collectors.toList()));
@@ -287,7 +287,8 @@ public class UpdateRoleDialog extends BaseActionDialog {
             // Load all applications
             allApplications = fetchAllApplications();
             if (allApplications.isEmpty()) {
-                Notification.show("No applications found.", 5000, Notification.Position.BOTTOM_END);
+                Notification.show("No applications found.", 5000, Notification.Position.BOTTOM_END)
+                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 applicationsGrid.setItems(Collections.emptyList());
                 appsCountLabel.setText("0 applications found");
             } else {
@@ -352,7 +353,8 @@ public class UpdateRoleDialog extends BaseActionDialog {
         try {
             allApplications = fetchAllApplications();
             if (allApplications.isEmpty()) {
-                Notification.show("No applications found.", 5000, Notification.Position.BOTTOM_END);
+                Notification.show("No applications found.", 5000, Notification.Position.BOTTOM_END)
+                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 applicationsGrid.setItems(Collections.emptyList());
                 appsCountLabel.setText("0 applications found");
             } else {
@@ -360,7 +362,8 @@ public class UpdateRoleDialog extends BaseActionDialog {
             }
         } catch (Exception e) {
             log.error("Failed to refresh applications", e);
-            Notification.show("Error refreshing applications: " + e.getMessage(), 5000, Notification.Position.BOTTOM_END);
+            Notification.show("Error refreshing applications: " + e.getMessage(), 5000, Notification.Position.BOTTOM_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             parentView.showLoading(false);
         }

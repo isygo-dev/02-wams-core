@@ -23,7 +23,6 @@ public class UpdateAliasDialog extends BaseActionDialog {
     private final AliasesView parentView;
     private final KmsApiService kmsApiService;
 
-
     private final String aliasName;
     private final String currentTargetKeyId;
     private ComboBox<String> targetKeyCombo;
@@ -50,8 +49,7 @@ public class UpdateAliasDialog extends BaseActionDialog {
     protected boolean onOk() {
         String newTargetId = targetKeyCombo.getValue();
         if (newTargetId == null || newTargetId.isBlank()) {
-            String errorMsg = "Please select a target key";
-            this.append(errorMsg);
+            append("Please select a target key");
             return false;
         }
 
@@ -63,21 +61,16 @@ public class UpdateAliasDialog extends BaseActionDialog {
                     .build();
             ResponseEntity<UpdateAliasResponse> response = kmsApiService.updateAlias(aliasName, request);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                String errorMsg = "Update failed: " + response.getStatusCode();
-                this.append(errorMsg);
+                append("Update failed: " + response.getStatusCode());
                 return false;
             }
 
-            Notification.show("Alias reassigned", 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-
+            append("Alias reassigned");
             return true;
         } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            this.append(errorMsg);
+            append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            String errorMsg = "Failed operation: " + e.getMessage();
-            this.append(errorMsg);
+            append("Failed operation: " + e.getMessage());
         } finally {
             parentView.showLoading(false);
         }

@@ -33,6 +33,7 @@ public class ApplicationDetailsDialog extends NoActionDialog {
         this.applicationId = applicationId;
 
         setWidth("700px");
+        setMaxWidth("95%");
         setModal(true);
         setDraggable(true);
         setResizable(true);

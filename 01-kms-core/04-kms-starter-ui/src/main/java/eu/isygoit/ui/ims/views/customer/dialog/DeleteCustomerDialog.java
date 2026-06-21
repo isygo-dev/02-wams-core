@@ -1,5 +1,6 @@
 package eu.isygoit.ui.ims.views.customer.dialog;
 
+import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.remote.ims.CustomerService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.customer.CustomerManagementView;
@@ -23,11 +24,17 @@ public class DeleteCustomerDialog extends PinBaseActionDialog {
         this.customerId = customerId;
 
         setOkButtonText("Delete permanently");
+        addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
 
     @Override
     protected boolean onOk() {
+        if (!validatePin()) {
+            append("Invalid confirmation code");
+            return false;
+        }
+
         parentView.showLoading(true);
         try {
             customerService.delete(customerId);

@@ -37,6 +37,7 @@ public class CreateGrantDialog extends BaseActionDialog {
         this.kmsApiService = kmsApiService;
         this.objectMapper = objectMapper;
         setOkButtonText("Create");
+        setWidth("500px");
         buildForm();
     }
 
@@ -78,7 +79,6 @@ public class CreateGrantDialog extends BaseActionDialog {
 
     @Override
     protected boolean onOk() {
-        // Manual validation with append()
         String grantee = granteeField.getValue();
         if (!StringUtils.hasText(grantee)) {
             append("Grantee principal is required");
@@ -105,8 +105,7 @@ public class CreateGrantDialog extends BaseActionDialog {
         KmsDtos.CreateGrantRequest.GrantConstraints constraints = null;
         if (StringUtils.hasText(constraintsText)) {
             try {
-                Map<String, Object> constraintsMap = objectMapper.readValue(constraintsText, new TypeReference<>() {
-                });
+                Map<String, Object> constraintsMap = objectMapper.readValue(constraintsText, new TypeReference<>() {});
                 constraints = KmsDtos.CreateGrantRequest.GrantConstraints.builder()
                         .encryptionContextSubset((Map<String, String>) constraintsMap.get("encryptionContextSubset"))
                         .encryptionContextEquals((Map<String, String>) constraintsMap.get("encryptionContextEquals"))
@@ -134,21 +133,16 @@ public class CreateGrantDialog extends BaseActionDialog {
                     .build();
             ResponseEntity<KmsDtos.CreateGrantResponse> response = kmsApiService.createGrant(keyId, request);
             if (response.getStatusCode().is2xxSuccessful()) {
-
-                Notification.show("Grant created successfully", 6000, Notification.Position.BOTTOM_END)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-
+                append("Grant created successfully");
                 return true;
             } else {
                 append("Creation failed: " + response.getStatusCode());
                 return false;
             }
         } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            this.append(errorMsg);
+            append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            String errorMsg = "Failed operation: " + e.getMessage();
-            this.append(errorMsg);
+            append("Failed operation: " + e.getMessage());
         }
 
         return false;

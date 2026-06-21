@@ -48,49 +48,57 @@ public class CreateApplicationDialog extends BaseActionDialog {
                                    ApplicationService applicationService,
                                    ApplicationImageService applicationImageService,
                                    Runnable onSuccess) {
-        super("Create Application");
+        super("Create Application", onSuccess);
         this.parentView = parentView;
         this.applicationService = applicationService;
         this.applicationImageService = applicationImageService;
         this.onSuccess = onSuccess;
 
         setOkButtonText("Create");
-        setWidth("90%");
-        getElement().getStyle().set("max-width", "700px");
+        setWidth("700px");
+        setMaxWidth("95%");
 
         buildForm();
-        add(buildLayout());
+        addContent(buildLayout());
     }
 
     private void buildForm() {
         nameField = new TextField("Name *");
         nameField.setRequiredIndicatorVisible(true);
         nameField.setPlaceholder("Acme App");
+        nameField.setWidthFull();
 
         titleField = new TextField("Title *");
         titleField.setRequiredIndicatorVisible(true);
         titleField.setPlaceholder("Acme Application");
+        titleField.setWidthFull();
 
         codeField = new TextField("Code (unique)");
         codeField.setPlaceholder("acme-app");
+        codeField.setWidthFull();
 
         categoryField = new TextField("Category");
         categoryField.setValue("PRM Store");
         categoryField.setPlaceholder("PRM Store");
+        categoryField.setWidthFull();
 
         urlField = new TextField("URL *");
         urlField.setRequiredIndicatorVisible(true);
         urlField.setPlaceholder("https://acme.com/app");
+        urlField.setWidthFull();
 
         orderField = new IntegerField("Display Order");
         orderField.setPlaceholder("0");
+        orderField.setWidthFull();
 
         descriptionField = new TextArea("Description");
         descriptionField.setPlaceholder("Brief description of the application");
+        descriptionField.setWidthFull();
 
         adminStatusCombo = new ComboBox<>("Admin status");
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
         adminStatusCombo.setValue(IEnumEnabledBinaryStatus.Types.ENABLED);
+        adminStatusCombo.setWidthFull();
 
         imageThumbnail = new Image();
         imageThumbnail.setWidth("60px");
