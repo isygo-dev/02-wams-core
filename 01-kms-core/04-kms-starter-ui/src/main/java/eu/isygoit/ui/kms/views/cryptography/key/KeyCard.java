@@ -17,6 +17,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
 import eu.isygoit.dto.KmsDtos.ListKeyVersionsResponse;
 import eu.isygoit.dto.KmsDtos.ListResourceTagsResponse;
+import eu.isygoit.enums.IEnumKeyOrigin;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.remote.kms.KmsApiService;
@@ -66,6 +67,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         this.metadata = metadata;
         updateDerivedFields();
 
+        // Setup body container
         bodyContainer.setPadding(false);
         bodyContainer.setSpacing(true);
         bodyContainer.setWidthFull();
@@ -75,6 +77,8 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
 
         initCard();
     }
+
+    // ─── Public accessors ─────────────────────────────────────────────────────
 
     public String getKeyId() {
         return keyId;
@@ -98,6 +102,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
                     this.metadata = response.getBody().getKeyMetadata();
                     updateDerivedFields();
 
+                    // Update header
                     titleSpan.setText(aliasOrId);
                     titleSpan.getElement().setAttribute("title", aliasOrId);
 
@@ -112,11 +117,11 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
                     updateRotationButton();
                     updateDeletionWarning();
 
-                    // Rebuild the body (clear container and repopulate)
+                    // Rebuild body
                     bodyContainer.removeAll();
                     buildBodyRows();
 
-                    // Rebuild the context menu and force re‑attach
+                    // Rebuild context menu and force re‑attach
                     attachContextMenu(moreBtn);
                     moreBtn.setVisible(false);
                     moreBtn.setVisible(true);
@@ -186,37 +191,50 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
     protected void buildBodyRows() {
         bodyContainer.removeAll();
 
+        // Description (with icon)
         bodyContainer.add(createIconRow(VaadinIcon.FILE_TEXT, "Description",
                 metadata != null && metadata.getDescription() != null ? metadata.getDescription() : "No description"));
 
-        String keySpec = metadata != null && metadata.getKeySpec() != null ? metadata.getKeySpec().name() : "N/A";
-        String keyUsage = metadata != null && metadata.getKeyUsage() != null ? metadata.getKeyUsage().name() : "N/A";
-        bodyContainer.add(createIconRow(VaadinIcon.COG, "Key spec", keySpec));
-        bodyContainer.add(createIconRow(VaadinIcon.SHIELD, "Key usage", keyUsage));
+        // Key spec & usage
+        bodyContainer.add(createIconRow(VaadinIcon.COG, "Key spec",
+                metadata != null && metadata.getKeySpec() != null ? metadata.getKeySpec().name() : "N/A"));
+        bodyContainer.add(createIconRow(VaadinIcon.SHIELD, "Key usage",
+                metadata != null && metadata.getKeyUsage() != null ? metadata.getKeyUsage().name() : "N/A"));
 
+        // Created & region
         String created = metadata != null && metadata.getCreateDate() != null
                 ? DateHelper.formatToHumanReadable(metadata.getCreateDate()) : "Unknown";
-        String region = metadata != null && Boolean.TRUE.equals(metadata.getMultiRegion())
-                ? "Multi-region" : "Single-region";
         bodyContainer.add(createIconRow(VaadinIcon.CALENDAR, "Created", created));
-        bodyContainer.add(createIconRow(VaadinIcon.GLOBE, "Region", region));
+        bodyContainer.add(createIconRow(VaadinIcon.GLOBE, "Region",
+                metadata != null && Boolean.TRUE.equals(metadata.getMultiRegion()) ? "Multi-region" : "Single-region"));
 
+        // Key ID with copy
         bodyContainer.add(createIconRowWithCopy(VaadinIcon.KEY, "Key ID", keyId, keyId));
 
-        String origin = metadata != null && metadata.getOrigin() != null ? metadata.getOrigin().name() : "N/A";
-        String rotation = metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled())
-                ? "ON (" + metadata.getRotationPeriodInDays() + " days)" : "OFF";
-        bodyContainer.add(createIconRow(VaadinIcon.CLOUD, "Origin", origin));
-        bodyContainer.add(createIconRow(VaadinIcon.REFRESH, "Rotation", rotation));
+        // Origin with color coding
+        String originLabel = metadata != null && metadata.getOrigin() != null ? metadata.getOrigin().name() : "N/A";
+        String originColor = getOriginColor(originLabel);
+        bodyContainer.add(createIconRowWithColor(VaadinIcon.CLOUD, "Origin", originLabel, originColor));
 
+        // Rotation with color coding
+        String rotationLabel = metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled())
+                ? "ON (" + metadata.getRotationPeriodInDays() + " days)" : "OFF";
+        String rotationColor = Boolean.TRUE.equals(metadata.getRotationEnabled()) ? "var(--lumo-success-color)" : "var(--lumo-tertiary-text-color)";
+        bodyContainer.add(createIconRowWithColor(VaadinIcon.REFRESH, "Rotation", rotationLabel, rotationColor));
+
+        // Deletion warning
         createDeletionWarningSpan();
         updateDeletionWarning();
         bodyContainer.add(deletionWarningSpan);
     }
 
-    // ─── Helper row builders ─────────────────────────────────────────────────
+    // ─── Helper row builders with color support ─────────────────────────────
 
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
+        return createIconRowWithColor(icon, label, value, "var(--lumo-primary-text-color)");
+    }
+
+    private HorizontalLayout createIconRowWithColor(VaadinIcon icon, String label, String value, String color) {
         HorizontalLayout row = new HorizontalLayout();
         row.setAlignItems(FlexComponent.Alignment.CENTER);
         row.setSpacing(true);
@@ -226,7 +244,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("16px");
-        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        iconComponent.getStyle().set("color", "var(--lumo-primary-color)");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
@@ -238,6 +256,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         valueSpan.getStyle().set("font-family", "monospace");
         valueSpan.getStyle().set("word-break", "break-all");
         valueSpan.getStyle().set("flex", "1");
+        valueSpan.getStyle().set("color", color);
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -250,6 +269,17 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         copyBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
         row.add(copyBtn);
         return row;
+    }
+
+    private String getOriginColor(String origin) {
+        if (origin == null) return "var(--lumo-tertiary-text-color)";
+        if (origin.equalsIgnoreCase(IEnumKeyOrigin.Types.WAMS_KMS.name())) {
+            return "var(--lumo-primary-color)";
+        }
+        if (origin.equalsIgnoreCase(IEnumKeyOrigin.Types.EXTERNAL.name())) {
+            return "var(--lumo-warning-color)";
+        }
+        return "var(--lumo-tertiary-text-color)";
     }
 
     // ─── Internal update helpers ─────────────────────────────────────────────
@@ -272,10 +302,6 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         versionSpan.getElement().setAttribute("title", "Current key version: " + full);
     }
 
-    /**
-     * Updates the rotation button's appearance, tooltip, and enabled state.
-     * The button is only enabled when the key is ENABLED and not pending deletion.
-     */
     private void updateRotationButton() {
         boolean isEnabled = metadata != null && metadata.getKeyStatus() == IEnumKeyStatus.Types.ENABLED;
         boolean isPending = "PENDING_DELETION".equalsIgnoreCase(statusText);
@@ -314,7 +340,9 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         if (isPending) {
             String warningText = buildDeletionWarning();
             deletionWarningSpan.removeAll();
-            deletionWarningSpan.add(VaadinIcon.EXCLAMATION_CIRCLE.create());
+            Icon warningIcon = VaadinIcon.EXCLAMATION_CIRCLE.create();
+            warningIcon.setColor("var(--lumo-error-color)");
+            deletionWarningSpan.add(warningIcon);
             deletionWarningSpan.add(new Span(warningText));
             deletionWarningSpan.setVisible(true);
         } else {
@@ -334,7 +362,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         return "Key is scheduled for deletion";
     }
 
-    // ─── Context menu – shows all actions, disables unavailable ones ────────
+    // ─── Context menu ────────────────────────────────────────────────────────
 
     private void attachContextMenu(Button button) {
         if (currentContextMenu != null) {
@@ -356,7 +384,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         boolean isPending = "PENDING_DELETION".equalsIgnoreCase(statusText);
         boolean hasRotation = metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled());
 
-        // ── 1. Toggle status (Enable/Disable) ────────────────────────────────
+        // ── 1. Toggle status ──────────────────────────────────────────────────
         String toggleLabel = isEnabled ? "Disable key" : "Enable key";
         VaadinIcon toggleIcon = isEnabled ? VaadinIcon.UNLOCK : VaadinIcon.LOCK;
         MenuItem toggleItem = createMenuItem(contextMenu, toggleIcon, toggleLabel);
@@ -368,7 +396,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         scheduleItem.setEnabled(!isPending);
         scheduleItem.addClickListener(e -> scheduleDeletion());
 
-        // ── 3. Rotate immediately (only if key is enabled AND rotation is ON) ─
+        // ── 3. Rotate immediately ─────────────────────────────────────────────
         MenuItem rotateItem = createMenuItem(contextMenu, VaadinIcon.REFRESH, "Rotate immediately");
         rotateItem.setEnabled(isEnabled && hasRotation);
         rotateItem.addClickListener(e ->
@@ -393,7 +421,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         return menu.addItem(layout);
     }
 
-    // ─── Action methods (all call refresh on success) ──────────────────────
+    // ─── Action methods ──────────────────────────────────────────────────────
 
     private void updateKey() {
         List<ListResourceTagsResponse.Tag> tags = fetchKeyTags();
@@ -438,7 +466,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
     private void confirmPermanentDelete() {
         Runnable onConfirm = () -> getUI().ifPresent(ui -> ui.access(() ->
                 getParent().ifPresent(p -> {
-                    if (p instanceof com.vaadin.flow.component.orderedlayout.VerticalLayout vl) vl.remove(this);
+                    if (p instanceof VerticalLayout vl) vl.remove(this);
                 })
         ));
         new PermanentDeleteKeyDialog(parentView, objectService, keyId, onConfirm).open();
@@ -484,6 +512,19 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
                 }
                 .key-card .meta-row:last-child {
                     border-bottom: none;
+                }
+                .key-card .meta-row .meta-value {
+                    font-weight: 500;
+                }
+                .key-card .deletion-warning {
+                    background: var(--lumo-error-color-10pct);
+                    color: var(--lumo-error-text-color);
+                    padding: var(--lumo-space-s);
+                    border-radius: var(--lumo-border-radius-m);
+                    display: flex;
+                    align-items: center;
+                    gap: var(--lumo-space-s);
+                    margin-top: var(--lumo-space-xs);
                 }
                 @media (max-width: 640px) {
                     .key-card .meta-row {
