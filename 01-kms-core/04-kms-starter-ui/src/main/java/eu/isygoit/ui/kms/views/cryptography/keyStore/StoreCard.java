@@ -4,9 +4,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -14,14 +18,18 @@ import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.kms.views.cryptography.keyStore.dialog.DeleteCustomKeyStoreDialog;
+import eu.isygoit.ui.kms.views.cryptography.keyStore.dialog.UpdateCustomKeyStoreDialog;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
-class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
+public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -34,10 +42,12 @@ class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
     private final String creationDate;
     private final String errorCode;
 
-    StoreCard(CustomKeyStoresView customKeyStoresView,
-              KmsApiService kmsApiService,
-              KmsDtos.DescribeCustomKeyStoreResponse.CustomKeyStore store) {
-        super(customKeyStoresView, kmsApiService);
+    // ── Constructor ───────────────────────────────────────────────────────────
+
+    public StoreCard(CustomKeyStoresView parentView,
+                     KmsApiService kmsApiService,
+                     KmsDtos.DescribeCustomKeyStoreResponse.CustomKeyStore store) {
+        super(parentView, kmsApiService);
         this.store = store;
         this.storeId = store.getCustomKeyStoreId();
         this.storeName = store.getName();
@@ -49,6 +59,8 @@ class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
         this.errorCode = store.getConnectionError();
         initCard();
     }
+
+    // ── Overrides ─────────────────────────────────────────────────────────────
 
     @Override
     protected String cardCssClassName() {
@@ -66,6 +78,7 @@ class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
         Span typeChip = buildStatusChip(storeType, ChipColor.INFO);
         String statusDisplay = connectionState != null ? connectionState : storeStatus;
         Span statusChip = buildStatusChip(statusDisplay, storeStatus);
+
         left.add(titleSpan, typeChip, statusChip);
         return left;
     }
@@ -74,17 +87,11 @@ class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
     protected List<Button> buildActionButtons() {
         Button connectBtn = createIconButton(VaadinIcon.CONNECT, "Connect");
         connectBtn.addClickListener(e -> confirmConnect());
-        if ("CONNECTED".equalsIgnoreCase(connectionState)) {
-            connectBtn.setEnabled(false);
-            connectBtn.setTooltipText("Already connected");
-        }
+        connectBtn.setEnabled(!"CONNECTED".equalsIgnoreCase(connectionState));
 
         Button disconnectBtn = createIconButton(VaadinIcon.OUT, "Disconnect");
         disconnectBtn.addClickListener(e -> confirmDisconnect());
-        if (!"CONNECTED".equalsIgnoreCase(connectionState)) {
-            disconnectBtn.setEnabled(false);
-            disconnectBtn.setTooltipText("Not connected");
-        }
+        disconnectBtn.setEnabled("CONNECTED".equalsIgnoreCase(connectionState));
 
         Button updateBtn = createIconButton(VaadinIcon.EDIT, "Update store");
         updateBtn.addClickListener(e -> updateCustomKeyStore());
@@ -97,23 +104,28 @@ class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
 
     @Override
     protected void buildBodyRows() {
-        add(createIconRow(VaadinIcon.CALENDAR, "Created", creationDate != null ? DateHelper.formatToHumanReadable(store.getCreateDate()) : "-"));
+        // Created
+        add(createIconRow(VaadinIcon.CALENDAR, "Created", creationDate));
+
+        // Updated if present
         if (store.getUpdateDate() != null) {
             add(createIconRow(VaadinIcon.REFRESH, "Updated", DateHelper.formatToHumanReadable(store.getUpdateDate())));
         }
 
+        // CloudHSM or XKS details
         if (StringUtils.hasText(store.getCloudHsmClusterId())) {
             add(createIconRow(VaadinIcon.CLOUD, "CloudHSM cluster", store.getCloudHsmClusterId()));
         } else if (StringUtils.hasText(store.getXksProxyUriEndpoint())) {
             add(createIconRow(VaadinIcon.LINK, "XKS endpoint", store.getXksProxyUriEndpoint()));
             if (StringUtils.hasText(store.getXksProxyUriPath())) {
-                add(createIconRow(VaadinIcon.ROAD, "XKS path", store.getXksProxyUriPath()));   // ROAD instead of PATH
+                add(createIconRow(VaadinIcon.ROAD, "XKS path", store.getXksProxyUriPath()));
             }
             if (StringUtils.hasText(store.getXksProxyConnectivity())) {
                 add(createIconRow(VaadinIcon.CONNECT, "Connectivity", store.getXksProxyConnectivity()));
             }
         }
 
+        // Health, max keys, last connections
         if (StringUtils.hasText(store.getHealthStatus())) {
             add(createIconRow(VaadinIcon.HEART, "Health", store.getHealthStatus()));
         }
@@ -126,22 +138,29 @@ class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
         if (store.getLastConnectionAttempt() != null) {
             add(createIconRow(VaadinIcon.CLOCK, "Last attempt", DateHelper.formatToHumanReadable(store.getLastConnectionAttempt())));
         }
+
+        // Connection settings
         if (store.getConnectionTimeoutSeconds() != null) {
             add(createIconRow(VaadinIcon.TIMER, "Timeout", store.getConnectionTimeoutSeconds() + "s"));
         }
         if (store.getHealthCheckIntervalSeconds() != null) {
-            add(createIconRow(VaadinIcon.SPARK_LINE, "Health interval", store.getHealthCheckIntervalSeconds() + "s")); // SPARK_LINE instead of PULSE
+            add(createIconRow(VaadinIcon.SPARK_LINE, "Health interval", store.getHealthCheckIntervalSeconds() + "s"));
         }
         if (store.getAutoReconnect() != null) {
             add(createIconRow(VaadinIcon.REFRESH, "Auto-reconnect", store.getAutoReconnect() ? "ON" : "OFF"));
         }
+
+        // Error code
         if (StringUtils.hasText(errorCode)) {
             add(createIconRow(VaadinIcon.EXCLAMATION_CIRCLE, "Error", errorCode));
         }
 
-        addKeyValueChips("📝 Metadata", store.getMetadata());
-        addKeyValueChips("🏷️ Tags", store.getTags());
+        // Metadata and tags (as key-value chips)
+        addKeyValueRow("📝 Metadata", store.getMetadata());
+        addKeyValueRow("🏷️ Tags", store.getTags());
     }
+
+    // ── Helper row builders ──────────────────────────────────────────────────
 
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
         HorizontalLayout row = new HorizontalLayout();
@@ -171,11 +190,10 @@ class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
         return row;
     }
 
-    private void addKeyValueChips(String label, String json) {
+    private void addKeyValueRow(String label, String json) {
         if (!StringUtils.hasText(json)) return;
         try {
-            Map<String, String> map = MAPPER.readValue(json, new TypeReference<>() {
-            });
+            Map<String, String> map = MAPPER.readValue(json, new TypeReference<>() {});
             if (map == null || map.isEmpty()) return;
 
             HorizontalLayout row = new HorizontalLayout();
@@ -212,22 +230,90 @@ class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
             row.expand(chips);
             add(row);
         } catch (Exception e) {
-            // ignore
+            log.warn("Failed to parse {} JSON: {}", label, json, e);
         }
     }
 
-    // Actions (unchanged)
-    private void confirmConnect() { /* same as original */ }
+    // ── Action handlers ──────────────────────────────────────────────────────
 
-    private void confirmDisconnect() { /* same */ }
+    private void confirmConnect() {
+        ConfirmDialog dlg = new ConfirmDialog();
+        dlg.setHeader("Connect to store");
+        dlg.setText("Are you sure you want to connect to the custom key store '" + storeName + "'?");
+        dlg.setCancelable(true);
+        dlg.setConfirmText("Connect");
+        dlg.setConfirmButtonTheme(ButtonVariant.LUMO_SUCCESS.getVariantName());
+        dlg.addConfirmListener(e -> connectStore());
+        dlg.open();
+    }
 
-    private void connectStore() { /* same */ }
+    private void confirmDisconnect() {
+        ConfirmDialog dlg = new ConfirmDialog();
+        dlg.setHeader("Disconnect from store");
+        dlg.setText("Disconnecting may make keys hosted here temporarily unusable. Are you sure?");
+        dlg.setCancelable(true);
+        dlg.setConfirmText("Disconnect");
+        dlg.setConfirmButtonTheme(ButtonVariant.LUMO_WARNING.getVariantName());
+        dlg.addConfirmListener(e -> disconnectStore());
+        dlg.open();
+    }
 
-    private void disconnectStore() { /* same */ }
+    private void connectStore() {
+        parentView.showLoading(true);
+        try {
+            ResponseEntity<KmsDtos.ConnectCustomKeyStoreResponse> resp =
+                    objectService.connectCustomKeyStore(storeId);
+            boolean ok = resp.getStatusCode().is2xxSuccessful();
+            notify(ok ? "Connection initiated" : "Connection failed", ok);
+            if (ok) parentView.loadStores();
+        } catch (FeignException ex) {
+            String msg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
+            notify("Error: " + msg, false);
+            log.error("Failed to connect store {}", storeId, ex);
+        } catch (Exception ex) {
+            notify("Error: " + ex.getMessage(), false);
+            log.error("Failed to connect store {}", storeId, ex);
+        } finally {
+            parentView.showLoading(false);
+        }
+    }
 
-    private void updateCustomKeyStore() { /* same */ }
+    private void disconnectStore() {
+        parentView.showLoading(true);
+        try {
+            ResponseEntity<KmsDtos.DisconnectCustomKeyStoreResponse> resp =
+                    objectService.disconnectCustomKeyStore(storeId);
+            boolean ok = resp.getStatusCode().is2xxSuccessful();
+            notify(ok ? "Disconnected" : "Disconnect failed", ok);
+            if (ok) parentView.loadStores();
+        } catch (FeignException ex) {
+            String msg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
+            notify("Error: " + msg, false);
+            log.error("Failed to disconnect store {}", storeId, ex);
+        } catch (Exception ex) {
+            notify("Error: " + ex.getMessage(), false);
+            log.error("Failed to disconnect store {}", storeId, ex);
+        } finally {
+            parentView.showLoading(false);
+        }
+    }
 
-    private void confirmDelete() { /* same */ }
+    private void updateCustomKeyStore() {
+        new UpdateCustomKeyStoreDialog(parentView, objectService, parentView::loadStores, store).open();
+    }
+
+    private void confirmDelete() {
+        new DeleteCustomKeyStoreDialog(parentView, objectService, parentView::loadStores, store).open();
+    }
+
+    private void notify(String msg, boolean success) {
+        Notification notification = Notification.show(msg, 6000, Notification.Position.BOTTOM_END);
+        notification.addThemeVariants(
+                success ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR
+        );
+    }
+
+    // ── Extra CSS (responsive) ──────────────────────────────────────────────
 
     @Override
     protected String buildExtraStyles() {
