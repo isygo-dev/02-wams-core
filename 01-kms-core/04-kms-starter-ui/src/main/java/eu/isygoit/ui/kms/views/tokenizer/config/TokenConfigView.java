@@ -45,13 +45,12 @@ public class TokenConfigView extends VerticalLayout implements BeforeEnterObserv
     private final KmsTokenConfigService tokenConfigService;
     private final KmsApiService kmsApiService;
 
-    private final VerticalLayout cardsContainer = new VerticalLayout();
+    private final Div cardsContainer = new Div();
     private final TextField searchField = new TextField();
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button createButton = new Button("Create Config", new Icon(VaadinIcon.PLUS_CIRCLE));
     private final ProgressBar loadingBar = new ProgressBar();
 
-    // Pagination
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
     private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
@@ -87,8 +86,7 @@ public class TokenConfigView extends VerticalLayout implements BeforeEnterObserv
         add(toolbar);
 
         cardsContainer.setWidthFull();
-        cardsContainer.setPadding(false);
-        cardsContainer.setSpacing(true);
+        cardsContainer.addClassName("token-configs-grid");
         add(cardsContainer);
 
         loadingBar.setIndeterminate(true);
@@ -302,6 +300,12 @@ public class TokenConfigView extends VerticalLayout implements BeforeEnterObserv
                     gap: var(--lumo-space-s);
                     width: 100%;
                 }
+                .token-configs-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+                    gap: var(--lumo-space-m);
+                    padding: var(--lumo-space-s);
+                }
                 @media (max-width: 768px) {
                     .token-config-view .token-config-toolbar {
                         flex-direction: column;
@@ -310,6 +314,9 @@ public class TokenConfigView extends VerticalLayout implements BeforeEnterObserv
                     .token-config-view .token-config-toolbar > * {
                         width: 100% !important;
                         justify-content: center;
+                    }
+                    .token-configs-grid {
+                        grid-template-columns: 1fr;
                     }
                 }
                 """;

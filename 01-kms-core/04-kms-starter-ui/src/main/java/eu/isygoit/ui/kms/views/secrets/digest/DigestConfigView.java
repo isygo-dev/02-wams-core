@@ -42,13 +42,12 @@ import java.util.List;
 public class DigestConfigView extends VerticalLayout implements BeforeEnterObserver {
 
     private final DigestConfigService configService;
-    private final VerticalLayout cardsContainer = new VerticalLayout();
+    private final Div cardsContainer = new Div();
     private final TextField searchField = new TextField();
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button createButton = new Button("Create Config", new Icon(VaadinIcon.PLUS_CIRCLE));
     private final ProgressBar loadingBar = new ProgressBar();
 
-    // Pagination
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
     private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
@@ -83,8 +82,7 @@ public class DigestConfigView extends VerticalLayout implements BeforeEnterObser
         add(toolbar);
 
         cardsContainer.setWidthFull();
-        cardsContainer.setPadding(false);
-        cardsContainer.setSpacing(true);
+        cardsContainer.addClassName("digest-configs-grid");
         add(cardsContainer);
 
         loadingBar.setIndeterminate(true);
@@ -292,6 +290,12 @@ public class DigestConfigView extends VerticalLayout implements BeforeEnterObser
                     gap: var(--lumo-space-s);
                     width: 100%;
                 }
+                .digest-configs-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+                    gap: var(--lumo-space-m);
+                    padding: var(--lumo-space-s);
+                }
                 @media (max-width: 768px) {
                     .digest-config-view .digest-toolbar {
                         flex-direction: column;
@@ -300,6 +304,9 @@ public class DigestConfigView extends VerticalLayout implements BeforeEnterObser
                     .digest-config-view .digest-toolbar > * {
                         width: 100% !important;
                         justify-content: center;
+                    }
+                    .digest-configs-grid {
+                        grid-template-columns: 1fr;
                     }
                 }
                 """;

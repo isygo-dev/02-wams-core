@@ -44,13 +44,12 @@ public class RandomKeyView extends Composite<VerticalLayout> implements BeforeEn
 
     private final RandomKeyService keyService;
 
-    private final VerticalLayout cardsContainer = new VerticalLayout();
+    private final Div cardsContainer = new Div();
     private final TextField searchField = new TextField();
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button createButton = new Button("Create", new Icon(VaadinIcon.PLUS_CIRCLE));
     private final ProgressBar loadingBar = new ProgressBar();
 
-    // Pagination controls
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
     private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
@@ -87,8 +86,7 @@ public class RandomKeyView extends Composite<VerticalLayout> implements BeforeEn
         layout.add(toolbar);
 
         cardsContainer.setWidthFull();
-        cardsContainer.setPadding(false);
-        cardsContainer.setSpacing(true);
+        cardsContainer.addClassName("random-keys-grid");
         layout.add(cardsContainer);
 
         loadingBar.setIndeterminate(true);
@@ -282,6 +280,12 @@ public class RandomKeyView extends Composite<VerticalLayout> implements BeforeEn
                     flex-wrap: wrap;
                     gap: var(--lumo-space-s);
                 }
+                .random-keys-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+                    gap: var(--lumo-space-m);
+                    padding: var(--lumo-space-s);
+                }
                 @media (max-width: 768px) {
                     .randomkey-toolbar {
                         flex-direction: column;
@@ -290,6 +294,9 @@ public class RandomKeyView extends Composite<VerticalLayout> implements BeforeEn
                     .randomkey-toolbar > * {
                         width: 100% !important;
                         justify-content: center;
+                    }
+                    .random-keys-grid {
+                        grid-template-columns: 1fr;
                     }
                 }
                 """;

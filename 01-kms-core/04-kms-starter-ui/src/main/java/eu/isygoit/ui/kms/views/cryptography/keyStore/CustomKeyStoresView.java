@@ -50,21 +50,19 @@ import java.util.stream.Collectors;
 public class CustomKeyStoresView extends VerticalLayout implements BeforeEnterObserver {
 
     private final KmsApiService kmsApiService;
-    private final VerticalLayout cardsContainer = new VerticalLayout();
+    private final Div cardsContainer = new Div();
     private final Button createButton = new Button("Create Store", new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final ProgressBar loadingBar = new ProgressBar();
     private final TextField filterField = new TextField();
     private final Button clearFilterButton = new Button(new Icon(VaadinIcon.CLOSE));
 
-    // Pagination controls
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
     private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
     private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
 
-    // Pagination state (cursor-based)
     private final Stack<String> previousTokens = new Stack<>();
     private int pageSize = 10;
     private String currentNextToken = null;
@@ -74,11 +72,7 @@ public class CustomKeyStoresView extends VerticalLayout implements BeforeEnterOb
     private long totalElements = 0;
     private int numberOfElements = 0;
     private boolean truncated = false;
-
-    // Filter state
     private String currentFilter = "";
-
-    // Store data for current page (unfiltered)
     private List<DescribeCustomKeyStoreResponse.CustomKeyStore> currentPageStores = new ArrayList<>();
 
     @Autowired
@@ -98,8 +92,7 @@ public class CustomKeyStoresView extends VerticalLayout implements BeforeEnterOb
         add(toolbar);
 
         cardsContainer.setWidthFull();
-        cardsContainer.setPadding(false);
-        cardsContainer.setSpacing(true);
+        cardsContainer.addClassName("stores-grid");
         add(cardsContainer);
 
         loadingBar.setIndeterminate(true);
@@ -155,8 +148,6 @@ public class CustomKeyStoresView extends VerticalLayout implements BeforeEnterOb
         });
 
         injectResponsiveStyles();
-
-        // Initial load
         resetPaginationAndLoad();
     }
 
@@ -317,6 +308,12 @@ public class CustomKeyStoresView extends VerticalLayout implements BeforeEnterOb
                     gap: var(--lumo-space-s);
                     width: 100%;
                 }
+                .stores-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+                    gap: var(--lumo-space-m);
+                    padding: var(--lumo-space-s);
+                }
                 @media (max-width: 768px) {
                     .custom-stores-toolbar {
                         flex-direction: column;
@@ -325,6 +322,9 @@ public class CustomKeyStoresView extends VerticalLayout implements BeforeEnterOb
                     .custom-stores-toolbar > * {
                         width: 100% !important;
                         justify-content: center;
+                    }
+                    .stores-grid {
+                        grid-template-columns: 1fr;
                     }
                 }
                 """;

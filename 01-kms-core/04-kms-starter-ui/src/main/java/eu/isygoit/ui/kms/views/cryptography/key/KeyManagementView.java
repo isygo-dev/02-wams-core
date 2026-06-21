@@ -53,7 +53,7 @@ public class KeyManagementView extends VerticalLayout implements BeforeEnterObse
     private final KmsApiService kmsApiService;
     private final ObjectMapper objectMapper;
 
-    private final VerticalLayout cardsContainer = new VerticalLayout();
+    private final Div cardsContainer = new Div();
     private final Button createButton = new Button("Create key", new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
@@ -64,9 +64,7 @@ public class KeyManagementView extends VerticalLayout implements BeforeEnterObse
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
     private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
-    // Key pagination state
     private final Stack<String> previousTokens = new Stack<>();
-    // Alias browser components
     private final Button toggleAliasBrowser = new Button("Browse Aliases", new Icon(VaadinIcon.LIST));
     private final VerticalLayout aliasBrowserPanel = new VerticalLayout();
     private final Grid<ListAliasesResponse.AliasEntry> aliasGrid = new Grid<>();
@@ -76,7 +74,6 @@ public class KeyManagementView extends VerticalLayout implements BeforeEnterObse
     private final Span aliasPageInfo = new Span();
     private final ComboBox<Integer> aliasPageSizeSelect = new ComboBox<>("Per page", 10, 20, 50);
     private final ProgressBar aliasLoading = new ProgressBar();
-    // Alias pagination state (cursor-based)
     private final Stack<String> aliasPreviousTokens = new Stack<>();
     private final int aliasCurrentLimit = 10;
     private int pageSize = 10;
@@ -90,7 +87,6 @@ public class KeyManagementView extends VerticalLayout implements BeforeEnterObse
     private List<KeyCard> currentPageCards = new ArrayList<>();
     private String aliasCurrentNextToken = null;
     private boolean aliasesLoaded = false;
-    // Filters
     private String currentSearch = "";
     private IEnumKeyStatus.Types currentStatus = null;
 
@@ -112,8 +108,7 @@ public class KeyManagementView extends VerticalLayout implements BeforeEnterObse
         add(toolbar);
 
         cardsContainer.setWidthFull();
-        cardsContainer.setPadding(false);
-        cardsContainer.setSpacing(true);
+        cardsContainer.addClassName("keys-grid");
         add(cardsContainer);
 
         loadingBar.setIndeterminate(true);
@@ -179,8 +174,6 @@ public class KeyManagementView extends VerticalLayout implements BeforeEnterObse
         nextButton.setTooltipText("Next page");
 
         injectResponsiveStyles();
-
-        // Load first page of keys
         resetKeyPaginationAndLoad();
     }
 
@@ -389,6 +382,12 @@ public class KeyManagementView extends VerticalLayout implements BeforeEnterObse
                     gap: var(--lumo-space-s);
                     width: 100%;
                 }
+                .keys-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+                    gap: var(--lumo-space-m);
+                    padding: var(--lumo-space-s);
+                }
                 @media (max-width: 768px) {
                     .key-management-toolbar {
                         flex-direction: column;
@@ -397,6 +396,9 @@ public class KeyManagementView extends VerticalLayout implements BeforeEnterObse
                     .key-management-toolbar > * {
                         width: 100% !important;
                         justify-content: center;
+                    }
+                    .keys-grid {
+                        grid-template-columns: 1fr;
                     }
                 }
                 """;

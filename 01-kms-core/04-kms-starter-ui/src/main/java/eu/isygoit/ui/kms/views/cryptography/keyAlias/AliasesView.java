@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 public class AliasesView extends VerticalLayout implements BeforeEnterObserver {
 
     private final KmsApiService kmsApiService;
-    private final VerticalLayout cardsContainer = new VerticalLayout();
+    private final Div cardsContainer = new Div();
     private final Button createButton = new Button("Create alias", new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
@@ -53,7 +53,6 @@ public class AliasesView extends VerticalLayout implements BeforeEnterObserver {
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
     private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
-    // Pagination state (cursor‑based)
     private final Stack<String> previousTokens = new Stack<>();
     private int pageSize = 10;
     private String currentNextToken = null;
@@ -64,8 +63,6 @@ public class AliasesView extends VerticalLayout implements BeforeEnterObserver {
     private int numberOfElements = 0;
     private boolean truncated = false;
     private List<AliasCard> currentPageCards = new ArrayList<>();
-
-    // Client‑side filter
     private String currentSearch = "";
 
     @Autowired
@@ -85,8 +82,7 @@ public class AliasesView extends VerticalLayout implements BeforeEnterObserver {
         add(toolbar);
 
         cardsContainer.setWidthFull();
-        cardsContainer.setPadding(false);
-        cardsContainer.setSpacing(true);
+        cardsContainer.addClassName("aliases-grid");
         add(cardsContainer);
 
         loadingBar.setIndeterminate(true);
@@ -140,8 +136,6 @@ public class AliasesView extends VerticalLayout implements BeforeEnterObserver {
         totalCountLabel.getElement().setAttribute("title", "Total number of aliases across all pages");
 
         injectResponsiveStyles();
-
-        // Load first page
         resetPaginationAndLoad();
     }
 
@@ -288,6 +282,12 @@ public class AliasesView extends VerticalLayout implements BeforeEnterObserver {
                     gap: var(--lumo-space-s);
                     width: 100%;
                 }
+                .aliases-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+                    gap: var(--lumo-space-m);
+                    padding: var(--lumo-space-s);
+                }
                 @media (max-width: 768px) {
                     .aliases-toolbar {
                         flex-direction: column;
@@ -296,6 +296,9 @@ public class AliasesView extends VerticalLayout implements BeforeEnterObserver {
                     .aliases-toolbar > * {
                         width: 100% !important;
                         justify-content: center;
+                    }
+                    .aliases-grid {
+                        grid-template-columns: 1fr;
                     }
                 }
                 """;

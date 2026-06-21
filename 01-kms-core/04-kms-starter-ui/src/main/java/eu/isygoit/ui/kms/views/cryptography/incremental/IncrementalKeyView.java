@@ -48,13 +48,12 @@ public class IncrementalKeyView extends Composite<VerticalLayout> implements Bef
     @Getter
     private final KmsAppNextCodeService nextCodeService;
 
-    private final VerticalLayout cardsContainer = new VerticalLayout();
+    private final Div cardsContainer = new Div();
     private final TextField searchField = new TextField();
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button subscribeButton = new Button("Subscribe", new Icon(VaadinIcon.PLUS_CIRCLE));
     private final ProgressBar loadingBar = new ProgressBar();
 
-    // Pagination
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
     private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
@@ -93,8 +92,7 @@ public class IncrementalKeyView extends Composite<VerticalLayout> implements Bef
         layout.add(toolbar);
 
         cardsContainer.setWidthFull();
-        cardsContainer.setPadding(false);
-        cardsContainer.setSpacing(true);
+        cardsContainer.addClassName("incremental-keys-grid");
         layout.add(cardsContainer);
 
         loadingBar.setIndeterminate(true);
@@ -327,6 +325,12 @@ public class IncrementalKeyView extends Composite<VerticalLayout> implements Bef
                     flex-wrap: wrap;
                     gap: var(--lumo-space-s);
                 }
+                .incremental-keys-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+                    gap: var(--lumo-space-m);
+                    padding: var(--lumo-space-s);
+                }
                 @media (max-width: 768px) {
                     .incremental-toolbar {
                         flex-direction: column;
@@ -335,6 +339,9 @@ public class IncrementalKeyView extends Composite<VerticalLayout> implements Bef
                     .incremental-toolbar > * {
                         width: 100% !important;
                         justify-content: center;
+                    }
+                    .incremental-keys-grid {
+                        grid-template-columns: 1fr;
                     }
                 }
                 """;
