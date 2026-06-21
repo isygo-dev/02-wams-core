@@ -28,7 +28,6 @@ import org.springframework.http.ResponseEntity;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 public class ApplicationCard extends BaseCard<ApplicationManagementView, ApplicationService> {
@@ -225,12 +224,23 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
         loadApplicationImage();
     }
 
+    /**
+     * Loads the application image synchronously on the UI thread.
+     * This method is called from onCardAttach and uses getUI().ifPresent(ui -> ui.access(() -> { ... }))
+     * to ensure the UI update is performed on the correct thread.
+     */
     private void loadApplicationImage() {
-        CompletableFuture.supplyAsync(() -> {
+        getUI().ifPresent(ui -> ui.access(() -> {
             try {
                 ResponseEntity<Resource> response = applicationImageService.downloadImage(application.getId());
                 if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                    return response.getBody().getContentAsByteArray();
+                    byte[] imageBytes = response.getBody().getContentAsByteArray();
+                    if (imageBytes != null && imageBytes.length > 0) {
+                        StreamResource resource = new StreamResource("app_" + application.getId() + ".jpg",
+                                () -> new ByteArrayInputStream(imageBytes));
+                        appImage.setSrc(resource);
+                        return;
+                    }
                 }
             } catch (FeignException ex) {
                 if (ex.status() == 404) {
@@ -241,18 +251,9 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
             } catch (IOException e) {
                 log.error("Error reading image stream for application {}", application.getId(), e);
             }
-            return null;
-        }).thenAccept(imageBytes -> {
-            getUI().ifPresent(ui -> ui.access(() -> {
-                if (imageBytes != null && imageBytes.length > 0) {
-                    StreamResource resource = new StreamResource("app_" + application.getId() + ".jpg",
-                            () -> new ByteArrayInputStream(imageBytes));
-                    appImage.setSrc(resource);
-                } else {
-                    appImage.setSrc(getSvgPlaceholder());
-                }
-            }));
-        });
+            // Fallback to placeholder
+            appImage.setSrc(getSvgPlaceholder());
+        }));
     }
 
     private String getSvgPlaceholder() {

@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class KeyUsageStatsPanel extends VerticalLayout {
 
@@ -96,84 +95,67 @@ public class KeyUsageStatsPanel extends VerticalLayout {
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
-        statsContainer.setVisible(false);
-        loadingBar.setVisible(true);
-        loadButton.setEnabled(false);
 
-        String keyId = selected.getKeyId();
-        IEnumKeyUsage.Types keyUsage = selected.getKeyUsage();
+        ui.access(() -> {
+            statsContainer.setVisible(false);
+            loadingBar.setVisible(true);
+            loadButton.setEnabled(false);
 
-        CompletableFuture<KeyUsageStatsResponse> statsFuture = CompletableFuture.supplyAsync(() -> {
             try {
-                ResponseEntity<KeyUsageStatsResponse> response = kmsApiService.getKeyUsageStats(keyId);
-                return response.getBody();
-            } catch (Exception e) {
-                log.error("Failed to load usage stats for key {}", keyId, e);
-                return null;
-            }
-        });
+                String keyId = selected.getKeyId();
+                IEnumKeyUsage.Types keyUsage = selected.getKeyUsage();
 
-        CompletableFuture<Integer> versionsFuture = CompletableFuture.supplyAsync(() -> {
-            try {
-                ResponseEntity<ListKeyRotationsResponse> response = kmsApiService.listKeyRotations(keyId, 1000, null);
-                ListKeyRotationsResponse body = response.getBody();
-                return (body != null && body.getRotations() != null) ? body.getRotations().size() : 0;
-            } catch (Exception e) {
-                log.error("Failed to load key versions for key {}", keyId, e);
-                return 0;
-            }
-        });
+                ResponseEntity<KeyUsageStatsResponse> statsResponse = kmsApiService.getKeyUsageStats(keyId);
+                KeyUsageStatsResponse stats = statsResponse.getBody();
 
-        CompletableFuture.allOf(statsFuture, versionsFuture)
-                .thenAccept(v -> {
-                    KeyUsageStatsResponse stats = statsFuture.join();
-                    Integer versionCount = versionsFuture.join();
-                    UI updateUi = ui != null ? ui : UI.getCurrent();
-                    if (updateUi == null) return;
-                    updateUi.access(() -> {
-                        loadingBar.setVisible(false);
-                        loadButton.setEnabled(true);
-                        statsContainer.removeAll();
-                        if (stats == null) {
-                            Span errorSpan = new Span("Failed to load statistics. Check server logs.");
-                            errorSpan.getStyle().set("color", "var(--lumo-error-text-color)");
-                            statsContainer.add(errorSpan);
-                        } else {
-                            if (keyUsage == IEnumKeyUsage.Types.ENCRYPT_DECRYPT) {
-                                statsContainer.add(createSmallStatCard("Encrypts", stats.getEncryptCount()));
-                                statsContainer.add(createSmallStatCard("Decrypts", stats.getDecryptCount()));
-                                statsContainer.add(createSmallStatCard("Generate Data Keys", stats.getGenerateDataKeyCount()));
-                                statsContainer.add(createSmallStatCard("Re-Encrypts", stats.getReEncryptCount()));
-                            } else if (keyUsage == IEnumKeyUsage.Types.SIGN_VERIFY) {
-                                statsContainer.add(createSmallStatCard("Signs", stats.getSignCount()));
-                                statsContainer.add(createSmallStatCard("Verifies", stats.getVerifyCount()));
-                            } else if (keyUsage == IEnumKeyUsage.Types.GENERATE_VERIFY_MAC) {
-                                long gen = stats.getGenerateMacCount() != null ? stats.getGenerateMacCount() : 0L;
-                                long ver = stats.getVerifyMacCount() != null ? stats.getVerifyMacCount() : 0L;
-                                statsContainer.add(createSmallStatCard("Generate MAC", gen));
-                                statsContainer.add(createSmallStatCard("Verify MAC", ver));
-                            }
-                            statsContainer.add(createSmallStatCard("Key Versions", versionCount));
-                            if (stats.getLastUsedDate() != null) {
-                                statsContainer.add(createSmallStatCard("Last Used", DateHelper.formatToHumanReadable(stats.getLastUsedDate())));
-                            }
-                        }
-                        statsContainer.setVisible(true);
-                    });
-                })
-                .exceptionally(ex -> {
-                    UI updateUi = ui != null ? ui : UI.getCurrent();
-                    if (updateUi != null) {
-                        updateUi.access(() -> {
-                            loadingBar.setVisible(false);
-                            loadButton.setEnabled(true);
-                            statsContainer.removeAll();
-                            statsContainer.add(new Span("Error loading statistics"));
-                            statsContainer.setVisible(true);
-                        });
+                ResponseEntity<ListKeyRotationsResponse> rotationsResponse = kmsApiService.listKeyRotations(keyId, 1000, null);
+                ListKeyRotationsResponse rotationsBody = rotationsResponse.getBody();
+                int versionCount = (rotationsBody != null && rotationsBody.getRotations() != null)
+                        ? rotationsBody.getRotations().size()
+                        : 0;
+
+                statsContainer.removeAll();
+
+                if (stats == null) {
+                    Span errorSpan = new Span("Failed to load statistics. Check server logs.");
+                    errorSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+                    statsContainer.add(errorSpan);
+                } else {
+                    if (keyUsage == IEnumKeyUsage.Types.ENCRYPT_DECRYPT) {
+                        statsContainer.add(createSmallStatCard("Encrypts", stats.getEncryptCount()));
+                        statsContainer.add(createSmallStatCard("Decrypts", stats.getDecryptCount()));
+                        statsContainer.add(createSmallStatCard("Generate Data Keys", stats.getGenerateDataKeyCount()));
+                        statsContainer.add(createSmallStatCard("Re-Encrypts", stats.getReEncryptCount()));
+                    } else if (keyUsage == IEnumKeyUsage.Types.SIGN_VERIFY) {
+                        statsContainer.add(createSmallStatCard("Signs", stats.getSignCount()));
+                        statsContainer.add(createSmallStatCard("Verifies", stats.getVerifyCount()));
+                    } else if (keyUsage == IEnumKeyUsage.Types.GENERATE_VERIFY_MAC) {
+                        long gen = stats.getGenerateMacCount() != null ? stats.getGenerateMacCount() : 0L;
+                        long ver = stats.getVerifyMacCount() != null ? stats.getVerifyMacCount() : 0L;
+                        statsContainer.add(createSmallStatCard("Generate MAC", gen));
+                        statsContainer.add(createSmallStatCard("Verify MAC", ver));
                     }
-                    return null;
-                });
+                    statsContainer.add(createSmallStatCard("Key Versions", versionCount));
+                    if (stats.getLastUsedDate() != null) {
+                        statsContainer.add(createSmallStatCard("Last Used", DateHelper.formatToHumanReadable(stats.getLastUsedDate())));
+                    }
+                }
+
+                loadingBar.setVisible(false);
+                loadButton.setEnabled(true);
+                statsContainer.setVisible(true);
+
+            } catch (Exception ex) {
+                log.error("Failed to load usage stats", ex);
+                loadingBar.setVisible(false);
+                loadButton.setEnabled(true);
+                statsContainer.removeAll();
+                statsContainer.add(new Span("Error loading statistics"));
+                statsContainer.setVisible(true);
+                Notification.show("Error loading statistics", 3000, Notification.Position.BOTTOM_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            }
+        });
     }
 
     private VerticalLayout createSmallStatCard(String label, Object value) {

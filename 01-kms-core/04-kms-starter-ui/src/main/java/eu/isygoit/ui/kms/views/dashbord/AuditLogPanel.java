@@ -27,7 +27,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class AuditLogPanel extends VerticalLayout {
 
@@ -142,29 +141,22 @@ public class AuditLogPanel extends VerticalLayout {
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
-        loadButton.setEnabled(false);
-        grid.setVisible(false);
-        paginationBar.setVisible(false);
-        loadingBar.setVisible(true);
 
-        LocalDateTime from = fromDatePicker.getValue() != null ? fromDatePicker.getValue().atStartOfDay() : null;
-        LocalDateTime to = toDatePicker.getValue() != null ? toDatePicker.getValue().atTime(LocalTime.MAX) : null;
+        ui.access(() -> {
+            loadButton.setEnabled(false);
+            grid.setVisible(false);
+            paginationBar.setVisible(false);
+            loadingBar.setVisible(true);
 
-        CompletableFuture.supplyAsync(() -> {
-            List<AuditLogResponse.LogEntry> logs = new ArrayList<>();
             try {
+                LocalDateTime from = fromDatePicker.getValue() != null ? fromDatePicker.getValue().atStartOfDay() : null;
+                LocalDateTime to = toDatePicker.getValue() != null ? toDatePicker.getValue().atTime(LocalTime.MAX) : null;
+
                 ResponseEntity<AuditLogResponse> response = kmsApiService.getAuditLogs(selected.getKeyId(), from, to, 500);
-                if (response.getBody() != null && response.getBody().getLogs() != null) {
-                    logs = response.getBody().getLogs();
-                }
-            } catch (Exception e) {
-                log.error("Failed to load audit logs for key {}", selected.getKeyId(), e);
-            }
-            return logs;
-        }).thenAccept(logs -> {
-            UI updateUi = ui != null ? ui : UI.getCurrent();
-            if (updateUi == null) return;
-            updateUi.access(() -> {
+                List<AuditLogResponse.LogEntry> logs = (response.getBody() != null && response.getBody().getLogs() != null)
+                        ? response.getBody().getLogs()
+                        : new ArrayList<>();
+
                 allLogs = logs;
                 currentPage = 0;
                 updateGrid();
@@ -172,21 +164,17 @@ public class AuditLogPanel extends VerticalLayout {
                 paginationBar.setVisible(!logs.isEmpty());
                 loadingBar.setVisible(false);
                 loadButton.setEnabled(true);
+
                 String msg = logs.isEmpty() ? "No audit logs found" : "Loaded " + logs.size() + " log entries";
                 Notification.show(msg, 3000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(logs.isEmpty() ? NotificationVariant.LUMO_WARNING : NotificationVariant.LUMO_SUCCESS);
-            });
-        }).exceptionally(ex -> {
-            UI updateUi = ui != null ? ui : UI.getCurrent();
-            if (updateUi != null) {
-                updateUi.access(() -> {
-                    Notification.show("Error loading audit logs", 3000, Notification.Position.BOTTOM_END)
-                            .addThemeVariants(NotificationVariant.LUMO_ERROR);
-                    loadingBar.setVisible(false);
-                    loadButton.setEnabled(true);
-                });
+            } catch (Exception ex) {
+                log.error("Failed to load audit logs", ex);
+                Notification.show("Error loading audit logs", 3000, Notification.Position.BOTTOM_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                loadingBar.setVisible(false);
+                loadButton.setEnabled(true);
             }
-            return null;
         });
     }
 

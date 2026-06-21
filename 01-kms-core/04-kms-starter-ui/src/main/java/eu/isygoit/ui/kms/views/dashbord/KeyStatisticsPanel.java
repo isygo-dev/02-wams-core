@@ -5,6 +5,8 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -22,9 +24,6 @@ import eu.isygoit.remote.kms.RandomKeyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 public class KeyStatisticsPanel extends VerticalLayout {
 
@@ -75,13 +74,15 @@ public class KeyStatisticsPanel extends VerticalLayout {
     }
 
     public void loadStatistics() {
-        loadingBar.setVisible(true);
-        refreshButton.setEnabled(false);
+        ui.access(() -> {
+            loadingBar.setVisible(true);
+            refreshButton.setEnabled(false);
+            statsContainer.removeAll();
 
-        CompletableFuture.supplyAsync(() -> {
-            Stats stats = new Stats();
             try {
                 log.info("Starting KMS statistics collection...");
+                Stats stats = new Stats();
+
                 ResponseEntity<ListKeysResponse> keysResp = kmsApiService.listKeys(100, null);
                 ListKeysResponse keys = keysResp.getBody();
                 if (keys != null && keys.getKeys() != null) {
@@ -119,16 +120,19 @@ public class KeyStatisticsPanel extends VerticalLayout {
                         } catch (Exception e) { /* ignore */ }
                     }
                 }
+
                 try {
                     ResponseEntity<ListAliasesResponse> aliasesResp = kmsApiService.listAliases(100, null);
                     if (aliasesResp.getBody() != null && aliasesResp.getBody().getAliases() != null)
                         stats.totalAliases = aliasesResp.getBody().getAliases().size();
                 } catch (Exception e) { /* ignore */ }
+
                 try {
                     ResponseEntity<ListCustomKeyStoresResponse> storesResp = kmsApiService.listCustomKeyStores(100, null);
                     if (storesResp.getBody() != null && storesResp.getBody().getCustomKeyStores() != null)
                         stats.totalStores = storesResp.getBody().getCustomKeyStores().size();
                 } catch (Exception e) { /* ignore */ }
+
                 // Incremental Key configs
                 try {
                     ResponseEntity<PaginatedResponseDto<NextCodeDto>> nextCodeResp = nextCodeService.findAll(0, 1);
@@ -137,6 +141,7 @@ public class KeyStatisticsPanel extends VerticalLayout {
                 } catch (Exception e) {
                     log.error("Failed to load Incremental Key statistics", e);
                 }
+
                 // Random Keys
                 try {
                     ResponseEntity<PaginatedResponseDto<RandomKeyDto>> randomResp = randomKeyService.listRandomKeys(0, 1);
@@ -145,18 +150,8 @@ public class KeyStatisticsPanel extends VerticalLayout {
                 } catch (Exception e) {
                     log.error("Failed to load Random Keys statistics", e);
                 }
-            } catch (Exception e) {
-                log.error("Error in statistics collection", e);
-            }
-            return stats;
-        }).orTimeout(30, TimeUnit.SECONDS).exceptionally(ex -> {
-            log.error("Statistics timeout/failure", ex);
-            return new Stats();
-        }).thenAccept(stats -> {
-            UI updateUi = ui != null ? ui : UI.getCurrent();
-            if (updateUi == null) return;
-            updateUi.access(() -> {
-                statsContainer.removeAll();
+
+                // Build stat cards
                 statsContainer.add(
                         new StatCard("Total Keys", String.valueOf(stats.totalKeys), VaadinIcon.KEY, "#1E88E5", "Total number of KMS keys in your account"),
                         new StatCard("Active Keys", String.valueOf(stats.activeKeys), VaadinIcon.CHECK_CIRCLE, "#2E7D32", "Keys that are enabled and usable for cryptographic operations"),
@@ -174,10 +169,18 @@ public class KeyStatisticsPanel extends VerticalLayout {
                         new StatCard("Incremental Key Configs", String.valueOf(stats.nextCodeTotal), VaadinIcon.CODE, "#607D8B", "Number of incremental code generator configurations"),
                         new StatCard("Random Keys", String.valueOf(stats.randomKeysTotal), VaadinIcon.RANDOM, "#8E24AA", "Number of stored random key values")
                 );
+
                 loadingBar.setVisible(false);
                 refreshButton.setEnabled(true);
-                updateUi.push();
-            });
+                ui.push();
+
+            } catch (Exception ex) {
+                log.error("Error in statistics collection", ex);
+                loadingBar.setVisible(false);
+                refreshButton.setEnabled(true);
+                Notification.show("Error loading statistics", 3000, Notification.Position.BOTTOM_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            }
         });
     }
 

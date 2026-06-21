@@ -3,6 +3,8 @@ package eu.isygoit.ui.kms.views.dashbord;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -16,8 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 public class TokenStatisticsPanel extends VerticalLayout {
 
@@ -70,10 +70,13 @@ public class TokenStatisticsPanel extends VerticalLayout {
     }
 
     public void loadStatistics() {
-        loadingBar.setVisible(true);
-        CompletableFuture.supplyAsync(() -> {
-            TokenStats stats = new TokenStats();
+        ui.access(() -> {
+            loadingBar.setVisible(true);
+            statsContainer.removeAll();
+
             try {
+                TokenStats stats = new TokenStats();
+
                 ResponseEntity<PaginatedResponseDto<TokenConfigDto>> totalResp = tokenConfigService.findAll(0, 1);
                 PaginatedResponseDto<TokenConfigDto> totalBody = totalResp.getBody();
                 if (totalBody != null) stats.total = totalBody.getTotalElements();
@@ -86,18 +89,7 @@ public class TokenStatisticsPanel extends VerticalLayout {
                     stats.rstpwd = configs.stream().filter(c -> c.getTokenType() == IEnumToken.Types.RSTPWD).count();
                     stats.authority = configs.stream().filter(c -> c.getTokenType() == IEnumToken.Types.AUTHORITY).count();
                 }
-            } catch (Exception e) {
-                log.error("Error fetching token configuration statistics", e);
-            }
-            return stats;
-        }).orTimeout(30, TimeUnit.SECONDS).exceptionally(ex -> {
-            log.error("Token stats timeout/failure", ex);
-            return new TokenStats();
-        }).thenAccept(stats -> {
-            UI updateUi = ui != null ? ui : UI.getCurrent();
-            if (updateUi == null) return;
-            updateUi.access(() -> {
-                statsContainer.removeAll();
+
                 statsContainer.add(
                         new StatCard("Total Configs", String.valueOf(stats.total), VaadinIcon.COG, "#607D8B", "Total number of JWT token configurations"),
                         new StatCard("ACCESS", String.valueOf(stats.access), VaadinIcon.KEY, "#1E88E5", "Configurations for access tokens (used for API authorization)"),
@@ -105,9 +97,16 @@ public class TokenStatisticsPanel extends VerticalLayout {
                         new StatCard("RSTPWD", String.valueOf(stats.rstpwd), VaadinIcon.LOCK, "#F57C00", "Configurations for password reset tokens"),
                         new StatCard("AUTHORITY", String.valueOf(stats.authority), VaadinIcon.USER, "#8E24AA", "Configurations for authority tokens (granting specific permissions)")
                 );
+
                 loadingBar.setVisible(false);
-                updateUi.push();
-            });
+                ui.push();
+
+            } catch (Exception e) {
+                log.error("Error fetching token configuration statistics", e);
+                loadingBar.setVisible(false);
+                Notification.show("Error loading statistics", 3000, Notification.Position.BOTTOM_END)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            }
         });
     }
 
