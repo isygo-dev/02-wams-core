@@ -31,6 +31,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.util.Optional;
+
 @Component
 @UIScope
 @Route(value = "login")
@@ -44,7 +46,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
     private final Div errorContainer = new Div();
     private boolean stylesInjected = false;
 
-    private String redirectTarget; // Store for later use
+    private String redirectTarget;
 
     @Autowired
     private PublicAuthService authService;
@@ -139,24 +141,25 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
                 UserContext userContext = response.getBody();
                 IEnumAuth.Types authType = userContext.getAuthTypeMode();
 
-                // Build base query string with tenant + username
+                // Build base query string with tenant and username
                 StringBuilder query = new StringBuilder("?tenant=" + tenant + "&username=" + username);
-                // Append redirect parameter if present
+                // Append redirect if present
                 if (redirectTarget != null) {
                     query.append("&redirect=").append(redirectTarget);
                 }
 
-                Integer otpLength = null;
-                String targetView;
+                String targetView = null;
                 switch (authType) {
                     case PWD:
                         targetView = "login/password";
                         break;
                     case OTP:
-                        // Pass the OTP length as a query parameter
-                        otpLength = userContext.getOtpLength();
+                        Integer otpLength = userContext.getOtpLength();
+                        if (otpLength != null) {
+                            query.append("&otpLength=").append(otpLength);
+                        }
                         targetView = "login/otp";
-                        break; // return to avoid double navigation
+                        break;
                     case QRC:
                         targetView = "login/qr";
                         break;
@@ -169,12 +172,9 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
                         return;
                 }
 
-                // For PWD and QRC, navigate with only tenant and username
-                UI.getCurrent().navigate(targetView + "?" +
-                        (tenant != null ? "tenant=" + tenant : "") +
-                        (username != null ? "&username=" + username : "") +
-                        (otpLength != null ? "&otpLength=" + otpLength : "")
-                );
+                if (targetView != null) {
+                    UI.getCurrent().navigate(targetView + query.toString());
+                }
             } else {
                 showError("Unable to determine authentication method. Please check your credentials.");
             }
@@ -199,12 +199,13 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
                 .filter(this::isSafeInternalPath)
                 .orElse(null);
 
+        // If already authenticated, forward to target or default
         if (VaadinSession.getCurrent().getAttribute("user") != null) {
-            // Already authenticated – forward to original target or default
             String target = (redirectTarget != null) ? redirectTarget : "kms";
             event.forwardTo(target);
             return;
         }
+
         errorContainer.setVisible(false);
     }
 

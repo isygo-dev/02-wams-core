@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RouteAlias(value = "kms/home", layout = KmsMainLayout.class)
-@VaadinSessionScope //(or UIScope)
+@VaadinSessionScope
 @Route(value = "kms", layout = KmsMainLayout.class)
 @PageTitle("KMS Dashboard")
 public class KmsMainView extends VerticalLayout implements BeforeEnterObserver {
@@ -203,7 +203,6 @@ public class KmsMainView extends VerticalLayout implements BeforeEnterObserver {
         );
     }
 
-    // Helper Span class for quick links
     private static class Span extends com.vaadin.flow.component.html.Span {
         public Span(String text) {
             super(text);
@@ -213,7 +212,6 @@ public class KmsMainView extends VerticalLayout implements BeforeEnterObserver {
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         if (VaadinSession.getCurrent().getAttribute("user") == null) {
-            // User is not authenticated – redirect to login, passing the current URL as a redirect parameter.
             String currentPath = event.getLocation().getPath();
             event.forwardTo("login?redirect=" + currentPath);
         }

@@ -237,6 +237,16 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        // If already authenticated, redirect to target or default
+        if (VaadinSession.getCurrent().getAttribute("user") != null) {
+            String target = event.getLocation().getQueryParameters()
+                    .getSingleParameter("redirect")
+                    .filter(this::isSafeInternalPath)
+                    .orElse("kms");
+            event.forwardTo(target);
+            return;
+        }
+
         Optional<String> tenantOpt = event.getLocation().getQueryParameters().getSingleParameter("tenant");
         Optional<String> usernameOpt = event.getLocation().getQueryParameters().getSingleParameter("username");
         Optional<String> otpLengthOpt = event.getLocation().getQueryParameters().getSingleParameter("otpLength");

@@ -179,7 +179,6 @@ public class RegisterView extends VerticalLayout implements BeforeEnterObserver 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         if (VaadinSession.getCurrent().getAttribute("user") != null) {
-            // Try to get redirect parameter (if any) and forward there, else go to kms.
             Optional<String> redirectOpt = event.getLocation()
                     .getQueryParameters()
                     .getSingleParameter("redirect")

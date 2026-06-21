@@ -137,7 +137,6 @@ public class PasswordView extends VerticalLayout implements BeforeEnterObserver 
                 VaadinSession.getCurrent().setAttribute("user", username);
                 VaadinSession.getCurrent().setAttribute("accessToken", authResponse.getAccessToken());
 
-                // Navigate to original target or default
                 String target = (redirectTarget != null) ? redirectTarget : "kms";
                 UI.getCurrent().navigate(target);
 
@@ -160,6 +159,16 @@ public class PasswordView extends VerticalLayout implements BeforeEnterObserver 
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        // If already authenticated, redirect to target or default
+        if (VaadinSession.getCurrent().getAttribute("user") != null) {
+            String target = event.getLocation().getQueryParameters()
+                    .getSingleParameter("redirect")
+                    .filter(this::isSafeInternalPath)
+                    .orElse("kms");
+            event.forwardTo(target);
+            return;
+        }
+
         Optional<String> tenantOpt = event.getLocation().getQueryParameters().getSingleParameter("tenant");
         Optional<String> usernameOpt = event.getLocation().getQueryParameters().getSingleParameter("username");
         redirectTarget = event.getLocation().getQueryParameters()
