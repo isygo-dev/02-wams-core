@@ -9,6 +9,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.TokenConfigDto;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
 import eu.isygoit.ui.common.card.BaseCard;
@@ -71,10 +72,10 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit configuration");
+        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("token.config.edit.button"));
         editBtn.addClickListener(e -> openEditDialog());
 
-        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, "Delete configuration");
+        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, I18n.t("token.config.delete.button"));
         deleteBtn.addClickListener(e -> new DeleteTokenConfigDialog(objectService, dto.getId(), dto.getCode(), onDeleteRefresh).open());
 
         return List.of(editBtn, deleteBtn);
@@ -82,10 +83,10 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
 
     @Override
     protected void buildBodyRows() {
-        add(createIconRow(VaadinIcon.BUILDING, "Issuer", dto.getIssuer() != null ? dto.getIssuer() : "—"));
-        add(createIconRow(VaadinIcon.GROUP, "Audience", formatAudienceList()));
-        add(createIconRow(VaadinIcon.CODE, "Algorithm", dto.getSignatureAlgorithm() != null ? dto.getSignatureAlgorithm() : "—"));
-        add(createIconRow(VaadinIcon.CLOCK, "Lifetime", formatLifetime(dto.getLifeTimeInMs())));
+        add(createIconRow(VaadinIcon.BUILDING, I18n.t("token.config.issuer"), dto.getIssuer() != null ? dto.getIssuer() : "—"));
+        add(createIconRow(VaadinIcon.GROUP, I18n.t("token.config.audience"), formatAudienceList()));
+        add(createIconRow(VaadinIcon.CODE, I18n.t("token.config.algorithm"), dto.getSignatureAlgorithm() != null ? dto.getSignatureAlgorithm() : "—"));
+        add(createIconRow(VaadinIcon.CLOCK, I18n.t("token.config.lifetime"), formatLifetime(dto.getLifeTimeInMs())));
     }
 
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
@@ -124,13 +125,13 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
     private String formatLifetime(Integer lifeTimeInMs) {
         if (lifeTimeInMs == null || lifeTimeInMs <= 0) return "—";
         long seconds = lifeTimeInMs / 1000;
-        if (seconds < 60) return seconds + " second" + (seconds != 1 ? "s" : "");
+        if (seconds < 60) return seconds + " " + I18n.t("time.seconds");
         long minutes = seconds / 60;
-        if (minutes < 60) return minutes + " minute" + (minutes != 1 ? "s" : "");
+        if (minutes < 60) return minutes + " " + I18n.t("time.minutes");
         long hours = minutes / 60;
-        if (hours < 24) return hours + " hour" + (hours != 1 ? "s" : "");
+        if (hours < 24) return hours + " " + I18n.t("time.hours");
         long days = hours / 24;
-        return days + " day" + (days != 1 ? "s" : "");
+        return days + " " + I18n.t("time.days");
     }
 
     private void refreshDisplay() {

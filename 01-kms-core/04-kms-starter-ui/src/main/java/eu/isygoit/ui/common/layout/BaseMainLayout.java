@@ -19,6 +19,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.remote.ims.AccountImageService;
 import eu.isygoit.remote.ims.AccountService;
+import eu.isygoit.ui.common.component.LanguageSelectorComponent;
 import eu.isygoit.ui.common.spring.SpringContextUtil;
 import feign.FeignException;
 import org.springframework.core.io.Resource;
@@ -80,10 +81,26 @@ public abstract class BaseMainLayout extends AppLayout {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        // Replace placeholder content with real profile component
+        // Replace placeholder content with real components (language selector + profile)
         rightSlot.removeAll();
-        rightSlot.add(createProfileComponent());
+        rightSlot.add(createRightHeaderContent());
         injectResponsiveStyles();
+    }
+
+    private Component createRightHeaderContent() {
+        HorizontalLayout rightContent = new HorizontalLayout();
+        rightContent.setAlignItems(FlexComponent.Alignment.CENTER);
+        rightContent.setSpacing(true);
+        rightContent.setPadding(false);
+
+        // Add language selector
+        LanguageSelectorComponent languageSelector = new LanguageSelectorComponent();
+        
+        // Add profile component
+        Component profileComponent = createProfileComponent();
+
+        rightContent.add(languageSelector, profileComponent);
+        return rightContent;
     }
 
     private Component createProfileComponent() {

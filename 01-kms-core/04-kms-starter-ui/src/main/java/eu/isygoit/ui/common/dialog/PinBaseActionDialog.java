@@ -2,6 +2,10 @@ package eu.isygoit.ui.common.dialog;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -11,6 +15,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Base dialog that adds a 9‑digit PIN confirmation for destructive actions.
+ * Displays a warning icon before the warning message in the content area.
  */
 public abstract class PinBaseActionDialog extends BaseActionDialog {
 
@@ -21,6 +26,7 @@ public abstract class PinBaseActionDialog extends BaseActionDialog {
     public PinBaseActionDialog(String title, String warningMessage, Runnable onSuccess, boolean requirePin) {
         super(title, onSuccess);
         this.requirePin = requirePin;
+
         if (requirePin) {
             this.confirmationCode = generateConfirmationCode();
             enableOkButton(false);
@@ -35,12 +41,31 @@ public abstract class PinBaseActionDialog extends BaseActionDialog {
         this(title, warningMessage, onSuccess, true);
     }
 
+    /**
+     * Builds a warning message layout with an icon before the text.
+     */
+    private HorizontalLayout createWarningMessage(String message) {
+        Icon warningIcon = VaadinIcon.WARNING.create();
+        warningIcon.setColor("var(--lumo-error-color)");
+        warningIcon.setSize("18px");
+        warningIcon.getStyle().set("flex-shrink", "0");
+
+        Span messageSpan = new Span(message);
+        messageSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+
+        HorizontalLayout warningLayout = new HorizontalLayout(warningIcon, messageSpan);
+        warningLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        warningLayout.setSpacing(true);
+        warningLayout.setPadding(false);
+        return warningLayout;
+    }
+
     private void buildContentWithPin(String warningMessage) {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
         layout.setPadding(true);
 
-        layout.add(new Span(warningMessage));
+        layout.add(createWarningMessage(warningMessage));
         layout.add(new Span("To confirm, enter the 9‑digit code below:"));
 
         layout.add(createCodeDisplay(confirmationCode));
@@ -56,7 +81,7 @@ public abstract class PinBaseActionDialog extends BaseActionDialog {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
         layout.setPadding(true);
-        layout.add(new Span(warningMessage));
+        layout.add(createWarningMessage(warningMessage));
         addContent(layout);
     }
 

@@ -26,6 +26,7 @@ import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.TokenConfigDto;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.tokenizer.config.dialog.CreateTokenConfigDialog;
 import feign.FeignException;
@@ -48,7 +49,7 @@ public class TokenConfigView extends VerticalLayout implements BeforeEnterObserv
     private final Div cardsContainer = new Div();
     private final TextField searchField = new TextField();
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
-    private final Button createButton = new Button("Create Config", new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button createButton = new Button(I18n.t("token.config.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final ProgressBar loadingBar = new ProgressBar();
 
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
@@ -78,7 +79,7 @@ public class TokenConfigView extends VerticalLayout implements BeforeEnterObserv
         setSpacing(true);
         addClassName("token-config-view");
 
-        H2 header = new H2("Token Configurations");
+        H2 header = new H2(I18n.t("token.config.header"));
         header.addClassNames(LumoUtility.FontSize.XXLARGE, LumoUtility.Margin.Bottom.NONE);
         add(header);
 
@@ -98,12 +99,12 @@ public class TokenConfigView extends VerticalLayout implements BeforeEnterObserv
             currentPage = 0;
             loadConfigs();
         });
-        refreshButton.setTooltipText("Refresh configurations");
+        refreshButton.setTooltipText(I18n.t("tooltip.refresh"));
 
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         createButton.addClickListener(e -> openCreateDialog());
 
-        searchField.setPlaceholder("Search by code or token type...");
+        searchField.setPlaceholder(I18n.t("token.config.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.addValueChangeListener(e -> {
@@ -198,9 +199,9 @@ public class TokenConfigView extends VerticalLayout implements BeforeEnterObserv
             renderCards();
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            showError("Failed to load configurations: " + errorMsg);
+            showError(I18n.t("notification.error.load") + ": " + errorMsg);
         } catch (Exception e) {
-            showError("Failed to load configurations: " + e.getMessage());
+            showError(I18n.t("notification.error.load") + ": " + e.getMessage());
         } finally {
             showLoading(false);
         }
@@ -208,11 +209,11 @@ public class TokenConfigView extends VerticalLayout implements BeforeEnterObserv
 
     private void updatePaginationDisplay() {
         if (totalPages > 0) {
-            pageInfoLabel.setText(String.format("Page %d/%d", currentPage + 1, totalPages));
+            pageInfoLabel.setText(I18n.t("token.config.page.info", currentPage + 1, totalPages));
         } else {
-            pageInfoLabel.setText("Page 0/0");
+            pageInfoLabel.setText(I18n.t("token.config.page.info", 0, 0));
         }
-        totalCountLabel.setText(String.format("%d configs", totalElements));
+        totalCountLabel.setText(I18n.t("token.config.total.count", totalElements));
         prevButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(currentPage + 1 < totalPages);
     }
@@ -226,8 +227,8 @@ public class TokenConfigView extends VerticalLayout implements BeforeEnterObserv
             Icon emptyIcon = VaadinIcon.CODE.create();
             emptyIcon.setSize("48px");
             emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-            H4 emptyTitle = new H4("No configurations found");
-            Paragraph emptyDesc = new Paragraph("Click 'Create Config' to add a token configuration.");
+            H4 emptyTitle = new H4(I18n.t("token.config.empty.title"));
+            Paragraph emptyDesc = new Paragraph(I18n.t("token.config.empty.description"));
             emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);
@@ -263,7 +264,7 @@ public class TokenConfigView extends VerticalLayout implements BeforeEnterObserv
                 loadConfigs();
             }
         } catch (Exception e) {
-            showError("Failed to refresh card: " + e.getMessage());
+            showError(I18n.t("notification.error.load") + ": " + e.getMessage());
         }
     }
 
