@@ -15,8 +15,11 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
@@ -32,11 +35,11 @@ import org.springframework.http.ResponseEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-@VaadinSessionScope //(or UIScope)
+@VaadinSessionScope
 @Route(value = "kms/digest-configs", layout = KmsMainLayout.class)
 @PageTitle("Digest Configurations")
 @PermitAll
-public class DigestConfigView extends VerticalLayout {
+public class DigestConfigView extends VerticalLayout implements BeforeEnterObserver {
 
     private final DigestConfigService configService;
     private final VerticalLayout cardsContainer = new VerticalLayout();
@@ -274,6 +277,15 @@ public class DigestConfigView extends VerticalLayout {
 
     private void injectResponsiveStyles() {
         String css = """
+                .digest-config-view {
+                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+                    min-height: 100vh;
+                    animation: fadeIn 0.5s ease-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
                 .digest-config-view .digest-toolbar {
                     display: flex;
                     flex-wrap: wrap;
@@ -295,5 +307,13 @@ public class DigestConfigView extends VerticalLayout {
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
                 css
         );
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (VaadinSession.getCurrent().getAttribute("user") == null) {
+            String currentPath = event.getLocation().getPath();
+            event.forwardTo("login?redirect=" + currentPath);
+        }
     }
 }

@@ -18,8 +18,11 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.DescribeCustomKeyStoreResponse;
@@ -40,11 +43,11 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 @Slf4j
-@VaadinSessionScope //(or UIScope)
+@VaadinSessionScope
 @Route(value = "kms/custom-key-stores", layout = KmsMainLayout.class)
 @PageTitle("Custom Key Stores")
 @PermitAll
-public class CustomKeyStoresView extends VerticalLayout {
+public class CustomKeyStoresView extends VerticalLayout implements BeforeEnterObserver {
 
     private final KmsApiService kmsApiService;
     private final VerticalLayout cardsContainer = new VerticalLayout();
@@ -58,8 +61,8 @@ public class CustomKeyStoresView extends VerticalLayout {
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
     private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
-    private final Span pageInfoLabel = new Span();      // shows "Page X/Y : N stores"
-    private final Span totalCountLabel = new Span();    // shows "Total stores"
+    private final Span pageInfoLabel = new Span();
+    private final Span totalCountLabel = new Span();
 
     // Pagination state (cursor-based)
     private final Stack<String> previousTokens = new Stack<>();
@@ -113,7 +116,7 @@ public class CustomKeyStoresView extends VerticalLayout {
         filterField.setWidth("250px");
         filterField.addValueChangeListener(e -> {
             currentFilter = e.getValue();
-            applyFilter(); // only filters the already loaded page, does not reload
+            applyFilter();
         });
 
         clearFilterButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
@@ -125,7 +128,6 @@ public class CustomKeyStoresView extends VerticalLayout {
             applyFilter();
         });
 
-        // Pagination initialisation
         pageSizeSelect.setItems(5, 10, 20, 50);
         pageSizeSelect.setValue(10);
         pageSizeSelect.setPlaceholder("Per page");
@@ -185,7 +187,6 @@ public class CustomKeyStoresView extends VerticalLayout {
             truncated = (body != null && Boolean.TRUE.equals(body.getTruncated()));
             currentToken = nextToken;
 
-            // Compute current page
             if (nextToken == null) {
                 currentPage = 1;
             } else {
@@ -194,7 +195,7 @@ public class CustomKeyStoresView extends VerticalLayout {
 
             currentPageStores = stores;
             updatePaginationDisplay();
-            applyFilter(); // apply client-side filter on the loaded page
+            applyFilter();
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             Notification.show("Failed to load stores: " + errorMsg, 6000, Notification.Position.BOTTOM_END)
@@ -275,20 +276,17 @@ public class CustomKeyStoresView extends VerticalLayout {
         toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         toolbar.addClassName("custom-stores-toolbar");
 
-        // Left group: filter
         HorizontalLayout leftGroup = new HorizontalLayout();
         leftGroup.setSpacing(true);
         leftGroup.setAlignItems(FlexComponent.Alignment.BASELINE);
         leftGroup.add(filterField, clearFilterButton);
 
-        // Center group: pagination
         HorizontalLayout centerGroup = new HorizontalLayout();
         centerGroup.setSpacing(true);
         centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
         pageSizeSelect.setWidth("120px");
         centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
 
-        // Right group: create + refresh
         HorizontalLayout rightGroup = new HorizontalLayout();
         rightGroup.setSpacing(true);
         rightGroup.setAlignItems(FlexComponent.Alignment.END);
@@ -304,22 +302,31 @@ public class CustomKeyStoresView extends VerticalLayout {
 
     private void injectResponsiveStyles() {
         String css = """
+                .kms-custom-stores-view {
+                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+                    min-height: 100vh;
+                    animation: fadeIn 0.5s ease-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .custom-stores-toolbar {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: var(--lumo-space-s);
+                    width: 100%;
+                }
+                @media (max-width: 768px) {
                     .custom-stores-toolbar {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: var(--lumo-space-s);
-                        width: 100%;
+                        flex-direction: column;
+                        align-items: stretch;
                     }
-                    @media (max-width: 768px) {
-                        .custom-stores-toolbar {
-                            flex-direction: column;
-                            align-items: stretch;
-                        }
-                        .custom-stores-toolbar > * {
-                            width: 100% !important;
-                            justify-content: center;
-                        }
+                    .custom-stores-toolbar > * {
+                        width: 100% !important;
+                        justify-content: center;
                     }
+                }
                 """;
         UI.getCurrent().getPage().executeJs(
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
@@ -342,8 +349,15 @@ public class CustomKeyStoresView extends VerticalLayout {
         pageSizeSelect.setEnabled(!show);
     }
 
-    // Called by dialogs to refresh the list after changes
     public void loadStores() {
         resetPaginationAndLoad();
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (VaadinSession.getCurrent().getAttribute("user") == null) {
+            String currentPath = event.getLocation().getPath();
+            event.forwardTo("login?redirect=" + currentPath);
+        }
     }
 }

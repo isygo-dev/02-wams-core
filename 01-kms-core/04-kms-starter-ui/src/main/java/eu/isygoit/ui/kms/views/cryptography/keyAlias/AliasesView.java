@@ -15,8 +15,11 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.ListAliasesResponse;
@@ -33,11 +36,11 @@ import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
-@VaadinSessionScope //(or UIScope)
+@VaadinSessionScope
 @Route(value = "kms/aliases", layout = KmsMainLayout.class)
 @PageTitle("Key Aliases")
 @PermitAll
-public class AliasesView extends VerticalLayout {
+public class AliasesView extends VerticalLayout implements BeforeEnterObserver {
 
     private final KmsApiService kmsApiService;
     private final VerticalLayout cardsContainer = new VerticalLayout();
@@ -48,11 +51,10 @@ public class AliasesView extends VerticalLayout {
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
     private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
-    private final Span pageInfoLabel = new Span();   // "Page X/Y : N aliases"
-    private final Span totalCountLabel = new Span(); // "Total: N aliases"
+    private final Span pageInfoLabel = new Span();
+    private final Span totalCountLabel = new Span();
     // Pagination state (cursor‑based)
     private final Stack<String> previousTokens = new Stack<>();
-    // Pagination controls
     private int pageSize = 10;
     private String currentNextToken = null;
     private String currentToken = null;
@@ -177,7 +179,6 @@ public class AliasesView extends VerticalLayout {
                 currentPage = previousTokens.size() + 1;
             }
 
-            // Build AliasCard list
             List<AliasCard> cards = new ArrayList<>();
             for (ListAliasesResponse.AliasEntry entry : aliasEntries) {
                 cards.add(new AliasCard(this, kmsApiService, entry));
@@ -241,14 +242,12 @@ public class AliasesView extends VerticalLayout {
         toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         toolbar.addClassName("aliases-toolbar");
 
-        // Left group: search field only (no status filter for aliases)
         HorizontalLayout leftGroup = new HorizontalLayout();
         leftGroup.setSpacing(true);
         leftGroup.setAlignItems(FlexComponent.Alignment.END);
         searchField.setWidth("200px");
         leftGroup.add(searchField);
 
-        // Center group: pagination controls (identical to KeyManagementView)
         HorizontalLayout centerGroup = new HorizontalLayout();
         centerGroup.setSpacing(true);
         centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -260,7 +259,6 @@ public class AliasesView extends VerticalLayout {
         totalCountLabel.getStyle().set("margin", "0 0.5rem");
         centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
 
-        // Right group: refresh + create button (refresh moved from left to right)
         HorizontalLayout rightGroup = new HorizontalLayout();
         rightGroup.setSpacing(true);
         rightGroup.setAlignItems(FlexComponent.Alignment.END);
@@ -275,6 +273,15 @@ public class AliasesView extends VerticalLayout {
 
     private void injectResponsiveStyles() {
         String css = """
+                .kms-aliases-view {
+                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+                    min-height: 100vh;
+                    animation: fadeIn 0.5s ease-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
                 .aliases-toolbar {
                     display: flex;
                     flex-wrap: wrap;
@@ -324,5 +331,13 @@ public class AliasesView extends VerticalLayout {
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
         return keyIds;
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (VaadinSession.getCurrent().getAttribute("user") == null) {
+            String currentPath = event.getLocation().getPath();
+            event.forwardTo("login?redirect=" + currentPath);
+        }
     }
 }

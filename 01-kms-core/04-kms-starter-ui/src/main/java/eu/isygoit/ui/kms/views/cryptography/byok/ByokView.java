@@ -18,8 +18,11 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
@@ -45,11 +48,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@VaadinSessionScope //(or UIScope)
+@VaadinSessionScope
 @Route(value = "kms/byok", layout = KmsMainLayout.class)
 @PageTitle("BYOK - Bring Your Own Key")
 @PermitAll
-public class ByokView extends VerticalLayout {
+public class ByokView extends VerticalLayout implements BeforeEnterObserver {
 
     private final KmsApiService kmsApiService;
     private final ComboBox<KeyOption> keyCombo = new ComboBox<>("External KMS Key");
@@ -212,7 +215,7 @@ public class ByokView extends VerticalLayout {
 
         deleteMaterialButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
         deleteMaterialButton.setTooltipText("Delete imported key material");
-        deleteMaterialButton.setVisible(false); // initially hidden
+        deleteMaterialButton.setVisible(false);
 
         row.add(keyStatusInfo, deleteMaterialButton);
         return row;
@@ -649,7 +652,7 @@ public class ByokView extends VerticalLayout {
         getParamsButton.setEnabled(!show);
         encryptNowButton.setEnabled(!show);
         importButton.setEnabled(!show);
-        deleteMaterialButton.setEnabled(!show); // keep enabled even when hidden, but visibility toggles
+        deleteMaterialButton.setEnabled(!show);
         encryptedMaterialField.setEnabled(!show);
         plainKeyMaterialField.setEnabled(!show);
         expirationDatePicker.setEnabled(!show);
@@ -672,6 +675,15 @@ public class ByokView extends VerticalLayout {
 
     private void injectResponsiveStyles() {
         String css = """
+                .kms-byok-view {
+                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+                    min-height: 100vh;
+                    animation: fadeIn 0.5s ease-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
                 .kms-byok-view {
                     max-width: 1200px;
                     margin: 0 auto;
@@ -711,6 +723,14 @@ public class ByokView extends VerticalLayout {
 
         boolean isExternal() {
             return isExternal;
+        }
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (VaadinSession.getCurrent().getAttribute("user") == null) {
+            String currentPath = event.getLocation().getPath();
+            event.forwardTo("login?redirect=" + currentPath);
         }
     }
 }

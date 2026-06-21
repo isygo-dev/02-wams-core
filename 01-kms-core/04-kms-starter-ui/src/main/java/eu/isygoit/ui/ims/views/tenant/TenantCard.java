@@ -241,11 +241,17 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
     }
 
     private void loadTenantImage() {
-        CompletableFuture.supplyAsync(() -> {
+        getUI().ifPresent(ui -> ui.access(() -> {
             try {
                 ResponseEntity<Resource> response = tenantImageService.downloadImage(tenant.getId());
                 if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                    return response.getBody().getContentAsByteArray();
+                    byte[] imageBytes = response.getBody().getContentAsByteArray();
+                    if (imageBytes != null && imageBytes.length > 0) {
+                        StreamResource resource = new StreamResource("tenant_" + tenant.getId() + ".jpg",
+                                () -> new ByteArrayInputStream(imageBytes));
+                        tenantImage.setSrc(resource);
+                        return; // Success, skip fallback
+                    }
                 }
             } catch (FeignException ex) {
                 if (ex.status() == 404) {
@@ -256,18 +262,9 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
             } catch (IOException e) {
                 log.error("Error reading image stream for tenant {}", tenant.getId(), e);
             }
-            return null;
-        }).thenAccept(imageBytes -> {
-            getUI().ifPresent(ui -> ui.access(() -> {
-                if (imageBytes != null && imageBytes.length > 0) {
-                    StreamResource resource = new StreamResource("tenant_" + tenant.getId() + ".jpg",
-                            () -> new ByteArrayInputStream(imageBytes));
-                    tenantImage.setSrc(resource);
-                } else {
-                    tenantImage.setSrc(getSvgPlaceholder());
-                }
-            }));
-        });
+            // Fallback to placeholder if anything fails
+            tenantImage.setSrc(getSvgPlaceholder());
+        }));
     }
 
     private String getSvgPlaceholder() {

@@ -12,6 +12,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.data.MinAccountDto;
@@ -25,6 +26,7 @@ import eu.isygoit.ui.ims.views.account.dialog.EnableDisableAccountDialog;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
 import java.io.ByteArrayInputStream;
@@ -272,32 +274,24 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
     }
 
     private void loadAccountImage() {
-        CompletableFuture.supplyAsync(() -> {
-            try {
-                ResponseEntity<Resource> response = accountImageService.downloadImage(minAccount.getId());
-                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                    return response.getBody().getContentAsByteArray();
+        getUI().ifPresent(ui -> {
+            ui.access(() -> {
+                try {
+                    ResponseEntity<Resource> response = accountImageService.downloadImage(minAccount.getId());
+                    if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                        byte[] imageBytes = response.getBody().getContentAsByteArray();
+                        if (imageBytes != null && imageBytes.length > 0) {
+                            StreamResource resource = new StreamResource("account_" + minAccount.getId() + ".jpg",
+                                    () -> new ByteArrayInputStream(imageBytes));
+                            accountImage.setSrc(resource);
+                            return;
+                        }
+                    }
+                } catch (FeignException | IOException e) {
+                    log.warn("Failed to load image", e);
                 }
-            } catch (FeignException ex) {
-                if (ex.status() == 404) {
-                    log.debug("No image found for account {}", minAccount.getId());
-                } else {
-                    log.warn("Failed to load image for account {}: {}", minAccount.getId(), ex.getMessage());
-                }
-            } catch (IOException e) {
-                log.error("Error reading image stream for account {}", minAccount.getId(), e);
-            }
-            return null;
-        }).thenAccept(imageBytes -> {
-            getUI().ifPresent(ui -> ui.access(() -> {
-                if (imageBytes != null && imageBytes.length > 0) {
-                    StreamResource resource = new StreamResource("account_" + minAccount.getId() + ".jpg",
-                            () -> new ByteArrayInputStream(imageBytes));
-                    accountImage.setSrc(resource);
-                } else {
-                    accountImage.setSrc(getSvgPlaceholder());
-                }
-            }));
+                accountImage.setSrc(getSvgPlaceholder());
+            });
         });
     }
 

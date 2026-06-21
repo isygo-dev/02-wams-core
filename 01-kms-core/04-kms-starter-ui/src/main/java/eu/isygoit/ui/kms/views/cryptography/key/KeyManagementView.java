@@ -17,8 +17,11 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
@@ -41,11 +44,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
-@VaadinSessionScope //(or UIScope)
+@VaadinSessionScope
 @Route(value = "kms/keys", layout = KmsMainLayout.class)
 @PageTitle("Key Management")
 @PermitAll
-public class KeyManagementView extends VerticalLayout {
+public class KeyManagementView extends VerticalLayout implements BeforeEnterObserver {
 
     private final KmsApiService kmsApiService;
     private final ObjectMapper objectMapper;
@@ -59,8 +62,8 @@ public class KeyManagementView extends VerticalLayout {
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
     private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
-    private final Span pageInfoLabel = new Span();      // shows "Page X/Y : N keys"
-    private final Span totalCountLabel = new Span();    // shows "TotalElements keys found"
+    private final Span pageInfoLabel = new Span();
+    private final Span totalCountLabel = new Span();
     // Key pagination state
     private final Stack<String> previousTokens = new Stack<>();
     // Alias browser components
@@ -76,7 +79,6 @@ public class KeyManagementView extends VerticalLayout {
     // Alias pagination state (cursor-based)
     private final Stack<String> aliasPreviousTokens = new Stack<>();
     private final int aliasCurrentLimit = 10;
-    // Pagination controls for keys (server-side cursor-based)
     private int pageSize = 10;
     private String currentNextToken = null;
     private String currentToken = null;
@@ -207,14 +209,12 @@ public class KeyManagementView extends VerticalLayout {
             truncated = (body != null && Boolean.TRUE.equals(body.getTruncated()));
             currentToken = nextToken;
 
-            // Compute current page number from navigation stack
             if (nextToken == null) {
                 currentPage = 1;
             } else {
                 currentPage = previousTokens.size() + 1;
             }
 
-            // Build KeyCard list from key entries
             List<KeyCard> cards = new ArrayList<>();
             for (ListKeysResponse.KeyEntry entry : keyEntries) {
                 try {
@@ -247,14 +247,11 @@ public class KeyManagementView extends VerticalLayout {
     }
 
     private void updatePaginationDisplay() {
-        // Display: "Page X/Y : N keys"
         if (totalPages > 0) {
             pageInfoLabel.setText(String.format("Page %d/%d : %d keys", currentPage, totalPages, numberOfElements));
         } else {
-            // Fallback when totalPages is not available (e.g., initial load or zero)
             pageInfoLabel.setText(String.format("Page %d : %d keys", currentPage, numberOfElements));
         }
-        // Display: "TotalElements keys found"
         totalCountLabel.setText(String.format("%d keys found", totalElements));
 
         prevButton.setEnabled(!previousTokens.isEmpty());
@@ -340,7 +337,6 @@ public class KeyManagementView extends VerticalLayout {
         toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         toolbar.addClassName("key-management-toolbar");
 
-        // Left group
         HorizontalLayout leftGroup = new HorizontalLayout();
         leftGroup.setSpacing(true);
         leftGroup.setAlignItems(FlexComponent.Alignment.END);
@@ -353,7 +349,6 @@ public class KeyManagementView extends VerticalLayout {
         statusLayout.setSpacing(true);
         leftGroup.add(searchField, statusLayout);
 
-        // Center group
         HorizontalLayout centerGroup = new HorizontalLayout();
         centerGroup.setSpacing(true);
         centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -365,7 +360,6 @@ public class KeyManagementView extends VerticalLayout {
         totalCountLabel.getStyle().set("margin", "0 0.5rem");
         centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
 
-        // Right group
         HorizontalLayout rightGroup = new HorizontalLayout();
         rightGroup.setSpacing(true);
         rightGroup.setAlignItems(FlexComponent.Alignment.END);
@@ -380,6 +374,15 @@ public class KeyManagementView extends VerticalLayout {
 
     private void injectResponsiveStyles() {
         String css = """
+                .kms-keys-view {
+                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+                    min-height: 100vh;
+                    animation: fadeIn 0.5s ease-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
                 .key-management-toolbar {
                     display: flex;
                     flex-wrap: wrap;
@@ -414,7 +417,6 @@ public class KeyManagementView extends VerticalLayout {
         new CreateKeyDialog(this, kmsApiService, objectMapper, () -> resetKeyPaginationAndLoad()).open();
     }
 
-    // Utility method for tag rows in other dialogs (kept for compatibility)
     public void addTagRow(VerticalLayout container, List<HorizontalLayout> rows, String existingKey, String existingValue) {
         String randomKey = (existingKey != null) ? existingKey : "tag-" + UUID.randomUUID().toString().substring(0, 8);
         TextField keyField = new TextField();
@@ -442,5 +444,13 @@ public class KeyManagementView extends VerticalLayout {
     }
 
     public record KeyStatusOption(String label, IEnumKeyStatus.Types value) {
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (VaadinSession.getCurrent().getAttribute("user") == null) {
+            String currentPath = event.getLocation().getPath();
+            event.forwardTo("login?redirect=" + currentPath);
+        }
     }
 }

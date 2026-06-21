@@ -16,8 +16,11 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
@@ -33,11 +36,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@VaadinSessionScope //(or UIScope)
+@VaadinSessionScope
 @Route(value = "kms/random-keys", layout = KmsMainLayout.class)
 @PageTitle("Random Keys")
 @PermitAll
-public class RandomKeyView extends Composite<VerticalLayout> {
+public class RandomKeyView extends Composite<VerticalLayout> implements BeforeEnterObserver {
 
     private final RandomKeyService keyService;
 
@@ -54,7 +57,7 @@ public class RandomKeyView extends Composite<VerticalLayout> {
     private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
 
-    private List<RandomKeyDto> allKeysForSearch = new ArrayList<>(); // used only when search is active
+    private List<RandomKeyDto> allKeysForSearch = new ArrayList<>();
     private int currentPage = 0;
     private int pageSize = 10;
     private int totalPages = 0;
@@ -171,7 +174,6 @@ public class RandomKeyView extends Composite<VerticalLayout> {
         showLoading(true);
         try {
             if (currentSearch == null || currentSearch.isBlank()) {
-                // Server-side pagination
                 ResponseEntity<PaginatedResponseDto<RandomKeyDto>> response =
                         keyService.listRandomKeys(currentPage, pageSize);
                 PaginatedResponseDto<RandomKeyDto> body = response.getBody();
@@ -188,9 +190,8 @@ public class RandomKeyView extends Composite<VerticalLayout> {
                 updatePaginationDisplay();
                 renderCards(allKeysForSearch);
             } else {
-                // Client-side search: fetch all (up to a reasonable limit) then filter and paginate
                 ResponseEntity<PaginatedResponseDto<RandomKeyDto>> response =
-                        keyService.listRandomKeys(0, 5000); // fetch up to 5000, acceptable for demo
+                        keyService.listRandomKeys(0, 5000);
                 PaginatedResponseDto<RandomKeyDto> body = response.getBody();
                 List<RandomKeyDto> fullList = (body != null && body.getContent() != null)
                         ? body.getContent() : new ArrayList<>();
@@ -251,7 +252,6 @@ public class RandomKeyView extends Composite<VerticalLayout> {
     }
 
     public void refreshCard(RandomKeyCard card) {
-        // Reload the whole list to reflect any changes (renewal, deletion)
         loadKeys();
     }
 
@@ -270,9 +270,13 @@ public class RandomKeyView extends Composite<VerticalLayout> {
     private void injectResponsiveStyles() {
         String css = """
                 .random-keys-view {
-                    display: flex;
-                    flex-direction: column;
-                    gap: var(--lumo-space-m);
+                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+                    min-height: 100vh;
+                    animation: fadeIn 0.5s ease-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
                 }
                 .randomkey-toolbar {
                     flex-wrap: wrap;
@@ -293,5 +297,13 @@ public class RandomKeyView extends Composite<VerticalLayout> {
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
                 css
         );
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (VaadinSession.getCurrent().getAttribute("user") == null) {
+            String currentPath = event.getLocation().getPath();
+            event.forwardTo("login?redirect=" + currentPath);
+        }
     }
 }
