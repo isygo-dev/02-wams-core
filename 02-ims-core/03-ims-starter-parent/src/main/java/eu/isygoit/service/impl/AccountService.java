@@ -166,7 +166,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
                     .distinct()
                     .map(application -> {
                         ApplicationDto app = applicationMapper.entityToDto(application);
-                        app.setToken(kmsTokenService.buildToken(
+                        app.setToken(kmsTokenService.buildToken(account.getTenant(),
                                 Set.of(application.getName()),
                                 IEnumToken.Types.ACCESS,
                                 TokenRequestDto.builder()
@@ -183,7 +183,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
                     .distinct().
                     map(application -> {
                         ApplicationDto app = applicationMapper.entityToDto(application);
-                        app.setToken(kmsTokenService.buildToken(
+                        app.setToken(kmsTokenService.buildToken(account.getTenant(),
                                 Set.of(application.getName()),
                                 IEnumToken.Types.ACCESS,
                                 TokenRequestDto.builder()
@@ -252,7 +252,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
 
             } else if (IEnumAuth.Types.QRC == account.getAuthType()) {
                 try {
-                    ResponseEntity<TokenResponseDto> result = kmsTokenService.buildToken(
+                    ResponseEntity<TokenResponseDto> result = kmsTokenService.buildToken(account.getTenant(),
                             Set.of(IEnumAuth.Types.QRC.meaning()),
                             IEnumToken.Types.QRC,
                             TokenRequestDto.builder()

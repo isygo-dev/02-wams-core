@@ -8,21 +8,13 @@ import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
 import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.response.AccessKeyResponseDto;
-import eu.isygoit.dto.response.AccessTokenResponseDto;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.enums.IEnumPasswordStatus;
-import eu.isygoit.enums.IEnumToken;
-import eu.isygoit.enums.IEnumWebToken;
-import eu.isygoit.exception.AccountAuthenticationException;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.mapper.AccountMapper;
-import eu.isygoit.service.*;
-import eu.isygoit.service.impl.TokenService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import eu.isygoit.service.IAccountService;
+import eu.isygoit.service.IPasswordService;
+import eu.isygoit.service.RequestContextService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +22,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Set;
 
 /**
  * The type Password controller.
@@ -47,13 +37,9 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     @Autowired
     private IAccountService accountService;
     @Autowired
-    private ITenantService tenantService;
-    @Autowired
     private AccountMapper accountMapper;
     @Autowired
     private IPasswordService passwordService;
-    @Autowired
-    private TokenService tokenService;
     @Autowired
     private RequestContextService requestContextService;
 
@@ -140,68 +126,14 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     }
 
     @Override
-    public ResponseEntity<AccessTokenResponseDto> getAccess(
-            AccessRequestDto accessRequest) {
-        log.info("Call access for tenant {}", accessRequest);
+    public ResponseEntity<IEnumPasswordStatus.Types> matchesPassword(
+            MatchesRequestDto matchesRequest) {
+        log.info("Call match password for tenant {}", matchesRequest);
         try {
-            if (!tenantService.isEnabled(accessRequest.getTenant().trim().toLowerCase())) {
-                throw new AccountAuthenticationException("tenant disabled: " + accessRequest.getTenant());
-            }
-
-            if (IEnumAuth.Types.TOKEN == accessRequest.getAuthType()) {
-                try {
-                    tokenService.isTokenValid(accessRequest.getTenant(),
-                            Set.of(accessRequest.getApplication()),
-                            IEnumToken.Types.ACCESS,
-                            accessRequest.getPassword(),
-                            new StringBuilder(accessRequest.getUserName().trim().toLowerCase())
-                                    .append("@")
-                                    .append(accessRequest.getTenant().trim().toLowerCase())
-                                    .toString());
-                } catch (Exception e) {
-                    return ResponseFactory.responseOk(AccessTokenResponseDto.builder()
-                            .status(IEnumPasswordStatus.Types.UNAUTHORIZED)
-                            .build());
-                }
-
-                return ResponseFactory.responseOk(AccessTokenResponseDto.builder()
-                        .status(IEnumPasswordStatus.Types.VALID)
-                        .tokenType(IEnumWebToken.Types.Bearer)
-                        .accessToken(tokenService.buildAccessToken(accessRequest.getTenant().trim().toLowerCase(),
-                                        Set.of(accessRequest.getApplication()),
-                                        accessRequest.getUserName().trim().toLowerCase(),
-                                        accessRequest.getIsAdmin())
-                                .getToken())
-                        .refreshToken(tokenService.buildRefreshToken(accessRequest.getTenant().trim().toLowerCase(),
-                                        Set.of(accessRequest.getApplication()),
-                                        accessRequest.getUserName().trim().toLowerCase())
-                                .getToken())
-                        .authorityToken(tokenService.buildAuthorityToken(accessRequest.getTenant().trim().toLowerCase(),
-                                        Set.of(accessRequest.getApplication()),
-                                        accessRequest.getUserName().trim().toLowerCase(),
-                                        accessRequest.getAuthorities())
-                                .getToken())
-                        .build());
-            } else {
-                return ResponseFactory.responseOk(AccessTokenResponseDto.builder()
-                        .status(passwordService.matches(accessRequest.getTenant().trim().toLowerCase()
-                                , accessRequest.getUserName().trim().toLowerCase()
-                                , accessRequest.getPassword()
-                                , accessRequest.getAuthType()))
-                        .tokenType(IEnumWebToken.Types.Bearer)
-                        .accessToken(tokenService.buildAccessToken(accessRequest.getTenant().trim().toLowerCase(),
-                                Set.of(accessRequest.getApplication()),
-                                accessRequest.getUserName().trim().toLowerCase(),
-                                accessRequest.getIsAdmin()).getToken())
-                        .refreshToken(tokenService.buildRefreshToken(accessRequest.getTenant().trim().toLowerCase(),
-                                Set.of(accessRequest.getApplication()),
-                                accessRequest.getUserName().trim().toLowerCase()).getToken())
-                        .authorityToken(tokenService.buildAuthorityToken(accessRequest.getTenant().trim().toLowerCase(),
-                                Set.of(accessRequest.getApplication()),
-                                accessRequest.getUserName().trim().toLowerCase(),
-                                accessRequest.getAuthorities()).getToken())
-                        .build());
-            }
+            return ResponseFactory.responseOk(passwordService.matches(matchesRequest.getTenant()
+                    , matchesRequest.getUserName()
+                    , matchesRequest.getPassword()
+                    , IEnumAuth.Types.PWD));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -209,14 +141,14 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     }
 
     @Override
-    public ResponseEntity<IEnumPasswordStatus.Types> matches(
+    public ResponseEntity<IEnumPasswordStatus.Types> matchesToken(
             MatchesRequestDto matchesRequest) {
         log.info("Call match password for tenant {}", matchesRequest);
         try {
             return ResponseFactory.responseOk(passwordService.matches(matchesRequest.getTenant()
                     , matchesRequest.getUserName()
                     , matchesRequest.getPassword()
-                    , matchesRequest.getAuthType()));
+                    , IEnumAuth.Types.TOKEN));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

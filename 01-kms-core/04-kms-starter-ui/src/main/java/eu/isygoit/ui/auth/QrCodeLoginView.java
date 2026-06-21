@@ -10,7 +10,10 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -24,13 +27,14 @@ import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 @Component
-@UIScope //(or @VaadinSessionScope)
+@UIScope
 @Route(value = "login/qr")
 @PageTitle("QR Code Login")
 @PermitAll
@@ -44,6 +48,7 @@ public class QrCodeLoginView extends VerticalLayout implements BeforeEnterObserv
     private String tenant;
     private String username;
     private String qrCodeToken;
+    private String redirectTarget;
 
     @Autowired
     private PublicAuthService authService;
@@ -111,7 +116,7 @@ public class QrCodeLoginView extends VerticalLayout implements BeforeEnterObserv
                 injectResponsiveStyles();
                 stylesInjected = true;
             }
-            // Defer QR scan simulation until after attach
+            // Simulate QR scan after 5 seconds (demo)
             UI.getCurrent().getPage().executeJs(
                     "setTimeout(() => { $0.dispatchEvent(new Event('qr-scanned')); }, 5000);",
                     getElement()
@@ -163,9 +168,12 @@ public class QrCodeLoginView extends VerticalLayout implements BeforeEnterObserv
                 AuthResponseDto authResponse = response.getBody();
                 VaadinSession.getCurrent().setAttribute("user", username);
                 VaadinSession.getCurrent().setAttribute("accessToken", authResponse.getAccessToken());
+
+                String target = (redirectTarget != null) ? redirectTarget : "kms";
+                UI.getCurrent().navigate(target);
+
                 Notification.show("Logged in via QR code!", 2000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                UI.getCurrent().navigate("ims");
             } else {
                 statusContainer.setText("QR authentication failed. Please try again.");
                 statusContainer.getStyle().set("color", "var(--lumo-error-text-color)");
@@ -180,15 +188,23 @@ public class QrCodeLoginView extends VerticalLayout implements BeforeEnterObserv
     public void beforeEnter(BeforeEnterEvent event) {
         Optional<String> tenantOpt = event.getLocation().getQueryParameters().getSingleParameter("tenant");
         Optional<String> usernameOpt = event.getLocation().getQueryParameters().getSingleParameter("username");
+        redirectTarget = event.getLocation().getQueryParameters()
+                .getSingleParameter("redirect")
+                .filter(this::isSafeInternalPath)
+                .orElse(null);
 
         if (tenantOpt.isEmpty() || usernameOpt.isEmpty()) {
-            UI.getCurrent().navigate("login");
+            event.forwardTo("login");
             return;
         }
 
         tenant = tenantOpt.get();
         username = usernameOpt.get();
         generateQrCode();
+    }
+
+    private boolean isSafeInternalPath(String path) {
+        return StringUtils.hasText(path) && path.startsWith("/") && !path.contains("..") && !path.contains("//");
     }
 
     private void injectResponsiveStyles() {

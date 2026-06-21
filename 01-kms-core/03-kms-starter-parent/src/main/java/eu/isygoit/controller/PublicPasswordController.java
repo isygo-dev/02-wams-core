@@ -6,12 +6,20 @@ import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.dto.common.UserContextRequestDto;
+import eu.isygoit.dto.request.AccessRequestDto;
 import eu.isygoit.dto.request.GeneratePwdRequestDto;
 import eu.isygoit.dto.request.IsPwdExpiredRequestDto;
+import eu.isygoit.dto.request.MatchesRequestDto;
 import eu.isygoit.dto.response.AccessKeyResponseDto;
+import eu.isygoit.dto.response.AccessTokenResponseDto;
 import eu.isygoit.enums.IEnumAuth;
+import eu.isygoit.enums.IEnumPasswordStatus;
+import eu.isygoit.enums.IEnumToken;
+import eu.isygoit.enums.IEnumWebToken;
+import eu.isygoit.exception.AccountAuthenticationException;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.service.IPasswordService;
+import eu.isygoit.service.ITenantService;
 import eu.isygoit.service.ITokenBuilderService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +47,78 @@ public class PublicPasswordController extends ControllerExceptionHandler impleme
 
     @Autowired
     private IPasswordService passwordService;
+
+    @Autowired
+    private ITenantService tenantService;
+
+    @Override
+    public ResponseEntity<AccessTokenResponseDto> getAccess(
+            AccessRequestDto accessRequest) {
+        log.info("Call access for tenant {}", accessRequest);
+        try {
+            if (!tenantService.isEnabled(accessRequest.getTenant().trim().toLowerCase())) {
+                throw new AccountAuthenticationException("tenant disabled: " + accessRequest.getTenant());
+            }
+
+            if (IEnumAuth.Types.TOKEN == accessRequest.getAuthType()) {
+                try {
+                    tokenService.isTokenValid(accessRequest.getTenant(),
+                            Set.of(accessRequest.getApplication()),
+                            IEnumToken.Types.ACCESS,
+                            accessRequest.getPassword(),
+                            new StringBuilder(accessRequest.getUserName().trim().toLowerCase())
+                                    .append("@")
+                                    .append(accessRequest.getTenant().trim().toLowerCase())
+                                    .toString());
+                } catch (Exception e) {
+                    return ResponseFactory.responseOk(AccessTokenResponseDto.builder()
+                            .status(IEnumPasswordStatus.Types.UNAUTHORIZED)
+                            .build());
+                }
+
+                return ResponseFactory.responseOk(AccessTokenResponseDto.builder()
+                        .status(IEnumPasswordStatus.Types.VALID)
+                        .tokenType(IEnumWebToken.Types.Bearer)
+                        .accessToken(tokenService.buildAccessToken(accessRequest.getTenant().trim().toLowerCase(),
+                                        Set.of(accessRequest.getApplication()),
+                                        accessRequest.getUserName().trim().toLowerCase(),
+                                        accessRequest.getIsAdmin())
+                                .getToken())
+                        .refreshToken(tokenService.buildRefreshToken(accessRequest.getTenant().trim().toLowerCase(),
+                                        Set.of(accessRequest.getApplication()),
+                                        accessRequest.getUserName().trim().toLowerCase())
+                                .getToken())
+                        .authorityToken(tokenService.buildAuthorityToken(accessRequest.getTenant().trim().toLowerCase(),
+                                        Set.of(accessRequest.getApplication()),
+                                        accessRequest.getUserName().trim().toLowerCase(),
+                                        accessRequest.getAuthorities())
+                                .getToken())
+                        .build());
+            } else {
+                return ResponseFactory.responseOk(AccessTokenResponseDto.builder()
+                        .status(passwordService.matches(accessRequest.getTenant().trim().toLowerCase()
+                                , accessRequest.getUserName().trim().toLowerCase()
+                                , accessRequest.getPassword()
+                                , accessRequest.getAuthType()))
+                        .tokenType(IEnumWebToken.Types.Bearer)
+                        .accessToken(tokenService.buildAccessToken(accessRequest.getTenant().trim().toLowerCase(),
+                                Set.of(accessRequest.getApplication()),
+                                accessRequest.getUserName().trim().toLowerCase(),
+                                accessRequest.getIsAdmin()).getToken())
+                        .refreshToken(tokenService.buildRefreshToken(accessRequest.getTenant().trim().toLowerCase(),
+                                Set.of(accessRequest.getApplication()),
+                                accessRequest.getUserName().trim().toLowerCase()).getToken())
+                        .authorityToken(tokenService.buildAuthorityToken(accessRequest.getTenant().trim().toLowerCase(),
+                                Set.of(accessRequest.getApplication()),
+                                accessRequest.getUserName().trim().toLowerCase(),
+                                accessRequest.getAuthorities()).getToken())
+                        .build());
+            }
+        } catch (Throwable e) {
+            log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
+            return getBackExceptionResponse(e);
+        }
+    }
 
     @Override
     public ResponseEntity<Boolean> isOtpExpired(
@@ -69,6 +149,37 @@ public class PublicPasswordController extends ControllerExceptionHandler impleme
             return getBackExceptionResponse(e);
         }
     }
+
+    @Override
+    public ResponseEntity<IEnumPasswordStatus.Types> matchesOtp(
+            MatchesRequestDto matchesRequest) {
+        log.info("Call match password for tenant {}", matchesRequest);
+        try {
+            return ResponseFactory.responseOk(passwordService.matches(matchesRequest.getTenant()
+                    , matchesRequest.getUserName()
+                    , matchesRequest.getPassword()
+                    , IEnumAuth.Types.OTP));
+        } catch (Throwable e) {
+            log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
+            return getBackExceptionResponse(e);
+        }
+    }
+
+    @Override
+    public ResponseEntity<IEnumPasswordStatus.Types> matchesQrc(
+            MatchesRequestDto matchesRequest) {
+        log.info("Call match password for tenant {}", matchesRequest);
+        try {
+            return ResponseFactory.responseOk(passwordService.matches(matchesRequest.getTenant()
+                    , matchesRequest.getUserName()
+                    , matchesRequest.getPassword()
+                    , IEnumAuth.Types.QRC));
+        } catch (Throwable e) {
+            log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
+            return getBackExceptionResponse(e);
+        }
+    }
+
 
     @Override
     public ResponseEntity<Integer> generateOtp(

@@ -4,7 +4,10 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -26,9 +29,10 @@ import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Component
-@UIScope //(or @VaadinSessionScope)
+@UIScope
 @Route(value = "login")
 @PageTitle("Sign In")
 @PermitAll
@@ -39,6 +43,8 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
     private final Button continueButton = new Button("Continue", VaadinIcon.ARROW_RIGHT.create());
     private final Div errorContainer = new Div();
     private boolean stylesInjected = false;
+
+    private String redirectTarget; // Store for later use
 
     @Autowired
     private PublicAuthService authService;
@@ -133,20 +139,24 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
                 UserContext userContext = response.getBody();
                 IEnumAuth.Types authType = userContext.getAuthTypeMode();
 
+                // Build base query string with tenant + username
+                StringBuilder query = new StringBuilder("?tenant=" + tenant + "&username=" + username);
+                // Append redirect parameter if present
+                if (redirectTarget != null) {
+                    query.append("&redirect=").append(redirectTarget);
+                }
+
+                Integer otpLength = null;
                 String targetView;
                 switch (authType) {
                     case PWD:
                         targetView = "login/password";
                         break;
                     case OTP:
-                        targetView = "login/otp";
                         // Pass the OTP length as a query parameter
-                        int otpLength = userContext.getOtpLength();
-                        UI.getCurrent().navigate(targetView +
-                                "?tenant=" + tenant +
-                                "&username=" + username +
-                                "&otpLength=" + otpLength);
-                        return; // return to avoid double navigation
+                        otpLength = userContext.getOtpLength();
+                        targetView = "login/otp";
+                        break; // return to avoid double navigation
                     case QRC:
                         targetView = "login/qr";
                         break;
@@ -160,9 +170,11 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
                 }
 
                 // For PWD and QRC, navigate with only tenant and username
-                UI.getCurrent().navigate(targetView +
-                        "?tenant=" + tenant +
-                        "&username=" + username);
+                UI.getCurrent().navigate(targetView + "?" +
+                        (tenant != null ? "tenant=" + tenant : "") +
+                        (username != null ? "&username=" + username : "") +
+                        (otpLength != null ? "&otpLength=" + otpLength : "")
+                );
             } else {
                 showError("Unable to determine authentication method. Please check your credentials.");
             }
@@ -180,14 +192,27 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        // Capture redirect parameter
+        redirectTarget = event.getLocation()
+                .getQueryParameters()
+                .getSingleParameter("redirect")
+                .filter(this::isSafeInternalPath)
+                .orElse(null);
+
         if (VaadinSession.getCurrent().getAttribute("user") != null) {
-            event.forwardTo("ims");
+            // Already authenticated – forward to original target or default
+            String target = (redirectTarget != null) ? redirectTarget : "kms";
+            event.forwardTo(target);
+            return;
         }
         errorContainer.setVisible(false);
     }
 
+    private boolean isSafeInternalPath(String path) {
+        return StringUtils.hasText(path) && path.startsWith("/") && !path.contains("..") && !path.contains("//");
+    }
+
     private void injectResponsiveStyles() {
-        // ... (same as before, omitted for brevity)
         String css = """
                 .login-view {
                     background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);

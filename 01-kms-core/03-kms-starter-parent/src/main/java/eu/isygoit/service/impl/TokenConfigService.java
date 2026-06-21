@@ -109,7 +109,7 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
         // Fallback: token config from system properties
         return TokenConfig.builder()
                 .issuer(tenant)
-                .audience(Set.of("*"))
+                .audience(Set.of(TokenConfig.ALL_AUDIENCES))
                 .signatureAlgorithm(jwtProperties.getSignatureAlgorithm().name())
                 .secretKey(jwtProperties.getSecretKey())
                 .lifeTimeInMs(jwtProperties.getLifeTimeInMs())

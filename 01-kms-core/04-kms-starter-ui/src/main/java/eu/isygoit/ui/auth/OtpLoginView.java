@@ -4,7 +4,10 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -29,6 +32,7 @@ import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +40,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
-@UIScope //(or @VaadinSessionScope)
+@UIScope
 @Route(value = "login/otp")
 @PageTitle("OTP Login")
 @PermitAll
@@ -51,7 +55,8 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
 
     private String tenant;
     private String username;
-    private int otpLength = 6; // default, will be overridden
+    private int otpLength = 6;
+    private String redirectTarget;
     private List<TextField> digitFields = new ArrayList<>();
 
     @Autowired
@@ -81,7 +86,7 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
         usernameField.setWidthFull();
         usernameField.setReadOnly(true);
 
-        // OTP fields container – will be populated dynamically
+        // OTP fields container
         otpFieldsLayout.setSpacing(true);
         otpFieldsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         otpFieldsLayout.setWidthFull();
@@ -136,7 +141,6 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
 
         for (int i = 0; i < length; i++) {
             TextField field = new TextField();
-            // No explicit width – let CSS handle sizing
             field.setMaxLength(1);
             field.setPattern("[0-9]");
             field.setPlaceholder("•");
@@ -144,15 +148,11 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
             final int index = i;
             field.addValueChangeListener(e -> {
                 String val = e.getValue();
-                if (!val.isEmpty()) {
-                    // Move to next field if available
-                    if (index < digitFields.size() - 1) {
-                        digitFields.get(index + 1).focus();
-                    }
+                if (!val.isEmpty() && index < digitFields.size() - 1) {
+                    digitFields.get(index + 1).focus();
                 }
                 updateLoginButtonState();
             });
-            // Allow backspace to move to previous field
             field.addKeyDownListener(e -> {
                 if (e.getKey().equals(com.vaadin.flow.component.Key.BACKSPACE) &&
                         field.getValue().isEmpty() && index > 0) {
@@ -162,13 +162,10 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
             digitFields.add(field);
             otpFieldsLayout.add(field);
         }
-        // Enable all fields from the start
         digitFields.forEach(f -> f.setEnabled(true));
-        // Focus the first field
         if (!digitFields.isEmpty()) {
             digitFields.get(0).focus();
         }
-        // Clear any previous values
         digitFields.forEach(TextField::clear);
         loginButton.setEnabled(false);
     }
@@ -183,7 +180,6 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
     }
 
     private void requestOtp() {
-        // Clear previous OTP fields and focus first
         digitFields.forEach(f -> f.clear());
         if (!digitFields.isEmpty()) {
             digitFields.get(0).focus();
@@ -191,27 +187,8 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
         loginButton.setEnabled(false);
         errorContainer.setVisible(false);
 
-        // Here we would call the backend to send the OTP.
-        // For demonstration, we simulate success.
-        // In production, uncomment the real call:
-        /*
-        UserContextRequestDto request = UserContextRequestDto.builder()
-                .tenant(tenant)
-                .userName(username)
-                .build();
-        try {
-            ResponseEntity<Boolean> response = authService.generateForgotPWDToken(request);
-            if (response.getStatusCode().is2xxSuccessful() && Boolean.TRUE.equals(response.getBody())) {
-                Notification.show("OTP sent to your registered email.", 4000, Notification.Position.BOTTOM_END)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            } else {
-                showError("Failed to send OTP. Please try again.");
-            }
-        } catch (Exception ex) {
-            showError("Service error. Please try again.");
-        }
-        */
-        // Demo:
+        // In production, call the actual OTP service.
+        // For demo, simulate success.
         Notification.show("OTP sent to your registered email.", 4000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
@@ -237,9 +214,12 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
                 AuthResponseDto authResponse = response.getBody();
                 VaadinSession.getCurrent().setAttribute("user", username);
                 VaadinSession.getCurrent().setAttribute("accessToken", authResponse.getAccessToken());
+
+                String target = (redirectTarget != null) ? redirectTarget : "kms";
+                UI.getCurrent().navigate(target);
+
                 Notification.show("Welcome " + username + "!", 2000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                UI.getCurrent().navigate("ims");
             } else {
                 showError("Invalid OTP. Please try again.");
             }
@@ -260,9 +240,13 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
         Optional<String> tenantOpt = event.getLocation().getQueryParameters().getSingleParameter("tenant");
         Optional<String> usernameOpt = event.getLocation().getQueryParameters().getSingleParameter("username");
         Optional<String> otpLengthOpt = event.getLocation().getQueryParameters().getSingleParameter("otpLength");
+        redirectTarget = event.getLocation().getQueryParameters()
+                .getSingleParameter("redirect")
+                .filter(this::isSafeInternalPath)
+                .orElse(null);
 
         if (tenantOpt.isEmpty() || usernameOpt.isEmpty() || otpLengthOpt.isEmpty()) {
-            UI.getCurrent().navigate("login");
+            event.forwardTo("login");
             return;
         }
 
@@ -271,14 +255,16 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
         try {
             otpLength = Integer.parseInt(otpLengthOpt.get());
         } catch (NumberFormatException e) {
-            otpLength = 6; // fallback
+            otpLength = 6;
         }
 
         usernameField.setValue(username);
         errorContainer.setVisible(false);
-
-        // Build and enable OTP fields
         buildOtpFields(otpLength);
+    }
+
+    private boolean isSafeInternalPath(String path) {
+        return StringUtils.hasText(path) && path.startsWith("/") && !path.contains("..") && !path.contains("//");
     }
 
     private void injectResponsiveStyles() {

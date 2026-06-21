@@ -5,8 +5,13 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import jakarta.annotation.security.PermitAll;
+import org.springframework.util.StringUtils;
 
+import java.util.Optional;
+
+@VaadinSessionScope //(or UIScope)
 @Route("")
 @PermitAll
 public class IndexView extends Div implements BeforeEnterObserver {
@@ -14,9 +19,26 @@ public class IndexView extends Div implements BeforeEnterObserver {
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         if (VaadinSession.getCurrent().getAttribute("user") != null) {
-            event.forwardTo("ims");
+            // Try to get the redirect target from query parameters.
+            Optional<String> redirectOpt = event.getLocation()
+                    .getQueryParameters()
+                    .getSingleParameter("redirect");
+
+            // If a redirect target exists and is a valid internal path, use it.
+            // Otherwise, fall back to a default view.
+            String target = redirectOpt
+                    .filter(this::isSafeInternalPath)
+                    .orElse("kms");
+
+            event.forwardTo(target);
         } else {
             event.forwardTo("login");
         }
+    }
+
+    private boolean isSafeInternalPath(String path) {
+        // Prevent open redirects: only allow relative paths that start with '/'
+        // and do not contain malicious patterns like "//", "..", or external URLs.
+        return StringUtils.hasText(path) && path.startsWith("/") && !path.contains("..") && !path.contains("//");
     }
 }

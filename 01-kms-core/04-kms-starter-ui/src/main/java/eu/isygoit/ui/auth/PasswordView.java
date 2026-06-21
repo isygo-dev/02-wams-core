@@ -4,14 +4,20 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -23,9 +29,12 @@ import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import java.util.Optional;
 
 @Component
-@UIScope //(or @VaadinSessionScope)
+@UIScope
 @Route(value = "login/password")
 @PageTitle("Password Login")
 @PermitAll
@@ -38,6 +47,7 @@ public class PasswordView extends VerticalLayout implements BeforeEnterObserver 
 
     private String tenant;
     private String username;
+    private String redirectTarget;
 
     @Autowired
     private PublicAuthService authService;
@@ -126,9 +136,13 @@ public class PasswordView extends VerticalLayout implements BeforeEnterObserver 
                 AuthResponseDto authResponse = response.getBody();
                 VaadinSession.getCurrent().setAttribute("user", username);
                 VaadinSession.getCurrent().setAttribute("accessToken", authResponse.getAccessToken());
+
+                // Navigate to original target or default
+                String target = (redirectTarget != null) ? redirectTarget : "kms";
+                UI.getCurrent().navigate(target);
+
                 Notification.show("Welcome " + username + "!", 2000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                UI.getCurrent().navigate("ims");
             } else {
                 showError("Invalid credentials. Please try again.");
             }
@@ -146,15 +160,15 @@ public class PasswordView extends VerticalLayout implements BeforeEnterObserver 
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        // Retrieve query parameters
-        java.util.Optional<String> tenantOpt = event.getLocation().getQueryParameters()
-                .getSingleParameter("tenant");
-        java.util.Optional<String> usernameOpt = event.getLocation().getQueryParameters()
-                .getSingleParameter("username");
+        Optional<String> tenantOpt = event.getLocation().getQueryParameters().getSingleParameter("tenant");
+        Optional<String> usernameOpt = event.getLocation().getQueryParameters().getSingleParameter("username");
+        redirectTarget = event.getLocation().getQueryParameters()
+                .getSingleParameter("redirect")
+                .filter(this::isSafeInternalPath)
+                .orElse(null);
 
         if (tenantOpt.isEmpty() || usernameOpt.isEmpty()) {
-            // Missing parameters – redirect back to login
-            UI.getCurrent().navigate("login");
+            event.forwardTo("login");
             return;
         }
 
@@ -162,6 +176,10 @@ public class PasswordView extends VerticalLayout implements BeforeEnterObserver 
         username = usernameOpt.get();
         errorContainer.setVisible(false);
         passwordField.clear();
+    }
+
+    private boolean isSafeInternalPath(String path) {
+        return StringUtils.hasText(path) && path.startsWith("/") && !path.contains("..") && !path.contains("//");
     }
 
     private void injectResponsiveStyles() {

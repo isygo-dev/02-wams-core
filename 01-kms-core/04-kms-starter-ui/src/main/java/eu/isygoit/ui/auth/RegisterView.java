@@ -32,9 +32,12 @@ import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import java.util.Optional;
 
 @Component
-@UIScope //(or @VaadinSessionScope)
+@UIScope
 @Route(value = "register")
 @PageTitle("Create Account")
 @PermitAll
@@ -150,7 +153,7 @@ public class RegisterView extends VerticalLayout implements BeforeEnterObserver 
 
         RegisteredUserDto dto = new RegisteredUserDto();
         binder.writeBeanIfValid(dto);
-        dto.setTenant("default"); // or let the DTO default
+        dto.setTenant("default");
 
         try {
             ResponseEntity<Boolean> response = authService.registerUser(dto);
@@ -176,9 +179,19 @@ public class RegisterView extends VerticalLayout implements BeforeEnterObserver 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         if (VaadinSession.getCurrent().getAttribute("user") != null) {
-            event.forwardTo("ims");
+            // Try to get redirect parameter (if any) and forward there, else go to kms.
+            Optional<String> redirectOpt = event.getLocation()
+                    .getQueryParameters()
+                    .getSingleParameter("redirect")
+                    .filter(this::isSafeInternalPath);
+            String target = redirectOpt.orElse("kms");
+            event.forwardTo(target);
         }
         errorContainer.setVisible(false);
+    }
+
+    private boolean isSafeInternalPath(String path) {
+        return StringUtils.hasText(path) && path.startsWith("/") && !path.contains("..") && !path.contains("//");
     }
 
     private void injectResponsiveStyles() {

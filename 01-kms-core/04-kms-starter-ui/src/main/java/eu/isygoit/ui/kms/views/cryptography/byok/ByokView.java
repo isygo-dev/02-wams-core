@@ -20,6 +20,7 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.enums.IEnumKeyExpirationModel;
@@ -44,6 +45,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
+@VaadinSessionScope //(or UIScope)
 @Route(value = "kms/byok", layout = KmsMainLayout.class)
 @PageTitle("BYOK - Bring Your Own Key")
 @PermitAll

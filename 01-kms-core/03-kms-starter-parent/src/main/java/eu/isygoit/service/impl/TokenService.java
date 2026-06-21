@@ -96,15 +96,18 @@ public class TokenService implements ITokenBuilderService {
         //Get Token config configured by tenant and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.prepareTokenConfig(tenant, tokenType, null);
         if (tokenConfig != null) {
+            // Token config audience should not be empty
             if (CollectionUtils.isEmpty(tokenConfig.getAudience())) {
                 log.error("Bad Token config: audience is required for tenant: {} / {}", tenant, tokenType.name());
                 throw new TokenAudienceException("Bad Token config: audience is required");
             }
 
+            // if token config audience is specified (not all permitted)
             if (!tokenConfig.getAudience().contains(TokenConfig.ALL_AUDIENCES)) {
+                // if configured audiences not contain all received audiences => Received audiences are invalid
                 if (!tokenConfig.getAudience().containsAll(audience)) {
-                    log.error("Token audience is invalid for tenant: {} / {}", tenant, tokenType.name());
-                    throw new TokenAudienceException("Token audience is invalid");
+                    log.error("Received audiences are invalid for tenant: {} / {}", tenant, tokenType.name());
+                    throw new TokenAudienceException("Received audiences are invalid");
                 }
             }
 

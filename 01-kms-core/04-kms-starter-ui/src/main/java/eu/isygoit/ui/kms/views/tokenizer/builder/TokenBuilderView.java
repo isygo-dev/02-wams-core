@@ -22,6 +22,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.TokenRequestDto;
 import eu.isygoit.dto.common.TokenResponseDto;
@@ -40,6 +41,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+@VaadinSessionScope //(or UIScope)
 @Route(value = "kms/token-builder", layout = KmsMainLayout.class)
 @PageTitle("Tokenizer – JWT Management")
 @PermitAll
@@ -253,7 +255,7 @@ public class TokenBuilderView extends VerticalLayout {
         buildButton.setEnabled(false);
         try {
             TokenRequestDto request = TokenRequestDto.builder().subject(subject).claims(claims).build();
-            ResponseEntity<TokenResponseDto> response = tokenService.buildToken(audiences, tokenType, request);
+            ResponseEntity<TokenResponseDto> response = tokenService.buildToken("super-tenant", audiences, tokenType, request);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 displayBuildResult(response.getBody());
                 showSuccess("Token generated successfully");

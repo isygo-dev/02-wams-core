@@ -40,12 +40,12 @@ public class TokenController extends ControllerExceptionHandler implements Token
 
     @Override
     public ResponseEntity<TokenResponseDto> buildToken(
+            String tenant,
             Set<String> audience,
             IEnumToken.Types tokenType,
             TokenRequestDto tokenRequestDto) {
         log.info("Call create Token By Tenant");
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
             return ResponseFactory.responseOk(tokenService.buildTokenAndSave(tenant, audience, tokenType, tokenRequestDto.getSubject(), tokenRequestDto.getClaims()));
         } catch (Throwable e) {
             log.error("<Error>: create Token By Tenant: {} ", e);

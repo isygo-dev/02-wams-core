@@ -1,8 +1,12 @@
 package eu.isygoit.api;
 
 import eu.isygoit.dto.common.UserContextRequestDto;
+import eu.isygoit.dto.request.AccessRequestDto;
 import eu.isygoit.dto.request.GeneratePwdRequestDto;
 import eu.isygoit.dto.request.IsPwdExpiredRequestDto;
+import eu.isygoit.dto.request.MatchesRequestDto;
+import eu.isygoit.dto.response.AccessTokenResponseDto;
+import eu.isygoit.enums.IEnumPasswordStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,6 +21,24 @@ import org.springframework.web.bind.annotation.RequestBody;
  * The interface Public password controller api.
  */
 public interface PublicPasswordServiceApi {
+
+    /**
+     * Gets access.
+     *
+     * @param matchPwdRequest the match pwd request
+     * @return the access
+     */
+    @Operation(summary = "getAccess Api",
+            description = "getAccess")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Api executed successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = AccessTokenResponseDto.class))})
+    })
+    @PostMapping(path = "/access")
+    ResponseEntity<AccessTokenResponseDto> getAccess(
+            @Valid @RequestBody AccessRequestDto matchPwdRequest);
 
     /**
      * Is password expired response entity.
@@ -54,6 +76,41 @@ public interface PublicPasswordServiceApi {
     ResponseEntity<Boolean> isQrcExpired(
             @Valid @RequestBody IsPwdExpiredRequestDto isPwdExpiredRequestDto);
 
+    /**
+     * Matches response entity.
+     *
+     * @param matchesRequest the matches request
+     * @return the response entity
+     */
+    @Operation(summary = "matches Api",
+            description = "matches")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Api executed successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = IEnumPasswordStatus.Types.class))})
+    })
+    @PostMapping(path = "/matches/OTP")
+    ResponseEntity<IEnumPasswordStatus.Types> matchesOtp(
+            @Valid @RequestBody MatchesRequestDto matchesRequest);
+
+    /**
+     * Matches response entity.
+     *
+     * @param matchesRequest the matches request
+     * @return the response entity
+     */
+    @Operation(summary = "matches Api",
+            description = "matches")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Api executed successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = IEnumPasswordStatus.Types.class))})
+    })
+    @PostMapping(path = "/matches/QRC")
+    ResponseEntity<IEnumPasswordStatus.Types> matchesQrc(
+            @Valid @RequestBody MatchesRequestDto matchesRequest);
 
     /**
      * Generate response entity.
