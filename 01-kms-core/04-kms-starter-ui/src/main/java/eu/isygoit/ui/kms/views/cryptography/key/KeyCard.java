@@ -66,15 +66,13 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         this.metadata = metadata;
         updateDerivedFields();
 
-        // Setup the body container BEFORE initCard() so it's in place
         bodyContainer.setPadding(false);
         bodyContainer.setSpacing(true);
         bodyContainer.setWidthFull();
         bodyContainer.setFlexGrow(1);
         bodyContainer.addClassName("key-card-body");
-        add(bodyContainer);  // Add the container to the card
+        add(bodyContainer);
 
-        // Now call the base init to build header, footer, and body rows
         initCard();
     }
 
@@ -186,20 +184,16 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
 
     @Override
     protected void buildBodyRows() {
-        // Clear the container before adding new rows (safe because we own the container)
         bodyContainer.removeAll();
 
-        // Description row
         bodyContainer.add(createIconRow(VaadinIcon.FILE_TEXT, "Description",
                 metadata != null && metadata.getDescription() != null ? metadata.getDescription() : "No description"));
 
-        // Key spec & usage
         String keySpec = metadata != null && metadata.getKeySpec() != null ? metadata.getKeySpec().name() : "N/A";
         String keyUsage = metadata != null && metadata.getKeyUsage() != null ? metadata.getKeyUsage().name() : "N/A";
         bodyContainer.add(createIconRow(VaadinIcon.COG, "Key spec", keySpec));
         bodyContainer.add(createIconRow(VaadinIcon.SHIELD, "Key usage", keyUsage));
 
-        // Created & region
         String created = metadata != null && metadata.getCreateDate() != null
                 ? DateHelper.formatToHumanReadable(metadata.getCreateDate()) : "Unknown";
         String region = metadata != null && Boolean.TRUE.equals(metadata.getMultiRegion())
@@ -207,17 +201,14 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         bodyContainer.add(createIconRow(VaadinIcon.CALENDAR, "Created", created));
         bodyContainer.add(createIconRow(VaadinIcon.GLOBE, "Region", region));
 
-        // Key ID with copy
         bodyContainer.add(createIconRowWithCopy(VaadinIcon.KEY, "Key ID", keyId, keyId));
 
-        // Origin & rotation
         String origin = metadata != null && metadata.getOrigin() != null ? metadata.getOrigin().name() : "N/A";
         String rotation = metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled())
                 ? "ON (" + metadata.getRotationPeriodInDays() + " days)" : "OFF";
         bodyContainer.add(createIconRow(VaadinIcon.CLOUD, "Origin", origin));
         bodyContainer.add(createIconRow(VaadinIcon.REFRESH, "Rotation", rotation));
 
-        // Deletion warning (Span)
         createDeletionWarningSpan();
         updateDeletionWarning();
         bodyContainer.add(deletionWarningSpan);
@@ -281,12 +272,26 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         versionSpan.getElement().setAttribute("title", "Current key version: " + full);
     }
 
+    /**
+     * Updates the rotation button's appearance, tooltip, and enabled state.
+     * The button is only enabled when the key is ENABLED and not pending deletion.
+     */
     private void updateRotationButton() {
-        boolean on = metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled());
-        rotationBtn.setTooltipText(on ? "Disable automatic rotation" : "Enable automatic rotation");
-        rotationBtn.getStyle().set("color", on
-                ? "var(--lumo-success-color)"
-                : "var(--lumo-tertiary-text-color)");
+        boolean isEnabled = metadata != null && metadata.getKeyStatus() == IEnumKeyStatus.Types.ENABLED;
+        boolean isPending = "PENDING_DELETION".equalsIgnoreCase(statusText);
+        boolean isActive = isEnabled && !isPending;
+
+        boolean rotationOn = metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled());
+
+        if (rotationOn) {
+            rotationBtn.setTooltipText(isActive ? "Disable automatic rotation" : "Rotation is enabled but key is not active");
+            rotationBtn.getStyle().set("color", isActive ? "var(--lumo-success-color)" : "var(--lumo-tertiary-text-color)");
+        } else {
+            rotationBtn.setTooltipText(isActive ? "Enable automatic rotation" : "Key must be enabled to configure rotation");
+            rotationBtn.getStyle().set("color", isActive ? "var(--lumo-primary-color)" : "var(--lumo-tertiary-text-color)");
+        }
+
+        rotationBtn.setEnabled(isActive);
     }
 
     private void createDeletionWarningSpan() {
@@ -363,7 +368,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         scheduleItem.setEnabled(!isPending);
         scheduleItem.addClickListener(e -> scheduleDeletion());
 
-        // ── 3. Rotate immediately ─────────────────────────────────────────────
+        // ── 3. Rotate immediately (only if key is enabled AND rotation is ON) ─
         MenuItem rotateItem = createMenuItem(contextMenu, VaadinIcon.REFRESH, "Rotate immediately");
         rotateItem.setEnabled(isEnabled && hasRotation);
         rotateItem.addClickListener(e ->
