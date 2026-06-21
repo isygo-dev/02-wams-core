@@ -6,11 +6,13 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
 import eu.isygoit.dto.KmsDtos.ListKeyVersionsResponse;
@@ -34,11 +36,16 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
 
     private final String keyId;
     private final ObjectMapper objectMapper;
-    // Container for dynamic body components (both rows and warning)
-    private final List<Component> bodyComponents = new ArrayList<>();
+
+    // Dedicated body container – cleared and rebuilt on refresh
+    private final VerticalLayout bodyContainer = new VerticalLayout();
+
     private DescribeKeyResponse.KeyMetadata metadata;
     private String aliasOrId;
     private String statusText;
+
+    // UI components (updated on refresh)
+    private Span titleSpan;
     private Span statusChip;
     private Span versionSpan;
     private Button rotationBtn;
@@ -46,8 +53,6 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
     private Button moreBtn;
     private Span deletionWarningSpan;
     private ContextMenu currentContextMenu;
-    // UI components
-    private Span titleSpan;
     private int versionCount = 0;
 
     public KeyCard(KeyManagementView parentView,
@@ -60,10 +65,19 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         this.keyId = keyId;
         this.metadata = metadata;
         updateDerivedFields();
+
+        // Setup the body container BEFORE initCard() so it's in place
+        bodyContainer.setPadding(false);
+        bodyContainer.setSpacing(true);
+        bodyContainer.setWidthFull();
+        bodyContainer.setFlexGrow(1);
+        bodyContainer.addClassName("key-card-body");
+        add(bodyContainer);  // Add the container to the card
+
+        // Now call the base init to build header, footer, and body rows
         initCard();
     }
 
-    // Public accessors
     public String getKeyId() {
         return keyId;
     }
@@ -76,7 +90,8 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         return metadata != null ? metadata.getKeyStatus() : null;
     }
 
-    // Refresh method
+    // ─── Refresh – fully reloads the card and context menu ──────────────────
+
     public void refresh() {
         getUI().ifPresent(ui -> ui.access(() -> {
             try {
@@ -85,9 +100,9 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
                     this.metadata = response.getBody().getKeyMetadata();
                     updateDerivedFields();
 
-                    // Update header
                     titleSpan.setText(aliasOrId);
                     titleSpan.getElement().setAttribute("title", aliasOrId);
+
                     ChipColor color = ChipColor.fromStatus(statusText);
                     statusChip.setText(statusText);
                     statusChip.getStyle()
@@ -99,13 +114,15 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
                     updateRotationButton();
                     updateDeletionWarning();
 
-                    // Rebuild body
-                    rebuildBody();
+                    // Rebuild the body (clear container and repopulate)
+                    bodyContainer.removeAll();
+                    buildBodyRows();
 
-                    // Refresh context menu
+                    // Rebuild the context menu and force re‑attach
                     attachContextMenu(moreBtn);
+                    moreBtn.setVisible(false);
+                    moreBtn.setVisible(true);
 
-                    // Reload version count
                     loadVersionCount();
                 }
             } catch (Exception e) {
@@ -114,7 +131,8 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         }));
     }
 
-    // BaseCard implementation
+    // ─── BaseCard implementation ─────────────────────────────────────────────
+
     @Override
     protected String cardCssClassName() {
         return "key-card";
@@ -168,48 +186,45 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
 
     @Override
     protected void buildBodyRows() {
-        // Clear previous components
-        bodyComponents.clear();
+        // Clear the container before adding new rows (safe because we own the container)
+        bodyContainer.removeAll();
 
         // Description row
-        HorizontalLayout descRow = createIconRow(VaadinIcon.FILE_TEXT, "Description",
-                metadata != null && metadata.getDescription() != null ? metadata.getDescription() : "No description");
-        bodyComponents.add(descRow);
+        bodyContainer.add(createIconRow(VaadinIcon.FILE_TEXT, "Description",
+                metadata != null && metadata.getDescription() != null ? metadata.getDescription() : "No description"));
 
         // Key spec & usage
         String keySpec = metadata != null && metadata.getKeySpec() != null ? metadata.getKeySpec().name() : "N/A";
         String keyUsage = metadata != null && metadata.getKeyUsage() != null ? metadata.getKeyUsage().name() : "N/A";
-        bodyComponents.add(createIconRow(VaadinIcon.COG, "Key spec", keySpec));
-        bodyComponents.add(createIconRow(VaadinIcon.SHIELD, "Key usage", keyUsage));
+        bodyContainer.add(createIconRow(VaadinIcon.COG, "Key spec", keySpec));
+        bodyContainer.add(createIconRow(VaadinIcon.SHIELD, "Key usage", keyUsage));
 
         // Created & region
         String created = metadata != null && metadata.getCreateDate() != null
                 ? DateHelper.formatToHumanReadable(metadata.getCreateDate()) : "Unknown";
         String region = metadata != null && Boolean.TRUE.equals(metadata.getMultiRegion())
                 ? "Multi-region" : "Single-region";
-        bodyComponents.add(createIconRow(VaadinIcon.CALENDAR, "Created", created));
-        bodyComponents.add(createIconRow(VaadinIcon.GLOBE, "Region", region));
+        bodyContainer.add(createIconRow(VaadinIcon.CALENDAR, "Created", created));
+        bodyContainer.add(createIconRow(VaadinIcon.GLOBE, "Region", region));
 
         // Key ID with copy
-        bodyComponents.add(createIconRowWithCopy(VaadinIcon.KEY, "Key ID", keyId, keyId));
+        bodyContainer.add(createIconRowWithCopy(VaadinIcon.KEY, "Key ID", keyId, keyId));
 
         // Origin & rotation
         String origin = metadata != null && metadata.getOrigin() != null ? metadata.getOrigin().name() : "N/A";
         String rotation = metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled())
                 ? "ON (" + metadata.getRotationPeriodInDays() + " days)" : "OFF";
-        bodyComponents.add(createIconRow(VaadinIcon.CLOUD, "Origin", origin));
-        bodyComponents.add(createIconRow(VaadinIcon.REFRESH, "Rotation", rotation));
+        bodyContainer.add(createIconRow(VaadinIcon.CLOUD, "Origin", origin));
+        bodyContainer.add(createIconRow(VaadinIcon.REFRESH, "Rotation", rotation));
 
         // Deletion warning (Span)
         createDeletionWarningSpan();
         updateDeletionWarning();
-        bodyComponents.add(deletionWarningSpan);
-
-        // Add all components to the card
-        bodyComponents.forEach(this::add);
+        bodyContainer.add(deletionWarningSpan);
     }
 
-    // Helper: standard icon row
+    // ─── Helper row builders ─────────────────────────────────────────────────
+
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
         HorizontalLayout row = new HorizontalLayout();
         row.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -246,7 +261,8 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         return row;
     }
 
-    // Internal update helpers
+    // ─── Internal update helpers ─────────────────────────────────────────────
+
     private void updateDerivedFields() {
         aliasOrId = (metadata != null && metadata.getKeyAlias() != null && !metadata.getKeyAlias().isEmpty())
                 ? metadata.getKeyAlias() : keyId;
@@ -313,36 +329,14 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         return "Key is scheduled for deletion";
     }
 
-    private void rebuildBody() {
-        // Remove all current body components
-        bodyComponents.forEach(comp -> {
-            if (comp.getParent().isPresent()) remove(comp);
-        });
-        bodyComponents.clear();
-        // Rebuild
-        buildBodyRows();
-    }
+    // ─── Context menu – shows all actions, disables unavailable ones ────────
 
-    private void loadVersionCount() {
-        try {
-            ResponseEntity<ListKeyVersionsResponse> resp = objectService.listKeyVersions(keyId, 100, null);
-            versionCount = resp.getBody() != null && resp.getBody().getVersions() != null
-                    ? resp.getBody().getVersions().size() : 0;
-        } catch (Exception e) {
-            versionCount = 0;
-        }
-        getUI().ifPresent(ui -> ui.access(() -> {
-            versionsBtn.setText("Ver (" + versionCount + ")");
-            versionsBtn.setTooltipText("Total key versions: " + versionCount);
-        }));
-    }
-
-    // Context menu (unchanged)
     private void attachContextMenu(Button button) {
         if (currentContextMenu != null) {
             currentContextMenu.setTarget(null);
             currentContextMenu.removeAll();
         }
+
         ContextMenu contextMenu = new ContextMenu();
         contextMenu.setTarget(button);
         contextMenu.setOpenOnClick(true);
@@ -354,49 +348,48 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         contextMenu.getItems().clear();
 
         boolean isEnabled = metadata != null && metadata.getKeyStatus() == IEnumKeyStatus.Types.ENABLED;
+        boolean isPending = "PENDING_DELETION".equalsIgnoreCase(statusText);
+        boolean hasRotation = metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled());
+
+        // ── 1. Toggle status (Enable/Disable) ────────────────────────────────
         String toggleLabel = isEnabled ? "Disable key" : "Enable key";
         VaadinIcon toggleIcon = isEnabled ? VaadinIcon.UNLOCK : VaadinIcon.LOCK;
-        HorizontalLayout toggleItem = new HorizontalLayout(toggleIcon.create(), new Span(toggleLabel));
-        toggleItem.setSpacing(true);
-        toggleItem.setAlignItems(FlexComponent.Alignment.CENTER);
-        contextMenu.addItem(toggleItem, e -> toggleKeyStatus());
+        MenuItem toggleItem = createMenuItem(contextMenu, toggleIcon, toggleLabel);
+        toggleItem.setEnabled(!isPending);
+        toggleItem.addClickListener(e -> toggleKeyStatus());
 
-        HorizontalLayout scheduleItem = new HorizontalLayout(VaadinIcon.CLOCK.create(), new Span("Schedule deletion"));
-        scheduleItem.setSpacing(true);
-        scheduleItem.setAlignItems(FlexComponent.Alignment.CENTER);
-        contextMenu.addItem(scheduleItem, e -> scheduleDeletion());
+        // ── 2. Schedule deletion ──────────────────────────────────────────────
+        MenuItem scheduleItem = createMenuItem(contextMenu, VaadinIcon.CLOCK, "Schedule deletion");
+        scheduleItem.setEnabled(!isPending);
+        scheduleItem.addClickListener(e -> scheduleDeletion());
 
-        if (metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled())) {
-            HorizontalLayout rotateItem = new HorizontalLayout(VaadinIcon.REFRESH.create(), new Span("Rotate immediately"));
-            rotateItem.setSpacing(true);
-            rotateItem.setAlignItems(FlexComponent.Alignment.CENTER);
-            contextMenu.addItem(rotateItem, e ->
-                    new RotateKeyConfirmDialog(parentView, objectService, keyId, this::refresh).open());
-        }
+        // ── 3. Rotate immediately ─────────────────────────────────────────────
+        MenuItem rotateItem = createMenuItem(contextMenu, VaadinIcon.REFRESH, "Rotate immediately");
+        rotateItem.setEnabled(isEnabled && hasRotation);
+        rotateItem.addClickListener(e ->
+                new RotateKeyConfirmDialog(parentView, objectService, keyId, this::refresh).open());
 
-        boolean isPending = "PENDING_DELETION".equalsIgnoreCase(statusText);
-        if (isPending) {
-            HorizontalLayout cancelItem = new HorizontalLayout(VaadinIcon.REFRESH.create(), new Span("Cancel deletion"));
-            cancelItem.setSpacing(true);
-            cancelItem.setAlignItems(FlexComponent.Alignment.CENTER);
-            contextMenu.addItem(cancelItem, e -> cancelDeletion());
+        // ── 4. Cancel deletion ────────────────────────────────────────────────
+        MenuItem cancelItem = createMenuItem(contextMenu, VaadinIcon.REFRESH, "Cancel deletion");
+        cancelItem.setEnabled(isPending);
+        cancelItem.addClickListener(e -> cancelDeletion());
 
-            HorizontalLayout deleteItem = new HorizontalLayout(VaadinIcon.TRASH.create(), new Span("Permanently delete"));
-            deleteItem.setSpacing(true);
-            deleteItem.setAlignItems(FlexComponent.Alignment.CENTER);
-            deleteItem.getStyle().set("color", "var(--lumo-error-color)");
-            contextMenu.addItem(deleteItem, e -> confirmPermanentDelete());
-        } else {
-            HorizontalLayout disabledItem = new HorizontalLayout(VaadinIcon.BAN.create(), new Span("Permanently delete (not pending)"));
-            disabledItem.setSpacing(true);
-            disabledItem.setAlignItems(FlexComponent.Alignment.CENTER);
-            disabledItem.getStyle().set("opacity", "0.5");
-            contextMenu.addItem(disabledItem, e -> {
-            });
-        }
+        // ── 5. Permanently delete ─────────────────────────────────────────────
+        MenuItem deleteItem = createMenuItem(contextMenu, VaadinIcon.TRASH, "Permanently delete");
+        deleteItem.setEnabled(isPending);
+        deleteItem.getStyle().set("color", "var(--lumo-error-color)");
+        deleteItem.addClickListener(e -> confirmPermanentDelete());
     }
 
-    // Actions (all call refresh on completion)
+    private MenuItem createMenuItem(ContextMenu menu, VaadinIcon icon, String label) {
+        HorizontalLayout layout = new HorizontalLayout(icon.create(), new Span(label));
+        layout.setSpacing(true);
+        layout.setAlignItems(FlexComponent.Alignment.CENTER);
+        return menu.addItem(layout);
+    }
+
+    // ─── Action methods (all call refresh on success) ──────────────────────
+
     private void updateKey() {
         List<ListResourceTagsResponse.Tag> tags = fetchKeyTags();
         boolean rotationEnabled = metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled());
@@ -423,12 +416,14 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
 
     private void toggleKeyStatus() {
         new ToggleKeyStatusDialog(parentView, objectService, keyId,
-                metadata != null && metadata.getKeyStatus() == IEnumKeyStatus.Types.ENABLED, this::refresh).open();
+                metadata != null && metadata.getKeyStatus() == IEnumKeyStatus.Types.ENABLED,
+                this::refresh).open();
     }
 
     private void scheduleDeletion() {
         new ScheduleKeyDeletionDialog(parentView, objectService, keyId,
-                metadata != null ? metadata.getPendingDeletionWindowDays() : null, this::refresh).open();
+                metadata != null ? metadata.getPendingDeletionWindowDays() : null,
+                this::refresh).open();
     }
 
     private void cancelDeletion() {
@@ -452,10 +447,28 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         return new ArrayList<>();
     }
 
+    // ─── Lifecycle ────────────────────────────────────────────────────────────
+
     @Override
     protected void onCardAttach(AttachEvent event) {
         loadVersionCount();
     }
+
+    private void loadVersionCount() {
+        try {
+            ResponseEntity<ListKeyVersionsResponse> resp = objectService.listKeyVersions(keyId, 100, null);
+            versionCount = resp.getBody() != null && resp.getBody().getVersions() != null
+                    ? resp.getBody().getVersions().size() : 0;
+        } catch (Exception e) {
+            versionCount = 0;
+        }
+        getUI().ifPresent(ui -> ui.access(() -> {
+            versionsBtn.setText("Ver (" + versionCount + ")");
+            versionsBtn.setTooltipText("Total key versions: " + versionCount);
+        }));
+    }
+
+    // ─── Extra CSS ────────────────────────────────────────────────────────────
 
     @Override
     protected String buildExtraStyles() {
