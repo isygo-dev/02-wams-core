@@ -9,7 +9,7 @@ import eu.isygoit.constants.AccountTypeConstants;
 import eu.isygoit.constants.AppParameterConstants;
 import eu.isygoit.constants.JwtConstants;
 import eu.isygoit.constants.TenantConstants;
-import eu.isygoit.dto.common.ContextRequestDto;
+import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.common.TokenRequestDto;
 import eu.isygoit.dto.common.TokenResponseDto;
 import eu.isygoit.dto.data.*;
@@ -26,6 +26,7 @@ import eu.isygoit.model.*;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.remote.kms.KmsIncrementalKeyService;
 import eu.isygoit.remote.kms.KmsPasswordService;
+import eu.isygoit.remote.kms.KmsPublicPasswordService;
 import eu.isygoit.remote.kms.KmsTokenService;
 import eu.isygoit.remote.mms.MmsChatMessageService;
 import eu.isygoit.repository.AccountRepository;
@@ -61,6 +62,8 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
 
     @Autowired
     private KmsPasswordService kmsPasswordService;
+    @Autowired
+    private KmsPublicPasswordService kmsPublicPasswordService;
     @Autowired
     private KmsTokenService kmsTokenService;
     @Autowired
@@ -163,7 +166,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
                     .distinct()
                     .map(application -> {
                         ApplicationDto app = applicationMapper.entityToDto(application);
-                        app.setToken(kmsTokenService.buildToken(
+                        app.setToken(kmsTokenService.buildToken(account.getTenant(),
                                 Set.of(application.getName()),
                                 IEnumToken.Types.ACCESS,
                                 TokenRequestDto.builder()
@@ -180,7 +183,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
                     .distinct().
                     map(application -> {
                         ApplicationDto app = applicationMapper.entityToDto(application);
-                        app.setToken(kmsTokenService.buildToken(
+                        app.setToken(kmsTokenService.buildToken(account.getTenant(),
                                 Set.of(application.getName()),
                                 IEnumToken.Types.ACCESS,
                                 TokenRequestDto.builder()
@@ -227,8 +230,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
         if (account != null) {
             if (IEnumAuth.Types.OTP == account.getAuthType()) {
                 try {
-                    ResponseEntity<Integer> result = kmsPasswordService.generate(
-                            IEnumAuth.Types.OTP,
+                    ResponseEntity<Integer> result = kmsPublicPasswordService.generateOtp(
                             GeneratePwdRequestDto.builder()
                                     .tenant(account.getTenant())
                                     .email(account.getEmail())
@@ -250,7 +252,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
 
             } else if (IEnumAuth.Types.QRC == account.getAuthType()) {
                 try {
-                    ResponseEntity<TokenResponseDto> result = kmsTokenService.buildToken(
+                    ResponseEntity<TokenResponseDto> result = kmsTokenService.buildToken(account.getTenant(),
                             Set.of(IEnumAuth.Types.QRC.meaning()),
                             IEnumToken.Types.QRC,
                             TokenRequestDto.builder()
@@ -402,8 +404,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
             Optional<Account> optional = this.findById(tenant, id);
             if (optional.isPresent()) {
                 Account account = optional.get();
-                ResponseEntity<Integer> result = kmsPasswordService.generate(
-                        IEnumAuth.Types.PWD,
+                ResponseEntity<Integer> result = kmsPasswordService.generatePwd(
                         GeneratePwdRequestDto.builder()
                                 .tenant(account.getTenant())
                                 .tenantUrl(tenantService.findByName(account.getTenant()).getUrl())
@@ -426,7 +427,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     }
 
     @Override
-    public AccountGlobalStatDto getGlobalStatistics(IEnumSharedStatType.Types statType, ContextRequestDto requestContext) {
+    public AccountGlobalStatDto getGlobalStatistics(IEnumSharedStatType.Types statType, RequestContextDto requestContext) {
         AccountGlobalStatDto.AccountGlobalStatDtoBuilder builder = AccountGlobalStatDto.builder();
         switch (statType) {
             case TOTAL_COUNT:
@@ -448,7 +449,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
         return builder.build();
     }
 
-    private Long stat_GetAdminsCount(ContextRequestDto requestContext) {
+    private Long stat_GetAdminsCount(RequestContextDto requestContext) {
         if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return repository().countByIsAdminTrue();
         } else {
@@ -456,7 +457,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
         }
     }
 
-    private Long stat_GetAccountsCount(ContextRequestDto requestContext) {
+    private Long stat_GetAccountsCount(RequestContextDto requestContext) {
         if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return repository().count();
         } else {
@@ -464,7 +465,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
         }
     }
 
-    private Long stat_GetActiveAccountsCount(ContextRequestDto requestContext) {
+    private Long stat_GetActiveAccountsCount(RequestContextDto requestContext) {
         if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return repository().countByAdminStatus(IEnumEnabledBinaryStatus.Types.ENABLED);
         } else {
@@ -472,7 +473,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
         }
     }
 
-    private Long stat_GetConfirmedAccountsCount(ContextRequestDto requestContext) {
+    private Long stat_GetConfirmedAccountsCount(RequestContextDto requestContext) {
         if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return repository().countByOrigin("SYS_ADMIN%");
         } else {
@@ -481,7 +482,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     }
 
     @Override
-    public Long stat_GetConfirmedResumeAccountsCount(ContextRequestDto requestContext) {
+    public Long stat_GetConfirmedResumeAccountsCount(RequestContextDto requestContext) {
         if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return repository().countByOrigin("RESUME%");
         } else {
@@ -490,7 +491,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     }
 
     @Override
-    public Long stat_GetConfirmedEmployeeAccountsCount(ContextRequestDto requestContext) {
+    public Long stat_GetConfirmedEmployeeAccountsCount(RequestContextDto requestContext) {
         if (TenantConstants.SUPER_TENANT_NAME.equals(requestContext.getSenderTenant())) {
             return repository().countByOrigin("EMPLOYEE%");
         } else {

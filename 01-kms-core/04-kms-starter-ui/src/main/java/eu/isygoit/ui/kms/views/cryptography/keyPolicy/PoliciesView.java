@@ -21,8 +21,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
@@ -39,10 +43,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
+@VaadinSessionScope
 @Route(value = "kms/policies", layout = KmsMainLayout.class)
 @PageTitle("Key Policies")
 @PermitAll
-public class PoliciesView extends VerticalLayout {
+public class PoliciesView extends VerticalLayout implements BeforeEnterObserver {
 
     private final KmsApiService kmsApiService;
     private final ObjectMapper objectMapper;
@@ -81,7 +86,6 @@ public class PoliciesView extends VerticalLayout {
         buildLoadingIndicator();
         attachResponsiveStyles();
 
-        // Initial button state: disabled (no key selected)
         updateButtonsState();
         loadKeyOptions();
     }
@@ -190,6 +194,15 @@ public class PoliciesView extends VerticalLayout {
 
     private void attachResponsiveStyles() {
         String css = """
+                .policies-view {
+                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+                    min-height: 100vh;
+                    animation: fadeIn 0.5s ease-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
                 .policies-view .policies-action-bar {
                     display: flex;
                     flex-wrap: wrap;
@@ -754,5 +767,13 @@ public class PoliciesView extends VerticalLayout {
 
     private record EvaluationResult(String decision, String reason, String matchedStatement, String sid,
                                     String principal) {
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (VaadinSession.getCurrent().getAttribute("user") == null) {
+            String currentPath = event.getLocation().getPath();
+            event.forwardTo("login?redirect=" + currentPath);
+        }
     }
 }

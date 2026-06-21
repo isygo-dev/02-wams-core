@@ -318,7 +318,7 @@ public class PasswordService implements IPasswordService {
     }
 
     @Override
-    public Boolean isExpired(String tenant /*senderTenant*/, String email, String userName, IEnumAuth.Types authType)
+    public Boolean isExpired(String tenant, String email, String userName, IEnumAuth.Types authType)
             throws UserPasswordNotFoundException, UserNotFoundException {
         Account account = tenantService.checkAccountIfExists(tenant, null, null, userName, null, false);
         if (account != null) {
@@ -328,7 +328,7 @@ public class PasswordService implements IPasswordService {
             List<PasswordInfo> passwordInfos = passwordInfoRepository.findByUserIdAndAuthTypeOrderByCreateDateDesc(account.getId(), authType);
             if (!CollectionUtils.isEmpty(passwordInfos)) {
                 PasswordInfo passwordInfo = passwordInfos.get(0);
-                return passwordInfo.getStatus() == IEnumPasswordStatus.Types.EXPIRED;
+                return passwordInfo.isExpired() ? true : passwordInfo.getStatus() == IEnumPasswordStatus.Types.EXPIRED;
             } else {
                 throw new UserPasswordNotFoundException("for user name " + userName);
             }

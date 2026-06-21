@@ -15,8 +15,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.MinAccountDto;
@@ -40,10 +44,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
+@VaadinSessionScope
 @Route(value = "ims/accounts", layout = ImsMainLayout.class)
 @PageTitle("Account Management")
 @PermitAll
-public class AccountManagementView extends VerticalLayout {
+public class AccountManagementView extends VerticalLayout implements BeforeEnterObserver {
 
     private final AccountService accountService;
     private final AccountImageService accountImageService;
@@ -62,14 +67,12 @@ public class AccountManagementView extends VerticalLayout {
     private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
 
-    // Pagination state
     private int currentPage = 0;
     private int pageSize = 10;
     private int totalPages = 0;
     private long totalElements = 0;
     private List<MinAccountDto> currentPageAccounts = new ArrayList<>();
 
-    // Filters
     private String currentSearch = "";
     private IEnumEnabledBinaryStatus.Types currentAdminStatus = null;
     private IEnumAccountSystemStatus.Types currentSystemStatus = null;
@@ -224,7 +227,6 @@ public class AccountManagementView extends VerticalLayout {
             cardsContainer.add(emptyState);
         } else {
             for (MinAccountDto acc : filtered) {
-                // Pass AccountImageService and a refresh callback that reloads the current page
                 cardsContainer.add(new AccountCard(this, accountService, accountImageService, acc, this::loadPageZero));
             }
         }
@@ -302,6 +304,15 @@ public class AccountManagementView extends VerticalLayout {
 
     private void injectResponsiveStyles() {
         String css = """
+                .account-management-view {
+                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+                    min-height: 100vh;
+                    animation: fadeIn 0.5s ease-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
                 .account-management-toolbar {
                     display: flex;
                     flex-wrap: wrap;
@@ -347,5 +358,13 @@ public class AccountManagementView extends VerticalLayout {
     private record StatusFilterOption(String label,
                                       IEnumEnabledBinaryStatus.Types adminStatus,
                                       IEnumAccountSystemStatus.Types systemStatus) {
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (VaadinSession.getCurrent().getAttribute("user") == null) {
+            String currentPath = event.getLocation().getPath();
+            event.forwardTo("login?redirect=" + currentPath);
+        }
     }
 }

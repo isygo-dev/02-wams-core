@@ -19,8 +19,12 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
@@ -38,10 +42,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
+@VaadinSessionScope
 @Route(value = "kms/tags", layout = KmsMainLayout.class)
 @PageTitle("Key Tagging")
 @PermitAll
-public class TagsView extends VerticalLayout {
+public class TagsView extends VerticalLayout implements BeforeEnterObserver {
 
     private final KmsApiService kmsApiService;
     private final ComboBox<KeyOption> keyCombo = new ComboBox<>();
@@ -71,11 +76,11 @@ public class TagsView extends VerticalLayout {
         header.addClassName(LumoUtility.Margin.Top.NONE);
         add(header);
 
-        // --- Toolbar (aligned with KeyManagementView) ---
+        // --- Toolbar ---
         HorizontalLayout toolbar = buildToolbar();
         add(toolbar);
 
-        // Tags grid with per-row delete button
+        // Tags grid
         tagsGrid.setWidthFull();
         tagsGrid.addColumn(KmsDtos.ListResourceTagsResponse.Tag::getTagKey)
                 .setHeader("Tag Key")
@@ -118,7 +123,7 @@ public class TagsView extends VerticalLayout {
         toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         toolbar.addClassName("tags-toolbar");
 
-        // Left group: key selector + tag search
+        // Left group
         Span keyLabel = new Span("KMS Key");
         keyLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         keyLabel.addClassName(LumoUtility.TextColor.PRIMARY);
@@ -146,14 +151,14 @@ public class TagsView extends VerticalLayout {
         HorizontalLayout leftGroup = new HorizontalLayout(keyLabel, keyCombo, searchField);
         leftGroup.setAlignItems(FlexComponent.Alignment.CENTER);
         leftGroup.setSpacing(true);
-        leftGroup.setFlexGrow(1, keyCombo); // give combo more space
+        leftGroup.setFlexGrow(1, keyCombo);
 
-        // Center group: empty (to match three-group layout of KeyManagementView)
+        // Center group: empty
         HorizontalLayout centerGroup = new HorizontalLayout();
         centerGroup.setWidthFull();
-        centerGroup.setVisible(false); // invisible but maintains structure
+        centerGroup.setVisible(false);
 
-        // Right group: refresh + add tag
+        // Right group
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         refreshButton.setTooltipText("Refresh keys and tags");
         refreshButton.addClickListener(e -> {
@@ -170,12 +175,21 @@ public class TagsView extends VerticalLayout {
         rightGroup.setSpacing(true);
 
         toolbar.add(leftGroup, centerGroup, rightGroup);
-        toolbar.setFlexGrow(1, centerGroup); // allow center to absorb space
+        toolbar.setFlexGrow(1, centerGroup);
         return toolbar;
     }
 
     private void injectResponsiveStyles() {
         String css = """
+                .kms-tags-view {
+                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+                    min-height: 100vh;
+                    animation: fadeIn 0.5s ease-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
                 .tags-toolbar {
                     display: flex;
                     flex-wrap: wrap;
@@ -220,7 +234,6 @@ public class TagsView extends VerticalLayout {
         }
     }
 
-    // ----- Data loading -----
     private void loadKeyOptions() {
         showLoading(true);
         try {
@@ -283,7 +296,7 @@ public class TagsView extends VerticalLayout {
             tagsGrid.setDataProvider(tagsDataProvider);
             tagsGrid.setVisible(true);
             searchField.setEnabled(true);
-            filterTags(); // apply any existing filter
+            filterTags();
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             showError("Failed to load tags: " + errorMsg);
@@ -328,7 +341,6 @@ public class TagsView extends VerticalLayout {
                 .addThemeVariants(NotificationVariant.LUMO_WARNING);
     }
 
-    // ----- Add tag dialog -----
     private void openAddTagDialog() {
         if (selectedKeyId == null) {
             showWarning("Please select a key first");
@@ -337,7 +349,6 @@ public class TagsView extends VerticalLayout {
         new AddTagDialog(kmsApiService, selectedKeyId, this::loadTags).open();
     }
 
-    // ----- Delete tag (per row) -----
     private void confirmDeleteTag(KmsDtos.ListResourceTagsResponse.Tag tag) {
         ConfirmDialog confirmDialog = new ConfirmDialog();
         confirmDialog.setHeader("Remove tag");
@@ -368,7 +379,6 @@ public class TagsView extends VerticalLayout {
         }
     }
 
-    // Helper class
     private static class KeyOption {
         private final String keyId;
         private final String displayName;
@@ -384,6 +394,14 @@ public class TagsView extends VerticalLayout {
 
         String getDisplayName() {
             return displayName;
+        }
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (VaadinSession.getCurrent().getAttribute("user") == null) {
+            String currentPath = event.getLocation().getPath();
+            event.forwardTo("login?redirect=" + currentPath);
         }
     }
 }

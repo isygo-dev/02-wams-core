@@ -15,7 +15,6 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
-import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.validator.EmailValidator;
@@ -25,22 +24,37 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.dto.request.RegisteredUserDto;
+import eu.isygoit.remote.ims.PublicAuthService;
 import jakarta.annotation.security.PermitAll;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
+import java.util.Optional;
+
+@Component
+@UIScope
 @Route(value = "register")
 @PageTitle("Create Account")
 @PermitAll
 public class RegisterView extends VerticalLayout implements BeforeEnterObserver {
 
-    private final TextField fullNameField = new TextField("Full name");
-    private final TextField usernameField = new TextField("Username");
+    private final TextField firstNameField = new TextField("First name");
+    private final TextField lastNameField = new TextField("Last name");
     private final EmailField emailField = new EmailField("Email");
-    private final PasswordField passwordField = new PasswordField("Password");
-    private final PasswordField confirmPasswordField = new PasswordField("Confirm password");
+    private final TextField phoneField = new TextField("Phone number");
+    private final TextField roleField = new TextField("Role (optional)");
     private final Button registerButton = new Button("Create account", VaadinIcon.USER_STAR.create());
     private final Div errorContainer = new Div();
-    private final Binder<RegistrationDto> binder = new Binder<>(RegistrationDto.class);
+    private final Binder<RegisteredUserDto> binder = new Binder<>(RegisteredUserDto.class);
+    private boolean stylesInjected = false;
+
+    @Autowired
+    private PublicAuthService authService;
 
     public RegisterView() {
         setSizeFull();
@@ -65,7 +79,7 @@ public class RegisterView extends VerticalLayout implements BeforeEnterObserver 
         // Form
         FormLayout form = new FormLayout();
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
-        form.add(fullNameField, usernameField, emailField, passwordField, confirmPasswordField);
+        form.add(firstNameField, lastNameField, emailField, phoneField, roleField);
         form.setWidthFull();
         form.addClassName("register-form");
 
@@ -89,34 +103,28 @@ public class RegisterView extends VerticalLayout implements BeforeEnterObserver 
         footer.addClassName(LumoUtility.Margin.Top.MEDIUM);
 
         // Validation
-        binder.forField(fullNameField)
-                .asRequired("Full name is required")
-                .withValidator(new StringLengthValidator("At least 2 characters", 2, 100))
-                .bind(RegistrationDto::getFullName, RegistrationDto::setFullName);
+        binder.forField(firstNameField)
+                .asRequired("First name is required")
+                .withValidator(new StringLengthValidator("At least 2 characters", 2, 50))
+                .bind(RegisteredUserDto::getFirstName, RegisteredUserDto::setFirstName);
 
-        binder.forField(usernameField)
-                .asRequired("Username is required")
-                .withValidator(new StringLengthValidator("At least 3 characters", 3, 50))
-                .bind(RegistrationDto::getUsername, RegistrationDto::setUsername);
+        binder.forField(lastNameField)
+                .asRequired("Last name is required")
+                .withValidator(new StringLengthValidator("At least 2 characters", 2, 50))
+                .bind(RegisteredUserDto::getLastName, RegisteredUserDto::setLastName);
 
         binder.forField(emailField)
                 .asRequired("Email is required")
                 .withValidator(new EmailValidator("Please enter a valid email address"))
-                .bind(RegistrationDto::getEmail, RegistrationDto::setEmail);
+                .bind(RegisteredUserDto::getEmail, RegisteredUserDto::setEmail);
 
-        binder.forField(passwordField)
-                .asRequired("Password is required")
-                .withValidator(new StringLengthValidator("At least 6 characters", 6, 100))
-                .bind(RegistrationDto::getPassword, RegistrationDto::setPassword);
+        binder.forField(phoneField)
+                .asRequired("Phone number is required")
+                .withValidator(new StringLengthValidator("Enter a valid phone number", 5, 20))
+                .bind(RegisteredUserDto::getPhoneNumber, RegisteredUserDto::setPhoneNumber);
 
-        confirmPasswordField.addValueChangeListener(e -> {
-            if (!confirmPasswordField.getValue().equals(passwordField.getValue())) {
-                confirmPasswordField.setErrorMessage("Passwords do not match");
-                confirmPasswordField.setInvalid(true);
-            } else {
-                confirmPasswordField.setInvalid(false);
-            }
-        });
+        binder.forField(roleField)
+                .bind(RegisteredUserDto::getFunctionRole, RegisteredUserDto::setFunctionRole);
 
         // Main wrapper
         VerticalLayout wrapper = new VerticalLayout(brand, form, errorContainer, registerButton, loginLink, footer);
@@ -128,7 +136,13 @@ public class RegisterView extends VerticalLayout implements BeforeEnterObserver 
         wrapper.addClassName("register-wrapper");
 
         add(wrapper);
-        injectResponsiveStyles();
+
+        addAttachListener(event -> {
+            if (!stylesInjected) {
+                injectResponsiveStyles();
+                stylesInjected = true;
+            }
+        });
     }
 
     private void handleRegistration() {
@@ -137,19 +151,22 @@ public class RegisterView extends VerticalLayout implements BeforeEnterObserver 
             return;
         }
 
-        if (!passwordField.getValue().equals(confirmPasswordField.getValue())) {
-            confirmPasswordField.setInvalid(true);
-            showError("Passwords do not match");
-            return;
-        }
-
-        RegistrationDto dto = new RegistrationDto();
+        RegisteredUserDto dto = new RegisteredUserDto();
         binder.writeBeanIfValid(dto);
+        dto.setTenant("default");
 
-        // Fake registration – just simulate success
-        Notification.show("Account created successfully! Please sign in.", 4000, Notification.Position.BOTTOM_END)
-                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-        UI.getCurrent().navigate("login");
+        try {
+            ResponseEntity<Boolean> response = authService.registerUser(dto);
+            if (response.getStatusCode().is2xxSuccessful() && Boolean.TRUE.equals(response.getBody())) {
+                Notification.show("Account created successfully! Check your email for password setup.", 5000,
+                        Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                UI.getCurrent().navigate("login");
+            } else {
+                showError("Registration failed. Please try again.");
+            }
+        } catch (Exception ex) {
+            showError("Service error. Please try again later.");
+        }
     }
 
     private void showError(String message) {
@@ -162,9 +179,18 @@ public class RegisterView extends VerticalLayout implements BeforeEnterObserver 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         if (VaadinSession.getCurrent().getAttribute("user") != null) {
-            event.forwardTo("ims");
+            Optional<String> redirectOpt = event.getLocation()
+                    .getQueryParameters()
+                    .getSingleParameter("redirect")
+                    .filter(this::isSafeInternalPath);
+            String target = redirectOpt.orElse("kms");
+            event.forwardTo(target);
         }
         errorContainer.setVisible(false);
+    }
+
+    private boolean isSafeInternalPath(String path) {
+        return StringUtils.hasText(path) && path.startsWith("/") && !path.contains("..") && !path.contains("//");
     }
 
     private void injectResponsiveStyles() {
@@ -224,44 +250,5 @@ public class RegisterView extends VerticalLayout implements BeforeEnterObserver 
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
                 css
         );
-    }
-
-    public static class RegistrationDto {
-        private String fullName;
-        private String username;
-        private String email;
-        private String password;
-
-        public String getFullName() {
-            return fullName;
-        }
-
-        public void setFullName(String fullName) {
-            this.fullName = fullName;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
     }
 }

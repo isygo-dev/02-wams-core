@@ -15,8 +15,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.CustomerDto;
@@ -38,10 +42,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
+@VaadinSessionScope
 @Route(value = "ims/customers", layout = ImsMainLayout.class)
 @PageTitle("Customer Management")
 @PermitAll
-public class CustomerManagementView extends VerticalLayout {
+public class CustomerManagementView extends VerticalLayout implements BeforeEnterObserver {
 
     private final CustomerService customerService;
     private final CustomerImageService customerImageService;
@@ -275,6 +280,15 @@ public class CustomerManagementView extends VerticalLayout {
 
     private void injectResponsiveStyles() {
         String css = """
+                .customer-management-view {
+                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+                    min-height: 100vh;
+                    animation: fadeIn 0.5s ease-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
                 .customer-management-toolbar {
                     display: flex;
                     flex-wrap: wrap;
@@ -315,5 +329,13 @@ public class CustomerManagementView extends VerticalLayout {
         } catch (Exception ignored) {
         }
         return ex.getMessage();
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (VaadinSession.getCurrent().getAttribute("user") == null) {
+            String currentPath = event.getLocation().getPath();
+            event.forwardTo("login?redirect=" + currentPath);
+        }
     }
 }

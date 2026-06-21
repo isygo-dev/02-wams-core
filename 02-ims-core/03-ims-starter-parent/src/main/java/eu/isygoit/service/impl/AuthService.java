@@ -9,7 +9,7 @@ import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.exception.*;
 import eu.isygoit.model.ConnectionTracking;
 import eu.isygoit.model.RegistredUser;
-import eu.isygoit.remote.kms.KmsPasswordService;
+import eu.isygoit.remote.kms.KmsPublicPasswordService;
 import eu.isygoit.repository.RegistredUserRepository;
 import eu.isygoit.security.CustomAuthentification;
 import eu.isygoit.security.CustomUserDetails;
@@ -40,7 +40,7 @@ import java.util.Date;
 public class AuthService implements IAuthService {
 
     @Autowired
-    private KmsPasswordService kmsPasswordService;
+    private KmsPublicPasswordService kmsPublicPasswordService;
     @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
@@ -77,7 +77,7 @@ public class AuthService implements IAuthService {
                             new ArrayList<>()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
             try {
-                ResponseEntity<AccessTokenResponseDto> result = kmsPasswordService.getAccess(
+                ResponseEntity<AccessTokenResponseDto> result = kmsPublicPasswordService.getAccess(
                         AccessRequestDto.builder()
                                 .tenant(tenant)
                                 .userName(userName)

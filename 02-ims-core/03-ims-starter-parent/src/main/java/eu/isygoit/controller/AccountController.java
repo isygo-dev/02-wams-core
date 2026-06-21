@@ -22,6 +22,7 @@ import eu.isygoit.mapper.MinAccountMapper;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.Tenant;
 import eu.isygoit.remote.kms.KmsPasswordService;
+import eu.isygoit.remote.kms.KmsPublicPasswordService;
 import eu.isygoit.service.IAccountService;
 import eu.isygoit.service.ITenantService;
 import eu.isygoit.service.RequestContextService;
@@ -81,8 +82,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     @Override
     public Account afterCreate(Account account) {
         try {
-            ResponseEntity<Integer> result = kmsPasswordService.generate(
-                    IEnumAuth.Types.PWD,
+            ResponseEntity<Integer> result = kmsPasswordService.generatePwd(
                     GeneratePwdRequestDto.builder()
                             .tenant(account.getTenant())
                             .tenantUrl(tenantService.findByName(account.getTenant()).getUrl())

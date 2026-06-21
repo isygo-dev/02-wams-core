@@ -10,9 +10,9 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.router.*;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsAppNextCodeService;
@@ -29,9 +29,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RouteAlias(value = "kms/home", layout = KmsMainLayout.class)
+@VaadinSessionScope
 @Route(value = "kms", layout = KmsMainLayout.class)
 @PageTitle("KMS Dashboard")
-public class KmsMainView extends VerticalLayout {
+public class KmsMainView extends VerticalLayout implements BeforeEnterObserver {
 
     private final KmsApiService kmsApiService;
     private final KmsTokenConfigService tokenConfigService;
@@ -202,10 +203,17 @@ public class KmsMainView extends VerticalLayout {
         );
     }
 
-    // Helper Span class for quick links
     private static class Span extends com.vaadin.flow.component.html.Span {
         public Span(String text) {
             super(text);
+        }
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (VaadinSession.getCurrent().getAttribute("user") == null) {
+            String currentPath = event.getLocation().getPath();
+            event.forwardTo("login?redirect=" + currentPath);
         }
     }
 }

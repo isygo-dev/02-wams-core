@@ -16,8 +16,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.NextCodeDto;
 import eu.isygoit.dto.common.PaginatedResponseDto;
@@ -33,30 +37,30 @@ import org.springframework.http.ResponseEntity;
 import java.util.ArrayList;
 import java.util.List;
 
+@VaadinSessionScope
 @Route(value = "kms/incremental-key", layout = KmsMainLayout.class)
 @PageTitle("Incremental Key Configurations")
 @PermitAll
-public class IncrementalKeyView extends Composite<VerticalLayout> {
+public class IncrementalKeyView extends Composite<VerticalLayout> implements BeforeEnterObserver {
 
     @Getter
     private final KmsIncrementalKeyService incrementalKeyService;
     @Getter
     private final KmsAppNextCodeService nextCodeService;
 
-    private final VerticalLayout cardsContainer = new VerticalLayout();
+    private final Div cardsContainer = new Div();
     private final TextField searchField = new TextField();
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button subscribeButton = new Button("Subscribe", new Icon(VaadinIcon.PLUS_CIRCLE));
     private final ProgressBar loadingBar = new ProgressBar();
 
-    // Pagination
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
     private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
     private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
 
-    private int currentPage = 0;       // 0‑based page index
+    private int currentPage = 0;
     private int pageSize = 10;
     private int totalPages = 0;
     private long totalElements = 0;
@@ -88,8 +92,7 @@ public class IncrementalKeyView extends Composite<VerticalLayout> {
         layout.add(toolbar);
 
         cardsContainer.setWidthFull();
-        cardsContainer.setPadding(false);
-        cardsContainer.setSpacing(true);
+        cardsContainer.addClassName("incremental-keys-grid");
         layout.add(cardsContainer);
 
         loadingBar.setIndeterminate(true);
@@ -248,16 +251,12 @@ public class IncrementalKeyView extends Composite<VerticalLayout> {
         }
     }
 
-    /**
-     * Refreshes a single card after code generation or other updates.
-     */
     public void refreshCard(NextCodeCard card) {
         try {
             ResponseEntity<NextCodeDto> response = nextCodeService.findById(card.getDto().getId());
             NextCodeDto updated = response.getBody();
             if (updated != null) {
                 card.updateDto(updated);
-                // Keep the in‑memory list consistent
                 for (int i = 0; i < currentPageContent.size(); i++) {
                     if (currentPageContent.get(i).getId().equals(updated.getId())) {
                         currentPageContent.set(i, updated);
@@ -265,7 +264,6 @@ public class IncrementalKeyView extends Composite<VerticalLayout> {
                     }
                 }
             } else {
-                // If not found, remove the card and reload the page
                 cardsContainer.remove(card);
                 loadNextCodes();
             }
@@ -282,7 +280,7 @@ public class IncrementalKeyView extends Composite<VerticalLayout> {
             Notification.show("Configuration deleted successfully", 3000,
                             Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            loadNextCodes(); // reload current page
+            loadNextCodes();
         } catch (Exception e) {
             Notification.show("Delete failed: " + e.getMessage(), 5000,
                             Notification.Position.BOTTOM_END)
@@ -315,13 +313,23 @@ public class IncrementalKeyView extends Composite<VerticalLayout> {
     private void injectResponsiveStyles() {
         String css = """
                 .incremental-keys-view {
-                    display: flex;
-                    flex-direction: column;
-                    gap: var(--lumo-space-m);
+                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+                    min-height: 100vh;
+                    animation: fadeIn 0.5s ease-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
                 }
                 .incremental-toolbar {
                     flex-wrap: wrap;
                     gap: var(--lumo-space-s);
+                }
+                .incremental-keys-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+                    gap: var(--lumo-space-m);
+                    padding: var(--lumo-space-s);
                 }
                 @media (max-width: 768px) {
                     .incremental-toolbar {
@@ -332,11 +340,22 @@ public class IncrementalKeyView extends Composite<VerticalLayout> {
                         width: 100% !important;
                         justify-content: center;
                     }
+                    .incremental-keys-grid {
+                        grid-template-columns: 1fr;
+                    }
                 }
                 """;
         UI.getCurrent().getPage().executeJs(
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
                 css
         );
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (VaadinSession.getCurrent().getAttribute("user") == null) {
+            String currentPath = event.getLocation().getPath();
+            event.forwardTo("login?redirect=" + currentPath);
+        }
     }
 }

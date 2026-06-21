@@ -15,8 +15,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.PasswordConfigDto;
@@ -31,19 +35,19 @@ import org.springframework.http.ResponseEntity;
 import java.util.ArrayList;
 import java.util.List;
 
+@VaadinSessionScope
 @Route(value = "kms/password-configs", layout = KmsMainLayout.class)
 @PageTitle("Password Configurations")
 @PermitAll
-public class PasswordConfigView extends VerticalLayout {
+public class PasswordConfigView extends VerticalLayout implements BeforeEnterObserver {
 
     private final PasswordConfigService configService;
-    private final VerticalLayout cardsContainer = new VerticalLayout();
+    private final Div cardsContainer = new Div();
     private final TextField searchField = new TextField();
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button createButton = new Button("Create Config", new Icon(VaadinIcon.PLUS_CIRCLE));
     private final ProgressBar loadingBar = new ProgressBar();
 
-    // Pagination
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
     private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
@@ -78,8 +82,7 @@ public class PasswordConfigView extends VerticalLayout {
         add(toolbar);
 
         cardsContainer.setWidthFull();
-        cardsContainer.setPadding(false);
-        cardsContainer.setSpacing(true);
+        cardsContainer.addClassName("password-configs-grid");
         add(cardsContainer);
 
         loadingBar.setIndeterminate(true);
@@ -272,11 +275,26 @@ public class PasswordConfigView extends VerticalLayout {
 
     private void injectResponsiveStyles() {
         String css = """
+                .password-config-view {
+                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+                    min-height: 100vh;
+                    animation: fadeIn 0.5s ease-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
                 .password-config-view .password-toolbar {
                     display: flex;
                     flex-wrap: wrap;
                     gap: var(--lumo-space-s);
                     width: 100%;
+                }
+                .password-configs-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+                    gap: var(--lumo-space-m);
+                    padding: var(--lumo-space-s);
                 }
                 @media (max-width: 768px) {
                     .password-config-view .password-toolbar {
@@ -287,11 +305,22 @@ public class PasswordConfigView extends VerticalLayout {
                         width: 100% !important;
                         justify-content: center;
                     }
+                    .password-configs-grid {
+                        grid-template-columns: 1fr;
+                    }
                 }
                 """;
         UI.getCurrent().getPage().executeJs(
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
                 css
         );
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (VaadinSession.getCurrent().getAttribute("user") == null) {
+            String currentPath = event.getLocation().getPath();
+            event.forwardTo("login?redirect=" + currentPath);
+        }
     }
 }

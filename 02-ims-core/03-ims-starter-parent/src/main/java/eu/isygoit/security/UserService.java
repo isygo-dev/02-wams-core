@@ -7,6 +7,7 @@ import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.Tenant;
 import eu.isygoit.remote.kms.KmsPasswordService;
+import eu.isygoit.remote.kms.KmsPublicPasswordService;
 import eu.isygoit.repository.AccountRepository;
 import eu.isygoit.repository.TenantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +29,27 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private KmsPasswordService kmsPasswordService;
+
+    @Autowired
+    private KmsPublicPasswordService kmsPublicPasswordService;
+
     @Autowired
     private TenantRepository tenantRepository;
+
+    private boolean isPasswordExpired(IsPwdExpiredRequestDto isPwdExpiredRequestDto) {
+        switch (isPwdExpiredRequestDto.getAuthType()) {
+            case TOKEN:
+                return kmsPasswordService.isPwdExpired(isPwdExpiredRequestDto).getBody();
+            case PWD:
+                return kmsPasswordService.isPwdExpired(isPwdExpiredRequestDto).getBody();
+            case OTP:
+                return kmsPublicPasswordService.isOtpExpired(isPwdExpiredRequestDto).getBody();
+            case QRC:
+                return kmsPublicPasswordService.isQrcExpired(isPwdExpiredRequestDto).getBody();
+            default:
+                throw new IllegalArgumentException("Invalid auth type: " + isPwdExpiredRequestDto.getAuthType());
+        }
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -41,13 +61,13 @@ public class UserService implements UserDetailsService {
                     .username(account.getCode())
                     .isAdmin(account.getIsAdmin())
                     .password(username)
-                    .passwordExpired(kmsPasswordService.isPasswordExpired(
+                    .passwordExpired(this.isPasswordExpired(
                             IsPwdExpiredRequestDto.builder()
                                     .tenant(account.getTenant())
                                     .email(account.getEmail())
                                     .userName(account.getCode())
                                     .authType(IEnumAuth.Types.valueOf(userNameArray[2]))
-                                    .build()).getBody())
+                                    .build()))
                     .authorities(Account.getAuthorities(account))
                     .tenantEnabled(tenant.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED)
                     .accountEnabled(account.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED)

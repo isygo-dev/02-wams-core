@@ -33,8 +33,6 @@ public interface PublicAuthServiceApi {
     /**
      * Authenticate response entity.
      *
-     * @param request        the request
-     * @param response       the response
      * @param authRequestDto the auth request dto
      * @return the response entity
      */
@@ -47,9 +45,7 @@ public interface PublicAuthServiceApi {
                             schema = @Schema(implementation = AuthResponseDto.class))})
     })
     @PostMapping(path = "/authenticate")
-    ResponseEntity<AuthResponseDto> authenticate(HttpServletRequest request,
-                                                 HttpServletResponse response,
-                                                 @Valid @RequestBody AuthenticationRequestDto authRequestDto);
+    ResponseEntity<AuthResponseDto> authenticate(@Valid @RequestBody AuthenticationRequestDto authRequestDto);
 
     /**
      * Generate forgot pwd token response entity.

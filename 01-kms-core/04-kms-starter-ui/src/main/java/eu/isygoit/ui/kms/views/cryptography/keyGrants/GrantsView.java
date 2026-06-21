@@ -20,8 +20,12 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
@@ -42,10 +46,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
+@VaadinSessionScope
 @Route(value = "kms/grants", layout = KmsMainLayout.class)
 @PageTitle("Grants")
 @PermitAll
-public class GrantsView extends VerticalLayout {
+public class GrantsView extends VerticalLayout implements BeforeEnterObserver {
 
     private final KmsApiService kmsApiService;
     private final ObjectMapper objectMapper;
@@ -84,7 +89,6 @@ public class GrantsView extends VerticalLayout {
         buildLoadingIndicator();
         attachResponsiveStyles();
 
-        // Event handlers
         refreshButton.addClickListener(e -> loadGrants());
         createGrantButton.addClickListener(e -> openCreateGrantDialog());
         revokeGrantButton.addClickListener(e -> revokeSelectedGrant());
@@ -237,6 +241,15 @@ public class GrantsView extends VerticalLayout {
 
     private void attachResponsiveStyles() {
         String css = """
+                .kms-grants-view {
+                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+                    min-height: 100vh;
+                    animation: fadeIn 0.5s ease-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
                 .grants-key-layout, .grants-action-bar {
                     display: flex;
                     flex-wrap: wrap;
@@ -448,6 +461,14 @@ public class GrantsView extends VerticalLayout {
 
         String getDisplayName() {
             return displayName;
+        }
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (VaadinSession.getCurrent().getAttribute("user") == null) {
+            String currentPath = event.getLocation().getPath();
+            event.forwardTo("login?redirect=" + currentPath);
         }
     }
 }

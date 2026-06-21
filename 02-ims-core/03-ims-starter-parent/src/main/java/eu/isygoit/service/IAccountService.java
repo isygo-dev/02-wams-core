@@ -2,7 +2,7 @@ package eu.isygoit.service;
 
 import eu.isygoit.com.rest.controller.impl.tenancy.IImageTenantServiceOperations;
 import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceOperations;
-import eu.isygoit.dto.common.ContextRequestDto;
+import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.*;
 import eu.isygoit.dto.request.AccountAuthTypeRequest;
 import eu.isygoit.dto.response.UserAccountDto;
@@ -164,7 +164,7 @@ public interface IAccountService extends ICrudTenantServiceOperations<Long, Acco
      * @param requestContext the request context
      * @return the global statistics
      */
-    AccountGlobalStatDto getGlobalStatistics(IEnumSharedStatType.Types statType, ContextRequestDto requestContext);
+    AccountGlobalStatDto getGlobalStatistics(IEnumSharedStatType.Types statType, RequestContextDto requestContext);
 
     /**
      * Gets object statistics.
@@ -180,7 +180,7 @@ public interface IAccountService extends ICrudTenantServiceOperations<Long, Acco
      * @param requestContext the request context
      * @return the long
      */
-    Long stat_GetConfirmedResumeAccountsCount(ContextRequestDto requestContext);
+    Long stat_GetConfirmedResumeAccountsCount(RequestContextDto requestContext);
 
     /**
      * Stat get confirmed employee accounts count long.
@@ -188,7 +188,7 @@ public interface IAccountService extends ICrudTenantServiceOperations<Long, Acco
      * @param requestContext the request context
      * @return the long
      */
-    Long stat_GetConfirmedEmployeeAccountsCount(ContextRequestDto requestContext);
+    Long stat_GetConfirmedEmployeeAccountsCount(RequestContextDto requestContext);
 
     /**
      * Create tenant admin account.

@@ -3,8 +3,6 @@ package eu.isygoit.api;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
 import eu.isygoit.dto.request.*;
-import eu.isygoit.dto.response.AccessTokenResponseDto;
-import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.enums.IEnumPasswordStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,17 +26,34 @@ public interface PasswordServiceApi {
      * @param generatePwdRequest the generate pwd request
      * @return the response entity
      */
-    @Operation(summary = "generate Api",
-            description = "generate")
+    @Operation(summary = "generate Token Api",
+            description = "generate Token")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Boolean.class))})
     })
-    @PostMapping(path = "/generate/{type}")
-    ResponseEntity<Integer> generate(
-            @Valid @PathVariable(name = RestApiConstants.type) IEnumAuth.Types authType,
+    @PostMapping(path = "/generate/TOKEN")
+    ResponseEntity<Integer> generateToken(
+            @Valid @RequestBody GeneratePwdRequestDto generatePwdRequest);
+
+    /**
+     * Generate response entity.
+     *
+     * @param generatePwdRequest the generate pwd request
+     * @return the response entity
+     */
+    @Operation(summary = "generate Password Api",
+            description = "generate Password")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Api executed successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Boolean.class))})
+    })
+    @PostMapping(path = "/generate/PWD")
+    ResponseEntity<Integer> generatePwd(
             @Valid @RequestBody GeneratePwdRequestDto generatePwdRequest);
 
     /**
@@ -98,23 +112,6 @@ public interface PasswordServiceApi {
     ResponseEntity<Boolean> patternCheck(
             @Valid @RequestBody CheckPwdRequestDto checkPwdRequest);
 
-    /**
-     * Gets access.
-     *
-     * @param matchPwdRequest the match pwd request
-     * @return the access
-     */
-    @Operation(summary = "getAccess Api",
-            description = "getAccess")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Api executed successfully",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = AccessTokenResponseDto.class))})
-    })
-    @PostMapping(path = "/access")
-    ResponseEntity<AccessTokenResponseDto> getAccess(
-            @Valid @RequestBody AccessRequestDto matchPwdRequest);
 
     /**
      * Matches response entity.
@@ -130,8 +127,26 @@ public interface PasswordServiceApi {
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = IEnumPasswordStatus.Types.class))})
     })
-    @PostMapping(path = "/matches")
-    ResponseEntity<IEnumPasswordStatus.Types> matches(
+    @PostMapping(path = "/matches/PWD")
+    ResponseEntity<IEnumPasswordStatus.Types> matchesPassword(
+            @Valid @RequestBody MatchesRequestDto matchesRequest);
+
+    /**
+     * Matches response entity.
+     *
+     * @param matchesRequest the matches request
+     * @return the response entity
+     */
+    @Operation(summary = "matches Api",
+            description = "matches")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Api executed successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = IEnumPasswordStatus.Types.class))})
+    })
+    @PostMapping(path = "/matches/TOKEN")
+    ResponseEntity<IEnumPasswordStatus.Types> matchesToken(
             @Valid @RequestBody MatchesRequestDto matchesRequest);
 
     /**
@@ -148,8 +163,8 @@ public interface PasswordServiceApi {
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Boolean.class))})
     })
-    @PostMapping(path = "/isExpired")
-    ResponseEntity<Boolean> isPasswordExpired(
+    @PostMapping(path = "/isExpired/PWD")
+    ResponseEntity<Boolean> isPwdExpired(
             @Valid @RequestBody IsPwdExpiredRequestDto isPwdExpiredRequestDto);
 
     /**

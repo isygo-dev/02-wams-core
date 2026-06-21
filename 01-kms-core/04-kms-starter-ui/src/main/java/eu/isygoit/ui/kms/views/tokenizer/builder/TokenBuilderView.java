@@ -20,8 +20,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.TokenRequestDto;
 import eu.isygoit.dto.common.TokenResponseDto;
@@ -40,10 +44,11 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+@VaadinSessionScope
 @Route(value = "kms/token-builder", layout = KmsMainLayout.class)
 @PageTitle("Tokenizer – JWT Management")
 @PermitAll
-public class TokenBuilderView extends VerticalLayout {
+public class TokenBuilderView extends VerticalLayout implements BeforeEnterObserver {
 
     private final KmsTokenService tokenService;
     private final ObjectMapper objectMapper;
@@ -130,7 +135,6 @@ public class TokenBuilderView extends VerticalLayout {
         subjectField.setPlaceholder("user@domain.com or service‑name");
         subjectField.setRequired(true);
 
-        // Claims area with a button to open builder
         HorizontalLayout claimsHeader = new HorizontalLayout();
         claimsHeader.setAlignItems(FlexComponent.Alignment.CENTER);
         claimsHeader.setSpacing(true);
@@ -202,24 +206,15 @@ public class TokenBuilderView extends VerticalLayout {
         validateCard.add(validationResultSpan);
     }
 
-    // ========================================================================
-    // Claims Builder Dialog - extracted
-    // ========================================================================
     private void openClaimsBuilderDialog() {
         new ClaimsBuilderDialog(objectMapper, claimsArea.getValue(),
                 prettyJson -> claimsArea.setValue(prettyJson)).open();
     }
 
-    // ========================================================================
-    // Decode JWT Dialog - extracted
-    // ========================================================================
     private void showDecodeDialog(String jwtToken) {
         new DecodeJwtDialog(objectMapper, jwtToken).open();
     }
 
-    // ========================================================================
-    // Build token logic
-    // ========================================================================
     private void buildToken() {
         Set<String> audiences = audienceInputBuilder.getAudiences();
         IEnumToken.Types tokenType = tokenTypeCombo.getValue();
@@ -253,7 +248,7 @@ public class TokenBuilderView extends VerticalLayout {
         buildButton.setEnabled(false);
         try {
             TokenRequestDto request = TokenRequestDto.builder().subject(subject).claims(claims).build();
-            ResponseEntity<TokenResponseDto> response = tokenService.buildToken(audiences, tokenType, request);
+            ResponseEntity<TokenResponseDto> response = tokenService.buildToken("super-tenant", audiences, tokenType, request);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 displayBuildResult(response.getBody());
                 showSuccess("Token generated successfully");
@@ -319,9 +314,6 @@ public class TokenBuilderView extends VerticalLayout {
         buildResultPanel.add(tokenLine, expiryLine);
     }
 
-    // ========================================================================
-    // Validate token logic
-    // ========================================================================
     private void validateToken() {
         Set<String> audiences = audienceInputValidator.getAudiences();
         IEnumToken.Types tokenType = validateTokenTypeCombo.getValue();
@@ -373,9 +365,6 @@ public class TokenBuilderView extends VerticalLayout {
         }
     }
 
-    // ========================================================================
-    // Utility methods
-    // ========================================================================
     private void showGlobalLoading(boolean show) {
         globalLoadingBar.setVisible(show);
         buildButton.setEnabled(!show);
@@ -440,16 +429,25 @@ public class TokenBuilderView extends VerticalLayout {
                 .addThemeVariants(NotificationVariant.LUMO_WARNING);
     }
 
-    // ========================================================================
-    // Responsive CSS
-    // ========================================================================
     private void attachResponsiveStyles() {
         String css = """
+                .tokenizer-view {
+                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+                    min-height: 100vh;
+                    animation: fadeIn 0.5s ease-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
                 .tokenizer-view .compact-card {
                     flex: 1;
                     min-width: 280px;
                     padding: var(--lumo-space-m);
                     transition: all 0.2s ease;
+                    background: var(--lumo-base-color);
+                    border-radius: var(--lumo-border-radius-xl);
+                    box-shadow: var(--lumo-box-shadow-m);
                 }
                 .tokenizer-view .compact-card .form-layout {
                     margin-top: var(--lumo-space-m);
@@ -478,9 +476,15 @@ public class TokenBuilderView extends VerticalLayout {
         );
     }
 
-    // ========================================================================
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (VaadinSession.getCurrent().getAttribute("user") == null) {
+            String currentPath = event.getLocation().getPath();
+            event.forwardTo("login?redirect=" + currentPath);
+        }
+    }
+
     // AudienceInput component (unchanged)
-    // ========================================================================
     private static class AudienceInput extends VerticalLayout {
         private final TextField inputField;
         private final HorizontalLayout mainRow;
