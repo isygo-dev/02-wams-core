@@ -15,8 +15,9 @@ import eu.isygoit.i18n.I18n;
 import java.util.Locale;
 
 /**
- * Modern language selector with flag icons and a compact, stylish design.
- * Uses flag-icon-css library (CDN) for consistent flag display.
+ * Modern language selector with flag icons and a polished, compact design.
+ * Uses flag-icon-css library (CDN) for reliable flag display.
+ * Seamlessly integrates with Lumo theming (dark/light modes).
  */
 public class LanguageSelectorComponent extends HorizontalLayout {
 
@@ -25,34 +26,48 @@ public class LanguageSelectorComponent extends HorizontalLayout {
     private final Span flagPrefixSpan;
 
     public LanguageSelectorComponent() {
-        // Inject flag-icon-css if not already present (using cloudflare CDN for reliability)
+        // Inject flag-icon-css if not already present
         injectFlagIconCss();
 
         setAlignItems(FlexComponent.Alignment.CENTER);
-        setSpacing(true);
+        setSpacing(false);
         setPadding(false);
         getStyle()
                 .set("padding", "2px var(--lumo-space-s)")
                 .set("background", "var(--lumo-contrast-5pct)")
                 .set("border-radius", "var(--lumo-border-radius-l)")
                 .set("border", "1px solid var(--lumo-contrast-20pct)")
-                .set("transition", "all 0.2s ease");
+                .set("transition", "all 0.2s ease-in-out")
+                .set("height", "var(--lumo-size-m)")
+                .set("box-shadow", "var(--lumo-box-shadow-xs)");
 
-        // Subtle hover effect
-        addAttachListener(e -> getStyle()
-                .set("cursor", "pointer")
-                .set("background", "var(--lumo-contrast-10pct)"));
+        // Hover effect: subtle elevation and background change
+        addAttachListener(e -> {
+            getStyle()
+                    .set("cursor", "pointer")
+                    .set("transition", "all 0.25s ease-in-out");
+            // On hover
+            addClassName("language-selector-hover");
+        });
+
+        // We'll add hover via CSS injection instead of inline to avoid the need for a separate style.
+        // We'll inject a small style block to handle hover.
+        injectHoverStyle();
 
         // Globe icon
         globeIcon = VaadinIcon.GLOBE.create();
         globeIcon.setSize("16px");
-        globeIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        globeIcon.getStyle()
+                .set("color", "var(--lumo-secondary-text-color)")
+                .set("margin-right", "var(--lumo-space-xs)");
 
         // Prefix flag (shows selected flag)
         flagPrefixSpan = new Span();
         flagPrefixSpan.addClassName("flag-icon");
         flagPrefixSpan.addClassName(getFlagCssClass(I18n.getCurrentLocale()));
-        flagPrefixSpan.getStyle().set("font-size", "1.2em");
+        flagPrefixSpan.getStyle()
+                .set("font-size", "1.2em")
+                .set("margin-right", "var(--lumo-space-xs)");
 
         // Language combo box with flag icons
         languageCombo = new ComboBox<>();
@@ -61,25 +76,36 @@ public class LanguageSelectorComponent extends HorizontalLayout {
             HorizontalLayout itemLayout = new HorizontalLayout();
             itemLayout.setAlignItems(FlexComponent.Alignment.CENTER);
             itemLayout.setSpacing(true);
+            itemLayout.setPadding(false);
 
-            // Flag span with flag-icon class
+            // Flag span
             Span flagSpan = new Span();
             flagSpan.addClassName("flag-icon");
             flagSpan.addClassName(getFlagCssClass(locale));
             flagSpan.getStyle().set("font-size", "1.2em");
 
+            // Language name
             String languageName = getLanguageName(locale);
             Span nameSpan = new Span(languageName);
             nameSpan.addClassName(LumoUtility.FontSize.SMALL);
+            nameSpan.getStyle().set("white-space", "nowrap");
 
             itemLayout.add(flagSpan, nameSpan);
             return itemLayout;
         }));
 
-        languageCombo.setItemLabelGenerator(this::getLanguageName);
+        // Show selected value as flag + language name
+        languageCombo.setItemLabelGenerator(locale -> {
+            String flag = getFlagEmoji(locale); // fallback if needed
+            return getLanguageName(locale);
+        });
+
+        // Use flag prefix for the selected value
         languageCombo.setPrefixComponent(flagPrefixSpan);
+
+        // Styling
         languageCombo.setWidth("auto");
-        languageCombo.setMinWidth("120px");
+        languageCombo.setMinWidth("100px");
         languageCombo.setPlaceholder(null);
         languageCombo.setClearButtonVisible(false);
         languageCombo.getStyle()
@@ -87,7 +113,8 @@ public class LanguageSelectorComponent extends HorizontalLayout {
                 .set("border", "none")
                 .set("box-shadow", "none")
                 .set("--lumo-combo-box-overlay-width", "auto")
-                .set("min-width", "0");
+                .set("min-width", "0")
+                .set("padding", "0 var(--lumo-space-s)");
 
         // Set current locale
         languageCombo.setValue(I18n.getCurrentLocale());
@@ -99,12 +126,18 @@ public class LanguageSelectorComponent extends HorizontalLayout {
                 String newFlagClass = getFlagCssClass(event.getValue());
                 flagPrefixSpan.setClassName("flag-icon " + newFlagClass);
 
+                // Also update the prefix tooltip (optional)
+                flagPrefixSpan.setTitle(getLanguageName(event.getValue()));
+
                 I18n.setLocale(event.getValue());
                 VaadinSession.getCurrent().setAttribute("locale", event.getValue());
                 // Refresh the entire UI to apply new language
                 UI.getCurrent().getPage().reload();
             }
         });
+
+        // Add a tooltip to the prefix flag
+        flagPrefixSpan.setTitle(getLanguageName(I18n.getCurrentLocale()));
 
         add(globeIcon, languageCombo);
     }
@@ -122,6 +155,27 @@ public class LanguageSelectorComponent extends HorizontalLayout {
                         "  link.href = 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css';" +
                         "  document.head.appendChild(link);" +
                         "}"
+        );
+    }
+
+    /**
+     * Injects a small style block for hover effects on the component.
+     */
+    private void injectHoverStyle() {
+        UI.getCurrent().getPage().executeJs(
+                "const style = document.createElement('style');" +
+                        "style.textContent = `" +
+                        "  .language-selector-hover:hover {" +
+                        "    background: var(--lumo-contrast-10pct) !important;" +
+                        "    box-shadow: var(--lumo-box-shadow-s) !important;" +
+                        "    border-color: var(--lumo-primary-color) !important;" +
+                        "  }" +
+                        "  .language-selector-hover:active {" +
+                        "    background: var(--lumo-contrast-20pct) !important;" +
+                        "    transform: scale(0.98);" +
+                        "  }" +
+                        "`;" +
+                        "document.head.appendChild(style);"
         );
     }
 
@@ -154,6 +208,35 @@ public class LanguageSelectorComponent extends HorizontalLayout {
     }
 
     /**
+     * Returns the flag emoji as a fallback if the CSS class fails.
+     */
+    private String getFlagEmoji(Locale locale) {
+        String countryCode = locale.getCountry();
+        if (countryCode == null || countryCode.isEmpty()) {
+            countryCode = switch (locale.getLanguage()) {
+                case "en" -> "US";
+                case "fr" -> "FR";
+                case "de" -> "DE";
+                case "es" -> "ES";
+                case "it" -> "IT";
+                case "pt" -> "PT";
+                case "nl" -> "NL";
+                case "ru" -> "RU";
+                case "zh" -> "CN";
+                case "ja" -> "JP";
+                case "ko" -> "KR";
+                case "ar" -> "SA";
+                case "hi" -> "IN";
+                default -> "UN";
+            };
+        }
+        // Convert country code to flag emoji (regional indicator symbols)
+        int firstChar = Character.codePointAt(countryCode.toUpperCase(), 0) - 'A' + 0x1F1E6;
+        int secondChar = Character.codePointAt(countryCode.toUpperCase(), 1) - 'A' + 0x1F1E6;
+        return new String(Character.toChars(firstChar)) + new String(Character.toChars(secondChar));
+    }
+
+    /**
      * Returns the localized display name of the language.
      */
     private String getLanguageName(Locale locale) {
@@ -171,5 +254,6 @@ public class LanguageSelectorComponent extends HorizontalLayout {
         languageCombo.setValue(current);
         // Update prefix flag
         flagPrefixSpan.setClassName("flag-icon " + getFlagCssClass(current));
+        flagPrefixSpan.setTitle(getLanguageName(current));
     }
 }
