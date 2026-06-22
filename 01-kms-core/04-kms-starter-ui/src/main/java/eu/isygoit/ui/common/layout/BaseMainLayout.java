@@ -34,7 +34,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObserver, AfterNavigationObserver {
+public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObserver {
 
     private final AccountService accountService;
     private final AccountImageService accountImageService;
@@ -227,17 +227,12 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
     }
 
     @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        if (!SecurityUtils.isUserLoggedIn()) {
-            String currentPath = event.getLocation().getPath();
-            SecurityUtils.storeRedirect(currentPath);
-            UI.getCurrent().getPage().setLocation("login?redirect=" + currentPath);
-        }
-    }
-
-    @Override
-    public void afterNavigation(AfterNavigationEvent event) {
+    public final void beforeEnter(BeforeEnterEvent event) {
         String currentPath = event.getLocation().getPathWithQueryParameters(); // Better: includes query params if any
-        SecurityUtils.storeRedirect(currentPath);
+        if (!SecurityUtils.isUserLoggedIn()) {
+            UI.getCurrent().getPage().setLocation("login?redirect=" + java.net.URLEncoder.encode(currentPath, java.nio.charset.StandardCharsets.UTF_8));
+        } else {
+            SecurityUtils.storeRedirect(currentPath);
+        }
     }
 }
