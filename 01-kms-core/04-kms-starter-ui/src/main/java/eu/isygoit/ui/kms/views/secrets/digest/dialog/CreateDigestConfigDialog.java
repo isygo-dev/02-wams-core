@@ -3,7 +3,6 @@ package eu.isygoit.ui.kms.views.secrets.digest.dialog;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.DigestConfigDto;
@@ -14,7 +13,6 @@ import eu.isygoit.enums.IEnumStringOutputType;
 import eu.isygoit.remote.kms.DigestConfigService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
@@ -26,7 +24,7 @@ import java.util.stream.Collectors;
 public class CreateDigestConfigDialog extends BaseActionDialog {
 
     private final DigestConfigService configService;
-
+    private final Map<String, String> classToProviderNameMap = new HashMap<>();
     private TextField codeField;
     private ComboBox<IEnumAlgoDigestConfig.Types> algorithmCombo;
     private IntegerField iterationsField;
@@ -42,8 +40,6 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
     private ComboBox<IEnumStringOutputType.Types> outputTypeCombo;
     private TextField prefixField;
     private TextField suffixField;
-
-    private final Map<String, String> classToProviderNameMap = new HashMap<>();
 
     public CreateDigestConfigDialog(DigestConfigService configService, Runnable onSuccess) {
         super("Create Digest Configuration", onSuccess);

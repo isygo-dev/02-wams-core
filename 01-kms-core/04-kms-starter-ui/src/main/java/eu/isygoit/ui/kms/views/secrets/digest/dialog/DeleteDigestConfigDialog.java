@@ -3,7 +3,6 @@ package eu.isygoit.ui.kms.views.secrets.digest.dialog;
 import eu.isygoit.remote.kms.DigestConfigService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 
 public class DeleteDigestConfigDialog extends PinBaseActionDialog {
 

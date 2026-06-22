@@ -5,7 +5,6 @@ import eu.isygoit.remote.ims.ApplicationService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.application.ApplicationManagementView;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 
 public class DeleteApplicationDialog extends PinBaseActionDialog {
 

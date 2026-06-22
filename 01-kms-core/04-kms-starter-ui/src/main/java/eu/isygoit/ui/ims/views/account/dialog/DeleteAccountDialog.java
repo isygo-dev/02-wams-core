@@ -4,7 +4,6 @@ import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.account.AccountManagementView;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 
 public class DeleteAccountDialog extends PinBaseActionDialog {

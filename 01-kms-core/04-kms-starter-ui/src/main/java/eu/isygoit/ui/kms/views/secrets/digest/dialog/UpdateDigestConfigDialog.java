@@ -13,7 +13,6 @@ import eu.isygoit.enums.IEnumStringOutputType;
 import eu.isygoit.remote.kms.DigestConfigService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
@@ -25,7 +24,7 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
 
     private final DigestConfigService configService;
     private final DigestConfigDto original;
-
+    private final Map<String, String> classToProviderNameMap = new HashMap<>();
     private TextField codeField;
     private ComboBox<IEnumAlgoDigestConfig.Types> algorithmCombo;
     private IntegerField iterationsField;
@@ -41,8 +40,6 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
     private ComboBox<IEnumStringOutputType.Types> outputTypeCombo;
     private TextField prefixField;
     private TextField suffixField;
-
-    private final Map<String, String> classToProviderNameMap = new HashMap<>();
 
     public UpdateDigestConfigDialog(DigestConfigService configService, DigestConfigDto dto, Runnable onSuccess) {
         super("Edit Digest Configuration", onSuccess);

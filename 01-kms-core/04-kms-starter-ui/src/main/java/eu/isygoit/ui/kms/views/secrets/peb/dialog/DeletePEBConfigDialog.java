@@ -4,7 +4,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.remote.kms.PEBConfigService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 
 public class DeletePEBConfigDialog extends PinBaseActionDialog {
 

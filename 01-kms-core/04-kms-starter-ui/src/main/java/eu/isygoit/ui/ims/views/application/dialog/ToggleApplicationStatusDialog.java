@@ -1,13 +1,11 @@
 package eu.isygoit.ui.ims.views.application.dialog;
 
-import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.dto.data.ApplicationDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.remote.ims.ApplicationService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.application.ApplicationManagementView;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 
 public class ToggleApplicationStatusDialog extends PinBaseActionDialog {

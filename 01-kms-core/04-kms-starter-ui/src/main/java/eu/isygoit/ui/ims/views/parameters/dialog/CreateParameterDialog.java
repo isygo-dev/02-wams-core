@@ -8,7 +8,6 @@ import eu.isygoit.remote.ims.AppParameterService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import eu.isygoit.ui.ims.views.parameters.ParameterManagementView;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 
 public class CreateParameterDialog extends BaseActionDialog {

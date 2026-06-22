@@ -5,7 +5,6 @@ import eu.isygoit.remote.ims.AnnexService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.annex.AnnexManagementView;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 
 public class DeleteAnnexDialog extends PinBaseActionDialog {
 
