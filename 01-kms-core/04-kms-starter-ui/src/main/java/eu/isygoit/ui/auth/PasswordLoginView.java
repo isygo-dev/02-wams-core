@@ -12,15 +12,12 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.server.VaadinServletRequest;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
+import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -44,21 +41,19 @@ import java.util.Optional;
 @Route(value = "login/password")
 @PageTitle("Password Login")
 @PermitAll
-public class PasswordView extends VerticalLayout implements BeforeEnterObserver {
+public class PasswordLoginView extends BaseLoginView {
 
     private final PasswordField passwordField = new PasswordField("Password");
     private final Button loginButton = new Button("Sign in", VaadinIcon.SIGN_IN.create());
     private final Div errorContainer = new Div();
-    private boolean stylesInjected = false;
 
     private String tenant;
     private String username;
-    private String redirectTarget;
 
     @Autowired
     private PublicAuthService authService;
 
-    public PasswordView() {
+    public PasswordLoginView() {
         setSizeFull();
         setPadding(false);
         setSpacing(false);
@@ -125,6 +120,8 @@ public class PasswordView extends VerticalLayout implements BeforeEnterObserver 
         String password = passwordField.getValue();
         if (password.isBlank()) {
             showError("Password is required");
+            errorContainer.setText("Password is required");
+            errorContainer.setVisible(true);
             return;
         }
 
@@ -161,43 +158,20 @@ public class PasswordView extends VerticalLayout implements BeforeEnterObserver 
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } else {
                 showError("Invalid credentials. Please try again.");
+                errorContainer.setText("Invalid credentials. Please try again.");
+                errorContainer.setVisible(true);
             }
         } catch (Exception ex) {
             showError("Authentication service error. Please try again.");
+            errorContainer.setText("Authentication service error. Please try again.");
+            errorContainer.setVisible(true);
         }
-    }
-
-    private void showError(String message) {
-        errorContainer.setText(message);
-        errorContainer.setVisible(true);
-        Notification.show(message, 3000, Notification.Position.BOTTOM_END)
-                .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 
     @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        if (SecurityUtils.isUserLoggedIn()) {
-            String target = SecurityUtils.consumeRedirect();
-            if (target == null) {
-                target = event.getLocation()
-                        .getQueryParameters()
-                        .getSingleParameter("redirect")
-                        .filter(SecurityUtils::isSafeInternalPath)
-                        .orElse("kms");
-            }
-            event.forwardTo(target);
-            return;
-        }
-
-        // Capture redirect from session or query
-        redirectTarget = SecurityUtils.consumeRedirect();
-        if (redirectTarget == null) {
-            redirectTarget = event.getLocation()
-                    .getQueryParameters()
-                    .getSingleParameter("redirect")
-                    .filter(SecurityUtils::isSafeInternalPath)
-                    .orElse(null);
-        }
+    protected void onBeforeEnter(BeforeEnterEvent event) {
+        errorContainer.setVisible(false);
+        errorContainer.setText("");
 
         Optional<String> tenantOpt = event.getLocation().getQueryParameters().getSingleParameter("tenant");
         Optional<String> usernameOpt = event.getLocation().getQueryParameters().getSingleParameter("username");
@@ -209,11 +183,11 @@ public class PasswordView extends VerticalLayout implements BeforeEnterObserver 
 
         tenant = tenantOpt.get();
         username = usernameOpt.get();
-        errorContainer.setVisible(false);
         passwordField.clear();
     }
 
-    private void injectResponsiveStyles() {
+    @Override
+    protected void injectResponsiveStyles() {
         String css = """
                 .password-view {
                     background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
@@ -263,9 +237,6 @@ public class PasswordView extends VerticalLayout implements BeforeEnterObserver 
                     }
                 }
                 """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
+        injectStyles(css);
     }
 }

@@ -13,18 +13,14 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.server.VaadinServletRequest;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
+import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -51,19 +47,17 @@ import java.util.stream.Collectors;
 @Route(value = "login/otp")
 @PageTitle("OTP Login")
 @PermitAll
-public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver {
+public class OtpLoginView extends BaseLoginView {
 
     private final TextField usernameField = new TextField("Username");
     private final HorizontalLayout otpFieldsLayout = new HorizontalLayout();
     private final Button requestOtpButton = new Button("Request OTP", new Icon(VaadinIcon.ENVELOPE));
     private final Button loginButton = new Button("Sign in", new Icon(VaadinIcon.SIGN_IN));
     private final Div errorContainer = new Div();
-    private boolean stylesInjected = false;
 
     private String tenant;
     private String username;
     private int otpLength = 6;
-    private String redirectTarget;
     private List<TextField> digitFields = new ArrayList<>();
 
     @Autowired
@@ -204,6 +198,8 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
         String otp = getOtpFromFields();
         if (otp.length() != otpLength) {
             showError("Please enter the complete OTP.");
+            errorContainer.setText("Please enter the complete OTP.");
+            errorContainer.setVisible(true);
             return;
         }
 
@@ -234,55 +230,39 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
                 String target = (redirectTarget != null && SecurityUtils.isSafeInternalPath(redirectTarget))
                         ? redirectTarget
                         : "kms";
+
+                log.info("Redirecting after login to: {}", target);
                 UI.getCurrent().navigate(target);
 
                 Notification.show("Welcome " + username + "!", 2000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } else {
                 showError("Invalid OTP. Please try again.");
+                errorContainer.setText("Invalid OTP. Please try again.");
+                errorContainer.setVisible(true);
             }
         } catch (Exception ex) {
             showError("Authentication error. Please try again.");
+            errorContainer.setText("Authentication error. Please try again.");
+            errorContainer.setVisible(true);
         }
     }
 
-    private void showError(String message) {
-        errorContainer.setText(message);
-        errorContainer.setVisible(true);
-        Notification.show(message, 3000, Notification.Position.BOTTOM_END)
-                .addThemeVariants(NotificationVariant.LUMO_ERROR);
-    }
-
+    // ─── Override only onBeforeEnter – base beforeEnter will call this ────
     @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        if (SecurityUtils.isUserLoggedIn()) {
-            String target = SecurityUtils.consumeRedirect();
-            if (target == null) {
-                target = event.getLocation()
-                        .getQueryParameters()
-                        .getSingleParameter("redirect")
-                        .filter(SecurityUtils::isSafeInternalPath)
-                        .orElse("kms");
-            }
-            event.forwardTo(target);
-            return;
-        }
+    protected void onBeforeEnter(BeforeEnterEvent event) {
+        // Clear error container
+        errorContainer.setVisible(false);
+        errorContainer.setText("");
 
-        // Capture redirect from session or query
-        redirectTarget = SecurityUtils.consumeRedirect();
-        if (redirectTarget == null) {
-            redirectTarget = event.getLocation()
-                    .getQueryParameters()
-                    .getSingleParameter("redirect")
-                    .filter(SecurityUtils::isSafeInternalPath)
-                    .orElse(null);
-        }
+        // DO NOT overwrite redirectTarget here — BaseLoginView already did it
+        // Only extract tenant/username/otpLength
 
         Optional<String> tenantOpt = event.getLocation().getQueryParameters().getSingleParameter("tenant");
         Optional<String> usernameOpt = event.getLocation().getQueryParameters().getSingleParameter("username");
         Optional<String> otpLengthOpt = event.getLocation().getQueryParameters().getSingleParameter("otpLength");
 
-        if (tenantOpt.isEmpty() || usernameOpt.isEmpty() || otpLengthOpt.isEmpty()) {
+        if (tenantOpt.isEmpty() || usernameOpt.isEmpty()) {
             event.forwardTo("login");
             return;
         }
@@ -290,17 +270,17 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
         tenant = tenantOpt.get();
         username = usernameOpt.get();
         try {
-            otpLength = Integer.parseInt(otpLengthOpt.get());
+            otpLength = Integer.parseInt(otpLengthOpt.orElse("6"));
         } catch (NumberFormatException e) {
             otpLength = 6;
         }
 
         usernameField.setValue(username);
-        errorContainer.setVisible(false);
         buildOtpFields(otpLength);
     }
 
-    private void injectResponsiveStyles() {
+    @Override
+    protected void injectResponsiveStyles() {
         String css = """
                 .otp-login-view {
                     background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
@@ -378,9 +358,6 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
                     }
                 }
                 """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
+        injectStyles(css);
     }
 }

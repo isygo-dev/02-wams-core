@@ -11,12 +11,9 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.QueryParameters;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinSession;
@@ -28,15 +25,12 @@ import eu.isygoit.ui.common.component.LanguageSelectorComponent;
 import eu.isygoit.ui.common.spring.SpringContextUtil;
 import eu.isygoit.util.SecurityUtils;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObserver {
 
@@ -104,7 +98,7 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
 
         // Add language selector
         LanguageSelectorComponent languageSelector = new LanguageSelectorComponent();
-        
+
         // Add profile component
         Component profileComponent = createProfileComponent();
 
@@ -235,7 +229,7 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         if (!SecurityUtils.isUserLoggedIn()) {
             String currentPath = event.getLocation().getPath();
             SecurityUtils.storeRedirect(currentPath);
-            event.forwardTo("login?redirect=" + currentPath);
+            UI.getCurrent().getPage().setLocation("login?redirect=" + currentPath);
         }
     }
 }

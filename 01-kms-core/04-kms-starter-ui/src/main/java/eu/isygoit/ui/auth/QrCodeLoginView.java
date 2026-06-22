@@ -9,14 +9,11 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.server.VaadinServletRequest;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
+import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -44,17 +41,15 @@ import java.util.Optional;
 @Route(value = "login/qr")
 @PageTitle("QR Code Login")
 @PermitAll
-public class QrCodeLoginView extends VerticalLayout implements BeforeEnterObserver {
+public class QrCodeLoginView extends BaseLoginView {
 
     private final Image qrImage = new Image();
     private final Button refreshQrButton = new Button("Refresh QR", VaadinIcon.REFRESH.create());
     private final Div statusContainer = new Div();
-    private boolean stylesInjected = false;
 
     private String tenant;
     private String username;
     private String qrCodeToken;
-    private String redirectTarget;
 
     @Autowired
     private PublicAuthService authService;
@@ -202,30 +197,7 @@ public class QrCodeLoginView extends VerticalLayout implements BeforeEnterObserv
     }
 
     @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        if (SecurityUtils.isUserLoggedIn()) {
-            String target = SecurityUtils.consumeRedirect();
-            if (target == null) {
-                target = event.getLocation()
-                        .getQueryParameters()
-                        .getSingleParameter("redirect")
-                        .filter(SecurityUtils::isSafeInternalPath)
-                        .orElse("kms");
-            }
-            event.forwardTo(target);
-            return;
-        }
-
-        // Capture redirect from session or query
-        redirectTarget = SecurityUtils.consumeRedirect();
-        if (redirectTarget == null) {
-            redirectTarget = event.getLocation()
-                    .getQueryParameters()
-                    .getSingleParameter("redirect")
-                    .filter(SecurityUtils::isSafeInternalPath)
-                    .orElse(null);
-        }
-
+    protected void onBeforeEnter(BeforeEnterEvent event) {
         Optional<String> tenantOpt = event.getLocation().getQueryParameters().getSingleParameter("tenant");
         Optional<String> usernameOpt = event.getLocation().getQueryParameters().getSingleParameter("username");
 
@@ -239,7 +211,8 @@ public class QrCodeLoginView extends VerticalLayout implements BeforeEnterObserv
         generateQrCode();
     }
 
-    private void injectResponsiveStyles() {
+    @Override
+    protected void injectResponsiveStyles() {
         String css = """
                 .qr-login-view {
                     background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
@@ -291,9 +264,6 @@ public class QrCodeLoginView extends VerticalLayout implements BeforeEnterObserv
                     }
                 }
                 """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
+        injectStyles(css);
     }
 }

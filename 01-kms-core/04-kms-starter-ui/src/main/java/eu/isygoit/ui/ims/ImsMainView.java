@@ -6,14 +6,12 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.*;
-import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.spring.annotation.VaadinSessionScope;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.remote.ims.*;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
@@ -25,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * Accessible at "/ims" and "/ims/home".
  */
 @RouteAlias(value = "ims/home", layout = ImsMainLayout.class)
-@VaadinSessionScope //(or UIScope)
+@UIScope
 @Route(value = "ims", layout = ImsMainLayout.class)
 @PageTitle("IMS Dashboard")
 public class ImsMainView extends ManagementVerticalView {

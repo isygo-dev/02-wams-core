@@ -5,56 +5,42 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.spring.annotation.VaadinSessionScope;
+import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
-import eu.isygoit.dto.KmsDtos.ListAliasesResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.cryptography.key.dialog.CreateKeyDialog;
-import eu.isygoit.util.SecurityUtils;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Stack;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
-@VaadinSessionScope
+@UIScope
 @Route(value = "kms/keys", layout = KmsMainLayout.class)
 @PageTitle("Key Management")
 @PermitAll
@@ -75,17 +61,6 @@ public class KeyManagementView extends ManagementVerticalView {
     private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
     private final Stack<String> previousTokens = new Stack<>();
-    private final Button toggleAliasBrowser = new Button("Browse Aliases", new Icon(VaadinIcon.LIST));
-    private final VerticalLayout aliasBrowserPanel = new VerticalLayout();
-    private final Grid<ListAliasesResponse.AliasEntry> aliasGrid = new Grid<>();
-    private final HorizontalLayout aliasPaginationLayout = new HorizontalLayout();
-    private final Button aliasPrevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
-    private final Button aliasNextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
-    private final Span aliasPageInfo = new Span();
-    private final ComboBox<Integer> aliasPageSizeSelect = new ComboBox<>("Per page", 10, 20, 50);
-    private final ProgressBar aliasLoading = new ProgressBar();
-    private final Stack<String> aliasPreviousTokens = new Stack<>();
-    private final int aliasCurrentLimit = 10;
     private int pageSize = 10;
     private String currentNextToken = null;
     private String currentToken = null;
@@ -95,8 +70,6 @@ public class KeyManagementView extends ManagementVerticalView {
     private int numberOfElements = 0;
     private boolean truncated = false;
     private List<KeyCard> currentPageCards = new ArrayList<>();
-    private String aliasCurrentNextToken = null;
-    private boolean aliasesLoaded = false;
     private String currentSearch = "";
     private IEnumKeyStatus.Types currentStatus = null;
 
@@ -292,42 +265,6 @@ public class KeyManagementView extends ManagementVerticalView {
             cardsContainer.add(emptyState);
         } else {
             filtered.forEach(cardsContainer::add);
-        }
-    }
-
-    private void resetAliasPagination() {
-        aliasPreviousTokens.clear();
-        aliasCurrentNextToken = null;
-        aliasPrevButton.setEnabled(false);
-        aliasNextButton.setEnabled(false);
-        aliasPageInfo.setText("");
-        aliasesLoaded = false;
-    }
-
-    private void loadAliasesPage(String nextToken) {
-        aliasLoading.setVisible(true);
-        aliasGrid.setVisible(false);
-        try {
-            ResponseEntity<ListAliasesResponse> response = kmsApiService.listAliases(aliasCurrentLimit, nextToken);
-            ListAliasesResponse body = response.getBody();
-            List<ListAliasesResponse.AliasEntry> aliases = (body != null && body.getAliases() != null) ? body.getAliases() : new ArrayList<>();
-            aliasGrid.setItems(aliases);
-            aliasCurrentNextToken = (body != null) ? body.getNextToken() : null;
-            aliasNextButton.setEnabled(aliasCurrentNextToken != null);
-            aliasPrevButton.setEnabled(!aliasPreviousTokens.isEmpty());
-            String info = aliases.isEmpty() ? "No results" : "Showing " + aliases.size() + " aliases";
-            aliasPageInfo.setText(info);
-            aliasPageInfo.getElement().setAttribute("title", info);
-            aliasesLoaded = true;
-        } catch (Exception e) {
-            Notification.show("Failed to load aliases: " + e.getMessage(), 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            log.error("Failed to load aliases", e);
-            aliasGrid.setItems(new ArrayList<>());
-            aliasNextButton.setEnabled(false);
-        } finally {
-            aliasLoading.setVisible(false);
-            aliasGrid.setVisible(true);
         }
     }
 

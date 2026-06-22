@@ -12,15 +12,11 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.request.AccountAuthTypeRequest;
@@ -40,15 +36,12 @@ import org.springframework.stereotype.Component;
 @Route(value = "login")
 @PageTitle("Sign In")
 @PermitAll
-public class LoginView extends VerticalLayout implements BeforeEnterObserver {
+public class LoginView extends BaseLoginView {
 
     private final TextField tenantField = new TextField("Organisation");
     private final TextField usernameField = new TextField("Login");
     private final Button continueButton = new Button("Continue", VaadinIcon.ARROW_RIGHT.create());
     private final Div errorContainer = new Div();
-    private boolean stylesInjected = false;
-
-    private String redirectTarget;
 
     @Autowired
     private PublicAuthService authService;
@@ -129,6 +122,8 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
         if (tenant.isEmpty() || username.isEmpty()) {
             showError("Organisation and Login are required");
+            errorContainer.setText("Organisation and Login are required");
+            errorContainer.setVisible(true);
             return;
         }
 
@@ -142,6 +137,16 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 UserContext userContext = response.getBody();
                 IEnumAuth.Types authType = userContext.getAuthTypeMode();
+
+                // Ensure redirectTarget is set (fallback to current query param)
+                if (redirectTarget == null) {
+                    redirectTarget = UI.getCurrent().getInternals()
+                            .getActiveViewLocation()
+                            .getQueryParameters()
+                            .getSingleParameter("redirect")
+                            .filter(SecurityUtils::isSafeInternalPath)
+                            .orElse(null);
+                }
 
                 // Build base query string with tenant and username
                 StringBuilder query = new StringBuilder("?tenant=" + tenant + "&username=" + username);
@@ -172,6 +177,8 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
                         return;
                     default:
                         showError("Unsupported authentication type: " + authType);
+                        errorContainer.setText("Unsupported authentication type: " + authType);
+                        errorContainer.setVisible(true);
                         return;
                 }
 
@@ -180,45 +187,25 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
                 }
             } else {
                 showError("Unable to determine authentication method. Please check your credentials.");
+                errorContainer.setText("Unable to determine authentication method. Please check your credentials.");
+                errorContainer.setVisible(true);
             }
         } catch (Exception ex) {
             showError("Service unavailable. Please try again later.");
+            errorContainer.setText("Service unavailable. Please try again later.");
+            errorContainer.setVisible(true);
         }
-    }
-
-    private void showError(String message) {
-        errorContainer.setText(message);
-        errorContainer.setVisible(true);
-        Notification.show(message, 3000, Notification.Position.BOTTOM_END)
-                .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
 
     @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        // 1. Try session first
-        redirectTarget = SecurityUtils.consumeRedirect();
-
-        // 2. Fallback to query parameter
-        if (redirectTarget == null) {
-            redirectTarget = event.getLocation()
-                    .getQueryParameters()
-                    .getSingleParameter("redirect")
-                    .filter(SecurityUtils::isSafeInternalPath)
-                    .orElse(null);
-        }
-
-        log.info("🔐 LoginView redirectTarget: {}", redirectTarget);
-
-        if (SecurityUtils.isUserLoggedIn()) {
-            String target = (redirectTarget != null) ? redirectTarget : "kms";
-            event.forwardTo(target);
-            return;
-        }
-
+    protected void onBeforeEnter(BeforeEnterEvent event) {
+        // Clear error on fresh login view
         errorContainer.setVisible(false);
+        errorContainer.setText("");
     }
 
-    private void injectResponsiveStyles() {
+    @Override
+    protected void injectResponsiveStyles() {
         String css = """
                 .login-view {
                     background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
@@ -271,9 +258,6 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
                     }
                 }
                 """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
+        injectStyles(css);
     }
 }
