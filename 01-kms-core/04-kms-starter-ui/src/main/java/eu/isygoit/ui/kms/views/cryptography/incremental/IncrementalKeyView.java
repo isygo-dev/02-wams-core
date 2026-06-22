@@ -11,6 +11,9 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import eu.isygoit.ui.common.view.ManagementCompositeVerticalView;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
@@ -20,6 +23,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -41,7 +45,7 @@ import java.util.List;
 @Route(value = "kms/incremental-key", layout = KmsMainLayout.class)
 @PageTitle("Incremental Key Configurations")
 @PermitAll
-public class IncrementalKeyView extends Composite<VerticalLayout> implements BeforeEnterObserver {
+public class IncrementalKeyView extends ManagementCompositeVerticalView {
 
     @Getter
     private final KmsIncrementalKeyService incrementalKeyService;
@@ -349,13 +353,5 @@ public class IncrementalKeyView extends Composite<VerticalLayout> implements Bef
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
                 css
         );
-    }
-
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        if (VaadinSession.getCurrent().getAttribute("user") == null) {
-            String currentPath = event.getLocation().getPath();
-            event.forwardTo("login?redirect=" + currentPath);
-        }
     }
 }

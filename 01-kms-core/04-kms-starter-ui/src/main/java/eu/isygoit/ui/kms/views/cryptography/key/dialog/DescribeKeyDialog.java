@@ -3,6 +3,7 @@ package eu.isygoit.ui.kms.views.cryptography.key.dialog;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;

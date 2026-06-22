@@ -8,6 +8,8 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -20,6 +22,7 @@ import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import eu.isygoit.ui.common.dialog.ImageCropperDialog;
 import eu.isygoit.ui.ims.views.application.ApplicationManagementView;
 import feign.FeignException;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 

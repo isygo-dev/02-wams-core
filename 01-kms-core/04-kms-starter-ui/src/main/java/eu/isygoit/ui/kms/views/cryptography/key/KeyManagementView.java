@@ -12,6 +12,8 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
@@ -20,7 +22,9 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -29,16 +33,22 @@ import eu.isygoit.dto.KmsDtos.ListAliasesResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.cryptography.key.dialog.CreateKeyDialog;
+import eu.isygoit.util.SecurityUtils;
 import feign.FeignException;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -48,7 +58,7 @@ import java.util.stream.Collectors;
 @Route(value = "kms/keys", layout = KmsMainLayout.class)
 @PageTitle("Key Management")
 @PermitAll
-public class KeyManagementView extends VerticalLayout implements BeforeEnterObserver {
+public class KeyManagementView extends ManagementVerticalView {
 
     private final KmsApiService kmsApiService;
     private final ObjectMapper objectMapper;
@@ -65,10 +75,14 @@ public class KeyManagementView extends VerticalLayout implements BeforeEnterObse
     private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
     private final Stack<String> previousTokens = new Stack<>();
+    private final Button toggleAliasBrowser = new Button("Browse Aliases", new Icon(VaadinIcon.LIST));
+    private final VerticalLayout aliasBrowserPanel = new VerticalLayout();
     private final Grid<ListAliasesResponse.AliasEntry> aliasGrid = new Grid<>();
+    private final HorizontalLayout aliasPaginationLayout = new HorizontalLayout();
     private final Button aliasPrevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
     private final Button aliasNextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
     private final Span aliasPageInfo = new Span();
+    private final ComboBox<Integer> aliasPageSizeSelect = new ComboBox<>("Per page", 10, 20, 50);
     private final ProgressBar aliasLoading = new ProgressBar();
     private final Stack<String> aliasPreviousTokens = new Stack<>();
     private final int aliasCurrentLimit = 10;
@@ -442,13 +456,5 @@ public class KeyManagementView extends VerticalLayout implements BeforeEnterObse
     }
 
     public record KeyStatusOption(String label, IEnumKeyStatus.Types value) {
-    }
-
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        if (VaadinSession.getCurrent().getAttribute("user") == null) {
-            String currentPath = event.getLocation().getPath();
-            event.forwardTo("login?redirect=" + currentPath);
-        }
     }
 }

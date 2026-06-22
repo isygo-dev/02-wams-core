@@ -9,6 +9,8 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -23,6 +25,7 @@ import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.kms.views.cryptography.key.KeyManagementView;
 import feign.FeignException;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 

@@ -12,12 +12,14 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -27,10 +29,12 @@ import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.remote.ims.PublicAuthService;
 import eu.isygoit.util.SecurityUtils;
 import jakarta.annotation.security.PermitAll;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @UIScope
 @Route(value = "login")
@@ -142,17 +146,18 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
                 // Build base query string with tenant and username
                 StringBuilder query = new StringBuilder("?tenant=" + tenant + "&username=" + username);
                 // Append redirect if present
-                if (redirectTarget != null) {
+                if (redirectTarget != null && SecurityUtils.isSafeInternalPath(redirectTarget)) {
                     query.append("&redirect=").append(redirectTarget);
                 }
 
+                Integer otpLength = null;
                 String targetView = null;
                 switch (authType) {
                     case PWD:
                         targetView = "login/password";
                         break;
                     case OTP:
-                        Integer otpLength = userContext.getOtpLength();
+                        otpLength = userContext.getOtpLength();
                         if (otpLength != null) {
                             query.append("&otpLength=").append(otpLength);
                         }
@@ -190,16 +195,26 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        // Capture redirect parameter
-        redirectTarget = event.getLocation()
-                .getQueryParameters()
-                .getSingleParameter("redirect")
-                .filter(SecurityUtils::isSafeInternalPath)
-                .orElse(null);
+        // 1. Try session first
+        redirectTarget = SecurityUtils.consumeRedirect();
 
-        // If already authenticated, forward to target or default
-        if (VaadinSession.getCurrent().getAttribute("user") != null) {
-            String target = (redirectTarget != null) ? redirectTarget : "kms";
+        // 2. Fallback to query parameter
+        if (redirectTarget == null) {
+            redirectTarget = event.getLocation()
+                    .getQueryParameters()
+                    .getSingleParameter("redirect")
+                    .filter(SecurityUtils::isSafeInternalPath)
+                    .orElse(null);
+        }
+
+        log.info("🔐 LoginView redirectTarget: {}", redirectTarget);
+
+        // 3. If already authenticated, forward directly
+        if (SecurityUtils.isUserLoggedIn()) {
+            String target = (redirectTarget != null && SecurityUtils.isSafeInternalPath(redirectTarget))
+                    ? redirectTarget
+                    : "kms";
+            log.info("✅ User already logged in – forwarding to {}", target);
             event.forwardTo(target);
             return;
         }

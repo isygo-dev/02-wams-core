@@ -10,6 +10,7 @@ import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.remote.kms.PasswordConfigService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import feign.FeignException;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 
 public class UpdatePasswordConfigDialog extends BaseActionDialog {

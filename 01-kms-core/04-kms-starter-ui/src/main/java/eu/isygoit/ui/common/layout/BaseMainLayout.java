@@ -11,8 +11,13 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.QueryParameters;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -21,15 +26,19 @@ import eu.isygoit.remote.ims.AccountImageService;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.ui.common.component.LanguageSelectorComponent;
 import eu.isygoit.ui.common.spring.SpringContextUtil;
+import eu.isygoit.util.SecurityUtils;
 import feign.FeignException;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
-public abstract class BaseMainLayout extends AppLayout {
+public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObserver {
 
     private final AccountService accountService;
     private final AccountImageService accountImageService;
@@ -218,6 +227,19 @@ public abstract class BaseMainLayout extends AppLayout {
     protected static class DrawerToggle extends com.vaadin.flow.component.applayout.DrawerToggle {
         public DrawerToggle() {
             super();
+        }
+    }
+
+    @Override
+    public final void beforeEnter(BeforeEnterEvent event) {
+        if (VaadinSession.getCurrent().getAttribute("user") == null) {
+            String currentPath = event.getLocation().getPath();
+            // 1. Store in session as primary mechanism
+            SecurityUtils.storeRedirect(currentPath);
+            // 2. Also pass as query param (fallback)
+            Map<String, String> params = new HashMap<>();
+            params.put("redirect", currentPath);
+            event.forwardTo("login", QueryParameters.simple(params));
         }
     }
 }

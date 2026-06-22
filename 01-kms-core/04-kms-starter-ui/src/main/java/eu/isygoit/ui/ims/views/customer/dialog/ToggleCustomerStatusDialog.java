@@ -6,6 +6,7 @@ import eu.isygoit.remote.ims.CustomerService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.customer.CustomerManagementView;
 import feign.FeignException;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 
 public class ToggleCustomerStatusDialog extends PinBaseActionDialog {

@@ -13,6 +13,8 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -21,6 +23,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -30,6 +33,7 @@ import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.remote.ims.PublicAuthService;
 import eu.isygoit.util.SecurityUtils;
 import jakarta.annotation.security.PermitAll;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -39,6 +43,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 @UIScope
 @Route(value = "login/otp")
@@ -212,10 +217,16 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
             ResponseEntity<AuthResponseDto> response = authService.authenticate(authRequest);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 AuthResponseDto authResponse = response.getBody();
-                VaadinSession.getCurrent().setAttribute("user", username);
-                VaadinSession.getCurrent().setAttribute("accessToken", authResponse.getAccessToken());
 
-                String target = (redirectTarget != null) ? redirectTarget : "kms";
+                VaadinSession session = VaadinSession.getCurrent();
+                session.setAttribute("user", username);
+                session.setAttribute("accessToken", authResponse.getAccessToken());
+
+                log.info("✅ User logged in: {} (session id: {})", username, session.getSession().getId());
+
+                String target = (redirectTarget != null && SecurityUtils.isSafeInternalPath(redirectTarget))
+                        ? redirectTarget
+                        : "kms";
                 UI.getCurrent().navigate(target);
 
                 Notification.show("Welcome " + username + "!", 2000, Notification.Position.BOTTOM_END)
@@ -237,23 +248,32 @@ public class OtpLoginView extends VerticalLayout implements BeforeEnterObserver 
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        // If already authenticated, redirect to target or default
-        if (VaadinSession.getCurrent().getAttribute("user") != null) {
-            String target = event.getLocation().getQueryParameters()
-                    .getSingleParameter("redirect")
-                    .filter(SecurityUtils::isSafeInternalPath)
-                    .orElse("kms");
+        if (SecurityUtils.isUserLoggedIn()) {
+            String target = SecurityUtils.consumeRedirect();
+            if (target == null) {
+                target = event.getLocation()
+                        .getQueryParameters()
+                        .getSingleParameter("redirect")
+                        .filter(SecurityUtils::isSafeInternalPath)
+                        .orElse("kms");
+            }
             event.forwardTo(target);
             return;
+        }
+
+        // Capture redirect from session or query
+        redirectTarget = SecurityUtils.consumeRedirect();
+        if (redirectTarget == null) {
+            redirectTarget = event.getLocation()
+                    .getQueryParameters()
+                    .getSingleParameter("redirect")
+                    .filter(SecurityUtils::isSafeInternalPath)
+                    .orElse(null);
         }
 
         Optional<String> tenantOpt = event.getLocation().getQueryParameters().getSingleParameter("tenant");
         Optional<String> usernameOpt = event.getLocation().getQueryParameters().getSingleParameter("username");
         Optional<String> otpLengthOpt = event.getLocation().getQueryParameters().getSingleParameter("otpLength");
-        redirectTarget = event.getLocation().getQueryParameters()
-                .getSingleParameter("redirect")
-                .filter(SecurityUtils::isSafeInternalPath)
-                .orElse(null);
 
         if (tenantOpt.isEmpty() || usernameOpt.isEmpty() || otpLengthOpt.isEmpty()) {
             event.forwardTo("login");

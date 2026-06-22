@@ -6,6 +6,9 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
@@ -13,6 +16,7 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.remote.ims.*;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.ims.layout.ImsMainLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -24,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @VaadinSessionScope //(or UIScope)
 @Route(value = "ims", layout = ImsMainLayout.class)
 @PageTitle("IMS Dashboard")
-public class ImsMainView extends VerticalLayout implements BeforeEnterObserver {
+public class ImsMainView extends ManagementVerticalView {
 
     private final AccountService accountService;
     private final TenantService tenantService;
@@ -181,15 +185,6 @@ public class ImsMainView extends VerticalLayout implements BeforeEnterObserver {
     private static class Span extends com.vaadin.flow.component.html.Span {
         public Span(String text) {
             super(text);
-        }
-    }
-
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        if (VaadinSession.getCurrent().getAttribute("user") == null) {
-            // User is not authenticated – redirect to login, passing the current URL as a redirect parameter.
-            String currentPath = event.getLocation().getPath();
-            event.forwardTo("login?redirect=" + currentPath);
         }
     }
 }

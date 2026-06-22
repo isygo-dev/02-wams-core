@@ -14,6 +14,8 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
@@ -24,6 +26,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -35,6 +38,7 @@ import eu.isygoit.ui.kms.views.cryptography.keyGrants.dialog.GrantDetailsDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyGrants.dialog.RetireGrantDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyGrants.dialog.RevokeGrantDialog;
 import feign.FeignException;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +54,7 @@ import java.util.stream.Collectors;
 @Route(value = "kms/grants", layout = KmsMainLayout.class)
 @PageTitle("Grants")
 @PermitAll
-public class GrantsView extends VerticalLayout implements BeforeEnterObserver {
+public class GrantsView extends ManagementVerticalView {
 
     private final KmsApiService kmsApiService;
     private final ObjectMapper objectMapper;
@@ -461,14 +465,6 @@ public class GrantsView extends VerticalLayout implements BeforeEnterObserver {
 
         String getDisplayName() {
             return displayName;
-        }
-    }
-
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        if (VaadinSession.getCurrent().getAttribute("user") == null) {
-            String currentPath = event.getLocation().getPath();
-            event.forwardTo("login?redirect=" + currentPath);
         }
     }
 }

@@ -6,6 +6,7 @@ import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import feign.FeignException;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 
 public class DisableKeyVersionDialog extends PinBaseActionDialog {

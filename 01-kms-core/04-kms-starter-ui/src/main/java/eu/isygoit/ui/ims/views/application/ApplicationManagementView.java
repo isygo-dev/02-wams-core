@@ -10,6 +10,8 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
@@ -19,6 +21,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -31,6 +34,7 @@ import eu.isygoit.ui.ims.layout.ImsMainLayout;
 import eu.isygoit.ui.ims.views.application.dialog.CreateApplicationDialog;
 import eu.isygoit.ui.ims.views.application.dialog.UpdateApplicationDialog;
 import feign.FeignException;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +49,7 @@ import java.util.stream.Collectors;
 @Route(value = "ims/applications", layout = ImsMainLayout.class)
 @PageTitle("Application Management")
 @PermitAll
-public class ApplicationManagementView extends VerticalLayout implements BeforeEnterObserver {
+public class ApplicationManagementView extends ManagementVerticalView {
 
     private final ApplicationService applicationService;
     private final ApplicationImageService applicationImageService;
@@ -325,13 +329,5 @@ public class ApplicationManagementView extends VerticalLayout implements BeforeE
         } catch (Exception ignored) {
         }
         return ex.getMessage();
-    }
-
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        if (VaadinSession.getCurrent().getAttribute("user") == null) {
-            String currentPath = event.getLocation().getPath();
-            event.forwardTo("login?redirect=" + currentPath);
-        }
     }
 }

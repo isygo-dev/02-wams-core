@@ -12,6 +12,7 @@ import eu.isygoit.enums.IEnumStringOutputType;
 import eu.isygoit.remote.kms.PEBConfigService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import feign.FeignException;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 
 public class UpdatePEBConfigDialog extends BaseActionDialog {

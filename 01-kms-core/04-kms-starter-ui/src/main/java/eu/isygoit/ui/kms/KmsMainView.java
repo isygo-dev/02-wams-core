@@ -10,7 +10,14 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.QueryParameters;
+import com.vaadin.flow.router.Route;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
+import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -18,21 +25,25 @@ import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsAppNextCodeService;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
 import eu.isygoit.remote.kms.RandomKeyService;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.dashbord.AuditLogPanel;
 import eu.isygoit.ui.kms.views.dashbord.KeyStatisticsPanel;
 import eu.isygoit.ui.kms.views.dashbord.KeyUsageStatsPanel;
 import eu.isygoit.ui.kms.views.dashbord.TokenStatisticsPanel;
+import eu.isygoit.util.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RouteAlias(value = "kms/home", layout = KmsMainLayout.class)
 @VaadinSessionScope
 @Route(value = "kms", layout = KmsMainLayout.class)
 @PageTitle("KMS Dashboard")
-public class KmsMainView extends VerticalLayout implements BeforeEnterObserver {
+public class KmsMainView extends ManagementVerticalView {
 
     private final KmsApiService kmsApiService;
     private final KmsTokenConfigService tokenConfigService;
@@ -206,14 +217,6 @@ public class KmsMainView extends VerticalLayout implements BeforeEnterObserver {
     private static class Span extends com.vaadin.flow.component.html.Span {
         public Span(String text) {
             super(text);
-        }
-    }
-
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        if (VaadinSession.getCurrent().getAttribute("user") == null) {
-            String currentPath = event.getLocation().getPath();
-            event.forwardTo("login?redirect=" + currentPath);
         }
     }
 }

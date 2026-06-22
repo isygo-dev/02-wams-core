@@ -5,6 +5,7 @@ import eu.isygoit.remote.ims.RoleInfoService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.roleinfo.RoleManagementView;
 import feign.FeignException;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 
 public class DeleteRoleDialog extends PinBaseActionDialog {
 

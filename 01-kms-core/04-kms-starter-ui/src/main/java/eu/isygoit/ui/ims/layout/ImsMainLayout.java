@@ -5,7 +5,14 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.QueryParameters;
+import com.vaadin.flow.server.VaadinSession;
 import eu.isygoit.ui.common.layout.BaseMainLayout;
+import eu.isygoit.util.SecurityUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ImsMainLayout extends BaseMainLayout {
 
