@@ -13,6 +13,8 @@ import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.server.StreamResource;
@@ -32,7 +34,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObserver {
+public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObserver, AfterNavigationObserver {
 
     private final AccountService accountService;
     private final AccountImageService accountImageService;
@@ -231,5 +233,11 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
             SecurityUtils.storeRedirect(currentPath);
             UI.getCurrent().getPage().setLocation("login?redirect=" + currentPath);
         }
+    }
+
+    @Override
+    public void afterNavigation(AfterNavigationEvent event) {
+        String currentPath = event.getLocation().getPathWithQueryParameters(); // Better: includes query params if any
+        SecurityUtils.storeRedirect(currentPath);
     }
 }

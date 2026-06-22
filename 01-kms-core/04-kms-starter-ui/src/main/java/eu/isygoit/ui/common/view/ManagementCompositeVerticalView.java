@@ -2,15 +2,13 @@ package eu.isygoit.ui.common.view;
 
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.QueryParameters;
+import com.vaadin.flow.router.*;
 import eu.isygoit.util.SecurityUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class ManagementCompositeVerticalView extends Composite<VerticalLayout> /*no replace*/implements BeforeEnterObserver {
+public class ManagementCompositeVerticalView extends Composite<VerticalLayout> implements BeforeEnterObserver, AfterNavigationObserver {
 
     @Override
     public final void beforeEnter(BeforeEnterEvent event) {
@@ -21,5 +19,11 @@ public class ManagementCompositeVerticalView extends Composite<VerticalLayout> /
             params.put("redirect", currentPath);
             event.forwardTo("login", QueryParameters.simple(params));
         }
+    }
+
+    @Override
+    public void afterNavigation(AfterNavigationEvent event) {
+        String currentPath = event.getLocation().getPathWithQueryParameters(); // Better: includes query params if any
+        SecurityUtils.storeRedirect(currentPath);
     }
 }

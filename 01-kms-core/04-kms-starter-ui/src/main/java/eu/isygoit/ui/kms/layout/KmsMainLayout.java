@@ -18,7 +18,7 @@ public class KmsMainLayout extends BaseMainLayout {
     protected void createDrawer() {
         SideNav nav = new SideNav();
 
-        SideNavItem dashboard = new SideNavItem("Dashboard", "kms", VaadinIcon.HOME.create());
+        SideNavItem dashboard = new SideNavItem("Dashboard", "kms/home", VaadinIcon.HOME.create());
 
         SideNavItem keyMgmt = new SideNavItem("Key Management");
         keyMgmt.setPrefixComponent(VaadinIcon.KEY.create());

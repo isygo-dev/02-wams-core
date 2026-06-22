@@ -17,12 +17,21 @@ public final class SecurityUtils {
 
     public static boolean isSafeInternalPath(String path) {
         if (!StringUtils.hasText(path)) return false;
-        return path.startsWith("/")
-                && !path.contains("://")
-                && !path.contains("..")
-                && !path.contains("//")
-                && !path.contains("\\")
-                && path.matches("^/[a-zA-Z0-9\\-/_?=&]+$"); // Allow query params
+
+        // Normalise: remove leading slash for validation, but allow it
+        String normalized = path.trim();
+        if (normalized.startsWith("/")) {
+            normalized = normalized.substring(1);
+        }
+
+        // Block attempts to go up directories, external URLs, or double slashes
+        if (normalized.isEmpty() || normalized.contains("..") || normalized.contains("//")
+                || normalized.contains("\\") || normalized.contains(":")) {
+            return false;
+        }
+
+        // Only allow safe characters (letters, digits, hyphens, underscores, slashes)
+        return normalized.matches("^[a-zA-Z0-9\\-/_]+$");
     }
 
     public static void storeRedirect(String path) {
