@@ -231,15 +231,11 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
     }
 
     @Override
-    public final void beforeEnter(BeforeEnterEvent event) {
-        if (VaadinSession.getCurrent().getAttribute("user") == null) {
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (!SecurityUtils.isUserLoggedIn()) {
             String currentPath = event.getLocation().getPath();
-            // 1. Store in session as primary mechanism
             SecurityUtils.storeRedirect(currentPath);
-            // 2. Also pass as query param (fallback)
-            Map<String, String> params = new HashMap<>();
-            params.put("redirect", currentPath);
-            event.forwardTo("login", QueryParameters.simple(params));
+            event.forwardTo("login?redirect=" + currentPath);
         }
     }
 }

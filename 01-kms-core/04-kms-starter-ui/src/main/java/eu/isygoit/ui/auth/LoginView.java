@@ -209,12 +209,8 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
         log.info("🔐 LoginView redirectTarget: {}", redirectTarget);
 
-        // 3. If already authenticated, forward directly
         if (SecurityUtils.isUserLoggedIn()) {
-            String target = (redirectTarget != null && SecurityUtils.isSafeInternalPath(redirectTarget))
-                    ? redirectTarget
-                    : "kms";
-            log.info("✅ User already logged in – forwarding to {}", target);
+            String target = (redirectTarget != null) ? redirectTarget : "kms";
             event.forwardTo(target);
             return;
         }

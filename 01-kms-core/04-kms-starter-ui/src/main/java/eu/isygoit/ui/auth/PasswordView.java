@@ -12,6 +12,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.server.VaadinServletRequest;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
@@ -29,6 +30,7 @@ import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.remote.ims.PublicAuthService;
 import eu.isygoit.util.SecurityUtils;
 import jakarta.annotation.security.PermitAll;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -139,11 +141,16 @@ public class PasswordView extends VerticalLayout implements BeforeEnterObserver 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 AuthResponseDto authResponse = response.getBody();
 
-                VaadinSession session = VaadinSession.getCurrent();
-                session.setAttribute("user", username);
-                session.setAttribute("accessToken", authResponse.getAccessToken());
+                VaadinSession vaadinSession = VaadinSession.getCurrent();
+                vaadinSession.setAttribute("user", username);
+                vaadinSession.setAttribute("accessToken", authResponse.getAccessToken());
 
-                log.info("✅ User logged in: {} (session id: {})", username, session.getSession().getId());
+                // Also store in plain HTTP session as a fallback
+                HttpSession httpSession = VaadinServletRequest.getCurrent().getSession(true);
+                httpSession.setAttribute("user", username);
+                httpSession.setAttribute("accessToken", authResponse.getAccessToken());
+
+                log.info("✅ User logged in: {} (session id: {})", username, vaadinSession.getSession().getId());
 
                 String target = (redirectTarget != null && SecurityUtils.isSafeInternalPath(redirectTarget))
                         ? redirectTarget
