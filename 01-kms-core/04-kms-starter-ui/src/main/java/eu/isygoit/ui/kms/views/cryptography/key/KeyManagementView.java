@@ -65,14 +65,10 @@ public class KeyManagementView extends VerticalLayout implements BeforeEnterObse
     private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
     private final Stack<String> previousTokens = new Stack<>();
-    private final Button toggleAliasBrowser = new Button("Browse Aliases", new Icon(VaadinIcon.LIST));
-    private final VerticalLayout aliasBrowserPanel = new VerticalLayout();
     private final Grid<ListAliasesResponse.AliasEntry> aliasGrid = new Grid<>();
-    private final HorizontalLayout aliasPaginationLayout = new HorizontalLayout();
     private final Button aliasPrevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
     private final Button aliasNextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
     private final Span aliasPageInfo = new Span();
-    private final ComboBox<Integer> aliasPageSizeSelect = new ComboBox<>("Per page", 10, 20, 50);
     private final ProgressBar aliasLoading = new ProgressBar();
     private final Stack<String> aliasPreviousTokens = new Stack<>();
     private final int aliasCurrentLimit = 10;

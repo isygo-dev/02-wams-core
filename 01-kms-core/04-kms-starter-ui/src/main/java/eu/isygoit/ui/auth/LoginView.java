@@ -25,13 +25,11 @@ import eu.isygoit.dto.request.AccountAuthTypeRequest;
 import eu.isygoit.dto.response.UserContext;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.remote.ims.PublicAuthService;
+import eu.isygoit.util.SecurityUtils;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
-import java.util.Optional;
 
 @Component
 @UIScope
@@ -196,7 +194,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         redirectTarget = event.getLocation()
                 .getQueryParameters()
                 .getSingleParameter("redirect")
-                .filter(this::isSafeInternalPath)
+                .filter(SecurityUtils::isSafeInternalPath)
                 .orElse(null);
 
         // If already authenticated, forward to target or default
@@ -207,10 +205,6 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         }
 
         errorContainer.setVisible(false);
-    }
-
-    private boolean isSafeInternalPath(String path) {
-        return StringUtils.hasText(path) && path.startsWith("/") && !path.contains("..") && !path.contains("//");
     }
 
     private void injectResponsiveStyles() {

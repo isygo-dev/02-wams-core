@@ -23,11 +23,11 @@ import eu.isygoit.dto.response.AuthResponseDto;
 import eu.isygoit.dto.response.UserContext;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.remote.ims.PublicAuthService;
+import eu.isygoit.util.SecurityUtils;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -190,7 +190,7 @@ public class QrCodeLoginView extends VerticalLayout implements BeforeEnterObserv
         if (VaadinSession.getCurrent().getAttribute("user") != null) {
             String target = event.getLocation().getQueryParameters()
                     .getSingleParameter("redirect")
-                    .filter(this::isSafeInternalPath)
+                    .filter(SecurityUtils::isSafeInternalPath)
                     .orElse("kms");
             event.forwardTo(target);
             return;
@@ -200,7 +200,7 @@ public class QrCodeLoginView extends VerticalLayout implements BeforeEnterObserv
         Optional<String> usernameOpt = event.getLocation().getQueryParameters().getSingleParameter("username");
         redirectTarget = event.getLocation().getQueryParameters()
                 .getSingleParameter("redirect")
-                .filter(this::isSafeInternalPath)
+                .filter(SecurityUtils::isSafeInternalPath)
                 .orElse(null);
 
         if (tenantOpt.isEmpty() || usernameOpt.isEmpty()) {
@@ -211,10 +211,6 @@ public class QrCodeLoginView extends VerticalLayout implements BeforeEnterObserv
         tenant = tenantOpt.get();
         username = usernameOpt.get();
         generateQrCode();
-    }
-
-    private boolean isSafeInternalPath(String path) {
-        return StringUtils.hasText(path) && path.startsWith("/") && !path.contains("..") && !path.contains("//");
     }
 
     private void injectResponsiveStyles() {

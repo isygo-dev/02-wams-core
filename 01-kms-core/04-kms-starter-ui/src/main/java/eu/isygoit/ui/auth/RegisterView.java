@@ -28,11 +28,11 @@ import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.request.RegisteredUserDto;
 import eu.isygoit.remote.ims.PublicAuthService;
+import eu.isygoit.util.SecurityUtils;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 
@@ -182,15 +182,11 @@ public class RegisterView extends VerticalLayout implements BeforeEnterObserver 
             Optional<String> redirectOpt = event.getLocation()
                     .getQueryParameters()
                     .getSingleParameter("redirect")
-                    .filter(this::isSafeInternalPath);
+                    .filter(SecurityUtils::isSafeInternalPath);
             String target = redirectOpt.orElse("kms");
             event.forwardTo(target);
         }
         errorContainer.setVisible(false);
-    }
-
-    private boolean isSafeInternalPath(String path) {
-        return StringUtils.hasText(path) && path.startsWith("/") && !path.contains("..") && !path.contains("//");
     }
 
     private void injectResponsiveStyles() {
