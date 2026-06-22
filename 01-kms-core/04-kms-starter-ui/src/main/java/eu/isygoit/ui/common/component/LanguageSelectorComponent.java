@@ -1,7 +1,7 @@
 package eu.isygoit.ui.common.component;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -12,45 +12,49 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.i18n.I18n;
 
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 /**
- * Modern language selector with flag emojis and a compact, stylish design.
- * Allows users to switch between supported languages.
+ * Modern language selector with flag icons and a compact, stylish design.
+ * Uses flag-icon-css library (CDN) for consistent flag display.
  */
 public class LanguageSelectorComponent extends HorizontalLayout {
 
     private final ComboBox<Locale> languageCombo;
     private final Icon globeIcon;
-    private final Map<String, String> languageToFlagMap = new HashMap<>();
+    private final Span flagPrefixSpan;
 
     public LanguageSelectorComponent() {
+        // Inject flag-icon-css if not already present (using cloudflare CDN for reliability)
+        injectFlagIconCss();
+
         setAlignItems(FlexComponent.Alignment.CENTER);
         setSpacing(true);
         setPadding(false);
         getStyle()
-                .set("padding", "0 var(--lumo-space-s)")
+                .set("padding", "2px var(--lumo-space-s)")
                 .set("background", "var(--lumo-contrast-5pct)")
                 .set("border-radius", "var(--lumo-border-radius-l)")
                 .set("border", "1px solid var(--lumo-contrast-20pct)")
                 .set("transition", "all 0.2s ease");
 
-        // Add a subtle hover effect
+        // Subtle hover effect
         addAttachListener(e -> getStyle()
                 .set("cursor", "pointer")
                 .set("background", "var(--lumo-contrast-10pct)"));
 
         // Globe icon
         globeIcon = VaadinIcon.GLOBE.create();
-        globeIcon.setSize("18px");
+        globeIcon.setSize("16px");
         globeIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
 
-        // Build language → flag mapping
-        initFlagMapping();
+        // Prefix flag (shows selected flag)
+        flagPrefixSpan = new Span();
+        flagPrefixSpan.addClassName("flag-icon");
+        flagPrefixSpan.addClassName(getFlagCssClass(I18n.getCurrentLocale()));
+        flagPrefixSpan.getStyle().set("font-size", "1.2em");
 
-        // Create language combo box with flag support
+        // Language combo box with flag icons
         languageCombo = new ComboBox<>();
         languageCombo.setItems(I18n.getSupportedLocales());
         languageCombo.setRenderer(new ComponentRenderer<>(locale -> {
@@ -58,9 +62,11 @@ public class LanguageSelectorComponent extends HorizontalLayout {
             itemLayout.setAlignItems(FlexComponent.Alignment.CENTER);
             itemLayout.setSpacing(true);
 
-            String flag = getFlagEmoji(locale);
-            Span flagSpan = new Span(flag);
-            flagSpan.getStyle().set("font-size", "18px");
+            // Flag span with flag-icon class
+            Span flagSpan = new Span();
+            flagSpan.addClassName("flag-icon");
+            flagSpan.addClassName(getFlagCssClass(locale));
+            flagSpan.getStyle().set("font-size", "1.2em");
 
             String languageName = getLanguageName(locale);
             Span nameSpan = new Span(languageName);
@@ -70,14 +76,10 @@ public class LanguageSelectorComponent extends HorizontalLayout {
             return itemLayout;
         }));
 
-        languageCombo.setItemLabelGenerator(locale -> {
-            String flag = getFlagEmoji(locale);
-            String name = getLanguageName(locale);
-            return flag + " " + name;
-        });
-
+        languageCombo.setItemLabelGenerator(this::getLanguageName);
+        languageCombo.setPrefixComponent(flagPrefixSpan);
         languageCombo.setWidth("auto");
-        languageCombo.setMinWidth("140px");
+        languageCombo.setMinWidth("120px");
         languageCombo.setPlaceholder(null);
         languageCombo.setClearButtonVisible(false);
         languageCombo.getStyle()
@@ -90,13 +92,17 @@ public class LanguageSelectorComponent extends HorizontalLayout {
         // Set current locale
         languageCombo.setValue(I18n.getCurrentLocale());
 
-        // Add change listener
+        // Add change listener – update prefix flag and reload page
         languageCombo.addValueChangeListener(event -> {
             if (event.getValue() != null) {
+                // Update the prefix flag
+                String newFlagClass = getFlagCssClass(event.getValue());
+                flagPrefixSpan.setClassName("flag-icon " + newFlagClass);
+
                 I18n.setLocale(event.getValue());
                 VaadinSession.getCurrent().setAttribute("locale", event.getValue());
                 // Refresh the entire UI to apply new language
-                com.vaadin.flow.component.UI.getCurrent().getPage().reload();
+                UI.getCurrent().getPage().reload();
             }
         });
 
@@ -104,51 +110,47 @@ public class LanguageSelectorComponent extends HorizontalLayout {
     }
 
     /**
-     * Initialises the mapping from language codes to country codes for flag emojis.
+     * Injects the flag-icon-css library if not already loaded.
+     * Uses cloudflare CDN for reliability.
      */
-    private void initFlagMapping() {
-        languageToFlagMap.put("en", "US");
-        languageToFlagMap.put("fr", "FR");
-        languageToFlagMap.put("de", "DE");
-        languageToFlagMap.put("es", "ES");
-        languageToFlagMap.put("it", "IT");
-        languageToFlagMap.put("pt", "PT");
-        languageToFlagMap.put("nl", "NL");
-        languageToFlagMap.put("ru", "RU");
-        languageToFlagMap.put("zh", "CN");
-        languageToFlagMap.put("ja", "JP");
-        languageToFlagMap.put("ko", "KR");
-        languageToFlagMap.put("ar", "SA");
-        languageToFlagMap.put("hi", "IN");
+    private void injectFlagIconCss() {
+        UI.getCurrent().getPage().executeJs(
+                "if (!document.getElementById('flag-icon-css')) {" +
+                        "  const link = document.createElement('link');" +
+                        "  link.id = 'flag-icon-css';" +
+                        "  link.rel = 'stylesheet';" +
+                        "  link.href = 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css';" +
+                        "  document.head.appendChild(link);" +
+                        "}"
+        );
     }
 
     /**
-     * Returns the flag emoji for a given locale.
-     * Uses the country code if available, otherwise falls back to the mapping.
+     * Returns the CSS class for the flag icon based on the locale.
+     * Maps language to country code.
      */
-    private String getFlagEmoji(Locale locale) {
+    private String getFlagCssClass(Locale locale) {
         String countryCode = locale.getCountry();
         if (countryCode == null || countryCode.isEmpty()) {
-            // Try to map from language code
-            String language = locale.getLanguage();
-            countryCode = languageToFlagMap.getOrDefault(language, "UN");
+            // Fallback mapping for languages without country
+            countryCode = switch (locale.getLanguage()) {
+                case "en" -> "us";
+                case "fr" -> "fr";
+                case "de" -> "de";
+                case "es" -> "es";
+                case "it" -> "it";
+                case "pt" -> "pt";
+                case "nl" -> "nl";
+                case "ru" -> "ru";
+                case "zh" -> "cn";
+                case "ja" -> "jp";
+                case "ko" -> "kr";
+                case "ar" -> "sa";
+                case "hi" -> "in";
+                default -> "un";
+            };
         }
-        // Convert country code to uppercase flag emoji
-        return countryCodeToFlagEmoji(countryCode);
-    }
-
-    /**
-     * Converts a two-letter country code to its flag emoji representation.
-     */
-    private String countryCodeToFlagEmoji(String countryCode) {
-        if (countryCode == null || countryCode.length() != 2) {
-            return "🌐"; // fallback globe
-        }
-        String code = countryCode.toUpperCase();
-        // Unicode regional indicator symbols: 🇦 = U+1F1E6, so we add offset
-        int firstChar = Character.codePointAt(code, 0) - 'A' + 0x1F1E6;
-        int secondChar = Character.codePointAt(code, 1) - 'A' + 0x1F1E6;
-        return new String(Character.toChars(firstChar)) + new String(Character.toChars(secondChar));
+        return "flag-icon-" + countryCode.toLowerCase();
     }
 
     /**
@@ -167,5 +169,7 @@ public class LanguageSelectorComponent extends HorizontalLayout {
     public void updateCurrentLanguage() {
         Locale current = I18n.getCurrentLocale();
         languageCombo.setValue(current);
+        // Update prefix flag
+        flagPrefixSpan.setClassName("flag-icon " + getFlagCssClass(current));
     }
 }
