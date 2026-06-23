@@ -15,31 +15,26 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.TokenRequestDto;
 import eu.isygoit.dto.common.TokenResponseDto;
 import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.helper.DateHelper;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsTokenService;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.tokenizer.builder.dialog.ClaimsBuilderDialog;
 import eu.isygoit.ui.kms.views.tokenizer.builder.dialog.DecodeJwtDialog;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -65,8 +60,8 @@ public class TokenBuilderView extends ManagementVerticalView {
     private final AudienceInput audienceInputBuilder = new AudienceInput();
     private final TextField subjectField = new TextField();
     private final TextArea claimsArea = new TextArea();
-    private final Button buildClaimsButton = new Button("Build Claims", new Icon(VaadinIcon.PLUS_CIRCLE));
-    private final Button buildButton = new Button("Generate Token", new Icon(VaadinIcon.COG));
+    private final Button buildClaimsButton = new Button(I18n.t("token.builder.custom.claims.build"), new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button buildButton = new Button(I18n.t("token.builder.generate.button"), new Icon(VaadinIcon.COG));
     private final VerticalLayout buildResultPanel = new VerticalLayout();
 
     // Validate section
@@ -75,7 +70,7 @@ public class TokenBuilderView extends ManagementVerticalView {
     private final AudienceInput audienceInputValidator = new AudienceInput();
     private final TextArea validateTokenField = new TextArea();
     private final TextField validateSubjectField = new TextField();
-    private final Button validateButton = new Button("Validate Token", new Icon(VaadinIcon.SEARCH));
+    private final Button validateButton = new Button(I18n.t("token.builder.validate.token"), new Icon(VaadinIcon.SEARCH));
     private final Span validationResultSpan = new Span();
 
     public TokenBuilderView(KmsTokenService tokenService, ObjectMapper objectMapper) {
@@ -107,9 +102,9 @@ public class TokenBuilderView extends ManagementVerticalView {
     }
 
     private void buildHeader() {
-        H2 header = new H2("JWT Tokenizer");
+        H2 header = new H2(I18n.t("token.builder.title"));
         header.addClassNames(LumoUtility.FontSize.XXLARGE, LumoUtility.Margin.Bottom.NONE, LumoUtility.Margin.Top.NONE);
-        Span subtitle = new Span("Generate and validate signed JSON Web Tokens");
+        Span subtitle = new Span(I18n.t("token.builder.subtitle"));
         subtitle.addClassName(LumoUtility.TextColor.SECONDARY);
         subtitle.addClassName(LumoUtility.FontSize.SMALL);
         add(header, subtitle);
@@ -119,7 +114,7 @@ public class TokenBuilderView extends ManagementVerticalView {
         buildCard.setWidthFull();
         buildCard.addClassNames("compact-card");
 
-        HorizontalLayout titleRow = new HorizontalLayout(new Icon(VaadinIcon.COG), new Span("Generate Token"));
+        HorizontalLayout titleRow = new HorizontalLayout(new Icon(VaadinIcon.COG), new Span(I18n.t("token.builder.generate.title")));
         titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
         titleRow.setSpacing(true);
         titleRow.addClassName(LumoUtility.FontWeight.BOLD);
@@ -128,21 +123,21 @@ public class TokenBuilderView extends ManagementVerticalView {
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
         form.setMaxWidth("100%");
 
-        tokenTypeCombo.setLabel("Token type");
+        tokenTypeCombo.setLabel(I18n.t("token.builder.token.type"));
         tokenTypeCombo.setItems(IEnumToken.Types.values());
         tokenTypeCombo.setValue(IEnumToken.Types.ACCESS);
         tokenTypeCombo.setRequired(true);
 
-        audienceInputBuilder.setLabelText("Audiences (at least one)");
+        audienceInputBuilder.setLabelText(I18n.t("token.builder.audiences"));
 
-        subjectField.setLabel("Subject");
-        subjectField.setPlaceholder("user@domain.com or service‑name");
+        subjectField.setLabel(I18n.t("token.builder.subject"));
+        subjectField.setPlaceholder(I18n.t("token.builder.subject.placeholder"));
         subjectField.setRequired(true);
 
         HorizontalLayout claimsHeader = new HorizontalLayout();
         claimsHeader.setAlignItems(FlexComponent.Alignment.CENTER);
         claimsHeader.setSpacing(true);
-        Span claimsLabel = new Span("Custom claims (JSON)");
+        Span claimsLabel = new Span(I18n.t("token.builder.custom.claims"));
         claimsLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         buildClaimsButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
         buildClaimsButton.addClickListener(e -> openClaimsBuilderDialog());
@@ -150,8 +145,8 @@ public class TokenBuilderView extends ManagementVerticalView {
         claimsHeader.expand(claimsLabel);
 
         claimsArea.setHeight("200px");
-        claimsArea.setPlaceholder("{\n  \"role\": \"admin\",\n  \"scope\": \"read write\"\n}");
-        claimsArea.setHelperText("Optional – must be valid JSON. Use the builder to create claims easily.");
+        claimsArea.setPlaceholder(I18n.t("token.builder.custom.claims.placeholder"));
+        claimsArea.setHelperText(I18n.t("token.builder.custom.claims.helper"));
 
         form.add(tokenTypeCombo, audienceInputBuilder, subjectField, claimsHeader, claimsArea);
         buildCard.add(titleRow, form);
@@ -172,7 +167,7 @@ public class TokenBuilderView extends ManagementVerticalView {
         validateCard.setWidthFull();
         validateCard.addClassNames("compact-card");
 
-        HorizontalLayout titleRow = new HorizontalLayout(new Icon(VaadinIcon.SEARCH), new Span("Validate Token"));
+        HorizontalLayout titleRow = new HorizontalLayout(new Icon(VaadinIcon.SEARCH), new Span(I18n.t("token.builder.validate.title")));
         titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
         titleRow.setSpacing(true);
         titleRow.addClassName(LumoUtility.FontWeight.BOLD);
@@ -181,20 +176,20 @@ public class TokenBuilderView extends ManagementVerticalView {
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
         form.setMaxWidth("100%");
 
-        validateTokenTypeCombo.setLabel("Token type");
+        validateTokenTypeCombo.setLabel(I18n.t("token.builder.token.type"));
         validateTokenTypeCombo.setItems(IEnumToken.Types.values());
         validateTokenTypeCombo.setValue(IEnumToken.Types.ACCESS);
         validateTokenTypeCombo.setRequired(true);
 
-        audienceInputValidator.setLabelText("Expected audiences");
+        audienceInputValidator.setLabelText(I18n.t("token.builder.validate.expected.audiences"));
 
-        validateTokenField.setLabel("JWT token");
-        validateTokenField.setPlaceholder("Paste the full JWT string here");
+        validateTokenField.setLabel(I18n.t("token.builder.validate.token"));
+        validateTokenField.setPlaceholder(I18n.t("token.builder.validate.token.placeholder"));
         validateTokenField.setHeight("120px");
         validateTokenField.setRequired(true);
 
-        validateSubjectField.setLabel("Expected subject");
-        validateSubjectField.setPlaceholder("Subject that must match the token's 'sub' claim");
+        validateSubjectField.setLabel(I18n.t("token.builder.validate.subject"));
+        validateSubjectField.setPlaceholder(I18n.t("token.builder.validate.subject.placeholder"));
         validateSubjectField.setRequired(true);
 
         form.add(validateTokenTypeCombo, audienceInputValidator, validateSubjectField, validateTokenField);
@@ -226,15 +221,15 @@ public class TokenBuilderView extends ManagementVerticalView {
         String claimsJson = claimsArea.getValue();
 
         if (audiences.isEmpty()) {
-            showError("At least one audience is required");
+            showError(I18n.t("token.builder.audience.required"));
             return;
         }
         if (tokenType == null) {
-            showError("Token type is required");
+            showError(I18n.t("token.builder.token.type.required"));
             return;
         }
         if (!StringUtils.hasText(subject)) {
-            showError("Subject is required");
+            showError(I18n.t("token.builder.subject.required"));
             return;
         }
 
@@ -243,7 +238,7 @@ public class TokenBuilderView extends ManagementVerticalView {
             try {
                 claims = objectMapper.readValue(claimsJson, Map.class);
             } catch (Exception e) {
-                showError("Invalid claims JSON: " + e.getMessage());
+                showError(I18n.t("token.builder.claims.invalid", e.getMessage()));
                 return;
             }
         }
@@ -255,16 +250,16 @@ public class TokenBuilderView extends ManagementVerticalView {
             ResponseEntity<TokenResponseDto> response = tokenService.buildToken("super-tenant", audiences, tokenType, request);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 displayBuildResult(response.getBody());
-                showSuccess("Token generated successfully");
+                showSuccess(I18n.t("token.builder.token.generated"));
             } else {
-                showError("Token generation failed: " + response.getStatusCode());
+                showError(I18n.t("token.builder.token.generation.failed", response.getStatusCode()));
             }
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? extractErrorMessage(ex.contentUTF8()) : ex.getMessage();
-            showError("Build error: " + errorMsg);
+            showError(I18n.t("token.builder.build.error", errorMsg));
             buildResultPanel.setVisible(false);
         } catch (Exception e) {
-            showError("Unexpected error: " + e.getMessage());
+            showError(I18n.t("token.builder.unexpected.error", e.getMessage()));
             buildResultPanel.setVisible(false);
         } finally {
             showGlobalLoading(false);
@@ -282,7 +277,7 @@ public class TokenBuilderView extends ManagementVerticalView {
         tokenLine.setWidthFull();
         tokenLine.getStyle().set("flex-wrap", "wrap");
 
-        Span tokenLabel = new Span("🔑 Token:");
+        Span tokenLabel = new Span("🔑 " + I18n.t("token.builder.token.label"));
         tokenLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
 
         Span tokenValue = new Span(tokenResponse.getToken());
@@ -293,12 +288,12 @@ public class TokenBuilderView extends ManagementVerticalView {
 
         Button copyBtn = new Button(new Icon(VaadinIcon.COPY));
         copyBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
-        copyBtn.setTooltipText("Copy token");
+        copyBtn.setTooltipText(I18n.t("token.builder.copy.token"));
         copyBtn.addClickListener(e -> copyToClipboard(tokenResponse.getToken()));
 
         Button decryptBtn = new Button(new Icon(VaadinIcon.EYE));
         decryptBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
-        decryptBtn.setTooltipText("Decode JWT");
+        decryptBtn.setTooltipText(I18n.t("token.builder.decode.jwt"));
         decryptBtn.addClickListener(e -> showDecodeDialog(tokenResponse.getToken()));
 
         tokenLine.add(tokenLabel, tokenValue, copyBtn, decryptBtn);
@@ -307,11 +302,11 @@ public class TokenBuilderView extends ManagementVerticalView {
         HorizontalLayout expiryLine = new HorizontalLayout();
         expiryLine.setAlignItems(FlexComponent.Alignment.CENTER);
         expiryLine.setSpacing(true);
-        Span expiryLabel = new Span("📅 Expires:");
+        Span expiryLabel = new Span("📅 " + I18n.t("token.builder.expires.label"));
         expiryLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         Span expiryValue = new Span(tokenResponse.getExpiryDate() != null ?
                 DateHelper.formatToHumanReadable(DateHelper.toLocalDateTime(tokenResponse.getExpiryDate()))
-                : "Never");
+                : I18n.t("token.builder.expires.never"));
         expiryValue.getStyle().set("font-family", "monospace");
         expiryLine.add(expiryLabel, expiryValue);
 
@@ -325,19 +320,19 @@ public class TokenBuilderView extends ManagementVerticalView {
         String subject = validateSubjectField.getValue();
 
         if (audiences.isEmpty()) {
-            showError("At least one audience is required for validation");
+            showError(I18n.t("token.builder.audience.required.validation"));
             return;
         }
         if (tokenType == null) {
-            showError("Token type is required");
+            showError(I18n.t("token.builder.token.type.required"));
             return;
         }
         if (!StringUtils.hasText(token)) {
-            showError("Token is required");
+            showError(I18n.t("token.builder.token.required"));
             return;
         }
         if (!StringUtils.hasText(subject)) {
-            showError("Subject is required");
+            showError(I18n.t("token.builder.subject.required"));
             return;
         }
 
@@ -347,22 +342,22 @@ public class TokenBuilderView extends ManagementVerticalView {
             ResponseEntity<Boolean> response = tokenService.isTokenValid(audiences, tokenType, token, subject);
             validationResultSpan.setVisible(true);
             if (response.getStatusCode().is2xxSuccessful() && Boolean.TRUE.equals(response.getBody())) {
-                validationResultSpan.setText("✅ Token is VALID");
+                validationResultSpan.setText("✅ " + I18n.t("token.builder.token.valid"));
                 validationResultSpan.getStyle().set("color", "var(--lumo-success-text-color)");
-                showSuccess("Token is valid");
+                showSuccess(I18n.t("token.builder.token.valid.success"));
             } else {
-                validationResultSpan.setText("❌ Token is INVALID");
+                validationResultSpan.setText("❌ " + I18n.t("token.builder.token.invalid"));
                 validationResultSpan.getStyle().set("color", "var(--lumo-error-text-color)");
-                showWarning("Token is invalid");
+                showWarning(I18n.t("token.builder.token.invalid.warning"));
             }
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? extractErrorMessage(ex.contentUTF8()) : ex.getMessage();
-            showError("Validation error: " + errorMsg);
+            showError(I18n.t("token.builder.validate.error", errorMsg));
             validationResultSpan.setVisible(true);
-            validationResultSpan.setText("❌ Validation failed: " + errorMsg);
+            validationResultSpan.setText("❌ " + I18n.t("token.builder.validation.failed", errorMsg));
             validationResultSpan.getStyle().set("color", "var(--lumo-error-text-color)");
         } catch (Exception e) {
-            showError("Error: " + e.getMessage());
+            showError(I18n.t("token.builder.unexpected.error", e.getMessage()));
         } finally {
             showGlobalLoading(false);
             validateButton.setEnabled(true);
@@ -380,7 +375,7 @@ public class TokenBuilderView extends ManagementVerticalView {
         UI.getCurrent().getPage().executeJs(
                 "navigator.clipboard.writeText($0).then(() => {" +
                         "  const notification = document.createElement('div');" +
-                        "  notification.textContent = 'Copied to clipboard';" +
+                        "  notification.textContent = $1;" +
                         "  notification.style.position = 'fixed';" +
                         "  notification.style.bottom = '20px';" +
                         "  notification.style.right = '20px';" +
@@ -393,7 +388,7 @@ public class TokenBuilderView extends ManagementVerticalView {
                         "  setTimeout(() => notification.remove(), 2000);" +
                         "}).catch(() => {" +
                         "  const notification = document.createElement('div');" +
-                        "  notification.textContent = 'Failed to copy';" +
+                        "  notification.textContent = $2;" +
                         "  notification.style.backgroundColor = '#f44336';" +
                         "  notification.style.color = 'white';" +
                         "  notification.style.padding = '8px 16px';" +
@@ -405,7 +400,7 @@ public class TokenBuilderView extends ManagementVerticalView {
                         "  document.body.appendChild(notification);" +
                         "  setTimeout(() => notification.remove(), 2000);" +
                         "});",
-                text);
+                text, I18n.t("token.builder.copy.success"), I18n.t("token.builder.copy.failed"));
     }
 
     private String extractErrorMessage(String responseBody) {
@@ -480,7 +475,7 @@ public class TokenBuilderView extends ManagementVerticalView {
         );
     }
 
-    // AudienceInput component (unchanged)
+    // AudienceInput component with i18n
     private static class AudienceInput extends VerticalLayout {
         private final TextField inputField;
         private final HorizontalLayout mainRow;
@@ -496,7 +491,7 @@ public class TokenBuilderView extends ManagementVerticalView {
             labelSpan.getStyle().set("margin-right", "var(--lumo-space-s)");
 
             inputField = new TextField();
-            inputField.setPlaceholder("Enter audience (e.g., https://api.example.com)");
+            inputField.setPlaceholder(I18n.t("token.builder.audience.placeholder"));
             inputField.setWidthFull();
 
             Button addButton = new Button(new Icon(VaadinIcon.PLUS));
@@ -525,13 +520,13 @@ public class TokenBuilderView extends ManagementVerticalView {
         private void addAudience() {
             String value = inputField.getValue();
             if (value == null || value.isBlank()) {
-                Notification.show("Audience cannot be empty", 2000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("token.builder.audience.empty"), 2000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
             }
             value = value.trim();
             if (getAudiences().contains(value)) {
-                Notification.show("Audience already added", 2000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("token.builder.audience.exists"), 2000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
             }

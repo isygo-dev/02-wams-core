@@ -9,6 +9,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.PEBConfigDto;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.PEBConfigService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.kms.views.secrets.peb.dialog.DeletePEBConfigDialog;
@@ -59,22 +60,22 @@ public class PEBConfigCard extends BaseCard<PEBConfigView, PEBConfigService> {
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit configuration");
+        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("peb.card.edit.tooltip"));
         editBtn.addClickListener(e -> openEditDialog());
-        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, "Delete configuration");
+        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, I18n.t("peb.card.delete.tooltip"));
         deleteBtn.addClickListener(e -> new DeletePEBConfigDialog(objectService, dto.getId(), dto.getCode(), onDeleteRefresh).open());
         return List.of(editBtn, deleteBtn);
     }
 
     @Override
     protected void buildBodyRows() {
-        add(createIconRow(VaadinIcon.COG, "Algorithm", dto.getAlgorithm() != null ? dto.getAlgorithm().meaning() : "—"));
-        add(createIconRow(VaadinIcon.ROTATE_RIGHT, "Iterations", String.valueOf(dto.getKeyObtentionIterations())));
-        add(createIconRow(VaadinIcon.DROP, "Salt generator", dto.getSaltGenerator() != null ? dto.getSaltGenerator().meaning() : "—"));
-        add(createIconRow(VaadinIcon.RANDOM, "IV generator", dto.getIvGenerator() != null ? dto.getIvGenerator().meaning() : "—"));
-        add(createIconRow(VaadinIcon.UPLOAD, "Output type", dto.getStringOutputType() != null ? dto.getStringOutputType().meaning() : "—"));
-        add(createIconRow(VaadinIcon.SERVER, "Provider", dto.getProviderName() != null ? dto.getProviderName() : "—"));
-        add(createIconRow(VaadinIcon.GROUP, "Pool size", String.valueOf(dto.getPoolSize())));
+        add(createIconRow(VaadinIcon.COG, I18n.t("peb.card.algorithm"), dto.getAlgorithm() != null ? dto.getAlgorithm().meaning() : "—"));
+        add(createIconRow(VaadinIcon.ROTATE_RIGHT, I18n.t("peb.card.iterations"), String.valueOf(dto.getKeyObtentionIterations())));
+        add(createIconRow(VaadinIcon.DROP, I18n.t("peb.card.salt.generator"), dto.getSaltGenerator() != null ? dto.getSaltGenerator().meaning() : "—"));
+        add(createIconRow(VaadinIcon.RANDOM, I18n.t("peb.card.iv.generator"), dto.getIvGenerator() != null ? dto.getIvGenerator().meaning() : "—"));
+        add(createIconRow(VaadinIcon.UPLOAD, I18n.t("peb.card.output.type"), dto.getStringOutputType() != null ? dto.getStringOutputType().meaning() : "—"));
+        add(createIconRow(VaadinIcon.SERVER, I18n.t("peb.card.provider"), dto.getProviderName() != null ? dto.getProviderName() : "—"));
+        add(createIconRow(VaadinIcon.GROUP, I18n.t("peb.card.pool.size"), String.valueOf(dto.getPoolSize())));
     }
 
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
