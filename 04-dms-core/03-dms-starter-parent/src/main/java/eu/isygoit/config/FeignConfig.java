@@ -1,12 +1,17 @@
 package eu.isygoit.config;
 
-import eu.isygoit.jwt.JwtService;
+import eu.isygoit.jwt.interceptor.SmartAuthInterceptor;
 import feign.RequestInterceptor;
-import jakarta.servlet.http.HttpServletRequest;
+import feign.codec.Encoder;
+import feign.form.spring.SpringFormEncoder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
+import org.springframework.cloud.openfeign.support.SpringEncoder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
 
 /**
  * The type Feign config.
@@ -14,29 +19,21 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Slf4j
 public class FeignConfig {
 
-    /**
-     * Not filtered request interceptor request interceptor.
-     *
-     * @return the request interceptor
-     */
-    @Bean
-    public RequestInterceptor notFilteredRequestInterceptor() {
-        return requestTemplate -> {
-            //requestTemplate.header("SHOULD_NOT_FILTER_KEY", AbstractJwtAuthFilter.SHOULD_NOT_FILTER_KEY);
-            ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            if (requestAttributes == null) {
-                return;
-            }
-            HttpServletRequest request = requestAttributes.getRequest();
-            if (request == null) {
-                return;
-            }
-            String jwtToken = request.getHeader(JwtService.AUTHORIZATION);
-            if (jwtToken == null) {
-                return;
-            }
+    @Value("${app.feign.api.internal-key:}")
+    private String serviceApiKey;
 
-            requestTemplate.header(JwtService.AUTHORIZATION, jwtToken);
-        };
+    @Value("${spring.application.name:}")
+    private String serviceId;
+
+    @Bean
+    public RequestInterceptor smartAuthInterceptor() {
+        return new SmartAuthInterceptor(serviceApiKey, serviceId);
+    }
+
+    @Bean
+    @Primary
+    @Scope("prototype")
+    public Encoder feignFormEncoder(ObjectFactory<HttpMessageConverters> messageConverters) {
+        return new SpringFormEncoder(new SpringEncoder(messageConverters));
     }
 }
