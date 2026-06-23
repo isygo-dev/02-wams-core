@@ -14,8 +14,8 @@ public class DeleteTokenConfigDialog extends PinBaseActionDialog {
                                    Long configId,
                                    String code,
                                    Runnable onSuccess) {
-        super(I18n.t("dialog.delete.title"),
-                I18n.t("token.config.delete.confirmation", code),
+        super(I18n.t("dialog.token.delete.title"),
+                I18n.t("dialog.token.delete.confirmation", code),
                 onSuccess,
                 true);
         this.tokenConfigService = tokenConfigService;
@@ -28,16 +28,16 @@ public class DeleteTokenConfigDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append(I18n.t("dialog.action.required"));
+            append(I18n.t("dialog.token.action.required"));
             return false;
         }
 
         try {
             tokenConfigService.delete(configId);
-            append(I18n.t("token.config.deleted"));
+            append(I18n.t("dialog.token.deleted"));
             return true;
         } catch (Exception e) {
-            append(I18n.t("notification.error") + ": " + e.getMessage());
+            append(I18n.t("dialog.token.delete.failed") + ": " + e.getMessage());
             return false;
         }
     }

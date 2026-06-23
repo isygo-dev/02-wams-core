@@ -22,6 +22,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.enums.IEnumToken;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import feign.FeignException;
@@ -113,33 +114,33 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         metadataCard = new Card();
         metadataCard.addClassName("config-metadata-card");
         metadataCard.setWidthFull();
-        Span metaTitle = new Span("Token Metadata");
+        Span metaTitle = new Span(I18n.t("dialog.token.metadata"));
         metaTitle.addClassName(LumoUtility.FontWeight.BOLD);
         metaTitle.addClassName(LumoUtility.FontSize.MEDIUM);
 
         // Token type
-        tokenTypeCombo = new ComboBox<>("Token type");
+        tokenTypeCombo = new ComboBox<>(I18n.t("dialog.token.token.type"));
         tokenTypeCombo.setItems(IEnumToken.Types.values());
         tokenTypeCombo.setRequired(true);
         tokenTypeCombo.setRequiredIndicatorVisible(true);
         tokenTypeCombo.setValue(IEnumToken.Types.ACCESS);
         tokenTypeCombo.setWidthFull();
-        tokenTypeCombo.setTooltipText("Type of token: ACCESS (short-lived) or REFRESH (longer-lived).");
+        tokenTypeCombo.setTooltipText(I18n.t("dialog.token.token.type.tooltip"));
 
         // Issuer
-        issuerField = new TextField("Issuer");
-        issuerField.setPlaceholder("e.g., https://kms.isygoit.eu");
+        issuerField = new TextField(I18n.t("dialog.token.issuer"));
+        issuerField.setPlaceholder(I18n.t("dialog.token.issuer.placeholder"));
         issuerField.setWidthFull();
-        issuerField.setTooltipText("The 'iss' claim – typically the base URL of your token issuer.");
+        issuerField.setTooltipText(I18n.t("dialog.token.issuer.tooltip"));
 
         // Audience input (custom component)
         audienceInput = new AudienceInput();
         audienceInput.setWidthFull();
-        audienceInput.setTooltipText("The intended recipient(s) of the token ('aud' claim). Add one or more URLs or identifiers.");
+        audienceInput.setTooltipText(I18n.t("dialog.token.audience.tooltip"));
 
         // Lifetime row with "No expiration" checkbox
-        noExpirationCheckbox = new Checkbox("No expiration");
-        noExpirationCheckbox.setTooltipText("If checked, the token will never expire (lifeTimeInMs = null).");
+        noExpirationCheckbox = new Checkbox(I18n.t("dialog.token.no.expiration"));
+        noExpirationCheckbox.setTooltipText(I18n.t("dialog.token.no.expiration.tooltip"));
         noExpirationCheckbox.addValueChangeListener(e -> {
             boolean noExp = e.getValue();
             lifeTimeValueField.setEnabled(!noExp);
@@ -151,22 +152,27 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         });
 
         lifeTimeValueField = new IntegerField();
-        lifeTimeValueField.setPlaceholder("e.g., 1");
+        lifeTimeValueField.setPlaceholder(I18n.t("dialog.token.lifetime.value.placeholder"));
         lifeTimeValueField.setValue(1);
         lifeTimeValueField.setWidth("50%");
         lifeTimeValueField.setStepButtonsVisible(true);
         lifeTimeValueField.setMin(1);
         lifeTimeValueField.setEnabled(true);
-        lifeTimeValueField.setTooltipText("Numeric value of the lifetime.");
+        lifeTimeValueField.setTooltipText(I18n.t("dialog.token.lifetime.tooltip"));
 
         lifeTimeUnitCombo = new ComboBox<>();
-        lifeTimeUnitCombo.setItems("Seconds", "Minutes", "Hours", "Days");
-        lifeTimeUnitCombo.setValue("Hours");
+        lifeTimeUnitCombo.setItems(
+                I18n.t("dialog.token.lifetime.unit.seconds"),
+                I18n.t("dialog.token.lifetime.unit.minutes"),
+                I18n.t("dialog.token.lifetime.unit.hours"),
+                I18n.t("dialog.token.lifetime.unit.days")
+        );
+        lifeTimeUnitCombo.setValue(I18n.t("dialog.token.lifetime.unit.hours"));
         lifeTimeUnitCombo.setWidth("30%");
         lifeTimeUnitCombo.setEnabled(true);
-        lifeTimeUnitCombo.setTooltipText("Unit of the lifetime value.");
+        lifeTimeUnitCombo.setTooltipText(I18n.t("dialog.token.lifetime.unit.tooltip"));
 
-        Span lifetimeLabel = new Span("Lifetime:");
+        Span lifetimeLabel = new Span(I18n.t("dialog.token.lifetime"));
         lifetimeLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         lifetimeLabel.getStyle().set("margin-right", "var(--lumo-space-s)");
 
@@ -186,7 +192,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         cryptoCard = new Card();
         cryptoCard.addClassName("config-crypto-card");
         cryptoCard.setWidthFull();
-        Span cryptoTitle = new Span("Cryptographic Material");
+        Span cryptoTitle = new Span(I18n.t("dialog.token.crypto"));
         cryptoTitle.addClassName(LumoUtility.FontWeight.BOLD);
         cryptoTitle.addClassName(LumoUtility.FontSize.MEDIUM);
         cryptoCard.add(cryptoTitle);
@@ -198,11 +204,11 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
 
         // Key source selection
         keySourceGroup = new RadioButtonGroup<>();
-        keySourceGroup.setLabel("Key source");
-        keySourceGroup.setItems("Use existing KMS key", "Define custom key");
-        keySourceGroup.setValue("Define custom key");
+        keySourceGroup.setLabel(I18n.t("dialog.token.key.source"));
+        keySourceGroup.setItems(I18n.t("dialog.token.key.source.kms"), I18n.t("dialog.token.key.source.custom"));
+        keySourceGroup.setValue(I18n.t("dialog.token.key.source.custom"));
         keySourceGroup.setWidthFull();
-        keySourceGroup.setTooltipText("Choose whether to reference an existing KMS key or provide custom cryptographic material.");
+        keySourceGroup.setTooltipText(I18n.t("dialog.token.key.source.tooltip"));
         cryptoCardContent.add(keySourceGroup);
 
         // KMS key selection layout
@@ -210,14 +216,14 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         kmsKeyLayout.setPadding(false);
         kmsKeyLayout.setSpacing(true);
         kmsKeyLayout.setVisible(false);
-        Span kmsKeyLabel = new Span("Select KMS key:");
+        Span kmsKeyLabel = new Span(I18n.t("dialog.token.select.kms.key"));
         kmsKeyLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         kmsKeyCombo = new ComboBox<>();
-        kmsKeyCombo.setPlaceholder("Choose a KMS key...");
+        kmsKeyCombo.setPlaceholder(I18n.t("dialog.token.choose.kms.key"));
         kmsKeyCombo.setItemLabelGenerator(KeyOption::getDisplayName);
         kmsKeyCombo.setWidthFull();
         kmsKeyCombo.setRequired(true);
-        kmsKeyCombo.setTooltipText("Existing key stored in the KMS. The token will be signed using that key.");
+        kmsKeyCombo.setTooltipText(I18n.t("dialog.token.kms.key.tooltip"));
         kmsKeyLayout.add(kmsKeyLabel, kmsKeyCombo);
         cryptoCardContent.add(kmsKeyLayout);
 
@@ -226,41 +232,41 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         customKeyLayout.setPadding(false);
         customKeyLayout.setSpacing(true);
 
-        signatureAlgorithmCombo = new ComboBox<>("Signature algorithm");
+        signatureAlgorithmCombo = new ComboBox<>(I18n.t("dialog.token.signature.algorithm"));
         signatureAlgorithmCombo.setItems(SUPPORTED_ALGORITHMS);
         signatureAlgorithmCombo.setRequired(true);
         signatureAlgorithmCombo.setRequiredIndicatorVisible(true);
         signatureAlgorithmCombo.setValue("HS256");
         signatureAlgorithmCombo.setWidthFull();
-        signatureAlgorithmCombo.setTooltipText("JWS algorithm used to sign the token. HS* = HMAC (shared secret), RS*/PS*/ES*/EdDSA = asymmetric key pair.");
+        signatureAlgorithmCombo.setTooltipText(I18n.t("dialog.token.signature.tooltip"));
         customKeyLayout.add(signatureAlgorithmCombo);
 
-        secretKeyField = new TextField("Secret key (Base64)");
+        secretKeyField = new TextField(I18n.t("dialog.token.secret.key"));
         secretKeyField.setRequired(true);
         secretKeyField.setRequiredIndicatorVisible(true);
         secretKeyField.setWidthFull();
-        secretKeyField.setTooltipText("Base64-encoded secret key for HMAC algorithms. Minimum length depends on algorithm: HS256=32B, HS384=48B, HS512=64B.");
+        secretKeyField.setTooltipText(I18n.t("dialog.token.secret.tooltip"));
 
-        privateKeyArea = new TextArea("Private key (PEM)");
+        privateKeyArea = new TextArea(I18n.t("dialog.token.private.key"));
         privateKeyArea.setRequired(true);
         privateKeyArea.setRequiredIndicatorVisible(true);
         privateKeyArea.setWidthFull();
         privateKeyArea.setHeight("150px");
-        privateKeyArea.setPlaceholder("-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----");
+        privateKeyArea.setPlaceholder(I18n.t("dialog.token.private.key.placeholder"));
         privateKeyArea.addClassName("no-copy");
-        privateKeyArea.setTooltipText("PEM-encoded private key for asymmetric algorithms. Can be generated with the 'Generate Key Pair' button.");
+        privateKeyArea.setTooltipText(I18n.t("dialog.token.private.tooltip"));
 
         publicKeyArea = new TextArea();
         publicKeyArea.setReadOnly(true);
         publicKeyArea.setWidthFull();
         publicKeyArea.setHeight("100px");
-        publicKeyArea.setPlaceholder("Generate a key pair to see the public key");
-        publicKeyArea.setTooltipText("Corresponding public key (PEM). Not stored on the server – used for verification only.");
+        publicKeyArea.setPlaceholder(I18n.t("dialog.token.public.key.placeholder"));
+        publicKeyArea.setTooltipText(I18n.t("dialog.token.public.tooltip"));
 
-        generateKeyPairButton = new Button("Generate Key Pair", event -> generateKeyPair());
+        generateKeyPairButton = new Button(I18n.t("dialog.token.generate.key.pair"), event -> generateKeyPair());
         generateKeyPairButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         generateKeyPairButton.setWidthFull();
-        generateKeyPairButton.setTooltipText("Generate a new RSA/EC/EdDSA key pair matching the selected algorithm. Private key will be filled; public key is displayed for reference.");
+        generateKeyPairButton.setTooltipText(I18n.t("dialog.token.generate.tooltip"));
 
         publicKeyComponent = createPublicKeyComponent();
 
@@ -270,13 +276,13 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
 
     private VerticalLayout createPublicKeyComponent() {
         HorizontalLayout header = new HorizontalLayout();
-        Span label = new Span("Public key (PEM) - for reference only");
+        Span label = new Span(I18n.t("dialog.token.public.key"));
         label.getStyle().set("font-weight", "bold");
         label.getStyle().set("margin-right", "auto");
 
         copyPublicKeyButton = new Button(new Icon(VaadinIcon.COPY));
         copyPublicKeyButton.addClickListener(e -> copyToClipboard(publicKeyArea.getValue()));
-        copyPublicKeyButton.setTooltipText("Copy public key to clipboard");
+        copyPublicKeyButton.setTooltipText(I18n.t("dialog.token.copy.public.key"));
         copyPublicKeyButton.getStyle().set("margin-left", "auto");
         copyPublicKeyButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
 
@@ -294,7 +300,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
     private void setupKeySourceListener() {
         keySourceGroup.addValueChangeListener(event -> {
             String value = event.getValue();
-            if ("Use existing KMS key".equals(value)) {
+            if (I18n.t("dialog.token.key.source.kms").equals(value)) {
                 kmsKeyLayout.setVisible(true);
                 customKeyLayout.setVisible(false);
                 secretKeyField.clear();
@@ -327,7 +333,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
             }
         } catch (FeignException ex) {
             log.error("Failed to load KMS keys: {}", ex.getMessage());
-            Notification.show("Could not load KMS keys: " + ex.getMessage(), 5000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("dialog.token.load.failed", ex.getMessage()), 5000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } catch (Exception e) {
             log.error("Failed to load KMS keys", e);
@@ -366,7 +372,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
                 case "HS512" -> 64;
                 default -> 32;
             };
-            secretKeyField.setHelperText("For " + algorithm + " the secret key must be at least " + minBytes + " bytes (Base64 encoded)");
+            secretKeyField.setHelperText(I18n.t("dialog.token.secret.helper", algorithm, minBytes));
             customKeyLayout.add(secretKeyField);
         } else if (ASYMMETRIC_ALGORITHMS.contains(algorithm)) {
             privateKeyArea.clear();
@@ -380,7 +386,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
     protected void generateKeyPair() {
         String algorithm = signatureAlgorithmCombo.getValue();
         if (algorithm == null || !ASYMMETRIC_ALGORITHMS.contains(algorithm)) {
-            Notification.show("Select an asymmetric algorithm first", 3000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("dialog.token.select.asymmetric.first"), 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
@@ -454,10 +460,10 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
             privateKeyArea.setValue(privateKeyPem);
             publicKeyArea.setValue(publicKeyPem);
 
-            Notification.show("Key pair generated successfully", 3000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("dialog.token.key.generated.success", algorithm), 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         } catch (Exception e) {
-            Notification.show("Failed to generate key pair: " + e.getMessage(), 5000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("dialog.token.failed.generate.key", e.getMessage()), 5000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }
@@ -465,14 +471,14 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
     // ---------- Utility Methods ----------
     protected void copyToClipboard(String text) {
         if (text == null || text.isBlank()) {
-            Notification.show("Nothing to copy", 2000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("dialog.token.nothing.to.copy"), 2000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
         UI.getCurrent().getPage().executeJs(
                 "navigator.clipboard.writeText($0).then(() => {" +
                         "  const notification = document.createElement('div');" +
-                        "  notification.textContent = 'Copied to clipboard';" +
+                        "  notification.textContent = $1;" +
                         "  notification.style.position = 'fixed';" +
                         "  notification.style.bottom = '20px';" +
                         "  notification.style.left = '50%';" +
@@ -485,7 +491,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
                         "  document.body.appendChild(notification);" +
                         "  setTimeout(() => notification.remove(), 2000);" +
                         "});",
-                text);
+                text, I18n.t("dialog.token.copied"));
     }
 
     protected boolean validateHmacKey(String algorithm, String secretKey) {
@@ -498,12 +504,12 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
                 default -> 32;
             };
             if (keyBytes.length < requiredMinBytes) {
-                append("Secret key for " + algorithm + " must be at least " + requiredMinBytes + " bytes (Base64 decoded length)");
+                append(I18n.t("dialog.token.secret.length", algorithm, requiredMinBytes));
                 return false;
             }
             return true;
         } catch (IllegalArgumentException e) {
-            append("Secret key must be valid Base64");
+            append(I18n.t("dialog.token.secret.base64"));
             return false;
         }
     }
@@ -533,30 +539,25 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         }
         Integer value = lifeTimeValueField.getValue();
         if (value == null || value <= 0) {
-            append("Lifetime value must be a positive number");
+            append(I18n.t("dialog.token.lifetime.positive"));
             return null;
         }
         String unit = lifeTimeUnitCombo.getValue();
         if (unit == null) {
-            append("Please select a time unit");
+            append(I18n.t("dialog.token.select.unit"));
             return null;
         }
         int ms;
-        switch (unit) {
-            case "Seconds":
-                ms = value * 1000;
-                break;
-            case "Minutes":
-                ms = value * 60 * 1000;
-                break;
-            case "Hours":
-                ms = value * 60 * 60 * 1000;
-                break;
-            case "Days":
-                ms = value * 24 * 60 * 60 * 1000;
-                break;
-            default:
-                throw new IllegalStateException("Unknown unit: " + unit);
+        if (I18n.t("dialog.token.lifetime.unit.seconds").equals(unit)) {
+            ms = value * 1000;
+        } else if (I18n.t("dialog.token.lifetime.unit.minutes").equals(unit)) {
+            ms = value * 60 * 1000;
+        } else if (I18n.t("dialog.token.lifetime.unit.hours").equals(unit)) {
+            ms = value * 60 * 60 * 1000;
+        } else if (I18n.t("dialog.token.lifetime.unit.days").equals(unit)) {
+            ms = value * 24 * 60 * 60 * 1000;
+        } else {
+            throw new IllegalStateException("Unknown unit: " + unit);
         }
         return ms;
     }
@@ -569,7 +570,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
             lifeTimeUnitCombo.setEnabled(false);
             // Placeholder values (won't be used)
             lifeTimeValueField.setValue(1);
-            lifeTimeUnitCombo.setValue("Hours");
+            lifeTimeUnitCombo.setValue(I18n.t("dialog.token.lifetime.unit.hours"));
             return;
         }
         noExpirationCheckbox.setValue(false);
@@ -579,18 +580,18 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         // Determine best unit
         if (ms % (24 * 60 * 60 * 1000) == 0 && ms >= (24 * 60 * 60 * 1000)) {
             lifeTimeValueField.setValue(ms / (24 * 60 * 60 * 1000));
-            lifeTimeUnitCombo.setValue("Days");
+            lifeTimeUnitCombo.setValue(I18n.t("dialog.token.lifetime.unit.days"));
         } else if (ms % (60 * 60 * 1000) == 0) {
             lifeTimeValueField.setValue(ms / (60 * 60 * 1000));
-            lifeTimeUnitCombo.setValue("Hours");
+            lifeTimeUnitCombo.setValue(I18n.t("dialog.token.lifetime.unit.hours"));
         } else if (ms % (60 * 1000) == 0) {
             lifeTimeValueField.setValue(ms / (60 * 1000));
-            lifeTimeUnitCombo.setValue("Minutes");
+            lifeTimeUnitCombo.setValue(I18n.t("dialog.token.lifetime.unit.minutes"));
         } else {
             lifeTimeValueField.setValue(ms / 1000);
-            lifeTimeUnitCombo.setValue("Seconds");
+            lifeTimeUnitCombo.setValue(I18n.t("dialog.token.lifetime.unit.seconds"));
             if (ms % 1000 != 0) {
-                Notification.show("Lifetime millisecond precision lost, rounded to seconds", 3000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("dialog.token.lifetime.warning"), 3000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
             }
         }
@@ -620,7 +621,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         }
     }
 
-    // Custom audience input component (unchanged, but added tooltip support)
+    // Custom audience input component
     protected static class AudienceInput extends VerticalLayout {
         private final TextField inputField;
         private final Button addButton;
@@ -630,11 +631,11 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
             setPadding(false);
             setSpacing(false);
 
-            inputField = new TextField();
-            inputField.setPlaceholder("Enter audience (e.g., https://api.example.com)");
+            inputField = new TextField(I18n.t("dialog.token.audience"));
+            inputField.setPlaceholder(I18n.t("dialog.token.audience.placeholder"));
             inputField.setWidthFull();
 
-            addButton = new Button("Add", new Icon(VaadinIcon.PLUS));
+            addButton = new Button(I18n.t("dialog.token.audience.add"), new Icon(VaadinIcon.PLUS));
             addButton.addClickListener(e -> addAudience());
 
             HorizontalLayout inputRow = new HorizontalLayout(inputField, addButton);
@@ -656,13 +657,13 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         private void addAudience() {
             String value = inputField.getValue();
             if (value == null || value.isBlank()) {
-                Notification.show("Audience cannot be empty", 2000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("dialog.token.audience.empty"), 2000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
             }
             value = value.trim();
             if (getAudiences().contains(value)) {
-                Notification.show("Audience already added", 2000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("dialog.token.audience.exists"), 2000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
             }

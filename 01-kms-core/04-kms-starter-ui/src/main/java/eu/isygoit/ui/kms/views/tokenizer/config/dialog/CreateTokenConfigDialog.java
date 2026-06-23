@@ -2,10 +2,10 @@ package eu.isygoit.ui.kms.views.tokenizer.config.dialog;
 
 import eu.isygoit.dto.data.TokenConfigDto;
 import eu.isygoit.enums.IEnumToken;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -16,9 +16,9 @@ public class CreateTokenConfigDialog extends TokenConfigDialogBase {
     private final KmsTokenConfigService tokenConfigService;
 
     public CreateTokenConfigDialog(KmsTokenConfigService tokenConfigService, KmsApiService kmsApiService, Runnable onSuccess) {
-        super("Create Token Configuration", onSuccess, kmsApiService);
+        super(I18n.t("dialog.token.create.title"), onSuccess, kmsApiService);
         this.tokenConfigService = tokenConfigService;
-        setOkButtonText("Create");
+        setOkButtonText(I18n.t("dialog.token.create.button"));
         initUI();
         bindData();
     }
@@ -33,8 +33,8 @@ public class CreateTokenConfigDialog extends TokenConfigDialogBase {
         privateKeyArea.clear();
         publicKeyArea.clear();
         lifeTimeValueField.setValue(1);
-        lifeTimeUnitCombo.setValue("Hours");
-        keySourceGroup.setValue("Define custom key");
+        lifeTimeUnitCombo.setValue(I18n.t("dialog.token.lifetime.unit.hours"));
+        keySourceGroup.setValue(I18n.t("dialog.token.key.source.custom"));
         kmsKeyCombo.clear();
     }
 
@@ -42,7 +42,7 @@ public class CreateTokenConfigDialog extends TokenConfigDialogBase {
     protected boolean onOk() {
         IEnumToken.Types tokenType = tokenTypeCombo.getValue();
         if (tokenType == null) {
-            append("Token type is required");
+            append(I18n.t("dialog.token.type.required"));
             return false;
         }
 
@@ -57,11 +57,11 @@ public class CreateTokenConfigDialog extends TokenConfigDialogBase {
                 .audience(getAudienceList())
                 .lifeTimeInMs(lifeTime);
 
-        boolean useKmsKey = "Use existing KMS key".equals(keySourceGroup.getValue());
+        boolean useKmsKey = I18n.t("dialog.token.key.source.kms").equals(keySourceGroup.getValue());
         if (useKmsKey) {
             KeyOption selected = kmsKeyCombo.getValue();
             if (selected == null) {
-                append("Please select a KMS key");
+                append(I18n.t("dialog.token.kms.select"));
                 return false;
             }
             builder.kmsKeyId(selected.getKeyId())
@@ -71,7 +71,7 @@ public class CreateTokenConfigDialog extends TokenConfigDialogBase {
         } else {
             String signatureAlgorithm = signatureAlgorithmCombo.getValue();
             if (signatureAlgorithm == null || signatureAlgorithm.isBlank()) {
-                append("Signature algorithm is required");
+                append(I18n.t("dialog.token.algorithm.required"));
                 return false;
             }
             builder.signatureAlgorithm(signatureAlgorithm);
@@ -79,7 +79,7 @@ public class CreateTokenConfigDialog extends TokenConfigDialogBase {
             if (HMAC_ALGORITHMS.contains(signatureAlgorithm)) {
                 String secretKey = secretKeyField.getValue();
                 if (secretKey == null || secretKey.isBlank()) {
-                    append("Secret key is required for " + signatureAlgorithm);
+                    append(I18n.t("dialog.token.secret.required", signatureAlgorithm));
                     return false;
                 }
                 if (!validateHmacKey(signatureAlgorithm, secretKey)) return false;
@@ -88,13 +88,13 @@ public class CreateTokenConfigDialog extends TokenConfigDialogBase {
             } else if (ASYMMETRIC_ALGORITHMS.contains(signatureAlgorithm)) {
                 String privateKey = privateKeyArea.getValue();
                 if (privateKey == null || privateKey.isBlank()) {
-                    append("Private key is required for " + signatureAlgorithm);
+                    append(I18n.t("dialog.token.private.required", signatureAlgorithm));
                     return false;
                 }
                 secretOrPrivateKey = privateKey;
                 builder.publicKey(publicKeyArea.getValue());
             } else {
-                append("Unsupported signature algorithm: " + signatureAlgorithm);
+                append(I18n.t("dialog.token.unsupported.algorithm", signatureAlgorithm));
                 return false;
             }
             builder.secretKey(secretOrPrivateKey)
@@ -109,7 +109,7 @@ public class CreateTokenConfigDialog extends TokenConfigDialogBase {
                 onSaveSuccess();
                 return true;
             } else {
-                append("Creation failed with status: " + response.getStatusCode());
+                append(I18n.t("dialog.token.create.failed", response.getStatusCode()));
                 return false;
             }
         } catch (FeignException ex) {
@@ -123,6 +123,6 @@ public class CreateTokenConfigDialog extends TokenConfigDialogBase {
 
     @Override
     protected void onSaveSuccess() {
-        append("Configuration created successfully");
+        append(I18n.t("dialog.token.created"));
     }
 }
