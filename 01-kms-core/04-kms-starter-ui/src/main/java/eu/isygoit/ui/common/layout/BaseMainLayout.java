@@ -13,14 +13,13 @@ import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.AfterNavigationEvent;
-import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.AccountDto;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountImageService;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.ui.common.component.LanguageSelectorComponent;
@@ -33,6 +32,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObserver {
 
@@ -75,7 +76,7 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         rightSlot = new Div();
         rightSlot.getStyle().set("margin-right", "var(--lumo-space-m)");
         // Put a simple placeholder text
-        rightSlot.setText("⚫");
+        rightSlot.setText(I18n.t("layout.loading"));
 
         headerLayout.add(leftPart, rightSlot);
         headerLayout.expand(leftPart);
@@ -128,13 +129,13 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
             }
             loadProfileImage(avatar, currentAccount.getId());
         } else {
-            avatar.setName("User");
+            avatar.setName(I18n.t("layout.avatar.user.default.name"));
         }
 
         MenuItem menuItem = menuBar.addItem(avatar);
-        menuItem.getSubMenu().addItem("Profile", e -> UI.getCurrent().navigate("profile"));
-        menuItem.getSubMenu().addItem("Settings", e -> UI.getCurrent().navigate("settings"));
-        menuItem.getSubMenu().addItem("Logout", e -> logout());
+        menuItem.getSubMenu().addItem(I18n.t("layout.avatar.profile"), e -> UI.getCurrent().navigate("profile"));
+        menuItem.getSubMenu().addItem(I18n.t("layout.avatar.settings"), e -> UI.getCurrent().navigate("settings"));
+        menuItem.getSubMenu().addItem(I18n.t("layout.avatar.logout"), e -> logout());
 
         VerticalLayout profileContainer = new VerticalLayout(menuBar);
         profileContainer.setPadding(false);
@@ -228,9 +229,9 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
 
     @Override
     public final void beforeEnter(BeforeEnterEvent event) {
-        String currentPath = event.getLocation().getPathWithQueryParameters(); // Better: includes query params if any
+        String currentPath = event.getLocation().getPathWithQueryParameters();
         if (!SecurityUtils.isUserLoggedIn()) {
-            UI.getCurrent().getPage().setLocation("login?redirect=" + java.net.URLEncoder.encode(currentPath, java.nio.charset.StandardCharsets.UTF_8));
+            UI.getCurrent().getPage().setLocation("login?redirect=" + URLEncoder.encode(currentPath, StandardCharsets.UTF_8));
         } else {
             SecurityUtils.storeRedirect(currentPath);
         }
