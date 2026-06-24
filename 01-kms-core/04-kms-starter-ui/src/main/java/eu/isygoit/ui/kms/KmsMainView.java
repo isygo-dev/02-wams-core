@@ -15,6 +15,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsAppNextCodeService;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
@@ -86,7 +87,7 @@ public class KmsMainView extends ManagementVerticalView {
         btn.setTooltipText(tooltip);
         btn.setWidth("20px");
         btn.setHeight("20px");
-        btn.addClickListener(e -> copyToClipboard(textToCopy, "Copied " + textToCopy + " to clipboard"));
+        btn.addClickListener(e -> copyToClipboard(textToCopy, I18n.t("kms.dashboard.copied", textToCopy)));
         return btn;
     }
 
@@ -100,7 +101,7 @@ public class KmsMainView extends ManagementVerticalView {
     }
 
     private H2 buildHeader() {
-        H2 title = new H2("Key Management Service Dashboard");
+        H2 title = new H2(I18n.t("kms.dashboard.title"));
         title.getStyle().set("margin-bottom", "10px");
         title.addClassName(LumoUtility.FontSize.XXLARGE);
         return title;
@@ -152,10 +153,16 @@ public class KmsMainView extends ManagementVerticalView {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
         layout.getStyle().set("gap", "10px").set("margin-top", "24px");
-        H2 title = new H2("Quick Actions");
+        H2 title = new H2(I18n.t("kms.dashboard.quick.actions"));
         title.addClassName(LumoUtility.FontSize.MEDIUM);
         Div actions = new Div();
-        actions.add(new Span("• Create Key\n• Encrypt / Decrypt\n• Manage Aliases\n• Configure Policies\n• Manage Grants"));
+        StringBuilder sb = new StringBuilder();
+        sb.append("• ").append(I18n.t("kms.dashboard.quick.actions.create.key")).append("\n");
+        sb.append("• ").append(I18n.t("kms.dashboard.quick.actions.encrypt.decrypt")).append("\n");
+        sb.append("• ").append(I18n.t("kms.dashboard.quick.actions.manage.aliases")).append("\n");
+        sb.append("• ").append(I18n.t("kms.dashboard.quick.actions.configure.policies")).append("\n");
+        sb.append("• ").append(I18n.t("kms.dashboard.quick.actions.manage.grants"));
+        actions.add(new Span(sb.toString()));
         actions.getStyle().set("white-space", "pre-line");
         layout.add(title, actions);
         return layout;

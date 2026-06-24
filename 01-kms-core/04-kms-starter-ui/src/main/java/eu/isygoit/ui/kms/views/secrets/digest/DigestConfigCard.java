@@ -9,6 +9,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.DigestConfigDto;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.DigestConfigService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.kms.views.secrets.digest.dialog.DeleteDigestConfigDialog;
@@ -59,36 +60,36 @@ public class DigestConfigCard extends BaseCard<DigestConfigView, DigestConfigSer
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit configuration");
+        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("digest.card.edit.tooltip"));
         editBtn.addClickListener(e -> openEditDialog());
-        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, "Delete configuration");
+        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, I18n.t("digest.card.delete.tooltip"));
         deleteBtn.addClickListener(e -> new DeleteDigestConfigDialog(objectService, dto.getId(), dto.getCode(), onDeleteRefresh).open());
         return List.of(editBtn, deleteBtn);
     }
 
     @Override
     protected void buildBodyRows() {
-        add(createIconRow(VaadinIcon.COG, "Algorithm", dto.getAlgorithm() != null ? dto.getAlgorithm().meaning() : "—"));
-        add(createIconRow(VaadinIcon.ROTATE_RIGHT, "Iterations", String.valueOf(dto.getIterations())));
-        add(createIconRow(VaadinIcon.DROP, "Salt size (bytes)", String.valueOf(dto.getSaltSizeBytes())));
-        add(createIconRow(VaadinIcon.DROP, "Salt generator", dto.getSaltGenerator() != null ? dto.getSaltGenerator().meaning() : "—"));
-        add(createIconRow(VaadinIcon.UPLOAD, "Output type", dto.getStringOutputType() != null ? dto.getStringOutputType().meaning() : "—"));
-        add(createIconRow(VaadinIcon.SERVER, "Provider", dto.getProviderName() != null ? dto.getProviderName() : "—"));
-        add(createIconRow(VaadinIcon.GROUP, "Pool size", String.valueOf(dto.getPoolSize())));
-        add(createIconRow(VaadinIcon.FLIP_H, "Invert position of salt", booleanToCheckmark(dto.getInvertPositionOfSaltInMessageBeforeDigesting())));
-        add(createIconRow(VaadinIcon.FLIP_H, "Invert plain salt in results", booleanToCheckmark(dto.getInvertPositionOfPlainSaltInEncryptionResults())));
-        add(createIconRow(VaadinIcon.CHECK, "Lenient salt size check", booleanToCheckmark(dto.getUseLenientSaltSizeCheck())));
-        add(createIconRow(VaadinIcon.FONT, "Ignore Unicode normalization", booleanToCheckmark(dto.getUnicodeNormalizationIgnored())));
+        add(createIconRow(VaadinIcon.COG, I18n.t("digest.card.algorithm"), dto.getAlgorithm() != null ? dto.getAlgorithm().meaning() : "—"));
+        add(createIconRow(VaadinIcon.ROTATE_RIGHT, I18n.t("digest.card.iterations"), String.valueOf(dto.getIterations())));
+        add(createIconRow(VaadinIcon.DROP, I18n.t("digest.card.salt.size"), String.valueOf(dto.getSaltSizeBytes())));
+        add(createIconRow(VaadinIcon.DROP, I18n.t("digest.card.salt.generator"), dto.getSaltGenerator() != null ? dto.getSaltGenerator().meaning() : "—"));
+        add(createIconRow(VaadinIcon.UPLOAD, I18n.t("digest.card.output.type"), dto.getStringOutputType() != null ? dto.getStringOutputType().meaning() : "—"));
+        add(createIconRow(VaadinIcon.SERVER, I18n.t("digest.card.provider"), dto.getProviderName() != null ? dto.getProviderName() : "—"));
+        add(createIconRow(VaadinIcon.GROUP, I18n.t("digest.card.pool.size"), String.valueOf(dto.getPoolSize())));
+        add(createIconRow(VaadinIcon.FLIP_H, I18n.t("digest.card.invert.salt.position"), booleanToCheckmark(dto.getInvertPositionOfSaltInMessageBeforeDigesting())));
+        add(createIconRow(VaadinIcon.FLIP_H, I18n.t("digest.card.invert.plain.salt"), booleanToCheckmark(dto.getInvertPositionOfPlainSaltInEncryptionResults())));
+        add(createIconRow(VaadinIcon.CHECK, I18n.t("digest.card.lenient.salt"), booleanToCheckmark(dto.getUseLenientSaltSizeCheck())));
+        add(createIconRow(VaadinIcon.FONT, I18n.t("digest.card.ignore.unicode"), booleanToCheckmark(dto.getUnicodeNormalizationIgnored())));
         if (dto.getPrefix() != null && !dto.getPrefix().isEmpty()) {
-            add(createIconRow(VaadinIcon.TEXT_INPUT, "Prefix", dto.getPrefix()));
+            add(createIconRow(VaadinIcon.TEXT_INPUT, I18n.t("digest.card.prefix"), dto.getPrefix()));
         }
         if (dto.getSuffix() != null && !dto.getSuffix().isEmpty()) {
-            add(createIconRow(VaadinIcon.TEXT_INPUT, "Suffix", dto.getSuffix()));
+            add(createIconRow(VaadinIcon.TEXT_INPUT, I18n.t("digest.card.suffix"), dto.getSuffix()));
         }
     }
 
     private String booleanToCheckmark(Boolean value) {
-        return Boolean.TRUE.equals(value) ? "YES" : "NO";
+        return Boolean.TRUE.equals(value) ? I18n.t("digest.card.yes") : I18n.t("digest.card.no");
     }
 
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {

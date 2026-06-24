@@ -4,10 +4,9 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import eu.isygoit.i18n.I18n;
 
 /**
  * Simple info dialog with a close button.
@@ -34,7 +33,7 @@ public class NoActionDialog extends Dialog {
         // Add the wrapper as the main content
         super.add(contentWrapper);
 
-        closeButton = new Button("Close", e -> close());
+        closeButton = new Button(I18n.t("dialog.noaction.close"), e -> close());
         closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         HorizontalLayout footerLayout = new HorizontalLayout(closeButton);

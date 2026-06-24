@@ -12,7 +12,9 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.TokenConfigDto;
 import eu.isygoit.enums.IEnumToken;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
+import eu.isygoit.ui.common.component.StatCard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +45,7 @@ public class TokenStatisticsPanel extends VerticalLayout {
         HorizontalLayout titleRow = new HorizontalLayout();
         titleRow.setWidthFull();
         titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        H3 title = new H3("Token Configuration Statistics");
+        H3 title = new H3(I18n.t("kms.stats.token.title"));
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
         loadingBar.setWidth("200px");
@@ -61,11 +63,11 @@ public class TokenStatisticsPanel extends VerticalLayout {
     private void showPlaceholderCards() {
         statsContainer.removeAll();
         statsContainer.add(
-                new StatCard("Total Configs", "…", VaadinIcon.COG, "#607D8B", "Total number of JWT token configurations"),
-                new StatCard("ACCESS", "…", VaadinIcon.KEY, "#1E88E5", "Configurations for access tokens (used for API authorization)"),
-                new StatCard("REFRESH", "…", VaadinIcon.REFRESH, "#43A047", "Configurations for refresh tokens (used to obtain new access tokens)"),
-                new StatCard("RSTPWD", "…", VaadinIcon.LOCK, "#F57C00", "Configurations for password reset tokens"),
-                new StatCard("AUTHORITY", "…", VaadinIcon.USER, "#8E24AA", "Configurations for authority tokens (granting specific permissions)")
+                new StatCard(I18n.t("kms.stats.token.total"), "…", VaadinIcon.COG, "#607D8B", I18n.t("kms.stats.token.total.tooltip")),
+                new StatCard(I18n.t("kms.stats.token.access"), "…", VaadinIcon.KEY, "#1E88E5", I18n.t("kms.stats.token.access.tooltip")),
+                new StatCard(I18n.t("kms.stats.token.refresh"), "…", VaadinIcon.REFRESH, "#43A047", I18n.t("kms.stats.token.refresh.tooltip")),
+                new StatCard(I18n.t("kms.stats.token.rstpwd"), "…", VaadinIcon.LOCK, "#F57C00", I18n.t("kms.stats.token.rstpwd.tooltip")),
+                new StatCard(I18n.t("kms.stats.token.authority"), "…", VaadinIcon.USER, "#8E24AA", I18n.t("kms.stats.token.authority.tooltip"))
         );
     }
 
@@ -91,11 +93,11 @@ public class TokenStatisticsPanel extends VerticalLayout {
                 }
 
                 statsContainer.add(
-                        new StatCard("Total Configs", String.valueOf(stats.total), VaadinIcon.COG, "#607D8B", "Total number of JWT token configurations"),
-                        new StatCard("ACCESS", String.valueOf(stats.access), VaadinIcon.KEY, "#1E88E5", "Configurations for access tokens (used for API authorization)"),
-                        new StatCard("REFRESH", String.valueOf(stats.refresh), VaadinIcon.REFRESH, "#43A047", "Configurations for refresh tokens (used to obtain new access tokens)"),
-                        new StatCard("RSTPWD", String.valueOf(stats.rstpwd), VaadinIcon.LOCK, "#F57C00", "Configurations for password reset tokens"),
-                        new StatCard("AUTHORITY", String.valueOf(stats.authority), VaadinIcon.USER, "#8E24AA", "Configurations for authority tokens (granting specific permissions)")
+                        new StatCard(I18n.t("kms.stats.token.total"), String.valueOf(stats.total), VaadinIcon.COG, "#607D8B", I18n.t("kms.stats.token.total.tooltip")),
+                        new StatCard(I18n.t("kms.stats.token.access"), String.valueOf(stats.access), VaadinIcon.KEY, "#1E88E5", I18n.t("kms.stats.token.access.tooltip")),
+                        new StatCard(I18n.t("kms.stats.token.refresh"), String.valueOf(stats.refresh), VaadinIcon.REFRESH, "#43A047", I18n.t("kms.stats.token.refresh.tooltip")),
+                        new StatCard(I18n.t("kms.stats.token.rstpwd"), String.valueOf(stats.rstpwd), VaadinIcon.LOCK, "#F57C00", I18n.t("kms.stats.token.rstpwd.tooltip")),
+                        new StatCard(I18n.t("kms.stats.token.authority"), String.valueOf(stats.authority), VaadinIcon.USER, "#8E24AA", I18n.t("kms.stats.token.authority.tooltip"))
                 );
 
                 loadingBar.setVisible(false);
@@ -104,7 +106,7 @@ public class TokenStatisticsPanel extends VerticalLayout {
             } catch (Exception e) {
                 log.error("Error fetching token configuration statistics", e);
                 loadingBar.setVisible(false);
-                Notification.show("Error loading statistics", 3000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("kms.stats.token.load.error"), 3000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });

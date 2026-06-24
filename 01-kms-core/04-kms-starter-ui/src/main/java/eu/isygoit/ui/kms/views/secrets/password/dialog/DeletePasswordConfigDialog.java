@@ -1,6 +1,7 @@
 package eu.isygoit.ui.kms.views.secrets.password.dialog;
 
 import com.vaadin.flow.component.button.ButtonVariant;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.PasswordConfigService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 
@@ -10,13 +11,13 @@ public class DeletePasswordConfigDialog extends PinBaseActionDialog {
     private final Long configId;
 
     public DeletePasswordConfigDialog(PasswordConfigService configService, Long configId, String code, Runnable onSuccess) {
-        super("Delete Configuration",
-                "Delete configuration '" + code + "'? This action is irreversible.",
+        super(I18n.t("password.dialog.delete.title"),
+                I18n.t("password.dialog.delete.confirmation", code),
                 onSuccess,
                 true);
         this.configService = configService;
         this.configId = configId;
-        setOkButtonText("Delete permanently");
+        setOkButtonText(I18n.t("password.dialog.delete.button"));
         addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
@@ -24,16 +25,16 @@ public class DeletePasswordConfigDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append("Invalid confirmation code");
+            append(I18n.t("password.dialog.delete.invalid.code"));
             return false;
         }
 
         try {
             configService.delete(configId);
-            append("Configuration deleted successfully");
+            append(I18n.t("password.dialog.delete.success"));
             return true;
         } catch (Exception e) {
-            append("Delete failed: " + e.getMessage());
+            append(I18n.t("password.dialog.delete.failed", e.getMessage()));
             return false;
         }
     }

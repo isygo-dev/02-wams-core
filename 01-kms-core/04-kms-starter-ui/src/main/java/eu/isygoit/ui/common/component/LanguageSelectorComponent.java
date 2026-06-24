@@ -6,8 +6,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.server.VaadinSession;
@@ -242,10 +240,28 @@ public class LanguageSelectorComponent extends HorizontalLayout {
      * Returns the localized display name of the language.
      */
     private String getLanguageName(Locale locale) {
-        if (locale.getCountry().isEmpty()) {
-            return locale.getDisplayLanguage(locale);
+        String languageCode = locale.getLanguage();
+        String languageName = switch (languageCode) {
+            case "en" -> I18n.t("language.selector.english");
+            case "fr" -> I18n.t("language.selector.french");
+            case "de" -> I18n.t("language.selector.german");
+            case "es" -> I18n.t("language.selector.spanish");
+            case "it" -> I18n.t("language.selector.italian");
+            case "pt" -> I18n.t("language.selector.portuguese");
+            case "nl" -> I18n.t("language.selector.dutch");
+            case "ru" -> I18n.t("language.selector.russian");
+            case "zh" -> I18n.t("language.selector.chinese");
+            case "ja" -> I18n.t("language.selector.japanese");
+            case "ko" -> I18n.t("language.selector.korean");
+            case "ar" -> I18n.t("language.selector.arabic");
+            case "hi" -> I18n.t("language.selector.hindi");
+            default -> I18n.t("language.selector.fallback");
+        };
+
+        if (locale.getCountry() != null && !locale.getCountry().isEmpty()) {
+            return languageName + " (" + locale.getDisplayCountry(locale) + ")";
         }
-        return locale.getDisplayLanguage(locale) + " (" + locale.getDisplayCountry(locale) + ")";
+        return languageName;
     }
 
     /**

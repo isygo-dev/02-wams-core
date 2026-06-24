@@ -17,6 +17,7 @@ import eu.isygoit.dto.KmsDtos.KeyUsageStatsResponse;
 import eu.isygoit.dto.KmsDtos.ListKeyRotationsResponse;
 import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.helper.DateHelper;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,7 @@ public class KeyUsageStatsPanel extends VerticalLayout {
         HorizontalLayout titleRow = new HorizontalLayout();
         titleRow.setWidthFull();
         titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        H3 title = new H3("Key Usage Statistics");
+        H3 title = new H3(I18n.t("kms.stats.key.usage.title"));
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
         loadingBar.setWidth("200px");
@@ -63,13 +64,13 @@ public class KeyUsageStatsPanel extends VerticalLayout {
         filterBar.setSpacing(true);
         filterBar.getStyle().set("flex-wrap", "wrap");
 
-        keyCombo = new ComboBox<>("Select Key");
-        keyCombo.setPlaceholder("Choose a key");
+        keyCombo = new ComboBox<>(I18n.t("kms.stats.key.usage.select.key"));
+        keyCombo.setPlaceholder(I18n.t("kms.stats.key.usage.choose.key"));
         keyCombo.setItemLabelGenerator(KeyOption::getDisplayName);
         keyCombo.setWidth("300px");
         keyCombo.setRequired(true);
 
-        loadButton = new Button("Load Usage Stats", VaadinIcon.CHART.create());
+        loadButton = new Button(I18n.t("kms.stats.key.usage.load.button"), VaadinIcon.CHART.create());
         loadButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         loadButton.addClickListener(e -> loadUsageStats());
 
@@ -91,7 +92,7 @@ public class KeyUsageStatsPanel extends VerticalLayout {
     private void loadUsageStats() {
         KeyOption selected = keyCombo.getValue();
         if (selected == null) {
-            Notification.show("Please select a key", 3000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("kms.stats.key.usage.select.key.warning"), 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
@@ -117,27 +118,27 @@ public class KeyUsageStatsPanel extends VerticalLayout {
                 statsContainer.removeAll();
 
                 if (stats == null) {
-                    Span errorSpan = new Span("Failed to load statistics. Check server logs.");
+                    Span errorSpan = new Span(I18n.t("kms.stats.key.usage.failed.load"));
                     errorSpan.getStyle().set("color", "var(--lumo-error-text-color)");
                     statsContainer.add(errorSpan);
                 } else {
                     if (keyUsage == IEnumKeyUsage.Types.ENCRYPT_DECRYPT) {
-                        statsContainer.add(createSmallStatCard("Encrypts", stats.getEncryptCount()));
-                        statsContainer.add(createSmallStatCard("Decrypts", stats.getDecryptCount()));
-                        statsContainer.add(createSmallStatCard("Generate Data Keys", stats.getGenerateDataKeyCount()));
-                        statsContainer.add(createSmallStatCard("Re-Encrypts", stats.getReEncryptCount()));
+                        statsContainer.add(createSmallStatCard(I18n.t("kms.stats.key.usage.encrypts"), stats.getEncryptCount()));
+                        statsContainer.add(createSmallStatCard(I18n.t("kms.stats.key.usage.decrypts"), stats.getDecryptCount()));
+                        statsContainer.add(createSmallStatCard(I18n.t("kms.stats.key.usage.generate.data.keys"), stats.getGenerateDataKeyCount()));
+                        statsContainer.add(createSmallStatCard(I18n.t("kms.stats.key.usage.reencrypts"), stats.getReEncryptCount()));
                     } else if (keyUsage == IEnumKeyUsage.Types.SIGN_VERIFY) {
-                        statsContainer.add(createSmallStatCard("Signs", stats.getSignCount()));
-                        statsContainer.add(createSmallStatCard("Verifies", stats.getVerifyCount()));
+                        statsContainer.add(createSmallStatCard(I18n.t("kms.stats.key.usage.signs"), stats.getSignCount()));
+                        statsContainer.add(createSmallStatCard(I18n.t("kms.stats.key.usage.verifies"), stats.getVerifyCount()));
                     } else if (keyUsage == IEnumKeyUsage.Types.GENERATE_VERIFY_MAC) {
                         long gen = stats.getGenerateMacCount() != null ? stats.getGenerateMacCount() : 0L;
                         long ver = stats.getVerifyMacCount() != null ? stats.getVerifyMacCount() : 0L;
-                        statsContainer.add(createSmallStatCard("Generate MAC", gen));
-                        statsContainer.add(createSmallStatCard("Verify MAC", ver));
+                        statsContainer.add(createSmallStatCard(I18n.t("kms.stats.key.usage.generate.mac"), gen));
+                        statsContainer.add(createSmallStatCard(I18n.t("kms.stats.key.usage.verify.mac"), ver));
                     }
-                    statsContainer.add(createSmallStatCard("Key Versions", versionCount));
+                    statsContainer.add(createSmallStatCard(I18n.t("kms.stats.key.usage.key.versions"), versionCount));
                     if (stats.getLastUsedDate() != null) {
-                        statsContainer.add(createSmallStatCard("Last Used", DateHelper.formatToHumanReadable(stats.getLastUsedDate())));
+                        statsContainer.add(createSmallStatCard(I18n.t("kms.stats.key.usage.last.used"), DateHelper.formatToHumanReadable(stats.getLastUsedDate())));
                     }
                 }
 
@@ -150,9 +151,9 @@ public class KeyUsageStatsPanel extends VerticalLayout {
                 loadingBar.setVisible(false);
                 loadButton.setEnabled(true);
                 statsContainer.removeAll();
-                statsContainer.add(new Span("Error loading statistics"));
+                statsContainer.add(new Span(I18n.t("kms.stats.key.usage.load.error")));
                 statsContainer.setVisible(true);
-                Notification.show("Error loading statistics", 3000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("kms.stats.key.usage.load.error"), 3000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });

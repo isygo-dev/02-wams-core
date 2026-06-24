@@ -7,10 +7,14 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.shared.Registration;
+import eu.isygoit.i18n.I18n;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
@@ -51,7 +55,12 @@ public class ImageCropper extends VerticalLayout
         upload = new Upload(buffer);
         upload.setAcceptedFileTypes("image/jpeg", "image/png", "image/jpg", "image/webp");
         upload.setMaxFileSize(5 * 1024 * 1024);
+        upload.setDropLabel(new Span(I18n.t("image.cropper.upload.label")));
         upload.addSucceededListener(event -> loadImage(event.getMIMEType(), buffer.getInputStream()));
+        upload.addFailedListener(event -> {
+            Notification.show(I18n.t("image.cropper.error.upload.failed"), 3000, Notification.Position.BOTTOM_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        });
         add(upload);
 
         previewImage.setId("cropper-img");
@@ -64,7 +73,7 @@ public class ImageCropper extends VerticalLayout
         cropperContainer.getStyle().set("text-align", "center");
         add(cropperContainer);
 
-        cropButton = new Button("Crop", e -> cropImage());
+        cropButton = new Button(I18n.t("image.cropper.crop.button"), e -> cropImage());
         cropButton.setVisible(false);
         add(cropButton);
     }
@@ -89,7 +98,8 @@ public class ImageCropper extends VerticalLayout
 
             initCropper();
         } catch (IOException e) {
-            e.printStackTrace();
+            Notification.show(I18n.t("image.cropper.error.read.failed"), 3000, Notification.Position.BOTTOM_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }
 
@@ -135,7 +145,8 @@ public class ImageCropper extends VerticalLayout
             listeners.forEach(l -> l.valueChanged(event));
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Notification.show(I18n.t("image.cropper.error.crop.failed"), 3000, Notification.Position.BOTTOM_END)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }
 

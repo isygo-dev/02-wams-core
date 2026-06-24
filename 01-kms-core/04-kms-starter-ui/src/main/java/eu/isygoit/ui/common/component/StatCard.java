@@ -1,4 +1,4 @@
-package eu.isygoit.ui.kms.views.dashbord;
+package eu.isygoit.ui.common.component;
 
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;

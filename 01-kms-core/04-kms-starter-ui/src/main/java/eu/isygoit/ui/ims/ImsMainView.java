@@ -13,6 +13,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.*;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.ims.layout.ImsMainLayout;
@@ -64,7 +65,7 @@ public class ImsMainView extends ManagementVerticalView {
     }
 
     private H2 buildHeader() {
-        H2 title = new H2("Identity Management System Dashboard");
+        H2 title = new H2(I18n.t("ims.dashboard.title"));
         title.getStyle().set("margin-bottom", "10px");
         title.addClassName(LumoUtility.FontSize.XXLARGE);
         return title;
@@ -78,11 +79,11 @@ public class ImsMainView extends ManagementVerticalView {
         row.setJustifyContentMode(FlexComponent.JustifyContentMode.EVENLY);
         row.addClassName("stats-row");
 
-        row.add(createStatCard("Total Accounts", "0", VaadinIcon.USER, "accounts-link"));
-        row.add(createStatCard("Total Tenants", "0", VaadinIcon.BUILDING, "tenants-link"));
-        row.add(createStatCard("Total Applications", "0", VaadinIcon.PAPERCLIP, "apps-link"));
-        row.add(createStatCard("Total Customers", "0", VaadinIcon.GROUP, "customers-link"));
-        row.add(createStatCard("Total Roles", "0", VaadinIcon.SHIELD, "roles-link"));
+        row.add(createStatCard(I18n.t("ims.dashboard.total.accounts"), "0", VaadinIcon.USER, "accounts-link"));
+        row.add(createStatCard(I18n.t("ims.dashboard.total.tenants"), "0", VaadinIcon.BUILDING, "tenants-link"));
+        row.add(createStatCard(I18n.t("ims.dashboard.total.applications"), "0", VaadinIcon.PAPERCLIP, "apps-link"));
+        row.add(createStatCard(I18n.t("ims.dashboard.total.customers"), "0", VaadinIcon.GROUP, "customers-link"));
+        row.add(createStatCard(I18n.t("ims.dashboard.total.roles"), "0", VaadinIcon.SHIELD, "roles-link"));
 
         return row;
     }
@@ -121,10 +122,10 @@ public class ImsMainView extends ManagementVerticalView {
         VerticalLayout panel = new VerticalLayout();
         panel.setSpacing(true);
         panel.getStyle().set("margin-top", "24px");
-        H2 title = new H2("Recent Activity");
+        H2 title = new H2(I18n.t("ims.dashboard.recent.activity"));
         title.addClassName(LumoUtility.FontSize.MEDIUM);
         Div content = new Div();
-        content.setText("Latest account creations, tenant updates, and system events will appear here.");
+        content.setText(I18n.t("ims.dashboard.recent.activity.description"));
         content.getStyle().set("padding", "var(--lumo-space-m)")
                 .set("background", "var(--lumo-base-color)")
                 .set("border-radius", "var(--lumo-border-radius-m)");
@@ -136,10 +137,16 @@ public class ImsMainView extends ManagementVerticalView {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
         layout.getStyle().set("gap", "10px").set("margin-top", "24px");
-        H2 title = new H2("Quick Actions");
+        H2 title = new H2(I18n.t("ims.dashboard.quick.actions"));
         title.addClassName(LumoUtility.FontSize.MEDIUM);
         Div actions = new Div();
-        actions.add(new Span("• Create Account\n• Add Tenant\n• Register Application\n• Add Customer\n• Assign Role"));
+        StringBuilder sb = new StringBuilder();
+        sb.append("• ").append(I18n.t("ims.dashboard.quick.actions.create.account")).append("\n");
+        sb.append("• ").append(I18n.t("ims.dashboard.quick.actions.add.tenant")).append("\n");
+        sb.append("• ").append(I18n.t("ims.dashboard.quick.actions.register.application")).append("\n");
+        sb.append("• ").append(I18n.t("ims.dashboard.quick.actions.add.customer")).append("\n");
+        sb.append("• ").append(I18n.t("ims.dashboard.quick.actions.assign.role"));
+        actions.add(new Span(sb.toString()));
         actions.getStyle().set("white-space", "pre-line");
         layout.add(title, actions);
         return layout;

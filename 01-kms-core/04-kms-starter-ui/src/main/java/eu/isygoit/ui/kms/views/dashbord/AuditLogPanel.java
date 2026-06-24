@@ -18,6 +18,7 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import eu.isygoit.dto.KmsDtos.AuditLogResponse;
 import eu.isygoit.helper.DateHelper;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +63,7 @@ public class AuditLogPanel extends VerticalLayout {
         HorizontalLayout titleRow = new HorizontalLayout();
         titleRow.setWidthFull();
         titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        H3 title = new H3("Audit Logs");
+        H3 title = new H3(I18n.t("kms.audit.log.title"));
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
         loadingBar.setWidth("200px");
@@ -75,21 +76,21 @@ public class AuditLogPanel extends VerticalLayout {
         filterBar.setSpacing(true);
         filterBar.getStyle().set("flex-wrap", "wrap");
 
-        keyCombo = new ComboBox<>("KMS Key");
-        keyCombo.setPlaceholder("Select a key");
+        keyCombo = new ComboBox<>(I18n.t("kms.audit.log.kms.key"));
+        keyCombo.setPlaceholder(I18n.t("kms.audit.log.select.key"));
         keyCombo.setItemLabelGenerator(KeyUsageStatsPanel.KeyOption::getDisplayName);
         keyCombo.setWidth("300px");
         keyCombo.setRequired(true);
 
-        fromDatePicker = new DatePicker("From Date");
-        fromDatePicker.setPlaceholder("YYYY-MM-DD");
+        fromDatePicker = new DatePicker(I18n.t("kms.audit.log.from.date"));
+        fromDatePicker.setPlaceholder(I18n.t("kms.audit.log.date.placeholder"));
         fromDatePicker.setWidth("180px");
 
-        toDatePicker = new DatePicker("To Date");
-        toDatePicker.setPlaceholder("YYYY-MM-DD");
+        toDatePicker = new DatePicker(I18n.t("kms.audit.log.to.date"));
+        toDatePicker.setPlaceholder(I18n.t("kms.audit.log.date.placeholder"));
         toDatePicker.setWidth("180px");
 
-        loadButton = new Button("Load Logs", VaadinIcon.SEARCH.create());
+        loadButton = new Button(I18n.t("kms.audit.log.load.button"), VaadinIcon.SEARCH.create());
         loadButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         loadButton.addClickListener(e -> loadLogs());
 
@@ -103,14 +104,14 @@ public class AuditLogPanel extends VerticalLayout {
         grid.addColumn(new ComponentRenderer<>(entry -> {
             LocalDateTime ts = entry.getTimestamp();
             return new Span(ts != null ? DateHelper.formatToHumanReadable(ts) : "-");
-        })).setHeader("Timestamp").setSortable(true).setResizable(true);
-        grid.addColumn(AuditLogResponse.LogEntry::getAction).setHeader("Action").setSortable(true).setResizable(true);
-        grid.addColumn(AuditLogResponse.LogEntry::getKeyId).setHeader("Key ID").setSortable(true).setResizable(true);
-        grid.addColumn(AuditLogResponse.LogEntry::getPrincipal).setHeader("Principal").setSortable(true).setResizable(true);
-        grid.addColumn(AuditLogResponse.LogEntry::getIpAddress).setHeader("IP Address").setResizable(true);
-        grid.addColumn(AuditLogResponse.LogEntry::getStatus).setHeader("Status").setResizable(true);
-        grid.addColumn(AuditLogResponse.LogEntry::getErrorMessage).setHeader("Error Message").setResizable(true);
-        grid.addColumn(AuditLogResponse.LogEntry::getExecutionTimeMs).setHeader("Exec Time (ms)").setResizable(true);
+        })).setHeader(I18n.t("kms.audit.log.column.timestamp")).setSortable(true).setResizable(true);
+        grid.addColumn(AuditLogResponse.LogEntry::getAction).setHeader(I18n.t("kms.audit.log.column.action")).setSortable(true).setResizable(true);
+        grid.addColumn(AuditLogResponse.LogEntry::getKeyId).setHeader(I18n.t("kms.audit.log.column.key.id")).setSortable(true).setResizable(true);
+        grid.addColumn(AuditLogResponse.LogEntry::getPrincipal).setHeader(I18n.t("kms.audit.log.column.principal")).setSortable(true).setResizable(true);
+        grid.addColumn(AuditLogResponse.LogEntry::getIpAddress).setHeader(I18n.t("kms.audit.log.column.ip.address")).setResizable(true);
+        grid.addColumn(AuditLogResponse.LogEntry::getStatus).setHeader(I18n.t("kms.audit.log.column.status")).setResizable(true);
+        grid.addColumn(AuditLogResponse.LogEntry::getErrorMessage).setHeader(I18n.t("kms.audit.log.column.error.message")).setResizable(true);
+        grid.addColumn(AuditLogResponse.LogEntry::getExecutionTimeMs).setHeader(I18n.t("kms.audit.log.column.exec.time")).setResizable(true);
         add(grid);
 
         paginationBar = new HorizontalLayout();
@@ -119,10 +120,10 @@ public class AuditLogPanel extends VerticalLayout {
         paginationBar.setAlignItems(FlexComponent.Alignment.CENTER);
         paginationBar.setSpacing(true);
         paginationBar.setVisible(false);
-        prevButton = new Button("Previous", VaadinIcon.ANGLE_LEFT.create());
+        prevButton = new Button(I18n.t("kms.audit.log.pagination.previous"), VaadinIcon.ANGLE_LEFT.create());
         prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         prevButton.addClickListener(e -> changePage(-1));
-        nextButton = new Button("Next", VaadinIcon.ANGLE_RIGHT.create());
+        nextButton = new Button(I18n.t("kms.audit.log.pagination.next"), VaadinIcon.ANGLE_RIGHT.create());
         nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         nextButton.addClickListener(e -> changePage(1));
         pageInfoSpan = new Span();
@@ -137,7 +138,7 @@ public class AuditLogPanel extends VerticalLayout {
     private void loadLogs() {
         KeyUsageStatsPanel.KeyOption selected = keyCombo.getValue();
         if (selected == null) {
-            Notification.show("Please select a KMS key", 3000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("kms.audit.log.select.key.warning"), 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
@@ -165,12 +166,12 @@ public class AuditLogPanel extends VerticalLayout {
                 loadingBar.setVisible(false);
                 loadButton.setEnabled(true);
 
-                String msg = logs.isEmpty() ? "No audit logs found" : "Loaded " + logs.size() + " log entries";
+                String msg = logs.isEmpty() ? I18n.t("kms.audit.log.no.logs") : I18n.t("kms.audit.log.loaded", logs.size());
                 Notification.show(msg, 3000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(logs.isEmpty() ? NotificationVariant.LUMO_WARNING : NotificationVariant.LUMO_SUCCESS);
             } catch (Exception ex) {
                 log.error("Failed to load audit logs", ex);
-                Notification.show("Error loading audit logs", 3000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("kms.audit.log.load.error"), 3000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 loadingBar.setVisible(false);
                 loadButton.setEnabled(true);
@@ -181,7 +182,7 @@ public class AuditLogPanel extends VerticalLayout {
     private void updateGrid() {
         if (allLogs.isEmpty()) {
             grid.setItems(new ArrayList<>());
-            pageInfoSpan.setText("No logs found");
+            pageInfoSpan.setText(I18n.t("kms.audit.log.pagination.no.logs"));
             prevButton.setEnabled(false);
             nextButton.setEnabled(false);
             return;
@@ -190,7 +191,7 @@ public class AuditLogPanel extends VerticalLayout {
         int end = Math.min(start + PAGE_SIZE, allLogs.size());
         grid.setItems(allLogs.subList(start, end));
         int totalPages = (int) Math.ceil((double) allLogs.size() / PAGE_SIZE);
-        pageInfoSpan.setText("Page " + (currentPage + 1) + " of " + totalPages);
+        pageInfoSpan.setText(I18n.t("kms.audit.log.pagination.page", currentPage + 1, totalPages));
         prevButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(currentPage < totalPages - 1);
     }

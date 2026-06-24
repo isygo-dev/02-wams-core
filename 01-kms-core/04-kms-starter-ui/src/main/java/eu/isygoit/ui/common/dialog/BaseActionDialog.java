@@ -9,11 +9,10 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.i18n.I18n;
 
 /**
  * Modern, compact base dialog with a header, a content area, and a footer
@@ -108,7 +107,7 @@ public abstract class BaseActionDialog extends Dialog {
     }
 
     private Button createOkButton() {
-        Button button = new Button("Ok");
+        Button button = new Button(I18n.t("dialog.base.ok"));
         button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         button.addClickListener(e -> {
             clearError();
@@ -125,7 +124,7 @@ public abstract class BaseActionDialog extends Dialog {
     }
 
     private Button createCancelButton() {
-        Button button = new Button("Cancel");
+        Button button = new Button(I18n.t("dialog.base.cancel"));
         button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         button.addClickListener(e -> close());
         return button;

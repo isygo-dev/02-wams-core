@@ -18,9 +18,11 @@ import eu.isygoit.dto.common.RandomKeyDto;
 import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.enums.IEnumKeyUsage;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsAppNextCodeService;
 import eu.isygoit.remote.kms.RandomKeyService;
+import eu.isygoit.ui.common.component.StatCard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +36,7 @@ public class KeyStatisticsPanel extends VerticalLayout {
     private final RandomKeyService randomKeyService;
     private final UI ui;
     private final ProgressBar loadingBar = new ProgressBar();
-    private final Button refreshButton = new Button("Refresh Stats", VaadinIcon.REFRESH.create());
+    private final Button refreshButton = new Button(I18n.t("kms.stats.key.refresh.button"), VaadinIcon.REFRESH.create());
     private HorizontalLayout statsContainer;
 
     public KeyStatisticsPanel(KmsApiService kmsApiService,
@@ -57,7 +59,7 @@ public class KeyStatisticsPanel extends VerticalLayout {
         HorizontalLayout titleRow = new HorizontalLayout();
         titleRow.setWidthFull();
         titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        H3 statsTitle = new H3("Key Statistics");
+        H3 statsTitle = new H3(I18n.t("kms.stats.key.title"));
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         refreshButton.addClickListener(e -> loadStatistics());
         loadingBar.setIndeterminate(true);
@@ -153,21 +155,21 @@ public class KeyStatisticsPanel extends VerticalLayout {
 
                 // Build stat cards
                 statsContainer.add(
-                        new StatCard("Total Keys", String.valueOf(stats.totalKeys), VaadinIcon.KEY, "#1E88E5", "Total number of KMS keys in your account"),
-                        new StatCard("Active Keys", String.valueOf(stats.activeKeys), VaadinIcon.CHECK_CIRCLE, "#2E7D32", "Keys that are enabled and usable for cryptographic operations"),
-                        new StatCard("Disabled Keys", String.valueOf(stats.disabledKeys), VaadinIcon.BAN, "#D32F2F", "Keys that are disabled and cannot be used"),
-                        new StatCard("Pending Deletion", String.valueOf(stats.pendingDeletion), VaadinIcon.CLOCK, "#F57C00", "Keys that have been scheduled for deletion"),
-                        new StatCard("Rotation Enabled", String.valueOf(stats.rotationEnabled), VaadinIcon.ROTATE_RIGHT, "#8E24AA", "Keys with automatic key rotation enabled"),
-                        new StatCard("Symmetric Keys", String.valueOf(stats.symmetricKeys), VaadinIcon.CIRCLE, "#43A047", "AES or HMAC keys (same key for encryption and decryption)"),
-                        new StatCard("Asymmetric Keys", String.valueOf(stats.asymmetricKeys), VaadinIcon.LOCK, "#FB8C00", "RSA or EC keys (different keys for signing/verification)"),
-                        new StatCard("Encrypt/Decrypt Keys", String.valueOf(stats.encryptUsage), VaadinIcon.LOCK, "#1E88E5", "Keys intended for encryption and decryption operations"),
-                        new StatCard("Sign/Verify Keys", String.valueOf(stats.signUsage), VaadinIcon.PENCIL, "#8E24AA", "Keys intended for digital signature and verification"),
-                        new StatCard("MAC Keys", String.valueOf(stats.macUsage), VaadinIcon.SIGNAL, "#D81B60", "Keys used for Message Authentication Code (HMAC) operations"),
-                        new StatCard("Aliases", String.valueOf(stats.totalAliases), VaadinIcon.TAG, "#00ACC1", "Total number of friendly aliases pointing to keys"),
-                        new StatCard("Grants", String.valueOf(stats.totalGrants), VaadinIcon.SHARE, "#546E7A", "Total number of access grants across all keys"),
-                        new StatCard("Custom Key Stores", String.valueOf(stats.totalStores), VaadinIcon.STORAGE, "#37474F", "Number of configured custom key stores (CloudHSM or external)"),
-                        new StatCard("Incremental Key Configs", String.valueOf(stats.nextCodeTotal), VaadinIcon.CODE, "#607D8B", "Number of incremental code generator configurations"),
-                        new StatCard("Random Keys", String.valueOf(stats.randomKeysTotal), VaadinIcon.RANDOM, "#8E24AA", "Number of stored random key values")
+                        new StatCard(I18n.t("kms.stats.key.total"), String.valueOf(stats.totalKeys), VaadinIcon.KEY, "#1E88E5", I18n.t("kms.stats.key.total.tooltip")),
+                        new StatCard(I18n.t("kms.stats.key.active"), String.valueOf(stats.activeKeys), VaadinIcon.CHECK_CIRCLE, "#2E7D32", I18n.t("kms.stats.key.active.tooltip")),
+                        new StatCard(I18n.t("kms.stats.key.disabled"), String.valueOf(stats.disabledKeys), VaadinIcon.BAN, "#D32F2F", I18n.t("kms.stats.key.disabled.tooltip")),
+                        new StatCard(I18n.t("kms.stats.key.pending.deletion"), String.valueOf(stats.pendingDeletion), VaadinIcon.CLOCK, "#F57C00", I18n.t("kms.stats.key.pending.deletion.tooltip")),
+                        new StatCard(I18n.t("kms.stats.key.rotation.enabled"), String.valueOf(stats.rotationEnabled), VaadinIcon.ROTATE_RIGHT, "#8E24AA", I18n.t("kms.stats.key.rotation.enabled.tooltip")),
+                        new StatCard(I18n.t("kms.stats.key.symmetric"), String.valueOf(stats.symmetricKeys), VaadinIcon.CIRCLE, "#43A047", I18n.t("kms.stats.key.symmetric.tooltip")),
+                        new StatCard(I18n.t("kms.stats.key.asymmetric"), String.valueOf(stats.asymmetricKeys), VaadinIcon.LOCK, "#FB8C00", I18n.t("kms.stats.key.asymmetric.tooltip")),
+                        new StatCard(I18n.t("kms.stats.key.encrypt.decrypt"), String.valueOf(stats.encryptUsage), VaadinIcon.LOCK, "#1E88E5", I18n.t("kms.stats.key.encrypt.decrypt.tooltip")),
+                        new StatCard(I18n.t("kms.stats.key.sign.verify"), String.valueOf(stats.signUsage), VaadinIcon.PENCIL, "#8E24AA", I18n.t("kms.stats.key.sign.verify.tooltip")),
+                        new StatCard(I18n.t("kms.stats.key.mac"), String.valueOf(stats.macUsage), VaadinIcon.SIGNAL, "#D81B60", I18n.t("kms.stats.key.mac.tooltip")),
+                        new StatCard(I18n.t("kms.stats.key.aliases"), String.valueOf(stats.totalAliases), VaadinIcon.TAG, "#00ACC1", I18n.t("kms.stats.key.aliases.tooltip")),
+                        new StatCard(I18n.t("kms.stats.key.grants"), String.valueOf(stats.totalGrants), VaadinIcon.SHARE, "#546E7A", I18n.t("kms.stats.key.grants.tooltip")),
+                        new StatCard(I18n.t("kms.stats.key.custom.stores"), String.valueOf(stats.totalStores), VaadinIcon.STORAGE, "#37474F", I18n.t("kms.stats.key.custom.stores.tooltip")),
+                        new StatCard(I18n.t("kms.stats.key.incremental.configs"), String.valueOf(stats.nextCodeTotal), VaadinIcon.CODE, "#607D8B", I18n.t("kms.stats.key.incremental.configs.tooltip")),
+                        new StatCard(I18n.t("kms.stats.key.random.keys"), String.valueOf(stats.randomKeysTotal), VaadinIcon.RANDOM, "#8E24AA", I18n.t("kms.stats.key.random.keys.tooltip"))
                 );
 
                 loadingBar.setVisible(false);
@@ -178,7 +180,7 @@ public class KeyStatisticsPanel extends VerticalLayout {
                 log.error("Error in statistics collection", ex);
                 loadingBar.setVisible(false);
                 refreshButton.setEnabled(true);
-                Notification.show("Error loading statistics", 3000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("kms.stats.key.load.error"), 3000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });

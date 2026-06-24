@@ -5,13 +5,12 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.i18n.I18n;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -68,7 +67,7 @@ public abstract class PinBaseActionDialog extends BaseActionDialog {
         layout.setPadding(true);
 
         layout.add(createWarningMessage(warningMessage));
-        layout.add(new Span("To confirm, enter the 9‑digit code below:"));
+        layout.add(new Span(I18n.t("dialog.pin.confirm.instruction")));
 
         layout.add(createCodeDisplay(confirmationCode));
 
@@ -105,7 +104,7 @@ public abstract class PinBaseActionDialog extends BaseActionDialog {
 
     protected TextField createPinField() {
         TextField field = new TextField();
-        field.setPlaceholder("Enter 9‑digit code");
+        field.setPlaceholder(I18n.t("dialog.pin.field.placeholder"));
         field.setWidthFull();
         field.setPattern("[0-9]*");
         field.setMaxLength(9);

@@ -4,7 +4,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.util.SecurityUtils;
 import jakarta.annotation.security.PermitAll;
 
