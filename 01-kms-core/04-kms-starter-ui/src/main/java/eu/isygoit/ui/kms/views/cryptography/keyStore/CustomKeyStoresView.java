@@ -13,28 +13,23 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.DescribeCustomKeyStoreResponse;
 import eu.isygoit.dto.KmsDtos.ListCustomKeyStoresResponse;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.cryptography.keyStore.dialog.CreateCustomKeyStoreDialog;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +50,7 @@ public class CustomKeyStoresView extends ManagementVerticalView {
 
     private final KmsApiService kmsApiService;
     private final Div cardsContainer = new Div();
-    private final Button createButton = new Button("Create Store", new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button createButton = new Button(I18n.t("keystore.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final ProgressBar loadingBar = new ProgressBar();
     private final TextField filterField = new TextField();
@@ -88,7 +83,7 @@ public class CustomKeyStoresView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("kms-custom-stores-view");
 
-        H2 header = new H2("Custom Key Stores");
+        H2 header = new H2(I18n.t("keystore.view.title"));
         header.addClassNames(LumoUtility.FontSize.XXLARGE, LumoUtility.Margin.Bottom.NONE);
         add(header);
 
@@ -107,7 +102,7 @@ public class CustomKeyStoresView extends ManagementVerticalView {
         createButton.addClickListener(e -> createCustomKeyStore());
         refreshButton.addClickListener(e -> resetPaginationAndLoad());
 
-        filterField.setPlaceholder("Filter by name or type...");
+        filterField.setPlaceholder(I18n.t("keystore.view.filter.placeholder"));
         filterField.setValueChangeMode(ValueChangeMode.LAZY);
         filterField.setValueChangeTimeout(300);
         filterField.setWidth("250px");
@@ -117,7 +112,7 @@ public class CustomKeyStoresView extends ManagementVerticalView {
         });
 
         clearFilterButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        clearFilterButton.setTooltipText("Clear filter");
+        clearFilterButton.setTooltipText(I18n.t("keystore.view.clear.filter.tooltip"));
         clearFilterButton.setEnabled(false);
         clearFilterButton.addClickListener(e -> {
             filterField.clear();
@@ -127,7 +122,7 @@ public class CustomKeyStoresView extends ManagementVerticalView {
 
         pageSizeSelect.setItems(5, 10, 20, 50);
         pageSizeSelect.setValue(10);
-        pageSizeSelect.setPlaceholder("Per page");
+        pageSizeSelect.setPlaceholder(I18n.t("keystore.view.page.per.page"));
         pageSizeSelect.addValueChangeListener(e -> {
             if (e.getValue() != null) {
                 pageSize = e.getValue();
@@ -193,14 +188,14 @@ public class CustomKeyStoresView extends ManagementVerticalView {
             applyFilter();
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            Notification.show("Failed to load stores: " + errorMsg, 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("keystore.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load custom key stores: {}", errorMsg);
             currentPageStores = new ArrayList<>();
             updatePaginationDisplay();
             showEmptyState();
         } catch (Exception e) {
-            Notification.show("Failed to load stores: " + e.getMessage(), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("keystore.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load custom key stores: {}", e.getMessage());
             currentPageStores = new ArrayList<>();
@@ -213,11 +208,11 @@ public class CustomKeyStoresView extends ManagementVerticalView {
 
     private void updatePaginationDisplay() {
         if (totalPages > 0) {
-            pageInfoLabel.setText(String.format("Page %d/%d : %d stores", currentPage, totalPages, numberOfElements));
+            pageInfoLabel.setText(I18n.t("keystore.view.page.info", currentPage, totalPages, numberOfElements));
         } else {
-            pageInfoLabel.setText(String.format("Page %d : %d stores", currentPage, numberOfElements));
+            pageInfoLabel.setText(I18n.t("keystore.view.page.info.simple", currentPage, numberOfElements));
         }
-        totalCountLabel.setText(String.format("%d stores total", totalElements));
+        totalCountLabel.setText(I18n.t("keystore.view.total.count", totalElements));
 
         prevButton.setEnabled(!previousTokens.isEmpty());
         nextButton.setEnabled(truncated && currentNextToken != null);
@@ -255,8 +250,8 @@ public class CustomKeyStoresView extends ManagementVerticalView {
         Icon emptyIcon = VaadinIcon.STORAGE.create();
         emptyIcon.setSize("48px");
         emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-        H4 emptyTitle = new H4("No custom key stores found");
-        Span emptyDesc = new Span("Click 'Create Store' to add one.");
+        H4 emptyTitle = new H4(I18n.t("keystore.view.empty.title"));
+        Span emptyDesc = new Span(I18n.t("keystore.view.empty.description"));
         emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
         emptyState.add(emptyIcon, emptyTitle, emptyDesc);
         cardsContainer.add(emptyState);
@@ -286,9 +281,9 @@ public class CustomKeyStoresView extends ManagementVerticalView {
         rightGroup.setSpacing(true);
         rightGroup.setAlignItems(FlexComponent.Alignment.END);
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText("Refresh stores");
+        refreshButton.setTooltipText(I18n.t("keystore.view.refresh.stores"));
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        createButton.setTooltipText("Create a new custom key store");
+        createButton.setTooltipText(I18n.t("keystore.view.create.tooltip"));
         rightGroup.add(refreshButton, createButton);
 
         toolbar.add(leftGroup, centerGroup, rightGroup);

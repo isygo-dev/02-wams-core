@@ -11,25 +11,20 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import eu.isygoit.ui.common.view.ManagementCompositeVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.common.RandomKeyDto;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.RandomKeyService;
+import eu.isygoit.ui.common.view.ManagementCompositeVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.cryptography.random.dialog.CreateRandomKeyDialog;
 import jakarta.annotation.security.PermitAll;
@@ -51,7 +46,7 @@ public class RandomKeyView extends ManagementCompositeVerticalView {
     private final Div cardsContainer = new Div();
     private final TextField searchField = new TextField();
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
-    private final Button createButton = new Button("Create", new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button createButton = new Button(I18n.t("random.key.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final ProgressBar loadingBar = new ProgressBar();
 
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
@@ -81,7 +76,7 @@ public class RandomKeyView extends ManagementCompositeVerticalView {
         layout.setSpacing(true);
         layout.addClassName("random-keys-view");
 
-        H2 header = new H2("Random Keys");
+        H2 header = new H2(I18n.t("random.key.title"));
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         layout.add(header);
@@ -102,12 +97,12 @@ public class RandomKeyView extends ManagementCompositeVerticalView {
             currentPage = 0;
             loadKeys();
         });
-        refreshButton.setTooltipText("Refresh random keys");
+        refreshButton.setTooltipText(I18n.t("random.key.refresh.tooltip"));
 
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         createButton.addClickListener(e -> new CreateRandomKeyDialog(keyService, this::loadKeys).open());
 
-        searchField.setPlaceholder("Search by key name");
+        searchField.setPlaceholder(I18n.t("random.key.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.addValueChangeListener(e -> {
@@ -212,7 +207,7 @@ public class RandomKeyView extends ManagementCompositeVerticalView {
                 renderCards(pageItems);
             }
         } catch (Exception e) {
-            Notification.show("Failed to load random keys: " + e.getMessage(), 5000,
+            Notification.show(I18n.t("random.key.load.error", e.getMessage()), 5000,
                             Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
@@ -222,11 +217,11 @@ public class RandomKeyView extends ManagementCompositeVerticalView {
 
     private void updatePaginationDisplay() {
         if (totalPages > 0) {
-            pageInfoLabel.setText(String.format("Page %d/%d", currentPage + 1, totalPages));
+            pageInfoLabel.setText(I18n.t("random.key.page.info", currentPage + 1, totalPages));
         } else {
-            pageInfoLabel.setText("Page 0/0");
+            pageInfoLabel.setText(I18n.t("random.key.page.info", 0, 0));
         }
-        totalCountLabel.setText(String.format("%d keys", totalElements));
+        totalCountLabel.setText(I18n.t("random.key.total.count", totalElements));
         prevButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(currentPage + 1 < totalPages);
     }
@@ -240,8 +235,8 @@ public class RandomKeyView extends ManagementCompositeVerticalView {
             Icon emptyIcon = VaadinIcon.KEY.create();
             emptyIcon.setSize("48px");
             emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-            H4 emptyTitle = new H4("No random keys found");
-            Paragraph emptyDesc = new Paragraph("Click 'Create' to generate a new random key.");
+            H4 emptyTitle = new H4(I18n.t("random.key.empty.title"));
+            Paragraph emptyDesc = new Paragraph(I18n.t("random.key.empty.description"));
             emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);

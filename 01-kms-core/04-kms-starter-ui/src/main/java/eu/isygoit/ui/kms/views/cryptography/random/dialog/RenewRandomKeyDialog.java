@@ -4,6 +4,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import eu.isygoit.enums.IEnumCharSet;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.RandomKeyService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import org.springframework.http.ResponseEntity;
@@ -18,21 +19,21 @@ public class RenewRandomKeyDialog extends PinBaseActionDialog {
     private ComboBox<IEnumCharSet.Types> charSetCombo;
 
     public RenewRandomKeyDialog(RandomKeyService keyService, String keyName, Runnable onSuccess) {
-        super("Renew Random Key",
-                "Renewing will generate a completely new random value. The old value will be lost forever.",
+        super(I18n.t("random.key.dialog.renew.title"),
+                I18n.t("random.key.dialog.renew.message"),
                 onSuccess, true);
         this.keyService = keyService;
         this.keyName = keyName;
         this.length = 32;      // default
         this.charSet = IEnumCharSet.Types.ALL;
-        setOkButtonText("Renew");
+        setOkButtonText(I18n.t("random.key.dialog.renew.button"));
         setWidth("500px");
         buildForm();
         addContent(createFormLayout());
     }
 
     private void buildForm() {
-        lengthField = new IntegerField("Length (bytes)");
+        lengthField = new IntegerField(I18n.t("random.key.dialog.field.length"));
         lengthField.setValue(length);
         lengthField.setMin(1);
         lengthField.setMax(4096);
@@ -40,7 +41,7 @@ public class RenewRandomKeyDialog extends PinBaseActionDialog {
         lengthField.setWidthFull();
         lengthField.addValueChangeListener(e -> length = e.getValue());
 
-        charSetCombo = new ComboBox<>("Character set");
+        charSetCombo = new ComboBox<>(I18n.t("random.key.dialog.field.char.set"));
         charSetCombo.setItems(IEnumCharSet.Types.values());
         charSetCombo.setValue(charSet);
         charSetCombo.setWidthFull();
@@ -57,30 +58,30 @@ public class RenewRandomKeyDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append("Invalid confirmation code");
+            append(I18n.t("random.key.dialog.renew.invalid.code"));
             return false;
         }
 
         if (length == null || length <= 0) {
-            append("Length must be positive");
+            append(I18n.t("random.key.dialog.renew.length.required"));
             return false;
         }
         if (charSet == null) {
-            append("Character set is required");
+            append(I18n.t("random.key.dialog.renew.char.set.required"));
             return false;
         }
 
         try {
             ResponseEntity<String> response = keyService.renewRandomKey(keyName, length, charSet);
             if (response.getStatusCode().is2xxSuccessful()) {
-                append("Key renewed");
+                append(I18n.t("random.key.dialog.renew.success"));
                 return true;
             } else {
-                append("Renew failed: " + response.getStatusCode());
+                append(I18n.t("random.key.dialog.renew.failed", response.getStatusCode()));
                 return false;
             }
         } catch (Exception e) {
-            append("Renew failed: " + e.getMessage());
+            append(I18n.t("random.key.dialog.renew.failed", e.getMessage()));
             return false;
         }
     }

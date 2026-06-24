@@ -6,13 +6,13 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.KmsDtos.KeyPolicy;
 import eu.isygoit.enums.IKmsActionType;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 
 import java.util.*;
@@ -26,12 +26,12 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
     private final String aliasArnPlaceholder = "wrn:wams:kms:us-east-1:123456789012:alias/";
 
     // Form fields
-    private final TextField sidField = new TextField("SID (Statement ID)");
-    private final ComboBox<String> effectCombo = new ComboBox<>("Effect");
-    private final TextField principalField = new TextField("Principal");
-    private final TextArea actionsArea = new TextArea("Actions");
-    private final TextArea resourcesArea = new TextArea("Resources");
-    private final TextArea conditionArea = new TextArea("Condition (JSON)");
+    private final TextField sidField = new TextField(I18n.t("policy.statement.field.sid"));
+    private final ComboBox<String> effectCombo = new ComboBox<>(I18n.t("policy.statement.field.effect"));
+    private final TextField principalField = new TextField(I18n.t("policy.statement.field.principal"));
+    private final TextArea actionsArea = new TextArea(I18n.t("policy.statement.field.actions"));
+    private final TextArea resourcesArea = new TextArea(I18n.t("policy.statement.field.resources"));
+    private final TextArea conditionArea = new TextArea(I18n.t("policy.statement.field.condition"));
     private final Span resourcesPreview = new Span();
 
     // Shortcut buttons
@@ -41,12 +41,12 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
     private final KeyPolicy.Statement statement;
 
     public PolicyStatementEditorDialog(ObjectMapper objectMapper, KeyPolicy.Statement existing, Consumer<KeyPolicy.Statement> onDone) {
-        super(existing == null ? "Add Statement" : "Edit Statement", null);
+        super(existing == null ? I18n.t("policy.statement.dialog.add.title") : I18n.t("policy.statement.dialog.edit.title"), null);
         this.objectMapper = objectMapper;
         this.onDone = onDone;
         this.statement = (existing != null) ? deepCopyStatement(existing) : createEmptyStatement();
 
-        setOkButtonText("Save Statement");
+        setOkButtonText(I18n.t("policy.statement.dialog.save"));
         setWidth("850px");
         setMaxWidth("95%");
         setResizable(true);
@@ -89,18 +89,18 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
         layout.setWidthFull();
 
         sidField.setWidthFull();
-        sidField.setHelperText("Optional unique identifier (e.g., 'AllowKeyAdmin')");
+        sidField.setHelperText(I18n.t("policy.statement.field.sid.helper"));
 
         effectCombo.setItems("Allow", "Deny");
         effectCombo.setWidthFull();
 
         principalField.setWidthFull();
-        principalField.setHelperText("Examples: '*' (everyone), 'wrn:wams:iam::123456789012:root', or JSON like {\"WAMS\": \"wrn:wams:iam::123456789012:role/MyRole\"}");
+        principalField.setHelperText(I18n.t("policy.statement.field.principal.helper"));
 
         // ---- Actions section with shortcuts ----
         actionsArea.setWidthFull();
         actionsArea.setHeight("120px");
-        actionsArea.setHelperText("Enter actions separated by new lines or commas. Click shortcuts to add.");
+        actionsArea.setHelperText(I18n.t("policy.statement.field.actions.helper"));
 
         List<IKmsActionType.Types> importantActions = Arrays.asList(
                 IKmsActionType.Types.ENCRYPT,
@@ -125,7 +125,7 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
             btn.addClickListener(e -> addToActionsArea("kms:" + actionMeaning));
             actionShortcuts.add(btn);
         }
-        Button allActionsBtn = new Button("All (kms:*)");
+        Button allActionsBtn = new Button(I18n.t("policy.statement.shortcut.all.actions"));
         allActionsBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_SUCCESS);
         allActionsBtn.addClickListener(e -> actionsArea.setValue("kms:*"));
         actionShortcuts.add(allActionsBtn);
@@ -133,45 +133,45 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
         // ---- Resources section with shortcuts ----
         resourcesArea.setWidthFull();
         resourcesArea.setHeight("120px");
-        resourcesArea.setHelperText("Enter resource ARNs one per line or separated by commas. Use '*' for all resources.");
+        resourcesArea.setHelperText(I18n.t("policy.statement.field.resources.helper"));
 
         resourceShortcuts.setWidthFull();
         resourceShortcuts.setSpacing(true);
         resourceShortcuts.getStyle().set("flex-wrap", "wrap");
 
-        Button allResourcesBtn = new Button("All resources (*)");
+        Button allResourcesBtn = new Button(I18n.t("policy.statement.shortcut.all.resources"));
         allResourcesBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
         allResourcesBtn.addClickListener(e -> addToResourcesArea("*"));
         resourceShortcuts.add(allResourcesBtn);
 
-        Button keyArnBtn = new Button("Key WRN");
+        Button keyArnBtn = new Button(I18n.t("policy.statement.shortcut.key.wrn"));
         keyArnBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
         keyArnBtn.addClickListener(e -> addToResourcesArea(keyArnPlaceholder + "<key-id>"));
         resourceShortcuts.add(keyArnBtn);
 
-        Button aliasArnBtn = new Button("Alias WRN");
+        Button aliasArnBtn = new Button(I18n.t("policy.statement.shortcut.alias.wrn"));
         aliasArnBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
         aliasArnBtn.addClickListener(e -> addToResourcesArea(aliasArnPlaceholder + "<alias-name>"));
         resourceShortcuts.add(aliasArnBtn);
 
-        Button accountRootBtn = new Button("Account root");
+        Button accountRootBtn = new Button(I18n.t("policy.statement.shortcut.account.root"));
         accountRootBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
         accountRootBtn.addClickListener(e -> addToResourcesArea("wrn:wams:iam::*:root"));
         resourceShortcuts.add(accountRootBtn);
 
         resourcesPreview.getStyle().set("font-family", "monospace").set("font-size", "small");
         resourcesPreview.getStyle().set("color", "var(--lumo-secondary-text-color)");
-        resourcesPreview.setText("→ Will be stored as: [\"*\"]");
+        resourcesPreview.setText(I18n.t("policy.statement.preview.stored.as", "[\"*\"]"));
         resourcesArea.addValueChangeListener(e -> updatePreview());
 
         conditionArea.setWidthFull();
         conditionArea.setHeight("120px");
-        conditionArea.setHelperText("Optional JSON condition. Example:\n{\n  \"Bool\": {\n    \"wams:MultiFactorAuthPresent\": \"true\"\n  }\n}");
+        conditionArea.setHelperText(I18n.t("policy.statement.field.condition.helper"));
 
         layout.add(sidField, effectCombo, principalField,
-                new Span("Actions"), actionsArea, actionShortcuts,
-                new Span("Resources"), resourcesArea, resourceShortcuts, resourcesPreview,
-                new Span("Condition"), conditionArea);
+                new Span(I18n.t("policy.statement.field.actions")), actionsArea, actionShortcuts,
+                new Span(I18n.t("policy.statement.field.resources")), resourcesArea, resourceShortcuts, resourcesPreview,
+                new Span(I18n.t("policy.statement.field.condition")), conditionArea);
         add(layout);
     }
 
@@ -196,16 +196,16 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
     private void updatePreview() {
         String text = resourcesArea.getValue();
         if (text == null || text.trim().isEmpty()) {
-            resourcesPreview.setText("→ Will be stored as: [\"*\"]");
+            resourcesPreview.setText(I18n.t("policy.statement.preview.stored.as", "[\"*\"]"));
             return;
         }
         List<String> items = new ArrayList<>(parseMultilineOrComma(text));
         if (items.isEmpty()) items = new ArrayList<>(Collections.singletonList("*"));
         try {
             String json = objectMapper.writeValueAsString(items);
-            resourcesPreview.setText("→ Will be stored as: " + json);
+            resourcesPreview.setText(I18n.t("policy.statement.preview.stored.as", json));
         } catch (JsonProcessingException e) {
-            resourcesPreview.setText("→ Invalid format");
+            resourcesPreview.setText(I18n.t("policy.statement.preview.invalid.format"));
         }
     }
 
@@ -275,7 +275,7 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
 
         String sid = sidField.getValue().trim();
         if (sid.isEmpty()) {
-            sid = "stmt-" + UUID.randomUUID();
+            sid = I18n.t("policy.statement.sid.empty") + UUID.randomUUID();
         }
         builder.sid(sid);
         builder.effect(effectCombo.getValue());
@@ -288,7 +288,7 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
                 Map<String, Object> principalMap = objectMapper.readValue(principalStr, Map.class);
                 builder.principal(principalMap);
             } catch (Exception e) {
-                append("Invalid Principal JSON: " + e.getMessage());
+                append(I18n.t("policy.statement.invalid.principal.json", e.getMessage()));
                 return false;
             }
         } else {
@@ -297,7 +297,7 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
 
         // Actions
         String actionsText = actionsArea.getValue().trim();
-        if (actionsText.isEmpty()) actionsText = "kms:*";
+        if (actionsText.isEmpty()) actionsText = I18n.t("policy.statement.action.default");
         List<String> actions;
         if (actionsText.contains("\n")) {
             actions = new ArrayList<>(Arrays.asList(actionsText.split("\\r?\\n")));
@@ -315,7 +315,7 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
 
         // Resources
         String resourcesText = resourcesArea.getValue().trim();
-        if (resourcesText.isEmpty()) resourcesText = "*";
+        if (resourcesText.isEmpty()) resourcesText = I18n.t("policy.statement.resource.default");
         List<String> resources = new ArrayList<>(parseMultilineOrComma(resourcesText));
         if (resources.isEmpty()) resources = new ArrayList<>(Collections.singletonList("*"));
         resources.replaceAll(String::trim);
@@ -333,7 +333,7 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
                 Map<String, Map<String, String>> conditionMap = objectMapper.readValue(conditionText, Map.class);
                 builder.condition(conditionMap);
             } catch (Exception e) {
-                append("Invalid Condition JSON: " + e.getMessage());
+                append(I18n.t("policy.statement.invalid.condition.json", e.getMessage()));
                 return false;
             }
         } else {

@@ -5,6 +5,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.enums.IEnumCharSet;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.RandomKeyService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import org.springframework.http.ResponseEntity;
@@ -19,35 +20,35 @@ public class CreateRandomKeyDialog extends BaseActionDialog {
     private ComboBox<IEnumCharSet.Types> charSetCombo;
 
     public CreateRandomKeyDialog(RandomKeyService keyService, Runnable onSuccess) {
-        super("Create Random Key", onSuccess);
+        super(I18n.t("random.key.dialog.create.title"), onSuccess);
         this.keyService = keyService;
         this.onSuccess = onSuccess;
-        setOkButtonText("Create");
+        setOkButtonText(I18n.t("random.key.dialog.create.button"));
         setWidth("550px");
         buildForm();
         addContent(createFormLayout());
     }
 
     private void buildForm() {
-        nameField = new TextField("Key name");
+        nameField = new TextField(I18n.t("random.key.dialog.field.name"));
         nameField.setRequired(true);
         nameField.setRequiredIndicatorVisible(true);
-        nameField.setPlaceholder("e.g., my-api-secret");
+        nameField.setPlaceholder(I18n.t("random.key.dialog.field.name.placeholder"));
         nameField.setWidthFull();
 
-        lengthField = new IntegerField("Length (bytes)");
+        lengthField = new IntegerField(I18n.t("random.key.dialog.field.length"));
         lengthField.setValue(32);
         lengthField.setMin(1);
         lengthField.setMax(4096);
         lengthField.setStepButtonsVisible(true);
-        lengthField.setHelperText("Number of random bytes to generate");
+        lengthField.setHelperText(I18n.t("random.key.dialog.field.length.helper"));
         lengthField.setWidthFull();
 
-        charSetCombo = new ComboBox<>("Character set");
+        charSetCombo = new ComboBox<>(I18n.t("random.key.dialog.field.char.set"));
         charSetCombo.setItems(IEnumCharSet.Types.values());
         charSetCombo.setValue(IEnumCharSet.Types.ALL);
         charSetCombo.setRequired(true);
-        charSetCombo.setHelperText("Allowed characters for the random string");
+        charSetCombo.setHelperText(I18n.t("random.key.dialog.field.char.set.helper"));
         charSetCombo.setWidthFull();
     }
 
@@ -62,31 +63,31 @@ public class CreateRandomKeyDialog extends BaseActionDialog {
     protected boolean onOk() {
         String name = nameField.getValue();
         if (name == null || name.isBlank()) {
-            append("Key name is required");
+            append(I18n.t("random.key.dialog.field.name.required"));
             return false;
         }
         Integer length = lengthField.getValue();
         if (length == null || length <= 0) {
-            append("Length must be positive");
+            append(I18n.t("random.key.dialog.field.length.required"));
             return false;
         }
         IEnumCharSet.Types charSet = charSetCombo.getValue();
         if (charSet == null) {
-            append("Character set is required");
+            append(I18n.t("random.key.dialog.field.char.set.required"));
             return false;
         }
 
         try {
             ResponseEntity<String> response = keyService.renewRandomKey(name, length, charSet);
             if (response.getStatusCode().is2xxSuccessful()) {
-                append("Random key created");
+                append(I18n.t("random.key.dialog.create.success"));
                 return true;
             } else {
-                append("Creation failed: " + response.getStatusCode());
+                append(I18n.t("random.key.dialog.create.failed", response.getStatusCode()));
                 return false;
             }
         } catch (Exception e) {
-            append("Error: " + e.getMessage());
+            append(I18n.t("random.key.dialog.error", e.getMessage()));
             return false;
         }
     }

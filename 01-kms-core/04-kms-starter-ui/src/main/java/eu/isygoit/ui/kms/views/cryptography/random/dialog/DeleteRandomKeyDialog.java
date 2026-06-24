@@ -1,5 +1,6 @@
 package eu.isygoit.ui.kms.views.cryptography.random.dialog;
 
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.RandomKeyService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 
@@ -9,28 +10,28 @@ public class DeleteRandomKeyDialog extends PinBaseActionDialog {
     private final String keyName;
 
     public DeleteRandomKeyDialog(RandomKeyService keyService, String keyName, Runnable onSuccess) {
-        super("Delete Random Key",
-                "Deleting this random key is permanent and cannot be undone.",
+        super(I18n.t("random.key.dialog.delete.title"),
+                I18n.t("random.key.dialog.delete.message"),
                 onSuccess, true);
         this.keyService = keyService;
         this.keyName = keyName;
-        setOkButtonText("Delete");
+        setOkButtonText(I18n.t("random.key.dialog.delete.button"));
         setWidth("450px");
     }
 
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append("Invalid confirmation code");
+            append(I18n.t("random.key.dialog.delete.invalid.code"));
             return false;
         }
 
         try {
             keyService.deleteRandomKey(keyName);
-            append("Key deleted");
+            append(I18n.t("random.key.dialog.delete.success"));
             return true;
         } catch (Exception e) {
-            append("Delete failed: " + e.getMessage());
+            append(I18n.t("random.key.dialog.delete.failed", e.getMessage()));
             return false;
         }
     }

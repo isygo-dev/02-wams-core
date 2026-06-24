@@ -13,28 +13,23 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.cryptography.keyTag.dialog.AddTagDialog;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +50,7 @@ public class TagsView extends ManagementVerticalView {
     private final KmsApiService kmsApiService;
     private final ComboBox<KeyOption> keyCombo = new ComboBox<>();
     private final Grid<KmsDtos.ListResourceTagsResponse.Tag> tagsGrid = new Grid<>();
-    private final Button addTagButton = new Button("Add Tag", new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button addTagButton = new Button(I18n.t("tags.view.add.tag.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
     private final ProgressBar loadingBar = new ProgressBar();
@@ -74,7 +69,7 @@ public class TagsView extends ManagementVerticalView {
         addClassName("kms-tags-view");
 
         // Header
-        H2 header = new H2("Key Tagging");
+        H2 header = new H2(I18n.t("tags.view.title"));
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         header.addClassName(LumoUtility.Margin.Top.NONE);
@@ -87,22 +82,22 @@ public class TagsView extends ManagementVerticalView {
         // Tags grid
         tagsGrid.setWidthFull();
         tagsGrid.addColumn(KmsDtos.ListResourceTagsResponse.Tag::getTagKey)
-                .setHeader("Tag Key")
+                .setHeader(I18n.t("tags.view.grid.column.key"))
                 .setSortable(true)
                 .setResizable(true);
         tagsGrid.addColumn(KmsDtos.ListResourceTagsResponse.Tag::getTagValue)
-                .setHeader("Tag Value")
+                .setHeader(I18n.t("tags.view.grid.column.value"))
                 .setSortable(true)
                 .setResizable(true);
         tagsGrid.addComponentColumn(tag -> {
             Button deleteBtn = new Button(new Icon(VaadinIcon.TRASH));
             deleteBtn.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_TERTIARY);
-            deleteBtn.setTooltipText("Remove this tag");
+            deleteBtn.setTooltipText(I18n.t("tags.view.remove.tag"));
             deleteBtn.addClickListener(e -> confirmDeleteTag(tag));
             return deleteBtn;
-        }).setHeader("Actions").setWidth("80px").setFlexGrow(0);
+        }).setHeader(I18n.t("tags.view.grid.column.actions")).setWidth("80px").setFlexGrow(0);
         tagsGrid.setVisible(false);
-        tagsGrid.setEmptyStateText("No tags found for this key.");
+        tagsGrid.setEmptyStateText(I18n.t("tags.view.grid.empty"));
         tagsGrid.addClassName("tags-grid");
         add(tagsGrid);
         setFlexGrow(1, tagsGrid);
@@ -128,14 +123,14 @@ public class TagsView extends ManagementVerticalView {
         toolbar.addClassName("tags-toolbar");
 
         // Left group
-        Span keyLabel = new Span("KMS Key");
+        Span keyLabel = new Span(I18n.t("tags.view.key.label"));
         keyLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         keyLabel.addClassName(LumoUtility.TextColor.PRIMARY);
 
-        keyCombo.setPlaceholder("Select a KMS key...");
+        keyCombo.setPlaceholder(I18n.t("tags.view.select.key"));
         keyCombo.setItemLabelGenerator(KeyOption::getDisplayName);
         keyCombo.setWidth("250px");
-        keyCombo.setTooltipText("Choose a KMS key to view or manage its tags");
+        keyCombo.setTooltipText(I18n.t("tags.view.select.key"));
         keyCombo.addValueChangeListener(e -> {
             if (e.getValue() != null) {
                 selectedKeyId = e.getValue().getKeyId();
@@ -146,10 +141,10 @@ public class TagsView extends ManagementVerticalView {
             }
         });
 
-        searchField.setPlaceholder("Filter tags by key or value...");
+        searchField.setPlaceholder(I18n.t("tags.view.filter.placeholder"));
         searchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         searchField.setClearButtonVisible(true);
-        searchField.setTooltipText("Type to filter tags by key or value");
+        searchField.setTooltipText(I18n.t("tags.view.filter.placeholder"));
         searchField.addValueChangeListener(e -> filterTags());
 
         HorizontalLayout leftGroup = new HorizontalLayout(keyLabel, keyCombo, searchField);
@@ -164,14 +159,14 @@ public class TagsView extends ManagementVerticalView {
 
         // Right group
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText("Refresh keys and tags");
+        refreshButton.setTooltipText(I18n.t("tags.view.refresh.tooltip"));
         refreshButton.addClickListener(e -> {
             loadKeyOptions();
             if (selectedKeyId != null) loadTags();
         });
 
         addTagButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        addTagButton.setTooltipText("Add a new tag to the selected key");
+        addTagButton.setTooltipText(I18n.t("tags.view.add.tag.tooltip"));
         addTagButton.addClickListener(e -> openAddTagDialog());
 
         HorizontalLayout rightGroup = new HorizontalLayout(refreshButton, addTagButton);
@@ -259,10 +254,10 @@ public class TagsView extends ManagementVerticalView {
             }
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            showError("Failed to load keys: " + errorMsg);
+            showError(I18n.t("tags.view.load.keys.error", errorMsg));
             log.error("Failed to load keys: {}", errorMsg);
         } catch (Exception e) {
-            showError("Failed to load keys: " + e.getMessage());
+            showError(I18n.t("tags.view.load.keys.error", e.getMessage()));
             log.error("Failed to load keys: {}", e.getMessage());
         } finally {
             showLoading(false);
@@ -303,12 +298,12 @@ public class TagsView extends ManagementVerticalView {
             filterTags();
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            showError("Failed to load tags: " + errorMsg);
+            showError(I18n.t("tags.view.load.tags.error", errorMsg));
             log.error("Failed to load tags for key {}: {}", selectedKeyId, errorMsg);
             tagsGrid.setItems(new ArrayList<>());
             tagsGrid.setVisible(true);
         } catch (Exception e) {
-            showError("Failed to load tags: " + e.getMessage());
+            showError(I18n.t("tags.view.load.tags.error", e.getMessage()));
             log.error("Failed to load tags for key {}: {}", selectedKeyId, e.getMessage());
             tagsGrid.setItems(new ArrayList<>());
             tagsGrid.setVisible(true);
@@ -347,7 +342,7 @@ public class TagsView extends ManagementVerticalView {
 
     private void openAddTagDialog() {
         if (selectedKeyId == null) {
-            showWarning("Please select a key first");
+            showWarning(I18n.t("tags.view.select.key.warning"));
             return;
         }
         new AddTagDialog(kmsApiService, selectedKeyId, this::loadTags).open();
@@ -355,10 +350,10 @@ public class TagsView extends ManagementVerticalView {
 
     private void confirmDeleteTag(KmsDtos.ListResourceTagsResponse.Tag tag) {
         ConfirmDialog confirmDialog = new ConfirmDialog();
-        confirmDialog.setHeader("Remove tag");
-        confirmDialog.setText("Are you sure you want to remove the tag \"" + tag.getTagKey() + "\" from the key?");
+        confirmDialog.setHeader(I18n.t("tag.delete.confirm.title"));
+        confirmDialog.setText(I18n.t("tag.delete.confirm.message", tag.getTagKey()));
         confirmDialog.setCancelable(true);
-        confirmDialog.setConfirmText("Remove");
+        confirmDialog.setConfirmText(I18n.t("tag.delete.confirm.button"));
         confirmDialog.setConfirmButtonTheme(ButtonVariant.LUMO_ERROR.getVariantName());
         confirmDialog.addConfirmListener(event -> deleteTag(tag.getTagKey()));
         confirmDialog.open();
@@ -371,14 +366,14 @@ public class TagsView extends ManagementVerticalView {
                     .tagKeys(List.of(tagKey))
                     .build();
             kmsApiService.untagResource(selectedKeyId, request);
-            showSuccess("Tag removed");
+            showSuccess(I18n.t("tag.delete.success"));
             loadTags();
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            showError("Failed to remove tag: " + errorMsg);
+            showError(I18n.t("tag.delete.failed", errorMsg));
             log.error("Failed to remove tag from key {}: {}", selectedKeyId, errorMsg);
         } catch (Exception e) {
-            showError("Failed to remove tag: " + e.getMessage());
+            showError(I18n.t("tag.delete.failed", e.getMessage()));
             log.error("Failed to remove tag from key {}: {}", selectedKeyId, e.getMessage());
         }
     }
