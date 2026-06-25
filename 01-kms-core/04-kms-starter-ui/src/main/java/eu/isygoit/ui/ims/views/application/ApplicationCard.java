@@ -3,7 +3,6 @@ package eu.isygoit.ui.ims.views.application;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -54,17 +53,18 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
     }
 
     @Override
-    protected Component buildTitle() {
-        return new Div();
-    }
-
-    @Override
     protected String cardCssClassName() {
         return "application-card";
     }
 
     @Override
-    protected void buildHeader() {
+    protected Component buildTitle() {
+        VerticalLayout titleLayout = new VerticalLayout();
+        titleLayout.setPadding(false);
+        titleLayout.setSpacing(false);
+        titleLayout.setWidthFull();
+
+        // Row 1: image and action buttons
         HorizontalLayout row1 = new HorizontalLayout();
         row1.setWidthFull();
         row1.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
@@ -95,6 +95,7 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
         row1.add(appImage, buttonBar);
         row1.expand(buttonBar);
 
+        // Row 2: name + status chip
         HorizontalLayout row2 = new HorizontalLayout();
         row2.setAlignItems(FlexComponent.Alignment.CENTER);
         row2.setSpacing(true);
@@ -108,7 +109,8 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
         );
         row2.add(titleSpan, adminStatusChip);
 
-        add(row1, row2);
+        titleLayout.add(row1, row2);
+        return titleLayout;
     }
 
     @Override
@@ -225,11 +227,6 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
         loadApplicationImage();
     }
 
-    /**
-     * Loads the application image synchronously on the UI thread.
-     * This method is called from onCardAttach and uses getUI().ifPresent(ui -> ui.access(() -> { ... }))
-     * to ensure the UI update is performed on the correct thread.
-     */
     private void loadApplicationImage() {
         getUI().ifPresent(ui -> ui.access(() -> {
             try {
@@ -252,7 +249,6 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
             } catch (IOException e) {
                 log.error("Error reading image stream for application {}", application.getId(), e);
             }
-            // Fallback to placeholder
             appImage.setSrc(getSvgPlaceholder());
         }));
     }

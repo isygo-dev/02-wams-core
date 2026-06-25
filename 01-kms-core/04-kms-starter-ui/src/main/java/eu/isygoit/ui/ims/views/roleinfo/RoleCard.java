@@ -3,7 +3,6 @@ package eu.isygoit.ui.ims.views.roleinfo;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -37,23 +36,16 @@ public class RoleCard extends BaseCard<RoleManagementView, RoleInfoService> {
     }
 
     @Override
-    protected Component buildTitle() {
-        return new Div();
-    }
-
-    @Override
     protected String cardCssClassName() {
         return "role-card";
     }
 
     @Override
-    protected void buildHeader() {
-        HorizontalLayout headerRow = new HorizontalLayout();
-        headerRow.setWidthFull();
-        headerRow.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        headerRow.setSpacing(true);
-        headerRow.getStyle().set("flex-wrap", "wrap");
+    protected Component buildTitle() {
+        HorizontalLayout titleLayout = new HorizontalLayout();
+        titleLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        titleLayout.setSpacing(true);
+        titleLayout.getStyle().set("flex-wrap", "wrap");
 
         Span titleSpan = buildTitleSpan(role.getName(), role.getCode());
         titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
@@ -66,20 +58,8 @@ public class RoleCard extends BaseCard<RoleManagementView, RoleInfoService> {
                 .set("padding", "0.2rem 0.5rem")
                 .set("font-size", "var(--lumo-font-size-xs)");
 
-        buttonBar = new HorizontalLayout();
-        buttonBar.setSpacing(true);
-        buttonBar.setPadding(false);
-        buttonBar.getStyle().set("flex-wrap", "wrap");
-        buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        buttonBar.addClassName(cardCssClassName() + "__button-bar");
-
-        List<Button> buttons = buildActionButtons();
-        buttons.forEach(buttonBar::add);
-
-        headerRow.add(titleSpan, levelChip, buttonBar);
-        headerRow.expand(buttonBar);
-
-        add(headerRow);
+        titleLayout.add(titleSpan, levelChip);
+        return titleLayout;
     }
 
     @Override

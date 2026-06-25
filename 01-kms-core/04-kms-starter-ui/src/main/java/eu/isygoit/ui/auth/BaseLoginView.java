@@ -39,7 +39,7 @@ public abstract class BaseLoginView extends VerticalLayout implements BeforeEnte
         }
 
         if (SecurityUtils.isUserLoggedIn()) {
-            String target = redirectTarget != null ? redirectTarget : "kms";
+            String target = redirectTarget != null ? redirectTarget : "landing";
             event.forwardTo(target);
             return;
         }

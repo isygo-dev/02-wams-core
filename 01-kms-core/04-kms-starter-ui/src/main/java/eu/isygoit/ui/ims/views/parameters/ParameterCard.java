@@ -3,7 +3,6 @@ package eu.isygoit.ui.ims.views.parameters;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -37,43 +36,20 @@ public class ParameterCard extends BaseCard<ParameterManagementView, AppParamete
     }
 
     @Override
-    protected Component buildTitle() {
-        return new Div(); // not used
-    }
-
-    @Override
     protected String cardCssClassName() {
         return "parameter-card";
     }
 
     @Override
-    protected void buildHeader() {
-        // Row 1: name + value summary
-        HorizontalLayout row1 = new HorizontalLayout();
-        row1.setWidthFull();
-        row1.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        row1.setAlignItems(FlexComponent.Alignment.CENTER);
-        row1.setSpacing(true);
-        row1.getStyle().set("flex-wrap", "wrap");
+    protected Component buildTitle() {
+        HorizontalLayout titleLayout = new HorizontalLayout();
+        titleLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        titleLayout.setSpacing(true);
+        titleLayout.getStyle().set("flex-wrap", "wrap");
 
         Span titleSpan = buildTitleSpan(parameter.getName(), parameter.getValue());
-        row1.add(titleSpan);
-
-        // Action buttons
-        buttonBar = new HorizontalLayout();
-        buttonBar.setSpacing(true);
-        buttonBar.setPadding(false);
-        buttonBar.getStyle().set("flex-wrap", "wrap");
-        buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        buttonBar.addClassName(cardCssClassName() + "__button-bar");
-
-        List<Button> buttons = buildActionButtons();
-        buttons.forEach(buttonBar::add);
-
-        row1.add(buttonBar);
-        row1.expand(buttonBar);
-
-        add(row1);
+        titleLayout.add(titleSpan);
+        return titleLayout;
     }
 
     @Override

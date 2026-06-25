@@ -151,7 +151,7 @@ public class PasswordLoginView extends BaseLoginView {
 
                 String target = (redirectTarget != null && SecurityUtils.isSafeInternalPath(redirectTarget))
                         ? redirectTarget
-                        : "kms";
+                        : "landing";
                 UI.getCurrent().navigate(target);
 
                 Notification.show("Welcome " + username + "!", 2000, Notification.Position.BOTTOM_END)

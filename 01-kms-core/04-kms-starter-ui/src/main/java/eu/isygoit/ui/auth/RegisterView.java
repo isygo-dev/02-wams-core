@@ -185,7 +185,7 @@ public class RegisterView extends VerticalLayout implements BeforeEnterObserver 
                     .getQueryParameters()
                     .getSingleParameter("redirect")
                     .filter(SecurityUtils::isSafeInternalPath);
-            String target = redirectOpt.orElse("kms");
+            String target = redirectOpt.orElse("landing");
             event.forwardTo(target);
         }
         errorContainer.setVisible(false);

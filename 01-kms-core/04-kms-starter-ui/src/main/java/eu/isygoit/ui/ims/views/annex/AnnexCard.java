@@ -3,7 +3,6 @@ package eu.isygoit.ui.ims.views.annex;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -37,45 +36,25 @@ public class AnnexCard extends BaseCard<AnnexManagementView, AnnexService> {
     }
 
     @Override
-    protected Component buildTitle() {
-        return new Div(); // not used
-    }
-
-    @Override
     protected String cardCssClassName() {
         return "annex-card";
     }
 
     @Override
-    protected void buildHeader() {
-        // Row 1: title + chip (language)
-        HorizontalLayout row1 = new HorizontalLayout();
-        row1.setWidthFull();
-        row1.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        row1.setAlignItems(FlexComponent.Alignment.CENTER);
-        row1.setSpacing(true);
-        row1.getStyle().set("flex-wrap", "wrap");
+    protected Component buildTitle() {
+        HorizontalLayout titleLayout = new HorizontalLayout();
+        titleLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        titleLayout.setSpacing(true);
+        titleLayout.getStyle().set("flex-wrap", "wrap");
 
         Span titleSpan = buildTitleSpan(annex.getTableCode(), annex.getValue());
         Span langChip = buildStatusChip(
                 annex.getLanguage() != null ? annex.getLanguage().name() : I18n.t("annex.card.status.unknown"),
                 annex.getLanguage() != null ? annex.getLanguage().name() : I18n.t("annex.card.status.unknown")
         );
-        row1.add(titleSpan, langChip);
 
-        // Action buttons
-        buttonBar = new HorizontalLayout();
-        buttonBar.setSpacing(true);
-        buttonBar.setPadding(false);
-        buttonBar.getStyle().set("flex-wrap", "wrap");
-        buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        buttonBar.addClassName(cardCssClassName() + "__button-bar");
-
-        List<Button> buttons = buildActionButtons();
-        buttons.forEach(buttonBar::add);
-
-        // Add both rows
-        add(row1, buttonBar);
+        titleLayout.add(titleSpan, langChip);
+        return titleLayout;
     }
 
     @Override

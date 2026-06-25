@@ -3,7 +3,6 @@ package eu.isygoit.ui.ims.views.tenant;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -54,23 +53,18 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
     }
 
     @Override
-    protected Component buildTitle() {
-        return new Div(); // Not used because we override buildHeader()
-    }
-
-    @Override
     protected String cardCssClassName() {
         return "tenant-card";
     }
 
-    /**
-     * Override header construction to create two rows:
-     * Row 1: image + action buttons
-     * Row 2: name + status chip
-     */
     @Override
-    protected void buildHeader() {
-        // Row 1: image (left) and action buttons (right)
+    protected Component buildTitle() {
+        VerticalLayout titleLayout = new VerticalLayout();
+        titleLayout.setPadding(false);
+        titleLayout.setSpacing(false);
+        titleLayout.setWidthFull();
+
+        // Row 1: image and action buttons
         HorizontalLayout row1 = new HorizontalLayout();
         row1.setWidthFull();
         row1.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
@@ -78,7 +72,6 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
         row1.setSpacing(true);
         row1.getStyle().set("flex-wrap", "wrap");
 
-        // Image component
         tenantImage = new Image();
         tenantImage.setWidth("48px");
         tenantImage.setHeight("48px");
@@ -89,7 +82,6 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
                 .set("border", "2px solid var(--lumo-contrast-20pct)");
         tenantImage.setSrc(getSvgPlaceholder());
 
-        // Action buttons (built by the abstract method)
         buttonBar = new HorizontalLayout();
         buttonBar.setSpacing(true);
         buttonBar.setPadding(false);
@@ -101,7 +93,7 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
         buttons.forEach(buttonBar::add);
 
         row1.add(tenantImage, buttonBar);
-        row1.expand(buttonBar); // push buttons to the right
+        row1.expand(buttonBar);
 
         // Row 2: name + status chip
         HorizontalLayout row2 = new HorizontalLayout();
@@ -117,8 +109,8 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
         );
         row2.add(titleSpan, adminStatusChip);
 
-        // Add both rows to the card
-        add(row1, row2);
+        titleLayout.add(row1, row2);
+        return titleLayout;
     }
 
     @Override
@@ -165,8 +157,6 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
         }
         add(body);
     }
-
-    // ─── Helper methods (unchanged) ───────────────────────────────────────────
 
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
         HorizontalLayout row = new HorizontalLayout();
@@ -250,7 +240,7 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
                         StreamResource resource = new StreamResource("tenant_" + tenant.getId() + ".jpg",
                                 () -> new ByteArrayInputStream(imageBytes));
                         tenantImage.setSrc(resource);
-                        return; // Success, skip fallback
+                        return;
                     }
                 }
             } catch (FeignException ex) {
@@ -262,7 +252,6 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
             } catch (IOException e) {
                 log.error("Error reading image stream for tenant {}", tenant.getId(), e);
             }
-            // Fallback to placeholder if anything fails
             tenantImage.setSrc(getSvgPlaceholder());
         }));
     }

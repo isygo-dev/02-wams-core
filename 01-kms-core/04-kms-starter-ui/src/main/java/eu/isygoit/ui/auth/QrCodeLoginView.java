@@ -181,7 +181,7 @@ public class QrCodeLoginView extends BaseLoginView {
 
                 String target = (redirectTarget != null && SecurityUtils.isSafeInternalPath(redirectTarget))
                         ? redirectTarget
-                        : "kms";
+                        : "landing";
                 UI.getCurrent().navigate(target);
 
                 Notification.show("Logged in via QR code!", 2000, Notification.Position.BOTTOM_END)

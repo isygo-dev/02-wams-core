@@ -229,7 +229,7 @@ public class OtpLoginView extends BaseLoginView {
 
                 String target = (redirectTarget != null && SecurityUtils.isSafeInternalPath(redirectTarget))
                         ? redirectTarget
-                        : "kms";
+                        : "landing";
 
                 log.info("Redirecting after login to: {}", target);
                 UI.getCurrent().navigate(target);

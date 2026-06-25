@@ -22,8 +22,12 @@ public class IndexView extends Div implements BeforeEnterObserver {
                         .filter(SecurityUtils::isSafeInternalPath)
                         .orElse(null);
             }
-            String target = (redirect != null) ? redirect : "kms";
-            event.forwardTo(target);
+            if (redirect != null) {
+                event.forwardTo(redirect);
+            } else {
+                // Forward to the landing page where user can choose KMS or IMS
+                event.forwardTo("landing");
+            }
         } else {
             event.forwardTo("login");
         }

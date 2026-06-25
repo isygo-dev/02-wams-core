@@ -15,6 +15,81 @@ public final class SecurityUtils {
 
     private SecurityUtils() {}
 
+    /**
+     * Logs out the current user by invalidating the session and clearing all session attributes.
+     * This method should be called before redirecting to the login page.
+     */
+    public static void logout() {
+        try {
+            // 1. Clear VaadinSession attributes
+            VaadinSession vaadinSession = VaadinSession.getCurrent();
+            if (vaadinSession != null) {
+                // Clear known attributes
+                vaadinSession.setAttribute("user", null);
+                vaadinSession.setAttribute("accessToken", null);
+                vaadinSession.setAttribute("refreshToken", null);
+                vaadinSession.setAttribute("tenant", null);
+                vaadinSession.setAttribute("roles", null);
+
+                // Remove any redirect that might be stored
+                vaadinSession.setAttribute(REDIRECT_SESSION_KEY, null);
+
+                log.info("🔐 Cleared VaadinSession attributes (id={})",
+                        vaadinSession.getSession() != null ? vaadinSession.getSession().getId() : "unknown");
+            }
+
+            // 2. Invalidate HttpSession
+            try {
+                var req = VaadinServletRequest.getCurrent();
+                if (req != null) {
+                    HttpSession httpSession = req.getSession(false);
+                    if (httpSession != null) {
+                        httpSession.invalidate();
+                        log.info("🔐 Invalidated HttpSession (id={})", httpSession.getId());
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Could not invalidate HttpSession", e);
+            }
+
+            // 3. Close VaadinSession
+            if (vaadinSession != null) {
+                try {
+                    vaadinSession.close();
+                    log.info("🔐 Closed VaadinSession");
+                } catch (Exception e) {
+                    log.warn("Could not close VaadinSession", e);
+                }
+            }
+
+            log.info("🔐 User logged out successfully");
+
+        } catch (Exception e) {
+            log.error("❌ Error during logout", e);
+            // Try to force cleanup even if something fails
+            forceCleanup();
+        }
+    }
+
+    /**
+     * Forces cleanup of session attributes as a fallback when normal logout fails.
+     */
+    private static void forceCleanup() {
+        try {
+            VaadinSession vaadinSession = VaadinSession.getCurrent();
+            if (vaadinSession != null) {
+                vaadinSession.setAttribute("user", null);
+                vaadinSession.setAttribute("accessToken", null);
+                vaadinSession.setAttribute("refreshToken", null);
+                vaadinSession.setAttribute("tenant", null);
+                vaadinSession.setAttribute("roles", null);
+                vaadinSession.setAttribute(REDIRECT_SESSION_KEY, null);
+            }
+        } catch (Exception ignored) {
+            // Last resort - ignore
+        }
+    }
+
     public static boolean isSafeInternalPath(String path) {
         if (!StringUtils.hasText(path)) return false;
 
@@ -44,7 +119,8 @@ public final class SecurityUtils {
         VaadinSession vaadinSession = VaadinSession.getCurrent();
         if (vaadinSession != null) {
             vaadinSession.setAttribute(REDIRECT_SESSION_KEY, path);
-            log.info("🔐 Stored redirect in VaadinSession (id={}): {}", vaadinSession.getSession().getId(), path);
+            log.info("🔐 Stored redirect in VaadinSession (id={}): {}",
+                    vaadinSession.getSession() != null ? vaadinSession.getSession().getId() : "unknown", path);
             return;
         }
 
@@ -99,23 +175,65 @@ public final class SecurityUtils {
         return null;
     }
 
-    // ... keep isUserLoggedIn() as is
     public static boolean isUserLoggedIn() {
-        // (your current implementation)
         VaadinSession vaadinSession = VaadinSession.getCurrent();
         if (vaadinSession == null) return false;
 
-        WrappedSession httpSession = vaadinSession.getSession();
-        if (httpSession != null) {
-            Object user = httpSession.getAttribute("user");
-            if (user != null) {
-                if (vaadinSession.getAttribute("user") == null) {
-                    vaadinSession.setAttribute("user", user);
-                    vaadinSession.setAttribute("accessToken", httpSession.getAttribute("accessToken"));
-                }
-                return true;
-            }
+        // First check if user is in VaadinSession
+        Object user = vaadinSession.getAttribute("user");
+        if (user != null) {
+            return true;
         }
-        return vaadinSession.getAttribute("user") != null;
+
+        // If not, check HttpSession and copy to VaadinSession
+        try {
+            WrappedSession httpSession = vaadinSession.getSession();
+            if (httpSession != null) {
+                Object httpUser = httpSession.getAttribute("user");
+                if (httpUser != null) {
+                    // Sync from HttpSession to VaadinSession
+                    vaadinSession.setAttribute("user", httpUser);
+                    vaadinSession.setAttribute("accessToken", httpSession.getAttribute("accessToken"));
+                    vaadinSession.setAttribute("refreshToken", httpSession.getAttribute("refreshToken"));
+                    vaadinSession.setAttribute("tenant", httpSession.getAttribute("tenant"));
+                    vaadinSession.setAttribute("roles", httpSession.getAttribute("roles"));
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Error checking HttpSession for user", e);
+        }
+
+        return false;
+    }
+
+    /**
+     * Gets the current logged-in user from the session.
+     * @return the user object, or null if not logged in
+     */
+    public static Object getCurrentUser() {
+        VaadinSession vaadinSession = VaadinSession.getCurrent();
+        if (vaadinSession == null) return null;
+        return vaadinSession.getAttribute("user");
+    }
+
+    /**
+     * Gets the current access token from the session.
+     * @return the access token, or null if not available
+     */
+    public static String getAccessToken() {
+        VaadinSession vaadinSession = VaadinSession.getCurrent();
+        if (vaadinSession == null) return null;
+        return (String) vaadinSession.getAttribute("accessToken");
+    }
+
+    /**
+     * Gets the current tenant from the session.
+     * @return the tenant, or null if not available
+     */
+    public static String getCurrentTenant() {
+        VaadinSession vaadinSession = VaadinSession.getCurrent();
+        if (vaadinSession == null) return null;
+        return (String) vaadinSession.getAttribute("tenant");
     }
 }

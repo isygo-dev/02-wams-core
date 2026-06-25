@@ -3,7 +3,6 @@ package eu.isygoit.ui.ims.views.customer;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -59,17 +58,18 @@ public class CustomerCard extends BaseCard<CustomerManagementView, CustomerServi
     }
 
     @Override
-    protected Component buildTitle() {
-        return new Div();
-    }
-
-    @Override
     protected String cardCssClassName() {
         return "customer-card";
     }
 
     @Override
-    protected void buildHeader() {
+    protected Component buildTitle() {
+        VerticalLayout titleLayout = new VerticalLayout();
+        titleLayout.setPadding(false);
+        titleLayout.setSpacing(false);
+        titleLayout.setWidthFull();
+
+        // Row 1: image and action buttons
         HorizontalLayout row1 = new HorizontalLayout();
         row1.setWidthFull();
         row1.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
@@ -100,6 +100,7 @@ public class CustomerCard extends BaseCard<CustomerManagementView, CustomerServi
         row1.add(customerImage, buttonBar);
         row1.expand(buttonBar);
 
+        // Row 2: name + status chip
         HorizontalLayout row2 = new HorizontalLayout();
         row2.setAlignItems(FlexComponent.Alignment.CENTER);
         row2.setSpacing(true);
@@ -113,7 +114,8 @@ public class CustomerCard extends BaseCard<CustomerManagementView, CustomerServi
         );
         row2.add(titleSpan, adminStatusChip);
 
-        add(row1, row2);
+        titleLayout.add(row1, row2);
+        return titleLayout;
     }
 
     @Override
@@ -255,7 +257,7 @@ public class CustomerCard extends BaseCard<CustomerManagementView, CustomerServi
                         StreamResource resource = new StreamResource("customer_" + customer.getId() + ".jpg",
                                 () -> new ByteArrayInputStream(imageBytes));
                         customerImage.setSrc(resource);
-                        return; // Success, skip fallback
+                        return;
                     }
                 }
             } catch (FeignException ex) {
@@ -267,7 +269,6 @@ public class CustomerCard extends BaseCard<CustomerManagementView, CustomerServi
             } catch (IOException e) {
                 log.error("Error reading image stream for customer {}", customer.getId(), e);
             }
-            // Fallback to placeholder
             customerImage.setSrc(getSvgPlaceholder());
         }));
     }

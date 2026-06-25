@@ -3,7 +3,6 @@ package eu.isygoit.ui.ims.views.account;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -61,19 +60,13 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
         return "account-card";
     }
 
-    // Dummy implementation – not used because we override buildHeader()
     @Override
     protected Component buildTitle() {
-        return new Div();
-    }
+        VerticalLayout titleLayout = new VerticalLayout();
+        titleLayout.setPadding(false);
+        titleLayout.setSpacing(false);
+        titleLayout.setWidthFull();
 
-    /**
-     * Custom header layout:
-     * Row 1: image (left) + action buttons (right)
-     * Row 2: full name/email + status chips (admin + system)
-     */
-    @Override
-    protected void buildHeader() {
         // Row 1: image and action buttons
         HorizontalLayout row1 = new HorizontalLayout();
         row1.setWidthFull();
@@ -103,7 +96,7 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
         buttons.forEach(buttonBar::add);
 
         row1.add(accountImage, buttonBar);
-        row1.expand(buttonBar); // push buttons to the right
+        row1.expand(buttonBar);
 
         // Row 2: name/email + status chips
         HorizontalLayout row2 = new HorizontalLayout();
@@ -124,7 +117,8 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
         );
         row2.add(titleSpan, adminStatusChip, systemStatusChip);
 
-        add(row1, row2);
+        titleLayout.add(row1, row2);
+        return titleLayout;
     }
 
     @Override
