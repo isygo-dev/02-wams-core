@@ -88,7 +88,7 @@
                 <excludes>
                     <exclude>uploads/**/*.*</exclude>
 <!--                    <exclude>camel/**/*.*</exclude>-->
-                    <exclude>template/**/*.*</exclude>
+                    <exclude>msgtemplate/**/*.*</exclude>
                 </excludes>
             </resource>
             <resource>
@@ -102,9 +102,9 @@
                 <targetPath>../camel</targetPath>
             </resource>-->
             <resource>
-                <directory>src/main/resources/template</directory>
+                <directory>src/main/resources/msgtemplate</directory>
                 <filtering>true</filtering>
-                <targetPath>../template</targetPath>
+                <targetPath>../msgtemplate</targetPath>
             </resource>
         </resources>
 

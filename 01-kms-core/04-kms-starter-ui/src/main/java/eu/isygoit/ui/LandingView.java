@@ -81,7 +81,7 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
         return main;
     }
 
-    // ─── REDESIGNED HERO TITLE WITH READABLE GRADIENT ──────────────────────
+    // ─── HERO SECTION ──────────────────────────────────────────────────────
 
     private Div buildHero() {
         Div hero = new Div();
@@ -101,12 +101,13 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
 
         hero.add(decorLeft, decorRight, decorBottomLeft, decorBottomRight);
 
-        // ── Main Title with readable gradient styling ──
+        // ── Main Title ──
         Div titleContainer = new Div();
         titleContainer.getStyle()
                 .set("position", "relative")
                 .set("display", "inline-block")
-                .set("margin-bottom", "var(--lumo-space-s)");
+                .set("margin-bottom", "var(--lumo-space-s)")
+                .set("animation", "fadeInDown 0.8s ease-out");
 
         H1 headline = new H1();
         headline.addClassName("hero-title");
@@ -120,13 +121,10 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("z-index", "1")
                 .set("color", "var(--lumo-header-text-color)");
 
-        // Build the title with readable gradient parts
         Text manageText = new Text("IsyGo Platform");
-
-
         headline.add(manageText);
 
-        // ── Subtle glow effect behind text ──
+        // ── Glow effect ──
         Div glowEffect = new Div();
         glowEffect.addClassName("text-glow");
         glowEffect.getStyle()
@@ -141,12 +139,13 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("opacity", "0.4")
                 .set("pointer-events", "none")
                 .set("z-index", "0")
-                .set("border-radius", "50%");
+                .set("border-radius", "50%")
+                .set("animation", "glowPulse 3s ease-in-out infinite");
 
         titleContainer.add(glowEffect);
         titleContainer.getElement().appendChild(headline.getElement());
 
-        // ── Decorative underline with gradient ──
+        // ── Underline ──
         Div underline = new Div();
         underline.addClassName("hero-underline");
         underline.getStyle()
@@ -155,9 +154,9 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("background", "linear-gradient(90deg, #4f46e5, #7c3aed, #059669, #10b981)")
                 .set("border-radius", "var(--lumo-border-radius-s)")
                 .set("margin", "var(--lumo-space-s) auto 0")
-                .set("position", "relative");
+                .set("position", "relative")
+                .set("animation", "slideIn 0.8s ease-out 0.3s both");
 
-        // Glow effect on underline
         Div glow = new Div();
         glow.getStyle()
                 .set("position", "absolute")
@@ -171,18 +170,20 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("border-radius", "var(--lumo-border-radius-s)");
         underline.add(glow);
 
-        // ── Subtitle with icon ──
+        // ── Subtitle ──
         HorizontalLayout subtitleLayout = new HorizontalLayout();
         subtitleLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         subtitleLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         subtitleLayout.setSpacing(true);
         subtitleLayout.getStyle()
                 .set("margin-top", "var(--lumo-space-m)")
-                .set("gap", "var(--lumo-space-s)");
+                .set("gap", "var(--lumo-space-s)")
+                .set("animation", "fadeInUp 0.8s ease-out 0.5s both");
 
         Icon arrowIcon = VaadinIcon.ARROW_DOWN.create();
         arrowIcon.setSize("20px");
         arrowIcon.setColor("var(--lumo-secondary-text-color)");
+        arrowIcon.getStyle().set("animation", "bounce 2s ease-in-out infinite");
 
         Paragraph subtitle = new Paragraph(I18n.t("landing.subtitle"));
         subtitle.addClassName(LumoUtility.TextColor.SECONDARY);
@@ -215,7 +216,6 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
 
         decor.add(decorIcon);
 
-        // Position with media query awareness
         decor.getStyle()
                 .set("left", offsetX)
                 .set("top", offsetY)
@@ -224,7 +224,7 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
         return decor;
     }
 
-    // ─── CARDS ──────────────────────────────────────────────────────────────
+    // ─── CARDS WITH ANIMATIONS ─────────────────────────────────────────────
 
     private HorizontalLayout buildCardsContainer() {
         HorizontalLayout container = new HorizontalLayout();
@@ -238,7 +238,8 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("width", "100%")
                 .set("justify-content", "center");
 
-        container.add(createCard(
+        // KMS Card with animation delay
+        Div kmsCard = createCard(
                 "KMS",
                 VaadinIcon.KEY,
                 I18n.t("landing.kms.title"),
@@ -251,9 +252,11 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 },
                 "kms",
                 ButtonVariant.LUMO_PRIMARY
-        ));
+        );
+        kmsCard.getStyle().set("animation", "cardFadeIn 0.6s ease-out 0.2s both");
 
-        container.add(createCard(
+        // IMS Card with animation delay
+        Div imsCard = createCard(
                 "IMS",
                 VaadinIcon.USERS,
                 I18n.t("landing.ims.title"),
@@ -266,7 +269,10 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 },
                 "ims",
                 ButtonVariant.LUMO_SUCCESS
-        ));
+        );
+        imsCard.getStyle().set("animation", "cardFadeIn 0.6s ease-out 0.4s both");
+
+        container.add(kmsCard, imsCard);
 
         return container;
     }
@@ -288,14 +294,16 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("border", "1px solid var(--lumo-contrast-10pct)")
                 .set("cursor", "pointer")
                 .set("position", "relative")
-                .set("overflow", "hidden");
-
-        // Glass morphism effect
-        card.getStyle()
+                .set("overflow", "hidden")
                 .set("backdrop-filter", "blur(10px)")
-                .set("-webkit-backdrop-filter", "blur(10px)");
+                .set("-webkit-backdrop-filter", "blur(10px)")
+                .set("transform", "translateY(30px)")
+                .set("opacity", "0");
 
-        // Accent color bar with gradient
+        // ── Card Animation ──
+        card.addClassName("animated-card");
+
+        // ── Accent color bar with gradient and shimmer ──
         Div accentBar = new Div();
         String accentColor = route.equals("kms")
                 ? "linear-gradient(90deg, #4f46e5, #7c3aed)"
@@ -307,18 +315,37 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("right", "0")
                 .set("height", "4px")
                 .set("background", accentColor)
-                .set("border-radius", "var(--lumo-border-radius-l) var(--lumo-border-radius-l) 0 0");
+                .set("border-radius", "var(--lumo-border-radius-l) var(--lumo-border-radius-l) 0 0")
+                .set("background-size", "200% 100%")
+                .set("animation", "shimmer 3s ease-in-out infinite");
 
         card.add(accentBar);
 
-        // Card content
+        // ── Card glow effect on hover ──
+        Div cardGlow = new Div();
+        cardGlow.addClassName("card-glow");
+        cardGlow.getStyle()
+                .set("position", "absolute")
+                .set("top", "-50%")
+                .set("left", "-50%")
+                .set("width", "200%")
+                .set("height", "200%")
+                .set("background", "radial-gradient(circle, " + (route.equals("kms") ? "rgba(79,70,229,0.03)" : "rgba(5,150,105,0.03)") + ", transparent 70%)")
+                .set("pointer-events", "none")
+                .set("transition", "all 0.6s ease")
+                .set("transform", "scale(0.8)")
+                .set("opacity", "0");
+
+        card.add(cardGlow);
+
+        // ── Card content ──
         VerticalLayout content = new VerticalLayout();
         content.setPadding(false);
         content.setSpacing(false);
         content.setAlignItems(FlexComponent.Alignment.CENTER);
         content.getStyle().set("flex", "1").set("padding-top", "var(--lumo-space-m)");
 
-        // Badge / Short name with gradient
+        // Badge / Short name
         Div badge = new Div(shortName);
         String badgeGradient = route.equals("kms")
                 ? "linear-gradient(135deg, #4f46e5, #7c3aed)"
@@ -337,14 +364,15 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("border", "1px solid " + (route.equals("kms") ? "#4f46e5" : "#059669"))
                 .set("background-color", "var(--lumo-base-color)");
 
-        // Icon with subtle glow
+        // Icon with pulse animation
         Icon cardIcon = icon.create();
         cardIcon.setSize("48px");
         String iconColor = route.equals("kms") ? "#4f46e5" : "#059669";
         cardIcon.setColor(iconColor);
         cardIcon.getStyle()
                 .set("margin-bottom", "var(--lumo-space-s)")
-                .set("filter", "drop-shadow(0 4px 8px " + (route.equals("kms") ? "rgba(79, 70, 229, 0.3)" : "rgba(5, 150, 105, 0.3)") + ")");
+                .set("filter", "drop-shadow(0 4px 8px " + (route.equals("kms") ? "rgba(79, 70, 229, 0.3)" : "rgba(5, 150, 105, 0.3)") + ")")
+                .set("animation", "iconPulse 3s ease-in-out infinite");
 
         // Title
         H2 cardTitle = new H2(title);
@@ -364,7 +392,7 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("margin", "0 0 var(--lumo-space-m)")
                 .set("line-height", "1.6");
 
-        // Features as chips with modern design
+        // Features as chips with stagger animation
         Div featuresContainer = new Div();
         featuresContainer.getStyle()
                 .set("display", "flex")
@@ -374,6 +402,7 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("margin-bottom", "var(--lumo-space-m)")
                 .set("width", "100%");
 
+        int chipDelay = 0;
         for (String feature : features) {
             Div chip = new Div(feature);
             chip.addClassName("chip");
@@ -384,23 +413,54 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                     .set("font-size", "var(--lumo-font-size-xs)")
                     .set("color", "var(--lumo-secondary-text-color)")
                     .set("border", "1px solid var(--lumo-contrast-10pct)")
-                    .set("transition", "all 0.2s ease");
+                    .set("transition", "all 0.2s ease")
+                    .set("animation", "chipFadeIn 0.4s ease-out " + (0.6 + chipDelay * 0.1) + "s both");
             featuresContainer.add(chip);
+            chipDelay++;
         }
 
-        // Enter button with modern styling
+        // Enter button
         Button enterBtn = new Button(I18n.t("landing." + route.toLowerCase() + ".button"), VaadinIcon.ARROW_RIGHT.create());
         enterBtn.addThemeVariants(buttonVariant);
         enterBtn.addClassName(LumoUtility.Width.FULL);
         enterBtn.getStyle()
                 .set("margin-top", "auto")
                 .set("font-weight", "600")
-                .set("letter-spacing", "0.02em");
+                .set("letter-spacing", "0.02em")
+                .set("transition", "all 0.3s ease")
+                .set("position", "relative")
+                .set("overflow", "hidden");
 
-        // Click on card or button navigates
-        Runnable navigate = () -> ui.navigate(route);
-        enterBtn.addClickListener(e -> navigate.run());
-        card.addClickListener(e -> navigate.run());
+        // Button hover effect - ripple
+        enterBtn.addClickListener(e -> {
+            // Navigate
+            ui.navigate(route);
+        });
+
+        // Click on card navigates
+        card.addClickListener(e -> {
+            // Add click animation
+            card.getStyle().set("transform", "scale(0.95)");
+            UI.getCurrent().getPage().executeJs(
+                    "setTimeout(() => { $0.style.transform = 'scale(1)'; }, 150)",
+                    card.getElement()
+            );
+            ui.navigate(route);
+        });
+
+        // Hover effects
+        card.addAttachListener(e -> {
+            card.getElement().executeJs(
+                    "this.addEventListener('mouseenter', function() {" +
+                            "  this.querySelector('.card-glow').style.opacity = '1';" +
+                            "  this.querySelector('.card-glow').style.transform = 'scale(1)';" +
+                            "});" +
+                            "this.addEventListener('mouseleave', function() {" +
+                            "  this.querySelector('.card-glow').style.opacity = '0';" +
+                            "  this.querySelector('.card-glow').style.transform = 'scale(0.8)';" +
+                            "});"
+            );
+        });
 
         content.add(badge, cardIcon, cardTitle, desc, featuresContainer, enterBtn);
         card.add(content);
@@ -420,7 +480,8 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("background", "transparent")
                 .set("flex-shrink", "0")
                 .set("margin-top", "var(--lumo-space-l)")
-                .set("width", "100%");
+                .set("width", "100%")
+                .set("animation", "fadeInUp 0.8s ease-out 0.8s both");
 
         Paragraph footerText = new Paragraph(I18n.t("landing.footer"));
         footerText.addClassName(LumoUtility.FontSize.XSMALL);
@@ -431,7 +492,7 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
         return footer;
     }
 
-    // ─── RESPONSIVE STYLES ──────────────────────────────────────────────────
+    // ─── RESPONSIVE STYLES WITH ANIMATIONS ─────────────────────────────────
 
     private void injectResponsiveStyles() {
         String css = """
@@ -441,63 +502,38 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                     min-height: 100vh;
                 }
 
-                /* ── Hero Section ── */
-                .hero-section {
-                    position: relative;
-                    overflow: visible;
-                }
-
-                .hero-title {
-                    display: inline-block;
-                    position: relative;
-                    z-index: 1;
-                }
-
-                /* Gradient text styles - fully readable */
-                .gradient-text-security {
-                    background: linear-gradient(135deg, #4f46e5, #7c3aed);
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                    background-clip: text;
-                    transition: all 0.3s ease;
-                }
-
-                .gradient-text-identity {
-                    background: linear-gradient(135deg, #059669, #10b981);
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                    background-clip: text;
-                    transition: all 0.3s ease;
-                }
-
-                .gradient-text-security:hover,
-                .gradient-text-identity:hover {
-                    transform: scale(1.05);
-                    filter: drop-shadow(0 0 20px rgba(79, 70, 229, 0.3));
-                }
-
-                /* Text glow effect */
-                .text-glow {
-                    animation: glowPulse 3s ease-in-out infinite;
-                }
-
-                @keyframes glowPulse {
-                    0%, 100% {
-                        opacity: 0.3;
-                        transform: translate(-50%, -50%) scale(1);
+                /* ── Keyframe Animations ── */
+                @keyframes fadeInDown {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-30px);
                     }
-                    50% {
-                        opacity: 0.6;
-                        transform: translate(-50%, -50%) scale(1.1);
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
                     }
                 }
 
-                /* Floating decorations */
-                .floating-decor {
-                    position: absolute;
-                    opacity: 0.12;
-                    pointer-events: none;
-                    animation: float 8s ease-in-out infinite;
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(30px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                @keyframes slideIn {
+                    from {
+                        width: 0;
+                        opacity: 0;
+                    }
+                    to {
+                        width: 140px;
+                        opacity: 1;
+                    }
                 }
 
                 @keyframes float {
@@ -512,6 +548,91 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                     }
                 }
 
+                @keyframes glowPulse {
+                    0%, 100% {
+                        opacity: 0.3;
+                        transform: translate(-50%, -50%) scale(1);
+                    }
+                    50% {
+                        opacity: 0.6;
+                        transform: translate(-50%, -50%) scale(1.1);
+                    }
+                }
+
+                @keyframes bounce {
+                    0%, 100% {
+                        transform: translateY(0);
+                    }
+                    50% {
+                        transform: translateY(8px);
+                    }
+                }
+
+                @keyframes shimmer {
+                    0% {
+                        background-position: -200% 0;
+                    }
+                    100% {
+                        background-position: 200% 0;
+                    }
+                }
+
+                @keyframes iconPulse {
+                    0%, 100% {
+                        transform: scale(1);
+                    }
+                    50% {
+                        transform: scale(1.08);
+                    }
+                }
+
+                @keyframes cardFadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(30px) scale(0.95);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0) scale(1);
+                    }
+                }
+
+                @keyframes chipFadeIn {
+                    from {
+                        opacity: 0;
+                        transform: scale(0.8);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: scale(1);
+                    }
+                }
+
+                /* ── Hero Section ── */
+                .hero-section {
+                    position: relative;
+                    overflow: visible;
+                }
+
+                .hero-title {
+                    display: inline-block;
+                    position: relative;
+                    z-index: 1;
+                }
+
+                /* Text glow effect */
+                .text-glow {
+                    animation: glowPulse 3s ease-in-out infinite;
+                }
+
+                /* Floating decorations */
+                .floating-decor {
+                    position: absolute;
+                    opacity: 0.12;
+                    pointer-events: none;
+                    animation: float 8s ease-in-out infinite;
+                }
+
                 .floating-decor:nth-child(2) {
                     animation-delay: 0.5s;
                 }
@@ -522,7 +643,6 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                     animation-delay: 0.8s;
                 }
 
-                /* Hero underline glow */
                 .hero-underline {
                     position: relative;
                 }
@@ -539,57 +659,64 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                     border-radius: var(--lumo-border-radius-s);
                 }
 
-                /* ── Cards Container ── */
-                .landing-view .cards-container {
+                /* ── Cards ── */
+                .cards-container {
                     gap: var(--lumo-space-l);
                 }
 
-                .landing-view .domain-card {
+                .domain-card {
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    position: relative;
+                    overflow: hidden;
                 }
 
-                .landing-view .domain-card:hover {
-                    transform: translateY(-8px);
+                .domain-card:hover {
+                    transform: translateY(-8px) !important;
                     box-shadow: var(--lumo-box-shadow-l);
                     border-color: var(--lumo-primary-color-30pct);
                 }
 
-                .landing-view .domain-card:active {
-                    transform: scale(0.98);
+                .domain-card:active {
+                    transform: scale(0.98) !important;
                 }
 
-                .landing-view .domain-card vaadin-button {
+                .domain-card vaadin-button {
                     width: 100%;
                 }
 
-                .landing-view .domain-card .chip:hover {
+                .domain-card .chip {
+                    transition: all 0.2s ease;
+                }
+
+                .domain-card .chip:hover {
                     background: var(--lumo-contrast-10pct);
                     border-color: var(--lumo-primary-color-20pct);
+                    transform: translateY(-2px);
                 }
 
                 /* ── Mobile First (default is mobile) ── */
 
                 /* Small phones */
                 @media (max-width: 480px) {
-                    .landing-view .landing-main {
+                    .landing-main {
                         padding: var(--lumo-space-m);
                     }
 
-                    .landing-view .domain-card {
-                        width: 100%;
+                    .domain-card {
+                        width: 100% !important;
                         min-height: 280px;
                         padding: var(--lumo-space-m);
                     }
 
-                    .landing-view .hero-title {
+                    .hero-title {
                         font-size: var(--lumo-font-size-xl) !important;
                     }
 
-                    .landing-view .domain-card h2 {
+                    .domain-card h2 {
                         font-size: var(--lumo-font-size-m) !important;
                     }
 
-                    .landing-view .domain-card vaadin-icon {
+                    .domain-card vaadin-icon {
                         width: 32px !important;
                         height: 32px !important;
                     }
@@ -602,27 +729,42 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                         width: 80px !important;
                     }
 
-                    .landing-view .landing-footer {
+                    .landing-footer {
                         margin-top: var(--lumo-space-m);
                     }
 
                     .text-glow {
                         display: none !important;
                     }
+
+                    .hero-section {
+                        padding: var(--lumo-space-s) 0 !important;
+                    }
+
+                    @keyframes slideIn {
+                        from {
+                            width: 0;
+                            opacity: 0;
+                        }
+                        to {
+                            width: 80px;
+                            opacity: 1;
+                        }
+                    }
                 }
 
-                /* Tablets and small desktops */
+                /* Tablets */
                 @media (min-width: 481px) and (max-width: 768px) {
-                    .landing-view .cards-container {
+                    .cards-container {
                         gap: var(--lumo-space-m);
                     }
 
-                    .landing-view .domain-card {
+                    .domain-card {
                         width: 280px;
                         min-height: 300px;
                     }
 
-                    .landing-view .hero-title {
+                    .hero-title {
                         font-size: var(--lumo-font-size-xxl) !important;
                     }
 
@@ -633,16 +775,16 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
 
                 /* Desktop */
                 @media (min-width: 769px) {
-                    .landing-view .cards-container {
+                    .cards-container {
                         gap: var(--lumo-space-xl);
                     }
 
-                    .landing-view .domain-card {
+                    .domain-card {
                         width: 340px;
                         min-height: 380px;
                     }
 
-                    .landing-view .domain-card:hover {
+                    .domain-card:hover {
                         transform: translateY(-8px) scale(1.02);
                         box-shadow: var(--lumo-box-shadow-l);
                     }
@@ -658,7 +800,7 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                         font-size: 4rem !important;
                     }
 
-                    .landing-view .domain-card {
+                    .domain-card {
                         width: 380px;
                         min-height: 400px;
                         padding: var(--lumo-space-xl);
@@ -666,14 +808,38 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 }
 
                 /* ── Accessibility ── */
-                .landing-view .domain-card:focus-visible {
+                .domain-card:focus-visible {
                     outline: 2px solid var(--lumo-primary-color);
                     outline-offset: 2px;
                 }
 
-                .landing-view vaadin-button:focus-visible {
+                vaadin-button:focus-visible {
                     outline: 2px solid var(--lumo-primary-color);
                     outline-offset: 2px;
+                }
+
+                /* Reduced motion preference */
+                @media (prefers-reduced-motion: reduce) {
+                    *,
+                    *::before,
+                    *::after {
+                        animation-duration: 0.01ms !important;
+                        animation-iteration-count: 1 !important;
+                        transition-duration: 0.01ms !important;
+                    }
+
+                    .domain-card {
+                        opacity: 1 !important;
+                        transform: none !important;
+                    }
+
+                    .domain-card:hover {
+                        transform: none !important;
+                    }
+
+                    .floating-decor {
+                        display: none !important;
+                    }
                 }
                 """;
 
