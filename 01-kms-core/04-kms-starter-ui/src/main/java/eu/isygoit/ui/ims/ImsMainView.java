@@ -152,12 +152,6 @@ public class ImsMainView extends ManagementVerticalView {
         return layout;
     }
 
-    private void updateStatValue(String elementId, String value) {
-        ui.access(() -> ui.getPage().executeJs(
-                "const el = document.getElementById($0); if(el) el.innerText = $1;", elementId, value
-        ));
-    }
-
     private void injectResponsiveStyles() {
         String css = """
                 .ims-dashboard .stat-card {
