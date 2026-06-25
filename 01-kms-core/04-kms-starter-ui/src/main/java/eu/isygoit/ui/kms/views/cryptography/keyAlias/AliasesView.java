@@ -10,24 +10,19 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.ListAliasesResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.cryptography.keyAlias.dialog.CreateAliasDialog;
 import jakarta.annotation.security.PermitAll;
@@ -47,7 +42,7 @@ public class AliasesView extends ManagementVerticalView {
 
     private final KmsApiService kmsApiService;
     private final Div cardsContainer = new Div();
-    private final Button createButton = new Button("Create alias", new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button createButton = new Button(I18n.t("aliases.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
     private final ProgressBar loadingBar = new ProgressBar();
@@ -76,7 +71,7 @@ public class AliasesView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("kms-aliases-view");
 
-        H2 header = new H2("Key Aliases");
+        H2 header = new H2(I18n.t("aliases.view.title"));
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         add(header);
@@ -94,15 +89,15 @@ public class AliasesView extends ManagementVerticalView {
         add(loadingBar);
 
         createButton.addClickListener(e -> createAlias());
-        createButton.setTooltipText("Create a new alias for a KMS key");
+        createButton.setTooltipText(I18n.t("aliases.view.create.tooltip"));
 
         refreshButton.addClickListener(e -> resetPaginationAndLoad());
-        refreshButton.setTooltipText("Refresh aliases from server");
+        refreshButton.setTooltipText(I18n.t("aliases.view.refresh.tooltip"));
 
-        searchField.setPlaceholder("Search by alias name or target key ID");
+        searchField.setPlaceholder(I18n.t("aliases.view.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
-        searchField.setTooltipText("Filter aliases by name or target key ID");
+        searchField.setTooltipText(I18n.t("aliases.view.search.tooltip"));
         searchField.addValueChangeListener(e -> {
             currentSearch = e.getValue();
             filterCards();
@@ -110,8 +105,8 @@ public class AliasesView extends ManagementVerticalView {
 
         pageSizeSelect.setItems(10, 20, 30, 40, 50);
         pageSizeSelect.setValue(10);
-        pageSizeSelect.setPlaceholder("Per page");
-        pageSizeSelect.setTooltipText("Number of aliases per page");
+        pageSizeSelect.setPlaceholder(I18n.t("aliases.view.page.per.page"));
+        pageSizeSelect.setTooltipText(I18n.t("aliases.view.page.per.page.tooltip"));
         pageSizeSelect.addValueChangeListener(e -> {
             if (e.getValue() != null) {
                 pageSize = e.getValue();
@@ -125,7 +120,7 @@ public class AliasesView extends ManagementVerticalView {
                 loadAliasesPage(prevToken);
             }
         });
-        prevButton.setTooltipText("Previous page");
+        prevButton.setTooltipText(I18n.t("aliases.view.prev.page.tooltip"));
 
         nextButton.addClickListener(e -> {
             if (truncated && currentNextToken != null) {
@@ -133,10 +128,10 @@ public class AliasesView extends ManagementVerticalView {
                 loadAliasesPage(currentNextToken);
             }
         });
-        nextButton.setTooltipText("Next page");
+        nextButton.setTooltipText(I18n.t("aliases.view.next.page.tooltip"));
 
-        pageInfoLabel.getElement().setAttribute("title", "Current page / total pages and number of aliases on this page");
-        totalCountLabel.getElement().setAttribute("title", "Total number of aliases across all pages");
+        pageInfoLabel.getElement().setAttribute("title", I18n.t("aliases.view.page.info.title"));
+        totalCountLabel.getElement().setAttribute("title", I18n.t("aliases.view.total.count.title"));
 
         injectResponsiveStyles();
         resetPaginationAndLoad();
@@ -184,7 +179,7 @@ public class AliasesView extends ManagementVerticalView {
             updatePaginationDisplay();
             filterCards();
         } catch (Exception e) {
-            Notification.show("Failed to load aliases: " + e.getMessage(), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("aliases.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             showLoading(false);
@@ -193,11 +188,11 @@ public class AliasesView extends ManagementVerticalView {
 
     private void updatePaginationDisplay() {
         if (totalPages > 0) {
-            pageInfoLabel.setText(String.format("Page %d/%d : %d aliases", currentPage, totalPages, numberOfElements));
+            pageInfoLabel.setText(I18n.t("aliases.view.page.info", currentPage, totalPages, numberOfElements));
         } else {
-            pageInfoLabel.setText(String.format("Page %d : %d aliases", currentPage, numberOfElements));
+            pageInfoLabel.setText(I18n.t("aliases.view.page.info.simple", currentPage, numberOfElements));
         }
-        totalCountLabel.setText(String.format("%d aliases found", totalElements));
+        totalCountLabel.setText(I18n.t("aliases.view.total.count", totalElements));
         prevButton.setEnabled(!previousTokens.isEmpty());
         nextButton.setEnabled(truncated && currentNextToken != null);
     }
@@ -220,8 +215,8 @@ public class AliasesView extends ManagementVerticalView {
             Icon emptyIcon = VaadinIcon.TAG.create();
             emptyIcon.setSize("48px");
             emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-            H4 emptyTitle = new H4("No aliases found");
-            Paragraph emptyDesc = new Paragraph("Create an alias to give your KMS keys friendly names.");
+            H4 emptyTitle = new H4(I18n.t("aliases.view.empty.title"));
+            Paragraph emptyDesc = new Paragraph(I18n.t("aliases.view.empty.description"));
             emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);
@@ -260,7 +255,7 @@ public class AliasesView extends ManagementVerticalView {
         rightGroup.setSpacing(true);
         rightGroup.setAlignItems(FlexComponent.Alignment.END);
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText("Refresh aliases");
+        refreshButton.setTooltipText(I18n.t("aliases.view.refresh.tooltip"));
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         rightGroup.add(refreshButton, createButton);
 
@@ -333,7 +328,7 @@ public class AliasesView extends ManagementVerticalView {
                         .collect(Collectors.toList());
             }
         } catch (Exception e) {
-            Notification.show("Could not load keys: " + e.getMessage(), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("aliases.view.load.keys.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
         return keyIds;

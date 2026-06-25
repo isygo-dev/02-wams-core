@@ -3,10 +3,10 @@ package eu.isygoit.ui.kms.views.cryptography.key.dialog;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import eu.isygoit.dto.KmsDtos;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 
 public class DisableKeyVersionDialog extends PinBaseActionDialog {
@@ -20,14 +20,14 @@ public class DisableKeyVersionDialog extends PinBaseActionDialog {
                                    String keyId,
                                    String versionId,
                                    Runnable onSuccess) {
-        super("Disable Key Version",
-                "Disabling a key version makes it unusable for cryptographic operations. This action is reversible only by enabling the version (if supported).",
+        super(I18n.t("key.dialog.disable.version.title"),
+                I18n.t("key.dialog.disable.version.message"),
                 onSuccess);
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
         this.versionId = versionId;
 
-        setOkButtonText("Disable permanently");
+        setOkButtonText(I18n.t("key.dialog.disable.version.button"));
         setWidth("450px");
     }
 
@@ -38,21 +38,21 @@ public class DisableKeyVersionDialog extends PinBaseActionDialog {
             ResponseEntity<KmsDtos.DisableKeyVersionResponse> response =
                     kmsApiService.disableKeyVersion(keyId, versionId);  // versionId maps to keyVersionId
             if (!response.getStatusCode().is2xxSuccessful()) {
-                String errorMsg = "Disable failed: " + response.getStatusCode();
+                String errorMsg = I18n.t("key.dialog.disable.version.failed", response.getStatusCode());
                 this.append(errorMsg);
 
                 return false;
             }
 
 
-            Notification.show("Key version disabled", 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("key.dialog.disable.version.success"), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             return true;
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             this.append(errorMsg);
         } catch (Exception e) {
-            String errorMsg = "Failed operation: " + e.getMessage();
+            String errorMsg = I18n.t("key.dialog.disable.version.error", e.getMessage());
             this.append(errorMsg);
         }
 

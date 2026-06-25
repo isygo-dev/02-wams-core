@@ -1,6 +1,5 @@
 package eu.isygoit.ui.kms.views.cryptography.incremental;
 
-import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -11,28 +10,23 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import eu.isygoit.ui.common.view.ManagementCompositeVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.NextCodeDto;
 import eu.isygoit.dto.common.PaginatedResponseDto;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsAppNextCodeService;
 import eu.isygoit.remote.kms.KmsIncrementalKeyService;
+import eu.isygoit.ui.common.view.ManagementCompositeVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
-import eu.isygoit.ui.kms.views.cryptography.incremental.dialog.SubscribeDialog;
+import eu.isygoit.ui.kms.views.cryptography.incremental.dialog.SubscribeNextCodeConfigDialog;
 import jakarta.annotation.security.PermitAll;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +49,7 @@ public class IncrementalKeyView extends ManagementCompositeVerticalView {
     private final Div cardsContainer = new Div();
     private final TextField searchField = new TextField();
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
-    private final Button subscribeButton = new Button("Subscribe", new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button subscribeButton = new Button(I18n.t("incremental.key.subscribe.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final ProgressBar loadingBar = new ProgressBar();
 
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
@@ -87,7 +81,7 @@ public class IncrementalKeyView extends ManagementCompositeVerticalView {
         layout.setSpacing(true);
         layout.addClassName("incremental-keys-view");
 
-        H2 header = new H2("Incremental Key Configurations");
+        H2 header = new H2(I18n.t("incremental.key.title"));
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         layout.add(header);
@@ -108,12 +102,12 @@ public class IncrementalKeyView extends ManagementCompositeVerticalView {
             currentPage = 0;
             loadNextCodes();
         });
-        refreshButton.setTooltipText("Refresh configurations");
+        refreshButton.setTooltipText(I18n.t("incremental.key.refresh.tooltip"));
 
         subscribeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         subscribeButton.addClickListener(e -> openSubscribeDialog());
 
-        searchField.setPlaceholder("Search by entity or attribute");
+        searchField.setPlaceholder(I18n.t("incremental.key.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.addValueChangeListener(e -> {
@@ -207,7 +201,7 @@ public class IncrementalKeyView extends ManagementCompositeVerticalView {
             updatePaginationDisplay();
             renderCards();
         } catch (Exception e) {
-            Notification.show("Failed to load configurations: " + e.getMessage(), 5000,
+            Notification.show(I18n.t("incremental.key.load.error", e.getMessage()), 5000,
                             Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
@@ -217,11 +211,11 @@ public class IncrementalKeyView extends ManagementCompositeVerticalView {
 
     private void updatePaginationDisplay() {
         if (totalPages > 0) {
-            pageInfoLabel.setText(String.format("Page %d/%d", currentPage + 1, totalPages));
+            pageInfoLabel.setText(I18n.t("incremental.key.page.info", currentPage + 1, totalPages));
         } else {
-            pageInfoLabel.setText("Page 0/0");
+            pageInfoLabel.setText(I18n.t("incremental.key.page.info", 0, 0));
         }
-        totalCountLabel.setText(String.format("%d configs", totalElements));
+        totalCountLabel.setText(I18n.t("incremental.key.total.count", totalElements));
         prevButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(currentPage + 1 < totalPages);
     }
@@ -235,8 +229,8 @@ public class IncrementalKeyView extends ManagementCompositeVerticalView {
             Icon emptyIcon = VaadinIcon.KEY.create();
             emptyIcon.setSize("48px");
             emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-            H4 emptyTitle = new H4("No configurations found");
-            Paragraph emptyDesc = new Paragraph("Click 'Subscribe' to create a new incremental key generator.");
+            H4 emptyTitle = new H4(I18n.t("incremental.key.empty.title"));
+            Paragraph emptyDesc = new Paragraph(I18n.t("incremental.key.empty.description"));
             emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);
@@ -272,7 +266,7 @@ public class IncrementalKeyView extends ManagementCompositeVerticalView {
                 loadNextCodes();
             }
         } catch (Exception e) {
-            Notification.show("Failed to refresh card: " + e.getMessage(), 3000,
+            Notification.show(I18n.t("incremental.key.refresh.card.error", e.getMessage()), 3000,
                             Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
@@ -281,12 +275,12 @@ public class IncrementalKeyView extends ManagementCompositeVerticalView {
     private void deleteConfig(Long id) {
         try {
             nextCodeService.delete(id);
-            Notification.show("Configuration deleted successfully", 3000,
+            Notification.show(I18n.t("incremental.key.delete.success"), 3000,
                             Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             loadNextCodes();
         } catch (Exception e) {
-            Notification.show("Delete failed: " + e.getMessage(), 5000,
+            Notification.show(I18n.t("incremental.key.delete.failed", e.getMessage()), 5000,
                             Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
@@ -301,7 +295,7 @@ public class IncrementalKeyView extends ManagementCompositeVerticalView {
     }
 
     private void openSubscribeDialog() {
-        new SubscribeDialog(nextCodeService, () -> {
+        new SubscribeNextCodeConfigDialog(nextCodeService, () -> {
             currentPage = 0;
             loadNextCodes();
         }).open();

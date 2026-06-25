@@ -12,7 +12,6 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -23,6 +22,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
 import eu.isygoit.enums.IEnumKeyStatus;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
@@ -36,7 +36,6 @@ import org.springframework.http.ResponseEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -50,7 +49,7 @@ public class KeyManagementView extends ManagementVerticalView {
     private final ObjectMapper objectMapper;
 
     private final Div cardsContainer = new Div();
-    private final Button createButton = new Button("Create key", new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button createButton = new Button(I18n.t("key.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
     private final ComboBox<KeyStatusOption> statusFilter = new ComboBox<>();
@@ -82,7 +81,7 @@ public class KeyManagementView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("kms-keys-view");
 
-        H2 header = new H2("Key Management");
+        H2 header = new H2(I18n.t("key.view.title"));
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         add(header);
@@ -100,39 +99,39 @@ public class KeyManagementView extends ManagementVerticalView {
         add(loadingBar);
 
         createButton.addClickListener(e -> openCreateKeyDialog());
-        createButton.setTooltipText("Create a new KMS key");
+        createButton.setTooltipText(I18n.t("key.view.create.tooltip"));
 
         refreshButton.addClickListener(e -> resetKeyPaginationAndLoad());
-        refreshButton.setTooltipText("Refresh keys from server");
+        refreshButton.setTooltipText(I18n.t("key.view.refresh.tooltip"));
 
-        searchField.setPlaceholder("Search by alias or key ID");
+        searchField.setPlaceholder(I18n.t("key.view.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
-        searchField.setTooltipText("Filter keys by alias or key ID");
+        searchField.setTooltipText(I18n.t("key.view.search.tooltip"));
         searchField.addValueChangeListener(e -> {
             currentSearch = e.getValue();
             resetKeyPaginationAndLoad();
         });
 
         statusFilter.setItems(
-                new KeyStatusOption("All", null),
+                new KeyStatusOption(I18n.t("key.view.status.all"), null),
                 new KeyStatusOption(IEnumKeyStatus.Types.ENABLED.meaning(), IEnumKeyStatus.Types.ENABLED),
                 new KeyStatusOption(IEnumKeyStatus.Types.DISABLED.meaning(), IEnumKeyStatus.Types.DISABLED),
                 new KeyStatusOption(IEnumKeyStatus.Types.PENDING_DELETION.meaning(), IEnumKeyStatus.Types.PENDING_DELETION)
         );
         statusFilter.setItemLabelGenerator(option -> option.label());
-        statusFilter.setValue(new KeyStatusOption("All", null));
-        statusFilter.setPlaceholder("Status");
-        statusFilter.setTooltipText("Filter by key status");
+        statusFilter.setValue(new KeyStatusOption(I18n.t("key.view.status.all"), null));
+        statusFilter.setPlaceholder(I18n.t("key.view.status.placeholder"));
+        statusFilter.setTooltipText(I18n.t("key.view.status.tooltip"));
         statusFilter.addValueChangeListener(e -> {
-            currentStatus = e.getValue().value;
+            currentStatus = e.getValue().value();
             resetKeyPaginationAndLoad();
         });
 
         pageSizeSelect.setItems(10, 20, 30, 40, 50);
         pageSizeSelect.setValue(10);
-        pageSizeSelect.setPlaceholder("Per page");
-        pageSizeSelect.setTooltipText("Number of keys per page");
+        pageSizeSelect.setPlaceholder(I18n.t("key.view.page.per.page"));
+        pageSizeSelect.setTooltipText(I18n.t("key.view.page.per.page.tooltip"));
         pageSizeSelect.addValueChangeListener(e -> {
             if (e.getValue() != null) {
                 pageSize = e.getValue();
@@ -146,7 +145,7 @@ public class KeyManagementView extends ManagementVerticalView {
                 loadKeysPage(prevToken);
             }
         });
-        prevButton.setTooltipText("Previous page");
+        prevButton.setTooltipText(I18n.t("key.view.prev.page.tooltip"));
 
         nextButton.addClickListener(e -> {
             if (truncated && currentNextToken != null) {
@@ -154,7 +153,7 @@ public class KeyManagementView extends ManagementVerticalView {
                 loadKeysPage(currentNextToken);
             }
         });
-        nextButton.setTooltipText("Next page");
+        nextButton.setTooltipText(I18n.t("key.view.next.page.tooltip"));
 
         injectResponsiveStyles();
         resetKeyPaginationAndLoad();
@@ -210,11 +209,11 @@ public class KeyManagementView extends ManagementVerticalView {
             filterCards();
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            Notification.show("Failed to load keys: " + errorMsg, 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("key.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load keys", ex.getMessage());
         } catch (Exception e) {
-            Notification.show("Failed to load keys: " + e.getMessage(), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("key.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load keys", e);
         } finally {
@@ -224,11 +223,11 @@ public class KeyManagementView extends ManagementVerticalView {
 
     private void updatePaginationDisplay() {
         if (totalPages > 0) {
-            pageInfoLabel.setText(String.format("Page %d/%d : %d keys", currentPage, totalPages, numberOfElements));
+            pageInfoLabel.setText(I18n.t("key.view.page.info", currentPage, totalPages, numberOfElements));
         } else {
-            pageInfoLabel.setText(String.format("Page %d : %d keys", currentPage, numberOfElements));
+            pageInfoLabel.setText(I18n.t("key.view.page.info.simple", currentPage, numberOfElements));
         }
-        totalCountLabel.setText(String.format("%d keys found", totalElements));
+        totalCountLabel.setText(I18n.t("key.view.total.count", totalElements));
 
         prevButton.setEnabled(!previousTokens.isEmpty());
         nextButton.setEnabled(truncated && currentNextToken != null);
@@ -258,8 +257,8 @@ public class KeyManagementView extends ManagementVerticalView {
             Icon emptyIcon = VaadinIcon.KEY.create();
             emptyIcon.setSize("48px");
             emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-            H4 emptyTitle = new H4("No keys found");
-            Paragraph emptyDesc = new Paragraph("Try adjusting your search or filter criteria.");
+            H4 emptyTitle = new H4(I18n.t("key.view.empty.title"));
+            Paragraph emptyDesc = new Paragraph(I18n.t("key.view.empty.description"));
             emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);
@@ -281,8 +280,8 @@ public class KeyManagementView extends ManagementVerticalView {
         leftGroup.setSpacing(true);
         leftGroup.setAlignItems(FlexComponent.Alignment.END);
         searchField.setWidth("200px");
-        Span statusLabel = new Span("Status: ");
-        statusLabel.getElement().setAttribute("title", "Filter by key status");
+        Span statusLabel = new Span(I18n.t("key.view.status.label"));
+        statusLabel.getElement().setAttribute("title", I18n.t("key.view.status.tooltip"));
         statusFilter.setWidth("140px");
         HorizontalLayout statusLayout = new HorizontalLayout(statusLabel, statusFilter);
         statusLayout.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -304,7 +303,7 @@ public class KeyManagementView extends ManagementVerticalView {
         rightGroup.setSpacing(true);
         rightGroup.setAlignItems(FlexComponent.Alignment.END);
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText("Refresh keys");
+        refreshButton.setTooltipText(I18n.t("key.view.refresh.tooltip"));
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         rightGroup.add(refreshButton, createButton);
 
@@ -364,32 +363,6 @@ public class KeyManagementView extends ManagementVerticalView {
 
     private void openCreateKeyDialog() {
         new CreateKeyDialog(this, kmsApiService, objectMapper, () -> resetKeyPaginationAndLoad()).open();
-    }
-
-    public void addTagRow(VerticalLayout container, List<HorizontalLayout> rows, String existingKey, String existingValue) {
-        String randomKey = (existingKey != null) ? existingKey : "tag-" + UUID.randomUUID().toString().substring(0, 8);
-        TextField keyField = new TextField();
-        keyField.setValue(randomKey);
-        keyField.setReadOnly(true);
-        keyField.setWidth("150px");
-        keyField.setTooltipText(randomKey);
-        TextField valueField = new TextField();
-        valueField.setValue(existingValue != null ? existingValue : "");
-        valueField.setPlaceholder("Tag value");
-        valueField.setWidth("250px");
-        valueField.setTooltipText(existingValue != null ? existingValue : "");
-        Button removeBtn = new Button(new Icon(VaadinIcon.TRASH));
-        removeBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR);
-        removeBtn.setTooltipText("Remove this tag");
-        HorizontalLayout row = new HorizontalLayout(keyField, valueField, removeBtn);
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.setSpacing(true);
-        rows.add(row);
-        container.add(row);
-        removeBtn.addClickListener(e -> {
-            container.remove(row);
-            rows.remove(row);
-        });
     }
 
     public record KeyStatusOption(String label, IEnumKeyStatus.Types value) {

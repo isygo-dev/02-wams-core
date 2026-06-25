@@ -8,14 +8,13 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.KmsDtos.CreateKeyRequest;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import eu.isygoit.ui.kms.views.cryptography.key.KeyManagementView;
@@ -53,21 +52,21 @@ public abstract class KeyDialogBase extends BaseActionDialog {
      */
     protected void buildCommonForm() {
         // Alias field
-        aliasField = new TextField("Alias (optional)");
-        aliasField.setPlaceholder("alias:my-key");
-        aliasField.setHelperText("Must start with 'alias:' if provided.");
+        aliasField = new TextField(I18n.t("key.dialog.base.field.alias"));
+        aliasField.setPlaceholder(I18n.t("key.dialog.base.field.alias.placeholder"));
+        aliasField.setHelperText(I18n.t("key.dialog.base.field.alias.helper"));
 
         // Description
-        descriptionField = new TextArea("Description");
+        descriptionField = new TextArea(I18n.t("key.dialog.base.field.description"));
         descriptionField.setMaxLength(500);
         descriptionField.setWidthFull();
 
         // Rotation settings
-        rotationEnabledCheckbox = new Checkbox("Enable automatic rotation");
-        rotationPeriodField = new IntegerField("Rotation period (days)");
+        rotationEnabledCheckbox = new Checkbox(I18n.t("key.dialog.base.field.rotation.enabled"));
+        rotationPeriodField = new IntegerField(I18n.t("key.dialog.base.field.rotation.period"));
         rotationPeriodField.setMin(90);
         rotationPeriodField.setMax(365);
-        rotationPeriodField.setHelperText("Default 365 days, min 90, max 365");
+        rotationPeriodField.setHelperText(I18n.t("key.dialog.base.field.rotation.period.helper"));
         rotationPeriodField.setVisible(false);
 
         rotationEnabledCheckbox.addValueChangeListener(e -> {
@@ -94,9 +93,9 @@ public abstract class KeyDialogBase extends BaseActionDialog {
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
         // Tags header with add button
-        Button addTagButton = new Button("Add tag", new Icon(VaadinIcon.PLUS));
+        Button addTagButton = new Button(I18n.t("key.dialog.base.field.add.tag"), new Icon(VaadinIcon.PLUS));
         addTagButton.addClickListener(e -> addTagRow(null, null));
-        HorizontalLayout tagsHeader = new HorizontalLayout(new Span("Tags"), addTagButton);
+        HorizontalLayout tagsHeader = new HorizontalLayout(new Span(I18n.t("key.dialog.base.field.tags")), addTagButton);
         tagsHeader.setAlignItems(FlexComponent.Alignment.BASELINE);
         tagsHeader.setSpacing(true);
         VerticalLayout tagsSection = new VerticalLayout(tagsHeader, tagsContainer);
@@ -120,7 +119,7 @@ public abstract class KeyDialogBase extends BaseActionDialog {
         keyField.setWidth("150px");
         TextField valueField = new TextField();
         valueField.setValue(existingValue != null ? existingValue : "");
-        valueField.setPlaceholder("Tag value");
+        valueField.setPlaceholder(I18n.t("key.dialog.base.field.tag.value.placeholder"));
         valueField.setWidth("250px");
         Button removeBtn = new Button(new Icon(VaadinIcon.TRASH));
         removeBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR);
@@ -160,7 +159,7 @@ public abstract class KeyDialogBase extends BaseActionDialog {
         String alias = aliasField.getValue();
         if (alias != null && !alias.isBlank()) {
             if (!alias.startsWith("alias:")) {
-                append("Alias must start with 'alias:' (e.g., alias:my-key)");
+                append(I18n.t("key.dialog.base.alias.format"));
                 return null;
             }
             return alias;

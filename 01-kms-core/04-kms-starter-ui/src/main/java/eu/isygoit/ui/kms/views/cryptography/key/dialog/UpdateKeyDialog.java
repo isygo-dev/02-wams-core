@@ -5,10 +5,10 @@ import eu.isygoit.dto.KmsDtos.CreateKeyRequest;
 import eu.isygoit.dto.KmsDtos.ListResourceTagsResponse;
 import eu.isygoit.dto.KmsDtos.UpdateKeyDescriptionRequest;
 import eu.isygoit.dto.KmsDtos.UpdateKeyDescriptionResponse;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.kms.views.cryptography.key.KeyManagementView;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
@@ -30,11 +30,11 @@ public class UpdateKeyDialog extends KeyDialogBase {
                            Boolean currentRotationEnabled,
                            Integer currentRotationPeriodInDays,
                            Runnable onSuccess) {
-        super("Edit key", parentView, kmsApiService, onSuccess);
+        super(I18n.t("key.dialog.update.title"), parentView, kmsApiService, onSuccess);
         this.objectMapper = objectMapper;
         this.keyId = keyId;
         this.currentTags = currentTags != null ? currentTags : new ArrayList<>();
-        setOkButtonText("Save");
+        setOkButtonText(I18n.t("key.dialog.update.button"));
         buildCommonForm();
         add(createCommonFormLayout());
         prefillData(currentAlias, currentDesc, currentRotationEnabled, currentRotationPeriodInDays);
@@ -89,16 +89,16 @@ public class UpdateKeyDialog extends KeyDialogBase {
 
             ResponseEntity<UpdateKeyDescriptionResponse> response = kmsApiService.updateKeyDescription(keyId, request);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append("Update failed: " + (response.getBody() != null ? response.getBody() : "unknown error"));
+                append(I18n.t("key.dialog.update.failed", (response.getBody() != null ? response.getBody() : "unknown error")));
                 return false;
             }
 
-            append("Key updated successfully");
+            append(I18n.t("key.dialog.update.success"));
             return true;
         } catch (FeignException ex) {
             append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            append("Failed operation: " + e.getMessage());
+            append(I18n.t("key.dialog.update.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

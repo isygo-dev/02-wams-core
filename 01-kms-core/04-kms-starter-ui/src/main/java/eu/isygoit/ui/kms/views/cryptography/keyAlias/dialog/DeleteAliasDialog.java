@@ -1,14 +1,12 @@
 package eu.isygoit.ui.kms.views.cryptography.keyAlias.dialog;
 
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import eu.isygoit.dto.KmsDtos.DeleteAliasResponse;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyAlias.AliasesView;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -27,16 +25,16 @@ public class DeleteAliasDialog extends PinBaseActionDialog {
                              Runnable onSuccess,
                              String aliasName,
                              Boolean primaryKey) {
-        super("Delete alias",
-                primaryKey ? "WARNING: This is the primary key alias. Deleting it may affect default key operations."
-                        : "Are you sure you want to delete alias '" + aliasName + "'?",
+        super(I18n.t("alias.dialog.delete.title"),
+                primaryKey ? I18n.t("alias.dialog.delete.primary.warning")
+                        : I18n.t("alias.dialog.delete.confirmation", aliasName),
                 onSuccess,
                 primaryKey); // only require PIN for primary key
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
         this.aliasName = aliasName;
 
-        setOkButtonText("Delete");
+        setOkButtonText(I18n.t("alias.dialog.delete.button"));
         addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
         setWidth("500px");
     }
@@ -45,7 +43,7 @@ public class DeleteAliasDialog extends PinBaseActionDialog {
     protected boolean onOk() {
         // Extra safety: validate PIN again (the base class already validated the button, but double-check)
         if (!validatePin()) {
-            append("Invalid confirmation code. Deletion aborted.");
+            append(I18n.t("alias.dialog.delete.invalid.code"));
             parentView.showLoading(false);
             return false;
         }
@@ -54,16 +52,16 @@ public class DeleteAliasDialog extends PinBaseActionDialog {
         try {
             ResponseEntity<DeleteAliasResponse> response = kmsApiService.deleteAlias(aliasName);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append("Deletion failed: " + response.getStatusCode());
+                append(I18n.t("alias.dialog.delete.failed", response.getStatusCode()));
                 return false;
             }
 
-            append("Alias deleted");
+            append(I18n.t("alias.dialog.delete.success"));
             return true;
         } catch (FeignException ex) {
             append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            append("Failed operation: " + e.getMessage());
+            append(I18n.t("alias.dialog.delete.failed.operation", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

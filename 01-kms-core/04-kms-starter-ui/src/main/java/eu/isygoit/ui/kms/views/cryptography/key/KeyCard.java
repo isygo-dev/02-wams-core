@@ -11,8 +11,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -22,6 +20,7 @@ import eu.isygoit.dto.KmsDtos.ListResourceTagsResponse;
 import eu.isygoit.enums.IEnumKeyOrigin;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.helper.DateHelper;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.kms.KmsMainView;
@@ -157,7 +156,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         updateVersionDisplay();
         String currentVer = metadata != null && metadata.getCurrentVersion() != null
                 ? metadata.getCurrentVersion() : "N/A";
-        Button copyVersionBtn = KmsMainView.createCopyButton(VaadinIcon.COPY, currentVer, "Copy current key version");
+        Button copyVersionBtn = KmsMainView.createCopyButton(VaadinIcon.COPY, currentVer, I18n.t("key.card.copy.version.tooltip"));
         copyVersionBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
 
         HorizontalLayout versionLayout = new HorizontalLayout(versionSpan, copyVersionBtn);
@@ -170,20 +169,20 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit alias, description, tags, rotation");
+        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("key.card.edit.tooltip"));
         editBtn.addClickListener(e -> updateKey());
 
-        Button describeBtn = createIconButton(VaadinIcon.INFO_CIRCLE, "View full key details");
+        Button describeBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("key.card.describe.tooltip"));
         describeBtn.addClickListener(e -> describeKey());
 
         rotationBtn = createIconButton(VaadinIcon.ROTATE_RIGHT, "");
         rotationBtn.addClickListener(e -> toggleRotation());
         updateRotationButton();
 
-        versionsBtn = createIconButton(VaadinIcon.CUBE, "View all key versions");
+        versionsBtn = createIconButton(VaadinIcon.CUBE, I18n.t("key.card.versions.tooltip"));
         versionsBtn.addClickListener(e -> showVersionsDialog());
 
-        moreBtn = createIconButton(VaadinIcon.ELLIPSIS_DOTS_V, "More actions");
+        moreBtn = createIconButton(VaadinIcon.ELLIPSIS_DOTS_V, I18n.t("key.card.more.tooltip"));
         attachContextMenu(moreBtn);
 
         return List.of(editBtn, describeBtn, rotationBtn, versionsBtn, moreBtn);
@@ -194,35 +193,35 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         bodyContainer.removeAll();
 
         // Description (with icon)
-        bodyContainer.add(createIconRow(VaadinIcon.FILE_TEXT, "Description",
-                metadata != null && metadata.getDescription() != null ? metadata.getDescription() : "No description"));
+        bodyContainer.add(createIconRow(VaadinIcon.FILE_TEXT, I18n.t("key.card.description"),
+                metadata != null && metadata.getDescription() != null ? metadata.getDescription() : I18n.t("key.card.no.description")));
 
         // Key spec & usage
-        bodyContainer.add(createIconRow(VaadinIcon.COG, "Key spec",
+        bodyContainer.add(createIconRow(VaadinIcon.COG, I18n.t("key.card.key.spec"),
                 metadata != null && metadata.getKeySpec() != null ? metadata.getKeySpec().name() : "N/A"));
-        bodyContainer.add(createIconRow(VaadinIcon.SHIELD, "Key usage",
+        bodyContainer.add(createIconRow(VaadinIcon.SHIELD, I18n.t("key.card.key.usage"),
                 metadata != null && metadata.getKeyUsage() != null ? metadata.getKeyUsage().name() : "N/A"));
 
         // Created & region
         String created = metadata != null && metadata.getCreateDate() != null
-                ? DateHelper.formatToHumanReadable(metadata.getCreateDate()) : "Unknown";
-        bodyContainer.add(createIconRow(VaadinIcon.CALENDAR, "Created", created));
-        bodyContainer.add(createIconRow(VaadinIcon.GLOBE, "Region",
-                metadata != null && Boolean.TRUE.equals(metadata.getMultiRegion()) ? "Multi-region" : "Single-region"));
+                ? DateHelper.formatToHumanReadable(metadata.getCreateDate()) : I18n.t("key.card.unknown");
+        bodyContainer.add(createIconRow(VaadinIcon.CALENDAR, I18n.t("key.card.created"), created));
+        bodyContainer.add(createIconRow(VaadinIcon.GLOBE, I18n.t("key.card.region"),
+                metadata != null && Boolean.TRUE.equals(metadata.getMultiRegion()) ? I18n.t("key.card.multi.region") : I18n.t("key.card.single.region")));
 
         // Key ID with copy
-        bodyContainer.add(createIconRowWithCopy(VaadinIcon.KEY, "Key ID", keyId, keyId));
+        bodyContainer.add(createIconRowWithCopy(VaadinIcon.KEY, I18n.t("key.card.key.id"), keyId, keyId));
 
         // Origin with color coding
         String originLabel = metadata != null && metadata.getOrigin() != null ? metadata.getOrigin().name() : "N/A";
         String originColor = getOriginColor(originLabel);
-        bodyContainer.add(createIconRowWithColor(VaadinIcon.CLOUD, "Origin", originLabel, originColor));
+        bodyContainer.add(createIconRowWithColor(VaadinIcon.CLOUD, I18n.t("key.card.origin"), originLabel, originColor));
 
         // Rotation with color coding
         String rotationLabel = metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled())
-                ? "ON (" + metadata.getRotationPeriodInDays() + " days)" : "OFF";
+                ? I18n.t("key.card.rotation.on", metadata.getRotationPeriodInDays()) : I18n.t("key.card.rotation.off");
         String rotationColor = Boolean.TRUE.equals(metadata.getRotationEnabled()) ? "var(--lumo-success-color)" : "var(--lumo-tertiary-text-color)";
-        bodyContainer.add(createIconRowWithColor(VaadinIcon.REFRESH, "Rotation", rotationLabel, rotationColor));
+        bodyContainer.add(createIconRowWithColor(VaadinIcon.REFRESH, I18n.t("key.card.rotation"), rotationLabel, rotationColor));
 
         // Deletion warning
         createDeletionWarningSpan();
@@ -267,7 +266,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
 
     private HorizontalLayout createIconRowWithCopy(VaadinIcon icon, String label, String value, String copyValue) {
         HorizontalLayout row = createIconRow(icon, label, value);
-        Button copyBtn = KmsMainView.createCopyButton(VaadinIcon.COPY, copyValue, "Copy");
+        Button copyBtn = KmsMainView.createCopyButton(VaadinIcon.COPY, copyValue, I18n.t("key.card.copy.version.tooltip"));
         copyBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
         row.add(copyBtn);
         return row;
@@ -353,15 +352,15 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
     }
 
     private String buildDeletionWarning() {
-        if (metadata == null) return "Key is scheduled for deletion";
+        if (metadata == null) return I18n.t("key.card.deletion.warning.default");
         LocalDateTime deletionDate = metadata.getDeletionDate();
         if (deletionDate != null) {
             long daysRemaining = ChronoUnit.DAYS.between(LocalDateTime.now(), deletionDate);
-            if (daysRemaining > 0) return "Key will be deleted in " + daysRemaining + " days";
-            if (daysRemaining == 0) return "Key will be deleted today";
-            return "Key deletion is overdue";
+            if (daysRemaining > 0) return I18n.t("key.card.deletion.warning.days", daysRemaining);
+            if (daysRemaining == 0) return I18n.t("key.card.deletion.warning.today");
+            return I18n.t("key.card.deletion.warning.overdue");
         }
-        return "Key is scheduled for deletion";
+        return I18n.t("key.card.deletion.warning.default");
     }
 
     // ─── Context menu ────────────────────────────────────────────────────────
@@ -387,30 +386,30 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         boolean hasRotation = metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled());
 
         // ── 1. Toggle status ──────────────────────────────────────────────────
-        String toggleLabel = isEnabled ? "Disable key" : "Enable key";
+        String toggleLabel = isEnabled ? I18n.t("key.card.menu.toggle.disable") : I18n.t("key.card.menu.toggle.enable");
         VaadinIcon toggleIcon = isEnabled ? VaadinIcon.UNLOCK : VaadinIcon.LOCK;
         MenuItem toggleItem = createMenuItem(contextMenu, toggleIcon, toggleLabel);
         toggleItem.setEnabled(!isPending);
         toggleItem.addClickListener(e -> toggleKeyStatus());
 
         // ── 2. Schedule deletion ──────────────────────────────────────────────
-        MenuItem scheduleItem = createMenuItem(contextMenu, VaadinIcon.CLOCK, "Schedule deletion");
+        MenuItem scheduleItem = createMenuItem(contextMenu, VaadinIcon.CLOCK, I18n.t("key.card.menu.schedule.delete"));
         scheduleItem.setEnabled(!isPending);
         scheduleItem.addClickListener(e -> scheduleDeletion());
 
         // ── 3. Rotate immediately ─────────────────────────────────────────────
-        MenuItem rotateItem = createMenuItem(contextMenu, VaadinIcon.REFRESH, "Rotate immediately");
+        MenuItem rotateItem = createMenuItem(contextMenu, VaadinIcon.REFRESH, I18n.t("key.card.menu.rotate.now"));
         rotateItem.setEnabled(isEnabled && hasRotation);
         rotateItem.addClickListener(e ->
                 new RotateKeyConfirmDialog(parentView, objectService, keyId, this::refresh).open());
 
         // ── 4. Cancel deletion ────────────────────────────────────────────────
-        MenuItem cancelItem = createMenuItem(contextMenu, VaadinIcon.REFRESH, "Cancel deletion");
+        MenuItem cancelItem = createMenuItem(contextMenu, VaadinIcon.REFRESH, I18n.t("key.card.menu.cancel.deletion"));
         cancelItem.setEnabled(isPending);
         cancelItem.addClickListener(e -> cancelDeletion());
 
         // ── 5. Permanently delete ─────────────────────────────────────────────
-        MenuItem deleteItem = createMenuItem(contextMenu, VaadinIcon.TRASH, "Permanently delete");
+        MenuItem deleteItem = createMenuItem(contextMenu, VaadinIcon.TRASH, I18n.t("key.card.menu.permanent.delete"));
         deleteItem.setEnabled(isPending);
         deleteItem.getStyle().set("color", "var(--lumo-error-color)");
         deleteItem.addClickListener(e -> confirmPermanentDelete());
@@ -498,8 +497,8 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
             versionCount = 0;
         }
         getUI().ifPresent(ui -> ui.access(() -> {
-            versionsBtn.setText("Ver (" + versionCount + ")");
-            versionsBtn.setTooltipText("Total key versions: " + versionCount);
+            versionsBtn.setText(I18n.t("key.card.versions.count", versionCount));
+            versionsBtn.setTooltipText(I18n.t("key.card.versions.total", versionCount));
         }));
     }
 

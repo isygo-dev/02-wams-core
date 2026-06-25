@@ -1,11 +1,11 @@
 package eu.isygoit.ui.kms.views.cryptography.key.dialog;
 
 import eu.isygoit.dto.KmsDtos;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.kms.views.cryptography.key.KeyManagementView;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 
 public class PermanentDeleteKeyDialog extends PinBaseActionDialog {
@@ -18,14 +18,14 @@ public class PermanentDeleteKeyDialog extends PinBaseActionDialog {
                                     KmsApiService kmsApiService,
                                     String keyId,
                                     Runnable onSuccess) {
-        super("Permanently delete key",
-                "This action is irreversible. The key will be permanently removed.",
+        super(I18n.t("key.dialog.permanent.title"),
+                I18n.t("key.dialog.permanent.message"),
                 onSuccess);
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
 
-        setOkButtonText("Delete permanently");
+        setOkButtonText(I18n.t("key.dialog.permanent.button"));
         addThemeVariantsOkButton(com.vaadin.flow.component.button.ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
@@ -33,7 +33,7 @@ public class PermanentDeleteKeyDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append("Invalid confirmation code");
+            append(I18n.t("key.dialog.permanent.invalid.code"));
             return false;
         }
 
@@ -41,15 +41,15 @@ public class PermanentDeleteKeyDialog extends PinBaseActionDialog {
         try {
             ResponseEntity<KmsDtos.DeleteKeyResponse> response = kmsApiService.deleteKey(keyId);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append("Deletion failed: " + (response.getBody() != null ? response.getBody().toString() : "unknown error"));
+                append(I18n.t("key.dialog.permanent.failed", (response.getBody() != null ? response.getBody().toString() : "unknown error")));
                 return false;
             }
-            append("Key permanently deleted");
+            append(I18n.t("key.dialog.permanent.success"));
             return true;
         } catch (FeignException ex) {
             append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            append("Failed operation: " + e.getMessage());
+            append(I18n.t("key.dialog.permanent.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

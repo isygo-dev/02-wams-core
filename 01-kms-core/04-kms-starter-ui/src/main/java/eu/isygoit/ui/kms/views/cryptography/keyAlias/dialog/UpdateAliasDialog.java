@@ -2,16 +2,14 @@ package eu.isygoit.ui.kms.views.cryptography.keyAlias.dialog;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
 import eu.isygoit.dto.KmsDtos.UpdateAliasRequest;
 import eu.isygoit.dto.KmsDtos.UpdateAliasResponse;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyAlias.AliasesView;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 
@@ -33,13 +31,13 @@ public class UpdateAliasDialog extends BaseActionDialog {
                              Runnable onSuccess,
                              String aliasName,
                              String currentTargetKeyId) {
-        super("Reassign alias", onSuccess);
+        super(I18n.t("alias.dialog.update.title"), onSuccess);
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
         this.aliasName = aliasName;
         this.currentTargetKeyId = currentTargetKeyId;
 
-        setOkButtonText("Update");
+        setOkButtonText(I18n.t("alias.dialog.update.button"));
         setWidth("500px");
 
         buildForm();
@@ -50,7 +48,7 @@ public class UpdateAliasDialog extends BaseActionDialog {
     protected boolean onOk() {
         String newTargetId = targetKeyCombo.getValue();
         if (newTargetId == null || newTargetId.isBlank()) {
-            append("Please select a target key");
+            append(I18n.t("alias.dialog.field.target.key.required"));
             return false;
         }
 
@@ -62,16 +60,16 @@ public class UpdateAliasDialog extends BaseActionDialog {
                     .build();
             ResponseEntity<UpdateAliasResponse> response = kmsApiService.updateAlias(aliasName, request);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append("Update failed: " + response.getStatusCode());
+                append(I18n.t("alias.dialog.update.failed", response.getStatusCode()));
                 return false;
             }
 
-            append("Alias reassigned");
+            append(I18n.t("alias.dialog.update.success"));
             return true;
         } catch (FeignException ex) {
             append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            append("Failed operation: " + e.getMessage());
+            append(I18n.t("alias.dialog.update.failed.operation", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }
@@ -80,9 +78,9 @@ public class UpdateAliasDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        targetKeyCombo = new ComboBox<>("New target KMS key");
+        targetKeyCombo = new ComboBox<>(I18n.t("alias.dialog.field.target.key"));
         targetKeyCombo.setRequiredIndicatorVisible(true);
-        targetKeyCombo.setPlaceholder("Select a key...");
+        targetKeyCombo.setPlaceholder(I18n.t("alias.dialog.field.target.key.placeholder"));
         targetKeyCombo.setItems(parentView.fetchKeyIds());
         targetKeyCombo.setItemLabelGenerator(keyId -> {
             try {

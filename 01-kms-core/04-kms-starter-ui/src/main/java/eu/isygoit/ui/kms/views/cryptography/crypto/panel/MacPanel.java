@@ -6,7 +6,6 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -14,11 +13,11 @@ import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.enums.IEnumMacAlgorithm;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.mapper.AlgorithmMapper;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.kms.views.cryptography.crypto.CryptoPanelUtils;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
@@ -62,12 +61,12 @@ public class MacPanel extends VerticalLayout {
         macArea = new TextArea();
         macArea.setHeight("100px");
 
-        macAlgoCombo = new ComboBox<>("MAC Algorithm");
+        macAlgoCombo = new ComboBox<>(I18n.t("crypto.mac.algorithm"));
         macAlgoCombo.setEnabled(false);
-        macAlgoCombo.setPlaceholder("Select an HMAC key");
+        macAlgoCombo.setPlaceholder(I18n.t("crypto.mac.hmac.key.placeholder"));
 
-        Button generateBtn = new Button("Generate MAC", new Icon(VaadinIcon.SIGNAL));
-        Button verifyBtn = new Button("Verify MAC", new Icon(VaadinIcon.CHECK));
+        Button generateBtn = new Button(I18n.t("crypto.mac.generate.button"), new Icon(VaadinIcon.SIGNAL));
+        Button verifyBtn = new Button(I18n.t("crypto.mac.verify.button"), new Icon(VaadinIcon.CHECK));
         generateBtn.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_PRIMARY);
         verifyBtn.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_SUCCESS);
 
@@ -78,8 +77,8 @@ public class MacPanel extends VerticalLayout {
         generateBtn.addClickListener(e -> generateMac());
         verifyBtn.addClickListener(e -> verifyMac());
 
-        add(CryptoPanelUtils.createLabelledTextArea("Message (UTF-8)", messageArea),
-                CryptoPanelUtils.createLabelledTextArea("MAC (Base64)", macArea),
+        add(CryptoPanelUtils.createLabelledTextArea(I18n.t("crypto.mac.message"), messageArea),
+                CryptoPanelUtils.createLabelledTextArea(I18n.t("crypto.mac.mac"), macArea),
                 macAlgoCombo, buttonRow);
     }
 
@@ -91,7 +90,7 @@ public class MacPanel extends VerticalLayout {
         macAlgoCombo.clear();
         if (keyUsage == null || keySpec == null || keyUsage != IEnumKeyUsage.Types.GENERATE_VERIFY_MAC) {
             macAlgoCombo.setEnabled(false);
-            macAlgoCombo.setPlaceholder("Select an HMAC key to enable MAC operations");
+            macAlgoCombo.setPlaceholder(I18n.t("crypto.mac.hmac.key.placeholder"));
             return;
         }
         List<String> algorithms = AlgorithmMapper.keySpecToMacAlgo(keySpec).stream()
@@ -99,7 +98,7 @@ public class MacPanel extends VerticalLayout {
                 .collect(Collectors.toList());
         if (algorithms.isEmpty()) {
             macAlgoCombo.setEnabled(false);
-            macAlgoCombo.setPlaceholder("No compatible MAC algorithm for this key");
+            macAlgoCombo.setPlaceholder(I18n.t("crypto.mac.no.algorithm"));
             return;
         }
         macAlgoCombo.setItems(algorithms);
@@ -116,22 +115,22 @@ public class MacPanel extends VerticalLayout {
     private void generateMac() {
         String keyId = keyIdSupplier.get();
         if (keyId == null) {
-            notifyWarning("Select a key first");
+            notifyWarning(I18n.t("crypto.mac.select.key.first"));
             return;
         }
         IEnumKeyUsage.Types keyUsage = keyUsageSupplier.get();
         if (keyUsage != IEnumKeyUsage.Types.GENERATE_VERIFY_MAC) {
-            notifyWarning("Selected key does not support MAC operations");
+            notifyWarning(I18n.t("crypto.mac.key.not.supported"));
             return;
         }
         String algo = macAlgoCombo.getValue();
         if (algo == null) {
-            notifyWarning("No compatible MAC algorithm for this key");
+            notifyWarning(I18n.t("crypto.mac.no.algorithm"));
             return;
         }
         String message = messageArea.getValue();
         if (!StringUtils.hasText(message)) {
-            notifyWarning("Message is required");
+            notifyWarning(I18n.t("crypto.mac.message.required"));
             return;
         }
         try {
@@ -144,32 +143,32 @@ public class MacPanel extends VerticalLayout {
             ResponseEntity<KmsDtos.GenerateMacResponse> response = kmsApiService.generateMac(request);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 macArea.setValue(response.getBody().getMac());
-                notifySuccess("MAC generated");
+                notifySuccess(I18n.t("crypto.mac.generated"));
             } else {
-                notifyError("MAC generation failed");
+                notifyError(I18n.t("crypto.mac.generate.failed"));
             }
         } catch (FeignException ex) {
-            notifyError("MAC generation error: " + ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage()));
+            notifyError(I18n.t("crypto.mac.generate.error", ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage())));
         } catch (Exception ex) {
-            notifyError("MAC generation error: " + ex.getMessage());
+            notifyError(I18n.t("crypto.mac.generate.error", ex.getMessage()));
         }
     }
 
     private void verifyMac() {
         String keyId = keyIdSupplier.get();
         if (keyId == null) {
-            notifyWarning("Select a key first");
+            notifyWarning(I18n.t("crypto.mac.select.key.first"));
             return;
         }
         String message = messageArea.getValue();
         String mac = macArea.getValue();
         if (!StringUtils.hasText(message) || !StringUtils.hasText(mac)) {
-            notifyWarning("Both message and MAC are required");
+            notifyWarning(I18n.t("crypto.mac.both.required"));
             return;
         }
         String algo = macAlgoCombo.getValue();
         if (algo == null) {
-            notifyWarning("No MAC algorithm selected");
+            notifyWarning(I18n.t("crypto.mac.no.algorithm.selected"));
             return;
         }
         try {
@@ -183,17 +182,17 @@ public class MacPanel extends VerticalLayout {
             ResponseEntity<KmsDtos.VerifyMacResponse> response = kmsApiService.verifyMac(request);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 if (response.getBody().getMacValid()) {
-                    notifySuccess("MAC is valid");
+                    notifySuccess(I18n.t("crypto.mac.valid"));
                 } else {
-                    notifyError("MAC is invalid");
+                    notifyError(I18n.t("crypto.mac.invalid"));
                 }
             } else {
-                notifyError("MAC verification failed");
+                notifyError(I18n.t("crypto.mac.verify.failed"));
             }
         } catch (FeignException ex) {
-            notifyError("MAC verification error: " + ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage()));
+            notifyError(I18n.t("crypto.mac.verify.error", ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage())));
         } catch (Exception ex) {
-            notifyError("MAC verification error: " + ex.getMessage());
+            notifyError(I18n.t("crypto.mac.verify.error", ex.getMessage()));
         }
     }
 

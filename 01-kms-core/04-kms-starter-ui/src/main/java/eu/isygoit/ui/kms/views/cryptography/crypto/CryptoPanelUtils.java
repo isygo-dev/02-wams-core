@@ -9,11 +9,10 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
+import eu.isygoit.i18n.I18n;
 import org.springframework.util.StringUtils;
 
 public final class CryptoPanelUtils {
@@ -40,7 +39,7 @@ public final class CryptoPanelUtils {
         label.getStyle().set("font-size", "var(--lumo-font-size-s)");
 
         Button copyButton = new Button(new Icon(VaadinIcon.COPY));
-        copyButton.setTooltipText("Copy to clipboard");
+        copyButton.setTooltipText(I18n.t("crypto.utils.copy.tooltip"));
         copyButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
         copyButton.addClickListener(e -> {
             String value = textArea.getValue();
@@ -49,10 +48,10 @@ public final class CryptoPanelUtils {
                         "navigator.clipboard.writeText($0).catch(e => console.error('Copy failed:', e));",
                         value
                 );
-                Notification.show("Copied to clipboard", 6000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("crypto.utils.copied"), 6000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } else {
-                Notification.show("Nothing to copy", 6000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("crypto.utils.nothing.to.copy"), 6000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
             }
         });

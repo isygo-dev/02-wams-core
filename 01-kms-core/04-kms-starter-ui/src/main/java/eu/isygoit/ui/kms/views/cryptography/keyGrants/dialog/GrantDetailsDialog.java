@@ -6,12 +6,13 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.helper.DateHelper;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.dialog.NoActionDialog;
 
 public class GrantDetailsDialog extends NoActionDialog {
 
     public GrantDetailsDialog(KmsDtos.ListGrantsResponse.Grant grant, ObjectMapper objectMapper) {
-        super("Grant Details");
+        super(I18n.t("grant.details.title"));
         setWidth("600px");
         setMaxWidth("95%");
         setResizable(true);
@@ -23,16 +24,16 @@ public class GrantDetailsDialog extends NoActionDialog {
         content.setPadding(true);
         content.setWidthFull();
 
-        content.add(createDetailRow("Grant ID", grant.getGrantId()));
-        content.add(createDetailRow("Grantee Principal", grant.getGranteePrincipal()));
-        content.add(createDetailRow("Retiring Principal", grant.getRetiringPrincipal()));
-        content.add(createDetailRow("Name", grant.getName()));
-        content.add(createDetailRow("Status", grant.getStatus()));
+        content.add(createDetailRow(I18n.t("grant.details.field.grant.id"), grant.getGrantId()));
+        content.add(createDetailRow(I18n.t("grant.details.field.grantee"), grant.getGranteePrincipal()));
+        content.add(createDetailRow(I18n.t("grant.details.field.retiring"), grant.getRetiringPrincipal()));
+        content.add(createDetailRow(I18n.t("grant.details.field.name"), grant.getName()));
+        content.add(createDetailRow(I18n.t("grant.details.field.status"), grant.getStatus()));
         if (grant.getCreateDate() != null) {
-            content.add(createDetailRow("Creation Date", DateHelper.formatToHumanReadable(grant.getCreateDate())));
+            content.add(createDetailRow(I18n.t("grant.details.field.creation.date"), DateHelper.formatToHumanReadable(grant.getCreateDate())));
         }
         if (grant.getOperations() != null) {
-            content.add(createDetailRow("Operations", String.join(", ", grant.getOperations())));
+            content.add(createDetailRow(I18n.t("grant.details.field.operations"), String.join(", ", grant.getOperations())));
         }
         if (grant.getConstraints() != null) {
             try {
@@ -40,9 +41,9 @@ public class GrantDetailsDialog extends NoActionDialog {
                         .writeValueAsString(grant.getConstraints());
                 Pre pre = new Pre(constraintsJson);
                 pre.getStyle().set("background-color", "#f5f5f5").set("padding", "8px").set("border-radius", "4px");
-                content.add(createDetailRow("Constraints", pre));
+                content.add(createDetailRow(I18n.t("grant.details.field.constraints"), pre));
             } catch (Exception e) {
-                content.add(createDetailRow("Constraints", grant.getConstraints().toString()));
+                content.add(createDetailRow(I18n.t("grant.details.field.constraints"), grant.getConstraints().toString()));
             }
         }
 
@@ -50,7 +51,7 @@ public class GrantDetailsDialog extends NoActionDialog {
     }
 
     private Span createDetailRow(String label, String value) {
-        if (value == null) value = "-";
+        if (value == null) value = I18n.t("grant.details.placeholder");
         Span span = new Span(label + ": " + value);
         span.getStyle().set("font-family", "monospace").set("font-size", "13px");
         return span;

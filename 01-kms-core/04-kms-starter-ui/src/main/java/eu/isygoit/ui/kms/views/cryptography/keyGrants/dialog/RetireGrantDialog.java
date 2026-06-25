@@ -2,10 +2,10 @@ package eu.isygoit.ui.kms.views.cryptography.keyGrants.dialog;
 
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.dto.KmsDtos;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 
 public class RetireGrantDialog extends PinBaseActionDialog {
 
@@ -15,13 +15,13 @@ public class RetireGrantDialog extends PinBaseActionDialog {
 
     public RetireGrantDialog(String keyId, KmsDtos.ListGrantsResponse.Grant grant,
                              KmsApiService kmsApiService, Runnable onSuccess) {
-        super("Retire Grant",
-                "Retiring a grant will immediately retire it. The grant cannot be used after retirement. This action is irreversible.",
+        super(I18n.t("grant.retire.title"),
+                I18n.t("grant.retire.message"),
                 onSuccess);
         this.keyId = keyId;
         this.grant = grant;
         this.kmsApiService = kmsApiService;
-        setOkButtonText("Retire");
+        setOkButtonText(I18n.t("grant.retire.button"));
         addThemeVariantsOkButton(ButtonVariant.LUMO_WARNING);
         setWidth("500px");
     }
@@ -29,7 +29,7 @@ public class RetireGrantDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append("Invalid confirmation code");
+            append(I18n.t("grant.retire.invalid.code"));
             return false;
         }
         try {
@@ -39,12 +39,12 @@ public class RetireGrantDialog extends PinBaseActionDialog {
                     .build();
             kmsApiService.retireGrant(request);
 
-            append("Grant retired successfully");
+            append(I18n.t("grant.retire.success"));
             return true;
         } catch (FeignException ex) {
             append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            append("Failed operation: " + e.getMessage());
+            append(I18n.t("grant.retire.failed", e.getMessage()));
         }
 
         return false;

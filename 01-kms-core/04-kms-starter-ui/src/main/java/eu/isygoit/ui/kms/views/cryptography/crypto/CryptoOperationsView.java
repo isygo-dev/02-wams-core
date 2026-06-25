@@ -10,32 +10,26 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyUsage;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.cryptography.crypto.panel.DataKeyPanel;
 import eu.isygoit.ui.kms.views.cryptography.crypto.panel.EncryptDecryptPanel;
 import eu.isygoit.ui.kms.views.cryptography.crypto.panel.MacPanel;
 import eu.isygoit.ui.kms.views.cryptography.crypto.panel.SignVerifyPanel;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +48,7 @@ import java.util.stream.Collectors;
 public class CryptoOperationsView extends ManagementVerticalView {
 
     private final KmsApiService kmsApiService;
-    private final ComboBox<KeyOption> keyCombo = new ComboBox<>("KMS Key");
+    private final ComboBox<KeyOption> keyCombo = new ComboBox<>(I18n.t("crypto.view.select.key"));
     private final Button refreshKeysButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final ProgressBar loadingBar = new ProgressBar();
 
@@ -83,7 +77,7 @@ public class CryptoOperationsView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("kms-crypto-view");
 
-        H2 header = new H2("Cryptographic Operations");
+        H2 header = new H2(I18n.t("crypto.view.title"));
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         add(header);
@@ -106,10 +100,10 @@ public class CryptoOperationsView extends ManagementVerticalView {
 
         // Create tabs
         tabs = new Tabs();
-        encryptDecryptTabHeader = new Tab("Encrypt / Decrypt");
-        signVerifyTabHeader = new Tab("Sign / Verify");
-        dataKeyTabHeader = new Tab("Data Keys");
-        macTabHeader = new Tab("MAC");
+        encryptDecryptTabHeader = new Tab(I18n.t("crypto.view.tab.encrypt.decrypt"));
+        signVerifyTabHeader = new Tab(I18n.t("crypto.view.tab.sign.verify"));
+        dataKeyTabHeader = new Tab(I18n.t("crypto.view.tab.data.keys"));
+        macTabHeader = new Tab(I18n.t("crypto.view.tab.mac"));
         tabs.add(encryptDecryptTabHeader, signVerifyTabHeader, dataKeyTabHeader, macTabHeader);
         tabs.setWidthFull();
         tabs.getStyle().set("overflow-x", "auto");
@@ -124,7 +118,7 @@ public class CryptoOperationsView extends ManagementVerticalView {
             Tab selected = event.getSelectedTab();
             boolean supported = isTabSupported(selected);
             if (!supported && selectedKeyId != null) {
-                Notification.show("The selected key does not support this operation.", 6000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("crypto.view.key.not.supported"), 6000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
             }
             encryptDecryptPanel.setVisible(selected == encryptDecryptTabHeader);
@@ -147,7 +141,7 @@ public class CryptoOperationsView extends ManagementVerticalView {
         keyLayout.getStyle().set("flex-wrap", "wrap");
         keyLayout.addClassName("crypto-key-layout");
 
-        keyCombo.setPlaceholder("Select a KMS key...");
+        keyCombo.setPlaceholder(I18n.t("crypto.view.select.key"));
         keyCombo.setItemLabelGenerator(KeyOption::getDisplayName);
         keyCombo.setWidth("400px");
         keyCombo.addValueChangeListener(e -> {
@@ -164,7 +158,7 @@ public class CryptoOperationsView extends ManagementVerticalView {
         });
 
         refreshKeysButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshKeysButton.setTooltipText("Refresh key list");
+        refreshKeysButton.setTooltipText(I18n.t("crypto.view.refresh.tooltip"));
         refreshKeysButton.addClickListener(e -> loadKeyOptions());
 
         keyLayout.add(keyCombo, refreshKeysButton);
@@ -245,11 +239,11 @@ public class CryptoOperationsView extends ManagementVerticalView {
                 updateTabBasedOnKey();
             }
         } catch (FeignException e) {
-            Notification.show("Failed to load keys: " + (e.status() == 500 ? e.contentUTF8() : e.getMessage()))
+            Notification.show(I18n.t("crypto.view.load.keys.error", (e.status() == 500 ? e.contentUTF8() : e.getMessage())))
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load keys: {}", e.getMessage());
         } catch (Exception e) {
-            Notification.show("Failed to load keys: " + e.getMessage(), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("crypto.view.load.keys.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load keys", e);
         } finally {
@@ -265,10 +259,10 @@ public class CryptoOperationsView extends ManagementVerticalView {
                 return desc.getKeyMetadata().getKeyAlias();
             }
         } catch (FeignException e) {
-            Notification.show("Failed to fetch alias: " + (e.status() == 500 ? e.contentUTF8() : e.getMessage()));
+            Notification.show(I18n.t("crypto.view.fetch.alias.failed", (e.status() == 500 ? e.contentUTF8() : e.getMessage())));
             log.error("Failed to fetch alias for keyId: {}", keyId, e);
         } catch (Exception e) {
-            Notification.show("Failed to fetch alias: " + e.getMessage());
+            Notification.show(I18n.t("crypto.view.fetch.alias.failed", e.getMessage()));
             log.error("Failed to fetch alias for keyId: {}", keyId, e);
         }
         return keyId;
@@ -286,11 +280,11 @@ public class CryptoOperationsView extends ManagementVerticalView {
                 updateTabBasedOnKey();
             }
         } catch (FeignException e) {
-            Notification.show("Failed to load key metadata: " + (e.status() == 500 ? e.contentUTF8() : e.getMessage()))
+            Notification.show(I18n.t("crypto.view.load.metadata.failed") + ": " + (e.status() == 500 ? e.contentUTF8() : e.getMessage()))
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load key metadata for keyId: {}", selectedKeyId, e);
         } catch (Exception e) {
-            Notification.show("Failed to load key metadata", 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("crypto.view.load.metadata.failed"), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             log.error("Failed to load key metadata for keyId: {}", selectedKeyId, e);
         }
@@ -310,10 +304,10 @@ public class CryptoOperationsView extends ManagementVerticalView {
             Tab supported = getFirstSupportedTab();
             if (supported != null) {
                 tabs.setSelectedTab(supported);
-                Notification.show("Switched to a supported operation for this key.", 6000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("crypto.view.switched.supported"), 6000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
             } else {
-                Notification.show("This key does not support any cryptographic operation.", 6000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("crypto.view.no.operation.supported"), 6000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         }

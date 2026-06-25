@@ -10,11 +10,11 @@ import eu.isygoit.dto.KmsDtos.CreateAliasRequest;
 import eu.isygoit.dto.KmsDtos.CreateAliasResponse;
 import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyAlias.AliasesView;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
@@ -36,11 +36,11 @@ public class CreateAliasDialog extends BaseActionDialog {
     public CreateAliasDialog(AliasesView parentView,
                              KmsApiService kmsApiService,
                              Runnable onSuccess) {
-        super("Create alias", onSuccess);
+        super(I18n.t("alias.dialog.create.title"), onSuccess);
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
 
-        setOkButtonText("Create");
+        setOkButtonText(I18n.t("alias.dialog.create.button"));
         setWidth("500px");
 
         buildForm();
@@ -52,11 +52,11 @@ public class CreateAliasDialog extends BaseActionDialog {
         String aliasName = aliasNameField.getValue();
         String targetKeyId = targetKeyCombo.getValue();
         if (aliasName == null || aliasName.isBlank()) {
-            append("Alias name is required");
+            append(I18n.t("alias.dialog.field.alias.name.required"));
             return false;
         }
         if (targetKeyId == null || targetKeyId.isBlank()) {
-            append("Target key is required");
+            append(I18n.t("alias.dialog.field.target.key.required"));
             return false;
         }
 
@@ -69,16 +69,16 @@ public class CreateAliasDialog extends BaseActionDialog {
                     .build();
             ResponseEntity<CreateAliasResponse> response = kmsApiService.createAlias(request);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append("Creation failed: " + response.getStatusCode());
+                append(I18n.t("alias.dialog.create.failed", response.getStatusCode()));
                 return false;
             }
 
-            append("Alias created successfully");
+            append(I18n.t("alias.dialog.create.success"));
             return true;
         } catch (FeignException ex) {
             append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            append("Failed operation: " + e.getMessage());
+            append(I18n.t("alias.dialog.create.failed", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }
@@ -87,13 +87,13 @@ public class CreateAliasDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        aliasNameField = new TextField("Alias name");
-        aliasNameField.setPlaceholder("alias:my-key-alias");
+        aliasNameField = new TextField(I18n.t("alias.dialog.field.alias.name"));
+        aliasNameField.setPlaceholder(I18n.t("alias.dialog.field.alias.name.placeholder"));
         aliasNameField.setRequiredIndicatorVisible(true);
 
-        targetKeyCombo = new ComboBox<>("Target KMS key");
+        targetKeyCombo = new ComboBox<>(I18n.t("alias.dialog.field.target.key"));
         targetKeyCombo.setRequiredIndicatorVisible(true);
-        targetKeyCombo.setPlaceholder("Select a key...");
+        targetKeyCombo.setPlaceholder(I18n.t("alias.dialog.field.target.key.placeholder"));
         targetKeyCombo.setItems(fetchKeyIds());
         targetKeyCombo.setItemLabelGenerator(keyId -> {
             try {
@@ -109,7 +109,7 @@ public class CreateAliasDialog extends BaseActionDialog {
             return keyId;
         });
 
-        primaryCheckbox = new Checkbox("Set as primary alias");
+        primaryCheckbox = new Checkbox(I18n.t("alias.dialog.field.primary"));
         primaryCheckbox.setValue(false);
     }
 
@@ -131,7 +131,7 @@ public class CreateAliasDialog extends BaseActionDialog {
                         .collect(Collectors.toList());
             }
         } catch (Exception e) {
-            Notification.show("Could not load keys: " + e.getMessage(), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("aliases.view.load.keys.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
         return keyIds;

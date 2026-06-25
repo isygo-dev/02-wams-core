@@ -5,11 +5,11 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.KmsDtos;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import eu.isygoit.ui.kms.views.cryptography.key.KeyManagementView;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -28,13 +28,13 @@ public class CancelKeyDeletionDialog extends BaseActionDialog {
                                    String keyId,
                                    String keyAliasOrId,
                                    Runnable onSuccess) {
-        super("Cancel deletion", onSuccess);
+        super(I18n.t("key.dialog.cancel.title"), onSuccess);
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
         this.keyAliasOrId = keyAliasOrId;
         this.parentView = parentView;
 
-        setOkButtonText("Yes, cancel");
+        setOkButtonText(I18n.t("key.dialog.cancel.button"));
         setWidth("450px");
 
         buildContent();
@@ -47,12 +47,12 @@ public class CancelKeyDeletionDialog extends BaseActionDialog {
             ResponseEntity<KmsDtos.CancelKeyDeletionResponse> response =
                     kmsApiService.cancelKeyDeletion(keyId);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                String errorMsg = "Failed to cancel deletion: " + response.getStatusCode();
+                String errorMsg = I18n.t("key.dialog.cancel.failed", response.getStatusCode());
                 this.append(errorMsg);
                 return false;
             }
 
-            Notification.show("Deletion cancelled", 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("key.dialog.cancel.success"), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
             return true;
@@ -60,7 +60,7 @@ public class CancelKeyDeletionDialog extends BaseActionDialog {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             this.append(errorMsg);
         } catch (Exception e) {
-            String errorMsg = "Failed operation: " + e.getMessage();
+            String errorMsg = I18n.t("key.dialog.cancel.error", e.getMessage());
             this.append(errorMsg);
         } finally {
             parentView.showLoading(false);
@@ -73,7 +73,7 @@ public class CancelKeyDeletionDialog extends BaseActionDialog {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
         layout.setPadding(true);
-        layout.add(new Span("Are you sure you want to cancel the deletion of key " + keyAliasOrId + "?"));
+        layout.add(new Span(I18n.t("key.dialog.cancel.confirmation", keyAliasOrId)));
         add(layout);
     }
 }

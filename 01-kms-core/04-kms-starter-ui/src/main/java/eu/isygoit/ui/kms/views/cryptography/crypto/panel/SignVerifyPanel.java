@@ -6,7 +6,6 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -14,11 +13,11 @@ import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.enums.IEnumSignatureAlgorithm;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.mapper.AlgorithmMapper;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.kms.views.cryptography.crypto.CryptoPanelUtils;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
@@ -62,12 +61,12 @@ public class SignVerifyPanel extends VerticalLayout {
         signatureArea = new TextArea();
         signatureArea.setHeight("150px");
 
-        signAlgoCombo = new ComboBox<>("Signing Algorithm");
+        signAlgoCombo = new ComboBox<>(I18n.t("crypto.sign.verify.algorithm"));
         signAlgoCombo.setEnabled(false);
-        signAlgoCombo.setPlaceholder("Select a key that supports SIGN_VERIFY");
+        signAlgoCombo.setPlaceholder(I18n.t("crypto.view.select.key"));
 
-        Button signBtn = new Button("Sign", new Icon(VaadinIcon.PENCIL));
-        Button verifyBtn = new Button("Verify", new Icon(VaadinIcon.CHECK));
+        Button signBtn = new Button(I18n.t("crypto.sign.verify.sign.button"), new Icon(VaadinIcon.PENCIL));
+        Button verifyBtn = new Button(I18n.t("crypto.sign.verify.verify.button"), new Icon(VaadinIcon.CHECK));
         signBtn.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_PRIMARY);
         verifyBtn.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_SUCCESS);
 
@@ -78,8 +77,8 @@ public class SignVerifyPanel extends VerticalLayout {
         signBtn.addClickListener(e -> sign());
         verifyBtn.addClickListener(e -> verify());
 
-        add(CryptoPanelUtils.createLabelledTextArea("Message (UTF-8)", messageArea),
-                CryptoPanelUtils.createLabelledTextArea("Signature (Base64)", signatureArea),
+        add(CryptoPanelUtils.createLabelledTextArea(I18n.t("crypto.sign.verify.message"), messageArea),
+                CryptoPanelUtils.createLabelledTextArea(I18n.t("crypto.sign.verify.signature"), signatureArea),
                 signAlgoCombo, buttonRow);
     }
 
@@ -91,7 +90,7 @@ public class SignVerifyPanel extends VerticalLayout {
         signAlgoCombo.clear();
         if (keyUsage == null || keySpec == null || keyUsage != IEnumKeyUsage.Types.SIGN_VERIFY) {
             signAlgoCombo.setEnabled(false);
-            signAlgoCombo.setPlaceholder("Select a key that supports SIGN_VERIFY");
+            signAlgoCombo.setPlaceholder(I18n.t("crypto.view.select.key"));
             return;
         }
         List<String> algorithms = AlgorithmMapper.keySpecToSigningAlgo(keySpec).stream()
@@ -99,7 +98,7 @@ public class SignVerifyPanel extends VerticalLayout {
                 .collect(Collectors.toList());
         if (algorithms.isEmpty()) {
             signAlgoCombo.setEnabled(false);
-            signAlgoCombo.setPlaceholder("No compatible signing algorithm");
+            signAlgoCombo.setPlaceholder(I18n.t("crypto.sign.verify.no.algorithm"));
             return;
         }
         signAlgoCombo.setItems(algorithms);
@@ -116,21 +115,21 @@ public class SignVerifyPanel extends VerticalLayout {
     private void sign() {
         String keyId = keyIdSupplier.get();
         if (keyId == null) {
-            notifyWarning("Select a key first");
+            notifyWarning(I18n.t("crypto.sign.verify.select.key.first"));
             return;
         }
         if (keyUsageSupplier.get() != IEnumKeyUsage.Types.SIGN_VERIFY) {
-            notifyWarning("Selected key does not support SIGN_VERIFY");
+            notifyWarning(I18n.t("crypto.sign.verify.key.not.supported"));
             return;
         }
         String algo = signAlgoCombo.getValue();
         if (algo == null) {
-            notifyWarning("No compatible signing algorithm for this key");
+            notifyWarning(I18n.t("crypto.sign.verify.no.algorithm"));
             return;
         }
         String message = messageArea.getValue();
         if (!StringUtils.hasText(message)) {
-            notifyWarning("Message is required");
+            notifyWarning(I18n.t("crypto.sign.verify.message.required"));
             return;
         }
         try {
@@ -144,32 +143,32 @@ public class SignVerifyPanel extends VerticalLayout {
             ResponseEntity<KmsDtos.SignResponse> response = kmsApiService.sign(request);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 signatureArea.setValue(response.getBody().getSignature());
-                notifySuccess("Signature generated");
+                notifySuccess(I18n.t("crypto.sign.verify.signature.generated"));
             } else {
-                notifyError("Signing failed");
+                notifyError(I18n.t("crypto.sign.verify.sign.failed"));
             }
         } catch (FeignException ex) {
-            notifyError("Signing error: " + ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage()));
+            notifyError(I18n.t("crypto.sign.verify.sign.error", ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage())));
         } catch (Exception ex) {
-            notifyError("Signing error: " + ex.getMessage());
+            notifyError(I18n.t("crypto.sign.verify.sign.error", ex.getMessage()));
         }
     }
 
     private void verify() {
         String keyId = keyIdSupplier.get();
         if (keyId == null) {
-            notifyWarning("Select a key first");
+            notifyWarning(I18n.t("crypto.sign.verify.select.key.first"));
             return;
         }
         String message = messageArea.getValue();
         String signature = signatureArea.getValue();
         if (!StringUtils.hasText(message) || !StringUtils.hasText(signature)) {
-            notifyWarning("Both message and signature are required");
+            notifyWarning(I18n.t("crypto.sign.verify.both.required"));
             return;
         }
         String algo = signAlgoCombo.getValue();
         if (algo == null) {
-            notifyWarning("No signing algorithm selected");
+            notifyWarning(I18n.t("crypto.sign.verify.no.algorithm.selected"));
             return;
         }
         try {
@@ -184,17 +183,17 @@ public class SignVerifyPanel extends VerticalLayout {
             ResponseEntity<KmsDtos.VerifyResponse> response = kmsApiService.verify(request);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 if (response.getBody().isValid()) {
-                    notifySuccess("Signature is valid");
+                    notifySuccess(I18n.t("crypto.sign.verify.valid"));
                 } else {
-                    notifyError("Signature is invalid");
+                    notifyError(I18n.t("crypto.sign.verify.invalid"));
                 }
             } else {
-                notifyError("Verification failed");
+                notifyError(I18n.t("crypto.sign.verify.verify.failed"));
             }
         } catch (FeignException ex) {
-            notifyError("Verification error: " + ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage()));
+            notifyError(I18n.t("crypto.sign.verify.verify.error", ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage())));
         } catch (Exception ex) {
-            notifyError("Verification error: " + ex.getMessage());
+            notifyError(I18n.t("crypto.sign.verify.verify.error", ex.getMessage()));
         }
     }
 

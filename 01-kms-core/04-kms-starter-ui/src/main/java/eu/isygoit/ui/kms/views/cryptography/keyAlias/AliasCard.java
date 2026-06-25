@@ -7,11 +7,10 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.kms.KmsMainView;
@@ -63,16 +62,16 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
 
         Span aliasSpan = buildTitleSpan(aliasName, aliasName);
         left.add(aliasSpan);
-        left.add(KmsMainView.createCopyButton(VaadinIcon.COPY, aliasName, "Copy alias name"));
+        left.add(KmsMainView.createCopyButton(VaadinIcon.COPY, aliasName, I18n.t("alias.card.copy.alias.tooltip")));
 
         if (Boolean.TRUE.equals(primaryKey)) {
             Icon warningIcon = VaadinIcon.WARNING.create();
             warningIcon.setColor("var(--lumo-error-color)");
             warningIcon.setSize("18px");
-            warningIcon.setTooltipText("Primary key alias – handle with care.");
+            warningIcon.setTooltipText(I18n.t("alias.card.primary.tooltip"));
             left.add(warningIcon);
 
-            Span primaryBadge = new Span("PRIMARY");
+            Span primaryBadge = new Span(I18n.t("alias.card.primary.badge"));
             primaryBadge.getElement().getThemeList().add("badge");
             primaryBadge.addClassName(LumoUtility.Background.ERROR_10);
             primaryBadge.addClassName(LumoUtility.TextColor.ERROR);
@@ -84,10 +83,10 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button updateBtn = createIconButton(VaadinIcon.EDIT, "Update alias");
+        Button updateBtn = createIconButton(VaadinIcon.EDIT, I18n.t("alias.card.update.tooltip"));
         updateBtn.addClickListener(e -> updateAlias());
 
-        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, "Delete alias");
+        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, I18n.t("alias.card.delete.tooltip"));
         deleteBtn.addClickListener(e -> deleteAlias());
 
         return List.of(updateBtn, deleteBtn);
@@ -95,19 +94,19 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
 
     @Override
     protected void buildBodyRows() {
-        add(createIconRowWithCopy(VaadinIcon.KEY, "Target key", targetKeyId, targetKeyId));
+        add(createIconRowWithCopy(VaadinIcon.KEY, I18n.t("alias.card.target.key"), targetKeyId, targetKeyId));
         if (aliasWrn != null && !aliasWrn.isBlank()) {
-            add(createIconRowWithCopy(VaadinIcon.TAG, "WRN", aliasWrn, aliasWrn));
+            add(createIconRowWithCopy(VaadinIcon.TAG, I18n.t("alias.card.wrn"), aliasWrn, aliasWrn));
         }
         if (createDate != null && !createDate.isBlank()) {
-            add(createIconRow(VaadinIcon.CALENDAR, "Created", createDate));
+            add(createIconRow(VaadinIcon.CALENDAR, I18n.t("alias.card.created"), createDate));
         }
         if (Boolean.TRUE.equals(primaryKey)) {
-            add(createIconRow(VaadinIcon.EXCLAMATION_CIRCLE, "Note", "This is the primary key alias. Handle with care."));
+            add(createIconRow(VaadinIcon.EXCLAMATION_CIRCLE, I18n.t("alias.card.primary.note"), ""));
         }
     }
 
-    // ── Helper row builders (identical to previous version) ──────────────────
+    // ── Helper row builders ──────────────────────────────────────────────────
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
         HorizontalLayout row = new HorizontalLayout();
         row.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -125,7 +124,7 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
         labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
         labelSpan.getStyle().set("min-width", "100px");
 
-        Span valueSpan = new Span(value != null ? value : "—");
+        Span valueSpan = new Span(value != null ? value : I18n.t("alias.card.masked"));
         valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
         valueSpan.getStyle().set("font-family", "monospace");
         valueSpan.getStyle().set("word-break", "break-all");
@@ -153,13 +152,13 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
         labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
         labelSpan.getStyle().set("min-width", "100px");
 
-        Span valueSpan = new Span(value != null ? value : "—");
+        Span valueSpan = new Span(value != null ? value : I18n.t("alias.card.masked"));
         valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
         valueSpan.getStyle().set("font-family", "monospace");
         valueSpan.getStyle().set("word-break", "break-all");
         valueSpan.getStyle().set("flex", "1");
 
-        Button copyBtn = KmsMainView.createCopyButton(VaadinIcon.COPY, copyValue, "Copy");
+        Button copyBtn = KmsMainView.createCopyButton(VaadinIcon.COPY, copyValue, I18n.t("alias.card.copy.tooltip"));
         copyBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
 
         row.add(iconComponent, labelSpan, valueSpan, copyBtn);

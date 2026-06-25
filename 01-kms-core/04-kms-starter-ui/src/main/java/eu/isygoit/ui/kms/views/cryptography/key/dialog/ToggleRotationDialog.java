@@ -7,11 +7,11 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import eu.isygoit.dto.KmsDtos.UpdateKeyRotationRequest;
 import eu.isygoit.dto.KmsDtos.UpdateKeyRotationResponse;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.kms.views.cryptography.key.KeyManagementView;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -37,10 +37,10 @@ public class ToggleRotationDialog extends PinBaseActionDialog {
                                 Integer currentPeriod,
                                 Runnable onSuccess) {
         super(
-                currentlyEnabled ? "Disable automatic rotation" : "Enable automatic rotation",
+                currentlyEnabled ? I18n.t("key.dialog.rotation.toggle.title.disable") : I18n.t("key.dialog.rotation.toggle.title.enable"),
                 currentlyEnabled
-                        ? "Disabling automatic rotation will stop future key rotations. You can re‑enable it later."
-                        : "Enabling automatic rotation will **immediately create a new key version**. This action cannot be undone.",
+                        ? I18n.t("key.dialog.rotation.toggle.message.disable")
+                        : I18n.t("key.dialog.rotation.toggle.message.enable"),
                 onSuccess,
                 true  // always require PIN confirmation
         );
@@ -50,7 +50,7 @@ public class ToggleRotationDialog extends PinBaseActionDialog {
         this.currentlyEnabled = currentlyEnabled;
         this.currentPeriod = currentPeriod;
 
-        setOkButtonText(currentlyEnabled ? "Disable" : "Enable");
+        setOkButtonText(currentlyEnabled ? I18n.t("key.dialog.rotation.toggle.button.disable") : I18n.t("key.dialog.rotation.toggle.button.enable"));
         setWidth("450px");
 
         if (!currentlyEnabled) {
@@ -69,7 +69,7 @@ public class ToggleRotationDialog extends PinBaseActionDialog {
     protected boolean onOk() {
         // Validate PIN
         if (!validatePin()) {
-            String errorMsg = "Invalid confirmation code";
+            String errorMsg = I18n.t("key.dialog.rotation.toggle.invalid.code");
             this.append(errorMsg);
             return false;
         }
@@ -87,7 +87,7 @@ public class ToggleRotationDialog extends PinBaseActionDialog {
                 // Enable rotation with chosen period (validate period)
                 int period = periodField.getValue();
                 if (period < 90 || period > 365) {
-                    String errorMsg = "Rotation period must be between 90 and 365 days";
+                    String errorMsg = I18n.t("key.dialog.rotation.toggle.field.period.range");
                     this.append(errorMsg);
                     parentView.showLoading(false);
                     return false;
@@ -100,15 +100,15 @@ public class ToggleRotationDialog extends PinBaseActionDialog {
 
             ResponseEntity<UpdateKeyRotationResponse> response = kmsApiService.updateKeyRotation(keyId, request);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                String errorMsg = "Update key rotation failed: " +
-                        (response.getBody() != null ? response.getBody().toString() : "unknown error");
+                String errorMsg = I18n.t("key.dialog.rotation.toggle.failed",
+                        (response.getBody() != null ? response.getBody().toString() : "unknown error"));
                 this.append(errorMsg);
                 return false;
             }
 
             String successMsg = currentlyEnabled
-                    ? "Rotation disabled"
-                    : "Rotation enabled with period " + periodField.getValue() + " days. A new key version has been created.";
+                    ? I18n.t("key.dialog.rotation.toggle.success.disabled")
+                    : I18n.t("key.dialog.rotation.toggle.success.enabled", periodField.getValue());
             Notification.show(successMsg, 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
@@ -118,7 +118,7 @@ public class ToggleRotationDialog extends PinBaseActionDialog {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             this.append(errorMsg);
         } catch (Exception e) {
-            String errorMsg = "Failed operation: " + e.getMessage();
+            String errorMsg = I18n.t("key.dialog.rotation.toggle.error", e.getMessage());
             this.append(errorMsg);
         } finally {
             parentView.showLoading(false);
@@ -128,13 +128,13 @@ public class ToggleRotationDialog extends PinBaseActionDialog {
     }
 
     private void buildEnableForm() {
-        periodField = new IntegerField("Rotation period (days)");
+        periodField = new IntegerField(I18n.t("key.dialog.rotation.toggle.field.period"));
         periodField.setMin(90);
         periodField.setMax(365);
         periodField.setValue(currentPeriod != null ? currentPeriod : 365);
         periodField.setStepButtonsVisible(true);
         periodField.setWidthFull();
-        periodField.setTooltipText("Number of days between automatic key rotations (90–365)");
+        periodField.setTooltipText(I18n.t("key.dialog.rotation.toggle.field.period.tooltip"));
         periodField.setRequiredIndicatorVisible(true);
     }
 

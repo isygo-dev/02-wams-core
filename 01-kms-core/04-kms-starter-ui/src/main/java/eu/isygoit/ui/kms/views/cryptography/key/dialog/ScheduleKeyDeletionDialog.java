@@ -5,11 +5,11 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import eu.isygoit.dto.KmsDtos;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import eu.isygoit.ui.kms.views.cryptography.key.KeyManagementView;
 import feign.FeignException;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -32,13 +32,13 @@ public class ScheduleKeyDeletionDialog extends BaseActionDialog {
                                      String keyId,
                                      Integer days,
                                      Runnable onSuccess) {
-        super("Schedule key deletion", onSuccess);
+        super(I18n.t("key.dialog.schedule.title"), onSuccess);
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
         this.parentView = parentView;
         this.days = days != null ? days : 30; // default to 30 if not provided
 
-        setOkButtonText("Schedule");
+        setOkButtonText(I18n.t("key.dialog.schedule.button"));
         setWidth("400px");
 
         buildContent();
@@ -51,12 +51,12 @@ public class ScheduleKeyDeletionDialog extends BaseActionDialog {
         try {
             ResponseEntity<KmsDtos.ScheduleKeyDeletionResponse> response = kmsApiService.scheduleKeyDeletion(keyId, days);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                String errorMsg = "Schedule deletion error: " + response.getStatusCode();
+                String errorMsg = I18n.t("key.dialog.schedule.failed", response.getStatusCode());
                 this.append(errorMsg);
                 return false;
             }
 
-            Notification.show("Deletion scheduled in " + days + " days", 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("key.dialog.schedule.success", days), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
             return true;
@@ -64,7 +64,7 @@ public class ScheduleKeyDeletionDialog extends BaseActionDialog {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             this.append(errorMsg);
         } catch (Exception e) {
-            String errorMsg = "Failed operation: " + e.getMessage();
+            String errorMsg = I18n.t("key.dialog.schedule.error", e.getMessage());
             this.append(errorMsg);
         } finally {
             parentView.showLoading(false);
@@ -78,7 +78,7 @@ public class ScheduleKeyDeletionDialog extends BaseActionDialog {
         layout.setSpacing(true);
         layout.setPadding(true);
 
-        daysField = new IntegerField("Pending window (days)");
+        daysField = new IntegerField(I18n.t("key.dialog.schedule.field.pending.window"));
         daysField.setMin(7);
         daysField.setMax(30);
         daysField.setValue(days);
