@@ -1,6 +1,7 @@
 package eu.isygoit.ui.ims.views.parameters.dialog;
 
 import com.vaadin.flow.component.button.ButtonVariant;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AppParameterService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.parameters.ParameterManagementView;
@@ -16,14 +17,14 @@ public class DeleteParameterDialog extends PinBaseActionDialog {
                                  AppParameterService parameterService,
                                  Long parameterId,
                                  Runnable onSuccess) {
-        super("Delete Parameter",
-                "This action is irreversible. The parameter will be permanently removed.",
+        super(I18n.t("parameter.dialog.delete.title"),
+                I18n.t("parameter.dialog.delete.message"),
                 onSuccess);
         this.parentView = parentView;
         this.parameterService = parameterService;
         this.parameterId = parameterId;
 
-        setOkButtonText("Delete permanently");
+        setOkButtonText(I18n.t("parameter.dialog.delete.button"));
         addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
@@ -31,19 +32,19 @@ public class DeleteParameterDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append("Invalid confirmation code");
+            append(I18n.t("parameter.dialog.delete.invalid.code"));
             return false;
         }
 
         parentView.showLoading(true);
         try {
             parameterService.delete(parameterId);
-            append("Parameter deleted successfully");
+            append(I18n.t("parameter.dialog.delete.success"));
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append("Failed operation: " + e.getMessage());
+            append(I18n.t("parameter.dialog.delete.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

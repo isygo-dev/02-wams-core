@@ -2,6 +2,7 @@ package eu.isygoit.ui.ims.views.application.dialog;
 
 import eu.isygoit.dto.data.ApplicationDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.ApplicationService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.application.ApplicationManagementView;
@@ -21,10 +22,10 @@ public class ToggleApplicationStatusDialog extends PinBaseActionDialog {
                                          IEnumEnabledBinaryStatus.Types currentStatus,
                                          Runnable onSuccess) {
         super(
-                currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? "Disable Application" : "Enable Application",
+                currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("app.dialog.toggle.title.disable") : I18n.t("app.dialog.toggle.title.enable"),
                 currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED
-                        ? "This will deactivate the application. Users will not see it in the store. Are you sure?"
-                        : "This will reactivate the application and make it visible in the store. Are you sure?",
+                        ? I18n.t("app.dialog.toggle.message.disable")
+                        : I18n.t("app.dialog.toggle.message.enable"),
                 onSuccess,
                 false // requirePin = false (simple confirmation)
         );
@@ -33,7 +34,7 @@ public class ToggleApplicationStatusDialog extends PinBaseActionDialog {
         this.applicationId = applicationId;
         this.currentStatus = currentStatus;
 
-        setOkButtonText(currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? "Disable" : "Enable");
+        setOkButtonText(currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("app.dialog.toggle.button.disable") : I18n.t("app.dialog.toggle.button.enable"));
         setWidth("450px");
     }
 
@@ -47,16 +48,16 @@ public class ToggleApplicationStatusDialog extends PinBaseActionDialog {
 
             ResponseEntity<ApplicationDto> response = applicationService.updateStatus(applicationId, newStatus);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append("Failed to update application status: HTTP " + response.getStatusCodeValue());
+                append(I18n.t("app.dialog.toggle.failed", response.getStatusCodeValue()));
                 return false;
             }
 
-            append("Application " + (newStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? "enabled" : "disabled") + " successfully");
+            append(I18n.t("app.dialog.toggle.success." + (newStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? "enable" : "disable")));
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append("Operation failed: " + e.getMessage());
+            append(I18n.t("app.dialog.toggle.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

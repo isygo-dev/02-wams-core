@@ -1,5 +1,6 @@
 package eu.isygoit.ui.ims.views.account.dialog;
 
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.account.AccountManagementView;
@@ -16,14 +17,14 @@ public class DeleteAccountDialog extends PinBaseActionDialog {
                                AccountService accountService,
                                Long accountId,
                                Runnable onSuccess) {
-        super("Delete account",
-                "This action is irreversible. The account will be permanently removed.",
+        super(I18n.t("account.dialog.delete.title"),
+                I18n.t("account.dialog.delete.message"),
                 onSuccess);
         this.parentView = parentView;
         this.accountService = accountService;
         this.accountId = accountId;
 
-        setOkButtonText("Delete permanently");
+        setOkButtonText(I18n.t("account.dialog.delete.button"));
         addThemeVariantsOkButton(com.vaadin.flow.component.button.ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
@@ -31,7 +32,7 @@ public class DeleteAccountDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append("Invalid confirmation code");
+            append(I18n.t("account.dialog.delete.invalid.code"));
             return false;
         }
 
@@ -39,16 +40,16 @@ public class DeleteAccountDialog extends PinBaseActionDialog {
         try {
             ResponseEntity<?> response = accountService.delete(accountId);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append("Deletion failed: " + response.getStatusCode());
+                append(I18n.t("account.dialog.delete.failed", response.getStatusCode()));
                 return false;
             }
 
-            append("Account deleted successfully");
+            append(I18n.t("account.dialog.delete.success"));
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append("Failed operation: " + e.getMessage());
+            append(I18n.t("account.dialog.delete.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

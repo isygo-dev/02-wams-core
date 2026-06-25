@@ -20,6 +20,7 @@ import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.AppParameterDto;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AppParameterService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.ims.layout.ImsMainLayout;
@@ -45,7 +46,7 @@ public class ParameterManagementView extends ManagementVerticalView {
     private final AppParameterService parameterService;
 
     private final Div cardsContainer = new Div();
-    private final Button createButton = new Button("Create parameter", new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button createButton = new Button(I18n.t("parameter.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
     private final TextField tenantFilter = new TextField();
@@ -74,7 +75,7 @@ public class ParameterManagementView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("parameter-management-view");
 
-        H2 header = new H2("Application Parameters");
+        H2 header = new H2(I18n.t("parameter.view.title"));
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         add(header);
@@ -99,12 +100,12 @@ public class ParameterManagementView extends ManagementVerticalView {
 
     private void initEventHandlers() {
         createButton.addClickListener(e -> openCreateParameterDialog());
-        createButton.setTooltipText("Create a new application parameter");
+        createButton.setTooltipText(I18n.t("parameter.view.create.tooltip"));
 
         refreshButton.addClickListener(e -> loadPage(0));
-        refreshButton.setTooltipText("Refresh parameters from server");
+        refreshButton.setTooltipText(I18n.t("parameter.view.refresh.tooltip"));
 
-        searchField.setPlaceholder("Search by name or value");
+        searchField.setPlaceholder(I18n.t("parameter.view.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.addValueChangeListener(e -> {
@@ -112,7 +113,7 @@ public class ParameterManagementView extends ManagementVerticalView {
             loadPage(0);
         });
 
-        tenantFilter.setPlaceholder("Tenant");
+        tenantFilter.setPlaceholder(I18n.t("parameter.view.tenant.placeholder"));
         tenantFilter.setClearButtonVisible(true);
         tenantFilter.addValueChangeListener(e -> {
             currentTenant = e.getValue();
@@ -156,11 +157,11 @@ public class ParameterManagementView extends ManagementVerticalView {
             filterAndDisplayCards();
         } catch (FeignException ex) {
             String errorMsg = extractErrorMessage(ex);
-            Notification.show("Failed to load parameters: " + errorMsg, 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("parameter.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load parameters", ex);
         } catch (Exception e) {
-            Notification.show("Failed to load parameters: " + e.getMessage(), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("parameter.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load parameters", e);
         } finally {
@@ -193,8 +194,8 @@ public class ParameterManagementView extends ManagementVerticalView {
             Icon emptyIcon = VaadinIcon.COG.create();
             emptyIcon.setSize("48px");
             emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-            H4 emptyTitle = new H4("No parameters found");
-            Paragraph emptyDesc = new Paragraph("Try adjusting your search or filter criteria.");
+            H4 emptyTitle = new H4(I18n.t("parameter.view.empty.title"));
+            Paragraph emptyDesc = new Paragraph(I18n.t("parameter.view.empty.description"));
             emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);
@@ -206,8 +207,8 @@ public class ParameterManagementView extends ManagementVerticalView {
     }
 
     private void updatePaginationDisplay() {
-        pageInfoLabel.setText(String.format("Page %d / %d", currentPage + 1, totalPages));
-        totalCountLabel.setText(String.format("%d total parameters", totalElements));
+        pageInfoLabel.setText(I18n.t("parameter.view.page.info", currentPage + 1, totalPages));
+        totalCountLabel.setText(I18n.t("parameter.view.total.count", totalElements));
         prevButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(currentPage + 1 < totalPages);
     }

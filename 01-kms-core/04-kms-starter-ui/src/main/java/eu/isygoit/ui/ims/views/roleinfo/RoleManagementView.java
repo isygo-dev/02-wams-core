@@ -20,6 +20,7 @@ import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.RoleInfoDto;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.ApplicationService;
 import eu.isygoit.remote.ims.RoleInfoService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
@@ -47,7 +48,7 @@ public class RoleManagementView extends ManagementVerticalView {
     private final ApplicationService applicationService;
 
     private final Div cardsContainer = new Div();
-    private final Button createButton = new Button("Create role", new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button createButton = new Button(I18n.t("role.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
 
@@ -75,7 +76,7 @@ public class RoleManagementView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("role-management-view");
 
-        H2 header = new H2("Role Management");
+        H2 header = new H2(I18n.t("role.view.title"));
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         add(header);
@@ -100,12 +101,12 @@ public class RoleManagementView extends ManagementVerticalView {
 
     private void initEventHandlers() {
         createButton.addClickListener(e -> openCreateRoleDialog());
-        createButton.setTooltipText("Create a new role");
+        createButton.setTooltipText(I18n.t("role.view.create.tooltip"));
 
         refreshButton.addClickListener(e -> loadPage(0));
-        refreshButton.setTooltipText("Refresh roles from server");
+        refreshButton.setTooltipText(I18n.t("role.view.refresh.tooltip"));
 
-        searchField.setPlaceholder("Search by name or code");
+        searchField.setPlaceholder(I18n.t("role.view.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.addValueChangeListener(e -> {
@@ -150,11 +151,11 @@ public class RoleManagementView extends ManagementVerticalView {
             filterAndDisplayCards();
         } catch (FeignException ex) {
             String errorMsg = extractErrorMessage(ex);
-            Notification.show("Failed to load roles: " + errorMsg, 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("role.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load roles", ex);
         } catch (Exception e) {
-            Notification.show("Failed to load roles: " + e.getMessage(), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("role.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load roles", e);
         } finally {
@@ -183,8 +184,8 @@ public class RoleManagementView extends ManagementVerticalView {
             Icon emptyIcon = VaadinIcon.SHIELD.create();
             emptyIcon.setSize("48px");
             emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-            H4 emptyTitle = new H4("No roles found");
-            Paragraph emptyDesc = new Paragraph("Try adjusting your search criteria.");
+            H4 emptyTitle = new H4(I18n.t("role.view.empty.title"));
+            Paragraph emptyDesc = new Paragraph(I18n.t("role.view.empty.description"));
             emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);
@@ -196,8 +197,8 @@ public class RoleManagementView extends ManagementVerticalView {
     }
 
     private void updatePaginationDisplay() {
-        pageInfoLabel.setText(String.format("Page %d / %d", currentPage + 1, totalPages));
-        totalCountLabel.setText(String.format("%d total roles", totalElements));
+        pageInfoLabel.setText(I18n.t("role.view.page.info", currentPage + 1, totalPages));
+        totalCountLabel.setText(I18n.t("role.view.total.count", totalElements));
         prevButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(currentPage + 1 < totalPages);
     }

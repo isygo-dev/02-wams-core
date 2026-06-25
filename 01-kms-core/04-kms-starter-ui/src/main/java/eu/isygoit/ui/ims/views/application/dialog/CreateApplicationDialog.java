@@ -14,6 +14,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.ApplicationDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.ApplicationImageService;
 import eu.isygoit.remote.ims.ApplicationService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
@@ -48,13 +49,13 @@ public class CreateApplicationDialog extends BaseActionDialog {
                                    ApplicationService applicationService,
                                    ApplicationImageService applicationImageService,
                                    Runnable onSuccess) {
-        super("Create Application", onSuccess);
+        super(I18n.t("app.dialog.create.title"), onSuccess);
         this.parentView = parentView;
         this.applicationService = applicationService;
         this.applicationImageService = applicationImageService;
         this.onSuccess = onSuccess;
 
-        setOkButtonText("Create");
+        setOkButtonText(I18n.t("app.dialog.create.button"));
         setWidth("700px");
         setMaxWidth("95%");
 
@@ -63,39 +64,38 @@ public class CreateApplicationDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        nameField = new TextField("Name *");
+        nameField = new TextField(I18n.t("app.dialog.field.name"));
         nameField.setRequiredIndicatorVisible(true);
-        nameField.setPlaceholder("Acme App");
+        nameField.setPlaceholder(I18n.t("app.dialog.field.name.placeholder"));
         nameField.setWidthFull();
 
-        titleField = new TextField("Title *");
+        titleField = new TextField(I18n.t("app.dialog.field.title"));
         titleField.setRequiredIndicatorVisible(true);
-        titleField.setPlaceholder("Acme Application");
+        titleField.setPlaceholder(I18n.t("app.dialog.field.title.placeholder"));
         titleField.setWidthFull();
 
-        codeField = new TextField("Code (unique)");
-        codeField.setPlaceholder("acme-app");
+        codeField = new TextField(I18n.t("app.dialog.field.code"));
+        codeField.setPlaceholder(I18n.t("app.dialog.field.code.placeholder"));
         codeField.setWidthFull();
 
-        categoryField = new TextField("Category");
-        categoryField.setValue("PRM Store");
-        categoryField.setPlaceholder("PRM Store");
+        categoryField = new TextField(I18n.t("app.dialog.field.category"));
+        categoryField.setPlaceholder(I18n.t("app.dialog.field.category.placeholder"));
         categoryField.setWidthFull();
 
-        urlField = new TextField("URL *");
+        urlField = new TextField(I18n.t("app.dialog.field.url"));
         urlField.setRequiredIndicatorVisible(true);
-        urlField.setPlaceholder("https://acme.com/app");
+        urlField.setPlaceholder(I18n.t("app.dialog.field.url.placeholder"));
         urlField.setWidthFull();
 
-        orderField = new IntegerField("Display Order");
-        orderField.setPlaceholder("0");
+        orderField = new IntegerField(I18n.t("app.dialog.field.order"));
+        orderField.setPlaceholder(I18n.t("app.dialog.field.order.placeholder"));
         orderField.setWidthFull();
 
-        descriptionField = new TextArea("Description");
-        descriptionField.setPlaceholder("Brief description of the application");
+        descriptionField = new TextArea(I18n.t("app.dialog.field.description"));
+        descriptionField.setPlaceholder(I18n.t("app.dialog.field.description.placeholder"));
         descriptionField.setWidthFull();
 
-        adminStatusCombo = new ComboBox<>("Admin status");
+        adminStatusCombo = new ComboBox<>(I18n.t("app.dialog.field.admin.status"));
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
         adminStatusCombo.setValue(IEnumEnabledBinaryStatus.Types.ENABLED);
         adminStatusCombo.setWidthFull();
@@ -120,7 +120,7 @@ public class CreateApplicationDialog extends BaseActionDialog {
                 .set("justify-content", "center");
         imagePlaceholder.add(new Icon(VaadinIcon.CAMERA));
 
-        uploadImageButton = new Button("Upload Image", e -> openCropperDialog());
+        uploadImageButton = new Button(I18n.t("app.dialog.field.upload.image"), e -> openCropperDialog());
         uploadImageButton.setIcon(new Icon(VaadinIcon.UPLOAD));
     }
 
@@ -174,19 +174,19 @@ public class CreateApplicationDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (nameField.getValue().isBlank()) {
-            append("Name is required");
+            append(I18n.t("app.dialog.field.name.required"));
             return false;
         }
         if (titleField.getValue().isBlank()) {
-            append("Title is required");
+            append(I18n.t("app.dialog.field.title.required"));
             return false;
         }
         if (urlField.getValue().isBlank()) {
-            append("URL is required");
+            append(I18n.t("app.dialog.field.url.required"));
             return false;
         }
         if (selectedImageFile == null) {
-            append("Please upload and crop an image for the application");
+            append(I18n.t("app.dialog.create.image.required"));
             return false;
         }
 
@@ -205,30 +205,30 @@ public class CreateApplicationDialog extends BaseActionDialog {
 
             ResponseEntity<ApplicationDto> createResponse = applicationService.create(newApp);
             if (!createResponse.getStatusCode().is2xxSuccessful() || createResponse.getBody() == null) {
-                append("Application creation failed: HTTP " + createResponse.getStatusCodeValue());
+                append(I18n.t("app.dialog.create.failed", createResponse.getStatusCodeValue()));
                 return false;
             }
 
             Long appId = createResponse.getBody().getId();
             if (appId == null) {
-                append("Created application has no ID");
+                append(I18n.t("app.dialog.create.no.id"));
                 return false;
             }
 
             ResponseEntity<ApplicationDto> uploadResponse = applicationImageService.uploadImage(appId, selectedImageFile);
             if (!uploadResponse.getStatusCode().is2xxSuccessful()) {
-                append("Application created but image upload failed: HTTP " + uploadResponse.getStatusCodeValue());
+                append(I18n.t("app.dialog.create.image.failed", uploadResponse.getStatusCodeValue()));
                 return false;
             }
 
-            append("Application created successfully with image");
+            append(I18n.t("app.dialog.create.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
 
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append("Failed operation: " + e.getMessage());
+            append(I18n.t("app.dialog.create.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

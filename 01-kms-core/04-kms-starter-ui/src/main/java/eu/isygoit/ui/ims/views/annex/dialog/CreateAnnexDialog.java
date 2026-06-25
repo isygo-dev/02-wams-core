@@ -7,6 +7,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.AnnexDto;
 import eu.isygoit.enums.IEnumLanguage;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AnnexService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import eu.isygoit.ui.ims.views.annex.AnnexManagementView;
@@ -29,12 +30,12 @@ public class CreateAnnexDialog extends BaseActionDialog {
     public CreateAnnexDialog(AnnexManagementView parentView,
                              AnnexService annexService,
                              Runnable onSuccess) {
-        super("Create Annex", onSuccess);
+        super(I18n.t("annex.dialog.create.title"), onSuccess);
         this.parentView = parentView;
         this.annexService = annexService;
         this.onSuccess = onSuccess;
 
-        setOkButtonText("Create");
+        setOkButtonText(I18n.t("annex.dialog.create.button"));
         setWidth("600px");
         setMaxWidth("95%");
 
@@ -43,32 +44,32 @@ public class CreateAnnexDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        tableCodeField = new TextField("Table code *");
+        tableCodeField = new TextField(I18n.t("annex.dialog.field.table.code"));
         tableCodeField.setRequiredIndicatorVisible(true);
-        tableCodeField.setPlaceholder("e.g., COUNTRY");
+        tableCodeField.setPlaceholder(I18n.t("annex.dialog.field.table.code.placeholder"));
         tableCodeField.setWidthFull();
 
-        languageCombo = new ComboBox<>("Language *");
+        languageCombo = new ComboBox<>(I18n.t("annex.dialog.field.language"));
         languageCombo.setItems(IEnumLanguage.Types.values());
         languageCombo.setRequiredIndicatorVisible(true);
-        languageCombo.setPlaceholder("Select language");
+        languageCombo.setPlaceholder(I18n.t("annex.dialog.field.language.placeholder"));
         languageCombo.setWidthFull();
 
-        valueField = new TextField("Value *");
+        valueField = new TextField(I18n.t("annex.dialog.field.value"));
         valueField.setRequiredIndicatorVisible(true);
-        valueField.setPlaceholder("Display value");
+        valueField.setPlaceholder(I18n.t("annex.dialog.field.value.placeholder"));
         valueField.setWidthFull();
 
-        descriptionArea = new TextArea("Description");
-        descriptionArea.setPlaceholder("Optional description");
+        descriptionArea = new TextArea(I18n.t("annex.dialog.field.description"));
+        descriptionArea.setPlaceholder(I18n.t("annex.dialog.field.description.placeholder"));
         descriptionArea.setWidthFull();
 
-        referenceField = new TextField("Reference");
-        referenceField.setPlaceholder("Optional reference code");
+        referenceField = new TextField(I18n.t("annex.dialog.field.reference"));
+        referenceField.setPlaceholder(I18n.t("annex.dialog.field.reference.placeholder"));
         referenceField.setWidthFull();
 
-        orderField = new IntegerField("Order");
-        orderField.setPlaceholder("Display order");
+        orderField = new IntegerField(I18n.t("annex.dialog.field.order"));
+        orderField.setPlaceholder(I18n.t("annex.dialog.field.order.placeholder"));
         orderField.setWidthFull();
     }
 
@@ -87,15 +88,15 @@ public class CreateAnnexDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (tableCodeField.getValue().isBlank()) {
-            append("Table code is required");
+            append(I18n.t("annex.dialog.field.table.code.required"));
             return false;
         }
         if (languageCombo.getValue() == null) {
-            append("Language is required");
+            append(I18n.t("annex.dialog.field.language.required"));
             return false;
         }
         if (valueField.getValue().isBlank()) {
-            append("Value is required");
+            append(I18n.t("annex.dialog.field.value.required"));
             return false;
         }
 
@@ -112,17 +113,17 @@ public class CreateAnnexDialog extends BaseActionDialog {
 
             ResponseEntity<AnnexDto> response = annexService.create(newAnnex);
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                append("Creation failed: HTTP " + response.getStatusCodeValue());
+                append(I18n.t("annex.dialog.create.failed", response.getStatusCodeValue()));
                 return false;
             }
 
-            append("Annex created successfully");
+            append(I18n.t("annex.dialog.create.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append("Failed operation: " + e.getMessage());
+            append(I18n.t("annex.dialog.create.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

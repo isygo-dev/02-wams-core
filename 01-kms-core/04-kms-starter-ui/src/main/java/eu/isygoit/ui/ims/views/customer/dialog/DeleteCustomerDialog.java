@@ -1,6 +1,7 @@
 package eu.isygoit.ui.ims.views.customer.dialog;
 
 import com.vaadin.flow.component.button.ButtonVariant;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.CustomerService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.customer.CustomerManagementView;
@@ -16,14 +17,14 @@ public class DeleteCustomerDialog extends PinBaseActionDialog {
                                 CustomerService customerService,
                                 Long customerId,
                                 Runnable onSuccess) {
-        super("Delete Customer",
-                "This action is irreversible. The customer and all associated data will be permanently removed.",
+        super(I18n.t("customer.dialog.delete.title"),
+                I18n.t("customer.dialog.delete.message"),
                 onSuccess);
         this.parentView = parentView;
         this.customerService = customerService;
         this.customerId = customerId;
 
-        setOkButtonText("Delete permanently");
+        setOkButtonText(I18n.t("customer.dialog.delete.button"));
         addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
@@ -31,19 +32,19 @@ public class DeleteCustomerDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append("Invalid confirmation code");
+            append(I18n.t("customer.dialog.delete.invalid.code"));
             return false;
         }
 
         parentView.showLoading(true);
         try {
             customerService.delete(customerId);
-            append("Customer deleted successfully");
+            append(I18n.t("customer.dialog.delete.success"));
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append("Failed operation: " + e.getMessage());
+            append(I18n.t("customer.dialog.delete.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

@@ -14,6 +14,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.TenantImageService;
 import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
@@ -55,14 +56,14 @@ public class UpdateTenantDialog extends BaseActionDialog {
                               TenantImageService tenantImageService,
                               TenantDto tenant,
                               Runnable onSuccess) {
-        super("Edit Tenant", onSuccess);
+        super(I18n.t("tenant.dialog.update.title"), onSuccess);
         this.parentView = parentView;
         this.tenantService = tenantService;
         this.tenantImageService = tenantImageService;
         this.tenant = tenant;
         this.onSuccess = onSuccess;
 
-        setOkButtonText("Save");
+        setOkButtonText(I18n.t("tenant.dialog.update.button"));
         setWidth("700px");
         setMaxWidth("95%");
 
@@ -73,31 +74,31 @@ public class UpdateTenantDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        nameField = new TextField("Name *");
+        nameField = new TextField(I18n.t("tenant.dialog.update.field.name"));
         nameField.setRequiredIndicatorVisible(true);
         nameField.setWidthFull();
 
-        codeField = new TextField("Code");
+        codeField = new TextField(I18n.t("tenant.dialog.update.field.code"));
         codeField.setWidthFull();
 
-        emailField = new EmailField("Email *");
+        emailField = new EmailField(I18n.t("tenant.dialog.update.field.email"));
         emailField.setRequiredIndicatorVisible(true);
         emailField.setWidthFull();
 
-        phoneField = new TextField("Phone *");
+        phoneField = new TextField(I18n.t("tenant.dialog.update.field.phone"));
         phoneField.setRequiredIndicatorVisible(true);
         phoneField.setWidthFull();
 
-        industryField = new TextField("Industry");
+        industryField = new TextField(I18n.t("tenant.dialog.update.field.industry"));
         industryField.setWidthFull();
 
-        urlField = new TextField("Website URL");
+        urlField = new TextField(I18n.t("tenant.dialog.update.field.website"));
         urlField.setWidthFull();
 
-        descriptionField = new TextArea("Description");
+        descriptionField = new TextArea(I18n.t("tenant.dialog.update.field.description"));
         descriptionField.setWidthFull();
 
-        adminStatusCombo = new ComboBox<>("Admin status");
+        adminStatusCombo = new ComboBox<>(I18n.t("tenant.dialog.update.field.admin.status"));
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
         adminStatusCombo.setWidthFull();
 
@@ -121,7 +122,7 @@ public class UpdateTenantDialog extends BaseActionDialog {
                 .set("justify-content", "center");
         imagePlaceholder.add(new Icon(VaadinIcon.CAMERA));
 
-        changeImageButton = new Button("Change Image", e -> openCropperDialog());
+        changeImageButton = new Button(I18n.t("tenant.dialog.field.change.image"), e -> openCropperDialog());
         changeImageButton.setIcon(new Icon(VaadinIcon.UPLOAD));
     }
 
@@ -215,15 +216,15 @@ public class UpdateTenantDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (nameField.getValue().isBlank()) {
-            append("Name is required");
+            append(I18n.t("tenant.dialog.update.field.name.required"));
             return false;
         }
         if (emailField.getValue().isBlank()) {
-            append("Email is required");
+            append(I18n.t("tenant.dialog.update.field.email.required"));
             return false;
         }
         if (phoneField.getValue().isBlank()) {
-            append("Phone is required");
+            append(I18n.t("tenant.dialog.update.field.phone.required"));
             return false;
         }
 
@@ -240,25 +241,25 @@ public class UpdateTenantDialog extends BaseActionDialog {
 
             ResponseEntity<TenantDto> response = tenantService.update(tenant.getId(), tenant);
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                append("Update failed: HTTP " + response.getStatusCodeValue());
+                append(I18n.t("tenant.dialog.update.failed", response.getStatusCodeValue()));
                 return false;
             }
 
             if (imageChanged && newImageFile != null) {
                 ResponseEntity<TenantDto> uploadResponse = tenantImageService.uploadImage(tenant.getId(), newImageFile);
                 if (!uploadResponse.getStatusCode().is2xxSuccessful()) {
-                    append("Tenant updated but image upload failed: HTTP " + uploadResponse.getStatusCodeValue());
+                    append(I18n.t("tenant.dialog.update.image.failed", uploadResponse.getStatusCodeValue()));
                     return false;
                 }
             }
 
-            append("Tenant updated successfully");
+            append(I18n.t("tenant.dialog.update.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append("Failed operation: " + e.getMessage());
+            append(I18n.t("tenant.dialog.update.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

@@ -4,6 +4,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.AppParameterDto;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AppParameterService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import eu.isygoit.ui.ims.views.parameters.ParameterManagementView;
@@ -24,12 +25,12 @@ public class CreateParameterDialog extends BaseActionDialog {
     public CreateParameterDialog(ParameterManagementView parentView,
                                  AppParameterService parameterService,
                                  Runnable onSuccess) {
-        super("Create Parameter", onSuccess);
+        super(I18n.t("parameter.dialog.create.title"), onSuccess);
         this.parentView = parentView;
         this.parameterService = parameterService;
         this.onSuccess = onSuccess;
 
-        setOkButtonText("Create");
+        setOkButtonText(I18n.t("parameter.dialog.create.button"));
         setWidth("600px");
         setMaxWidth("95%");
 
@@ -38,22 +39,22 @@ public class CreateParameterDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        nameField = new TextField("Name *");
+        nameField = new TextField(I18n.t("parameter.dialog.field.name"));
         nameField.setRequiredIndicatorVisible(true);
-        nameField.setPlaceholder("e.g., app.timeout");
+        nameField.setPlaceholder(I18n.t("parameter.dialog.field.name.placeholder"));
         nameField.setWidthFull();
 
-        valueField = new TextField("Value *");
+        valueField = new TextField(I18n.t("parameter.dialog.field.value"));
         valueField.setRequiredIndicatorVisible(true);
-        valueField.setPlaceholder("e.g., 30000");
+        valueField.setPlaceholder(I18n.t("parameter.dialog.field.value.placeholder"));
         valueField.setWidthFull();
 
-        tenantField = new TextField("Tenant");
-        tenantField.setPlaceholder("Leave empty for global parameter");
+        tenantField = new TextField(I18n.t("parameter.dialog.field.tenant"));
+        tenantField.setPlaceholder(I18n.t("parameter.dialog.field.tenant.placeholder"));
         tenantField.setWidthFull();
 
-        descriptionArea = new TextArea("Description");
-        descriptionArea.setPlaceholder("Optional description");
+        descriptionArea = new TextArea(I18n.t("parameter.dialog.field.description"));
+        descriptionArea.setPlaceholder(I18n.t("parameter.dialog.field.description.placeholder"));
         descriptionArea.setWidthFull();
     }
 
@@ -71,11 +72,11 @@ public class CreateParameterDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (nameField.getValue().isBlank()) {
-            append("Name is required");
+            append(I18n.t("parameter.dialog.field.name.required"));
             return false;
         }
         if (valueField.getValue().isBlank()) {
-            append("Value is required");
+            append(I18n.t("parameter.dialog.field.value.required"));
             return false;
         }
 
@@ -90,17 +91,17 @@ public class CreateParameterDialog extends BaseActionDialog {
 
             ResponseEntity<AppParameterDto> response = parameterService.create(newParam);
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                append("Creation failed: HTTP " + response.getStatusCodeValue());
+                append(I18n.t("parameter.dialog.create.failed", response.getStatusCodeValue()));
                 return false;
             }
 
-            append("Parameter created successfully");
+            append(I18n.t("parameter.dialog.create.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append("Failed operation: " + e.getMessage());
+            append(I18n.t("parameter.dialog.create.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

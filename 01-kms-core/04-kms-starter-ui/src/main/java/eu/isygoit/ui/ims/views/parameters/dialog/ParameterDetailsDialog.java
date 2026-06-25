@@ -12,6 +12,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.AppParameterDto;
 import eu.isygoit.helper.DateHelper;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AppParameterService;
 import eu.isygoit.ui.common.dialog.NoActionDialog;
 import eu.isygoit.ui.ims.views.parameters.ParameterManagementView;
@@ -27,7 +28,7 @@ public class ParameterDetailsDialog extends NoActionDialog {
     public ParameterDetailsDialog(ParameterManagementView parentView,
                                   AppParameterService parameterService,
                                   Long parameterId) {
-        super("Parameter Details");
+        super(I18n.t("parameter.details.title"));
         this.parentView = parentView;
         this.parameterService = parameterService;
         this.parameterId = parameterId;
@@ -49,14 +50,14 @@ public class ParameterDetailsDialog extends NoActionDialog {
             if (response.getBody() != null) {
                 buildContent(response.getBody());
             } else {
-                add(new Span("Parameter not found"));
+                add(new Span(I18n.t("parameter.details.not.found")));
                 addCloseButton();
             }
         } catch (FeignException ex) {
-            add(new Span("Failed to load details: " + extractErrorMessage(ex)));
+            add(new Span(I18n.t("parameter.details.load.error", extractErrorMessage(ex))));
             addCloseButton();
         } catch (Exception e) {
-            add(new Span("Error: " + e.getMessage()));
+            add(new Span(I18n.t("parameter.details.load.error", e.getMessage())));
             addCloseButton();
         } finally {
             parentView.showLoading(false);
@@ -74,16 +75,16 @@ public class ParameterDetailsDialog extends NoActionDialog {
                 .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
                 .set("gap", "var(--lumo-space-s)");
 
-        addFieldToGrid(infoGrid, VaadinIcon.KEY, "Name", param.getName());
-        addFieldToGrid(infoGrid, VaadinIcon.INPUT, "Value", param.getValue());
-        addFieldToGrid(infoGrid, VaadinIcon.BUILDING, "Tenant", param.getTenant());
-        addFieldToGrid(infoGrid, VaadinIcon.FILE_TEXT, "Description", param.getDescription());
-        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR, "Created", param.getCreateDate() != null ? DateHelper.formatToHumanReadable(param.getCreateDate()) : null);
-        addFieldToGrid(infoGrid, VaadinIcon.USER_CHECK, "Created by", param.getCreatedBy());
-        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR_O, "Updated", param.getUpdateDate() != null ? DateHelper.formatToHumanReadable(param.getUpdateDate()) : null);
-        addFieldToGrid(infoGrid, VaadinIcon.EDIT, "Updated by", param.getUpdatedBy());
+        addFieldToGrid(infoGrid, VaadinIcon.KEY, I18n.t("parameter.details.field.name"), param.getName());
+        addFieldToGrid(infoGrid, VaadinIcon.INPUT, I18n.t("parameter.details.field.value"), param.getValue());
+        addFieldToGrid(infoGrid, VaadinIcon.BUILDING, I18n.t("parameter.details.field.tenant"), param.getTenant());
+        addFieldToGrid(infoGrid, VaadinIcon.FILE_TEXT, I18n.t("parameter.details.field.description"), param.getDescription());
+        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR, I18n.t("parameter.details.field.created"), param.getCreateDate() != null ? DateHelper.formatToHumanReadable(param.getCreateDate()) : null);
+        addFieldToGrid(infoGrid, VaadinIcon.USER_CHECK, I18n.t("parameter.details.field.created.by"), param.getCreatedBy());
+        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR_O, I18n.t("parameter.details.field.updated"), param.getUpdateDate() != null ? DateHelper.formatToHumanReadable(param.getUpdateDate()) : null);
+        addFieldToGrid(infoGrid, VaadinIcon.EDIT, I18n.t("parameter.details.field.updated.by"), param.getUpdatedBy());
 
-        mainLayout.add(createSection("Parameter Information", infoGrid));
+        mainLayout.add(createSection(I18n.t("parameter.details.section.info"), infoGrid));
 
         add(mainLayout);
         addCloseButton();
@@ -129,7 +130,7 @@ public class ParameterDetailsDialog extends NoActionDialog {
     }
 
     private void addCloseButton() {
-        Button closeButton = new Button("Close", e -> close());
+        Button closeButton = new Button(I18n.t("parameter.details.close"), e -> close());
         closeButton.addClassName(LumoUtility.Margin.Top.MEDIUM);
         HorizontalLayout buttonBar = new HorizontalLayout(closeButton);
         buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);

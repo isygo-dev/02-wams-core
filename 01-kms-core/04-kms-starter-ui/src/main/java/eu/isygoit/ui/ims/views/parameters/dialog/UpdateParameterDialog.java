@@ -4,6 +4,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.AppParameterDto;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AppParameterService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import eu.isygoit.ui.ims.views.parameters.ParameterManagementView;
@@ -26,13 +27,13 @@ public class UpdateParameterDialog extends BaseActionDialog {
                                  AppParameterService parameterService,
                                  AppParameterDto parameter,
                                  Runnable onSuccess) {
-        super("Edit Parameter", onSuccess);
+        super(I18n.t("parameter.dialog.update.title"), onSuccess);
         this.parentView = parentView;
         this.parameterService = parameterService;
         this.parameter = parameter;
         this.onSuccess = onSuccess;
 
-        setOkButtonText("Save");
+        setOkButtonText(I18n.t("parameter.dialog.update.button"));
         setWidth("600px");
         setMaxWidth("95%");
 
@@ -42,19 +43,19 @@ public class UpdateParameterDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        nameField = new TextField("Name *");
+        nameField = new TextField(I18n.t("parameter.dialog.update.field.name"));
         nameField.setRequiredIndicatorVisible(true);
         nameField.setWidthFull();
 
-        valueField = new TextField("Value *");
+        valueField = new TextField(I18n.t("parameter.dialog.update.field.value"));
         valueField.setRequiredIndicatorVisible(true);
         valueField.setWidthFull();
 
-        tenantField = new TextField("Tenant");
-        tenantField.setPlaceholder("Leave empty for global parameter");
+        tenantField = new TextField(I18n.t("parameter.dialog.update.field.tenant"));
+        tenantField.setPlaceholder(I18n.t("parameter.dialog.update.field.tenant.placeholder"));
         tenantField.setWidthFull();
 
-        descriptionArea = new TextArea("Description");
+        descriptionArea = new TextArea(I18n.t("parameter.dialog.update.field.description"));
         descriptionArea.setWidthFull();
     }
 
@@ -79,11 +80,11 @@ public class UpdateParameterDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (nameField.getValue().isBlank()) {
-            append("Name is required");
+            append(I18n.t("parameter.dialog.update.field.name.required"));
             return false;
         }
         if (valueField.getValue().isBlank()) {
-            append("Value is required");
+            append(I18n.t("parameter.dialog.update.field.value.required"));
             return false;
         }
 
@@ -96,17 +97,17 @@ public class UpdateParameterDialog extends BaseActionDialog {
 
             ResponseEntity<AppParameterDto> response = parameterService.update(parameter.getId(), parameter);
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                append("Update failed: HTTP " + response.getStatusCodeValue());
+                append(I18n.t("parameter.dialog.update.failed", response.getStatusCodeValue()));
                 return false;
             }
 
-            append("Parameter updated successfully");
+            append(I18n.t("parameter.dialog.update.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append("Failed operation: " + e.getMessage());
+            append(I18n.t("parameter.dialog.update.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

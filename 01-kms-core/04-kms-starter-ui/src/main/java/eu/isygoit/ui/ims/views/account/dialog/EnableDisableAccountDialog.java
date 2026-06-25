@@ -2,6 +2,7 @@ package eu.isygoit.ui.ims.views.account.dialog;
 
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.account.AccountManagementView;
@@ -28,20 +29,20 @@ public class EnableDisableAccountDialog extends PinBaseActionDialog {
         this.accountId = accountId;
         this.currentlyEnabled = fetchCurrentStatus();
 
-        setOkButtonText(currentlyEnabled ? "Disable" : "Enable");
+        setOkButtonText(currentlyEnabled ? I18n.t("account.dialog.disable.button") : I18n.t("account.dialog.enable.button"));
         setWidth("450px");
     }
 
     private static String determineTitle(AccountService accountService, Long accountId) {
         boolean enabled = fetchCurrentStatusStatic(accountService, accountId);
-        return enabled ? "Disable account" : "Enable account";
+        return enabled ? I18n.t("account.dialog.disable.title") : I18n.t("account.dialog.enable.title");
     }
 
     private static String determineWarning(AccountService accountService, Long accountId) {
         boolean enabled = fetchCurrentStatusStatic(accountService, accountId);
         return enabled ?
-                "Are you sure you want to disable this account? The user will not be able to log in." :
-                "Are you sure you want to enable this account? The user will regain access.";
+                I18n.t("account.dialog.disable.message") :
+                I18n.t("account.dialog.enable.message");
     }
 
     private static boolean fetchCurrentStatusStatic(AccountService accountService, Long accountId) {
@@ -65,7 +66,7 @@ public class EnableDisableAccountDialog extends PinBaseActionDialog {
         try {
             ResponseEntity<AccountDto> response = accountService.findById(accountId);
             if (response.getBody() == null) {
-                append("Account not found");
+                append(I18n.t("account.dialog.toggle.not.found"));
                 return false;
             }
             AccountDto account = response.getBody();
@@ -75,16 +76,16 @@ public class EnableDisableAccountDialog extends PinBaseActionDialog {
 
             ResponseEntity<AccountDto> updateResponse = accountService.update(accountId, account);
             if (!updateResponse.getStatusCode().is2xxSuccessful()) {
-                append("Failed to update account status");
+                append(I18n.t("account.dialog.toggle.failed"));
                 return false;
             }
 
-            append(currentlyEnabled ? "Account disabled" : "Account enabled");
+            append(currentlyEnabled ? I18n.t("account.dialog.disable.success") : I18n.t("account.dialog.enable.success"));
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append("Failed operation: " + e.getMessage());
+            append(I18n.t("account.dialog.toggle.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

@@ -2,6 +2,7 @@ package eu.isygoit.ui.ims.views.customer.dialog;
 
 import eu.isygoit.dto.data.CustomerDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.CustomerService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.customer.CustomerManagementView;
@@ -21,10 +22,10 @@ public class ToggleCustomerStatusDialog extends PinBaseActionDialog {
                                       IEnumEnabledBinaryStatus.Types currentStatus,
                                       Runnable onSuccess) {
         super(
-                currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? "Disable Customer" : "Enable Customer",
+                currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("customer.dialog.toggle.title.disable") : I18n.t("customer.dialog.toggle.title.enable"),
                 currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED
-                        ? "This will deactivate the customer. Are you sure?"
-                        : "This will reactivate the customer. Are you sure?",
+                        ? I18n.t("customer.dialog.toggle.message.disable")
+                        : I18n.t("customer.dialog.toggle.message.enable"),
                 onSuccess,
                 false // simple confirmation, no PIN
         );
@@ -33,7 +34,7 @@ public class ToggleCustomerStatusDialog extends PinBaseActionDialog {
         this.customerId = customerId;
         this.currentStatus = currentStatus;
 
-        setOkButtonText(currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? "Disable" : "Enable");
+        setOkButtonText(currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("customer.dialog.toggle.button.disable") : I18n.t("customer.dialog.toggle.button.enable"));
         setWidth("450px");
     }
 
@@ -47,16 +48,16 @@ public class ToggleCustomerStatusDialog extends PinBaseActionDialog {
 
             ResponseEntity<CustomerDto> response = customerService.updateCustomerStatus(customerId, newStatus);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append("Failed to update customer status: HTTP " + response.getStatusCodeValue());
+                append(I18n.t("customer.dialog.toggle.failed", response.getStatusCodeValue()));
                 return false;
             }
 
-            append("Customer " + (newStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? "enabled" : "disabled") + " successfully");
+            append(I18n.t("customer.dialog.toggle.success." + (newStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? "enable" : "disable")));
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append("Operation failed: " + e.getMessage());
+            append(I18n.t("customer.dialog.toggle.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

@@ -22,6 +22,7 @@ import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.MinAccountDto;
 import eu.isygoit.enums.IEnumAccountSystemStatus;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountImageService;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.remote.ims.TenantService;
@@ -52,7 +53,7 @@ public class AccountManagementView extends ManagementVerticalView {
     private final TenantService tenantService;
 
     private final Div cardsContainer = new Div();
-    private final Button createButton = new Button("Create account", new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button createButton = new Button(I18n.t("account.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
     private final ComboBox<StatusFilterOption> statusFilter = new ComboBox<>();
@@ -85,7 +86,7 @@ public class AccountManagementView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("account-management-view");
 
-        H2 header = new H2("Account Management");
+        H2 header = new H2(I18n.t("account.view.title"));
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         add(header);
@@ -110,12 +111,12 @@ public class AccountManagementView extends ManagementVerticalView {
 
     private void initEventHandlers() {
         createButton.addClickListener(e -> openCreateAccountDialog());
-        createButton.setTooltipText("Create a new account");
+        createButton.setTooltipText(I18n.t("account.view.create.tooltip"));
 
         refreshButton.addClickListener(e -> loadPage(0));
-        refreshButton.setTooltipText("Refresh accounts from server");
+        refreshButton.setTooltipText(I18n.t("account.view.refresh.tooltip"));
 
-        searchField.setPlaceholder("Search by email or full name");
+        searchField.setPlaceholder(I18n.t("account.view.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.addValueChangeListener(e -> {
@@ -124,17 +125,17 @@ public class AccountManagementView extends ManagementVerticalView {
         });
 
         statusFilter.setItems(
-                new StatusFilterOption("All", null, null),
-                new StatusFilterOption("Admin Enabled", IEnumEnabledBinaryStatus.Types.ENABLED, null),
-                new StatusFilterOption("Admin Disabled", IEnumEnabledBinaryStatus.Types.DISABLED, null),
-                new StatusFilterOption("System Expired", null, IEnumAccountSystemStatus.Types.EXPIRED),
-                new StatusFilterOption("System Registered", null, IEnumAccountSystemStatus.Types.REGISTRED),
-                new StatusFilterOption("System Temporarily Locked", null, IEnumAccountSystemStatus.Types.TEM_LOCKED),
-                new StatusFilterOption("System Idle", null, IEnumAccountSystemStatus.Types.IDLE),
-                new StatusFilterOption("System Locked", null, IEnumAccountSystemStatus.Types.LOCKED)
+                new StatusFilterOption(I18n.t("account.view.status.all"), null, null),
+                new StatusFilterOption(I18n.t("account.view.status.admin.enabled"), IEnumEnabledBinaryStatus.Types.ENABLED, null),
+                new StatusFilterOption(I18n.t("account.view.status.admin.disabled"), IEnumEnabledBinaryStatus.Types.DISABLED, null),
+                new StatusFilterOption(I18n.t("account.view.status.system.expired"), null, IEnumAccountSystemStatus.Types.EXPIRED),
+                new StatusFilterOption(I18n.t("account.view.status.system.registered"), null, IEnumAccountSystemStatus.Types.REGISTRED),
+                new StatusFilterOption(I18n.t("account.view.status.system.temp.locked"), null, IEnumAccountSystemStatus.Types.TEM_LOCKED),
+                new StatusFilterOption(I18n.t("account.view.status.system.idle"), null, IEnumAccountSystemStatus.Types.IDLE),
+                new StatusFilterOption(I18n.t("account.view.status.system.locked"), null, IEnumAccountSystemStatus.Types.LOCKED)
         );
         statusFilter.setItemLabelGenerator(StatusFilterOption::label);
-        statusFilter.setValue(new StatusFilterOption("All", null, null));
+        statusFilter.setValue(new StatusFilterOption(I18n.t("account.view.status.all"), null, null));
         statusFilter.addValueChangeListener(e -> {
             if (e.getValue() != null) {
                 currentAdminStatus = e.getValue().adminStatus;
@@ -180,11 +181,11 @@ public class AccountManagementView extends ManagementVerticalView {
             filterAndDisplayCards();
         } catch (FeignException ex) {
             String errorMsg = extractErrorMessage(ex);
-            Notification.show("Failed to load accounts: " + errorMsg, 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("account.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load accounts", ex);
         } catch (Exception e) {
-            Notification.show("Failed to load accounts: " + e.getMessage(), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("account.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load accounts", e);
         } finally {
@@ -217,8 +218,8 @@ public class AccountManagementView extends ManagementVerticalView {
             Icon emptyIcon = VaadinIcon.USER.create();
             emptyIcon.setSize("48px");
             emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-            H4 emptyTitle = new H4("No accounts found");
-            Paragraph emptyDesc = new Paragraph("Try adjusting your search or filter criteria.");
+            H4 emptyTitle = new H4(I18n.t("account.view.empty.title"));
+            Paragraph emptyDesc = new Paragraph(I18n.t("account.view.empty.description"));
             emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);
@@ -230,8 +231,8 @@ public class AccountManagementView extends ManagementVerticalView {
     }
 
     private void updatePaginationDisplay() {
-        pageInfoLabel.setText(String.format("Page %d / %d", currentPage + 1, totalPages));
-        totalCountLabel.setText(String.format("%d total accounts", totalElements));
+        pageInfoLabel.setText(I18n.t("account.view.page.info", currentPage + 1, totalPages));
+        totalCountLabel.setText(I18n.t("account.view.total.count", totalElements));
         prevButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(currentPage + 1 < totalPages);
     }
@@ -249,7 +250,7 @@ public class AccountManagementView extends ManagementVerticalView {
         leftGroup.setSpacing(true);
         leftGroup.setAlignItems(FlexComponent.Alignment.END);
         searchField.setWidth("200px");
-        statusFilter.setPlaceholder("Status filter");
+        statusFilter.setPlaceholder(I18n.t("account.view.status.filter.placeholder"));
         statusFilter.setWidth("180px");
         leftGroup.add(searchField, statusFilter);
 
@@ -283,7 +284,7 @@ public class AccountManagementView extends ManagementVerticalView {
 
     public void openResetPasswordDialog(Long accountId, String email) {
         new ResetPasswordDialog(this, accountService, accountId, email, () -> {
-            Notification.show("Password reset email sent (if supported).", 3000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("account.dialog.reset.success", email), 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         }).open();
     }

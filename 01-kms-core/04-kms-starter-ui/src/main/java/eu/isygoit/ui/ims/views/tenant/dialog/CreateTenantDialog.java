@@ -14,6 +14,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.TenantImageService;
 import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
@@ -48,13 +49,13 @@ public class CreateTenantDialog extends BaseActionDialog {
                               TenantService tenantService,
                               TenantImageService tenantImageService,
                               Runnable onSuccess) {
-        super("Create Tenant", onSuccess);
+        super(I18n.t("tenant.dialog.create.title"), onSuccess);
         this.parentView = parentView;
         this.tenantService = tenantService;
         this.tenantImageService = tenantImageService;
         this.onSuccess = onSuccess;
 
-        setOkButtonText("Create");
+        setOkButtonText(I18n.t("tenant.dialog.create.button"));
         setWidth("700px");
         setMaxWidth("95%");
 
@@ -63,38 +64,38 @@ public class CreateTenantDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        nameField = new TextField("Name *");
+        nameField = new TextField(I18n.t("tenant.dialog.field.name"));
         nameField.setRequiredIndicatorVisible(true);
-        nameField.setPlaceholder("Acme Corporation");
+        nameField.setPlaceholder(I18n.t("tenant.dialog.field.name.placeholder"));
         nameField.setWidthFull();
 
-        codeField = new TextField("Code (unique)");
-        codeField.setPlaceholder("acme-corp");
+        codeField = new TextField(I18n.t("tenant.dialog.field.code"));
+        codeField.setPlaceholder(I18n.t("tenant.dialog.field.code.placeholder"));
         codeField.setWidthFull();
 
-        emailField = new EmailField("Email *");
+        emailField = new EmailField(I18n.t("tenant.dialog.field.email"));
         emailField.setRequiredIndicatorVisible(true);
-        emailField.setPlaceholder("contact@acme.com");
+        emailField.setPlaceholder(I18n.t("tenant.dialog.field.email.placeholder"));
         emailField.setWidthFull();
 
-        phoneField = new TextField("Phone *");
+        phoneField = new TextField(I18n.t("tenant.dialog.field.phone"));
         phoneField.setRequiredIndicatorVisible(true);
-        phoneField.setPlaceholder("+1 234 567 8900");
+        phoneField.setPlaceholder(I18n.t("tenant.dialog.field.phone.placeholder"));
         phoneField.setWidthFull();
 
-        industryField = new TextField("Industry");
-        industryField.setPlaceholder("Technology");
+        industryField = new TextField(I18n.t("tenant.dialog.field.industry"));
+        industryField.setPlaceholder(I18n.t("tenant.dialog.field.industry.placeholder"));
         industryField.setWidthFull();
 
-        urlField = new TextField("Website URL");
-        urlField.setPlaceholder("https://acme.com");
+        urlField = new TextField(I18n.t("tenant.dialog.field.website"));
+        urlField.setPlaceholder(I18n.t("tenant.dialog.field.website.placeholder"));
         urlField.setWidthFull();
 
-        descriptionField = new TextArea("Description");
-        descriptionField.setPlaceholder("Brief description of the tenant");
+        descriptionField = new TextArea(I18n.t("tenant.dialog.field.description"));
+        descriptionField.setPlaceholder(I18n.t("tenant.dialog.field.description.placeholder"));
         descriptionField.setWidthFull();
 
-        adminStatusCombo = new ComboBox<>("Admin status");
+        adminStatusCombo = new ComboBox<>(I18n.t("tenant.dialog.field.admin.status"));
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
         adminStatusCombo.setValue(IEnumEnabledBinaryStatus.Types.ENABLED);
         adminStatusCombo.setWidthFull();
@@ -120,7 +121,7 @@ public class CreateTenantDialog extends BaseActionDialog {
                 .set("justify-content", "center");
         imagePlaceholder.add(new Icon(VaadinIcon.CAMERA));
 
-        uploadImageButton = new Button("Upload Image", e -> openCropperDialog());
+        uploadImageButton = new Button(I18n.t("tenant.dialog.field.upload.image"), e -> openCropperDialog());
         uploadImageButton.setIcon(new Icon(VaadinIcon.UPLOAD));
     }
 
@@ -174,19 +175,19 @@ public class CreateTenantDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (nameField.getValue().isBlank()) {
-            append("Name is required");
+            append(I18n.t("tenant.dialog.field.name.required"));
             return false;
         }
         if (emailField.getValue().isBlank()) {
-            append("Email is required");
+            append(I18n.t("tenant.dialog.field.email.required"));
             return false;
         }
         if (phoneField.getValue().isBlank()) {
-            append("Phone is required");
+            append(I18n.t("tenant.dialog.field.phone.required"));
             return false;
         }
         if (selectedImageFile == null) {
-            append("Please upload and crop an image for the tenant");
+            append(I18n.t("tenant.dialog.create.image.required"));
             return false;
         }
 
@@ -205,30 +206,30 @@ public class CreateTenantDialog extends BaseActionDialog {
 
             ResponseEntity<TenantDto> createResponse = tenantService.create(newTenant);
             if (!createResponse.getStatusCode().is2xxSuccessful() || createResponse.getBody() == null) {
-                append("Tenant creation failed: HTTP " + createResponse.getStatusCodeValue());
+                append(I18n.t("tenant.dialog.create.failed", createResponse.getStatusCodeValue()));
                 return false;
             }
 
             Long tenantId = createResponse.getBody().getId();
             if (tenantId == null) {
-                append("Created tenant has no ID");
+                append(I18n.t("tenant.dialog.create.no.id"));
                 return false;
             }
 
             ResponseEntity<TenantDto> uploadResponse = tenantImageService.uploadImage(tenantId, selectedImageFile);
             if (!uploadResponse.getStatusCode().is2xxSuccessful()) {
-                append("Tenant created but image upload failed: HTTP " + uploadResponse.getStatusCodeValue());
+                append(I18n.t("tenant.dialog.create.image.failed", uploadResponse.getStatusCodeValue()));
                 return false;
             }
 
-            append("Tenant created successfully with image");
+            append(I18n.t("tenant.dialog.create.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
 
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append("Failed operation: " + e.getMessage());
+            append(I18n.t("tenant.dialog.create.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

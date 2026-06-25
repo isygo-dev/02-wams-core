@@ -12,6 +12,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.AnnexDto;
 import eu.isygoit.helper.DateHelper;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AnnexService;
 import eu.isygoit.ui.common.dialog.NoActionDialog;
 import eu.isygoit.ui.ims.views.annex.AnnexManagementView;
@@ -27,7 +28,7 @@ public class AnnexDetailsDialog extends NoActionDialog {
     public AnnexDetailsDialog(AnnexManagementView parentView,
                               AnnexService annexService,
                               Long annexId) {
-        super("Annex Details");
+        super(I18n.t("annex.details.title"));
         this.parentView = parentView;
         this.annexService = annexService;
         this.annexId = annexId;
@@ -49,14 +50,14 @@ public class AnnexDetailsDialog extends NoActionDialog {
             if (response.getBody() != null) {
                 buildContent(response.getBody());
             } else {
-                add(new Span("Annex not found"));
+                add(new Span(I18n.t("annex.details.not.found")));
                 addCloseButton();
             }
         } catch (FeignException ex) {
-            add(new Span("Failed to load details: " + extractErrorMessage(ex)));
+            add(new Span(I18n.t("annex.details.load.error", extractErrorMessage(ex))));
             addCloseButton();
         } catch (Exception e) {
-            add(new Span("Error: " + e.getMessage()));
+            add(new Span(I18n.t("annex.details.load.error", e.getMessage())));
             addCloseButton();
         } finally {
             parentView.showLoading(false);
@@ -74,18 +75,18 @@ public class AnnexDetailsDialog extends NoActionDialog {
                 .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
                 .set("gap", "var(--lumo-space-s)");
 
-        addFieldToGrid(infoGrid, VaadinIcon.CODE, "Table code", annex.getTableCode());
-        addFieldToGrid(infoGrid, VaadinIcon.LOCATION_ARROW_CIRCLE, "Language", annex.getLanguage() != null ? annex.getLanguage().name() : null);
-        addFieldToGrid(infoGrid, VaadinIcon.FONT, "Value", annex.getValue());
-        addFieldToGrid(infoGrid, VaadinIcon.FILE_TEXT, "Description", annex.getDescription());
-        addFieldToGrid(infoGrid, VaadinIcon.LINK, "Reference", annex.getReference());
-        addFieldToGrid(infoGrid, VaadinIcon.SORT, "Order", annex.getAnnexOrder() != null ? String.valueOf(annex.getAnnexOrder()) : null);
-        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR, "Created", annex.getCreateDate() != null ? DateHelper.formatToHumanReadable(annex.getCreateDate()) : null);
-        addFieldToGrid(infoGrid, VaadinIcon.USER_CHECK, "Created by", annex.getCreatedBy());
-        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR_O, "Updated", annex.getUpdateDate() != null ? DateHelper.formatToHumanReadable(annex.getUpdateDate()) : null);
-        addFieldToGrid(infoGrid, VaadinIcon.EDIT, "Updated by", annex.getUpdatedBy());
+        addFieldToGrid(infoGrid, VaadinIcon.CODE, I18n.t("annex.details.field.table.code"), annex.getTableCode());
+        addFieldToGrid(infoGrid, VaadinIcon.LOCATION_ARROW_CIRCLE, I18n.t("annex.details.field.language"), annex.getLanguage() != null ? annex.getLanguage().name() : null);
+        addFieldToGrid(infoGrid, VaadinIcon.FONT, I18n.t("annex.details.field.value"), annex.getValue());
+        addFieldToGrid(infoGrid, VaadinIcon.FILE_TEXT, I18n.t("annex.details.field.description"), annex.getDescription());
+        addFieldToGrid(infoGrid, VaadinIcon.LINK, I18n.t("annex.details.field.reference"), annex.getReference());
+        addFieldToGrid(infoGrid, VaadinIcon.SORT, I18n.t("annex.details.field.order"), annex.getAnnexOrder() != null ? String.valueOf(annex.getAnnexOrder()) : null);
+        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR, I18n.t("annex.details.field.created"), annex.getCreateDate() != null ? DateHelper.formatToHumanReadable(annex.getCreateDate()) : null);
+        addFieldToGrid(infoGrid, VaadinIcon.USER_CHECK, I18n.t("annex.details.field.created.by"), annex.getCreatedBy());
+        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR_O, I18n.t("annex.details.field.updated"), annex.getUpdateDate() != null ? DateHelper.formatToHumanReadable(annex.getUpdateDate()) : null);
+        addFieldToGrid(infoGrid, VaadinIcon.EDIT, I18n.t("annex.details.field.updated.by"), annex.getUpdatedBy());
 
-        mainLayout.add(createSection("Annex Information", infoGrid));
+        mainLayout.add(createSection(I18n.t("annex.details.section.info"), infoGrid));
 
         add(mainLayout);
         addCloseButton();
@@ -131,7 +132,7 @@ public class AnnexDetailsDialog extends NoActionDialog {
     }
 
     private void addCloseButton() {
-        Button closeButton = new Button("Close", e -> close());
+        Button closeButton = new Button(I18n.t("annex.details.close"), e -> close());
         closeButton.addClassName(LumoUtility.Margin.Top.MEDIUM);
         HorizontalLayout buttonBar = new HorizontalLayout(closeButton);
         buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);

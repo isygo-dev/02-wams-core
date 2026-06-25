@@ -1,6 +1,7 @@
 package eu.isygoit.ui.ims.views.roleinfo.dialog;
 
 import com.vaadin.flow.component.button.ButtonVariant;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.RoleInfoService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.roleinfo.RoleManagementView;
@@ -16,14 +17,14 @@ public class DeleteRoleDialog extends PinBaseActionDialog {
                             RoleInfoService roleService,
                             Long roleId,
                             Runnable onSuccess) {
-        super("Delete Role",
-                "This action is irreversible. The role and all its assignments will be permanently removed.",
+        super(I18n.t("role.dialog.delete.title"),
+                I18n.t("role.dialog.delete.message"),
                 onSuccess);
         this.parentView = parentView;
         this.roleService = roleService;
         this.roleId = roleId;
 
-        setOkButtonText("Delete permanently");
+        setOkButtonText(I18n.t("role.dialog.delete.button"));
         addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
@@ -31,19 +32,19 @@ public class DeleteRoleDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append("Invalid confirmation code");
+            append(I18n.t("role.dialog.delete.invalid.code"));
             return false;
         }
 
         parentView.showLoading(true);
         try {
             roleService.delete(roleId);
-            append("Role deleted successfully");
+            append(I18n.t("role.dialog.delete.success"));
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append("Failed operation: " + e.getMessage());
+            append(I18n.t("role.dialog.delete.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

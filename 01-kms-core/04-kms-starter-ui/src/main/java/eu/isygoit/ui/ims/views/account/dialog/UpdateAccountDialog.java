@@ -18,6 +18,7 @@ import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.enums.IEnumLanguage;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountImageService;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.remote.ims.TenantService;
@@ -71,7 +72,7 @@ public class UpdateAccountDialog extends BaseActionDialog {
                                TenantService tenantService,
                                Long accountId,
                                Runnable onSuccess) {
-        super("Edit Account", onSuccess);
+        super(I18n.t("account.dialog.update.title"), onSuccess);
         this.parentView = parentView;
         this.accountService = accountService;
         this.accountImageService = accountImageService;
@@ -79,7 +80,7 @@ public class UpdateAccountDialog extends BaseActionDialog {
         this.accountId = accountId;
         this.onSuccess = onSuccess;
 
-        setOkButtonText("Save");
+        setOkButtonText(I18n.t("account.dialog.update.button"));
         setWidth("700px");
         setMaxWidth("95%");
 
@@ -90,7 +91,7 @@ public class UpdateAccountDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        tenantCombo = new ComboBox<>("Tenant *");
+        tenantCombo = new ComboBox<>(I18n.t("account.dialog.field.tenant"));
         tenantCombo.setReadOnly(true);
         tenantCombo.setRequiredIndicatorVisible(true);
         tenantCombo.setItemLabelGenerator(item -> {
@@ -100,7 +101,7 @@ public class UpdateAccountDialog extends BaseActionDialog {
         tenantCombo.setAllowCustomValue(false);
         tenantCombo.setWidthFull();
 
-        accountTypeCombo = new ComboBox<>("Account type *");
+        accountTypeCombo = new ComboBox<>(I18n.t("account.dialog.field.account.type"));
         accountTypeCombo.setRequiredIndicatorVisible(true);
         accountTypeCombo.setItems(
                 AccountTypeConstants.SUPER_ADMIN,
@@ -108,33 +109,33 @@ public class UpdateAccountDialog extends BaseActionDialog {
                 AccountTypeConstants.TENANT_USER
         );
         accountTypeCombo.setAllowCustomValue(true);
-        accountTypeCombo.setPlaceholder("Select or type account type");
+        accountTypeCombo.setPlaceholder(I18n.t("account.dialog.field.account.type.placeholder"));
         accountTypeCombo.setWidthFull();
 
-        emailField = new EmailField("Email *");
+        emailField = new EmailField(I18n.t("account.dialog.field.email"));
         emailField.setRequiredIndicatorVisible(true);
         emailField.setWidthFull();
 
-        firstNameField = new TextField("First name");
+        firstNameField = new TextField(I18n.t("account.dialog.field.first.name"));
         firstNameField.setWidthFull();
 
-        lastNameField = new TextField("Last name");
+        lastNameField = new TextField(I18n.t("account.dialog.field.last.name"));
         lastNameField.setWidthFull();
 
-        phoneNumberField = new TextField("Phone number");
+        phoneNumberField = new TextField(I18n.t("account.dialog.field.phone"));
         phoneNumberField.setWidthFull();
 
-        languageCombo = new ComboBox<>("Language");
+        languageCombo = new ComboBox<>(I18n.t("account.dialog.field.language"));
         languageCombo.setItems(IEnumLanguage.Types.values());
         languageCombo.setWidthFull();
 
-        functionRoleField = new TextField("Function role");
+        functionRoleField = new TextField(I18n.t("account.dialog.field.function.role"));
         functionRoleField.setWidthFull();
 
-        isAdminCheckbox = new Checkbox("Is administrator");
+        isAdminCheckbox = new Checkbox(I18n.t("account.dialog.field.is.admin"));
         isAdminCheckbox.setWidthFull();
 
-        adminStatusCombo = new ComboBox<>("Admin status");
+        adminStatusCombo = new ComboBox<>(I18n.t("account.dialog.field.admin.status"));
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
         adminStatusCombo.setWidthFull();
 
@@ -159,7 +160,7 @@ public class UpdateAccountDialog extends BaseActionDialog {
                 .set("justify-content", "center");
         imagePlaceholder.add(new Icon(VaadinIcon.CAMERA));
 
-        changeImageButton = new Button("Change Image", e -> openCropperDialog());
+        changeImageButton = new Button(I18n.t("account.dialog.field.change.image"), e -> openCropperDialog());
         changeImageButton.setIcon(new Icon(VaadinIcon.UPLOAD));
     }
 
@@ -172,9 +173,9 @@ public class UpdateAccountDialog extends BaseActionDialog {
                 tenantCombo.setItems(tenants.stream().map(TenantDto::getCode).collect(Collectors.toList()));
             }
         } catch (FeignException ex) {
-            append("Failed to load tenants: " + extractErrorMessage(ex));
+            append(I18n.t("account.dialog.load.tenants.error", extractErrorMessage(ex)));
         } catch (Exception e) {
-            append("Failed to load tenants: " + e.getMessage());
+            append(I18n.t("account.dialog.load.tenants.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }
@@ -268,14 +269,14 @@ public class UpdateAccountDialog extends BaseActionDialog {
                 populateFields();
                 loadExistingImage();
             } else {
-                append("Account not found");
+                append(I18n.t("account.dialog.update.not.found"));
                 close();
             }
         } catch (FeignException ex) {
-            append("Failed to load account: " + extractErrorMessage(ex));
+            append(I18n.t("account.dialog.update.load.error", extractErrorMessage(ex)));
             close();
         } catch (Exception e) {
-            append("Failed to load account: " + e.getMessage());
+            append(I18n.t("account.dialog.update.load.error", e.getMessage()));
             close();
         } finally {
             parentView.showLoading(false);
@@ -300,15 +301,15 @@ public class UpdateAccountDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (tenantCombo.getValue() == null || tenantCombo.getValue().isBlank()) {
-            append("Tenant is required");
+            append(I18n.t("account.dialog.tenant.required"));
             return false;
         }
         if (accountTypeCombo.getValue() == null || accountTypeCombo.getValue().isBlank()) {
-            append("Account type is required");
+            append(I18n.t("account.dialog.account.type.required"));
             return false;
         }
         if (emailField.getValue().isBlank()) {
-            append("Email is required");
+            append(I18n.t("account.dialog.email.required"));
             return false;
         }
 
@@ -331,25 +332,25 @@ public class UpdateAccountDialog extends BaseActionDialog {
 
             ResponseEntity<AccountDto> response = accountService.update(accountId, currentAccount);
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                append("Update failed: HTTP " + response.getStatusCodeValue());
+                append(I18n.t("account.dialog.update.failed", response.getStatusCodeValue()));
                 return false;
             }
 
             if (imageChanged && newImageFile != null) {
                 ResponseEntity<AccountDto> uploadResponse = accountImageService.uploadImage(accountId, newImageFile);
                 if (!uploadResponse.getStatusCode().is2xxSuccessful()) {
-                    append("Account updated but image upload failed: HTTP " + uploadResponse.getStatusCodeValue());
+                    append(I18n.t("account.dialog.update.image.failed", uploadResponse.getStatusCodeValue()));
                     return false;
                 }
             }
 
-            append("Account updated successfully");
+            append(I18n.t("account.dialog.update.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append("Failed operation: " + e.getMessage());
+            append(I18n.t("account.dialog.update.failed", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

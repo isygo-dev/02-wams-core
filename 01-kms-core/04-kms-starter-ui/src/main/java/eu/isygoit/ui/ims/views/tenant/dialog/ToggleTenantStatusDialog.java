@@ -2,6 +2,7 @@ package eu.isygoit.ui.ims.views.tenant.dialog;
 
 import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.tenant.TenantManagementView;
@@ -21,10 +22,10 @@ public class ToggleTenantStatusDialog extends PinBaseActionDialog {
                                     IEnumEnabledBinaryStatus.Types currentStatus,
                                     Runnable onSuccess) {
         super(
-                currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? "Disable Tenant" : "Enable Tenant",
+                currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("tenant.dialog.toggle.title.disable") : I18n.t("tenant.dialog.toggle.title.enable"),
                 currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED
-                        ? "This will deactivate the tenant. All associated users will lose access. Are you sure?"
-                        : "This will reactivate the tenant and restore full access. Are you sure?",
+                        ? I18n.t("tenant.dialog.toggle.message.disable")
+                        : I18n.t("tenant.dialog.toggle.message.enable"),
                 onSuccess,
                 false // simple confirmation, no PIN
         );
@@ -33,7 +34,7 @@ public class ToggleTenantStatusDialog extends PinBaseActionDialog {
         this.tenantId = tenantId;
         this.currentStatus = currentStatus;
 
-        setOkButtonText(currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? "Disable" : "Enable");
+        setOkButtonText(currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("tenant.dialog.toggle.button.disable") : I18n.t("tenant.dialog.toggle.button.enable"));
         setWidth("450px");
     }
 
@@ -47,16 +48,16 @@ public class ToggleTenantStatusDialog extends PinBaseActionDialog {
 
             ResponseEntity<TenantDto> response = tenantService.updateAdminStatus(tenantId, newStatus);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append("Failed to update tenant status: HTTP " + response.getStatusCodeValue());
+                append(I18n.t("tenant.dialog.toggle.failed", response.getStatusCodeValue()));
                 return false;
             }
 
-            append("Tenant " + (newStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? "enabled" : "disabled") + " successfully");
+            append(I18n.t("tenant.dialog.toggle.success." + (newStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? "enable" : "disable")));
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append("Operation failed: " + e.getMessage());
+            append(I18n.t("tenant.dialog.toggle.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

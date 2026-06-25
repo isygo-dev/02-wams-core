@@ -11,6 +11,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.AnnexDto;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AnnexService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.ims.views.annex.dialog.AnnexDetailsDialog;
@@ -57,8 +58,8 @@ public class AnnexCard extends BaseCard<AnnexManagementView, AnnexService> {
 
         Span titleSpan = buildTitleSpan(annex.getTableCode(), annex.getValue());
         Span langChip = buildStatusChip(
-                annex.getLanguage() != null ? annex.getLanguage().name() : "UNKNOWN",
-                annex.getLanguage() != null ? annex.getLanguage().name() : "UNKNOWN"
+                annex.getLanguage() != null ? annex.getLanguage().name() : I18n.t("annex.card.status.unknown"),
+                annex.getLanguage() != null ? annex.getLanguage().name() : I18n.t("annex.card.status.unknown")
         );
         row1.add(titleSpan, langChip);
 
@@ -79,15 +80,15 @@ public class AnnexCard extends BaseCard<AnnexManagementView, AnnexService> {
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, "View full annex details");
+        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("annex.card.details.tooltip"));
         detailsBtn.addClickListener(e -> new AnnexDetailsDialog(parentView, objectService, annex.getId()).open());
 
-        Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit annex");
+        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("annex.card.edit.tooltip"));
         editBtn.addClickListener(e -> parentView.openUpdateAnnexDialog(annex, () -> {
             if (onRefresh != null) onRefresh.run();
         }));
 
-        Button deleteBtn = createIconButton(VaadinIcon.TRASH, "Delete annex");
+        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("annex.card.delete.tooltip"));
         deleteBtn.addClickListener(e -> new DeleteAnnexDialog(parentView, objectService, annex.getId(), () -> {
             if (onRefresh != null) onRefresh.run();
         }).open());
@@ -102,16 +103,16 @@ public class AnnexCard extends BaseCard<AnnexManagementView, AnnexService> {
         body.setPadding(false);
         body.getStyle().set("margin-top", "var(--lumo-space-s)");
 
-        body.add(createIconRow(VaadinIcon.CODE, "Table code", annex.getTableCode()));
-        body.add(createIconRow(VaadinIcon.FONT, "Value", annex.getValue()));
+        body.add(createIconRow(VaadinIcon.CODE, I18n.t("annex.card.table.code"), annex.getTableCode()));
+        body.add(createIconRow(VaadinIcon.FONT, I18n.t("annex.card.value"), annex.getValue()));
         if (annex.getDescription() != null && !annex.getDescription().isBlank()) {
-            body.add(createIconRow(VaadinIcon.FILE_TEXT, "Description", annex.getDescription()));
+            body.add(createIconRow(VaadinIcon.FILE_TEXT, I18n.t("annex.card.description"), annex.getDescription()));
         }
         if (annex.getReference() != null && !annex.getReference().isBlank()) {
-            body.add(createIconRow(VaadinIcon.LINK, "Reference", annex.getReference()));
+            body.add(createIconRow(VaadinIcon.LINK, I18n.t("annex.card.reference"), annex.getReference()));
         }
         if (annex.getAnnexOrder() != null) {
-            body.add(createIconRow(VaadinIcon.SORT, "Order", String.valueOf(annex.getAnnexOrder())));
+            body.add(createIconRow(VaadinIcon.SORT, I18n.t("annex.card.order"), String.valueOf(annex.getAnnexOrder())));
         }
         add(body);
     }

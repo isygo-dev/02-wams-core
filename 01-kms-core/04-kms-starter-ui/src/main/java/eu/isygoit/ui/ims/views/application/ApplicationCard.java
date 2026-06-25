@@ -14,6 +14,7 @@ import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.ApplicationDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.ApplicationImageService;
 import eu.isygoit.remote.ims.ApplicationService;
 import eu.isygoit.ui.common.card.BaseCard;
@@ -102,8 +103,8 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
 
         Span titleSpan = buildTitleSpan(application.getName(), application.getTitle());
         adminStatusChip = buildStatusChip(
-                application.getAdminStatus() != null ? application.getAdminStatus().name() : "UNKNOWN",
-                application.getAdminStatus() != null ? application.getAdminStatus().name() : "UNKNOWN"
+                application.getAdminStatus() != null ? application.getAdminStatus().name() : I18n.t("app.card.status.unknown"),
+                application.getAdminStatus() != null ? application.getAdminStatus().name() : I18n.t("app.card.status.unknown")
         );
         row2.add(titleSpan, adminStatusChip);
 
@@ -112,21 +113,21 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, "View full application details");
+        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("app.card.details.tooltip"));
         detailsBtn.addClickListener(e -> new ApplicationDetailsDialog(parentView, objectService, application.getId()).open());
 
-        Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit application");
+        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("app.card.edit.tooltip"));
         editBtn.addClickListener(e -> parentView.openUpdateApplicationDialog(application, () -> {
             if (onRefresh != null) onRefresh.run();
         }));
 
         toggleStatusBtn = createIconButton(
                 application.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED ? VaadinIcon.LOCK : VaadinIcon.UNLOCK,
-                application.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED ? "Disable application" : "Enable application"
+                application.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("app.card.disable.tooltip") : I18n.t("app.card.enable.tooltip")
         );
         toggleStatusBtn.addClickListener(e -> openToggleStatusDialog());
 
-        Button deleteBtn = createIconButton(VaadinIcon.TRASH, "Delete application");
+        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("app.card.delete.tooltip"));
         deleteBtn.addClickListener(e -> new DeleteApplicationDialog(parentView, objectService, application.getId(), () -> {
             if (onRefresh != null) onRefresh.run();
         }).open());
@@ -141,13 +142,13 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
         body.setPadding(false);
         body.getStyle().set("margin-top", "var(--lumo-space-s)");
 
-        body.add(createIconRow(VaadinIcon.DESKTOP, "Category", application.getCategory()));
-        body.add(createIconRow(VaadinIcon.GLOBE, "URL", application.getUrl()));
+        body.add(createIconRow(VaadinIcon.DESKTOP, I18n.t("app.card.category"), application.getCategory()));
+        body.add(createIconRow(VaadinIcon.GLOBE, I18n.t("app.card.url"), application.getUrl()));
         if (application.getOrder() != null) {
-            body.add(createIconRow(VaadinIcon.SORT, "Order", String.valueOf(application.getOrder())));
+            body.add(createIconRow(VaadinIcon.SORT, I18n.t("app.card.order"), String.valueOf(application.getOrder())));
         }
         if (application.getDescription() != null && !application.getDescription().isBlank()) {
-            body.add(createIconRow(VaadinIcon.FILE_TEXT, "Description", application.getDescription()));
+            body.add(createIconRow(VaadinIcon.FILE_TEXT, I18n.t("app.card.description"), application.getDescription()));
         }
         add(body);
     }
@@ -200,7 +201,7 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
 
     private void updateStatusChip() {
         if (adminStatusChip != null) {
-            String status = application.getAdminStatus() != null ? application.getAdminStatus().name() : "UNKNOWN";
+            String status = application.getAdminStatus() != null ? application.getAdminStatus().name() : I18n.t("app.card.status.unknown");
             adminStatusChip.setText(status);
             adminStatusChip.getElement().setAttribute("title", status);
             ChipColor color = ChipColor.fromStatus(status);
@@ -214,7 +215,7 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
         if (toggleStatusBtn != null) {
             boolean enabled = application.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED;
             toggleStatusBtn.setIcon(enabled ? VaadinIcon.LOCK.create() : VaadinIcon.UNLOCK.create());
-            toggleStatusBtn.setTooltipText(enabled ? "Disable application" : "Enable application");
+            toggleStatusBtn.setTooltipText(enabled ? I18n.t("app.card.disable.tooltip") : I18n.t("app.card.enable.tooltip"));
         }
     }
 

@@ -26,6 +26,7 @@ import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.ApplicationDto;
 import eu.isygoit.dto.data.RoleInfoDto;
 import eu.isygoit.dto.data.RolePermissionDto;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.ApplicationService;
 import eu.isygoit.remote.ims.RoleInfoService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
@@ -70,13 +71,13 @@ public class CreateRoleDialog extends BaseActionDialog {
                             RoleInfoService roleInfoService,
                             ApplicationService applicationService,
                             Runnable onSuccess) {
-        super("Create Role", onSuccess);
+        super(I18n.t("role.dialog.create.title"), onSuccess);
         this.parentView = parentView;
         this.roleInfoService = roleInfoService;
         this.applicationService = applicationService;
         this.onSuccess = onSuccess;
 
-        setOkButtonText("Create");
+        setOkButtonText(I18n.t("role.dialog.create.button"));
         setWidth("95%");
         setMaxWidth("1100px");
         setHeight("85vh");
@@ -94,19 +95,19 @@ public class CreateRoleDialog extends BaseActionDialog {
     }
 
     private void buildBasicForm() {
-        nameField = new TextField("Role name *");
+        nameField = new TextField(I18n.t("role.dialog.field.name"));
         nameField.setRequiredIndicatorVisible(true);
         nameField.setWidthFull();
 
-        codeField = new TextField("Role code *");
+        codeField = new TextField(I18n.t("role.dialog.field.code"));
         codeField.setRequiredIndicatorVisible(true);
         codeField.setWidthFull();
 
-        levelField = new IntegerField("Level");
+        levelField = new IntegerField(I18n.t("role.dialog.field.level"));
         levelField.setValue(0);
         levelField.setWidthFull();
 
-        descriptionField = new TextArea("Description");
+        descriptionField = new TextArea(I18n.t("role.dialog.field.description"));
         descriptionField.setWidthFull();
         descriptionField.setHeight("80px");
     }
@@ -126,14 +127,14 @@ public class CreateRoleDialog extends BaseActionDialog {
                 }
             });
             return cb;
-        }).setHeader("Allow").setWidth("70px").setFlexGrow(0);
-        applicationsGrid.addColumn(ApplicationDto::getName).setHeader("Name").setAutoWidth(true);
-        applicationsGrid.addColumn(ApplicationDto::getTitle).setHeader("Title").setAutoWidth(true);
+        }).setHeader(I18n.t("role.dialog.apps.column.allow")).setWidth("70px").setFlexGrow(0);
+        applicationsGrid.addColumn(ApplicationDto::getName).setHeader(I18n.t("role.dialog.apps.column.name")).setAutoWidth(true);
+        applicationsGrid.addColumn(ApplicationDto::getTitle).setHeader(I18n.t("role.dialog.apps.column.title")).setAutoWidth(true);
         applicationsGrid.addThemeVariants(GridVariant.LUMO_COMPACT, GridVariant.LUMO_NO_BORDER);
         applicationsGrid.setHeight("350px");
 
         appsSearchField = new TextField();
-        appsSearchField.setPlaceholder("Search applications...");
+        appsSearchField.setPlaceholder(I18n.t("role.dialog.apps.search"));
         appsSearchField.setClearButtonVisible(true);
         appsSearchField.setValueChangeMode(ValueChangeMode.LAZY);
         appsSearchField.addValueChangeListener(e -> filterApplicationsGrid());
@@ -151,12 +152,12 @@ public class CreateRoleDialog extends BaseActionDialog {
                         app.getTitle().toLowerCase().contains(term))
                 .collect(Collectors.toList());
         applicationsGrid.setItems(filtered);
-        appsCountLabel.setText(filtered.size() + " applications shown");
+        appsCountLabel.setText(I18n.t("role.dialog.apps.count", filtered.size()));
     }
 
     private void refreshApplicationsGrid() {
         applicationsGrid.setItems(allApplications);
-        appsCountLabel.setText(allApplications.size() + " total applications");
+        appsCountLabel.setText(I18n.t("role.dialog.apps.total", allApplications.size()));
         appsSearchField.clear();
     }
 
@@ -169,7 +170,7 @@ public class CreateRoleDialog extends BaseActionDialog {
             if (item instanceof String) return (String) item;
             if (item instanceof RolePermissionDto) return ((RolePermissionDto) item).getObjectName();
             return "";
-        }).setHeader("Service / Object").setAutoWidth(true);
+        }).setHeader(I18n.t("role.dialog.perms.column.service")).setAutoWidth(true);
 
         permissionsTree.addComponentColumn(item -> {
             if (item instanceof RolePermissionDto) {
@@ -178,7 +179,7 @@ public class CreateRoleDialog extends BaseActionDialog {
                 return chk;
             }
             return new Span();
-        }).setHeader("Read").setWidth("70px").setFlexGrow(0);
+        }).setHeader(I18n.t("role.dialog.perms.column.read")).setWidth("70px").setFlexGrow(0);
 
         permissionsTree.addComponentColumn(item -> {
             if (item instanceof RolePermissionDto) {
@@ -187,7 +188,7 @@ public class CreateRoleDialog extends BaseActionDialog {
                 return chk;
             }
             return new Span();
-        }).setHeader("Write").setWidth("70px").setFlexGrow(0);
+        }).setHeader(I18n.t("role.dialog.perms.column.write")).setWidth("70px").setFlexGrow(0);
 
         permissionsTree.addComponentColumn(item -> {
             if (item instanceof RolePermissionDto) {
@@ -196,7 +197,7 @@ public class CreateRoleDialog extends BaseActionDialog {
                 return chk;
             }
             return new Span();
-        }).setHeader("Delete").setWidth("70px").setFlexGrow(0);
+        }).setHeader(I18n.t("role.dialog.perms.column.delete")).setWidth("70px").setFlexGrow(0);
 
         permissionsTree.addComponentColumn(item -> {
             if (item instanceof RolePermissionDto) {
@@ -217,7 +218,7 @@ public class CreateRoleDialog extends BaseActionDialog {
         refreshPermissionsTree();
 
         permSearchField = new TextField();
-        permSearchField.setPlaceholder("Filter permissions...");
+        permSearchField.setPlaceholder(I18n.t("role.dialog.perms.search"));
         permSearchField.setClearButtonVisible(true);
         permSearchField.setValueChangeMode(ValueChangeMode.LAZY);
         permSearchField.addValueChangeListener(e -> filterPermissionsTree());
@@ -272,7 +273,7 @@ public class CreateRoleDialog extends BaseActionDialog {
         try {
             allApplications = fetchAllApplications();
             if (allApplications.isEmpty()) {
-                Notification.show("No applications found. Check backend services.", 5000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("role.dialog.apps.no.apps"), 5000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 applicationsGrid.setItems(Collections.emptyList());
                 appsCountLabel.setText("0 applications found");
@@ -281,7 +282,7 @@ public class CreateRoleDialog extends BaseActionDialog {
             }
         } catch (Exception e) {
             log.error("Failed to load applications", e);
-            append("Failed to load applications: " + e.getMessage());
+            append(I18n.t("role.dialog.apps.load.failed", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }
@@ -337,9 +338,9 @@ public class CreateRoleDialog extends BaseActionDialog {
         tabContent.setSpacing(false);
         tabContent.setSizeFull();
 
-        Tab basicTab = new Tab("Basic Info");
-        Tab appsTab = new Tab("Applications");
-        Tab permsTab = new Tab("Permissions");
+        Tab basicTab = new Tab(I18n.t("role.dialog.tab.basic"));
+        Tab appsTab = new Tab(I18n.t("role.dialog.tab.apps"));
+        Tab permsTab = new Tab(I18n.t("role.dialog.tab.perms"));
 
         tabs.add(basicTab, appsTab, permsTab);
         tabs.addSelectedChangeListener(event -> updateTabContent(tabs.getSelectedIndex()));
@@ -359,7 +360,7 @@ public class CreateRoleDialog extends BaseActionDialog {
                 VerticalLayout appsLayout = new VerticalLayout();
                 appsLayout.setPadding(false);
                 appsLayout.setSpacing(false);
-                Button refreshAppsBtn = new Button("Refresh", VaadinIcon.REFRESH.create());
+                Button refreshAppsBtn = new Button(I18n.t("role.dialog.apps.refresh"), VaadinIcon.REFRESH.create());
                 refreshAppsBtn.addThemeVariants(ButtonVariant.LUMO_SMALL);
                 refreshAppsBtn.addClickListener(e -> refreshApplications());
                 HorizontalLayout topBar = new HorizontalLayout(appsSearchField, refreshAppsBtn, appsCountLabel);
@@ -371,7 +372,7 @@ public class CreateRoleDialog extends BaseActionDialog {
                 break;
             case 2:
                 VerticalLayout permsLayout = new VerticalLayout();
-                Button addPermBtn = new Button("Add Permission", VaadinIcon.PLUS.create());
+                Button addPermBtn = new Button(I18n.t("role.dialog.apps.add.permission"), VaadinIcon.PLUS.create());
                 addPermBtn.addThemeVariants(ButtonVariant.LUMO_SMALL);
                 addPermBtn.addClickListener(e -> {
                     permissions.add(RolePermissionDto.builder()
@@ -418,11 +419,11 @@ public class CreateRoleDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (nameField.getValue().isBlank()) {
-            append("Role name is required");
+            append(I18n.t("role.dialog.field.name.required"));
             return false;
         }
         if (codeField.getValue().isBlank()) {
-            append("Role code is required");
+            append(I18n.t("role.dialog.field.code.required"));
             return false;
         }
 
@@ -447,16 +448,16 @@ public class CreateRoleDialog extends BaseActionDialog {
 
             ResponseEntity<RoleInfoDto> response = roleInfoService.create(newRole);
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                append("Creation failed: HTTP " + response.getStatusCodeValue());
+                append(I18n.t("role.dialog.create.failed", response.getStatusCodeValue()));
                 return false;
             }
-            append("Role created successfully");
+            append(I18n.t("role.dialog.create.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append("Failed operation: " + e.getMessage());
+            append(I18n.t("role.dialog.create.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

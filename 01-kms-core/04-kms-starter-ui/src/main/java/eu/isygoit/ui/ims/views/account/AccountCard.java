@@ -16,6 +16,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.data.MinAccountDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountImageService;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.ui.common.card.BaseCard;
@@ -114,12 +115,12 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
         String displayName = minAccount.getFullName() != null ? minAccount.getFullName() : minAccount.getEmail();
         Span titleSpan = buildTitleSpan(displayName, minAccount.getEmail());
         adminStatusChip = buildStatusChip(
-                minAccount.getAdminStatus() != null ? minAccount.getAdminStatus().name() : "UNKNOWN",
-                minAccount.getAdminStatus() != null ? minAccount.getAdminStatus().name() : "UNKNOWN"
+                minAccount.getAdminStatus() != null ? minAccount.getAdminStatus().name() : I18n.t("account.card.status.unknown"),
+                minAccount.getAdminStatus() != null ? minAccount.getAdminStatus().name() : I18n.t("account.card.status.unknown")
         );
         systemStatusChip = buildStatusChip(
-                minAccount.getSystemStatus() != null ? minAccount.getSystemStatus().name() : "UNKNOWN",
-                minAccount.getSystemStatus() != null ? minAccount.getSystemStatus().name() : "UNKNOWN"
+                minAccount.getSystemStatus() != null ? minAccount.getSystemStatus().name() : I18n.t("account.card.status.unknown"),
+                minAccount.getSystemStatus() != null ? minAccount.getSystemStatus().name() : I18n.t("account.card.status.unknown")
         );
         row2.add(titleSpan, adminStatusChip, systemStatusChip);
 
@@ -128,24 +129,24 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, "View full account details");
+        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("account.card.details.tooltip"));
         detailsBtn.addClickListener(e -> new AccountDetailsDialog(parentView, objectService, minAccount.getId()).open());
 
-        Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit account details");
+        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("account.card.edit.tooltip"));
         editBtn.addClickListener(e -> parentView.openUpdateAccountDialog(minAccount.getId(), () -> {
             if (onRefresh != null) onRefresh.run();
         }));
 
-        Button resetPwdBtn = createIconButton(VaadinIcon.KEY, "Reset password");
+        Button resetPwdBtn = createIconButton(VaadinIcon.KEY, I18n.t("account.card.reset.password.tooltip"));
         resetPwdBtn.addClickListener(e -> parentView.openResetPasswordDialog(minAccount.getId(), minAccount.getEmail()));
 
         toggleStatusBtn = createIconButton(
                 minAccount.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED ? VaadinIcon.LOCK : VaadinIcon.UNLOCK,
-                minAccount.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED ? "Disable account" : "Enable account"
+                minAccount.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("account.card.disable.tooltip") : I18n.t("account.card.enable.tooltip")
         );
         toggleStatusBtn.addClickListener(e -> openToggleStatusDialog());
 
-        Button deleteBtn = createIconButton(VaadinIcon.TRASH, "Delete account");
+        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("account.card.delete.tooltip"));
         deleteBtn.addClickListener(e -> new DeleteAccountDialog(parentView, objectService, minAccount.getId(), () -> {
             if (onRefresh != null) onRefresh.run();
         }).open());
@@ -176,7 +177,7 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
 
     private void updateStatusChips() {
         if (adminStatusChip != null) {
-            String status = minAccount.getAdminStatus() != null ? minAccount.getAdminStatus().name() : "UNKNOWN";
+            String status = minAccount.getAdminStatus() != null ? minAccount.getAdminStatus().name() : I18n.t("account.card.status.unknown");
             adminStatusChip.setText(status);
             adminStatusChip.getElement().setAttribute("title", status);
             ChipColor color = ChipColor.fromStatus(status);
@@ -185,7 +186,7 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
                     .set("color", color.foreground());
         }
         if (systemStatusChip != null) {
-            String status = minAccount.getSystemStatus() != null ? minAccount.getSystemStatus().name() : "UNKNOWN";
+            String status = minAccount.getSystemStatus() != null ? minAccount.getSystemStatus().name() : I18n.t("account.card.status.unknown");
             systemStatusChip.setText(status);
             systemStatusChip.getElement().setAttribute("title", status);
             ChipColor color = ChipColor.fromStatus(status);
@@ -199,7 +200,7 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
         if (toggleStatusBtn != null) {
             boolean enabled = minAccount.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED;
             toggleStatusBtn.setIcon(enabled ? VaadinIcon.LOCK.create() : VaadinIcon.UNLOCK.create());
-            toggleStatusBtn.setTooltipText(enabled ? "Disable account" : "Enable account");
+            toggleStatusBtn.setTooltipText(enabled ? I18n.t("account.card.disable.tooltip") : I18n.t("account.card.enable.tooltip"));
         }
     }
 
@@ -210,29 +211,29 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
         body.setPadding(false);
         body.getStyle().set("margin-top", "var(--lumo-space-s)");
 
-        body.add(createIconRow(VaadinIcon.MAILBOX, "Email", minAccount.getEmail()));
+        body.add(createIconRow(VaadinIcon.MAILBOX, I18n.t("account.card.email"), minAccount.getEmail()));
 
         if (minAccount.getTenant() != null) {
-            body.add(createIconRow(VaadinIcon.BUILDING, "Tenant", minAccount.getTenant()));
+            body.add(createIconRow(VaadinIcon.BUILDING, I18n.t("account.card.tenant"), minAccount.getTenant()));
         }
 
         if (minAccount.getFullName() != null && !minAccount.getFullName().equals(minAccount.getEmail())) {
-            body.add(createIconRow(VaadinIcon.USER, "Full name", minAccount.getFullName()));
+            body.add(createIconRow(VaadinIcon.USER, I18n.t("account.card.full.name"), minAccount.getFullName()));
         }
 
         if (minAccount.getFunctionRole() != null && !minAccount.getFunctionRole().isBlank()) {
-            body.add(createIconRow(VaadinIcon.COG, "Function role", minAccount.getFunctionRole()));
+            body.add(createIconRow(VaadinIcon.COG, I18n.t("account.card.function.role"), minAccount.getFunctionRole()));
         }
 
-        String adminFlag = Boolean.TRUE.equals(minAccount.getIsAdmin()) ? "Yes" : "No";
-        body.add(createIconRow(VaadinIcon.SHIELD, "Admin", adminFlag));
+        String adminFlag = Boolean.TRUE.equals(minAccount.getIsAdmin()) ? I18n.t("account.card.yes") : I18n.t("account.card.no");
+        body.add(createIconRow(VaadinIcon.SHIELD, I18n.t("account.card.admin"), adminFlag));
 
         if (minAccount.getAccountType() != null && !minAccount.getAccountType().isBlank()) {
-            body.add(createIconRow(VaadinIcon.TAGS, "Account type", minAccount.getAccountType()));
+            body.add(createIconRow(VaadinIcon.TAGS, I18n.t("account.card.account.type"), minAccount.getAccountType()));
         }
 
         if (minAccount.getLastConnectionDate() != null) {
-            body.add(createIconRow(VaadinIcon.CLOCK, "Last login", minAccount.getLastConnectionDate().toString()));
+            body.add(createIconRow(VaadinIcon.CLOCK, I18n.t("account.card.last.login"), minAccount.getLastConnectionDate().toString()));
         }
 
         add(body);

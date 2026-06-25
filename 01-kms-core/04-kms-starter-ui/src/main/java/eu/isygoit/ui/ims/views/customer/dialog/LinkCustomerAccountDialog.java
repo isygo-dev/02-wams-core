@@ -6,6 +6,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import eu.isygoit.dto.data.CustomerDto;
 import eu.isygoit.dto.data.MinAccountDto;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.remote.ims.CustomerService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
@@ -32,14 +33,14 @@ public class LinkCustomerAccountDialog extends BaseActionDialog {
                                      AccountService accountService,
                                      Long customerId,
                                      Runnable onSuccess) {
-        super("Link to Account", onSuccess);
+        super(I18n.t("customer.dialog.link.title"), onSuccess);
         this.parentView = parentView;
         this.customerService = customerService;
         this.accountService = accountService;
         this.customerId = customerId;
         this.onSuccess = onSuccess;
 
-        setOkButtonText("Link");
+        setOkButtonText(I18n.t("customer.dialog.link.button"));
         setWidth("500px");
         setMaxWidth("95%");
 
@@ -49,9 +50,9 @@ public class LinkCustomerAccountDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        accountCombo = new ComboBox<>("Select account");
+        accountCombo = new ComboBox<>(I18n.t("customer.dialog.link.field.select.account"));
         accountCombo.setRequiredIndicatorVisible(true);
-        accountCombo.setPlaceholder("Choose an account to link");
+        accountCombo.setPlaceholder(I18n.t("customer.dialog.link.field.select.account.placeholder"));
         accountCombo.setItemLabelGenerator(account ->
                 account.getEmail() + " (" + account.getCode() + ")"
         );
@@ -72,16 +73,16 @@ public class LinkCustomerAccountDialog extends BaseActionDialog {
                 availableAccounts = response.getBody();
                 accountCombo.setItems(availableAccounts);
                 if (availableAccounts.isEmpty()) {
-                    Notification.show("No accounts available to link.", 3000, Notification.Position.BOTTOM_END)
+                    Notification.show(I18n.t("customer.dialog.link.no.accounts"), 3000, Notification.Position.BOTTOM_END)
                             .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 }
             } else {
-                append("Failed to load accounts list.");
+                append(I18n.t("customer.dialog.link.accounts.load.error"));
             }
         } catch (FeignException ex) {
-            append("Error loading accounts: " + extractErrorMessage(ex));
+            append(I18n.t("customer.dialog.link.accounts.load.error.detail", extractErrorMessage(ex)));
         } catch (Exception e) {
-            append("Unexpected error: " + e.getMessage());
+            append(I18n.t("customer.dialog.link.accounts.load.unexpected", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }
@@ -91,7 +92,7 @@ public class LinkCustomerAccountDialog extends BaseActionDialog {
     protected boolean onOk() {
         MinAccountDto selectedAccount = accountCombo.getValue();
         if (selectedAccount == null) {
-            append("Please select an account");
+            append(I18n.t("customer.dialog.link.select.required"));
             return false;
         }
 
@@ -100,17 +101,17 @@ public class LinkCustomerAccountDialog extends BaseActionDialog {
         try {
             ResponseEntity<CustomerDto> response = customerService.LinkToExistingAccount(customerId, accountCode);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append("Failed to link account: HTTP " + response.getStatusCodeValue());
+                append(I18n.t("customer.dialog.link.failed", response.getStatusCodeValue()));
                 return false;
             }
 
-            append("Customer linked to account '" + accountCode + "' successfully");
+            append(I18n.t("customer.dialog.link.success", accountCode));
             if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append("Operation failed: " + e.getMessage());
+            append(I18n.t("customer.dialog.link.operation.failed", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

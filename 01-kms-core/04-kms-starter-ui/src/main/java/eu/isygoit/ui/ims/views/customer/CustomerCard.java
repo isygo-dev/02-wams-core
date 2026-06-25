@@ -14,6 +14,7 @@ import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.CustomerDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.remote.ims.CustomerImageService;
 import eu.isygoit.remote.ims.CustomerService;
@@ -107,8 +108,8 @@ public class CustomerCard extends BaseCard<CustomerManagementView, CustomerServi
 
         Span titleSpan = buildTitleSpan(customer.getName(), customer.getEmail());
         adminStatusChip = buildStatusChip(
-                customer.getAdminStatus() != null ? customer.getAdminStatus().name() : "UNKNOWN",
-                customer.getAdminStatus() != null ? customer.getAdminStatus().name() : "UNKNOWN"
+                customer.getAdminStatus() != null ? customer.getAdminStatus().name() : I18n.t("customer.card.status.unknown"),
+                customer.getAdminStatus() != null ? customer.getAdminStatus().name() : I18n.t("customer.card.status.unknown")
         );
         row2.add(titleSpan, adminStatusChip);
 
@@ -117,24 +118,24 @@ public class CustomerCard extends BaseCard<CustomerManagementView, CustomerServi
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, "View full customer details");
+        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("customer.card.details.tooltip"));
         detailsBtn.addClickListener(e -> new CustomerDetailsDialog(parentView, objectService, customer.getId()).open());
 
-        Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit customer");
+        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("customer.card.edit.tooltip"));
         editBtn.addClickListener(e -> parentView.openUpdateCustomerDialog(customer, () -> {
             if (onRefresh != null) onRefresh.run();
         }));
 
         toggleStatusBtn = createIconButton(
                 customer.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED ? VaadinIcon.LOCK : VaadinIcon.UNLOCK,
-                customer.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED ? "Disable customer" : "Enable customer"
+                customer.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("customer.card.disable.tooltip") : I18n.t("customer.card.enable.tooltip")
         );
         toggleStatusBtn.addClickListener(e -> openToggleStatusDialog());
 
-        Button linkAccountBtn = createIconButton(VaadinIcon.LINK, "Link to existing account");
+        Button linkAccountBtn = createIconButton(VaadinIcon.LINK, I18n.t("customer.card.link.account.tooltip"));
         linkAccountBtn.addClickListener(e -> openLinkAccountDialog());
 
-        Button deleteBtn = createIconButton(VaadinIcon.TRASH, "Delete customer");
+        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("customer.card.delete.tooltip"));
         deleteBtn.addClickListener(e -> new DeleteCustomerDialog(parentView, objectService, customer.getId(), () -> {
             if (onRefresh != null) onRefresh.run();
         }).open());
@@ -149,16 +150,16 @@ public class CustomerCard extends BaseCard<CustomerManagementView, CustomerServi
         body.setPadding(false);
         body.getStyle().set("margin-top", "var(--lumo-space-s)");
 
-        body.add(createIconRow(VaadinIcon.ENVELOPE, "Email", customer.getEmail()));
-        body.add(createIconRow(VaadinIcon.PHONE, "Phone", customer.getPhoneNumber()));
+        body.add(createIconRow(VaadinIcon.ENVELOPE, I18n.t("customer.card.email"), customer.getEmail()));
+        body.add(createIconRow(VaadinIcon.PHONE, I18n.t("customer.card.phone"), customer.getPhoneNumber()));
         if (customer.getAccountCode() != null && !customer.getAccountCode().isBlank()) {
-            body.add(createIconRow(VaadinIcon.KEY, "Account code", customer.getAccountCode()));
+            body.add(createIconRow(VaadinIcon.KEY, I18n.t("customer.card.account.code"), customer.getAccountCode()));
         }
         if (customer.getUrl() != null && !customer.getUrl().isBlank()) {
-            body.add(createIconRow(VaadinIcon.GLOBE, "Website", customer.getUrl()));
+            body.add(createIconRow(VaadinIcon.GLOBE, I18n.t("customer.card.website"), customer.getUrl()));
         }
         if (customer.getDescription() != null && !customer.getDescription().isBlank()) {
-            body.add(createIconRow(VaadinIcon.FILE_TEXT, "Description", customer.getDescription()));
+            body.add(createIconRow(VaadinIcon.FILE_TEXT, I18n.t("customer.card.description"), customer.getDescription()));
         }
         add(body);
     }
@@ -220,7 +221,7 @@ public class CustomerCard extends BaseCard<CustomerManagementView, CustomerServi
 
     private void updateStatusChip() {
         if (adminStatusChip != null) {
-            String status = customer.getAdminStatus() != null ? customer.getAdminStatus().name() : "UNKNOWN";
+            String status = customer.getAdminStatus() != null ? customer.getAdminStatus().name() : I18n.t("customer.card.status.unknown");
             adminStatusChip.setText(status);
             adminStatusChip.getElement().setAttribute("title", status);
             ChipColor color = ChipColor.fromStatus(status);
@@ -234,7 +235,7 @@ public class CustomerCard extends BaseCard<CustomerManagementView, CustomerServi
         if (toggleStatusBtn != null) {
             boolean enabled = customer.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED;
             toggleStatusBtn.setIcon(enabled ? VaadinIcon.LOCK.create() : VaadinIcon.UNLOCK.create());
-            toggleStatusBtn.setTooltipText(enabled ? "Disable customer" : "Enable customer");
+            toggleStatusBtn.setTooltipText(enabled ? I18n.t("customer.card.disable.tooltip") : I18n.t("customer.card.enable.tooltip"));
         }
     }
 

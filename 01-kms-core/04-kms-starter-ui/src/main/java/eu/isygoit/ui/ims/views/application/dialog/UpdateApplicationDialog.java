@@ -14,6 +14,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.ApplicationDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.ApplicationImageService;
 import eu.isygoit.remote.ims.ApplicationService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
@@ -55,14 +56,14 @@ public class UpdateApplicationDialog extends BaseActionDialog {
                                    ApplicationImageService applicationImageService,
                                    ApplicationDto application,
                                    Runnable onSuccess) {
-        super("Edit Application", onSuccess);
+        super(I18n.t("app.dialog.update.title"), onSuccess);
         this.parentView = parentView;
         this.applicationService = applicationService;
         this.applicationImageService = applicationImageService;
         this.application = application;
         this.onSuccess = onSuccess;
 
-        setOkButtonText("Save");
+        setOkButtonText(I18n.t("app.dialog.update.button"));
         setWidth("700px");
         setMaxWidth("95%");
 
@@ -73,31 +74,31 @@ public class UpdateApplicationDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        nameField = new TextField("Name *");
+        nameField = new TextField(I18n.t("app.dialog.update.field.name"));
         nameField.setRequiredIndicatorVisible(true);
         nameField.setWidthFull();
 
-        titleField = new TextField("Title *");
+        titleField = new TextField(I18n.t("app.dialog.update.field.title"));
         titleField.setRequiredIndicatorVisible(true);
         titleField.setWidthFull();
 
-        codeField = new TextField("Code");
+        codeField = new TextField(I18n.t("app.dialog.update.field.code"));
         codeField.setWidthFull();
 
-        categoryField = new TextField("Category");
+        categoryField = new TextField(I18n.t("app.dialog.update.field.category"));
         categoryField.setWidthFull();
 
-        urlField = new TextField("URL *");
+        urlField = new TextField(I18n.t("app.dialog.update.field.url"));
         urlField.setRequiredIndicatorVisible(true);
         urlField.setWidthFull();
 
-        orderField = new IntegerField("Display Order");
+        orderField = new IntegerField(I18n.t("app.dialog.update.field.order"));
         orderField.setWidthFull();
 
-        descriptionField = new TextArea("Description");
+        descriptionField = new TextArea(I18n.t("app.dialog.update.field.description"));
         descriptionField.setWidthFull();
 
-        adminStatusCombo = new ComboBox<>("Admin status");
+        adminStatusCombo = new ComboBox<>(I18n.t("app.dialog.update.field.admin.status"));
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
         adminStatusCombo.setWidthFull();
 
@@ -121,7 +122,7 @@ public class UpdateApplicationDialog extends BaseActionDialog {
                 .set("justify-content", "center");
         imagePlaceholder.add(new Icon(VaadinIcon.CAMERA));
 
-        changeImageButton = new Button("Change Image", e -> openCropperDialog());
+        changeImageButton = new Button(I18n.t("app.dialog.field.change.image"), e -> openCropperDialog());
         changeImageButton.setIcon(new Icon(VaadinIcon.UPLOAD));
     }
 
@@ -215,15 +216,15 @@ public class UpdateApplicationDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (nameField.getValue().isBlank()) {
-            append("Name is required");
+            append(I18n.t("app.dialog.update.field.name.required"));
             return false;
         }
         if (titleField.getValue().isBlank()) {
-            append("Title is required");
+            append(I18n.t("app.dialog.update.field.title.required"));
             return false;
         }
         if (urlField.getValue().isBlank()) {
-            append("URL is required");
+            append(I18n.t("app.dialog.update.field.url.required"));
             return false;
         }
 
@@ -240,25 +241,25 @@ public class UpdateApplicationDialog extends BaseActionDialog {
 
             ResponseEntity<ApplicationDto> response = applicationService.update(application.getId(), application);
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                append("Update failed: " + (response.getBody() != null ? response.getBody() : "no response body"));
+                append(I18n.t("app.dialog.update.failed", (response.getBody() != null ? response.getBody() : "no response body")));
                 return false;
             }
 
             if (imageChanged && newImageFile != null) {
                 ResponseEntity<ApplicationDto> uploadResponse = applicationImageService.uploadImage(application.getId(), newImageFile);
                 if (!uploadResponse.getStatusCode().is2xxSuccessful()) {
-                    append("Application updated but image upload failed: HTTP " + uploadResponse.getStatusCodeValue());
+                    append(I18n.t("app.dialog.update.image.failed", uploadResponse.getStatusCodeValue()));
                     return false;
                 }
             }
 
-            append("Application updated successfully");
+            append(I18n.t("app.dialog.update.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append("Failed operation: " + e.getMessage());
+            append(I18n.t("app.dialog.update.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

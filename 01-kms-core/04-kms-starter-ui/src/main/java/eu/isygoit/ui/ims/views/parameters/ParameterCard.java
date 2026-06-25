@@ -11,6 +11,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.AppParameterDto;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AppParameterService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.ims.views.parameters.dialog.DeleteParameterDialog;
@@ -77,15 +78,15 @@ public class ParameterCard extends BaseCard<ParameterManagementView, AppParamete
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, "View full parameter details");
+        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("parameter.card.details.tooltip"));
         detailsBtn.addClickListener(e -> new ParameterDetailsDialog(parentView, objectService, parameter.getId()).open());
 
-        Button editBtn = createIconButton(VaadinIcon.EDIT, "Edit parameter");
+        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("parameter.card.edit.tooltip"));
         editBtn.addClickListener(e -> parentView.openUpdateParameterDialog(parameter, () -> {
             if (onRefresh != null) onRefresh.run();
         }));
 
-        Button deleteBtn = createIconButton(VaadinIcon.TRASH, "Delete parameter");
+        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("parameter.card.delete.tooltip"));
         deleteBtn.addClickListener(e -> new DeleteParameterDialog(parentView, objectService, parameter.getId(), () -> {
             if (onRefresh != null) onRefresh.run();
         }).open());
@@ -100,13 +101,13 @@ public class ParameterCard extends BaseCard<ParameterManagementView, AppParamete
         body.setPadding(false);
         body.getStyle().set("margin-top", "var(--lumo-space-s)");
 
-        body.add(createIconRow(VaadinIcon.KEY, "Name", parameter.getName()));
-        body.add(createIconRow(VaadinIcon.INPUT, "Value", parameter.getValue()));
+        body.add(createIconRow(VaadinIcon.KEY, I18n.t("parameter.card.name"), parameter.getName()));
+        body.add(createIconRow(VaadinIcon.INPUT, I18n.t("parameter.card.value"), parameter.getValue()));
         if (parameter.getTenant() != null && !parameter.getTenant().isBlank()) {
-            body.add(createIconRow(VaadinIcon.BUILDING, "Tenant", parameter.getTenant()));
+            body.add(createIconRow(VaadinIcon.BUILDING, I18n.t("parameter.card.tenant"), parameter.getTenant()));
         }
         if (parameter.getDescription() != null && !parameter.getDescription().isBlank()) {
-            body.add(createIconRow(VaadinIcon.FILE_TEXT, "Description", parameter.getDescription()));
+            body.add(createIconRow(VaadinIcon.FILE_TEXT, I18n.t("parameter.card.description"), parameter.getDescription()));
         }
         add(body);
     }

@@ -21,6 +21,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.TenantImageService;
 import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
@@ -48,7 +49,7 @@ public class TenantManagementView extends ManagementVerticalView {
     private final TenantImageService tenantImageService;
 
     private final Div cardsContainer = new Div();
-    private final Button createButton = new Button("Create tenant", new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button createButton = new Button(I18n.t("tenant.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
     private final ComboBox<IEnumEnabledBinaryStatus.Types> statusFilter = new ComboBox<>();
@@ -78,7 +79,7 @@ public class TenantManagementView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("tenant-management-view");
 
-        H2 header = new H2("Tenant Management");
+        H2 header = new H2(I18n.t("tenant.view.title"));
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         add(header);
@@ -103,12 +104,12 @@ public class TenantManagementView extends ManagementVerticalView {
 
     private void initEventHandlers() {
         createButton.addClickListener(e -> openCreateTenantDialog());
-        createButton.setTooltipText("Create a new tenant");
+        createButton.setTooltipText(I18n.t("tenant.view.create.tooltip"));
 
         refreshButton.addClickListener(e -> loadPage(0));
-        refreshButton.setTooltipText("Refresh tenants from server");
+        refreshButton.setTooltipText(I18n.t("tenant.view.refresh.tooltip"));
 
-        searchField.setPlaceholder("Search by name or email");
+        searchField.setPlaceholder(I18n.t("tenant.view.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.addValueChangeListener(e -> {
@@ -118,7 +119,7 @@ public class TenantManagementView extends ManagementVerticalView {
 
         statusFilter.setItems(IEnumEnabledBinaryStatus.Types.values());
         statusFilter.setItemLabelGenerator(status -> status.name());
-        statusFilter.setPlaceholder("Admin status");
+        statusFilter.setPlaceholder(I18n.t("tenant.view.status.placeholder"));
         statusFilter.addValueChangeListener(e -> {
             currentAdminStatus = e.getValue();
             loadPage(0);
@@ -161,11 +162,11 @@ public class TenantManagementView extends ManagementVerticalView {
             filterAndDisplayCards();
         } catch (FeignException ex) {
             String errorMsg = extractErrorMessage(ex);
-            Notification.show("Failed to load tenants: " + errorMsg, 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("tenant.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load tenants", ex);
         } catch (Exception e) {
-            Notification.show("Failed to load tenants: " + e.getMessage(), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("tenant.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load tenants", e);
         } finally {
@@ -196,8 +197,8 @@ public class TenantManagementView extends ManagementVerticalView {
             Icon emptyIcon = VaadinIcon.BUILDING.create();
             emptyIcon.setSize("48px");
             emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-            H4 emptyTitle = new H4("No tenants found");
-            Paragraph emptyDesc = new Paragraph("Try adjusting your search or filter criteria.");
+            H4 emptyTitle = new H4(I18n.t("tenant.view.empty.title"));
+            Paragraph emptyDesc = new Paragraph(I18n.t("tenant.view.empty.description"));
             emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);
@@ -209,8 +210,8 @@ public class TenantManagementView extends ManagementVerticalView {
     }
 
     private void updatePaginationDisplay() {
-        pageInfoLabel.setText(String.format("Page %d / %d", currentPage + 1, totalPages));
-        totalCountLabel.setText(String.format("%d total tenants", totalElements));
+        pageInfoLabel.setText(I18n.t("tenant.view.page.info", currentPage + 1, totalPages));
+        totalCountLabel.setText(I18n.t("tenant.view.total.count", totalElements));
         prevButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(currentPage + 1 < totalPages);
     }
