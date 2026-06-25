@@ -81,7 +81,7 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
         return main;
     }
 
-    // ─── REDESIGNED HERO TITLE ──────────────────────────────────────────────
+    // ─── REDESIGNED HERO TITLE WITH READABLE GRADIENT ──────────────────────
 
     private Div buildHero() {
         Div hero = new Div();
@@ -101,7 +101,7 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
 
         hero.add(decorLeft, decorRight, decorBottomLeft, decorBottomRight);
 
-        // ── Main Title with gradient styling ──
+        // ── Main Title with readable gradient styling ──
         Div titleContainer = new Div();
         titleContainer.getStyle()
                 .set("position", "relative")
@@ -117,38 +117,42 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("line-height", "1.2")
                 .set("letter-spacing", "-0.02em")
                 .set("position", "relative")
-                .set("z-index", "1");
+                .set("z-index", "1")
+                .set("color", "var(--lumo-header-text-color)");
 
-        // Build the title with styled parts
-        Text manageText = new Text("Manage your ");
+        // Build the title with readable gradient parts
+        Text manageText = new Text("IsyGo Platform");
 
-        Span highlightText = new Span("Security");
-        highlightText.getStyle()
-                .set("background", "linear-gradient(135deg, var(--lumo-primary-color), #7c3aed)")
-                .set("-webkit-background-clip", "text")
-                .set("-webkit-text-fill-color", "transparent")
-                .set("background-clip", "text")
-                .set("position", "relative");
 
-        Text andText = new Text(" & ");
+        headline.add(manageText);
 
-        Span identityText = new Span("Identity");
-        identityText.getStyle()
-                .set("background", "linear-gradient(135deg, var(--lumo-success-color), #059669)")
-                .set("-webkit-background-clip", "text")
-                .set("-webkit-text-fill-color", "transparent")
-                .set("background-clip", "text")
-                .set("position", "relative");
+        // ── Subtle glow effect behind text ──
+        Div glowEffect = new Div();
+        glowEffect.addClassName("text-glow");
+        glowEffect.getStyle()
+                .set("position", "absolute")
+                .set("top", "50%")
+                .set("left", "50%")
+                .set("transform", "translate(-50%, -50%)")
+                .set("width", "100%")
+                .set("height", "100%")
+                .set("background", "radial-gradient(ellipse at center, var(--lumo-primary-color-10pct), transparent 70%)")
+                .set("filter", "blur(30px)")
+                .set("opacity", "0.4")
+                .set("pointer-events", "none")
+                .set("z-index", "0")
+                .set("border-radius", "50%");
 
-        headline.add(manageText, highlightText, andText, identityText);
+        titleContainer.add(glowEffect);
+        titleContainer.getElement().appendChild(headline.getElement());
 
-        // ── Decorative underline with glow ──
+        // ── Decorative underline with gradient ──
         Div underline = new Div();
         underline.addClassName("hero-underline");
         underline.getStyle()
                 .set("width", "140px")
                 .set("height", "4px")
-                .set("background", "linear-gradient(90deg, var(--lumo-primary-color), var(--lumo-success-color))")
+                .set("background", "linear-gradient(90deg, #4f46e5, #7c3aed, #059669, #10b981)")
                 .set("border-radius", "var(--lumo-border-radius-s)")
                 .set("margin", "var(--lumo-space-s) auto 0")
                 .set("position", "relative");
@@ -161,8 +165,9 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("left", "-20px")
                 .set("right", "-20px")
                 .set("height", "8px")
-                .set("background", "linear-gradient(90deg, transparent, var(--lumo-primary-color-30pct), var(--lumo-success-color-30pct), transparent)")
+                .set("background", "linear-gradient(90deg, transparent, #4f46e5, #10b981, transparent)")
                 .set("filter", "blur(8px)")
+                .set("opacity", "0.5")
                 .set("border-radius", "var(--lumo-border-radius-s)");
         underline.add(glow);
 
@@ -189,7 +194,6 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
 
         subtitleLayout.add(arrowIcon, subtitle);
 
-        titleContainer.add(headline, underline);
         hero.add(titleContainer, subtitleLayout);
 
         return hero;
@@ -200,7 +204,7 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
         decor.addClassName("floating-decor");
         decor.getStyle()
                 .set("position", "absolute")
-                .set("opacity", "0.15")
+                .set("opacity", "0.12")
                 .set("pointer-events", "none")
                 .set("animation", "float 6s ease-in-out infinite")
                 .set("animation-delay", Math.random() * 2 + "s");
@@ -294,8 +298,8 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
         // Accent color bar with gradient
         Div accentBar = new Div();
         String accentColor = route.equals("kms")
-                ? "linear-gradient(90deg, var(--lumo-primary-color), #7c3aed)"
-                : "linear-gradient(90deg, var(--lumo-success-color), #059669)";
+                ? "linear-gradient(90deg, #4f46e5, #7c3aed)"
+                : "linear-gradient(90deg, #059669, #10b981)";
         accentBar.getStyle()
                 .set("position", "absolute")
                 .set("top", "0")
@@ -317,27 +321,30 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
         // Badge / Short name with gradient
         Div badge = new Div(shortName);
         String badgeGradient = route.equals("kms")
-                ? "linear-gradient(135deg, var(--lumo-primary-color-10pct), var(--lumo-primary-color-30pct))"
-                : "linear-gradient(135deg, var(--lumo-success-color-10pct), var(--lumo-success-color-30pct))";
+                ? "linear-gradient(135deg, #4f46e5, #7c3aed)"
+                : "linear-gradient(135deg, #059669, #10b981)";
         badge.getStyle()
                 .set("background", badgeGradient)
+                .set("-webkit-background-clip", "text")
+                .set("-webkit-text-fill-color", "transparent")
+                .set("background-clip", "text")
                 .set("border-radius", "var(--lumo-border-radius-s)")
                 .set("padding", "2px var(--lumo-space-s)")
                 .set("font-size", "var(--lumo-font-size-xs)")
                 .set("font-weight", "700")
                 .set("letter-spacing", "0.08em")
-                .set("color", route.equals("kms") ? "var(--lumo-primary-color)" : "var(--lumo-success-color)")
                 .set("margin-bottom", "var(--lumo-space-s)")
-                .set("border", "1px solid " + (route.equals("kms") ? "var(--lumo-primary-color-30pct)" : "var(--lumo-success-color-30pct)"));
+                .set("border", "1px solid " + (route.equals("kms") ? "#4f46e5" : "#059669"))
+                .set("background-color", "var(--lumo-base-color)");
 
         // Icon with subtle glow
         Icon cardIcon = icon.create();
         cardIcon.setSize("48px");
-        String iconColor = route.equals("kms") ? "var(--lumo-primary-color)" : "var(--lumo-success-color)";
+        String iconColor = route.equals("kms") ? "#4f46e5" : "#059669";
         cardIcon.setColor(iconColor);
         cardIcon.getStyle()
                 .set("margin-bottom", "var(--lumo-space-s)")
-                .set("filter", "drop-shadow(0 4px 8px " + (route.equals("kms") ? "var(--lumo-primary-color-30pct)" : "var(--lumo-success-color-30pct)") + ")");
+                .set("filter", "drop-shadow(0 4px 8px " + (route.equals("kms") ? "rgba(79, 70, 229, 0.3)" : "rgba(5, 150, 105, 0.3)") + ")");
 
         // Title
         H2 cardTitle = new H2(title);
@@ -442,6 +449,47 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
 
                 .hero-title {
                     display: inline-block;
+                    position: relative;
+                    z-index: 1;
+                }
+
+                /* Gradient text styles - fully readable */
+                .gradient-text-security {
+                    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                    transition: all 0.3s ease;
+                }
+
+                .gradient-text-identity {
+                    background: linear-gradient(135deg, #059669, #10b981);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                    transition: all 0.3s ease;
+                }
+
+                .gradient-text-security:hover,
+                .gradient-text-identity:hover {
+                    transform: scale(1.05);
+                    filter: drop-shadow(0 0 20px rgba(79, 70, 229, 0.3));
+                }
+
+                /* Text glow effect */
+                .text-glow {
+                    animation: glowPulse 3s ease-in-out infinite;
+                }
+
+                @keyframes glowPulse {
+                    0%, 100% {
+                        opacity: 0.3;
+                        transform: translate(-50%, -50%) scale(1);
+                    }
+                    50% {
+                        opacity: 0.6;
+                        transform: translate(-50%, -50%) scale(1.1);
+                    }
                 }
 
                 /* Floating decorations */
@@ -485,8 +533,9 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                     left: -20px;
                     right: -20px;
                     height: 8px;
-                    background: linear-gradient(90deg, transparent, var(--lumo-primary-color-30pct), var(--lumo-success-color-30pct), transparent);
+                    background: linear-gradient(90deg, transparent, #4f46e5, #10b981, transparent);
                     filter: blur(8px);
+                    opacity: 0.5;
                     border-radius: var(--lumo-border-radius-s);
                 }
 
@@ -555,6 +604,10 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
 
                     .landing-view .landing-footer {
                         margin-top: var(--lumo-space-m);
+                    }
+
+                    .text-glow {
+                        display: none !important;
                     }
                 }
 

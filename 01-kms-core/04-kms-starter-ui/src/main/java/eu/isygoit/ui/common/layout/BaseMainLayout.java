@@ -5,9 +5,13 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.avatar.Avatar;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -40,6 +44,7 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
     private final AccountService accountService;
     private final AccountImageService accountImageService;
     private Div rightSlot; // container for profile
+    private Button landingButton;
 
     public BaseMainLayout() {
         // Retrieve services statically (layout is not a Spring bean)
@@ -55,6 +60,15 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
     protected abstract void createDrawer();
 
     private void createHeader() {
+        // Create landing button
+        landingButton = new Button(new Icon(VaadinIcon.HOME));
+        landingButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        landingButton.setTooltipText(I18n.t("layout.header.landing.tooltip"));
+        landingButton.addClickListener(e -> UI.getCurrent().navigate("landing"));
+        landingButton.getStyle()
+                .set("color", "var(--lumo-primary-text-color)")
+                .set("margin-right", "var(--lumo-space-s)");
+
         H1 title = new H1(getTitle());
         title.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.MEDIUM);
         title.getStyle().set("white-space", "nowrap");
@@ -67,7 +81,7 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         headerLayout.setSpacing(true);
         headerLayout.addClassName("main-header");
 
-        HorizontalLayout leftPart = new HorizontalLayout(new DrawerToggle(), title);
+        HorizontalLayout leftPart = new HorizontalLayout(new DrawerToggle(), landingButton, title);
         leftPart.setAlignItems(FlexComponent.Alignment.CENTER);
         leftPart.setSpacing(true);
         leftPart.getStyle().set("overflow", "hidden");
