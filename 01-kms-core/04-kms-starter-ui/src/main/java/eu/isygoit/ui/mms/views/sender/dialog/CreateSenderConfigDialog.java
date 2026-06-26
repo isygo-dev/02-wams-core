@@ -1,201 +1,177 @@
 package eu.isygoit.ui.mms.views.sender.dialog;
 
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.spring.annotation.UIScope;
 import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.SenderConfigService;
+import eu.isygoit.ui.mms.views.sender.SenderConfigManagementView;
 import feign.FeignException;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 
-@Component
-@UIScope
-public class CreateSenderConfigDialog extends Dialog {
+@Slf4j
+public class CreateSenderConfigDialog extends BaseSenderConfigDialog {
 
-    private final SenderConfigService senderConfigService;
-    private final Runnable onSuccess;
+    private TextField tenantField;
+    private TextField hostField;
+    private TextField portField;
+    private TextField usernameField;
+    private PasswordField passwordField;
+    private TextField transportProtocolField;
+    private TextField smtpAuthField;
+    private Checkbox smtpStarttlsEnableCheckbox;
+    private Checkbox smtpStarttlsRequiredCheckbox;
+    private Checkbox debugCheckbox;
 
-    private final TextField tenantField = new TextField(I18n.t("sender.dialog.tenant"));
-    private final TextField hostField = new TextField(I18n.t("sender.dialog.host"));
-    private final TextField portField = new TextField(I18n.t("sender.dialog.port"));
-    private final TextField usernameField = new TextField(I18n.t("sender.dialog.username"));
-    private final PasswordField passwordField = new PasswordField(I18n.t("sender.dialog.password"));
-    private final TextField transportProtocolField = new TextField(I18n.t("sender.dialog.transport.protocol"));
-    private final TextField smtpAuthField = new TextField(I18n.t("sender.dialog.smtp.auth"));
-    private final Checkbox smtpStarttlsEnable = new Checkbox(I18n.t("sender.dialog.smtp.starttls.enable"));
-    private final Checkbox smtpStarttlsRequired = new Checkbox(I18n.t("sender.dialog.smtp.starttls.required"));
-    private final Checkbox debugField = new Checkbox(I18n.t("sender.dialog.debug"));
-
-    private final Button saveButton = new Button(I18n.t("sender.dialog.save"));
-    private final Button cancelButton = new Button(I18n.t("sender.dialog.cancel"));
-
-    public CreateSenderConfigDialog(SenderConfigService senderConfigService, Runnable onSuccess) {
-        this.senderConfigService = senderConfigService;
-        this.onSuccess = onSuccess;
-
-        setHeaderTitle(I18n.t("sender.dialog.create.title"));
-        setWidth("600px");
-        setModal(true);
-        setDraggable(true);
-        setResizable(true);
-
-        VerticalLayout layout = new VerticalLayout();
-        layout.setPadding(true);
-        layout.setSpacing(true);
-        layout.setWidthFull();
-
-        layout.add(buildForm());
-
-        HorizontalLayout buttons = new HorizontalLayout();
-        buttons.setWidthFull();
-        buttons.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        buttons.setSpacing(true);
-
-        cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        cancelButton.addClickListener(e -> close());
-
-        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        saveButton.addClickListener(e -> saveConfig());
-
-        buttons.add(cancelButton, saveButton);
-        layout.add(buttons);
-
-        add(layout);
+    public CreateSenderConfigDialog(SenderConfigManagementView parentView,
+                                    SenderConfigService senderConfigService,
+                                    Runnable onSuccess) {
+        super(I18n.t("sender.dialog.create.title"), parentView, senderConfigService, onSuccess);
+        setOkButtonText(I18n.t("sender.dialog.create.button"));
+        buildContent();
+        prefillData();
     }
 
-    private VerticalLayout buildForm() {
-        VerticalLayout form = new VerticalLayout();
-        form.setSpacing(true);
-        form.setPadding(false);
-
-        tenantField.setWidthFull();
-        tenantField.setRequired(true);
-        tenantField.setRequiredIndicatorVisible(true);
-        tenantField.setTooltipText(I18n.t("sender.dialog.tenant.tooltip"));
-
-        hostField.setWidthFull();
-        hostField.setRequired(true);
-        hostField.setRequiredIndicatorVisible(true);
-        hostField.setTooltipText(I18n.t("sender.dialog.host.tooltip"));
-
-        portField.setWidthFull();
-        portField.setRequired(true);
-        portField.setRequiredIndicatorVisible(true);
-        portField.setTooltipText(I18n.t("sender.dialog.port.tooltip"));
-
-        usernameField.setWidthFull();
-        usernameField.setRequired(true);
-        usernameField.setRequiredIndicatorVisible(true);
-        usernameField.setTooltipText(I18n.t("sender.dialog.username.tooltip"));
-
-        passwordField.setWidthFull();
-        passwordField.setRequired(true);
-        passwordField.setRequiredIndicatorVisible(true);
-        passwordField.setTooltipText(I18n.t("sender.dialog.password.tooltip"));
-
-        transportProtocolField.setWidthFull();
-        transportProtocolField.setValue("smtp");
-        transportProtocolField.setTooltipText(I18n.t("sender.dialog.transport.protocol.tooltip"));
-
-        smtpAuthField.setWidthFull();
-        smtpAuthField.setValue("true");
-        smtpAuthField.setTooltipText(I18n.t("sender.dialog.smtp.auth.tooltip"));
-
-        HorizontalLayout tlsLayout = new HorizontalLayout();
-        tlsLayout.setSpacing(true);
-        tlsLayout.setWidthFull();
-        smtpStarttlsEnable.setValue(true);
-        smtpStarttlsRequired.setValue(false);
-        tlsLayout.add(smtpStarttlsEnable, smtpStarttlsRequired);
-
-        debugField.setValue(false);
-
-        form.add(
-                tenantField,
-                hostField,
-                portField,
-                usernameField,
-                passwordField,
-                transportProtocolField,
-                smtpAuthField,
-                tlsLayout,
-                debugField
+    @Override
+    protected void buildContent() {
+        FormLayout form = new FormLayout();
+        form.setResponsiveSteps(
+                new FormLayout.ResponsiveStep("0", 1),
+                new FormLayout.ResponsiveStep("500px", 2)
         );
 
-        return form;
+        tenantField = new TextField(I18n.t("sender.dialog.create.field.tenant"));
+        tenantField.setPlaceholder(I18n.t("sender.dialog.create.field.tenant.placeholder"));
+        tenantField.setRequiredIndicatorVisible(true);
+        tenantField.setWidthFull();
+
+        hostField = new TextField(I18n.t("sender.dialog.create.field.host"));
+        hostField.setPlaceholder(I18n.t("sender.dialog.create.field.host.placeholder"));
+        hostField.setRequiredIndicatorVisible(true);
+        hostField.setWidthFull();
+
+        portField = new TextField(I18n.t("sender.dialog.create.field.port"));
+        portField.setPlaceholder(I18n.t("sender.dialog.create.field.port.placeholder"));
+        portField.setRequiredIndicatorVisible(true);
+        portField.setWidthFull();
+
+        usernameField = new TextField(I18n.t("sender.dialog.create.field.username"));
+        usernameField.setPlaceholder(I18n.t("sender.dialog.create.field.username.placeholder"));
+        usernameField.setRequiredIndicatorVisible(true);
+        usernameField.setWidthFull();
+
+        passwordField = new PasswordField(I18n.t("sender.dialog.create.field.password"));
+        passwordField.setPlaceholder(I18n.t("sender.dialog.create.field.password.placeholder"));
+        passwordField.setRequiredIndicatorVisible(true);
+        passwordField.setWidthFull();
+
+        transportProtocolField = new TextField(I18n.t("sender.dialog.create.field.protocol"));
+        transportProtocolField.setPlaceholder(I18n.t("sender.dialog.create.field.protocol.placeholder"));
+        transportProtocolField.setValue("smtp");
+        transportProtocolField.setWidthFull();
+
+        smtpAuthField = new TextField(I18n.t("sender.dialog.create.field.smtp.auth"));
+        smtpAuthField.setPlaceholder(I18n.t("sender.dialog.create.field.smtp.auth.placeholder"));
+        smtpAuthField.setValue("true");
+        smtpAuthField.setWidthFull();
+
+        smtpStarttlsEnableCheckbox = new Checkbox(I18n.t("sender.dialog.create.field.tls.enable"));
+        smtpStarttlsEnableCheckbox.setValue(false);
+
+        smtpStarttlsRequiredCheckbox = new Checkbox(I18n.t("sender.dialog.create.field.tls.required"));
+        smtpStarttlsRequiredCheckbox.setValue(false);
+
+        debugCheckbox = new Checkbox(I18n.t("sender.dialog.create.field.debug"));
+        debugCheckbox.setValue(false);
+
+        form.add(tenantField, hostField, portField, usernameField, passwordField,
+                transportProtocolField, smtpAuthField,
+                smtpStarttlsEnableCheckbox, smtpStarttlsRequiredCheckbox,
+                debugCheckbox);
+
+        // Set column spans
+        form.setColspan(tenantField, 2);
+        form.setColspan(hostField, 2);
+        form.setColspan(usernameField, 2);
+        form.setColspan(passwordField, 2);
+
+        contentArea.add(form);
     }
 
-    private void saveConfig() {
-        if (!validateForm()) {
-            return;
-        }
-
-        SenderConfigDto dto = new SenderConfigDto();
-        dto.setTenant(tenantField.getValue());
-        dto.setHost(hostField.getValue());
-        dto.setPort(portField.getValue());
-        dto.setUsername(usernameField.getValue());
-        dto.setPassword(passwordField.getValue());
-        dto.setTransportProtocol(transportProtocolField.getValue());
-        dto.setSmtpAuth(smtpAuthField.getValue());
-        dto.setSmtpStarttlsEnable(smtpStarttlsEnable.getValue());
-        dto.setSmtpStarttlsRequired(smtpStarttlsRequired.getValue());
-        dto.setDebug(debugField.getValue());
-
-        try {
-            senderConfigService.create(dto);
-            Notification.show(I18n.t("sender.create.success"), 3000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            close();
-            if (onSuccess != null) {
-                onSuccess.run();
-            }
-        } catch (FeignException ex) {
-            String errorMsg = ex.status() == 400 ? I18n.t("sender.create.validation.error") : ex.getMessage();
-            Notification.show(I18n.t("sender.create.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-        } catch (Exception e) {
-            Notification.show(I18n.t("sender.create.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-        }
+    private void prefillData() {
+        // Default values can be set here if needed
     }
 
-    private boolean validateForm() {
-        StringBuilder errors = new StringBuilder();
+    @Override
+    protected boolean onOk() {
+        clearErrors();
 
-        if (tenantField.getValue() == null || tenantField.getValue().isEmpty()) {
-            errors.append(I18n.t("sender.validation.tenant.required")).append("\n");
+        // Validate required fields
+        if (tenantField.getValue() == null || tenantField.getValue().isBlank()) {
+            append(I18n.t("sender.dialog.create.error.tenant.required"));
+            return false;
         }
-        if (hostField.getValue() == null || hostField.getValue().isEmpty()) {
-            errors.append(I18n.t("sender.validation.host.required")).append("\n");
+        if (hostField.getValue() == null || hostField.getValue().isBlank()) {
+            append(I18n.t("sender.dialog.create.error.host.required"));
+            return false;
         }
-        if (portField.getValue() == null || portField.getValue().isEmpty()) {
-            errors.append(I18n.t("sender.validation.port.required")).append("\n");
+        if (portField.getValue() == null || portField.getValue().isBlank()) {
+            append(I18n.t("sender.dialog.create.error.port.required"));
+            return false;
         }
-        if (usernameField.getValue() == null || usernameField.getValue().isEmpty()) {
-            errors.append(I18n.t("sender.validation.username.required")).append("\n");
+        if (usernameField.getValue() == null || usernameField.getValue().isBlank()) {
+            append(I18n.t("sender.dialog.create.error.username.required"));
+            return false;
         }
-        if (passwordField.getValue() == null || passwordField.getValue().isEmpty()) {
-            errors.append(I18n.t("sender.validation.password.required")).append("\n");
-        }
-
-        if (errors.length() > 0) {
-            Notification.show(errors.toString(), 5000, Notification.Position.MIDDLE)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        if (passwordField.getValue() == null || passwordField.getValue().isBlank()) {
+            append(I18n.t("sender.dialog.create.error.password.required"));
             return false;
         }
 
-        return true;
+        if (parentView != null) {
+            parentView.showLoading(true);
+        }
+        try {
+            SenderConfigDto config = SenderConfigDto.builder()
+                    .tenant(tenantField.getValue().trim())
+                    .host(hostField.getValue().trim())
+                    .port(portField.getValue().trim())
+                    .username(usernameField.getValue().trim())
+                    .password(passwordField.getValue())
+                    .transportProtocol(transportProtocolField.getValue() != null ?
+                            transportProtocolField.getValue().trim() : "smtp")
+                    .smtpAuth(smtpAuthField.getValue() != null ?
+                            smtpAuthField.getValue().trim() : "true")
+                    .smtpStarttlsEnable(smtpStarttlsEnableCheckbox.getValue())
+                    .smtpStarttlsRequired(smtpStarttlsRequiredCheckbox.getValue())
+                    .debug(debugCheckbox.getValue())
+                    .build();
+
+            ResponseEntity<SenderConfigDto> response = senderConfigService.create(config);
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                append(I18n.t("sender.dialog.create.failed",
+                        response.getBody() != null ? response.getBody().toString() : "unknown error"));
+                return false;
+            }
+
+            showSuccess(I18n.t("sender.dialog.create.success"));
+            return true;
+        } catch (FeignException ex) {
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ?
+                    ex.contentUTF8() : ex.getMessage();
+            append(I18n.t("sender.dialog.create.error", errorMsg));
+            log.error("Failed to create sender config", ex);
+        } catch (Exception e) {
+            append(I18n.t("sender.dialog.create.error", e.getMessage()));
+            log.error("Failed to create sender config", e);
+        } finally {
+            if (parentView != null) {
+                parentView.showLoading(false);
+            }
+        }
+        return false;
     }
 }

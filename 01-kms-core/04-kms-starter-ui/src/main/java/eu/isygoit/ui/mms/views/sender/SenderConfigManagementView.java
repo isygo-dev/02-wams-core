@@ -1,19 +1,17 @@
 package eu.isygoit.ui.mms.views.sender;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -27,6 +25,7 @@ import eu.isygoit.remote.mms.SenderConfigService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.mms.layout.MmsMainLayout;
 import eu.isygoit.ui.mms.views.sender.dialog.CreateSenderConfigDialog;
+import eu.isygoit.ui.mms.views.sender.dialog.DeleteSenderConfigDialog;
 import eu.isygoit.ui.mms.views.sender.dialog.EditSenderConfigDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
@@ -36,6 +35,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @UIScope
@@ -46,14 +46,17 @@ public class SenderConfigManagementView extends ManagementVerticalView {
 
     private final SenderConfigService senderConfigService;
 
-    private final Grid<SenderConfigDto> grid = new Grid<>(SenderConfigDto.class, false);
+    private final Div cardsContainer = new Div();
     private final Button createButton = new Button(I18n.t("sender.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
+    private final ComboBox<SenderStatusOption> statusFilter = new ComboBox<>();
     private final ProgressBar loadingBar = new ProgressBar();
 
     private List<SenderConfigDto> allConfigs = new ArrayList<>();
-    private List<SenderConfigDto> filteredConfigs = new ArrayList<>();
+    private List<SenderConfigCard> currentPageCards = new ArrayList<>();
+    private String currentSearch = "";
+    private Boolean currentActiveFilter = null;
 
     @Autowired
     public SenderConfigManagementView(SenderConfigService senderConfigService) {
@@ -71,130 +74,46 @@ public class SenderConfigManagementView extends ManagementVerticalView {
         HorizontalLayout toolbar = buildToolbar();
         add(toolbar);
 
-        configureGrid();
-        add(grid);
+        cardsContainer.setWidthFull();
+        cardsContainer.addClassName("sender-grid");
+        add(cardsContainer);
 
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
         loadingBar.setWidth("200px");
         add(loadingBar);
 
-        injectResponsiveStyles();
-        loadSenderConfigs();
-    }
+        createButton.addClickListener(e -> openCreateSenderDialog());
+        createButton.setTooltipText(I18n.t("sender.view.create.tooltip"));
 
-    private void configureGrid() {
-        grid.setWidthFull();
-        grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES, GridVariant.LUMO_COLUMN_BORDERS);
+        refreshButton.addClickListener(e -> loadSenderConfigs());
+        refreshButton.setTooltipText(I18n.t("sender.view.refresh.tooltip"));
 
-        grid.addColumn(SenderConfigDto::getId)
-                .setHeader(I18n.t("sender.grid.id"))
-                .setWidth("80px")
-                .setFlexGrow(0)
-                .setSortable(true);
-
-        grid.addColumn(SenderConfigDto::getTenant)
-                .setHeader(I18n.t("sender.grid.tenant"))
-                .setWidth("150px")
-                .setSortable(true);
-
-        grid.addColumn(SenderConfigDto::getHost)
-                .setHeader(I18n.t("sender.grid.host"))
-                .setSortable(true)
-                .setResizable(true);
-
-        grid.addColumn(SenderConfigDto::getPort)
-                .setHeader(I18n.t("sender.grid.port"))
-                .setWidth("100px")
-                .setFlexGrow(0)
-                .setSortable(true);
-
-        grid.addColumn(SenderConfigDto::getUsername)
-                .setHeader(I18n.t("sender.grid.username"))
-                .setWidth("150px")
-                .setSortable(true);
-
-        grid.addColumn(config -> config.getSmtpStarttlsEnable() != null && config.getSmtpStarttlsEnable() ? "✓" : "✗")
-                .setHeader(I18n.t("sender.grid.tls"))
-                .setWidth("80px")
-                .setFlexGrow(0)
-                .setSortable(true);
-
-        grid.addColumn(config -> config.getDebug() != null && config.getDebug() ? "✓" : "✗")
-                .setHeader(I18n.t("sender.grid.debug"))
-                .setWidth("80px")
-                .setFlexGrow(0)
-                .setSortable(true);
-
-        grid.addComponentColumn(this::createActionButtons)
-                .setHeader(I18n.t("sender.grid.actions"))
-                .setWidth("150px")
-                .setFlexGrow(0);
-
-        grid.setItems(filteredConfigs);
-    }
-
-    private HorizontalLayout createActionButtons(SenderConfigDto config) {
-        HorizontalLayout actions = new HorizontalLayout();
-        actions.setSpacing(true);
-
-        Button editBtn = new Button(new Icon(VaadinIcon.EDIT));
-        editBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
-        editBtn.setTooltipText(I18n.t("sender.action.edit"));
-        editBtn.addClickListener(e -> openEditDialog(config));
-
-        Button deleteBtn = new Button(new Icon(VaadinIcon.TRASH));
-        deleteBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR);
-        deleteBtn.setTooltipText(I18n.t("sender.action.delete"));
-        deleteBtn.addClickListener(e -> confirmDelete(config));
-
-        Button testBtn = new Button(new Icon(VaadinIcon.START_COG));
-        testBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SUCCESS);
-        testBtn.setTooltipText(I18n.t("sender.action.test"));
-        testBtn.addClickListener(e -> testConnection(config));
-
-        actions.add(editBtn, testBtn, deleteBtn);
-        return actions;
-    }
-
-    private HorizontalLayout buildToolbar() {
-        HorizontalLayout toolbar = new HorizontalLayout();
-        toolbar.setWidthFull();
-        toolbar.setPadding(false);
-        toolbar.setSpacing(true);
-        toolbar.setAlignItems(Alignment.CENTER);
-        toolbar.setJustifyContentMode(JustifyContentMode.BETWEEN);
-        toolbar.addClassName("sender-toolbar");
-
-        HorizontalLayout leftGroup = new HorizontalLayout();
-        leftGroup.setSpacing(true);
-        leftGroup.setAlignItems(Alignment.CENTER);
-
-        searchField.setPlaceholder(I18n.t("sender.search.placeholder"));
+        searchField.setPlaceholder(I18n.t("sender.view.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
-        searchField.setTooltipText(I18n.t("sender.search.tooltip"));
-        searchField.addValueChangeListener(e -> filterConfigs(e.getValue()));
-        searchField.setWidth("300px");
+        searchField.setTooltipText(I18n.t("sender.view.search.tooltip"));
+        searchField.addValueChangeListener(e -> {
+            currentSearch = e.getValue();
+            filterAndDisplayCards();
+        });
 
-        leftGroup.add(searchField);
+        statusFilter.setItems(
+                new SenderStatusOption(I18n.t("sender.view.status.all"), null),
+                new SenderStatusOption(I18n.t("sender.view.status.active"), true),
+                new SenderStatusOption(I18n.t("sender.view.status.inactive"), false)
+        );
+        statusFilter.setItemLabelGenerator(option -> option.label());
+        statusFilter.setValue(new SenderStatusOption(I18n.t("sender.view.status.all"), null));
+        statusFilter.setPlaceholder(I18n.t("sender.view.status.placeholder"));
+        statusFilter.setTooltipText(I18n.t("sender.view.status.tooltip"));
+        statusFilter.addValueChangeListener(e -> {
+            currentActiveFilter = e.getValue().value();
+            filterAndDisplayCards();
+        });
 
-        HorizontalLayout rightGroup = new HorizontalLayout();
-        rightGroup.setSpacing(true);
-        rightGroup.setAlignItems(Alignment.CENTER);
-
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText(I18n.t("sender.refresh.tooltip"));
-        refreshButton.addClickListener(e -> loadSenderConfigs());
-
-        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        createButton.setTooltipText(I18n.t("sender.create.tooltip"));
-        createButton.addClickListener(e -> openCreateDialog());
-
-        rightGroup.add(refreshButton, createButton);
-
-        toolbar.add(leftGroup, rightGroup);
-        return toolbar;
+        injectResponsiveStyles();
+        loadSenderConfigs();
     }
 
     private void loadSenderConfigs() {
@@ -202,16 +121,17 @@ public class SenderConfigManagementView extends ManagementVerticalView {
         try {
             ResponseEntity<List<SenderConfigDto>> response = senderConfigService.findAllList();
             allConfigs = response.getBody() != null ? response.getBody() : new ArrayList<>();
-            filteredConfigs = new ArrayList<>(allConfigs);
-            grid.setItems(filteredConfigs);
-            grid.getDataProvider().refreshAll();
+            currentPageCards = allConfigs.stream()
+                    .map(config -> new SenderConfigCard(this, senderConfigService, config, this::loadSenderConfigs))
+                    .collect(Collectors.toList());
+            filterAndDisplayCards();
         } catch (FeignException ex) {
-            String errorMsg = ex.status() == 404 ? I18n.t("sender.load.not.found") : ex.getMessage();
-            Notification.show(I18n.t("sender.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
+            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
+            Notification.show(I18n.t("sender.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            log.error("Failed to load sender configs", ex);
+            log.error("Failed to load sender configs", ex.getMessage());
         } catch (Exception e) {
-            Notification.show(I18n.t("sender.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("sender.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load sender configs", e);
         } finally {
@@ -219,89 +139,101 @@ public class SenderConfigManagementView extends ManagementVerticalView {
         }
     }
 
-    private void filterConfigs(String searchText) {
-        if (searchText == null || searchText.isEmpty()) {
-            filteredConfigs = new ArrayList<>(allConfigs);
+    private void filterAndDisplayCards() {
+        cardsContainer.removeAll();
+
+        List<SenderConfigCard> filtered = currentPageCards.stream()
+                .filter(card -> {
+                    SenderConfigDto config = card.getConfig();
+                    if (currentActiveFilter != null) {
+                        boolean isActive = config.getSmtpStarttlsEnable() != null && config.getSmtpStarttlsEnable();
+                        if (isActive != currentActiveFilter) return false;
+                    }
+                    if (currentSearch != null && !currentSearch.isEmpty()) {
+                        String searchLower = currentSearch.toLowerCase();
+                        String host = config.getHost() != null ? config.getHost().toLowerCase() : "";
+                        String username = config.getUsername() != null ? config.getUsername().toLowerCase() : "";
+                        String tenant = config.getTenant() != null ? config.getTenant().toLowerCase() : "";
+                        return host.contains(searchLower) ||
+                                username.contains(searchLower) ||
+                                tenant.contains(searchLower);
+                    }
+                    return true;
+                })
+                .collect(Collectors.toList());
+
+        if (filtered.isEmpty()) {
+            Div emptyState = new Div();
+            emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
+            emptyState.addClassName(LumoUtility.Padding.XLARGE);
+            Icon emptyIcon = VaadinIcon.INBOX.create();
+            emptyIcon.setSize("48px");
+            emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
+            H4 emptyTitle = new H4(I18n.t("sender.view.empty.title"));
+            Paragraph emptyDesc = new Paragraph(I18n.t("sender.view.empty.description"));
+            emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
+            emptyState.add(emptyIcon, emptyTitle, emptyDesc);
+            cardsContainer.add(emptyState);
         } else {
-            String searchLower = searchText.toLowerCase();
-            filteredConfigs = allConfigs.stream()
-                    .filter(config ->
-                            config.getHost() != null && config.getHost().toLowerCase().contains(searchLower) ||
-                                    config.getUsername() != null && config.getUsername().toLowerCase().contains(searchLower) ||
-                                    config.getTenant() != null && config.getTenant().toLowerCase().contains(searchLower)
-                    )
-                    .toList();
-        }
-        grid.setItems(filteredConfigs);
-        grid.getDataProvider().refreshAll();
-    }
-
-    private void openCreateDialog() {
-        CreateSenderConfigDialog dialog = new CreateSenderConfigDialog(
-                senderConfigService,
-                this::loadSenderConfigs
-        );
-        dialog.open();
-    }
-
-    private void openEditDialog(SenderConfigDto config) {
-        EditSenderConfigDialog dialog = new EditSenderConfigDialog(
-                senderConfigService,
-                config,
-                this::loadSenderConfigs
-        );
-        dialog.open();
-    }
-
-    private void confirmDelete(SenderConfigDto config) {
-        Notification.show(I18n.t("sender.delete.confirm", config.getId()), 3000, Notification.Position.MIDDLE)
-                .addThemeVariants(NotificationVariant.LUMO_WARNING);
-
-        // Simplified delete - in real implementation use a confirmation dialog
-        try {
-            senderConfigService.delete(config.getId());
-            Notification.show(I18n.t("sender.delete.success"), 3000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            loadSenderConfigs();
-        } catch (Exception e) {
-            Notification.show(I18n.t("sender.delete.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            filtered.forEach(cardsContainer::add);
         }
     }
 
-    private void testConnection(SenderConfigDto config) {
-        Notification.show(I18n.t("sender.test.starting", config.getHost()), 3000, Notification.Position.BOTTOM_END)
-                .addThemeVariants(NotificationVariant.LUMO_PRIMARY);
+    private HorizontalLayout buildToolbar() {
+        HorizontalLayout toolbar = new HorizontalLayout();
+        toolbar.setWidthFull();
+        toolbar.setPadding(false);
+        toolbar.setSpacing(true);
+        toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
+        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        toolbar.addClassName("sender-toolbar");
 
-        // In real implementation, call a test endpoint
-        // For now, simulate success
-        UI.getCurrent().getPage().executeJs(
-                "setTimeout(() => { $0.dispatchEvent(new Event('test-complete')); }, 2000)",
-                getElement()
-        );
+        HorizontalLayout leftGroup = new HorizontalLayout();
+        leftGroup.setSpacing(true);
+        leftGroup.setAlignItems(FlexComponent.Alignment.END);
+        searchField.setWidth("200px");
+        Span statusLabel = new Span(I18n.t("sender.view.status.label"));
+        statusLabel.getElement().setAttribute("title", I18n.t("sender.view.status.tooltip"));
+        statusFilter.setWidth("140px");
+        HorizontalLayout statusLayout = new HorizontalLayout(statusLabel, statusFilter);
+        statusLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        statusLayout.setSpacing(true);
+        leftGroup.add(searchField, statusLayout);
 
-        Notification.show(I18n.t("sender.test.success"), 3000, Notification.Position.BOTTOM_END)
-                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-    }
+        HorizontalLayout rightGroup = new HorizontalLayout();
+        rightGroup.setSpacing(true);
+        rightGroup.setAlignItems(FlexComponent.Alignment.END);
+        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        refreshButton.setTooltipText(I18n.t("sender.view.refresh.tooltip"));
+        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        rightGroup.add(refreshButton, createButton);
 
-    public void showLoading(boolean show) {
-        loadingBar.setVisible(show);
-        grid.setVisible(!show);
-        refreshButton.setEnabled(!show);
-        createButton.setEnabled(!show);
+        toolbar.add(leftGroup, rightGroup);
+        return toolbar;
     }
 
     private void injectResponsiveStyles() {
         String css = """
                 .sender-config-view {
-                    background: var(--lumo-base-color);
+                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
                     min-height: 100vh;
+                    animation: fadeIn 0.5s ease-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
                 }
                 .sender-toolbar {
                     display: flex;
                     flex-wrap: wrap;
                     gap: var(--lumo-space-s);
                     width: 100%;
+                }
+                .sender-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+                    gap: var(--lumo-space-m);
+                    padding: var(--lumo-space-s);
                 }
                 @media (max-width: 768px) {
                     .sender-toolbar {
@@ -310,9 +242,10 @@ public class SenderConfigManagementView extends ManagementVerticalView {
                     }
                     .sender-toolbar > * {
                         width: 100% !important;
+                        justify-content: center;
                     }
-                    .sender-toolbar vaadin-text-field {
-                        width: 100% !important;
+                    .sender-grid {
+                        grid-template-columns: 1fr;
                     }
                 }
                 """;
@@ -320,5 +253,30 @@ public class SenderConfigManagementView extends ManagementVerticalView {
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
                 css
         );
+    }
+
+    public void showLoading(boolean show) {
+        loadingBar.setVisible(show);
+        cardsContainer.setVisible(!show);
+        refreshButton.setEnabled(!show);
+        createButton.setEnabled(!show);
+    }
+
+    private void openCreateSenderDialog() {
+        // FIXED: Pass parentView, senderConfigService, and refresh callback
+        new CreateSenderConfigDialog(this, senderConfigService, this::loadSenderConfigs).open();
+    }
+
+    private void openEditSenderDialog(SenderConfigDto config) {
+        // FIXED: Pass senderConfigService, config, and refresh callback
+        new EditSenderConfigDialog(senderConfigService, config, this::loadSenderConfigs).open();
+    }
+
+    private void openDeleteSenderDialog(SenderConfigDto config) {
+        // FIXED: Pass parentView, senderConfigService, config, and refresh callback
+        new DeleteSenderConfigDialog(this, senderConfigService, config, this::loadSenderConfigs).open();
+    }
+
+    public record SenderStatusOption(String label, Boolean value) {
     }
 }

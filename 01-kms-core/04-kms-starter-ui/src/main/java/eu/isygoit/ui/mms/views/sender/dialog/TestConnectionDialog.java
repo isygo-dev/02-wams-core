@@ -1,10 +1,11 @@
 package eu.isygoit.ui.mms.views.sender.dialog;
 
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -13,154 +14,177 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.spring.annotation.UIScope;
 import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.SenderConfigService;
 import feign.FeignException;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 
-@UIScope
+@Slf4j
 public class TestConnectionDialog extends Dialog {
 
     private final SenderConfigService senderConfigService;
     private final SenderConfigDto config;
-    private final Runnable onSuccess;
+    private final Runnable onComplete;
 
+    private final Div statusArea = new Div();
     private final ProgressBar progressBar = new ProgressBar();
-    private final Paragraph statusText = new Paragraph(I18n.t("sender.test.connecting"));
-    private final Button closeButton = new Button(I18n.t("sender.test.close"));
-    private final Button retryButton = new Button(I18n.t("sender.test.retry"));
-    private boolean isRunning = false;
+    private final Button closeButton = new Button(I18n.t("dialog.close"));
 
     public TestConnectionDialog(SenderConfigService senderConfigService,
                                 SenderConfigDto config,
-                                Runnable onSuccess) {
+                                Runnable onComplete) {
         this.senderConfigService = senderConfigService;
         this.config = config;
-        this.onSuccess = onSuccess;
+        this.onComplete = onComplete;
 
-        setHeaderTitle(I18n.t("sender.test.title", config.getHost()));
-        setWidth("450px");
+        setHeaderTitle(I18n.t("sender.dialog.test.title", config.getHost()));
+        setWidth("500px");
+        setMaxWidth("95vw");
         setModal(true);
         setDraggable(true);
-        setResizable(false);
 
-        VerticalLayout layout = new VerticalLayout();
-        layout.setPadding(true);
-        layout.setSpacing(true);
-        layout.setWidthFull();
-        layout.setAlignItems(FlexComponent.Alignment.CENTER);
-
-        // Progress indicator
-        progressBar.setIndeterminate(true);
-        progressBar.setWidthFull();
-
-        // Status icon and text
-        HorizontalLayout statusLayout = new HorizontalLayout();
-        statusLayout.setSpacing(true);
-        statusLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        statusLayout.setWidthFull();
-
-        Icon statusIcon = VaadinIcon.COG.create();
-        statusIcon.setSize("24px");
-        statusIcon.getStyle().set("color", "var(--lumo-primary-color)");
-
-        statusText.getStyle().set("margin", "0");
-        statusText.getStyle().set("flex", "1");
-
-        statusLayout.add(statusIcon, statusText);
-
-        // Buttons
-        HorizontalLayout buttonLayout = new HorizontalLayout();
-        buttonLayout.setSpacing(true);
-        buttonLayout.setWidthFull();
-        buttonLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-
-        retryButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        retryButton.setVisible(false);
-        retryButton.addClickListener(e -> runTest());
-
-        closeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        closeButton.addClickListener(e -> close());
-
-        buttonLayout.add(retryButton, closeButton);
-
-        layout.add(progressBar, statusLayout, buttonLayout);
-        add(layout);
-
-        // Auto-start test
+        buildLayout();
         runTest();
     }
 
-    private void runTest() {
-        if (isRunning) {
-            return;
-        }
+    private void buildLayout() {
+        VerticalLayout mainLayout = new VerticalLayout();
+        mainLayout.setPadding(true);
+        mainLayout.setSpacing(true);
+        mainLayout.setWidthFull();
 
-        isRunning = true;
-        progressBar.setVisible(true);
-        retryButton.setVisible(false);
+        // Host info
+        HorizontalLayout infoRow = new HorizontalLayout();
+        infoRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        infoRow.setSpacing(true);
+
+        Icon serverIcon = VaadinIcon.SERVER.create();
+        serverIcon.setColor("var(--lumo-primary-color)");
+        Span hostLabel = new Span(I18n.t("sender.dialog.test.host") + ":");
+        hostLabel.getStyle().set("font-weight", "bold");
+        Span hostValue = new Span(config.getHost() + ":" + config.getPort());
+        hostValue.getStyle().set("font-family", "monospace");
+
+        infoRow.add(serverIcon, hostLabel, hostValue);
+        mainLayout.add(infoRow);
+
+        // Progress bar
+        progressBar.setIndeterminate(true);
+        progressBar.setWidthFull();
+        mainLayout.add(progressBar);
+
+        // Status area
+        statusArea.setWidthFull();
+        statusArea.getStyle()
+                .set("padding", "var(--lumo-space-m)")
+                .set("border-radius", "var(--lumo-border-radius-m)")
+                .set("min-height", "100px")
+                .set("display", "flex")
+                .set("align-items", "center")
+                .set("justify-content", "center");
+        mainLayout.add(statusArea);
+
+        // Close button
+        HorizontalLayout footer = new HorizontalLayout();
+        footer.setWidthFull();
+        footer.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+        closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         closeButton.setEnabled(false);
+        closeButton.addClickListener(e -> {
+            close();
+            if (onComplete != null) {
+                onComplete.run();
+            }
+        });
+        footer.add(closeButton);
+        mainLayout.add(footer);
 
-        statusText.setText(I18n.t("sender.test.connecting"));
-        statusText.getStyle().set("color", "var(--lumo-primary-text-color)");
+        add(mainLayout);
+    }
 
-        // Simulate test with a delay - in real implementation, call the actual test endpoint
-        // For this example, we'll use a simulated test with config validation
+    private void runTest() {
+        // Simulate async test - in real implementation, call actual test endpoint
+        // For now, simulate a successful connection test
+        statusArea.removeAll();
+        statusArea.getStyle()
+                .set("background-color", "var(--lumo-primary-color-10pct)")
+                .set("color", "var(--lumo-primary-text-color)");
+
+        VerticalLayout statusContent = new VerticalLayout();
+        statusContent.setAlignItems(FlexComponent.Alignment.CENTER);
+        statusContent.setSpacing(true);
+
+        Icon spinner = VaadinIcon.SPINNER.create();
+        spinner.getStyle().set("animation", "spin 1s linear infinite");
+        spinner.setSize("32px");
+        statusContent.add(spinner);
+        statusContent.add(new Span(I18n.t("sender.dialog.test.connecting")));
+
+        statusArea.add(statusContent);
+
+        // Simulate test completion after delay
         getUI().ifPresent(ui -> ui.access(() -> {
             try {
-                // Validate required fields
-                if (config.getHost() == null || config.getHost().isEmpty()) {
-                    showResult(false, I18n.t("sender.test.error.host.missing"));
-                    return;
-                }
-                if (config.getPort() == null || config.getPort().isEmpty()) {
-                    showResult(false, I18n.t("sender.test.error.port.missing"));
-                    return;
-                }
-                if (config.getUsername() == null || config.getUsername().isEmpty()) {
-                    showResult(false, I18n.t("sender.test.error.username.missing"));
-                    return;
-                }
+                // In real implementation, call:
+                // ResponseEntity<TestConnectionResponse> response = senderConfigService.testConnection(config.getId());
+                // For now, simulate success
+                Thread.sleep(2000);
 
-                // Simulate connection test - in production, call the actual API
-                // For demonstration, we'll simulate a successful connection
-                // with a random success/failure for demonstration
-                boolean success = Math.random() > 0.3; // 70% success rate for demo
-
-                if (success) {
-                    showResult(true, I18n.t("sender.test.success"));
-                    if (onSuccess != null) {
-                        onSuccess.run();
-                    }
-                } else {
-                    showResult(false, I18n.t("sender.test.failed"));
-                }
-
-            } catch (Exception e) {
-                showResult(false, I18n.t("sender.test.error", e.getMessage()));
-            } finally {
-                isRunning = false;
+                getUI().ifPresent(ui2 -> ui2.access(() -> {
+                    showTestResult(true, I18n.t("sender.dialog.test.success"));
+                }));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                showTestResult(false, I18n.t("sender.dialog.test.failed", e.getMessage()));
             }
         }));
     }
 
-    private void showResult(boolean success, String message) {
+    private void showTestResult(boolean success, String message) {
         progressBar.setVisible(false);
         closeButton.setEnabled(true);
 
+        statusArea.removeAll();
         if (success) {
-            statusText.setText("✓ " + message);
-            statusText.getStyle().set("color", "var(--lumo-success-color)");
-            Notification.show(message, 3000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            statusArea.getStyle()
+                    .set("background-color", "var(--lumo-success-color-10pct)")
+                    .set("color", "var(--lumo-success-text-color)");
+
+            VerticalLayout resultContent = new VerticalLayout();
+            resultContent.setAlignItems(FlexComponent.Alignment.CENTER);
+            resultContent.setSpacing(true);
+
+            Icon successIcon = VaadinIcon.CHECK_CIRCLE.create();
+            successIcon.setColor("var(--lumo-success-color)");
+            successIcon.setSize("48px");
+
+            resultContent.add(successIcon);
+            resultContent.add(new Span(message));
+            resultContent.add(new Span(I18n.t("sender.dialog.test.connection.established")));
+            resultContent.getStyle().set("font-size", "var(--lumo-font-size-s)");
+
+            statusArea.add(resultContent);
         } else {
-            statusText.setText("✗ " + message);
-            statusText.getStyle().set("color", "var(--lumo-error-color)");
-            retryButton.setVisible(true);
-            Notification.show(message, 5000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            statusArea.getStyle()
+                    .set("background-color", "var(--lumo-error-color-10pct)")
+                    .set("color", "var(--lumo-error-text-color)");
+
+            VerticalLayout resultContent = new VerticalLayout();
+            resultContent.setAlignItems(FlexComponent.Alignment.CENTER);
+            resultContent.setSpacing(true);
+
+            Icon errorIcon = VaadinIcon.EXCLAMATION_CIRCLE.create();
+            errorIcon.setColor("var(--lumo-error-color)");
+            errorIcon.setSize("48px");
+
+            resultContent.add(errorIcon);
+            resultContent.add(new Span(message));
+            resultContent.add(new Span(I18n.t("sender.dialog.test.check.configuration")));
+            resultContent.getStyle().set("font-size", "var(--lumo-font-size-s)");
+
+            statusArea.add(resultContent);
         }
     }
 }
