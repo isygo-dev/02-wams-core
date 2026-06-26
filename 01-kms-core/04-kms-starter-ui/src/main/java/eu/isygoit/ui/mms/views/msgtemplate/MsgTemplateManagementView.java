@@ -112,8 +112,10 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
         languageFilter.setValue(new TemplateLanguageOption(I18n.t("template.view.language.all"), null));
         languageFilter.setPlaceholder(I18n.t("template.view.language.placeholder"));
         languageFilter.setTooltipText(I18n.t("template.view.language.tooltip"));
+        // Safe listener - handle null
         languageFilter.addValueChangeListener(e -> {
-            currentLanguageFilter = e.getValue().value();
+            TemplateLanguageOption option = e.getValue();
+            currentLanguageFilter = option != null ? option.value() : null;
             filterAndDisplayCards();
         });
 
@@ -124,8 +126,10 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
         nameFilter.setValue(new TemplateNameOption(I18n.t("template.view.name.all"), null));
         nameFilter.setPlaceholder(I18n.t("template.view.name.placeholder"));
         nameFilter.setTooltipText(I18n.t("template.view.name.tooltip"));
+        // Safe listener - handle null
         nameFilter.addValueChangeListener(e -> {
-            currentNameFilter = e.getValue().value();
+            TemplateNameOption option = e.getValue();
+            currentNameFilter = option != null ? option.value() : null;
             filterAndDisplayCards();
         });
 
@@ -146,6 +150,7 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
                         options.add(new TemplateNameOption(name, name))
                 );
                 nameFilter.setItems(options);
+                // Set value after items are set, avoid triggering value change event that causes NPE
                 nameFilter.setValue(options.get(0));
             }
         } catch (Exception e) {

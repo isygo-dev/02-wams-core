@@ -181,13 +181,6 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
                 .set("color", color.foreground());
         left.add(languageChip);
 
-        // ID badge
-        Span idBadge = new Span("ID: " + template.getId());
-        idBadge.addClassName(LumoUtility.FontSize.XSMALL);
-        idBadge.addClassName(LumoUtility.TextColor.TERTIARY);
-        idBadge.getStyle().set("font-family", "monospace");
-        left.add(idBadge);
-
         return left;
     }
 

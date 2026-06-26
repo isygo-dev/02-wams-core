@@ -22,6 +22,9 @@ import eu.isygoit.ui.mms.views.msgtemplate.MsgTemplateManagementView;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -234,6 +237,8 @@ public class EditTemplateContentDialog extends Dialog {
                     } else if (fileName.endsWith(".json")) {
                         contentType = "application/json";
                     } else if (fileName.endsWith(".ftl") || fileName.endsWith(".vm")) {
+                        contentType = "text/plain";
+                    } else if (fileName.endsWith(".properties")) {
                         contentType = "text/plain";
                     }
                     return contentType;
