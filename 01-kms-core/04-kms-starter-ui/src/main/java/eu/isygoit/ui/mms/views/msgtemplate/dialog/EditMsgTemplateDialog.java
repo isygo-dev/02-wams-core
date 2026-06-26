@@ -16,6 +16,7 @@ import eu.isygoit.ui.mms.views.msgtemplate.MsgTemplateManagementView;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
@@ -41,7 +42,7 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
         buildContent();
         prefillData();
     }
-
+    
     protected void buildContent() {
         FormLayout form = new FormLayout();
         form.setResponsiveSteps(
@@ -131,9 +132,15 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
 
             ResponseEntity<MsgTemplateDto> response;
             if (hasFileUploaded()) {
+                MultipartFile uploadedFile = getUploadedFile();
+                if (uploadedFile == null || uploadedFile.isEmpty()) {
+                    append(I18n.t("template.dialog.edit.error.file.invalid"));
+                    return false;
+                }
                 // Use MsgTemplateFileService for update with new file
+                // The API expects: @RequestPart(name = "file") MultipartFile file, @RequestPart(name = "dto") D dto
                 response = templateFileService.updateWithFile(
-                        template.getId(), getUploadedFile(), updatedTemplate);
+                        template.getId(), uploadedFile, updatedTemplate);
             } else {
                 // Use MsgTemplateService for update without file change
                 response = templateService.update(template.getId(), updatedTemplate);

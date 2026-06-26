@@ -15,6 +15,10 @@ import eu.isygoit.ui.mms.views.msgtemplate.MsgTemplateManagementView;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 @Slf4j
 public class CreateMsgTemplateDialog extends BaseMsgTemplateDialog {
@@ -110,6 +114,12 @@ public class CreateMsgTemplateDialog extends BaseMsgTemplateDialog {
             return false;
         }
 
+        MultipartFile uploadedFile = getUploadedFile();
+        if (uploadedFile == null || uploadedFile.isEmpty()) {
+            append(I18n.t("template.dialog.create.error.file.invalid"));
+            return false;
+        }
+
         if (parentView != null) {
             parentView.showLoading(true);
         }
@@ -121,12 +131,12 @@ public class CreateMsgTemplateDialog extends BaseMsgTemplateDialog {
                     .description(descriptionField.getValue() != null ?
                             descriptionField.getValue().trim() : null)
                     .language(languageCombo.getValue())
-                    .file(getUploadedFile())
                     .build();
 
             // Use MsgTemplateFileService for create with file
+            // The API expects: @RequestPart(name = "file") MultipartFile file, @RequestPart(name = "dto") D dto
             ResponseEntity<MsgTemplateDto> response = templateFileService.createWithFile(
-                    getUploadedFile(), template);
+                    uploadedFile, template);
             if (!response.getStatusCode().is2xxSuccessful()) {
                 append(I18n.t("template.dialog.create.failed",
                         response.getBody() != null ? response.getBody().toString() : "unknown error"));

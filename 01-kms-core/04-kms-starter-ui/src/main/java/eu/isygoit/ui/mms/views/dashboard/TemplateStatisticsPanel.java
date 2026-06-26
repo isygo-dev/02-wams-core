@@ -1,8 +1,10 @@
 package eu.isygoit.ui.mms.views.dashboard;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -18,117 +20,148 @@ import org.springframework.stereotype.Component;
 public class TemplateStatisticsPanel extends VerticalLayout {
 
     public TemplateStatisticsPanel() {
-        setPadding(true);
-        setSpacing(true);
+        setPadding(false);
+        setSpacing(false);
         setWidthFull();
         addClassName("template-stats-panel");
-        getStyle()
-                .set("background", "var(--lumo-base-color)")
+
+        Div mainContainer = new Div();
+        mainContainer.setWidthFull();
+        mainContainer.getStyle()
+                .set("background", "linear-gradient(145deg, rgba(255,255,255,0.95), rgba(249,250,251,0.98))")
                 .set("border-radius", "var(--lumo-border-radius-l)")
-                .set("box-shadow", "var(--lumo-box-shadow-xs)")
-                .set("padding", "var(--lumo-space-l)");
+                .set("box-shadow", "var(--lumo-box-shadow-s)")
+                .set("padding", "var(--lumo-space-m)")
+                .set("border", "1px solid rgba(255,255,255,0.3)")
+                .set("backdrop-filter", "blur(10px)")
+                .set("-webkit-backdrop-filter", "blur(10px)");
+
+        // Compact Header
+        HorizontalLayout header = createCompactHeader();
+        mainContainer.add(header);
+
+        // Mini Stats - 4 compact cards
+        Div statsGrid = createMiniStats();
+        mainContainer.add(statsGrid);
+
+        // Template usage with mini progress bars
+        Div usageSection = createCompactUsage();
+        mainContainer.add(usageSection);
+
+        add(mainContainer);
+        injectResponsiveStyles();
+    }
+
+    private HorizontalLayout createCompactHeader() {
+        HorizontalLayout header = new HorizontalLayout();
+        header.setWidthFull();
+        header.setAlignItems(FlexComponent.Alignment.CENTER);
+        header.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        header.getStyle()
+                .set("margin-bottom", "var(--lumo-space-s)")
+                .set("flex-wrap", "wrap")
+                .set("gap", "var(--lumo-space-xs)");
 
         H3 title = new H3(I18n.t("mms.dashboard.template.statistics"));
         title.addClassName(LumoUtility.FontSize.MEDIUM);
-        title.addClassName(LumoUtility.Margin.Bottom.MEDIUM);
-        add(title);
+        title.addClassName(LumoUtility.Margin.NONE);
+        title.getStyle().set("font-weight", "600");
 
-        // Stats grid
-        Div statsGrid = createStatsGrid();
-        add(statsGrid);
+        Span badge = new Span("Live");
+        badge.getStyle()
+                .set("background", "#10B98120")
+                .set("color", "#10B981")
+                .set("padding", "2px 12px")
+                .set("border-radius", "var(--lumo-border-radius-s)")
+                .set("font-size", "var(--lumo-font-size-xs)")
+                .set("font-weight", "600");
 
-        // Template usage list
-        Div usageList = createUsageList();
-        add(usageList);
+        header.add(title, badge);
+        return header;
     }
 
-    private Div createStatsGrid() {
+    private Div createMiniStats() {
         Div grid = new Div();
         grid.getStyle()
                 .set("display", "grid")
-                .set("grid-template-columns", "repeat(auto-fit, minmax(150px, 1fr))")
-                .set("gap", "var(--lumo-space-m)")
-                .set("margin-bottom", "var(--lumo-space-l)");
+                .set("grid-template-columns", "repeat(4, 1fr)")
+                .set("gap", "var(--lumo-space-xs)")
+                .set("margin-bottom", "var(--lumo-space-s)");
 
-        grid.add(createStatCard("Total Templates", "120", VaadinIcon.FILE_TEXT, "var(--lumo-primary-color)"));
-        grid.add(createStatCard("Active", "85", VaadinIcon.CHECK_CIRCLE, "var(--lumo-success-color)"));
-        grid.add(createStatCard("Draft", "25", VaadinIcon.PENCIL, "var(--lumo-warning-color)"));
-        grid.add(createStatCard("Archived", "10", VaadinIcon.ARCHIVE, "var(--lumo-secondary-text-color)"));
+        grid.add(createMiniStatCard("Total", "120", VaadinIcon.FILE_TEXT, "#4F46E5"));
+        grid.add(createMiniStatCard("Active", "85", VaadinIcon.CHECK_CIRCLE, "#10B981"));
+        grid.add(createMiniStatCard("Draft", "25", VaadinIcon.PENCIL, "#F59E0B"));
+        grid.add(createMiniStatCard("Archived", "10", VaadinIcon.ARCHIVE, "#6B7280"));
 
         return grid;
     }
 
-    private Div createStatCard(String label, String value, VaadinIcon icon, String color) {
+    private Div createMiniStatCard(String label, String value, VaadinIcon icon, String color) {
         Div card = new Div();
         card.getStyle()
                 .set("background", "var(--lumo-contrast-5pct)")
                 .set("border-radius", "var(--lumo-border-radius-m)")
-                .set("padding", "var(--lumo-space-m)")
+                .set("padding", "var(--lumo-space-s)")
                 .set("text-align", "center")
-                .set("transition", "all 0.3s ease")
-                .set("border", "1px solid var(--lumo-contrast-10pct)");
+                .set("border", "1px solid var(--lumo-contrast-10pct)")
+                .set("transition", "all 0.2s ease")
+                .set("cursor", "pointer");
 
-        // Icon
+        card.addClassName("template-stat-card");
+
         Icon iconComponent = icon.create();
-        iconComponent.setSize("24px");
+        iconComponent.setSize("18px");
         iconComponent.setColor(color);
         iconComponent.getStyle()
                 .set("display", "block")
                 .set("margin", "0 auto var(--lumo-space-xs)");
 
-        // Value
-        Paragraph valueText = new Paragraph(value);
-        valueText.getStyle()
-                .set("font-size", "var(--lumo-font-size-xxl)")
+        Span valueSpan = new Span(value);
+        valueSpan.getStyle()
+                .set("font-size", "var(--lumo-font-size-l)")
                 .set("font-weight", "700")
-                .set("margin", "0")
-                .set("color", "var(--lumo-header-text-color)");
+                .set("color", "var(--lumo-header-text-color)")
+                .set("display", "block");
 
-        // Label
-        Paragraph labelText = new Paragraph(label);
-        labelText.addClassName(LumoUtility.TextColor.SECONDARY);
-        labelText.getStyle()
-                .set("font-size", "var(--lumo-font-size-xs)")
-                .set("margin", "var(--lumo-space-xs) 0 0");
+        Span labelSpan = new Span(label);
+        labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
+        labelSpan.addClassName(LumoUtility.TextColor.SECONDARY);
 
-        card.add(iconComponent, valueText, labelText);
+        card.add(iconComponent, valueSpan, labelSpan);
         return card;
     }
 
-    private Div createUsageList() {
+    private Div createCompactUsage() {
         Div container = new Div();
         container.getStyle()
-                .set("margin-top", "var(--lumo-space-m)");
+                .set("background", "var(--lumo-contrast-5pct)")
+                .set("border-radius", "var(--lumo-border-radius-m)")
+                .set("padding", "var(--lumo-space-s)");
 
-        // Header
+        // Header with title
         HorizontalLayout header = new HorizontalLayout();
         header.setWidthFull();
-        header.setPadding(false);
-        header.setSpacing(true);
-        header.getStyle()
-                .set("border-bottom", "2px solid var(--lumo-contrast-20pct)")
-                .set("padding-bottom", "var(--lumo-space-xs)")
-                .set("margin-bottom", "var(--lumo-space-s)");
+        header.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        header.setAlignItems(FlexComponent.Alignment.CENTER);
+        header.getStyle().set("margin-bottom", "var(--lumo-space-s)");
 
-        Paragraph nameHeader = new Paragraph(I18n.t("mms.dashboard.template.name"));
-        nameHeader.addClassName(LumoUtility.FontWeight.BOLD);
-        nameHeader.addClassName(LumoUtility.FontSize.XSMALL);
-        nameHeader.getStyle().set("flex", "1");
+        Span usageLabel = new Span("Top Templates");
+        usageLabel.addClassName(LumoUtility.FontSize.XSMALL);
+        usageLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
 
-        Paragraph usageHeader = new Paragraph(I18n.t("mms.dashboard.template.usage"));
-        usageHeader.addClassName(LumoUtility.FontWeight.BOLD);
-        usageHeader.addClassName(LumoUtility.FontSize.XSMALL);
-        usageHeader.getStyle().set("width", "80px").set("text-align", "right");
+        Span viewAll = new Span("View all →");
+        viewAll.addClassName(LumoUtility.FontSize.XSMALL);
+        viewAll.addClassName(LumoUtility.TextColor.PRIMARY);
+        viewAll.getStyle().set("cursor", "pointer");
 
-        header.add(nameHeader, usageHeader);
+        header.add(usageLabel, viewAll);
         container.add(header);
 
-        // Template items with usage bars
-        container.add(createUsageItem("Welcome Email", 45, "var(--lumo-primary-color)"));
-        container.add(createUsageItem("Password Reset", 30, "var(--lumo-success-color)"));
-        container.add(createUsageItem("Newsletter", 15, "var(--lumo-warning-color)"));
-        container.add(createUsageItem("Invoice", 8, "var(--lumo-error-color)"));
-        container.add(createUsageItem("Other", 2, "var(--lumo-secondary-text-color)"));
+        // Usage items with mini progress bars
+        container.add(createUsageItem("Welcome Email", 45, "#4F46E5"));
+        container.add(createUsageItem("Password Reset", 30, "#10B981"));
+        container.add(createUsageItem("Newsletter", 15, "#F59E0B"));
+        container.add(createUsageItem("Invoice", 8, "#EF4444"));
 
         return container;
     }
@@ -141,30 +174,39 @@ public class TemplateStatisticsPanel extends VerticalLayout {
         row.setAlignItems(FlexComponent.Alignment.CENTER);
         row.getStyle()
                 .set("padding", "var(--lumo-space-xs) 0")
-                .set("border-bottom", "1px solid var(--lumo-contrast-5pct)");
+                .set("border-bottom", "1px solid var(--lumo-contrast-5pct)")
+                .set("gap", "var(--lumo-space-s)");
 
-        // Name
-        Paragraph nameText = new Paragraph(name);
-        nameText.addClassName(LumoUtility.FontSize.SMALL);
-        nameText.getStyle()
-                .set("flex", "1")
-                .set("margin", "0");
+        // Name with icon
+        HorizontalLayout nameLayout = new HorizontalLayout();
+        nameLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        nameLayout.setSpacing(true);
+        nameLayout.getStyle().set("flex", "1").set("min-width", "0");
 
-        // Usage bar container
+        Icon fileIcon = VaadinIcon.FILE_O.create();
+        fileIcon.setSize("14px");
+        fileIcon.setColor(color);
+
+        Span nameSpan = new Span(name);
+        nameSpan.addClassName(LumoUtility.FontSize.SMALL);
+        nameSpan.getStyle()
+                .set("white-space", "nowrap")
+                .set("overflow", "hidden")
+                .set("text-overflow", "ellipsis");
+
+        nameLayout.add(fileIcon, nameSpan);
+
+        // Progress bar
         Div barContainer = new Div();
         barContainer.getStyle()
-                .set("display", "flex")
-                .set("align-items", "center")
-                .set("gap", "var(--lumo-space-s)")
-                .set("width", "120px");
+                .set("flex", "2")
+                .set("min-width", "60px");
 
-        // Progress bar (custom)
         Div bar = new Div();
         bar.getStyle()
-                .set("height", "6px")
+                .set("height", "5px")
                 .set("border-radius", "var(--lumo-border-radius-s)")
                 .set("background", "var(--lumo-contrast-10pct)")
-                .set("flex", "1")
                 .set("overflow", "hidden");
 
         Div fill = new Div();
@@ -175,20 +217,48 @@ public class TemplateStatisticsPanel extends VerticalLayout {
                 .set("border-radius", "var(--lumo-border-radius-s)")
                 .set("transition", "width 0.6s ease");
         bar.add(fill);
+        barContainer.add(bar);
 
         // Percentage
-        Paragraph percentText = new Paragraph(usage + "%");
-        percentText.addClassName(LumoUtility.FontSize.XSMALL);
-        percentText.getStyle()
+        Span percentSpan = new Span(usage + "%");
+        percentSpan.addClassName(LumoUtility.FontSize.XSMALL);
+        percentSpan.getStyle()
                 .set("color", color)
                 .set("font-weight", "600")
-                .set("margin", "0")
-                .set("min-width", "40px")
+                .set("min-width", "36px")
                 .set("text-align", "right");
 
-        barContainer.add(bar, percentText);
-        row.add(nameText, barContainer);
-
+        row.add(nameLayout, barContainer, percentSpan);
+        row.expand(nameLayout);
         return row;
+    }
+
+    private void injectResponsiveStyles() {
+        String css = """
+                .template-stats-panel {
+                    animation: fadeIn 0.5s ease-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .template-stat-card:hover {
+                    transform: translateY(-2px);
+                    box-shadow: var(--lumo-box-shadow-xs);
+                    border-color: var(--lumo-primary-color-50pct);
+                }
+                @media (max-width: 480px) {
+                    .template-stats-panel [style*="grid-template-columns: repeat(4, 1fr)"] {
+                        grid-template-columns: repeat(2, 1fr) !important;
+                    }
+                    .template-stats-panel [class*="usage-item"] {
+                        flex-wrap: wrap;
+                    }
+                }
+                """;
+        UI.getCurrent().getPage().executeJs(
+                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
+                css
+        );
     }
 }

@@ -31,7 +31,6 @@ public class MmsMainLayout extends BaseMainLayout {
         SideNavItem templates = new SideNavItem(I18n.t("mms.nav.templates"));
         templates.setPrefixComponent(VaadinIcon.FILE_TEXT.create());
         templates.addItem(new SideNavItem(I18n.t("mms.nav.templates"), "mms/templates", VaadinIcon.FILE_TEXT.create()));
-        templates.addItem(new SideNavItem(I18n.t("mms.nav.template.names"), "mms/template-names", VaadinIcon.LIST.create()));
 
         // Email Operations
         SideNavItem emailOps = new SideNavItem(I18n.t("mms.nav.email.operations"));

@@ -216,7 +216,7 @@ public class EditTemplateContentDialog extends Dialog {
             MultipartFile multipartFile = new MultipartFile() {
                 @Override
                 public String getName() {
-                    return fileName;
+                    return "file";
                 }
 
                 @Override
@@ -273,9 +273,9 @@ public class EditTemplateContentDialog extends Dialog {
                     .name(template.getName())
                     .description(template.getDescription())
                     .language(template.getLanguage())
-                    .file(multipartFile)
                     .build();
 
+            // Use MsgTemplateFileService for update with file
             ResponseEntity<MsgTemplateDto> response = templateFileService.updateWithFile(
                     template.getId(), multipartFile, updatedTemplate);
 
