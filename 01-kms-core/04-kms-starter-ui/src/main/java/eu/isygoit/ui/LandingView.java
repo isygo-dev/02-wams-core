@@ -18,11 +18,14 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.layout.BaseMainLayout;
 import eu.isygoit.util.SecurityUtils;
 import jakarta.annotation.security.PermitAll;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Route("landing")
 @PageTitle("Platform - Choose Your Area")
@@ -95,9 +98,9 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
 
         // ── Floating decorative elements ──
         Div decorLeft = createFloatingDecor(VaadinIcon.KEY, "var(--lumo-primary-color-30pct)", "-100px", "15%");
-        Div decorRight = createFloatingDecor(VaadinIcon.USERS, "var(--lumo-success-color-30pct)", "100px", "15%");
+        Div decorRight = createFloatingDecor(VaadinIcon.ENVELOPE, "var(--lumo-warning-color-30pct)", "100px", "15%");
         Div decorBottomLeft = createFloatingDecor(VaadinIcon.SHIELD, "var(--lumo-primary-color-20pct)", "-80px", "55%");
-        Div decorBottomRight = createFloatingDecor(VaadinIcon.CODE, "var(--lumo-success-color-20pct)", "80px", "55%");
+        Div decorBottomRight = createFloatingDecor(VaadinIcon.USERS, "var(--lumo-success-color-20pct)", "80px", "55%");
 
         hero.add(decorLeft, decorRight, decorBottomLeft, decorBottomRight);
 
@@ -121,7 +124,7 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("z-index", "1")
                 .set("color", "var(--lumo-header-text-color)");
 
-        Text manageText = new Text("IsyGo Platform");
+        Text manageText = new Text(I18n.t("landing.title.main"));
         headline.add(manageText);
 
         // ── Glow effect ──
@@ -151,7 +154,7 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
         underline.getStyle()
                 .set("width", "140px")
                 .set("height", "4px")
-                .set("background", "linear-gradient(90deg, #4f46e5, #7c3aed, #059669, #10b981)")
+                .set("background", "linear-gradient(90deg, #4f46e5, #7c3aed, #059669, #d97706)")
                 .set("border-radius", "var(--lumo-border-radius-s)")
                 .set("margin", "var(--lumo-space-s) auto 0")
                 .set("position", "relative")
@@ -164,7 +167,7 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("left", "-20px")
                 .set("right", "-20px")
                 .set("height", "8px")
-                .set("background", "linear-gradient(90deg, transparent, #4f46e5, #10b981, transparent)")
+                .set("background", "linear-gradient(90deg, transparent, #4f46e5, #059669, transparent)")
                 .set("filter", "blur(8px)")
                 .set("opacity", "0.5")
                 .set("border-radius", "var(--lumo-border-radius-s)");
@@ -195,7 +198,7 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
 
         subtitleLayout.add(arrowIcon, subtitle);
 
-        hero.add(titleContainer, subtitleLayout);
+        hero.add(titleContainer, underline, subtitleLayout);
 
         return hero;
     }
@@ -272,7 +275,24 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
         );
         imsCard.getStyle().set("animation", "cardFadeIn 0.6s ease-out 0.4s both");
 
-        container.add(kmsCard, imsCard);
+        // MMS Card with animation delay
+        Div mmsCard = createCard(
+                "MMS",
+                VaadinIcon.ENVELOPE,
+                I18n.t("landing.mms.title"),
+                I18n.t("landing.mms.description"),
+                new String[]{
+                        I18n.t("landing.mms.feature.senders"),
+                        I18n.t("landing.mms.feature.templates"),
+                        I18n.t("landing.mms.feature.email"),
+                        I18n.t("landing.mms.feature.logs")
+                },
+                "mms",
+                ButtonVariant.LUMO_WARNING
+        );
+        mmsCard.getStyle().set("animation", "cardFadeIn 0.6s ease-out 0.6s both");
+
+        container.add(kmsCard, imsCard, mmsCard);
 
         return container;
     }
@@ -300,14 +320,14 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("transform", "translateY(30px)")
                 .set("opacity", "0");
 
-        // ── Card Animation ──
-        card.addClassName("animated-card");
-
         // ── Accent color bar with gradient and shimmer ──
         Div accentBar = new Div();
-        String accentColor = route.equals("kms")
-                ? "linear-gradient(90deg, #4f46e5, #7c3aed)"
-                : "linear-gradient(90deg, #059669, #10b981)";
+        String accentColor = switch (route) {
+            case "kms" -> "linear-gradient(90deg, #4f46e5, #7c3aed)";
+            case "ims" -> "linear-gradient(90deg, #059669, #10b981)";
+            case "mms" -> "linear-gradient(90deg, #d97706, #f59e0b)";
+            default -> "linear-gradient(90deg, #4f46e5, #7c3aed)";
+        };
         accentBar.getStyle()
                 .set("position", "absolute")
                 .set("top", "0")
@@ -324,13 +344,19 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
         // ── Card glow effect on hover ──
         Div cardGlow = new Div();
         cardGlow.addClassName("card-glow");
+        String glowColor = switch (route) {
+            case "kms" -> "rgba(79,70,229,0.03)";
+            case "ims" -> "rgba(5,150,105,0.03)";
+            case "mms" -> "rgba(217,119,6,0.03)";
+            default -> "rgba(79,70,229,0.03)";
+        };
         cardGlow.getStyle()
                 .set("position", "absolute")
                 .set("top", "-50%")
                 .set("left", "-50%")
                 .set("width", "200%")
                 .set("height", "200%")
-                .set("background", "radial-gradient(circle, " + (route.equals("kms") ? "rgba(79,70,229,0.03)" : "rgba(5,150,105,0.03)") + ", transparent 70%)")
+                .set("background", "radial-gradient(circle, " + glowColor + ", transparent 70%)")
                 .set("pointer-events", "none")
                 .set("transition", "all 0.6s ease")
                 .set("transform", "scale(0.8)")
@@ -347,9 +373,18 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
 
         // Badge / Short name
         Div badge = new Div(shortName);
-        String badgeGradient = route.equals("kms")
-                ? "linear-gradient(135deg, #4f46e5, #7c3aed)"
-                : "linear-gradient(135deg, #059669, #10b981)";
+        String badgeGradient = switch (route) {
+            case "kms" -> "linear-gradient(135deg, #4f46e5, #7c3aed)";
+            case "ims" -> "linear-gradient(135deg, #059669, #10b981)";
+            case "mms" -> "linear-gradient(135deg, #d97706, #f59e0b)";
+            default -> "linear-gradient(135deg, #4f46e5, #7c3aed)";
+        };
+        String badgeColor = switch (route) {
+            case "kms" -> "#4f46e5";
+            case "ims" -> "#059669";
+            case "mms" -> "#d97706";
+            default -> "#4f46e5";
+        };
         badge.getStyle()
                 .set("background", badgeGradient)
                 .set("-webkit-background-clip", "text")
@@ -361,17 +396,28 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("font-weight", "700")
                 .set("letter-spacing", "0.08em")
                 .set("margin-bottom", "var(--lumo-space-s)")
-                .set("border", "1px solid " + (route.equals("kms") ? "#4f46e5" : "#059669"))
+                .set("border", "1px solid " + badgeColor)
                 .set("background-color", "var(--lumo-base-color)");
 
         // Icon with pulse animation
         Icon cardIcon = icon.create();
         cardIcon.setSize("48px");
-        String iconColor = route.equals("kms") ? "#4f46e5" : "#059669";
+        String iconColor = switch (route) {
+            case "kms" -> "#4f46e5";
+            case "ims" -> "#059669";
+            case "mms" -> "#d97706";
+            default -> "#4f46e5";
+        };
         cardIcon.setColor(iconColor);
+        String shadowColor = switch (route) {
+            case "kms" -> "rgba(79, 70, 229, 0.3)";
+            case "ims" -> "rgba(5, 150, 105, 0.3)";
+            case "mms" -> "rgba(217, 119, 6, 0.3)";
+            default -> "rgba(79, 70, 229, 0.3)";
+        };
         cardIcon.getStyle()
                 .set("margin-bottom", "var(--lumo-space-s)")
-                .set("filter", "drop-shadow(0 4px 8px " + (route.equals("kms") ? "rgba(79, 70, 229, 0.3)" : "rgba(5, 150, 105, 0.3)") + ")")
+                .set("filter", "drop-shadow(0 4px 8px " + shadowColor + ")")
                 .set("animation", "iconPulse 3s ease-in-out infinite");
 
         // Title
@@ -431,10 +477,13 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("position", "relative")
                 .set("overflow", "hidden");
 
-        // Button hover effect - ripple
+        // Button click - navigate
         enterBtn.addClickListener(e -> {
-            // Navigate
-            ui.navigate(route);
+            if (ui != null) {
+                ui.navigate(route);
+            } else {
+                UI.getCurrent().navigate(route);
+            }
         });
 
         // Click on card navigates
@@ -445,7 +494,11 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                     "setTimeout(() => { $0.style.transform = 'scale(1)'; }, 150)",
                     card.getElement()
             );
-            ui.navigate(route);
+            if (ui != null) {
+                ui.navigate(route);
+            } else {
+                UI.getCurrent().navigate(route);
+            }
         });
 
         // Hover effects
@@ -500,6 +553,22 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .landing-view {
                     background: var(--lumo-shade-5pct);
                     min-height: 100vh;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .landing-main {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    padding: var(--lumo-space-l) var(--lumo-space-m);
+                    max-width: 1200px;
+                    width: 100%;
+                    margin: 0 auto;
                 }
 
                 /* ── Keyframe Animations ── */
@@ -620,12 +689,10 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                     z-index: 1;
                 }
 
-                /* Text glow effect */
                 .text-glow {
                     animation: glowPulse 3s ease-in-out infinite;
                 }
 
-                /* Floating decorations */
                 .floating-decor {
                     position: absolute;
                     opacity: 0.12;
@@ -633,30 +700,13 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                     animation: float 8s ease-in-out infinite;
                 }
 
-                .floating-decor:nth-child(2) {
-                    animation-delay: 0.5s;
-                }
-                .floating-decor:nth-child(3) {
-                    animation-delay: 1.2s;
-                }
-                .floating-decor:nth-child(4) {
-                    animation-delay: 0.8s;
-                }
+                .floating-decor:nth-child(1) { animation-delay: 0s; }
+                .floating-decor:nth-child(2) { animation-delay: 0.5s; }
+                .floating-decor:nth-child(3) { animation-delay: 1.2s; }
+                .floating-decor:nth-child(4) { animation-delay: 0.8s; }
 
                 .hero-underline {
                     position: relative;
-                }
-
-                .hero-underline .glow {
-                    position: absolute;
-                    top: -2px;
-                    left: -20px;
-                    right: -20px;
-                    height: 8px;
-                    background: linear-gradient(90deg, transparent, #4f46e5, #10b981, transparent);
-                    filter: blur(8px);
-                    opacity: 0.5;
-                    border-radius: var(--lumo-border-radius-s);
                 }
 
                 /* ── Cards ── */
@@ -695,8 +745,6 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 }
 
                 /* ── Mobile First (default is mobile) ── */
-
-                /* Small phones */
                 @media (max-width: 480px) {
                     .landing-main {
                         padding: var(--lumo-space-m);
@@ -847,13 +895,5 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
                 css
         );
-    }
-
-    // ─── HELPERS ─────────────────────────────────────────────────────────────
-
-    private static class Span extends com.vaadin.flow.component.html.Span {
-        public Span(String text) {
-            super(text);
-        }
     }
 }

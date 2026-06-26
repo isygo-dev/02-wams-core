@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectMapperAndService;
+import eu.isygoit.api.SenderConfigServiceApi;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.exception.handler.MmsExceptionHandler;
@@ -22,9 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping(path = "/api/v1/private/config/mail")
+@RequestMapping(path = "/api/v1/private/config/sender")
 @InjectMapperAndService(handler = MmsExceptionHandler.class, mapper = SenderConfigMapper.class, minMapper = SenderConfigMapper.class, service = SenderConfigService.class)
-public class SenderConfigController extends MappedCrudTenantController<Long, SenderConfig, SenderConfigDto, SenderConfigDto, SenderConfigService> {
+public class SenderConfigController extends MappedCrudTenantController<Long, SenderConfig, SenderConfigDto, SenderConfigDto, SenderConfigService>
+        implements SenderConfigServiceApi {
 
     @Autowired
     private SenderFactory senderFactory;

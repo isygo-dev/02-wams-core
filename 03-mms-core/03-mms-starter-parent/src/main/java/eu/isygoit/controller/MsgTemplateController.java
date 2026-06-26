@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectMapperAndService;
+import eu.isygoit.api.MsgTemplateServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
@@ -34,22 +35,9 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/api/v1/private/mail/template")
 @InjectMapperAndService(handler = MmsExceptionHandler.class, mapper = MsgTemplateMapper.class, minMapper = MsgTemplateMapper.class, service = MsgTemplateService.class)
-public class MsgTemplateController extends MappedCrudTenantController<Long, MsgTemplate, MsgTemplateDto, MsgTemplateDto, MsgTemplateService> {
+public class MsgTemplateController extends MappedCrudTenantController<Long, MsgTemplate, MsgTemplateDto, MsgTemplateDto, MsgTemplateService>
+        implements MsgTemplateServiceApi {
 
-    /**
-     * Get template names response entity.
-     *
-     * @return the response entity
-     */
-    @Operation(summary = "get Template Names Api",
-            description = "get Template Names")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Api executed successfully",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = IdAssignableDto.class))})
-    })
-    @GetMapping(path = "/names")
     public ResponseEntity<List<String>> getTemplateNames() {
         try {
             return ResponseFactory.responseOk(Arrays.stream(Arrays.stream(IEnumEmailTemplate.Types.class.getEnumConstants()).map(Enum::name)
