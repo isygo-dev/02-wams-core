@@ -1,6 +1,5 @@
 package eu.isygoit.ui.mms.views.sender;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -25,8 +24,6 @@ import eu.isygoit.remote.mms.SenderConfigService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.mms.layout.MmsMainLayout;
 import eu.isygoit.ui.mms.views.sender.dialog.CreateSenderConfigDialog;
-import eu.isygoit.ui.mms.views.sender.dialog.DeleteSenderConfigDialog;
-import eu.isygoit.ui.mms.views.sender.dialog.EditSenderConfigDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +32,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -52,11 +50,27 @@ public class SenderConfigManagementView extends ManagementVerticalView {
     private final TextField searchField = new TextField();
     private final ComboBox<SenderStatusOption> statusFilter = new ComboBox<>();
     private final ProgressBar loadingBar = new ProgressBar();
+    private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
+    private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
+    private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
+    private final Span pageInfoLabel = new Span();
+    private final Span totalCountLabel = new Span();
 
-    private List<SenderConfigDto> allConfigs = new ArrayList<>();
+    private final Stack<String> previousTokens = new Stack<>();
+    private int pageSize = 10;
+    private String currentNextToken = null;
+    private String currentToken = null;
+    private int currentPage = 1;
+    private int totalPages = 0;
+    private long totalElements = 0;
+    private int numberOfElements = 0;
+    private boolean truncated = false;
     private List<SenderConfigCard> currentPageCards = new ArrayList<>();
     private String currentSearch = "";
     private Boolean currentActiveFilter = null;
+
+    private List<SenderConfigDto> allConfigs = new ArrayList<>();
+    private List<SenderConfigDto> filteredConfigs = new ArrayList<>();
 
     @Autowired
     public SenderConfigManagementView(SenderConfigService senderConfigService) {
@@ -86,7 +100,7 @@ public class SenderConfigManagementView extends ManagementVerticalView {
         createButton.addClickListener(e -> openCreateSenderDialog());
         createButton.setTooltipText(I18n.t("sender.view.create.tooltip"));
 
-        refreshButton.addClickListener(e -> loadSenderConfigs());
+        refreshButton.addClickListener(e -> resetPaginationAndLoad());
         refreshButton.setTooltipText(I18n.t("sender.view.refresh.tooltip"));
 
         searchField.setPlaceholder(I18n.t("sender.view.search.placeholder"));
@@ -95,7 +109,7 @@ public class SenderConfigManagementView extends ManagementVerticalView {
         searchField.setTooltipText(I18n.t("sender.view.search.tooltip"));
         searchField.addValueChangeListener(e -> {
             currentSearch = e.getValue();
-            filterAndDisplayCards();
+            resetPaginationAndLoad();
         });
 
         statusFilter.setItems(
@@ -108,23 +122,89 @@ public class SenderConfigManagementView extends ManagementVerticalView {
         statusFilter.setPlaceholder(I18n.t("sender.view.status.placeholder"));
         statusFilter.setTooltipText(I18n.t("sender.view.status.tooltip"));
         statusFilter.addValueChangeListener(e -> {
-            currentActiveFilter = e.getValue().value();
-            filterAndDisplayCards();
+            SenderStatusOption option = e.getValue();
+            currentActiveFilter = option != null ? option.value() : null;
+            resetPaginationAndLoad();
         });
 
+        pageSizeSelect.setItems(10, 20, 30, 40, 50);
+        pageSizeSelect.setValue(10);
+        pageSizeSelect.setPlaceholder(I18n.t("sender.view.page.per.page"));
+        pageSizeSelect.setTooltipText(I18n.t("sender.view.page.per.page.tooltip"));
+        pageSizeSelect.addValueChangeListener(e -> {
+            if (e.getValue() != null) {
+                pageSize = e.getValue();
+                resetPaginationAndLoad();
+            }
+        });
+
+        prevButton.addClickListener(e -> {
+            if (!previousTokens.isEmpty()) {
+                String prevToken = previousTokens.pop();
+                loadSenderConfigsPage(prevToken);
+            }
+        });
+        prevButton.setTooltipText(I18n.t("sender.view.prev.page.tooltip"));
+
+        nextButton.addClickListener(e -> {
+            if (truncated && currentNextToken != null) {
+                previousTokens.push(currentToken);
+                loadSenderConfigsPage(currentNextToken);
+            }
+        });
+        nextButton.setTooltipText(I18n.t("sender.view.next.page.tooltip"));
+
         injectResponsiveStyles();
-        loadSenderConfigs();
+        resetPaginationAndLoad();
     }
 
-    private void loadSenderConfigs() {
+    private void resetPaginationAndLoad() {
+        previousTokens.clear();
+        currentNextToken = null;
+        currentToken = null;
+        currentPage = 1;
+        totalPages = 0;
+        totalElements = 0;
+        numberOfElements = 0;
+        truncated = false;
+        loadSenderConfigsPage(null);
+    }
+
+    private void loadSenderConfigsPage(String nextToken) {
         showLoading(true);
         try {
+            // Use paginated API if available, otherwise use findAllList with manual pagination
             ResponseEntity<List<SenderConfigDto>> response = senderConfigService.findAllList();
             allConfigs = response.getBody() != null ? response.getBody() : new ArrayList<>();
-            currentPageCards = allConfigs.stream()
-                    .map(config -> new SenderConfigCard(this, senderConfigService, config, this::loadSenderConfigs))
+
+            // Apply filters
+            filteredConfigs = filterConfigs(allConfigs);
+
+            // Manual pagination
+            totalElements = filteredConfigs.size();
+            totalPages = (int) Math.ceil((double) totalElements / pageSize);
+
+            int startIndex = (currentPage - 1) * pageSize;
+            int endIndex = Math.min(startIndex + pageSize, (int) totalElements);
+
+            List<SenderConfigDto> pageConfigs;
+            if (startIndex < totalElements) {
+                pageConfigs = filteredConfigs.subList(startIndex, endIndex);
+            } else {
+                pageConfigs = new ArrayList<>();
+            }
+
+            numberOfElements = pageConfigs.size();
+            truncated = endIndex < totalElements;
+            currentNextToken = truncated ? String.valueOf(currentPage + 1) : null;
+
+            currentPageCards = pageConfigs.stream()
+                    .map(config -> new SenderConfigCard(this, senderConfigService, config, this::resetPaginationAndLoad))
                     .collect(Collectors.toList());
-            filterAndDisplayCards();
+
+            updatePaginationDisplay();
+            displayCards();
+
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             Notification.show(I18n.t("sender.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
@@ -139,12 +219,9 @@ public class SenderConfigManagementView extends ManagementVerticalView {
         }
     }
 
-    private void filterAndDisplayCards() {
-        cardsContainer.removeAll();
-
-        List<SenderConfigCard> filtered = currentPageCards.stream()
-                .filter(card -> {
-                    SenderConfigDto config = card.getConfig();
+    private List<SenderConfigDto> filterConfigs(List<SenderConfigDto> configs) {
+        return configs.stream()
+                .filter(config -> {
                     if (currentActiveFilter != null) {
                         boolean isActive = config.getSmtpStarttlsEnable() != null && config.getSmtpStarttlsEnable();
                         if (isActive != currentActiveFilter) return false;
@@ -161,8 +238,24 @@ public class SenderConfigManagementView extends ManagementVerticalView {
                     return true;
                 })
                 .collect(Collectors.toList());
+    }
 
-        if (filtered.isEmpty()) {
+    private void updatePaginationDisplay() {
+        if (totalPages > 0) {
+            pageInfoLabel.setText(I18n.t("sender.view.page.info", currentPage, totalPages, numberOfElements));
+        } else {
+            pageInfoLabel.setText(I18n.t("sender.view.page.info.simple", currentPage, numberOfElements));
+        }
+        totalCountLabel.setText(I18n.t("sender.view.total.count", totalElements));
+
+        prevButton.setEnabled(!previousTokens.isEmpty());
+        nextButton.setEnabled(truncated && currentNextToken != null);
+    }
+
+    private void displayCards() {
+        cardsContainer.removeAll();
+
+        if (currentPageCards.isEmpty()) {
             Div emptyState = new Div();
             emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
             emptyState.addClassName(LumoUtility.Padding.XLARGE);
@@ -175,7 +268,7 @@ public class SenderConfigManagementView extends ManagementVerticalView {
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);
         } else {
-            filtered.forEach(cardsContainer::add);
+            currentPageCards.forEach(cardsContainer::add);
         }
     }
 
@@ -200,6 +293,17 @@ public class SenderConfigManagementView extends ManagementVerticalView {
         statusLayout.setSpacing(true);
         leftGroup.add(searchField, statusLayout);
 
+        HorizontalLayout centerGroup = new HorizontalLayout();
+        centerGroup.setSpacing(true);
+        centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
+        centerGroup.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+        prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        pageSizeSelect.setWidth("120px");
+        pageInfoLabel.getStyle().set("margin", "0 0.5rem");
+        totalCountLabel.getStyle().set("margin", "0 0.5rem");
+        centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
+
         HorizontalLayout rightGroup = new HorizontalLayout();
         rightGroup.setSpacing(true);
         rightGroup.setAlignItems(FlexComponent.Alignment.END);
@@ -208,7 +312,7 @@ public class SenderConfigManagementView extends ManagementVerticalView {
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         rightGroup.add(refreshButton, createButton);
 
-        toolbar.add(leftGroup, rightGroup);
+        toolbar.add(leftGroup, centerGroup, rightGroup);
         return toolbar;
     }
 
@@ -263,18 +367,7 @@ public class SenderConfigManagementView extends ManagementVerticalView {
     }
 
     private void openCreateSenderDialog() {
-        // FIXED: Pass parentView, senderConfigService, and refresh callback
-        new CreateSenderConfigDialog(this, senderConfigService, this::loadSenderConfigs).open();
-    }
-
-    private void openEditSenderDialog(SenderConfigDto config) {
-        // FIXED: Pass senderConfigService, config, and refresh callback
-        new EditSenderConfigDialog(senderConfigService, config, this::loadSenderConfigs).open();
-    }
-
-    private void openDeleteSenderDialog(SenderConfigDto config) {
-        // FIXED: Pass parentView, senderConfigService, config, and refresh callback
-        new DeleteSenderConfigDialog(this, senderConfigService, config, this::loadSenderConfigs).open();
+        new CreateSenderConfigDialog(this, senderConfigService, this::resetPaginationAndLoad).open();
     }
 
     public record SenderStatusOption(String label, Boolean value) {

@@ -34,6 +34,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -53,12 +54,28 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
     private final ComboBox<TemplateLanguageOption> languageFilter = new ComboBox<>();
     private final ComboBox<TemplateNameOption> nameFilter = new ComboBox<>();
     private final ProgressBar loadingBar = new ProgressBar();
+    private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
+    private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
+    private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
+    private final Span pageInfoLabel = new Span();
+    private final Span totalCountLabel = new Span();
 
-    private List<MsgTemplateDto> allTemplates = new ArrayList<>();
+    private final Stack<String> previousTokens = new Stack<>();
+    private int pageSize = 10;
+    private String currentNextToken = null;
+    private String currentToken = null;
+    private int currentPage = 1;
+    private int totalPages = 0;
+    private long totalElements = 0;
+    private int numberOfElements = 0;
+    private boolean truncated = false;
     private List<MsgTemplateCard> currentPageCards = new ArrayList<>();
     private String currentSearch = "";
     private IEnumLanguage.Types currentLanguageFilter = null;
     private String currentNameFilter = null;
+
+    private List<MsgTemplateDto> allTemplates = new ArrayList<>();
+    private List<MsgTemplateDto> filteredTemplates = new ArrayList<>();
 
     @Autowired
     public MsgTemplateManagementView(MsgTemplateService templateService,
@@ -90,7 +107,7 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
         createButton.addClickListener(e -> openCreateTemplateDialog());
         createButton.setTooltipText(I18n.t("template.view.create.tooltip"));
 
-        refreshButton.addClickListener(e -> loadTemplates());
+        refreshButton.addClickListener(e -> resetPaginationAndLoad());
         refreshButton.setTooltipText(I18n.t("template.view.refresh.tooltip"));
 
         searchField.setPlaceholder(I18n.t("template.view.search.placeholder"));
@@ -99,7 +116,7 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
         searchField.setTooltipText(I18n.t("template.view.search.tooltip"));
         searchField.addValueChangeListener(e -> {
             currentSearch = e.getValue();
-            filterAndDisplayCards();
+            resetPaginationAndLoad();
         });
 
         languageFilter.setItems(
@@ -112,11 +129,10 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
         languageFilter.setValue(new TemplateLanguageOption(I18n.t("template.view.language.all"), null));
         languageFilter.setPlaceholder(I18n.t("template.view.language.placeholder"));
         languageFilter.setTooltipText(I18n.t("template.view.language.tooltip"));
-        // Safe listener - handle null
         languageFilter.addValueChangeListener(e -> {
             TemplateLanguageOption option = e.getValue();
             currentLanguageFilter = option != null ? option.value() : null;
-            filterAndDisplayCards();
+            resetPaginationAndLoad();
         });
 
         nameFilter.setItems(
@@ -126,18 +142,44 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
         nameFilter.setValue(new TemplateNameOption(I18n.t("template.view.name.all"), null));
         nameFilter.setPlaceholder(I18n.t("template.view.name.placeholder"));
         nameFilter.setTooltipText(I18n.t("template.view.name.tooltip"));
-        // Safe listener - handle null
         nameFilter.addValueChangeListener(e -> {
             TemplateNameOption option = e.getValue();
             currentNameFilter = option != null ? option.value() : null;
-            filterAndDisplayCards();
+            resetPaginationAndLoad();
         });
 
         // Load template names for filter
         loadTemplateNames();
 
+        pageSizeSelect.setItems(10, 20, 30, 40, 50);
+        pageSizeSelect.setValue(10);
+        pageSizeSelect.setPlaceholder(I18n.t("template.view.page.per.page"));
+        pageSizeSelect.setTooltipText(I18n.t("template.view.page.per.page.tooltip"));
+        pageSizeSelect.addValueChangeListener(e -> {
+            if (e.getValue() != null) {
+                pageSize = e.getValue();
+                resetPaginationAndLoad();
+            }
+        });
+
+        prevButton.addClickListener(e -> {
+            if (!previousTokens.isEmpty()) {
+                String prevToken = previousTokens.pop();
+                loadTemplatesPage(prevToken);
+            }
+        });
+        prevButton.setTooltipText(I18n.t("template.view.prev.page.tooltip"));
+
+        nextButton.addClickListener(e -> {
+            if (truncated && currentNextToken != null) {
+                previousTokens.push(currentToken);
+                loadTemplatesPage(currentNextToken);
+            }
+        });
+        nextButton.setTooltipText(I18n.t("template.view.next.page.tooltip"));
+
         injectResponsiveStyles();
-        loadTemplates();
+        resetPaginationAndLoad();
     }
 
     private void loadTemplateNames() {
@@ -150,7 +192,6 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
                         options.add(new TemplateNameOption(name, name))
                 );
                 nameFilter.setItems(options);
-                // Set value after items are set, avoid triggering value change event that causes NPE
                 nameFilter.setValue(options.get(0));
             }
         } catch (Exception e) {
@@ -158,15 +199,52 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
         }
     }
 
-    private void loadTemplates() {
+    private void resetPaginationAndLoad() {
+        previousTokens.clear();
+        currentNextToken = null;
+        currentToken = null;
+        currentPage = 1;
+        totalPages = 0;
+        totalElements = 0;
+        numberOfElements = 0;
+        truncated = false;
+        loadTemplatesPage(null);
+    }
+
+    private void loadTemplatesPage(String nextToken) {
         showLoading(true);
         try {
             ResponseEntity<List<MsgTemplateDto>> response = templateService.findAllList();
             allTemplates = response.getBody() != null ? response.getBody() : new ArrayList<>();
-            currentPageCards = allTemplates.stream()
-                    .map(template -> new MsgTemplateCard(this, templateService, templateFileService, template, this::loadTemplates))
+
+            // Apply filters
+            filteredTemplates = filterTemplates(allTemplates);
+
+            // Manual pagination
+            totalElements = filteredTemplates.size();
+            totalPages = (int) Math.ceil((double) totalElements / pageSize);
+
+            int startIndex = (currentPage - 1) * pageSize;
+            int endIndex = Math.min(startIndex + pageSize, (int) totalElements);
+
+            List<MsgTemplateDto> pageTemplates;
+            if (startIndex < totalElements) {
+                pageTemplates = filteredTemplates.subList(startIndex, endIndex);
+            } else {
+                pageTemplates = new ArrayList<>();
+            }
+
+            numberOfElements = pageTemplates.size();
+            truncated = endIndex < totalElements;
+            currentNextToken = truncated ? String.valueOf(currentPage + 1) : null;
+
+            currentPageCards = pageTemplates.stream()
+                    .map(template -> new MsgTemplateCard(this, templateService, templateFileService, template, this::resetPaginationAndLoad))
                     .collect(Collectors.toList());
-            filterAndDisplayCards();
+
+            updatePaginationDisplay();
+            displayCards();
+
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             Notification.show(I18n.t("template.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
@@ -181,13 +259,9 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
         }
     }
 
-    private void filterAndDisplayCards() {
-        cardsContainer.removeAll();
-
-        List<MsgTemplateCard> filtered = currentPageCards.stream()
-                .filter(card -> {
-                    MsgTemplateDto template = card.getTemplate();
-
+    private List<MsgTemplateDto> filterTemplates(List<MsgTemplateDto> templates) {
+        return templates.stream()
+                .filter(template -> {
                     // Language filter
                     if (currentLanguageFilter != null) {
                         if (template.getLanguage() != currentLanguageFilter) return false;
@@ -213,8 +287,24 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
                     return true;
                 })
                 .collect(Collectors.toList());
+    }
 
-        if (filtered.isEmpty()) {
+    private void updatePaginationDisplay() {
+        if (totalPages > 0) {
+            pageInfoLabel.setText(I18n.t("template.view.page.info", currentPage, totalPages, numberOfElements));
+        } else {
+            pageInfoLabel.setText(I18n.t("template.view.page.info.simple", currentPage, numberOfElements));
+        }
+        totalCountLabel.setText(I18n.t("template.view.total.count", totalElements));
+
+        prevButton.setEnabled(!previousTokens.isEmpty());
+        nextButton.setEnabled(truncated && currentNextToken != null);
+    }
+
+    private void displayCards() {
+        cardsContainer.removeAll();
+
+        if (currentPageCards.isEmpty()) {
             Div emptyState = new Div();
             emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
             emptyState.addClassName(LumoUtility.Padding.XLARGE);
@@ -227,7 +317,7 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);
         } else {
-            filtered.forEach(cardsContainer::add);
+            currentPageCards.forEach(cardsContainer::add);
         }
     }
 
@@ -266,6 +356,17 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
 
         leftGroup.add(searchField, languageLayout, nameLayout);
 
+        HorizontalLayout centerGroup = new HorizontalLayout();
+        centerGroup.setSpacing(true);
+        centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
+        centerGroup.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+        prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        pageSizeSelect.setWidth("120px");
+        pageInfoLabel.getStyle().set("margin", "0 0.5rem");
+        totalCountLabel.getStyle().set("margin", "0 0.5rem");
+        centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
+
         HorizontalLayout rightGroup = new HorizontalLayout();
         rightGroup.setSpacing(true);
         rightGroup.setAlignItems(FlexComponent.Alignment.END);
@@ -274,7 +375,7 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         rightGroup.add(refreshButton, createButton);
 
-        toolbar.add(leftGroup, rightGroup);
+        toolbar.add(leftGroup, centerGroup, rightGroup);
         return toolbar;
     }
 
@@ -329,7 +430,7 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
     }
 
     private void openCreateTemplateDialog() {
-        new CreateMsgTemplateDialog(this, templateService, templateFileService, this::loadTemplates).open();
+        new CreateMsgTemplateDialog(this, templateService, templateFileService, this::resetPaginationAndLoad).open();
     }
 
     public record TemplateLanguageOption(String label, IEnumLanguage.Types value) {

@@ -30,8 +30,10 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
     private final SenderConfigDto config;
     private final Runnable onRefresh;
 
+    // Dedicated body container – cleared and rebuilt on refresh
     private final VerticalLayout bodyContainer = new VerticalLayout();
 
+    // UI components (updated on refresh)
     private Span titleSpan;
     private Span statusChip;
     private Span hostSpan;
@@ -85,7 +87,7 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         return config.getSmtpStarttlsEnable() != null && config.getSmtpStarttlsEnable();
     }
 
-    // ─── Refresh ──────────────────────────────────────────────────────────────
+    // ─── Refresh – fully reloads the card ──────────────────────────────────
 
     public void refresh() {
         getUI().ifPresent(ui -> ui.access(() -> {

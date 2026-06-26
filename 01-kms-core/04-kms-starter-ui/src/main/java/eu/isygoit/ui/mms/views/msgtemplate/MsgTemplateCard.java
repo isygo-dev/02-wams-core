@@ -37,8 +37,10 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
     private final MsgTemplateFileService templateFileService;
     private final Runnable onRefresh;
 
+    // Dedicated body container – cleared and rebuilt on refresh
     private final VerticalLayout bodyContainer = new VerticalLayout();
 
+    // UI components (updated on refresh)
     private Span titleSpan;
     private Span languageChip;
     private Span codeSpan;
@@ -69,6 +71,8 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         initCard();
     }
 
+    // ─── Public Accessors ─────────────────────────────────────────────────────
+
     public MsgTemplateDto getTemplate() {
         return template;
     }
@@ -80,6 +84,8 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
     public String getTemplateName() {
         return template.getName();
     }
+
+    // ─── Refresh – fully reloads the card ──────────────────────────────────
 
     public void refresh() {
         getUI().ifPresent(ui -> ui.access(() -> {
@@ -104,6 +110,23 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
     }
 
     private void updateDisplay() {
+        // Null check for all span components
+        if (titleSpan == null) {
+            titleSpan = buildTitleSpan("", "");
+        }
+        if (languageChip == null) {
+            languageChip = buildStatusChip("", "");
+        }
+        if (codeSpan == null) {
+            codeSpan = new Span();
+        }
+        if (descriptionSpan == null) {
+            descriptionSpan = new Span();
+        }
+        if (fileNameSpan == null) {
+            fileNameSpan = new Span();
+        }
+
         String displayName = template.getName() != null ? template.getName() : "Template " + template.getId();
         titleSpan.setText(displayName);
         titleSpan.getElement().setAttribute("title", displayName);
@@ -121,14 +144,18 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         fileNameSpan.setText(template.getOriginalFileName() != null ? template.getOriginalFileName() : I18n.t("template.card.no.file"));
 
         boolean hasFile = template.getFileName() != null && !template.getFileName().isEmpty();
-        downloadButton.setEnabled(hasFile);
-        downloadButton.setTooltipText(hasFile ?
-                I18n.t("template.card.download.tooltip") :
-                I18n.t("template.card.download.disabled.tooltip"));
-        editContentButton.setEnabled(hasFile);
-        editContentButton.setTooltipText(hasFile ?
-                I18n.t("template.card.edit.content.tooltip") :
-                I18n.t("template.card.edit.content.disabled.tooltip"));
+        if (downloadButton != null) {
+            downloadButton.setEnabled(hasFile);
+            downloadButton.setTooltipText(hasFile ?
+                    I18n.t("template.card.download.tooltip") :
+                    I18n.t("template.card.download.disabled.tooltip"));
+        }
+        if (editContentButton != null) {
+            editContentButton.setEnabled(hasFile);
+            editContentButton.setTooltipText(hasFile ?
+                    I18n.t("template.card.edit.content.tooltip") :
+                    I18n.t("template.card.edit.content.disabled.tooltip"));
+        }
 
         bodyContainer.removeAll();
         buildBodyRows();
@@ -143,6 +170,8 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
             default: return ChipColor.NEUTRAL;
         }
     }
+
+    // ─── BaseCard Implementation ─────────────────────────────────────────────
 
     @Override
     protected String cardCssClassName() {
@@ -266,6 +295,8 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         }
     }
 
+    // ─── Helper Methods ──────────────────────────────────────────────────────
+
     private HorizontalLayout createDetailRow(VaadinIcon icon, String label, String value) {
         Span valueSpan = new Span(value);
         valueSpan.addClassName(LumoUtility.FontSize.SMALL);
@@ -317,6 +348,8 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         return row;
     }
 
+    // ─── Action Methods ─────────────────────────────────────────────────────
+
     private void viewTemplate() {
         new ViewMsgTemplateDialog(templateFileService, template).open();
     }
@@ -329,9 +362,7 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
             ResponseEntity<Resource> response = templateFileService.downloadFile(template.getId(), 0L);
             if (response.getBody() != null) {
                 Resource resource = response.getBody();
-                // Read the resource content as bytes
                 byte[] content = resource.getInputStream().readAllBytes();
-                // Encode to Base64
                 String base64Content = java.util.Base64.getEncoder().encodeToString(content);
                 String fileName = template.getOriginalFileName() != null ?
                         template.getOriginalFileName() : template.getFileName();
@@ -391,10 +422,14 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         }).open();
     }
 
+    // ─── Lifecycle ──────────────────────────────────────────────────────────
+
     @Override
     protected void onCardAttach(AttachEvent event) {
         // No additional lifecycle actions needed
     }
+
+    // ─── Extra Styles ──────────────────────────────────────────────────────
 
     @Override
     protected String buildExtraStyles() {
