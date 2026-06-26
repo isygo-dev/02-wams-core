@@ -15,6 +15,7 @@ import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.SenderConfigService;
 import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.mms.views.sender.dialog.DeleteSenderConfigDialog;
 import eu.isygoit.ui.mms.views.sender.dialog.EditSenderConfigDialog;
 import eu.isygoit.ui.mms.views.sender.dialog.TestConnectionDialog;
 import lombok.extern.slf4j.Slf4j;
@@ -29,10 +30,8 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
     private final SenderConfigDto config;
     private final Runnable onRefresh;
 
-    // Dedicated body container – cleared and rebuilt on refresh
     private final VerticalLayout bodyContainer = new VerticalLayout();
 
-    // UI components (updated on refresh)
     private Span titleSpan;
     private Span statusChip;
     private Span hostSpan;
@@ -52,7 +51,6 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         this.config = config;
         this.onRefresh = onRefresh;
 
-        // Setup body container
         bodyContainer.setPadding(false);
         bodyContainer.setSpacing(true);
         bodyContainer.setWidthFull();
@@ -61,8 +59,6 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
 
         initCard();
     }
-
-    // ─── Public Accessors ─────────────────────────────────────────────────────
 
     public SenderConfigDto getConfig() {
         return config;
@@ -80,15 +76,12 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         return config.getSmtpStarttlsEnable() != null && config.getSmtpStarttlsEnable();
     }
 
-    // ─── Refresh – fully reloads the card ──────────────────────────────────
-
     public void refresh() {
         getUI().ifPresent(ui -> ui.access(() -> {
             try {
                 ResponseEntity<SenderConfigDto> response = objectService.findById(config.getId());
                 if (response.getBody() != null) {
                     SenderConfigDto updatedConfig = response.getBody();
-                    // Update config fields
                     config.setHost(updatedConfig.getHost());
                     config.setPort(updatedConfig.getPort());
                     config.setUsername(updatedConfig.getUsername());
@@ -99,42 +92,7 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
                     config.setTransportProtocol(updatedConfig.getTransportProtocol());
                     config.setSmtpAuth(updatedConfig.getSmtpAuth());
 
-                    // Update header
-                    String displayName = config.getHost() != null ? config.getHost() : "Sender " + config.getId();
-                    titleSpan.setText(displayName);
-                    titleSpan.getElement().setAttribute("title", displayName);
-
-                    ChipColor color = isActive() ? ChipColor.SUCCESS : ChipColor.WARNING;
-                    statusChip.setText(isActive() ? "Active" : "Inactive");
-                    statusChip.getStyle()
-                            .set("background-color", color.background())
-                            .set("color", color.foreground());
-                    statusChip.getElement().setAttribute("title", isActive() ? "Active" : "Inactive");
-
-                    // Update details
-                    hostSpan.setText(config.getHost() != null ? config.getHost() : "N/A");
-                    portSpan.setText(config.getPort() != null ? config.getPort() : "N/A");
-                    usernameSpan.setText(config.getUsername() != null ? config.getUsername() : "N/A");
-
-                    boolean tlsEnabled = Boolean.TRUE.equals(config.getSmtpStarttlsEnable());
-                    tlsSpan.setText(tlsEnabled ? "✓ Enabled" : "✗ Disabled");
-                    tlsSpan.getStyle().set("color", tlsEnabled ?
-                            "var(--lumo-success-color)" : "var(--lumo-error-color)");
-
-                    boolean debugEnabled = Boolean.TRUE.equals(config.getDebug());
-                    debugSpan.setText(debugEnabled ? "✓ On" : "✗ Off");
-                    debugSpan.getStyle().set("color", debugEnabled ?
-                            "var(--lumo-warning-color)" : "var(--lumo-tertiary-text-color)");
-
-                    // Update test button
-                    testButton.setEnabled(isActive());
-                    testButton.setTooltipText(isActive() ?
-                            I18n.t("sender.card.test.tooltip") :
-                            I18n.t("sender.card.test.disabled.tooltip"));
-
-                    // Rebuild body
-                    bodyContainer.removeAll();
-                    buildBodyRows();
+                    updateDisplay();
                 }
             } catch (Exception e) {
                 log.error("Failed to refresh sender config card for {}", config.getId(), e);
@@ -142,7 +100,39 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         }));
     }
 
-    // ─── BaseCard Implementation ─────────────────────────────────────────────
+    private void updateDisplay() {
+        String displayName = config.getHost() != null ? config.getHost() : "Sender " + config.getId();
+        titleSpan.setText(displayName);
+        titleSpan.getElement().setAttribute("title", displayName);
+
+        ChipColor color = isActive() ? ChipColor.SUCCESS : ChipColor.WARNING;
+        statusChip.setText(isActive() ? "Active" : "Inactive");
+        statusChip.getStyle()
+                .set("background-color", color.background())
+                .set("color", color.foreground());
+
+        hostSpan.setText(config.getHost() != null ? config.getHost() : "N/A");
+        portSpan.setText(config.getPort() != null ? config.getPort() : "N/A");
+        usernameSpan.setText(config.getUsername() != null ? config.getUsername() : "N/A");
+
+        boolean tlsEnabled = Boolean.TRUE.equals(config.getSmtpStarttlsEnable());
+        tlsSpan.setText(tlsEnabled ? "✓ Enabled" : "✗ Disabled");
+        tlsSpan.getStyle().set("color", tlsEnabled ?
+                "var(--lumo-success-color)" : "var(--lumo-error-color)");
+
+        boolean debugEnabled = Boolean.TRUE.equals(config.getDebug());
+        debugSpan.setText(debugEnabled ? "✓ On" : "✗ Off");
+        debugSpan.getStyle().set("color", debugEnabled ?
+                "var(--lumo-warning-color)" : "var(--lumo-tertiary-text-color)");
+
+        testButton.setEnabled(isActive());
+        testButton.setTooltipText(isActive() ?
+                I18n.t("sender.card.test.tooltip") :
+                I18n.t("sender.card.test.disabled.tooltip"));
+
+        bodyContainer.removeAll();
+        buildBodyRows();
+    }
 
     @Override
     protected String cardCssClassName() {
@@ -156,7 +146,6 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         left.setSpacing(true);
         left.getStyle().set("flex-wrap", "wrap");
 
-        // Tenant badge
         if (config.getTenant() != null) {
             Span tenantBadge = new Span(config.getTenant());
             tenantBadge.addClassName(LumoUtility.Background.CONTRAST_5);
@@ -167,25 +156,16 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
             left.add(tenantBadge);
         }
 
-        // Title
         String displayName = config.getHost() != null ? config.getHost() : "Sender " + config.getId();
         titleSpan = buildTitleSpan(displayName, displayName);
         left.add(titleSpan);
 
-        // Status chip
         statusChip = buildStatusChip(isActive() ? "Active" : "Inactive", isActive() ? "Active" : "Inactive");
         ChipColor color = isActive() ? ChipColor.SUCCESS : ChipColor.WARNING;
         statusChip.getStyle()
                 .set("background-color", color.background())
                 .set("color", color.foreground());
         left.add(statusChip);
-
-        // ID badge
-        Span idBadge = new Span("ID: " + config.getId());
-        idBadge.addClassName(LumoUtility.FontSize.XSMALL);
-        idBadge.addClassName(LumoUtility.TextColor.TERTIARY);
-        idBadge.getStyle().set("font-family", "monospace");
-        left.add(idBadge);
 
         return left;
     }
@@ -194,22 +174,19 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
     protected List<Button> buildActionButtons() {
         List<Button> buttons = new ArrayList<>();
 
-        // Test Connection Button
         testButton = createIconButton(VaadinIcon.START_COG, I18n.t("sender.card.test.tooltip"));
         testButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
         testButton.addClickListener(e -> testConnection());
         testButton.setEnabled(isActive());
         buttons.add(testButton);
 
-        // Edit Button
         editButton = createIconButton(VaadinIcon.EDIT, I18n.t("sender.card.edit.tooltip"));
         editButton.addClickListener(e -> openEditDialog());
         buttons.add(editButton);
 
-        // Delete Button
         deleteButton = createIconButton(VaadinIcon.TRASH, I18n.t("sender.card.delete.tooltip"));
         deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        deleteButton.addClickListener(e -> confirmDelete());
+        deleteButton.addClickListener(e -> openDeleteDialog());
         buttons.add(deleteButton);
 
         return buttons;
@@ -219,14 +196,12 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
     protected void buildBodyRows() {
         bodyContainer.removeAll();
 
-        // Tenant
         bodyContainer.add(createDetailRow(
                 VaadinIcon.GLOBE,
                 I18n.t("sender.card.tenant"),
                 config.getTenant() != null ? config.getTenant() : "N/A"
         ));
 
-        // Host with copy
         String hostValue = config.getHost() != null ? config.getHost() : "N/A";
         bodyContainer.add(createDetailRowWithCopy(
                 VaadinIcon.SERVER,
@@ -235,7 +210,6 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
                 hostValue
         ));
 
-        // Port
         String portValue = config.getPort() != null ? config.getPort() : "N/A";
         bodyContainer.add(createDetailRowWithCopy(
                 VaadinIcon.COG,
@@ -244,7 +218,6 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
                 portValue
         ));
 
-        // Username
         String usernameValue = config.getUsername() != null ? config.getUsername() : "N/A";
         bodyContainer.add(createDetailRowWithCopy(
                 VaadinIcon.USER,
@@ -253,21 +226,18 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
                 usernameValue
         ));
 
-        // Transport Protocol
         bodyContainer.add(createDetailRow(
                 VaadinIcon.CLOUD,
                 I18n.t("sender.card.protocol"),
                 config.getTransportProtocol() != null ? config.getTransportProtocol() : "smtp"
         ));
 
-        // SMTP Auth
         bodyContainer.add(createDetailRow(
                 VaadinIcon.SHIELD,
                 I18n.t("sender.card.smtp.auth"),
                 config.getSmtpAuth() != null ? config.getSmtpAuth() : "true"
         ));
 
-        // TLS
         tlsSpan = new Span();
         boolean tlsEnabled = Boolean.TRUE.equals(config.getSmtpStarttlsEnable());
         tlsSpan.setText(tlsEnabled ? "✓ Enabled" : "✗ Disabled");
@@ -279,14 +249,12 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
                 tlsSpan
         ));
 
-        // TLS Required
         bodyContainer.add(createDetailRow(
                 VaadinIcon.CHECK_CIRCLE,
                 I18n.t("sender.card.tls.required"),
                 Boolean.TRUE.equals(config.getSmtpStarttlsRequired()) ? "✓ Required" : "✗ Not Required"
         ));
 
-        // Debug
         debugSpan = new Span();
         boolean debugEnabled = Boolean.TRUE.equals(config.getDebug());
         debugSpan.setText(debugEnabled ? "✓ On" : "✗ Off");
@@ -298,8 +266,6 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
                 debugSpan
         ));
     }
-
-    // ─── Helper Methods ──────────────────────────────────────────────────────
 
     private HorizontalLayout createDetailRow(VaadinIcon icon, String label, String value) {
         Span valueSpan = new Span(value);
@@ -350,8 +316,6 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         return row;
     }
 
-    // ─── Action Methods ─────────────────────────────────────────────────────
-
     private void testConnection() {
         if (!isActive()) {
             return;
@@ -360,45 +324,38 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
     }
 
     private void openEditDialog() {
-        new EditSenderConfigDialog(
-                objectService,
-                config,
-                () -> {
-                    refresh();
+        new EditSenderConfigDialog(objectService, config, () -> {
+            refresh();
+            if (onRefresh != null) {
+                onRefresh.run();
+            }
+        }).open();
+    }
+
+    private void openDeleteDialog() {
+        // Use DeleteSenderConfigDialog with PIN confirmation
+        new DeleteSenderConfigDialog(
+                parentView,           // SenderConfigManagementView
+                objectService,        // SenderConfigService
+                config,               // SenderConfigDto
+                () -> {               // Runnable onSuccess
                     if (onRefresh != null) {
                         onRefresh.run();
                     }
+                    // Remove card from parent
+                    getParent().ifPresent(parent -> {
+                        if (parent instanceof VerticalLayout layout) {
+                            layout.remove(this);
+                        }
+                    });
                 }
         ).open();
     }
-
-    private void confirmDelete() {
-        getUI().ifPresent(ui -> ui.access(() -> {
-            try {
-                objectService.delete(config.getId());
-                if (onRefresh != null) {
-                    onRefresh.run();
-                }
-                // Remove card from parent
-                getParent().ifPresent(parent -> {
-                    if (parent instanceof VerticalLayout layout) {
-                        layout.remove(this);
-                    }
-                });
-            } catch (Exception e) {
-                log.error("Failed to delete sender config {}", config.getId(), e);
-            }
-        }));
-    }
-
-    // ─── Lifecycle ──────────────────────────────────────────────────────────
 
     @Override
     protected void onCardAttach(AttachEvent event) {
         // No additional lifecycle actions needed
     }
-
-    // ─── Extra Styles ──────────────────────────────────────────────────────
 
     @Override
     protected String buildExtraStyles() {
