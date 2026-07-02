@@ -39,6 +39,7 @@ public class Category extends AuditableEntity<Long> {
 
     @Column(name = SchemaColumnConstantName.C_NAME, length = SchemaConstantSize.S_NAME, updatable = false, nullable = false)
     private String name;
+
     @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = SchemaConstantSize.DESCRIPTION)
     private String description;
 }

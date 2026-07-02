@@ -62,11 +62,11 @@ public class LinkedFile extends LinkedFileModel<Long> implements ITenantAssignab
     @JoinTable(name = SchemaTableConstantName.T_ASSO_LINKED_FILE_CATEGORY, joinColumns = {
             @JoinColumn(foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_CATEGORY_REF_LINKED_FILE),
                     name = SchemaColumnConstantName.C_FILE,
-                    referencedColumnName = SchemaColumnConstantName.C_CODE, nullable = false, updatable = false)}
+                    referencedColumnName = SchemaColumnConstantName.C_CODE)}
             , inverseJoinColumns = {
             @JoinColumn(foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_LINKED_FILE_REF_CATEGORY),
                     name = SchemaColumnConstantName.C_CATEGORY,
-                    referencedColumnName = SchemaColumnConstantName.C_NAME, nullable = false, updatable = false)}
+                    referencedColumnName = SchemaColumnConstantName.C_NAME)}
             , uniqueConstraints = {@UniqueConstraint(name = SchemaUcConstantName.UC_FILE_CATEGORY, columnNames = {SchemaColumnConstantName.C_FILE, SchemaColumnConstantName.C_CATEGORY})})
     private List<Category> categories;
 }
