@@ -1,9 +1,7 @@
 package eu.isygoit.remote.mms;
 
 import eu.isygoit.api.SenderConfigServiceApi;
-import eu.isygoit.com.rest.api.IMappedCrudApi;
 import eu.isygoit.config.FeignConfig;
-import eu.isygoit.dto.data.SenderConfigDto;
 import org.springframework.cloud.openfeign.FeignClient;
 
 /**

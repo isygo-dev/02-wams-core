@@ -1,6 +1,5 @@
 package eu.isygoit.ui.kms.views.cryptography.keyTag.dialog;
 
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;

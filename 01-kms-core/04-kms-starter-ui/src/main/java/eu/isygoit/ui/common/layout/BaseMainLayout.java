@@ -235,12 +235,6 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         );
     }
 
-    protected static class DrawerToggle extends com.vaadin.flow.component.applayout.DrawerToggle {
-        public DrawerToggle() {
-            super();
-        }
-    }
-
     @Override
     public final void beforeEnter(BeforeEnterEvent event) {
         String currentPath = event.getLocation().getPathWithQueryParameters();
@@ -248,6 +242,12 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
             UI.getCurrent().getPage().setLocation("login?redirect=" + URLEncoder.encode(currentPath, StandardCharsets.UTF_8));
         } else {
             SecurityUtils.storeRedirect(currentPath);
+        }
+    }
+
+    protected static class DrawerToggle extends com.vaadin.flow.component.applayout.DrawerToggle {
+        public DrawerToggle() {
+            super();
         }
     }
 }

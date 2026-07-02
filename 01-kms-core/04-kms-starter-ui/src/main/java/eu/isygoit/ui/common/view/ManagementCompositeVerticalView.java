@@ -3,11 +3,9 @@ package eu.isygoit.ui.common.view;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import eu.isygoit.util.SecurityUtils;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class ManagementCompositeVerticalView extends Composite<VerticalLayout> implements BeforeEnterObserver {
 

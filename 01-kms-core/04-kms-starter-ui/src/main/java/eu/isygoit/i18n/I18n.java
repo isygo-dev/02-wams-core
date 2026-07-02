@@ -1,6 +1,5 @@
 package eu.isygoit.i18n;
 
-import com.vaadin.flow.server.VaadinSession;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -18,11 +17,6 @@ import java.util.Locale;
 public class I18n implements ApplicationContextAware {
 
     private static ApplicationContext context;
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        I18n.context = applicationContext;
-    }
 
     private static I18nProvider getProvider() {
         if (context != null) {
@@ -177,5 +171,10 @@ public class I18n implements ApplicationContextAware {
      */
     public static String i18n(String key, Object... params) {
         return t(key, params);
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        I18n.context = applicationContext;
     }
 }

@@ -23,8 +23,8 @@ public abstract class BaseActionDialog extends Dialog {
     private final Span errorSpan;
     private final Button okButton;
     private final Button cancelButton;
-    private Runnable onSuccess;
     private final StringBuilder msgBuilder = new StringBuilder();
+    private Runnable onSuccess;
 
     public BaseActionDialog(String title, Runnable onSuccess) {
         this(title);

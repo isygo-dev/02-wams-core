@@ -16,8 +16,8 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.mms.layout.MmsMainLayout;
 import eu.isygoit.ui.mms.views.dashboard.EmailStatisticsPanel;
-import eu.isygoit.ui.mms.views.dashboard.TemplateStatisticsPanel;
 import eu.isygoit.ui.mms.views.dashboard.SenderConfigPanel;
+import eu.isygoit.ui.mms.views.dashboard.TemplateStatisticsPanel;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 

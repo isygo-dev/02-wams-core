@@ -87,7 +87,7 @@
                 <filtering>true</filtering>
                 <excludes>
                     <exclude>uploads/**/*.*</exclude>
-<!--                    <exclude>camel/**/*.*</exclude>-->
+                    <!--                    <exclude>camel/**/*.*</exclude>-->
                     <exclude>msgtemplate/**/*.*</exclude>
                 </excludes>
             </resource>

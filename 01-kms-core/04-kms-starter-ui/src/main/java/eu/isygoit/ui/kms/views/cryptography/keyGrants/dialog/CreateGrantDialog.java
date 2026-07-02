@@ -114,7 +114,8 @@ public class CreateGrantDialog extends BaseActionDialog {
         KmsDtos.CreateGrantRequest.GrantConstraints constraints = null;
         if (StringUtils.hasText(constraintsText)) {
             try {
-                Map<String, Object> constraintsMap = objectMapper.readValue(constraintsText, new TypeReference<>() {});
+                Map<String, Object> constraintsMap = objectMapper.readValue(constraintsText, new TypeReference<>() {
+                });
                 constraints = KmsDtos.CreateGrantRequest.GrantConstraints.builder()
                         .encryptionContextSubset((Map<String, String>) constraintsMap.get("encryptionContextSubset"))
                         .encryptionContextEquals((Map<String, String>) constraintsMap.get("encryptionContextEquals"))

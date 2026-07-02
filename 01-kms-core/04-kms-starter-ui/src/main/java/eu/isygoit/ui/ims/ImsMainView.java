@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @RouteAlias(value = "ims/home", layout = ImsMainLayout.class)
 @UIScope
 @Route(value = "ims", layout = ImsMainLayout.class)
-@PageTitle("IMS Dashboard")
+@PageTitle("Identity management Dashboard")
 public class ImsMainView extends ManagementVerticalView {
 
     private final AccountService accountService;

@@ -12,7 +12,6 @@ import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
 import eu.isygoit.remote.mms.MsgTemplateService;
-import eu.isygoit.ui.mms.views.msgtemplate.MsgTemplateManagementView;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +41,7 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
         buildContent();
         prefillData();
     }
-    
+
     protected void buildContent() {
         FormLayout form = new FormLayout();
         form.setResponsiveSteps(

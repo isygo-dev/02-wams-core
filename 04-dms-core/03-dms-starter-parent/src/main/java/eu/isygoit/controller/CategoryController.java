@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectMapperAndService;
+import eu.isygoit.api.CategoryServiceApi;
 import eu.isygoit.com.rest.controller.impl.MappedCrudController;
 import eu.isygoit.dto.data.CategoryDto;
 import eu.isygoit.exception.handler.DmsExceptionHandler;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @InjectMapperAndService(handler = DmsExceptionHandler.class, mapper = CategoryMapper.class, minMapper = CategoryMapper.class, service = CategoryService.class)
 @RequestMapping(path = "/api/v1/private/category")
-public class CategoryController extends MappedCrudController<Long, Category, CategoryDto, CategoryDto, CategoryService> {
+public class CategoryController extends MappedCrudController<Long, Category, CategoryDto, CategoryDto, CategoryService>
+        implements CategoryServiceApi {
 
 }

@@ -194,7 +194,8 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
     private void addKeyValueRow(String label, String json) {
         if (!StringUtils.hasText(json)) return;
         try {
-            Map<String, String> map = MAPPER.readValue(json, new TypeReference<>() {});
+            Map<String, String> map = MAPPER.readValue(json, new TypeReference<>() {
+            });
             if (map == null || map.isEmpty()) return;
 
             HorizontalLayout row = new HorizontalLayout();

@@ -1,6 +1,7 @@
 package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectMapperAndService;
+import eu.isygoit.api.StorageConfigServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.constants.RestApiConstants;
@@ -31,8 +32,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(path = "/api/v1/private/storage/config")
 @InjectMapperAndService(handler = SmsExceptionHandler.class, mapper = StorageConfigMapper.class, minMapper = StorageConfigMapper.class, service = StorageConfigService.class)
-public class StorageConfigController extends MappedCrudTenantController<Long, StorageConfig, StorageConfigDto, StorageConfigDto, StorageConfigService> {
-
+public class StorageConfigController extends MappedCrudTenantController<Long, StorageConfig, StorageConfigDto, StorageConfigDto, StorageConfigService>
+        implements StorageConfigServiceApi {
 
     /**
      * Find by tenant ignore case response entity.

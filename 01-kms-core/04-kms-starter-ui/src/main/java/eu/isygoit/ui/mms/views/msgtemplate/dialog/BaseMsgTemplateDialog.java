@@ -119,12 +119,12 @@ public abstract class BaseMsgTemplateDialog extends Dialog {
         return I18n.t("dialog.ok");
     }
 
-    protected void addThemeVariantsOkButton(ButtonVariant... variants) {
-        okButton.addThemeVariants(variants);
-    }
-
     protected void setOkButtonText(String text) {
         okButton.setText(text);
+    }
+
+    protected void addThemeVariantsOkButton(ButtonVariant... variants) {
+        okButton.addThemeVariants(variants);
     }
 
     protected void append(String errorMessage) {

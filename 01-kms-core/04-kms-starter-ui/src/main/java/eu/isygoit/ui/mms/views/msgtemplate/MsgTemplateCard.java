@@ -164,10 +164,14 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
     private ChipColor getLanguageColor(IEnumLanguage.Types language) {
         if (language == null) return ChipColor.NEUTRAL;
         switch (language) {
-            case EN: return ChipColor.INFO;
-            case FR: return ChipColor.SUCCESS;
-            case AR: return ChipColor.WARNING;
-            default: return ChipColor.NEUTRAL;
+            case EN:
+                return ChipColor.INFO;
+            case FR:
+                return ChipColor.SUCCESS;
+            case AR:
+                return ChipColor.WARNING;
+            default:
+                return ChipColor.NEUTRAL;
         }
     }
 

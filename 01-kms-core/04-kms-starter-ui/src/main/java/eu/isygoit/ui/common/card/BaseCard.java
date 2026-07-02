@@ -9,8 +9,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -71,13 +69,19 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
 
     protected abstract String cardCssClassName();
 
-    /** Returns the component(s) for the left side of the header. */
+    /**
+     * Returns the component(s) for the left side of the header.
+     */
     protected abstract Component buildTitle();
 
-    /** Returns the action buttons to be placed in the footer (right‑aligned). */
+    /**
+     * Returns the action buttons to be placed in the footer (right‑aligned).
+     */
     protected abstract List<Button> buildActionButtons();
 
-    /** Adds body rows (meta rows, description, tags, …) using {@link #add(Component...)}. */
+    /**
+     * Adds body rows (meta rows, description, tags, …) using {@link #add(Component...)}.
+     */
     protected abstract void buildBodyRows();
 
     // ── Optional hook ─────────────────────────────────────────────────────────

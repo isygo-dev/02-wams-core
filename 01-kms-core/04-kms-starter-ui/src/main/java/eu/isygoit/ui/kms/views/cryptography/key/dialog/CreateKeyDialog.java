@@ -197,7 +197,8 @@ public class CreateKeyDialog extends KeyDialogBase {
         Map<String, Object> policyMap = null;
         if (StringUtils.hasText(policyField.getValue())) {
             try {
-                policyMap = objectMapper.readValue(policyField.getValue(), new TypeReference<>() {});
+                policyMap = objectMapper.readValue(policyField.getValue(), new TypeReference<>() {
+                });
             } catch (Exception ex) {
                 append(I18n.t("key.dialog.create.invalid.policy"));
                 return false;

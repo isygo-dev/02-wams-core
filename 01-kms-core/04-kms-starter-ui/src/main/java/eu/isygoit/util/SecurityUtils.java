@@ -13,7 +13,8 @@ public final class SecurityUtils {
     private static final Logger log = LoggerFactory.getLogger(SecurityUtils.class);
     private static final String REDIRECT_SESSION_KEY = "login.redirect";
 
-    private SecurityUtils() {}
+    private SecurityUtils() {
+    }
 
     /**
      * Logs out the current user by invalidating the session and clearing all session attributes.
@@ -209,6 +210,7 @@ public final class SecurityUtils {
 
     /**
      * Gets the current logged-in user from the session.
+     *
      * @return the user object, or null if not logged in
      */
     public static Object getCurrentUser() {
@@ -219,6 +221,7 @@ public final class SecurityUtils {
 
     /**
      * Gets the current access token from the session.
+     *
      * @return the access token, or null if not available
      */
     public static String getAccessToken() {
@@ -229,6 +232,7 @@ public final class SecurityUtils {
 
     /**
      * Gets the current tenant from the session.
+     *
      * @return the tenant, or null if not available
      */
     public static String getCurrentTenant() {

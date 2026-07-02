@@ -1,9 +1,7 @@
 package eu.isygoit.remote.mms;
 
 import eu.isygoit.api.MsgTemplateServiceApi;
-import eu.isygoit.com.rest.api.IMappedCrudApi;
 import eu.isygoit.config.FeignConfig;
-import eu.isygoit.dto.data.MsgTemplateDto;
 import eu.isygoit.dto.extendable.IdAssignableDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

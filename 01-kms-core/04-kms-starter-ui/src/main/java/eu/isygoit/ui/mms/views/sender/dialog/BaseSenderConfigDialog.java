@@ -1,6 +1,5 @@
 package eu.isygoit.ui.mms.views.sender.dialog;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -113,17 +112,17 @@ public abstract class BaseSenderConfigDialog extends Dialog {
     }
 
     /**
-     * Override to add theme variants to OK button.
-     */
-    protected void addThemeVariantsOkButton(ButtonVariant... variants) {
-        okButton.addThemeVariants(variants);
-    }
-
-    /**
      * Sets the OK button text.
      */
     protected void setOkButtonText(String text) {
         okButton.setText(text);
+    }
+
+    /**
+     * Override to add theme variants to OK button.
+     */
+    protected void addThemeVariantsOkButton(ButtonVariant... variants) {
+        okButton.addThemeVariants(variants);
     }
 
     /**
@@ -161,6 +160,7 @@ public abstract class BaseSenderConfigDialog extends Dialog {
 
     /**
      * Abstract method to be implemented by subclasses for the OK action.
+     *
      * @return true if successful, false otherwise
      */
     protected abstract boolean onOk();
