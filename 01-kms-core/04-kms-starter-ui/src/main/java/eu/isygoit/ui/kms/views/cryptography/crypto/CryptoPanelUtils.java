@@ -31,12 +31,11 @@ public final class CryptoPanelUtils {
         header.setWidthFull();
         header.setAlignItems(FlexComponent.Alignment.CENTER);
         header.setSpacing(true);
-        header.getStyle().set("margin-bottom", "var(--lumo-space-xs)");
+        header.addClassName("labelled-textarea-container__header");
 
         // Replace deprecated Label with Span
         Span label = new Span(labelText);
-        label.getStyle().set("font-weight", "500");
-        label.getStyle().set("font-size", "var(--lumo-font-size-s)");
+        label.addClassName("labelled-textarea-container__label");
 
         Button copyButton = new Button(new Icon(VaadinIcon.COPY));
         copyButton.setTooltipText(I18n.t("kms.crypto.utils.copy.tooltip"));

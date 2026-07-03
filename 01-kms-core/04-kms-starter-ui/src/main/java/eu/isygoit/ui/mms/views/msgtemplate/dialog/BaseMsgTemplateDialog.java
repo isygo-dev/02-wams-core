@@ -72,17 +72,10 @@ public abstract class BaseMsgTemplateDialog extends Dialog {
         mainLayout.setWidthFull();
 
         errorArea.setVisible(false);
-        errorArea.getStyle()
-                .set("background-color", "var(--lumo-error-color-10pct)")
-                .set("color", "var(--lumo-error-text-color)")
-                .set("padding", "var(--lumo-space-s)")
-                .set("border-radius", "var(--lumo-border-radius-m)")
-                .set("margin-bottom", "var(--lumo-space-m)");
-        errorArea.setWidthFull();
+        errorArea.addClassName("wams-dialog-error-area");
         mainLayout.add(errorArea);
 
-        contentArea.getStyle().set("padding", "0");
-        contentArea.setWidthFull();
+        contentArea.addClassName("wams-dialog-content-area");
         mainLayout.add(contentArea);
 
         HorizontalLayout footer = buildFooter();
@@ -158,11 +151,7 @@ public abstract class BaseMsgTemplateDialog extends Dialog {
         fileUpload.setDropLabel(new Span(I18n.t("mms.msgtemplate.dialog.upload.drop")));
 
         fileInfoArea = new Div();
-        fileInfoArea.getStyle()
-                .set("padding", "var(--lumo-space-s)")
-                .set("background-color", "var(--lumo-contrast-5pct)")
-                .set("border-radius", "var(--lumo-border-radius-m)")
-                .set("font-size", "var(--lumo-font-size-s)");
+        fileInfoArea.addClassName("wams-dialog-file-info-area");
 
         if (currentFileName != null && !currentFileName.isEmpty()) {
             fileInfoArea.setText(I18n.t("mms.msgtemplate.dialog.current.file", currentFileName));
@@ -173,18 +162,21 @@ public abstract class BaseMsgTemplateDialog extends Dialog {
         fileUpload.addSucceededListener(event -> {
             uploadedFileName = event.getFileName();
             fileInfoArea.setText(I18n.t("mms.msgtemplate.dialog.file.uploaded", uploadedFileName));
-            fileInfoArea.getStyle().set("color", "var(--lumo-success-color)");
+            fileInfoArea.removeClassName("wams-dialog-file-info-area--error");
+            fileInfoArea.addClassName("wams-dialog-file-info-area--success");
         });
 
         fileUpload.addFailedListener(event -> {
             String errorMsg = event.getReason() != null ? event.getReason().getMessage() : I18n.t("mms.common.error.unknown");
             fileInfoArea.setText(I18n.t("mms.msgtemplate.dialog.upload.failed", errorMsg));
-            fileInfoArea.getStyle().set("color", "var(--lumo-error-color)");
+            fileInfoArea.removeClassName("wams-dialog-file-info-area--success");
+            fileInfoArea.addClassName("wams-dialog-file-info-area--error");
         });
 
         fileUpload.addFileRejectedListener(event -> {
             fileInfoArea.setText(I18n.t("mms.msgtemplate.dialog.upload.rejected", event.getErrorMessage()));
-            fileInfoArea.getStyle().set("color", "var(--lumo-error-color)");
+            fileInfoArea.removeClassName("wams-dialog-file-info-area--success");
+            fileInfoArea.addClassName("wams-dialog-file-info-area--error");
         });
     }
 

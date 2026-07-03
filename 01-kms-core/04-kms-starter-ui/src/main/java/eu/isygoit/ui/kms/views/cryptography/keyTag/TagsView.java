@@ -1,6 +1,5 @@
 package eu.isygoit.ui.kms.views.cryptography.keyTag;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -108,7 +107,6 @@ public class TagsView extends ManagementVerticalView {
         loadingBar.addClassName(LumoUtility.Margin.Top.MEDIUM);
         add(loadingBar);
 
-        injectResponsiveStyles();
         loadKeyOptions();
     }
 
@@ -175,40 +173,6 @@ public class TagsView extends ManagementVerticalView {
         toolbar.add(leftGroup, centerGroup, rightGroup);
         toolbar.setFlexGrow(1, centerGroup);
         return toolbar;
-    }
-
-    private void injectResponsiveStyles() {
-        String css = """
-                .kms-tags-view {
-                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-                    min-height: 100vh;
-                    animation: fadeIn 0.5s ease-out;
-                }
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .tags-toolbar {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: var(--lumo-space-s);
-                    width: 100%;
-                }
-                @media (max-width: 768px) {
-                    .tags-toolbar {
-                        flex-direction: column;
-                        align-items: stretch;
-                    }
-                    .tags-toolbar > * {
-                        width: 100% !important;
-                        justify-content: center;
-                    }
-                }
-                """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
     }
 
     private void clearTagsGrid() {

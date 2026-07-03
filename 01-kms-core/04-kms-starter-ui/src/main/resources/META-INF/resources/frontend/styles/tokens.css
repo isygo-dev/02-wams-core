@@ -1,0 +1,44 @@
+/*
+ * Design tokens shared by every module (common, auth, ims, kms, dms, mms, sms, cms).
+ * Custom properties that Lumo does not provide (warning/info palettes) are defined
+ * once here; everything else reuses Lumo's built-in --lumo-* custom properties so
+ * the app follows the active Lumo theme (including dark mode) automatically.
+ */
+html {
+    --wams-warning-bg: #FFF4E5;
+    --wams-warning-fg: #B25600;
+    --wams-info-bg: #E9ECEF;
+    --wams-info-fg: #495057;
+}
+
+/* ── Status / chip tokens ───────────────────────────────────────────────── */
+
+.wams-chip {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.wams-chip--success {
+    background-color: var(--lumo-success-color-10pct);
+    color: var(--lumo-success-text-color);
+}
+
+.wams-chip--error {
+    background-color: var(--lumo-error-color-10pct);
+    color: var(--lumo-error-text-color);
+}
+
+.wams-chip--warning {
+    background-color: var(--wams-warning-bg);
+    color: var(--wams-warning-fg);
+}
+
+.wams-chip--neutral {
+    background-color: var(--lumo-contrast-10pct);
+    color: var(--lumo-secondary-text-color);
+}
+
+.wams-chip--info {
+    background-color: var(--wams-info-bg);
+    color: var(--wams-info-fg);
+}

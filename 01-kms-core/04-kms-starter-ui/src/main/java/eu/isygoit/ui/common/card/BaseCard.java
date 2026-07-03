@@ -2,7 +2,6 @@ package eu.isygoit.ui.common.card;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Span;
@@ -61,7 +60,6 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         buildBodyRows();
         buildFooter();
         rearrangeToFlexLayout();
-        injectResponsiveStyles();
         addClassName(cardCssClassName());
     }
 
@@ -100,7 +98,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         addClassName(LumoUtility.BorderRadius.LARGE);
         addClassName(LumoUtility.Background.BASE);
         addClassName(LumoUtility.BoxShadow.XSMALL);
-        getStyle().set("transition", "all 0.2s ease-in-out");
+        addClassName("wams-card");
         // Ensure flex column (VerticalLayout does this by default)
     }
 
@@ -110,7 +108,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         headerLeft = new HorizontalLayout();
         headerLeft.setAlignItems(FlexComponent.Alignment.CENTER);
         headerLeft.setSpacing(true);
-        headerLeft.getStyle().set("flex-wrap", "wrap");
+        headerLeft.addClassName("wams-card__header-row");
 
         Component titleComponent = buildTitle();
         headerLeft.add(titleComponent);
@@ -119,9 +117,8 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         headerRow.setWidthFull();
         headerRow.setJustifyContentMode(FlexComponent.JustifyContentMode.START);
         headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        headerRow.getStyle().set("flex-wrap", "wrap");
         headerRow.setSpacing(true);
-        headerRow.addClassName(cardCssClassName() + "__header-row");
+        headerRow.addClassName("wams-card__header-row");
 
         // We add headerRow later after rearrangement
     }
@@ -138,9 +135,8 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         buttonBar = new HorizontalLayout();
         buttonBar.setSpacing(true);
         buttonBar.setPadding(false);
-        buttonBar.getStyle().set("flex-wrap", "wrap");
         buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        buttonBar.addClassName(cardCssClassName() + "__button-bar");
+        buttonBar.addClassName("wams-card__button-bar");
         buttons.forEach(buttonBar::add);
 
         footerRow = new HorizontalLayout(buttonBar);
@@ -148,11 +144,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         footerRow.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
         footerRow.setAlignItems(FlexComponent.Alignment.CENTER);
         footerRow.setPadding(true);
-        footerRow.getStyle()
-                .set("border-top", "1px solid var(--lumo-contrast-10pct)")
-                .set("margin-top", "var(--lumo-space-m)")
-                .set("padding-top", "var(--lumo-space-m)");
-        footerRow.addClassName(cardCssClassName() + "__footer-row");
+        footerRow.addClassName("wams-card__footer-row");
     }
 
     // ── Rearrangement into header / body / footer ────────────────────────────
@@ -171,7 +163,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         bodyContainer.setSpacing(true);
         bodyContainer.setWidthFull();
         bodyContainer.setFlexGrow(1);
-        bodyContainer.addClassName(cardCssClassName() + "__body");
+        bodyContainer.addClassName("wams-card__body");
 
         // Move all remaining components (except header and footer) into the body container
         for (Component child : children) {
@@ -195,17 +187,29 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         chip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
         chip.addClassName(LumoUtility.Padding.Vertical.XSMALL);
         chip.addClassName(LumoUtility.BorderRadius.LARGE);
-        chip.getStyle()
-                .set("display", "inline-block")
-                .set("white-space", "nowrap")
-                .set("background-color", color.background())
-                .set("color", color.foreground());
+        chip.addClassName("wams-chip");
+        chip.addClassName(color.cssClass());
         chip.getElement().setAttribute("title", text);
         return chip;
     }
 
     protected Span buildStatusChip(String text, String status) {
         return buildStatusChip(text, ChipColor.fromStatus(status));
+    }
+
+    /**
+     * Re-colors an existing chip (e.g. after a status change) by swapping its
+     * {@code wams-chip--*} class instead of setting inline background/foreground
+     * colors.
+     */
+    protected static void applyChipColor(Span chip, ChipColor color) {
+        chip.removeClassName(ChipColor.SUCCESS.cssClass());
+        chip.removeClassName(ChipColor.ERROR.cssClass());
+        chip.removeClassName(ChipColor.WARNING.cssClass());
+        chip.removeClassName(ChipColor.NEUTRAL.cssClass());
+        chip.removeClassName(ChipColor.INFO.cssClass());
+        chip.addClassName("wams-chip");
+        chip.addClassName(color.cssClass());
     }
 
     // ── Title span factory ────────────────────────────────────────────────────
@@ -215,7 +219,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         span.addClassName(LumoUtility.FontWeight.BOLD);
         span.addClassName(LumoUtility.FontSize.MEDIUM);
         span.addClassName(LumoUtility.TextColor.PRIMARY);
-        span.getStyle().set("word-break", "break-word");
+        span.addClassName("wams-card__title");
         span.getElement().setAttribute("title", fullValue != null ? fullValue : displayText);
         return span;
     }
@@ -233,7 +237,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         row.setSpacing(true);
         row.addClassName(LumoUtility.FontSize.XSMALL);
         row.addClassName(LumoUtility.TextColor.TERTIARY);
-        row.getStyle().set("margin-top", "var(--lumo-space-xs)").set("flex-wrap", "wrap");
+        row.addClassName("wams-card__meta-row");
 
         for (int i = 0; i < valid.size(); i++) {
             if (i > 0) row.add(new Span("•"));
@@ -262,73 +266,6 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         return btn;
     }
 
-    // ── Responsive CSS injection ──────────────────────────────────────────────
-
-    private void injectResponsiveStyles() {
-        String block = cardCssClassName();
-        String css = """
-                .%1$s {
-                    display: flex;
-                    flex-direction: column;
-                    height: 100%%;
-                }
-                .%1$s .%1$s__header-row {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: var(--lumo-space-s);
-                    align-items: center;
-                    width: 100%%;
-                }
-                .%1$s .%1$s__body {
-                    flex: 1 1 auto;
-                    width: 100%%;
-                }
-                .%1$s .%1$s__footer-row {
-                    display: flex;
-                    flex-wrap: wrap;
-                    justify-content: flex-end;
-                    width: 100%%;
-                }
-                .%1$s .%1$s__button-bar {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: var(--lumo-space-xs);
-                }
-                @media (max-width: 640px) {
-                    .%1$s .%1$s__header-row {
-                        flex-direction: column;
-                        align-items: flex-start;
-                    }
-                    .%1$s .%1$s__footer-row {
-                        flex-direction: column;
-                        align-items: stretch;
-                    }
-                    .%1$s .%1$s__button-bar {
-                        width: 100%%;
-                        justify-content: center;
-                    }
-                }
-                """.formatted(block);
-
-        injectStyles(css);
-
-        String extra = buildExtraStyles();
-        if (extra != null && !extra.isBlank()) {
-            injectStyles(extra);
-        }
-    }
-
-    protected String buildExtraStyles() {
-        return null;
-    }
-
-    protected final void injectStyles(String css) {
-        UI.getCurrent().getPage().executeJs(
-                "const s=document.createElement('style');s.textContent=$0;document.head.appendChild(s);",
-                css
-        );
-    }
-
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     @Override
@@ -339,12 +276,12 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
 
     // ── Inner types ───────────────────────────────────────────────────────────
 
-    public record ChipColor(String background, String foreground) {
-        public static final ChipColor SUCCESS = new ChipColor("#E3F7E5", "#1E7B2E");
-        public static final ChipColor ERROR = new ChipColor("#FEF3F2", "#C73A2B");
-        public static final ChipColor WARNING = new ChipColor("#FFF4E5", "#B25600");
-        public static final ChipColor NEUTRAL = new ChipColor("#F2F4F8", "#5E6C84");
-        public static final ChipColor INFO = new ChipColor("#E9ECEF", "#495057");
+    public record ChipColor(String cssClass) {
+        public static final ChipColor SUCCESS = new ChipColor("wams-chip--success");
+        public static final ChipColor ERROR = new ChipColor("wams-chip--error");
+        public static final ChipColor WARNING = new ChipColor("wams-chip--warning");
+        public static final ChipColor NEUTRAL = new ChipColor("wams-chip--neutral");
+        public static final ChipColor INFO = new ChipColor("wams-chip--info");
 
         public static ChipColor fromStatus(String status) {
             if (status == null) return NEUTRAL;

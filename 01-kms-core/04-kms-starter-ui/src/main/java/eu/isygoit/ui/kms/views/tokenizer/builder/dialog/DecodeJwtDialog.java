@@ -35,6 +35,7 @@ public class DecodeJwtDialog extends NoActionDialog {
         this.objectMapper = objectMapper;
         this.jwtToken = jwtToken;
 
+        addClassName("decode-jwt-dialog");
         setWidth("750px");
         setMaxWidth("95%");
         setResizable(true);
@@ -86,8 +87,7 @@ public class DecodeJwtDialog extends NoActionDialog {
             if (parts[2] != null && !parts[2].isEmpty()) {
                 String signature = parts[2];
                 Span sigInfo = new Span(I18n.t("kms.decode.jwt.signature", signature.substring(0, Math.min(20, signature.length()))));
-                sigInfo.getStyle().set("font-size", "var(--lumo-font-size-xs)");
-                sigInfo.getStyle().set("color", "var(--lumo-secondary-text-color)");
+                sigInfo.addClassName("signature-info");
                 mainLayout.add(sigInfo);
             }
         } catch (Exception e) {
@@ -122,18 +122,16 @@ public class DecodeJwtDialog extends NoActionDialog {
         HorizontalLayout titleRow = new HorizontalLayout(titleSpan, copyButton);
         titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
         titleRow.setSpacing(true);
-        titleRow.getStyle().set("margin-bottom", "var(--lumo-space-s)");
+        titleRow.addClassName("section-title-row");
 
         // Content area
+        boolean isHeaderSection = title.equals(I18n.t("kms.decode.jwt.header"));
         TextArea textArea = new TextArea();
         textArea.setValue(content);
         textArea.setReadOnly(true);
         textArea.setWidthFull();
-        textArea.setHeight(title.equals(I18n.t("kms.decode.jwt.header")) ? "150px" : "300px");
-        textArea.getStyle().set("font-family", "monospace");
-        textArea.getStyle().set("font-size", "12px");
-        textArea.getStyle().set("background", "var(--lumo-contrast-5pct)");
-        textArea.getStyle().set("border-radius", "var(--lumo-border-radius-m)");
+        textArea.addClassName("code-textarea");
+        textArea.addClassName(isHeaderSection ? "code-textarea--header" : "code-textarea--payload");
 
         VerticalLayout cardContent = new VerticalLayout(titleRow, textArea);
         cardContent.setSpacing(false);
@@ -147,7 +145,7 @@ public class DecodeJwtDialog extends NoActionDialog {
         Card card = new Card();
         card.setWidthFull();
         Span errorSpan = new Span(VaadinIcon.EXCLAMATION_CIRCLE.create() + " " + message);
-        errorSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+        errorSpan.addClassName("error-message");
         card.add(errorSpan);
         return card;
     }

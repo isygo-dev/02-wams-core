@@ -46,7 +46,7 @@ public class KeyUsageStatsPanel extends VerticalLayout {
         setSpacing(true);
         setPadding(true);
         addClassName("stats-filter-bar");
-        getStyle().set("margin-top", "24px");
+        addClassName("kms-parta-panel-spaced");
 
         HorizontalLayout titleRow = new HorizontalLayout();
         titleRow.setWidthFull();
@@ -62,7 +62,7 @@ public class KeyUsageStatsPanel extends VerticalLayout {
         filterBar.setWidthFull();
         filterBar.setAlignItems(FlexComponent.Alignment.END);
         filterBar.setSpacing(true);
-        filterBar.getStyle().set("flex-wrap", "wrap");
+        filterBar.addClassName("kms-parta-filter-bar-wrap");
 
         keyCombo = new ComboBox<>(I18n.t("kms.stats.key.usage.select.key"));
         keyCombo.setPlaceholder(I18n.t("kms.stats.key.usage.choose.key"));
@@ -80,7 +80,7 @@ public class KeyUsageStatsPanel extends VerticalLayout {
         statsContainer = new HorizontalLayout();
         statsContainer.setWidthFull();
         statsContainer.setSpacing(true);
-        statsContainer.getStyle().set("flex-wrap", "wrap").set("gap", "16px");
+        statsContainer.addClassName("kms-parta-stats-wrap");
         statsContainer.setVisible(false);
         add(statsContainer);
     }
@@ -119,7 +119,7 @@ public class KeyUsageStatsPanel extends VerticalLayout {
 
                 if (stats == null) {
                     Span errorSpan = new Span(I18n.t("kms.stats.key.usage.failed.load"));
-                    errorSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+                    errorSpan.addClassName("kms-parta-usage-stats-error");
                     statsContainer.add(errorSpan);
                 } else {
                     if (keyUsage == IEnumKeyUsage.Types.ENCRYPT_DECRYPT) {
@@ -163,21 +163,13 @@ public class KeyUsageStatsPanel extends VerticalLayout {
         VerticalLayout card = new VerticalLayout();
         card.setSpacing(false);
         card.setPadding(true);
-        card.setWidth("160px");
-        card.getStyle()
-                .set("border", "1px solid var(--lumo-contrast-20pct)")
-                .set("border-radius", "var(--lumo-border-radius-m)")
-                .set("box-shadow", "var(--lumo-box-shadow-xs)")
-                .set("align-items", "center")
-                .set("background-color", "var(--lumo-base-color)")
-                .set("text-align", "center")
-                .set("flex", "1 1 auto");
+        card.addClassName("kms-parta-usage-stat-card");
 
         Span valueSpan = new Span(value != null ? value.toString() : "0");
-        valueSpan.getStyle().set("font-size", "24px").set("font-weight", "bold");
+        valueSpan.addClassName("kms-parta-usage-stat-card__value");
 
         Span labelSpan = new Span(label);
-        labelSpan.getStyle().set("color", "var(--lumo-secondary-text-color)").set("font-size", "var(--lumo-font-size-xs)");
+        labelSpan.addClassName("kms-parta-usage-stat-card__label");
 
         card.add(valueSpan, labelSpan);
         card.setAlignItems(FlexComponent.Alignment.CENTER);

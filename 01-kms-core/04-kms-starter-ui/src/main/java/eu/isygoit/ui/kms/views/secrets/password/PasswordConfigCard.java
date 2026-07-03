@@ -52,7 +52,7 @@ public class PasswordConfigCard extends BaseCard<PasswordConfigView, PasswordCon
         HorizontalLayout left = new HorizontalLayout();
         left.setAlignItems(FlexComponent.Alignment.CENTER);
         left.setSpacing(true);
-        left.getStyle().set("flex-wrap", "wrap");
+        left.addClassName("card-title-group");
         titleSpan = buildTitleSpan(dto.getCode(), dto.getCode());
         left.add(titleSpan);
         return left;
@@ -85,23 +85,20 @@ public class PasswordConfigCard extends BaseCard<PasswordConfigView, PasswordCon
         row.setAlignItems(FlexComponent.Alignment.CENTER);
         row.setSpacing(true);
         row.setWidthFull();
-        row.getStyle().set("margin-top", "var(--lumo-space-xs)");
         row.addClassName("meta-row");
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("16px");
-        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        iconComponent.addClassName("meta-row-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        labelSpan.getStyle().set("min-width", "100px");
+        labelSpan.addClassName("meta-row-label");
 
         Span valueSpan = new Span(value);
         valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        valueSpan.getStyle().set("font-family", "monospace");
-        valueSpan.getStyle().set("word-break", "break-all");
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("meta-row-value");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -127,26 +124,5 @@ public class PasswordConfigCard extends BaseCard<PasswordConfigView, PasswordCon
 
     private void openEditDialog() {
         new UpdatePasswordConfigDialog(objectService, dto, () -> parentView.refreshCard(this)).open();
-    }
-
-    @Override
-    protected String buildExtraStyles() {
-        return """
-                .password-config-card .meta-row {
-                    border-bottom: 1px solid var(--lumo-contrast-10pct);
-                    padding-bottom: var(--lumo-space-xs);
-                }
-                .password-config-card .meta-row:last-child {
-                    border-bottom: none;
-                }
-                @media (max-width: 640px) {
-                    .password-config-card .meta-row {
-                        flex-wrap: wrap;
-                    }
-                    .password-config-card .meta-row > :not(:first-child) {
-                        margin-left: 28px;
-                    }
-                }
-                """;
     }
 }

@@ -11,6 +11,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.SenderConfigService;
@@ -58,9 +59,9 @@ public class TestConnectionDialog extends Dialog {
         Icon serverIcon = VaadinIcon.SERVER.create();
         serverIcon.setColor("var(--lumo-primary-color)");
         Span hostLabel = new Span(I18n.t("mms.sender.dialog.test.host") + ":");
-        hostLabel.getStyle().set("font-weight", "bold");
+        hostLabel.addClassName(LumoUtility.FontWeight.BOLD);
         Span hostValue = new Span(config.getHost() + ":" + config.getPort());
-        hostValue.getStyle().set("font-family", "monospace");
+        hostValue.addClassName("wams-dialog-host-value");
 
         infoRow.add(serverIcon, hostLabel, hostValue);
         mainLayout.add(infoRow);
@@ -71,14 +72,7 @@ public class TestConnectionDialog extends Dialog {
         mainLayout.add(progressBar);
 
         // Status area
-        statusArea.setWidthFull();
-        statusArea.getStyle()
-                .set("padding", "var(--lumo-space-m)")
-                .set("border-radius", "var(--lumo-border-radius-m)")
-                .set("min-height", "100px")
-                .set("display", "flex")
-                .set("align-items", "center")
-                .set("justify-content", "center");
+        statusArea.addClassName("wams-dialog-status-box");
         mainLayout.add(statusArea);
 
         // Close button
@@ -103,16 +97,16 @@ public class TestConnectionDialog extends Dialog {
         // Simulate async test - in real implementation, call actual test endpoint
         // For now, simulate a successful connection test
         statusArea.removeAll();
-        statusArea.getStyle()
-                .set("background-color", "var(--lumo-primary-color-10pct)")
-                .set("color", "var(--lumo-primary-text-color)");
+        statusArea.removeClassName("wams-dialog-status-box--success");
+        statusArea.removeClassName("wams-dialog-status-box--error");
+        statusArea.addClassName("wams-dialog-status-box--info");
 
         VerticalLayout statusContent = new VerticalLayout();
         statusContent.setAlignItems(FlexComponent.Alignment.CENTER);
         statusContent.setSpacing(true);
 
         Icon spinner = VaadinIcon.SPINNER.create();
-        spinner.getStyle().set("animation", "spin 1s linear infinite");
+        spinner.addClassName("wams-dialog-spinner");
         spinner.setSize("32px");
         statusContent.add(spinner);
         statusContent.add(new Span(I18n.t("mms.sender.dialog.test.connecting")));
@@ -142,14 +136,14 @@ public class TestConnectionDialog extends Dialog {
         closeButton.setEnabled(true);
 
         statusArea.removeAll();
+        statusArea.removeClassName("wams-dialog-status-box--info");
         if (success) {
-            statusArea.getStyle()
-                    .set("background-color", "var(--lumo-success-color-10pct)")
-                    .set("color", "var(--lumo-success-text-color)");
+            statusArea.addClassName("wams-dialog-status-box--success");
 
             VerticalLayout resultContent = new VerticalLayout();
             resultContent.setAlignItems(FlexComponent.Alignment.CENTER);
             resultContent.setSpacing(true);
+            resultContent.addClassName("wams-dialog-status-content");
 
             Icon successIcon = VaadinIcon.CHECK_CIRCLE.create();
             successIcon.setColor("var(--lumo-success-color)");
@@ -158,17 +152,15 @@ public class TestConnectionDialog extends Dialog {
             resultContent.add(successIcon);
             resultContent.add(new Span(message));
             resultContent.add(new Span(I18n.t("mms.sender.dialog.test.connection.established")));
-            resultContent.getStyle().set("font-size", "var(--lumo-font-size-s)");
 
             statusArea.add(resultContent);
         } else {
-            statusArea.getStyle()
-                    .set("background-color", "var(--lumo-error-color-10pct)")
-                    .set("color", "var(--lumo-error-text-color)");
+            statusArea.addClassName("wams-dialog-status-box--error");
 
             VerticalLayout resultContent = new VerticalLayout();
             resultContent.setAlignItems(FlexComponent.Alignment.CENTER);
             resultContent.setSpacing(true);
+            resultContent.addClassName("wams-dialog-status-content");
 
             Icon errorIcon = VaadinIcon.EXCLAMATION_CIRCLE.create();
             errorIcon.setColor("var(--lumo-error-color)");
@@ -177,7 +169,6 @@ public class TestConnectionDialog extends Dialog {
             resultContent.add(errorIcon);
             resultContent.add(new Span(message));
             resultContent.add(new Span(I18n.t("mms.sender.dialog.test.check.configuration")));
-            resultContent.getStyle().set("font-size", "var(--lumo-font-size-s)");
 
             statusArea.add(resultContent);
         }

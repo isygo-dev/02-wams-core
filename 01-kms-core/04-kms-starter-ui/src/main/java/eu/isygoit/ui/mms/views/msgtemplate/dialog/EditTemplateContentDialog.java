@@ -83,10 +83,7 @@ public class EditTemplateContentDialog extends Dialog {
         infoBar.setWidthFull();
         infoBar.setAlignItems(FlexComponent.Alignment.CENTER);
         infoBar.setSpacing(true);
-        infoBar.getStyle()
-                .set("padding", "var(--lumo-space-s)")
-                .set("background-color", "var(--lumo-contrast-5pct)")
-                .set("border-radius", "var(--lumo-border-radius-m)");
+        infoBar.addClassName("wams-dialog-info-bar");
 
         Icon fileIcon = VaadinIcon.FILE.create();
         fileIcon.setColor("var(--lumo-primary-color)");
@@ -107,11 +104,7 @@ public class EditTemplateContentDialog extends Dialog {
         // Status area
         statusArea = new Div();
         statusArea.setVisible(false);
-        statusArea.getStyle()
-                .set("padding", "var(--lumo-space-s)")
-                .set("border-radius", "var(--lumo-border-radius-m)")
-                .set("margin-bottom", "var(--lumo-space-s)");
-        statusArea.setWidthFull();
+        statusArea.addClassName("wams-dialog-status-area");
         mainLayout.add(statusArea);
 
         // Content editor
@@ -119,20 +112,15 @@ public class EditTemplateContentDialog extends Dialog {
         contentArea.setWidthFull();
         contentArea.setHeight("350px");
         contentArea.setPlaceholder(I18n.t("mms.msgtemplate.dialog.edit.content.placeholder"));
-        contentArea.getStyle()
-                .set("font-family", "monospace")
-                .set("font-size", "var(--lumo-font-size-s)")
-                .set("tab-size", "2");
+        contentArea.addClassName("wams-dialog-content-editor");
         contentArea.addClassName(LumoUtility.Border.ALL);
         contentArea.addClassName(LumoUtility.BorderRadius.MEDIUM);
         mainLayout.add(contentArea);
 
         // Actions
         HorizontalLayout actions = new HorizontalLayout();
-        actions.setWidthFull();
         actions.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        actions.setSpacing(true);
-        actions.getStyle().set("margin-top", "var(--lumo-space-m)");
+        actions.addClassName("wams-dialog-actions");
 
         downloadButton = new Button(I18n.t("mms.msgtemplate.dialog.edit.content.download"), new Icon(VaadinIcon.DOWNLOAD));
         downloadButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
@@ -361,32 +349,35 @@ public class EditTemplateContentDialog extends Dialog {
         }
     }
 
+    private static final String[] STATUS_MODIFIER_CLASSES = {
+            "wams-dialog-status-area--success",
+            "wams-dialog-status-area--error",
+            "wams-dialog-status-area--warning",
+            "wams-dialog-status-area--info"
+    };
+
     private void showStatus(String message, String type) {
         statusArea.setVisible(true);
         statusArea.removeAll();
         statusArea.add(new Span(message));
 
+        for (String modifierClass : STATUS_MODIFIER_CLASSES) {
+            statusArea.removeClassName(modifierClass);
+        }
+
         switch (type) {
             case "success":
-                statusArea.getStyle()
-                        .set("background-color", "var(--lumo-success-color-10pct)")
-                        .set("color", "var(--lumo-success-text-color)");
+                statusArea.addClassName("wams-dialog-status-area--success");
                 break;
             case "error":
-                statusArea.getStyle()
-                        .set("background-color", "var(--lumo-error-color-10pct)")
-                        .set("color", "var(--lumo-error-text-color)");
+                statusArea.addClassName("wams-dialog-status-area--error");
                 break;
             case "warning":
-                statusArea.getStyle()
-                        .set("background-color", "var(--lumo-warning-color-10pct)")
-                        .set("color", "var(--lumo-warning-text-color)");
+                statusArea.addClassName("wams-dialog-status-area--warning");
                 break;
             case "info":
             default:
-                statusArea.getStyle()
-                        .set("background-color", "var(--lumo-primary-color-10pct)")
-                        .set("color", "var(--lumo-primary-text-color)");
+                statusArea.addClassName("wams-dialog-status-area--info");
                 break;
         }
     }

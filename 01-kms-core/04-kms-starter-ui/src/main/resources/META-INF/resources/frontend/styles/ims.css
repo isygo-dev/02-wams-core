@@ -1,0 +1,435 @@
+/*
+ * IMS module — styles extracted from runtime CSS injection
+ * (BaseCard#buildExtraStyles(), Vaadin Page#executeJs() style-tag injection,
+ * and static .getStyle().set(...) calls) into a single static stylesheet.
+ * Imported once via @CssImport on ImsMainLayout.
+ */
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Cards — AccountCard / AnnexCard / ApplicationCard / CustomerCard /
+   ParameterCard / RoleCard / TenantCard
+   These 7 card types used to each override BaseCard#buildExtraStyles() with
+   an identical block (only the card-type class prefix differed). That hook
+   no longer exists on BaseCard, so the rules are consolidated here once,
+   grouped by selector, instead of being duplicated 7×.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.account-card,
+.annex-card,
+.application-card,
+.customer-card,
+.parameter-card,
+.role-card,
+.tenant-card {
+    padding: var(--lumo-space-s) var(--lumo-space-m);
+}
+
+.account-card .meta-row,
+.annex-card .meta-row,
+.application-card .meta-row,
+.customer-card .meta-row,
+.parameter-card .meta-row,
+.role-card .meta-row,
+.tenant-card .meta-row {
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
+    padding-bottom: var(--lumo-space-xs);
+    margin-bottom: var(--lumo-space-xs);
+}
+
+.account-card .meta-row:last-child,
+.annex-card .meta-row:last-child,
+.application-card .meta-row:last-child,
+.customer-card .meta-row:last-child,
+.parameter-card .meta-row:last-child,
+.role-card .meta-row:last-child,
+.tenant-card .meta-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+@media (max-width: 640px) {
+    .account-card .meta-row,
+    .annex-card .meta-row,
+    .application-card .meta-row,
+    .customer-card .meta-row,
+    .parameter-card .meta-row,
+    .role-card .meta-row,
+    .tenant-card .meta-row {
+        flex-wrap: wrap;
+    }
+
+    .account-card .meta-row > :not(:first-child),
+    .annex-card .meta-row > :not(:first-child),
+    .application-card .meta-row > :not(:first-child),
+    .customer-card .meta-row > :not(:first-child),
+    .parameter-card .meta-row > :not(:first-child),
+    .role-card .meta-row > :not(:first-child),
+    .tenant-card .meta-row > :not(:first-child) {
+        margin-left: 28px;
+    }
+}
+
+/* Card body/title rows wrap on narrow cards (AccountCard/ApplicationCard/
+   CustomerCard/TenantCard #buildTitle() row1/row2; AnnexCard/ParameterCard/
+   RoleCard #buildTitle() titleLayout). */
+
+.account-card .card-row,
+.application-card .card-row,
+.customer-card .card-row,
+.tenant-card .card-row,
+.annex-card .card-title-group,
+.parameter-card .card-title-group,
+.role-card .card-title-group {
+    flex-wrap: wrap;
+}
+
+.account-card .card-row--spaced,
+.application-card .card-row--spaced,
+.customer-card .card-row--spaced,
+.tenant-card .card-row--spaced {
+    margin-top: var(--lumo-space-s);
+}
+
+/* Card avatar image (AccountCard/ApplicationCard/CustomerCard/TenantCard). */
+
+.account-card .card-avatar,
+.application-card .card-avatar,
+.customer-card .card-avatar,
+.tenant-card .card-avatar {
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--lumo-contrast-10pct);
+    border: 2px solid var(--lumo-contrast-20pct);
+}
+
+/* Meta-row icon/label/value (all 7 card types' createIconRow()/createInfoRow()). */
+
+.account-card .meta-row-icon,
+.annex-card .meta-row-icon,
+.application-card .meta-row-icon,
+.customer-card .meta-row-icon,
+.parameter-card .meta-row-icon,
+.role-card .meta-row-icon,
+.tenant-card .meta-row-icon {
+    color: var(--lumo-secondary-text-color);
+}
+
+.account-card .meta-row-label,
+.annex-card .meta-row-label,
+.application-card .meta-row-label,
+.customer-card .meta-row-label,
+.parameter-card .meta-row-label,
+.role-card .meta-row-label,
+.tenant-card .meta-row-label {
+    min-width: 80px;
+}
+
+.account-card .meta-row-value,
+.annex-card .meta-row-value,
+.application-card .meta-row-value,
+.customer-card .meta-row-value,
+.parameter-card .meta-row-value,
+.tenant-card .meta-row-value {
+    word-break: break-all;
+    flex: 1;
+}
+
+.role-card .meta-row-value {
+    flex: 1;
+}
+
+/* RoleCard — level chip (unique to this card, static styling). */
+
+.role-card .level-chip {
+    background-color: var(--lumo-primary-color-10pct);
+    color: var(--lumo-primary-text-color);
+    border-radius: var(--lumo-border-radius-s);
+    padding: 0.2rem 0.5rem;
+    font-size: var(--lumo-font-size-xs);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Details dialogs — AccountDetailsDialog / AnnexDetailsDialog /
+   ApplicationDetailsDialog / CustomerDetailsDialog / ParameterDetailsDialog /
+   RoleDetailsDialog / TenantDetailsDialog
+   All share the same addFieldToGrid()/createSection() helpers: a responsive
+   label/value grid plus a bordered section title. The grid container reuses
+   the shared wams-card__detail-grid class from card.css (overriding its
+   column width for the wider dialog layout); the per-row icon/value classes
+   are dialog-scoped, matching the convention used by cms.css/dms.css/sms.css.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.account-details-dialog .wams-card__detail-grid,
+.annex-details-dialog .wams-card__detail-grid,
+.application-details-dialog .wams-card__detail-grid,
+.customer-details-dialog .wams-card__detail-grid,
+.parameter-details-dialog .wams-card__detail-grid,
+.tenant-details-dialog .wams-card__detail-grid,
+.role-details-dialog .wams-card__detail-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.account-details-dialog .wams-section-title,
+.annex-details-dialog .wams-section-title,
+.application-details-dialog .wams-section-title,
+.customer-details-dialog .wams-section-title,
+.parameter-details-dialog .wams-section-title,
+.tenant-details-dialog .wams-section-title,
+.role-details-dialog .wams-section-title {
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    margin-bottom: var(--lumo-space-s);
+    padding-bottom: var(--lumo-space-xs);
+}
+
+.account-details-dialog .detail-field-icon,
+.annex-details-dialog .detail-field-icon,
+.application-details-dialog .detail-field-icon,
+.customer-details-dialog .detail-field-icon,
+.parameter-details-dialog .detail-field-icon,
+.tenant-details-dialog .detail-field-icon,
+.role-details-dialog .detail-field-icon {
+    color: var(--lumo-primary-color);
+}
+
+.account-details-dialog .detail-field-value,
+.annex-details-dialog .detail-field-value,
+.application-details-dialog .detail-field-value,
+.customer-details-dialog .detail-field-value,
+.parameter-details-dialog .detail-field-value,
+.tenant-details-dialog .detail-field-value,
+.role-details-dialog .detail-field-value {
+    flex: 1;
+}
+
+/* AccountDetailsDialog — connection-tracking rows (unique to this dialog). */
+
+.account-details-dialog .connection-row-icon {
+    color: var(--lumo-secondary-text-color);
+}
+
+.account-details-dialog .connection-row-label {
+    min-width: 160px;
+}
+
+.account-details-dialog .connection-row-value {
+    color: var(--lumo-secondary-text-color);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Management views — AccountManagementView / AnnexManagementView /
+   ApplicationManagementView / CustomerManagementView /
+   ParameterManagementView / RoleManagementView / TenantManagementView
+   Each used to inject an identical page background + fade-in animation +
+   toolbar + card-grid ruleset via Page#executeJs(). Consolidated here.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.account-management-view,
+.annex-management-view,
+.application-management-view,
+.customer-management-view,
+.parameter-management-view,
+.role-management-view,
+.tenant-management-view {
+    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+    min-height: 100vh;
+    animation: wams-ims-fade-in 0.5s ease-out;
+}
+
+@keyframes wams-ims-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.account-management-toolbar,
+.annex-management-toolbar,
+.application-management-toolbar,
+.customer-management-toolbar,
+.parameter-management-toolbar,
+.role-management-toolbar,
+.tenant-management-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--lumo-space-s);
+    width: 100%;
+}
+
+.account-cards-grid,
+.annex-cards-grid,
+.application-cards-grid,
+.customer-cards-grid,
+.parameter-cards-grid,
+.role-cards-grid,
+.tenant-cards-grid {
+    display: grid;
+    gap: var(--lumo-space-m);
+    padding: var(--lumo-space-s);
+}
+
+.account-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+}
+
+.annex-cards-grid,
+.application-cards-grid,
+.customer-cards-grid,
+.parameter-cards-grid,
+.role-cards-grid,
+.tenant-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+}
+
+/* Empty-state icon (all 7 *ManagementView#filterAndDisplayCards()). */
+
+.account-management-view .empty-state-icon,
+.annex-management-view .empty-state-icon,
+.application-management-view .empty-state-icon,
+.customer-management-view .empty-state-icon,
+.parameter-management-view .empty-state-icon,
+.role-management-view .empty-state-icon,
+.tenant-management-view .empty-state-icon {
+    color: var(--lumo-secondary-text-color);
+}
+
+/* Pagination "n / m" label spacing (all 7 *ManagementView#buildToolbar()). */
+
+.account-management-toolbar .page-info-label,
+.annex-management-toolbar .page-info-label,
+.application-management-toolbar .page-info-label,
+.customer-management-toolbar .page-info-label,
+.parameter-management-toolbar .page-info-label,
+.role-management-toolbar .page-info-label,
+.tenant-management-toolbar .page-info-label {
+    margin: 0 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .account-management-toolbar,
+    .annex-management-toolbar,
+    .application-management-toolbar,
+    .customer-management-toolbar,
+    .parameter-management-toolbar,
+    .role-management-toolbar,
+    .tenant-management-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .account-management-toolbar > *,
+    .annex-management-toolbar > *,
+    .application-management-toolbar > *,
+    .customer-management-toolbar > *,
+    .parameter-management-toolbar > *,
+    .tenant-management-toolbar > * {
+        width: 100% !important;
+        justify-content: center;
+    }
+
+    .account-cards-grid,
+    .annex-cards-grid,
+    .application-cards-grid,
+    .customer-cards-grid,
+    .parameter-cards-grid,
+    .role-cards-grid,
+    .tenant-cards-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ImsMainView — dashboard (stat cards, activity panel, quick actions)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.ims-dashboard .dashboard-title {
+    margin-bottom: 10px;
+}
+
+.ims-dashboard .stats-row {
+    flex-wrap: wrap;
+}
+
+.ims-dashboard .stat-card {
+    background: var(--lumo-base-color);
+    border-radius: var(--lumo-border-radius-l);
+    box-shadow: var(--lumo-box-shadow-xs);
+    padding: var(--lumo-space-m);
+    text-align: center;
+    flex: 1;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ims-dashboard .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--lumo-box-shadow-m);
+}
+
+.ims-dashboard .activity-panel {
+    margin-top: 24px;
+}
+
+.ims-dashboard .activity-panel-content {
+    padding: var(--lumo-space-m);
+    background: var(--lumo-base-color);
+    border-radius: var(--lumo-border-radius-m);
+}
+
+.ims-dashboard .quick-actions {
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.ims-dashboard .quick-actions-list {
+    white-space: pre-line;
+}
+
+@media (max-width: 768px) {
+    .ims-dashboard .stat-card {
+        flex-basis: calc(50% - 16px);
+        margin-bottom: 16px;
+    }
+
+    .ims-dashboard .stats-row {
+        gap: 16px;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Role dialogs — CreateRoleDialog / UpdateRoleDialog
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.role-dialog .apps-count-label {
+    font-size: var(--lumo-font-size-xs);
+    color: var(--lumo-secondary-text-color);
+}
+
+@media (max-width: 600px) {
+    .role-dialog .apps-filter-bar {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Avatar upload (image thumbnail / placeholder) — Create/Update dialogs for
+   Account, Application, Customer, Tenant
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.wams-image-thumbnail {
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--lumo-contrast-20pct);
+}
+
+.wams-image-placeholder {
+    background: var(--lumo-contrast-10pct);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

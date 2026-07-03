@@ -1,0 +1,202 @@
+/*
+ * Module-specific styling for eu.isygoit.ui.dms.** (DmsMainView, DmsMainLayout,
+ * CategoryCard/CategoryManagementView and their dialogs). Imported once via
+ * DmsMainLayout so it is available to every view rendered inside it.
+ */
+
+/* ── Dashboard (DmsMainView) ──────────────────────────────────────────────── */
+
+.dms-dashboard .wams-dashboard-header {
+    margin-bottom: 10px;
+}
+
+.dms-dashboard .stat-card {
+    background: var(--lumo-base-color);
+    border-radius: var(--lumo-border-radius-l);
+    box-shadow: var(--lumo-box-shadow-xs);
+    padding: var(--lumo-space-m);
+    text-align: center;
+    flex: 1;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dms-dashboard .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--lumo-box-shadow-m);
+}
+
+.dms-dashboard .stats-row {
+    flex-wrap: wrap;
+}
+
+.dms-dashboard .wams-recent-activity-panel {
+    margin-top: 24px;
+}
+
+.dms-dashboard .wams-recent-activity-content {
+    padding: var(--lumo-space-m);
+    background: var(--lumo-base-color);
+    border-radius: var(--lumo-border-radius-m);
+}
+
+.dms-dashboard .wams-quick-actions {
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.dms-dashboard .wams-quick-actions-text {
+    white-space: pre-line;
+}
+
+@media (max-width: 768px) {
+    .dms-dashboard .stat-card {
+        flex-basis: calc(50% - 16px);
+        margin-bottom: 16px;
+    }
+
+    .dms-dashboard .stats-row {
+        gap: 16px;
+    }
+}
+
+/* ── Category management view ─────────────────────────────────────────────── */
+
+.category-management-view {
+    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+    min-height: 100vh;
+    animation: dms-fade-in 0.5s ease-out;
+}
+
+@keyframes dms-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.category-management-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--lumo-space-s);
+    width: 100%;
+}
+
+.category-management-toolbar .wams-page-info-label {
+    margin: 0 0.5rem;
+}
+
+.category-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: var(--lumo-space-m);
+    padding: var(--lumo-space-s);
+}
+
+@media (max-width: 768px) {
+    .category-management-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .category-management-toolbar > * {
+        width: 100% !important;
+        justify-content: center;
+    }
+
+    .category-cards-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.category-management-view .wams-empty-state-icon {
+    color: var(--lumo-secondary-text-color);
+}
+
+/* ── Category card ─────────────────────────────────────────────────────────── */
+
+.category-card {
+    padding: var(--lumo-space-s) var(--lumo-space-m);
+}
+
+.category-card .wams-title-row {
+    flex-wrap: wrap;
+}
+
+.category-card .meta-row {
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
+    padding-bottom: var(--lumo-space-xs);
+    margin-bottom: var(--lumo-space-xs);
+}
+
+.category-card .meta-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.category-card .wams-body-rows {
+    margin-top: var(--lumo-space-s);
+}
+
+.category-card .meta-row-icon {
+    color: var(--lumo-secondary-text-color);
+}
+
+.category-card .meta-row-label {
+    min-width: 80px;
+}
+
+.category-card .meta-row-value {
+    word-break: break-all;
+    flex: 1;
+}
+
+.category-card .meta-row-value--wrap {
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+.category-card .meta-row-icon--align-start {
+    margin-top: 2px;
+}
+
+@media (max-width: 640px) {
+    .category-card .meta-row {
+        flex-wrap: wrap;
+    }
+
+    .category-card .meta-row > :not(:first-child) {
+        margin-left: 28px;
+    }
+
+    .category-card .wams-card__button-bar {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+/* ── Category details dialog ──────────────────────────────────────────────── */
+
+.category-details-dialog .details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--lumo-space-s);
+}
+
+.category-details-dialog .detail-field-icon {
+    color: var(--lumo-primary-color);
+}
+
+.category-details-dialog .detail-field-value {
+    flex: 1;
+}
+
+.category-details-dialog .wams-section-title {
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    margin-bottom: var(--lumo-space-s);
+    padding-bottom: var(--lumo-space-xs);
+}

@@ -71,10 +71,7 @@ public class TenantDetailsDialog extends NoActionDialog {
 
         // Basic information - two-column grid
         Div basicInfo = new Div();
-        basicInfo.addClassName("details-grid");
-        basicInfo.getStyle().set("display", "grid")
-                .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
-                .set("gap", "var(--lumo-space-s)");
+        basicInfo.addClassName("wams-card__detail-grid");
 
         addFieldToGrid(basicInfo, VaadinIcon.BUILDING, I18n.t("ims.tenant.details.field.name"), tenant.getName());
         addFieldToGrid(basicInfo, VaadinIcon.CODE, I18n.t("ims.tenant.details.field.code"), tenant.getCode());
@@ -93,11 +90,11 @@ public class TenantDetailsDialog extends NoActionDialog {
             descRow.setWidthFull();
             Icon descIcon = VaadinIcon.FILE_TEXT.create();
             descIcon.setSize("16px");
-            descIcon.getStyle().set("color", "var(--lumo-primary-color)");
+            descIcon.addClassName("detail-field-icon");
             Span descLabel = new Span(I18n.t("ims.tenant.details.field.description"));
             descLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
             Span descValue = new Span(tenant.getDescription());
-            descValue.getStyle().set("flex", "1");
+            descValue.addClassName("detail-field-value");
             descRow.add(descIcon, descLabel, descValue);
             descRow.expand(descValue);
             mainLayout.add(descRow);
@@ -105,10 +102,7 @@ public class TenantDetailsDialog extends NoActionDialog {
 
         // Status & audit section
         Div statusInfo = new Div();
-        statusInfo.addClassName("details-grid");
-        statusInfo.getStyle().set("display", "grid")
-                .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
-                .set("gap", "var(--lumo-space-s)");
+        statusInfo.addClassName("wams-card__detail-grid");
 
         addFieldToGrid(statusInfo, VaadinIcon.SHIELD, I18n.t("ims.tenant.details.field.admin.status"), tenant.getAdminStatus() != null ? tenant.getAdminStatus().name() : null);
         addFieldToGrid(statusInfo, VaadinIcon.CALENDAR, I18n.t("ims.tenant.details.field.created"), tenant.getCreateDate() != null ? DateHelper.formatToHumanReadable(tenant.getCreateDate()) : null);
@@ -130,7 +124,7 @@ public class TenantDetailsDialog extends NoActionDialog {
                 addrRow.setSpacing(true);
                 Icon addrIcon = VaadinIcon.MAP_MARKER.create();
                 addrIcon.setSize("16px");
-                addrIcon.getStyle().set("color", "var(--lumo-primary-color)");
+                addrIcon.addClassName("detail-field-icon");
                 Span addrLabel = new Span(I18n.t("ims.tenant.details.field.address"));
                 addrLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
                 Span addrValue = new Span(address);
@@ -154,7 +148,7 @@ public class TenantDetailsDialog extends NoActionDialog {
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("16px");
-        iconComponent.getStyle().set("color", "var(--lumo-primary-color)");
+        iconComponent.addClassName("detail-field-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
@@ -162,7 +156,7 @@ public class TenantDetailsDialog extends NoActionDialog {
 
         Span valueSpan = new Span(value);
         valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("detail-field-value");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -176,9 +170,7 @@ public class TenantDetailsDialog extends NoActionDialog {
         Span titleSpan = new Span(title);
         titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
         titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
-        titleSpan.getStyle().set("border-bottom", "1px solid var(--lumo-contrast-20pct)")
-                .set("margin-bottom", "var(--lumo-space-s)")
-                .set("padding-bottom", "var(--lumo-space-xs)");
+        titleSpan.addClassName("wams-section-title");
         section.add(titleSpan, content);
         return section;
     }

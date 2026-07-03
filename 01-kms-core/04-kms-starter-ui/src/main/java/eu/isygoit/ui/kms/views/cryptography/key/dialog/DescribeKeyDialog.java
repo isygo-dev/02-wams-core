@@ -49,6 +49,7 @@ public class DescribeKeyDialog extends NoActionDialog {
         setResizable(true);
         setCloseOnEsc(true);
         setCloseOnOutsideClick(true);
+        addClassName("describe-key-dialog");
 
         buildContent();
     }
@@ -103,11 +104,7 @@ public class DescribeKeyDialog extends NoActionDialog {
         List<ListResourceTagsResponse.Tag> tags = fetchTags();
         if (!tags.isEmpty()) {
             Div tagsContainer = new Div();
-            tagsContainer.getStyle()
-                    .set("display", "flex")
-                    .set("flex-wrap", "wrap")
-                    .set("gap", "var(--lumo-space-xs)")
-                    .set("margin-top", "var(--lumo-space-s)");
+            tagsContainer.addClassName("tags-container");
             Span label = new Span(I18n.t("kms.key.dialog.describe.field.tags"));
             label.addClassName(LumoUtility.FontWeight.BOLD);
             tagsContainer.add(label);
@@ -116,10 +113,8 @@ public class DescribeKeyDialog extends NoActionDialog {
                 chip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
                 chip.addClassName(LumoUtility.Padding.Vertical.XSMALL);
                 chip.addClassName(LumoUtility.BorderRadius.LARGE);
-                chip.getStyle()
-                        .set("background-color", "#E9ECEF")
-                        .set("color", "#495057")
-                        .set("white-space", "nowrap");
+                chip.addClassName("wams-chip--info");
+                chip.addClassName("tag-chip");
                 tagsContainer.add(chip);
             }
             content.add(tagsContainer);
@@ -146,7 +141,7 @@ public class DescribeKeyDialog extends NoActionDialog {
                     policyArea.setWidthFull();
                     policyArea.setHeight("300px");
                     policyArea.setReadOnly(true);
-                    policyArea.getStyle().set("font-family", "monospace");
+                    policyArea.addClassName("policy-textarea");
                     content.add(policyArea);
                 }
             }
@@ -161,7 +156,7 @@ public class DescribeKeyDialog extends NoActionDialog {
         HorizontalLayout row = new HorizontalLayout();
         row.setWidthFull();
         row.setSpacing(true);
-        row.getStyle().set("margin-bottom", "var(--lumo-space-xs)");
+        row.addClassName("detail-row");
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.BOLD);
         labelSpan.setWidth("30%");

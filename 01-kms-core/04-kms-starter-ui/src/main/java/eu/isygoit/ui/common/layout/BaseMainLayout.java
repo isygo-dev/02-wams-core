@@ -10,6 +10,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
@@ -22,6 +23,7 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import com.vaadin.flow.component.dependency.CssImport;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountImageService;
@@ -39,6 +41,16 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * All shared CSS for the application is imported once here, since every view
+ * sits inside a subclass of this layout (including {@code LandingView}).
+ */
+@CssImport("./styles/tokens.css")
+@CssImport("./styles/card.css")
+@CssImport("./styles/dialog.css")
+@CssImport("./styles/layout.css")
+@CssImport("./styles/modules.css")
+@CssImport("./styles/landing.css")
 public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObserver {
 
     private final AccountService accountService;
@@ -51,6 +63,9 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         this.accountService = SpringContextUtil.getBean(AccountService.class);
         this.accountImageService = SpringContextUtil.getBean(AccountImageService.class);
 
+        if (!getModuleKey().isBlank()) {
+            addClassName("wams-module-" + getModuleKey());
+        }
         createHeader();
         createDrawer();
     }
@@ -59,19 +74,27 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
 
     protected abstract void createDrawer();
 
+    /**
+     * Short module key (kms, ims, mms, dms, sms, cms) used to apply this
+     * module's brand accent color via the {@code wams-module-<key>} CSS class
+     * (see {@code styles/modules.css}). Returns an empty string for layouts
+     * that should not carry a module accent (e.g. the landing page).
+     */
+    protected String getModuleKey() {
+        return "";
+    }
+
     private void createHeader() {
         // Create landing button
         landingButton = new Button(new Icon(VaadinIcon.HOME));
         landingButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         landingButton.setTooltipText(I18n.t("common.layout.header.landing.tooltip"));
         landingButton.addClickListener(e -> UI.getCurrent().navigate("landing"));
-        landingButton.getStyle()
-                .set("color", "var(--lumo-primary-text-color)")
-                .set("margin-right", "var(--lumo-space-s)");
+        landingButton.addClassName("wams-landing-button");
 
-        H1 title = new H1(getTitle());
+        H2 title = new H2(getTitle());
         title.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.MEDIUM);
-        title.getStyle().set("white-space", "nowrap");
+        title.addClassName("wams-header-title");
 
         HorizontalLayout headerLayout = new HorizontalLayout();
         headerLayout.setWidthFull();
@@ -79,16 +102,16 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         headerLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         headerLayout.setPadding(false);
         headerLayout.setSpacing(true);
-        headerLayout.addClassName("main-header");
+        headerLayout.addClassName("wams-main-header");
 
         HorizontalLayout leftPart = new HorizontalLayout(new DrawerToggle(), landingButton, title);
         leftPart.setAlignItems(FlexComponent.Alignment.CENTER);
         leftPart.setSpacing(true);
-        leftPart.getStyle().set("overflow", "hidden");
+        leftPart.addClassName("wams-main-header__left");
 
         // Right slot – will be filled in onAttach
         rightSlot = new Div();
-        rightSlot.getStyle().set("margin-right", "var(--lumo-space-m)");
+        rightSlot.addClassName("wams-main-header__right");
         // Put a simple placeholder text
         rightSlot.setText(I18n.t("common.layout.loading"));
 
@@ -104,7 +127,6 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         // Replace placeholder content with real components (language selector + profile)
         rightSlot.removeAll();
         rightSlot.add(createRightHeaderContent());
-        injectResponsiveStyles();
     }
 
     private Component createRightHeaderContent() {
@@ -132,7 +154,7 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
 
         Avatar avatar = new Avatar();
         avatar.setThemeName("small");
-        avatar.getStyle().set("border", "2px solid var(--lumo-contrast-20pct)");
+        avatar.addClassName("wams-avatar-bordered");
 
         if (currentAccount != null) {
             String fullName = currentAccount.getFullName();
@@ -211,28 +233,6 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         }
         SecurityContextHolder.clearContext();
         UI.getCurrent().getPage().setLocation("login");
-    }
-
-    private void injectResponsiveStyles() {
-        String css = """
-                .main-header {
-                    flex-wrap: wrap;
-                    gap: var(--lumo-space-s);
-                }
-                @media (max-width: 640px) {
-                    .main-header {
-                        flex-direction: column;
-                        align-items: stretch;
-                    }
-                    .main-header > :first-child {
-                        justify-content: space-between;
-                    }
-                }
-                """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
     }
 
     @Override

@@ -1,6 +1,5 @@
 package eu.isygoit.ui.kms.views.secrets.password;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -128,8 +127,6 @@ public class PasswordConfigView extends ManagementVerticalView {
                 loadConfigs();
             }
         });
-
-        injectResponsiveStyles();
     }
 
     private HorizontalLayout buildToolbar() {
@@ -149,8 +146,8 @@ public class PasswordConfigView extends ManagementVerticalView {
         prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         pageSizeSelect.setWidth("100px");
-        pageInfoLabel.getStyle().set("margin", "0 0.5rem");
-        totalCountLabel.getStyle().set("margin", "0 0.5rem");
+        pageInfoLabel.addClassName("page-info-label");
+        totalCountLabel.addClassName("total-count-label");
         centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
 
         HorizontalLayout rightGroup = new HorizontalLayout(refreshButton, createButton);
@@ -219,7 +216,7 @@ public class PasswordConfigView extends ManagementVerticalView {
             emptyState.addClassName(LumoUtility.Padding.XLARGE);
             Icon emptyIcon = VaadinIcon.USER.create();
             emptyIcon.setSize("48px");
-            emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
+            emptyIcon.addClassName("empty-state-icon");
             H4 emptyTitle = new H4(I18n.t("kms.password.config.empty.title"));
             Paragraph emptyDesc = new Paragraph(I18n.t("kms.password.config.empty.description"));
             emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
@@ -269,48 +266,5 @@ public class PasswordConfigView extends ManagementVerticalView {
     private void showError(String msg) {
         Notification.show(msg, 5000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
-    }
-
-    private void injectResponsiveStyles() {
-        String css = """
-                .password-config-view {
-                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-                    min-height: 100vh;
-                    animation: fadeIn 0.5s ease-out;
-                }
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .password-config-view .password-toolbar {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: var(--lumo-space-s);
-                    width: 100%;
-                }
-                .password-configs-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-                    gap: var(--lumo-space-m);
-                    padding: var(--lumo-space-s);
-                }
-                @media (max-width: 768px) {
-                    .password-config-view .password-toolbar {
-                        flex-direction: column;
-                        align-items: stretch;
-                    }
-                    .password-config-view .password-toolbar > * {
-                        width: 100% !important;
-                        justify-content: center;
-                    }
-                    .password-configs-grid {
-                        grid-template-columns: 1fr;
-                    }
-                }
-                """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
     }
 }

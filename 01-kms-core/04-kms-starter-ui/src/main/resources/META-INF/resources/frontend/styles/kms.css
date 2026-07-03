@@ -1,0 +1,1186 @@
+/*
+ * KMS module styles. Assembled from 4 parallel migration batches covering:
+ * dashboard/byok/crypto/random, key/alias/tag, grants/policy/keystore/incremental,
+ * secrets/tokenizer.
+ */
+
+/* ===== Part A ===== */
+/*
+ * KMS group A — temporary partial stylesheet.
+ * Covers: KmsMainView, views/dashbord (AuditLogPanel, KeyStatisticsPanel,
+ *         KeyUsageStatsPanel, TokenStatisticsPanel), cryptography/byok,
+ *         cryptography/crypto (+ panel/), cryptography/random (+ dialog/).
+ * A later step merges all _kms_part*.css partials into kms.css.
+ */
+
+/* ── KmsMainView — dashboard root ─────────────────────────────────────────── */
+/* NOTE: .stat-card in the old injected CSS never matched anything (StatCard
+   already used the wams-stat-card class from card.css) — fixed to target the
+   real class name below. */
+
+.kms-dashboard .wams-stat-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kms-dashboard .wams-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--lumo-box-shadow-m);
+}
+
+.kms-dashboard .stats-filter-bar,
+.kms-dashboard .audit-filter-bar {
+    background: var(--lumo-base-color);
+    padding: var(--lumo-space-s);
+    border-radius: var(--lumo-border-radius-m);
+    margin-bottom: var(--lumo-space-s);
+}
+
+.kms-dashboard .audit-grid {
+    overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+    .kms-dashboard .stats-filter-bar,
+    .kms-dashboard .audit-filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .kms-dashboard .stats-filter-bar > *,
+    .kms-dashboard .audit-filter-bar > * {
+        width: 100% !important;
+        margin-bottom: var(--lumo-space-xs);
+    }
+
+    .kms-dashboard .audit-grid .vaadin-grid-table {
+        min-width: 800px;
+    }
+
+    .kms-dashboard .wams-stat-card {
+        flex-basis: calc(50% - 16px);
+    }
+}
+
+.kms-parta-dashboard-title {
+    margin-bottom: 10px;
+}
+
+.kms-parta-quick-links {
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.kms-parta-quick-links__actions {
+    white-space: pre-line;
+}
+
+/* ── Shared dashboard-panel spacing (AuditLogPanel, KeyUsageStatsPanel) ──────
+   (both used to inject an identical "margin-top: 24px" inline style)         */
+
+.kms-parta-panel-spaced {
+    margin-top: 24px;
+}
+
+/* ── Shared filter-bar wrapping (AuditLogPanel, KeyUsageStatsPanel, ByokView) */
+
+.kms-parta-filter-bar-wrap {
+    flex-wrap: wrap;
+}
+
+/* ── Shared stat-tile container wrapping (KeyStatisticsPanel,
+   TokenStatisticsPanel, KeyUsageStatsPanel) ─────────────────────────────── */
+
+.kms-parta-stats-wrap {
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+/* ── KeyUsageStatsPanel small stat card (formerly built entirely with
+   inline getStyle() calls) ──────────────────────────────────────────────── */
+
+.kms-parta-usage-stat-card {
+    width: 160px;
+    border: 1px solid var(--lumo-contrast-20pct);
+    border-radius: var(--lumo-border-radius-m);
+    box-shadow: var(--lumo-box-shadow-xs);
+    align-items: center;
+    background-color: var(--lumo-base-color);
+    text-align: center;
+    flex: 1 1 auto;
+}
+
+.kms-parta-usage-stat-card__value {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.kms-parta-usage-stat-card__label {
+    color: var(--lumo-secondary-text-color);
+    font-size: var(--lumo-font-size-xs);
+}
+
+.kms-parta-usage-stats-error {
+    color: var(--lumo-error-text-color);
+}
+
+/* ── ByokView ─────────────────────────────────────────────────────────────── */
+
+.kms-byok-view {
+    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+    min-height: 100vh;
+    animation: kms-parta-fade-in 0.5s ease-out;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.kms-parta-step-card {
+    margin-bottom: var(--lumo-space-s);
+    background-color: var(--lumo-base-color);
+}
+
+.kms-parta-step-card__hint {
+    margin-bottom: var(--lumo-space-s);
+}
+
+.kms-parta-key-status-info {
+    margin-top: var(--lumo-space-xs);
+}
+
+@media (max-width: 768px) {
+    .kms-byok-view .byok-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* ── CryptoOperationsView / crypto panels ─────────────────────────────────── */
+
+.kms-crypto-view {
+    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+    min-height: 100vh;
+    animation: kms-parta-fade-in 0.5s ease-out;
+}
+
+.kms-parta-crypto-tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.crypto-key-layout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--lumo-space-s);
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .crypto-key-layout {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .crypto-key-layout > * {
+        width: 100% !important;
+    }
+
+    .crypto-key-layout .vaadin-combo-box {
+        width: 100% !important;
+    }
+
+    .crypto-panel .vaadin-combo-box,
+    .crypto-panel .vaadin-text-field,
+    .crypto-panel .vaadin-text-area {
+        width: 100% !important;
+    }
+
+    .crypto-button-row {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .crypto-button-row > * {
+        width: 100% !important;
+        margin-bottom: var(--lumo-space-xs);
+    }
+
+    .crypto-data-key-panel .vaadin-combo-box,
+    .crypto-data-key-panel .vaadin-text-field {
+        width: 100% !important;
+    }
+}
+
+/* CryptoPanelUtils#createLabelledTextArea() label/header row */
+
+.labelled-textarea-container__header {
+    margin-bottom: var(--lumo-space-xs);
+}
+
+.labelled-textarea-container__label {
+    font-weight: 500;
+    font-size: var(--lumo-font-size-s);
+}
+
+/* ── RandomKeyView / RandomKeyCard ────────────────────────────────────────── */
+
+.random-keys-view {
+    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+    min-height: 100vh;
+    animation: kms-parta-fade-in 0.5s ease-out;
+}
+
+@keyframes kms-parta-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.randomkey-toolbar {
+    flex-wrap: wrap;
+    gap: var(--lumo-space-s);
+}
+
+.random-keys-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: var(--lumo-space-m);
+    padding: var(--lumo-space-s);
+}
+
+@media (max-width: 768px) {
+    .randomkey-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .randomkey-toolbar > * {
+        width: 100% !important;
+        justify-content: center;
+    }
+
+    .random-keys-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.randomkey-pagination-label {
+    margin: 0 0.5rem;
+}
+
+.kms-parta-empty-icon {
+    color: var(--lumo-secondary-text-color);
+}
+
+/* RandomKeyCard bordered meta rows (formerly BaseCard#buildExtraStyles() override) */
+
+.random-key-card .meta-row {
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
+    padding-bottom: var(--lumo-space-xs);
+    margin-top: var(--lumo-space-xs);
+}
+
+.random-key-card .meta-row:last-child {
+    border-bottom: none;
+}
+
+@media (max-width: 640px) {
+    .random-key-card .meta-row {
+        flex-wrap: wrap;
+    }
+
+    .random-key-card .meta-row > :not(:first-child) {
+        margin-left: 28px;
+    }
+}
+
+/* RandomKeyCard#createIconRow() / body key-value row icon/label/value styling */
+
+.random-key-card__row-icon {
+    color: var(--lumo-secondary-text-color);
+}
+
+.random-key-card__row-label {
+    min-width: 100px;
+}
+
+.random-key-card__row-value {
+    font-family: monospace;
+    flex: 1;
+}
+
+.random-key-card__row-value--wrap {
+    word-break: break-all;
+}
+
+/* ===== Part B ===== */
+/*
+ * KMS group B — temporary partial stylesheet.
+ * Covers: cryptography/key (KeyCard, KeyManagementView, dialogs),
+ *         cryptography/keyAlias (AliasCard, AliasesView, dialogs),
+ *         cryptography/keyTag (TagsView, AddTagDialog).
+ * A later step merges all _kms_part*.css partials into kms.css.
+ */
+
+/* ── KeyCard / AliasCard shared "bordered meta row" ───────────────────────────
+   (formerly duplicated BaseCard#buildExtraStyles() overrides; identical rules,
+   so both cards share this single scoped block.)                             */
+
+.key-card .meta-row,
+.alias-card .meta-row {
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
+    padding-bottom: var(--lumo-space-xs);
+    margin-top: var(--lumo-space-xs);
+}
+
+.key-card .meta-row:last-child,
+.alias-card .meta-row:last-child {
+    border-bottom: none;
+}
+
+.key-card .meta-row .meta-value {
+    font-weight: 500;
+}
+
+@media (max-width: 640px) {
+    .key-card .meta-row,
+    .alias-card .meta-row {
+        flex-wrap: wrap;
+    }
+
+    .key-card .meta-row > :not(:first-child),
+    .alias-card .meta-row > :not(:first-child) {
+        margin-left: 28px;
+    }
+}
+
+/* KeyCard#buildTitle() header-left group (title, status chip, version). */
+
+.key-card .key-card__title-row {
+    flex-wrap: wrap;
+}
+
+/* KeyCard#createIconRowWithColor() icon/label/value styling. */
+
+.key-card .key-card__row-icon {
+    color: var(--lumo-primary-color);
+}
+
+.key-card .key-card__row-label {
+    min-width: 100px;
+}
+
+.key-card .key-card__row-value {
+    font-family: monospace;
+    word-break: break-all;
+    flex: 1;
+}
+
+/* KeyCard#updateVersionDisplay() current-version span. */
+
+.key-card .key-card__version-span {
+    font-family: monospace;
+}
+
+/* KeyCard context-menu "Permanently delete" item (KeyCard#populateContextMenu()). */
+
+.key-card__menu-item--danger {
+    color: var(--lumo-error-color);
+}
+
+/* AliasCard#createIconRow() / #createIconRowWithCopy() icon/label/value styling. */
+
+.alias-card .alias-card__row-icon {
+    color: var(--lumo-secondary-text-color);
+}
+
+.alias-card .alias-card__row-label {
+    min-width: 100px;
+}
+
+.alias-card .alias-card__row-value {
+    font-family: monospace;
+    word-break: break-all;
+    flex: 1;
+}
+
+/* KeyCard deletion-warning banner (KeyCard#createDeletionWarningSpan).
+   Reuses the same Lumo utility classes already applied on the element
+   (Background.ERROR_10 / TextColor.ERROR / Padding.SMALL / BorderRadius.MEDIUM)
+   instead of a separate ".deletion-warning" class with duplicated colors —
+   this rule only adds the flex layout that Lumo utilities don't cover. */
+
+.key-card .wams-card__deletion-warning {
+    display: flex;
+    align-items: center;
+    gap: var(--lumo-space-s);
+    margin-top: var(--lumo-space-xs);
+}
+
+/* ── KeyManagementView / AliasesView — shared page background, toolbar and
+   card-grid layout that used to be injected at runtime via
+   injectResponsiveStyles(). ─────────────────────────────────────────────── */
+
+.kms-keys-view,
+.kms-aliases-view,
+.kms-tags-view {
+    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+    min-height: 100vh;
+    animation: kms-partb-fade-in 0.5s ease-out;
+}
+
+@keyframes kms-partb-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.key-management-toolbar,
+.aliases-toolbar,
+.tags-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--lumo-space-s);
+    width: 100%;
+}
+
+.keys-grid,
+.aliases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: var(--lumo-space-m);
+    padding: var(--lumo-space-s);
+}
+
+@media (max-width: 768px) {
+    .key-management-toolbar,
+    .aliases-toolbar,
+    .tags-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .key-management-toolbar > *,
+    .aliases-toolbar > *,
+    .tags-toolbar > * {
+        width: 100% !important;
+        justify-content: center;
+    }
+
+    .keys-grid,
+    .aliases-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Pagination labels (KeyManagementView/AliasesView #buildToolbar()). */
+
+.kms-keys-view .page-info-label,
+.kms-aliases-view .page-info-label,
+.kms-keys-view .total-count-label,
+.kms-aliases-view .total-count-label {
+    margin: 0 0.5rem;
+}
+
+/* Empty-state icon (KeyManagementView/AliasesView #filterCards()). */
+
+.kms-keys-view .empty-state-icon,
+.kms-aliases-view .empty-state-icon {
+    color: var(--lumo-secondary-text-color);
+}
+
+/* ── DescribeKeyDialog ─────────────────────────────────────────────────────── */
+
+.describe-key-dialog .detail-row {
+    margin-bottom: var(--lumo-space-xs);
+}
+
+.describe-key-dialog .tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--lumo-space-xs);
+    margin-top: var(--lumo-space-s);
+}
+
+.describe-key-dialog .tag-chip {
+    white-space: nowrap;
+}
+
+.describe-key-dialog .policy-textarea {
+    font-family: monospace;
+}
+
+/* ── ShowKeyVersionsDialog — grid status chip ─────────────────────────────────
+   Reuses the shared .wams-chip / .wams-chip--* classes from tokens.css instead
+   of setting inline background/foreground colors per row.                    */
+
+.show-key-versions-dialog .status-chip {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--lumo-border-radius-m);
+    font-size: var(--lumo-font-size-xs);
+    font-weight: 500;
+}
+
+/* ── ToggleRotationDialog ──────────────────────────────────────────────────── */
+
+.toggle-rotation-dialog .period-form {
+    margin-top: 1em;
+}
+
+/* ===== Part C ===== */
+/*
+ * KMS group C — temporary partial stylesheet.
+ * Covers: keyGrants, keyPolicy, keyStore, incremental views/dialogs/cards.
+ * A later step merges all _kms_part*.css partials into kms.css.
+ */
+
+/* ── Shared "gradient + fade-in" page background used by several KMS views ── */
+/* (GrantsView, PoliciesView, CustomKeyStoresView, IncrementalKeyView all used
+   to inject this identical block via UI.getCurrent().getPage().executeJs.)   */
+
+.kms-grants-view,
+.policies-view,
+.kms-custom-stores-view,
+.incremental-keys-view {
+    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+    min-height: 100vh;
+    animation: kms-partc-fade-in 0.5s ease-out;
+}
+
+@keyframes kms-partc-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── GrantsView ───────────────────────────────────────────────────────────── */
+
+.grants-key-layout,
+.grants-action-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--lumo-space-s);
+    align-items: center;
+}
+
+.grants-grid {
+    overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+    .grants-key-layout,
+    .grants-action-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .grants-key-layout > *,
+    .grants-action-bar > * {
+        width: 100% !important;
+    }
+
+    .kms-grants-view vaadin-grid {
+        overflow-x: auto;
+    }
+
+    .kms-grants-view vaadin-grid::part(table) {
+        min-width: 900px;
+    }
+}
+
+/* ── PoliciesView ─────────────────────────────────────────────────────────── */
+
+.policies-view .policies-action-bar,
+.policies-view .policies-key-layout,
+.policies-view .policies-action-checker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--lumo-space-s);
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .policies-view .policies-action-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .policies-view .policies-action-bar > * {
+        width: 100%;
+    }
+
+    .policies-view .vaadin-combo-box {
+        width: 100%;
+    }
+}
+
+.policies-policy-editor {
+    font-family: monospace;
+    font-size: 13px;
+}
+
+/* Action-evaluation result dialog (PoliciesView#checkActionAgainstPolicy) */
+
+.policy-eval-decision-span {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.policy-eval-decision-span--allowed {
+    color: var(--lumo-success-text-color);
+}
+
+.policy-eval-decision-span--denied {
+    color: var(--lumo-error-text-color);
+}
+
+.policy-eval-decision-span--uncertain {
+    color: var(--wams-warning-fg);
+}
+
+.policy-eval-reason-span {
+    font-style: italic;
+}
+
+.policy-eval-warning-span {
+    color: var(--wams-warning-fg);
+    font-size: 0.9em;
+}
+
+.policy-eval-muted-span {
+    font-size: 0.9em;
+}
+
+.policy-eval-matched-header {
+    font-weight: bold;
+}
+
+.policy-eval-matched-pre {
+    background-color: var(--lumo-contrast-5pct);
+    padding: 8px;
+    border-radius: var(--lumo-border-radius-m);
+    font-size: 12px;
+    overflow-x: auto;
+}
+
+.policy-eval-help-span {
+    font-size: 0.85em;
+    color: var(--lumo-secondary-text-color);
+}
+
+/* ── CustomKeyStoresView ──────────────────────────────────────────────────── */
+
+.custom-stores-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--lumo-space-s);
+    width: 100%;
+}
+
+.stores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: var(--lumo-space-m);
+    padding: var(--lumo-space-s);
+}
+
+@media (max-width: 768px) {
+    .custom-stores-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .custom-stores-toolbar > * {
+        width: 100% !important;
+        justify-content: center;
+    }
+
+    .stores-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── IncrementalKeyView ───────────────────────────────────────────────────── */
+
+.incremental-toolbar {
+    flex-wrap: wrap;
+    gap: var(--lumo-space-s);
+}
+
+.incremental-toolbar .kms-partc-inline-label {
+    margin: 0 0.5rem;
+}
+
+.incremental-keys-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: var(--lumo-space-m);
+    padding: var(--lumo-space-s);
+}
+
+@media (max-width: 768px) {
+    .incremental-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .incremental-toolbar > * {
+        width: 100% !important;
+        justify-content: center;
+    }
+
+    .incremental-keys-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── StoreCard / NextCodeCard shared "bordered meta row" ─────────────────────
+   (formerly duplicated buildExtraStyles() overrides on both cards; identical
+   rules, so both cards share this single scoped block.)                     */
+
+.store-card .meta-row,
+.next-code-card .meta-row {
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
+    padding-bottom: var(--lumo-space-xs);
+    margin-top: var(--lumo-space-xs);
+}
+
+.store-card .meta-row:last-child,
+.next-code-card .meta-row:last-child {
+    border-bottom: none;
+}
+
+@media (max-width: 640px) {
+    .store-card .meta-row,
+    .next-code-card .meta-row {
+        flex-wrap: wrap;
+    }
+
+    .store-card .meta-row > :not(:first-child),
+    .next-code-card .meta-row > :not(:first-child) {
+        margin-left: 28px;
+    }
+}
+
+/* Title-row wrapper used by StoreCard#buildTitle and NextCodeCard#buildTitle */
+
+.kms-partc-title-wrap {
+    flex-wrap: wrap;
+}
+
+/* Shared icon-row label/value styling (StoreCard#createIconRow, NextCodeCard#createIconRow) */
+
+.kms-partc-row-icon {
+    color: var(--lumo-secondary-text-color);
+}
+
+.kms-partc-row-label {
+    min-width: 100px;
+}
+
+.kms-partc-row-value {
+    font-family: monospace;
+    word-break: break-all;
+    flex: 1;
+}
+
+.kms-partc-row-value-mono {
+    font-family: monospace;
+}
+
+/* StoreCard key/value metadata chips (StoreCard#addKeyValueRow) */
+
+.kms-partc-metadata-chips {
+    flex-wrap: wrap;
+}
+
+/* ── PolicyStatementEditorDialog / PolicyBuilderDialog ───────────────────── */
+
+.policy-statement-shortcuts {
+    flex-wrap: wrap;
+}
+
+.policy-statement-resources-preview {
+    font-family: monospace;
+    font-size: small;
+    color: var(--lumo-secondary-text-color);
+}
+
+/* ── GrantDetailsDialog ───────────────────────────────────────────────────── */
+
+.grant-detail-row-span {
+    font-family: monospace;
+    font-size: 13px;
+}
+
+.grant-detail-row-label {
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.grant-detail-constraints-pre {
+    background-color: var(--lumo-contrast-5pct);
+    padding: 8px;
+    border-radius: var(--lumo-border-radius-m);
+}
+
+/* ── GrantsView grid status chip ──────────────────────────────────────────── */
+/* Reuses the shared .wams-chip / .wams-chip--* classes from tokens.css instead
+   of setting inline background/foreground colors per row.                   */
+
+/* ── Shared empty-state icon (CustomKeyStoresView, IncrementalKeyView) ───── */
+
+.kms-partc-empty-icon {
+    color: var(--lumo-secondary-text-color);
+}
+
+/* ===== Part D ===== */
+/*
+ * KMS group D — temporary partial stylesheet.
+ * Covers: secrets/digest, secrets/password, secrets/peb,
+ *         tokenizer/builder, tokenizer/config.
+ * A later step merges all _kms_part*.css partials into kms.css.
+ */
+
+/* ── Config cards: DigestConfigCard / PasswordConfigCard / PEBConfigCard /
+   TokenConfigCard — identical "meta-row" pattern that used to be re-injected
+   per-card via the now-removed BaseCard#buildExtraStyles() hook. ──────────── */
+
+.digest-config-card .meta-row,
+.password-config-card .meta-row,
+.peb-config-card .meta-row,
+.token-config-card .meta-row {
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
+    padding-bottom: var(--lumo-space-xs);
+    margin-top: var(--lumo-space-xs);
+}
+
+.digest-config-card .meta-row:last-child,
+.password-config-card .meta-row:last-child,
+.peb-config-card .meta-row:last-child,
+.token-config-card .meta-row:last-child {
+    border-bottom: none;
+}
+
+@media (max-width: 640px) {
+    .digest-config-card .meta-row,
+    .password-config-card .meta-row,
+    .peb-config-card .meta-row,
+    .token-config-card .meta-row {
+        flex-wrap: wrap;
+    }
+
+    .digest-config-card .meta-row > :not(:first-child),
+    .password-config-card .meta-row > :not(:first-child),
+    .peb-config-card .meta-row > :not(:first-child),
+    .token-config-card .meta-row > :not(:first-child) {
+        margin-left: 28px;
+    }
+}
+
+/* Card title group (DigestConfigCard/PasswordConfigCard/PEBConfigCard/
+   TokenConfigCard #buildTitle()) wraps on narrow cards. */
+
+.card-title-group {
+    flex-wrap: wrap;
+}
+
+.digest-config-card .meta-row-icon,
+.password-config-card .meta-row-icon,
+.peb-config-card .meta-row-icon,
+.token-config-card .meta-row-icon {
+    color: var(--lumo-secondary-text-color);
+}
+
+.digest-config-card .meta-row-label,
+.password-config-card .meta-row-label,
+.peb-config-card .meta-row-label,
+.token-config-card .meta-row-label {
+    min-width: 120px;
+}
+
+.password-config-card .meta-row-label,
+.peb-config-card .meta-row-label {
+    min-width: 100px;
+}
+
+.token-config-card .meta-row-label {
+    min-width: 80px;
+}
+
+.digest-config-card .meta-row-value,
+.password-config-card .meta-row-value,
+.peb-config-card .meta-row-value,
+.token-config-card .meta-row-value {
+    font-family: monospace;
+    word-break: break-all;
+    flex: 1;
+}
+
+/* ── Config views: DigestConfigView / PasswordConfigView / PEBConfigView /
+   TokenConfigView — shared page background, toolbar and card-grid layout that
+   used to be injected at runtime via injectResponsiveStyles(). ─────────────── */
+
+.digest-config-view,
+.password-config-view,
+.peb-config-view,
+.token-config-view {
+    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+    min-height: 100vh;
+    animation: wams-kms-fade-in 0.5s ease-out;
+}
+
+@keyframes wams-kms-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.digest-config-view .digest-toolbar,
+.password-config-view .password-toolbar,
+.peb-config-view .peb-toolbar,
+.token-config-view .token-config-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--lumo-space-s);
+    width: 100%;
+}
+
+.digest-configs-grid,
+.password-configs-grid,
+.peb-configs-grid,
+.token-configs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: var(--lumo-space-m);
+    padding: var(--lumo-space-s);
+}
+
+@media (max-width: 768px) {
+    .digest-config-view .digest-toolbar,
+    .password-config-view .password-toolbar,
+    .peb-config-view .peb-toolbar,
+    .token-config-view .token-config-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .digest-config-view .digest-toolbar > *,
+    .password-config-view .password-toolbar > *,
+    .peb-config-view .peb-toolbar > *,
+    .token-config-view .token-config-toolbar > * {
+        width: 100% !important;
+        justify-content: center;
+    }
+
+    .digest-configs-grid,
+    .password-configs-grid,
+    .peb-configs-grid,
+    .token-configs-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Pagination labels (DigestConfigView/PasswordConfigView/PEBConfigView/
+   TokenConfigView #buildToolbar()). */
+
+.digest-config-view .page-info-label,
+.password-config-view .page-info-label,
+.peb-config-view .page-info-label,
+.token-config-view .page-info-label,
+.digest-config-view .total-count-label,
+.password-config-view .total-count-label,
+.peb-config-view .total-count-label,
+.token-config-view .total-count-label {
+    margin: 0 0.5rem;
+}
+
+/* Empty-state icon (all four *ConfigView#renderCards()). */
+
+.digest-config-view .empty-state-icon,
+.password-config-view .empty-state-icon,
+.peb-config-view .empty-state-icon,
+.token-config-view .empty-state-icon {
+    color: var(--lumo-secondary-text-color);
+}
+
+/* ── TokenBuilderView — build/validate cards, result panel, audience chips.
+   Previously injected via attachResponsiveStyles(). ─────────────────────────── */
+
+.tokenizer-view {
+    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+    min-height: 100vh;
+    animation: wams-kms-fade-in 0.5s ease-out;
+}
+
+.tokenizer-view .cards-row {
+    flex-wrap: wrap;
+}
+
+.tokenizer-view .compact-card {
+    flex: 1;
+    min-width: 280px;
+    padding: var(--lumo-space-m);
+    transition: all 0.2s ease;
+    background: var(--lumo-base-color);
+    border-radius: var(--lumo-border-radius-xl);
+    box-shadow: var(--lumo-box-shadow-m);
+}
+
+.tokenizer-view .compact-card .form-layout {
+    margin-top: var(--lumo-space-m);
+}
+
+.tokenizer-view .result-panel {
+    margin-top: var(--lumo-space-m);
+    padding: var(--lumo-space-s);
+    background: var(--lumo-contrast-5pct);
+    border-radius: var(--lumo-border-radius-m);
+}
+
+.tokenizer-view .chip-remove {
+    width: 16px;
+    height: 16px;
+    padding: 0;
+}
+
+@media (max-width: 768px) {
+    .tokenizer-view .compact-card {
+        min-width: 100%;
+        margin-bottom: var(--lumo-space-m);
+    }
+}
+
+/* Audience chip rows shared by TokenBuilderView.AudienceInput and
+   TokenConfigDialogBase.AudienceInput. */
+
+.tokenizer-view .audience-label {
+    margin-right: var(--lumo-space-s);
+}
+
+.tokenizer-view .audience-chips-container,
+.token-config-dialog .audience-chips-container {
+    flex-wrap: wrap;
+}
+
+.tokenizer-view .audience-chip,
+.token-config-dialog .audience-chip {
+    background-color: var(--lumo-contrast-10pct);
+    border-radius: 16px;
+    padding: 4px 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tokenizer-view .audience-chip {
+    font-size: var(--lumo-font-size-xs);
+}
+
+.token-config-dialog .audience-chip {
+    font-size: var(--lumo-font-size-s);
+}
+
+.tokenizer-view .token-result-line {
+    flex-wrap: wrap;
+}
+
+.tokenizer-view .token-result-value {
+    font-family: monospace;
+    font-size: var(--lumo-font-size-xs);
+    word-break: break-all;
+    flex: 1;
+}
+
+.tokenizer-view .expiry-value {
+    font-family: monospace;
+}
+
+.tokenizer-view .validation-result-success {
+    color: var(--lumo-success-text-color);
+}
+
+.tokenizer-view .validation-result-error {
+    color: var(--lumo-error-text-color);
+}
+
+/* ── TokenConfigDialogBase (Create/UpdateTokenConfigDialog) ───────────────── */
+
+.token-config-dialog .lifetime-label {
+    margin-right: var(--lumo-space-s);
+}
+
+.token-config-dialog .public-key-label {
+    font-weight: bold;
+    margin-right: auto;
+}
+
+.token-config-dialog .copy-public-key-button {
+    margin-left: auto;
+}
+
+/* ── ClaimsBuilderDialog ───────────────────────────────────────────────────── */
+
+.claims-builder-dialog .claim-counter {
+    margin-top: 0;
+}
+
+.claims-builder-dialog .header-bar {
+    margin-bottom: var(--lumo-space-xs);
+}
+
+.claims-builder-dialog .claim-row {
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
+    padding-bottom: var(--lumo-space-xs);
+    margin-bottom: var(--lumo-space-xs);
+}
+
+/* ── DecodeJwtDialog ───────────────────────────────────────────────────────── */
+
+.decode-jwt-dialog .section-title-row {
+    margin-bottom: var(--lumo-space-s);
+}
+
+.decode-jwt-dialog .signature-info {
+    font-size: var(--lumo-font-size-xs);
+    color: var(--lumo-secondary-text-color);
+}
+
+.decode-jwt-dialog .code-textarea {
+    font-family: monospace;
+    font-size: 12px;
+    background: var(--lumo-contrast-5pct);
+    border-radius: var(--lumo-border-radius-m);
+}
+
+.decode-jwt-dialog .code-textarea--header {
+    height: 150px;
+}
+
+.decode-jwt-dialog .code-textarea--payload {
+    height: 300px;
+}
+
+.decode-jwt-dialog .error-message {
+    color: var(--lumo-error-text-color);
+}
+

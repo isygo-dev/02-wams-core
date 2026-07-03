@@ -1,5 +1,6 @@
 package eu.isygoit.ui.cms.layout;
 
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -8,7 +9,13 @@ import com.vaadin.flow.component.sidenav.SideNavItem;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.layout.BaseMainLayout;
 
+@CssImport("./styles/cms.css")
 public class CmsMainLayout extends BaseMainLayout {
+
+    @Override
+    protected String getModuleKey() {
+        return "cms";
+    }
 
     @Override
     protected String getTitle() {

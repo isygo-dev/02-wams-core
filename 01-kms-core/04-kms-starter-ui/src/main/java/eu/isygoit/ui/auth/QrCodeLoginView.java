@@ -78,15 +78,11 @@ public class QrCodeLoginView extends BaseLoginView {
         // QR Code Image
         qrImage.setWidth("200px");
         qrImage.setHeight("200px");
-        qrImage.getStyle().set("border-radius", "var(--lumo-border-radius-m)");
+        qrImage.addClassName("qr-image");
 
         // Status text
         statusContainer.addClassName("status-text");
-        statusContainer.getStyle()
-                .set("font-size", "var(--lumo-font-size-s)")
-                .set("color", "var(--lumo-secondary-text-color)")
-                .set("text-align", "center")
-                .set("margin", "var(--lumo-space-s) 0");
+        statusContainer.addClassName("status-text--info");
 
         // Refresh button
         refreshQrButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
@@ -114,10 +110,6 @@ public class QrCodeLoginView extends BaseLoginView {
         add(wrapper);
 
         addAttachListener(event -> {
-            if (!stylesInjected) {
-                injectResponsiveStyles();
-                stylesInjected = true;
-            }
             // Simulate QR scan after 5 seconds (demo)
             UI.getCurrent().getPage().executeJs(
                     "setTimeout(() => { $0.dispatchEvent(new Event('qr-scanned')); }, 5000);",
@@ -146,7 +138,8 @@ public class QrCodeLoginView extends BaseLoginView {
                 String qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encoded;
                 qrImage.setSrc(qrUrl);
                 statusContainer.setText(I18n.t("auth.qrcode.status.scanHint"));
-                statusContainer.getStyle().set("color", "var(--lumo-secondary-text-color)");
+                statusContainer.removeClassName("status-text--error");
+                statusContainer.addClassName("status-text--info");
             } else {
                 statusContainer.setText(I18n.t("auth.qrcode.status.tokenFailed"));
             }
@@ -189,11 +182,13 @@ public class QrCodeLoginView extends BaseLoginView {
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } else {
                 statusContainer.setText(I18n.t("auth.qrcode.status.authFailed"));
-                statusContainer.getStyle().set("color", "var(--lumo-error-text-color)");
+                statusContainer.removeClassName("status-text--info");
+                statusContainer.addClassName("status-text--error");
             }
         } catch (Exception ex) {
             statusContainer.setText(I18n.t("auth.common.error.authenticationError"));
-            statusContainer.getStyle().set("color", "var(--lumo-error-text-color)");
+            statusContainer.removeClassName("status-text--info");
+            statusContainer.addClassName("status-text--error");
         }
     }
 
@@ -210,61 +205,5 @@ public class QrCodeLoginView extends BaseLoginView {
         tenant = tenantOpt.get();
         username = usernameOpt.get();
         generateQrCode();
-    }
-
-    @Override
-    protected void injectResponsiveStyles() {
-        String css = """
-                .qr-login-view {
-                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-                    min-height: 100vh;
-                    animation: fadeIn 0.5s ease-out;
-                }
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .qr-wrapper {
-                    background: var(--lumo-base-color);
-                    border-radius: var(--lumo-border-radius-xl);
-                    box-shadow: var(--lumo-box-shadow-m);
-                    padding: var(--lumo-space-l);
-                }
-                .qr-login-view .brand {
-                    text-align: center;
-                    margin-bottom: var(--lumo-space-m);
-                }
-                .qr-login-view .brand h2 {
-                    font-size: var(--lumo-font-size-xl);
-                    letter-spacing: -0.5px;
-                }
-                .qr-login-view .back-link {
-                    color: var(--lumo-primary-text-color);
-                    font-size: var(--lumo-font-size-s);
-                    margin-top: var(--lumo-space-m);
-                }
-                .qr-login-view .status-text {
-                    min-height: 3em;
-                }
-                .qr-login-view img {
-                    border-radius: var(--lumo-border-radius-m);
-                    box-shadow: var(--lumo-box-shadow-xs);
-                }
-                @media (max-width: 480px) {
-                    .qr-wrapper {
-                        padding: var(--lumo-space-m);
-                        border-radius: var(--lumo-border-radius-l);
-                        margin: var(--lumo-space-m);
-                    }
-                    .qr-login-view .brand h2 {
-                        font-size: var(--lumo-font-size-l);
-                    }
-                    .qr-login-view img {
-                        width: 160px !important;
-                        height: 160px !important;
-                    }
-                }
-                """;
-        injectStyles(css);
     }
 }

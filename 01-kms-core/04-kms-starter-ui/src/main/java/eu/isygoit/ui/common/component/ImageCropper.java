@@ -70,7 +70,7 @@ public class ImageCropper extends VerticalLayout
 
         cropperContainer.add(previewImage);
         cropperContainer.setWidthFull();
-        cropperContainer.getStyle().set("text-align", "center");
+        cropperContainer.addClassName("wams-image-cropper__container");
         add(cropperContainer);
 
         cropButton = new Button(I18n.t("common.image.cropper.crop.button"), e -> cropImage());

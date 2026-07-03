@@ -70,10 +70,7 @@ public class ParameterDetailsDialog extends NoActionDialog {
         mainLayout.setSpacing(true);
 
         Div infoGrid = new Div();
-        infoGrid.addClassName("details-grid");
-        infoGrid.getStyle().set("display", "grid")
-                .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
-                .set("gap", "var(--lumo-space-s)");
+        infoGrid.addClassName("wams-card__detail-grid");
 
         addFieldToGrid(infoGrid, VaadinIcon.KEY, I18n.t("ims.parameter.details.field.name"), param.getName());
         addFieldToGrid(infoGrid, VaadinIcon.INPUT, I18n.t("ims.parameter.details.field.value"), param.getValue());
@@ -100,7 +97,7 @@ public class ParameterDetailsDialog extends NoActionDialog {
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("16px");
-        iconComponent.getStyle().set("color", "var(--lumo-primary-color)");
+        iconComponent.addClassName("detail-field-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
@@ -108,7 +105,7 @@ public class ParameterDetailsDialog extends NoActionDialog {
 
         Span valueSpan = new Span(value);
         valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("detail-field-value");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -122,9 +119,7 @@ public class ParameterDetailsDialog extends NoActionDialog {
         Span titleSpan = new Span(title);
         titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
         titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
-        titleSpan.getStyle().set("border-bottom", "1px solid var(--lumo-contrast-20pct)")
-                .set("margin-bottom", "var(--lumo-space-s)")
-                .set("padding-bottom", "var(--lumo-space-xs)");
+        titleSpan.addClassName("wams-section-title");
         section.add(titleSpan, content);
         return section;
     }

@@ -1,6 +1,5 @@
 package eu.isygoit.ui.kms.views.cryptography.keyStore;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -145,7 +144,6 @@ public class CustomKeyStoresView extends ManagementVerticalView {
             }
         });
 
-        injectResponsiveStyles();
         resetPaginationAndLoad();
     }
 
@@ -248,7 +246,7 @@ public class CustomKeyStoresView extends ManagementVerticalView {
         emptyState.addClassName(LumoUtility.Padding.XLARGE);
         Icon emptyIcon = VaadinIcon.STORAGE.create();
         emptyIcon.setSize("48px");
-        emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        emptyIcon.addClassName("kms-partc-empty-icon");
         H4 emptyTitle = new H4(I18n.t("kms.keystore.view.empty.title"));
         Span emptyDesc = new Span(I18n.t("kms.keystore.view.empty.description"));
         emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
@@ -287,49 +285,6 @@ public class CustomKeyStoresView extends ManagementVerticalView {
 
         toolbar.add(leftGroup, centerGroup, rightGroup);
         return toolbar;
-    }
-
-    private void injectResponsiveStyles() {
-        String css = """
-                .kms-custom-stores-view {
-                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-                    min-height: 100vh;
-                    animation: fadeIn 0.5s ease-out;
-                }
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .custom-stores-toolbar {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: var(--lumo-space-s);
-                    width: 100%;
-                }
-                .stores-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-                    gap: var(--lumo-space-m);
-                    padding: var(--lumo-space-s);
-                }
-                @media (max-width: 768px) {
-                    .custom-stores-toolbar {
-                        flex-direction: column;
-                        align-items: stretch;
-                    }
-                    .custom-stores-toolbar > * {
-                        width: 100% !important;
-                        justify-content: center;
-                    }
-                    .stores-grid {
-                        grid-template-columns: 1fr;
-                    }
-                }
-                """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
     }
 
     private void createCustomKeyStore() {

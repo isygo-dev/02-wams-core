@@ -45,7 +45,7 @@ public class AnnexCard extends BaseCard<AnnexManagementView, AnnexService> {
         HorizontalLayout titleLayout = new HorizontalLayout();
         titleLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         titleLayout.setSpacing(true);
-        titleLayout.getStyle().set("flex-wrap", "wrap");
+        titleLayout.addClassName("card-title-group");
 
         Span titleSpan = buildTitleSpan(annex.getTableCode(), annex.getValue());
         Span langChip = buildStatusChip(
@@ -80,7 +80,7 @@ public class AnnexCard extends BaseCard<AnnexManagementView, AnnexService> {
         VerticalLayout body = new VerticalLayout();
         body.setSpacing(false);
         body.setPadding(false);
-        body.getStyle().set("margin-top", "var(--lumo-space-s)");
+        body.addClassName("card-row--spaced");
 
         body.add(createIconRow(VaadinIcon.CODE, I18n.t("ims.annex.card.table.code"), annex.getTableCode()));
         body.add(createIconRow(VaadinIcon.FONT, I18n.t("ims.annex.card.value"), annex.getValue()));
@@ -105,17 +105,16 @@ public class AnnexCard extends BaseCard<AnnexManagementView, AnnexService> {
 
         com.vaadin.flow.component.icon.Icon iconComponent = icon.create();
         iconComponent.setSize("14px");
-        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        iconComponent.addClassName("meta-row-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        labelSpan.getStyle().set("min-width", "80px");
+        labelSpan.addClassName("meta-row-label");
 
         Span valueSpan = new Span(value != null ? value : "—");
         valueSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        valueSpan.getStyle().set("word-break", "break-all");
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("meta-row-value");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -125,35 +124,5 @@ public class AnnexCard extends BaseCard<AnnexManagementView, AnnexService> {
     @Override
     protected void onCardAttach(AttachEvent event) {
         // nothing special
-    }
-
-    @Override
-    protected String buildExtraStyles() {
-        return """
-                .annex-card {
-                    padding: var(--lumo-space-s) var(--lumo-space-m);
-                }
-                .annex-card .meta-row {
-                    border-bottom: 1px solid var(--lumo-contrast-10pct);
-                    padding-bottom: var(--lumo-space-xs);
-                    margin-bottom: var(--lumo-space-xs);
-                }
-                .annex-card .meta-row:last-child {
-                    border-bottom: none;
-                    margin-bottom: 0;
-                }
-                @media (max-width: 640px) {
-                    .annex-card .meta-row {
-                        flex-wrap: wrap;
-                    }
-                    .annex-card .meta-row > :not(:first-child) {
-                        margin-left: 28px;
-                    }
-                    .annex-card .annex-card__button-bar {
-                        width: 100%;
-                        justify-content: flex-start;
-                    }
-                }
-                """;
     }
 }

@@ -58,7 +58,7 @@ public class AuditLogPanel extends VerticalLayout {
     private void buildUI() {
         setSpacing(true);
         setPadding(true);
-        getStyle().set("margin-top", "24px");
+        addClassName("kms-parta-panel-spaced");
 
         HorizontalLayout titleRow = new HorizontalLayout();
         titleRow.setWidthFull();
@@ -74,7 +74,8 @@ public class AuditLogPanel extends VerticalLayout {
         filterBar.setWidthFull();
         filterBar.setAlignItems(FlexComponent.Alignment.END);
         filterBar.setSpacing(true);
-        filterBar.getStyle().set("flex-wrap", "wrap");
+        filterBar.addClassName("kms-parta-filter-bar-wrap");
+        filterBar.addClassName("audit-filter-bar");
 
         keyCombo = new ComboBox<>(I18n.t("kms.audit.log.kms.key"));
         keyCombo.setPlaceholder(I18n.t("kms.audit.log.select.key"));
@@ -101,6 +102,7 @@ public class AuditLogPanel extends VerticalLayout {
         grid.setWidthFull();
         grid.setHeight("400px");
         grid.setVisible(false);
+        grid.addClassName("audit-grid");
         grid.addColumn(new ComponentRenderer<>(entry -> {
             LocalDateTime ts = entry.getTimestamp();
             return new Span(ts != null ? DateHelper.formatToHumanReadable(ts) : "-");

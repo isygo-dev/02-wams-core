@@ -1,7 +1,6 @@
 package eu.isygoit.ui.ims.views.roleinfo.dialog;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -83,6 +82,7 @@ public class CreateRoleDialog extends BaseActionDialog {
         setHeight("85vh");
         setResizable(true);
         setDraggable(true);
+        addClassName("role-dialog");
 
         buildBasicForm();
         buildApplicationsGrid();
@@ -90,8 +90,6 @@ public class CreateRoleDialog extends BaseActionDialog {
         buildTabs();
         addContent(createMainLayout());
         loadApplications();
-
-        injectResponsiveStyles();
     }
 
     private void buildBasicForm() {
@@ -140,8 +138,7 @@ public class CreateRoleDialog extends BaseActionDialog {
         appsSearchField.addValueChangeListener(e -> filterApplicationsGrid());
 
         appsCountLabel = new Span();
-        appsCountLabel.getStyle().set("font-size", "var(--lumo-font-size-xs)");
-        appsCountLabel.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        appsCountLabel.addClassName("apps-count-label");
     }
 
     private void filterApplicationsGrid() {
@@ -366,6 +363,7 @@ public class CreateRoleDialog extends BaseActionDialog {
                 HorizontalLayout topBar = new HorizontalLayout(appsSearchField, refreshAppsBtn, appsCountLabel);
                 topBar.setWidthFull();
                 topBar.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
+                topBar.addClassName("apps-filter-bar");
                 topBar.expand(appsSearchField);
                 appsLayout.add(topBar, applicationsGrid);
                 tabContent.add(appsLayout);
@@ -399,21 +397,6 @@ public class CreateRoleDialog extends BaseActionDialog {
         main.setPadding(false);
         main.setSpacing(false);
         return main;
-    }
-
-    private void injectResponsiveStyles() {
-        String css = """
-                @media (max-width: 600px) {
-                    .apps-filter-bar {
-                        flex-direction: column;
-                        gap: 8px;
-                    }
-                }
-                """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
     }
 
     @Override

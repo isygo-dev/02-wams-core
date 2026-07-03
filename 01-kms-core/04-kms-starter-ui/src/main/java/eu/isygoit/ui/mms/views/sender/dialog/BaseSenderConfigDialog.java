@@ -60,18 +60,11 @@ public abstract class BaseSenderConfigDialog extends Dialog {
 
         // Error area
         errorArea.setVisible(false);
-        errorArea.getStyle()
-                .set("background-color", "var(--lumo-error-color-10pct)")
-                .set("color", "var(--lumo-error-text-color)")
-                .set("padding", "var(--lumo-space-s)")
-                .set("border-radius", "var(--lumo-border-radius-m)")
-                .set("margin-bottom", "var(--lumo-space-m)");
-        errorArea.setWidthFull();
+        errorArea.addClassName("wams-dialog-error-area");
         mainLayout.add(errorArea);
 
-        // Content area - Div doesn't have setPadding, use style
-        contentArea.getStyle().set("padding", "0");
-        contentArea.setWidthFull();
+        // Content area
+        contentArea.addClassName("wams-dialog-content-area");
         mainLayout.add(contentArea);
 
         // Footer

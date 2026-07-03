@@ -45,7 +45,7 @@ public class ParameterCard extends BaseCard<ParameterManagementView, AppParamete
         HorizontalLayout titleLayout = new HorizontalLayout();
         titleLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         titleLayout.setSpacing(true);
-        titleLayout.getStyle().set("flex-wrap", "wrap");
+        titleLayout.addClassName("card-title-group");
 
         Span titleSpan = buildTitleSpan(parameter.getName(), parameter.getValue());
         titleLayout.add(titleSpan);
@@ -75,7 +75,7 @@ public class ParameterCard extends BaseCard<ParameterManagementView, AppParamete
         VerticalLayout body = new VerticalLayout();
         body.setSpacing(false);
         body.setPadding(false);
-        body.getStyle().set("margin-top", "var(--lumo-space-s)");
+        body.addClassName("card-row--spaced");
 
         body.add(createIconRow(VaadinIcon.KEY, I18n.t("ims.parameter.card.name"), parameter.getName()));
         body.add(createIconRow(VaadinIcon.INPUT, I18n.t("ims.parameter.card.value"), parameter.getValue()));
@@ -97,17 +97,16 @@ public class ParameterCard extends BaseCard<ParameterManagementView, AppParamete
 
         com.vaadin.flow.component.icon.Icon iconComponent = icon.create();
         iconComponent.setSize("14px");
-        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        iconComponent.addClassName("meta-row-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        labelSpan.getStyle().set("min-width", "80px");
+        labelSpan.addClassName("meta-row-label");
 
         Span valueSpan = new Span(value != null ? value : "—");
         valueSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        valueSpan.getStyle().set("word-break", "break-all");
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("meta-row-value");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -117,35 +116,5 @@ public class ParameterCard extends BaseCard<ParameterManagementView, AppParamete
     @Override
     protected void onCardAttach(AttachEvent event) {
         // nothing special
-    }
-
-    @Override
-    protected String buildExtraStyles() {
-        return """
-                .parameter-card {
-                    padding: var(--lumo-space-s) var(--lumo-space-m);
-                }
-                .parameter-card .meta-row {
-                    border-bottom: 1px solid var(--lumo-contrast-10pct);
-                    padding-bottom: var(--lumo-space-xs);
-                    margin-bottom: var(--lumo-space-xs);
-                }
-                .parameter-card .meta-row:last-child {
-                    border-bottom: none;
-                    margin-bottom: 0;
-                }
-                @media (max-width: 640px) {
-                    .parameter-card .meta-row {
-                        flex-wrap: wrap;
-                    }
-                    .parameter-card .meta-row > :not(:first-child) {
-                        margin-left: 28px;
-                    }
-                    .parameter-card .parameter-card__button-bar {
-                        width: 100%;
-                        justify-content: flex-start;
-                    }
-                }
-                """;
     }
 }

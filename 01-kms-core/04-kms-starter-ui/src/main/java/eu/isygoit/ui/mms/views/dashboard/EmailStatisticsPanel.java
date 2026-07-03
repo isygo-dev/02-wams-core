@@ -1,6 +1,5 @@
 package eu.isygoit.ui.mms.views.dashboard;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
@@ -27,14 +26,7 @@ public class EmailStatisticsPanel extends VerticalLayout {
         // Main container with glass effect
         Div mainContainer = new Div();
         mainContainer.setWidthFull();
-        mainContainer.getStyle()
-                .set("background", "linear-gradient(145deg, rgba(255,255,255,0.95), rgba(249,250,251,0.98))")
-                .set("border-radius", "var(--lumo-border-radius-l)")
-                .set("box-shadow", "var(--lumo-box-shadow-s)")
-                .set("padding", "var(--lumo-space-m)")
-                .set("border", "1px solid rgba(255,255,255,0.3)")
-                .set("backdrop-filter", "blur(10px)")
-                .set("-webkit-backdrop-filter", "blur(10px)");
+        mainContainer.addClassName("wams-panel-container");
 
         // Compact Header
         HorizontalLayout header = createCompactHeader();
@@ -53,7 +45,6 @@ public class EmailStatisticsPanel extends VerticalLayout {
         mainContainer.add(monthlyCompact);
 
         add(mainContainer);
-        injectResponsiveStyles();
     }
 
     private HorizontalLayout createCompactHeader() {
@@ -61,23 +52,17 @@ public class EmailStatisticsPanel extends VerticalLayout {
         header.setWidthFull();
         header.setAlignItems(FlexComponent.Alignment.CENTER);
         header.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        header.getStyle()
-                .set("margin-bottom", "var(--lumo-space-s)")
-                .set("flex-wrap", "wrap")
-                .set("gap", "var(--lumo-space-xs)");
+        header.addClassName("wams-panel-header");
 
         H3 title = new H3(I18n.t("mms.dashboard.email.statistics"));
         title.addClassName(LumoUtility.FontSize.MEDIUM);
         title.addClassName(LumoUtility.Margin.NONE);
-        title.getStyle().set("font-weight", "600");
+        title.addClassName("wams-panel-title");
 
         Span period = new Span(I18n.t("mms.dashboard.email.stats.period"));
         period.addClassName(LumoUtility.FontSize.XSMALL);
         period.addClassName(LumoUtility.TextColor.SECONDARY);
-        period.getStyle()
-                .set("background", "var(--lumo-contrast-5pct)")
-                .set("padding", "var(--lumo-space-xs) var(--lumo-space-m)")
-                .set("border-radius", "var(--lumo-border-radius-s)");
+        period.addClassName("wams-panel-period-badge");
 
         HorizontalLayout rightGroup = new HorizontalLayout(period);
         rightGroup.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -89,11 +74,7 @@ public class EmailStatisticsPanel extends VerticalLayout {
 
     private Div createMiniStats() {
         Div grid = new Div();
-        grid.getStyle()
-                .set("display", "grid")
-                .set("grid-template-columns", "repeat(4, 1fr)")
-                .set("gap", "var(--lumo-space-xs)")
-                .set("margin-bottom", "var(--lumo-space-s)");
+        grid.addClassName("wams-mini-stats-grid");
 
         grid.add(createMiniStatCard(I18n.t("mms.dashboard.email.stats.sent"), "2.8K", VaadinIcon.ENVELOPE_O, "#4F46E5", "+12%"));
         grid.add(createMiniStatCard(I18n.t("mms.dashboard.email.stats.opened"), "1.9K", VaadinIcon.EYE, "#10B981", "+8%"));
@@ -105,15 +86,7 @@ public class EmailStatisticsPanel extends VerticalLayout {
 
     private Div createMiniStatCard(String label, String value, VaadinIcon icon, String color, String change) {
         Div card = new Div();
-        card.getStyle()
-                .set("background", "var(--lumo-contrast-5pct)")
-                .set("border-radius", "var(--lumo-border-radius-m)")
-                .set("padding", "var(--lumo-space-s)")
-                .set("border", "1px solid var(--lumo-contrast-10pct)")
-                .set("transition", "all 0.2s ease")
-                .set("cursor", "pointer");
-
-        // Hover effect
+        card.addClassName("wams-mini-stat-card");
         card.addClassName("stat-card");
 
         HorizontalLayout row = new HorizontalLayout();
@@ -123,16 +96,8 @@ public class EmailStatisticsPanel extends VerticalLayout {
 
         // Icon with circle background
         Div iconWrapper = new Div();
-        iconWrapper.getStyle()
-                .set("background", color + "20")
-                .set("border-radius", "50%")
-                .set("padding", "var(--lumo-space-xs)")
-                .set("width", "32px")
-                .set("height", "32px")
-                .set("display", "flex")
-                .set("align-items", "center")
-                .set("justify-content", "center")
-                .set("flex-shrink", "0");
+        iconWrapper.addClassName("wams-mini-stat-icon-wrapper");
+        iconWrapper.getStyle().set("--wams-mini-stat-color", color + "20");
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("16px");
@@ -143,14 +108,10 @@ public class EmailStatisticsPanel extends VerticalLayout {
         VerticalLayout info = new VerticalLayout();
         info.setPadding(false);
         info.setSpacing(false);
-        info.getStyle().set("flex", "1");
+        info.addClassName("wams-mini-stat-info");
 
         Span valueSpan = new Span(value);
-        valueSpan.getStyle()
-                .set("font-size", "var(--lumo-font-size-l)")
-                .set("font-weight", "700")
-                .set("color", "var(--lumo-header-text-color)")
-                .set("line-height", "1.2");
+        valueSpan.addClassName("wams-mini-stat-value");
 
         Span labelSpan = new Span(label);
         labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
@@ -162,13 +123,8 @@ public class EmailStatisticsPanel extends VerticalLayout {
         Span changeSpan = new Span(change);
         changeSpan.addClassName(LumoUtility.FontSize.XSMALL);
         boolean isPositive = change.startsWith("+");
-        changeSpan.getStyle()
-                .set("color", isPositive ? "#10B981" : "#EF4444")
-                .set("font-weight", "600")
-                .set("background", (isPositive ? "#10B981" : "#EF4444") + "15")
-                .set("padding", "0 var(--lumo-space-xs)")
-                .set("border-radius", "var(--lumo-border-radius-s)")
-                .set("white-space", "nowrap");
+        changeSpan.addClassName("wams-mini-stat-change");
+        changeSpan.addClassName(isPositive ? "wams-mini-stat-change--positive" : "wams-mini-stat-change--negative");
 
         row.add(iconWrapper, info, changeSpan);
         card.add(row);
@@ -177,17 +133,13 @@ public class EmailStatisticsPanel extends VerticalLayout {
 
     private Div createTrendSection() {
         Div container = new Div();
-        container.getStyle()
-                .set("margin-bottom", "var(--lumo-space-s)")
-                .set("background", "var(--lumo-contrast-5pct)")
-                .set("border-radius", "var(--lumo-border-radius-m)")
-                .set("padding", "var(--lumo-space-s)");
+        container.addClassName("wams-panel-section");
 
         HorizontalLayout header = new HorizontalLayout();
         header.setWidthFull();
         header.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         header.setAlignItems(FlexComponent.Alignment.CENTER);
-        header.getStyle().set("margin-bottom", "var(--lumo-space-xs)");
+        header.addClassName("wams-panel-section-header");
 
         Span trendLabel = new Span(I18n.t("mms.dashboard.email.stats.monthly.trend"));
         trendLabel.addClassName(LumoUtility.FontSize.XSMALL);
@@ -196,20 +148,14 @@ public class EmailStatisticsPanel extends VerticalLayout {
         Span viewAll = new Span(I18n.t("mms.dashboard.viewAll"));
         viewAll.addClassName(LumoUtility.FontSize.XSMALL);
         viewAll.addClassName(LumoUtility.TextColor.PRIMARY);
-        viewAll.getStyle().set("cursor", "pointer");
+        viewAll.addClassName("wams-panel-viewall-link");
 
         header.add(trendLabel, viewAll);
         container.add(header);
 
         // Mini bar chart - using divs as bars
         Div chartBars = new Div();
-        chartBars.getStyle()
-                .set("display", "flex")
-                .set("align-items", "flex-end")
-                .set("justify-content", "space-between")
-                .set("height", "60px")
-                .set("gap", "2px")
-                .set("padding", "var(--lumo-space-xs) 0");
+        chartBars.addClassName("wams-chart-bars");
 
         int[] values = {35, 42, 50, 45, 55, 62, 58, 70, 75, 68, 80, 85};
         int max = 85;
@@ -218,13 +164,11 @@ public class EmailStatisticsPanel extends VerticalLayout {
             Div bar = new Div();
             int height = (int) ((values[i] / (double) max) * 45) + 5;
             boolean isLast = (i == values.length - 1);
-            bar.getStyle()
-                    .set("height", height + "px")
-                    .set("width", "100%")
-                    .set("background", isLast ? "#4F46E5" : "var(--lumo-primary-color-60pct)")
-                    .set("border-radius", "3px 3px 0 0")
-                    .set("min-height", "4px")
-                    .set("transition", "height 0.3s ease");
+            bar.addClassName("wams-chart-bar");
+            if (isLast) {
+                bar.addClassName("wams-chart-bar--last");
+            }
+            bar.getStyle().set("height", height + "px");
             chartBars.add(bar);
         }
 
@@ -232,14 +176,14 @@ public class EmailStatisticsPanel extends VerticalLayout {
         HorizontalLayout labels = new HorizontalLayout();
         labels.setWidthFull();
         labels.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        labels.getStyle().set("gap", "2px");
+        labels.addClassName("wams-chart-labels");
 
         String[] months = {"J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"};
         for (String m : months) {
             Span label = new Span(m);
             label.addClassName(LumoUtility.FontSize.XSMALL);
             label.addClassName(LumoUtility.TextColor.TERTIARY);
-            label.getStyle().set("text-align", "center").set("flex", "1");
+            label.addClassName("wams-chart-label");
             labels.add(label);
         }
 
@@ -249,26 +193,14 @@ public class EmailStatisticsPanel extends VerticalLayout {
 
     private Div createMonthlyCompact() {
         Div container = new Div();
-        container.getStyle()
-                .set("background", "var(--lumo-contrast-5pct)")
-                .set("border-radius", "var(--lumo-border-radius-m)")
-                .set("padding", "var(--lumo-space-s)")
-                .set("max-height", "180px")
-                .set("overflow-y", "auto");
+        container.addClassName("wams-compact-table");
 
         // Table header
         HorizontalLayout header = new HorizontalLayout();
         header.setWidthFull();
         header.setPadding(false);
         header.setSpacing(true);
-        header.getStyle()
-                .set("border-bottom", "2px solid var(--lumo-contrast-20pct)")
-                .set("padding-bottom", "var(--lumo-space-xs)")
-                .set("margin-bottom", "var(--lumo-space-xs)")
-                .set("position", "sticky")
-                .set("top", "0")
-                .set("background", "var(--lumo-contrast-5pct)")
-                .set("z-index", "1");
+        header.addClassName("wams-compact-table-header");
 
         String[] headers = {
                 I18n.t("mms.dashboard.email.stats.table.month"),
@@ -280,7 +212,7 @@ public class EmailStatisticsPanel extends VerticalLayout {
             Span span = new Span(h);
             span.addClassName(LumoUtility.FontSize.XSMALL);
             span.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-            span.getStyle().set("flex", "1").set("text-align", "center");
+            span.addClassName("wams-compact-table-header-cell");
             header.add(span);
         }
         container.add(header);
@@ -307,21 +239,18 @@ public class EmailStatisticsPanel extends VerticalLayout {
             row.setPadding(false);
             row.setSpacing(true);
             row.setAlignItems(FlexComponent.Alignment.CENTER);
-            row.getStyle()
-                    .set("padding", "var(--lumo-space-xs) 0")
-                    .set("border-bottom", "1px solid var(--lumo-contrast-5pct)");
+            row.addClassName("wams-compact-table-row");
 
             for (int i = 0; i < rowData.length; i++) {
                 Span span = new Span(rowData[i]);
                 span.addClassName(LumoUtility.FontSize.XSMALL);
-                span.getStyle()
-                        .set("flex", "1")
-                        .set("text-align", "center")
-                        .set("font-weight", i == 0 ? "500" : "400");
-
-                if (i == 1) span.getStyle().set("color", "#4F46E5");
-                if (i == 2) span.getStyle().set("color", "#10B981");
-                if (i == 3) span.getStyle().set("color", "#EF4444");
+                span.addClassName("wams-compact-table-cell");
+                if (i == 0) {
+                    span.addClassName("wams-compact-table-cell--label");
+                }
+                if (i == 1) span.addClassName("wams-compact-table-cell--sent");
+                if (i == 2) span.addClassName("wams-compact-table-cell--open");
+                if (i == 3) span.addClassName("wams-compact-table-cell--bounce");
 
                 row.add(span);
             }
@@ -329,51 +258,5 @@ public class EmailStatisticsPanel extends VerticalLayout {
         }
 
         return container;
-    }
-
-    private void injectResponsiveStyles() {
-        String css = """
-                .email-stats-panel {
-                    animation: fadeIn 0.5s ease-out;
-                }
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(10px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .stat-card:hover {
-                    transform: translateY(-2px);
-                    box-shadow: var(--lumo-box-shadow-xs);
-                    border-color: var(--lumo-primary-color-50pct);
-                }
-                @media (max-width: 640px) {
-                    .email-stats-panel [class*="stat-card"] {
-                        padding: var(--lumo-space-xs);
-                    }
-                    .email-stats-panel [class*="stat-card"] span:first-child {
-                        font-size: var(--lumo-font-size-m);
-                    }
-                }
-                @media (max-width: 480px) {
-                    .email-stats-panel [style*="grid-template-columns: repeat(4, 1fr)"] {
-                        grid-template-columns: repeat(2, 1fr) !important;
-                    }
-                }
-                /* Custom scrollbar */
-                .email-stats-panel [style*="max-height: 180px"]::-webkit-scrollbar {
-                    width: 4px;
-                }
-                .email-stats-panel [style*="max-height: 180px"]::-webkit-scrollbar-track {
-                    background: var(--lumo-contrast-5pct);
-                    border-radius: 10px;
-                }
-                .email-stats-panel [style*="max-height: 180px"]::-webkit-scrollbar-thumb {
-                    background: var(--lumo-contrast-30pct);
-                    border-radius: 10px;
-                }
-                """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
     }
 }

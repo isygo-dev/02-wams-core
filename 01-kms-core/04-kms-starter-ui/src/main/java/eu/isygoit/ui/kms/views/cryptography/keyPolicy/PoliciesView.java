@@ -83,7 +83,6 @@ public class PoliciesView extends ManagementVerticalView {
         buildPolicyEditor();
         buildActionChecker();
         buildLoadingIndicator();
-        attachResponsiveStyles();
 
         updateButtonsState();
         loadKeyOptions();
@@ -105,7 +104,7 @@ public class PoliciesView extends ManagementVerticalView {
         keyLayout.setWidthFull();
         keyLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         keyLayout.setSpacing(true);
-        keyLayout.getStyle().set("flex-wrap", "wrap");
+        keyLayout.addClassName("policies-key-layout");
 
         keyCombo.setPlaceholder(I18n.t("kms.policy.view.select.key"));
         keyCombo.setItemLabelGenerator(KeyOption::getDisplayName);
@@ -130,7 +129,6 @@ public class PoliciesView extends ManagementVerticalView {
     private void buildActionBar() {
         HorizontalLayout actionBar = new HorizontalLayout();
         actionBar.setSpacing(true);
-        actionBar.getStyle().set("flex-wrap", "wrap");
         actionBar.addClassName("policies-action-bar");
 
         configureButton(loadButton, I18n.t("kms.policy.view.load.policy.tooltip"), ButtonVariant.LUMO_PRIMARY);
@@ -158,9 +156,7 @@ public class PoliciesView extends ManagementVerticalView {
         policyEditor.setWidthFull();
         policyEditor.setHeight("500px");
         policyEditor.setPlaceholder(I18n.t("kms.policy.view.policy.placeholder"));
-        policyEditor.getStyle()
-                .set("font-family", "monospace")
-                .set("font-size", "13px");
+        policyEditor.addClassName("policies-policy-editor");
         policyEditor.addValueChangeListener(e -> updateButtonsState());
         add(policyEditor);
     }
@@ -170,7 +166,7 @@ public class PoliciesView extends ManagementVerticalView {
         checkerLayout.setWidthFull();
         checkerLayout.setAlignItems(FlexComponent.Alignment.END);
         checkerLayout.setSpacing(true);
-        checkerLayout.getStyle().set("flex-wrap", "wrap");
+        checkerLayout.addClassName("policies-action-checker");
 
         actionField.setPlaceholder(I18n.t("kms.policy.view.action.placeholder"));
         actionField.setWidth("300px");
@@ -189,42 +185,6 @@ public class PoliciesView extends ManagementVerticalView {
         loadingBar.setVisible(false);
         loadingBar.setWidth("200px");
         add(loadingBar);
-    }
-
-    private void attachResponsiveStyles() {
-        String css = """
-                .policies-view {
-                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-                    min-height: 100vh;
-                    animation: fadeIn 0.5s ease-out;
-                }
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .policies-view .policies-action-bar {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: var(--lumo-space-s);
-                    align-items: center;
-                }
-                @media (max-width: 768px) {
-                    .policies-view .policies-action-bar {
-                        flex-direction: column;
-                        align-items: stretch;
-                    }
-                    .policies-view .policies-action-bar > * {
-                        width: 100%;
-                    }
-                    .policies-view .vaadin-combo-box {
-                        width: 100%;
-                    }
-                }
-                """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
     }
 
     private void updateButtonsState() {
@@ -503,35 +463,32 @@ public class PoliciesView extends ManagementVerticalView {
 
         Icon decisionIcon;
         String decisionText;
-        String decisionColor;
+        String decisionModifierClass;
         if ("ALLOWED".equals(result.decision)) {
             decisionIcon = VaadinIcon.CHECK_CIRCLE.create();
-            decisionIcon.setColor("#2e7d32");
             decisionText = I18n.t("kms.policy.eval.decision.allowed");
-            decisionColor = "#2e7d32";
+            decisionModifierClass = "policy-eval-decision-span--allowed";
         } else if ("DENIED".equals(result.decision)) {
             decisionIcon = VaadinIcon.CLOSE_CIRCLE.create();
-            decisionIcon.setColor("#c62828");
             decisionText = I18n.t("kms.policy.eval.decision.denied");
-            decisionColor = "#c62828";
+            decisionModifierClass = "policy-eval-decision-span--denied";
         } else {
             decisionIcon = VaadinIcon.EXCLAMATION_CIRCLE.create();
-            decisionIcon.setColor("#ef6c00");
             decisionText = I18n.t("kms.policy.eval.decision.uncertain");
-            decisionColor = "#ef6c00";
+            decisionModifierClass = "policy-eval-decision-span--uncertain";
         }
+        decisionIcon.addClassName(decisionModifierClass);
 
         Span decisionSpan = new Span(decisionText);
-        decisionSpan.getStyle().set("font-weight", "bold");
-        decisionSpan.getStyle().set("color", decisionColor);
-        decisionSpan.getStyle().set("font-size", "1.2em");
+        decisionSpan.addClassName("policy-eval-decision-span");
+        decisionSpan.addClassName(decisionModifierClass);
 
         decisionLayout.add(decisionIcon, decisionSpan);
         content.add(decisionLayout);
 
         // Reason
         Span reasonSpan = new Span(I18n.t("kms.policy.eval.reason", result.reason));
-        reasonSpan.getStyle().set("font-style", "italic");
+        reasonSpan.addClassName("policy-eval-reason-span");
         content.add(reasonSpan);
 
         // Sid and Principal
@@ -540,7 +497,7 @@ public class PoliciesView extends ManagementVerticalView {
             sidLayout.setAlignItems(FlexComponent.Alignment.CENTER);
             sidLayout.setSpacing(true);
             Span sidLabel = new Span("🆔 " + I18n.t("kms.policy.eval.sid"));
-            sidLabel.getStyle().set("font-weight", "bold");
+            sidLabel.addClassName(LumoUtility.FontWeight.BOLD);
             Span sidValue = new Span(result.sid);
             sidLayout.add(sidLabel, sidValue);
             content.add(sidLayout);
@@ -551,7 +508,7 @@ public class PoliciesView extends ManagementVerticalView {
             principalLayout.setAlignItems(FlexComponent.Alignment.CENTER);
             principalLayout.setSpacing(true);
             Span principalLabel = new Span("👤 " + I18n.t("kms.policy.eval.principal"));
-            principalLabel.getStyle().set("font-weight", "bold");
+            principalLabel.addClassName(LumoUtility.FontWeight.BOLD);
             Span principalValue = new Span(result.principal);
             principalLayout.add(principalLabel, principalValue);
             content.add(principalLayout);
@@ -560,36 +517,30 @@ public class PoliciesView extends ManagementVerticalView {
         // Key context
         if (selectedKeyId == null) {
             Span warningSpan = new Span(I18n.t("kms.policy.eval.no.key.selected"));
-            warningSpan.getStyle().set("color", "#ef6c00");
-            warningSpan.getStyle().set("font-size", "0.9em");
+            warningSpan.addClassName("policy-eval-warning-span");
             content.add(warningSpan);
         } else {
             Span resourceSpan = new Span(I18n.t("kms.policy.eval.key.arn", keyArn));
-            resourceSpan.getStyle().set("font-size", "0.9em");
+            resourceSpan.addClassName("policy-eval-muted-span");
             content.add(resourceSpan);
         }
 
         // Matched statement (full JSON)
         if (result.matchedStatement != null && !result.matchedStatement.isEmpty()) {
             Span matchedHeader = new Span(I18n.t("kms.policy.eval.matched.statement"));
-            matchedHeader.getStyle().set("font-weight", "bold");
+            matchedHeader.addClassName("policy-eval-matched-header");
             content.add(matchedHeader);
 
             Pre pre = new Pre();
             pre.setText(result.matchedStatement);
-            pre.getStyle().set("background-color", "#f5f5f5");
-            pre.getStyle().set("padding", "8px");
-            pre.getStyle().set("border-radius", "4px");
-            pre.getStyle().set("font-size", "12px");
-            pre.getStyle().set("overflow-x", "auto");
+            pre.addClassName("policy-eval-matched-pre");
             pre.setWidthFull();
             content.add(pre);
         }
 
         // Help tip
         Span helpSpan = new Span(I18n.t("kms.policy.eval.tip"));
-        helpSpan.getStyle().set("font-size", "0.85em");
-        helpSpan.getStyle().set("color", "#666");
+        helpSpan.addClassName("policy-eval-help-span");
         content.add(helpSpan);
 
         Button closeBtn = new Button(I18n.t("kms.policy.eval.close"), e -> resultDialog.close());

@@ -112,23 +112,20 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
         row.setAlignItems(FlexComponent.Alignment.CENTER);
         row.setSpacing(true);
         row.setWidthFull();
-        row.getStyle().set("margin-top", "var(--lumo-space-xs)");
         row.addClassName("meta-row");
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("16px");
-        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        iconComponent.addClassName("alias-card__row-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        labelSpan.getStyle().set("min-width", "100px");
+        labelSpan.addClassName("alias-card__row-label");
 
         Span valueSpan = new Span(value != null ? value : I18n.t("kms.alias.card.masked"));
         valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        valueSpan.getStyle().set("font-family", "monospace");
-        valueSpan.getStyle().set("word-break", "break-all");
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("alias-card__row-value");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -140,23 +137,20 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
         row.setAlignItems(FlexComponent.Alignment.CENTER);
         row.setSpacing(true);
         row.setWidthFull();
-        row.getStyle().set("margin-top", "var(--lumo-space-xs)");
         row.addClassName("meta-row");
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("16px");
-        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        iconComponent.addClassName("alias-card__row-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        labelSpan.getStyle().set("min-width", "100px");
+        labelSpan.addClassName("alias-card__row-label");
 
         Span valueSpan = new Span(value != null ? value : I18n.t("kms.alias.card.masked"));
         valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        valueSpan.getStyle().set("font-family", "monospace");
-        valueSpan.getStyle().set("word-break", "break-all");
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("alias-card__row-value");
 
         Button copyBtn = KmsMainView.createCopyButton(VaadinIcon.COPY, copyValue, I18n.t("kms.alias.card.copy.tooltip"));
         copyBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
@@ -175,27 +169,5 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
     private void updateAlias() {
         new UpdateAliasDialog(parentView, objectService, parentView::resetPaginationAndLoad,
                 aliasName, targetKeyId).open();
-    }
-
-    // ── Extra CSS (responsive) ────────────────────────────────────────────────
-    @Override
-    protected String buildExtraStyles() {
-        return """
-                .alias-card .meta-row {
-                    border-bottom: 1px solid var(--lumo-contrast-10pct);
-                    padding-bottom: var(--lumo-space-xs);
-                }
-                .alias-card .meta-row:last-child {
-                    border-bottom: none;
-                }
-                @media (max-width: 640px) {
-                    .alias-card .meta-row {
-                        flex-wrap: wrap;
-                    }
-                    .alias-card .meta-row > :not(:first-child) {
-                        margin-left: 28px;
-                    }
-                }
-                """;
     }
 }

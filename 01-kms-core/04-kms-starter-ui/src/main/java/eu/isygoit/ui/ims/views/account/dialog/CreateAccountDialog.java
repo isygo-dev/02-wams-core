@@ -151,20 +151,12 @@ public class CreateAccountDialog extends BaseActionDialog {
         imageThumbnail.setWidth("60px");
         imageThumbnail.setHeight("60px");
         imageThumbnail.setVisible(false);
-        imageThumbnail.getStyle()
-                .set("border-radius", "50%")
-                .set("object-fit", "cover")
-                .set("border", "2px solid var(--lumo-contrast-20pct)");
+        imageThumbnail.addClassName("wams-image-thumbnail");
 
         imagePlaceholder = new Div();
         imagePlaceholder.setWidth("60px");
         imagePlaceholder.setHeight("60px");
-        imagePlaceholder.getStyle()
-                .set("background", "#f0f0f0")
-                .set("border-radius", "50%")
-                .set("display", "flex")
-                .set("align-items", "center")
-                .set("justify-content", "center");
+        imagePlaceholder.addClassName("wams-image-placeholder");
         imagePlaceholder.add(new Icon(VaadinIcon.CAMERA));
 
         uploadImageButton = new Button(I18n.t("ims.account.dialog.field.upload.image"), e -> openCropperDialog());

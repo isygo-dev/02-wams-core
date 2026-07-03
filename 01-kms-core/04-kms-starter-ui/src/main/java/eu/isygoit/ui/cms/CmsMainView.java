@@ -49,14 +49,12 @@ public class CmsMainView extends ManagementVerticalView {
         add(buildStatisticsRow());
         add(buildRecentActivityPanel());
         add(buildQuickActions());
-
-        injectResponsiveStyles();
     }
 
     private H2 buildHeader() {
         H2 title = new H2(I18n.t("cms.dashboard.title"));
-        title.getStyle().set("margin-bottom", "10px");
         title.addClassName(LumoUtility.FontSize.XXLARGE);
+        title.addClassName("wams-dashboard-header");
         return title;
     }
 
@@ -78,14 +76,6 @@ public class CmsMainView extends ManagementVerticalView {
     private Div createStatCard(String title, String value, VaadinIcon icon, String navigateTo) {
         Div card = new Div();
         card.addClassName("stat-card");
-        card.getStyle()
-                .set("background", "var(--lumo-base-color)")
-                .set("border-radius", "var(--lumo-border-radius-l)")
-                .set("box-shadow", "var(--lumo-box-shadow-xs)")
-                .set("padding", "var(--lumo-space-m)")
-                .set("text-align", "center")
-                .set("flex", "1")
-                .set("cursor", "pointer");
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("32px");
@@ -108,14 +98,12 @@ public class CmsMainView extends ManagementVerticalView {
     private VerticalLayout buildRecentActivityPanel() {
         VerticalLayout panel = new VerticalLayout();
         panel.setSpacing(true);
-        panel.getStyle().set("margin-top", "24px");
+        panel.addClassName("wams-recent-activity-panel");
         H2 title = new H2(I18n.t("cms.dashboard.recent.activity"));
         title.addClassName(LumoUtility.FontSize.MEDIUM);
         Div content = new Div();
         content.setText(I18n.t("cms.dashboard.recent.activity.description"));
-        content.getStyle().set("padding", "var(--lumo-space-m)")
-                .set("background", "var(--lumo-base-color)")
-                .set("border-radius", "var(--lumo-border-radius-m)");
+        content.addClassName("wams-recent-activity-content");
         panel.add(title, content);
         return panel;
     }
@@ -123,7 +111,7 @@ public class CmsMainView extends ManagementVerticalView {
     private VerticalLayout buildQuickActions() {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
-        layout.getStyle().set("gap", "10px").set("margin-top", "24px");
+        layout.addClassName("wams-quick-actions");
         H2 title = new H2(I18n.t("cms.dashboard.quick.actions"));
         title.addClassName(LumoUtility.FontSize.MEDIUM);
         Div actions = new Div();
@@ -133,36 +121,8 @@ public class CmsMainView extends ManagementVerticalView {
         sb.append("• ").append(I18n.t("cms.dashboard.quick.actions.import.ics")).append("\n");
         sb.append("• ").append(I18n.t("cms.dashboard.quick.actions.view.schedule"));
         actions.add(new Span(sb.toString()));
-        actions.getStyle().set("white-space", "pre-line");
+        actions.addClassName("wams-quick-actions-text");
         layout.add(title, actions);
         return layout;
-    }
-
-    private void injectResponsiveStyles() {
-        String css = """
-                .cms-dashboard .stat-card {
-                    transition: transform 0.2s ease, box-shadow 0.2s ease;
-                }
-                .cms-dashboard .stat-card:hover {
-                    transform: translateY(-4px);
-                    box-shadow: var(--lumo-box-shadow-m);
-                }
-                .cms-dashboard .stats-row {
-                    flex-wrap: wrap;
-                }
-                @media (max-width: 768px) {
-                    .cms-dashboard .stat-card {
-                        flex-basis: calc(50% - 16px);
-                        margin-bottom: 16px;
-                    }
-                    .cms-dashboard .stats-row {
-                        gap: 16px;
-                    }
-                }
-                """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
     }
 }

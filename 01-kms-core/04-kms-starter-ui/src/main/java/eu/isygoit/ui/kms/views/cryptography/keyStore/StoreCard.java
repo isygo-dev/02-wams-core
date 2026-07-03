@@ -73,7 +73,7 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
         HorizontalLayout left = new HorizontalLayout();
         left.setAlignItems(FlexComponent.Alignment.CENTER);
         left.setSpacing(true);
-        left.getStyle().set("flex-wrap", "wrap");
+        left.addClassName("kms-partc-title-wrap");
 
         Span titleSpan = buildTitleSpan(storeName, storeName);
         Span typeChip = buildStatusChip(storeType, ChipColor.INFO);
@@ -168,23 +168,20 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
         row.setAlignItems(FlexComponent.Alignment.CENTER);
         row.setSpacing(true);
         row.setWidthFull();
-        row.getStyle().set("margin-top", "var(--lumo-space-xs)");
         row.addClassName("meta-row");
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("16px");
-        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        iconComponent.addClassName("kms-partc-row-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        labelSpan.getStyle().set("min-width", "100px");
+        labelSpan.addClassName("kms-partc-row-label");
 
         Span valueSpan = new Span(value != null ? value : "—");
         valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        valueSpan.getStyle().set("font-family", "monospace");
-        valueSpan.getStyle().set("word-break", "break-all");
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("kms-partc-row-value");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -202,21 +199,20 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
             row.setAlignItems(FlexComponent.Alignment.CENTER);
             row.setSpacing(true);
             row.setWidthFull();
-            row.getStyle().set("margin-top", "var(--lumo-space-xs)");
             row.addClassName("meta-row");
 
             Icon icon = VaadinIcon.TAGS.create();
             icon.setSize("16px");
-            icon.getStyle().set("color", "var(--lumo-secondary-text-color)");
+            icon.addClassName("kms-partc-row-icon");
 
             Span labelSpan = new Span(label + ":");
             labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
             labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
-            labelSpan.getStyle().set("min-width", "100px");
+            labelSpan.addClassName("kms-partc-row-label");
 
             HorizontalLayout chips = new HorizontalLayout();
             chips.setSpacing(true);
-            chips.getStyle().set("flex-wrap", "wrap");
+            chips.addClassName("kms-partc-metadata-chips");
 
             for (Map.Entry<String, String> entry : map.entrySet()) {
                 Span chip = new Span(entry.getKey() + "=" + entry.getValue());
@@ -313,28 +309,5 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
         notification.addThemeVariants(
                 success ? NotificationVariant.LUMO_SUCCESS : NotificationVariant.LUMO_ERROR
         );
-    }
-
-    // ── Extra CSS (responsive) ──────────────────────────────────────────────
-
-    @Override
-    protected String buildExtraStyles() {
-        return """
-                .store-card .meta-row {
-                    border-bottom: 1px solid var(--lumo-contrast-10pct);
-                    padding-bottom: var(--lumo-space-xs);
-                }
-                .store-card .meta-row:last-child {
-                    border-bottom: none;
-                }
-                @media (max-width: 640px) {
-                    .store-card .meta-row {
-                        flex-wrap: wrap;
-                    }
-                    .store-card .meta-row > :not(:first-child) {
-                        margin-left: 28px;
-                    }
-                }
-                """;
     }
 }

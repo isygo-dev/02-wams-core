@@ -1,7 +1,6 @@
 package eu.isygoit.ui.kms.views.cryptography.keyGrants;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -85,7 +84,6 @@ public class GrantsView extends ManagementVerticalView {
         buildActionBar();
         buildGrantsGrid();
         buildLoadingIndicator();
-        attachResponsiveStyles();
 
         refreshButton.addClickListener(e -> loadGrants());
         createGrantButton.addClickListener(e -> openCreateGrantDialog());
@@ -117,7 +115,6 @@ public class GrantsView extends ManagementVerticalView {
         keyLayout.setWidthFull();
         keyLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         keyLayout.setSpacing(true);
-        keyLayout.getStyle().set("flex-wrap", "wrap");
         keyLayout.addClassName("grants-key-layout");
 
         keyCombo.setPlaceholder(I18n.t("kms.grants.view.select.key"));
@@ -147,7 +144,7 @@ public class GrantsView extends ManagementVerticalView {
         filterLayout.setWidthFull();
         filterLayout.setAlignItems(FlexComponent.Alignment.BASELINE);
         filterLayout.setSpacing(true);
-        filterLayout.getStyle().set("flex-wrap", "wrap");
+        filterLayout.addClassName("grants-key-layout");
 
         filterField.setPlaceholder(I18n.t("kms.grants.view.filter.placeholder"));
         filterField.setValueChangeMode(ValueChangeMode.LAZY);
@@ -167,7 +164,6 @@ public class GrantsView extends ManagementVerticalView {
         HorizontalLayout actionBar = new HorizontalLayout(refreshButton, createGrantButton,
                 revokeGrantButton, retireGrantButton, viewDetailsButton);
         actionBar.setSpacing(true);
-        actionBar.getStyle().set("flex-wrap", "wrap");
         actionBar.addClassName("grants-action-bar");
 
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
@@ -188,7 +184,7 @@ public class GrantsView extends ManagementVerticalView {
         grantsGrid.setWidthFull();
         grantsGrid.setHeight("500px");
         grantsGrid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES, GridVariant.LUMO_COLUMN_BORDERS);
-        grantsGrid.getStyle().set("overflow-x", "auto");
+        grantsGrid.addClassName("grants-grid");
 
         grantsGrid.addColumn(KmsDtos.ListGrantsResponse.Grant::getGrantId)
                 .setHeader(I18n.t("kms.grants.view.grid.column.grant.id")).setSortable(true).setFlexGrow(0).setWidth("200px");
@@ -203,22 +199,23 @@ public class GrantsView extends ManagementVerticalView {
             Span chip = new Span(status);
             chip.addClassNames(LumoUtility.FontSize.XSMALL, LumoUtility.Padding.Horizontal.SMALL,
                     LumoUtility.Padding.Vertical.XSMALL, LumoUtility.BorderRadius.LARGE);
+            chip.addClassName("wams-chip");
             String statusDisplay;
             switch (status.toUpperCase()) {
                 case "ACTIVE":
-                    chip.getStyle().set("background-color", "#E3F7E5").set("color", "#1E7B2E");
+                    chip.addClassName("wams-chip--success");
                     statusDisplay = I18n.t("kms.grants.view.status.active");
                     break;
                 case "REVOKED":
-                    chip.getStyle().set("background-color", "#FEF3F2").set("color", "#C73A2B");
+                    chip.addClassName("wams-chip--error");
                     statusDisplay = I18n.t("kms.grants.view.status.revoked");
                     break;
                 case "RETIRED":
-                    chip.getStyle().set("background-color", "#F2F4F8").set("color", "#5E6C84");
+                    chip.addClassName("wams-chip--neutral");
                     statusDisplay = I18n.t("kms.grants.view.status.retired");
                     break;
                 default:
-                    chip.getStyle().set("background-color", "#F0F0F0").set("color", "#000000");
+                    chip.addClassName("wams-chip--neutral");
                     statusDisplay = status;
             }
             chip.setText(statusDisplay);
@@ -241,44 +238,6 @@ public class GrantsView extends ManagementVerticalView {
         loadingBar.setVisible(false);
         loadingBar.setWidth("200px");
         add(loadingBar);
-    }
-
-    private void attachResponsiveStyles() {
-        String css = """
-                .kms-grants-view {
-                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-                    min-height: 100vh;
-                    animation: fadeIn 0.5s ease-out;
-                }
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .grants-key-layout, .grants-action-bar {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: var(--lumo-space-s);
-                    align-items: center;
-                }
-                @media (max-width: 768px) {
-                    .grants-key-layout, .grants-action-bar {
-                        flex-direction: column;
-                        align-items: stretch;
-                    }
-                    .grants-key-layout > *, .grants-action-bar > * {
-                        width: 100% !important;
-                    }
-                    .kms-grants-view vaadin-grid {
-                        overflow-x: auto;
-                    }
-                    .kms-grants-view vaadin-grid::part(table) {
-                        min-width: 900px;
-                    }
-                }
-                """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css);
     }
 
     // ------------------------------------------------------------------------

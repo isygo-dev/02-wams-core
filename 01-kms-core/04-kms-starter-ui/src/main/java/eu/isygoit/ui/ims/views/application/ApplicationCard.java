@@ -70,22 +70,18 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
         row1.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         row1.setAlignItems(FlexComponent.Alignment.CENTER);
         row1.setSpacing(true);
-        row1.getStyle().set("flex-wrap", "wrap");
+        row1.addClassName("card-row");
 
         appImage = new Image();
         appImage.setWidth("48px");
         appImage.setHeight("48px");
-        appImage.getStyle()
-                .set("border-radius", "50%")
-                .set("object-fit", "cover")
-                .set("background", "var(--lumo-contrast-10pct)")
-                .set("border", "2px solid var(--lumo-contrast-20pct)");
+        appImage.addClassName("card-avatar");
         appImage.setSrc(getSvgPlaceholder());
 
         buttonBar = new HorizontalLayout();
         buttonBar.setSpacing(true);
         buttonBar.setPadding(false);
-        buttonBar.getStyle().set("flex-wrap", "wrap");
+        buttonBar.addClassName("card-row");
         buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
         buttonBar.addClassName(cardCssClassName() + "__button-bar");
 
@@ -99,8 +95,8 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
         HorizontalLayout row2 = new HorizontalLayout();
         row2.setAlignItems(FlexComponent.Alignment.CENTER);
         row2.setSpacing(true);
-        row2.getStyle().set("flex-wrap", "wrap");
-        row2.getStyle().set("margin-top", "var(--lumo-space-s)");
+        row2.addClassName("card-row");
+        row2.addClassName("card-row--spaced");
 
         Span titleSpan = buildTitleSpan(application.getName(), application.getTitle());
         adminStatusChip = buildStatusChip(
@@ -142,7 +138,7 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
         VerticalLayout body = new VerticalLayout();
         body.setSpacing(false);
         body.setPadding(false);
-        body.getStyle().set("margin-top", "var(--lumo-space-s)");
+        body.addClassName("card-row--spaced");
 
         body.add(createIconRow(VaadinIcon.DESKTOP, I18n.t("ims.app.card.category"), application.getCategory()));
         body.add(createIconRow(VaadinIcon.GLOBE, I18n.t("ims.app.card.url"), application.getUrl()));
@@ -164,17 +160,16 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
 
         com.vaadin.flow.component.icon.Icon iconComponent = icon.create();
         iconComponent.setSize("14px");
-        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        iconComponent.addClassName("meta-row-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        labelSpan.getStyle().set("min-width", "80px");
+        labelSpan.addClassName("meta-row-label");
 
         Span valueSpan = new Span(value != null ? value : I18n.t("ims.app.card.value.empty"));
         valueSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        valueSpan.getStyle().set("word-break", "break-all");
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("meta-row-value");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -206,10 +201,7 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
             String status = application.getAdminStatus() != null ? application.getAdminStatus().name() : I18n.t("ims.app.card.status.unknown");
             adminStatusChip.setText(status);
             adminStatusChip.getElement().setAttribute("title", status);
-            ChipColor color = ChipColor.fromStatus(status);
-            adminStatusChip.getStyle()
-                    .set("background-color", color.background())
-                    .set("color", color.foreground());
+            applyChipColor(adminStatusChip, ChipColor.fromStatus(status));
         }
     }
 
@@ -255,35 +247,5 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
 
     private String getSvgPlaceholder() {
         return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='2' width='20' height='20' rx='2.18' ry='2.18'%3E%3C/rect%3E%3Cpath d='M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5'%3E%3C/path%3E%3C/svg%3E";
-    }
-
-    @Override
-    protected String buildExtraStyles() {
-        return """
-                .application-card {
-                    padding: var(--lumo-space-s) var(--lumo-space-m);
-                }
-                .application-card .meta-row {
-                    border-bottom: 1px solid var(--lumo-contrast-10pct);
-                    padding-bottom: var(--lumo-space-xs);
-                    margin-bottom: var(--lumo-space-xs);
-                }
-                .application-card .meta-row:last-child {
-                    border-bottom: none;
-                    margin-bottom: 0;
-                }
-                @media (max-width: 640px) {
-                    .application-card .meta-row {
-                        flex-wrap: wrap;
-                    }
-                    .application-card .meta-row > :not(:first-child) {
-                        margin-left: 28px;
-                    }
-                    .application-card .application-card__button-bar {
-                        width: 100%;
-                        justify-content: flex-start;
-                    }
-                }
-                """;
     }
 }

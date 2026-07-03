@@ -40,7 +40,7 @@ public class GrantDetailsDialog extends NoActionDialog {
                 String constraintsJson = objectMapper.writerWithDefaultPrettyPrinter()
                         .writeValueAsString(grant.getConstraints());
                 Pre pre = new Pre(constraintsJson);
-                pre.getStyle().set("background-color", "#f5f5f5").set("padding", "8px").set("border-radius", "4px");
+                pre.addClassName("grant-detail-constraints-pre");
                 content.add(createDetailRow(I18n.t("kms.grant.details.field.constraints"), pre));
             } catch (Exception e) {
                 content.add(createDetailRow(I18n.t("kms.grant.details.field.constraints"), grant.getConstraints().toString()));
@@ -53,7 +53,7 @@ public class GrantDetailsDialog extends NoActionDialog {
     private Span createDetailRow(String label, String value) {
         if (value == null) value = I18n.t("kms.grant.details.placeholder");
         Span span = new Span(label + ": " + value);
-        span.getStyle().set("font-family", "monospace").set("font-size", "13px");
+        span.addClassName("grant-detail-row-span");
         return span;
     }
 
@@ -62,7 +62,7 @@ public class GrantDetailsDialog extends NoActionDialog {
         layout.setSpacing(false);
         layout.setPadding(false);
         Span labelSpan = new Span(label + ":");
-        labelSpan.getStyle().set("font-weight", "bold").set("font-size", "13px");
+        labelSpan.addClassName("grant-detail-row-label");
         layout.add(labelSpan, value);
         return layout;
     }

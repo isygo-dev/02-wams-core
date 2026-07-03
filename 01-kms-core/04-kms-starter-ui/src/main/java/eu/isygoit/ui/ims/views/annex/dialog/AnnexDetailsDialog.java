@@ -70,10 +70,7 @@ public class AnnexDetailsDialog extends NoActionDialog {
         mainLayout.setSpacing(true);
 
         Div infoGrid = new Div();
-        infoGrid.addClassName("details-grid");
-        infoGrid.getStyle().set("display", "grid")
-                .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
-                .set("gap", "var(--lumo-space-s)");
+        infoGrid.addClassName("wams-card__detail-grid");
 
         addFieldToGrid(infoGrid, VaadinIcon.CODE, I18n.t("ims.annex.details.field.table.code"), annex.getTableCode());
         addFieldToGrid(infoGrid, VaadinIcon.LOCATION_ARROW_CIRCLE, I18n.t("ims.annex.details.field.language"), annex.getLanguage() != null ? annex.getLanguage().name() : null);
@@ -102,7 +99,7 @@ public class AnnexDetailsDialog extends NoActionDialog {
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("16px");
-        iconComponent.getStyle().set("color", "var(--lumo-primary-color)");
+        iconComponent.addClassName("detail-field-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
@@ -110,7 +107,7 @@ public class AnnexDetailsDialog extends NoActionDialog {
 
         Span valueSpan = new Span(value);
         valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("detail-field-value");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -124,9 +121,7 @@ public class AnnexDetailsDialog extends NoActionDialog {
         Span titleSpan = new Span(title);
         titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
         titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
-        titleSpan.getStyle().set("border-bottom", "1px solid var(--lumo-contrast-20pct)")
-                .set("margin-bottom", "var(--lumo-space-s)")
-                .set("padding-bottom", "var(--lumo-space-xs)");
+        titleSpan.addClassName("wams-section-title");
         section.add(titleSpan, content);
         return section;
     }

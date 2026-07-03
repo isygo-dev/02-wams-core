@@ -134,10 +134,7 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         // Language chip
         String language = template.getLanguage() != null ? template.getLanguage().name() : I18n.t("mms.common.value.notAvailable");
         languageChip.setText(language);
-        ChipColor color = getLanguageColor(template.getLanguage());
-        languageChip.getStyle()
-                .set("background-color", color.background())
-                .set("color", color.foreground());
+        applyChipColor(languageChip, getLanguageColor(template.getLanguage()));
 
         codeSpan.setText(template.getCode() != null ? template.getCode() : I18n.t("mms.common.value.notAvailable"));
         descriptionSpan.setText(template.getDescription() != null ? template.getDescription() : I18n.t("mms.msgtemplate.card.no.description"));
@@ -187,7 +184,7 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         HorizontalLayout left = new HorizontalLayout();
         left.setAlignItems(FlexComponent.Alignment.CENTER);
         left.setSpacing(true);
-        left.getStyle().set("flex-wrap", "wrap");
+        left.addClassName("wams-title-row");
 
         // Tenant badge
         if (template.getTenant() != null) {
@@ -196,7 +193,7 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
             tenantBadge.addClassName(LumoUtility.Padding.XSMALL);
             tenantBadge.addClassName(LumoUtility.BorderRadius.SMALL);
             tenantBadge.addClassName(LumoUtility.FontSize.XSMALL);
-            tenantBadge.getStyle().set("font-family", "monospace");
+            tenantBadge.addClassName("wams-tenant-badge");
             left.add(tenantBadge);
         }
 
@@ -208,10 +205,7 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         // Language chip
         String language = template.getLanguage() != null ? template.getLanguage().name() : I18n.t("mms.common.value.notAvailable");
         languageChip = buildStatusChip(language, I18n.t("mms.msgtemplate.card.language.tooltip", language));
-        ChipColor color = getLanguageColor(template.getLanguage());
-        languageChip.getStyle()
-                .set("background-color", color.background())
-                .set("color", color.foreground());
+        applyChipColor(languageChip, getLanguageColor(template.getLanguage()));
         left.add(languageChip);
 
         return left;
@@ -304,9 +298,7 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
     private HorizontalLayout createDetailRow(VaadinIcon icon, String label, String value) {
         Span valueSpan = new Span(value);
         valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.getStyle().set("font-family", "monospace");
-        valueSpan.getStyle().set("word-break", "break-all");
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("detail-value");
         return createDetailRow(icon, label, valueSpan);
     }
 
@@ -315,17 +307,16 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         row.setAlignItems(FlexComponent.Alignment.CENTER);
         row.setSpacing(true);
         row.setWidthFull();
-        row.getStyle().set("margin-top", "var(--lumo-space-xs)");
         row.addClassName("detail-row");
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("16px");
-        iconComponent.getStyle().set("color", "var(--lumo-primary-color)");
+        iconComponent.addClassName("detail-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        labelSpan.getStyle().set("min-width", "120px");
+        labelSpan.addClassName("detail-label");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -339,13 +330,13 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
             Button copyBtn = new Button(new Icon(VaadinIcon.COPY));
             copyBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
             copyBtn.setTooltipText(I18n.t("mms.msgtemplate.card.copy.tooltip"));
+            copyBtn.addClassName("detail-copy-button");
             copyBtn.addClickListener(e -> {
                 getUI().ifPresent(ui -> ui.getPage().executeJs(
                         "navigator.clipboard.writeText($0)",
                         copyValue
                 ));
             });
-            copyBtn.getStyle().set("padding", "var(--lumo-space-xs)");
             row.add(copyBtn);
         }
 
@@ -431,28 +422,5 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
     @Override
     protected void onCardAttach(AttachEvent event) {
         // No additional lifecycle actions needed
-    }
-
-    // ─── Extra Styles ──────────────────────────────────────────────────────
-
-    @Override
-    protected String buildExtraStyles() {
-        return """
-                .template-card .detail-row {
-                    border-bottom: 1px solid var(--lumo-contrast-10pct);
-                    padding-bottom: var(--lumo-space-xs);
-                }
-                .template-card .detail-row:last-child {
-                    border-bottom: none;
-                }
-                @media (max-width: 640px) {
-                    .template-card .detail-row {
-                        flex-wrap: wrap;
-                    }
-                    .template-card .detail-row > :not(:first-child) {
-                        margin-left: 28px;
-                    }
-                }
-                """;
     }
 }

@@ -141,11 +141,8 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         titleSpan.setText(displayName);
         titleSpan.getElement().setAttribute("title", displayName);
 
-        ChipColor color = isActive() ? ChipColor.SUCCESS : ChipColor.WARNING;
         statusChip.setText(isActive() ? I18n.t("mms.sender.card.status.active") : I18n.t("mms.sender.card.status.inactive"));
-        statusChip.getStyle()
-                .set("background-color", color.background())
-                .set("color", color.foreground());
+        applyChipColor(statusChip, isActive() ? ChipColor.SUCCESS : ChipColor.WARNING);
 
         hostSpan.setText(config.getHost() != null ? config.getHost() : I18n.t("mms.common.value.notAvailable"));
         portSpan.setText(config.getPort() != null ? config.getPort() : I18n.t("mms.common.value.notAvailable"));
@@ -153,13 +150,15 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
 
         boolean tlsEnabled = Boolean.TRUE.equals(config.getSmtpStarttlsEnable());
         tlsSpan.setText(tlsEnabled ? I18n.t("mms.sender.card.tls.enabled") : I18n.t("mms.sender.card.tls.disabled"));
-        tlsSpan.getStyle().set("color", tlsEnabled ?
-                "var(--lumo-success-color)" : "var(--lumo-error-color)");
+        tlsSpan.removeClassName("detail-value--enabled");
+        tlsSpan.removeClassName("detail-value--disabled");
+        tlsSpan.addClassName(tlsEnabled ? "detail-value--enabled" : "detail-value--disabled");
 
         boolean debugEnabled = Boolean.TRUE.equals(config.getDebug());
         debugSpan.setText(debugEnabled ? I18n.t("mms.sender.card.debug.on") : I18n.t("mms.sender.card.debug.off"));
-        debugSpan.getStyle().set("color", debugEnabled ?
-                "var(--lumo-warning-color)" : "var(--lumo-tertiary-text-color)");
+        debugSpan.removeClassName("detail-value--warning");
+        debugSpan.removeClassName("detail-value--muted");
+        debugSpan.addClassName(debugEnabled ? "detail-value--warning" : "detail-value--muted");
 
         if (testButton != null) {
             testButton.setEnabled(isActive());
@@ -184,7 +183,7 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         HorizontalLayout left = new HorizontalLayout();
         left.setAlignItems(FlexComponent.Alignment.CENTER);
         left.setSpacing(true);
-        left.getStyle().set("flex-wrap", "wrap");
+        left.addClassName("wams-title-row");
 
         // Tenant badge
         if (config.getTenant() != null) {
@@ -193,7 +192,7 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
             tenantBadge.addClassName(LumoUtility.Padding.XSMALL);
             tenantBadge.addClassName(LumoUtility.BorderRadius.SMALL);
             tenantBadge.addClassName(LumoUtility.FontSize.XSMALL);
-            tenantBadge.getStyle().set("font-family", "monospace");
+            tenantBadge.addClassName("wams-tenant-badge");
             left.add(tenantBadge);
         }
 
@@ -205,10 +204,7 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         // Status chip
         String statusText = isActive() ? I18n.t("mms.sender.card.status.active") : I18n.t("mms.sender.card.status.inactive");
         statusChip = buildStatusChip(statusText, statusText);
-        ChipColor color = isActive() ? ChipColor.SUCCESS : ChipColor.WARNING;
-        statusChip.getStyle()
-                .set("background-color", color.background())
-                .set("color", color.foreground());
+        applyChipColor(statusChip, isActive() ? ChipColor.SUCCESS : ChipColor.WARNING);
         left.add(statusChip);
 
         return left;
@@ -294,8 +290,9 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         // TLS
         boolean tlsEnabled = Boolean.TRUE.equals(config.getSmtpStarttlsEnable());
         tlsSpan.setText(tlsEnabled ? I18n.t("mms.sender.card.tls.enabled") : I18n.t("mms.sender.card.tls.disabled"));
-        tlsSpan.getStyle().set("color", tlsEnabled ?
-                "var(--lumo-success-color)" : "var(--lumo-error-color)");
+        tlsSpan.removeClassName("detail-value--enabled");
+        tlsSpan.removeClassName("detail-value--disabled");
+        tlsSpan.addClassName(tlsEnabled ? "detail-value--enabled" : "detail-value--disabled");
         bodyContainer.add(createDetailRow(
                 VaadinIcon.LOCK,
                 I18n.t("mms.sender.card.tls"),
@@ -312,8 +309,9 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         // Debug
         boolean debugEnabled = Boolean.TRUE.equals(config.getDebug());
         debugSpan.setText(debugEnabled ? I18n.t("mms.sender.card.debug.on") : I18n.t("mms.sender.card.debug.off"));
-        debugSpan.getStyle().set("color", debugEnabled ?
-                "var(--lumo-warning-color)" : "var(--lumo-tertiary-text-color)");
+        debugSpan.removeClassName("detail-value--warning");
+        debugSpan.removeClassName("detail-value--muted");
+        debugSpan.addClassName(debugEnabled ? "detail-value--warning" : "detail-value--muted");
         bodyContainer.add(createDetailRow(
                 VaadinIcon.BUG,
                 I18n.t("mms.sender.card.debug"),
@@ -326,9 +324,7 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
     private HorizontalLayout createDetailRow(VaadinIcon icon, String label, String value) {
         Span valueSpan = new Span(value);
         valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.getStyle().set("font-family", "monospace");
-        valueSpan.getStyle().set("word-break", "break-all");
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("detail-value");
         return createDetailRow(icon, label, valueSpan);
     }
 
@@ -337,17 +333,16 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         row.setAlignItems(FlexComponent.Alignment.CENTER);
         row.setSpacing(true);
         row.setWidthFull();
-        row.getStyle().set("margin-top", "var(--lumo-space-xs)");
         row.addClassName("detail-row");
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("16px");
-        iconComponent.getStyle().set("color", "var(--lumo-primary-color)");
+        iconComponent.addClassName("detail-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        labelSpan.getStyle().set("min-width", "120px");
+        labelSpan.addClassName("detail-label");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -360,13 +355,13 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         Button copyBtn = new Button(new Icon(VaadinIcon.COPY));
         copyBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
         copyBtn.setTooltipText(I18n.t("mms.sender.card.copy.tooltip"));
+        copyBtn.addClassName("detail-copy-button");
         copyBtn.addClickListener(e -> {
             getUI().ifPresent(ui -> ui.getPage().executeJs(
                     "navigator.clipboard.writeText($0)",
                     copyValue
             ));
         });
-        copyBtn.getStyle().set("padding", "var(--lumo-space-xs)");
 
         row.add(copyBtn);
         return row;
@@ -412,31 +407,5 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
     @Override
     protected void onCardAttach(AttachEvent event) {
         // No additional lifecycle actions needed
-    }
-
-    // ─── Extra Styles ──────────────────────────────────────────────────────
-
-    @Override
-    protected String buildExtraStyles() {
-        return """
-                .sender-config-card .detail-row {
-                    border-bottom: 1px solid var(--lumo-contrast-10pct);
-                    padding-bottom: var(--lumo-space-xs);
-                }
-                .sender-config-card .detail-row:last-child {
-                    border-bottom: none;
-                }
-                .sender-config-card .detail-row .detail-value {
-                    font-weight: 500;
-                }
-                @media (max-width: 640px) {
-                    .sender-config-card .detail-row {
-                        flex-wrap: wrap;
-                    }
-                    .sender-config-card .detail-row > :not(:first-child) {
-                        margin-left: 28px;
-                    }
-                }
-                """;
     }
 }

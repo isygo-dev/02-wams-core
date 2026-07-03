@@ -52,6 +52,7 @@ public class ToggleRotationDialog extends PinBaseActionDialog {
 
         setOkButtonText(currentlyEnabled ? I18n.t("kms.key.dialog.rotation.toggle.button.disable") : I18n.t("kms.key.dialog.rotation.toggle.button.enable"));
         setWidth("450px");
+        addClassName("toggle-rotation-dialog");
 
         if (!currentlyEnabled) {
             // For enable case, add the rotation period field before the PIN field
@@ -142,7 +143,7 @@ public class ToggleRotationDialog extends PinBaseActionDialog {
         FormLayout form = new FormLayout();
         form.add(periodField);
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
-        form.getStyle().set("margin-top", "1em");
+        form.addClassName("period-form");
         return form;
     }
 }

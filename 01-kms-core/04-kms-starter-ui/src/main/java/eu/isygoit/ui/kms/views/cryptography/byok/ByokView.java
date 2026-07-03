@@ -149,7 +149,6 @@ public class ByokView extends ManagementVerticalView {
         });
 
         configureComponents();
-        injectResponsiveStyles();
         loadKeyOptions();
     }
 
@@ -160,8 +159,7 @@ public class ByokView extends ManagementVerticalView {
         card.addClassName(LumoUtility.Border.ALL);
         card.addClassName(LumoUtility.BorderRadius.LARGE);
         card.addClassName(LumoUtility.Padding.MEDIUM);
-        card.getStyle().set("margin-bottom", "var(--lumo-space-s)");
-        card.getStyle().set("background-color", "var(--lumo-base-color)");
+        card.addClassName("kms-parta-step-card");
 
         H3 stepTitle = new H3(title);
         stepTitle.addClassName(LumoUtility.FontSize.MEDIUM);
@@ -173,7 +171,7 @@ public class ByokView extends ManagementVerticalView {
             Span hintSpan = new Span(hint);
             hintSpan.addClassName(LumoUtility.FontSize.XSMALL);
             hintSpan.addClassName(LumoUtility.TextColor.TERTIARY);
-            hintSpan.getStyle().set("margin-bottom", "var(--lumo-space-s)");
+            hintSpan.addClassName("kms-parta-step-card__hint");
             card.add(hintSpan);
         }
 
@@ -188,7 +186,7 @@ public class ByokView extends ManagementVerticalView {
         keyLayout.setWidthFull();
         keyLayout.setAlignItems(FlexComponent.Alignment.BASELINE);
         keyLayout.setSpacing(true);
-        keyLayout.getStyle().set("flex-wrap", "wrap");
+        keyLayout.addClassName("kms-parta-filter-bar-wrap");
 
         keyCombo.setPlaceholder(I18n.t("kms.byok.view.select.key"));
         keyCombo.setItemLabelGenerator(KeyOption::getDisplayName);
@@ -207,10 +205,10 @@ public class ByokView extends ManagementVerticalView {
         row.setWidthFull();
         row.setAlignItems(FlexComponent.Alignment.CENTER);
         row.setSpacing(true);
-        row.getStyle().set("flex-wrap", "wrap");
+        row.addClassName("kms-parta-filter-bar-wrap");
 
         keyStatusInfo.addClassName(LumoUtility.FontSize.SMALL);
-        keyStatusInfo.getStyle().set("margin-top", "var(--lumo-space-xs)");
+        keyStatusInfo.addClassName("kms-parta-key-status-info");
 
         deleteMaterialButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
         deleteMaterialButton.setTooltipText(I18n.t("kms.byok.view.delete.material.tooltip"));
@@ -264,11 +262,11 @@ public class ByokView extends ManagementVerticalView {
         headerRow.setWidthFull();
         headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
         headerRow.setSpacing(true);
+        headerRow.addClassName("byok-header-row");
         Span labelSpan = new Span(I18n.t("kms.byok.view.plain.material.label"));
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.addClassName(LumoUtility.FontSize.SMALL);
         headerRow.add(labelSpan);
-        headerRow.getStyle().set("flex-wrap", "wrap");
 
         plainKeyMaterialField.setWidthFull();
         plainKeyMaterialField.setPlaceholder(I18n.t("kms.byok.view.plain.material.placeholder"));
@@ -288,6 +286,7 @@ public class ByokView extends ManagementVerticalView {
         headerRow.setWidthFull();
         headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
         headerRow.setSpacing(true);
+        headerRow.addClassName("byok-header-row");
 
         Span labelSpan = new Span(label);
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
@@ -308,7 +307,6 @@ public class ByokView extends ManagementVerticalView {
         });
 
         headerRow.add(labelSpan, copyBtn);
-        headerRow.getStyle().set("flex-wrap", "wrap");
 
         textArea.setWidthFull();
         textArea.setHeight("100px");
@@ -318,34 +316,11 @@ public class ByokView extends ManagementVerticalView {
     }
 
     private void copyToClipboard(String text) {
+        // Clipboard write must go through the browser API; success/failure feedback is
+        // handled by the caller via the standard Vaadin Notification component.
         UI.getCurrent().getPage().executeJs(
-                "navigator.clipboard.writeText($0).then(() => { " +
-                        "  const notification = document.createElement('div'); " +
-                        "  notification.textContent = $1; " +
-                        "  notification.style.position = 'fixed'; " +
-                        "  notification.style.bottom = '20px'; " +
-                        "  notification.style.right = '20px'; " +
-                        "  notification.style.backgroundColor = '#4caf50'; " +
-                        "  notification.style.color = 'white'; " +
-                        "  notification.style.padding = '10px 20px'; " +
-                        "  notification.style.borderRadius = '4px'; " +
-                        "  notification.style.zIndex = '1000'; " +
-                        "  document.body.appendChild(notification); " +
-                        "  setTimeout(() => notification.remove(), 2000); " +
-                        "}).catch(() => { " +
-                        "  const notification = document.createElement('div'); " +
-                        "  notification.textContent = $2; " +
-                        "  notification.style.position = 'fixed'; " +
-                        "  notification.style.bottom = '20px'; " +
-                        "  notification.style.right = '20px'; " +
-                        "  notification.style.backgroundColor = '#f44336'; " +
-                        "  notification.style.color = 'white'; " +
-                        "  notification.style.padding = '10px 20px'; " +
-                        "  notification.style.borderRadius = '4px'; " +
-                        "  notification.style.zIndex = '1000'; " +
-                        "  document.body.appendChild(notification); " +
-                        "  setTimeout(() => notification.remove(), 3000); " +
-                        "});", text, I18n.t("kms.byok.view.copied"), I18n.t("kms.byok.view.copy.failed"));
+                "navigator.clipboard.writeText($0).catch(e => console.error('Copy failed:', e));",
+                text);
     }
 
     private void configureComponents() {
@@ -670,35 +645,6 @@ public class ByokView extends ManagementVerticalView {
     private void showWarningNotification(String msg) {
         Notification.show(msg, 6000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_WARNING);
-    }
-
-    private void injectResponsiveStyles() {
-        String css = """
-                .kms-byok-view {
-                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-                    min-height: 100vh;
-                    animation: fadeIn 0.5s ease-out;
-                }
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .kms-byok-view {
-                    max-width: 1200px;
-                    margin: 0 auto;
-                }
-                @media (max-width: 768px) {
-                    .kms-byok-view .byok-field-row,
-                    .kms-byok-view .byok-header-row {
-                        flex-direction: column;
-                        align-items: flex-start;
-                    }
-                }
-                """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
     }
 
     private static class KeyOption {

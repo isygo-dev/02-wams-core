@@ -1,0 +1,43 @@
+/*
+ * Shared styling for eu.isygoit.ui.common.dialog.* (BaseActionDialog,
+ * PinBaseActionDialog, NoActionDialog and their subclasses across all modules).
+ */
+
+.wams-dialog-error-span {
+    margin-right: auto;
+}
+
+.wams-dialog-warning-row {
+    display: flex;
+    align-items: center;
+    gap: var(--lumo-space-s);
+}
+
+.wams-dialog-warning-icon {
+    flex-shrink: 0;
+    color: var(--lumo-error-color);
+}
+
+.wams-dialog-code-display {
+    text-align: center;
+}
+
+.wams-dialog-code-span {
+    font-size: 28px;
+    font-family: monospace;
+    background-color: var(--lumo-contrast-5pct);
+    padding: 12px 20px;
+    border-radius: var(--lumo-border-radius-m);
+    text-align: center;
+    letter-spacing: 4px;
+}
+
+/* ── Image cropper (eu.isygoit.ui.common.{dialog.ImageCropperDialog, component.ImageCropper}) ── */
+
+.wams-image-cropper-dialog__content {
+    overflow: auto;
+}
+
+.wams-image-cropper__container {
+    text-align: center;
+}

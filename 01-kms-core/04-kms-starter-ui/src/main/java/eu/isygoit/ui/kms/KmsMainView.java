@@ -77,7 +77,6 @@ public class KmsMainView extends ManagementVerticalView {
         add(auditLogPanel);
         add(buildQuickLinks());
 
-        injectResponsiveStyles();
         loadKeyOptions();
     }
 
@@ -102,8 +101,8 @@ public class KmsMainView extends ManagementVerticalView {
 
     private H2 buildHeader() {
         H2 title = new H2(I18n.t("kms.dashboard.title"));
-        title.getStyle().set("margin-bottom", "10px");
         title.addClassName(LumoUtility.FontSize.XXLARGE);
+        title.addClassName("kms-parta-dashboard-title");
         return title;
     }
 
@@ -152,7 +151,7 @@ public class KmsMainView extends ManagementVerticalView {
     private VerticalLayout buildQuickLinks() {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
-        layout.getStyle().set("gap", "10px").set("margin-top", "24px");
+        layout.addClassName("kms-parta-quick-links");
         H2 title = new H2(I18n.t("kms.dashboard.quick.actions"));
         title.addClassName(LumoUtility.FontSize.MEDIUM);
         Div actions = new Div();
@@ -163,53 +162,9 @@ public class KmsMainView extends ManagementVerticalView {
         sb.append("• ").append(I18n.t("kms.dashboard.quick.actions.configure.policies")).append("\n");
         sb.append("• ").append(I18n.t("kms.dashboard.quick.actions.manage.grants"));
         actions.add(new Span(sb.toString()));
-        actions.getStyle().set("white-space", "pre-line");
+        actions.addClassName("kms-parta-quick-links__actions");
         layout.add(title, actions);
         return layout;
-    }
-
-    private void injectResponsiveStyles() {
-        String css = """
-                .kms-dashboard .stat-card {
-                    transition: transform 0.2s ease, box-shadow 0.2s ease;
-                }
-                .kms-dashboard .stat-card:hover {
-                    transform: translateY(-4px);
-                    box-shadow: var(--lumo-box-shadow-m);
-                }
-                .kms-dashboard .stats-filter-bar,
-                .kms-dashboard .audit-filter-bar {
-                    background: var(--lumo-base-color);
-                    padding: var(--lumo-space-s);
-                    border-radius: var(--lumo-border-radius-m);
-                    margin-bottom: var(--lumo-space-s);
-                }
-                .kms-dashboard .audit-grid {
-                    overflow-x: auto;
-                }
-                @media (max-width: 768px) {
-                    .kms-dashboard .stats-filter-bar,
-                    .kms-dashboard .audit-filter-bar {
-                        flex-direction: column;
-                        align-items: stretch;
-                    }
-                    .kms-dashboard .stats-filter-bar > *,
-                    .kms-dashboard .audit-filter-bar > * {
-                        width: 100% !important;
-                        margin-bottom: var(--lumo-space-xs);
-                    }
-                    .kms-dashboard .audit-grid .vaadin-grid-table {
-                        min-width: 800px;
-                    }
-                    .kms-dashboard .stat-card {
-                        flex-basis: calc(50% - 16px);
-                    }
-                }
-                """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
     }
 
     private static class Span extends com.vaadin.flow.component.html.Span {

@@ -73,22 +73,18 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
         row1.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         row1.setAlignItems(FlexComponent.Alignment.CENTER);
         row1.setSpacing(true);
-        row1.getStyle().set("flex-wrap", "wrap");
+        row1.addClassName("card-row");
 
         accountImage = new Image();
         accountImage.setWidth("48px");
         accountImage.setHeight("48px");
-        accountImage.getStyle()
-                .set("border-radius", "50%")
-                .set("object-fit", "cover")
-                .set("background", "var(--lumo-contrast-10pct)")
-                .set("border", "2px solid var(--lumo-contrast-20pct)");
+        accountImage.addClassName("card-avatar");
         accountImage.setSrc(getSvgPlaceholder());
 
         buttonBar = new HorizontalLayout();
         buttonBar.setSpacing(true);
         buttonBar.setPadding(false);
-        buttonBar.getStyle().set("flex-wrap", "wrap");
+        buttonBar.addClassName("card-row");
         buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
         buttonBar.addClassName(cardCssClassName() + "__button-bar");
 
@@ -102,8 +98,8 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
         HorizontalLayout row2 = new HorizontalLayout();
         row2.setAlignItems(FlexComponent.Alignment.CENTER);
         row2.setSpacing(true);
-        row2.getStyle().set("flex-wrap", "wrap");
-        row2.getStyle().set("margin-top", "var(--lumo-space-s)");
+        row2.addClassName("card-row");
+        row2.addClassName("card-row--spaced");
 
         String displayName = minAccount.getFullName() != null ? minAccount.getFullName() : minAccount.getEmail();
         Span titleSpan = buildTitleSpan(displayName, minAccount.getEmail());
@@ -174,19 +170,13 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
             String status = minAccount.getAdminStatus() != null ? minAccount.getAdminStatus().name() : I18n.t("ims.account.card.status.unknown");
             adminStatusChip.setText(status);
             adminStatusChip.getElement().setAttribute("title", status);
-            ChipColor color = ChipColor.fromStatus(status);
-            adminStatusChip.getStyle()
-                    .set("background-color", color.background())
-                    .set("color", color.foreground());
+            applyChipColor(adminStatusChip, ChipColor.fromStatus(status));
         }
         if (systemStatusChip != null) {
             String status = minAccount.getSystemStatus() != null ? minAccount.getSystemStatus().name() : I18n.t("ims.account.card.status.unknown");
             systemStatusChip.setText(status);
             systemStatusChip.getElement().setAttribute("title", status);
-            ChipColor color = ChipColor.fromStatus(status);
-            systemStatusChip.getStyle()
-                    .set("background-color", color.background())
-                    .set("color", color.foreground());
+            applyChipColor(systemStatusChip, ChipColor.fromStatus(status));
         }
     }
 
@@ -203,7 +193,7 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
         VerticalLayout body = new VerticalLayout();
         body.setSpacing(false);
         body.setPadding(false);
-        body.getStyle().set("margin-top", "var(--lumo-space-s)");
+        body.addClassName("card-row--spaced");
 
         body.add(createIconRow(VaadinIcon.MAILBOX, I18n.t("ims.account.card.email"), minAccount.getEmail()));
 
@@ -242,17 +232,16 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("14px");
-        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        iconComponent.addClassName("meta-row-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        labelSpan.getStyle().set("min-width", "80px");
+        labelSpan.addClassName("meta-row-label");
 
         Span valueSpan = new Span(value != null ? value : "—");
         valueSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        valueSpan.getStyle().set("word-break", "break-all");
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("meta-row-value");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -289,35 +278,5 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
 
     private String getSvgPlaceholder() {
         return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'%3E%3C/circle%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3C/svg%3E";
-    }
-
-    @Override
-    protected String buildExtraStyles() {
-        return """
-                .account-card {
-                    padding: var(--lumo-space-s) var(--lumo-space-m);
-                }
-                .account-card .meta-row {
-                    border-bottom: 1px solid var(--lumo-contrast-10pct);
-                    padding-bottom: var(--lumo-space-xs);
-                    margin-bottom: var(--lumo-space-xs);
-                }
-                .account-card .meta-row:last-child {
-                    border-bottom: none;
-                    margin-bottom: 0;
-                }
-                @media (max-width: 640px) {
-                    .account-card .meta-row {
-                        flex-wrap: wrap;
-                    }
-                    .account-card .meta-row > :not(:first-child) {
-                        margin-left: 28px;
-                    }
-                    .account-card .account-card__button-bar {
-                        width: 100%;
-                        justify-content: flex-start;
-                    }
-                }
-                """;
     }
 }

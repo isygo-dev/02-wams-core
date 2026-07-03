@@ -92,6 +92,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
     protected TokenConfigDialogBase(String title, Runnable onSuccess, KmsApiService kmsApiService) {
         super(title, onSuccess);
         this.kmsApiService = kmsApiService;
+        addClassName("token-config-dialog");
         setWidth("850px");
         setMaxWidth("95%");
         setResizable(true);
@@ -174,7 +175,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
 
         Span lifetimeLabel = new Span(I18n.t("kms.dialog.token.lifetime"));
         lifetimeLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        lifetimeLabel.getStyle().set("margin-right", "var(--lumo-space-s)");
+        lifetimeLabel.addClassName("lifetime-label");
 
         lifetimeRow = new HorizontalLayout(lifetimeLabel, lifeTimeValueField, lifeTimeUnitCombo, noExpirationCheckbox);
         lifetimeRow.setWidthFull();
@@ -277,13 +278,12 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
     private VerticalLayout createPublicKeyComponent() {
         HorizontalLayout header = new HorizontalLayout();
         Span label = new Span(I18n.t("kms.dialog.token.public.key"));
-        label.getStyle().set("font-weight", "bold");
-        label.getStyle().set("margin-right", "auto");
+        label.addClassName("public-key-label");
 
         copyPublicKeyButton = new Button(new Icon(VaadinIcon.COPY));
         copyPublicKeyButton.addClickListener(e -> copyToClipboard(publicKeyArea.getValue()));
         copyPublicKeyButton.setTooltipText(I18n.t("kms.dialog.token.copy.public.key"));
-        copyPublicKeyButton.getStyle().set("margin-left", "auto");
+        copyPublicKeyButton.addClassName("copy-public-key-button");
         copyPublicKeyButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
 
         header.add(label, copyPublicKeyButton);
@@ -645,7 +645,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
             chipsContainer = new HorizontalLayout();
             chipsContainer.setSpacing(true);
             chipsContainer.setWidthFull();
-            chipsContainer.getStyle().set("flex-wrap", "wrap");
+            chipsContainer.addClassName("audience-chips-container");
 
             add(inputRow, chipsContainer);
         }
@@ -673,14 +673,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
 
         private void addChip(String audience) {
             Span chip = new Span(audience);
-            chip.getStyle()
-                    .set("background-color", "var(--lumo-contrast-10pct)")
-                    .set("border-radius", "16px")
-                    .set("padding", "4px 12px")
-                    .set("font-size", "var(--lumo-font-size-s)")
-                    .set("display", "inline-flex")
-                    .set("align-items", "center")
-                    .set("gap", "8px");
+            chip.addClassName("audience-chip");
 
             Button removeButton = new Button(new Icon(VaadinIcon.CLOSE_SMALL));
             removeButton.addThemeName("tertiary-inline");

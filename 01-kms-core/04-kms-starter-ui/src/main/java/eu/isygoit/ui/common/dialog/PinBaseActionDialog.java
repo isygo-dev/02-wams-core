@@ -47,9 +47,8 @@ public abstract class PinBaseActionDialog extends BaseActionDialog {
      */
     private HorizontalLayout createWarningMessage(String message) {
         Icon warningIcon = VaadinIcon.WARNING.create();
-        warningIcon.setColor("var(--lumo-error-color)");
         warningIcon.setSize("18px");
-        warningIcon.getStyle().set("flex-shrink", "0");
+        warningIcon.addClassName("wams-dialog-warning-icon");
 
         Span messageSpan = new Span(message);
         messageSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
@@ -58,6 +57,7 @@ public abstract class PinBaseActionDialog extends BaseActionDialog {
         warningLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         warningLayout.setSpacing(true);
         warningLayout.setPadding(false);
+        warningLayout.addClassName("wams-dialog-warning-row");
         return warningLayout;
     }
 
@@ -89,16 +89,9 @@ public abstract class PinBaseActionDialog extends BaseActionDialog {
     protected Div createCodeDisplay(String code) {
         Span codeSpan = new Span(code);
         codeSpan.addClassName(LumoUtility.FontWeight.BOLD);
-        codeSpan.getStyle()
-                .set("font-size", "28px")
-                .set("font-family", "monospace")
-                .set("background-color", "var(--lumo-contrast-5pct)")
-                .set("padding", "12px 20px")
-                .set("border-radius", "8px")
-                .set("text-align", "center")
-                .set("letter-spacing", "4px");
+        codeSpan.addClassName("wams-dialog-code-span");
         Div codeDiv = new Div(codeSpan);
-        codeDiv.getStyle().set("text-align", "center");
+        codeDiv.addClassName("wams-dialog-code-display");
         return codeDiv;
     }
 

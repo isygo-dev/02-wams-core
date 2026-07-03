@@ -50,7 +50,7 @@ public class ViewMsgTemplateDialog extends Dialog {
 
         // Template details
         Div detailsDiv = new Div();
-        detailsDiv.getStyle().set("padding", "var(--lumo-space-m)");
+        detailsDiv.addClassName("wams-view-details");
 
         addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.id"), template.getId().toString());
         addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.code"), template.getCode());
@@ -94,18 +94,14 @@ public class ViewMsgTemplateDialog extends Dialog {
 
     private void addDetailRow(Div container, String label, String value) {
         Div row = new Div();
-        row.getStyle()
-                .set("display", "flex")
-                .set("padding", "var(--lumo-space-xs) 0")
-                .set("border-bottom", "1px solid var(--lumo-contrast-10pct)");
+        row.addClassName("wams-view-detail-row");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.getStyle().set("min-width", "120px");
+        labelSpan.addClassName("wams-view-detail-label");
 
         Span valueSpan = new Span(value != null ? value : I18n.t("mms.common.value.notAvailable"));
-        valueSpan.getStyle().set("font-family", "monospace");
-        valueSpan.getStyle().set("word-break", "break-all");
+        valueSpan.addClassName("wams-view-detail-value");
 
         row.add(labelSpan, valueSpan);
         container.add(row);

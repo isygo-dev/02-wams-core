@@ -1,5 +1,6 @@
 package eu.isygoit.ui.auth;
 
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -13,10 +14,10 @@ import lombok.extern.slf4j.Slf4j;
  * Handles redirect capture, authentication check, and error display.
  */
 @Slf4j
+@CssImport("./styles/auth.css")
 public abstract class BaseLoginView extends VerticalLayout implements BeforeEnterObserver {
 
     protected String redirectTarget;
-    protected boolean stylesInjected = false;
 
     /**
      * Common before‑enter logic for all login views:
@@ -63,22 +64,5 @@ public abstract class BaseLoginView extends VerticalLayout implements BeforeEnte
     protected void showError(String message) {
         Notification.show(message, 3000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
-    }
-
-    /**
-     * Injects responsive CSS styles into the page.
-     * Subclasses must implement this to provide their own styles.
-     */
-    protected abstract void injectResponsiveStyles();
-
-    /**
-     * Utility method to inject a CSS block.
-     * Called by subclasses from their constructors or on attach.
-     */
-    protected void injectStyles(String css) {
-        com.vaadin.flow.component.UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
     }
 }

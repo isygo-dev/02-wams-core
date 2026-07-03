@@ -94,11 +94,9 @@ public class TokenBuilderView extends ManagementVerticalView {
         HorizontalLayout cardsRow = new HorizontalLayout(buildCard, validateCard);
         cardsRow.setWidthFull();
         cardsRow.setSpacing(true);
-        cardsRow.getStyle().set("flex-wrap", "wrap");
+        cardsRow.addClassName("cards-row");
         cardsRow.setJustifyContentMode(FlexComponent.JustifyContentMode.START);
         add(cardsRow);
-
-        attachResponsiveStyles();
     }
 
     private void buildHeader() {
@@ -275,16 +273,13 @@ public class TokenBuilderView extends ManagementVerticalView {
         tokenLine.setAlignItems(FlexComponent.Alignment.CENTER);
         tokenLine.setSpacing(true);
         tokenLine.setWidthFull();
-        tokenLine.getStyle().set("flex-wrap", "wrap");
+        tokenLine.addClassName("token-result-line");
 
         Span tokenLabel = new Span("🔑 " + I18n.t("kms.token.builder.token.label"));
         tokenLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
 
         Span tokenValue = new Span(tokenResponse.getToken());
-        tokenValue.getStyle().set("font-family", "monospace");
-        tokenValue.getStyle().set("font-size", "var(--lumo-font-size-xs)");
-        tokenValue.getStyle().set("word-break", "break-all");
-        tokenValue.getStyle().set("flex", "1");
+        tokenValue.addClassName("token-result-value");
 
         Button copyBtn = new Button(new Icon(VaadinIcon.COPY));
         copyBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
@@ -307,7 +302,7 @@ public class TokenBuilderView extends ManagementVerticalView {
         Span expiryValue = new Span(tokenResponse.getExpiryDate() != null ?
                 DateHelper.formatToHumanReadable(DateHelper.toLocalDateTime(tokenResponse.getExpiryDate()))
                 : I18n.t("kms.token.builder.expires.never"));
-        expiryValue.getStyle().set("font-family", "monospace");
+        expiryValue.addClassName("expiry-value");
         expiryLine.add(expiryLabel, expiryValue);
 
         buildResultPanel.add(tokenLine, expiryLine);
@@ -343,11 +338,13 @@ public class TokenBuilderView extends ManagementVerticalView {
             validationResultSpan.setVisible(true);
             if (response.getStatusCode().is2xxSuccessful() && Boolean.TRUE.equals(response.getBody())) {
                 validationResultSpan.setText("✅ " + I18n.t("kms.token.builder.token.valid"));
-                validationResultSpan.getStyle().set("color", "var(--lumo-success-text-color)");
+                validationResultSpan.removeClassName("validation-result-error");
+                validationResultSpan.addClassName("validation-result-success");
                 showSuccess(I18n.t("kms.token.builder.token.valid.success"));
             } else {
                 validationResultSpan.setText("❌ " + I18n.t("kms.token.builder.token.invalid"));
-                validationResultSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+                validationResultSpan.removeClassName("validation-result-success");
+                validationResultSpan.addClassName("validation-result-error");
                 showWarning(I18n.t("kms.token.builder.token.invalid.warning"));
             }
         } catch (FeignException ex) {
@@ -355,7 +352,8 @@ public class TokenBuilderView extends ManagementVerticalView {
             showError(I18n.t("kms.token.builder.validate.error", errorMsg));
             validationResultSpan.setVisible(true);
             validationResultSpan.setText("❌ " + I18n.t("kms.token.builder.validation.failed", errorMsg));
-            validationResultSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+            validationResultSpan.removeClassName("validation-result-success");
+            validationResultSpan.addClassName("validation-result-error");
         } catch (Exception e) {
             showError(I18n.t("kms.token.builder.unexpected.error", e.getMessage()));
         } finally {
@@ -428,53 +426,6 @@ public class TokenBuilderView extends ManagementVerticalView {
                 .addThemeVariants(NotificationVariant.LUMO_WARNING);
     }
 
-    private void attachResponsiveStyles() {
-        String css = """
-                .tokenizer-view {
-                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-                    min-height: 100vh;
-                    animation: fadeIn 0.5s ease-out;
-                }
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .tokenizer-view .compact-card {
-                    flex: 1;
-                    min-width: 280px;
-                    padding: var(--lumo-space-m);
-                    transition: all 0.2s ease;
-                    background: var(--lumo-base-color);
-                    border-radius: var(--lumo-border-radius-xl);
-                    box-shadow: var(--lumo-box-shadow-m);
-                }
-                .tokenizer-view .compact-card .form-layout {
-                    margin-top: var(--lumo-space-m);
-                }
-                .tokenizer-view .result-panel {
-                    margin-top: var(--lumo-space-m);
-                    padding: var(--lumo-space-s);
-                    background: var(--lumo-contrast-5pct);
-                    border-radius: var(--lumo-border-radius-m);
-                }
-                .tokenizer-view .chip-remove {
-                    width: 16px;
-                    height: 16px;
-                    padding: 0;
-                }
-                @media (max-width: 768px) {
-                    .tokenizer-view .compact-card {
-                        min-width: 100%;
-                        margin-bottom: var(--lumo-space-m);
-                    }
-                }
-                """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
-    }
-
     // AudienceInput component with i18n
     private static class AudienceInput extends VerticalLayout {
         private final TextField inputField;
@@ -488,7 +439,7 @@ public class TokenBuilderView extends ManagementVerticalView {
 
             Span labelSpan = new Span();
             labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-            labelSpan.getStyle().set("margin-right", "var(--lumo-space-s)");
+            labelSpan.addClassName("audience-label");
 
             inputField = new TextField();
             inputField.setPlaceholder(I18n.t("kms.token.builder.audience.placeholder"));
@@ -507,7 +458,7 @@ public class TokenBuilderView extends ManagementVerticalView {
             chipsContainer = new HorizontalLayout();
             chipsContainer.setSpacing(true);
             chipsContainer.setWidthFull();
-            chipsContainer.getStyle().set("flex-wrap", "wrap");
+            chipsContainer.addClassName("audience-chips-container");
 
             add(mainRow, chipsContainer);
         }
@@ -536,14 +487,7 @@ public class TokenBuilderView extends ManagementVerticalView {
 
         private void addChip(String audience) {
             Span chip = new Span(audience);
-            chip.getStyle()
-                    .set("background-color", "var(--lumo-contrast-10pct)")
-                    .set("border-radius", "16px")
-                    .set("padding", "4px 12px")
-                    .set("font-size", "var(--lumo-font-size-xs)")
-                    .set("display", "inline-flex")
-                    .set("align-items", "center")
-                    .set("gap", "8px");
+            chip.addClassName("audience-chip");
 
             Button removeButton = new Button(new Icon(VaadinIcon.CLOSE_SMALL));
             removeButton.addThemeName("tertiary-inline");

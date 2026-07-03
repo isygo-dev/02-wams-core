@@ -4,6 +4,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
@@ -41,6 +42,7 @@ import java.util.Optional;
 @Route(value = "register")
 @PageTitle("Create Account")
 @PermitAll
+@CssImport("./styles/auth.css")
 public class RegisterView extends VerticalLayout implements BeforeEnterObserver {
 
     private final TextField firstNameField = new TextField(I18n.t("auth.register.field.firstName.label"));
@@ -51,7 +53,6 @@ public class RegisterView extends VerticalLayout implements BeforeEnterObserver 
     private final Button registerButton = new Button(I18n.t("auth.register.button.createAccount"), VaadinIcon.USER_STAR.create());
     private final Div errorContainer = new Div();
     private final Binder<RegisteredUserDto> binder = new Binder<>(RegisteredUserDto.class);
-    private boolean stylesInjected = false;
 
     @Autowired
     private PublicAuthService authService;
@@ -136,13 +137,6 @@ public class RegisterView extends VerticalLayout implements BeforeEnterObserver 
         wrapper.addClassName("register-wrapper");
 
         add(wrapper);
-
-        addAttachListener(event -> {
-            if (!stylesInjected) {
-                injectResponsiveStyles();
-                stylesInjected = true;
-            }
-        });
     }
 
     private void handleRegistration() {
@@ -187,64 +181,5 @@ public class RegisterView extends VerticalLayout implements BeforeEnterObserver 
             event.forwardTo(target);
         }
         errorContainer.setVisible(false);
-    }
-
-    private void injectResponsiveStyles() {
-        String css = """
-                .register-view {
-                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-                    min-height: 100vh;
-                    animation: fadeIn 0.5s ease-out;
-                }
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .register-wrapper {
-                    background: var(--lumo-base-color);
-                    border-radius: var(--lumo-border-radius-xl);
-                    box-shadow: var(--lumo-box-shadow-m);
-                    padding: var(--lumo-space-l);
-                }
-                .register-view .brand {
-                    text-align: center;
-                    margin-bottom: var(--lumo-space-m);
-                }
-                .register-view .brand h2 {
-                    font-size: var(--lumo-font-size-xl);
-                    letter-spacing: -0.5px;
-                }
-                .register-view .register-form {
-                    width: 100%;
-                }
-                .register-view .error-container {
-                    background: var(--lumo-error-color-10pct);
-                    color: var(--lumo-error-text-color);
-                    padding: var(--lumo-space-s);
-                    border-radius: var(--lumo-border-radius-m);
-                    font-size: var(--lumo-font-size-xs);
-                    width: 100%;
-                    text-align: center;
-                }
-                .register-view .login-link {
-                    color: var(--lumo-primary-text-color);
-                    font-size: var(--lumo-font-size-s);
-                    margin-top: var(--lumo-space-s);
-                }
-                @media (max-width: 480px) {
-                    .register-wrapper {
-                        padding: var(--lumo-space-m);
-                        border-radius: var(--lumo-border-radius-l);
-                        margin: var(--lumo-space-m);
-                    }
-                    .register-view .brand h2 {
-                        font-size: var(--lumo-font-size-l);
-                    }
-                }
-                """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
     }
 }

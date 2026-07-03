@@ -80,11 +80,7 @@ public class CreateMsgTemplateDialog extends BaseMsgTemplateDialog {
 
         // Add file upload section
         Div uploadSection = new Div();
-        uploadSection.getStyle()
-                .set("margin-top", "var(--lumo-space-m)")
-                .set("padding", "var(--lumo-space-m)")
-                .set("border", "1px dashed var(--lumo-contrast-30pct)")
-                .set("border-radius", "var(--lumo-border-radius-m)");
+        uploadSection.addClassName("wams-dialog-upload-section");
         uploadSection.add(fileUpload, fileInfoArea);
         contentArea.add(uploadSection);
     }

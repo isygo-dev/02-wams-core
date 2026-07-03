@@ -42,6 +42,7 @@ public class ClaimsBuilderDialog extends NoActionDialog {
         this.existingClaimsJson = existingClaimsJson;
         this.callback = callback;
 
+        addClassName("claims-builder-dialog");
         setWidth("750px");
         setMaxWidth("95%");
         setResizable(true);
@@ -71,7 +72,7 @@ public class ClaimsBuilderDialog extends NoActionDialog {
         claimCounter = new Span();
         claimCounter.addClassName(LumoUtility.FontSize.XSMALL);
         claimCounter.addClassName(LumoUtility.TextColor.TERTIARY);
-        claimCounter.getStyle().set("margin-top", "0");
+        claimCounter.addClassName("claim-counter");
 
         // Validation hint
         validationHint = new Span();
@@ -92,7 +93,7 @@ public class ClaimsBuilderDialog extends NoActionDialog {
         headerBar.setWidthFull();
         headerBar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         headerBar.setAlignItems(FlexComponent.Alignment.CENTER);
-        headerBar.getStyle().set("margin-bottom", "var(--lumo-space-xs)");
+        headerBar.addClassName("header-bar");
 
         // Action buttons
         Button applyButton = new Button(I18n.t("kms.claims.builder.apply.close"), new Icon(VaadinIcon.CHECK));
@@ -258,9 +259,7 @@ public class ClaimsBuilderDialog extends NoActionDialog {
             layout.setAlignItems(FlexComponent.Alignment.START);
             layout.setSpacing(true);
             layout.setWidthFull();
-            layout.getStyle().set("border-bottom", "1px solid var(--lumo-contrast-10pct)");
-            layout.getStyle().set("padding-bottom", "var(--lumo-space-xs)");
-            layout.getStyle().set("margin-bottom", "var(--lumo-space-xs)");
+            layout.addClassName("claim-row");
 
             // Key field (30%)
             keyField = new TextField();

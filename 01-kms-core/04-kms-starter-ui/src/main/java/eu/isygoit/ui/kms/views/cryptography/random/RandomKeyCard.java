@@ -45,7 +45,7 @@ public class RandomKeyCard extends BaseCard<RandomKeyView, RandomKeyService> {
         HorizontalLayout left = new HorizontalLayout();
         left.setAlignItems(FlexComponent.Alignment.CENTER);
         left.setSpacing(true);
-        left.getStyle().set("flex-wrap", "wrap");
+        left.addClassName("wams-card__header-row");
         Span titleSpan = buildTitleSpan(dto.getName(), null);
         left.add(titleSpan);
         return left;
@@ -79,12 +79,12 @@ public class RandomKeyCard extends BaseCard<RandomKeyView, RandomKeyService> {
         keyRow.setAlignItems(FlexComponent.Alignment.CENTER);
         keyRow.setSpacing(true);
         keyRow.setWidthFull();
-        keyRow.getStyle().set("margin-top", "var(--lumo-space-xs)");
         keyRow.addClassName("meta-row");
+        keyRow.addClassName("random-key-card__row");
 
         Icon keyIcon = VaadinIcon.KEY.create();
         keyIcon.setSize("16px");
-        keyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        keyIcon.addClassName("random-key-card__row-icon");
 
         // Compute key length and create label with parentheses
         int keyLength = dto.getValue() != null ? dto.getValue().length() : 0;
@@ -92,13 +92,12 @@ public class RandomKeyCard extends BaseCard<RandomKeyView, RandomKeyService> {
         Span keyLabel = new Span(keyLabelText);
         keyLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         keyLabel.addClassName(LumoUtility.FontSize.XSMALL);
-        keyLabel.getStyle().set("min-width", "100px");
+        keyLabel.addClassName("random-key-card__row-label");
 
         String maskedValue = maskKey(dto.getValue());
         Span keyValueSpan = new Span(maskedValue);
         keyValueSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        keyValueSpan.getStyle().set("font-family", "monospace");
-        keyValueSpan.getStyle().set("flex", "1");
+        keyValueSpan.addClassName("random-key-card__row-value");
 
         Button copyBtn = KmsMainView.createCopyButton(VaadinIcon.COPY, dto.getValue(), I18n.t("kms.random.key.card.copy.tooltip"));
         copyBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
@@ -113,23 +112,22 @@ public class RandomKeyCard extends BaseCard<RandomKeyView, RandomKeyService> {
         row.setAlignItems(FlexComponent.Alignment.CENTER);
         row.setSpacing(true);
         row.setWidthFull();
-        row.getStyle().set("margin-top", "var(--lumo-space-xs)");
         row.addClassName("meta-row");
+        row.addClassName("random-key-card__row");
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("16px");
-        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        iconComponent.addClassName("random-key-card__row-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        labelSpan.getStyle().set("min-width", "100px");
+        labelSpan.addClassName("random-key-card__row-label");
 
         Span valueSpan = new Span(value != null ? value : I18n.t("kms.random.key.card.masked"));
         valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        valueSpan.getStyle().set("font-family", "monospace");
-        valueSpan.getStyle().set("word-break", "break-all");
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("random-key-card__row-value");
+        valueSpan.addClassName("random-key-card__row-value--wrap");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -140,26 +138,5 @@ public class RandomKeyCard extends BaseCard<RandomKeyView, RandomKeyService> {
         if (full == null) return I18n.t("kms.random.key.card.masked");
         if (full.length() <= 8) return "****";
         return full.substring(0, 4) + "..." + full.substring(full.length() - 4);
-    }
-
-    @Override
-    protected String buildExtraStyles() {
-        return """
-                .random-key-card .meta-row {
-                    border-bottom: 1px solid var(--lumo-contrast-10pct);
-                    padding-bottom: var(--lumo-space-xs);
-                }
-                .random-key-card .meta-row:last-child {
-                    border-bottom: none;
-                }
-                @media (max-width: 640px) {
-                    .random-key-card .meta-row {
-                        flex-wrap: wrap;
-                    }
-                    .random-key-card .meta-row > :not(:first-child) {
-                        margin-left: 28px;
-                    }
-                }
-                """;
     }
 }

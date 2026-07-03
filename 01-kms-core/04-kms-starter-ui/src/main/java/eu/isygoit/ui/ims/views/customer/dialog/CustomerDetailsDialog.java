@@ -72,10 +72,7 @@ public class CustomerDetailsDialog extends NoActionDialog {
 
         // Basic info
         Div basicInfo = new Div();
-        basicInfo.addClassName("details-grid");
-        basicInfo.getStyle().set("display", "grid")
-                .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
-                .set("gap", "var(--lumo-space-s)");
+        basicInfo.addClassName("wams-card__detail-grid");
 
         addFieldToGrid(basicInfo, VaadinIcon.USER, I18n.t("ims.customer.details.field.name"), customer.getName());
         addFieldToGrid(basicInfo, VaadinIcon.ENVELOPE, I18n.t("ims.customer.details.field.email"), customer.getEmail());
@@ -94,11 +91,11 @@ public class CustomerDetailsDialog extends NoActionDialog {
             descRow.setWidthFull();
             Icon descIcon = VaadinIcon.FILE_TEXT.create();
             descIcon.setSize("16px");
-            descIcon.getStyle().set("color", "var(--lumo-primary-color)");
+            descIcon.addClassName("detail-field-icon");
             Span descLabel = new Span(I18n.t("ims.customer.details.field.description"));
             descLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
             Span descValue = new Span(customer.getDescription());
-            descValue.getStyle().set("flex", "1");
+            descValue.addClassName("detail-field-value");
             descRow.add(descIcon, descLabel, descValue);
             descRow.expand(descValue);
             mainLayout.add(descRow);
@@ -108,9 +105,7 @@ public class CustomerDetailsDialog extends NoActionDialog {
         if (customer.getAddress() != null) {
             AddressDto addr = customer.getAddress();
             Div addressInfo = new Div();
-            addressInfo.getStyle().set("display", "grid")
-                    .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
-                    .set("gap", "var(--lumo-space-s)");
+            addressInfo.addClassName("wams-card__detail-grid");
 
             addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.customer.details.field.country"), addr.getCountry());
             addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.customer.details.field.state"), addr.getState());
@@ -124,9 +119,7 @@ public class CustomerDetailsDialog extends NoActionDialog {
 
         // Audit
         Div auditInfo = new Div();
-        auditInfo.getStyle().set("display", "grid")
-                .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
-                .set("gap", "var(--lumo-space-s)");
+        auditInfo.addClassName("wams-card__detail-grid");
 
         addFieldToGrid(auditInfo, VaadinIcon.CALENDAR, I18n.t("ims.customer.details.field.created"), customer.getCreateDate() != null ? DateHelper.formatToHumanReadable(customer.getCreateDate()) : null);
         addFieldToGrid(auditInfo, VaadinIcon.USER_CHECK, I18n.t("ims.customer.details.field.created.by"), customer.getCreatedBy());
@@ -149,7 +142,7 @@ public class CustomerDetailsDialog extends NoActionDialog {
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("16px");
-        iconComponent.getStyle().set("color", "var(--lumo-primary-color)");
+        iconComponent.addClassName("detail-field-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
@@ -157,7 +150,7 @@ public class CustomerDetailsDialog extends NoActionDialog {
 
         Span valueSpan = new Span(value);
         valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("detail-field-value");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -171,9 +164,7 @@ public class CustomerDetailsDialog extends NoActionDialog {
         Span titleSpan = new Span(title);
         titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
         titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
-        titleSpan.getStyle().set("border-bottom", "1px solid var(--lumo-contrast-20pct)")
-                .set("margin-bottom", "var(--lumo-space-s)")
-                .set("padding-bottom", "var(--lumo-space-xs)");
+        titleSpan.addClassName("wams-section-title");
         section.add(titleSpan, content);
         return section;
     }

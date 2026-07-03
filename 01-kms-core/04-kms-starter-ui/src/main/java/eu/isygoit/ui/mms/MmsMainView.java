@@ -1,6 +1,5 @@
 package eu.isygoit.ui.mms;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.Icon;
@@ -48,13 +47,11 @@ public class MmsMainView extends ManagementVerticalView {
         senderConfigPanel = new SenderConfigPanel();
         add(senderConfigPanel);
         add(buildQuickLinks());
-
-        injectResponsiveStyles();
     }
 
     private H2 buildHeader() {
         H2 title = new H2(I18n.t("mms.dashboard.title"));
-        title.getStyle().set("margin-bottom", "10px");
+        title.addClassName("wams-dashboard-title");
         title.addClassName(LumoUtility.FontSize.XXLARGE);
         return title;
     }
@@ -81,7 +78,7 @@ public class MmsMainView extends ManagementVerticalView {
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("32px");
-        iconComponent.getStyle().set("color", "var(--lumo-primary-color)");
+        iconComponent.setColor("var(--lumo-primary-color)");
 
         H2 valueLabel = new H2(value);
         valueLabel.addClassName(LumoUtility.FontSize.XLARGE);
@@ -106,7 +103,7 @@ public class MmsMainView extends ManagementVerticalView {
     private VerticalLayout buildQuickLinks() {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
-        layout.getStyle().set("gap", "10px").set("margin-top", "24px");
+        layout.addClassName("wams-quick-actions");
 
         H2 title = new H2(I18n.t("mms.dashboard.quick.actions"));
         title.addClassName(LumoUtility.FontSize.MEDIUM);
@@ -132,62 +129,18 @@ public class MmsMainView extends ManagementVerticalView {
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("16px");
-        iconComponent.getStyle().set("color", "var(--lumo-primary-color)");
+        iconComponent.setColor("var(--lumo-primary-color)");
+        iconComponent.addClassName("quick-link-icon");
 
         Paragraph label = new Paragraph(I18n.t(labelKey));
         label.addClassName(LumoUtility.FontSize.SMALL);
         label.addClassName(LumoUtility.Margin.NONE);
 
         link.add(iconComponent, label);
-        link.getStyle().set("cursor", "pointer");
         link.addClickListener(e -> {
             // Navigate to appropriate view
         });
 
         return link;
-    }
-
-    private void injectResponsiveStyles() {
-        String css = """
-                .mms-dashboard .stat-card {
-                    background: var(--lumo-base-color);
-                    padding: var(--lumo-space-m);
-                    border-radius: var(--lumo-border-radius-l);
-                    box-shadow: var(--lumo-box-shadow-xs);
-                    transition: transform 0.2s ease, box-shadow 0.2s ease;
-                    flex: 1;
-                    min-width: 150px;
-                }
-                .mms-dashboard .stat-card:hover {
-                    transform: translateY(-4px);
-                    box-shadow: var(--lumo-box-shadow-m);
-                }
-                .mms-dashboard .stats-overview {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: var(--lumo-space-m);
-                    margin-bottom: var(--lumo-space-l);
-                }
-                .mms-dashboard .quick-link {
-                    padding: var(--lumo-space-xs) var(--lumo-space-s);
-                    border-radius: var(--lumo-border-radius-m);
-                    transition: background 0.2s;
-                }
-                .mms-dashboard .quick-link:hover {
-                    background: var(--lumo-primary-color-10pct);
-                }
-                @media (max-width: 768px) {
-                    .mms-dashboard .stat-card {
-                        flex-basis: calc(50% - 16px);
-                    }
-                    .mms-dashboard .stats-overview {
-                        flex-direction: column;
-                    }
-                }
-                """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
     }
 }

@@ -65,7 +65,7 @@ public class ImageCropperDialog extends Dialog {
         layout.setWidthFull();
 
         Div content = new Div(layout);
-        content.getStyle().set("overflow", "auto");
+        content.addClassName("wams-image-cropper-dialog__content");
         add(content);
     }
 }

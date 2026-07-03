@@ -88,14 +88,10 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
 
         // Add file upload section
         Div uploadSection = new Div();
-        uploadSection.getStyle()
-                .set("margin-top", "var(--lumo-space-m)")
-                .set("padding", "var(--lumo-space-m)")
-                .set("border", "1px dashed var(--lumo-contrast-30pct)")
-                .set("border-radius", "var(--lumo-border-radius-m)");
+        uploadSection.addClassName("wams-dialog-upload-section");
 
         Span uploadLabel = new Span(I18n.t("mms.msgtemplate.dialog.edit.upload.new.file"));
-        uploadLabel.getStyle().set("font-weight", "bold");
+        uploadLabel.addClassName("wams-dialog-upload-label");
         uploadSection.add(uploadLabel, fileUpload, fileInfoArea);
         contentArea.add(uploadSection);
     }

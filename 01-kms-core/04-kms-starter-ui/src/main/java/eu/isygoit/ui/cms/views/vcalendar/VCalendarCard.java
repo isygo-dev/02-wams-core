@@ -45,7 +45,7 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
         HorizontalLayout titleLayout = new HorizontalLayout();
         titleLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         titleLayout.setSpacing(true);
-        titleLayout.getStyle().set("flex-wrap", "wrap");
+        titleLayout.addClassName("wams-title-row");
 
         String displayName = calendar.getName() != null ? calendar.getName() : I18n.t("cms.calendar.card.default.name", calendar.getId());
         Span titleSpan = buildTitleSpan(displayName, calendar.getDescription());
@@ -91,7 +91,7 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
         VerticalLayout body = new VerticalLayout();
         body.setSpacing(false);
         body.setPadding(false);
-        body.getStyle().set("margin-top", "var(--lumo-space-s)");
+        body.addClassName("wams-body-rows");
 
         body.add(createIconRow(VaadinIcon.CODE, I18n.t("cms.calendar.card.code"), calendar.getCode()));
         body.add(createIconRow(VaadinIcon.BUILDING, I18n.t("cms.calendar.card.tenant"), calendar.getTenant()));
@@ -114,17 +114,16 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
 
         com.vaadin.flow.component.icon.Icon iconComponent = icon.create();
         iconComponent.setSize("14px");
-        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        iconComponent.addClassName("meta-row-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        labelSpan.getStyle().set("min-width", "80px");
+        labelSpan.addClassName("meta-row-label");
 
         Span valueSpan = new Span(value != null ? value : "—");
         valueSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        valueSpan.getStyle().set("word-break", "break-all");
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("meta-row-value");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -140,19 +139,18 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
 
         com.vaadin.flow.component.icon.Icon iconComponent = VaadinIcon.FILE_TEXT.create();
         iconComponent.setSize("14px");
-        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)")
-                .set("margin-top", "2px");
+        iconComponent.addClassName("meta-row-icon");
+        iconComponent.addClassName("meta-row-icon--align-start");
 
         Span labelSpan = new Span(I18n.t("cms.calendar.card.description") + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        labelSpan.getStyle().set("min-width", "80px");
+        labelSpan.addClassName("meta-row-label");
 
         Span valueSpan = new Span(description);
         valueSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        valueSpan.getStyle().set("word-break", "break-word");
-        valueSpan.getStyle().set("flex", "1");
-        valueSpan.getStyle().set("white-space", "pre-wrap");
+        valueSpan.addClassName("meta-row-value");
+        valueSpan.addClassName("meta-row-value--wrap");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -162,35 +160,5 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
     @Override
     protected void onCardAttach(AttachEvent event) {
         // nothing special
-    }
-
-    @Override
-    protected String buildExtraStyles() {
-        return """
-                .calendar-card {
-                    padding: var(--lumo-space-s) var(--lumo-space-m);
-                }
-                .calendar-card .meta-row {
-                    border-bottom: 1px solid var(--lumo-contrast-10pct);
-                    padding-bottom: var(--lumo-space-xs);
-                    margin-bottom: var(--lumo-space-xs);
-                }
-                .calendar-card .meta-row:last-child {
-                    border-bottom: none;
-                    margin-bottom: 0;
-                }
-                @media (max-width: 640px) {
-                    .calendar-card .meta-row {
-                        flex-wrap: wrap;
-                    }
-                    .calendar-card .meta-row > :not(:first-child) {
-                        margin-left: 28px;
-                    }
-                    .calendar-card .calendar-card__button-bar {
-                        width: 100%;
-                        justify-content: flex-start;
-                    }
-                }
-                """;
     }
 }

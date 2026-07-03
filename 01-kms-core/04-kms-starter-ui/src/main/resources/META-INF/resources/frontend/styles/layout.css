@@ -1,0 +1,94 @@
+/*
+ * Shared styling for eu.isygoit.ui.common.layout.BaseMainLayout, used by every
+ * module's <Module>MainLayout (kms, ims, dms, mms, sms, cms) and by LandingView.
+ */
+
+.wams-main-header {
+    flex-wrap: wrap;
+    gap: var(--lumo-space-s);
+    border-top: 3px solid var(--wams-module-accent, transparent);
+}
+
+.wams-main-header__left {
+    overflow: hidden;
+}
+
+.wams-main-header__right {
+    margin-right: var(--lumo-space-m);
+}
+
+.wams-landing-button {
+    color: var(--lumo-primary-text-color);
+    margin-right: var(--lumo-space-s);
+}
+
+.wams-header-title {
+    white-space: nowrap;
+    color: var(--wams-module-accent, var(--lumo-header-text-color));
+}
+
+.wams-avatar-bordered {
+    border: 2px solid var(--lumo-contrast-20pct);
+}
+
+@media (max-width: 640px) {
+    .wams-main-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .wams-main-header > :first-child {
+        justify-content: space-between;
+    }
+}
+
+/* ── Language selector (eu.isygoit.ui.common.component.LanguageSelectorComponent) ── */
+
+.wams-language-selector {
+    padding: 2px var(--lumo-space-s);
+    background: var(--lumo-contrast-5pct);
+    border-radius: var(--lumo-border-radius-l);
+    border: 1px solid var(--lumo-contrast-20pct);
+    height: var(--lumo-size-m);
+    box-shadow: var(--lumo-box-shadow-xs);
+    cursor: pointer;
+    transition: all 0.25s ease-in-out;
+}
+
+.wams-language-selector:hover {
+    background: var(--lumo-contrast-10pct);
+    box-shadow: var(--lumo-box-shadow-s);
+    border-color: var(--lumo-primary-color);
+}
+
+.wams-language-selector:active {
+    background: var(--lumo-contrast-20pct);
+    transform: scale(0.98);
+}
+
+.wams-language-selector__globe-icon {
+    color: var(--lumo-secondary-text-color);
+    margin-right: var(--lumo-space-xs);
+}
+
+.wams-language-selector__flag {
+    font-size: 1.2em;
+    margin-right: var(--lumo-space-xs);
+}
+
+.wams-language-selector__item-flag {
+    font-size: 1.2em;
+}
+
+.wams-language-selector__item-name {
+    white-space: nowrap;
+}
+
+.wams-language-selector__combo {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    --lumo-combo-box-overlay-width: auto;
+    min-width: 0;
+    padding: 0 var(--lumo-space-s);
+}

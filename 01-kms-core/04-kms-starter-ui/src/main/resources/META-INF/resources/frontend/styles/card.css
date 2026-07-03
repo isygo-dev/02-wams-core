@@ -1,0 +1,135 @@
+/*
+ * Shared structural styling for every card component extending
+ * eu.isygoit.ui.common.card.BaseCard, plus the common "meta row" / "detail grid"
+ * patterns that used to be copy-pasted (and re-injected as a <style> tag at
+ * runtime) inside each concrete card subclass.
+ */
+
+.wams-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: all 0.2s ease-in-out;
+}
+
+.wams-card__header-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--lumo-space-s);
+    align-items: center;
+    width: 100%;
+}
+
+.wams-card__body {
+    flex: 1 1 auto;
+    width: 100%;
+}
+
+.wams-card__footer-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+    border-top: 1px solid var(--lumo-contrast-10pct);
+    margin-top: var(--lumo-space-m);
+    padding-top: var(--lumo-space-m);
+}
+
+.wams-card__button-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--lumo-space-xs);
+}
+
+.wams-card__title {
+    word-break: break-word;
+}
+
+@media (max-width: 640px) {
+    .wams-card .wams-card__header-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .wams-card .wams-card__footer-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .wams-card .wams-card__button-bar {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ── Meta row (small "•"-separated caption line under the title) ─────────── */
+
+.wams-card__meta-row {
+    margin-top: var(--lumo-space-xs);
+    flex-wrap: wrap;
+}
+
+/* ── Detail grid (label/value pairs shown in card bodies and details dialogs) ── */
+
+.wams-card__detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--lumo-space-s);
+}
+
+.wams-card__detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--lumo-space-s);
+    width: 100%;
+}
+
+.wams-card__detail-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.wams-card__detail-field-label {
+    font-size: var(--lumo-font-size-xxs);
+    color: var(--lumo-secondary-text-color);
+    text-transform: uppercase;
+    letter-spacing: .03em;
+}
+
+.wams-card__detail-field-value {
+    font-size: var(--lumo-font-size-s);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Generic stat card (dashboard summary tiles) ─────────────────────────── */
+
+.wams-stat-card {
+    border: 1px solid var(--lumo-contrast-20pct);
+    border-radius: var(--lumo-border-radius-l);
+    box-shadow: var(--lumo-box-shadow-xs);
+    align-items: center;
+    flex: 1 1 180px;
+    background-color: var(--lumo-base-color);
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.wams-stat-card__icon {
+    color: var(--wams-stat-icon-color, var(--lumo-primary-color));
+}
+
+.wams-stat-card__value {
+    font-size: 28px;
+    font-weight: bold;
+    margin-top: 8px;
+}
+
+.wams-stat-card__label {
+    color: var(--lumo-secondary-text-color);
+    font-size: var(--lumo-font-size-s);
+}

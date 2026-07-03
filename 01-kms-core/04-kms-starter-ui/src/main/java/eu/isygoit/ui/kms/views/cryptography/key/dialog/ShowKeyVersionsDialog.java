@@ -40,6 +40,7 @@ public class ShowKeyVersionsDialog extends BaseActionDialog {
         setWidth("90%");
         setMaxWidth("1200px");
         setResizable(true);
+        addClassName("show-key-versions-dialog");
 
         buildContent();
         loadVersions();
@@ -76,27 +77,21 @@ public class ShowKeyVersionsDialog extends BaseActionDialog {
             String displayStatus;
             Span chip = new Span();
             chip.addClassName("status-chip");
-            chip.getStyle()
-                    .set("display", "inline-block")
-                    .set("padding", "0.25rem 0.75rem")
-                    .set("border-radius", "var(--lumo-border-radius-m)")
-                    .set("font-size", "var(--lumo-font-size-xs)")
-                    .set("font-weight", "500");
             switch (status) {
                 case "ENABLED":
-                    chip.getStyle().set("background-color", "#E3F7E5").set("color", "#1E7B2E");
+                    chip.addClassName("wams-chip--success");
                     displayStatus = I18n.t("kms.key.dialog.versions.status.enabled");
                     break;
                 case "DISABLED":
-                    chip.getStyle().set("background-color", "#FEF3F2").set("color", "#C73A2B");
+                    chip.addClassName("wams-chip--error");
                     displayStatus = I18n.t("kms.key.dialog.versions.status.disabled");
                     break;
                 case "PENDING_DELETION":
-                    chip.getStyle().set("background-color", "#FFF4E5").set("color", "#B25600");
+                    chip.addClassName("wams-chip--warning");
                     displayStatus = I18n.t("kms.key.dialog.versions.status.pending.deletion");
                     break;
                 default:
-                    chip.getStyle().set("background-color", "#F2F4F8").set("color", "#5E6C84");
+                    chip.addClassName("wams-chip--neutral");
                     displayStatus = I18n.t("kms.key.dialog.versions.status.unknown");
             }
             chip.setText(displayStatus);

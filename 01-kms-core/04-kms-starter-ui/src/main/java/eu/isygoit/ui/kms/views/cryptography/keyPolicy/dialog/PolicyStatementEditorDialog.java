@@ -117,7 +117,7 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
         );
         actionShortcuts.setWidthFull();
         actionShortcuts.setSpacing(true);
-        actionShortcuts.getStyle().set("flex-wrap", "wrap");
+        actionShortcuts.addClassName("policy-statement-shortcuts");
         for (IKmsActionType.Types action : importantActions) {
             String actionMeaning = action.meaning();
             Button btn = new Button(actionMeaning);
@@ -137,7 +137,7 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
 
         resourceShortcuts.setWidthFull();
         resourceShortcuts.setSpacing(true);
-        resourceShortcuts.getStyle().set("flex-wrap", "wrap");
+        resourceShortcuts.addClassName("policy-statement-shortcuts");
 
         Button allResourcesBtn = new Button(I18n.t("kms.policy.statement.shortcut.all.resources"));
         allResourcesBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
@@ -159,8 +159,7 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
         accountRootBtn.addClickListener(e -> addToResourcesArea("wrn:wams:iam::*:root"));
         resourceShortcuts.add(accountRootBtn);
 
-        resourcesPreview.getStyle().set("font-family", "monospace").set("font-size", "small");
-        resourcesPreview.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        resourcesPreview.addClassName("policy-statement-resources-preview");
         resourcesPreview.setText(I18n.t("kms.policy.statement.preview.stored.as", "[\"*\"]"));
         resourcesArea.addValueChangeListener(e -> updatePreview());
 

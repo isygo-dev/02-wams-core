@@ -70,10 +70,7 @@ public class ApplicationDetailsDialog extends NoActionDialog {
         mainLayout.setSpacing(true);
 
         Div basicInfo = new Div();
-        basicInfo.addClassName("details-grid");
-        basicInfo.getStyle().set("display", "grid")
-                .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
-                .set("gap", "var(--lumo-space-s)");
+        basicInfo.addClassName("wams-card__detail-grid");
 
         addFieldToGrid(basicInfo, VaadinIcon.PLAY, I18n.t("ims.app.details.field.name"), app.getName());
         addFieldToGrid(basicInfo, VaadinIcon.FUNCTION, I18n.t("ims.app.details.field.title"), app.getTitle());
@@ -91,21 +88,18 @@ public class ApplicationDetailsDialog extends NoActionDialog {
             descRow.setWidthFull();
             Icon descIcon = VaadinIcon.FILE_TEXT.create();
             descIcon.setSize("16px");
-            descIcon.getStyle().set("color", "var(--lumo-primary-color)");
+            descIcon.addClassName("detail-field-icon");
             Span descLabel = new Span(I18n.t("ims.app.details.field.description"));
             descLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
             Span descValue = new Span(app.getDescription());
-            descValue.getStyle().set("flex", "1");
+            descValue.addClassName("detail-field-value");
             descRow.add(descIcon, descLabel, descValue);
             descRow.expand(descValue);
             mainLayout.add(descRow);
         }
 
         Div statusInfo = new Div();
-        statusInfo.addClassName("details-grid");
-        statusInfo.getStyle().set("display", "grid")
-                .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
-                .set("gap", "var(--lumo-space-s)");
+        statusInfo.addClassName("wams-card__detail-grid");
 
         addFieldToGrid(statusInfo, VaadinIcon.SHIELD, I18n.t("ims.app.details.field.admin.status"), app.getAdminStatus() != null ? app.getAdminStatus().name() : null);
         addFieldToGrid(statusInfo, VaadinIcon.CALENDAR, I18n.t("ims.app.details.field.created"), app.getCreateDate() != null ? DateHelper.formatToHumanReadable(app.getCreateDate()) : null);
@@ -129,7 +123,7 @@ public class ApplicationDetailsDialog extends NoActionDialog {
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("16px");
-        iconComponent.getStyle().set("color", "var(--lumo-primary-color)");
+        iconComponent.addClassName("detail-field-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
@@ -137,7 +131,7 @@ public class ApplicationDetailsDialog extends NoActionDialog {
 
         Span valueSpan = new Span(value);
         valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("detail-field-value");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -151,9 +145,7 @@ public class ApplicationDetailsDialog extends NoActionDialog {
         Span titleSpan = new Span(title);
         titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
         titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
-        titleSpan.getStyle().set("border-bottom", "1px solid var(--lumo-contrast-20pct)")
-                .set("margin-bottom", "var(--lumo-space-s)")
-                .set("padding-bottom", "var(--lumo-space-xs)");
+        titleSpan.addClassName("wams-section-title");
         section.add(titleSpan, content);
         return section;
     }

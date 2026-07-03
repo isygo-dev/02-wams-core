@@ -1,0 +1,37 @@
+/*
+ * Per-module brand accent. Applied as a class (wams-module-<key>) on the root
+ * element of each module's MainLayout (see BaseMainLayout#getModuleKey()) and
+ * on the landing page's module-picker cards. Shared components (cards, dialogs,
+ * buttons, chips) never use these directly — only layout.css / landing.css do,
+ * via the --wams-module-accent / --wams-module-accent-gradient custom properties.
+ */
+
+.wams-module-kms {
+    --wams-module-accent: #6366f1;
+    --wams-module-accent-gradient: linear-gradient(135deg, #818cf8, #6366f1);
+}
+
+.wams-module-ims {
+    --wams-module-accent: #10b981;
+    --wams-module-accent-gradient: linear-gradient(135deg, #34d399, #10b981);
+}
+
+.wams-module-mms {
+    --wams-module-accent: #f59e0b;
+    --wams-module-accent-gradient: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+
+.wams-module-dms {
+    --wams-module-accent: #ec4899;
+    --wams-module-accent-gradient: linear-gradient(135deg, #f472b6, #ec4899);
+}
+
+.wams-module-sms {
+    --wams-module-accent: #64748b;
+    --wams-module-accent-gradient: linear-gradient(135deg, #94a3b8, #64748b);
+}
+
+.wams-module-cms {
+    --wams-module-accent: #06b6d4;
+    --wams-module-accent-gradient: linear-gradient(135deg, #22d3ee, #06b6d4);
+}

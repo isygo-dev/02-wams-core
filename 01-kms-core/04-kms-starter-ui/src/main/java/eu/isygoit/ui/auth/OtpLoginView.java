@@ -128,13 +128,6 @@ public class OtpLoginView extends BaseLoginView {
         wrapper.addClassName("otp-wrapper");
 
         add(wrapper);
-
-        addAttachListener(event -> {
-            if (!stylesInjected) {
-                injectResponsiveStyles();
-                stylesInjected = true;
-            }
-        });
     }
 
     private void buildOtpFields(int length) {
@@ -281,87 +274,5 @@ public class OtpLoginView extends BaseLoginView {
 
         usernameField.setValue(username);
         buildOtpFields(otpLength);
-    }
-
-    @Override
-    protected void injectResponsiveStyles() {
-        String css = """
-                .otp-login-view {
-                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-                    min-height: 100vh;
-                    animation: fadeIn 0.5s ease-out;
-                }
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .otp-wrapper {
-                    background: var(--lumo-base-color);
-                    border-radius: var(--lumo-border-radius-xl);
-                    box-shadow: var(--lumo-box-shadow-m);
-                    padding: var(--lumo-space-l);
-                }
-                .otp-login-view .brand {
-                    text-align: center;
-                    margin-bottom: var(--lumo-space-m);
-                }
-                .otp-login-view .brand h2 {
-                    font-size: var(--lumo-font-size-xl);
-                    letter-spacing: -0.5px;
-                }
-                .otp-login-view vaadin-text-field {
-                    width: 100%;
-                }
-                .otp-login-view .otp-fields vaadin-text-field {
-                    width: 2.8em !important;
-                    height: 2.8em !important;
-                    text-align: center;
-                    font-size: 1.2em;
-                    --lumo-text-field-size: 2.8em;
-                }
-                .otp-login-view .otp-fields vaadin-text-field input {
-                    text-align: center;
-                    padding: 0;
-                    font-size: 1em;
-                }
-                .otp-login-view .otp-fields vaadin-text-field::placeholder {
-                    font-size: 0.8em;
-                    color: var(--lumo-tertiary-text-color);
-                }
-                .otp-login-view .otp-fields {
-                    gap: 0.4em;
-                    margin: var(--lumo-space-s) 0;
-                }
-                .otp-login-view .error-container {
-                    background: var(--lumo-error-color-10pct);
-                    color: var(--lumo-error-text-color);
-                    padding: var(--lumo-space-s);
-                    border-radius: var(--lumo-border-radius-m);
-                    font-size: var(--lumo-font-size-xs);
-                    width: 100%;
-                    text-align: center;
-                }
-                .otp-login-view .back-link {
-                    color: var(--lumo-primary-text-color);
-                    font-size: var(--lumo-font-size-s);
-                    margin-top: var(--lumo-space-m);
-                }
-                @media (max-width: 480px) {
-                    .otp-wrapper {
-                        padding: var(--lumo-space-m);
-                        border-radius: var(--lumo-border-radius-l);
-                        margin: var(--lumo-space-m);
-                    }
-                    .otp-login-view .otp-fields vaadin-text-field {
-                        width: 2.2em !important;
-                        height: 2.2em !important;
-                        font-size: 1em;
-                    }
-                    .otp-login-view .otp-fields {
-                        gap: 0.3em;
-                    }
-                }
-                """;
-        injectStyles(css);
     }
 }

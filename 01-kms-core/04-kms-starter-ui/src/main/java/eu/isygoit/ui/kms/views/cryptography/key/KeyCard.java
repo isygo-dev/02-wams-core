@@ -107,11 +107,8 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
                     titleSpan.setText(aliasOrId);
                     titleSpan.getElement().setAttribute("title", aliasOrId);
 
-                    ChipColor color = ChipColor.fromStatus(statusText);
                     statusChip.setText(statusText);
-                    statusChip.getStyle()
-                            .set("background-color", color.background())
-                            .set("color", color.foreground());
+                    applyChipColor(statusChip, ChipColor.fromStatus(statusText));
                     statusChip.getElement().setAttribute("title", statusText);
 
                     updateVersionDisplay();
@@ -147,7 +144,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         HorizontalLayout left = new HorizontalLayout();
         left.setAlignItems(FlexComponent.Alignment.CENTER);
         left.setSpacing(true);
-        left.getStyle().set("flex-wrap", "wrap");
+        left.addClassName("key-card__title-row");
 
         titleSpan = buildTitleSpan(aliasOrId, aliasOrId);
         statusChip = buildStatusChip(statusText, statusText);
@@ -240,23 +237,21 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         row.setAlignItems(FlexComponent.Alignment.CENTER);
         row.setSpacing(true);
         row.setWidthFull();
-        row.getStyle().set("margin-top", "var(--lumo-space-xs)");
         row.addClassName("meta-row");
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("16px");
-        iconComponent.getStyle().set("color", "var(--lumo-primary-color)");
+        iconComponent.addClassName("key-card__row-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        labelSpan.getStyle().set("min-width", "100px");
+        labelSpan.addClassName("key-card__row-label");
 
         Span valueSpan = new Span(value);
         valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        valueSpan.getStyle().set("font-family", "monospace");
-        valueSpan.getStyle().set("word-break", "break-all");
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("key-card__row-value");
+        // Color is data-driven (origin/rotation state) — kept inline.
         valueSpan.getStyle().set("color", color);
 
         row.add(iconComponent, labelSpan, valueSpan);
@@ -299,7 +294,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         versionSpan.setText(display);
         versionSpan.addClassName(LumoUtility.FontSize.XSMALL);
         versionSpan.addClassName(LumoUtility.TextColor.TERTIARY);
-        versionSpan.getStyle().set("font-family", "monospace");
+        versionSpan.addClassName("key-card__version-span");
         versionSpan.getElement().setAttribute("title", I18n.t("kms.key.card.version.tooltip.current", full));
     }
 
@@ -327,11 +322,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         deletionWarningSpan.addClassName(LumoUtility.TextColor.ERROR);
         deletionWarningSpan.addClassName(LumoUtility.Padding.SMALL);
         deletionWarningSpan.addClassName(LumoUtility.BorderRadius.MEDIUM);
-        deletionWarningSpan.getStyle()
-                .set("display", "flex")
-                .set("align-items", "center")
-                .set("gap", "var(--lumo-space-s)")
-                .set("margin-top", "var(--lumo-space-xs)");
+        deletionWarningSpan.addClassName("wams-card__deletion-warning");
         deletionWarningSpan.setVisible(false);
     }
 
@@ -411,7 +402,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         // ── 5. Permanently delete ─────────────────────────────────────────────
         MenuItem deleteItem = createMenuItem(contextMenu, VaadinIcon.TRASH, I18n.t("kms.key.card.menu.permanent.delete"));
         deleteItem.setEnabled(isPending);
-        deleteItem.getStyle().set("color", "var(--lumo-error-color)");
+        deleteItem.addClassName("key-card__menu-item--danger");
         deleteItem.addClickListener(e -> confirmPermanentDelete());
     }
 
@@ -500,41 +491,5 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
             versionsBtn.setText(I18n.t("kms.key.card.versions.count", versionCount));
             versionsBtn.setTooltipText(I18n.t("kms.key.card.versions.total", versionCount));
         }));
-    }
-
-    // ─── Extra CSS ────────────────────────────────────────────────────────────
-
-    @Override
-    protected String buildExtraStyles() {
-        return """
-                .key-card .meta-row {
-                    border-bottom: 1px solid var(--lumo-contrast-10pct);
-                    padding-bottom: var(--lumo-space-xs);
-                }
-                .key-card .meta-row:last-child {
-                    border-bottom: none;
-                }
-                .key-card .meta-row .meta-value {
-                    font-weight: 500;
-                }
-                .key-card .deletion-warning {
-                    background: var(--lumo-error-color-10pct);
-                    color: var(--lumo-error-text-color);
-                    padding: var(--lumo-space-s);
-                    border-radius: var(--lumo-border-radius-m);
-                    display: flex;
-                    align-items: center;
-                    gap: var(--lumo-space-s);
-                    margin-top: var(--lumo-space-xs);
-                }
-                @media (max-width: 640px) {
-                    .key-card .meta-row {
-                        flex-wrap: wrap;
-                    }
-                    .key-card .meta-row > :not(:first-child) {
-                        margin-left: 28px;
-                    }
-                }
-                """;
     }
 }

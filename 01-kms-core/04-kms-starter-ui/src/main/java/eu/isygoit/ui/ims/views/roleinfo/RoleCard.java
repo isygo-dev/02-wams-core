@@ -45,18 +45,13 @@ public class RoleCard extends BaseCard<RoleManagementView, RoleInfoService> {
         HorizontalLayout titleLayout = new HorizontalLayout();
         titleLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         titleLayout.setSpacing(true);
-        titleLayout.getStyle().set("flex-wrap", "wrap");
+        titleLayout.addClassName("card-title-group");
 
         Span titleSpan = buildTitleSpan(role.getName(), role.getCode());
         titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
 
         Span levelChip = new Span(I18n.t("ims.role.card.level", role.getLevel()));
-        levelChip.getStyle()
-                .set("background-color", "var(--lumo-primary-color-10pct)")
-                .set("color", "var(--lumo-primary-text-color)")
-                .set("border-radius", "var(--lumo-border-radius-s)")
-                .set("padding", "0.2rem 0.5rem")
-                .set("font-size", "var(--lumo-font-size-xs)");
+        levelChip.addClassName("level-chip");
 
         titleLayout.add(titleSpan, levelChip);
         return titleLayout;
@@ -85,7 +80,7 @@ public class RoleCard extends BaseCard<RoleManagementView, RoleInfoService> {
         VerticalLayout body = new VerticalLayout();
         body.setSpacing(false);
         body.setPadding(false);
-        body.getStyle().set("margin-top", "var(--lumo-space-s)");
+        body.addClassName("card-row--spaced");
 
         body.add(createInfoRow(VaadinIcon.CODE, I18n.t("ims.role.card.code"), role.getCode()));
         body.add(createInfoRow(VaadinIcon.USERS, I18n.t("ims.role.card.users"), String.valueOf(role.getNumberOfUsers())));
@@ -107,16 +102,16 @@ public class RoleCard extends BaseCard<RoleManagementView, RoleInfoService> {
 
         com.vaadin.flow.component.icon.Icon iconComponent = icon.create();
         iconComponent.setSize("14px");
-        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        iconComponent.addClassName("meta-row-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        labelSpan.getStyle().set("min-width", "80px");
+        labelSpan.addClassName("meta-row-label");
 
         Span valueSpan = new Span(value != null ? value : "—");
         valueSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("meta-row-value");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -125,35 +120,5 @@ public class RoleCard extends BaseCard<RoleManagementView, RoleInfoService> {
 
     @Override
     protected void onCardAttach(AttachEvent event) {
-    }
-
-    @Override
-    protected String buildExtraStyles() {
-        return """
-                .role-card {
-                    padding: var(--lumo-space-s) var(--lumo-space-m);
-                }
-                .role-card .meta-row {
-                    border-bottom: 1px solid var(--lumo-contrast-10pct);
-                    padding-bottom: var(--lumo-space-xs);
-                    margin-bottom: var(--lumo-space-xs);
-                }
-                .role-card .meta-row:last-child {
-                    border-bottom: none;
-                    margin-bottom: 0;
-                }
-                @media (max-width: 640px) {
-                    .role-card .meta-row {
-                        flex-wrap: wrap;
-                    }
-                    .role-card .meta-row > :not(:first-child) {
-                        margin-left: 28px;
-                    }
-                    .role-card .role-card__button-bar {
-                        width: 100%;
-                        justify-content: flex-start;
-                    }
-                }
-                """;
     }
 }

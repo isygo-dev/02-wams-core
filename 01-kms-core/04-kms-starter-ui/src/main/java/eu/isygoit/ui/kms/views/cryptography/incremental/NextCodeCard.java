@@ -61,7 +61,7 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
         HorizontalLayout left = new HorizontalLayout();
         left.setAlignItems(FlexComponent.Alignment.CENTER);
         left.setSpacing(true);
-        left.getStyle().set("flex-wrap", "wrap");
+        left.addClassName("kms-partc-title-wrap");
         Span titleSpan = buildTitleSpan(dto.getEntity() + " : " + dto.getAttribute(), null);
         left.add(titleSpan);
         return left;
@@ -86,22 +86,21 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
         codePreviewRow.setAlignItems(FlexComponent.Alignment.CENTER);
         codePreviewRow.setSpacing(true);
         codePreviewRow.setWidthFull();
-        codePreviewRow.getStyle().set("margin-top", "var(--lumo-space-xs)");
         codePreviewRow.addClassName("meta-row");
 
         Icon codeIcon = VaadinIcon.CODE.create();
         codeIcon.setSize("16px");
-        codeIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        codeIcon.addClassName("kms-partc-row-icon");
 
         Span codeLabel = new Span(I18n.t("kms.nextcode.card.next.code"));
         codeLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         codeLabel.addClassName(LumoUtility.FontSize.XSMALL);
-        codeLabel.getStyle().set("min-width", "100px");
+        codeLabel.addClassName("kms-partc-row-label");
 
         formattedCodeSpan = new Span();
         formattedCodeSpan.addClassName(LumoUtility.FontSize.LARGE);
         formattedCodeSpan.addClassName(LumoUtility.FontWeight.BOLD);
-        formattedCodeSpan.getStyle().set("font-family", "monospace");
+        formattedCodeSpan.addClassName("kms-partc-row-value-mono");
         updateFormattedCodeDisplay();
 
         Button copyFormattedBtn = KmsMainView.createCopyButton(VaadinIcon.COPY, dto.getCode(), I18n.t("kms.nextcode.card.copy.formatted"));
@@ -124,21 +123,20 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
         currentRow.setAlignItems(FlexComponent.Alignment.CENTER);
         currentRow.setSpacing(true);
         currentRow.setWidthFull();
-        currentRow.getStyle().set("margin-top", "var(--lumo-space-xs)");
         currentRow.addClassName("meta-row");
 
         Icon currentIcon = VaadinIcon.CALC.create();
         currentIcon.setSize("16px");
-        currentIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        currentIcon.addClassName("kms-partc-row-icon");
 
         Span currentLabel = new Span(I18n.t("kms.nextcode.card.current.value"));
         currentLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         currentLabel.addClassName(LumoUtility.FontSize.XSMALL);
-        currentLabel.getStyle().set("min-width", "100px");
+        currentLabel.addClassName("kms-partc-row-label");
 
         codeValueSpan = new Span();
         codeValueSpan.addClassName(LumoUtility.FontWeight.BOLD);
-        codeValueSpan.getStyle().set("font-family", "monospace");
+        codeValueSpan.addClassName("kms-partc-row-value-mono");
         updateCodeValueDisplay();
 
         Button copyCurrentBtn = KmsMainView.createCopyButton(VaadinIcon.COPY, String.valueOf(dto.getCodeValue()), I18n.t("kms.nextcode.card.copy.numeric"));
@@ -154,23 +152,20 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
         row.setAlignItems(FlexComponent.Alignment.CENTER);
         row.setSpacing(true);
         row.setWidthFull();
-        row.getStyle().set("margin-top", "var(--lumo-space-xs)");
         row.addClassName("meta-row");
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("16px");
-        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        iconComponent.addClassName("kms-partc-row-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        labelSpan.getStyle().set("min-width", "100px");
+        labelSpan.addClassName("kms-partc-row-label");
 
         Span valueSpan = new Span(value != null ? value : "—");
         valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        valueSpan.getStyle().set("font-family", "monospace");
-        valueSpan.getStyle().set("word-break", "break-all");
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("kms-partc-row-value");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -204,26 +199,5 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
     private void refreshDisplay() {
         updateFormattedCodeDisplay();
         updateCodeValueDisplay();
-    }
-
-    @Override
-    protected String buildExtraStyles() {
-        return """
-                .next-code-card .meta-row {
-                    border-bottom: 1px solid var(--lumo-contrast-10pct);
-                    padding-bottom: var(--lumo-space-xs);
-                }
-                .next-code-card .meta-row:last-child {
-                    border-bottom: none;
-                }
-                @media (max-width: 640px) {
-                    .next-code-card .meta-row {
-                        flex-wrap: wrap;
-                    }
-                    .next-code-card .meta-row > :not(:first-child) {
-                        margin-left: 28px;
-                    }
-                }
-                """;
     }
 }

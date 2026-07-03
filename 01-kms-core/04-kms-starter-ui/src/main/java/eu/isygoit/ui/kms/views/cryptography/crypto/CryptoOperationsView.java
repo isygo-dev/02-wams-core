@@ -1,6 +1,5 @@
 package eu.isygoit.ui.kms.views.cryptography.crypto;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -106,8 +105,7 @@ public class CryptoOperationsView extends ManagementVerticalView {
         macTabHeader = new Tab(I18n.t("kms.crypto.view.tab.mac"));
         tabs.add(encryptDecryptTabHeader, signVerifyTabHeader, dataKeyTabHeader, macTabHeader);
         tabs.setWidthFull();
-        tabs.getStyle().set("overflow-x", "auto");
-        tabs.getStyle().set("white-space", "nowrap");
+        tabs.addClassName("kms-parta-crypto-tabs");
 
         encryptDecryptPanel.setVisible(true);
         signVerifyPanel.setVisible(false);
@@ -129,7 +127,6 @@ public class CryptoOperationsView extends ManagementVerticalView {
 
         add(tabs, encryptDecryptPanel, signVerifyPanel, dataKeyPanel, macPanel);
 
-        injectResponsiveStyles();
         loadKeyOptions();
     }
 
@@ -138,7 +135,6 @@ public class CryptoOperationsView extends ManagementVerticalView {
         keyLayout.setWidthFull();
         keyLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         keyLayout.setSpacing(true);
-        keyLayout.getStyle().set("flex-wrap", "wrap");
         keyLayout.addClassName("crypto-key-layout");
 
         keyCombo.setPlaceholder(I18n.t("kms.crypto.view.select.key"));
@@ -163,59 +159,6 @@ public class CryptoOperationsView extends ManagementVerticalView {
 
         keyLayout.add(keyCombo, refreshKeysButton);
         return keyLayout;
-    }
-
-    private void injectResponsiveStyles() {
-        String css = """
-                .kms-crypto-view {
-                    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-                    min-height: 100vh;
-                    animation: fadeIn 0.5s ease-out;
-                }
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .crypto-key-layout {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: var(--lumo-space-s);
-                    align-items: center;
-                }
-                @media (max-width: 768px) {
-                    .crypto-key-layout {
-                        flex-direction: column;
-                        align-items: stretch;
-                    }
-                    .crypto-key-layout > * {
-                        width: 100% !important;
-                    }
-                    .crypto-key-layout .vaadin-combo-box {
-                        width: 100% !important;
-                    }
-                    .crypto-panel .vaadin-combo-box,
-                    .crypto-panel .vaadin-text-field,
-                    .crypto-panel .vaadin-text-area {
-                        width: 100% !important;
-                    }
-                    .crypto-button-row {
-                        flex-direction: column;
-                        width: 100%;
-                    }
-                    .crypto-button-row > * {
-                        width: 100% !important;
-                        margin-bottom: var(--lumo-space-xs);
-                    }
-                    .crypto-data-key-panel .vaadin-combo-box,
-                    .crypto-data-key-panel .vaadin-text-field {
-                        width: 100% !important;
-                    }
-                }
-                """;
-        UI.getCurrent().getPage().executeJs(
-                "const style = document.createElement('style'); style.textContent = $0; document.head.appendChild(style);",
-                css
-        );
     }
 
     private void loadKeyOptions() {

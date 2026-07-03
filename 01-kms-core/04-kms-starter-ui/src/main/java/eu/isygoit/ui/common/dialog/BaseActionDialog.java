@@ -101,7 +101,7 @@ public abstract class BaseActionDialog extends Dialog {
         Span span = new Span();
         span.addClassName(LumoUtility.TextColor.ERROR);
         span.addClassName(LumoUtility.FontSize.SMALL);
-        span.getStyle().set("margin-right", "auto");
+        span.addClassName("wams-dialog-error-span");
         span.setVisible(false);
         return span;
     }

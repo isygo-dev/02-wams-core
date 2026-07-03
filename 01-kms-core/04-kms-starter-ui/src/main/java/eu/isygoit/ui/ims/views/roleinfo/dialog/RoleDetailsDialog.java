@@ -74,9 +74,7 @@ public class RoleDetailsDialog extends NoActionDialog {
 
         // Basic info grid
         Div basicInfo = new Div();
-        basicInfo.getStyle().set("display", "grid")
-                .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
-                .set("gap", "var(--lumo-space-s)");
+        basicInfo.addClassName("wams-card__detail-grid");
 
         addFieldToGrid(basicInfo, VaadinIcon.USER, I18n.t("ims.role.details.field.name"), role.getName());
         addFieldToGrid(basicInfo, VaadinIcon.CODE, I18n.t("ims.role.details.field.code"), role.getCode());
@@ -94,11 +92,11 @@ public class RoleDetailsDialog extends NoActionDialog {
             descRow.setWidthFull();
             Icon descIcon = VaadinIcon.FILE_TEXT.create();
             descIcon.setSize("16px");
-            descIcon.getStyle().set("color", "var(--lumo-primary-color)");
+            descIcon.addClassName("detail-field-icon");
             Span descLabel = new Span(I18n.t("ims.role.details.field.description"));
             descLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
             Span descValue = new Span(role.getDescription());
-            descValue.getStyle().set("flex", "1");
+            descValue.addClassName("detail-field-value");
             descRow.add(descIcon, descLabel, descValue);
             descRow.expand(descValue);
             mainLayout.add(descRow);
@@ -142,7 +140,7 @@ public class RoleDetailsDialog extends NoActionDialog {
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("16px");
-        iconComponent.getStyle().set("color", "var(--lumo-primary-color)");
+        iconComponent.addClassName("detail-field-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
@@ -150,7 +148,7 @@ public class RoleDetailsDialog extends NoActionDialog {
 
         Span valueSpan = new Span(value);
         valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("detail-field-value");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -164,9 +162,7 @@ public class RoleDetailsDialog extends NoActionDialog {
         Span titleSpan = new Span(title);
         titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
         titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
-        titleSpan.getStyle().set("border-bottom", "1px solid var(--lumo-contrast-20pct)")
-                .set("margin-bottom", "var(--lumo-space-s)")
-                .set("padding-bottom", "var(--lumo-space-xs)");
+        titleSpan.addClassName("wams-section-title");
         section.add(titleSpan, content);
         return section;
     }

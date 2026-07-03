@@ -1,0 +1,802 @@
+/*
+ * Module-specific styling for eu.isygoit.ui.mms.** (MmsMainView, MmsMainLayout,
+ * dashboard panels, MsgTemplateCard/MsgTemplateManagementView, SenderConfigCard/
+ * SenderConfigManagementView and their dialogs). Imported once via MmsMainLayout
+ * so it is available to every view rendered inside it.
+ */
+
+/* ── Dashboard (MmsMainView) ──────────────────────────────────────────────── */
+
+.mms-dashboard .wams-dashboard-title {
+    margin-bottom: 10px;
+}
+
+.mms-dashboard .stats-overview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--lumo-space-m);
+    margin-bottom: var(--lumo-space-l);
+}
+
+.mms-dashboard .stat-card {
+    background: var(--lumo-base-color);
+    padding: var(--lumo-space-m);
+    border-radius: var(--lumo-border-radius-l);
+    box-shadow: var(--lumo-box-shadow-xs);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    flex: 1;
+    min-width: 150px;
+}
+
+.mms-dashboard .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--lumo-box-shadow-m);
+}
+
+.mms-dashboard .wams-quick-actions {
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.mms-dashboard .quick-link {
+    padding: var(--lumo-space-xs) var(--lumo-space-s);
+    border-radius: var(--lumo-border-radius-m);
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.mms-dashboard .quick-link:hover {
+    background: var(--lumo-primary-color-10pct);
+}
+
+.mms-dashboard .quick-link-icon {
+    color: var(--lumo-primary-color);
+}
+
+@media (max-width: 768px) {
+    .mms-dashboard .stat-card {
+        flex-basis: calc(50% - 16px);
+    }
+
+    .mms-dashboard .stats-overview {
+        flex-direction: column;
+    }
+}
+
+/* ── Dashboard panels (EmailStatisticsPanel / SenderConfigPanel / TemplateStatisticsPanel) ── */
+
+.email-stats-panel,
+.sender-config-panel,
+.template-stats-panel {
+    animation: mms-fade-in 0.5s ease-out;
+}
+
+@keyframes mms-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes mms-pulse-dot {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.4;
+    }
+}
+
+.wams-panel-container {
+    width: 100%;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(249, 250, 251, 0.98));
+    border-radius: var(--lumo-border-radius-m);
+    box-shadow: var(--lumo-box-shadow-s);
+    padding: var(--lumo-space-m);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.wams-panel-header {
+    margin-bottom: var(--lumo-space-s);
+    flex-wrap: wrap;
+    gap: var(--lumo-space-xs);
+}
+
+.wams-panel-title {
+    font-weight: 600;
+}
+
+.wams-panel-period-badge {
+    background: var(--lumo-contrast-5pct);
+    padding: var(--lumo-space-xs) var(--lumo-space-m);
+    border-radius: var(--lumo-border-radius-s);
+}
+
+.wams-panel-live-badge {
+    background: var(--lumo-success-color-10pct);
+    color: var(--lumo-success-color);
+    padding: 2px 12px;
+    border-radius: var(--lumo-border-radius-s);
+    font-size: var(--lumo-font-size-xs);
+    font-weight: 600;
+}
+
+.wams-panel-viewall-link {
+    cursor: pointer;
+}
+
+/* Mini stat cards (email + template panels) */
+
+.wams-mini-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--lumo-space-xs);
+    margin-bottom: var(--lumo-space-s);
+}
+
+.wams-mini-stat-card {
+    background: var(--lumo-contrast-5pct);
+    border-radius: var(--lumo-border-radius-m);
+    padding: var(--lumo-space-s);
+    border: 1px solid var(--lumo-contrast-10pct);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.wams-mini-stat-card:hover,
+.template-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--lumo-box-shadow-xs);
+    border-color: var(--lumo-primary-color-50pct);
+}
+
+.wams-mini-stat-card.template-stat-card {
+    text-align: center;
+}
+
+.wams-mini-stat-icon-wrapper {
+    border-radius: 50%;
+    padding: var(--lumo-space-xs);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background-color: var(--wams-mini-stat-color, var(--lumo-primary-color));
+}
+
+.wams-mini-stat-info {
+    flex: 1;
+}
+
+.wams-mini-stat-value {
+    font-size: var(--lumo-font-size-l);
+    font-weight: 700;
+    color: var(--lumo-header-text-color);
+    line-height: 1.2;
+    display: block;
+}
+
+.template-stat-card .wams-mini-stat-value {
+    display: block;
+}
+
+.wams-mini-stat-change {
+    font-weight: 600;
+    background-color: var(--wams-mini-stat-change-bg, var(--lumo-contrast-10pct));
+    color: var(--wams-mini-stat-change-color, var(--lumo-body-text-color));
+    padding: 0 var(--lumo-space-xs);
+    border-radius: var(--lumo-border-radius-s);
+    white-space: nowrap;
+}
+
+.wams-mini-stat-change--positive {
+    --wams-mini-stat-change-color: var(--lumo-success-color);
+    --wams-mini-stat-change-bg: var(--lumo-success-color-10pct);
+}
+
+.wams-mini-stat-change--negative {
+    --wams-mini-stat-change-color: var(--lumo-error-color);
+    --wams-mini-stat-change-bg: var(--lumo-error-color-10pct);
+}
+
+.wams-mini-stat-card .template-stat-icon {
+    display: block;
+    margin: 0 auto var(--lumo-space-xs);
+}
+
+/* Trend / usage sections */
+
+.wams-panel-section {
+    margin-bottom: var(--lumo-space-s);
+    background: var(--lumo-contrast-5pct);
+    border-radius: var(--lumo-border-radius-m);
+    padding: var(--lumo-space-s);
+}
+
+.wams-panel-section-header {
+    margin-bottom: var(--lumo-space-xs);
+}
+
+.wams-panel-section:last-child {
+    margin-bottom: 0;
+}
+
+.wams-chart-bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    height: 60px;
+    gap: 2px;
+    padding: var(--lumo-space-xs) 0;
+}
+
+.wams-chart-bar {
+    width: 100%;
+    background: var(--wams-chart-bar-color, var(--lumo-primary-color-60pct));
+    border-radius: 3px 3px 0 0;
+    min-height: 4px;
+    transition: height 0.3s ease;
+}
+
+.wams-chart-bar--last {
+    --wams-chart-bar-color: #4F46E5;
+}
+
+.wams-chart-labels {
+    width: 100%;
+    gap: 2px;
+}
+
+.wams-chart-label {
+    text-align: center;
+    flex: 1;
+}
+
+/* Monthly compact table */
+
+.wams-compact-table {
+    background: var(--lumo-contrast-5pct);
+    border-radius: var(--lumo-border-radius-m);
+    padding: var(--lumo-space-s);
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.wams-compact-table-header {
+    border-bottom: 2px solid var(--lumo-contrast-20pct);
+    padding-bottom: var(--lumo-space-xs);
+    margin-bottom: var(--lumo-space-xs);
+    position: sticky;
+    top: 0;
+    background: var(--lumo-contrast-5pct);
+    z-index: 1;
+}
+
+.wams-compact-table-header-cell {
+    flex: 1;
+    text-align: center;
+}
+
+.wams-compact-table-row {
+    padding: var(--lumo-space-xs) 0;
+    border-bottom: 1px solid var(--lumo-contrast-5pct);
+}
+
+.wams-compact-table-cell {
+    flex: 1;
+    text-align: center;
+}
+
+.wams-compact-table-cell--label {
+    font-weight: 500;
+}
+
+.wams-compact-table-cell--sent {
+    color: #4F46E5;
+}
+
+.wams-compact-table-cell--open {
+    color: var(--lumo-success-color);
+}
+
+.wams-compact-table-cell--bounce {
+    color: var(--lumo-error-color);
+}
+
+/* Custom scrollbar for compact/scrollable panel sections */
+
+.wams-compact-table::-webkit-scrollbar,
+.wams-scroll-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.wams-compact-table::-webkit-scrollbar-track,
+.wams-scroll-list::-webkit-scrollbar-track {
+    background: var(--lumo-contrast-5pct);
+    border-radius: var(--lumo-border-radius-m);
+}
+
+.wams-compact-table::-webkit-scrollbar-thumb,
+.wams-scroll-list::-webkit-scrollbar-thumb {
+    background: var(--lumo-contrast-30pct);
+    border-radius: var(--lumo-border-radius-m);
+}
+
+@media (max-width: 640px) {
+    .wams-mini-stat-card {
+        padding: var(--lumo-space-xs);
+    }
+}
+
+@media (max-width: 480px) {
+    .wams-mini-stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .wams-usage-item {
+        flex-wrap: wrap;
+    }
+}
+
+/* Sender list (SenderConfigPanel) */
+
+.wams-scroll-list {
+    background: var(--lumo-contrast-5pct);
+    border-radius: var(--lumo-border-radius-m);
+    padding: var(--lumo-space-xs);
+    max-height: 220px;
+    overflow-y: auto;
+    margin-bottom: var(--lumo-space-s);
+}
+
+.sender-item {
+    background: var(--lumo-base-color);
+    border-radius: var(--lumo-border-radius-s);
+    padding: var(--lumo-space-s);
+    margin-bottom: var(--lumo-space-xs);
+    border: 1px solid var(--lumo-contrast-10pct);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.sender-item:hover {
+    border-color: var(--lumo-primary-color-50pct);
+    box-shadow: var(--lumo-box-shadow-xs);
+}
+
+.sender-item:hover .sender-item-actions vaadin-button {
+    opacity: 1;
+}
+
+.sender-item-actions vaadin-button {
+    opacity: 0.6;
+}
+
+.sender-item-row {
+    gap: var(--lumo-space-xs);
+}
+
+.sender-item-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--wams-sender-dot-color, var(--lumo-contrast-40pct));
+    flex-shrink: 0;
+}
+
+.sender-item-dot--active {
+    --wams-sender-dot-color: var(--lumo-success-color);
+    animation: mms-pulse-dot 2s ease-in-out infinite;
+}
+
+.sender-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.sender-item-name,
+.sender-item-host {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sender-item-details {
+    gap: var(--lumo-space-s);
+}
+
+.sender-item-status {
+    white-space: nowrap;
+    font-weight: 600;
+    color: var(--wams-sender-status-color, var(--lumo-contrast-60pct));
+}
+
+.sender-item-status--active {
+    --wams-sender-status-color: var(--lumo-success-color);
+}
+
+.sender-item-actions {
+    gap: 2px;
+}
+
+.wams-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--lumo-space-xs);
+    padding: var(--lumo-space-xs) 0;
+}
+
+.wams-summary-item {
+    text-align: center;
+    background: var(--lumo-contrast-5pct);
+    border-radius: var(--lumo-border-radius-s);
+    padding: var(--lumo-space-xs);
+}
+
+.wams-summary-value {
+    font-size: var(--lumo-font-size-m);
+    font-weight: 700;
+    color: var(--lumo-header-text-color);
+}
+
+@media (max-width: 480px) {
+    .sender-item-details {
+        flex-wrap: wrap;
+    }
+}
+
+/* Usage items with progress bars (TemplateStatisticsPanel) */
+
+.wams-usage-item {
+    padding: var(--lumo-space-xs) 0;
+    border-bottom: 1px solid var(--lumo-contrast-5pct);
+    gap: var(--lumo-space-s);
+}
+
+.wams-usage-name-layout {
+    flex: 1;
+    min-width: 0;
+}
+
+.wams-usage-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wams-usage-bar-container {
+    flex: 2;
+    min-width: 60px;
+}
+
+.wams-usage-bar-track {
+    height: 5px;
+    border-radius: var(--lumo-border-radius-s);
+    background: var(--lumo-contrast-10pct);
+    overflow: hidden;
+}
+
+.wams-usage-bar-fill {
+    height: 100%;
+    border-radius: var(--lumo-border-radius-s);
+    background-color: var(--wams-usage-color, var(--lumo-primary-color));
+    transition: width 0.6s ease;
+}
+
+.wams-usage-percent {
+    font-weight: 600;
+    min-width: 36px;
+    text-align: right;
+    color: var(--wams-usage-color, var(--lumo-primary-color));
+}
+
+/* ── Template / Sender management views ───────────────────────────────────── */
+
+.template-view,
+.sender-config-view {
+    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+    min-height: 100vh;
+    animation: mms-fade-in-up 0.5s ease-out;
+}
+
+@keyframes mms-fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.template-toolbar,
+.sender-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--lumo-space-s);
+    width: 100%;
+}
+
+.template-toolbar .wams-toolbar-group,
+.sender-toolbar .wams-toolbar-group {
+    flex-wrap: wrap;
+    gap: var(--lumo-space-s);
+}
+
+.template-toolbar .wams-page-info-label,
+.sender-toolbar .wams-page-info-label {
+    margin: 0 0.5rem;
+}
+
+.template-grid,
+.sender-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: var(--lumo-space-m);
+    padding: var(--lumo-space-s);
+}
+
+@media (max-width: 768px) {
+    .template-toolbar,
+    .sender-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .template-toolbar > *,
+    .sender-toolbar > * {
+        width: 100% !important;
+        justify-content: center;
+    }
+
+    .template-grid,
+    .sender-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Template / Sender config cards ───────────────────────────────────────── */
+
+.template-card .wams-tenant-badge,
+.sender-config-card .wams-tenant-badge {
+    font-family: monospace;
+}
+
+.template-card .wams-title-row,
+.sender-config-card .wams-title-row {
+    flex-wrap: wrap;
+}
+
+.wams-empty-state-icon {
+    color: var(--lumo-secondary-text-color);
+}
+
+.template-card .detail-row,
+.sender-config-card .detail-row {
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
+    padding-bottom: var(--lumo-space-xs);
+    margin-top: var(--lumo-space-xs);
+}
+
+.template-card .detail-row:last-child,
+.sender-config-card .detail-row:last-child {
+    border-bottom: none;
+}
+
+.template-card .detail-row .detail-label,
+.sender-config-card .detail-row .detail-label {
+    min-width: 120px;
+}
+
+.template-card .detail-row .detail-icon,
+.sender-config-card .detail-row .detail-icon {
+    color: var(--lumo-primary-color);
+}
+
+.template-card .detail-row .detail-value,
+.sender-config-card .detail-row .detail-value {
+    font-family: monospace;
+    word-break: break-all;
+    flex: 1;
+}
+
+.template-card .detail-row .detail-copy-button,
+.sender-config-card .detail-row .detail-copy-button {
+    padding: var(--lumo-space-xs);
+}
+
+.sender-config-card .detail-row .detail-value--enabled {
+    color: var(--lumo-success-color);
+}
+
+.sender-config-card .detail-row .detail-value--disabled {
+    color: var(--lumo-error-color);
+}
+
+.sender-config-card .detail-row .detail-value--warning {
+    color: var(--lumo-warning-color);
+}
+
+.sender-config-card .detail-row .detail-value--muted {
+    color: var(--lumo-tertiary-text-color);
+}
+
+@media (max-width: 640px) {
+    .template-card .detail-row,
+    .sender-config-card .detail-row {
+        flex-wrap: wrap;
+    }
+
+    .template-card .detail-row > :not(:first-child),
+    .sender-config-card .detail-row > :not(:first-child) {
+        margin-left: 28px;
+    }
+}
+
+/* ── Shared dialog helpers (Base*Dialog error/status/upload areas) ───────── */
+
+.wams-dialog-error-area {
+    background-color: var(--lumo-error-color-10pct);
+    color: var(--lumo-error-text-color);
+    padding: var(--lumo-space-s);
+    border-radius: var(--lumo-border-radius-m);
+    margin-bottom: var(--lumo-space-m);
+    width: 100%;
+}
+
+.wams-dialog-content-area {
+    padding: 0;
+    width: 100%;
+}
+
+.wams-dialog-upload-section {
+    margin-top: var(--lumo-space-m);
+    padding: var(--lumo-space-m);
+    border: 1px dashed var(--lumo-contrast-30pct);
+    border-radius: var(--lumo-border-radius-m);
+}
+
+.wams-dialog-upload-label {
+    font-weight: bold;
+}
+
+.wams-dialog-file-info-area {
+    padding: var(--lumo-space-s);
+    background-color: var(--lumo-contrast-5pct);
+    border-radius: var(--lumo-border-radius-m);
+    font-size: var(--lumo-font-size-s);
+}
+
+.wams-dialog-file-info-area--success {
+    color: var(--lumo-success-color);
+}
+
+.wams-dialog-file-info-area--error {
+    color: var(--lumo-error-color);
+}
+
+/* Edit template content dialog */
+
+.wams-dialog-info-bar {
+    padding: var(--lumo-space-s);
+    background-color: var(--lumo-contrast-5pct);
+    border-radius: var(--lumo-border-radius-m);
+}
+
+.wams-dialog-status-area {
+    padding: var(--lumo-space-s);
+    border-radius: var(--lumo-border-radius-m);
+    margin-bottom: var(--lumo-space-s);
+    width: 100%;
+}
+
+.wams-dialog-status-area--success {
+    background-color: var(--lumo-success-color-10pct);
+    color: var(--lumo-success-text-color);
+}
+
+.wams-dialog-status-area--error {
+    background-color: var(--lumo-error-color-10pct);
+    color: var(--lumo-error-text-color);
+}
+
+.wams-dialog-status-area--warning {
+    background-color: var(--lumo-warning-color-10pct);
+    color: var(--lumo-warning-text-color);
+}
+
+.wams-dialog-status-area--info {
+    background-color: var(--lumo-primary-color-10pct);
+    color: var(--lumo-primary-text-color);
+}
+
+.wams-dialog-content-editor {
+    font-family: monospace;
+    font-size: var(--lumo-font-size-s);
+    tab-size: 2;
+}
+
+.wams-dialog-actions {
+    width: 100%;
+    justify-content: flex-end;
+    gap: var(--lumo-space-s);
+    margin-top: var(--lumo-space-m);
+}
+
+/* View template dialog detail rows */
+
+.wams-view-details {
+    padding: var(--lumo-space-m);
+}
+
+.wams-view-detail-row {
+    display: flex;
+    padding: var(--lumo-space-xs) 0;
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
+}
+
+.wams-view-detail-label {
+    min-width: 120px;
+}
+
+.wams-view-detail-value {
+    font-family: monospace;
+    word-break: break-all;
+}
+
+/* Test connection dialog */
+
+.wams-dialog-host-value {
+    font-family: monospace;
+}
+
+.wams-dialog-status-box {
+    width: 100%;
+    padding: var(--lumo-space-m);
+    border-radius: var(--lumo-border-radius-m);
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wams-dialog-status-box--info {
+    background-color: var(--lumo-primary-color-10pct);
+    color: var(--lumo-primary-text-color);
+}
+
+.wams-dialog-status-box--success {
+    background-color: var(--lumo-success-color-10pct);
+    color: var(--lumo-success-text-color);
+}
+
+.wams-dialog-status-box--error {
+    background-color: var(--lumo-error-color-10pct);
+    color: var(--lumo-error-text-color);
+}
+
+.wams-dialog-status-content {
+    font-size: var(--lumo-font-size-s);
+}
+
+.wams-dialog-spinner {
+    animation: mms-spin 1s linear infinite;
+}
+
+@keyframes mms-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

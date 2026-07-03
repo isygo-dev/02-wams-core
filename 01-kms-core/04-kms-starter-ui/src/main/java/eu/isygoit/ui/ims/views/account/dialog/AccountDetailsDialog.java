@@ -74,10 +74,7 @@ public class AccountDetailsDialog extends NoActionDialog {
 
         // Basic information section (compact two-column grid)
         Div basicInfo = new Div();
-        basicInfo.addClassName("details-grid");
-        basicInfo.getStyle().set("display", "grid")
-                .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
-                .set("gap", "var(--lumo-space-s)");
+        basicInfo.addClassName("wams-card__detail-grid");
 
         addFieldToGrid(basicInfo, VaadinIcon.USER, I18n.t("ims.account.details.field.full.name"), account.getFullName());
         addFieldToGrid(basicInfo, VaadinIcon.ENVELOPE, I18n.t("ims.account.details.field.email"), account.getEmail());
@@ -92,10 +89,7 @@ public class AccountDetailsDialog extends NoActionDialog {
 
         // Status section
         Div statusInfo = new Div();
-        statusInfo.addClassName("details-grid");
-        statusInfo.getStyle().set("display", "grid")
-                .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
-                .set("gap", "var(--lumo-space-s)");
+        statusInfo.addClassName("wams-card__detail-grid");
 
         addFieldToGrid(statusInfo, VaadinIcon.SHIELD, I18n.t("ims.account.details.field.admin"), Boolean.TRUE.equals(account.getIsAdmin()) ? I18n.t("ims.account.details.yes") : I18n.t("ims.account.details.no"));
         addFieldToGrid(statusInfo, VaadinIcon.LOCK, I18n.t("ims.account.details.field.admin.status"), account.getAdminStatus() != null ? account.getAdminStatus().name() : null);
@@ -143,7 +137,7 @@ public class AccountDetailsDialog extends NoActionDialog {
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("16px");
-        iconComponent.getStyle().set("color", "var(--lumo-primary-color)");
+        iconComponent.addClassName("detail-field-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
@@ -151,7 +145,7 @@ public class AccountDetailsDialog extends NoActionDialog {
 
         Span valueSpan = new Span(value);
         valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("detail-field-value");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -165,9 +159,7 @@ public class AccountDetailsDialog extends NoActionDialog {
         Span titleSpan = new Span(title);
         titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
         titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
-        titleSpan.getStyle().set("border-bottom", "1px solid var(--lumo-contrast-20pct)")
-                .set("margin-bottom", "var(--lumo-space-s)")
-                .set("padding-bottom", "var(--lumo-space-xs)");
+        titleSpan.addClassName("wams-section-title");
         section.add(titleSpan, content);
         return section;
     }
@@ -181,13 +173,13 @@ public class AccountDetailsDialog extends NoActionDialog {
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("18px");
-        iconComponent.getStyle().set("color", "var(--lumo-primary-color)");
+        iconComponent.addClassName("detail-field-icon");
 
         Span titleSpan = new Span(title + ":");
         titleSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
 
         Span valueSpan = new Span(items);
-        valueSpan.getStyle().set("flex", "1");
+        valueSpan.addClassName("detail-field-value");
         valueSpan.addClassName(LumoUtility.FontSize.SMALL);
 
         layout.add(iconComponent, titleSpan, valueSpan);
@@ -202,13 +194,13 @@ public class AccountDetailsDialog extends NoActionDialog {
         row.setWidthFull();
         Icon iconComponent = icon.create();
         iconComponent.setSize("14px");
-        iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        iconComponent.addClassName("connection-row-icon");
         Span labelSpan = new Span(label);
         labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        labelSpan.getStyle().set("min-width", "160px");
+        labelSpan.addClassName("connection-row-label");
         Span valueSpan = new Span(value);
         valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        valueSpan.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        valueSpan.addClassName("connection-row-value");
         row.add(iconComponent, labelSpan, valueSpan);
         return row;
     }

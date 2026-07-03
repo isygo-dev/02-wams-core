@@ -55,7 +55,7 @@ public class TokenStatisticsPanel extends VerticalLayout {
         statsContainer = new HorizontalLayout();
         statsContainer.setWidthFull();
         statsContainer.setSpacing(true);
-        statsContainer.getStyle().set("flex-wrap", "wrap").set("gap", "16px");
+        statsContainer.addClassName("kms-parta-stats-wrap");
         add(statsContainer);
         showPlaceholderCards();
     }
