@@ -46,10 +46,10 @@ public class CreateCustomKeyStoreDialog extends BaseActionDialog {
     public CreateCustomKeyStoreDialog(CustomKeyStoresView parentView,
                                       KmsApiService kmsApiService,
                                       Runnable onSuccess) {
-        super(I18n.t("keystore.dialog.create.title"), onSuccess);
+        super(I18n.t("kms.keystore.dialog.create.title"), onSuccess);
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
-        setOkButtonText(I18n.t("keystore.dialog.create.button"));
+        setOkButtonText(I18n.t("kms.keystore.dialog.create.button"));
         setWidth("700px");
         setMaxWidth("95%");
         setResizable(true);
@@ -61,17 +61,17 @@ public class CreateCustomKeyStoreDialog extends BaseActionDialog {
     protected boolean onOk() {
         String name = nameField.getValue();
         if (!StringUtils.hasText(name)) {
-            append(I18n.t("keystore.dialog.field.name.required"));
+            append(I18n.t("kms.keystore.dialog.field.name.required"));
             return false;
         }
         if (name.length() > 255) {
-            append(I18n.t("keystore.dialog.field.name.maxlength"));
+            append(I18n.t("kms.keystore.dialog.field.name.maxlength"));
             return false;
         }
 
         IEnumCustomKeyStoreType.Types type = typeCombo.getValue();
         if (type == null) {
-            append(I18n.t("keystore.dialog.field.type.required"));
+            append(I18n.t("kms.keystore.dialog.field.type.required"));
             return false;
         }
 
@@ -92,17 +92,17 @@ public class CreateCustomKeyStoreDialog extends BaseActionDialog {
             if (type == IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM) {
                 String clusterId = cloudHsmClusterId.getValue();
                 if (!StringUtils.hasText(clusterId)) {
-                    append(I18n.t("keystore.dialog.field.cloudhsm.cluster.required"));
+                    append(I18n.t("kms.keystore.dialog.field.cloudhsm.cluster.required"));
                     return false;
                 }
                 String password = keyStorePassword.getValue();
                 if (!StringUtils.hasText(password)) {
-                    append(I18n.t("keystore.dialog.field.password.required"));
+                    append(I18n.t("kms.keystore.dialog.field.password.required"));
                     return false;
                 }
                 String cert = trustAnchorCert.getValue();
                 if (!StringUtils.hasText(cert)) {
-                    append(I18n.t("keystore.dialog.field.certificate.required"));
+                    append(I18n.t("kms.keystore.dialog.field.certificate.required"));
                     return false;
                 }
                 request.setCloudHsmClusterId(clusterId);
@@ -111,16 +111,16 @@ public class CreateCustomKeyStoreDialog extends BaseActionDialog {
             } else {
                 String endpoint = xksProxyUriEndpoint.getValue();
                 if (!StringUtils.hasText(endpoint)) {
-                    append(I18n.t("keystore.dialog.field.xks.endpoint.required"));
+                    append(I18n.t("kms.keystore.dialog.field.xks.endpoint.required"));
                     return false;
                 }
                 if (!endpoint.matches("^https?://.+")) {
-                    append(I18n.t("keystore.dialog.field.xks.endpoint.invalid"));
+                    append(I18n.t("kms.keystore.dialog.field.xks.endpoint.invalid"));
                     return false;
                 }
                 String auth = xksProxyAuth.getValue();
                 if (!StringUtils.hasText(auth)) {
-                    append(I18n.t("keystore.dialog.field.xks.auth.required"));
+                    append(I18n.t("kms.keystore.dialog.field.xks.auth.required"));
                     return false;
                 }
                 request.setXksProxyUriEndpoint(endpoint);
@@ -131,17 +131,17 @@ public class CreateCustomKeyStoreDialog extends BaseActionDialog {
 
             ResponseEntity<CreateCustomKeyStoreResponse> response = kmsApiService.createCustomKeyStore(request);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("keystore.dialog.create.failed", response.getStatusCode()));
+                append(I18n.t("kms.keystore.dialog.create.failed", response.getStatusCode()));
                 return false;
             }
 
-            append(I18n.t("keystore.dialog.create.success"));
+            append(I18n.t("kms.keystore.dialog.create.success"));
             return true;
 
         } catch (FeignException ex) {
             append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            append(I18n.t("keystore.dialog.create.failed", e.getMessage()));
+            append(I18n.t("kms.keystore.dialog.create.failed", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }
@@ -150,66 +150,66 @@ public class CreateCustomKeyStoreDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        nameField = new TextField(I18n.t("keystore.dialog.field.name"));
+        nameField = new TextField(I18n.t("kms.keystore.dialog.field.name"));
         nameField.setRequiredIndicatorVisible(true);
         nameField.setMaxLength(255);
-        nameField.setPlaceholder(I18n.t("keystore.dialog.field.name.placeholder"));
+        nameField.setPlaceholder(I18n.t("kms.keystore.dialog.field.name.placeholder"));
 
-        typeCombo = new ComboBox<>(I18n.t("keystore.dialog.field.type"));
+        typeCombo = new ComboBox<>(I18n.t("kms.keystore.dialog.field.type"));
         typeCombo.setItems(IEnumCustomKeyStoreType.Types.values());
         typeCombo.setRequiredIndicatorVisible(true);
         typeCombo.setValue(IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM);
-        typeCombo.setHelperText(I18n.t("keystore.dialog.field.type.helper"));
+        typeCombo.setHelperText(I18n.t("kms.keystore.dialog.field.type.helper"));
 
         // CloudHSM fields
-        cloudHsmClusterId = new TextField(I18n.t("keystore.dialog.field.cloudhsm.cluster"));
-        cloudHsmClusterId.setPlaceholder(I18n.t("keystore.dialog.field.cloudhsm.cluster.placeholder"));
+        cloudHsmClusterId = new TextField(I18n.t("kms.keystore.dialog.field.cloudhsm.cluster"));
+        cloudHsmClusterId.setPlaceholder(I18n.t("kms.keystore.dialog.field.cloudhsm.cluster.placeholder"));
         cloudHsmClusterId.setRequiredIndicatorVisible(true);
-        keyStorePassword = new PasswordField(I18n.t("keystore.dialog.field.password"));
-        keyStorePassword.setPlaceholder(I18n.t("keystore.dialog.field.password.placeholder"));
+        keyStorePassword = new PasswordField(I18n.t("kms.keystore.dialog.field.password"));
+        keyStorePassword.setPlaceholder(I18n.t("kms.keystore.dialog.field.password.placeholder"));
         keyStorePassword.setRequiredIndicatorVisible(true);
-        trustAnchorCert = new TextArea(I18n.t("keystore.dialog.field.certificate"));
-        trustAnchorCert.setPlaceholder(I18n.t("keystore.dialog.field.certificate.placeholder"));
+        trustAnchorCert = new TextArea(I18n.t("kms.keystore.dialog.field.certificate"));
+        trustAnchorCert.setPlaceholder(I18n.t("kms.keystore.dialog.field.certificate.placeholder"));
         trustAnchorCert.setHeight("120px");
         trustAnchorCert.setRequiredIndicatorVisible(true);
 
         // XKS fields
-        xksProxyUriEndpoint = new TextField(I18n.t("keystore.dialog.field.xks.endpoint"));
-        xksProxyUriEndpoint.setPlaceholder(I18n.t("keystore.dialog.field.xks.endpoint.placeholder"));
+        xksProxyUriEndpoint = new TextField(I18n.t("kms.keystore.dialog.field.xks.endpoint"));
+        xksProxyUriEndpoint.setPlaceholder(I18n.t("kms.keystore.dialog.field.xks.endpoint.placeholder"));
         xksProxyUriEndpoint.setRequiredIndicatorVisible(true);
-        xksProxyUriPath = new TextField(I18n.t("keystore.dialog.field.xks.path"));
-        xksProxyUriPath.setPlaceholder(I18n.t("keystore.dialog.field.xks.path.placeholder"));
-        xksProxyAuth = new PasswordField(I18n.t("keystore.dialog.field.xks.auth"));
-        xksProxyAuth.setPlaceholder(I18n.t("keystore.dialog.field.xks.auth.placeholder"));
+        xksProxyUriPath = new TextField(I18n.t("kms.keystore.dialog.field.xks.path"));
+        xksProxyUriPath.setPlaceholder(I18n.t("kms.keystore.dialog.field.xks.path.placeholder"));
+        xksProxyAuth = new PasswordField(I18n.t("kms.keystore.dialog.field.xks.auth"));
+        xksProxyAuth.setPlaceholder(I18n.t("kms.keystore.dialog.field.xks.auth.placeholder"));
         xksProxyAuth.setRequiredIndicatorVisible(true);
-        xksProxyConnectivity = new TextField(I18n.t("keystore.dialog.field.xks.connectivity"));
-        xksProxyConnectivity.setPlaceholder(I18n.t("keystore.dialog.field.xks.connectivity.placeholder"));
+        xksProxyConnectivity = new TextField(I18n.t("kms.keystore.dialog.field.xks.connectivity"));
+        xksProxyConnectivity.setPlaceholder(I18n.t("kms.keystore.dialog.field.xks.connectivity.placeholder"));
 
         // Common fields
-        maxKeysField = new IntegerField(I18n.t("keystore.dialog.field.max.keys"));
+        maxKeysField = new IntegerField(I18n.t("kms.keystore.dialog.field.max.keys"));
         maxKeysField.setMin(1);
         maxKeysField.setMax(10000);
-        maxKeysField.setPlaceholder(I18n.t("keystore.dialog.field.max.keys.placeholder"));
-        timeoutField = new IntegerField(I18n.t("keystore.dialog.field.timeout"));
+        maxKeysField.setPlaceholder(I18n.t("kms.keystore.dialog.field.max.keys.placeholder"));
+        timeoutField = new IntegerField(I18n.t("kms.keystore.dialog.field.timeout"));
         timeoutField.setMin(1);
         timeoutField.setValue(30);
-        timeoutField.setPlaceholder(I18n.t("keystore.dialog.field.timeout.placeholder"));
-        healthIntervalField = new IntegerField(I18n.t("keystore.dialog.field.health"));
+        timeoutField.setPlaceholder(I18n.t("kms.keystore.dialog.field.timeout.placeholder"));
+        healthIntervalField = new IntegerField(I18n.t("kms.keystore.dialog.field.health"));
         healthIntervalField.setMin(10);
         healthIntervalField.setValue(60);
-        healthIntervalField.setPlaceholder(I18n.t("keystore.dialog.field.health.placeholder"));
-        autoReconnectCheck = new Checkbox(I18n.t("keystore.dialog.field.auto.reconnect"));
+        healthIntervalField.setPlaceholder(I18n.t("kms.keystore.dialog.field.health.placeholder"));
+        autoReconnectCheck = new Checkbox(I18n.t("kms.keystore.dialog.field.auto.reconnect"));
         autoReconnectCheck.setValue(true);
 
         // Metadata & tags & type‑specific data
-        metadataField = new TextArea(I18n.t("keystore.dialog.field.metadata"));
-        metadataField.setPlaceholder(I18n.t("keystore.dialog.field.metadata.placeholder"));
+        metadataField = new TextArea(I18n.t("kms.keystore.dialog.field.metadata"));
+        metadataField.setPlaceholder(I18n.t("kms.keystore.dialog.field.metadata.placeholder"));
         metadataField.setHeight("100px");
-        tagsField = new TextArea(I18n.t("keystore.dialog.field.tags"));
-        tagsField.setPlaceholder(I18n.t("keystore.dialog.field.tags.placeholder"));
+        tagsField = new TextArea(I18n.t("kms.keystore.dialog.field.tags"));
+        tagsField.setPlaceholder(I18n.t("kms.keystore.dialog.field.tags.placeholder"));
         tagsField.setHeight("100px");
-        typeSpecificDataField = new TextArea(I18n.t("keystore.dialog.field.type.specific"));
-        typeSpecificDataField.setPlaceholder(I18n.t("keystore.dialog.field.type.specific.placeholder"));
+        typeSpecificDataField = new TextArea(I18n.t("kms.keystore.dialog.field.type.specific"));
+        typeSpecificDataField.setPlaceholder(I18n.t("kms.keystore.dialog.field.type.specific.placeholder"));
         typeSpecificDataField.setHeight("80px");
 
         // Initially hide XKS fields
@@ -261,7 +261,7 @@ public class CreateCustomKeyStoreDialog extends BaseActionDialog {
                 }
             }
         } catch (Exception e) {
-            append(I18n.t("keystore.dialog.error.invalid.json", e.getMessage()));
+            append(I18n.t("kms.keystore.dialog.error.invalid.json", e.getMessage()));
             return null;
         }
         return map.isEmpty() ? null : map;

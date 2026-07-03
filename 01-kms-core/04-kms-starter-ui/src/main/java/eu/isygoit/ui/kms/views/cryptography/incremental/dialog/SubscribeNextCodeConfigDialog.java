@@ -23,50 +23,50 @@ public class SubscribeNextCodeConfigDialog extends BaseActionDialog {
     private IntegerField startValueField;
 
     public SubscribeNextCodeConfigDialog(KmsAppNextCodeService nextCodeService, Runnable onSuccess) {
-        super(I18n.t("subscribe.dialog.title"), onSuccess);
+        super(I18n.t("kms.subscribe.dialog.title"), onSuccess);
         this.nextCodeService = nextCodeService;
-        setOkButtonText(I18n.t("subscribe.dialog.button"));
+        setOkButtonText(I18n.t("kms.subscribe.dialog.button"));
         setWidth("600px");
         buildForm();
         addContent(createFormLayout());
     }
 
     private void buildForm() {
-        entityField = new TextField(I18n.t("subscribe.dialog.field.entity"));
+        entityField = new TextField(I18n.t("kms.subscribe.dialog.field.entity"));
         entityField.setRequired(true);
         entityField.setRequiredIndicatorVisible(true);
-        entityField.setPlaceholder(I18n.t("subscribe.dialog.field.entity.placeholder"));
+        entityField.setPlaceholder(I18n.t("kms.subscribe.dialog.field.entity.placeholder"));
 
-        attributeField = new TextField(I18n.t("subscribe.dialog.field.attribute"));
+        attributeField = new TextField(I18n.t("kms.subscribe.dialog.field.attribute"));
         attributeField.setRequired(true);
         attributeField.setRequiredIndicatorVisible(true);
-        attributeField.setPlaceholder(I18n.t("subscribe.dialog.field.attribute.placeholder"));
+        attributeField.setPlaceholder(I18n.t("kms.subscribe.dialog.field.attribute.placeholder"));
 
-        prefixField = new TextField(I18n.t("subscribe.dialog.field.prefix"));
-        prefixField.setPlaceholder(I18n.t("subscribe.dialog.field.prefix.placeholder"));
+        prefixField = new TextField(I18n.t("kms.subscribe.dialog.field.prefix"));
+        prefixField.setPlaceholder(I18n.t("kms.subscribe.dialog.field.prefix.placeholder"));
 
-        suffixField = new TextField(I18n.t("subscribe.dialog.field.suffix"));
-        suffixField.setPlaceholder(I18n.t("subscribe.dialog.field.suffix.placeholder"));
+        suffixField = new TextField(I18n.t("kms.subscribe.dialog.field.suffix"));
+        suffixField.setPlaceholder(I18n.t("kms.subscribe.dialog.field.suffix.placeholder"));
 
-        valueLengthField = new IntegerField(I18n.t("subscribe.dialog.field.value.length"));
+        valueLengthField = new IntegerField(I18n.t("kms.subscribe.dialog.field.value.length"));
         valueLengthField.setValue(6);
         valueLengthField.setStepButtonsVisible(true);
         valueLengthField.setMin(1);
         valueLengthField.setMax(20);
-        valueLengthField.setHelperText(I18n.t("subscribe.dialog.field.value.length.helper"));
+        valueLengthField.setHelperText(I18n.t("kms.subscribe.dialog.field.value.length.helper"));
 
-        incrementField = new IntegerField(I18n.t("subscribe.dialog.field.increment"));
+        incrementField = new IntegerField(I18n.t("kms.subscribe.dialog.field.increment"));
         incrementField.setValue(1);
         incrementField.setStepButtonsVisible(true);
         incrementField.setMin(1);
         incrementField.setMax(1000);
-        incrementField.setHelperText(I18n.t("subscribe.dialog.field.increment.helper"));
+        incrementField.setHelperText(I18n.t("kms.subscribe.dialog.field.increment.helper"));
 
-        startValueField = new IntegerField(I18n.t("subscribe.dialog.field.start.value"));
+        startValueField = new IntegerField(I18n.t("kms.subscribe.dialog.field.start.value"));
         startValueField.setValue(0);
         startValueField.setStepButtonsVisible(true);
         startValueField.setMin(0);
-        startValueField.setHelperText(I18n.t("subscribe.dialog.field.start.value.helper"));
+        startValueField.setHelperText(I18n.t("kms.subscribe.dialog.field.start.value.helper"));
     }
 
     private VerticalLayout createFormLayout() {
@@ -100,7 +100,7 @@ public class SubscribeNextCodeConfigDialog extends BaseActionDialog {
         String attribute = attributeField.getValue();
 
         if (entity == null || entity.isBlank() || attribute == null || attribute.isBlank()) {
-            append(I18n.t("subscribe.dialog.entity.attribute.required"));
+            append(I18n.t("kms.subscribe.dialog.entity.attribute.required"));
             return false;
         }
 
@@ -117,14 +117,14 @@ public class SubscribeNextCodeConfigDialog extends BaseActionDialog {
 
             ResponseEntity<NextCodeDto> response = nextCodeService.create(dto);
             if (response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("subscribe.dialog.success"));
+                append(I18n.t("kms.subscribe.dialog.success"));
                 return true;
             } else {
-                append(I18n.t("subscribe.dialog.failed", response.getStatusCode()));
+                append(I18n.t("kms.subscribe.dialog.failed", response.getStatusCode()));
                 return false;
             }
         } catch (Exception e) {
-            append(I18n.t("subscribe.dialog.error", e.getMessage()));
+            append(I18n.t("kms.subscribe.dialog.error", e.getMessage()));
             return false;
         }
     }

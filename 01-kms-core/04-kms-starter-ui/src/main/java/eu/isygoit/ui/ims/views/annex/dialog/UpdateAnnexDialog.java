@@ -32,13 +32,13 @@ public class UpdateAnnexDialog extends BaseActionDialog {
                              AnnexService annexService,
                              AnnexDto annex,
                              Runnable onSuccess) {
-        super(I18n.t("annex.dialog.update.title"), onSuccess);
+        super(I18n.t("ims.annex.dialog.update.title"), onSuccess);
         this.parentView = parentView;
         this.annexService = annexService;
         this.annex = annex;
         this.onSuccess = onSuccess;
 
-        setOkButtonText(I18n.t("annex.dialog.update.button"));
+        setOkButtonText(I18n.t("ims.annex.dialog.update.button"));
         setWidth("600px");
         setMaxWidth("95%");
 
@@ -48,26 +48,26 @@ public class UpdateAnnexDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        tableCodeField = new TextField(I18n.t("annex.dialog.update.field.table.code"));
+        tableCodeField = new TextField(I18n.t("ims.annex.dialog.update.field.table.code"));
         tableCodeField.setRequiredIndicatorVisible(true);
         tableCodeField.setWidthFull();
 
-        languageCombo = new ComboBox<>(I18n.t("annex.dialog.update.field.language"));
+        languageCombo = new ComboBox<>(I18n.t("ims.annex.dialog.update.field.language"));
         languageCombo.setItems(IEnumLanguage.Types.values());
         languageCombo.setRequiredIndicatorVisible(true);
         languageCombo.setWidthFull();
 
-        valueField = new TextField(I18n.t("annex.dialog.update.field.value"));
+        valueField = new TextField(I18n.t("ims.annex.dialog.update.field.value"));
         valueField.setRequiredIndicatorVisible(true);
         valueField.setWidthFull();
 
-        descriptionArea = new TextArea(I18n.t("annex.dialog.update.field.description"));
+        descriptionArea = new TextArea(I18n.t("ims.annex.dialog.update.field.description"));
         descriptionArea.setWidthFull();
 
-        referenceField = new TextField(I18n.t("annex.dialog.update.field.reference"));
+        referenceField = new TextField(I18n.t("ims.annex.dialog.update.field.reference"));
         referenceField.setWidthFull();
 
-        orderField = new IntegerField(I18n.t("annex.dialog.update.field.order"));
+        orderField = new IntegerField(I18n.t("ims.annex.dialog.update.field.order"));
         orderField.setWidthFull();
     }
 
@@ -95,15 +95,15 @@ public class UpdateAnnexDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (tableCodeField.getValue().isBlank()) {
-            append(I18n.t("annex.dialog.update.field.table.code.required"));
+            append(I18n.t("ims.annex.dialog.update.field.table.code.required"));
             return false;
         }
         if (languageCombo.getValue() == null) {
-            append(I18n.t("annex.dialog.update.field.language.required"));
+            append(I18n.t("ims.annex.dialog.update.field.language.required"));
             return false;
         }
         if (valueField.getValue().isBlank()) {
-            append(I18n.t("annex.dialog.update.field.value.required"));
+            append(I18n.t("ims.annex.dialog.update.field.value.required"));
             return false;
         }
 
@@ -118,17 +118,17 @@ public class UpdateAnnexDialog extends BaseActionDialog {
 
             ResponseEntity<AnnexDto> response = annexService.update(annex.getId(), annex);
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                append(I18n.t("annex.dialog.update.failed", response.getStatusCodeValue()));
+                append(I18n.t("ims.annex.dialog.update.failed", response.getStatusCodeValue()));
                 return false;
             }
 
-            append(I18n.t("annex.dialog.update.success"));
+            append(I18n.t("ims.annex.dialog.update.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("annex.dialog.update.error", e.getMessage()));
+            append(I18n.t("ims.annex.dialog.update.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

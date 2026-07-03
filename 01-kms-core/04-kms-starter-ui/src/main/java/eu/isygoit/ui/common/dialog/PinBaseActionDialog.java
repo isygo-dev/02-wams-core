@@ -67,7 +67,7 @@ public abstract class PinBaseActionDialog extends BaseActionDialog {
         layout.setPadding(true);
 
         layout.add(createWarningMessage(warningMessage));
-        layout.add(new Span(I18n.t("dialog.pin.confirm.instruction")));
+        layout.add(new Span(I18n.t("common.dialog.pin.confirm.instruction")));
 
         layout.add(createCodeDisplay(confirmationCode));
 
@@ -104,7 +104,7 @@ public abstract class PinBaseActionDialog extends BaseActionDialog {
 
     protected TextField createPinField() {
         TextField field = new TextField();
-        field.setPlaceholder(I18n.t("dialog.pin.field.placeholder"));
+        field.setPlaceholder(I18n.t("common.dialog.pin.field.placeholder"));
         field.setWidthFull();
         field.setPattern("[0-9]*");
         field.setMaxLength(9);

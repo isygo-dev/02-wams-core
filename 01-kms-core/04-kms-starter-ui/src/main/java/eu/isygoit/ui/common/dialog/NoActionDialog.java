@@ -33,7 +33,7 @@ public class NoActionDialog extends Dialog {
         // Add the wrapper as the main content
         super.add(contentWrapper);
 
-        closeButton = new Button(I18n.t("dialog.noaction.close"), e -> close());
+        closeButton = new Button(I18n.t("common.dialog.noaction.close"), e -> close());
         closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         HorizontalLayout footerLayout = new HorizontalLayout(closeButton);

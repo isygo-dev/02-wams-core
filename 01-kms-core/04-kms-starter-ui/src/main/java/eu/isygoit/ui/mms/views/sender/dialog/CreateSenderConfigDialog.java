@@ -29,8 +29,8 @@ public class CreateSenderConfigDialog extends BaseSenderConfigDialog {
     public CreateSenderConfigDialog(SenderConfigManagementView parentView,
                                     SenderConfigService senderConfigService,
                                     Runnable onSuccess) {
-        super(I18n.t("sender.dialog.create.title"), parentView, senderConfigService, onSuccess);
-        setOkButtonText(I18n.t("sender.dialog.create.button"));
+        super(I18n.t("mms.sender.dialog.create.title"), parentView, senderConfigService, onSuccess);
+        setOkButtonText(I18n.t("mms.sender.dialog.create.button"));
         buildContent();
         prefillData();
     }
@@ -43,48 +43,48 @@ public class CreateSenderConfigDialog extends BaseSenderConfigDialog {
                 new FormLayout.ResponsiveStep("500px", 2)
         );
 
-        tenantField = new TextField(I18n.t("sender.dialog.create.field.tenant"));
-        tenantField.setPlaceholder(I18n.t("sender.dialog.create.field.tenant.placeholder"));
+        tenantField = new TextField(I18n.t("mms.sender.dialog.create.field.tenant"));
+        tenantField.setPlaceholder(I18n.t("mms.sender.dialog.create.field.tenant.placeholder"));
         tenantField.setRequiredIndicatorVisible(true);
         tenantField.setWidthFull();
 
-        hostField = new TextField(I18n.t("sender.dialog.create.field.host"));
-        hostField.setPlaceholder(I18n.t("sender.dialog.create.field.host.placeholder"));
+        hostField = new TextField(I18n.t("mms.sender.dialog.create.field.host"));
+        hostField.setPlaceholder(I18n.t("mms.sender.dialog.create.field.host.placeholder"));
         hostField.setRequiredIndicatorVisible(true);
         hostField.setWidthFull();
 
-        portField = new TextField(I18n.t("sender.dialog.create.field.port"));
-        portField.setPlaceholder(I18n.t("sender.dialog.create.field.port.placeholder"));
+        portField = new TextField(I18n.t("mms.sender.dialog.create.field.port"));
+        portField.setPlaceholder(I18n.t("mms.sender.dialog.create.field.port.placeholder"));
         portField.setRequiredIndicatorVisible(true);
         portField.setWidthFull();
 
-        usernameField = new TextField(I18n.t("sender.dialog.create.field.username"));
-        usernameField.setPlaceholder(I18n.t("sender.dialog.create.field.username.placeholder"));
+        usernameField = new TextField(I18n.t("mms.sender.dialog.create.field.username"));
+        usernameField.setPlaceholder(I18n.t("mms.sender.dialog.create.field.username.placeholder"));
         usernameField.setRequiredIndicatorVisible(true);
         usernameField.setWidthFull();
 
-        passwordField = new PasswordField(I18n.t("sender.dialog.create.field.password"));
-        passwordField.setPlaceholder(I18n.t("sender.dialog.create.field.password.placeholder"));
+        passwordField = new PasswordField(I18n.t("mms.sender.dialog.create.field.password"));
+        passwordField.setPlaceholder(I18n.t("mms.sender.dialog.create.field.password.placeholder"));
         passwordField.setRequiredIndicatorVisible(true);
         passwordField.setWidthFull();
 
-        transportProtocolField = new TextField(I18n.t("sender.dialog.create.field.protocol"));
-        transportProtocolField.setPlaceholder(I18n.t("sender.dialog.create.field.protocol.placeholder"));
+        transportProtocolField = new TextField(I18n.t("mms.sender.dialog.create.field.protocol"));
+        transportProtocolField.setPlaceholder(I18n.t("mms.sender.dialog.create.field.protocol.placeholder"));
         transportProtocolField.setValue("smtp");
         transportProtocolField.setWidthFull();
 
-        smtpAuthField = new TextField(I18n.t("sender.dialog.create.field.smtp.auth"));
-        smtpAuthField.setPlaceholder(I18n.t("sender.dialog.create.field.smtp.auth.placeholder"));
+        smtpAuthField = new TextField(I18n.t("mms.sender.dialog.create.field.smtp.auth"));
+        smtpAuthField.setPlaceholder(I18n.t("mms.sender.dialog.create.field.smtp.auth.placeholder"));
         smtpAuthField.setValue("true");
         smtpAuthField.setWidthFull();
 
-        smtpStarttlsEnableCheckbox = new Checkbox(I18n.t("sender.dialog.create.field.tls.enable"));
+        smtpStarttlsEnableCheckbox = new Checkbox(I18n.t("mms.sender.dialog.create.field.tls.enable"));
         smtpStarttlsEnableCheckbox.setValue(false);
 
-        smtpStarttlsRequiredCheckbox = new Checkbox(I18n.t("sender.dialog.create.field.tls.required"));
+        smtpStarttlsRequiredCheckbox = new Checkbox(I18n.t("mms.sender.dialog.create.field.tls.required"));
         smtpStarttlsRequiredCheckbox.setValue(false);
 
-        debugCheckbox = new Checkbox(I18n.t("sender.dialog.create.field.debug"));
+        debugCheckbox = new Checkbox(I18n.t("mms.sender.dialog.create.field.debug"));
         debugCheckbox.setValue(false);
 
         form.add(tenantField, hostField, portField, usernameField, passwordField,
@@ -111,23 +111,23 @@ public class CreateSenderConfigDialog extends BaseSenderConfigDialog {
 
         // Validate required fields
         if (tenantField.getValue() == null || tenantField.getValue().isBlank()) {
-            append(I18n.t("sender.dialog.create.error.tenant.required"));
+            append(I18n.t("mms.sender.dialog.create.error.tenant.required"));
             return false;
         }
         if (hostField.getValue() == null || hostField.getValue().isBlank()) {
-            append(I18n.t("sender.dialog.create.error.host.required"));
+            append(I18n.t("mms.sender.dialog.create.error.host.required"));
             return false;
         }
         if (portField.getValue() == null || portField.getValue().isBlank()) {
-            append(I18n.t("sender.dialog.create.error.port.required"));
+            append(I18n.t("mms.sender.dialog.create.error.port.required"));
             return false;
         }
         if (usernameField.getValue() == null || usernameField.getValue().isBlank()) {
-            append(I18n.t("sender.dialog.create.error.username.required"));
+            append(I18n.t("mms.sender.dialog.create.error.username.required"));
             return false;
         }
         if (passwordField.getValue() == null || passwordField.getValue().isBlank()) {
-            append(I18n.t("sender.dialog.create.error.password.required"));
+            append(I18n.t("mms.sender.dialog.create.error.password.required"));
             return false;
         }
 
@@ -152,20 +152,20 @@ public class CreateSenderConfigDialog extends BaseSenderConfigDialog {
 
             ResponseEntity<SenderConfigDto> response = senderConfigService.create(config);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("sender.dialog.create.failed",
-                        response.getBody() != null ? response.getBody().toString() : "unknown error"));
+                append(I18n.t("mms.sender.dialog.create.failed",
+                        response.getBody() != null ? response.getBody().toString() : I18n.t("mms.common.error.unknown")));
                 return false;
             }
 
-            showSuccess(I18n.t("sender.dialog.create.success"));
+            showSuccess(I18n.t("mms.sender.dialog.create.success"));
             return true;
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ?
                     ex.contentUTF8() : ex.getMessage();
-            append(I18n.t("sender.dialog.create.error", errorMsg));
+            append(I18n.t("mms.sender.dialog.create.error", errorMsg));
             log.error("Failed to create sender config", ex);
         } catch (Exception e) {
-            append(I18n.t("sender.dialog.create.error", e.getMessage()));
+            append(I18n.t("mms.sender.dialog.create.error", e.getMessage()));
             log.error("Failed to create sender config", e);
         } finally {
             if (parentView != null) {

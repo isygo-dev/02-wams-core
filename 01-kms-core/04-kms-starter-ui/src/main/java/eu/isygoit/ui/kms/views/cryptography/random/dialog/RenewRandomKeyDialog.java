@@ -19,21 +19,21 @@ public class RenewRandomKeyDialog extends PinBaseActionDialog {
     private ComboBox<IEnumCharSet.Types> charSetCombo;
 
     public RenewRandomKeyDialog(RandomKeyService keyService, String keyName, Runnable onSuccess) {
-        super(I18n.t("random.key.dialog.renew.title"),
-                I18n.t("random.key.dialog.renew.message"),
+        super(I18n.t("kms.random.key.dialog.renew.title"),
+                I18n.t("kms.random.key.dialog.renew.message"),
                 onSuccess, true);
         this.keyService = keyService;
         this.keyName = keyName;
         this.length = 32;      // default
         this.charSet = IEnumCharSet.Types.ALL;
-        setOkButtonText(I18n.t("random.key.dialog.renew.button"));
+        setOkButtonText(I18n.t("kms.random.key.dialog.renew.button"));
         setWidth("500px");
         buildForm();
         addContent(createFormLayout());
     }
 
     private void buildForm() {
-        lengthField = new IntegerField(I18n.t("random.key.dialog.field.length"));
+        lengthField = new IntegerField(I18n.t("kms.random.key.dialog.field.length"));
         lengthField.setValue(length);
         lengthField.setMin(1);
         lengthField.setMax(4096);
@@ -41,7 +41,7 @@ public class RenewRandomKeyDialog extends PinBaseActionDialog {
         lengthField.setWidthFull();
         lengthField.addValueChangeListener(e -> length = e.getValue());
 
-        charSetCombo = new ComboBox<>(I18n.t("random.key.dialog.field.char.set"));
+        charSetCombo = new ComboBox<>(I18n.t("kms.random.key.dialog.field.char.set"));
         charSetCombo.setItems(IEnumCharSet.Types.values());
         charSetCombo.setValue(charSet);
         charSetCombo.setWidthFull();
@@ -58,30 +58,30 @@ public class RenewRandomKeyDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append(I18n.t("random.key.dialog.renew.invalid.code"));
+            append(I18n.t("kms.random.key.dialog.renew.invalid.code"));
             return false;
         }
 
         if (length == null || length <= 0) {
-            append(I18n.t("random.key.dialog.renew.length.required"));
+            append(I18n.t("kms.random.key.dialog.renew.length.required"));
             return false;
         }
         if (charSet == null) {
-            append(I18n.t("random.key.dialog.renew.char.set.required"));
+            append(I18n.t("kms.random.key.dialog.renew.char.set.required"));
             return false;
         }
 
         try {
             ResponseEntity<String> response = keyService.renewRandomKey(keyName, length, charSet);
             if (response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("random.key.dialog.renew.success"));
+                append(I18n.t("kms.random.key.dialog.renew.success"));
                 return true;
             } else {
-                append(I18n.t("random.key.dialog.renew.failed", response.getStatusCode()));
+                append(I18n.t("kms.random.key.dialog.renew.failed", response.getStatusCode()));
                 return false;
             }
         } catch (Exception e) {
-            append(I18n.t("random.key.dialog.renew.failed", e.getMessage()));
+            append(I18n.t("kms.random.key.dialog.renew.failed", e.getMessage()));
             return false;
         }
     }

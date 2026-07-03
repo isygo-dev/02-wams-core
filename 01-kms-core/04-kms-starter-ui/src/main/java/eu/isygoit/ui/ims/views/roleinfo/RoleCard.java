@@ -50,7 +50,7 @@ public class RoleCard extends BaseCard<RoleManagementView, RoleInfoService> {
         Span titleSpan = buildTitleSpan(role.getName(), role.getCode());
         titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
 
-        Span levelChip = new Span(I18n.t("role.card.level", role.getLevel()));
+        Span levelChip = new Span(I18n.t("ims.role.card.level", role.getLevel()));
         levelChip.getStyle()
                 .set("background-color", "var(--lumo-primary-color-10pct)")
                 .set("color", "var(--lumo-primary-text-color)")
@@ -64,15 +64,15 @@ public class RoleCard extends BaseCard<RoleManagementView, RoleInfoService> {
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("role.card.details.tooltip"));
+        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("ims.role.card.details.tooltip"));
         detailsBtn.addClickListener(e -> new RoleDetailsDialog(parentView, objectService, role.getId()).open());
 
-        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("role.card.edit.tooltip"));
+        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("ims.role.card.edit.tooltip"));
         editBtn.addClickListener(e -> parentView.openUpdateRoleDialog(role, () -> {
             if (onRefresh != null) onRefresh.run();
         }));
 
-        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("role.card.delete.tooltip"));
+        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("ims.role.card.delete.tooltip"));
         deleteBtn.addClickListener(e -> new DeleteRoleDialog(parentView, objectService, role.getId(), () -> {
             if (onRefresh != null) onRefresh.run();
         }).open());
@@ -87,12 +87,12 @@ public class RoleCard extends BaseCard<RoleManagementView, RoleInfoService> {
         body.setPadding(false);
         body.getStyle().set("margin-top", "var(--lumo-space-s)");
 
-        body.add(createInfoRow(VaadinIcon.CODE, I18n.t("role.card.code"), role.getCode()));
-        body.add(createInfoRow(VaadinIcon.USERS, I18n.t("role.card.users"), String.valueOf(role.getNumberOfUsers())));
-        body.add(createInfoRow(VaadinIcon.FUNCTION, I18n.t("role.card.allowed.apps"), String.valueOf(role.getAllowedTools() != null ? role.getAllowedTools().size() : 0)));
-        body.add(createInfoRow(VaadinIcon.LOCK, I18n.t("role.card.permissions"), String.valueOf(role.getRolePermission() != null ? role.getRolePermission().size() : 0)));
+        body.add(createInfoRow(VaadinIcon.CODE, I18n.t("ims.role.card.code"), role.getCode()));
+        body.add(createInfoRow(VaadinIcon.USERS, I18n.t("ims.role.card.users"), String.valueOf(role.getNumberOfUsers())));
+        body.add(createInfoRow(VaadinIcon.FUNCTION, I18n.t("ims.role.card.allowed.apps"), String.valueOf(role.getAllowedTools() != null ? role.getAllowedTools().size() : 0)));
+        body.add(createInfoRow(VaadinIcon.LOCK, I18n.t("ims.role.card.permissions"), String.valueOf(role.getRolePermission() != null ? role.getRolePermission().size() : 0)));
         if (role.getDescription() != null && !role.getDescription().isBlank()) {
-            body.add(createInfoRow(VaadinIcon.FILE_TEXT, I18n.t("role.card.description"), role.getDescription()));
+            body.add(createInfoRow(VaadinIcon.FILE_TEXT, I18n.t("ims.role.card.description"), role.getDescription()));
         }
 
         add(body);

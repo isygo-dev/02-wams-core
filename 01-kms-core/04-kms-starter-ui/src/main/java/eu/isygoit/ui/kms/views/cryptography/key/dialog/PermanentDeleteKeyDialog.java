@@ -18,14 +18,14 @@ public class PermanentDeleteKeyDialog extends PinBaseActionDialog {
                                     KmsApiService kmsApiService,
                                     String keyId,
                                     Runnable onSuccess) {
-        super(I18n.t("key.dialog.permanent.title"),
-                I18n.t("key.dialog.permanent.message"),
+        super(I18n.t("kms.key.dialog.permanent.title"),
+                I18n.t("kms.key.dialog.permanent.message"),
                 onSuccess);
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
 
-        setOkButtonText(I18n.t("key.dialog.permanent.button"));
+        setOkButtonText(I18n.t("kms.key.dialog.permanent.button"));
         addThemeVariantsOkButton(com.vaadin.flow.component.button.ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
@@ -33,7 +33,7 @@ public class PermanentDeleteKeyDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append(I18n.t("key.dialog.permanent.invalid.code"));
+            append(I18n.t("kms.key.dialog.permanent.invalid.code"));
             return false;
         }
 
@@ -41,15 +41,15 @@ public class PermanentDeleteKeyDialog extends PinBaseActionDialog {
         try {
             ResponseEntity<KmsDtos.DeleteKeyResponse> response = kmsApiService.deleteKey(keyId);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("key.dialog.permanent.failed", (response.getBody() != null ? response.getBody().toString() : "unknown error")));
+                append(I18n.t("kms.key.dialog.permanent.failed", (response.getBody() != null ? response.getBody().toString() : "unknown error")));
                 return false;
             }
-            append(I18n.t("key.dialog.permanent.success"));
+            append(I18n.t("kms.key.dialog.permanent.success"));
             return true;
         } catch (FeignException ex) {
             append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            append(I18n.t("key.dialog.permanent.error", e.getMessage()));
+            append(I18n.t("kms.key.dialog.permanent.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

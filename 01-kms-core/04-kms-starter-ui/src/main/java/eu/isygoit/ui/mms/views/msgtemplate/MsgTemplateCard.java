@@ -127,34 +127,34 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
             fileNameSpan = new Span();
         }
 
-        String displayName = template.getName() != null ? template.getName() : "Template " + template.getId();
+        String displayName = template.getName() != null ? template.getName() : I18n.t("mms.msgtemplate.card.fallback.name", template.getId());
         titleSpan.setText(displayName);
         titleSpan.getElement().setAttribute("title", displayName);
 
         // Language chip
-        String language = template.getLanguage() != null ? template.getLanguage().name() : "N/A";
+        String language = template.getLanguage() != null ? template.getLanguage().name() : I18n.t("mms.common.value.notAvailable");
         languageChip.setText(language);
         ChipColor color = getLanguageColor(template.getLanguage());
         languageChip.getStyle()
                 .set("background-color", color.background())
                 .set("color", color.foreground());
 
-        codeSpan.setText(template.getCode() != null ? template.getCode() : "N/A");
-        descriptionSpan.setText(template.getDescription() != null ? template.getDescription() : I18n.t("template.card.no.description"));
-        fileNameSpan.setText(template.getOriginalFileName() != null ? template.getOriginalFileName() : I18n.t("template.card.no.file"));
+        codeSpan.setText(template.getCode() != null ? template.getCode() : I18n.t("mms.common.value.notAvailable"));
+        descriptionSpan.setText(template.getDescription() != null ? template.getDescription() : I18n.t("mms.msgtemplate.card.no.description"));
+        fileNameSpan.setText(template.getOriginalFileName() != null ? template.getOriginalFileName() : I18n.t("mms.msgtemplate.card.no.file"));
 
         boolean hasFile = template.getFileName() != null && !template.getFileName().isEmpty();
         if (downloadButton != null) {
             downloadButton.setEnabled(hasFile);
             downloadButton.setTooltipText(hasFile ?
-                    I18n.t("template.card.download.tooltip") :
-                    I18n.t("template.card.download.disabled.tooltip"));
+                    I18n.t("mms.msgtemplate.card.download.tooltip") :
+                    I18n.t("mms.msgtemplate.card.download.disabled.tooltip"));
         }
         if (editContentButton != null) {
             editContentButton.setEnabled(hasFile);
             editContentButton.setTooltipText(hasFile ?
-                    I18n.t("template.card.edit.content.tooltip") :
-                    I18n.t("template.card.edit.content.disabled.tooltip"));
+                    I18n.t("mms.msgtemplate.card.edit.content.tooltip") :
+                    I18n.t("mms.msgtemplate.card.edit.content.disabled.tooltip"));
         }
 
         bodyContainer.removeAll();
@@ -201,13 +201,13 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         }
 
         // Title
-        String displayName = template.getName() != null ? template.getName() : "Template " + template.getId();
+        String displayName = template.getName() != null ? template.getName() : I18n.t("mms.msgtemplate.card.fallback.name", template.getId());
         titleSpan = buildTitleSpan(displayName, displayName);
         left.add(titleSpan);
 
         // Language chip
-        String language = template.getLanguage() != null ? template.getLanguage().name() : "N/A";
-        languageChip = buildStatusChip(language, "Language: " + language);
+        String language = template.getLanguage() != null ? template.getLanguage().name() : I18n.t("mms.common.value.notAvailable");
+        languageChip = buildStatusChip(language, I18n.t("mms.msgtemplate.card.language.tooltip", language));
         ChipColor color = getLanguageColor(template.getLanguage());
         languageChip.getStyle()
                 .set("background-color", color.background())
@@ -222,12 +222,12 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         List<Button> buttons = new ArrayList<>();
 
         // View Button
-        Button viewBtn = createIconButton(VaadinIcon.EYE, I18n.t("template.card.view.tooltip"));
+        Button viewBtn = createIconButton(VaadinIcon.EYE, I18n.t("mms.msgtemplate.card.view.tooltip"));
         viewBtn.addClickListener(e -> viewTemplate());
         buttons.add(viewBtn);
 
         // Download Button
-        downloadButton = createIconButton(VaadinIcon.DOWNLOAD, I18n.t("template.card.download.tooltip"));
+        downloadButton = createIconButton(VaadinIcon.DOWNLOAD, I18n.t("mms.msgtemplate.card.download.tooltip"));
         downloadButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
         downloadButton.addClickListener(e -> downloadTemplate());
         boolean hasFile = template.getFileName() != null && !template.getFileName().isEmpty();
@@ -235,19 +235,19 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         buttons.add(downloadButton);
 
         // Edit Content Button - for online editing
-        editContentButton = createIconButton(VaadinIcon.EDIT, I18n.t("template.card.edit.content.tooltip"));
+        editContentButton = createIconButton(VaadinIcon.EDIT, I18n.t("mms.msgtemplate.card.edit.content.tooltip"));
         editContentButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
         editContentButton.addClickListener(e -> openEditContentDialog());
         editContentButton.setEnabled(hasFile);
         buttons.add(editContentButton);
 
         // Edit Button (metadata)
-        editButton = createIconButton(VaadinIcon.PENCIL, I18n.t("template.card.edit.tooltip"));
+        editButton = createIconButton(VaadinIcon.PENCIL, I18n.t("mms.msgtemplate.card.edit.tooltip"));
         editButton.addClickListener(e -> openEditDialog());
         buttons.add(editButton);
 
         // Delete Button
-        deleteButton = createIconButton(VaadinIcon.TRASH, I18n.t("template.card.delete.tooltip"));
+        deleteButton = createIconButton(VaadinIcon.TRASH, I18n.t("mms.msgtemplate.card.delete.tooltip"));
         deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
         deleteButton.addClickListener(e -> openDeleteDialog());
         buttons.add(deleteButton);
@@ -261,40 +261,40 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
 
         bodyContainer.add(createDetailRow(
                 VaadinIcon.GLOBE,
-                I18n.t("template.card.tenant"),
-                template.getTenant() != null ? template.getTenant() : "N/A"
+                I18n.t("mms.msgtemplate.card.tenant"),
+                template.getTenant() != null ? template.getTenant() : I18n.t("mms.common.value.notAvailable")
         ));
 
         bodyContainer.add(createDetailRowWithCopy(
                 VaadinIcon.CODE,
-                I18n.t("template.card.code"),
-                template.getCode() != null ? template.getCode() : "N/A",
+                I18n.t("mms.msgtemplate.card.code"),
+                template.getCode() != null ? template.getCode() : I18n.t("mms.common.value.notAvailable"),
                 template.getCode() != null ? template.getCode() : ""
         ));
 
         bodyContainer.add(createDetailRow(
                 VaadinIcon.FILE_TEXT,
-                I18n.t("template.card.description"),
-                template.getDescription() != null ? template.getDescription() : I18n.t("template.card.no.description")
+                I18n.t("mms.msgtemplate.card.description"),
+                template.getDescription() != null ? template.getDescription() : I18n.t("mms.msgtemplate.card.no.description")
         ));
 
         bodyContainer.add(createDetailRow(
                 VaadinIcon.LOCATION_ARROW,
-                I18n.t("template.card.language"),
-                template.getLanguage() != null ? template.getLanguage().name() : "N/A"
+                I18n.t("mms.msgtemplate.card.language"),
+                template.getLanguage() != null ? template.getLanguage().name() : I18n.t("mms.common.value.notAvailable")
         ));
 
         bodyContainer.add(createDetailRow(
                 VaadinIcon.FILE,
-                I18n.t("template.card.file"),
-                template.getOriginalFileName() != null ? template.getOriginalFileName() : I18n.t("template.card.no.file")
+                I18n.t("mms.msgtemplate.card.file"),
+                template.getOriginalFileName() != null ? template.getOriginalFileName() : I18n.t("mms.msgtemplate.card.no.file")
         ));
 
         if (template.getFileName() != null) {
             bodyContainer.add(createDetailRow(
                     VaadinIcon.FOLDER,
-                    I18n.t("template.card.path"),
-                    template.getPath() != null ? template.getPath() : "N/A"
+                    I18n.t("mms.msgtemplate.card.path"),
+                    template.getPath() != null ? template.getPath() : I18n.t("mms.common.value.notAvailable")
             ));
         }
     }
@@ -338,7 +338,7 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         if (copyValue != null && !copyValue.isEmpty()) {
             Button copyBtn = new Button(new Icon(VaadinIcon.COPY));
             copyBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
-            copyBtn.setTooltipText(I18n.t("template.card.copy.tooltip"));
+            copyBtn.setTooltipText(I18n.t("mms.msgtemplate.card.copy.tooltip"));
             copyBtn.addClickListener(e -> {
                 getUI().ifPresent(ui -> ui.getPage().executeJs(
                         "navigator.clipboard.writeText($0)",
@@ -390,7 +390,7 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
             }
         } catch (Exception e) {
             log.error("Failed to download template file for {}", template.getId(), e);
-            Notification.show(I18n.t("template.download.error", e.getMessage()), 5000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("mms.msgtemplate.download.error", e.getMessage()), 5000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }

@@ -30,8 +30,8 @@ public class CreateMsgTemplateDialog extends BaseMsgTemplateDialog {
                                    MsgTemplateService templateService,
                                    MsgTemplateFileService templateFileService,
                                    Runnable onSuccess) {
-        super(I18n.t("template.dialog.create.title"), parentView, templateService, templateFileService, onSuccess);
-        setOkButtonText(I18n.t("template.dialog.create.button"));
+        super(I18n.t("mms.msgtemplate.dialog.create.title"), parentView, templateService, templateFileService, onSuccess);
+        setOkButtonText(I18n.t("mms.msgtemplate.dialog.create.button"));
         buildContent();
     }
 
@@ -42,27 +42,27 @@ public class CreateMsgTemplateDialog extends BaseMsgTemplateDialog {
                 new FormLayout.ResponsiveStep("500px", 2)
         );
 
-        codeField = new TextField(I18n.t("template.dialog.create.field.code"));
-        codeField.setPlaceholder(I18n.t("template.dialog.create.field.code.placeholder"));
+        codeField = new TextField(I18n.t("mms.msgtemplate.dialog.create.field.code"));
+        codeField.setPlaceholder(I18n.t("mms.msgtemplate.dialog.create.field.code.placeholder"));
         codeField.setRequiredIndicatorVisible(true);
         codeField.setWidthFull();
 
-        tenantField = new TextField(I18n.t("template.dialog.create.field.tenant"));
-        tenantField.setPlaceholder(I18n.t("template.dialog.create.field.tenant.placeholder"));
+        tenantField = new TextField(I18n.t("mms.msgtemplate.dialog.create.field.tenant"));
+        tenantField.setPlaceholder(I18n.t("mms.msgtemplate.dialog.create.field.tenant.placeholder"));
         tenantField.setRequiredIndicatorVisible(true);
         tenantField.setWidthFull();
 
-        nameCombo = new ComboBox<>(I18n.t("template.dialog.create.field.name"));
+        nameCombo = new ComboBox<>(I18n.t("mms.msgtemplate.dialog.create.field.name"));
         nameCombo.setItems(IEnumEmailTemplate.Types.values());
         nameCombo.setRequiredIndicatorVisible(true);
         nameCombo.setWidthFull();
 
-        descriptionField = new TextArea(I18n.t("template.dialog.create.field.description"));
-        descriptionField.setPlaceholder(I18n.t("template.dialog.create.field.description.placeholder"));
+        descriptionField = new TextArea(I18n.t("mms.msgtemplate.dialog.create.field.description"));
+        descriptionField.setPlaceholder(I18n.t("mms.msgtemplate.dialog.create.field.description.placeholder"));
         descriptionField.setWidthFull();
         descriptionField.setHeight("80px");
 
-        languageCombo = new ComboBox<>(I18n.t("template.dialog.create.field.language"));
+        languageCombo = new ComboBox<>(I18n.t("mms.msgtemplate.dialog.create.field.language"));
         languageCombo.setItems(IEnumLanguage.Types.values());
         languageCombo.setValue(IEnumLanguage.Types.EN);
         languageCombo.setWidthFull();
@@ -94,26 +94,26 @@ public class CreateMsgTemplateDialog extends BaseMsgTemplateDialog {
         clearErrors();
 
         if (codeField.getValue() == null || codeField.getValue().isBlank()) {
-            append(I18n.t("template.dialog.create.error.code.required"));
+            append(I18n.t("mms.msgtemplate.dialog.create.error.code.required"));
             return false;
         }
         if (tenantField.getValue() == null || tenantField.getValue().isBlank()) {
-            append(I18n.t("template.dialog.create.error.tenant.required"));
+            append(I18n.t("mms.msgtemplate.dialog.create.error.tenant.required"));
             return false;
         }
         if (nameCombo.getValue() == null) {
-            append(I18n.t("template.dialog.create.error.name.required"));
+            append(I18n.t("mms.msgtemplate.dialog.create.error.name.required"));
             return false;
         }
 
         if (!hasFileUploaded()) {
-            append(I18n.t("template.dialog.create.error.file.required"));
+            append(I18n.t("mms.msgtemplate.dialog.create.error.file.required"));
             return false;
         }
 
         MultipartFile uploadedFile = getUploadedFile();
         if (uploadedFile == null || uploadedFile.isEmpty()) {
-            append(I18n.t("template.dialog.create.error.file.invalid"));
+            append(I18n.t("mms.msgtemplate.dialog.create.error.file.invalid"));
             return false;
         }
 
@@ -135,20 +135,20 @@ public class CreateMsgTemplateDialog extends BaseMsgTemplateDialog {
             ResponseEntity<MsgTemplateDto> response = templateFileService.createWithFile(
                     uploadedFile, template);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("template.dialog.create.failed",
-                        response.getBody() != null ? response.getBody().toString() : "unknown error"));
+                append(I18n.t("mms.msgtemplate.dialog.create.failed",
+                        response.getBody() != null ? response.getBody().toString() : I18n.t("mms.common.error.unknown")));
                 return false;
             }
 
-            showSuccess(I18n.t("template.dialog.create.success"));
+            showSuccess(I18n.t("mms.msgtemplate.dialog.create.success"));
             return true;
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ?
                     ex.contentUTF8() : ex.getMessage();
-            append(I18n.t("template.dialog.create.error", errorMsg));
+            append(I18n.t("mms.msgtemplate.dialog.create.error", errorMsg));
             log.error("Failed to create template", ex);
         } catch (Exception e) {
-            append(I18n.t("template.dialog.create.error", e.getMessage()));
+            append(I18n.t("mms.msgtemplate.dialog.create.error", e.getMessage()));
             log.error("Failed to create template", e);
         } finally {
             if (parentView != null) {

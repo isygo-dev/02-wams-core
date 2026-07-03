@@ -11,13 +11,13 @@ public class DeletePasswordConfigDialog extends PinBaseActionDialog {
     private final Long configId;
 
     public DeletePasswordConfigDialog(PasswordConfigService configService, Long configId, String code, Runnable onSuccess) {
-        super(I18n.t("password.dialog.delete.title"),
-                I18n.t("password.dialog.delete.confirmation", code),
+        super(I18n.t("kms.password.dialog.delete.title"),
+                I18n.t("kms.password.dialog.delete.confirmation", code),
                 onSuccess,
                 true);
         this.configService = configService;
         this.configId = configId;
-        setOkButtonText(I18n.t("password.dialog.delete.button"));
+        setOkButtonText(I18n.t("kms.password.dialog.delete.button"));
         addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
@@ -25,16 +25,16 @@ public class DeletePasswordConfigDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append(I18n.t("password.dialog.delete.invalid.code"));
+            append(I18n.t("kms.password.dialog.delete.invalid.code"));
             return false;
         }
 
         try {
             configService.delete(configId);
-            append(I18n.t("password.dialog.delete.success"));
+            append(I18n.t("kms.password.dialog.delete.success"));
             return true;
         } catch (Exception e) {
-            append(I18n.t("password.dialog.delete.failed", e.getMessage()));
+            append(I18n.t("kms.password.dialog.delete.failed", e.getMessage()));
             return false;
         }
     }

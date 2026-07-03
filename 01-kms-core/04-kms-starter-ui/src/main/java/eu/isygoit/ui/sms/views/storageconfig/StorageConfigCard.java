@@ -47,13 +47,11 @@ public class StorageConfigCard extends BaseCard<StorageConfigManagementView, Sto
         titleLayout.setSpacing(true);
         titleLayout.getStyle().set("flex-wrap", "wrap");
 
-        String displayName = config.getUserName() != null ? config.getUserName() : "Storage " + config.getId();
+        String displayName = config.getUserName() != null ? config.getUserName() : I18n.t("sms.storageconfig.card.default.name", config.getId());
         Span titleSpan = buildTitleSpan(displayName, config.getUrl());
 
-        Span typeChip = buildStatusChip(
-                config.getType() != null ? config.getType().name() : "UNKNOWN",
-                config.getType() != null ? config.getType().name() : "UNKNOWN"
-        );
+        String typeLabel = config.getType() != null ? config.getType().name() : I18n.t("sms.storageconfig.card.type.unknown");
+        Span typeChip = buildStatusChip(typeLabel, typeLabel);
 
         titleLayout.add(titleSpan, typeChip);
         return titleLayout;
@@ -61,15 +59,15 @@ public class StorageConfigCard extends BaseCard<StorageConfigManagementView, Sto
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("storageconfig.card.details.tooltip"));
+        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("sms.storageconfig.card.details.tooltip"));
         detailsBtn.addClickListener(e -> new StorageConfigDetailsDialog(parentView, objectService, config.getId()).open());
 
-        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("storageconfig.card.edit.tooltip"));
+        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("sms.storageconfig.card.edit.tooltip"));
         editBtn.addClickListener(e -> parentView.openUpdateStorageConfigDialog(config, () -> {
             if (onRefresh != null) onRefresh.run();
         }));
 
-        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("storageconfig.card.delete.tooltip"));
+        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("sms.storageconfig.card.delete.tooltip"));
         deleteBtn.addClickListener(e -> new DeleteStorageConfigDialog(parentView, objectService, config.getId(), () -> {
             if (onRefresh != null) onRefresh.run();
         }).open());
@@ -84,10 +82,10 @@ public class StorageConfigCard extends BaseCard<StorageConfigManagementView, Sto
         body.setPadding(false);
         body.getStyle().set("margin-top", "var(--lumo-space-s)");
 
-        body.add(createIconRow(VaadinIcon.BUILDING, I18n.t("storageconfig.card.tenant"), config.getTenant()));
-        body.add(createIconRow(VaadinIcon.USER, I18n.t("storageconfig.card.username"), config.getUserName()));
-        body.add(createIconRow(VaadinIcon.LINK, I18n.t("storageconfig.card.url"), config.getUrl()));
-        body.add(createIconRow(VaadinIcon.KEY, I18n.t("storageconfig.card.password"), "••••••••"));
+        body.add(createIconRow(VaadinIcon.BUILDING, I18n.t("sms.storageconfig.card.tenant"), config.getTenant()));
+        body.add(createIconRow(VaadinIcon.USER, I18n.t("sms.storageconfig.card.username"), config.getUserName()));
+        body.add(createIconRow(VaadinIcon.LINK, I18n.t("sms.storageconfig.card.url"), config.getUrl()));
+        body.add(createIconRow(VaadinIcon.KEY, I18n.t("sms.storageconfig.card.password"), "••••••••"));
 
         add(body);
     }

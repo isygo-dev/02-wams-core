@@ -17,14 +17,14 @@ public class DeleteTenantDialog extends PinBaseActionDialog {
                               TenantService tenantService,
                               Long tenantId,
                               Runnable onSuccess) {
-        super(I18n.t("tenant.dialog.delete.title"),
-                I18n.t("tenant.dialog.delete.message"),
+        super(I18n.t("ims.tenant.dialog.delete.title"),
+                I18n.t("ims.tenant.dialog.delete.message"),
                 onSuccess);
         this.parentView = parentView;
         this.tenantService = tenantService;
         this.tenantId = tenantId;
 
-        setOkButtonText(I18n.t("tenant.dialog.delete.button"));
+        setOkButtonText(I18n.t("ims.tenant.dialog.delete.button"));
         addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
@@ -32,19 +32,19 @@ public class DeleteTenantDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append(I18n.t("tenant.dialog.delete.invalid.code"));
+            append(I18n.t("ims.tenant.dialog.delete.invalid.code"));
             return false;
         }
 
         parentView.showLoading(true);
         try {
             tenantService.delete(tenantId);
-            append(I18n.t("tenant.dialog.delete.success"));
+            append(I18n.t("ims.tenant.dialog.delete.success"));
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("tenant.dialog.delete.error", e.getMessage()));
+            append(I18n.t("ims.tenant.dialog.delete.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

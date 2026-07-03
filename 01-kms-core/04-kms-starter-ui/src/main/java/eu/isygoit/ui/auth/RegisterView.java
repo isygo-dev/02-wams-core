@@ -26,6 +26,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.request.RegisteredUserDto;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.PublicAuthService;
 import eu.isygoit.util.SecurityUtils;
 import jakarta.annotation.security.PermitAll;
@@ -42,12 +43,12 @@ import java.util.Optional;
 @PermitAll
 public class RegisterView extends VerticalLayout implements BeforeEnterObserver {
 
-    private final TextField firstNameField = new TextField("First name");
-    private final TextField lastNameField = new TextField("Last name");
-    private final EmailField emailField = new EmailField("Email");
-    private final TextField phoneField = new TextField("Phone number");
-    private final TextField roleField = new TextField("Role (optional)");
-    private final Button registerButton = new Button("Create account", VaadinIcon.USER_STAR.create());
+    private final TextField firstNameField = new TextField(I18n.t("auth.register.field.firstName.label"));
+    private final TextField lastNameField = new TextField(I18n.t("auth.register.field.lastName.label"));
+    private final EmailField emailField = new EmailField(I18n.t("auth.register.field.email.label"));
+    private final TextField phoneField = new TextField(I18n.t("auth.register.field.phone.label"));
+    private final TextField roleField = new TextField(I18n.t("auth.register.field.role.label"));
+    private final Button registerButton = new Button(I18n.t("auth.register.button.createAccount"), VaadinIcon.USER_STAR.create());
     private final Div errorContainer = new Div();
     private final Binder<RegisteredUserDto> binder = new Binder<>(RegisteredUserDto.class);
     private boolean stylesInjected = false;
@@ -70,7 +71,7 @@ public class RegisterView extends VerticalLayout implements BeforeEnterObserver 
         logo.setColorIndex(1);
         logo.setWidth("56px");
         logo.setHeight("56px");
-        H2 title = new H2("Create Account");
+        H2 title = new H2(I18n.t("auth.register.title"));
         title.addClassName(LumoUtility.FontWeight.BOLD);
         title.addClassName(LumoUtility.Margin.NONE);
         brand.add(logo, title);
@@ -92,34 +93,34 @@ public class RegisterView extends VerticalLayout implements BeforeEnterObserver 
         registerButton.addClickListener(e -> handleRegistration());
 
         // Login link
-        Anchor loginLink = new Anchor("login", "Already have an account? Sign in");
+        Anchor loginLink = new Anchor("login", I18n.t("auth.register.link.signIn"));
         loginLink.addClassName("login-link");
 
         // Footer
-        Paragraph footer = new Paragraph("© 2026 KMS/IMS Platform");
+        Paragraph footer = new Paragraph(I18n.t("auth.common.footer"));
         footer.addClassName(LumoUtility.TextColor.TERTIARY);
         footer.addClassName(LumoUtility.FontSize.XXSMALL);
         footer.addClassName(LumoUtility.Margin.Top.MEDIUM);
 
         // Validation
         binder.forField(firstNameField)
-                .asRequired("First name is required")
-                .withValidator(new StringLengthValidator("At least 2 characters", 2, 50))
+                .asRequired(I18n.t("auth.register.validation.firstName.required"))
+                .withValidator(new StringLengthValidator(I18n.t("auth.register.validation.minLength2"), 2, 50))
                 .bind(RegisteredUserDto::getFirstName, RegisteredUserDto::setFirstName);
 
         binder.forField(lastNameField)
-                .asRequired("Last name is required")
-                .withValidator(new StringLengthValidator("At least 2 characters", 2, 50))
+                .asRequired(I18n.t("auth.register.validation.lastName.required"))
+                .withValidator(new StringLengthValidator(I18n.t("auth.register.validation.minLength2"), 2, 50))
                 .bind(RegisteredUserDto::getLastName, RegisteredUserDto::setLastName);
 
         binder.forField(emailField)
-                .asRequired("Email is required")
-                .withValidator(new EmailValidator("Please enter a valid email address"))
+                .asRequired(I18n.t("auth.register.validation.email.required"))
+                .withValidator(new EmailValidator(I18n.t("auth.register.validation.email.invalid")))
                 .bind(RegisteredUserDto::getEmail, RegisteredUserDto::setEmail);
 
         binder.forField(phoneField)
-                .asRequired("Phone number is required")
-                .withValidator(new StringLengthValidator("Enter a valid phone number", 5, 20))
+                .asRequired(I18n.t("auth.register.validation.phone.required"))
+                .withValidator(new StringLengthValidator(I18n.t("auth.register.validation.phone.invalid"), 5, 20))
                 .bind(RegisteredUserDto::getPhoneNumber, RegisteredUserDto::setPhoneNumber);
 
         binder.forField(roleField)
@@ -146,7 +147,7 @@ public class RegisterView extends VerticalLayout implements BeforeEnterObserver 
 
     private void handleRegistration() {
         if (!binder.validate().isOk()) {
-            showError("Please fix the validation errors");
+            showError(I18n.t("auth.register.error.validationErrors"));
             return;
         }
 
@@ -157,14 +158,14 @@ public class RegisterView extends VerticalLayout implements BeforeEnterObserver 
         try {
             ResponseEntity<Boolean> response = authService.registerUser(dto);
             if (response.getStatusCode().is2xxSuccessful() && Boolean.TRUE.equals(response.getBody())) {
-                Notification.show("Account created successfully! Check your email for password setup.", 5000,
+                Notification.show(I18n.t("auth.register.notification.success"), 5000,
                         Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 UI.getCurrent().navigate("login");
             } else {
-                showError("Registration failed. Please try again.");
+                showError(I18n.t("auth.register.error.failed"));
             }
         } catch (Exception ex) {
-            showError("Service error. Please try again later.");
+            showError(I18n.t("auth.register.error.serviceError"));
         }
     }
 

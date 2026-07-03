@@ -52,21 +52,21 @@ public abstract class KeyDialogBase extends BaseActionDialog {
      */
     protected void buildCommonForm() {
         // Alias field
-        aliasField = new TextField(I18n.t("key.dialog.base.field.alias"));
-        aliasField.setPlaceholder(I18n.t("key.dialog.base.field.alias.placeholder"));
-        aliasField.setHelperText(I18n.t("key.dialog.base.field.alias.helper"));
+        aliasField = new TextField(I18n.t("kms.key.dialog.base.field.alias"));
+        aliasField.setPlaceholder(I18n.t("kms.key.dialog.base.field.alias.placeholder"));
+        aliasField.setHelperText(I18n.t("kms.key.dialog.base.field.alias.helper"));
 
         // Description
-        descriptionField = new TextArea(I18n.t("key.dialog.base.field.description"));
+        descriptionField = new TextArea(I18n.t("kms.key.dialog.base.field.description"));
         descriptionField.setMaxLength(500);
         descriptionField.setWidthFull();
 
         // Rotation settings
-        rotationEnabledCheckbox = new Checkbox(I18n.t("key.dialog.base.field.rotation.enabled"));
-        rotationPeriodField = new IntegerField(I18n.t("key.dialog.base.field.rotation.period"));
+        rotationEnabledCheckbox = new Checkbox(I18n.t("kms.key.dialog.base.field.rotation.enabled"));
+        rotationPeriodField = new IntegerField(I18n.t("kms.key.dialog.base.field.rotation.period"));
         rotationPeriodField.setMin(90);
         rotationPeriodField.setMax(365);
-        rotationPeriodField.setHelperText(I18n.t("key.dialog.base.field.rotation.period.helper"));
+        rotationPeriodField.setHelperText(I18n.t("kms.key.dialog.base.field.rotation.period.helper"));
         rotationPeriodField.setVisible(false);
 
         rotationEnabledCheckbox.addValueChangeListener(e -> {
@@ -93,9 +93,9 @@ public abstract class KeyDialogBase extends BaseActionDialog {
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
         // Tags header with add button
-        Button addTagButton = new Button(I18n.t("key.dialog.base.field.add.tag"), new Icon(VaadinIcon.PLUS));
+        Button addTagButton = new Button(I18n.t("kms.key.dialog.base.field.add.tag"), new Icon(VaadinIcon.PLUS));
         addTagButton.addClickListener(e -> addTagRow(null, null));
-        HorizontalLayout tagsHeader = new HorizontalLayout(new Span(I18n.t("key.dialog.base.field.tags")), addTagButton);
+        HorizontalLayout tagsHeader = new HorizontalLayout(new Span(I18n.t("kms.key.dialog.base.field.tags")), addTagButton);
         tagsHeader.setAlignItems(FlexComponent.Alignment.BASELINE);
         tagsHeader.setSpacing(true);
         VerticalLayout tagsSection = new VerticalLayout(tagsHeader, tagsContainer);
@@ -119,7 +119,7 @@ public abstract class KeyDialogBase extends BaseActionDialog {
         keyField.setWidth("150px");
         TextField valueField = new TextField();
         valueField.setValue(existingValue != null ? existingValue : "");
-        valueField.setPlaceholder(I18n.t("key.dialog.base.field.tag.value.placeholder"));
+        valueField.setPlaceholder(I18n.t("kms.key.dialog.base.field.tag.value.placeholder"));
         valueField.setWidth("250px");
         Button removeBtn = new Button(new Icon(VaadinIcon.TRASH));
         removeBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR);
@@ -159,7 +159,7 @@ public abstract class KeyDialogBase extends BaseActionDialog {
         String alias = aliasField.getValue();
         if (alias != null && !alias.isBlank()) {
             if (!alias.startsWith("alias:")) {
-                append(I18n.t("key.dialog.base.alias.format"));
+                append(I18n.t("kms.key.dialog.base.alias.format"));
                 return null;
             }
             return alias;

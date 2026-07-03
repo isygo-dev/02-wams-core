@@ -37,7 +37,7 @@ public class ClaimsBuilderDialog extends NoActionDialog {
     private Span claimCounter;
 
     public ClaimsBuilderDialog(ObjectMapper objectMapper, String existingClaimsJson, ClaimsCallback callback) {
-        super(I18n.t("claims.builder.title"));
+        super(I18n.t("kms.claims.builder.title"));
         this.objectMapper = objectMapper;
         this.existingClaimsJson = existingClaimsJson;
         this.callback = callback;
@@ -57,7 +57,7 @@ public class ClaimsBuilderDialog extends NoActionDialog {
         mainLayout.setWidthFull();
 
         // Header
-        Span titleHint = new Span(I18n.t("claims.builder.hint"));
+        Span titleHint = new Span(I18n.t("kms.claims.builder.hint"));
         titleHint.addClassName(LumoUtility.TextColor.SECONDARY);
         titleHint.addClassName(LumoUtility.FontSize.SMALL);
         mainLayout.add(titleHint);
@@ -84,7 +84,7 @@ public class ClaimsBuilderDialog extends NoActionDialog {
 
         // Add row button
         Button addRowButton = new Button(new Icon(VaadinIcon.PLUS));
-        addRowButton.setText(I18n.t("claims.builder.add.claim"));
+        addRowButton.setText(I18n.t("kms.claims.builder.add.claim"));
         addRowButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
         addRowButton.addClickListener(e -> addNewRow());
 
@@ -95,11 +95,11 @@ public class ClaimsBuilderDialog extends NoActionDialog {
         headerBar.getStyle().set("margin-bottom", "var(--lumo-space-xs)");
 
         // Action buttons
-        Button applyButton = new Button(I18n.t("claims.builder.apply.close"), new Icon(VaadinIcon.CHECK));
+        Button applyButton = new Button(I18n.t("kms.claims.builder.apply.close"), new Icon(VaadinIcon.CHECK));
         applyButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         applyButton.addClickListener(e -> applyClaims());
 
-        Button cancelButton = new Button(I18n.t("claims.builder.cancel"), e -> close());
+        Button cancelButton = new Button(I18n.t("kms.claims.builder.cancel"), e -> close());
         cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
         HorizontalLayout buttonBar = new HorizontalLayout(applyButton, cancelButton);
@@ -159,8 +159,8 @@ public class ClaimsBuilderDialog extends NoActionDialog {
             String key = row.getKey();
             if (StringUtils.hasText(key)) {
                 if (keyMap.containsKey(key)) {
-                    row.setKeyError(I18n.t("claims.builder.duplicate.claim"));
-                    keyMap.get(key).setKeyError(I18n.t("claims.builder.duplicate.claim"));
+                    row.setKeyError(I18n.t("kms.claims.builder.duplicate.claim"));
+                    keyMap.get(key).setKeyError(I18n.t("kms.claims.builder.duplicate.claim"));
                     hasErrors = true;
                 } else {
                     keyMap.put(key, row);
@@ -179,7 +179,7 @@ public class ClaimsBuilderDialog extends NoActionDialog {
                         objectMapper.readTree(trimmed);
                         row.setValueError(null);
                     } catch (JsonProcessingException e) {
-                        row.setValueError(I18n.t("claims.builder.invalid.json"));
+                        row.setValueError(I18n.t("kms.claims.builder.invalid.json"));
                         hasErrors = true;
                     }
                 } else {
@@ -191,7 +191,7 @@ public class ClaimsBuilderDialog extends NoActionDialog {
         }
 
         if (hasErrors) {
-            validationHint.setText("⚠️ " + I18n.t("claims.builder.validation.error"));
+            validationHint.setText("⚠️ " + I18n.t("kms.claims.builder.validation.error"));
             validationHint.setVisible(true);
         } else {
             validationHint.setVisible(false);
@@ -201,15 +201,15 @@ public class ClaimsBuilderDialog extends NoActionDialog {
     private void updateCounter() {
         int nonEmpty = (int) rows.stream().filter(r -> StringUtils.hasText(r.getKey())).count();
         String counterText = nonEmpty == 1 ?
-                I18n.t("claims.builder.claim.count", nonEmpty) :
-                I18n.t("claims.builder.claim.count.plural", nonEmpty);
+                I18n.t("kms.claims.builder.claim.count", nonEmpty) :
+                I18n.t("kms.claims.builder.claim.count.plural", nonEmpty);
         claimCounter.setText(counterText);
     }
 
     private void applyClaims() {
         validateAll();
         if (validationHint.isVisible()) {
-            Notification.show(I18n.t("claims.builder.fix.errors"), 3000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("kms.claims.builder.fix.errors"), 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
@@ -231,10 +231,10 @@ public class ClaimsBuilderDialog extends NoActionDialog {
             String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(claimsMap);
             callback.onClaimsBuilt(prettyJson);
             close();
-            Notification.show(I18n.t("claims.builder.claims.applied"), 3000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("kms.claims.builder.claims.applied"), 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         } catch (Exception ex) {
-            Notification.show(I18n.t("claims.builder.json.failed", ex.getMessage()), 5000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("kms.claims.builder.json.failed", ex.getMessage()), 5000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }
@@ -264,20 +264,20 @@ public class ClaimsBuilderDialog extends NoActionDialog {
 
             // Key field (30%)
             keyField = new TextField();
-            keyField.setPlaceholder(I18n.t("claims.builder.claim.name.placeholder"));
+            keyField.setPlaceholder(I18n.t("kms.claims.builder.claim.name.placeholder"));
             keyField.setValue(initialKey);
             keyField.setWidthFull();
             keyField.addValueChangeListener(e -> onUpdate.run());
-            keyField.setTooltipText(I18n.t("claims.builder.claim.name.tooltip"));
+            keyField.setTooltipText(I18n.t("kms.claims.builder.claim.name.tooltip"));
 
             // Value area (60%)
             valueArea = new TextArea();
-            valueArea.setPlaceholder(I18n.t("claims.builder.claim.value.placeholder"));
+            valueArea.setPlaceholder(I18n.t("kms.claims.builder.claim.value.placeholder"));
             valueArea.setValue(initialValue);
             valueArea.setHeight("60px");
             valueArea.setWidthFull();
             valueArea.addValueChangeListener(e -> onUpdate.run());
-            valueArea.setTooltipText(I18n.t("claims.builder.claim.value.tooltip"));
+            valueArea.setTooltipText(I18n.t("kms.claims.builder.claim.value.tooltip"));
 
             // Remove button (10%)
             Button removeButton = new Button(new Icon(VaadinIcon.TRASH));
@@ -287,7 +287,7 @@ public class ClaimsBuilderDialog extends NoActionDialog {
                 allRows.remove(this);
                 onUpdate.run();
             });
-            removeButton.setTooltipText(I18n.t("claims.builder.remove.claim"));
+            removeButton.setTooltipText(I18n.t("kms.claims.builder.remove.claim"));
 
             // Error labels
             keyErrorLabel = new Span();

@@ -137,35 +137,35 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
             debugSpan = new Span();
         }
 
-        String displayName = config.getHost() != null ? config.getHost() : "Sender " + config.getId();
+        String displayName = config.getHost() != null ? config.getHost() : I18n.t("mms.sender.card.fallback.name", config.getId());
         titleSpan.setText(displayName);
         titleSpan.getElement().setAttribute("title", displayName);
 
         ChipColor color = isActive() ? ChipColor.SUCCESS : ChipColor.WARNING;
-        statusChip.setText(isActive() ? "Active" : "Inactive");
+        statusChip.setText(isActive() ? I18n.t("mms.sender.card.status.active") : I18n.t("mms.sender.card.status.inactive"));
         statusChip.getStyle()
                 .set("background-color", color.background())
                 .set("color", color.foreground());
 
-        hostSpan.setText(config.getHost() != null ? config.getHost() : "N/A");
-        portSpan.setText(config.getPort() != null ? config.getPort() : "N/A");
-        usernameSpan.setText(config.getUsername() != null ? config.getUsername() : "N/A");
+        hostSpan.setText(config.getHost() != null ? config.getHost() : I18n.t("mms.common.value.notAvailable"));
+        portSpan.setText(config.getPort() != null ? config.getPort() : I18n.t("mms.common.value.notAvailable"));
+        usernameSpan.setText(config.getUsername() != null ? config.getUsername() : I18n.t("mms.common.value.notAvailable"));
 
         boolean tlsEnabled = Boolean.TRUE.equals(config.getSmtpStarttlsEnable());
-        tlsSpan.setText(tlsEnabled ? "✓ Enabled" : "✗ Disabled");
+        tlsSpan.setText(tlsEnabled ? I18n.t("mms.sender.card.tls.enabled") : I18n.t("mms.sender.card.tls.disabled"));
         tlsSpan.getStyle().set("color", tlsEnabled ?
                 "var(--lumo-success-color)" : "var(--lumo-error-color)");
 
         boolean debugEnabled = Boolean.TRUE.equals(config.getDebug());
-        debugSpan.setText(debugEnabled ? "✓ On" : "✗ Off");
+        debugSpan.setText(debugEnabled ? I18n.t("mms.sender.card.debug.on") : I18n.t("mms.sender.card.debug.off"));
         debugSpan.getStyle().set("color", debugEnabled ?
                 "var(--lumo-warning-color)" : "var(--lumo-tertiary-text-color)");
 
         if (testButton != null) {
             testButton.setEnabled(isActive());
             testButton.setTooltipText(isActive() ?
-                    I18n.t("sender.card.test.tooltip") :
-                    I18n.t("sender.card.test.disabled.tooltip"));
+                    I18n.t("mms.sender.card.test.tooltip") :
+                    I18n.t("mms.sender.card.test.disabled.tooltip"));
         }
 
         bodyContainer.removeAll();
@@ -198,12 +198,13 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         }
 
         // Title
-        String displayName = config.getHost() != null ? config.getHost() : "Sender " + config.getId();
+        String displayName = config.getHost() != null ? config.getHost() : I18n.t("mms.sender.card.fallback.name", config.getId());
         titleSpan = buildTitleSpan(displayName, displayName);
         left.add(titleSpan);
 
         // Status chip
-        statusChip = buildStatusChip(isActive() ? "Active" : "Inactive", isActive() ? "Active" : "Inactive");
+        String statusText = isActive() ? I18n.t("mms.sender.card.status.active") : I18n.t("mms.sender.card.status.inactive");
+        statusChip = buildStatusChip(statusText, statusText);
         ChipColor color = isActive() ? ChipColor.SUCCESS : ChipColor.WARNING;
         statusChip.getStyle()
                 .set("background-color", color.background())
@@ -218,19 +219,19 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         List<Button> buttons = new ArrayList<>();
 
         // Test Connection Button
-        testButton = createIconButton(VaadinIcon.START_COG, I18n.t("sender.card.test.tooltip"));
+        testButton = createIconButton(VaadinIcon.START_COG, I18n.t("mms.sender.card.test.tooltip"));
         testButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
         testButton.addClickListener(e -> testConnection());
         testButton.setEnabled(isActive());
         buttons.add(testButton);
 
         // Edit Button
-        editButton = createIconButton(VaadinIcon.EDIT, I18n.t("sender.card.edit.tooltip"));
+        editButton = createIconButton(VaadinIcon.EDIT, I18n.t("mms.sender.card.edit.tooltip"));
         editButton.addClickListener(e -> openEditDialog());
         buttons.add(editButton);
 
         // Delete Button
-        deleteButton = createIconButton(VaadinIcon.TRASH, I18n.t("sender.card.delete.tooltip"));
+        deleteButton = createIconButton(VaadinIcon.TRASH, I18n.t("mms.sender.card.delete.tooltip"));
         deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
         deleteButton.addClickListener(e -> openDeleteDialog());
         buttons.add(deleteButton);
@@ -245,33 +246,33 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         // Tenant
         bodyContainer.add(createDetailRow(
                 VaadinIcon.GLOBE,
-                I18n.t("sender.card.tenant"),
-                config.getTenant() != null ? config.getTenant() : "N/A"
+                I18n.t("mms.sender.card.tenant"),
+                config.getTenant() != null ? config.getTenant() : I18n.t("mms.common.value.notAvailable")
         ));
 
         // Host with copy
-        String hostValue = config.getHost() != null ? config.getHost() : "N/A";
+        String hostValue = config.getHost() != null ? config.getHost() : I18n.t("mms.common.value.notAvailable");
         bodyContainer.add(createDetailRowWithCopy(
                 VaadinIcon.SERVER,
-                I18n.t("sender.card.host"),
+                I18n.t("mms.sender.card.host"),
                 hostValue,
                 hostValue
         ));
 
         // Port
-        String portValue = config.getPort() != null ? config.getPort() : "N/A";
+        String portValue = config.getPort() != null ? config.getPort() : I18n.t("mms.common.value.notAvailable");
         bodyContainer.add(createDetailRowWithCopy(
                 VaadinIcon.COG,
-                I18n.t("sender.card.port"),
+                I18n.t("mms.sender.card.port"),
                 portValue,
                 portValue
         ));
 
         // Username
-        String usernameValue = config.getUsername() != null ? config.getUsername() : "N/A";
+        String usernameValue = config.getUsername() != null ? config.getUsername() : I18n.t("mms.common.value.notAvailable");
         bodyContainer.add(createDetailRowWithCopy(
                 VaadinIcon.USER,
-                I18n.t("sender.card.username"),
+                I18n.t("mms.sender.card.username"),
                 usernameValue,
                 usernameValue
         ));
@@ -279,43 +280,43 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         // Transport Protocol
         bodyContainer.add(createDetailRow(
                 VaadinIcon.CLOUD,
-                I18n.t("sender.card.protocol"),
+                I18n.t("mms.sender.card.protocol"),
                 config.getTransportProtocol() != null ? config.getTransportProtocol() : "smtp"
         ));
 
         // SMTP Auth
         bodyContainer.add(createDetailRow(
                 VaadinIcon.SHIELD,
-                I18n.t("sender.card.smtp.auth"),
+                I18n.t("mms.sender.card.smtp.auth"),
                 config.getSmtpAuth() != null ? config.getSmtpAuth() : "true"
         ));
 
         // TLS
         boolean tlsEnabled = Boolean.TRUE.equals(config.getSmtpStarttlsEnable());
-        tlsSpan.setText(tlsEnabled ? "✓ Enabled" : "✗ Disabled");
+        tlsSpan.setText(tlsEnabled ? I18n.t("mms.sender.card.tls.enabled") : I18n.t("mms.sender.card.tls.disabled"));
         tlsSpan.getStyle().set("color", tlsEnabled ?
                 "var(--lumo-success-color)" : "var(--lumo-error-color)");
         bodyContainer.add(createDetailRow(
                 VaadinIcon.LOCK,
-                I18n.t("sender.card.tls"),
+                I18n.t("mms.sender.card.tls"),
                 tlsSpan
         ));
 
         // TLS Required
         bodyContainer.add(createDetailRow(
                 VaadinIcon.CHECK_CIRCLE,
-                I18n.t("sender.card.tls.required"),
-                Boolean.TRUE.equals(config.getSmtpStarttlsRequired()) ? "✓ Required" : "✗ Not Required"
+                I18n.t("mms.sender.card.tls.required"),
+                Boolean.TRUE.equals(config.getSmtpStarttlsRequired()) ? I18n.t("mms.sender.card.tls.required.yes") : I18n.t("mms.sender.card.tls.required.no")
         ));
 
         // Debug
         boolean debugEnabled = Boolean.TRUE.equals(config.getDebug());
-        debugSpan.setText(debugEnabled ? "✓ On" : "✗ Off");
+        debugSpan.setText(debugEnabled ? I18n.t("mms.sender.card.debug.on") : I18n.t("mms.sender.card.debug.off"));
         debugSpan.getStyle().set("color", debugEnabled ?
                 "var(--lumo-warning-color)" : "var(--lumo-tertiary-text-color)");
         bodyContainer.add(createDetailRow(
                 VaadinIcon.BUG,
-                I18n.t("sender.card.debug"),
+                I18n.t("mms.sender.card.debug"),
                 debugSpan
         ));
     }
@@ -358,7 +359,7 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
 
         Button copyBtn = new Button(new Icon(VaadinIcon.COPY));
         copyBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
-        copyBtn.setTooltipText(I18n.t("sender.card.copy.tooltip"));
+        copyBtn.setTooltipText(I18n.t("mms.sender.card.copy.tooltip"));
         copyBtn.addClickListener(e -> {
             getUI().ifPresent(ui -> ui.getPage().executeJs(
                     "navigator.clipboard.writeText($0)",

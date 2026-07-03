@@ -67,17 +67,17 @@ public class EncryptDecryptPanel extends VerticalLayout {
         ciphertextArea = new TextArea();
         ciphertextArea.setHeight("150px");
 
-        algorithmCombo = new ComboBox<>(I18n.t("crypto.encrypt.decrypt.algorithm"));
+        algorithmCombo = new ComboBox<>(I18n.t("kms.crypto.encrypt.decrypt.algorithm"));
         algorithmCombo.setWidth("300px");
         algorithmCombo.setEnabled(false);
-        algorithmCombo.setPlaceholder(I18n.t("crypto.view.select.key"));
+        algorithmCombo.setPlaceholder(I18n.t("kms.crypto.view.select.key"));
 
-        contextField = new TextField(I18n.t("crypto.encrypt.decrypt.context"));
+        contextField = new TextField(I18n.t("kms.crypto.encrypt.decrypt.context"));
         contextField.setWidth("300px");
-        contextField.setPlaceholder(I18n.t("crypto.encrypt.decrypt.context.placeholder"));
+        contextField.setPlaceholder(I18n.t("kms.crypto.encrypt.decrypt.context.placeholder"));
 
-        Button encryptBtn = new Button(I18n.t("crypto.encrypt.decrypt.encrypt.button"), new Icon(VaadinIcon.LOCK));
-        Button decryptBtn = new Button(I18n.t("crypto.encrypt.decrypt.decrypt.button"), new Icon(VaadinIcon.UNLOCK));
+        Button encryptBtn = new Button(I18n.t("kms.crypto.encrypt.decrypt.encrypt.button"), new Icon(VaadinIcon.LOCK));
+        Button decryptBtn = new Button(I18n.t("kms.crypto.encrypt.decrypt.decrypt.button"), new Icon(VaadinIcon.UNLOCK));
         encryptBtn.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_PRIMARY);
         decryptBtn.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_SUCCESS);
 
@@ -88,8 +88,8 @@ public class EncryptDecryptPanel extends VerticalLayout {
         encryptBtn.addClickListener(e -> encrypt());
         decryptBtn.addClickListener(e -> decrypt());
 
-        add(CryptoPanelUtils.createLabelledTextArea(I18n.t("crypto.encrypt.decrypt.plaintext"), plaintextArea),
-                CryptoPanelUtils.createLabelledTextArea(I18n.t("crypto.encrypt.decrypt.ciphertext"), ciphertextArea),
+        add(CryptoPanelUtils.createLabelledTextArea(I18n.t("kms.crypto.encrypt.decrypt.plaintext"), plaintextArea),
+                CryptoPanelUtils.createLabelledTextArea(I18n.t("kms.crypto.encrypt.decrypt.ciphertext"), ciphertextArea),
                 algorithmCombo, contextField, buttonRow);
     }
 
@@ -101,7 +101,7 @@ public class EncryptDecryptPanel extends VerticalLayout {
         algorithmCombo.clear();
         if (keyUsage == null || keySpec == null || keyUsage != IEnumKeyUsage.Types.ENCRYPT_DECRYPT) {
             algorithmCombo.setEnabled(false);
-            algorithmCombo.setPlaceholder(I18n.t("crypto.view.select.key"));
+            algorithmCombo.setPlaceholder(I18n.t("kms.crypto.view.select.key"));
             return;
         }
         List<String> algorithms = AlgorithmMapper.keySpecToEncryptionAlgo(keySpec).stream()
@@ -109,7 +109,7 @@ public class EncryptDecryptPanel extends VerticalLayout {
                 .collect(Collectors.toList());
         if (algorithms.isEmpty()) {
             algorithmCombo.setEnabled(false);
-            algorithmCombo.setPlaceholder(I18n.t("crypto.encrypt.decrypt.no.algorithm"));
+            algorithmCombo.setPlaceholder(I18n.t("kms.crypto.encrypt.decrypt.no.algorithm"));
             return;
         }
         algorithmCombo.setItems(algorithms);
@@ -126,17 +126,17 @@ public class EncryptDecryptPanel extends VerticalLayout {
     private void encrypt() {
         String keyId = keyIdSupplier.get();
         if (keyId == null) {
-            notifyWarning(I18n.t("crypto.encrypt.decrypt.select.key.first"));
+            notifyWarning(I18n.t("kms.crypto.encrypt.decrypt.select.key.first"));
             return;
         }
         String algorithm = algorithmCombo.getValue();
         if (algorithm == null) {
-            notifyWarning(I18n.t("crypto.encrypt.decrypt.no.algorithm"));
+            notifyWarning(I18n.t("kms.crypto.encrypt.decrypt.no.algorithm"));
             return;
         }
         String plain = plaintextArea.getValue();
         if (!StringUtils.hasText(plain)) {
-            notifyWarning(I18n.t("crypto.encrypt.decrypt.plaintext.required"));
+            notifyWarning(I18n.t("kms.crypto.encrypt.decrypt.plaintext.required"));
             return;
         }
         try {
@@ -151,29 +151,29 @@ public class EncryptDecryptPanel extends VerticalLayout {
             ResponseEntity<KmsDtos.EncryptResponse> response = kmsApiService.encrypt(request);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 ciphertextArea.setValue(response.getBody().getCiphertextBlob());
-                notifySuccess(I18n.t("crypto.encrypt.decrypt.encrypt.success"));
+                notifySuccess(I18n.t("kms.crypto.encrypt.decrypt.encrypt.success"));
             } else {
                 log.error("Encryption failed: {}", response.getBody());
-                notifyError(I18n.t("crypto.encrypt.decrypt.encrypt.failed"));
+                notifyError(I18n.t("kms.crypto.encrypt.decrypt.encrypt.failed"));
             }
         } catch (FeignException ex) {
             log.error("Encryption error: {}", (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
-            notifyError(I18n.t("crypto.encrypt.decrypt.encrypt.error", ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage())));
+            notifyError(I18n.t("kms.crypto.encrypt.decrypt.encrypt.error", ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage())));
         } catch (Exception ex) {
             log.error("Encryption error: {}", ex.getMessage());
-            notifyError(I18n.t("crypto.encrypt.decrypt.encrypt.error", ex.getMessage()));
+            notifyError(I18n.t("kms.crypto.encrypt.decrypt.encrypt.error", ex.getMessage()));
         }
     }
 
     private void decrypt() {
         String keyId = keyIdSupplier.get();
         if (keyId == null) {
-            notifyWarning(I18n.t("crypto.encrypt.decrypt.select.key.first"));
+            notifyWarning(I18n.t("kms.crypto.encrypt.decrypt.select.key.first"));
             return;
         }
         String cipher = ciphertextArea.getValue();
         if (!StringUtils.hasText(cipher)) {
-            notifyWarning(I18n.t("crypto.encrypt.decrypt.ciphertext.required"));
+            notifyWarning(I18n.t("kms.crypto.encrypt.decrypt.ciphertext.required"));
             return;
         }
         try {
@@ -189,17 +189,17 @@ public class EncryptDecryptPanel extends VerticalLayout {
                 String plainB64 = response.getBody().getPlaintext();
                 String plainText = new String(Base64.getDecoder().decode(plainB64), StandardCharsets.UTF_8);
                 plaintextArea.setValue(plainText);
-                notifySuccess(I18n.t("crypto.encrypt.decrypt.decrypt.success"));
+                notifySuccess(I18n.t("kms.crypto.encrypt.decrypt.decrypt.success"));
             } else {
                 log.error("Decryption failed: {}", response.getBody());
-                notifyError(I18n.t("crypto.encrypt.decrypt.decrypt.failed"));
+                notifyError(I18n.t("kms.crypto.encrypt.decrypt.decrypt.failed"));
             }
         } catch (FeignException ex) {
             log.error("Decryption error: {}", (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
-            notifyError(I18n.t("crypto.encrypt.decrypt.decrypt.error", ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage())));
+            notifyError(I18n.t("kms.crypto.encrypt.decrypt.decrypt.error", ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage())));
         } catch (Exception ex) {
             log.error("Decryption error: {}", ex.getMessage());
-            notifyError(I18n.t("crypto.encrypt.decrypt.decrypt.error", ex.getMessage()));
+            notifyError(I18n.t("kms.crypto.encrypt.decrypt.decrypt.error", ex.getMessage()));
         }
     }
 

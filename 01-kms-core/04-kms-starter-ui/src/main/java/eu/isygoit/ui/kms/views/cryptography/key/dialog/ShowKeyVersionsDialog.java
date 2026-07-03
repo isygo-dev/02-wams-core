@@ -30,12 +30,12 @@ public class ShowKeyVersionsDialog extends BaseActionDialog {
     public ShowKeyVersionsDialog(KmsApiService kmsApiService,
                                  String keyId,
                                  String aliasOrId) {
-        super(I18n.t("key.dialog.versions.title", aliasOrId));
+        super(I18n.t("kms.key.dialog.versions.title", aliasOrId));
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
         this.aliasOrId = aliasOrId;
 
-        setOkButtonText(I18n.t("key.dialog.versions.button.close"));
+        setOkButtonText(I18n.t("kms.key.dialog.versions.button.close"));
         addThemeVariantsOkButton(ButtonVariant.LUMO_TERTIARY);
         setWidth("90%");
         setMaxWidth("1200px");
@@ -68,7 +68,7 @@ public class ShowKeyVersionsDialog extends BaseActionDialog {
 
         // Version ID column
         grid.addColumn(KmsDtos.ListKeyVersionsResponse.KeyVersion::getVersionId)
-                .setHeader(I18n.t("key.dialog.versions.column.version.id")).setSortable(true).setResizable(true);
+                .setHeader(I18n.t("kms.key.dialog.versions.column.version.id")).setSortable(true).setResizable(true);
 
         // Status column with colored chip
         grid.addColumn(new ComponentRenderer<>(version -> {
@@ -85,48 +85,48 @@ public class ShowKeyVersionsDialog extends BaseActionDialog {
             switch (status) {
                 case "ENABLED":
                     chip.getStyle().set("background-color", "#E3F7E5").set("color", "#1E7B2E");
-                    displayStatus = I18n.t("key.dialog.versions.status.enabled");
+                    displayStatus = I18n.t("kms.key.dialog.versions.status.enabled");
                     break;
                 case "DISABLED":
                     chip.getStyle().set("background-color", "#FEF3F2").set("color", "#C73A2B");
-                    displayStatus = I18n.t("key.dialog.versions.status.disabled");
+                    displayStatus = I18n.t("kms.key.dialog.versions.status.disabled");
                     break;
                 case "PENDING_DELETION":
                     chip.getStyle().set("background-color", "#FFF4E5").set("color", "#B25600");
-                    displayStatus = I18n.t("key.dialog.versions.status.pending.deletion");
+                    displayStatus = I18n.t("kms.key.dialog.versions.status.pending.deletion");
                     break;
                 default:
                     chip.getStyle().set("background-color", "#F2F4F8").set("color", "#5E6C84");
-                    displayStatus = I18n.t("key.dialog.versions.status.unknown");
+                    displayStatus = I18n.t("kms.key.dialog.versions.status.unknown");
             }
             chip.setText(displayStatus);
             return chip;
-        })).setHeader(I18n.t("key.dialog.versions.column.status")).setSortable(true).setResizable(true);
+        })).setHeader(I18n.t("kms.key.dialog.versions.column.status")).setSortable(true).setResizable(true);
 
         // Creation date column – simple string formatting, sortable
         grid.addColumn(version -> version.getCreateDate() != null ?
                         DateHelper.formatToHumanReadable(version.getCreateDate()) : "-")
-                .setHeader(I18n.t("key.dialog.versions.column.creation.date"))
+                .setHeader(I18n.t("kms.key.dialog.versions.column.creation.date"))
                 .setSortable(true)
                 .setResizable(true);
 
         // Signing algorithm column
         grid.addColumn(KmsDtos.ListKeyVersionsResponse.KeyVersion::getSigningAlgorithm)
-                .setHeader(I18n.t("key.dialog.versions.column.signing.algorithm")).setResizable(true);
+                .setHeader(I18n.t("kms.key.dialog.versions.column.signing.algorithm")).setResizable(true);
 
         // Origin column
         grid.addColumn(version -> version.getOrigin() != null ? version.getOrigin().name() : "-")
-                .setHeader(I18n.t("key.dialog.versions.column.origin")).setSortable(true).setResizable(true);
+                .setHeader(I18n.t("kms.key.dialog.versions.column.origin")).setSortable(true).setResizable(true);
 
         // Deactivation date column
         grid.addColumn(version -> version.getDeactivationDate() != null ?
                         DateHelper.formatToHumanReadable(version.getDeactivationDate()) : "-")
-                .setHeader(I18n.t("key.dialog.versions.column.deactivation.date")).setResizable(true);
+                .setHeader(I18n.t("kms.key.dialog.versions.column.deactivation.date")).setResizable(true);
 
         // Expiry date column
         grid.addColumn(version -> version.getValidTo() != null ?
                         DateHelper.formatToHumanReadable(version.getValidTo().toLocalDate()) : "-")
-                .setHeader(I18n.t("key.dialog.versions.column.expiry.date")).setResizable(true);
+                .setHeader(I18n.t("kms.key.dialog.versions.column.expiry.date")).setResizable(true);
 
         // --- ACTIONS COLUMN with both Enable/Disable icon buttons ---
         grid.addColumn(new ComponentRenderer<>(version -> {
@@ -137,7 +137,7 @@ public class ShowKeyVersionsDialog extends BaseActionDialog {
                 // Disable button
                 actionBtn.setIcon(VaadinIcon.BAN.create());
                 actionBtn.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_TERTIARY);
-                actionBtn.setTooltipText(I18n.t("key.dialog.versions.disable.tooltip"));
+                actionBtn.setTooltipText(I18n.t("kms.key.dialog.versions.disable.tooltip"));
                 actionBtn.addClickListener(e -> {
                     DisableKeyVersionDialog dialog = new DisableKeyVersionDialog(
                             kmsApiService, keyId, version.getVersionId(), this::loadVersions);
@@ -147,7 +147,7 @@ public class ShowKeyVersionsDialog extends BaseActionDialog {
                 // Enable button
                 actionBtn.setIcon(VaadinIcon.CHECK_CIRCLE.create());
                 actionBtn.addThemeVariants(ButtonVariant.LUMO_SUCCESS, ButtonVariant.LUMO_TERTIARY);
-                actionBtn.setTooltipText(I18n.t("key.dialog.versions.enable.tooltip"));
+                actionBtn.setTooltipText(I18n.t("kms.key.dialog.versions.enable.tooltip"));
                 actionBtn.addClickListener(e -> {
                     EnableKeyVersionDialog dialog = new EnableKeyVersionDialog(
                             kmsApiService, keyId, version.getVersionId(), this::loadVersions);
@@ -158,10 +158,10 @@ public class ShowKeyVersionsDialog extends BaseActionDialog {
                 actionBtn.setIcon(VaadinIcon.MINUS_CIRCLE.create());
                 actionBtn.setEnabled(false);
                 actionBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-                actionBtn.setTooltipText(I18n.t("key.dialog.versions.cannot.change.tooltip"));
+                actionBtn.setTooltipText(I18n.t("kms.key.dialog.versions.cannot.change.tooltip"));
             }
             return actionBtn;
-        })).setHeader(I18n.t("key.dialog.versions.column.actions")).setResizable(false).setWidth("80px").setFlexGrow(0);
+        })).setHeader(I18n.t("kms.key.dialog.versions.column.actions")).setResizable(false).setWidth("80px").setFlexGrow(0);
 
         layout.add(grid);
         add(layout);
@@ -184,12 +184,12 @@ public class ShowKeyVersionsDialog extends BaseActionDialog {
             });
             grid.setItems(versions);
             if (versions.isEmpty()) {
-                grid.setEmptyStateText(I18n.t("key.dialog.versions.empty"));
+                grid.setEmptyStateText(I18n.t("kms.key.dialog.versions.empty"));
             }
         } catch (Exception e) {
             grid.setItems(new ArrayList<>());
-            grid.setEmptyStateText(I18n.t("key.dialog.versions.load.failed", e.getMessage()));
-            showError(I18n.t("key.dialog.versions.load.error"));
+            grid.setEmptyStateText(I18n.t("kms.key.dialog.versions.load.failed", e.getMessage()));
+            showError(I18n.t("kms.key.dialog.versions.load.error"));
         } finally {
             loadingBar.setVisible(false);
             grid.setVisible(true);

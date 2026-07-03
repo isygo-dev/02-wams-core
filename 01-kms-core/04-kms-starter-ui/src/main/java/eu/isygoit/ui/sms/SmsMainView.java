@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @RouteAlias(value = "sms/home", layout = SmsMainLayout.class)
 @UIScope
 @Route(value = "sms", layout = SmsMainLayout.class)
-@PageTitle("Storage mnagement Dashboard")
+@PageTitle("Storage Management Dashboard")
 public class SmsMainView extends ManagementVerticalView {
 
     private final StorageConfigService storageConfigService;

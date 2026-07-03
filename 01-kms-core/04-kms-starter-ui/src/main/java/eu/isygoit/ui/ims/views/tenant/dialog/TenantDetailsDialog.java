@@ -28,7 +28,7 @@ public class TenantDetailsDialog extends NoActionDialog {
     public TenantDetailsDialog(TenantManagementView parentView,
                                TenantService tenantService,
                                Long tenantId) {
-        super(I18n.t("tenant.details.title"));
+        super(I18n.t("ims.tenant.details.title"));
         this.parentView = parentView;
         this.tenantService = tenantService;
         this.tenantId = tenantId;
@@ -50,14 +50,14 @@ public class TenantDetailsDialog extends NoActionDialog {
             if (response.getBody() != null) {
                 buildContent(response.getBody());
             } else {
-                add(new Span(I18n.t("tenant.details.not.found")));
+                add(new Span(I18n.t("ims.tenant.details.not.found")));
                 addCloseButton();
             }
         } catch (FeignException ex) {
-            add(new Span(I18n.t("tenant.details.load.error", extractErrorMessage(ex))));
+            add(new Span(I18n.t("ims.tenant.details.load.error", extractErrorMessage(ex))));
             addCloseButton();
         } catch (Exception e) {
-            add(new Span(I18n.t("tenant.details.load.error", e.getMessage())));
+            add(new Span(I18n.t("ims.tenant.details.load.error", e.getMessage())));
             addCloseButton();
         } finally {
             parentView.showLoading(false);
@@ -76,14 +76,14 @@ public class TenantDetailsDialog extends NoActionDialog {
                 .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
                 .set("gap", "var(--lumo-space-s)");
 
-        addFieldToGrid(basicInfo, VaadinIcon.BUILDING, I18n.t("tenant.details.field.name"), tenant.getName());
-        addFieldToGrid(basicInfo, VaadinIcon.CODE, I18n.t("tenant.details.field.code"), tenant.getCode());
-        addFieldToGrid(basicInfo, VaadinIcon.ENVELOPE, I18n.t("tenant.details.field.email"), tenant.getEmail());
-        addFieldToGrid(basicInfo, VaadinIcon.PHONE, I18n.t("tenant.details.field.phone"), tenant.getPhone());
-        addFieldToGrid(basicInfo, VaadinIcon.INSTITUTION, I18n.t("tenant.details.field.industry"), tenant.getIndustry());
-        addFieldToGrid(basicInfo, VaadinIcon.GLOBE, I18n.t("tenant.details.field.website"), tenant.getUrl());
+        addFieldToGrid(basicInfo, VaadinIcon.BUILDING, I18n.t("ims.tenant.details.field.name"), tenant.getName());
+        addFieldToGrid(basicInfo, VaadinIcon.CODE, I18n.t("ims.tenant.details.field.code"), tenant.getCode());
+        addFieldToGrid(basicInfo, VaadinIcon.ENVELOPE, I18n.t("ims.tenant.details.field.email"), tenant.getEmail());
+        addFieldToGrid(basicInfo, VaadinIcon.PHONE, I18n.t("ims.tenant.details.field.phone"), tenant.getPhone());
+        addFieldToGrid(basicInfo, VaadinIcon.INSTITUTION, I18n.t("ims.tenant.details.field.industry"), tenant.getIndustry());
+        addFieldToGrid(basicInfo, VaadinIcon.GLOBE, I18n.t("ims.tenant.details.field.website"), tenant.getUrl());
 
-        mainLayout.add(createSection(I18n.t("tenant.details.section.general"), basicInfo));
+        mainLayout.add(createSection(I18n.t("ims.tenant.details.section.general"), basicInfo));
 
         // Description (full width)
         if (tenant.getDescription() != null && !tenant.getDescription().isBlank()) {
@@ -94,7 +94,7 @@ public class TenantDetailsDialog extends NoActionDialog {
             Icon descIcon = VaadinIcon.FILE_TEXT.create();
             descIcon.setSize("16px");
             descIcon.getStyle().set("color", "var(--lumo-primary-color)");
-            Span descLabel = new Span(I18n.t("tenant.details.field.description"));
+            Span descLabel = new Span(I18n.t("ims.tenant.details.field.description"));
             descLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
             Span descValue = new Span(tenant.getDescription());
             descValue.getStyle().set("flex", "1");
@@ -110,13 +110,13 @@ public class TenantDetailsDialog extends NoActionDialog {
                 .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
                 .set("gap", "var(--lumo-space-s)");
 
-        addFieldToGrid(statusInfo, VaadinIcon.SHIELD, I18n.t("tenant.details.field.admin.status"), tenant.getAdminStatus() != null ? tenant.getAdminStatus().name() : null);
-        addFieldToGrid(statusInfo, VaadinIcon.CALENDAR, I18n.t("tenant.details.field.created"), tenant.getCreateDate() != null ? DateHelper.formatToHumanReadable(tenant.getCreateDate()) : null);
-        addFieldToGrid(statusInfo, VaadinIcon.USER_CHECK, I18n.t("tenant.details.field.created.by"), tenant.getCreatedBy());
-        addFieldToGrid(statusInfo, VaadinIcon.CALENDAR_O, I18n.t("tenant.details.field.updated"), tenant.getUpdateDate() != null ? DateHelper.formatToHumanReadable(tenant.getUpdateDate()) : null);
-        addFieldToGrid(statusInfo, VaadinIcon.EDIT, I18n.t("tenant.details.field.updated.by"), tenant.getUpdatedBy());
+        addFieldToGrid(statusInfo, VaadinIcon.SHIELD, I18n.t("ims.tenant.details.field.admin.status"), tenant.getAdminStatus() != null ? tenant.getAdminStatus().name() : null);
+        addFieldToGrid(statusInfo, VaadinIcon.CALENDAR, I18n.t("ims.tenant.details.field.created"), tenant.getCreateDate() != null ? DateHelper.formatToHumanReadable(tenant.getCreateDate()) : null);
+        addFieldToGrid(statusInfo, VaadinIcon.USER_CHECK, I18n.t("ims.tenant.details.field.created.by"), tenant.getCreatedBy());
+        addFieldToGrid(statusInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.tenant.details.field.updated"), tenant.getUpdateDate() != null ? DateHelper.formatToHumanReadable(tenant.getUpdateDate()) : null);
+        addFieldToGrid(statusInfo, VaadinIcon.EDIT, I18n.t("ims.tenant.details.field.updated.by"), tenant.getUpdatedBy());
 
-        mainLayout.add(createSection(I18n.t("tenant.details.section.status"), statusInfo));
+        mainLayout.add(createSection(I18n.t("ims.tenant.details.section.status"), statusInfo));
 
         // Address (if present)
         if (tenant.getAddress() != null &&
@@ -131,7 +131,7 @@ public class TenantDetailsDialog extends NoActionDialog {
                 Icon addrIcon = VaadinIcon.MAP_MARKER.create();
                 addrIcon.setSize("16px");
                 addrIcon.getStyle().set("color", "var(--lumo-primary-color)");
-                Span addrLabel = new Span(I18n.t("tenant.details.field.address"));
+                Span addrLabel = new Span(I18n.t("ims.tenant.details.field.address"));
                 addrLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
                 Span addrValue = new Span(address);
                 addrRow.add(addrIcon, addrLabel, addrValue);
@@ -184,7 +184,7 @@ public class TenantDetailsDialog extends NoActionDialog {
     }
 
     private void addCloseButton() {
-        Button closeButton = new Button(I18n.t("tenant.details.close"), e -> close());
+        Button closeButton = new Button(I18n.t("ims.tenant.details.close"), e -> close());
         closeButton.addClassName(LumoUtility.Margin.Top.MEDIUM);
         HorizontalLayout buttonBar = new HorizontalLayout(closeButton);
         buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);

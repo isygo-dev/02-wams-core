@@ -29,20 +29,20 @@ public class EnableDisableAccountDialog extends PinBaseActionDialog {
         this.accountId = accountId;
         this.currentlyEnabled = fetchCurrentStatus();
 
-        setOkButtonText(currentlyEnabled ? I18n.t("account.dialog.disable.button") : I18n.t("account.dialog.enable.button"));
+        setOkButtonText(currentlyEnabled ? I18n.t("ims.account.dialog.disable.button") : I18n.t("ims.account.dialog.enable.button"));
         setWidth("450px");
     }
 
     private static String determineTitle(AccountService accountService, Long accountId) {
         boolean enabled = fetchCurrentStatusStatic(accountService, accountId);
-        return enabled ? I18n.t("account.dialog.disable.title") : I18n.t("account.dialog.enable.title");
+        return enabled ? I18n.t("ims.account.dialog.disable.title") : I18n.t("ims.account.dialog.enable.title");
     }
 
     private static String determineWarning(AccountService accountService, Long accountId) {
         boolean enabled = fetchCurrentStatusStatic(accountService, accountId);
         return enabled ?
-                I18n.t("account.dialog.disable.message") :
-                I18n.t("account.dialog.enable.message");
+                I18n.t("ims.account.dialog.disable.message") :
+                I18n.t("ims.account.dialog.enable.message");
     }
 
     private static boolean fetchCurrentStatusStatic(AccountService accountService, Long accountId) {
@@ -66,7 +66,7 @@ public class EnableDisableAccountDialog extends PinBaseActionDialog {
         try {
             ResponseEntity<AccountDto> response = accountService.findById(accountId);
             if (response.getBody() == null) {
-                append(I18n.t("account.dialog.toggle.not.found"));
+                append(I18n.t("ims.account.dialog.toggle.not.found"));
                 return false;
             }
             AccountDto account = response.getBody();
@@ -76,16 +76,16 @@ public class EnableDisableAccountDialog extends PinBaseActionDialog {
 
             ResponseEntity<AccountDto> updateResponse = accountService.update(accountId, account);
             if (!updateResponse.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("account.dialog.toggle.failed"));
+                append(I18n.t("ims.account.dialog.toggle.failed"));
                 return false;
             }
 
-            append(currentlyEnabled ? I18n.t("account.dialog.disable.success") : I18n.t("account.dialog.enable.success"));
+            append(currentlyEnabled ? I18n.t("ims.account.dialog.disable.success") : I18n.t("ims.account.dialog.enable.success"));
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("account.dialog.toggle.error", e.getMessage()));
+            append(I18n.t("ims.account.dialog.toggle.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

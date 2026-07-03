@@ -17,14 +17,14 @@ public class DeleteRoleDialog extends PinBaseActionDialog {
                             RoleInfoService roleService,
                             Long roleId,
                             Runnable onSuccess) {
-        super(I18n.t("role.dialog.delete.title"),
-                I18n.t("role.dialog.delete.message"),
+        super(I18n.t("ims.role.dialog.delete.title"),
+                I18n.t("ims.role.dialog.delete.message"),
                 onSuccess);
         this.parentView = parentView;
         this.roleService = roleService;
         this.roleId = roleId;
 
-        setOkButtonText(I18n.t("role.dialog.delete.button"));
+        setOkButtonText(I18n.t("ims.role.dialog.delete.button"));
         addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
@@ -32,19 +32,19 @@ public class DeleteRoleDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append(I18n.t("role.dialog.delete.invalid.code"));
+            append(I18n.t("ims.role.dialog.delete.invalid.code"));
             return false;
         }
 
         parentView.showLoading(true);
         try {
             roleService.delete(roleId);
-            append(I18n.t("role.dialog.delete.success"));
+            append(I18n.t("ims.role.dialog.delete.success"));
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("role.dialog.delete.error", e.getMessage()));
+            append(I18n.t("ims.role.dialog.delete.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

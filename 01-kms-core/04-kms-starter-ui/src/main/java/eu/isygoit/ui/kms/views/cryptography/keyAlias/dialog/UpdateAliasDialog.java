@@ -31,13 +31,13 @@ public class UpdateAliasDialog extends BaseActionDialog {
                              Runnable onSuccess,
                              String aliasName,
                              String currentTargetKeyId) {
-        super(I18n.t("alias.dialog.update.title"), onSuccess);
+        super(I18n.t("kms.alias.dialog.update.title"), onSuccess);
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
         this.aliasName = aliasName;
         this.currentTargetKeyId = currentTargetKeyId;
 
-        setOkButtonText(I18n.t("alias.dialog.update.button"));
+        setOkButtonText(I18n.t("kms.alias.dialog.update.button"));
         setWidth("500px");
 
         buildForm();
@@ -48,7 +48,7 @@ public class UpdateAliasDialog extends BaseActionDialog {
     protected boolean onOk() {
         String newTargetId = targetKeyCombo.getValue();
         if (newTargetId == null || newTargetId.isBlank()) {
-            append(I18n.t("alias.dialog.field.target.key.required"));
+            append(I18n.t("kms.alias.dialog.field.target.key.required"));
             return false;
         }
 
@@ -60,16 +60,16 @@ public class UpdateAliasDialog extends BaseActionDialog {
                     .build();
             ResponseEntity<UpdateAliasResponse> response = kmsApiService.updateAlias(aliasName, request);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("alias.dialog.update.failed", response.getStatusCode()));
+                append(I18n.t("kms.alias.dialog.update.failed", response.getStatusCode()));
                 return false;
             }
 
-            append(I18n.t("alias.dialog.update.success"));
+            append(I18n.t("kms.alias.dialog.update.success"));
             return true;
         } catch (FeignException ex) {
             append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            append(I18n.t("alias.dialog.update.failed.operation", e.getMessage()));
+            append(I18n.t("kms.alias.dialog.update.failed.operation", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }
@@ -78,9 +78,9 @@ public class UpdateAliasDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        targetKeyCombo = new ComboBox<>(I18n.t("alias.dialog.field.target.key"));
+        targetKeyCombo = new ComboBox<>(I18n.t("kms.alias.dialog.field.target.key"));
         targetKeyCombo.setRequiredIndicatorVisible(true);
-        targetKeyCombo.setPlaceholder(I18n.t("alias.dialog.field.target.key.placeholder"));
+        targetKeyCombo.setPlaceholder(I18n.t("kms.alias.dialog.field.target.key.placeholder"));
         targetKeyCombo.setItems(parentView.fetchKeyIds());
         targetKeyCombo.setItemLabelGenerator(keyId -> {
             try {

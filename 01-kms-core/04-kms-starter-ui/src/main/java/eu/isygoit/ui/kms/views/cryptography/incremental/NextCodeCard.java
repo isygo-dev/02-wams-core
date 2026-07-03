@@ -69,10 +69,10 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
 
     @Override
     protected List<Button> buildActionButtons() {
-        generateButton = createIconButton(VaadinIcon.COG, I18n.t("nextcode.card.generate.tooltip"));
+        generateButton = createIconButton(VaadinIcon.COG, I18n.t("kms.nextcode.card.generate.tooltip"));
         generateButton.addClickListener(e -> generateNextCode());
 
-        Button deleteButton = createDangerIconButton(VaadinIcon.TRASH, I18n.t("nextcode.card.delete.tooltip"));
+        Button deleteButton = createDangerIconButton(VaadinIcon.TRASH, I18n.t("kms.nextcode.card.delete.tooltip"));
         deleteButton.addClickListener(e -> new DeleteNextCodeConfigDialog(objectService, dto.getId(),
                 dto.getEntity(), dto.getAttribute(), deleteCallback).open());
 
@@ -93,7 +93,7 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
         codeIcon.setSize("16px");
         codeIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
 
-        Span codeLabel = new Span(I18n.t("nextcode.card.next.code"));
+        Span codeLabel = new Span(I18n.t("kms.nextcode.card.next.code"));
         codeLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         codeLabel.addClassName(LumoUtility.FontSize.XSMALL);
         codeLabel.getStyle().set("min-width", "100px");
@@ -104,7 +104,7 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
         formattedCodeSpan.getStyle().set("font-family", "monospace");
         updateFormattedCodeDisplay();
 
-        Button copyFormattedBtn = KmsMainView.createCopyButton(VaadinIcon.COPY, dto.getCode(), I18n.t("nextcode.card.copy.formatted"));
+        Button copyFormattedBtn = KmsMainView.createCopyButton(VaadinIcon.COPY, dto.getCode(), I18n.t("kms.nextcode.card.copy.formatted"));
         copyFormattedBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
 
         codePreviewRow.add(codeIcon, codeLabel, formattedCodeSpan, copyFormattedBtn);
@@ -112,12 +112,12 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
         add(codePreviewRow);
 
         // Details as icon rows
-        add(createIconRow(VaadinIcon.FILE_TEXT, I18n.t("nextcode.card.entity"), dto.getEntity()));
-        add(createIconRow(VaadinIcon.TAG, I18n.t("nextcode.card.attribute"), dto.getAttribute()));
-        add(createIconRow(VaadinIcon.ALIGN_LEFT, I18n.t("nextcode.card.prefix"), dto.getPrefix() != null ? dto.getPrefix() : "—"));
-        add(createIconRow(VaadinIcon.ALIGN_RIGHT, I18n.t("nextcode.card.suffix"), dto.getSuffix() != null ? dto.getSuffix() : "—"));
-        add(createIconRow(VaadinIcon.HASH, I18n.t("nextcode.card.value.length"), String.valueOf(dto.getValueLength() != null ? dto.getValueLength() : 6)));
-        add(createIconRow(VaadinIcon.ARROW_UP, I18n.t("nextcode.card.increment"), String.valueOf(dto.getIncrement())));
+        add(createIconRow(VaadinIcon.FILE_TEXT, I18n.t("kms.nextcode.card.entity"), dto.getEntity()));
+        add(createIconRow(VaadinIcon.TAG, I18n.t("kms.nextcode.card.attribute"), dto.getAttribute()));
+        add(createIconRow(VaadinIcon.ALIGN_LEFT, I18n.t("kms.nextcode.card.prefix"), dto.getPrefix() != null ? dto.getPrefix() : "—"));
+        add(createIconRow(VaadinIcon.ALIGN_RIGHT, I18n.t("kms.nextcode.card.suffix"), dto.getSuffix() != null ? dto.getSuffix() : "—"));
+        add(createIconRow(VaadinIcon.HASH, I18n.t("kms.nextcode.card.value.length"), String.valueOf(dto.getValueLength() != null ? dto.getValueLength() : 6)));
+        add(createIconRow(VaadinIcon.ARROW_UP, I18n.t("kms.nextcode.card.increment"), String.valueOf(dto.getIncrement())));
 
         // Current numeric value row (with copy)
         HorizontalLayout currentRow = new HorizontalLayout();
@@ -131,7 +131,7 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
         currentIcon.setSize("16px");
         currentIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
 
-        Span currentLabel = new Span(I18n.t("nextcode.card.current.value"));
+        Span currentLabel = new Span(I18n.t("kms.nextcode.card.current.value"));
         currentLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         currentLabel.addClassName(LumoUtility.FontSize.XSMALL);
         currentLabel.getStyle().set("min-width", "100px");
@@ -141,7 +141,7 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
         codeValueSpan.getStyle().set("font-family", "monospace");
         updateCodeValueDisplay();
 
-        Button copyCurrentBtn = KmsMainView.createCopyButton(VaadinIcon.COPY, String.valueOf(dto.getCodeValue()), I18n.t("nextcode.card.copy.numeric"));
+        Button copyCurrentBtn = KmsMainView.createCopyButton(VaadinIcon.COPY, String.valueOf(dto.getCodeValue()), I18n.t("kms.nextcode.card.copy.numeric"));
         copyCurrentBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
 
         currentRow.add(currentIcon, currentLabel, codeValueSpan, copyCurrentBtn);
@@ -181,11 +181,11 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
         generateButton.setEnabled(false);
         try {
             String generated = generateCallback.apply(dto.getEntity(), dto.getAttribute());
-            Notification.show(I18n.t("nextcode.card.generated", generated), 3000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("kms.nextcode.card.generated", generated), 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             parentView.refreshCard(this);
         } catch (Exception e) {
-            Notification.show(I18n.t("nextcode.card.generate.error", e.getMessage()), 5000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("kms.nextcode.card.generate.error", e.getMessage()), 5000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             generateButton.setEnabled(true);

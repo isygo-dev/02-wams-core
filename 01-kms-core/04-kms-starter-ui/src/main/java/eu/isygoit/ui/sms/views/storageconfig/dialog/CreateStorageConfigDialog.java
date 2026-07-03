@@ -28,12 +28,12 @@ public class CreateStorageConfigDialog extends BaseActionDialog {
     public CreateStorageConfigDialog(StorageConfigManagementView parentView,
                                      StorageConfigService storageConfigService,
                                      Runnable onSuccess) {
-        super(I18n.t("storageconfig.dialog.create.title"), onSuccess);
+        super(I18n.t("sms.storageconfig.dialog.create.title"), onSuccess);
         this.parentView = parentView;
         this.storageConfigService = storageConfigService;
         this.onSuccess = onSuccess;
 
-        setOkButtonText(I18n.t("storageconfig.dialog.create.button"));
+        setOkButtonText(I18n.t("sms.storageconfig.dialog.create.button"));
         setWidth("600px");
         setMaxWidth("95%");
 
@@ -42,31 +42,31 @@ public class CreateStorageConfigDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        tenantField = new TextField(I18n.t("storageconfig.dialog.field.tenant"));
+        tenantField = new TextField(I18n.t("sms.storageconfig.dialog.field.tenant"));
         tenantField.setRequiredIndicatorVisible(true);
-        tenantField.setPlaceholder(I18n.t("storageconfig.dialog.field.tenant.placeholder"));
+        tenantField.setPlaceholder(I18n.t("sms.storageconfig.dialog.field.tenant.placeholder"));
         tenantField.setWidthFull();
 
-        typeCombo = new ComboBox<>(I18n.t("storageconfig.dialog.field.type"));
+        typeCombo = new ComboBox<>(I18n.t("sms.storageconfig.dialog.field.type"));
         typeCombo.setItems(IEnumStorage.Types.values());
         typeCombo.setItemLabelGenerator(type -> type.name());
         typeCombo.setRequiredIndicatorVisible(true);
-        typeCombo.setPlaceholder(I18n.t("storageconfig.dialog.field.type.placeholder"));
+        typeCombo.setPlaceholder(I18n.t("sms.storageconfig.dialog.field.type.placeholder"));
         typeCombo.setWidthFull();
 
-        userNameField = new TextField(I18n.t("storageconfig.dialog.field.username"));
+        userNameField = new TextField(I18n.t("sms.storageconfig.dialog.field.username"));
         userNameField.setRequiredIndicatorVisible(true);
-        userNameField.setPlaceholder(I18n.t("storageconfig.dialog.field.username.placeholder"));
+        userNameField.setPlaceholder(I18n.t("sms.storageconfig.dialog.field.username.placeholder"));
         userNameField.setWidthFull();
 
-        passwordField = new PasswordField(I18n.t("storageconfig.dialog.field.password"));
+        passwordField = new PasswordField(I18n.t("sms.storageconfig.dialog.field.password"));
         passwordField.setRequiredIndicatorVisible(true);
-        passwordField.setPlaceholder(I18n.t("storageconfig.dialog.field.password.placeholder"));
+        passwordField.setPlaceholder(I18n.t("sms.storageconfig.dialog.field.password.placeholder"));
         passwordField.setWidthFull();
 
-        urlField = new TextField(I18n.t("storageconfig.dialog.field.url"));
+        urlField = new TextField(I18n.t("sms.storageconfig.dialog.field.url"));
         urlField.setRequiredIndicatorVisible(true);
-        urlField.setPlaceholder(I18n.t("storageconfig.dialog.field.url.placeholder"));
+        urlField.setPlaceholder(I18n.t("sms.storageconfig.dialog.field.url.placeholder"));
         urlField.setWidthFull();
     }
 
@@ -84,23 +84,23 @@ public class CreateStorageConfigDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (tenantField.getValue().isBlank()) {
-            append(I18n.t("storageconfig.dialog.field.tenant.required"));
+            append(I18n.t("sms.storageconfig.dialog.field.tenant.required"));
             return false;
         }
         if (typeCombo.getValue() == null) {
-            append(I18n.t("storageconfig.dialog.field.type.required"));
+            append(I18n.t("sms.storageconfig.dialog.field.type.required"));
             return false;
         }
         if (userNameField.getValue().isBlank()) {
-            append(I18n.t("storageconfig.dialog.field.username.required"));
+            append(I18n.t("sms.storageconfig.dialog.field.username.required"));
             return false;
         }
         if (passwordField.getValue().isBlank()) {
-            append(I18n.t("storageconfig.dialog.field.password.required"));
+            append(I18n.t("sms.storageconfig.dialog.field.password.required"));
             return false;
         }
         if (urlField.getValue().isBlank()) {
-            append(I18n.t("storageconfig.dialog.field.url.required"));
+            append(I18n.t("sms.storageconfig.dialog.field.url.required"));
             return false;
         }
 
@@ -116,17 +116,17 @@ public class CreateStorageConfigDialog extends BaseActionDialog {
 
             ResponseEntity<StorageConfigDto> response = storageConfigService.create(newConfig);
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                append(I18n.t("storageconfig.dialog.create.failed", response.getStatusCodeValue()));
+                append(I18n.t("sms.storageconfig.dialog.create.failed", response.getStatusCodeValue()));
                 return false;
             }
 
-            append(I18n.t("storageconfig.dialog.create.success"));
+            append(I18n.t("sms.storageconfig.dialog.create.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("storageconfig.dialog.create.error", e.getMessage()));
+            append(I18n.t("sms.storageconfig.dialog.create.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

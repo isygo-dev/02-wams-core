@@ -56,14 +56,14 @@ public class UpdateApplicationDialog extends BaseActionDialog {
                                    ApplicationImageService applicationImageService,
                                    ApplicationDto application,
                                    Runnable onSuccess) {
-        super(I18n.t("app.dialog.update.title"), onSuccess);
+        super(I18n.t("ims.app.dialog.update.title"), onSuccess);
         this.parentView = parentView;
         this.applicationService = applicationService;
         this.applicationImageService = applicationImageService;
         this.application = application;
         this.onSuccess = onSuccess;
 
-        setOkButtonText(I18n.t("app.dialog.update.button"));
+        setOkButtonText(I18n.t("ims.app.dialog.update.button"));
         setWidth("700px");
         setMaxWidth("95%");
 
@@ -74,31 +74,31 @@ public class UpdateApplicationDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        nameField = new TextField(I18n.t("app.dialog.update.field.name"));
+        nameField = new TextField(I18n.t("ims.app.dialog.update.field.name"));
         nameField.setRequiredIndicatorVisible(true);
         nameField.setWidthFull();
 
-        titleField = new TextField(I18n.t("app.dialog.update.field.title"));
+        titleField = new TextField(I18n.t("ims.app.dialog.update.field.title"));
         titleField.setRequiredIndicatorVisible(true);
         titleField.setWidthFull();
 
-        codeField = new TextField(I18n.t("app.dialog.update.field.code"));
+        codeField = new TextField(I18n.t("ims.app.dialog.update.field.code"));
         codeField.setWidthFull();
 
-        categoryField = new TextField(I18n.t("app.dialog.update.field.category"));
+        categoryField = new TextField(I18n.t("ims.app.dialog.update.field.category"));
         categoryField.setWidthFull();
 
-        urlField = new TextField(I18n.t("app.dialog.update.field.url"));
+        urlField = new TextField(I18n.t("ims.app.dialog.update.field.url"));
         urlField.setRequiredIndicatorVisible(true);
         urlField.setWidthFull();
 
-        orderField = new IntegerField(I18n.t("app.dialog.update.field.order"));
+        orderField = new IntegerField(I18n.t("ims.app.dialog.update.field.order"));
         orderField.setWidthFull();
 
-        descriptionField = new TextArea(I18n.t("app.dialog.update.field.description"));
+        descriptionField = new TextArea(I18n.t("ims.app.dialog.update.field.description"));
         descriptionField.setWidthFull();
 
-        adminStatusCombo = new ComboBox<>(I18n.t("app.dialog.update.field.admin.status"));
+        adminStatusCombo = new ComboBox<>(I18n.t("ims.app.dialog.update.field.admin.status"));
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
         adminStatusCombo.setWidthFull();
 
@@ -122,7 +122,7 @@ public class UpdateApplicationDialog extends BaseActionDialog {
                 .set("justify-content", "center");
         imagePlaceholder.add(new Icon(VaadinIcon.CAMERA));
 
-        changeImageButton = new Button(I18n.t("app.dialog.field.change.image"), e -> openCropperDialog());
+        changeImageButton = new Button(I18n.t("ims.app.dialog.field.change.image"), e -> openCropperDialog());
         changeImageButton.setIcon(new Icon(VaadinIcon.UPLOAD));
     }
 
@@ -216,15 +216,15 @@ public class UpdateApplicationDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (nameField.getValue().isBlank()) {
-            append(I18n.t("app.dialog.update.field.name.required"));
+            append(I18n.t("ims.app.dialog.update.field.name.required"));
             return false;
         }
         if (titleField.getValue().isBlank()) {
-            append(I18n.t("app.dialog.update.field.title.required"));
+            append(I18n.t("ims.app.dialog.update.field.title.required"));
             return false;
         }
         if (urlField.getValue().isBlank()) {
-            append(I18n.t("app.dialog.update.field.url.required"));
+            append(I18n.t("ims.app.dialog.update.field.url.required"));
             return false;
         }
 
@@ -241,25 +241,25 @@ public class UpdateApplicationDialog extends BaseActionDialog {
 
             ResponseEntity<ApplicationDto> response = applicationService.update(application.getId(), application);
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                append(I18n.t("app.dialog.update.failed", (response.getBody() != null ? response.getBody() : "no response body")));
+                append(I18n.t("ims.app.dialog.update.failed", (response.getBody() != null ? response.getBody() : I18n.t("ims.app.dialog.update.no.response.body"))));
                 return false;
             }
 
             if (imageChanged && newImageFile != null) {
                 ResponseEntity<ApplicationDto> uploadResponse = applicationImageService.uploadImage(application.getId(), newImageFile);
                 if (!uploadResponse.getStatusCode().is2xxSuccessful()) {
-                    append(I18n.t("app.dialog.update.image.failed", uploadResponse.getStatusCodeValue()));
+                    append(I18n.t("ims.app.dialog.update.image.failed", uploadResponse.getStatusCodeValue()));
                     return false;
                 }
             }
 
-            append(I18n.t("app.dialog.update.success"));
+            append(I18n.t("ims.app.dialog.update.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("app.dialog.update.error", e.getMessage()));
+            append(I18n.t("ims.app.dialog.update.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

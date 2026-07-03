@@ -22,6 +22,7 @@ import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.dto.response.AuthResponseDto;
 import eu.isygoit.dto.response.UserContext;
 import eu.isygoit.enums.IEnumAuth;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.PublicAuthService;
 import eu.isygoit.util.SecurityUtils;
 import jakarta.annotation.security.PermitAll;
@@ -44,7 +45,7 @@ import java.util.Optional;
 public class QrCodeLoginView extends BaseLoginView {
 
     private final Image qrImage = new Image();
-    private final Button refreshQrButton = new Button("Refresh QR", VaadinIcon.REFRESH.create());
+    private final Button refreshQrButton = new Button(I18n.t("auth.qrcode.button.refresh"), VaadinIcon.REFRESH.create());
     private final Div statusContainer = new Div();
 
     private String tenant;
@@ -69,7 +70,7 @@ public class QrCodeLoginView extends BaseLoginView {
         logo.setColorIndex(3);
         logo.setWidth("56px");
         logo.setHeight("56px");
-        H2 title = new H2("QR Code Login");
+        H2 title = new H2(I18n.t("auth.qrcode.title"));
         title.addClassName(LumoUtility.FontWeight.BOLD);
         title.addClassName(LumoUtility.Margin.NONE);
         brand.add(logo, title);
@@ -92,11 +93,11 @@ public class QrCodeLoginView extends BaseLoginView {
         refreshQrButton.addClickListener(e -> generateQrCode());
 
         // Back link
-        Anchor backToLogin = new Anchor("login", "← Back to sign in");
+        Anchor backToLogin = new Anchor("login", I18n.t("auth.common.link.backToSignIn"));
         backToLogin.addClassName("back-link");
 
         // Footer
-        Paragraph footer = new Paragraph("© 2026 KMS/IMS Platform");
+        Paragraph footer = new Paragraph(I18n.t("auth.common.footer"));
         footer.addClassName(LumoUtility.TextColor.TERTIARY);
         footer.addClassName(LumoUtility.FontSize.XXSMALL);
         footer.addClassName(LumoUtility.Margin.Top.MEDIUM);
@@ -138,19 +139,19 @@ public class QrCodeLoginView extends BaseLoginView {
                 UserContext userContext = response.getBody();
                 qrCodeToken = userContext.getQrCodeToken();
                 if (qrCodeToken == null || qrCodeToken.isEmpty()) {
-                    statusContainer.setText("QR code not available. Please use another method.");
+                    statusContainer.setText(I18n.t("auth.qrcode.status.notAvailable"));
                     return;
                 }
                 String encoded = URLEncoder.encode(qrCodeToken, StandardCharsets.UTF_8);
                 String qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encoded;
                 qrImage.setSrc(qrUrl);
-                statusContainer.setText("Scan the QR code with your authenticator app");
+                statusContainer.setText(I18n.t("auth.qrcode.status.scanHint"));
                 statusContainer.getStyle().set("color", "var(--lumo-secondary-text-color)");
             } else {
-                statusContainer.setText("Failed to retrieve QR token.");
+                statusContainer.setText(I18n.t("auth.qrcode.status.tokenFailed"));
             }
         } catch (Exception ex) {
-            statusContainer.setText("Service error. Please try again.");
+            statusContainer.setText(I18n.t("auth.qrcode.status.serviceError"));
         }
     }
 
@@ -184,14 +185,14 @@ public class QrCodeLoginView extends BaseLoginView {
                         : "landing";
                 UI.getCurrent().navigate(target);
 
-                Notification.show("Logged in via QR code!", 2000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("auth.qrcode.notification.loggedIn"), 2000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } else {
-                statusContainer.setText("QR authentication failed. Please try again.");
+                statusContainer.setText(I18n.t("auth.qrcode.status.authFailed"));
                 statusContainer.getStyle().set("color", "var(--lumo-error-text-color)");
             }
         } catch (Exception ex) {
-            statusContainer.setText("Authentication error. Please try again.");
+            statusContainer.setText(I18n.t("auth.common.error.authenticationError"));
             statusContainer.getStyle().set("color", "var(--lumo-error-text-color)");
         }
     }

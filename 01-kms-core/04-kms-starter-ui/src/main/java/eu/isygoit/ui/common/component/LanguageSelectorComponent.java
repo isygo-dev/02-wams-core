@@ -242,20 +242,20 @@ public class LanguageSelectorComponent extends HorizontalLayout {
     private String getLanguageName(Locale locale) {
         String languageCode = locale.getLanguage();
         String languageName = switch (languageCode) {
-            case "en" -> I18n.t("language.selector.english");
-            case "fr" -> I18n.t("language.selector.french");
-            case "de" -> I18n.t("language.selector.german");
-            case "es" -> I18n.t("language.selector.spanish");
-            case "it" -> I18n.t("language.selector.italian");
-            case "pt" -> I18n.t("language.selector.portuguese");
-            case "nl" -> I18n.t("language.selector.dutch");
-            case "ru" -> I18n.t("language.selector.russian");
-            case "zh" -> I18n.t("language.selector.chinese");
-            case "ja" -> I18n.t("language.selector.japanese");
-            case "ko" -> I18n.t("language.selector.korean");
-            case "ar" -> I18n.t("language.selector.arabic");
-            case "hi" -> I18n.t("language.selector.hindi");
-            default -> I18n.t("language.selector.fallback");
+            case "en" -> I18n.t("common.language.selector.english");
+            case "fr" -> I18n.t("common.language.selector.french");
+            case "de" -> I18n.t("common.language.selector.german");
+            case "es" -> I18n.t("common.language.selector.spanish");
+            case "it" -> I18n.t("common.language.selector.italian");
+            case "pt" -> I18n.t("common.language.selector.portuguese");
+            case "nl" -> I18n.t("common.language.selector.dutch");
+            case "ru" -> I18n.t("common.language.selector.russian");
+            case "zh" -> I18n.t("common.language.selector.chinese");
+            case "ja" -> I18n.t("common.language.selector.japanese");
+            case "ko" -> I18n.t("common.language.selector.korean");
+            case "ar" -> I18n.t("common.language.selector.arabic");
+            case "hi" -> I18n.t("common.language.selector.hindi");
+            default -> I18n.t("common.language.selector.fallback");
         };
 
         if (locale.getCountry() != null && !locale.getCountry().isEmpty()) {

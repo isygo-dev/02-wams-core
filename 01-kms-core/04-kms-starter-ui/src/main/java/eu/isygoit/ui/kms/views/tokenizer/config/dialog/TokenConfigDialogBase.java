@@ -114,65 +114,65 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         metadataCard = new Card();
         metadataCard.addClassName("config-metadata-card");
         metadataCard.setWidthFull();
-        Span metaTitle = new Span(I18n.t("dialog.token.metadata"));
+        Span metaTitle = new Span(I18n.t("kms.dialog.token.metadata"));
         metaTitle.addClassName(LumoUtility.FontWeight.BOLD);
         metaTitle.addClassName(LumoUtility.FontSize.MEDIUM);
 
         // Token type
-        tokenTypeCombo = new ComboBox<>(I18n.t("dialog.token.token.type"));
+        tokenTypeCombo = new ComboBox<>(I18n.t("kms.dialog.token.token.type"));
         tokenTypeCombo.setItems(IEnumToken.Types.values());
         tokenTypeCombo.setRequired(true);
         tokenTypeCombo.setRequiredIndicatorVisible(true);
         tokenTypeCombo.setValue(IEnumToken.Types.ACCESS);
         tokenTypeCombo.setWidthFull();
-        tokenTypeCombo.setTooltipText(I18n.t("dialog.token.token.type.tooltip"));
+        tokenTypeCombo.setTooltipText(I18n.t("kms.dialog.token.token.type.tooltip"));
 
         // Issuer
-        issuerField = new TextField(I18n.t("dialog.token.issuer"));
-        issuerField.setPlaceholder(I18n.t("dialog.token.issuer.placeholder"));
+        issuerField = new TextField(I18n.t("kms.dialog.token.issuer"));
+        issuerField.setPlaceholder(I18n.t("kms.dialog.token.issuer.placeholder"));
         issuerField.setWidthFull();
-        issuerField.setTooltipText(I18n.t("dialog.token.issuer.tooltip"));
+        issuerField.setTooltipText(I18n.t("kms.dialog.token.issuer.tooltip"));
 
         // Audience input (custom component)
         audienceInput = new AudienceInput();
         audienceInput.setWidthFull();
-        audienceInput.setTooltipText(I18n.t("dialog.token.audience.tooltip"));
+        audienceInput.setTooltipText(I18n.t("kms.dialog.token.audience.tooltip"));
 
         // Lifetime row with "No expiration" checkbox
-        noExpirationCheckbox = new Checkbox(I18n.t("dialog.token.no.expiration"));
-        noExpirationCheckbox.setTooltipText(I18n.t("dialog.token.no.expiration.tooltip"));
+        noExpirationCheckbox = new Checkbox(I18n.t("kms.dialog.token.no.expiration"));
+        noExpirationCheckbox.setTooltipText(I18n.t("kms.dialog.token.no.expiration.tooltip"));
         noExpirationCheckbox.addValueChangeListener(e -> {
             boolean noExp = e.getValue();
             lifeTimeValueField.setEnabled(!noExp);
             lifeTimeUnitCombo.setEnabled(!noExp);
             if (noExp) {
                 lifeTimeValueField.setValue(1);
-                lifeTimeUnitCombo.setValue("Hours");
+                lifeTimeUnitCombo.setValue(I18n.t("kms.dialog.token.lifetime.unit.hours"));
             }
         });
 
         lifeTimeValueField = new IntegerField();
-        lifeTimeValueField.setPlaceholder(I18n.t("dialog.token.lifetime.value.placeholder"));
+        lifeTimeValueField.setPlaceholder(I18n.t("kms.dialog.token.lifetime.value.placeholder"));
         lifeTimeValueField.setValue(1);
         lifeTimeValueField.setWidth("50%");
         lifeTimeValueField.setStepButtonsVisible(true);
         lifeTimeValueField.setMin(1);
         lifeTimeValueField.setEnabled(true);
-        lifeTimeValueField.setTooltipText(I18n.t("dialog.token.lifetime.tooltip"));
+        lifeTimeValueField.setTooltipText(I18n.t("kms.dialog.token.lifetime.tooltip"));
 
         lifeTimeUnitCombo = new ComboBox<>();
         lifeTimeUnitCombo.setItems(
-                I18n.t("dialog.token.lifetime.unit.seconds"),
-                I18n.t("dialog.token.lifetime.unit.minutes"),
-                I18n.t("dialog.token.lifetime.unit.hours"),
-                I18n.t("dialog.token.lifetime.unit.days")
+                I18n.t("kms.dialog.token.lifetime.unit.seconds"),
+                I18n.t("kms.dialog.token.lifetime.unit.minutes"),
+                I18n.t("kms.dialog.token.lifetime.unit.hours"),
+                I18n.t("kms.dialog.token.lifetime.unit.days")
         );
-        lifeTimeUnitCombo.setValue(I18n.t("dialog.token.lifetime.unit.hours"));
+        lifeTimeUnitCombo.setValue(I18n.t("kms.dialog.token.lifetime.unit.hours"));
         lifeTimeUnitCombo.setWidth("30%");
         lifeTimeUnitCombo.setEnabled(true);
-        lifeTimeUnitCombo.setTooltipText(I18n.t("dialog.token.lifetime.unit.tooltip"));
+        lifeTimeUnitCombo.setTooltipText(I18n.t("kms.dialog.token.lifetime.unit.tooltip"));
 
-        Span lifetimeLabel = new Span(I18n.t("dialog.token.lifetime"));
+        Span lifetimeLabel = new Span(I18n.t("kms.dialog.token.lifetime"));
         lifetimeLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         lifetimeLabel.getStyle().set("margin-right", "var(--lumo-space-s)");
 
@@ -192,7 +192,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         cryptoCard = new Card();
         cryptoCard.addClassName("config-crypto-card");
         cryptoCard.setWidthFull();
-        Span cryptoTitle = new Span(I18n.t("dialog.token.crypto"));
+        Span cryptoTitle = new Span(I18n.t("kms.dialog.token.crypto"));
         cryptoTitle.addClassName(LumoUtility.FontWeight.BOLD);
         cryptoTitle.addClassName(LumoUtility.FontSize.MEDIUM);
         cryptoCard.add(cryptoTitle);
@@ -204,11 +204,11 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
 
         // Key source selection
         keySourceGroup = new RadioButtonGroup<>();
-        keySourceGroup.setLabel(I18n.t("dialog.token.key.source"));
-        keySourceGroup.setItems(I18n.t("dialog.token.key.source.kms"), I18n.t("dialog.token.key.source.custom"));
-        keySourceGroup.setValue(I18n.t("dialog.token.key.source.custom"));
+        keySourceGroup.setLabel(I18n.t("kms.dialog.token.key.source"));
+        keySourceGroup.setItems(I18n.t("kms.dialog.token.key.source.kms"), I18n.t("kms.dialog.token.key.source.custom"));
+        keySourceGroup.setValue(I18n.t("kms.dialog.token.key.source.custom"));
         keySourceGroup.setWidthFull();
-        keySourceGroup.setTooltipText(I18n.t("dialog.token.key.source.tooltip"));
+        keySourceGroup.setTooltipText(I18n.t("kms.dialog.token.key.source.tooltip"));
         cryptoCardContent.add(keySourceGroup);
 
         // KMS key selection layout
@@ -216,14 +216,14 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         kmsKeyLayout.setPadding(false);
         kmsKeyLayout.setSpacing(true);
         kmsKeyLayout.setVisible(false);
-        Span kmsKeyLabel = new Span(I18n.t("dialog.token.select.kms.key"));
+        Span kmsKeyLabel = new Span(I18n.t("kms.dialog.token.select.kms.key"));
         kmsKeyLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         kmsKeyCombo = new ComboBox<>();
-        kmsKeyCombo.setPlaceholder(I18n.t("dialog.token.choose.kms.key"));
+        kmsKeyCombo.setPlaceholder(I18n.t("kms.dialog.token.choose.kms.key"));
         kmsKeyCombo.setItemLabelGenerator(KeyOption::getDisplayName);
         kmsKeyCombo.setWidthFull();
         kmsKeyCombo.setRequired(true);
-        kmsKeyCombo.setTooltipText(I18n.t("dialog.token.kms.key.tooltip"));
+        kmsKeyCombo.setTooltipText(I18n.t("kms.dialog.token.kms.key.tooltip"));
         kmsKeyLayout.add(kmsKeyLabel, kmsKeyCombo);
         cryptoCardContent.add(kmsKeyLayout);
 
@@ -232,41 +232,41 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         customKeyLayout.setPadding(false);
         customKeyLayout.setSpacing(true);
 
-        signatureAlgorithmCombo = new ComboBox<>(I18n.t("dialog.token.signature.algorithm"));
+        signatureAlgorithmCombo = new ComboBox<>(I18n.t("kms.dialog.token.signature.algorithm"));
         signatureAlgorithmCombo.setItems(SUPPORTED_ALGORITHMS);
         signatureAlgorithmCombo.setRequired(true);
         signatureAlgorithmCombo.setRequiredIndicatorVisible(true);
         signatureAlgorithmCombo.setValue("HS256");
         signatureAlgorithmCombo.setWidthFull();
-        signatureAlgorithmCombo.setTooltipText(I18n.t("dialog.token.signature.tooltip"));
+        signatureAlgorithmCombo.setTooltipText(I18n.t("kms.dialog.token.signature.tooltip"));
         customKeyLayout.add(signatureAlgorithmCombo);
 
-        secretKeyField = new TextField(I18n.t("dialog.token.secret.key"));
+        secretKeyField = new TextField(I18n.t("kms.dialog.token.secret.key"));
         secretKeyField.setRequired(true);
         secretKeyField.setRequiredIndicatorVisible(true);
         secretKeyField.setWidthFull();
-        secretKeyField.setTooltipText(I18n.t("dialog.token.secret.tooltip"));
+        secretKeyField.setTooltipText(I18n.t("kms.dialog.token.secret.tooltip"));
 
-        privateKeyArea = new TextArea(I18n.t("dialog.token.private.key"));
+        privateKeyArea = new TextArea(I18n.t("kms.dialog.token.private.key"));
         privateKeyArea.setRequired(true);
         privateKeyArea.setRequiredIndicatorVisible(true);
         privateKeyArea.setWidthFull();
         privateKeyArea.setHeight("150px");
-        privateKeyArea.setPlaceholder(I18n.t("dialog.token.private.key.placeholder"));
+        privateKeyArea.setPlaceholder(I18n.t("kms.dialog.token.private.key.placeholder"));
         privateKeyArea.addClassName("no-copy");
-        privateKeyArea.setTooltipText(I18n.t("dialog.token.private.tooltip"));
+        privateKeyArea.setTooltipText(I18n.t("kms.dialog.token.private.tooltip"));
 
         publicKeyArea = new TextArea();
         publicKeyArea.setReadOnly(true);
         publicKeyArea.setWidthFull();
         publicKeyArea.setHeight("100px");
-        publicKeyArea.setPlaceholder(I18n.t("dialog.token.public.key.placeholder"));
-        publicKeyArea.setTooltipText(I18n.t("dialog.token.public.tooltip"));
+        publicKeyArea.setPlaceholder(I18n.t("kms.dialog.token.public.key.placeholder"));
+        publicKeyArea.setTooltipText(I18n.t("kms.dialog.token.public.tooltip"));
 
-        generateKeyPairButton = new Button(I18n.t("dialog.token.generate.key.pair"), event -> generateKeyPair());
+        generateKeyPairButton = new Button(I18n.t("kms.dialog.token.generate.key.pair"), event -> generateKeyPair());
         generateKeyPairButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         generateKeyPairButton.setWidthFull();
-        generateKeyPairButton.setTooltipText(I18n.t("dialog.token.generate.tooltip"));
+        generateKeyPairButton.setTooltipText(I18n.t("kms.dialog.token.generate.tooltip"));
 
         publicKeyComponent = createPublicKeyComponent();
 
@@ -276,13 +276,13 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
 
     private VerticalLayout createPublicKeyComponent() {
         HorizontalLayout header = new HorizontalLayout();
-        Span label = new Span(I18n.t("dialog.token.public.key"));
+        Span label = new Span(I18n.t("kms.dialog.token.public.key"));
         label.getStyle().set("font-weight", "bold");
         label.getStyle().set("margin-right", "auto");
 
         copyPublicKeyButton = new Button(new Icon(VaadinIcon.COPY));
         copyPublicKeyButton.addClickListener(e -> copyToClipboard(publicKeyArea.getValue()));
-        copyPublicKeyButton.setTooltipText(I18n.t("dialog.token.copy.public.key"));
+        copyPublicKeyButton.setTooltipText(I18n.t("kms.dialog.token.copy.public.key"));
         copyPublicKeyButton.getStyle().set("margin-left", "auto");
         copyPublicKeyButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
 
@@ -300,7 +300,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
     private void setupKeySourceListener() {
         keySourceGroup.addValueChangeListener(event -> {
             String value = event.getValue();
-            if (I18n.t("dialog.token.key.source.kms").equals(value)) {
+            if (I18n.t("kms.dialog.token.key.source.kms").equals(value)) {
                 kmsKeyLayout.setVisible(true);
                 customKeyLayout.setVisible(false);
                 secretKeyField.clear();
@@ -333,7 +333,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
             }
         } catch (FeignException ex) {
             log.error("Failed to load KMS keys: {}", ex.getMessage());
-            Notification.show(I18n.t("dialog.token.load.failed", ex.getMessage()), 5000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("kms.dialog.token.load.failed", ex.getMessage()), 5000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } catch (Exception e) {
             log.error("Failed to load KMS keys", e);
@@ -372,7 +372,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
                 case "HS512" -> 64;
                 default -> 32;
             };
-            secretKeyField.setHelperText(I18n.t("dialog.token.secret.helper", algorithm, minBytes));
+            secretKeyField.setHelperText(I18n.t("kms.dialog.token.secret.helper", algorithm, minBytes));
             customKeyLayout.add(secretKeyField);
         } else if (ASYMMETRIC_ALGORITHMS.contains(algorithm)) {
             privateKeyArea.clear();
@@ -386,7 +386,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
     protected void generateKeyPair() {
         String algorithm = signatureAlgorithmCombo.getValue();
         if (algorithm == null || !ASYMMETRIC_ALGORITHMS.contains(algorithm)) {
-            Notification.show(I18n.t("dialog.token.select.asymmetric.first"), 3000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("kms.dialog.token.select.asymmetric.first"), 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
@@ -460,10 +460,10 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
             privateKeyArea.setValue(privateKeyPem);
             publicKeyArea.setValue(publicKeyPem);
 
-            Notification.show(I18n.t("dialog.token.key.generated.success", algorithm), 3000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("kms.dialog.token.key.generated.success", algorithm), 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         } catch (Exception e) {
-            Notification.show(I18n.t("dialog.token.failed.generate.key", e.getMessage()), 5000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("kms.dialog.token.failed.generate.key", e.getMessage()), 5000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }
@@ -471,7 +471,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
     // ---------- Utility Methods ----------
     protected void copyToClipboard(String text) {
         if (text == null || text.isBlank()) {
-            Notification.show(I18n.t("dialog.token.nothing.to.copy"), 2000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("kms.dialog.token.nothing.to.copy"), 2000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
@@ -491,7 +491,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
                         "  document.body.appendChild(notification);" +
                         "  setTimeout(() => notification.remove(), 2000);" +
                         "});",
-                text, I18n.t("dialog.token.copied"));
+                text, I18n.t("kms.dialog.token.copied"));
     }
 
     protected boolean validateHmacKey(String algorithm, String secretKey) {
@@ -504,12 +504,12 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
                 default -> 32;
             };
             if (keyBytes.length < requiredMinBytes) {
-                append(I18n.t("dialog.token.secret.length", algorithm, requiredMinBytes));
+                append(I18n.t("kms.dialog.token.secret.length", algorithm, requiredMinBytes));
                 return false;
             }
             return true;
         } catch (IllegalArgumentException e) {
-            append(I18n.t("dialog.token.secret.base64"));
+            append(I18n.t("kms.dialog.token.secret.base64"));
             return false;
         }
     }
@@ -539,22 +539,22 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         }
         Integer value = lifeTimeValueField.getValue();
         if (value == null || value <= 0) {
-            append(I18n.t("dialog.token.lifetime.positive"));
+            append(I18n.t("kms.dialog.token.lifetime.positive"));
             return null;
         }
         String unit = lifeTimeUnitCombo.getValue();
         if (unit == null) {
-            append(I18n.t("dialog.token.select.unit"));
+            append(I18n.t("kms.dialog.token.select.unit"));
             return null;
         }
         int ms;
-        if (I18n.t("dialog.token.lifetime.unit.seconds").equals(unit)) {
+        if (I18n.t("kms.dialog.token.lifetime.unit.seconds").equals(unit)) {
             ms = value * 1000;
-        } else if (I18n.t("dialog.token.lifetime.unit.minutes").equals(unit)) {
+        } else if (I18n.t("kms.dialog.token.lifetime.unit.minutes").equals(unit)) {
             ms = value * 60 * 1000;
-        } else if (I18n.t("dialog.token.lifetime.unit.hours").equals(unit)) {
+        } else if (I18n.t("kms.dialog.token.lifetime.unit.hours").equals(unit)) {
             ms = value * 60 * 60 * 1000;
-        } else if (I18n.t("dialog.token.lifetime.unit.days").equals(unit)) {
+        } else if (I18n.t("kms.dialog.token.lifetime.unit.days").equals(unit)) {
             ms = value * 24 * 60 * 60 * 1000;
         } else {
             throw new IllegalStateException("Unknown unit: " + unit);
@@ -570,7 +570,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
             lifeTimeUnitCombo.setEnabled(false);
             // Placeholder values (won't be used)
             lifeTimeValueField.setValue(1);
-            lifeTimeUnitCombo.setValue(I18n.t("dialog.token.lifetime.unit.hours"));
+            lifeTimeUnitCombo.setValue(I18n.t("kms.dialog.token.lifetime.unit.hours"));
             return;
         }
         noExpirationCheckbox.setValue(false);
@@ -580,18 +580,18 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         // Determine best unit
         if (ms % (24 * 60 * 60 * 1000) == 0 && ms >= (24 * 60 * 60 * 1000)) {
             lifeTimeValueField.setValue(ms / (24 * 60 * 60 * 1000));
-            lifeTimeUnitCombo.setValue(I18n.t("dialog.token.lifetime.unit.days"));
+            lifeTimeUnitCombo.setValue(I18n.t("kms.dialog.token.lifetime.unit.days"));
         } else if (ms % (60 * 60 * 1000) == 0) {
             lifeTimeValueField.setValue(ms / (60 * 60 * 1000));
-            lifeTimeUnitCombo.setValue(I18n.t("dialog.token.lifetime.unit.hours"));
+            lifeTimeUnitCombo.setValue(I18n.t("kms.dialog.token.lifetime.unit.hours"));
         } else if (ms % (60 * 1000) == 0) {
             lifeTimeValueField.setValue(ms / (60 * 1000));
-            lifeTimeUnitCombo.setValue(I18n.t("dialog.token.lifetime.unit.minutes"));
+            lifeTimeUnitCombo.setValue(I18n.t("kms.dialog.token.lifetime.unit.minutes"));
         } else {
             lifeTimeValueField.setValue(ms / 1000);
-            lifeTimeUnitCombo.setValue(I18n.t("dialog.token.lifetime.unit.seconds"));
+            lifeTimeUnitCombo.setValue(I18n.t("kms.dialog.token.lifetime.unit.seconds"));
             if (ms % 1000 != 0) {
-                Notification.show(I18n.t("dialog.token.lifetime.warning"), 3000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("kms.dialog.token.lifetime.warning"), 3000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
             }
         }
@@ -631,11 +631,11 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
             setPadding(false);
             setSpacing(false);
 
-            inputField = new TextField(I18n.t("dialog.token.audience"));
-            inputField.setPlaceholder(I18n.t("dialog.token.audience.placeholder"));
+            inputField = new TextField(I18n.t("kms.dialog.token.audience"));
+            inputField.setPlaceholder(I18n.t("kms.dialog.token.audience.placeholder"));
             inputField.setWidthFull();
 
-            addButton = new Button(I18n.t("dialog.token.audience.add"), new Icon(VaadinIcon.PLUS));
+            addButton = new Button(I18n.t("kms.dialog.token.audience.add"), new Icon(VaadinIcon.PLUS));
             addButton.addClickListener(e -> addAudience());
 
             HorizontalLayout inputRow = new HorizontalLayout(inputField, addButton);
@@ -657,13 +657,13 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         private void addAudience() {
             String value = inputField.getValue();
             if (value == null || value.isBlank()) {
-                Notification.show(I18n.t("dialog.token.audience.empty"), 2000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("kms.dialog.token.audience.empty"), 2000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
             }
             value = value.trim();
             if (getAudiences().contains(value)) {
-                Notification.show(I18n.t("dialog.token.audience.exists"), 2000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("kms.dialog.token.audience.exists"), 2000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
             }

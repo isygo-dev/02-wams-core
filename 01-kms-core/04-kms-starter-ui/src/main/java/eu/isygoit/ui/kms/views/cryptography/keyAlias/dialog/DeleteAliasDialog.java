@@ -25,16 +25,16 @@ public class DeleteAliasDialog extends PinBaseActionDialog {
                              Runnable onSuccess,
                              String aliasName,
                              Boolean primaryKey) {
-        super(I18n.t("alias.dialog.delete.title"),
-                primaryKey ? I18n.t("alias.dialog.delete.primary.warning")
-                        : I18n.t("alias.dialog.delete.confirmation", aliasName),
+        super(I18n.t("kms.alias.dialog.delete.title"),
+                primaryKey ? I18n.t("kms.alias.dialog.delete.primary.warning")
+                        : I18n.t("kms.alias.dialog.delete.confirmation", aliasName),
                 onSuccess,
                 primaryKey); // only require PIN for primary key
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
         this.aliasName = aliasName;
 
-        setOkButtonText(I18n.t("alias.dialog.delete.button"));
+        setOkButtonText(I18n.t("kms.alias.dialog.delete.button"));
         addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
         setWidth("500px");
     }
@@ -43,7 +43,7 @@ public class DeleteAliasDialog extends PinBaseActionDialog {
     protected boolean onOk() {
         // Extra safety: validate PIN again (the base class already validated the button, but double-check)
         if (!validatePin()) {
-            append(I18n.t("alias.dialog.delete.invalid.code"));
+            append(I18n.t("kms.alias.dialog.delete.invalid.code"));
             parentView.showLoading(false);
             return false;
         }
@@ -52,16 +52,16 @@ public class DeleteAliasDialog extends PinBaseActionDialog {
         try {
             ResponseEntity<DeleteAliasResponse> response = kmsApiService.deleteAlias(aliasName);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("alias.dialog.delete.failed", response.getStatusCode()));
+                append(I18n.t("kms.alias.dialog.delete.failed", response.getStatusCode()));
                 return false;
             }
 
-            append(I18n.t("alias.dialog.delete.success"));
+            append(I18n.t("kms.alias.dialog.delete.success"));
             return true;
         } catch (FeignException ex) {
             append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            append(I18n.t("alias.dialog.delete.failed.operation", e.getMessage()));
+            append(I18n.t("kms.alias.dialog.delete.failed.operation", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

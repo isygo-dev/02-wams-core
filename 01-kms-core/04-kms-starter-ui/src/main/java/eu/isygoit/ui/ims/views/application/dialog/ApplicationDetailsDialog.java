@@ -28,7 +28,7 @@ public class ApplicationDetailsDialog extends NoActionDialog {
     public ApplicationDetailsDialog(ApplicationManagementView parentView,
                                     ApplicationService applicationService,
                                     Long applicationId) {
-        super(I18n.t("app.details.title"));
+        super(I18n.t("ims.app.details.title"));
         this.parentView = parentView;
         this.applicationService = applicationService;
         this.applicationId = applicationId;
@@ -50,14 +50,14 @@ public class ApplicationDetailsDialog extends NoActionDialog {
             if (response.getBody() != null) {
                 buildContent(response.getBody());
             } else {
-                add(new Span(I18n.t("app.details.not.found")));
+                add(new Span(I18n.t("ims.app.details.not.found")));
                 addCloseButton();
             }
         } catch (FeignException ex) {
-            add(new Span(I18n.t("app.details.load.error", extractErrorMessage(ex))));
+            add(new Span(I18n.t("ims.app.details.load.error", extractErrorMessage(ex))));
             addCloseButton();
         } catch (Exception e) {
-            add(new Span(I18n.t("app.details.load.error", e.getMessage())));
+            add(new Span(I18n.t("ims.app.details.load.error", e.getMessage())));
             addCloseButton();
         } finally {
             parentView.showLoading(false);
@@ -75,14 +75,14 @@ public class ApplicationDetailsDialog extends NoActionDialog {
                 .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
                 .set("gap", "var(--lumo-space-s)");
 
-        addFieldToGrid(basicInfo, VaadinIcon.PLAY, I18n.t("app.details.field.name"), app.getName());
-        addFieldToGrid(basicInfo, VaadinIcon.FUNCTION, I18n.t("app.details.field.title"), app.getTitle());
-        addFieldToGrid(basicInfo, VaadinIcon.CODE, I18n.t("app.details.field.code"), app.getCode());
-        addFieldToGrid(basicInfo, VaadinIcon.DESKTOP, I18n.t("app.details.field.category"), app.getCategory());
-        addFieldToGrid(basicInfo, VaadinIcon.GLOBE, I18n.t("app.details.field.url"), app.getUrl());
-        addFieldToGrid(basicInfo, VaadinIcon.SORT, I18n.t("app.details.field.order"), app.getOrder() != null ? String.valueOf(app.getOrder()) : null);
+        addFieldToGrid(basicInfo, VaadinIcon.PLAY, I18n.t("ims.app.details.field.name"), app.getName());
+        addFieldToGrid(basicInfo, VaadinIcon.FUNCTION, I18n.t("ims.app.details.field.title"), app.getTitle());
+        addFieldToGrid(basicInfo, VaadinIcon.CODE, I18n.t("ims.app.details.field.code"), app.getCode());
+        addFieldToGrid(basicInfo, VaadinIcon.DESKTOP, I18n.t("ims.app.details.field.category"), app.getCategory());
+        addFieldToGrid(basicInfo, VaadinIcon.GLOBE, I18n.t("ims.app.details.field.url"), app.getUrl());
+        addFieldToGrid(basicInfo, VaadinIcon.SORT, I18n.t("ims.app.details.field.order"), app.getOrder() != null ? String.valueOf(app.getOrder()) : null);
 
-        mainLayout.add(createSection(I18n.t("app.details.section.general"), basicInfo));
+        mainLayout.add(createSection(I18n.t("ims.app.details.section.general"), basicInfo));
 
         if (app.getDescription() != null && !app.getDescription().isBlank()) {
             HorizontalLayout descRow = new HorizontalLayout();
@@ -92,7 +92,7 @@ public class ApplicationDetailsDialog extends NoActionDialog {
             Icon descIcon = VaadinIcon.FILE_TEXT.create();
             descIcon.setSize("16px");
             descIcon.getStyle().set("color", "var(--lumo-primary-color)");
-            Span descLabel = new Span(I18n.t("app.details.field.description"));
+            Span descLabel = new Span(I18n.t("ims.app.details.field.description"));
             descLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
             Span descValue = new Span(app.getDescription());
             descValue.getStyle().set("flex", "1");
@@ -107,13 +107,13 @@ public class ApplicationDetailsDialog extends NoActionDialog {
                 .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
                 .set("gap", "var(--lumo-space-s)");
 
-        addFieldToGrid(statusInfo, VaadinIcon.SHIELD, I18n.t("app.details.field.admin.status"), app.getAdminStatus() != null ? app.getAdminStatus().name() : null);
-        addFieldToGrid(statusInfo, VaadinIcon.CALENDAR, I18n.t("app.details.field.created"), app.getCreateDate() != null ? DateHelper.formatToHumanReadable(app.getCreateDate()) : null);
-        addFieldToGrid(statusInfo, VaadinIcon.USER_CHECK, I18n.t("app.details.field.created.by"), app.getCreatedBy());
-        addFieldToGrid(statusInfo, VaadinIcon.CALENDAR_O, I18n.t("app.details.field.updated"), app.getUpdateDate() != null ? DateHelper.formatToHumanReadable(app.getUpdateDate()) : null);
-        addFieldToGrid(statusInfo, VaadinIcon.EDIT, I18n.t("app.details.field.updated.by"), app.getUpdatedBy());
+        addFieldToGrid(statusInfo, VaadinIcon.SHIELD, I18n.t("ims.app.details.field.admin.status"), app.getAdminStatus() != null ? app.getAdminStatus().name() : null);
+        addFieldToGrid(statusInfo, VaadinIcon.CALENDAR, I18n.t("ims.app.details.field.created"), app.getCreateDate() != null ? DateHelper.formatToHumanReadable(app.getCreateDate()) : null);
+        addFieldToGrid(statusInfo, VaadinIcon.USER_CHECK, I18n.t("ims.app.details.field.created.by"), app.getCreatedBy());
+        addFieldToGrid(statusInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.app.details.field.updated"), app.getUpdateDate() != null ? DateHelper.formatToHumanReadable(app.getUpdateDate()) : null);
+        addFieldToGrid(statusInfo, VaadinIcon.EDIT, I18n.t("ims.app.details.field.updated.by"), app.getUpdatedBy());
 
-        mainLayout.add(createSection(I18n.t("app.details.section.status"), statusInfo));
+        mainLayout.add(createSection(I18n.t("ims.app.details.section.status"), statusInfo));
 
         add(mainLayout);
         addCloseButton();
@@ -159,7 +159,7 @@ public class ApplicationDetailsDialog extends NoActionDialog {
     }
 
     private void addCloseButton() {
-        Button closeButton = new Button(I18n.t("app.details.close"), e -> close());
+        Button closeButton = new Button(I18n.t("ims.app.details.close"), e -> close());
         closeButton.addClassName(LumoUtility.Margin.Top.MEDIUM);
         HorizontalLayout buttonBar = new HorizontalLayout(closeButton);
         buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);

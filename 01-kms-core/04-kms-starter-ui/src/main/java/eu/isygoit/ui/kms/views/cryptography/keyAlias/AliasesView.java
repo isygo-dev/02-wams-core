@@ -42,7 +42,7 @@ public class AliasesView extends ManagementVerticalView {
 
     private final KmsApiService kmsApiService;
     private final Div cardsContainer = new Div();
-    private final Button createButton = new Button(I18n.t("aliases.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button createButton = new Button(I18n.t("kms.aliases.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
     private final ProgressBar loadingBar = new ProgressBar();
@@ -71,7 +71,7 @@ public class AliasesView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("kms-aliases-view");
 
-        H2 header = new H2(I18n.t("aliases.view.title"));
+        H2 header = new H2(I18n.t("kms.aliases.view.title"));
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         add(header);
@@ -89,15 +89,15 @@ public class AliasesView extends ManagementVerticalView {
         add(loadingBar);
 
         createButton.addClickListener(e -> createAlias());
-        createButton.setTooltipText(I18n.t("aliases.view.create.tooltip"));
+        createButton.setTooltipText(I18n.t("kms.aliases.view.create.tooltip"));
 
         refreshButton.addClickListener(e -> resetPaginationAndLoad());
-        refreshButton.setTooltipText(I18n.t("aliases.view.refresh.tooltip"));
+        refreshButton.setTooltipText(I18n.t("kms.aliases.view.refresh.tooltip"));
 
-        searchField.setPlaceholder(I18n.t("aliases.view.search.placeholder"));
+        searchField.setPlaceholder(I18n.t("kms.aliases.view.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
-        searchField.setTooltipText(I18n.t("aliases.view.search.tooltip"));
+        searchField.setTooltipText(I18n.t("kms.aliases.view.search.tooltip"));
         searchField.addValueChangeListener(e -> {
             currentSearch = e.getValue();
             filterCards();
@@ -105,8 +105,8 @@ public class AliasesView extends ManagementVerticalView {
 
         pageSizeSelect.setItems(10, 20, 30, 40, 50);
         pageSizeSelect.setValue(10);
-        pageSizeSelect.setPlaceholder(I18n.t("aliases.view.page.per.page"));
-        pageSizeSelect.setTooltipText(I18n.t("aliases.view.page.per.page.tooltip"));
+        pageSizeSelect.setPlaceholder(I18n.t("kms.aliases.view.page.per.page"));
+        pageSizeSelect.setTooltipText(I18n.t("kms.aliases.view.page.per.page.tooltip"));
         pageSizeSelect.addValueChangeListener(e -> {
             if (e.getValue() != null) {
                 pageSize = e.getValue();
@@ -120,7 +120,7 @@ public class AliasesView extends ManagementVerticalView {
                 loadAliasesPage(prevToken);
             }
         });
-        prevButton.setTooltipText(I18n.t("aliases.view.prev.page.tooltip"));
+        prevButton.setTooltipText(I18n.t("kms.aliases.view.prev.page.tooltip"));
 
         nextButton.addClickListener(e -> {
             if (truncated && currentNextToken != null) {
@@ -128,10 +128,10 @@ public class AliasesView extends ManagementVerticalView {
                 loadAliasesPage(currentNextToken);
             }
         });
-        nextButton.setTooltipText(I18n.t("aliases.view.next.page.tooltip"));
+        nextButton.setTooltipText(I18n.t("kms.aliases.view.next.page.tooltip"));
 
-        pageInfoLabel.getElement().setAttribute("title", I18n.t("aliases.view.page.info.title"));
-        totalCountLabel.getElement().setAttribute("title", I18n.t("aliases.view.total.count.title"));
+        pageInfoLabel.getElement().setAttribute("title", I18n.t("kms.aliases.view.page.info.title"));
+        totalCountLabel.getElement().setAttribute("title", I18n.t("kms.aliases.view.total.count.title"));
 
         injectResponsiveStyles();
         resetPaginationAndLoad();
@@ -179,7 +179,7 @@ public class AliasesView extends ManagementVerticalView {
             updatePaginationDisplay();
             filterCards();
         } catch (Exception e) {
-            Notification.show(I18n.t("aliases.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("kms.aliases.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
             showLoading(false);
@@ -188,11 +188,11 @@ public class AliasesView extends ManagementVerticalView {
 
     private void updatePaginationDisplay() {
         if (totalPages > 0) {
-            pageInfoLabel.setText(I18n.t("aliases.view.page.info", currentPage, totalPages, numberOfElements));
+            pageInfoLabel.setText(I18n.t("kms.aliases.view.page.info", currentPage, totalPages, numberOfElements));
         } else {
-            pageInfoLabel.setText(I18n.t("aliases.view.page.info.simple", currentPage, numberOfElements));
+            pageInfoLabel.setText(I18n.t("kms.aliases.view.page.info.simple", currentPage, numberOfElements));
         }
-        totalCountLabel.setText(I18n.t("aliases.view.total.count", totalElements));
+        totalCountLabel.setText(I18n.t("kms.aliases.view.total.count", totalElements));
         prevButton.setEnabled(!previousTokens.isEmpty());
         nextButton.setEnabled(truncated && currentNextToken != null);
     }
@@ -215,8 +215,8 @@ public class AliasesView extends ManagementVerticalView {
             Icon emptyIcon = VaadinIcon.TAG.create();
             emptyIcon.setSize("48px");
             emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-            H4 emptyTitle = new H4(I18n.t("aliases.view.empty.title"));
-            Paragraph emptyDesc = new Paragraph(I18n.t("aliases.view.empty.description"));
+            H4 emptyTitle = new H4(I18n.t("kms.aliases.view.empty.title"));
+            Paragraph emptyDesc = new Paragraph(I18n.t("kms.aliases.view.empty.description"));
             emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);
@@ -255,7 +255,7 @@ public class AliasesView extends ManagementVerticalView {
         rightGroup.setSpacing(true);
         rightGroup.setAlignItems(FlexComponent.Alignment.END);
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText(I18n.t("aliases.view.refresh.tooltip"));
+        refreshButton.setTooltipText(I18n.t("kms.aliases.view.refresh.tooltip"));
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         rightGroup.add(refreshButton, createButton);
 
@@ -328,7 +328,7 @@ public class AliasesView extends ManagementVerticalView {
                         .collect(Collectors.toList());
             }
         } catch (Exception e) {
-            Notification.show(I18n.t("aliases.view.load.keys.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("kms.aliases.view.load.keys.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
         return keyIds;

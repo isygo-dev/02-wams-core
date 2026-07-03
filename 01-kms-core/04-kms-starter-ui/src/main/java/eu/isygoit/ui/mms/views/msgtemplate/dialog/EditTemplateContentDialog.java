@@ -57,7 +57,7 @@ public class EditTemplateContentDialog extends Dialog {
         this.template = template;
         this.onSuccess = onSuccess;
 
-        setHeaderTitle(I18n.t("template.dialog.edit.content.title",
+        setHeaderTitle(I18n.t("mms.msgtemplate.dialog.edit.content.title",
                 template.getName() != null ? template.getName() : template.getId()));
         setWidth("800px");
         setMaxWidth("95vw");
@@ -95,8 +95,8 @@ public class EditTemplateContentDialog extends Dialog {
                 template.getOriginalFileName() : template.getFileName());
         fileName.addClassName(LumoUtility.FontWeight.SEMIBOLD);
 
-        Span fileInfo = new Span(I18n.t("template.dialog.edit.content.file.info",
-                template.getPath() != null ? template.getPath() : "N/A"));
+        Span fileInfo = new Span(I18n.t("mms.msgtemplate.dialog.edit.content.file.info",
+                template.getPath() != null ? template.getPath() : I18n.t("mms.common.value.notAvailable")));
         fileInfo.addClassName(LumoUtility.FontSize.XSMALL);
         fileInfo.addClassName(LumoUtility.TextColor.SECONDARY);
 
@@ -118,7 +118,7 @@ public class EditTemplateContentDialog extends Dialog {
         contentArea = new TextArea();
         contentArea.setWidthFull();
         contentArea.setHeight("350px");
-        contentArea.setPlaceholder(I18n.t("template.dialog.edit.content.placeholder"));
+        contentArea.setPlaceholder(I18n.t("mms.msgtemplate.dialog.edit.content.placeholder"));
         contentArea.getStyle()
                 .set("font-family", "monospace")
                 .set("font-size", "var(--lumo-font-size-s)")
@@ -134,16 +134,16 @@ public class EditTemplateContentDialog extends Dialog {
         actions.setSpacing(true);
         actions.getStyle().set("margin-top", "var(--lumo-space-m)");
 
-        downloadButton = new Button(I18n.t("template.dialog.edit.content.download"), new Icon(VaadinIcon.DOWNLOAD));
+        downloadButton = new Button(I18n.t("mms.msgtemplate.dialog.edit.content.download"), new Icon(VaadinIcon.DOWNLOAD));
         downloadButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
         downloadButton.addClickListener(e -> downloadTemplate());
 
-        saveButton = new Button(I18n.t("template.dialog.edit.content.save"), new Icon(VaadinIcon.CHECK));
+        saveButton = new Button(I18n.t("mms.msgtemplate.dialog.edit.content.save"), new Icon(VaadinIcon.CHECK));
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         saveButton.setEnabled(false);
         saveButton.addClickListener(e -> saveContent());
 
-        cancelButton = new Button(I18n.t("dialog.cancel"), e -> close());
+        cancelButton = new Button(I18n.t("common.dialog.cancel"), e -> close());
         cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
         actions.add(downloadButton, saveButton, cancelButton);
@@ -154,14 +154,14 @@ public class EditTemplateContentDialog extends Dialog {
 
     private void loadTemplateContent() {
         if (template.getFileName() == null || template.getFileName().isEmpty()) {
-            showStatus(I18n.t("template.dialog.edit.content.no.file"), "warning");
-            contentArea.setValue(I18n.t("template.dialog.edit.content.no.file.message"));
+            showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.no.file"), "warning");
+            contentArea.setValue(I18n.t("mms.msgtemplate.dialog.edit.content.no.file.message"));
             contentArea.setReadOnly(true);
             saveButton.setEnabled(false);
             return;
         }
 
-        showStatus(I18n.t("template.dialog.edit.content.loading"), "info");
+        showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.loading"), "info");
         contentArea.setReadOnly(true);
         saveButton.setEnabled(false);
 
@@ -177,15 +177,15 @@ public class EditTemplateContentDialog extends Dialog {
                 contentLoaded = true;
                 hideStatus();
             } else {
-                showStatus(I18n.t("template.dialog.edit.content.load.failed"), "error");
+                showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.load.failed"), "error");
             }
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ?
                     ex.contentUTF8() : ex.getMessage();
-            showStatus(I18n.t("template.dialog.edit.content.load.error", errorMsg), "error");
+            showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.load.error", errorMsg), "error");
             log.error("Failed to load template content for {}", template.getId(), ex);
         } catch (Exception e) {
-            showStatus(I18n.t("template.dialog.edit.content.load.error", e.getMessage()), "error");
+            showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.load.error", e.getMessage()), "error");
             log.error("Failed to load template content for {}", template.getId(), e);
         }
     }
@@ -193,12 +193,12 @@ public class EditTemplateContentDialog extends Dialog {
     private void saveContent() {
         String newContent = contentArea.getValue();
         if (newContent == null || newContent.isEmpty()) {
-            showStatus(I18n.t("template.dialog.edit.content.empty.error"), "error");
+            showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.empty.error"), "error");
             return;
         }
 
         if (newContent.equals(originalContent)) {
-            showStatus(I18n.t("template.dialog.edit.content.no.changes"), "info");
+            showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.no.changes"), "info");
             return;
         }
 
@@ -282,14 +282,14 @@ public class EditTemplateContentDialog extends Dialog {
                     template.getId(), multipartFile, updatedTemplate);
 
             if (!response.getStatusCode().is2xxSuccessful()) {
-                showStatus(I18n.t("template.dialog.edit.content.save.failed",
-                        response.getBody() != null ? response.getBody().toString() : "unknown error"), "error");
+                showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.save.failed",
+                        response.getBody() != null ? response.getBody().toString() : I18n.t("mms.common.error.unknown")), "error");
                 saveButton.setEnabled(true);
                 return;
             }
 
             originalContent = newContent;
-            showStatus(I18n.t("template.dialog.edit.content.save.success"), "success");
+            showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.save.success"), "success");
 
             // Refresh the template in the card
             if (onSuccess != null) {
@@ -309,10 +309,10 @@ public class EditTemplateContentDialog extends Dialog {
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ?
                     ex.contentUTF8() : ex.getMessage();
-            showStatus(I18n.t("template.dialog.edit.content.save.error", errorMsg), "error");
+            showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.save.error", errorMsg), "error");
             log.error("Failed to save template content for {}", template.getId(), ex);
         } catch (Exception e) {
-            showStatus(I18n.t("template.dialog.edit.content.save.error", e.getMessage()), "error");
+            showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.save.error", e.getMessage()), "error");
             log.error("Failed to save template content for {}", template.getId(), e);
         } finally {
             if (parentView != null) {
@@ -356,7 +356,7 @@ public class EditTemplateContentDialog extends Dialog {
             }
         } catch (Exception e) {
             log.error("Failed to download template file for {}", template.getId(), e);
-            Notification.show(I18n.t("template.download.error", e.getMessage()), 5000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("mms.msgtemplate.download.error", e.getMessage()), 5000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }

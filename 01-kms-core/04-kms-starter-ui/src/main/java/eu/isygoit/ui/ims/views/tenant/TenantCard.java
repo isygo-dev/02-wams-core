@@ -104,8 +104,8 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
 
         Span titleSpan = buildTitleSpan(tenant.getName(), tenant.getEmail());
         adminStatusChip = buildStatusChip(
-                tenant.getAdminStatus() != null ? tenant.getAdminStatus().name() : I18n.t("tenant.card.status.unknown"),
-                tenant.getAdminStatus() != null ? tenant.getAdminStatus().name() : I18n.t("tenant.card.status.unknown")
+                tenant.getAdminStatus() != null ? tenant.getAdminStatus().name() : I18n.t("ims.tenant.card.status.unknown"),
+                tenant.getAdminStatus() != null ? tenant.getAdminStatus().name() : I18n.t("ims.tenant.card.status.unknown")
         );
         row2.add(titleSpan, adminStatusChip);
 
@@ -115,21 +115,21 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("tenant.card.details.tooltip"));
+        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("ims.tenant.card.details.tooltip"));
         detailsBtn.addClickListener(e -> new TenantDetailsDialog(parentView, objectService, tenant.getId()).open());
 
-        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("tenant.card.edit.tooltip"));
+        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("ims.tenant.card.edit.tooltip"));
         editBtn.addClickListener(e -> parentView.openUpdateTenantDialog(tenant, () -> {
             if (onRefresh != null) onRefresh.run();
         }));
 
         toggleStatusBtn = createIconButton(
                 tenant.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED ? VaadinIcon.LOCK : VaadinIcon.UNLOCK,
-                tenant.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("tenant.card.disable.tooltip") : I18n.t("tenant.card.enable.tooltip")
+                tenant.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("ims.tenant.card.disable.tooltip") : I18n.t("ims.tenant.card.enable.tooltip")
         );
         toggleStatusBtn.addClickListener(e -> openToggleStatusDialog());
 
-        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("tenant.card.delete.tooltip"));
+        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("ims.tenant.card.delete.tooltip"));
         deleteBtn.addClickListener(e -> new DeleteTenantDialog(parentView, objectService, tenant.getId(), () -> {
             if (onRefresh != null) onRefresh.run();
         }).open());
@@ -144,16 +144,16 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
         body.setPadding(false);
         body.getStyle().set("margin-top", "var(--lumo-space-s)");
 
-        body.add(createIconRow(VaadinIcon.ENVELOPE, I18n.t("tenant.card.email"), tenant.getEmail()));
-        body.add(createIconRow(VaadinIcon.PHONE, I18n.t("tenant.card.phone"), tenant.getPhone()));
+        body.add(createIconRow(VaadinIcon.ENVELOPE, I18n.t("ims.tenant.card.email"), tenant.getEmail()));
+        body.add(createIconRow(VaadinIcon.PHONE, I18n.t("ims.tenant.card.phone"), tenant.getPhone()));
         if (tenant.getIndustry() != null && !tenant.getIndustry().isBlank()) {
-            body.add(createIconRow(VaadinIcon.BUILDING, I18n.t("tenant.card.industry"), tenant.getIndustry()));
+            body.add(createIconRow(VaadinIcon.BUILDING, I18n.t("ims.tenant.card.industry"), tenant.getIndustry()));
         }
         if (tenant.getDescription() != null && !tenant.getDescription().isBlank()) {
-            body.add(createIconRow(VaadinIcon.FILE_TEXT, I18n.t("tenant.card.description"), tenant.getDescription()));
+            body.add(createIconRow(VaadinIcon.FILE_TEXT, I18n.t("ims.tenant.card.description"), tenant.getDescription()));
         }
         if (tenant.getUrl() != null && !tenant.getUrl().isBlank()) {
-            body.add(createIconRow(VaadinIcon.GLOBE, I18n.t("tenant.card.website"), tenant.getUrl()));
+            body.add(createIconRow(VaadinIcon.GLOBE, I18n.t("ims.tenant.card.website"), tenant.getUrl()));
         }
         add(body);
     }
@@ -174,7 +174,7 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
         labelSpan.addClassName(LumoUtility.FontSize.XXSMALL);
         labelSpan.getStyle().set("min-width", "80px");
 
-        Span valueSpan = new Span(value != null ? value : "—");
+        Span valueSpan = new Span(value != null ? value : I18n.t("ims.tenant.card.value.empty"));
         valueSpan.addClassName(LumoUtility.FontSize.XXSMALL);
         valueSpan.getStyle().set("word-break", "break-all");
         valueSpan.getStyle().set("flex", "1");
@@ -206,7 +206,7 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
 
     private void updateStatusChip() {
         if (adminStatusChip != null) {
-            String status = tenant.getAdminStatus() != null ? tenant.getAdminStatus().name() : I18n.t("tenant.card.status.unknown");
+            String status = tenant.getAdminStatus() != null ? tenant.getAdminStatus().name() : I18n.t("ims.tenant.card.status.unknown");
             adminStatusChip.setText(status);
             adminStatusChip.getElement().setAttribute("title", status);
             ChipColor color = ChipColor.fromStatus(status);
@@ -220,7 +220,7 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
         if (toggleStatusBtn != null) {
             boolean enabled = tenant.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED;
             toggleStatusBtn.setIcon(enabled ? VaadinIcon.LOCK.create() : VaadinIcon.UNLOCK.create());
-            toggleStatusBtn.setTooltipText(enabled ? I18n.t("tenant.card.disable.tooltip") : I18n.t("tenant.card.enable.tooltip"));
+            toggleStatusBtn.setTooltipText(enabled ? I18n.t("ims.tenant.card.disable.tooltip") : I18n.t("ims.tenant.card.enable.tooltip"));
         }
     }
 

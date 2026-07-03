@@ -62,16 +62,16 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
 
         Span aliasSpan = buildTitleSpan(aliasName, aliasName);
         left.add(aliasSpan);
-        left.add(KmsMainView.createCopyButton(VaadinIcon.COPY, aliasName, I18n.t("alias.card.copy.alias.tooltip")));
+        left.add(KmsMainView.createCopyButton(VaadinIcon.COPY, aliasName, I18n.t("kms.alias.card.copy.alias.tooltip")));
 
         if (Boolean.TRUE.equals(primaryKey)) {
             Icon warningIcon = VaadinIcon.WARNING.create();
             warningIcon.setColor("var(--lumo-error-color)");
             warningIcon.setSize("18px");
-            warningIcon.setTooltipText(I18n.t("alias.card.primary.tooltip"));
+            warningIcon.setTooltipText(I18n.t("kms.alias.card.primary.tooltip"));
             left.add(warningIcon);
 
-            Span primaryBadge = new Span(I18n.t("alias.card.primary.badge"));
+            Span primaryBadge = new Span(I18n.t("kms.alias.card.primary.badge"));
             primaryBadge.getElement().getThemeList().add("badge");
             primaryBadge.addClassName(LumoUtility.Background.ERROR_10);
             primaryBadge.addClassName(LumoUtility.TextColor.ERROR);
@@ -83,10 +83,10 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button updateBtn = createIconButton(VaadinIcon.EDIT, I18n.t("alias.card.update.tooltip"));
+        Button updateBtn = createIconButton(VaadinIcon.EDIT, I18n.t("kms.alias.card.update.tooltip"));
         updateBtn.addClickListener(e -> updateAlias());
 
-        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, I18n.t("alias.card.delete.tooltip"));
+        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, I18n.t("kms.alias.card.delete.tooltip"));
         deleteBtn.addClickListener(e -> deleteAlias());
 
         return List.of(updateBtn, deleteBtn);
@@ -94,15 +94,15 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
 
     @Override
     protected void buildBodyRows() {
-        add(createIconRowWithCopy(VaadinIcon.KEY, I18n.t("alias.card.target.key"), targetKeyId, targetKeyId));
+        add(createIconRowWithCopy(VaadinIcon.KEY, I18n.t("kms.alias.card.target.key"), targetKeyId, targetKeyId));
         if (aliasWrn != null && !aliasWrn.isBlank()) {
-            add(createIconRowWithCopy(VaadinIcon.TAG, I18n.t("alias.card.wrn"), aliasWrn, aliasWrn));
+            add(createIconRowWithCopy(VaadinIcon.TAG, I18n.t("kms.alias.card.wrn"), aliasWrn, aliasWrn));
         }
         if (createDate != null && !createDate.isBlank()) {
-            add(createIconRow(VaadinIcon.CALENDAR, I18n.t("alias.card.created"), createDate));
+            add(createIconRow(VaadinIcon.CALENDAR, I18n.t("kms.alias.card.created"), createDate));
         }
         if (Boolean.TRUE.equals(primaryKey)) {
-            add(createIconRow(VaadinIcon.EXCLAMATION_CIRCLE, I18n.t("alias.card.primary.note"), ""));
+            add(createIconRow(VaadinIcon.EXCLAMATION_CIRCLE, I18n.t("kms.alias.card.primary.note"), ""));
         }
     }
 
@@ -124,7 +124,7 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
         labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
         labelSpan.getStyle().set("min-width", "100px");
 
-        Span valueSpan = new Span(value != null ? value : I18n.t("alias.card.masked"));
+        Span valueSpan = new Span(value != null ? value : I18n.t("kms.alias.card.masked"));
         valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
         valueSpan.getStyle().set("font-family", "monospace");
         valueSpan.getStyle().set("word-break", "break-all");
@@ -152,13 +152,13 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
         labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
         labelSpan.getStyle().set("min-width", "100px");
 
-        Span valueSpan = new Span(value != null ? value : I18n.t("alias.card.masked"));
+        Span valueSpan = new Span(value != null ? value : I18n.t("kms.alias.card.masked"));
         valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
         valueSpan.getStyle().set("font-family", "monospace");
         valueSpan.getStyle().set("word-break", "break-all");
         valueSpan.getStyle().set("flex", "1");
 
-        Button copyBtn = KmsMainView.createCopyButton(VaadinIcon.COPY, copyValue, I18n.t("alias.card.copy.tooltip"));
+        Button copyBtn = KmsMainView.createCopyButton(VaadinIcon.COPY, copyValue, I18n.t("kms.alias.card.copy.tooltip"));
         copyBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
 
         row.add(iconComponent, labelSpan, valueSpan, copyBtn);

@@ -30,13 +30,13 @@ public class UpdateVCalendarDialog extends BaseActionDialog {
                                  VCalendarService calendarService,
                                  VCalendarDto calendar,
                                  Runnable onSuccess) {
-        super(I18n.t("calendar.dialog.update.title"), onSuccess);
+        super(I18n.t("cms.calendar.dialog.update.title"), onSuccess);
         this.parentView = parentView;
         this.calendarService = calendarService;
         this.calendar = calendar;
         this.onSuccess = onSuccess;
 
-        setOkButtonText(I18n.t("calendar.dialog.update.button"));
+        setOkButtonText(I18n.t("cms.calendar.dialog.update.button"));
         setWidth("600px");
         setMaxWidth("95%");
 
@@ -46,24 +46,24 @@ public class UpdateVCalendarDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        tenantField = new TextField(I18n.t("calendar.dialog.field.tenant"));
+        tenantField = new TextField(I18n.t("cms.calendar.dialog.field.tenant"));
         tenantField.setRequiredIndicatorVisible(true);
         tenantField.setWidthFull();
 
-        codeField = new TextField(I18n.t("calendar.dialog.field.code"));
+        codeField = new TextField(I18n.t("cms.calendar.dialog.field.code"));
         codeField.setWidthFull();
 
-        nameField = new TextField(I18n.t("calendar.dialog.field.name"));
+        nameField = new TextField(I18n.t("cms.calendar.dialog.field.name"));
         nameField.setRequiredIndicatorVisible(true);
         nameField.setWidthFull();
 
-        icsPathField = new TextField(I18n.t("calendar.dialog.field.ics.path"));
+        icsPathField = new TextField(I18n.t("cms.calendar.dialog.field.ics.path"));
         icsPathField.setWidthFull();
 
-        lockedCheckbox = new Checkbox(I18n.t("calendar.dialog.field.locked"));
+        lockedCheckbox = new Checkbox(I18n.t("cms.calendar.dialog.field.locked"));
         lockedCheckbox.setWidthFull();
 
-        descriptionArea = new TextArea(I18n.t("calendar.dialog.field.description"));
+        descriptionArea = new TextArea(I18n.t("cms.calendar.dialog.field.description"));
         descriptionArea.setWidthFull();
         descriptionArea.setHeight("100px");
     }
@@ -92,11 +92,11 @@ public class UpdateVCalendarDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (tenantField.getValue().isBlank()) {
-            append(I18n.t("calendar.dialog.field.tenant.required"));
+            append(I18n.t("cms.calendar.dialog.field.tenant.required"));
             return false;
         }
         if (nameField.getValue().isBlank()) {
-            append(I18n.t("calendar.dialog.field.name.required"));
+            append(I18n.t("cms.calendar.dialog.field.name.required"));
             return false;
         }
 
@@ -111,17 +111,17 @@ public class UpdateVCalendarDialog extends BaseActionDialog {
 
             ResponseEntity<VCalendarDto> response = calendarService.update(calendar.getId(), calendar);
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                append(I18n.t("calendar.dialog.update.failed", response.getStatusCodeValue()));
+                append(I18n.t("cms.calendar.dialog.update.failed", response.getStatusCodeValue()));
                 return false;
             }
 
-            append(I18n.t("calendar.dialog.update.success"));
+            append(I18n.t("cms.calendar.dialog.update.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("calendar.dialog.update.error", e.getMessage()));
+            append(I18n.t("cms.calendar.dialog.update.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

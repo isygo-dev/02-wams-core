@@ -23,13 +23,13 @@ public class ToggleKeyStatusDialog extends BaseActionDialog {
                                  String keyId,
                                  boolean currentlyEnabled,
                                  Runnable onSuccess) {
-        super(currentlyEnabled ? I18n.t("key.dialog.toggle.title.disable") : I18n.t("key.dialog.toggle.title.enable"), onSuccess);
+        super(currentlyEnabled ? I18n.t("kms.key.dialog.toggle.title.disable") : I18n.t("kms.key.dialog.toggle.title.enable"), onSuccess);
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
         this.currentlyEnabled = currentlyEnabled;
         this.parentView = parentView;
 
-        setOkButtonText(currentlyEnabled ? I18n.t("key.dialog.toggle.button.disable") : I18n.t("key.dialog.toggle.button.enable"));
+        setOkButtonText(currentlyEnabled ? I18n.t("kms.key.dialog.toggle.button.disable") : I18n.t("kms.key.dialog.toggle.button.enable"));
         if (currentlyEnabled) {
             addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
         } else {
@@ -46,22 +46,22 @@ public class ToggleKeyStatusDialog extends BaseActionDialog {
             if (currentlyEnabled) {
                 ResponseEntity<KmsDtos.DisableKeyResponse> response = kmsApiService.disableKey(keyId);
                 if (!response.getStatusCode().is2xxSuccessful()) {
-                    append(I18n.t("key.dialog.toggle.failed.disable", (response.getBody() != null ? response.getBody().toString() : "unknown error")));
+                    append(I18n.t("kms.key.dialog.toggle.failed.disable", (response.getBody() != null ? response.getBody().toString() : "unknown error")));
                     return false;
                 }
             } else {
                 ResponseEntity<KmsDtos.EnableKeyResponse> response = kmsApiService.enableKey(keyId);
                 if (!response.getStatusCode().is2xxSuccessful()) {
-                    append(I18n.t("key.dialog.toggle.failed.enable", (response.getBody() != null ? response.getBody().toString() : "unknown error")));
+                    append(I18n.t("kms.key.dialog.toggle.failed.enable", (response.getBody() != null ? response.getBody().toString() : "unknown error")));
                     return false;
                 }
             }
-            append(currentlyEnabled ? I18n.t("key.dialog.toggle.success.disabled") : I18n.t("key.dialog.toggle.success.enabled"));
+            append(currentlyEnabled ? I18n.t("kms.key.dialog.toggle.success.disabled") : I18n.t("kms.key.dialog.toggle.success.enabled"));
             return true;
         } catch (FeignException ex) {
             append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            append(I18n.t("key.dialog.toggle.error", e.getMessage()));
+            append(I18n.t("kms.key.dialog.toggle.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }
@@ -73,8 +73,8 @@ public class ToggleKeyStatusDialog extends BaseActionDialog {
         layout.setSpacing(true);
         layout.setPadding(true);
         layout.add(new Span(currentlyEnabled
-                ? I18n.t("key.dialog.toggle.message.disable")
-                : I18n.t("key.dialog.toggle.message.enable")));
+                ? I18n.t("kms.key.dialog.toggle.message.disable")
+                : I18n.t("kms.key.dialog.toggle.message.enable")));
         addContent(layout);
     }
 }

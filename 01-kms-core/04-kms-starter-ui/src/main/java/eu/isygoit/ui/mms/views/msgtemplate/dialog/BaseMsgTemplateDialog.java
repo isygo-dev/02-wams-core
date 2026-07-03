@@ -97,7 +97,7 @@ public abstract class BaseMsgTemplateDialog extends Dialog {
         footer.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
         footer.setSpacing(true);
 
-        cancelButton = new Button(I18n.t("dialog.cancel"), e -> close());
+        cancelButton = new Button(I18n.t("common.dialog.cancel"), e -> close());
         cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
         okButton = new Button(getOkButtonText(), e -> {
@@ -116,7 +116,7 @@ public abstract class BaseMsgTemplateDialog extends Dialog {
     }
 
     protected String getOkButtonText() {
-        return I18n.t("dialog.ok");
+        return I18n.t("common.dialog.ok");
     }
 
     protected void setOkButtonText(String text) {
@@ -154,8 +154,8 @@ public abstract class BaseMsgTemplateDialog extends Dialog {
         fileUpload.setMaxFileSize(10 * 1024 * 1024); // 10MB
         fileUpload.setAcceptedFileTypes(".html", ".htm", ".txt", ".ftl", ".vm", ".xml", ".json", ".properties");
         fileUpload.setDropAllowed(true);
-        fileUpload.setUploadButton(new Button(I18n.t("template.dialog.upload.button")));
-        fileUpload.setDropLabel(new Span(I18n.t("template.dialog.upload.drop")));
+        fileUpload.setUploadButton(new Button(I18n.t("mms.msgtemplate.dialog.upload.button")));
+        fileUpload.setDropLabel(new Span(I18n.t("mms.msgtemplate.dialog.upload.drop")));
 
         fileInfoArea = new Div();
         fileInfoArea.getStyle()
@@ -165,25 +165,25 @@ public abstract class BaseMsgTemplateDialog extends Dialog {
                 .set("font-size", "var(--lumo-font-size-s)");
 
         if (currentFileName != null && !currentFileName.isEmpty()) {
-            fileInfoArea.setText(I18n.t("template.dialog.current.file", currentFileName));
+            fileInfoArea.setText(I18n.t("mms.msgtemplate.dialog.current.file", currentFileName));
         } else {
-            fileInfoArea.setText(I18n.t("template.dialog.no.file"));
+            fileInfoArea.setText(I18n.t("mms.msgtemplate.dialog.no.file"));
         }
 
         fileUpload.addSucceededListener(event -> {
             uploadedFileName = event.getFileName();
-            fileInfoArea.setText(I18n.t("template.dialog.file.uploaded", uploadedFileName));
+            fileInfoArea.setText(I18n.t("mms.msgtemplate.dialog.file.uploaded", uploadedFileName));
             fileInfoArea.getStyle().set("color", "var(--lumo-success-color)");
         });
 
         fileUpload.addFailedListener(event -> {
-            String errorMsg = event.getReason() != null ? event.getReason().getMessage() : "Unknown error";
-            fileInfoArea.setText(I18n.t("template.dialog.upload.failed", errorMsg));
+            String errorMsg = event.getReason() != null ? event.getReason().getMessage() : I18n.t("mms.common.error.unknown");
+            fileInfoArea.setText(I18n.t("mms.msgtemplate.dialog.upload.failed", errorMsg));
             fileInfoArea.getStyle().set("color", "var(--lumo-error-color)");
         });
 
         fileUpload.addFileRejectedListener(event -> {
-            fileInfoArea.setText(I18n.t("template.dialog.upload.rejected", event.getErrorMessage()));
+            fileInfoArea.setText(I18n.t("mms.msgtemplate.dialog.upload.rejected", event.getErrorMessage()));
             fileInfoArea.getStyle().set("color", "var(--lumo-error-color)");
         });
     }

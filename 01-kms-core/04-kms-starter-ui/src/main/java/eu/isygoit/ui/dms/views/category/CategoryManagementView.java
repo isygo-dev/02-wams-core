@@ -45,7 +45,7 @@ public class CategoryManagementView extends ManagementVerticalView {
     private final CategoryService categoryService;
 
     private final Div cardsContainer = new Div();
-    private final Button createButton = new Button(I18n.t("category.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button createButton = new Button(I18n.t("dms.category.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
 
@@ -72,7 +72,7 @@ public class CategoryManagementView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("category-management-view");
 
-        H2 header = new H2(I18n.t("category.view.title"));
+        H2 header = new H2(I18n.t("dms.category.view.title"));
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         add(header);
@@ -97,12 +97,12 @@ public class CategoryManagementView extends ManagementVerticalView {
 
     private void initEventHandlers() {
         createButton.addClickListener(e -> openCreateCategoryDialog());
-        createButton.setTooltipText(I18n.t("category.view.create.tooltip"));
+        createButton.setTooltipText(I18n.t("dms.category.view.create.tooltip"));
 
         refreshButton.addClickListener(e -> loadPage(0));
-        refreshButton.setTooltipText(I18n.t("category.view.refresh.tooltip"));
+        refreshButton.setTooltipText(I18n.t("dms.category.view.refresh.tooltip"));
 
-        searchField.setPlaceholder(I18n.t("category.view.search.placeholder"));
+        searchField.setPlaceholder(I18n.t("dms.category.view.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.addValueChangeListener(e -> {
@@ -147,11 +147,11 @@ public class CategoryManagementView extends ManagementVerticalView {
             filterAndDisplayCards();
         } catch (FeignException ex) {
             String errorMsg = extractErrorMessage(ex);
-            Notification.show(I18n.t("category.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("dms.category.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load categories", ex);
         } catch (Exception e) {
-            Notification.show(I18n.t("category.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("dms.category.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load categories", e);
         } finally {
@@ -180,8 +180,8 @@ public class CategoryManagementView extends ManagementVerticalView {
             Icon emptyIcon = VaadinIcon.FOLDER_O.create();
             emptyIcon.setSize("48px");
             emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-            H4 emptyTitle = new H4(I18n.t("category.view.empty.title"));
-            Paragraph emptyDesc = new Paragraph(I18n.t("category.view.empty.description"));
+            H4 emptyTitle = new H4(I18n.t("dms.category.view.empty.title"));
+            Paragraph emptyDesc = new Paragraph(I18n.t("dms.category.view.empty.description"));
             emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);
@@ -193,8 +193,8 @@ public class CategoryManagementView extends ManagementVerticalView {
     }
 
     private void updatePaginationDisplay() {
-        pageInfoLabel.setText(I18n.t("category.view.page.info", currentPage + 1, totalPages));
-        totalCountLabel.setText(I18n.t("category.view.total.count", totalElements));
+        pageInfoLabel.setText(I18n.t("dms.category.view.page.info", currentPage + 1, totalPages));
+        totalCountLabel.setText(I18n.t("dms.category.view.total.count", totalElements));
         prevButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(currentPage + 1 < totalPages);
     }

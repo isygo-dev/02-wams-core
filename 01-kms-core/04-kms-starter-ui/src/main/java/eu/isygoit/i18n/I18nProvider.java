@@ -5,34 +5,70 @@ import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.server.VaadinSession;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
  * Provider pour la gestion de l'internationalisation (i18n) dans l'application.
- * Gère le chargement et la sélection des fichiers de ressources de traduction.
+ * Les traductions sont réparties par module fonctionnel (common, auth, ims, kms,
+ * dms, mms, sms, cms) sous {@code classpath:i18n/<module>/messages_<locale>.properties},
+ * puis fusionnées en mémoire par locale.
  */
 @Component
 public class I18nProvider implements com.vaadin.flow.i18n.I18NProvider, LocaleChangeObserver {
 
-    private static final String BUNDLE_NAME = "messages";
+    private static final String[] MODULES = {
+            "common", "auth", "ims", "kms", "dms", "mms", "sms", "cms"
+    };
+
     private static final Locale[] SUPPORTED_LOCALES = {
             new Locale("en", "US"),
             new Locale("fr", "FR"),
             new Locale("es", "ES"),
-            new Locale("de", "DE")
+            new Locale("it", "IT"),
+            new Locale("de", "DE"),
+            new Locale("ar", "SA")
     };
 
-    private final Map<Locale, ResourceBundle> bundleCache = new HashMap<>();
+    private static final Locale DEFAULT_LOCALE = new Locale("en", "US");
+
+    private final Map<Locale, Map<String, String>> translationsByLocale = new HashMap<>();
 
     public I18nProvider() {
-        // Pre-load all resource bundles
         for (Locale locale : SUPPORTED_LOCALES) {
-            try {
-                bundleCache.put(locale, ResourceBundle.getBundle(BUNDLE_NAME, locale));
-            } catch (MissingResourceException e) {
-                System.err.println("Failed to load resource bundle for locale: " + locale);
+            translationsByLocale.put(locale, loadMergedBundle(locale));
+        }
+    }
+
+    /**
+     * Charge et fusionne les fichiers de traduction de tous les modules pour une locale donnée.
+     */
+    private Map<String, String> loadMergedBundle(Locale locale) {
+        Map<String, String> merged = new HashMap<>();
+        String localeTag = locale.getLanguage() + "_" + locale.getCountry();
+        for (String module : MODULES) {
+            String path = "i18n/" + module + "/messages_" + localeTag + ".properties";
+            Properties properties = new Properties();
+            try (InputStream stream = getClass().getClassLoader().getResourceAsStream(path)) {
+                if (stream == null) {
+                    System.err.println("Missing i18n resource: " + path);
+                    continue;
+                }
+                try (InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+                    properties.load(reader);
+                }
+            } catch (IOException e) {
+                System.err.println("Failed to load i18n resource: " + path + " (" + e.getMessage() + ")");
+                continue;
+            }
+            for (String key : properties.stringPropertyNames()) {
+                merged.put(key, properties.getProperty(key));
             }
         }
+        return merged;
     }
 
     @Override
@@ -46,24 +82,23 @@ public class I18nProvider implements com.vaadin.flow.i18n.I18NProvider, LocaleCh
             return "";
         }
 
-        // Try to get the bundle for the requested locale
-        ResourceBundle bundle = bundleCache.get(locale);
-        if (bundle == null) {
+        Map<String, String> bundle = translationsByLocale.get(locale);
+        String message = bundle != null ? bundle.get(key) : null;
+
+        if (message == null) {
             // Fall back to English
-            bundle = bundleCache.get(new Locale("en", "US"));
+            Map<String, String> fallback = translationsByLocale.get(DEFAULT_LOCALE);
+            message = fallback != null ? fallback.get(key) : null;
         }
 
-        try {
-            String message = bundle.getString(key);
-            // Format the message with parameters if any
-            if (params != null && params.length > 0) {
-                return String.format(message, params);
-            }
-            return message;
-        } catch (MissingResourceException e) {
-            // Return the key itself if translation not found
+        if (message == null) {
             return "!" + key + "!";
         }
+
+        if (params != null && params.length > 0) {
+            return String.format(message, params);
+        }
+        return message;
     }
 
     @Override
@@ -77,7 +112,7 @@ public class I18nProvider implements com.vaadin.flow.i18n.I18NProvider, LocaleCh
     public String get(String key, Object... params) {
         Locale locale = VaadinSession.getCurrent() != null ?
                 VaadinSession.getCurrent().getLocale() :
-                new Locale("en", "US");
+                DEFAULT_LOCALE;
         return getTranslation(key, locale, params);
     }
 
@@ -103,7 +138,6 @@ public class I18nProvider implements com.vaadin.flow.i18n.I18NProvider, LocaleCh
     public Locale getCurrentLocale() {
         return VaadinSession.getCurrent() != null ?
                 VaadinSession.getCurrent().getLocale() :
-                new Locale("en", "US");
+                DEFAULT_LOCALE;
     }
 }
-

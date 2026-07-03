@@ -63,7 +63,7 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         // Create landing button
         landingButton = new Button(new Icon(VaadinIcon.HOME));
         landingButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        landingButton.setTooltipText(I18n.t("layout.header.landing.tooltip"));
+        landingButton.setTooltipText(I18n.t("common.layout.header.landing.tooltip"));
         landingButton.addClickListener(e -> UI.getCurrent().navigate("landing"));
         landingButton.getStyle()
                 .set("color", "var(--lumo-primary-text-color)")
@@ -90,7 +90,7 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         rightSlot = new Div();
         rightSlot.getStyle().set("margin-right", "var(--lumo-space-m)");
         // Put a simple placeholder text
-        rightSlot.setText(I18n.t("layout.loading"));
+        rightSlot.setText(I18n.t("common.layout.loading"));
 
         headerLayout.add(leftPart, rightSlot);
         headerLayout.expand(leftPart);
@@ -143,13 +143,13 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
             }
             loadProfileImage(avatar, currentAccount.getId());
         } else {
-            avatar.setName(I18n.t("layout.avatar.user.default.name"));
+            avatar.setName(I18n.t("common.layout.avatar.user.default.name"));
         }
 
         MenuItem menuItem = menuBar.addItem(avatar);
-        menuItem.getSubMenu().addItem(I18n.t("layout.avatar.profile"), e -> UI.getCurrent().navigate("profile"));
-        menuItem.getSubMenu().addItem(I18n.t("layout.avatar.settings"), e -> UI.getCurrent().navigate("settings"));
-        menuItem.getSubMenu().addItem(I18n.t("layout.avatar.logout"), e -> logout());
+        menuItem.getSubMenu().addItem(I18n.t("common.layout.avatar.profile"), e -> UI.getCurrent().navigate("profile"));
+        menuItem.getSubMenu().addItem(I18n.t("common.layout.avatar.settings"), e -> UI.getCurrent().navigate("settings"));
+        menuItem.getSubMenu().addItem(I18n.t("common.layout.avatar.logout"), e -> logout());
 
         VerticalLayout profileContainer = new VerticalLayout(menuBar);
         profileContainer.setPadding(false);

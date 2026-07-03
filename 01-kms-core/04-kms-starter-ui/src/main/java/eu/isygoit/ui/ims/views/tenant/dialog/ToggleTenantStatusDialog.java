@@ -22,10 +22,10 @@ public class ToggleTenantStatusDialog extends PinBaseActionDialog {
                                     IEnumEnabledBinaryStatus.Types currentStatus,
                                     Runnable onSuccess) {
         super(
-                currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("tenant.dialog.toggle.title.disable") : I18n.t("tenant.dialog.toggle.title.enable"),
+                currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("ims.tenant.dialog.toggle.title.disable") : I18n.t("ims.tenant.dialog.toggle.title.enable"),
                 currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED
-                        ? I18n.t("tenant.dialog.toggle.message.disable")
-                        : I18n.t("tenant.dialog.toggle.message.enable"),
+                        ? I18n.t("ims.tenant.dialog.toggle.message.disable")
+                        : I18n.t("ims.tenant.dialog.toggle.message.enable"),
                 onSuccess,
                 false // simple confirmation, no PIN
         );
@@ -34,7 +34,7 @@ public class ToggleTenantStatusDialog extends PinBaseActionDialog {
         this.tenantId = tenantId;
         this.currentStatus = currentStatus;
 
-        setOkButtonText(currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("tenant.dialog.toggle.button.disable") : I18n.t("tenant.dialog.toggle.button.enable"));
+        setOkButtonText(currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("ims.tenant.dialog.toggle.button.disable") : I18n.t("ims.tenant.dialog.toggle.button.enable"));
         setWidth("450px");
     }
 
@@ -48,16 +48,16 @@ public class ToggleTenantStatusDialog extends PinBaseActionDialog {
 
             ResponseEntity<TenantDto> response = tenantService.updateAdminStatus(tenantId, newStatus);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("tenant.dialog.toggle.failed", response.getStatusCodeValue()));
+                append(I18n.t("ims.tenant.dialog.toggle.failed", response.getStatusCodeValue()));
                 return false;
             }
 
-            append(I18n.t("tenant.dialog.toggle.success." + (newStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? "enable" : "disable")));
+            append(I18n.t("ims.tenant.dialog.toggle.success." + (newStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? "enable" : "disable")));
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("tenant.dialog.toggle.error", e.getMessage()));
+            append(I18n.t("ims.tenant.dialog.toggle.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

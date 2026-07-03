@@ -17,14 +17,14 @@ public class DeleteVCalendarDialog extends PinBaseActionDialog {
                                  VCalendarService calendarService,
                                  Long calendarId,
                                  Runnable onSuccess) {
-        super(I18n.t("calendar.dialog.delete.title"),
-                I18n.t("calendar.dialog.delete.message"),
+        super(I18n.t("cms.calendar.dialog.delete.title"),
+                I18n.t("cms.calendar.dialog.delete.message"),
                 onSuccess);
         this.parentView = parentView;
         this.calendarService = calendarService;
         this.calendarId = calendarId;
 
-        setOkButtonText(I18n.t("calendar.dialog.delete.button"));
+        setOkButtonText(I18n.t("cms.calendar.dialog.delete.button"));
         addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
@@ -32,19 +32,19 @@ public class DeleteVCalendarDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append(I18n.t("calendar.dialog.delete.invalid.code"));
+            append(I18n.t("cms.calendar.dialog.delete.invalid.code"));
             return false;
         }
 
         parentView.showLoading(true);
         try {
             calendarService.delete(calendarId);
-            append(I18n.t("calendar.dialog.delete.success"));
+            append(I18n.t("cms.calendar.dialog.delete.success"));
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("calendar.dialog.delete.error", e.getMessage()));
+            append(I18n.t("cms.calendar.dialog.delete.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

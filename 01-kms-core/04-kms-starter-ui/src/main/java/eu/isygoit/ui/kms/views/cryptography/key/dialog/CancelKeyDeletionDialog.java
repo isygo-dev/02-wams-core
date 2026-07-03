@@ -28,13 +28,13 @@ public class CancelKeyDeletionDialog extends BaseActionDialog {
                                    String keyId,
                                    String keyAliasOrId,
                                    Runnable onSuccess) {
-        super(I18n.t("key.dialog.cancel.title"), onSuccess);
+        super(I18n.t("kms.key.dialog.cancel.title"), onSuccess);
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
         this.keyAliasOrId = keyAliasOrId;
         this.parentView = parentView;
 
-        setOkButtonText(I18n.t("key.dialog.cancel.button"));
+        setOkButtonText(I18n.t("kms.key.dialog.cancel.button"));
         setWidth("450px");
 
         buildContent();
@@ -47,12 +47,12 @@ public class CancelKeyDeletionDialog extends BaseActionDialog {
             ResponseEntity<KmsDtos.CancelKeyDeletionResponse> response =
                     kmsApiService.cancelKeyDeletion(keyId);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                String errorMsg = I18n.t("key.dialog.cancel.failed", response.getStatusCode());
+                String errorMsg = I18n.t("kms.key.dialog.cancel.failed", response.getStatusCode());
                 this.append(errorMsg);
                 return false;
             }
 
-            Notification.show(I18n.t("key.dialog.cancel.success"), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("kms.key.dialog.cancel.success"), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
             return true;
@@ -60,7 +60,7 @@ public class CancelKeyDeletionDialog extends BaseActionDialog {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             this.append(errorMsg);
         } catch (Exception e) {
-            String errorMsg = I18n.t("key.dialog.cancel.error", e.getMessage());
+            String errorMsg = I18n.t("kms.key.dialog.cancel.error", e.getMessage());
             this.append(errorMsg);
         } finally {
             parentView.showLoading(false);
@@ -73,7 +73,7 @@ public class CancelKeyDeletionDialog extends BaseActionDialog {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
         layout.setPadding(true);
-        layout.add(new Span(I18n.t("key.dialog.cancel.confirmation", keyAliasOrId)));
+        layout.add(new Span(I18n.t("kms.key.dialog.cancel.confirmation", keyAliasOrId)));
         add(layout);
     }
 }

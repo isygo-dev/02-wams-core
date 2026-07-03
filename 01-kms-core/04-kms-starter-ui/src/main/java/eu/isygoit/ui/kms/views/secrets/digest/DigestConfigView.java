@@ -43,7 +43,7 @@ public class DigestConfigView extends ManagementVerticalView {
     private final Div cardsContainer = new Div();
     private final TextField searchField = new TextField();
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
-    private final Button createButton = new Button(I18n.t("digest.config.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button createButton = new Button(I18n.t("kms.digest.config.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final ProgressBar loadingBar = new ProgressBar();
 
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
@@ -72,7 +72,7 @@ public class DigestConfigView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("digest-config-view");
 
-        H2 header = new H2(I18n.t("digest.config.header"));
+        H2 header = new H2(I18n.t("kms.digest.config.header"));
         header.addClassNames(LumoUtility.FontSize.XXLARGE, LumoUtility.Margin.Bottom.NONE);
         add(header);
 
@@ -92,12 +92,12 @@ public class DigestConfigView extends ManagementVerticalView {
             currentPage = 0;
             loadConfigs();
         });
-        refreshButton.setTooltipText(I18n.t("digest.config.refresh.tooltip"));
+        refreshButton.setTooltipText(I18n.t("kms.digest.config.refresh.tooltip"));
 
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         createButton.addClickListener(e -> openCreateDialog());
 
-        searchField.setPlaceholder(I18n.t("digest.config.search.placeholder"));
+        searchField.setPlaceholder(I18n.t("kms.digest.config.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.addValueChangeListener(e -> {
@@ -192,9 +192,9 @@ public class DigestConfigView extends ManagementVerticalView {
             renderCards();
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            showError(I18n.t("digest.config.load.error", errorMsg));
+            showError(I18n.t("kms.digest.config.load.error", errorMsg));
         } catch (Exception e) {
-            showError(I18n.t("digest.config.load.error", e.getMessage()));
+            showError(I18n.t("kms.digest.config.load.error", e.getMessage()));
         } finally {
             showLoading(false);
         }
@@ -202,11 +202,11 @@ public class DigestConfigView extends ManagementVerticalView {
 
     private void updatePaginationDisplay() {
         if (totalPages > 0) {
-            pageInfoLabel.setText(I18n.t("digest.config.page.info", currentPage + 1, totalPages));
+            pageInfoLabel.setText(I18n.t("kms.digest.config.page.info", currentPage + 1, totalPages));
         } else {
-            pageInfoLabel.setText(I18n.t("digest.config.page.info", 0, 0));
+            pageInfoLabel.setText(I18n.t("kms.digest.config.page.info", 0, 0));
         }
-        totalCountLabel.setText(I18n.t("digest.config.total.count", totalElements));
+        totalCountLabel.setText(I18n.t("kms.digest.config.total.count", totalElements));
         prevButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(currentPage + 1 < totalPages);
     }
@@ -220,8 +220,8 @@ public class DigestConfigView extends ManagementVerticalView {
             Icon emptyIcon = VaadinIcon.DIPLOMA.create();
             emptyIcon.setSize("48px");
             emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-            H4 emptyTitle = new H4(I18n.t("digest.config.empty.title"));
-            Paragraph emptyDesc = new Paragraph(I18n.t("digest.config.empty.description"));
+            H4 emptyTitle = new H4(I18n.t("kms.digest.config.empty.title"));
+            Paragraph emptyDesc = new Paragraph(I18n.t("kms.digest.config.empty.description"));
             emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);
@@ -251,7 +251,7 @@ public class DigestConfigView extends ManagementVerticalView {
                 loadConfigs();
             }
         } catch (Exception e) {
-            showError(I18n.t("digest.config.refresh.card.error", e.getMessage()));
+            showError(I18n.t("kms.digest.config.refresh.card.error", e.getMessage()));
         }
     }
 

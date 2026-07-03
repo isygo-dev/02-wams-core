@@ -27,6 +27,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.dto.response.AuthResponseDto;
 import eu.isygoit.enums.IEnumAuth;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.PublicAuthService;
 import eu.isygoit.util.SecurityUtils;
 import jakarta.annotation.security.PermitAll;
@@ -49,10 +50,10 @@ import java.util.stream.Collectors;
 @PermitAll
 public class OtpLoginView extends BaseLoginView {
 
-    private final TextField usernameField = new TextField("Username");
+    private final TextField usernameField = new TextField(I18n.t("auth.otp.field.username.label"));
     private final HorizontalLayout otpFieldsLayout = new HorizontalLayout();
-    private final Button requestOtpButton = new Button("Request OTP", new Icon(VaadinIcon.ENVELOPE));
-    private final Button loginButton = new Button("Sign in", new Icon(VaadinIcon.SIGN_IN));
+    private final Button requestOtpButton = new Button(I18n.t("auth.otp.button.requestOtp"), new Icon(VaadinIcon.ENVELOPE));
+    private final Button loginButton = new Button(I18n.t("auth.otp.button.signIn"), new Icon(VaadinIcon.SIGN_IN));
     private final Div errorContainer = new Div();
 
     private String tenant;
@@ -78,7 +79,7 @@ public class OtpLoginView extends BaseLoginView {
         logo.setColorIndex(2);
         logo.setWidth("56px");
         logo.setHeight("56px");
-        H2 title = new H2("OTP Login");
+        H2 title = new H2(I18n.t("auth.otp.title"));
         title.addClassName(LumoUtility.FontWeight.BOLD);
         title.addClassName(LumoUtility.Margin.NONE);
         brand.add(logo, title);
@@ -108,11 +109,11 @@ public class OtpLoginView extends BaseLoginView {
         errorContainer.setVisible(false);
 
         // Back link
-        Anchor backToLogin = new Anchor("login", "← Back to sign in");
+        Anchor backToLogin = new Anchor("login", I18n.t("auth.common.link.backToSignIn"));
         backToLogin.addClassName("back-link");
 
         // Footer
-        Paragraph footer = new Paragraph("© 2026 KMS/IMS Platform");
+        Paragraph footer = new Paragraph(I18n.t("auth.common.footer"));
         footer.addClassName(LumoUtility.TextColor.TERTIARY);
         footer.addClassName(LumoUtility.FontSize.XXSMALL);
         footer.addClassName(LumoUtility.Margin.Top.MEDIUM);
@@ -144,7 +145,7 @@ public class OtpLoginView extends BaseLoginView {
             TextField field = new TextField();
             field.setMaxLength(1);
             field.setPattern("[0-9]");
-            field.setPlaceholder("•");
+            field.setPlaceholder(I18n.t("auth.otp.field.digit.placeholder"));
             field.setValueChangeMode(ValueChangeMode.EAGER);
             final int index = i;
             field.addValueChangeListener(e -> {
@@ -190,15 +191,16 @@ public class OtpLoginView extends BaseLoginView {
 
         // In production, call the actual OTP service.
         // For demo, simulate success.
-        Notification.show("OTP sent to your registered email.", 4000, Notification.Position.BOTTOM_END)
+        Notification.show(I18n.t("auth.otp.notification.otpSent"), 4000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
     }
 
     private void handleOtpLogin() {
         String otp = getOtpFromFields();
         if (otp.length() != otpLength) {
-            showError("Please enter the complete OTP.");
-            errorContainer.setText("Please enter the complete OTP.");
+            String message = I18n.t("auth.otp.error.incomplete");
+            showError(message);
+            errorContainer.setText(message);
             errorContainer.setVisible(true);
             return;
         }
@@ -234,16 +236,18 @@ public class OtpLoginView extends BaseLoginView {
                 log.info("Redirecting after login to: {}", target);
                 UI.getCurrent().navigate(target);
 
-                Notification.show("Welcome " + username + "!", 2000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("auth.common.notification.welcome", username), 2000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } else {
-                showError("Invalid OTP. Please try again.");
-                errorContainer.setText("Invalid OTP. Please try again.");
+                String message = I18n.t("auth.otp.error.invalidOtp");
+                showError(message);
+                errorContainer.setText(message);
                 errorContainer.setVisible(true);
             }
         } catch (Exception ex) {
-            showError("Authentication error. Please try again.");
-            errorContainer.setText("Authentication error. Please try again.");
+            String message = I18n.t("auth.common.error.authenticationError");
+            showError(message);
+            errorContainer.setText(message);
             errorContainer.setVisible(true);
         }
     }

@@ -29,7 +29,7 @@ public class CustomerDetailsDialog extends NoActionDialog {
     public CustomerDetailsDialog(CustomerManagementView parentView,
                                  CustomerService customerService,
                                  Long customerId) {
-        super(I18n.t("customer.details.title"));
+        super(I18n.t("ims.customer.details.title"));
         this.parentView = parentView;
         this.customerService = customerService;
         this.customerId = customerId;
@@ -51,14 +51,14 @@ public class CustomerDetailsDialog extends NoActionDialog {
             if (response.getBody() != null) {
                 buildContent(response.getBody());
             } else {
-                add(new Span(I18n.t("customer.details.not.found")));
+                add(new Span(I18n.t("ims.customer.details.not.found")));
                 addCloseButton();
             }
         } catch (FeignException ex) {
-            add(new Span(I18n.t("customer.details.load.error", extractErrorMessage(ex))));
+            add(new Span(I18n.t("ims.customer.details.load.error", extractErrorMessage(ex))));
             addCloseButton();
         } catch (Exception e) {
-            add(new Span(I18n.t("customer.details.load.error", e.getMessage())));
+            add(new Span(I18n.t("ims.customer.details.load.error", e.getMessage())));
             addCloseButton();
         } finally {
             parentView.showLoading(false);
@@ -77,14 +77,14 @@ public class CustomerDetailsDialog extends NoActionDialog {
                 .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
                 .set("gap", "var(--lumo-space-s)");
 
-        addFieldToGrid(basicInfo, VaadinIcon.USER, I18n.t("customer.details.field.name"), customer.getName());
-        addFieldToGrid(basicInfo, VaadinIcon.ENVELOPE, I18n.t("customer.details.field.email"), customer.getEmail());
-        addFieldToGrid(basicInfo, VaadinIcon.PHONE, I18n.t("customer.details.field.phone"), customer.getPhoneNumber());
-        addFieldToGrid(basicInfo, VaadinIcon.KEY, I18n.t("customer.details.field.account.code"), customer.getAccountCode());
-        addFieldToGrid(basicInfo, VaadinIcon.GLOBE, I18n.t("customer.details.field.website"), customer.getUrl());
-        addFieldToGrid(basicInfo, VaadinIcon.SHIELD, I18n.t("customer.details.field.status"), customer.getAdminStatus() != null ? customer.getAdminStatus().name() : null);
+        addFieldToGrid(basicInfo, VaadinIcon.USER, I18n.t("ims.customer.details.field.name"), customer.getName());
+        addFieldToGrid(basicInfo, VaadinIcon.ENVELOPE, I18n.t("ims.customer.details.field.email"), customer.getEmail());
+        addFieldToGrid(basicInfo, VaadinIcon.PHONE, I18n.t("ims.customer.details.field.phone"), customer.getPhoneNumber());
+        addFieldToGrid(basicInfo, VaadinIcon.KEY, I18n.t("ims.customer.details.field.account.code"), customer.getAccountCode());
+        addFieldToGrid(basicInfo, VaadinIcon.GLOBE, I18n.t("ims.customer.details.field.website"), customer.getUrl());
+        addFieldToGrid(basicInfo, VaadinIcon.SHIELD, I18n.t("ims.customer.details.field.status"), customer.getAdminStatus() != null ? customer.getAdminStatus().name() : null);
 
-        mainLayout.add(createSection(I18n.t("customer.details.section.general"), basicInfo));
+        mainLayout.add(createSection(I18n.t("ims.customer.details.section.general"), basicInfo));
 
         // Description
         if (customer.getDescription() != null && !customer.getDescription().isBlank()) {
@@ -95,7 +95,7 @@ public class CustomerDetailsDialog extends NoActionDialog {
             Icon descIcon = VaadinIcon.FILE_TEXT.create();
             descIcon.setSize("16px");
             descIcon.getStyle().set("color", "var(--lumo-primary-color)");
-            Span descLabel = new Span(I18n.t("customer.details.field.description"));
+            Span descLabel = new Span(I18n.t("ims.customer.details.field.description"));
             descLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
             Span descValue = new Span(customer.getDescription());
             descValue.getStyle().set("flex", "1");
@@ -112,14 +112,14 @@ public class CustomerDetailsDialog extends NoActionDialog {
                     .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
                     .set("gap", "var(--lumo-space-s)");
 
-            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("customer.details.field.country"), addr.getCountry());
-            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("customer.details.field.state"), addr.getState());
-            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("customer.details.field.city"), addr.getCity());
-            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("customer.details.field.street"), addr.getStreet());
-            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("customer.details.field.zip.code"), addr.getZipCode());
-            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("customer.details.field.additional.info"), addr.getAdditionalInfo());
+            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.customer.details.field.country"), addr.getCountry());
+            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.customer.details.field.state"), addr.getState());
+            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.customer.details.field.city"), addr.getCity());
+            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.customer.details.field.street"), addr.getStreet());
+            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.customer.details.field.zip.code"), addr.getZipCode());
+            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.customer.details.field.additional.info"), addr.getAdditionalInfo());
 
-            mainLayout.add(createSection(I18n.t("customer.details.section.address"), addressInfo));
+            mainLayout.add(createSection(I18n.t("ims.customer.details.section.address"), addressInfo));
         }
 
         // Audit
@@ -128,12 +128,12 @@ public class CustomerDetailsDialog extends NoActionDialog {
                 .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
                 .set("gap", "var(--lumo-space-s)");
 
-        addFieldToGrid(auditInfo, VaadinIcon.CALENDAR, I18n.t("customer.details.field.created"), customer.getCreateDate() != null ? DateHelper.formatToHumanReadable(customer.getCreateDate()) : null);
-        addFieldToGrid(auditInfo, VaadinIcon.USER_CHECK, I18n.t("customer.details.field.created.by"), customer.getCreatedBy());
-        addFieldToGrid(auditInfo, VaadinIcon.CALENDAR_O, I18n.t("customer.details.field.updated"), customer.getUpdateDate() != null ? DateHelper.formatToHumanReadable(customer.getUpdateDate()) : null);
-        addFieldToGrid(auditInfo, VaadinIcon.EDIT, I18n.t("customer.details.field.updated.by"), customer.getUpdatedBy());
+        addFieldToGrid(auditInfo, VaadinIcon.CALENDAR, I18n.t("ims.customer.details.field.created"), customer.getCreateDate() != null ? DateHelper.formatToHumanReadable(customer.getCreateDate()) : null);
+        addFieldToGrid(auditInfo, VaadinIcon.USER_CHECK, I18n.t("ims.customer.details.field.created.by"), customer.getCreatedBy());
+        addFieldToGrid(auditInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.customer.details.field.updated"), customer.getUpdateDate() != null ? DateHelper.formatToHumanReadable(customer.getUpdateDate()) : null);
+        addFieldToGrid(auditInfo, VaadinIcon.EDIT, I18n.t("ims.customer.details.field.updated.by"), customer.getUpdatedBy());
 
-        mainLayout.add(createSection(I18n.t("customer.details.section.audit"), auditInfo));
+        mainLayout.add(createSection(I18n.t("ims.customer.details.section.audit"), auditInfo));
 
         add(mainLayout);
         addCloseButton();
@@ -179,7 +179,7 @@ public class CustomerDetailsDialog extends NoActionDialog {
     }
 
     private void addCloseButton() {
-        Button closeButton = new Button(I18n.t("customer.details.close"), e -> close());
+        Button closeButton = new Button(I18n.t("ims.customer.details.close"), e -> close());
         closeButton.addClassName(LumoUtility.Margin.Top.MEDIUM);
         HorizontalLayout buttonBar = new HorizontalLayout(closeButton);
         buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);

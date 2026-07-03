@@ -25,13 +25,13 @@ public class UpdateCategoryDialog extends BaseActionDialog {
                                 CategoryService categoryService,
                                 CategoryDto category,
                                 Runnable onSuccess) {
-        super(I18n.t("category.dialog.update.title"), onSuccess);
+        super(I18n.t("dms.category.dialog.update.title"), onSuccess);
         this.parentView = parentView;
         this.categoryService = categoryService;
         this.category = category;
         this.onSuccess = onSuccess;
 
-        setOkButtonText(I18n.t("category.dialog.update.button"));
+        setOkButtonText(I18n.t("dms.category.dialog.update.button"));
         setWidth("500px");
         setMaxWidth("95%");
 
@@ -41,11 +41,11 @@ public class UpdateCategoryDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        nameField = new TextField(I18n.t("category.dialog.field.name"));
+        nameField = new TextField(I18n.t("dms.category.dialog.field.name"));
         nameField.setRequiredIndicatorVisible(true);
         nameField.setWidthFull();
 
-        descriptionArea = new TextArea(I18n.t("category.dialog.field.description"));
+        descriptionArea = new TextArea(I18n.t("dms.category.dialog.field.description"));
         descriptionArea.setWidthFull();
         descriptionArea.setHeight("150px");
     }
@@ -67,7 +67,7 @@ public class UpdateCategoryDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (nameField.getValue().isBlank()) {
-            append(I18n.t("category.dialog.field.name.required"));
+            append(I18n.t("dms.category.dialog.field.name.required"));
             return false;
         }
 
@@ -78,17 +78,17 @@ public class UpdateCategoryDialog extends BaseActionDialog {
 
             ResponseEntity<CategoryDto> response = categoryService.update(category.getId(), category);
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                append(I18n.t("category.dialog.update.failed", response.getStatusCodeValue()));
+                append(I18n.t("dms.category.dialog.update.failed", response.getStatusCodeValue()));
                 return false;
             }
 
-            append(I18n.t("category.dialog.update.success"));
+            append(I18n.t("dms.category.dialog.update.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("category.dialog.update.error", e.getMessage()));
+            append(I18n.t("dms.category.dialog.update.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

@@ -46,7 +46,7 @@ public class TokenConfigView extends ManagementVerticalView {
     private final Div cardsContainer = new Div();
     private final TextField searchField = new TextField();
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
-    private final Button createButton = new Button(I18n.t("token.config.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button createButton = new Button(I18n.t("kms.token.config.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final ProgressBar loadingBar = new ProgressBar();
 
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
@@ -76,7 +76,7 @@ public class TokenConfigView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("token-config-view");
 
-        H2 header = new H2(I18n.t("token.config.header"));
+        H2 header = new H2(I18n.t("kms.token.config.header"));
         header.addClassNames(LumoUtility.FontSize.XXLARGE, LumoUtility.Margin.Bottom.NONE);
         add(header);
 
@@ -101,7 +101,7 @@ public class TokenConfigView extends ManagementVerticalView {
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         createButton.addClickListener(e -> openCreateDialog());
 
-        searchField.setPlaceholder(I18n.t("token.config.search.placeholder"));
+        searchField.setPlaceholder(I18n.t("kms.token.config.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.addValueChangeListener(e -> {
@@ -206,11 +206,11 @@ public class TokenConfigView extends ManagementVerticalView {
 
     private void updatePaginationDisplay() {
         if (totalPages > 0) {
-            pageInfoLabel.setText(I18n.t("token.config.page.info", currentPage + 1, totalPages));
+            pageInfoLabel.setText(I18n.t("kms.token.config.page.info", currentPage + 1, totalPages));
         } else {
-            pageInfoLabel.setText(I18n.t("token.config.page.info", 0, 0));
+            pageInfoLabel.setText(I18n.t("kms.token.config.page.info", 0, 0));
         }
-        totalCountLabel.setText(I18n.t("token.config.total.count", totalElements));
+        totalCountLabel.setText(I18n.t("kms.token.config.total.count", totalElements));
         prevButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(currentPage + 1 < totalPages);
     }
@@ -224,8 +224,8 @@ public class TokenConfigView extends ManagementVerticalView {
             Icon emptyIcon = VaadinIcon.CODE.create();
             emptyIcon.setSize("48px");
             emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-            H4 emptyTitle = new H4(I18n.t("token.config.empty.title"));
-            Paragraph emptyDesc = new Paragraph(I18n.t("token.config.empty.description"));
+            H4 emptyTitle = new H4(I18n.t("kms.token.config.empty.title"));
+            Paragraph emptyDesc = new Paragraph(I18n.t("kms.token.config.empty.description"));
             emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);

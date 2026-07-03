@@ -31,7 +31,7 @@ public class AccountDetailsDialog extends NoActionDialog {
     private final Long accountId;
 
     public AccountDetailsDialog(AccountManagementView parentView, AccountService accountService, Long accountId) {
-        super(I18n.t("account.details.title"));
+        super(I18n.t("ims.account.details.title"));
         this.parentView = parentView;
         this.accountService = accountService;
         this.accountId = accountId;
@@ -53,14 +53,14 @@ public class AccountDetailsDialog extends NoActionDialog {
             if (response.getBody() != null) {
                 buildContent(response.getBody());
             } else {
-                add(new Span(I18n.t("account.details.not.found")));
+                add(new Span(I18n.t("ims.account.details.not.found")));
                 addCloseButton();
             }
         } catch (FeignException ex) {
-            add(new Span(I18n.t("account.details.load.error", extractErrorMessage(ex))));
+            add(new Span(I18n.t("ims.account.details.load.error", extractErrorMessage(ex))));
             addCloseButton();
         } catch (Exception e) {
-            add(new Span(I18n.t("account.details.load.error", e.getMessage())));
+            add(new Span(I18n.t("ims.account.details.load.error", e.getMessage())));
             addCloseButton();
         } finally {
             parentView.showLoading(false);
@@ -79,16 +79,16 @@ public class AccountDetailsDialog extends NoActionDialog {
                 .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
                 .set("gap", "var(--lumo-space-s)");
 
-        addFieldToGrid(basicInfo, VaadinIcon.USER, I18n.t("account.details.field.full.name"), account.getFullName());
-        addFieldToGrid(basicInfo, VaadinIcon.ENVELOPE, I18n.t("account.details.field.email"), account.getEmail());
-        addFieldToGrid(basicInfo, VaadinIcon.PHONE, I18n.t("account.details.field.phone"), account.getPhoneNumber());
-        addFieldToGrid(basicInfo, VaadinIcon.BUILDING, I18n.t("account.details.field.tenant"), account.getTenant());
-        addFieldToGrid(basicInfo, VaadinIcon.COG, I18n.t("account.details.field.function.role"), account.getFunctionRole());
-        addFieldToGrid(basicInfo, VaadinIcon.TAGS, I18n.t("account.details.field.account.type"), account.getAccountType());
-        addFieldToGrid(basicInfo, VaadinIcon.CLOUD, I18n.t("account.details.field.origin"), account.getOrigin());
-        addFieldToGrid(basicInfo, VaadinIcon.LOCATION_ARROW_CIRCLE, I18n.t("account.details.field.language"), account.getLanguage() != null ? account.getLanguage().name() : null);
+        addFieldToGrid(basicInfo, VaadinIcon.USER, I18n.t("ims.account.details.field.full.name"), account.getFullName());
+        addFieldToGrid(basicInfo, VaadinIcon.ENVELOPE, I18n.t("ims.account.details.field.email"), account.getEmail());
+        addFieldToGrid(basicInfo, VaadinIcon.PHONE, I18n.t("ims.account.details.field.phone"), account.getPhoneNumber());
+        addFieldToGrid(basicInfo, VaadinIcon.BUILDING, I18n.t("ims.account.details.field.tenant"), account.getTenant());
+        addFieldToGrid(basicInfo, VaadinIcon.COG, I18n.t("ims.account.details.field.function.role"), account.getFunctionRole());
+        addFieldToGrid(basicInfo, VaadinIcon.TAGS, I18n.t("ims.account.details.field.account.type"), account.getAccountType());
+        addFieldToGrid(basicInfo, VaadinIcon.CLOUD, I18n.t("ims.account.details.field.origin"), account.getOrigin());
+        addFieldToGrid(basicInfo, VaadinIcon.LOCATION_ARROW_CIRCLE, I18n.t("ims.account.details.field.language"), account.getLanguage() != null ? account.getLanguage().name() : null);
 
-        mainLayout.add(createSection(I18n.t("account.details.section.basic"), basicInfo));
+        mainLayout.add(createSection(I18n.t("ims.account.details.section.basic"), basicInfo));
 
         // Status section
         Div statusInfo = new Div();
@@ -97,22 +97,22 @@ public class AccountDetailsDialog extends NoActionDialog {
                 .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
                 .set("gap", "var(--lumo-space-s)");
 
-        addFieldToGrid(statusInfo, VaadinIcon.SHIELD, I18n.t("account.details.field.admin"), Boolean.TRUE.equals(account.getIsAdmin()) ? I18n.t("account.details.yes") : I18n.t("account.details.no"));
-        addFieldToGrid(statusInfo, VaadinIcon.LOCK, I18n.t("account.details.field.admin.status"), account.getAdminStatus() != null ? account.getAdminStatus().name() : null);
-        addFieldToGrid(statusInfo, VaadinIcon.STETHOSCOPE, I18n.t("account.details.field.system.status"), account.getSystemStatus() != null ? account.getSystemStatus().name() : null);
-        addFieldToGrid(statusInfo, VaadinIcon.CLOCK, I18n.t("account.details.field.last.login"), account.getLastConnectionDate() != null ? DateHelper.formatToHumanReadable(account.getLastConnectionDate()) : null);
-        addFieldToGrid(statusInfo, VaadinIcon.CALENDAR, I18n.t("account.details.field.created"), account.getCreateDate() != null ? DateHelper.formatToHumanReadable(account.getCreateDate()) : null);
-        addFieldToGrid(statusInfo, VaadinIcon.USER_CHECK, I18n.t("account.details.field.created.by"), account.getCreatedBy());
+        addFieldToGrid(statusInfo, VaadinIcon.SHIELD, I18n.t("ims.account.details.field.admin"), Boolean.TRUE.equals(account.getIsAdmin()) ? I18n.t("ims.account.details.yes") : I18n.t("ims.account.details.no"));
+        addFieldToGrid(statusInfo, VaadinIcon.LOCK, I18n.t("ims.account.details.field.admin.status"), account.getAdminStatus() != null ? account.getAdminStatus().name() : null);
+        addFieldToGrid(statusInfo, VaadinIcon.STETHOSCOPE, I18n.t("ims.account.details.field.system.status"), account.getSystemStatus() != null ? account.getSystemStatus().name() : null);
+        addFieldToGrid(statusInfo, VaadinIcon.CLOCK, I18n.t("ims.account.details.field.last.login"), account.getLastConnectionDate() != null ? DateHelper.formatToHumanReadable(account.getLastConnectionDate()) : null);
+        addFieldToGrid(statusInfo, VaadinIcon.CALENDAR, I18n.t("ims.account.details.field.created"), account.getCreateDate() != null ? DateHelper.formatToHumanReadable(account.getCreateDate()) : null);
+        addFieldToGrid(statusInfo, VaadinIcon.USER_CHECK, I18n.t("ims.account.details.field.created.by"), account.getCreatedBy());
 
-        mainLayout.add(createSection(I18n.t("account.details.section.status"), statusInfo));
+        mainLayout.add(createSection(I18n.t("ims.account.details.section.status"), statusInfo));
 
         // Roles (expandable)
         if (account.getRoleInfo() != null && !account.getRoleInfo().isEmpty()) {
             String rolesText = account.getRoleInfo().stream()
                     .map(RoleInfoDto::getName)
                     .collect(Collectors.joining(" • "));
-            Component rolesComponent = createCompactList(VaadinIcon.TAG, I18n.t("account.details.section.roles"), rolesText);
-            mainLayout.add(new Details(I18n.t("account.details.section.roles"), rolesComponent));
+            Component rolesComponent = createCompactList(VaadinIcon.TAG, I18n.t("ims.account.details.section.roles"), rolesText);
+            mainLayout.add(new Details(I18n.t("ims.account.details.section.roles"), rolesComponent));
         }
 
         // Connection tracking (expandable)
@@ -122,11 +122,11 @@ public class AccountDetailsDialog extends NoActionDialog {
             connectionsLayout.setSpacing(true);
             for (ConnectionTrackingDto ct : account.getConnectionTracking()) {
                 HorizontalLayout row = createIconRow(VaadinIcon.MOBILE,
-                        ct.getCreateDate() != null ? DateHelper.formatToHumanReadable(ct.getCreateDate()) : I18n.t("account.details.unknown.time"),
-                        ct.getDevice() != null ? ct.getDevice() : I18n.t("account.details.unknown.device"));
+                        ct.getCreateDate() != null ? DateHelper.formatToHumanReadable(ct.getCreateDate()) : I18n.t("ims.account.details.unknown.time"),
+                        ct.getDevice() != null ? ct.getDevice() : I18n.t("ims.account.details.unknown.device"));
                 connectionsLayout.add(row);
             }
-            mainLayout.add(new Details(I18n.t("account.details.section.connections"), connectionsLayout));
+            mainLayout.add(new Details(I18n.t("ims.account.details.section.connections"), connectionsLayout));
         }
 
         add(mainLayout);
@@ -214,7 +214,7 @@ public class AccountDetailsDialog extends NoActionDialog {
     }
 
     private void addCloseButton() {
-        Button closeButton = new Button(I18n.t("account.details.close"), e -> close());
+        Button closeButton = new Button(I18n.t("ims.account.details.close"), e -> close());
         closeButton.addClassName(LumoUtility.Margin.Top.MEDIUM);
         HorizontalLayout buttonBar = new HorizontalLayout(closeButton);
         buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);

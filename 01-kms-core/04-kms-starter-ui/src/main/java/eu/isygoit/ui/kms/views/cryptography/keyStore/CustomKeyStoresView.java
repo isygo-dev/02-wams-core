@@ -49,7 +49,7 @@ public class CustomKeyStoresView extends ManagementVerticalView {
 
     private final KmsApiService kmsApiService;
     private final Div cardsContainer = new Div();
-    private final Button createButton = new Button(I18n.t("keystore.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button createButton = new Button(I18n.t("kms.keystore.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final ProgressBar loadingBar = new ProgressBar();
     private final TextField filterField = new TextField();
@@ -82,7 +82,7 @@ public class CustomKeyStoresView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("kms-custom-stores-view");
 
-        H2 header = new H2(I18n.t("keystore.view.title"));
+        H2 header = new H2(I18n.t("kms.keystore.view.title"));
         header.addClassNames(LumoUtility.FontSize.XXLARGE, LumoUtility.Margin.Bottom.NONE);
         add(header);
 
@@ -101,7 +101,7 @@ public class CustomKeyStoresView extends ManagementVerticalView {
         createButton.addClickListener(e -> createCustomKeyStore());
         refreshButton.addClickListener(e -> resetPaginationAndLoad());
 
-        filterField.setPlaceholder(I18n.t("keystore.view.filter.placeholder"));
+        filterField.setPlaceholder(I18n.t("kms.keystore.view.filter.placeholder"));
         filterField.setValueChangeMode(ValueChangeMode.LAZY);
         filterField.setValueChangeTimeout(300);
         filterField.setWidth("250px");
@@ -111,7 +111,7 @@ public class CustomKeyStoresView extends ManagementVerticalView {
         });
 
         clearFilterButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        clearFilterButton.setTooltipText(I18n.t("keystore.view.clear.filter.tooltip"));
+        clearFilterButton.setTooltipText(I18n.t("kms.keystore.view.clear.filter.tooltip"));
         clearFilterButton.setEnabled(false);
         clearFilterButton.addClickListener(e -> {
             filterField.clear();
@@ -121,7 +121,7 @@ public class CustomKeyStoresView extends ManagementVerticalView {
 
         pageSizeSelect.setItems(5, 10, 20, 50);
         pageSizeSelect.setValue(10);
-        pageSizeSelect.setPlaceholder(I18n.t("keystore.view.page.per.page"));
+        pageSizeSelect.setPlaceholder(I18n.t("kms.keystore.view.page.per.page"));
         pageSizeSelect.addValueChangeListener(e -> {
             if (e.getValue() != null) {
                 pageSize = e.getValue();
@@ -187,14 +187,14 @@ public class CustomKeyStoresView extends ManagementVerticalView {
             applyFilter();
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            Notification.show(I18n.t("keystore.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("kms.keystore.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load custom key stores: {}", errorMsg);
             currentPageStores = new ArrayList<>();
             updatePaginationDisplay();
             showEmptyState();
         } catch (Exception e) {
-            Notification.show(I18n.t("keystore.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("kms.keystore.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load custom key stores: {}", e.getMessage());
             currentPageStores = new ArrayList<>();
@@ -207,11 +207,11 @@ public class CustomKeyStoresView extends ManagementVerticalView {
 
     private void updatePaginationDisplay() {
         if (totalPages > 0) {
-            pageInfoLabel.setText(I18n.t("keystore.view.page.info", currentPage, totalPages, numberOfElements));
+            pageInfoLabel.setText(I18n.t("kms.keystore.view.page.info", currentPage, totalPages, numberOfElements));
         } else {
-            pageInfoLabel.setText(I18n.t("keystore.view.page.info.simple", currentPage, numberOfElements));
+            pageInfoLabel.setText(I18n.t("kms.keystore.view.page.info.simple", currentPage, numberOfElements));
         }
-        totalCountLabel.setText(I18n.t("keystore.view.total.count", totalElements));
+        totalCountLabel.setText(I18n.t("kms.keystore.view.total.count", totalElements));
 
         prevButton.setEnabled(!previousTokens.isEmpty());
         nextButton.setEnabled(truncated && currentNextToken != null);
@@ -249,8 +249,8 @@ public class CustomKeyStoresView extends ManagementVerticalView {
         Icon emptyIcon = VaadinIcon.STORAGE.create();
         emptyIcon.setSize("48px");
         emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-        H4 emptyTitle = new H4(I18n.t("keystore.view.empty.title"));
-        Span emptyDesc = new Span(I18n.t("keystore.view.empty.description"));
+        H4 emptyTitle = new H4(I18n.t("kms.keystore.view.empty.title"));
+        Span emptyDesc = new Span(I18n.t("kms.keystore.view.empty.description"));
         emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
         emptyState.add(emptyIcon, emptyTitle, emptyDesc);
         cardsContainer.add(emptyState);
@@ -280,9 +280,9 @@ public class CustomKeyStoresView extends ManagementVerticalView {
         rightGroup.setSpacing(true);
         rightGroup.setAlignItems(FlexComponent.Alignment.END);
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText(I18n.t("keystore.view.refresh.stores"));
+        refreshButton.setTooltipText(I18n.t("kms.keystore.view.refresh.stores"));
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        createButton.setTooltipText(I18n.t("keystore.view.create.tooltip"));
+        createButton.setTooltipText(I18n.t("kms.keystore.view.create.tooltip"));
         rightGroup.add(refreshButton, createButton);
 
         toolbar.add(leftGroup, centerGroup, rightGroup);

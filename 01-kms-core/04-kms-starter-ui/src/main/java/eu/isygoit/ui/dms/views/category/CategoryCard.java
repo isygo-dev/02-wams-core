@@ -51,7 +51,7 @@ public class CategoryCard extends BaseCard<CategoryManagementView, CategoryServi
 
         // Add ID chip
         Span idChip = buildStatusChip(
-                "ID: " + category.getId(),
+                I18n.t("dms.category.card.id.chip", category.getId()),
                 "info"
         );
 
@@ -61,15 +61,15 @@ public class CategoryCard extends BaseCard<CategoryManagementView, CategoryServi
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("category.card.details.tooltip"));
+        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("dms.category.card.details.tooltip"));
         detailsBtn.addClickListener(e -> new CategoryDetailsDialog(parentView, objectService, category.getId()).open());
 
-        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("category.card.edit.tooltip"));
+        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("dms.category.card.edit.tooltip"));
         editBtn.addClickListener(e -> parentView.openUpdateCategoryDialog(category, () -> {
             if (onRefresh != null) onRefresh.run();
         }));
 
-        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("category.card.delete.tooltip"));
+        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("dms.category.card.delete.tooltip"));
         deleteBtn.addClickListener(e -> new DeleteCategoryDialog(parentView, objectService, category.getId(), () -> {
             if (onRefresh != null) onRefresh.run();
         }).open());
@@ -84,8 +84,8 @@ public class CategoryCard extends BaseCard<CategoryManagementView, CategoryServi
         body.setPadding(false);
         body.getStyle().set("margin-top", "var(--lumo-space-s)");
 
-        body.add(createIconRow(VaadinIcon.USER, I18n.t("category.card.created.by"), category.getCreatedBy()));
-        body.add(createIconRow(VaadinIcon.CALENDAR, I18n.t("category.card.created.date"),
+        body.add(createIconRow(VaadinIcon.USER, I18n.t("dms.category.card.created.by"), category.getCreatedBy()));
+        body.add(createIconRow(VaadinIcon.CALENDAR, I18n.t("dms.category.card.created.date"),
                 category.getCreateDate() != null ? category.getCreateDate().toString() : null));
 
         if (category.getDescription() != null && !category.getDescription().isBlank()) {
@@ -133,7 +133,7 @@ public class CategoryCard extends BaseCard<CategoryManagementView, CategoryServi
         iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)")
                 .set("margin-top", "2px");
 
-        Span labelSpan = new Span(I18n.t("category.card.description") + ":");
+        Span labelSpan = new Span(I18n.t("dms.category.card.description") + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.addClassName(LumoUtility.FontSize.XXSMALL);
         labelSpan.getStyle().set("min-width", "80px");

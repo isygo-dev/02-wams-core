@@ -24,6 +24,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.dto.response.AuthResponseDto;
 import eu.isygoit.enums.IEnumAuth;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.PublicAuthService;
 import eu.isygoit.util.SecurityUtils;
 import jakarta.annotation.security.PermitAll;
@@ -43,8 +44,8 @@ import java.util.Optional;
 @PermitAll
 public class PasswordLoginView extends BaseLoginView {
 
-    private final PasswordField passwordField = new PasswordField("Password");
-    private final Button loginButton = new Button("Sign in", VaadinIcon.SIGN_IN.create());
+    private final PasswordField passwordField = new PasswordField(I18n.t("auth.password.field.password.label"));
+    private final Button loginButton = new Button(I18n.t("auth.otp.button.signIn"), VaadinIcon.SIGN_IN.create());
     private final Div errorContainer = new Div();
 
     private String tenant;
@@ -68,14 +69,14 @@ public class PasswordLoginView extends BaseLoginView {
         logo.setColorIndex(1);
         logo.setWidth("56px");
         logo.setHeight("56px");
-        H2 title = new H2("Enter Password");
+        H2 title = new H2(I18n.t("auth.password.title"));
         title.addClassName(LumoUtility.FontWeight.BOLD);
         title.addClassName(LumoUtility.Margin.NONE);
         brand.add(logo, title);
 
         // Password field
         passwordField.setWidthFull();
-        passwordField.setPlaceholder("Your password");
+        passwordField.setPlaceholder(I18n.t("auth.password.field.password.placeholder"));
         passwordField.setPrefixComponent(VaadinIcon.LOCK.create());
 
         // Login button
@@ -88,11 +89,11 @@ public class PasswordLoginView extends BaseLoginView {
         errorContainer.setVisible(false);
 
         // Back link
-        Anchor backLink = new Anchor("login", "← Back");
+        Anchor backLink = new Anchor("login", I18n.t("auth.common.link.back"));
         backLink.addClassName("back-link");
 
         // Footer
-        Paragraph footer = new Paragraph("© 2026 KMS/IMS Platform");
+        Paragraph footer = new Paragraph(I18n.t("auth.common.footer"));
         footer.addClassName(LumoUtility.TextColor.TERTIARY);
         footer.addClassName(LumoUtility.FontSize.XXSMALL);
         footer.addClassName(LumoUtility.Margin.Top.MEDIUM);
@@ -119,8 +120,9 @@ public class PasswordLoginView extends BaseLoginView {
     private void handlePasswordLogin() {
         String password = passwordField.getValue();
         if (password.isBlank()) {
-            showError("Password is required");
-            errorContainer.setText("Password is required");
+            String message = I18n.t("auth.password.error.required");
+            showError(message);
+            errorContainer.setText(message);
             errorContainer.setVisible(true);
             return;
         }
@@ -154,16 +156,18 @@ public class PasswordLoginView extends BaseLoginView {
                         : "landing";
                 UI.getCurrent().navigate(target);
 
-                Notification.show("Welcome " + username + "!", 2000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("auth.common.notification.welcome", username), 2000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } else {
-                showError("Invalid credentials. Please try again.");
-                errorContainer.setText("Invalid credentials. Please try again.");
+                String message = I18n.t("auth.password.error.invalidCredentials");
+                showError(message);
+                errorContainer.setText(message);
                 errorContainer.setVisible(true);
             }
         } catch (Exception ex) {
-            showError("Authentication service error. Please try again.");
-            errorContainer.setText("Authentication service error. Please try again.");
+            String message = I18n.t("auth.password.error.serviceError");
+            showError(message);
+            errorContainer.setText(message);
             errorContainer.setVisible(true);
         }
     }

@@ -49,7 +49,7 @@ public class ApplicationManagementView extends ManagementVerticalView {
     private final ApplicationImageService applicationImageService;
 
     private final Div cardsContainer = new Div();
-    private final Button createButton = new Button(I18n.t("app.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button createButton = new Button(I18n.t("ims.app.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
     private final ComboBox<IEnumEnabledBinaryStatus.Types> statusFilter = new ComboBox<>();
@@ -80,7 +80,7 @@ public class ApplicationManagementView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("application-management-view");
 
-        H2 header = new H2(I18n.t("app.view.title"));
+        H2 header = new H2(I18n.t("ims.app.view.title"));
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         add(header);
@@ -105,12 +105,12 @@ public class ApplicationManagementView extends ManagementVerticalView {
 
     private void initEventHandlers() {
         createButton.addClickListener(e -> openCreateApplicationDialog());
-        createButton.setTooltipText(I18n.t("app.view.create.tooltip"));
+        createButton.setTooltipText(I18n.t("ims.app.view.create.tooltip"));
 
         refreshButton.addClickListener(e -> loadPage(0));
-        refreshButton.setTooltipText(I18n.t("app.view.refresh.tooltip"));
+        refreshButton.setTooltipText(I18n.t("ims.app.view.refresh.tooltip"));
 
-        searchField.setPlaceholder(I18n.t("app.view.search.placeholder"));
+        searchField.setPlaceholder(I18n.t("ims.app.view.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.addValueChangeListener(e -> {
@@ -120,7 +120,7 @@ public class ApplicationManagementView extends ManagementVerticalView {
 
         statusFilter.setItems(IEnumEnabledBinaryStatus.Types.values());
         statusFilter.setItemLabelGenerator(status -> status.name());
-        statusFilter.setPlaceholder(I18n.t("app.view.status.placeholder"));
+        statusFilter.setPlaceholder(I18n.t("ims.app.view.status.placeholder"));
         statusFilter.addValueChangeListener(e -> {
             currentAdminStatus = e.getValue();
             loadPage(0);
@@ -163,11 +163,11 @@ public class ApplicationManagementView extends ManagementVerticalView {
             filterAndDisplayCards();
         } catch (FeignException ex) {
             String errorMsg = extractErrorMessage(ex);
-            Notification.show(I18n.t("app.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("ims.app.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load applications", ex);
         } catch (Exception e) {
-            Notification.show(I18n.t("app.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("ims.app.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load applications", e);
         } finally {
@@ -198,8 +198,8 @@ public class ApplicationManagementView extends ManagementVerticalView {
             Icon emptyIcon = VaadinIcon.ASTERISK.create();
             emptyIcon.setSize("48px");
             emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-            H4 emptyTitle = new H4(I18n.t("app.view.empty.title"));
-            Paragraph emptyDesc = new Paragraph(I18n.t("app.view.empty.description"));
+            H4 emptyTitle = new H4(I18n.t("ims.app.view.empty.title"));
+            Paragraph emptyDesc = new Paragraph(I18n.t("ims.app.view.empty.description"));
             emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);
@@ -211,8 +211,8 @@ public class ApplicationManagementView extends ManagementVerticalView {
     }
 
     private void updatePaginationDisplay() {
-        pageInfoLabel.setText(I18n.t("app.view.page.info", currentPage + 1, totalPages));
-        totalCountLabel.setText(I18n.t("app.view.total.count", totalElements));
+        pageInfoLabel.setText(I18n.t("ims.app.view.page.info", currentPage + 1, totalPages));
+        totalCountLabel.setText(I18n.t("ims.app.view.total.count", totalElements));
         prevButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(currentPage + 1 < totalPages);
     }

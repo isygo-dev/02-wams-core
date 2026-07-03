@@ -31,7 +31,7 @@ public class RoleDetailsDialog extends NoActionDialog {
     public RoleDetailsDialog(RoleManagementView parentView,
                              RoleInfoService roleService,
                              Long roleId) {
-        super(I18n.t("role.details.title"));
+        super(I18n.t("ims.role.details.title"));
         this.parentView = parentView;
         this.roleService = roleService;
         this.roleId = roleId;
@@ -53,14 +53,14 @@ public class RoleDetailsDialog extends NoActionDialog {
             if (response.getBody() != null) {
                 buildContent(response.getBody());
             } else {
-                add(new Span(I18n.t("role.details.not.found")));
+                add(new Span(I18n.t("ims.role.details.not.found")));
                 addCloseButton();
             }
         } catch (FeignException ex) {
-            add(new Span(I18n.t("role.details.load.error", extractErrorMessage(ex))));
+            add(new Span(I18n.t("ims.role.details.load.error", extractErrorMessage(ex))));
             addCloseButton();
         } catch (Exception e) {
-            add(new Span(I18n.t("role.details.load.error", e.getMessage())));
+            add(new Span(I18n.t("ims.role.details.load.error", e.getMessage())));
             addCloseButton();
         } finally {
             parentView.showLoading(false);
@@ -78,14 +78,14 @@ public class RoleDetailsDialog extends NoActionDialog {
                 .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
                 .set("gap", "var(--lumo-space-s)");
 
-        addFieldToGrid(basicInfo, VaadinIcon.USER, I18n.t("role.details.field.name"), role.getName());
-        addFieldToGrid(basicInfo, VaadinIcon.CODE, I18n.t("role.details.field.code"), role.getCode());
-        addFieldToGrid(basicInfo, VaadinIcon.SORT, I18n.t("role.details.field.level"), String.valueOf(role.getLevel()));
-        addFieldToGrid(basicInfo, VaadinIcon.USERS, I18n.t("role.details.field.users"), String.valueOf(role.getNumberOfUsers()));
-        addFieldToGrid(basicInfo, VaadinIcon.CALENDAR, I18n.t("role.details.field.created"), role.getCreateDate() != null ? DateHelper.formatToHumanReadable(role.getCreateDate()) : null);
-        addFieldToGrid(basicInfo, VaadinIcon.USER_CHECK, I18n.t("role.details.field.created.by"), role.getCreatedBy());
+        addFieldToGrid(basicInfo, VaadinIcon.USER, I18n.t("ims.role.details.field.name"), role.getName());
+        addFieldToGrid(basicInfo, VaadinIcon.CODE, I18n.t("ims.role.details.field.code"), role.getCode());
+        addFieldToGrid(basicInfo, VaadinIcon.SORT, I18n.t("ims.role.details.field.level"), String.valueOf(role.getLevel()));
+        addFieldToGrid(basicInfo, VaadinIcon.USERS, I18n.t("ims.role.details.field.users"), String.valueOf(role.getNumberOfUsers()));
+        addFieldToGrid(basicInfo, VaadinIcon.CALENDAR, I18n.t("ims.role.details.field.created"), role.getCreateDate() != null ? DateHelper.formatToHumanReadable(role.getCreateDate()) : null);
+        addFieldToGrid(basicInfo, VaadinIcon.USER_CHECK, I18n.t("ims.role.details.field.created.by"), role.getCreatedBy());
 
-        mainLayout.add(createSection(I18n.t("role.details.section.general"), basicInfo));
+        mainLayout.add(createSection(I18n.t("ims.role.details.section.general"), basicInfo));
 
         if (role.getDescription() != null && !role.getDescription().isBlank()) {
             HorizontalLayout descRow = new HorizontalLayout();
@@ -95,7 +95,7 @@ public class RoleDetailsDialog extends NoActionDialog {
             Icon descIcon = VaadinIcon.FILE_TEXT.create();
             descIcon.setSize("16px");
             descIcon.getStyle().set("color", "var(--lumo-primary-color)");
-            Span descLabel = new Span(I18n.t("role.details.field.description"));
+            Span descLabel = new Span(I18n.t("ims.role.details.field.description"));
             descLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
             Span descValue = new Span(role.getDescription());
             descValue.getStyle().set("flex", "1");
@@ -107,25 +107,25 @@ public class RoleDetailsDialog extends NoActionDialog {
         // Allowed Applications
         if (role.getAllowedTools() != null && !role.getAllowedTools().isEmpty()) {
             Grid<ApplicationDto> appsGrid = new Grid<>();
-            appsGrid.addColumn(ApplicationDto::getName).setHeader(I18n.t("role.details.apps.column.name"));
-            appsGrid.addColumn(ApplicationDto::getTitle).setHeader(I18n.t("role.details.apps.column.title"));
-            appsGrid.addColumn(ApplicationDto::getCategory).setHeader(I18n.t("role.details.apps.column.category"));
+            appsGrid.addColumn(ApplicationDto::getName).setHeader(I18n.t("ims.role.details.apps.column.name"));
+            appsGrid.addColumn(ApplicationDto::getTitle).setHeader(I18n.t("ims.role.details.apps.column.title"));
+            appsGrid.addColumn(ApplicationDto::getCategory).setHeader(I18n.t("ims.role.details.apps.column.category"));
             appsGrid.setItems(role.getAllowedTools());
             appsGrid.setHeight("200px");
-            mainLayout.add(createSection(I18n.t("role.details.section.apps"), appsGrid));
+            mainLayout.add(createSection(I18n.t("ims.role.details.section.apps"), appsGrid));
         }
 
         // Permissions
         if (role.getRolePermission() != null && !role.getRolePermission().isEmpty()) {
             Grid<RolePermissionDto> permsGrid = new Grid<>();
-            permsGrid.addColumn(RolePermissionDto::getServiceName).setHeader(I18n.t("role.details.field.service"));
-            permsGrid.addColumn(RolePermissionDto::getObjectName).setHeader(I18n.t("role.details.field.object"));
-            permsGrid.addComponentColumn(perm -> new Span(perm.getRead() ? I18n.t("role.details.yes") : I18n.t("role.details.no"))).setHeader(I18n.t("role.details.field.read"));
-            permsGrid.addComponentColumn(perm -> new Span(perm.getWrite() ? I18n.t("role.details.yes") : I18n.t("role.details.no"))).setHeader(I18n.t("role.details.field.write"));
-            permsGrid.addComponentColumn(perm -> new Span(perm.getDelete() ? I18n.t("role.details.yes") : I18n.t("role.details.no"))).setHeader(I18n.t("role.details.field.delete"));
+            permsGrid.addColumn(RolePermissionDto::getServiceName).setHeader(I18n.t("ims.role.details.field.service"));
+            permsGrid.addColumn(RolePermissionDto::getObjectName).setHeader(I18n.t("ims.role.details.field.object"));
+            permsGrid.addComponentColumn(perm -> new Span(perm.getRead() ? I18n.t("ims.role.details.yes") : I18n.t("ims.role.details.no"))).setHeader(I18n.t("ims.role.details.field.read"));
+            permsGrid.addComponentColumn(perm -> new Span(perm.getWrite() ? I18n.t("ims.role.details.yes") : I18n.t("ims.role.details.no"))).setHeader(I18n.t("ims.role.details.field.write"));
+            permsGrid.addComponentColumn(perm -> new Span(perm.getDelete() ? I18n.t("ims.role.details.yes") : I18n.t("ims.role.details.no"))).setHeader(I18n.t("ims.role.details.field.delete"));
             permsGrid.setItems(role.getRolePermission());
             permsGrid.setHeight("300px");
-            mainLayout.add(createSection(I18n.t("role.details.section.perms"), permsGrid));
+            mainLayout.add(createSection(I18n.t("ims.role.details.section.perms"), permsGrid));
         }
 
         add(mainLayout);
@@ -172,7 +172,7 @@ public class RoleDetailsDialog extends NoActionDialog {
     }
 
     private void addCloseButton() {
-        Button closeButton = new Button(I18n.t("role.details.close"), e -> close());
+        Button closeButton = new Button(I18n.t("ims.role.details.close"), e -> close());
         closeButton.addClassName(LumoUtility.Margin.Top.MEDIUM);
         HorizontalLayout buttonBar = new HorizontalLayout(closeButton);
         buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);

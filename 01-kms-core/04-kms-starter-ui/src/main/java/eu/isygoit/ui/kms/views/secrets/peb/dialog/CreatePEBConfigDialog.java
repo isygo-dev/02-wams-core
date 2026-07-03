@@ -31,57 +31,57 @@ public class CreatePEBConfigDialog extends BaseActionDialog {
     private ComboBox<IEnumStringOutputType.Types> outputTypeCombo;
 
     public CreatePEBConfigDialog(PEBConfigService configService, Runnable onSuccess) {
-        super(I18n.t("peb.dialog.create.title"), onSuccess);
+        super(I18n.t("kms.peb.dialog.create.title"), onSuccess);
         this.configService = configService;
-        setOkButtonText(I18n.t("peb.dialog.create.button"));
+        setOkButtonText(I18n.t("kms.peb.dialog.create.button"));
         setWidth("700px");
         buildForm();
         addContent(createFormLayout());
     }
 
     private void buildForm() {
-        codeField = new TextField(I18n.t("peb.dialog.field.code"));
+        codeField = new TextField(I18n.t("kms.peb.dialog.field.code"));
         codeField.setRequired(true);
         codeField.setRequiredIndicatorVisible(true);
-        codeField.setPlaceholder(I18n.t("peb.dialog.field.code.placeholder"));
+        codeField.setPlaceholder(I18n.t("kms.peb.dialog.field.code.placeholder"));
         codeField.setWidthFull();
 
-        algorithmCombo = new ComboBox<>(I18n.t("peb.dialog.field.algorithm"));
+        algorithmCombo = new ComboBox<>(I18n.t("kms.peb.dialog.field.algorithm"));
         algorithmCombo.setItems(IEnumAlgoPEBConfig.Types.values());
         algorithmCombo.setRequired(true);
         algorithmCombo.setRequiredIndicatorVisible(true);
         algorithmCombo.setWidthFull();
 
-        iterationsField = new IntegerField(I18n.t("peb.dialog.field.iterations"));
+        iterationsField = new IntegerField(I18n.t("kms.peb.dialog.field.iterations"));
         iterationsField.setValue(10000);
         iterationsField.setRequired(true);
         iterationsField.setMin(1);
         iterationsField.setWidthFull();
 
-        saltGeneratorCombo = new ComboBox<>(I18n.t("peb.dialog.field.salt.generator"));
+        saltGeneratorCombo = new ComboBox<>(I18n.t("kms.peb.dialog.field.salt.generator"));
         saltGeneratorCombo.setItems(IEnumSaltGenerator.Types.values());
         saltGeneratorCombo.setRequired(true);
         saltGeneratorCombo.setWidthFull();
 
-        ivGeneratorCombo = new ComboBox<>(I18n.t("peb.dialog.field.iv.generator"));
+        ivGeneratorCombo = new ComboBox<>(I18n.t("kms.peb.dialog.field.iv.generator"));
         ivGeneratorCombo.setItems(IEnumIvGenerator.Types.values());
         ivGeneratorCombo.setRequired(true);
         ivGeneratorCombo.setWidthFull();
 
-        providerClassField = new TextField(I18n.t("peb.dialog.field.provider.class"));
-        providerClassField.setPlaceholder(I18n.t("peb.dialog.field.provider.class.placeholder"));
+        providerClassField = new TextField(I18n.t("kms.peb.dialog.field.provider.class"));
+        providerClassField.setPlaceholder(I18n.t("kms.peb.dialog.field.provider.class.placeholder"));
         providerClassField.setWidthFull();
 
-        providerNameField = new TextField(I18n.t("peb.dialog.field.provider.name"));
-        providerNameField.setPlaceholder(I18n.t("peb.dialog.field.provider.name.placeholder"));
+        providerNameField = new TextField(I18n.t("kms.peb.dialog.field.provider.name"));
+        providerNameField.setPlaceholder(I18n.t("kms.peb.dialog.field.provider.name.placeholder"));
         providerNameField.setWidthFull();
 
-        poolSizeField = new IntegerField(I18n.t("peb.dialog.field.pool.size"));
+        poolSizeField = new IntegerField(I18n.t("kms.peb.dialog.field.pool.size"));
         poolSizeField.setValue(10);
         poolSizeField.setMin(1);
         poolSizeField.setWidthFull();
 
-        outputTypeCombo = new ComboBox<>(I18n.t("peb.dialog.field.output.type"));
+        outputTypeCombo = new ComboBox<>(I18n.t("kms.peb.dialog.field.output.type"));
         outputTypeCombo.setItems(IEnumStringOutputType.Types.values());
         outputTypeCombo.setValue(IEnumStringOutputType.Types.Base64);
         outputTypeCombo.setWidthFull();
@@ -99,27 +99,27 @@ public class CreatePEBConfigDialog extends BaseActionDialog {
     protected boolean onOk() {
         String code = codeField.getValue();
         if (!StringUtils.hasText(code)) {
-            append(I18n.t("peb.dialog.field.code.required"));
+            append(I18n.t("kms.peb.dialog.field.code.required"));
             return false;
         }
         IEnumAlgoPEBConfig.Types algo = algorithmCombo.getValue();
         if (algo == null) {
-            append(I18n.t("peb.dialog.field.algorithm.required"));
+            append(I18n.t("kms.peb.dialog.field.algorithm.required"));
             return false;
         }
         Integer iterations = iterationsField.getValue();
         if (iterations == null || iterations <= 0) {
-            append(I18n.t("peb.dialog.field.iterations.required"));
+            append(I18n.t("kms.peb.dialog.field.iterations.required"));
             return false;
         }
         IEnumSaltGenerator.Types saltGen = saltGeneratorCombo.getValue();
         if (saltGen == null) {
-            append(I18n.t("peb.dialog.field.salt.generator.required"));
+            append(I18n.t("kms.peb.dialog.field.salt.generator.required"));
             return false;
         }
         IEnumIvGenerator.Types ivGen = ivGeneratorCombo.getValue();
         if (ivGen == null) {
-            append(I18n.t("peb.dialog.field.iv.generator.required"));
+            append(I18n.t("kms.peb.dialog.field.iv.generator.required"));
             return false;
         }
 
@@ -138,17 +138,17 @@ public class CreatePEBConfigDialog extends BaseActionDialog {
         try {
             ResponseEntity<PEBConfigDto> response = configService.create(dto);
             if (response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("peb.dialog.create.success"));
+                append(I18n.t("kms.peb.dialog.create.success"));
                 return true;
             } else {
-                append(I18n.t("peb.dialog.create.failed", response.getStatusCode()));
+                append(I18n.t("kms.peb.dialog.create.failed", response.getStatusCode()));
                 return false;
             }
         } catch (FeignException ex) {
             append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
             return false;
         } catch (Exception ex) {
-            append(I18n.t("peb.dialog.creation.failed", ex.getMessage()));
+            append(I18n.t("kms.peb.dialog.creation.failed", ex.getMessage()));
             return false;
         }
     }

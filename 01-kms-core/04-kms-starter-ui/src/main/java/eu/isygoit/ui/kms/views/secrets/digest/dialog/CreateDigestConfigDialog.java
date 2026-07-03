@@ -43,39 +43,39 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
     private TextField suffixField;
 
     public CreateDigestConfigDialog(DigestConfigService configService, Runnable onSuccess) {
-        super(I18n.t("digest.dialog.create.title"), onSuccess);
+        super(I18n.t("kms.digest.dialog.create.title"), onSuccess);
         this.configService = configService;
-        setOkButtonText(I18n.t("digest.dialog.create.button"));
+        setOkButtonText(I18n.t("kms.digest.dialog.create.button"));
         setWidth("700px");
         buildForm();
         addContent(createFormLayout());
     }
 
     private void buildForm() {
-        codeField = new TextField(I18n.t("digest.dialog.field.code"));
+        codeField = new TextField(I18n.t("kms.digest.dialog.field.code"));
         codeField.setRequired(true);
         codeField.setRequiredIndicatorVisible(true);
-        codeField.setPlaceholder(I18n.t("digest.dialog.field.code.placeholder"));
+        codeField.setPlaceholder(I18n.t("kms.digest.dialog.field.code.placeholder"));
         codeField.setWidthFull();
 
-        algorithmCombo = new ComboBox<>(I18n.t("digest.dialog.field.algorithm"));
+        algorithmCombo = new ComboBox<>(I18n.t("kms.digest.dialog.field.algorithm"));
         algorithmCombo.setItems(IEnumAlgoDigestConfig.Types.values());
         algorithmCombo.setRequired(true);
         algorithmCombo.setWidthFull();
 
-        iterationsField = new IntegerField(I18n.t("digest.dialog.field.iterations"));
+        iterationsField = new IntegerField(I18n.t("kms.digest.dialog.field.iterations"));
         iterationsField.setValue(1);
         iterationsField.setMin(1);
         iterationsField.setRequired(true);
         iterationsField.setWidthFull();
 
-        saltSizeField = new IntegerField(I18n.t("digest.dialog.field.salt.size"));
+        saltSizeField = new IntegerField(I18n.t("kms.digest.dialog.field.salt.size"));
         saltSizeField.setValue(16);
         saltSizeField.setMin(0);
-        saltSizeField.setHelperText(I18n.t("digest.dialog.field.salt.size.helper"));
+        saltSizeField.setHelperText(I18n.t("kms.digest.dialog.field.salt.size.helper"));
         saltSizeField.setWidthFull();
 
-        saltGeneratorCombo = new ComboBox<>(I18n.t("digest.dialog.field.salt.generator"));
+        saltGeneratorCombo = new ComboBox<>(I18n.t("kms.digest.dialog.field.salt.generator"));
         saltGeneratorCombo.setItems(IEnumSaltGenerator.Types.values());
         saltGeneratorCombo.setValue(IEnumSaltGenerator.Types.RandomSaltGenerator);
         saltGeneratorCombo.setWidthFull();
@@ -84,14 +84,14 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
             classToProviderNameMap.put(type.getClassPath(), type.getProviderName());
         }
 
-        providerClassCombo = new ComboBox<>(I18n.t("digest.dialog.field.provider.class"));
+        providerClassCombo = new ComboBox<>(I18n.t("kms.digest.dialog.field.provider.class"));
         providerClassCombo.setAllowCustomValue(true);
         providerClassCombo.setItems(
                 Arrays.stream(IEnumProviderClassName.Types.values())
                         .map(IEnumProviderClassName.Types::getClassPath)
                         .collect(Collectors.toList())
         );
-        providerClassCombo.setPlaceholder(I18n.t("digest.dialog.field.provider.class.placeholder"));
+        providerClassCombo.setPlaceholder(I18n.t("kms.digest.dialog.field.provider.class.placeholder"));
         providerClassCombo.setClearButtonVisible(true);
         providerClassCombo.setWidthFull();
         providerClassCombo.addValueChangeListener(e -> {
@@ -101,37 +101,37 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
             }
         });
 
-        providerNameCombo = new ComboBox<>(I18n.t("digest.dialog.field.provider.name"));
+        providerNameCombo = new ComboBox<>(I18n.t("kms.digest.dialog.field.provider.name"));
         providerNameCombo.setAllowCustomValue(true);
         providerNameCombo.setItems(
                 Arrays.stream(IEnumProviderClassName.Types.values())
                         .map(IEnumProviderClassName.Types::getProviderName)
                         .collect(Collectors.toList())
         );
-        providerNameCombo.setPlaceholder(I18n.t("digest.dialog.field.provider.name.placeholder"));
+        providerNameCombo.setPlaceholder(I18n.t("kms.digest.dialog.field.provider.name.placeholder"));
         providerNameCombo.setClearButtonVisible(true);
         providerNameCombo.setWidthFull();
 
-        invertSaltPositionCheckbox = new Checkbox(I18n.t("digest.dialog.field.invert.salt.position"));
-        invertPlainSaltCheckbox = new Checkbox(I18n.t("digest.dialog.field.invert.plain.salt"));
-        lenientSaltCheckbox = new Checkbox(I18n.t("digest.dialog.field.lenient.salt"));
+        invertSaltPositionCheckbox = new Checkbox(I18n.t("kms.digest.dialog.field.invert.salt.position"));
+        invertPlainSaltCheckbox = new Checkbox(I18n.t("kms.digest.dialog.field.invert.plain.salt"));
+        lenientSaltCheckbox = new Checkbox(I18n.t("kms.digest.dialog.field.lenient.salt"));
 
-        poolSizeField = new IntegerField(I18n.t("digest.dialog.field.pool.size"));
+        poolSizeField = new IntegerField(I18n.t("kms.digest.dialog.field.pool.size"));
         poolSizeField.setValue(10);
         poolSizeField.setMin(1);
         poolSizeField.setWidthFull();
 
-        unicodeIgnoreCheckbox = new Checkbox(I18n.t("digest.dialog.field.ignore.unicode"));
+        unicodeIgnoreCheckbox = new Checkbox(I18n.t("kms.digest.dialog.field.ignore.unicode"));
 
-        outputTypeCombo = new ComboBox<>(I18n.t("digest.dialog.field.output.type"));
+        outputTypeCombo = new ComboBox<>(I18n.t("kms.digest.dialog.field.output.type"));
         outputTypeCombo.setItems(IEnumStringOutputType.Types.values());
         outputTypeCombo.setValue(IEnumStringOutputType.Types.Base64);
         outputTypeCombo.setWidthFull();
 
-        prefixField = new TextField(I18n.t("digest.dialog.field.prefix"));
+        prefixField = new TextField(I18n.t("kms.digest.dialog.field.prefix"));
         prefixField.setWidthFull();
 
-        suffixField = new TextField(I18n.t("digest.dialog.field.suffix"));
+        suffixField = new TextField(I18n.t("kms.digest.dialog.field.suffix"));
         suffixField.setWidthFull();
     }
 
@@ -150,22 +150,22 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
     protected boolean onOk() {
         String code = codeField.getValue();
         if (!StringUtils.hasText(code)) {
-            append(I18n.t("digest.dialog.field.code.required"));
+            append(I18n.t("kms.digest.dialog.field.code.required"));
             return false;
         }
         IEnumAlgoDigestConfig.Types algo = algorithmCombo.getValue();
         if (algo == null) {
-            append(I18n.t("digest.dialog.field.algorithm.required"));
+            append(I18n.t("kms.digest.dialog.field.algorithm.required"));
             return false;
         }
         Integer iterations = iterationsField.getValue();
         if (iterations == null || iterations < 1) {
-            append(I18n.t("digest.dialog.field.iterations.required"));
+            append(I18n.t("kms.digest.dialog.field.iterations.required"));
             return false;
         }
         Integer saltSize = saltSizeField.getValue();
         if (saltSize == null || saltSize < 0) {
-            append(I18n.t("digest.dialog.field.salt.size.required"));
+            append(I18n.t("kms.digest.dialog.field.salt.size.required"));
             return false;
         }
 
@@ -190,17 +190,17 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
         try {
             ResponseEntity<DigestConfigDto> response = configService.create(dto);
             if (response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("digest.dialog.create.success"));
+                append(I18n.t("kms.digest.dialog.create.success"));
                 return true;
             } else {
-                append(I18n.t("digest.dialog.create.failed", response.getStatusCode()));
+                append(I18n.t("kms.digest.dialog.create.failed", response.getStatusCode()));
                 return false;
             }
         } catch (FeignException ex) {
             append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
             return false;
         } catch (Exception ex) {
-            append(I18n.t("digest.dialog.creation.failed", ex.getMessage()));
+            append(I18n.t("kms.digest.dialog.creation.failed", ex.getMessage()));
             return false;
         }
     }

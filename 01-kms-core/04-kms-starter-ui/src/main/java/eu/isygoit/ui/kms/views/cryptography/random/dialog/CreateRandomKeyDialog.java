@@ -20,35 +20,35 @@ public class CreateRandomKeyDialog extends BaseActionDialog {
     private ComboBox<IEnumCharSet.Types> charSetCombo;
 
     public CreateRandomKeyDialog(RandomKeyService keyService, Runnable onSuccess) {
-        super(I18n.t("random.key.dialog.create.title"), onSuccess);
+        super(I18n.t("kms.random.key.dialog.create.title"), onSuccess);
         this.keyService = keyService;
         this.onSuccess = onSuccess;
-        setOkButtonText(I18n.t("random.key.dialog.create.button"));
+        setOkButtonText(I18n.t("kms.random.key.dialog.create.button"));
         setWidth("550px");
         buildForm();
         addContent(createFormLayout());
     }
 
     private void buildForm() {
-        nameField = new TextField(I18n.t("random.key.dialog.field.name"));
+        nameField = new TextField(I18n.t("kms.random.key.dialog.field.name"));
         nameField.setRequired(true);
         nameField.setRequiredIndicatorVisible(true);
-        nameField.setPlaceholder(I18n.t("random.key.dialog.field.name.placeholder"));
+        nameField.setPlaceholder(I18n.t("kms.random.key.dialog.field.name.placeholder"));
         nameField.setWidthFull();
 
-        lengthField = new IntegerField(I18n.t("random.key.dialog.field.length"));
+        lengthField = new IntegerField(I18n.t("kms.random.key.dialog.field.length"));
         lengthField.setValue(32);
         lengthField.setMin(1);
         lengthField.setMax(4096);
         lengthField.setStepButtonsVisible(true);
-        lengthField.setHelperText(I18n.t("random.key.dialog.field.length.helper"));
+        lengthField.setHelperText(I18n.t("kms.random.key.dialog.field.length.helper"));
         lengthField.setWidthFull();
 
-        charSetCombo = new ComboBox<>(I18n.t("random.key.dialog.field.char.set"));
+        charSetCombo = new ComboBox<>(I18n.t("kms.random.key.dialog.field.char.set"));
         charSetCombo.setItems(IEnumCharSet.Types.values());
         charSetCombo.setValue(IEnumCharSet.Types.ALL);
         charSetCombo.setRequired(true);
-        charSetCombo.setHelperText(I18n.t("random.key.dialog.field.char.set.helper"));
+        charSetCombo.setHelperText(I18n.t("kms.random.key.dialog.field.char.set.helper"));
         charSetCombo.setWidthFull();
     }
 
@@ -63,31 +63,31 @@ public class CreateRandomKeyDialog extends BaseActionDialog {
     protected boolean onOk() {
         String name = nameField.getValue();
         if (name == null || name.isBlank()) {
-            append(I18n.t("random.key.dialog.field.name.required"));
+            append(I18n.t("kms.random.key.dialog.field.name.required"));
             return false;
         }
         Integer length = lengthField.getValue();
         if (length == null || length <= 0) {
-            append(I18n.t("random.key.dialog.field.length.required"));
+            append(I18n.t("kms.random.key.dialog.field.length.required"));
             return false;
         }
         IEnumCharSet.Types charSet = charSetCombo.getValue();
         if (charSet == null) {
-            append(I18n.t("random.key.dialog.field.char.set.required"));
+            append(I18n.t("kms.random.key.dialog.field.char.set.required"));
             return false;
         }
 
         try {
             ResponseEntity<String> response = keyService.renewRandomKey(name, length, charSet);
             if (response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("random.key.dialog.create.success"));
+                append(I18n.t("kms.random.key.dialog.create.success"));
                 return true;
             } else {
-                append(I18n.t("random.key.dialog.create.failed", response.getStatusCode()));
+                append(I18n.t("kms.random.key.dialog.create.failed", response.getStatusCode()));
                 return false;
             }
         } catch (Exception e) {
-            append(I18n.t("random.key.dialog.error", e.getMessage()));
+            append(I18n.t("kms.random.key.dialog.error", e.getMessage()));
             return false;
         }
     }

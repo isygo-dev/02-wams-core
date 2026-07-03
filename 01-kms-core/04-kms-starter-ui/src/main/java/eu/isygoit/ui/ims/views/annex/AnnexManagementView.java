@@ -47,7 +47,7 @@ public class AnnexManagementView extends ManagementVerticalView {
     private final AnnexService annexService;
 
     private final Div cardsContainer = new Div();
-    private final Button createButton = new Button(I18n.t("annex.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button createButton = new Button(I18n.t("ims.annex.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
     private final TextField tableCodeFilter = new TextField();
@@ -78,7 +78,7 @@ public class AnnexManagementView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("annex-management-view");
 
-        H2 header = new H2(I18n.t("annex.view.title"));
+        H2 header = new H2(I18n.t("ims.annex.view.title"));
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         add(header);
@@ -103,12 +103,12 @@ public class AnnexManagementView extends ManagementVerticalView {
 
     private void initEventHandlers() {
         createButton.addClickListener(e -> openCreateAnnexDialog());
-        createButton.setTooltipText(I18n.t("annex.view.create.tooltip"));
+        createButton.setTooltipText(I18n.t("ims.annex.view.create.tooltip"));
 
         refreshButton.addClickListener(e -> loadPage(0));
-        refreshButton.setTooltipText(I18n.t("annex.view.refresh.tooltip"));
+        refreshButton.setTooltipText(I18n.t("ims.annex.view.refresh.tooltip"));
 
-        searchField.setPlaceholder(I18n.t("annex.view.search.placeholder"));
+        searchField.setPlaceholder(I18n.t("ims.annex.view.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.addValueChangeListener(e -> {
@@ -116,7 +116,7 @@ public class AnnexManagementView extends ManagementVerticalView {
             loadPage(0);
         });
 
-        tableCodeFilter.setPlaceholder(I18n.t("annex.view.table.code.placeholder"));
+        tableCodeFilter.setPlaceholder(I18n.t("ims.annex.view.table.code.placeholder"));
         tableCodeFilter.setClearButtonVisible(true);
         tableCodeFilter.addValueChangeListener(e -> {
             currentTableCode = e.getValue();
@@ -125,7 +125,7 @@ public class AnnexManagementView extends ManagementVerticalView {
 
         languageFilter.setItems(IEnumLanguage.Types.values());
         languageFilter.setItemLabelGenerator(lang -> lang.name());
-        languageFilter.setPlaceholder(I18n.t("annex.view.language.placeholder"));
+        languageFilter.setPlaceholder(I18n.t("ims.annex.view.language.placeholder"));
         languageFilter.addValueChangeListener(e -> {
             currentLanguage = e.getValue();
             loadPage(0);
@@ -168,11 +168,11 @@ public class AnnexManagementView extends ManagementVerticalView {
             filterAndDisplayCards();
         } catch (FeignException ex) {
             String errorMsg = extractErrorMessage(ex);
-            Notification.show(I18n.t("annex.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("ims.annex.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load annexes", ex);
         } catch (Exception e) {
-            Notification.show(I18n.t("annex.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("ims.annex.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load annexes", e);
         } finally {
@@ -207,8 +207,8 @@ public class AnnexManagementView extends ManagementVerticalView {
             Icon emptyIcon = VaadinIcon.FILE_CODE.create();
             emptyIcon.setSize("48px");
             emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-            H4 emptyTitle = new H4(I18n.t("annex.view.empty.title"));
-            Paragraph emptyDesc = new Paragraph(I18n.t("annex.view.empty.description"));
+            H4 emptyTitle = new H4(I18n.t("ims.annex.view.empty.title"));
+            Paragraph emptyDesc = new Paragraph(I18n.t("ims.annex.view.empty.description"));
             emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);
@@ -220,8 +220,8 @@ public class AnnexManagementView extends ManagementVerticalView {
     }
 
     private void updatePaginationDisplay() {
-        pageInfoLabel.setText(I18n.t("annex.view.page.info", currentPage + 1, totalPages));
-        totalCountLabel.setText(I18n.t("annex.view.total.count", totalElements));
+        pageInfoLabel.setText(I18n.t("ims.annex.view.page.info", currentPage + 1, totalPages));
+        totalCountLabel.setText(I18n.t("ims.annex.view.total.count", totalElements));
         prevButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(currentPage + 1 < totalPages);
     }

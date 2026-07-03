@@ -24,18 +24,18 @@ public class PolicyBuilderDialog extends BaseActionDialog {
     private final ObjectMapper objectMapper;
     private final Consumer<KeyPolicy> onSave;
     private final List<KeyPolicy.Statement> statements = new ArrayList<>();
-    private final TextField versionField = new TextField(I18n.t("policy.builder.field.version"));
-    private final TextField idField = new TextField(I18n.t("policy.builder.field.id"));
+    private final TextField versionField = new TextField(I18n.t("kms.policy.builder.field.version"));
+    private final TextField idField = new TextField(I18n.t("kms.policy.builder.field.id"));
     private final Grid<KeyPolicy.Statement> statementGrid = new Grid<>();
     private final KeyPolicy policy;
 
     public PolicyBuilderDialog(ObjectMapper objectMapper, KeyPolicy existingPolicy, Consumer<KeyPolicy> onSave) {
-        super(I18n.t("policy.builder.title"), null);
+        super(I18n.t("kms.policy.builder.title"), null);
         this.objectMapper = objectMapper;
         this.onSave = onSave;
         this.policy = (existingPolicy != null) ? existingPolicy : createDefaultPolicy();
 
-        setOkButtonText(I18n.t("policy.builder.apply"));
+        setOkButtonText(I18n.t("kms.policy.builder.apply"));
         setWidth("1000px");
         setMaxWidth("95%");
         setResizable(true);
@@ -59,31 +59,31 @@ public class PolicyBuilderDialog extends BaseActionDialog {
         String version = policy.getVersion();
         versionField.setValue(version != null ? version : "2012-10-17");
         versionField.setWidthFull();
-        versionField.setHelperText(I18n.t("policy.builder.field.version.helper"));
+        versionField.setHelperText(I18n.t("kms.policy.builder.field.version.helper"));
 
         String policyId = policy.getId();
         idField.setValue(policyId != null ? policyId : "");
         idField.setWidthFull();
-        idField.setHelperText(I18n.t("policy.builder.field.id.helper"));
+        idField.setHelperText(I18n.t("kms.policy.builder.field.id.helper"));
 
         mainLayout.add(versionField, idField);
-        mainLayout.add(new H3(I18n.t("policy.builder.statements")));
+        mainLayout.add(new H3(I18n.t("kms.policy.builder.statements")));
 
         HorizontalLayout toolbar = new HorizontalLayout();
-        Button addStatementBtn = new Button(I18n.t("policy.builder.add.statement"), new Icon(VaadinIcon.PLUS));
+        Button addStatementBtn = new Button(I18n.t("kms.policy.builder.add.statement"), new Icon(VaadinIcon.PLUS));
         addStatementBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
         toolbar.add(addStatementBtn);
         mainLayout.add(toolbar);
 
         statementGrid.setItems(statements);
         statementGrid.addColumn(KeyPolicy.Statement::getSid)
-                .setHeader(I18n.t("policy.builder.grid.column.sid"))
+                .setHeader(I18n.t("kms.policy.builder.grid.column.sid"))
                 .setFlexGrow(1);
         statementGrid.addColumn(KeyPolicy.Statement::getEffect)
-                .setHeader(I18n.t("policy.builder.grid.column.effect"))
+                .setHeader(I18n.t("kms.policy.builder.grid.column.effect"))
                 .setWidth("100px");
         statementGrid.addComponentColumn(this::createStatementActions)
-                .setHeader(I18n.t("policy.builder.grid.column.actions"))
+                .setHeader(I18n.t("kms.policy.builder.grid.column.actions"))
                 .setWidth("120px");
         statementGrid.setHeight("350px");
         mainLayout.add(statementGrid);
@@ -107,7 +107,7 @@ public class PolicyBuilderDialog extends BaseActionDialog {
 
         Button editBtn = new Button(new Icon(VaadinIcon.EDIT));
         editBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
-        editBtn.setTooltipText(I18n.t("policy.builder.edit.tooltip"));
+        editBtn.setTooltipText(I18n.t("kms.policy.builder.edit.tooltip"));
         editBtn.addClickListener(e -> editStatement(stmt, updated -> {
             int idx = statements.indexOf(stmt);
             if (idx >= 0) statements.set(idx, updated);
@@ -116,7 +116,7 @@ public class PolicyBuilderDialog extends BaseActionDialog {
 
         Button deleteBtn = new Button(new Icon(VaadinIcon.TRASH));
         deleteBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_SMALL);
-        deleteBtn.setTooltipText(I18n.t("policy.builder.delete.tooltip"));
+        deleteBtn.setTooltipText(I18n.t("kms.policy.builder.delete.tooltip"));
         deleteBtn.addClickListener(e -> {
             statements.remove(stmt);
             refreshStatementGrid();
@@ -138,7 +138,7 @@ public class PolicyBuilderDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (statements.isEmpty()) {
-            append(I18n.t("policy.builder.empty.error"));
+            append(I18n.t("kms.policy.builder.empty.error"));
             return false;
         }
 

@@ -37,7 +37,7 @@ public class DescribeKeyDialog extends NoActionDialog {
                              ObjectMapper objectMapper,
                              String keyId,
                              DescribeKeyResponse.KeyMetadata metadata) {
-        super(I18n.t("key.dialog.describe.title"));
+        super(I18n.t("kms.key.dialog.describe.title"));
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
         this.objectMapper = objectMapper;
@@ -60,23 +60,23 @@ public class DescribeKeyDialog extends NoActionDialog {
         content.setWidthFull();
 
         // Basic metadata
-        content.add(detailRow(I18n.t("key.dialog.describe.field.key.id"), metadata.getKeyId()),
-                detailRow(I18n.t("key.dialog.describe.field.wrn"), metadata.getWrn()),
-                detailRow(I18n.t("key.dialog.describe.field.alias"), metadata.getKeyAlias()),
-                detailRow(I18n.t("key.dialog.describe.field.description"), metadata.getDescription()),
-                detailRow(I18n.t("key.dialog.describe.field.status"), metadata.getKeyStatus() != null ? metadata.getKeyStatus().name() : I18n.t("key.dialog.describe.placeholder")),
-                detailRow(I18n.t("key.dialog.describe.field.key.spec"), metadata.getKeySpec() != null ? metadata.getKeySpec().name() : I18n.t("key.dialog.describe.placeholder")),
-                detailRow(I18n.t("key.dialog.describe.field.key.usage"), metadata.getKeyUsage() != null ? metadata.getKeyUsage().name() : I18n.t("key.dialog.describe.placeholder")),
-                detailRow(I18n.t("key.dialog.describe.field.customer.master.key.spec"), metadata.getCustomerMasterKeySpec()),
-                detailRow(I18n.t("key.dialog.describe.field.origin"), metadata.getOrigin() != null ? metadata.getOrigin().name() : I18n.t("key.dialog.describe.placeholder")),
-                detailRow(I18n.t("key.dialog.describe.field.creation.date"), metadata.getCreateDate() != null ? metadata.getCreateDate().toString() : I18n.t("key.dialog.describe.placeholder")),
-                detailRow(I18n.t("key.dialog.describe.field.rotation.enabled"), metadata.getRotationEnabled() != null ? metadata.getRotationEnabled().toString() : I18n.t("key.dialog.describe.placeholder")),
-                detailRow(I18n.t("key.dialog.describe.field.rotation.period"), metadata.getRotationPeriodInDays() != null ? metadata.getRotationPeriodInDays().toString() : I18n.t("key.dialog.describe.placeholder")),
-                detailRow(I18n.t("key.dialog.describe.field.current.version"), metadata.getCurrentVersion()),
-                detailRow(I18n.t("key.dialog.describe.field.key.manager"), metadata.getKeyManager()),
-                detailRow(I18n.t("key.dialog.describe.field.expiration.model"), metadata.getExpirationModel() != null ? metadata.getExpirationModel().name() : I18n.t("key.dialog.describe.placeholder")),
-                detailRow(I18n.t("key.dialog.describe.field.valid.until"), metadata.getValidTo() != null ? metadata.getValidTo().toString() : I18n.t("key.dialog.describe.placeholder")),
-                detailRow(I18n.t("key.dialog.describe.field.multi.region"), metadata.getMultiRegion() != null ? metadata.getMultiRegion().toString() : "false"));
+        content.add(detailRow(I18n.t("kms.key.dialog.describe.field.key.id"), metadata.getKeyId()),
+                detailRow(I18n.t("kms.key.dialog.describe.field.wrn"), metadata.getWrn()),
+                detailRow(I18n.t("kms.key.dialog.describe.field.alias"), metadata.getKeyAlias()),
+                detailRow(I18n.t("kms.key.dialog.describe.field.description"), metadata.getDescription()),
+                detailRow(I18n.t("kms.key.dialog.describe.field.status"), metadata.getKeyStatus() != null ? metadata.getKeyStatus().name() : I18n.t("kms.key.dialog.describe.placeholder")),
+                detailRow(I18n.t("kms.key.dialog.describe.field.key.spec"), metadata.getKeySpec() != null ? metadata.getKeySpec().name() : I18n.t("kms.key.dialog.describe.placeholder")),
+                detailRow(I18n.t("kms.key.dialog.describe.field.key.usage"), metadata.getKeyUsage() != null ? metadata.getKeyUsage().name() : I18n.t("kms.key.dialog.describe.placeholder")),
+                detailRow(I18n.t("kms.key.dialog.describe.field.customer.master.key.spec"), metadata.getCustomerMasterKeySpec()),
+                detailRow(I18n.t("kms.key.dialog.describe.field.origin"), metadata.getOrigin() != null ? metadata.getOrigin().name() : I18n.t("kms.key.dialog.describe.placeholder")),
+                detailRow(I18n.t("kms.key.dialog.describe.field.creation.date"), metadata.getCreateDate() != null ? metadata.getCreateDate().toString() : I18n.t("kms.key.dialog.describe.placeholder")),
+                detailRow(I18n.t("kms.key.dialog.describe.field.rotation.enabled"), metadata.getRotationEnabled() != null ? metadata.getRotationEnabled().toString() : I18n.t("kms.key.dialog.describe.placeholder")),
+                detailRow(I18n.t("kms.key.dialog.describe.field.rotation.period"), metadata.getRotationPeriodInDays() != null ? metadata.getRotationPeriodInDays().toString() : I18n.t("kms.key.dialog.describe.placeholder")),
+                detailRow(I18n.t("kms.key.dialog.describe.field.current.version"), metadata.getCurrentVersion()),
+                detailRow(I18n.t("kms.key.dialog.describe.field.key.manager"), metadata.getKeyManager()),
+                detailRow(I18n.t("kms.key.dialog.describe.field.expiration.model"), metadata.getExpirationModel() != null ? metadata.getExpirationModel().name() : I18n.t("kms.key.dialog.describe.placeholder")),
+                detailRow(I18n.t("kms.key.dialog.describe.field.valid.until"), metadata.getValidTo() != null ? metadata.getValidTo().toString() : I18n.t("kms.key.dialog.describe.placeholder")),
+                detailRow(I18n.t("kms.key.dialog.describe.field.multi.region"), metadata.getMultiRegion() != null ? metadata.getMultiRegion().toString() : Boolean.FALSE.toString()));
 
         // Multi‑region configuration (if present)
         if (metadata.getMultiRegionConfiguration() != null) {
@@ -84,19 +84,19 @@ public class DescribeKeyDialog extends NoActionDialog {
                 String mrConfig = objectMapper.writerWithDefaultPrettyPrinter()
                         .writeValueAsString(metadata.getMultiRegionConfiguration());
                 if (mrConfig != null && !mrConfig.isBlank()) {
-                    content.add(detailRow(I18n.t("key.dialog.describe.field.multi.region.config"), mrConfig));
+                    content.add(detailRow(I18n.t("kms.key.dialog.describe.field.multi.region.config"), mrConfig));
                 }
             } catch (Exception e) {
-                content.add(detailRow(I18n.t("key.dialog.describe.field.multi.region.config"), metadata.getMultiRegionConfiguration().toString()));
+                content.add(detailRow(I18n.t("kms.key.dialog.describe.field.multi.region.config"), metadata.getMultiRegionConfiguration().toString()));
             }
         }
 
         // Algorithm lists
         if (metadata.getEncryptionAlgorithmSpecs() != null && !metadata.getEncryptionAlgorithmSpecs().isEmpty()) {
-            content.add(detailRow(I18n.t("key.dialog.describe.field.encryption.algorithms"), String.join(", ", metadata.getEncryptionAlgorithmSpecs())));
+            content.add(detailRow(I18n.t("kms.key.dialog.describe.field.encryption.algorithms"), String.join(", ", metadata.getEncryptionAlgorithmSpecs())));
         }
         if (metadata.getSigningAlgorithms() != null && !metadata.getSigningAlgorithms().isEmpty()) {
-            content.add(detailRow(I18n.t("key.dialog.describe.field.signing.algorithms"), String.join(", ", metadata.getSigningAlgorithms())));
+            content.add(detailRow(I18n.t("kms.key.dialog.describe.field.signing.algorithms"), String.join(", ", metadata.getSigningAlgorithms())));
         }
 
         // Tags (as chips)
@@ -108,11 +108,11 @@ public class DescribeKeyDialog extends NoActionDialog {
                     .set("flex-wrap", "wrap")
                     .set("gap", "var(--lumo-space-xs)")
                     .set("margin-top", "var(--lumo-space-s)");
-            Span label = new Span(I18n.t("key.dialog.describe.field.tags"));
+            Span label = new Span(I18n.t("kms.key.dialog.describe.field.tags"));
             label.addClassName(LumoUtility.FontWeight.BOLD);
             tagsContainer.add(label);
             for (ListResourceTagsResponse.Tag tag : tags) {
-                Span chip = new Span(I18n.t("key.dialog.describe.tags.chip.format", tag.getTagKey(), tag.getTagValue()));
+                Span chip = new Span(I18n.t("kms.key.dialog.describe.tags.chip.format", tag.getTagKey(), tag.getTagValue()));
                 chip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
                 chip.addClassName(LumoUtility.Padding.Vertical.XSMALL);
                 chip.addClassName(LumoUtility.BorderRadius.LARGE);
@@ -138,7 +138,7 @@ public class DescribeKeyDialog extends NoActionDialog {
                     prettyPolicy = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(policyObj);
                 }
                 if (prettyPolicy != null && !prettyPolicy.isBlank()) {
-                    Span label = new Span(I18n.t("key.dialog.describe.field.policy"));
+                    Span label = new Span(I18n.t("kms.key.dialog.describe.field.policy"));
                     label.addClassName(LumoUtility.FontWeight.BOLD);
                     content.add(label);
                     TextArea policyArea = new TextArea();
@@ -165,7 +165,7 @@ public class DescribeKeyDialog extends NoActionDialog {
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.BOLD);
         labelSpan.setWidth("30%");
-        Span valueSpan = new Span(value != null ? value : I18n.t("key.dialog.describe.placeholder"));
+        Span valueSpan = new Span(value != null ? value : I18n.t("kms.key.dialog.describe.placeholder"));
         valueSpan.setWidth("70%");
         row.add(labelSpan, valueSpan);
         return row;

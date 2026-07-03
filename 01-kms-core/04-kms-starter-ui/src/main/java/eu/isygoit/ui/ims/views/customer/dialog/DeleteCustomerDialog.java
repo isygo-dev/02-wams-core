@@ -17,14 +17,14 @@ public class DeleteCustomerDialog extends PinBaseActionDialog {
                                 CustomerService customerService,
                                 Long customerId,
                                 Runnable onSuccess) {
-        super(I18n.t("customer.dialog.delete.title"),
-                I18n.t("customer.dialog.delete.message"),
+        super(I18n.t("ims.customer.dialog.delete.title"),
+                I18n.t("ims.customer.dialog.delete.message"),
                 onSuccess);
         this.parentView = parentView;
         this.customerService = customerService;
         this.customerId = customerId;
 
-        setOkButtonText(I18n.t("customer.dialog.delete.button"));
+        setOkButtonText(I18n.t("ims.customer.dialog.delete.button"));
         addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
@@ -32,19 +32,19 @@ public class DeleteCustomerDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append(I18n.t("customer.dialog.delete.invalid.code"));
+            append(I18n.t("ims.customer.dialog.delete.invalid.code"));
             return false;
         }
 
         parentView.showLoading(true);
         try {
             customerService.delete(customerId);
-            append(I18n.t("customer.dialog.delete.success"));
+            append(I18n.t("ims.customer.dialog.delete.success"));
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("customer.dialog.delete.error", e.getMessage()));
+            append(I18n.t("ims.customer.dialog.delete.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

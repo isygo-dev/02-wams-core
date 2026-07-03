@@ -30,11 +30,11 @@ public class UpdateKeyDialog extends KeyDialogBase {
                            Boolean currentRotationEnabled,
                            Integer currentRotationPeriodInDays,
                            Runnable onSuccess) {
-        super(I18n.t("key.dialog.update.title"), parentView, kmsApiService, onSuccess);
+        super(I18n.t("kms.key.dialog.update.title"), parentView, kmsApiService, onSuccess);
         this.objectMapper = objectMapper;
         this.keyId = keyId;
         this.currentTags = currentTags != null ? currentTags : new ArrayList<>();
-        setOkButtonText(I18n.t("key.dialog.update.button"));
+        setOkButtonText(I18n.t("kms.key.dialog.update.button"));
         buildCommonForm();
         add(createCommonFormLayout());
         prefillData(currentAlias, currentDesc, currentRotationEnabled, currentRotationPeriodInDays);
@@ -89,16 +89,16 @@ public class UpdateKeyDialog extends KeyDialogBase {
 
             ResponseEntity<UpdateKeyDescriptionResponse> response = kmsApiService.updateKeyDescription(keyId, request);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("key.dialog.update.failed", (response.getBody() != null ? response.getBody() : "unknown error")));
+                append(I18n.t("kms.key.dialog.update.failed", (response.getBody() != null ? response.getBody() : "unknown error")));
                 return false;
             }
 
-            append(I18n.t("key.dialog.update.success"));
+            append(I18n.t("kms.key.dialog.update.success"));
             return true;
         } catch (FeignException ex) {
             append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            append(I18n.t("key.dialog.update.error", e.getMessage()));
+            append(I18n.t("kms.key.dialog.update.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

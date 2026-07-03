@@ -49,13 +49,13 @@ public class CreateApplicationDialog extends BaseActionDialog {
                                    ApplicationService applicationService,
                                    ApplicationImageService applicationImageService,
                                    Runnable onSuccess) {
-        super(I18n.t("app.dialog.create.title"), onSuccess);
+        super(I18n.t("ims.app.dialog.create.title"), onSuccess);
         this.parentView = parentView;
         this.applicationService = applicationService;
         this.applicationImageService = applicationImageService;
         this.onSuccess = onSuccess;
 
-        setOkButtonText(I18n.t("app.dialog.create.button"));
+        setOkButtonText(I18n.t("ims.app.dialog.create.button"));
         setWidth("700px");
         setMaxWidth("95%");
 
@@ -64,38 +64,38 @@ public class CreateApplicationDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        nameField = new TextField(I18n.t("app.dialog.field.name"));
+        nameField = new TextField(I18n.t("ims.app.dialog.field.name"));
         nameField.setRequiredIndicatorVisible(true);
-        nameField.setPlaceholder(I18n.t("app.dialog.field.name.placeholder"));
+        nameField.setPlaceholder(I18n.t("ims.app.dialog.field.name.placeholder"));
         nameField.setWidthFull();
 
-        titleField = new TextField(I18n.t("app.dialog.field.title"));
+        titleField = new TextField(I18n.t("ims.app.dialog.field.title"));
         titleField.setRequiredIndicatorVisible(true);
-        titleField.setPlaceholder(I18n.t("app.dialog.field.title.placeholder"));
+        titleField.setPlaceholder(I18n.t("ims.app.dialog.field.title.placeholder"));
         titleField.setWidthFull();
 
-        codeField = new TextField(I18n.t("app.dialog.field.code"));
-        codeField.setPlaceholder(I18n.t("app.dialog.field.code.placeholder"));
+        codeField = new TextField(I18n.t("ims.app.dialog.field.code"));
+        codeField.setPlaceholder(I18n.t("ims.app.dialog.field.code.placeholder"));
         codeField.setWidthFull();
 
-        categoryField = new TextField(I18n.t("app.dialog.field.category"));
-        categoryField.setPlaceholder(I18n.t("app.dialog.field.category.placeholder"));
+        categoryField = new TextField(I18n.t("ims.app.dialog.field.category"));
+        categoryField.setPlaceholder(I18n.t("ims.app.dialog.field.category.placeholder"));
         categoryField.setWidthFull();
 
-        urlField = new TextField(I18n.t("app.dialog.field.url"));
+        urlField = new TextField(I18n.t("ims.app.dialog.field.url"));
         urlField.setRequiredIndicatorVisible(true);
-        urlField.setPlaceholder(I18n.t("app.dialog.field.url.placeholder"));
+        urlField.setPlaceholder(I18n.t("ims.app.dialog.field.url.placeholder"));
         urlField.setWidthFull();
 
-        orderField = new IntegerField(I18n.t("app.dialog.field.order"));
-        orderField.setPlaceholder(I18n.t("app.dialog.field.order.placeholder"));
+        orderField = new IntegerField(I18n.t("ims.app.dialog.field.order"));
+        orderField.setPlaceholder(I18n.t("ims.app.dialog.field.order.placeholder"));
         orderField.setWidthFull();
 
-        descriptionField = new TextArea(I18n.t("app.dialog.field.description"));
-        descriptionField.setPlaceholder(I18n.t("app.dialog.field.description.placeholder"));
+        descriptionField = new TextArea(I18n.t("ims.app.dialog.field.description"));
+        descriptionField.setPlaceholder(I18n.t("ims.app.dialog.field.description.placeholder"));
         descriptionField.setWidthFull();
 
-        adminStatusCombo = new ComboBox<>(I18n.t("app.dialog.field.admin.status"));
+        adminStatusCombo = new ComboBox<>(I18n.t("ims.app.dialog.field.admin.status"));
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
         adminStatusCombo.setValue(IEnumEnabledBinaryStatus.Types.ENABLED);
         adminStatusCombo.setWidthFull();
@@ -120,7 +120,7 @@ public class CreateApplicationDialog extends BaseActionDialog {
                 .set("justify-content", "center");
         imagePlaceholder.add(new Icon(VaadinIcon.CAMERA));
 
-        uploadImageButton = new Button(I18n.t("app.dialog.field.upload.image"), e -> openCropperDialog());
+        uploadImageButton = new Button(I18n.t("ims.app.dialog.field.upload.image"), e -> openCropperDialog());
         uploadImageButton.setIcon(new Icon(VaadinIcon.UPLOAD));
     }
 
@@ -174,19 +174,19 @@ public class CreateApplicationDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (nameField.getValue().isBlank()) {
-            append(I18n.t("app.dialog.field.name.required"));
+            append(I18n.t("ims.app.dialog.field.name.required"));
             return false;
         }
         if (titleField.getValue().isBlank()) {
-            append(I18n.t("app.dialog.field.title.required"));
+            append(I18n.t("ims.app.dialog.field.title.required"));
             return false;
         }
         if (urlField.getValue().isBlank()) {
-            append(I18n.t("app.dialog.field.url.required"));
+            append(I18n.t("ims.app.dialog.field.url.required"));
             return false;
         }
         if (selectedImageFile == null) {
-            append(I18n.t("app.dialog.create.image.required"));
+            append(I18n.t("ims.app.dialog.create.image.required"));
             return false;
         }
 
@@ -205,30 +205,30 @@ public class CreateApplicationDialog extends BaseActionDialog {
 
             ResponseEntity<ApplicationDto> createResponse = applicationService.create(newApp);
             if (!createResponse.getStatusCode().is2xxSuccessful() || createResponse.getBody() == null) {
-                append(I18n.t("app.dialog.create.failed", createResponse.getStatusCodeValue()));
+                append(I18n.t("ims.app.dialog.create.failed", createResponse.getStatusCodeValue()));
                 return false;
             }
 
             Long appId = createResponse.getBody().getId();
             if (appId == null) {
-                append(I18n.t("app.dialog.create.no.id"));
+                append(I18n.t("ims.app.dialog.create.no.id"));
                 return false;
             }
 
             ResponseEntity<ApplicationDto> uploadResponse = applicationImageService.uploadImage(appId, selectedImageFile);
             if (!uploadResponse.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("app.dialog.create.image.failed", uploadResponse.getStatusCodeValue()));
+                append(I18n.t("ims.app.dialog.create.image.failed", uploadResponse.getStatusCodeValue()));
                 return false;
             }
 
-            append(I18n.t("app.dialog.create.success"));
+            append(I18n.t("ims.app.dialog.create.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
 
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("app.dialog.create.error", e.getMessage()));
+            append(I18n.t("ims.app.dialog.create.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

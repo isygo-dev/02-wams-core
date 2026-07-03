@@ -48,7 +48,7 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
     private final MsgTemplateFileService templateFileService;
 
     private final Div cardsContainer = new Div();
-    private final Button createButton = new Button(I18n.t("template.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button createButton = new Button(I18n.t("mms.msgtemplate.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
     private final ComboBox<TemplateLanguageOption> languageFilter = new ComboBox<>();
@@ -87,7 +87,7 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("template-view");
 
-        H2 header = new H2(I18n.t("template.view.title"));
+        H2 header = new H2(I18n.t("mms.msgtemplate.view.title"));
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         add(header);
@@ -105,30 +105,30 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
         add(loadingBar);
 
         createButton.addClickListener(e -> openCreateTemplateDialog());
-        createButton.setTooltipText(I18n.t("template.view.create.tooltip"));
+        createButton.setTooltipText(I18n.t("mms.msgtemplate.view.create.tooltip"));
 
         refreshButton.addClickListener(e -> resetPaginationAndLoad());
-        refreshButton.setTooltipText(I18n.t("template.view.refresh.tooltip"));
+        refreshButton.setTooltipText(I18n.t("mms.msgtemplate.view.refresh.tooltip"));
 
-        searchField.setPlaceholder(I18n.t("template.view.search.placeholder"));
+        searchField.setPlaceholder(I18n.t("mms.msgtemplate.view.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
-        searchField.setTooltipText(I18n.t("template.view.search.tooltip"));
+        searchField.setTooltipText(I18n.t("mms.msgtemplate.view.search.tooltip"));
         searchField.addValueChangeListener(e -> {
             currentSearch = e.getValue();
             resetPaginationAndLoad();
         });
 
         languageFilter.setItems(
-                new TemplateLanguageOption(I18n.t("template.view.language.all"), null),
-                new TemplateLanguageOption(I18n.t("template.view.language.en"), IEnumLanguage.Types.EN),
-                new TemplateLanguageOption(I18n.t("template.view.language.fr"), IEnumLanguage.Types.FR),
-                new TemplateLanguageOption(I18n.t("template.view.language.ar"), IEnumLanguage.Types.AR)
+                new TemplateLanguageOption(I18n.t("mms.msgtemplate.view.language.all"), null),
+                new TemplateLanguageOption(I18n.t("mms.msgtemplate.view.language.en"), IEnumLanguage.Types.EN),
+                new TemplateLanguageOption(I18n.t("mms.msgtemplate.view.language.fr"), IEnumLanguage.Types.FR),
+                new TemplateLanguageOption(I18n.t("mms.msgtemplate.view.language.ar"), IEnumLanguage.Types.AR)
         );
         languageFilter.setItemLabelGenerator(option -> option.label());
-        languageFilter.setValue(new TemplateLanguageOption(I18n.t("template.view.language.all"), null));
-        languageFilter.setPlaceholder(I18n.t("template.view.language.placeholder"));
-        languageFilter.setTooltipText(I18n.t("template.view.language.tooltip"));
+        languageFilter.setValue(new TemplateLanguageOption(I18n.t("mms.msgtemplate.view.language.all"), null));
+        languageFilter.setPlaceholder(I18n.t("mms.msgtemplate.view.language.placeholder"));
+        languageFilter.setTooltipText(I18n.t("mms.msgtemplate.view.language.tooltip"));
         languageFilter.addValueChangeListener(e -> {
             TemplateLanguageOption option = e.getValue();
             currentLanguageFilter = option != null ? option.value() : null;
@@ -136,12 +136,12 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
         });
 
         nameFilter.setItems(
-                new TemplateNameOption(I18n.t("template.view.name.all"), null)
+                new TemplateNameOption(I18n.t("mms.msgtemplate.view.name.all"), null)
         );
         nameFilter.setItemLabelGenerator(option -> option.label());
-        nameFilter.setValue(new TemplateNameOption(I18n.t("template.view.name.all"), null));
-        nameFilter.setPlaceholder(I18n.t("template.view.name.placeholder"));
-        nameFilter.setTooltipText(I18n.t("template.view.name.tooltip"));
+        nameFilter.setValue(new TemplateNameOption(I18n.t("mms.msgtemplate.view.name.all"), null));
+        nameFilter.setPlaceholder(I18n.t("mms.msgtemplate.view.name.placeholder"));
+        nameFilter.setTooltipText(I18n.t("mms.msgtemplate.view.name.tooltip"));
         nameFilter.addValueChangeListener(e -> {
             TemplateNameOption option = e.getValue();
             currentNameFilter = option != null ? option.value() : null;
@@ -153,8 +153,8 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
 
         pageSizeSelect.setItems(10, 20, 30, 40, 50);
         pageSizeSelect.setValue(10);
-        pageSizeSelect.setPlaceholder(I18n.t("template.view.page.per.page"));
-        pageSizeSelect.setTooltipText(I18n.t("template.view.page.per.page.tooltip"));
+        pageSizeSelect.setPlaceholder(I18n.t("mms.msgtemplate.view.page.per.page"));
+        pageSizeSelect.setTooltipText(I18n.t("mms.msgtemplate.view.page.per.page.tooltip"));
         pageSizeSelect.addValueChangeListener(e -> {
             if (e.getValue() != null) {
                 pageSize = e.getValue();
@@ -168,7 +168,7 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
                 loadTemplatesPage(prevToken);
             }
         });
-        prevButton.setTooltipText(I18n.t("template.view.prev.page.tooltip"));
+        prevButton.setTooltipText(I18n.t("mms.msgtemplate.view.prev.page.tooltip"));
 
         nextButton.addClickListener(e -> {
             if (truncated && currentNextToken != null) {
@@ -176,7 +176,7 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
                 loadTemplatesPage(currentNextToken);
             }
         });
-        nextButton.setTooltipText(I18n.t("template.view.next.page.tooltip"));
+        nextButton.setTooltipText(I18n.t("mms.msgtemplate.view.next.page.tooltip"));
 
         injectResponsiveStyles();
         resetPaginationAndLoad();
@@ -187,7 +187,7 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
             ResponseEntity<List<String>> response = templateService.getTemplateNames();
             if (response.getBody() != null && !response.getBody().isEmpty()) {
                 List<TemplateNameOption> options = new ArrayList<>();
-                options.add(new TemplateNameOption(I18n.t("template.view.name.all"), null));
+                options.add(new TemplateNameOption(I18n.t("mms.msgtemplate.view.name.all"), null));
                 response.getBody().forEach(name ->
                         options.add(new TemplateNameOption(name, name))
                 );
@@ -247,11 +247,11 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
 
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            Notification.show(I18n.t("template.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("mms.msgtemplate.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load templates", ex.getMessage());
         } catch (Exception e) {
-            Notification.show(I18n.t("template.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("mms.msgtemplate.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load templates", e);
         } finally {
@@ -291,11 +291,11 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
 
     private void updatePaginationDisplay() {
         if (totalPages > 0) {
-            pageInfoLabel.setText(I18n.t("template.view.page.info", currentPage, totalPages, numberOfElements));
+            pageInfoLabel.setText(I18n.t("mms.msgtemplate.view.page.info", currentPage, totalPages, numberOfElements));
         } else {
-            pageInfoLabel.setText(I18n.t("template.view.page.info.simple", currentPage, numberOfElements));
+            pageInfoLabel.setText(I18n.t("mms.msgtemplate.view.page.info.simple", currentPage, numberOfElements));
         }
-        totalCountLabel.setText(I18n.t("template.view.total.count", totalElements));
+        totalCountLabel.setText(I18n.t("mms.msgtemplate.view.total.count", totalElements));
 
         prevButton.setEnabled(!previousTokens.isEmpty());
         nextButton.setEnabled(truncated && currentNextToken != null);
@@ -311,8 +311,8 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
             Icon emptyIcon = VaadinIcon.FILE_CODE.create();
             emptyIcon.setSize("48px");
             emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-            H4 emptyTitle = new H4(I18n.t("template.view.empty.title"));
-            Paragraph emptyDesc = new Paragraph(I18n.t("template.view.empty.description"));
+            H4 emptyTitle = new H4(I18n.t("mms.msgtemplate.view.empty.title"));
+            Paragraph emptyDesc = new Paragraph(I18n.t("mms.msgtemplate.view.empty.description"));
             emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);
@@ -338,12 +338,12 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
 
         searchField.setWidth("200px");
 
-        Span languageLabel = new Span(I18n.t("template.view.language.label"));
-        languageLabel.getElement().setAttribute("title", I18n.t("template.view.language.tooltip"));
+        Span languageLabel = new Span(I18n.t("mms.msgtemplate.view.language.label"));
+        languageLabel.getElement().setAttribute("title", I18n.t("mms.msgtemplate.view.language.tooltip"));
         languageFilter.setWidth("120px");
 
-        Span nameLabel = new Span(I18n.t("template.view.name.label"));
-        nameLabel.getElement().setAttribute("title", I18n.t("template.view.name.tooltip"));
+        Span nameLabel = new Span(I18n.t("mms.msgtemplate.view.name.label"));
+        nameLabel.getElement().setAttribute("title", I18n.t("mms.msgtemplate.view.name.tooltip"));
         nameFilter.setWidth("150px");
 
         HorizontalLayout languageLayout = new HorizontalLayout(languageLabel, languageFilter);
@@ -371,7 +371,7 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
         rightGroup.setSpacing(true);
         rightGroup.setAlignItems(FlexComponent.Alignment.END);
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText(I18n.t("template.view.refresh.tooltip"));
+        refreshButton.setTooltipText(I18n.t("mms.msgtemplate.view.refresh.tooltip"));
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         rightGroup.add(refreshButton, createButton);
 

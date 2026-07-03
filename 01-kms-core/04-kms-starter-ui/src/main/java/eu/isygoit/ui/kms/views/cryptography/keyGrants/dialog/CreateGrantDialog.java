@@ -31,11 +31,11 @@ public class CreateGrantDialog extends BaseActionDialog {
     private TextField nameField;
 
     public CreateGrantDialog(String keyId, KmsApiService kmsApiService, ObjectMapper objectMapper, Runnable onSuccess) {
-        super(I18n.t("grant.dialog.create.title"), onSuccess);
+        super(I18n.t("kms.grant.dialog.create.title"), onSuccess);
         this.keyId = keyId;
         this.kmsApiService = kmsApiService;
         this.objectMapper = objectMapper;
-        setOkButtonText(I18n.t("grant.dialog.create.button"));
+        setOkButtonText(I18n.t("kms.grant.dialog.create.button"));
         setWidth("500px");
         buildForm();
     }
@@ -46,40 +46,40 @@ public class CreateGrantDialog extends BaseActionDialog {
         content.setPadding(true);
         content.setWidthFull();
 
-        granteeField = new TextField(I18n.t("grant.dialog.field.grantee"));
+        granteeField = new TextField(I18n.t("kms.grant.dialog.field.grantee"));
         granteeField.setRequired(true);
-        granteeField.setPlaceholder(I18n.t("grant.dialog.field.grantee.placeholder"));
+        granteeField.setPlaceholder(I18n.t("kms.grant.dialog.field.grantee.placeholder"));
         granteeField.setWidthFull();
 
-        retiringField = new TextField(I18n.t("grant.dialog.field.retiring"));
-        retiringField.setPlaceholder(I18n.t("grant.dialog.field.retiring.placeholder"));
+        retiringField = new TextField(I18n.t("kms.grant.dialog.field.retiring"));
+        retiringField.setPlaceholder(I18n.t("kms.grant.dialog.field.retiring.placeholder"));
         retiringField.setWidthFull();
 
-        operationsGroup = new CheckboxGroup<>(I18n.t("grant.dialog.field.operations"));
+        operationsGroup = new CheckboxGroup<>(I18n.t("kms.grant.dialog.field.operations"));
         operationsGroup.setItems(
-                I18n.t("grant.dialog.operation.decrypt"),
-                I18n.t("grant.dialog.operation.encrypt"),
-                I18n.t("grant.dialog.operation.generate.data.key"),
-                I18n.t("grant.dialog.operation.generate.data.key.without.plaintext"),
-                I18n.t("grant.dialog.operation.reencrypt.from"),
-                I18n.t("grant.dialog.operation.reencrypt.to"),
-                I18n.t("grant.dialog.operation.sign"),
-                I18n.t("grant.dialog.operation.verify"),
-                I18n.t("grant.dialog.operation.generate.mac"),
-                I18n.t("grant.dialog.operation.verify.mac"),
-                I18n.t("grant.dialog.operation.get.public.key"),
-                I18n.t("grant.dialog.operation.describe.key"),
-                I18n.t("grant.dialog.operation.retire.grant")
+                I18n.t("kms.grant.dialog.operation.decrypt"),
+                I18n.t("kms.grant.dialog.operation.encrypt"),
+                I18n.t("kms.grant.dialog.operation.generate.data.key"),
+                I18n.t("kms.grant.dialog.operation.generate.data.key.without.plaintext"),
+                I18n.t("kms.grant.dialog.operation.reencrypt.from"),
+                I18n.t("kms.grant.dialog.operation.reencrypt.to"),
+                I18n.t("kms.grant.dialog.operation.sign"),
+                I18n.t("kms.grant.dialog.operation.verify"),
+                I18n.t("kms.grant.dialog.operation.generate.mac"),
+                I18n.t("kms.grant.dialog.operation.verify.mac"),
+                I18n.t("kms.grant.dialog.operation.get.public.key"),
+                I18n.t("kms.grant.dialog.operation.describe.key"),
+                I18n.t("kms.grant.dialog.operation.retire.grant")
         );
         operationsGroup.setRequired(true);
         operationsGroup.setWidthFull();
 
-        constraintsArea = new TextArea(I18n.t("grant.dialog.field.constraints"));
-        constraintsArea.setPlaceholder(I18n.t("grant.dialog.field.constraints.placeholder"));
+        constraintsArea = new TextArea(I18n.t("kms.grant.dialog.field.constraints"));
+        constraintsArea.setPlaceholder(I18n.t("kms.grant.dialog.field.constraints.placeholder"));
         constraintsArea.setHeight("100px");
 
-        nameField = new TextField(I18n.t("grant.dialog.field.name"));
-        nameField.setPlaceholder(I18n.t("grant.dialog.field.name.placeholder"));
+        nameField = new TextField(I18n.t("kms.grant.dialog.field.name"));
+        nameField.setPlaceholder(I18n.t("kms.grant.dialog.field.name.placeholder"));
         nameField.setWidthFull();
 
         content.add(granteeField, retiringField, operationsGroup, constraintsArea, nameField);
@@ -90,22 +90,22 @@ public class CreateGrantDialog extends BaseActionDialog {
     protected boolean onOk() {
         String grantee = granteeField.getValue();
         if (!StringUtils.hasText(grantee)) {
-            append(I18n.t("grant.dialog.field.grantee.required"));
+            append(I18n.t("kms.grant.dialog.field.grantee.required"));
             return false;
         }
         if (!grantee.matches("^wrn:wams:iam::\\d+:.*")) {
-            append(I18n.t("grant.dialog.field.grantee.invalid"));
+            append(I18n.t("kms.grant.dialog.field.grantee.invalid"));
             return false;
         }
 
         String retiring = retiringField.getValue();
         if (StringUtils.hasText(retiring) && !retiring.matches("^wrn:wams:iam::\\d+:.*")) {
-            append(I18n.t("grant.dialog.field.retiring.invalid"));
+            append(I18n.t("kms.grant.dialog.field.retiring.invalid"));
             return false;
         }
 
         if (operationsGroup.getSelectedItems().isEmpty()) {
-            append(I18n.t("grant.dialog.field.operations.required"));
+            append(I18n.t("kms.grant.dialog.field.operations.required"));
             return false;
         }
         List<String> operations = new ArrayList<>(operationsGroup.getSelectedItems());
@@ -121,14 +121,14 @@ public class CreateGrantDialog extends BaseActionDialog {
                         .encryptionContextEquals((Map<String, String>) constraintsMap.get("encryptionContextEquals"))
                         .build();
             } catch (Exception e) {
-                append(I18n.t("grant.dialog.field.constraints.invalid", e.getMessage()));
+                append(I18n.t("kms.grant.dialog.field.constraints.invalid", e.getMessage()));
                 return false;
             }
         }
 
         String name = nameField.getValue();
         if (StringUtils.hasText(name) && name.length() > 128) {
-            append(I18n.t("grant.dialog.field.name.too.long"));
+            append(I18n.t("kms.grant.dialog.field.name.too.long"));
             return false;
         }
 
@@ -143,16 +143,16 @@ public class CreateGrantDialog extends BaseActionDialog {
                     .build();
             ResponseEntity<KmsDtos.CreateGrantResponse> response = kmsApiService.createGrant(keyId, request);
             if (response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("grant.dialog.create.success"));
+                append(I18n.t("kms.grant.dialog.create.success"));
                 return true;
             } else {
-                append(I18n.t("grant.dialog.create.failed", response.getStatusCode()));
+                append(I18n.t("kms.grant.dialog.create.failed", response.getStatusCode()));
                 return false;
             }
         } catch (FeignException ex) {
             append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            append(I18n.t("grant.dialog.create.failed", e.getMessage()));
+            append(I18n.t("kms.grant.dialog.create.failed", e.getMessage()));
         }
 
         return false;

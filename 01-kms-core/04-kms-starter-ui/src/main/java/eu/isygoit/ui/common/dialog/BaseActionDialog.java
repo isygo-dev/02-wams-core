@@ -107,7 +107,7 @@ public abstract class BaseActionDialog extends Dialog {
     }
 
     private Button createOkButton() {
-        Button button = new Button(I18n.t("dialog.base.ok"));
+        Button button = new Button(I18n.t("common.dialog.base.ok"));
         button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         button.addClickListener(e -> {
             clearError();
@@ -124,7 +124,7 @@ public abstract class BaseActionDialog extends Dialog {
     }
 
     private Button createCancelButton() {
-        Button button = new Button(I18n.t("dialog.base.cancel"));
+        Button button = new Button(I18n.t("common.dialog.base.cancel"));
         button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         button.addClickListener(e -> close());
         return button;

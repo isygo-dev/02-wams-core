@@ -47,19 +47,19 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
         titleLayout.setSpacing(true);
         titleLayout.getStyle().set("flex-wrap", "wrap");
 
-        String displayName = calendar.getName() != null ? calendar.getName() : "Calendar " + calendar.getId();
+        String displayName = calendar.getName() != null ? calendar.getName() : I18n.t("cms.calendar.card.default.name", calendar.getId());
         Span titleSpan = buildTitleSpan(displayName, calendar.getDescription());
 
         // Locked status chip
         if (calendar.getLocked() != null && calendar.getLocked()) {
             Span lockChip = buildStatusChip(
-                    I18n.t("calendar.card.status.locked"),
+                    I18n.t("cms.calendar.card.status.locked"),
                     "LOCKED"
             );
             titleLayout.add(titleSpan, lockChip);
         } else {
             Span unlockedChip = buildStatusChip(
-                    I18n.t("calendar.card.status.unlocked"),
+                    I18n.t("cms.calendar.card.status.unlocked"),
                     "UNLOCKED"
             );
             titleLayout.add(titleSpan, unlockedChip);
@@ -70,15 +70,15 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("calendar.card.details.tooltip"));
+        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("cms.calendar.card.details.tooltip"));
         detailsBtn.addClickListener(e -> new VCalendarDetailsDialog(parentView, objectService, calendar.getId()).open());
 
-        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("calendar.card.edit.tooltip"));
+        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("cms.calendar.card.edit.tooltip"));
         editBtn.addClickListener(e -> parentView.openUpdateCalendarDialog(calendar, () -> {
             if (onRefresh != null) onRefresh.run();
         }));
 
-        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("calendar.card.delete.tooltip"));
+        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("cms.calendar.card.delete.tooltip"));
         deleteBtn.addClickListener(e -> new DeleteVCalendarDialog(parentView, objectService, calendar.getId(), () -> {
             if (onRefresh != null) onRefresh.run();
         }).open());
@@ -93,10 +93,10 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
         body.setPadding(false);
         body.getStyle().set("margin-top", "var(--lumo-space-s)");
 
-        body.add(createIconRow(VaadinIcon.CODE, I18n.t("calendar.card.code"), calendar.getCode()));
-        body.add(createIconRow(VaadinIcon.BUILDING, I18n.t("calendar.card.tenant"), calendar.getTenant()));
-        body.add(createIconRow(VaadinIcon.FILE, I18n.t("calendar.card.ics.path"), calendar.getIcsPath()));
-        body.add(createIconRow(VaadinIcon.USER, I18n.t("calendar.card.created.by"), calendar.getCreatedBy()));
+        body.add(createIconRow(VaadinIcon.CODE, I18n.t("cms.calendar.card.code"), calendar.getCode()));
+        body.add(createIconRow(VaadinIcon.BUILDING, I18n.t("cms.calendar.card.tenant"), calendar.getTenant()));
+        body.add(createIconRow(VaadinIcon.FILE, I18n.t("cms.calendar.card.ics.path"), calendar.getIcsPath()));
+        body.add(createIconRow(VaadinIcon.USER, I18n.t("cms.calendar.card.created.by"), calendar.getCreatedBy()));
 
         if (calendar.getDescription() != null && !calendar.getDescription().isBlank()) {
             body.add(createDescriptionRow(calendar.getDescription()));
@@ -143,7 +143,7 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
         iconComponent.getStyle().set("color", "var(--lumo-secondary-text-color)")
                 .set("margin-top", "2px");
 
-        Span labelSpan = new Span(I18n.t("calendar.card.description") + ":");
+        Span labelSpan = new Span(I18n.t("cms.calendar.card.description") + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.addClassName(LumoUtility.FontSize.XXSMALL);
         labelSpan.getStyle().set("min-width", "80px");

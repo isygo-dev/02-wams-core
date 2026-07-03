@@ -28,7 +28,7 @@ public class CategoryDetailsDialog extends NoActionDialog {
     public CategoryDetailsDialog(CategoryManagementView parentView,
                                  CategoryService categoryService,
                                  Long categoryId) {
-        super(I18n.t("category.details.title"));
+        super(I18n.t("dms.category.details.title"));
         this.parentView = parentView;
         this.categoryService = categoryService;
         this.categoryId = categoryId;
@@ -50,14 +50,14 @@ public class CategoryDetailsDialog extends NoActionDialog {
             if (response.getBody() != null) {
                 buildContent(response.getBody());
             } else {
-                add(new Span(I18n.t("category.details.not.found")));
+                add(new Span(I18n.t("dms.category.details.not.found")));
                 addCloseButton();
             }
         } catch (FeignException ex) {
-            add(new Span(I18n.t("category.details.load.error", extractErrorMessage(ex))));
+            add(new Span(I18n.t("dms.category.details.load.error", extractErrorMessage(ex))));
             addCloseButton();
         } catch (Exception e) {
-            add(new Span(I18n.t("category.details.load.error", e.getMessage())));
+            add(new Span(I18n.t("dms.category.details.load.error", e.getMessage())));
             addCloseButton();
         } finally {
             parentView.showLoading(false);
@@ -75,16 +75,16 @@ public class CategoryDetailsDialog extends NoActionDialog {
                 .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
                 .set("gap", "var(--lumo-space-s)");
 
-        addFieldToGrid(infoGrid, VaadinIcon.TAG, I18n.t("category.details.field.name"), category.getName());
-        addFieldToGrid(infoGrid, VaadinIcon.EDIT, I18n.t("category.details.field.description"), category.getDescription());
-        addFieldToGrid(infoGrid, VaadinIcon.USER_CHECK, I18n.t("category.details.field.created.by"), category.getCreatedBy());
-        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR, I18n.t("category.details.field.created.date"),
+        addFieldToGrid(infoGrid, VaadinIcon.TAG, I18n.t("dms.category.details.field.name"), category.getName());
+        addFieldToGrid(infoGrid, VaadinIcon.EDIT, I18n.t("dms.category.details.field.description"), category.getDescription());
+        addFieldToGrid(infoGrid, VaadinIcon.USER_CHECK, I18n.t("dms.category.details.field.created.by"), category.getCreatedBy());
+        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR, I18n.t("dms.category.details.field.created.date"),
                 category.getCreateDate() != null ? DateHelper.formatToHumanReadable(category.getCreateDate()) : null);
-        addFieldToGrid(infoGrid, VaadinIcon.EDIT, I18n.t("category.details.field.updated.by"), category.getUpdatedBy());
-        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR_O, I18n.t("category.details.field.updated.date"),
+        addFieldToGrid(infoGrid, VaadinIcon.EDIT, I18n.t("dms.category.details.field.updated.by"), category.getUpdatedBy());
+        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR_O, I18n.t("dms.category.details.field.updated.date"),
                 category.getUpdateDate() != null ? DateHelper.formatToHumanReadable(category.getUpdateDate()) : null);
 
-        mainLayout.add(createSection(I18n.t("category.details.section.info"), infoGrid));
+        mainLayout.add(createSection(I18n.t("dms.category.details.section.info"), infoGrid));
 
         add(mainLayout);
         addCloseButton();
@@ -130,7 +130,7 @@ public class CategoryDetailsDialog extends NoActionDialog {
     }
 
     private void addCloseButton() {
-        Button closeButton = new Button(I18n.t("category.details.close"), e -> close());
+        Button closeButton = new Button(I18n.t("dms.category.details.close"), e -> close());
         closeButton.addClassName(LumoUtility.Margin.Top.MEDIUM);
         HorizontalLayout buttonBar = new HorizontalLayout(closeButton);
         buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);

@@ -17,14 +17,14 @@ public class DeleteAccountDialog extends PinBaseActionDialog {
                                AccountService accountService,
                                Long accountId,
                                Runnable onSuccess) {
-        super(I18n.t("account.dialog.delete.title"),
-                I18n.t("account.dialog.delete.message"),
+        super(I18n.t("ims.account.dialog.delete.title"),
+                I18n.t("ims.account.dialog.delete.message"),
                 onSuccess);
         this.parentView = parentView;
         this.accountService = accountService;
         this.accountId = accountId;
 
-        setOkButtonText(I18n.t("account.dialog.delete.button"));
+        setOkButtonText(I18n.t("ims.account.dialog.delete.button"));
         addThemeVariantsOkButton(com.vaadin.flow.component.button.ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
@@ -32,7 +32,7 @@ public class DeleteAccountDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append(I18n.t("account.dialog.delete.invalid.code"));
+            append(I18n.t("ims.account.dialog.delete.invalid.code"));
             return false;
         }
 
@@ -40,16 +40,16 @@ public class DeleteAccountDialog extends PinBaseActionDialog {
         try {
             ResponseEntity<?> response = accountService.delete(accountId);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("account.dialog.delete.failed", response.getStatusCode()));
+                append(I18n.t("ims.account.dialog.delete.failed", response.getStatusCode()));
                 return false;
             }
 
-            append(I18n.t("account.dialog.delete.success"));
+            append(I18n.t("ims.account.dialog.delete.success"));
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("account.dialog.delete.error", e.getMessage()));
+            append(I18n.t("ims.account.dialog.delete.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

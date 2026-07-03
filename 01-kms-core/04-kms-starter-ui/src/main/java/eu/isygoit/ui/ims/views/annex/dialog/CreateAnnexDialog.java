@@ -30,12 +30,12 @@ public class CreateAnnexDialog extends BaseActionDialog {
     public CreateAnnexDialog(AnnexManagementView parentView,
                              AnnexService annexService,
                              Runnable onSuccess) {
-        super(I18n.t("annex.dialog.create.title"), onSuccess);
+        super(I18n.t("ims.annex.dialog.create.title"), onSuccess);
         this.parentView = parentView;
         this.annexService = annexService;
         this.onSuccess = onSuccess;
 
-        setOkButtonText(I18n.t("annex.dialog.create.button"));
+        setOkButtonText(I18n.t("ims.annex.dialog.create.button"));
         setWidth("600px");
         setMaxWidth("95%");
 
@@ -44,32 +44,32 @@ public class CreateAnnexDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        tableCodeField = new TextField(I18n.t("annex.dialog.field.table.code"));
+        tableCodeField = new TextField(I18n.t("ims.annex.dialog.field.table.code"));
         tableCodeField.setRequiredIndicatorVisible(true);
-        tableCodeField.setPlaceholder(I18n.t("annex.dialog.field.table.code.placeholder"));
+        tableCodeField.setPlaceholder(I18n.t("ims.annex.dialog.field.table.code.placeholder"));
         tableCodeField.setWidthFull();
 
-        languageCombo = new ComboBox<>(I18n.t("annex.dialog.field.language"));
+        languageCombo = new ComboBox<>(I18n.t("ims.annex.dialog.field.language"));
         languageCombo.setItems(IEnumLanguage.Types.values());
         languageCombo.setRequiredIndicatorVisible(true);
-        languageCombo.setPlaceholder(I18n.t("annex.dialog.field.language.placeholder"));
+        languageCombo.setPlaceholder(I18n.t("ims.annex.dialog.field.language.placeholder"));
         languageCombo.setWidthFull();
 
-        valueField = new TextField(I18n.t("annex.dialog.field.value"));
+        valueField = new TextField(I18n.t("ims.annex.dialog.field.value"));
         valueField.setRequiredIndicatorVisible(true);
-        valueField.setPlaceholder(I18n.t("annex.dialog.field.value.placeholder"));
+        valueField.setPlaceholder(I18n.t("ims.annex.dialog.field.value.placeholder"));
         valueField.setWidthFull();
 
-        descriptionArea = new TextArea(I18n.t("annex.dialog.field.description"));
-        descriptionArea.setPlaceholder(I18n.t("annex.dialog.field.description.placeholder"));
+        descriptionArea = new TextArea(I18n.t("ims.annex.dialog.field.description"));
+        descriptionArea.setPlaceholder(I18n.t("ims.annex.dialog.field.description.placeholder"));
         descriptionArea.setWidthFull();
 
-        referenceField = new TextField(I18n.t("annex.dialog.field.reference"));
-        referenceField.setPlaceholder(I18n.t("annex.dialog.field.reference.placeholder"));
+        referenceField = new TextField(I18n.t("ims.annex.dialog.field.reference"));
+        referenceField.setPlaceholder(I18n.t("ims.annex.dialog.field.reference.placeholder"));
         referenceField.setWidthFull();
 
-        orderField = new IntegerField(I18n.t("annex.dialog.field.order"));
-        orderField.setPlaceholder(I18n.t("annex.dialog.field.order.placeholder"));
+        orderField = new IntegerField(I18n.t("ims.annex.dialog.field.order"));
+        orderField.setPlaceholder(I18n.t("ims.annex.dialog.field.order.placeholder"));
         orderField.setWidthFull();
     }
 
@@ -88,15 +88,15 @@ public class CreateAnnexDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (tableCodeField.getValue().isBlank()) {
-            append(I18n.t("annex.dialog.field.table.code.required"));
+            append(I18n.t("ims.annex.dialog.field.table.code.required"));
             return false;
         }
         if (languageCombo.getValue() == null) {
-            append(I18n.t("annex.dialog.field.language.required"));
+            append(I18n.t("ims.annex.dialog.field.language.required"));
             return false;
         }
         if (valueField.getValue().isBlank()) {
-            append(I18n.t("annex.dialog.field.value.required"));
+            append(I18n.t("ims.annex.dialog.field.value.required"));
             return false;
         }
 
@@ -113,17 +113,17 @@ public class CreateAnnexDialog extends BaseActionDialog {
 
             ResponseEntity<AnnexDto> response = annexService.create(newAnnex);
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                append(I18n.t("annex.dialog.create.failed", response.getStatusCodeValue()));
+                append(I18n.t("ims.annex.dialog.create.failed", response.getStatusCodeValue()));
                 return false;
             }
 
-            append(I18n.t("annex.dialog.create.success"));
+            append(I18n.t("ims.annex.dialog.create.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("annex.dialog.create.error", e.getMessage()));
+            append(I18n.t("ims.annex.dialog.create.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

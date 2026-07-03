@@ -28,12 +28,12 @@ public class CreateVCalendarDialog extends BaseActionDialog {
     public CreateVCalendarDialog(VCalendarManagementView parentView,
                                  VCalendarService calendarService,
                                  Runnable onSuccess) {
-        super(I18n.t("calendar.dialog.create.title"), onSuccess);
+        super(I18n.t("cms.calendar.dialog.create.title"), onSuccess);
         this.parentView = parentView;
         this.calendarService = calendarService;
         this.onSuccess = onSuccess;
 
-        setOkButtonText(I18n.t("calendar.dialog.create.button"));
+        setOkButtonText(I18n.t("cms.calendar.dialog.create.button"));
         setWidth("600px");
         setMaxWidth("95%");
 
@@ -42,29 +42,29 @@ public class CreateVCalendarDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        tenantField = new TextField(I18n.t("calendar.dialog.field.tenant"));
+        tenantField = new TextField(I18n.t("cms.calendar.dialog.field.tenant"));
         tenantField.setRequiredIndicatorVisible(true);
-        tenantField.setPlaceholder(I18n.t("calendar.dialog.field.tenant.placeholder"));
+        tenantField.setPlaceholder(I18n.t("cms.calendar.dialog.field.tenant.placeholder"));
         tenantField.setWidthFull();
 
-        codeField = new TextField(I18n.t("calendar.dialog.field.code"));
-        codeField.setPlaceholder(I18n.t("calendar.dialog.field.code.placeholder"));
+        codeField = new TextField(I18n.t("cms.calendar.dialog.field.code"));
+        codeField.setPlaceholder(I18n.t("cms.calendar.dialog.field.code.placeholder"));
         codeField.setWidthFull();
 
-        nameField = new TextField(I18n.t("calendar.dialog.field.name"));
+        nameField = new TextField(I18n.t("cms.calendar.dialog.field.name"));
         nameField.setRequiredIndicatorVisible(true);
-        nameField.setPlaceholder(I18n.t("calendar.dialog.field.name.placeholder"));
+        nameField.setPlaceholder(I18n.t("cms.calendar.dialog.field.name.placeholder"));
         nameField.setWidthFull();
 
-        icsPathField = new TextField(I18n.t("calendar.dialog.field.ics.path"));
-        icsPathField.setPlaceholder(I18n.t("calendar.dialog.field.ics.path.placeholder"));
+        icsPathField = new TextField(I18n.t("cms.calendar.dialog.field.ics.path"));
+        icsPathField.setPlaceholder(I18n.t("cms.calendar.dialog.field.ics.path.placeholder"));
         icsPathField.setWidthFull();
 
-        lockedCheckbox = new Checkbox(I18n.t("calendar.dialog.field.locked"));
+        lockedCheckbox = new Checkbox(I18n.t("cms.calendar.dialog.field.locked"));
         lockedCheckbox.setWidthFull();
 
-        descriptionArea = new TextArea(I18n.t("calendar.dialog.field.description"));
-        descriptionArea.setPlaceholder(I18n.t("calendar.dialog.field.description.placeholder"));
+        descriptionArea = new TextArea(I18n.t("cms.calendar.dialog.field.description"));
+        descriptionArea.setPlaceholder(I18n.t("cms.calendar.dialog.field.description.placeholder"));
         descriptionArea.setWidthFull();
         descriptionArea.setHeight("100px");
     }
@@ -84,11 +84,11 @@ public class CreateVCalendarDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (tenantField.getValue().isBlank()) {
-            append(I18n.t("calendar.dialog.field.tenant.required"));
+            append(I18n.t("cms.calendar.dialog.field.tenant.required"));
             return false;
         }
         if (nameField.getValue().isBlank()) {
-            append(I18n.t("calendar.dialog.field.name.required"));
+            append(I18n.t("cms.calendar.dialog.field.name.required"));
             return false;
         }
 
@@ -105,17 +105,17 @@ public class CreateVCalendarDialog extends BaseActionDialog {
 
             ResponseEntity<VCalendarDto> response = calendarService.create(newCalendar);
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                append(I18n.t("calendar.dialog.create.failed", response.getStatusCodeValue()));
+                append(I18n.t("cms.calendar.dialog.create.failed", response.getStatusCodeValue()));
                 return false;
             }
 
-            append(I18n.t("calendar.dialog.create.success"));
+            append(I18n.t("cms.calendar.dialog.create.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("calendar.dialog.create.error", e.getMessage()));
+            append(I18n.t("cms.calendar.dialog.create.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

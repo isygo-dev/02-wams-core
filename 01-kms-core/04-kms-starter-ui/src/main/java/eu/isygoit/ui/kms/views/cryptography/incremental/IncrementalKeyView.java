@@ -49,7 +49,7 @@ public class IncrementalKeyView extends ManagementCompositeVerticalView {
     private final Div cardsContainer = new Div();
     private final TextField searchField = new TextField();
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
-    private final Button subscribeButton = new Button(I18n.t("incremental.key.subscribe.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button subscribeButton = new Button(I18n.t("kms.incremental.key.subscribe.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final ProgressBar loadingBar = new ProgressBar();
 
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
@@ -81,7 +81,7 @@ public class IncrementalKeyView extends ManagementCompositeVerticalView {
         layout.setSpacing(true);
         layout.addClassName("incremental-keys-view");
 
-        H2 header = new H2(I18n.t("incremental.key.title"));
+        H2 header = new H2(I18n.t("kms.incremental.key.title"));
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         layout.add(header);
@@ -102,12 +102,12 @@ public class IncrementalKeyView extends ManagementCompositeVerticalView {
             currentPage = 0;
             loadNextCodes();
         });
-        refreshButton.setTooltipText(I18n.t("incremental.key.refresh.tooltip"));
+        refreshButton.setTooltipText(I18n.t("kms.incremental.key.refresh.tooltip"));
 
         subscribeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         subscribeButton.addClickListener(e -> openSubscribeDialog());
 
-        searchField.setPlaceholder(I18n.t("incremental.key.search.placeholder"));
+        searchField.setPlaceholder(I18n.t("kms.incremental.key.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.addValueChangeListener(e -> {
@@ -201,7 +201,7 @@ public class IncrementalKeyView extends ManagementCompositeVerticalView {
             updatePaginationDisplay();
             renderCards();
         } catch (Exception e) {
-            Notification.show(I18n.t("incremental.key.load.error", e.getMessage()), 5000,
+            Notification.show(I18n.t("kms.incremental.key.load.error", e.getMessage()), 5000,
                             Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
@@ -211,11 +211,11 @@ public class IncrementalKeyView extends ManagementCompositeVerticalView {
 
     private void updatePaginationDisplay() {
         if (totalPages > 0) {
-            pageInfoLabel.setText(I18n.t("incremental.key.page.info", currentPage + 1, totalPages));
+            pageInfoLabel.setText(I18n.t("kms.incremental.key.page.info", currentPage + 1, totalPages));
         } else {
-            pageInfoLabel.setText(I18n.t("incremental.key.page.info", 0, 0));
+            pageInfoLabel.setText(I18n.t("kms.incremental.key.page.info", 0, 0));
         }
-        totalCountLabel.setText(I18n.t("incremental.key.total.count", totalElements));
+        totalCountLabel.setText(I18n.t("kms.incremental.key.total.count", totalElements));
         prevButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(currentPage + 1 < totalPages);
     }
@@ -229,8 +229,8 @@ public class IncrementalKeyView extends ManagementCompositeVerticalView {
             Icon emptyIcon = VaadinIcon.KEY.create();
             emptyIcon.setSize("48px");
             emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-            H4 emptyTitle = new H4(I18n.t("incremental.key.empty.title"));
-            Paragraph emptyDesc = new Paragraph(I18n.t("incremental.key.empty.description"));
+            H4 emptyTitle = new H4(I18n.t("kms.incremental.key.empty.title"));
+            Paragraph emptyDesc = new Paragraph(I18n.t("kms.incremental.key.empty.description"));
             emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);
@@ -266,7 +266,7 @@ public class IncrementalKeyView extends ManagementCompositeVerticalView {
                 loadNextCodes();
             }
         } catch (Exception e) {
-            Notification.show(I18n.t("incremental.key.refresh.card.error", e.getMessage()), 3000,
+            Notification.show(I18n.t("kms.incremental.key.refresh.card.error", e.getMessage()), 3000,
                             Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
@@ -275,12 +275,12 @@ public class IncrementalKeyView extends ManagementCompositeVerticalView {
     private void deleteConfig(Long id) {
         try {
             nextCodeService.delete(id);
-            Notification.show(I18n.t("incremental.key.delete.success"), 3000,
+            Notification.show(I18n.t("kms.incremental.key.delete.success"), 3000,
                             Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             loadNextCodes();
         } catch (Exception e) {
-            Notification.show(I18n.t("incremental.key.delete.failed", e.getMessage()), 5000,
+            Notification.show(I18n.t("kms.incremental.key.delete.failed", e.getMessage()), 5000,
                             Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }

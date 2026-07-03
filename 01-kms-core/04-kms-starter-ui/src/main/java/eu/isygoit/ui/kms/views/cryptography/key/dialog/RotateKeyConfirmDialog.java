@@ -21,13 +21,13 @@ public class RotateKeyConfirmDialog extends PinBaseActionDialog {
                                   KmsApiService kmsApiService,
                                   String keyId,
                                   Runnable onSuccess) {
-        super(I18n.t("key.dialog.rotate.title"),
-                I18n.t("key.dialog.rotate.message"),
+        super(I18n.t("kms.key.dialog.rotate.title"),
+                I18n.t("kms.key.dialog.rotate.message"),
                 onSuccess);
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
-        setOkButtonText(I18n.t("key.dialog.rotate.button"));
+        setOkButtonText(I18n.t("kms.key.dialog.rotate.button"));
         addThemeVariantsOkButton(com.vaadin.flow.component.button.ButtonVariant.LUMO_WARNING);
         setWidth("450px");
     }
@@ -38,12 +38,12 @@ public class RotateKeyConfirmDialog extends PinBaseActionDialog {
         try {
             ResponseEntity<RotateKeyResponse> response = kmsApiService.rotateKey(keyId);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                String errorMsg = I18n.t("key.dialog.rotate.failed", response.getStatusCode());
+                String errorMsg = I18n.t("kms.key.dialog.rotate.failed", response.getStatusCode());
                 this.append(errorMsg);
                 return false;
             }
 
-            Notification.show(I18n.t("key.dialog.rotate.success"), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("kms.key.dialog.rotate.success"), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
             return true;
@@ -51,7 +51,7 @@ public class RotateKeyConfirmDialog extends PinBaseActionDialog {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             this.append(errorMsg);
         } catch (Exception e) {
-            String errorMsg = I18n.t("key.dialog.rotate.error", e.getMessage());
+            String errorMsg = I18n.t("kms.key.dialog.rotate.error", e.getMessage());
             this.append(errorMsg);
         } finally {
             parentView.showLoading(false);

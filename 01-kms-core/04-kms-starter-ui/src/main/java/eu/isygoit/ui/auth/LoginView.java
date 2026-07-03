@@ -22,6 +22,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.request.AccountAuthTypeRequest;
 import eu.isygoit.dto.response.UserContext;
 import eu.isygoit.enums.IEnumAuth;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.PublicAuthService;
 import eu.isygoit.util.SecurityUtils;
 import jakarta.annotation.security.PermitAll;
@@ -38,9 +39,9 @@ import org.springframework.stereotype.Component;
 @PermitAll
 public class LoginView extends BaseLoginView {
 
-    private final TextField tenantField = new TextField("Organisation");
-    private final TextField usernameField = new TextField("Login");
-    private final Button continueButton = new Button("Continue", VaadinIcon.ARROW_RIGHT.create());
+    private final TextField tenantField = new TextField(I18n.t("auth.login.field.tenant.label"));
+    private final TextField usernameField = new TextField(I18n.t("auth.login.field.username.label"));
+    private final Button continueButton = new Button(I18n.t("auth.login.button.continue"), VaadinIcon.ARROW_RIGHT.create());
     private final Div errorContainer = new Div();
 
     @Autowired
@@ -61,20 +62,20 @@ public class LoginView extends BaseLoginView {
         logo.setColorIndex(0);
         logo.setWidth("64px");
         logo.setHeight("64px");
-        H2 title = new H2("KMS · IMS");
+        H2 title = new H2(I18n.t("auth.common.brand.title"));
         title.addClassName(LumoUtility.FontWeight.BOLD);
         title.addClassName(LumoUtility.Margin.NONE);
-        Paragraph subtitle = new Paragraph("Key & Identity Management");
+        Paragraph subtitle = new Paragraph(I18n.t("auth.common.brand.subtitle"));
         subtitle.addClassName(LumoUtility.TextColor.SECONDARY);
         subtitle.addClassName(LumoUtility.FontSize.SMALL);
         brand.add(logo, title, subtitle);
 
         // Tenant + Login fields
         tenantField.setWidthFull();
-        tenantField.setPlaceholder("Your organisation");
+        tenantField.setPlaceholder(I18n.t("auth.login.field.tenant.placeholder"));
         tenantField.setPrefixComponent(VaadinIcon.BUILDING.create());
         usernameField.setWidthFull();
-        usernameField.setPlaceholder("Username");
+        usernameField.setPlaceholder(I18n.t("auth.login.field.username.placeholder"));
         usernameField.setPrefixComponent(VaadinIcon.USER.create());
 
         // Continue button
@@ -87,11 +88,11 @@ public class LoginView extends BaseLoginView {
         errorContainer.setVisible(false);
 
         // Register link
-        Anchor registerLink = new Anchor("register", "Create an account");
+        Anchor registerLink = new Anchor("register", I18n.t("auth.login.link.register"));
         registerLink.addClassName("register-link");
 
         // Footer
-        Paragraph footer = new Paragraph("© 2026 KMS/IMS Platform");
+        Paragraph footer = new Paragraph(I18n.t("auth.common.footer"));
         footer.addClassName(LumoUtility.TextColor.TERTIARY);
         footer.addClassName(LumoUtility.FontSize.XXSMALL);
         footer.addClassName(LumoUtility.Margin.Top.MEDIUM);
@@ -121,8 +122,9 @@ public class LoginView extends BaseLoginView {
         String username = usernameField.getValue().trim().toLowerCase();
 
         if (tenant.isEmpty() || username.isEmpty()) {
-            showError("Organisation and Login are required");
-            errorContainer.setText("Organisation and Login are required");
+            String message = I18n.t("auth.login.error.requiredFields");
+            showError(message);
+            errorContainer.setText(message);
             errorContainer.setVisible(true);
             return;
         }
@@ -172,12 +174,13 @@ public class LoginView extends BaseLoginView {
                         targetView = "login/qr";
                         break;
                     case TOKEN:
-                        Notification.show("Token-based login is not supported in UI yet.", 3000,
+                        Notification.show(I18n.t("auth.login.warning.tokenUnsupported"), 3000,
                                 Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_WARNING);
                         return;
                     default:
-                        showError("Unsupported authentication type: " + authType);
-                        errorContainer.setText("Unsupported authentication type: " + authType);
+                        String unsupportedMessage = I18n.t("auth.login.error.unsupportedAuthType", authType);
+                        showError(unsupportedMessage);
+                        errorContainer.setText(unsupportedMessage);
                         errorContainer.setVisible(true);
                         return;
                 }
@@ -186,13 +189,15 @@ public class LoginView extends BaseLoginView {
                     UI.getCurrent().navigate(targetView + query.toString());
                 }
             } else {
-                showError("Unable to determine authentication method. Please check your credentials.");
-                errorContainer.setText("Unable to determine authentication method. Please check your credentials.");
+                String message = I18n.t("auth.login.error.authMethodUnavailable");
+                showError(message);
+                errorContainer.setText(message);
                 errorContainer.setVisible(true);
             }
         } catch (Exception ex) {
-            showError("Service unavailable. Please try again later.");
-            errorContainer.setText("Service unavailable. Please try again later.");
+            String message = I18n.t("auth.login.error.serviceUnavailable");
+            showError(message);
+            errorContainer.setText(message);
             errorContainer.setVisible(true);
         }
     }

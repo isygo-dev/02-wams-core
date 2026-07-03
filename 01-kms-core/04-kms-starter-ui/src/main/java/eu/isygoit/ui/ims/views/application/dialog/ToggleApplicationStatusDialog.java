@@ -22,10 +22,10 @@ public class ToggleApplicationStatusDialog extends PinBaseActionDialog {
                                          IEnumEnabledBinaryStatus.Types currentStatus,
                                          Runnable onSuccess) {
         super(
-                currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("app.dialog.toggle.title.disable") : I18n.t("app.dialog.toggle.title.enable"),
+                currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("ims.app.dialog.toggle.title.disable") : I18n.t("ims.app.dialog.toggle.title.enable"),
                 currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED
-                        ? I18n.t("app.dialog.toggle.message.disable")
-                        : I18n.t("app.dialog.toggle.message.enable"),
+                        ? I18n.t("ims.app.dialog.toggle.message.disable")
+                        : I18n.t("ims.app.dialog.toggle.message.enable"),
                 onSuccess,
                 false // requirePin = false (simple confirmation)
         );
@@ -34,7 +34,7 @@ public class ToggleApplicationStatusDialog extends PinBaseActionDialog {
         this.applicationId = applicationId;
         this.currentStatus = currentStatus;
 
-        setOkButtonText(currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("app.dialog.toggle.button.disable") : I18n.t("app.dialog.toggle.button.enable"));
+        setOkButtonText(currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("ims.app.dialog.toggle.button.disable") : I18n.t("ims.app.dialog.toggle.button.enable"));
         setWidth("450px");
     }
 
@@ -48,16 +48,16 @@ public class ToggleApplicationStatusDialog extends PinBaseActionDialog {
 
             ResponseEntity<ApplicationDto> response = applicationService.updateStatus(applicationId, newStatus);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("app.dialog.toggle.failed", response.getStatusCodeValue()));
+                append(I18n.t("ims.app.dialog.toggle.failed", response.getStatusCodeValue()));
                 return false;
             }
 
-            append(I18n.t("app.dialog.toggle.success." + (newStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? "enable" : "disable")));
+            append(I18n.t("ims.app.dialog.toggle.success." + (newStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? "enable" : "disable")));
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("app.dialog.toggle.error", e.getMessage()));
+            append(I18n.t("ims.app.dialog.toggle.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

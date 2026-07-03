@@ -21,7 +21,7 @@ public class ImageCropperDialog extends Dialog {
     private final Button applyButton;
 
     public ImageCropperDialog(Consumer<MultipartFile> onImageCropped) {
-        setHeaderTitle(I18n.t("dialog.image.cropper.title"));
+        setHeaderTitle(I18n.t("common.dialog.image.cropper.title"));
         setWidth("90%");
         setMaxWidth("500px");
         setDraggable(false);
@@ -32,14 +32,14 @@ public class ImageCropperDialog extends Dialog {
         imageCropper = new ImageCropper();
         imageCropper.setWidthFull();
 
-        applyButton = new Button(I18n.t("dialog.image.cropper.apply"), e -> {
+        applyButton = new Button(I18n.t("common.dialog.image.cropper.apply"), e -> {
             MultipartFile cropped = imageCropper.getValue();
             if (cropped != null && onImageCropped != null) {
                 onImageCropped.accept(cropped);
-                Notification.show(I18n.t("dialog.image.cropper.crop.success"), 3000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("common.dialog.image.cropper.crop.success"), 3000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } else {
-                Notification.show(I18n.t("dialog.image.cropper.no.image"), 3000, Notification.Position.BOTTOM_END)
+                Notification.show(I18n.t("common.dialog.image.cropper.no.image"), 3000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
             }
             close();
@@ -51,7 +51,7 @@ public class ImageCropperDialog extends Dialog {
             applyButton.setEnabled(event.getValue() != null);
         });
 
-        Button cancelButton = new Button(I18n.t("dialog.image.cropper.cancel"), e -> close());
+        Button cancelButton = new Button(I18n.t("common.dialog.image.cropper.cancel"), e -> close());
         cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
         HorizontalLayout buttonLayout = new HorizontalLayout(cancelButton, applyButton);

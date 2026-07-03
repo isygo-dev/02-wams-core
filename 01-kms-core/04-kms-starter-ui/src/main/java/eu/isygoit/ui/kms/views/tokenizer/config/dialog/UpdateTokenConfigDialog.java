@@ -20,17 +20,17 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
     private TextField codeField;
 
     public UpdateTokenConfigDialog(KmsTokenConfigService tokenConfigService, KmsApiService kmsApiService, TokenConfigDto dto, Runnable onSuccess) {
-        super(I18n.t("dialog.token.update.title"), onSuccess, kmsApiService);
+        super(I18n.t("kms.dialog.token.update.title"), onSuccess, kmsApiService);
         this.tokenConfigService = tokenConfigService;
         this.original = dto;
-        setOkButtonText(I18n.t("dialog.token.save.button"));
+        setOkButtonText(I18n.t("kms.dialog.token.save.button"));
         initUI();
         addCodeFieldToMetadataCard();
         bindData();
     }
 
     private void addCodeFieldToMetadataCard() {
-        codeField = new TextField(I18n.t("dialog.token.code"));
+        codeField = new TextField(I18n.t("kms.dialog.token.code"));
         codeField.setReadOnly(true);
         codeField.setWidthFull();
         VerticalLayout metaForm = (VerticalLayout) metadataCard.getChildren().toArray()[1];
@@ -52,7 +52,7 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
 
         // Handle key source selection
         if (StringUtils.hasText(original.getKmsKeyId())) {
-            keySourceGroup.setValue(I18n.t("dialog.token.key.source.kms"));
+            keySourceGroup.setValue(I18n.t("kms.dialog.token.key.source.kms"));
             if (availableKeyOptions != null) {
                 KeyOption selected = availableKeyOptions.stream()
                         .filter(opt -> opt.getKeyId().equals(original.getKmsKeyId()))
@@ -62,7 +62,7 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
             }
             // No custom key fields to populate
         } else {
-            keySourceGroup.setValue(I18n.t("dialog.token.key.source.custom"));
+            keySourceGroup.setValue(I18n.t("kms.dialog.token.key.source.custom"));
             signatureAlgorithmCombo.setValue(original.getSignatureAlgorithm());
             String storedKey = original.getSecretKey();
             if (HMAC_ALGORITHMS.contains(original.getSignatureAlgorithm())) {
@@ -71,7 +71,7 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
             } else if (ASYMMETRIC_ALGORITHMS.contains(original.getSignatureAlgorithm())) {
                 privateKeyArea.setValue(storedKey != null ? storedKey : "");
                 publicKeyArea.setValue(original.getPublicKey() != null ? original.getPublicKey() :
-                        I18n.t("dialog.token.public.key.not.stored"));
+                        I18n.t("kms.dialog.token.public.key.not.stored"));
                 updateCryptographySection(original.getSignatureAlgorithm());
             }
         }
@@ -81,7 +81,7 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
     protected boolean onOk() {
         IEnumToken.Types tokenType = tokenTypeCombo.getValue();
         if (tokenType == null) {
-            append(I18n.t("dialog.token.type.required"));
+            append(I18n.t("kms.dialog.token.type.required"));
             return false;
         }
 
@@ -95,11 +95,11 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
                 .audience(getAudienceList())
                 .lifeTimeInMs(lifeTime);
 
-        boolean useKmsKey = I18n.t("dialog.token.key.source.kms").equals(keySourceGroup.getValue());
+        boolean useKmsKey = I18n.t("kms.dialog.token.key.source.kms").equals(keySourceGroup.getValue());
         if (useKmsKey) {
             KeyOption selected = kmsKeyCombo.getValue();
             if (selected == null) {
-                append(I18n.t("dialog.token.kms.select"));
+                append(I18n.t("kms.dialog.token.kms.select"));
                 return false;
             }
             builder.kmsKeyId(selected.getKeyId())
@@ -109,7 +109,7 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
         } else {
             String signatureAlgorithm = signatureAlgorithmCombo.getValue();
             if (signatureAlgorithm == null || signatureAlgorithm.isBlank()) {
-                append(I18n.t("dialog.token.algorithm.required"));
+                append(I18n.t("kms.dialog.token.algorithm.required"));
                 return false;
             }
             builder.signatureAlgorithm(signatureAlgorithm);
@@ -117,7 +117,7 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
             if (HMAC_ALGORITHMS.contains(signatureAlgorithm)) {
                 String secretKey = secretKeyField.getValue();
                 if (secretKey == null || secretKey.isBlank()) {
-                    append(I18n.t("dialog.token.secret.required", signatureAlgorithm));
+                    append(I18n.t("kms.dialog.token.secret.required", signatureAlgorithm));
                     return false;
                 }
                 if (!validateHmacKey(signatureAlgorithm, secretKey)) return false;
@@ -126,13 +126,13 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
             } else if (ASYMMETRIC_ALGORITHMS.contains(signatureAlgorithm)) {
                 String privateKey = privateKeyArea.getValue();
                 if (privateKey == null || privateKey.isBlank()) {
-                    append(I18n.t("dialog.token.private.required", signatureAlgorithm));
+                    append(I18n.t("kms.dialog.token.private.required", signatureAlgorithm));
                     return false;
                 }
                 secretOrPrivateKey = privateKey;
                 builder.publicKey(publicKeyArea.getValue());
             } else {
-                append(I18n.t("dialog.token.unsupported.algorithm", signatureAlgorithm));
+                append(I18n.t("kms.dialog.token.unsupported.algorithm", signatureAlgorithm));
                 return false;
             }
             builder.secretKey(secretOrPrivateKey)
@@ -147,7 +147,7 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
                 onSaveSuccess();
                 return true;
             } else {
-                append(I18n.t("dialog.token.update.failed", response.getStatusCode()));
+                append(I18n.t("kms.dialog.token.update.failed", response.getStatusCode()));
                 return false;
             }
         } catch (FeignException ex) {
@@ -161,6 +161,6 @@ public class UpdateTokenConfigDialog extends TokenConfigDialogBase {
 
     @Override
     protected void onSaveSuccess() {
-        append(I18n.t("dialog.token.updated"));
+        append(I18n.t("kms.dialog.token.updated"));
     }
 }

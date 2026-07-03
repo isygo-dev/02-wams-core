@@ -31,13 +31,13 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
                                  MsgTemplateFileService templateFileService,
                                  MsgTemplateDto template,
                                  Runnable onSuccess) {
-        super(I18n.t("template.dialog.edit.title"),
+        super(I18n.t("mms.msgtemplate.dialog.edit.title"),
                 null,
                 templateService,
                 templateFileService,
                 onSuccess);
         this.template = template;
-        setOkButtonText(I18n.t("template.dialog.edit.button"));
+        setOkButtonText(I18n.t("mms.msgtemplate.dialog.edit.button"));
         buildContent();
         prefillData();
     }
@@ -49,29 +49,29 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
                 new FormLayout.ResponsiveStep("500px", 2)
         );
 
-        codeField = new TextField(I18n.t("template.dialog.edit.field.code"));
-        codeField.setPlaceholder(I18n.t("template.dialog.edit.field.code.placeholder"));
+        codeField = new TextField(I18n.t("mms.msgtemplate.dialog.edit.field.code"));
+        codeField.setPlaceholder(I18n.t("mms.msgtemplate.dialog.edit.field.code.placeholder"));
         codeField.setRequiredIndicatorVisible(true);
         codeField.setReadOnly(true); // Code is immutable
         codeField.setWidthFull();
 
-        tenantField = new TextField(I18n.t("template.dialog.edit.field.tenant"));
-        tenantField.setPlaceholder(I18n.t("template.dialog.edit.field.tenant.placeholder"));
+        tenantField = new TextField(I18n.t("mms.msgtemplate.dialog.edit.field.tenant"));
+        tenantField.setPlaceholder(I18n.t("mms.msgtemplate.dialog.edit.field.tenant.placeholder"));
         tenantField.setRequiredIndicatorVisible(true);
         tenantField.setReadOnly(true); // Tenant is immutable
         tenantField.setWidthFull();
 
-        nameCombo = new ComboBox<>(I18n.t("template.dialog.edit.field.name"));
+        nameCombo = new ComboBox<>(I18n.t("mms.msgtemplate.dialog.edit.field.name"));
         nameCombo.setItems(IEnumEmailTemplate.Types.values());
         nameCombo.setRequiredIndicatorVisible(true);
         nameCombo.setWidthFull();
 
-        descriptionField = new TextArea(I18n.t("template.dialog.edit.field.description"));
-        descriptionField.setPlaceholder(I18n.t("template.dialog.edit.field.description.placeholder"));
+        descriptionField = new TextArea(I18n.t("mms.msgtemplate.dialog.edit.field.description"));
+        descriptionField.setPlaceholder(I18n.t("mms.msgtemplate.dialog.edit.field.description.placeholder"));
         descriptionField.setWidthFull();
         descriptionField.setHeight("80px");
 
-        languageCombo = new ComboBox<>(I18n.t("template.dialog.edit.field.language"));
+        languageCombo = new ComboBox<>(I18n.t("mms.msgtemplate.dialog.edit.field.language"));
         languageCombo.setItems(IEnumLanguage.Types.values());
         languageCombo.setWidthFull();
 
@@ -94,7 +94,7 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
                 .set("border", "1px dashed var(--lumo-contrast-30pct)")
                 .set("border-radius", "var(--lumo-border-radius-m)");
 
-        Span uploadLabel = new Span(I18n.t("template.dialog.edit.upload.new.file"));
+        Span uploadLabel = new Span(I18n.t("mms.msgtemplate.dialog.edit.upload.new.file"));
         uploadLabel.getStyle().set("font-weight", "bold");
         uploadSection.add(uploadLabel, fileUpload, fileInfoArea);
         contentArea.add(uploadSection);
@@ -114,7 +114,7 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
         clearErrors();
 
         if (nameCombo.getValue() == null) {
-            append(I18n.t("template.dialog.edit.error.name.required"));
+            append(I18n.t("mms.msgtemplate.dialog.edit.error.name.required"));
             return false;
         }
 
@@ -133,7 +133,7 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
             if (hasFileUploaded()) {
                 MultipartFile uploadedFile = getUploadedFile();
                 if (uploadedFile == null || uploadedFile.isEmpty()) {
-                    append(I18n.t("template.dialog.edit.error.file.invalid"));
+                    append(I18n.t("mms.msgtemplate.dialog.edit.error.file.invalid"));
                     return false;
                 }
                 // Use MsgTemplateFileService for update with new file
@@ -146,20 +146,20 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
             }
 
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("template.dialog.edit.failed",
-                        response.getBody() != null ? response.getBody().toString() : "unknown error"));
+                append(I18n.t("mms.msgtemplate.dialog.edit.failed",
+                        response.getBody() != null ? response.getBody().toString() : I18n.t("mms.common.error.unknown")));
                 return false;
             }
 
-            showSuccess(I18n.t("template.dialog.edit.success"));
+            showSuccess(I18n.t("mms.msgtemplate.dialog.edit.success"));
             return true;
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ?
                     ex.contentUTF8() : ex.getMessage();
-            append(I18n.t("template.dialog.edit.error", errorMsg));
+            append(I18n.t("mms.msgtemplate.dialog.edit.error", errorMsg));
             log.error("Failed to update template {}", template.getId(), ex);
         } catch (Exception e) {
-            append(I18n.t("template.dialog.edit.error", e.getMessage()));
+            append(I18n.t("mms.msgtemplate.dialog.edit.error", e.getMessage()));
             log.error("Failed to update template {}", template.getId(), e);
         }
         return false;

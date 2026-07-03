@@ -28,7 +28,7 @@ public class VCalendarDetailsDialog extends NoActionDialog {
     public VCalendarDetailsDialog(VCalendarManagementView parentView,
                                   VCalendarService calendarService,
                                   Long calendarId) {
-        super(I18n.t("calendar.details.title"));
+        super(I18n.t("cms.calendar.details.title"));
         this.parentView = parentView;
         this.calendarService = calendarService;
         this.calendarId = calendarId;
@@ -50,14 +50,14 @@ public class VCalendarDetailsDialog extends NoActionDialog {
             if (response.getBody() != null) {
                 buildContent(response.getBody());
             } else {
-                add(new Span(I18n.t("calendar.details.not.found")));
+                add(new Span(I18n.t("cms.calendar.details.not.found")));
                 addCloseButton();
             }
         } catch (FeignException ex) {
-            add(new Span(I18n.t("calendar.details.load.error", extractErrorMessage(ex))));
+            add(new Span(I18n.t("cms.calendar.details.load.error", extractErrorMessage(ex))));
             addCloseButton();
         } catch (Exception e) {
-            add(new Span(I18n.t("calendar.details.load.error", e.getMessage())));
+            add(new Span(I18n.t("cms.calendar.details.load.error", e.getMessage())));
             addCloseButton();
         } finally {
             parentView.showLoading(false);
@@ -75,23 +75,23 @@ public class VCalendarDetailsDialog extends NoActionDialog {
                 .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
                 .set("gap", "var(--lumo-space-s)");
 
-        addFieldToGrid(infoGrid, VaadinIcon.TAG, I18n.t("calendar.details.field.name"), calendar.getName());
-        addFieldToGrid(infoGrid, VaadinIcon.CODE, I18n.t("calendar.details.field.code"), calendar.getCode());
-        addFieldToGrid(infoGrid, VaadinIcon.BUILDING, I18n.t("calendar.details.field.tenant"), calendar.getTenant());
-        addFieldToGrid(infoGrid, VaadinIcon.FILE, I18n.t("calendar.details.field.ics.path"), calendar.getIcsPath());
-        addFieldToGrid(infoGrid, VaadinIcon.LOCK, I18n.t("calendar.details.field.locked"),
+        addFieldToGrid(infoGrid, VaadinIcon.TAG, I18n.t("cms.calendar.details.field.name"), calendar.getName());
+        addFieldToGrid(infoGrid, VaadinIcon.CODE, I18n.t("cms.calendar.details.field.code"), calendar.getCode());
+        addFieldToGrid(infoGrid, VaadinIcon.BUILDING, I18n.t("cms.calendar.details.field.tenant"), calendar.getTenant());
+        addFieldToGrid(infoGrid, VaadinIcon.FILE, I18n.t("cms.calendar.details.field.ics.path"), calendar.getIcsPath());
+        addFieldToGrid(infoGrid, VaadinIcon.LOCK, I18n.t("cms.calendar.details.field.locked"),
                 calendar.getLocked() != null && calendar.getLocked() ?
-                        I18n.t("calendar.details.field.locked.yes") :
-                        I18n.t("calendar.details.field.locked.no"));
-        addFieldToGrid(infoGrid, VaadinIcon.USER_CHECK, I18n.t("calendar.details.field.created.by"), calendar.getCreatedBy());
-        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR, I18n.t("calendar.details.field.created.date"),
+                        I18n.t("cms.calendar.details.field.locked.yes") :
+                        I18n.t("cms.calendar.details.field.locked.no"));
+        addFieldToGrid(infoGrid, VaadinIcon.USER_CHECK, I18n.t("cms.calendar.details.field.created.by"), calendar.getCreatedBy());
+        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR, I18n.t("cms.calendar.details.field.created.date"),
                 calendar.getCreateDate() != null ? DateHelper.formatToHumanReadable(calendar.getCreateDate()) : null);
-        addFieldToGrid(infoGrid, VaadinIcon.EDIT, I18n.t("calendar.details.field.updated.by"), calendar.getUpdatedBy());
-        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR_O, I18n.t("calendar.details.field.updated.date"),
+        addFieldToGrid(infoGrid, VaadinIcon.EDIT, I18n.t("cms.calendar.details.field.updated.by"), calendar.getUpdatedBy());
+        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR_O, I18n.t("cms.calendar.details.field.updated.date"),
                 calendar.getUpdateDate() != null ? DateHelper.formatToHumanReadable(calendar.getUpdateDate()) : null);
-        addFieldToGrid(infoGrid, VaadinIcon.FILE_TEXT, I18n.t("calendar.details.field.description"), calendar.getDescription());
+        addFieldToGrid(infoGrid, VaadinIcon.FILE_TEXT, I18n.t("cms.calendar.details.field.description"), calendar.getDescription());
 
-        mainLayout.add(createSection(I18n.t("calendar.details.section.info"), infoGrid));
+        mainLayout.add(createSection(I18n.t("cms.calendar.details.section.info"), infoGrid));
 
         add(mainLayout);
         addCloseButton();
@@ -137,7 +137,7 @@ public class VCalendarDetailsDialog extends NoActionDialog {
     }
 
     private void addCloseButton() {
-        Button closeButton = new Button(I18n.t("calendar.details.close"), e -> close());
+        Button closeButton = new Button(I18n.t("cms.calendar.details.close"), e -> close());
         closeButton.addClassName(LumoUtility.Margin.Top.MEDIUM);
         HorizontalLayout buttonBar = new HorizontalLayout(closeButton);
         buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);

@@ -15,13 +15,13 @@ public class RetireGrantDialog extends PinBaseActionDialog {
 
     public RetireGrantDialog(String keyId, KmsDtos.ListGrantsResponse.Grant grant,
                              KmsApiService kmsApiService, Runnable onSuccess) {
-        super(I18n.t("grant.retire.title"),
-                I18n.t("grant.retire.message"),
+        super(I18n.t("kms.grant.retire.title"),
+                I18n.t("kms.grant.retire.message"),
                 onSuccess);
         this.keyId = keyId;
         this.grant = grant;
         this.kmsApiService = kmsApiService;
-        setOkButtonText(I18n.t("grant.retire.button"));
+        setOkButtonText(I18n.t("kms.grant.retire.button"));
         addThemeVariantsOkButton(ButtonVariant.LUMO_WARNING);
         setWidth("500px");
     }
@@ -29,7 +29,7 @@ public class RetireGrantDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append(I18n.t("grant.retire.invalid.code"));
+            append(I18n.t("kms.grant.retire.invalid.code"));
             return false;
         }
         try {
@@ -39,12 +39,12 @@ public class RetireGrantDialog extends PinBaseActionDialog {
                     .build();
             kmsApiService.retireGrant(request);
 
-            append(I18n.t("grant.retire.success"));
+            append(I18n.t("kms.grant.retire.success"));
             return true;
         } catch (FeignException ex) {
             append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            append(I18n.t("grant.retire.failed", e.getMessage()));
+            append(I18n.t("kms.grant.retire.failed", e.getMessage()));
         }
 
         return false;

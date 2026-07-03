@@ -60,23 +60,23 @@ public class PasswordConfigCard extends BaseCard<PasswordConfigView, PasswordCon
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("password.card.edit.tooltip"));
+        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("kms.password.card.edit.tooltip"));
         editBtn.addClickListener(e -> openEditDialog());
-        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, I18n.t("password.card.delete.tooltip"));
+        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, I18n.t("kms.password.card.delete.tooltip"));
         deleteBtn.addClickListener(e -> new DeletePasswordConfigDialog(objectService, dto.getId(), dto.getCode(), onDeleteRefresh).open());
         return List.of(editBtn, deleteBtn);
     }
 
     @Override
     protected void buildBodyRows() {
-        add(createIconRow(VaadinIcon.USER, I18n.t("password.card.type"), dto.getType() != null ? dto.getType().meaning() : "—"));
-        add(createIconRow(VaadinIcon.TEXT_INPUT, I18n.t("password.card.pattern"), dto.getPattern() != null ? dto.getPattern() : "—"));
-        add(createIconRow(VaadinIcon.FONT, I18n.t("password.card.char.set"), dto.getCharSetType() != null ? dto.getCharSetType().meaning() : "—"));
-        add(createIconRow(VaadinIcon.ARROW_DOWN, I18n.t("password.card.min.length"), String.valueOf(dto.getMinLength())));
-        add(createIconRow(VaadinIcon.ARROW_UP, I18n.t("password.card.max.length"), String.valueOf(dto.getMaxLength())));
-        add(createIconRow(VaadinIcon.CLOCK, I18n.t("password.card.lifetime"), String.valueOf(dto.getLifeTime())));
+        add(createIconRow(VaadinIcon.USER, I18n.t("kms.password.card.type"), dto.getType() != null ? dto.getType().meaning() : "—"));
+        add(createIconRow(VaadinIcon.TEXT_INPUT, I18n.t("kms.password.card.pattern"), dto.getPattern() != null ? dto.getPattern() : "—"));
+        add(createIconRow(VaadinIcon.FONT, I18n.t("kms.password.card.char.set"), dto.getCharSetType() != null ? dto.getCharSetType().meaning() : "—"));
+        add(createIconRow(VaadinIcon.ARROW_DOWN, I18n.t("kms.password.card.min.length"), String.valueOf(dto.getMinLength())));
+        add(createIconRow(VaadinIcon.ARROW_UP, I18n.t("kms.password.card.max.length"), String.valueOf(dto.getMaxLength())));
+        add(createIconRow(VaadinIcon.CLOCK, I18n.t("kms.password.card.lifetime"), String.valueOf(dto.getLifeTime())));
         if (dto.getInitial() != null && !dto.getInitial().isEmpty()) {
-            add(createIconRow(VaadinIcon.FLAG, I18n.t("password.card.initial.value"), dto.getInitial()));
+            add(createIconRow(VaadinIcon.FLAG, I18n.t("kms.password.card.initial.value"), dto.getInitial()));
         }
     }
 

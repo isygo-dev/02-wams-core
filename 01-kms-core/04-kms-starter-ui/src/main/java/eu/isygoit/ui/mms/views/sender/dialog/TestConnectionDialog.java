@@ -25,7 +25,7 @@ public class TestConnectionDialog extends Dialog {
 
     private final Div statusArea = new Div();
     private final ProgressBar progressBar = new ProgressBar();
-    private final Button closeButton = new Button(I18n.t("dialog.close"));
+    private final Button closeButton = new Button(I18n.t("common.dialog.close"));
 
     public TestConnectionDialog(SenderConfigService senderConfigService,
                                 SenderConfigDto config,
@@ -34,7 +34,7 @@ public class TestConnectionDialog extends Dialog {
         this.config = config;
         this.onComplete = onComplete;
 
-        setHeaderTitle(I18n.t("sender.dialog.test.title", config.getHost()));
+        setHeaderTitle(I18n.t("mms.sender.dialog.test.title", config.getHost()));
         setWidth("500px");
         setMaxWidth("95vw");
         setModal(true);
@@ -57,7 +57,7 @@ public class TestConnectionDialog extends Dialog {
 
         Icon serverIcon = VaadinIcon.SERVER.create();
         serverIcon.setColor("var(--lumo-primary-color)");
-        Span hostLabel = new Span(I18n.t("sender.dialog.test.host") + ":");
+        Span hostLabel = new Span(I18n.t("mms.sender.dialog.test.host") + ":");
         hostLabel.getStyle().set("font-weight", "bold");
         Span hostValue = new Span(config.getHost() + ":" + config.getPort());
         hostValue.getStyle().set("font-family", "monospace");
@@ -115,7 +115,7 @@ public class TestConnectionDialog extends Dialog {
         spinner.getStyle().set("animation", "spin 1s linear infinite");
         spinner.setSize("32px");
         statusContent.add(spinner);
-        statusContent.add(new Span(I18n.t("sender.dialog.test.connecting")));
+        statusContent.add(new Span(I18n.t("mms.sender.dialog.test.connecting")));
 
         statusArea.add(statusContent);
 
@@ -128,11 +128,11 @@ public class TestConnectionDialog extends Dialog {
                 Thread.sleep(2000);
 
                 getUI().ifPresent(ui2 -> ui2.access(() -> {
-                    showTestResult(true, I18n.t("sender.dialog.test.success"));
+                    showTestResult(true, I18n.t("mms.sender.dialog.test.success"));
                 }));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                showTestResult(false, I18n.t("sender.dialog.test.failed", e.getMessage()));
+                showTestResult(false, I18n.t("mms.sender.dialog.test.failed", e.getMessage()));
             }
         }));
     }
@@ -157,7 +157,7 @@ public class TestConnectionDialog extends Dialog {
 
             resultContent.add(successIcon);
             resultContent.add(new Span(message));
-            resultContent.add(new Span(I18n.t("sender.dialog.test.connection.established")));
+            resultContent.add(new Span(I18n.t("mms.sender.dialog.test.connection.established")));
             resultContent.getStyle().set("font-size", "var(--lumo-font-size-s)");
 
             statusArea.add(resultContent);
@@ -176,7 +176,7 @@ public class TestConnectionDialog extends Dialog {
 
             resultContent.add(errorIcon);
             resultContent.add(new Span(message));
-            resultContent.add(new Span(I18n.t("sender.dialog.test.check.configuration")));
+            resultContent.add(new Span(I18n.t("mms.sender.dialog.test.check.configuration")));
             resultContent.getStyle().set("font-size", "var(--lumo-font-size-s)");
 
             statusArea.add(resultContent);

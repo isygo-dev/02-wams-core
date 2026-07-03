@@ -52,17 +52,17 @@ public class PoliciesView extends ManagementVerticalView {
     private final ObjectMapper objectMapper;
 
     // UI components
-    private final ComboBox<KeyOption> keyCombo = new ComboBox<>(I18n.t("policy.view.select.key"));
-    private final TextArea policyEditor = new TextArea("Policy Document (JSON)");
+    private final ComboBox<KeyOption> keyCombo = new ComboBox<>(I18n.t("kms.policy.view.select.key"));
+    private final TextArea policyEditor = new TextArea(I18n.t("kms.policy.view.policy.editor.label"));
     private final ProgressBar loadingBar = new ProgressBar();
 
-    private final Button loadButton = new Button(I18n.t("policy.view.load.button"), new Icon(VaadinIcon.DOWNLOAD));
-    private final Button saveButton = new Button(I18n.t("policy.view.save.button"), new Icon(VaadinIcon.UPLOAD));
-    private final Button formatButton = new Button(I18n.t("policy.view.format.button"), new Icon(VaadinIcon.CODE));
+    private final Button loadButton = new Button(I18n.t("kms.policy.view.load.button"), new Icon(VaadinIcon.DOWNLOAD));
+    private final Button saveButton = new Button(I18n.t("kms.policy.view.save.button"), new Icon(VaadinIcon.UPLOAD));
+    private final Button formatButton = new Button(I18n.t("kms.policy.view.format.button"), new Icon(VaadinIcon.CODE));
     private final Button copyButton = new Button(new Icon(VaadinIcon.COPY));
-    private final Button builderButton = new Button(I18n.t("policy.view.builder.button"), new Icon(VaadinIcon.PUZZLE_PIECE));
-    private final TextField actionField = new TextField(I18n.t("policy.view.check.action"));
-    private final Button checkActionButton = new Button(I18n.t("policy.view.check.action"), new Icon(VaadinIcon.SEARCH));
+    private final Button builderButton = new Button(I18n.t("kms.policy.view.builder.button"), new Icon(VaadinIcon.PUZZLE_PIECE));
+    private final TextField actionField = new TextField(I18n.t("kms.policy.view.check.action"));
+    private final Button checkActionButton = new Button(I18n.t("kms.policy.view.check.action"), new Icon(VaadinIcon.SEARCH));
 
     private String selectedKeyId = null;
     private List<KeyOption> keyOptions = new ArrayList<>();
@@ -90,7 +90,7 @@ public class PoliciesView extends ManagementVerticalView {
     }
 
     private void buildHeader() {
-        H2 header = new H2(I18n.t("policy.view.title"));
+        H2 header = new H2(I18n.t("kms.policy.view.title"));
         header.addClassNames(
                 LumoUtility.FontSize.XXLARGE,
                 LumoUtility.Margin.Bottom.NONE,
@@ -107,7 +107,7 @@ public class PoliciesView extends ManagementVerticalView {
         keyLayout.setSpacing(true);
         keyLayout.getStyle().set("flex-wrap", "wrap");
 
-        keyCombo.setPlaceholder(I18n.t("policy.view.select.key"));
+        keyCombo.setPlaceholder(I18n.t("kms.policy.view.select.key"));
         keyCombo.setItemLabelGenerator(KeyOption::getDisplayName);
         keyCombo.setWidth("400px");
         keyCombo.addValueChangeListener(e -> {
@@ -120,7 +120,7 @@ public class PoliciesView extends ManagementVerticalView {
 
         Button refreshBtn = new Button(new Icon(VaadinIcon.REFRESH));
         refreshBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshBtn.setTooltipText(I18n.t("policy.view.refresh.tooltip"));
+        refreshBtn.setTooltipText(I18n.t("kms.policy.view.refresh.tooltip"));
         refreshBtn.addClickListener(e -> loadKeyOptions());
 
         keyLayout.add(keyCombo, refreshBtn);
@@ -133,11 +133,11 @@ public class PoliciesView extends ManagementVerticalView {
         actionBar.getStyle().set("flex-wrap", "wrap");
         actionBar.addClassName("policies-action-bar");
 
-        configureButton(loadButton, I18n.t("policy.view.load.policy.tooltip"), ButtonVariant.LUMO_PRIMARY);
-        configureButton(saveButton, I18n.t("policy.view.save.policy.tooltip"), ButtonVariant.LUMO_SUCCESS);
-        configureButton(formatButton, I18n.t("policy.view.format.tooltip"), ButtonVariant.LUMO_TERTIARY);
-        configureButton(copyButton, I18n.t("policy.view.copy.tooltip"), ButtonVariant.LUMO_TERTIARY_INLINE);
-        configureButton(builderButton, I18n.t("policy.view.builder.tooltip"), ButtonVariant.LUMO_CONTRAST);
+        configureButton(loadButton, I18n.t("kms.policy.view.load.policy.tooltip"), ButtonVariant.LUMO_PRIMARY);
+        configureButton(saveButton, I18n.t("kms.policy.view.save.policy.tooltip"), ButtonVariant.LUMO_SUCCESS);
+        configureButton(formatButton, I18n.t("kms.policy.view.format.tooltip"), ButtonVariant.LUMO_TERTIARY);
+        configureButton(copyButton, I18n.t("kms.policy.view.copy.tooltip"), ButtonVariant.LUMO_TERTIARY_INLINE);
+        configureButton(builderButton, I18n.t("kms.policy.view.builder.tooltip"), ButtonVariant.LUMO_CONTRAST);
 
         loadButton.addClickListener(e -> loadPolicy(false));
         saveButton.addClickListener(e -> savePolicy());
@@ -157,7 +157,7 @@ public class PoliciesView extends ManagementVerticalView {
     private void buildPolicyEditor() {
         policyEditor.setWidthFull();
         policyEditor.setHeight("500px");
-        policyEditor.setPlaceholder(I18n.t("policy.view.policy.placeholder"));
+        policyEditor.setPlaceholder(I18n.t("kms.policy.view.policy.placeholder"));
         policyEditor.getStyle()
                 .set("font-family", "monospace")
                 .set("font-size", "13px");
@@ -172,12 +172,12 @@ public class PoliciesView extends ManagementVerticalView {
         checkerLayout.setSpacing(true);
         checkerLayout.getStyle().set("flex-wrap", "wrap");
 
-        actionField.setPlaceholder(I18n.t("policy.view.action.placeholder"));
+        actionField.setPlaceholder(I18n.t("kms.policy.view.action.placeholder"));
         actionField.setWidth("300px");
         actionField.setClearButtonVisible(true);
 
         checkActionButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        checkActionButton.setTooltipText(I18n.t("policy.view.action.check.tooltip"));
+        checkActionButton.setTooltipText(I18n.t("kms.policy.view.action.check.tooltip"));
         checkActionButton.addClickListener(e -> checkActionAgainstPolicy());
 
         checkerLayout.add(actionField, checkActionButton);
@@ -260,10 +260,10 @@ public class PoliciesView extends ManagementVerticalView {
             updateButtonsState();
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            showError(I18n.t("policy.view.load.keys.error", errorMsg));
+            showError(I18n.t("kms.policy.view.load.keys.error", errorMsg));
             log.error("Failed to load keys: {}", errorMsg);
         } catch (Exception e) {
-            showError(I18n.t("policy.view.load.keys.error", e.getMessage()));
+            showError(I18n.t("kms.policy.view.load.keys.error", e.getMessage()));
             log.error("Failed to load keys: {}", e.getMessage());
         } finally {
             showLoading(false);
@@ -284,7 +284,7 @@ public class PoliciesView extends ManagementVerticalView {
 
     private void loadPolicy(boolean silentFailure) {
         if (selectedKeyId == null) {
-            if (!silentFailure) showWarning(I18n.t("policy.view.select.key.first"));
+            if (!silentFailure) showWarning(I18n.t("kms.policy.view.select.key.first"));
             return;
         }
         showLoading(true);
@@ -294,21 +294,21 @@ public class PoliciesView extends ManagementVerticalView {
                 String policy = objectMapper.writeValueAsString(response.getBody().getPolicy());
                 if (StringUtils.hasText(policy)) {
                     policyEditor.setValue(prettyPrintJson(policy));
-                    if (!silentFailure) showSuccess(I18n.t("policy.view.policy.loaded"));
+                    if (!silentFailure) showSuccess(I18n.t("kms.policy.view.policy.loaded"));
                 } else {
                     policyEditor.clear();
-                    if (!silentFailure) showWarning(I18n.t("policy.view.no.policy"));
+                    if (!silentFailure) showWarning(I18n.t("kms.policy.view.no.policy"));
                 }
             } else {
                 policyEditor.clear();
-                if (!silentFailure) showError(I18n.t("policy.view.load.policy.error", response.getStatusCode()));
+                if (!silentFailure) showError(I18n.t("kms.policy.view.load.policy.error", response.getStatusCode()));
             }
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            if (!silentFailure) showError(I18n.t("policy.view.load.policy.error", errorMsg));
+            if (!silentFailure) showError(I18n.t("kms.policy.view.load.policy.error", errorMsg));
             log.error("Failed to load policy for key {}: {}", selectedKeyId, errorMsg);
         } catch (Exception e) {
-            if (!silentFailure) showError(I18n.t("policy.view.load.policy.error", e.getMessage()));
+            if (!silentFailure) showError(I18n.t("kms.policy.view.load.policy.error", e.getMessage()));
             log.error("Failed to load policy for key {}: {}", selectedKeyId, e.getMessage());
         } finally {
             showLoading(false);
@@ -318,21 +318,17 @@ public class PoliciesView extends ManagementVerticalView {
 
     private void savePolicy() {
         if (selectedKeyId == null) {
-            showWarning(I18n.t("policy.view.select.key.first"));
+            showWarning(I18n.t("kms.policy.view.select.key.first"));
             return;
         }
         String policyText = policyEditor.getValue();
 
         if (!StringUtils.hasText(policyText)) {
             ConfirmDialog confirmDialog = new ConfirmDialog();
-            confirmDialog.setHeader("Erase policy");
-            confirmDialog.setText(
-                    "The policy editor is empty.\n" +
-                            "Saving will erase the current policy from the key.\n" +
-                            "Are you sure you want to proceed?"
-            );
-            confirmDialog.setConfirmText("Erase policy");
-            confirmDialog.setCancelText("Cancel");
+            confirmDialog.setHeader(I18n.t("kms.policy.view.erase.confirm.header"));
+            confirmDialog.setText(I18n.t("kms.policy.view.erase.confirm.message"));
+            confirmDialog.setConfirmText(I18n.t("kms.policy.view.erase.confirm.button"));
+            confirmDialog.setCancelText(I18n.t("kms.policy.view.erase.cancel.button"));
             confirmDialog.setConfirmButtonTheme("error primary");
             confirmDialog.addConfirmListener(event -> {
                 Map<String, Object> emptyPolicy = new HashMap<>();
@@ -346,7 +342,7 @@ public class PoliciesView extends ManagementVerticalView {
         try {
             policyMap = objectMapper.readValue(policyText, Map.class);
         } catch (Exception e) {
-            showError(I18n.t("policy.view.invalid.json", e.getMessage()));
+            showError(I18n.t("kms.policy.view.invalid.json", e.getMessage()));
             return;
         }
         performSave(policyMap, false);
@@ -362,17 +358,17 @@ public class PoliciesView extends ManagementVerticalView {
                     .build();
             ResponseEntity<KmsDtos.PutKeyPolicyResponse> response = kmsApiService.putKeyPolicy(selectedKeyId, request);
             if (response.getStatusCode().is2xxSuccessful()) {
-                showSuccess(I18n.t("policy.view.policy.saved"));
+                showSuccess(I18n.t("kms.policy.view.policy.saved"));
                 loadPolicy(true);
             } else {
-                showError(I18n.t("policy.view.save.policy.error", response.getStatusCode()));
+                showError(I18n.t("kms.policy.view.save.policy.error", response.getStatusCode()));
             }
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            showError(I18n.t("policy.view.save.policy.error", errorMsg));
+            showError(I18n.t("kms.policy.view.save.policy.error", errorMsg));
             log.error("Failed to save policy for key {}: {}", selectedKeyId, errorMsg);
         } catch (Exception e) {
-            showError(I18n.t("policy.view.save.policy.error", e.getMessage()));
+            showError(I18n.t("kms.policy.view.save.policy.error", e.getMessage()));
             log.error("Failed to save policy for key {}: {}", selectedKeyId, e.getMessage());
         } finally {
             showLoading(false);
@@ -384,16 +380,16 @@ public class PoliciesView extends ManagementVerticalView {
         if (!StringUtils.hasText(text)) return;
         try {
             policyEditor.setValue(prettyPrintJson(text));
-            showSuccess(I18n.t("policy.view.policy.formatted"));
+            showSuccess(I18n.t("kms.policy.view.policy.formatted"));
         } catch (Exception e) {
-            showError(I18n.t("policy.view.invalid.json", e.getMessage()));
+            showError(I18n.t("kms.policy.view.invalid.json", e.getMessage()));
         }
     }
 
     private void copyPolicyToClipboard() {
         String content = policyEditor.getValue();
         if (!StringUtils.hasText(content)) {
-            showWarning(I18n.t("policy.view.nothing.to.copy"));
+            showWarning(I18n.t("kms.policy.view.nothing.to.copy"));
             return;
         }
         UI.getCurrent().getPage().executeJs(
@@ -424,7 +420,7 @@ public class PoliciesView extends ManagementVerticalView {
                         "  document.body.appendChild(notification); " +
                         "  setTimeout(() => notification.remove(), 3000); " +
                         "});",
-                content, I18n.t("policy.view.policy.copied"), I18n.t("policy.view.copy.failed")
+                content, I18n.t("kms.policy.view.policy.copied"), I18n.t("kms.policy.view.copy.failed")
         );
     }
 
@@ -436,7 +432,7 @@ public class PoliciesView extends ManagementVerticalView {
                 existingPolicy = objectMapper.readValue(currentText, KmsDtos.KeyPolicy.class);
             } catch (Exception e) {
                 Notification.show(
-                        I18n.t("policy.view.current.content.invalid"),
+                        I18n.t("kms.policy.view.current.content.invalid"),
                         5000,
                         Notification.Position.BOTTOM_END
                 ).addThemeVariants(NotificationVariant.LUMO_WARNING);
@@ -448,10 +444,10 @@ public class PoliciesView extends ManagementVerticalView {
             try {
                 String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(newPolicy);
                 policyEditor.setValue(json);
-                showSuccess(I18n.t("policy.view.policy.built"));
+                showSuccess(I18n.t("kms.policy.view.policy.built"));
                 updateButtonsState();
             } catch (Exception ex) {
-                showError(I18n.t("policy.view.invalid.json", ex.getMessage()));
+                showError(I18n.t("kms.policy.view.invalid.json", ex.getMessage()));
             }
         });
         dialog.open();
@@ -465,13 +461,13 @@ public class PoliciesView extends ManagementVerticalView {
     private void checkActionAgainstPolicy() {
         String action = actionField.getValue();
         if (!StringUtils.hasText(action)) {
-            showWarning(I18n.t("policy.view.action.check.enter"));
+            showWarning(I18n.t("kms.policy.view.action.check.enter"));
             return;
         }
 
         String policyText = policyEditor.getValue();
         if (!StringUtils.hasText(policyText)) {
-            showWarning(I18n.t("policy.view.action.check.no.policy"));
+            showWarning(I18n.t("kms.policy.view.action.check.no.policy"));
             return;
         }
 
@@ -479,7 +475,7 @@ public class PoliciesView extends ManagementVerticalView {
         try {
             policyMap = objectMapper.readValue(policyText, Map.class);
         } catch (Exception e) {
-            showError(I18n.t("policy.view.action.check.invalid.policy", e.getMessage()));
+            showError(I18n.t("kms.policy.view.action.check.invalid.policy", e.getMessage()));
             return;
         }
 
@@ -492,7 +488,7 @@ public class PoliciesView extends ManagementVerticalView {
 
         // Build refined dialog
         Dialog resultDialog = new Dialog();
-        resultDialog.setHeaderTitle(I18n.t("policy.eval.title", action));
+        resultDialog.setHeaderTitle(I18n.t("kms.policy.eval.title", action));
         resultDialog.setWidth("600px");
         resultDialog.setResizable(true);
 
@@ -511,17 +507,17 @@ public class PoliciesView extends ManagementVerticalView {
         if ("ALLOWED".equals(result.decision)) {
             decisionIcon = VaadinIcon.CHECK_CIRCLE.create();
             decisionIcon.setColor("#2e7d32");
-            decisionText = I18n.t("policy.eval.decision.allowed");
+            decisionText = I18n.t("kms.policy.eval.decision.allowed");
             decisionColor = "#2e7d32";
         } else if ("DENIED".equals(result.decision)) {
             decisionIcon = VaadinIcon.CLOSE_CIRCLE.create();
             decisionIcon.setColor("#c62828");
-            decisionText = I18n.t("policy.eval.decision.denied");
+            decisionText = I18n.t("kms.policy.eval.decision.denied");
             decisionColor = "#c62828";
         } else {
             decisionIcon = VaadinIcon.EXCLAMATION_CIRCLE.create();
             decisionIcon.setColor("#ef6c00");
-            decisionText = I18n.t("policy.eval.decision.uncertain");
+            decisionText = I18n.t("kms.policy.eval.decision.uncertain");
             decisionColor = "#ef6c00";
         }
 
@@ -534,7 +530,7 @@ public class PoliciesView extends ManagementVerticalView {
         content.add(decisionLayout);
 
         // Reason
-        Span reasonSpan = new Span(I18n.t("policy.eval.reason", result.reason));
+        Span reasonSpan = new Span(I18n.t("kms.policy.eval.reason", result.reason));
         reasonSpan.getStyle().set("font-style", "italic");
         content.add(reasonSpan);
 
@@ -543,7 +539,7 @@ public class PoliciesView extends ManagementVerticalView {
             HorizontalLayout sidLayout = new HorizontalLayout();
             sidLayout.setAlignItems(FlexComponent.Alignment.CENTER);
             sidLayout.setSpacing(true);
-            Span sidLabel = new Span("🆔 " + I18n.t("policy.eval.sid"));
+            Span sidLabel = new Span("🆔 " + I18n.t("kms.policy.eval.sid"));
             sidLabel.getStyle().set("font-weight", "bold");
             Span sidValue = new Span(result.sid);
             sidLayout.add(sidLabel, sidValue);
@@ -554,7 +550,7 @@ public class PoliciesView extends ManagementVerticalView {
             HorizontalLayout principalLayout = new HorizontalLayout();
             principalLayout.setAlignItems(FlexComponent.Alignment.CENTER);
             principalLayout.setSpacing(true);
-            Span principalLabel = new Span("👤 " + I18n.t("policy.eval.principal"));
+            Span principalLabel = new Span("👤 " + I18n.t("kms.policy.eval.principal"));
             principalLabel.getStyle().set("font-weight", "bold");
             Span principalValue = new Span(result.principal);
             principalLayout.add(principalLabel, principalValue);
@@ -563,19 +559,19 @@ public class PoliciesView extends ManagementVerticalView {
 
         // Key context
         if (selectedKeyId == null) {
-            Span warningSpan = new Span(I18n.t("policy.eval.no.key.selected"));
+            Span warningSpan = new Span(I18n.t("kms.policy.eval.no.key.selected"));
             warningSpan.getStyle().set("color", "#ef6c00");
             warningSpan.getStyle().set("font-size", "0.9em");
             content.add(warningSpan);
         } else {
-            Span resourceSpan = new Span(I18n.t("policy.eval.key.arn", keyArn));
+            Span resourceSpan = new Span(I18n.t("kms.policy.eval.key.arn", keyArn));
             resourceSpan.getStyle().set("font-size", "0.9em");
             content.add(resourceSpan);
         }
 
         // Matched statement (full JSON)
         if (result.matchedStatement != null && !result.matchedStatement.isEmpty()) {
-            Span matchedHeader = new Span(I18n.t("policy.eval.matched.statement"));
+            Span matchedHeader = new Span(I18n.t("kms.policy.eval.matched.statement"));
             matchedHeader.getStyle().set("font-weight", "bold");
             content.add(matchedHeader);
 
@@ -591,12 +587,12 @@ public class PoliciesView extends ManagementVerticalView {
         }
 
         // Help tip
-        Span helpSpan = new Span(I18n.t("policy.eval.tip"));
+        Span helpSpan = new Span(I18n.t("kms.policy.eval.tip"));
         helpSpan.getStyle().set("font-size", "0.85em");
         helpSpan.getStyle().set("color", "#666");
         content.add(helpSpan);
 
-        Button closeBtn = new Button(I18n.t("policy.eval.close"), e -> resultDialog.close());
+        Button closeBtn = new Button(I18n.t("kms.policy.eval.close"), e -> resultDialog.close());
         closeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         resultDialog.getFooter().add(closeBtn);
         resultDialog.add(content);
@@ -608,11 +604,11 @@ public class PoliciesView extends ManagementVerticalView {
         String matchedStatementJson = null;
         String matchedSid = null;
         String matchedPrincipal = null;
-        String reason = I18n.t("policy.eval.reason.no.match");
+        String reason = I18n.t("kms.policy.eval.reason.no.match");
 
         Object statementsObj = policyMap.get("Statement");
         if (!(statementsObj instanceof Collection<?> statements)) {
-            return new EvaluationResult("DENIED", "Policy has no valid Statement array.", null, null, null);
+            return new EvaluationResult("DENIED", I18n.t("kms.policy.eval.reason.no.valid.statement.array"), null, null, null);
         }
 
         for (Object stmtObj : statements) {
@@ -650,13 +646,13 @@ public class PoliciesView extends ManagementVerticalView {
             String statementStr = statementToString(stmt);
 
             if ("Deny".equals(effect)) {
-                return new EvaluationResult("DENIED", I18n.t("policy.eval.reason.deny"), statementStr, sid, principal);
+                return new EvaluationResult("DENIED", I18n.t("kms.policy.eval.reason.deny"), statementStr, sid, principal);
             } else if ("Allow".equals(effect)) {
                 explicitlyAllowed = true;
                 matchedStatementJson = statementStr;
                 matchedSid = sid;
                 matchedPrincipal = principal;
-                reason = I18n.t("policy.eval.reason.allow");
+                reason = I18n.t("kms.policy.eval.reason.allow");
             }
         }
 

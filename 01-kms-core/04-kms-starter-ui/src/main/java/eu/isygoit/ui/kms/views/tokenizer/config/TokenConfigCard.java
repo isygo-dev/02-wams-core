@@ -62,8 +62,8 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
         titleSpan = buildTitleSpan(dto.getCode(), dto.getCode());
 
         typeChip = buildStatusChip(
-                dto.getTokenType() != null ? dto.getTokenType().meaning() : "UNKNOWN",
-                dto.getTokenType() != null ? dto.getTokenType().name() : "UNKNOWN"
+                dto.getTokenType() != null ? dto.getTokenType().meaning() : I18n.t("kms.token.config.type.unknown"),
+                dto.getTokenType() != null ? dto.getTokenType().name() : I18n.t("kms.token.config.type.unknown")
         );
 
         left.add(titleSpan, typeChip);
@@ -72,10 +72,10 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("token.config.edit.button"));
+        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("kms.token.config.edit.button"));
         editBtn.addClickListener(e -> openEditDialog());
 
-        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, I18n.t("token.config.delete.button"));
+        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, I18n.t("kms.token.config.delete.button"));
         deleteBtn.addClickListener(e -> new DeleteTokenConfigDialog(objectService, dto.getId(), dto.getCode(), onDeleteRefresh).open());
 
         return List.of(editBtn, deleteBtn);
@@ -83,10 +83,10 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
 
     @Override
     protected void buildBodyRows() {
-        add(createIconRow(VaadinIcon.BUILDING, I18n.t("token.config.issuer"), dto.getIssuer() != null ? dto.getIssuer() : "—"));
-        add(createIconRow(VaadinIcon.GROUP, I18n.t("token.config.audience"), formatAudienceList()));
-        add(createIconRow(VaadinIcon.CODE, I18n.t("token.config.algorithm"), dto.getSignatureAlgorithm() != null ? dto.getSignatureAlgorithm() : "—"));
-        add(createIconRow(VaadinIcon.CLOCK, I18n.t("token.config.lifetime"), formatLifetime(dto.getLifeTimeInMs())));
+        add(createIconRow(VaadinIcon.BUILDING, I18n.t("kms.token.config.issuer"), dto.getIssuer() != null ? dto.getIssuer() : "—"));
+        add(createIconRow(VaadinIcon.GROUP, I18n.t("kms.token.config.audience"), formatAudienceList()));
+        add(createIconRow(VaadinIcon.CODE, I18n.t("kms.token.config.algorithm"), dto.getSignatureAlgorithm() != null ? dto.getSignatureAlgorithm() : "—"));
+        add(createIconRow(VaadinIcon.CLOCK, I18n.t("kms.token.config.lifetime"), formatLifetime(dto.getLifeTimeInMs())));
     }
 
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
@@ -137,7 +137,7 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
     private void refreshDisplay() {
         titleSpan.setText(dto.getCode());
         titleSpan.getElement().setAttribute("title", dto.getCode());
-        typeChip.setText(dto.getTokenType() != null ? dto.getTokenType().meaning() : "UNKNOWN");
+        typeChip.setText(dto.getTokenType() != null ? dto.getTokenType().meaning() : I18n.t("kms.token.config.type.unknown"));
         getUI().ifPresent(ui -> ui.access(() -> {
             List<Component> children = new java.util.ArrayList<>(getChildren().toList());
             boolean headerRemoved = false;

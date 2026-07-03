@@ -87,7 +87,7 @@ public abstract class BaseSenderConfigDialog extends Dialog {
         footer.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
         footer.setSpacing(true);
 
-        cancelButton = new Button(I18n.t("dialog.cancel"), e -> close());
+        cancelButton = new Button(I18n.t("common.dialog.cancel"), e -> close());
         cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
         okButton = new Button(getOkButtonText(), e -> {
@@ -108,7 +108,7 @@ public abstract class BaseSenderConfigDialog extends Dialog {
      * Override to provide custom OK button text.
      */
     protected String getOkButtonText() {
-        return I18n.t("dialog.ok");
+        return I18n.t("common.dialog.ok");
     }
 
     /**

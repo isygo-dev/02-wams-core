@@ -127,28 +127,28 @@ public class I18nUIHelper {
      * Obtient un message d'erreur traduit
      */
     public static String getErrorMessage(String errorType) {
-        return I18n.t("error." + errorType);
+        return I18n.t("common.error." + errorType);
     }
 
     /**
      * Obtient un message de succès traduit
      */
     public static String getSuccessMessage(String type) {
-        return I18n.t("success." + type);
+        return I18n.t("common.success." + type);
     }
 
     /**
      * Obtient un message de notification traduit
      */
     public static String getNotificationMessage(String type) {
-        return I18n.t("notification." + type);
+        return I18n.t("common.notification." + type);
     }
 
     /**
      * Obtient un message de validation traduit
      */
     public static String getValidationMessage(String type) {
-        return I18n.t("validation." + type);
+        return I18n.t("common.validation." + type);
     }
 }
 

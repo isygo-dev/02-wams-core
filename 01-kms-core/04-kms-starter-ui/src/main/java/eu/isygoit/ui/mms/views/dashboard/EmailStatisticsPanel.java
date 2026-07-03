@@ -71,7 +71,7 @@ public class EmailStatisticsPanel extends VerticalLayout {
         title.addClassName(LumoUtility.Margin.NONE);
         title.getStyle().set("font-weight", "600");
 
-        Span period = new Span("Last 12 months");
+        Span period = new Span(I18n.t("mms.dashboard.email.stats.period"));
         period.addClassName(LumoUtility.FontSize.XSMALL);
         period.addClassName(LumoUtility.TextColor.SECONDARY);
         period.getStyle()
@@ -95,10 +95,10 @@ public class EmailStatisticsPanel extends VerticalLayout {
                 .set("gap", "var(--lumo-space-xs)")
                 .set("margin-bottom", "var(--lumo-space-s)");
 
-        grid.add(createMiniStatCard("Sent", "2.8K", VaadinIcon.ENVELOPE_O, "#4F46E5", "+12%"));
-        grid.add(createMiniStatCard("Opened", "1.9K", VaadinIcon.EYE, "#10B981", "+8%"));
-        grid.add(createMiniStatCard("Bounced", "124", VaadinIcon.EXCLAMATION_CIRCLE_O, "#EF4444", "-3%"));
-        grid.add(createMiniStatCard("Rate", "67.6%", VaadinIcon.TRENDING_UP, "#F59E0B", "+5%"));
+        grid.add(createMiniStatCard(I18n.t("mms.dashboard.email.stats.sent"), "2.8K", VaadinIcon.ENVELOPE_O, "#4F46E5", "+12%"));
+        grid.add(createMiniStatCard(I18n.t("mms.dashboard.email.stats.opened"), "1.9K", VaadinIcon.EYE, "#10B981", "+8%"));
+        grid.add(createMiniStatCard(I18n.t("mms.dashboard.email.stats.bounced"), "124", VaadinIcon.EXCLAMATION_CIRCLE_O, "#EF4444", "-3%"));
+        grid.add(createMiniStatCard(I18n.t("mms.dashboard.email.stats.rate"), "67.6%", VaadinIcon.TRENDING_UP, "#F59E0B", "+5%"));
 
         return grid;
     }
@@ -189,11 +189,11 @@ public class EmailStatisticsPanel extends VerticalLayout {
         header.setAlignItems(FlexComponent.Alignment.CENTER);
         header.getStyle().set("margin-bottom", "var(--lumo-space-xs)");
 
-        Span trendLabel = new Span("Monthly Trend");
+        Span trendLabel = new Span(I18n.t("mms.dashboard.email.stats.monthly.trend"));
         trendLabel.addClassName(LumoUtility.FontSize.XSMALL);
         trendLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
 
-        Span viewAll = new Span("View all →");
+        Span viewAll = new Span(I18n.t("mms.dashboard.viewAll"));
         viewAll.addClassName(LumoUtility.FontSize.XSMALL);
         viewAll.addClassName(LumoUtility.TextColor.PRIMARY);
         viewAll.getStyle().set("cursor", "pointer");
@@ -270,7 +270,12 @@ public class EmailStatisticsPanel extends VerticalLayout {
                 .set("background", "var(--lumo-contrast-5pct)")
                 .set("z-index", "1");
 
-        String[] headers = {"Month", "Sent", "Open", "Bounce"};
+        String[] headers = {
+                I18n.t("mms.dashboard.email.stats.table.month"),
+                I18n.t("mms.dashboard.email.stats.sent"),
+                I18n.t("mms.dashboard.email.stats.table.open"),
+                I18n.t("mms.dashboard.email.stats.table.bounce")
+        };
         for (String h : headers) {
             Span span = new Span(h);
             span.addClassName(LumoUtility.FontSize.XSMALL);

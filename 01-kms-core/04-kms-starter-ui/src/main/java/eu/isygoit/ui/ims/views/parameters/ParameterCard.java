@@ -54,15 +54,15 @@ public class ParameterCard extends BaseCard<ParameterManagementView, AppParamete
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("parameter.card.details.tooltip"));
+        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("ims.parameter.card.details.tooltip"));
         detailsBtn.addClickListener(e -> new ParameterDetailsDialog(parentView, objectService, parameter.getId()).open());
 
-        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("parameter.card.edit.tooltip"));
+        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("ims.parameter.card.edit.tooltip"));
         editBtn.addClickListener(e -> parentView.openUpdateParameterDialog(parameter, () -> {
             if (onRefresh != null) onRefresh.run();
         }));
 
-        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("parameter.card.delete.tooltip"));
+        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("ims.parameter.card.delete.tooltip"));
         deleteBtn.addClickListener(e -> new DeleteParameterDialog(parentView, objectService, parameter.getId(), () -> {
             if (onRefresh != null) onRefresh.run();
         }).open());
@@ -77,13 +77,13 @@ public class ParameterCard extends BaseCard<ParameterManagementView, AppParamete
         body.setPadding(false);
         body.getStyle().set("margin-top", "var(--lumo-space-s)");
 
-        body.add(createIconRow(VaadinIcon.KEY, I18n.t("parameter.card.name"), parameter.getName()));
-        body.add(createIconRow(VaadinIcon.INPUT, I18n.t("parameter.card.value"), parameter.getValue()));
+        body.add(createIconRow(VaadinIcon.KEY, I18n.t("ims.parameter.card.name"), parameter.getName()));
+        body.add(createIconRow(VaadinIcon.INPUT, I18n.t("ims.parameter.card.value"), parameter.getValue()));
         if (parameter.getTenant() != null && !parameter.getTenant().isBlank()) {
-            body.add(createIconRow(VaadinIcon.BUILDING, I18n.t("parameter.card.tenant"), parameter.getTenant()));
+            body.add(createIconRow(VaadinIcon.BUILDING, I18n.t("ims.parameter.card.tenant"), parameter.getTenant()));
         }
         if (parameter.getDescription() != null && !parameter.getDescription().isBlank()) {
-            body.add(createIconRow(VaadinIcon.FILE_TEXT, I18n.t("parameter.card.description"), parameter.getDescription()));
+            body.add(createIconRow(VaadinIcon.FILE_TEXT, I18n.t("ims.parameter.card.description"), parameter.getDescription()));
         }
         add(body);
     }

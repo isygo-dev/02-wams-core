@@ -31,7 +31,7 @@ public class ViewMsgTemplateDialog extends Dialog {
         this.templateFileService = templateFileService;
         this.template = template;
 
-        setHeaderTitle(I18n.t("template.dialog.view.title",
+        setHeaderTitle(I18n.t("mms.msgtemplate.dialog.view.title",
                 template.getName() != null ? template.getName() : template.getId()));
         setWidth("600px");
         setMaxWidth("95vw");
@@ -52,19 +52,19 @@ public class ViewMsgTemplateDialog extends Dialog {
         Div detailsDiv = new Div();
         detailsDiv.getStyle().set("padding", "var(--lumo-space-m)");
 
-        addDetailRow(detailsDiv, I18n.t("template.dialog.view.id"), template.getId().toString());
-        addDetailRow(detailsDiv, I18n.t("template.dialog.view.code"), template.getCode());
-        addDetailRow(detailsDiv, I18n.t("template.dialog.view.tenant"), template.getTenant());
-        addDetailRow(detailsDiv, I18n.t("template.dialog.view.name"), template.getName());
-        addDetailRow(detailsDiv, I18n.t("template.dialog.view.language"),
-                template.getLanguage() != null ? template.getLanguage().name() : "N/A");
-        addDetailRow(detailsDiv, I18n.t("template.dialog.view.description"),
-                template.getDescription() != null ? template.getDescription() : "N/A");
-        addDetailRow(detailsDiv, I18n.t("template.dialog.view.file"),
-                template.getOriginalFileName() != null ? template.getOriginalFileName() : "N/A");
+        addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.id"), template.getId().toString());
+        addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.code"), template.getCode());
+        addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.tenant"), template.getTenant());
+        addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.name"), template.getName());
+        addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.language"),
+                template.getLanguage() != null ? template.getLanguage().name() : I18n.t("mms.common.value.notAvailable"));
+        addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.description"),
+                template.getDescription() != null ? template.getDescription() : I18n.t("mms.common.value.notAvailable"));
+        addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.file"),
+                template.getOriginalFileName() != null ? template.getOriginalFileName() : I18n.t("mms.common.value.notAvailable"));
 
         if (template.getPath() != null) {
-            addDetailRow(detailsDiv, I18n.t("template.dialog.view.path"), template.getPath());
+            addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.path"), template.getPath());
         }
 
         mainLayout.add(detailsDiv);
@@ -77,14 +77,14 @@ public class ViewMsgTemplateDialog extends Dialog {
 
         // Download button
         boolean hasFile = template.getFileName() != null && !template.getFileName().isEmpty();
-        Button downloadBtn = new Button(I18n.t("template.dialog.view.download"), new Icon(VaadinIcon.DOWNLOAD));
+        Button downloadBtn = new Button(I18n.t("mms.msgtemplate.dialog.view.download"), new Icon(VaadinIcon.DOWNLOAD));
         downloadBtn.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
         downloadBtn.setEnabled(hasFile);
         downloadBtn.addClickListener(e -> downloadTemplate());
         actions.add(downloadBtn);
 
         // Close button
-        Button closeBtn = new Button(I18n.t("dialog.close"), e -> close());
+        Button closeBtn = new Button(I18n.t("common.dialog.close"), e -> close());
         closeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         actions.add(closeBtn);
 
@@ -103,7 +103,7 @@ public class ViewMsgTemplateDialog extends Dialog {
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.getStyle().set("min-width", "120px");
 
-        Span valueSpan = new Span(value != null ? value : "N/A");
+        Span valueSpan = new Span(value != null ? value : I18n.t("mms.common.value.notAvailable"));
         valueSpan.getStyle().set("font-family", "monospace");
         valueSpan.getStyle().set("word-break", "break-all");
 
@@ -145,7 +145,7 @@ public class ViewMsgTemplateDialog extends Dialog {
             }
         } catch (Exception e) {
             log.error("Failed to download template file for {}", template.getId(), e);
-            Notification.show(I18n.t("template.download.error", e.getMessage()), 5000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("mms.msgtemplate.download.error", e.getMessage()), 5000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }

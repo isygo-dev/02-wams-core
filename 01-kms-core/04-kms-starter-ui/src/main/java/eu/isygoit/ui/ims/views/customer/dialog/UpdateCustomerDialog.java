@@ -64,14 +64,14 @@ public class UpdateCustomerDialog extends BaseActionDialog {
                                 CustomerImageService customerImageService,
                                 CustomerDto customer,
                                 Runnable onSuccess) {
-        super(I18n.t("customer.dialog.update.title"), onSuccess);
+        super(I18n.t("ims.customer.dialog.update.title"), onSuccess);
         this.parentView = parentView;
         this.customerService = customerService;
         this.customerImageService = customerImageService;
         this.customer = customer;
         this.onSuccess = onSuccess;
 
-        setOkButtonText(I18n.t("customer.dialog.update.button"));
+        setOkButtonText(I18n.t("ims.customer.dialog.update.button"));
         setWidth("800px");
         setMaxWidth("95%");
 
@@ -82,44 +82,44 @@ public class UpdateCustomerDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        nameField = new TextField(I18n.t("customer.dialog.update.field.name"));
+        nameField = new TextField(I18n.t("ims.customer.dialog.update.field.name"));
         nameField.setRequiredIndicatorVisible(true);
         nameField.setWidthFull();
 
-        emailField = new EmailField(I18n.t("customer.dialog.update.field.email"));
+        emailField = new EmailField(I18n.t("ims.customer.dialog.update.field.email"));
         emailField.setRequiredIndicatorVisible(true);
         emailField.setWidthFull();
 
-        phoneField = new TextField(I18n.t("customer.dialog.update.field.phone"));
+        phoneField = new TextField(I18n.t("ims.customer.dialog.update.field.phone"));
         phoneField.setRequiredIndicatorVisible(true);
         phoneField.setWidthFull();
 
-        urlField = new TextField(I18n.t("customer.dialog.update.field.website"));
+        urlField = new TextField(I18n.t("ims.customer.dialog.update.field.website"));
         urlField.setWidthFull();
 
-        descriptionField = new TextArea(I18n.t("customer.dialog.update.field.description"));
+        descriptionField = new TextArea(I18n.t("ims.customer.dialog.update.field.description"));
         descriptionField.setWidthFull();
 
-        adminStatusCombo = new ComboBox<>(I18n.t("customer.dialog.update.field.admin.status"));
+        adminStatusCombo = new ComboBox<>(I18n.t("ims.customer.dialog.update.field.admin.status"));
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
         adminStatusCombo.setWidthFull();
 
-        countryField = new TextField(I18n.t("customer.dialog.update.field.country"));
+        countryField = new TextField(I18n.t("ims.customer.dialog.update.field.country"));
         countryField.setWidthFull();
 
-        stateField = new TextField(I18n.t("customer.dialog.update.field.state"));
+        stateField = new TextField(I18n.t("ims.customer.dialog.update.field.state"));
         stateField.setWidthFull();
 
-        cityField = new TextField(I18n.t("customer.dialog.update.field.city"));
+        cityField = new TextField(I18n.t("ims.customer.dialog.update.field.city"));
         cityField.setWidthFull();
 
-        streetField = new TextField(I18n.t("customer.dialog.update.field.street"));
+        streetField = new TextField(I18n.t("ims.customer.dialog.update.field.street"));
         streetField.setWidthFull();
 
-        zipCodeField = new TextField(I18n.t("customer.dialog.update.field.zip.code"));
+        zipCodeField = new TextField(I18n.t("ims.customer.dialog.update.field.zip.code"));
         zipCodeField.setWidthFull();
 
-        additionalInfoField = new TextField(I18n.t("customer.dialog.update.field.additional.info"));
+        additionalInfoField = new TextField(I18n.t("ims.customer.dialog.update.field.additional.info"));
         additionalInfoField.setWidthFull();
 
         imageThumbnail = new Image();
@@ -142,7 +142,7 @@ public class UpdateCustomerDialog extends BaseActionDialog {
                 .set("justify-content", "center");
         imagePlaceholder.add(new Icon(VaadinIcon.CAMERA));
 
-        changeImageButton = new Button(I18n.t("customer.dialog.field.change.image"), e -> openCropperDialog());
+        changeImageButton = new Button(I18n.t("ims.customer.dialog.field.change.image"), e -> openCropperDialog());
         changeImageButton.setIcon(new Icon(VaadinIcon.UPLOAD));
     }
 
@@ -227,7 +227,7 @@ public class UpdateCustomerDialog extends BaseActionDialog {
 
     private Div buildLayout() {
         Div main = new Div();
-        main.add(buildMainForm(), new H4(I18n.t("customer.dialog.update.field.address")), buildAddressForm(), buildImageRow());
+        main.add(buildMainForm(), new H4(I18n.t("ims.customer.dialog.update.field.address")), buildAddressForm(), buildImageRow());
         return main;
     }
 
@@ -253,15 +253,15 @@ public class UpdateCustomerDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (nameField.getValue().isBlank()) {
-            append(I18n.t("customer.dialog.update.field.name.required"));
+            append(I18n.t("ims.customer.dialog.update.field.name.required"));
             return false;
         }
         if (emailField.getValue().isBlank()) {
-            append(I18n.t("customer.dialog.update.field.email.required"));
+            append(I18n.t("ims.customer.dialog.update.field.email.required"));
             return false;
         }
         if (phoneField.getValue().isBlank()) {
-            append(I18n.t("customer.dialog.update.field.phone.required"));
+            append(I18n.t("ims.customer.dialog.update.field.phone.required"));
             return false;
         }
 
@@ -290,25 +290,25 @@ public class UpdateCustomerDialog extends BaseActionDialog {
 
             ResponseEntity<CustomerDto> response = customerService.update(customer.getId(), customer);
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                append(I18n.t("customer.dialog.update.failed", response.getStatusCodeValue()));
+                append(I18n.t("ims.customer.dialog.update.failed", response.getStatusCodeValue()));
                 return false;
             }
 
             if (imageChanged && newImageFile != null) {
                 ResponseEntity<CustomerDto> uploadResponse = customerImageService.uploadImage(customer.getId(), newImageFile);
                 if (!uploadResponse.getStatusCode().is2xxSuccessful()) {
-                    append(I18n.t("customer.dialog.update.image.failed", uploadResponse.getStatusCodeValue()));
+                    append(I18n.t("ims.customer.dialog.update.image.failed", uploadResponse.getStatusCodeValue()));
                     return false;
                 }
             }
 
-            append(I18n.t("customer.dialog.update.success"));
+            append(I18n.t("ims.customer.dialog.update.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("customer.dialog.update.error", e.getMessage()));
+            append(I18n.t("ims.customer.dialog.update.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

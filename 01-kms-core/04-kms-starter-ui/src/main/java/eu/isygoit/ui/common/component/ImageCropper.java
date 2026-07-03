@@ -55,10 +55,10 @@ public class ImageCropper extends VerticalLayout
         upload = new Upload(buffer);
         upload.setAcceptedFileTypes("image/jpeg", "image/png", "image/jpg", "image/webp");
         upload.setMaxFileSize(5 * 1024 * 1024);
-        upload.setDropLabel(new Span(I18n.t("image.cropper.upload.label")));
+        upload.setDropLabel(new Span(I18n.t("common.image.cropper.upload.label")));
         upload.addSucceededListener(event -> loadImage(event.getMIMEType(), buffer.getInputStream()));
         upload.addFailedListener(event -> {
-            Notification.show(I18n.t("image.cropper.error.upload.failed"), 3000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("common.image.cropper.error.upload.failed"), 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         });
         add(upload);
@@ -73,7 +73,7 @@ public class ImageCropper extends VerticalLayout
         cropperContainer.getStyle().set("text-align", "center");
         add(cropperContainer);
 
-        cropButton = new Button(I18n.t("image.cropper.crop.button"), e -> cropImage());
+        cropButton = new Button(I18n.t("common.image.cropper.crop.button"), e -> cropImage());
         cropButton.setVisible(false);
         add(cropButton);
     }
@@ -98,7 +98,7 @@ public class ImageCropper extends VerticalLayout
 
             initCropper();
         } catch (IOException e) {
-            Notification.show(I18n.t("image.cropper.error.read.failed"), 3000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("common.image.cropper.error.read.failed"), 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }
@@ -145,7 +145,7 @@ public class ImageCropper extends VerticalLayout
             listeners.forEach(l -> l.valueChanged(event));
 
         } catch (Exception e) {
-            Notification.show(I18n.t("image.cropper.error.crop.failed"), 3000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("common.image.cropper.error.crop.failed"), 3000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }

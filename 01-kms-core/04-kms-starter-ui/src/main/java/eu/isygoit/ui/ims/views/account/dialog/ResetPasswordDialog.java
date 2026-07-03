@@ -18,8 +18,8 @@ public class ResetPasswordDialog extends PinBaseActionDialog {
                                Long accountId,
                                String email,
                                Runnable onSuccess) {
-        super(I18n.t("account.dialog.reset.title"),
-                I18n.t("account.dialog.reset.message", email),
+        super(I18n.t("ims.account.dialog.reset.title"),
+                I18n.t("ims.account.dialog.reset.message", email),
                 onSuccess,
                 false); // requirePin = false (simple confirmation)
         this.parentView = parentView;
@@ -27,7 +27,7 @@ public class ResetPasswordDialog extends PinBaseActionDialog {
         this.accountId = accountId;
         this.email = email;
 
-        setOkButtonText(I18n.t("account.dialog.reset.button"));
+        setOkButtonText(I18n.t("ims.account.dialog.reset.button"));
         setWidth("450px");
     }
 
@@ -43,15 +43,15 @@ public class ResetPasswordDialog extends PinBaseActionDialog {
 
             // Simulate network call
             Thread.sleep(500);
-            append(I18n.t("account.dialog.reset.success", email));
+            append(I18n.t("ims.account.dialog.reset.success", email));
             return true;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            append(I18n.t("account.dialog.reset.interrupted"));
+            append(I18n.t("ims.account.dialog.reset.interrupted"));
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("account.dialog.reset.failed", e.getMessage()));
+            append(I18n.t("ims.account.dialog.reset.failed", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

@@ -31,7 +31,7 @@ public class DecodeJwtDialog extends NoActionDialog {
     private final String jwtToken;
 
     public DecodeJwtDialog(ObjectMapper objectMapper, String jwtToken) {
-        super(I18n.t("decode.jwt.title"));
+        super(I18n.t("kms.decode.jwt.title"));
         this.objectMapper = objectMapper;
         this.jwtToken = jwtToken;
 
@@ -52,7 +52,7 @@ public class DecodeJwtDialog extends NoActionDialog {
         try {
             String[] parts = jwtToken.split("\\.");
             if (parts.length != 3) {
-                mainLayout.add(createErrorCard(I18n.t("decode.jwt.invalid.format")));
+                mainLayout.add(createErrorCard(I18n.t("kms.decode.jwt.invalid.format")));
                 add(mainLayout);
                 return;
             }
@@ -69,15 +69,15 @@ public class DecodeJwtDialog extends NoActionDialog {
 
             // Header card
             Card headerCard = createSectionCard(
-                    I18n.t("decode.jwt.header"),
+                    I18n.t("kms.decode.jwt.header"),
                     prettyHeader,
-                    I18n.t("decode.jwt.header.tooltip")
+                    I18n.t("kms.decode.jwt.header.tooltip")
             );
             // Payload card
             Card payloadCard = createSectionCard(
-                    I18n.t("decode.jwt.payload"),
+                    I18n.t("kms.decode.jwt.payload"),
                     displayPayload,
-                    I18n.t("decode.jwt.payload.tooltip")
+                    I18n.t("kms.decode.jwt.payload.tooltip")
             );
 
             mainLayout.add(headerCard, payloadCard);
@@ -85,17 +85,17 @@ public class DecodeJwtDialog extends NoActionDialog {
             // Signature info
             if (parts[2] != null && !parts[2].isEmpty()) {
                 String signature = parts[2];
-                Span sigInfo = new Span(I18n.t("decode.jwt.signature", signature.substring(0, Math.min(20, signature.length()))));
+                Span sigInfo = new Span(I18n.t("kms.decode.jwt.signature", signature.substring(0, Math.min(20, signature.length()))));
                 sigInfo.getStyle().set("font-size", "var(--lumo-font-size-xs)");
                 sigInfo.getStyle().set("color", "var(--lumo-secondary-text-color)");
                 mainLayout.add(sigInfo);
             }
         } catch (Exception e) {
-            mainLayout.add(createErrorCard(I18n.t("decode.jwt.decode.failed", e.getMessage())));
+            mainLayout.add(createErrorCard(I18n.t("kms.decode.jwt.decode.failed", e.getMessage())));
         }
 
         // Close button row
-        Button closeBtn = new Button(I18n.t("decode.jwt.close"), e -> close());
+        Button closeBtn = new Button(I18n.t("kms.decode.jwt.close"), e -> close());
         closeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         HorizontalLayout buttonBar = new HorizontalLayout(closeBtn);
         buttonBar.setWidthFull();
@@ -116,7 +116,7 @@ public class DecodeJwtDialog extends NoActionDialog {
 
         Button copyButton = new Button(new Icon(VaadinIcon.COPY));
         copyButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
-        copyButton.setTooltipText(I18n.t("decode.jwt.copy"));
+        copyButton.setTooltipText(I18n.t("kms.decode.jwt.copy"));
         copyButton.addClickListener(e -> copyToClipboard(content));
 
         HorizontalLayout titleRow = new HorizontalLayout(titleSpan, copyButton);
@@ -129,7 +129,7 @@ public class DecodeJwtDialog extends NoActionDialog {
         textArea.setValue(content);
         textArea.setReadOnly(true);
         textArea.setWidthFull();
-        textArea.setHeight(title.equals(I18n.t("decode.jwt.header")) ? "150px" : "300px");
+        textArea.setHeight(title.equals(I18n.t("kms.decode.jwt.header")) ? "150px" : "300px");
         textArea.getStyle().set("font-family", "monospace");
         textArea.getStyle().set("font-size", "12px");
         textArea.getStyle().set("background", "var(--lumo-contrast-5pct)");
@@ -154,7 +154,7 @@ public class DecodeJwtDialog extends NoActionDialog {
 
     private void copyToClipboard(String text) {
         if (text == null || text.isBlank()) {
-            Notification.show(I18n.t("decode.jwt.nothing.to.copy"), 2000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("kms.decode.jwt.nothing.to.copy"), 2000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_WARNING);
             return;
         }
@@ -174,7 +174,7 @@ public class DecodeJwtDialog extends NoActionDialog {
                         "  document.body.appendChild(notification);" +
                         "  setTimeout(() => notification.remove(), 2000);" +
                         "});",
-                text, I18n.t("token.builder.copy.success")));
+                text, I18n.t("kms.token.builder.copy.success")));
     }
 
     private String transformPayloadWithInlineDates(String prettyJson, JsonNode payloadNode) {

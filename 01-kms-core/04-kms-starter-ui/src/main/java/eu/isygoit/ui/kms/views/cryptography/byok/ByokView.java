@@ -54,17 +54,17 @@ import java.util.stream.Collectors;
 public class ByokView extends ManagementVerticalView {
 
     private final KmsApiService kmsApiService;
-    private final ComboBox<KeyOption> keyCombo = new ComboBox<>(I18n.t("byok.view.select.key"));
+    private final ComboBox<KeyOption> keyCombo = new ComboBox<>(I18n.t("kms.byok.view.select.key"));
     private final Button refreshKeysButton = new Button(new Icon(VaadinIcon.REFRESH));
-    private final Button getParamsButton = new Button(I18n.t("byok.view.generate.params.button"), new Icon(VaadinIcon.DOWNLOAD));
+    private final Button getParamsButton = new Button(I18n.t("kms.byok.view.generate.params.button"), new Icon(VaadinIcon.DOWNLOAD));
     private final TextArea wrappedKeyDisplay = new TextArea();
     private final TextArea importTokenDisplay = new TextArea();
     private final TextArea plainKeyMaterialField = new TextArea();
-    private final Button encryptNowButton = new Button(I18n.t("byok.view.encrypt.now.button"), new Icon(VaadinIcon.LOCK));
+    private final Button encryptNowButton = new Button(I18n.t("kms.byok.view.encrypt.now.button"), new Icon(VaadinIcon.LOCK));
     private final TextArea encryptedMaterialField = new TextArea();
-    private final DatePicker expirationDatePicker = new DatePicker(I18n.t("byok.view.expiration.date"));
-    private final Button importButton = new Button(I18n.t("byok.view.import.button"), new Icon(VaadinIcon.UPLOAD));
-    private final Button deleteMaterialButton = new Button(I18n.t("byok.view.delete.material.button"), new Icon(VaadinIcon.TRASH));
+    private final DatePicker expirationDatePicker = new DatePicker(I18n.t("kms.byok.view.expiration.date"));
+    private final Button importButton = new Button(I18n.t("kms.byok.view.import.button"), new Icon(VaadinIcon.UPLOAD));
+    private final Button deleteMaterialButton = new Button(I18n.t("kms.byok.view.delete.material.button"), new Icon(VaadinIcon.TRASH));
     private final ProgressBar loadingBar = new ProgressBar();
     private final Span paramsExpiryInfo = new Span();
     private final Span keyStatusInfo = new Span();
@@ -87,15 +87,15 @@ public class ByokView extends ManagementVerticalView {
         setAlignItems(FlexComponent.Alignment.STRETCH);
 
         // Header
-        H2 header = new H2(I18n.t("byok.view.title"));
+        H2 header = new H2(I18n.t("kms.byok.view.title"));
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.SMALL);
         header.addClassName(LumoUtility.Margin.Top.NONE);
         add(header);
 
         // Step 1: Key selection + status + delete button
-        add(createStepCard(I18n.t("byok.view.step1.title"),
-                I18n.t("byok.view.step1.hint"),
+        add(createStepCard(I18n.t("kms.byok.view.step1.title"),
+                I18n.t("kms.byok.view.step1.hint"),
                 buildKeySelectionSection(),
                 buildStatusAndDeleteRow()));
 
@@ -104,11 +104,11 @@ public class ByokView extends ManagementVerticalView {
         step2Content.setSpacing(false);
         step2Content.setPadding(false);
         step2Content.add(buildParamButtons());
-        step2Content.add(createFieldRow(I18n.t("byok.view.wrapping.key.label"), wrappedKeyDisplay, I18n.t("byok.view.wrapping.key.copy.tooltip")));
-        step2Content.add(createFieldRow(I18n.t("byok.view.import.token.label"), importTokenDisplay, I18n.t("byok.view.import.token.copy.tooltip")));
+        step2Content.add(createFieldRow(I18n.t("kms.byok.view.wrapping.key.label"), wrappedKeyDisplay, I18n.t("kms.byok.view.wrapping.key.copy.tooltip")));
+        step2Content.add(createFieldRow(I18n.t("kms.byok.view.import.token.label"), importTokenDisplay, I18n.t("kms.byok.view.import.token.copy.tooltip")));
         step2Content.add(paramsExpiryInfo);
-        add(createStepCard(I18n.t("byok.view.step2.title"),
-                I18n.t("byok.view.step2.hint"),
+        add(createStepCard(I18n.t("kms.byok.view.step2.title"),
+                I18n.t("kms.byok.view.step2.hint"),
                 step2Content));
 
         // Step 3: Encrypt key material
@@ -116,9 +116,9 @@ public class ByokView extends ManagementVerticalView {
         step3Content.setSpacing(false);
         step3Content.setPadding(false);
         step3Content.add(createEncryptionSection());
-        step3Content.add(createFieldRow(I18n.t("byok.view.encrypted.material.label"), encryptedMaterialField, I18n.t("byok.view.encrypted.material.copy.tooltip")));
-        add(createStepCard(I18n.t("byok.view.step3.title"),
-                I18n.t("byok.view.step3.hint"),
+        step3Content.add(createFieldRow(I18n.t("kms.byok.view.encrypted.material.label"), encryptedMaterialField, I18n.t("kms.byok.view.encrypted.material.copy.tooltip")));
+        add(createStepCard(I18n.t("kms.byok.view.step3.title"),
+                I18n.t("kms.byok.view.step3.hint"),
                 step3Content));
 
         // Step 4: Import
@@ -127,8 +127,8 @@ public class ByokView extends ManagementVerticalView {
         step4Content.setPadding(false);
         step4Content.add(expirationDatePicker);
         step4Content.add(buildImportSection());
-        add(createStepCard(I18n.t("byok.view.step4.title"),
-                I18n.t("byok.view.step4.hint"),
+        add(createStepCard(I18n.t("kms.byok.view.step4.title"),
+                I18n.t("kms.byok.view.step4.hint"),
                 step4Content));
 
         loadingBar.setIndeterminate(true);
@@ -190,13 +190,13 @@ public class ByokView extends ManagementVerticalView {
         keyLayout.setSpacing(true);
         keyLayout.getStyle().set("flex-wrap", "wrap");
 
-        keyCombo.setPlaceholder(I18n.t("byok.view.select.key"));
+        keyCombo.setPlaceholder(I18n.t("kms.byok.view.select.key"));
         keyCombo.setItemLabelGenerator(KeyOption::getDisplayName);
         keyCombo.setWidth("400px");
-        keyCombo.setTooltipText(I18n.t("byok.view.select.key.tooltip"));
+        keyCombo.setTooltipText(I18n.t("kms.byok.view.select.key.tooltip"));
 
         refreshKeysButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshKeysButton.setTooltipText(I18n.t("byok.view.refresh.tooltip"));
+        refreshKeysButton.setTooltipText(I18n.t("kms.byok.view.refresh.tooltip"));
 
         keyLayout.add(keyCombo, refreshKeysButton);
         return keyLayout;
@@ -213,7 +213,7 @@ public class ByokView extends ManagementVerticalView {
         keyStatusInfo.getStyle().set("margin-top", "var(--lumo-space-xs)");
 
         deleteMaterialButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        deleteMaterialButton.setTooltipText(I18n.t("byok.view.delete.material.tooltip"));
+        deleteMaterialButton.setTooltipText(I18n.t("kms.byok.view.delete.material.tooltip"));
         deleteMaterialButton.setVisible(false);
 
         row.add(keyStatusInfo, deleteMaterialButton);
@@ -224,7 +224,7 @@ public class ByokView extends ManagementVerticalView {
         HorizontalLayout paramLayout = new HorizontalLayout(getParamsButton);
         paramLayout.setSpacing(true);
         getParamsButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        getParamsButton.setTooltipText(I18n.t("byok.view.generate.params.tooltip"));
+        getParamsButton.setTooltipText(I18n.t("kms.byok.view.generate.params.tooltip"));
         return paramLayout;
     }
 
@@ -233,7 +233,7 @@ public class ByokView extends ManagementVerticalView {
         importLayout.setWidthFull();
         importLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.START);
         importButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
-        importButton.setTooltipText(I18n.t("byok.view.import.tooltip"));
+        importButton.setTooltipText(I18n.t("kms.byok.view.import.tooltip"));
         return importLayout;
     }
 
@@ -248,7 +248,7 @@ public class ByokView extends ManagementVerticalView {
         buttonRow.setWidthFull();
         buttonRow.setJustifyContentMode(FlexComponent.JustifyContentMode.START);
         encryptNowButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        encryptNowButton.setTooltipText(I18n.t("byok.view.encrypt.now.tooltip"));
+        encryptNowButton.setTooltipText(I18n.t("kms.byok.view.encrypt.now.tooltip"));
         layout.add(buttonRow);
 
         return layout;
@@ -264,15 +264,15 @@ public class ByokView extends ManagementVerticalView {
         headerRow.setWidthFull();
         headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
         headerRow.setSpacing(true);
-        Span labelSpan = new Span(I18n.t("byok.view.plain.material.label"));
+        Span labelSpan = new Span(I18n.t("kms.byok.view.plain.material.label"));
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
         labelSpan.addClassName(LumoUtility.FontSize.SMALL);
         headerRow.add(labelSpan);
         headerRow.getStyle().set("flex-wrap", "wrap");
 
         plainKeyMaterialField.setWidthFull();
-        plainKeyMaterialField.setPlaceholder(I18n.t("byok.view.plain.material.placeholder"));
-        plainKeyMaterialField.setHelperText(I18n.t("byok.view.plain.material.helper"));
+        plainKeyMaterialField.setPlaceholder(I18n.t("kms.byok.view.plain.material.placeholder"));
+        plainKeyMaterialField.setHelperText(I18n.t("kms.byok.view.plain.material.helper"));
 
         row.add(headerRow, plainKeyMaterialField);
         return row;
@@ -301,9 +301,9 @@ public class ByokView extends ManagementVerticalView {
             String value = textArea.getValue();
             if (StringUtils.hasText(value)) {
                 copyToClipboard(value);
-                showSuccessNotification(I18n.t("byok.view.copied"));
+                showSuccessNotification(I18n.t("kms.byok.view.copied"));
             } else {
-                showWarningNotification(I18n.t("byok.view.nothing.to.copy"));
+                showWarningNotification(I18n.t("kms.byok.view.nothing.to.copy"));
             }
         });
 
@@ -345,26 +345,26 @@ public class ByokView extends ManagementVerticalView {
                         "  notification.style.zIndex = '1000'; " +
                         "  document.body.appendChild(notification); " +
                         "  setTimeout(() => notification.remove(), 3000); " +
-                        "});", text, I18n.t("byok.view.copied"), I18n.t("byok.view.copy.failed"));
+                        "});", text, I18n.t("kms.byok.view.copied"), I18n.t("kms.byok.view.copy.failed"));
     }
 
     private void configureComponents() {
         int textAreaHeight = 100;
         wrappedKeyDisplay.setHeight(textAreaHeight + "px");
         wrappedKeyDisplay.setReadOnly(true);
-        wrappedKeyDisplay.setPlaceholder(I18n.t("byok.view.wrapping.key.placeholder"));
+        wrappedKeyDisplay.setPlaceholder(I18n.t("kms.byok.view.wrapping.key.placeholder"));
 
         importTokenDisplay.setHeight(textAreaHeight + "px");
         importTokenDisplay.setReadOnly(true);
-        importTokenDisplay.setPlaceholder(I18n.t("byok.view.import.token.placeholder"));
+        importTokenDisplay.setPlaceholder(I18n.t("kms.byok.view.import.token.placeholder"));
 
         encryptedMaterialField.setHeight(textAreaHeight + "px");
-        encryptedMaterialField.setPlaceholder(I18n.t("byok.view.encrypted.material.placeholder"));
-        encryptedMaterialField.setHelperText(I18n.t("byok.view.encrypted.material.helper"));
+        encryptedMaterialField.setPlaceholder(I18n.t("kms.byok.view.encrypted.material.placeholder"));
+        encryptedMaterialField.setHelperText(I18n.t("kms.byok.view.encrypted.material.helper"));
 
         expirationDatePicker.setWidth("250px");
-        expirationDatePicker.setPlaceholder(I18n.t("byok.view.expiration.date.placeholder"));
-        expirationDatePicker.setHelperText(I18n.t("byok.view.expiration.date.helper"));
+        expirationDatePicker.setPlaceholder(I18n.t("kms.byok.view.expiration.date.placeholder"));
+        expirationDatePicker.setHelperText(I18n.t("kms.byok.view.expiration.date.helper"));
     }
 
     // ---------- Data & API ----------
@@ -391,10 +391,10 @@ public class ByokView extends ManagementVerticalView {
             updateKeyStatus();
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            showErrorNotification(I18n.t("byok.view.load.keys.error", errorMsg));
+            showErrorNotification(I18n.t("kms.byok.view.load.keys.error", errorMsg));
             log.error("Failed to load keys: {}", errorMsg);
         } catch (Exception e) {
-            showErrorNotification(I18n.t("byok.view.load.keys.error", e.getMessage()));
+            showErrorNotification(I18n.t("kms.byok.view.load.keys.error", e.getMessage()));
             log.error("Failed to load keys: {}", e.getMessage());
         } finally {
             showLoading(false);
@@ -413,10 +413,10 @@ public class ByokView extends ManagementVerticalView {
             }
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            showErrorNotification(I18n.t("byok.view.fetch.key.error", errorMsg));
+            showErrorNotification(I18n.t("kms.byok.view.fetch.key.error", errorMsg));
             log.error("Error fetching key details for {}: {}", keyId, errorMsg);
         } catch (Exception e) {
-            showErrorNotification(I18n.t("byok.view.fetch.key.details.error", keyId, e.getMessage()));
+            showErrorNotification(I18n.t("kms.byok.view.fetch.key.details.error", keyId, e.getMessage()));
             log.error("Error fetching key details for {}: {}", keyId, e.getMessage());
         }
         return new KeyOption(keyId, keyId, false);
@@ -436,17 +436,17 @@ public class ByokView extends ManagementVerticalView {
                 hasImportedMaterial = desc.getKeyMetadata().getOrigin() == IEnumKeyOrigin.Types.EXTERNAL &&
                         desc.getKeyMetadata().getKeyStatus() != IEnumKeyStatus.Types.PENDING_IMPORT;
                 String statusText = hasImportedMaterial ?
-                        "✅ " + I18n.t("byok.view.key.status.imported") :
-                        "⚠️ " + I18n.t("byok.view.key.status.pending");
+                        "✅ " + I18n.t("kms.byok.view.key.status.imported") :
+                        "⚠️ " + I18n.t("kms.byok.view.key.status.pending");
                 keyStatusInfo.setText(statusText);
                 deleteMaterialButton.setVisible(hasImportedMaterial);
             }
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            showErrorNotification(I18n.t("byok.view.fetch.key.error", errorMsg));
+            showErrorNotification(I18n.t("kms.byok.view.fetch.key.error", errorMsg));
             log.error("Error fetching key details for {}: {}", selectedKeyId, ex.getMessage());
         } catch (Exception e) {
-            showErrorNotification(I18n.t("byok.view.fetch.key.details.error", selectedKeyId, e.getMessage()));
+            showErrorNotification(I18n.t("kms.byok.view.fetch.key.details.error", selectedKeyId, e.getMessage()));
             log.error("Error fetching key details for {}: {}", selectedKeyId, e.getMessage());
             keyStatusInfo.setText("");
             deleteMaterialButton.setVisible(false);
@@ -456,11 +456,11 @@ public class ByokView extends ManagementVerticalView {
 
     private void generateParameters() {
         if (selectedKeyId == null) {
-            showWarningNotification(I18n.t("byok.view.params.select.key.first"));
+            showWarningNotification(I18n.t("kms.byok.view.params.select.key.first"));
             return;
         }
         if (hasImportedMaterial) {
-            showWarningNotification(I18n.t("byok.view.params.has.material"));
+            showWarningNotification(I18n.t("kms.byok.view.params.has.material"));
             return;
         }
         showLoading(true);
@@ -480,22 +480,22 @@ public class ByokView extends ManagementVerticalView {
                 parametersValidUntil = params.getValidTo();
 
                 String expiryMsg = parametersValidUntil != null ?
-                        I18n.t("byok.view.params.expiry.info", DateHelper.formatToHumanReadable(parametersValidUntil)) :
-                        I18n.t("byok.view.params.expiry.no.expiry");
+                        I18n.t("kms.byok.view.params.expiry.info", DateHelper.formatToHumanReadable(parametersValidUntil)) :
+                        I18n.t("kms.byok.view.params.expiry.no.expiry");
                 paramsExpiryInfo.setText(expiryMsg);
                 paramsExpiryInfo.addClassName(LumoUtility.FontSize.XSMALL);
                 paramsExpiryInfo.addClassName(LumoUtility.TextColor.TERTIARY);
 
-                showSuccessNotification(I18n.t("byok.view.params.generated"));
+                showSuccessNotification(I18n.t("kms.byok.view.params.generated"));
             } else {
-                showErrorNotification(I18n.t("byok.view.params.generate.failed"));
+                showErrorNotification(I18n.t("kms.byok.view.params.generate.failed"));
             }
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            showErrorNotification(I18n.t("byok.view.params.generate.error", errorMsg));
+            showErrorNotification(I18n.t("kms.byok.view.params.generate.error", errorMsg));
             log.error("Failed to generate import parameters for key {}: {}", selectedKeyId, errorMsg);
         } catch (Exception e) {
-            showErrorNotification(I18n.t("byok.view.params.generate.error", e.getMessage()));
+            showErrorNotification(I18n.t("kms.byok.view.params.generate.error", e.getMessage()));
             log.error("Failed to generate import parameters for key {}: {}", selectedKeyId, e.getMessage());
         } finally {
             showLoading(false);
@@ -505,16 +505,16 @@ public class ByokView extends ManagementVerticalView {
     private void encryptWithPublicKey() {
         String publicKey = wrappedKeyDisplay.getValue();
         if (!StringUtils.hasText(publicKey)) {
-            showWarningNotification(I18n.t("byok.view.encrypt.generate.first"));
+            showWarningNotification(I18n.t("kms.byok.view.encrypt.generate.first"));
             return;
         }
         String plainBase64 = plainKeyMaterialField.getValue();
         if (!StringUtils.hasText(plainBase64)) {
-            showWarningNotification(I18n.t("byok.view.encrypt.enter.material"));
+            showWarningNotification(I18n.t("kms.byok.view.encrypt.enter.material"));
             return;
         }
         if (!isValidBase64(plainBase64)) {
-            showErrorNotification(I18n.t("byok.view.encrypt.invalid.base64"));
+            showErrorNotification(I18n.t("kms.byok.view.encrypt.invalid.base64"));
             return;
         }
 
@@ -522,9 +522,9 @@ public class ByokView extends ManagementVerticalView {
         try {
             String encryptedBase64 = RsaEncryptionUtil.encryptWithPublicKey(publicKey, plainBase64);
             encryptedMaterialField.setValue(encryptedBase64);
-            showSuccessNotification(I18n.t("byok.view.encrypt.success"));
+            showSuccessNotification(I18n.t("kms.byok.view.encrypt.success"));
         } catch (Exception e) {
-            showErrorNotification(I18n.t("byok.view.encrypt.failed", e.getMessage()));
+            showErrorNotification(I18n.t("kms.byok.view.encrypt.failed", e.getMessage()));
         } finally {
             showLoading(false);
         }
@@ -532,28 +532,28 @@ public class ByokView extends ManagementVerticalView {
 
     private void importKeyMaterial() {
         if (selectedKeyId == null) {
-            showWarningNotification(I18n.t("byok.view.import.select.key"));
+            showWarningNotification(I18n.t("kms.byok.view.import.select.key"));
             return;
         }
         if (hasImportedMaterial) {
-            showWarningNotification(I18n.t("byok.view.import.has.material"));
+            showWarningNotification(I18n.t("kms.byok.view.import.has.material"));
             return;
         }
         String encrypted = encryptedMaterialField.getValue();
         if (!StringUtils.hasText(encrypted)) {
-            showWarningNotification(I18n.t("byok.view.import.encrypted.required"));
+            showWarningNotification(I18n.t("kms.byok.view.import.encrypted.required"));
             return;
         }
         if (!isValidBase64(encrypted)) {
-            showErrorNotification(I18n.t("byok.view.import.invalid.base64"));
+            showErrorNotification(I18n.t("kms.byok.view.import.invalid.base64"));
             return;
         }
         if (currentImportToken == null) {
-            showWarningNotification(I18n.t("byok.view.import.generate.first"));
+            showWarningNotification(I18n.t("kms.byok.view.import.generate.first"));
             return;
         }
         if (parametersValidUntil != null && parametersValidUntil.isBefore(LocalDateTime.now())) {
-            showErrorNotification(I18n.t("byok.view.import.token.expired"));
+            showErrorNotification(I18n.t("kms.byok.view.import.token.expired"));
             return;
         }
 
@@ -573,18 +573,18 @@ public class ByokView extends ManagementVerticalView {
             }
             ResponseEntity<KmsDtos.ImportKeyMaterialResponse> response = kmsApiService.importKeyMaterial(selectedKeyId, request);
             if (response.getStatusCode().is2xxSuccessful()) {
-                showSuccessNotification(I18n.t("byok.view.import.success"));
+                showSuccessNotification(I18n.t("kms.byok.view.import.success"));
                 clearParameters();
                 updateKeyStatus();
             } else {
-                showErrorNotification(I18n.t("byok.view.import.failed"));
+                showErrorNotification(I18n.t("kms.byok.view.import.failed"));
             }
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            showErrorNotification(I18n.t("byok.view.import.error", errorMsg));
+            showErrorNotification(I18n.t("kms.byok.view.import.error", errorMsg));
             log.error("Import key material failed for {}: {}", selectedKeyId, errorMsg);
         } catch (Exception e) {
-            showErrorNotification(I18n.t("byok.view.import.error", e.getMessage()));
+            showErrorNotification(I18n.t("kms.byok.view.import.error", e.getMessage()));
             log.error("Import key material failed for {}: {}", selectedKeyId, e.getMessage());
         } finally {
             showLoading(false);
@@ -593,11 +593,11 @@ public class ByokView extends ManagementVerticalView {
 
     private void deleteImportedMaterial() {
         if (selectedKeyId == null) {
-            showWarningNotification(I18n.t("byok.view.delete.select.key"));
+            showWarningNotification(I18n.t("kms.byok.view.delete.select.key"));
             return;
         }
         if (!hasImportedMaterial) {
-            showWarningNotification(I18n.t("byok.view.delete.no.material"));
+            showWarningNotification(I18n.t("kms.byok.view.delete.no.material"));
             return;
         }
         showLoading(true);
@@ -605,18 +605,18 @@ public class ByokView extends ManagementVerticalView {
             ResponseEntity<KmsDtos.DeleteImportedKeyMaterialResponse> response =
                     kmsApiService.deleteImportedKeyMaterial(selectedKeyId);
             if (response.getStatusCode().is2xxSuccessful()) {
-                showSuccessNotification(I18n.t("byok.view.delete.success"));
+                showSuccessNotification(I18n.t("kms.byok.view.delete.success"));
                 clearParameters();
                 updateKeyStatus();
             } else {
-                showErrorNotification(I18n.t("byok.view.delete.failed"));
+                showErrorNotification(I18n.t("kms.byok.view.delete.failed"));
             }
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            showErrorNotification(I18n.t("byok.view.delete.error", errorMsg));
+            showErrorNotification(I18n.t("kms.byok.view.delete.error", errorMsg));
             log.error("Failed to delete imported key material for {}: {}", selectedKeyId, errorMsg);
         } catch (Exception e) {
-            showErrorNotification(I18n.t("byok.view.delete.error", e.getMessage()));
+            showErrorNotification(I18n.t("kms.byok.view.delete.error", e.getMessage()));
             log.error("Failed to delete imported key material for {}: {}", selectedKeyId, e.getMessage());
         } finally {
             showLoading(false);

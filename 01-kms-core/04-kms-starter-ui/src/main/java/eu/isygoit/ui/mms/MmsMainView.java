@@ -65,10 +65,10 @@ public class MmsMainView extends ManagementVerticalView {
         stats.setSpacing(true);
         stats.addClassName("stats-overview");
 
-        stats.add(createStatCard(VaadinIcon.MAILBOX, "mms.dashboard.senders", "2", "Active senders"));
-        stats.add(createStatCard(VaadinIcon.FILE_TEXT, "mms.dashboard.templates", "5", "Available templates"));
-        stats.add(createStatCard(VaadinIcon.ENVELOPE, "mms.dashboard.emails.sent", "1,234", "This month"));
-        stats.add(createStatCard(VaadinIcon.INFO_CIRCLE, "mms.dashboard.queued", "12", "Pending delivery"));
+        stats.add(createStatCard(VaadinIcon.MAILBOX, "mms.dashboard.senders", "2", I18n.t("mms.dashboard.senders.subtitle")));
+        stats.add(createStatCard(VaadinIcon.FILE_TEXT, "mms.dashboard.templates", "5", I18n.t("mms.dashboard.templates.subtitle")));
+        stats.add(createStatCard(VaadinIcon.ENVELOPE, "mms.dashboard.emails.sent", "1,234", I18n.t("mms.dashboard.emails.sent.subtitle")));
+        stats.add(createStatCard(VaadinIcon.INFO_CIRCLE, "mms.dashboard.queued", "12", I18n.t("mms.dashboard.queued.subtitle")));
 
         return stats;
     }

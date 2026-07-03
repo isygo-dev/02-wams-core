@@ -57,13 +57,13 @@ public class CreateCustomerDialog extends BaseActionDialog {
                                 CustomerService customerService,
                                 CustomerImageService customerImageService,
                                 Runnable onSuccess) {
-        super(I18n.t("customer.dialog.create.title"), onSuccess);
+        super(I18n.t("ims.customer.dialog.create.title"), onSuccess);
         this.parentView = parentView;
         this.customerService = customerService;
         this.customerImageService = customerImageService;
         this.onSuccess = onSuccess;
 
-        setOkButtonText(I18n.t("customer.dialog.create.button"));
+        setOkButtonText(I18n.t("ims.customer.dialog.create.button"));
         setWidth("800px");
         setMaxWidth("95%");
 
@@ -72,46 +72,46 @@ public class CreateCustomerDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        nameField = new TextField(I18n.t("customer.dialog.field.name"));
+        nameField = new TextField(I18n.t("ims.customer.dialog.field.name"));
         nameField.setRequiredIndicatorVisible(true);
         nameField.setWidthFull();
 
-        emailField = new EmailField(I18n.t("customer.dialog.field.email"));
+        emailField = new EmailField(I18n.t("ims.customer.dialog.field.email"));
         emailField.setRequiredIndicatorVisible(true);
         emailField.setWidthFull();
 
-        phoneField = new TextField(I18n.t("customer.dialog.field.phone"));
+        phoneField = new TextField(I18n.t("ims.customer.dialog.field.phone"));
         phoneField.setRequiredIndicatorVisible(true);
         phoneField.setWidthFull();
 
-        urlField = new TextField(I18n.t("customer.dialog.field.website"));
+        urlField = new TextField(I18n.t("ims.customer.dialog.field.website"));
         urlField.setWidthFull();
 
-        descriptionField = new TextArea(I18n.t("customer.dialog.field.description"));
+        descriptionField = new TextArea(I18n.t("ims.customer.dialog.field.description"));
         descriptionField.setWidthFull();
 
-        adminStatusCombo = new ComboBox<>(I18n.t("customer.dialog.field.admin.status"));
+        adminStatusCombo = new ComboBox<>(I18n.t("ims.customer.dialog.field.admin.status"));
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
         adminStatusCombo.setValue(IEnumEnabledBinaryStatus.Types.ENABLED);
         adminStatusCombo.setWidthFull();
 
         // Address
-        countryField = new TextField(I18n.t("customer.dialog.field.country"));
+        countryField = new TextField(I18n.t("ims.customer.dialog.field.country"));
         countryField.setWidthFull();
 
-        stateField = new TextField(I18n.t("customer.dialog.field.state"));
+        stateField = new TextField(I18n.t("ims.customer.dialog.field.state"));
         stateField.setWidthFull();
 
-        cityField = new TextField(I18n.t("customer.dialog.field.city"));
+        cityField = new TextField(I18n.t("ims.customer.dialog.field.city"));
         cityField.setWidthFull();
 
-        streetField = new TextField(I18n.t("customer.dialog.field.street"));
+        streetField = new TextField(I18n.t("ims.customer.dialog.field.street"));
         streetField.setWidthFull();
 
-        zipCodeField = new TextField(I18n.t("customer.dialog.field.zip.code"));
+        zipCodeField = new TextField(I18n.t("ims.customer.dialog.field.zip.code"));
         zipCodeField.setWidthFull();
 
-        additionalInfoField = new TextField(I18n.t("customer.dialog.field.additional.info"));
+        additionalInfoField = new TextField(I18n.t("ims.customer.dialog.field.additional.info"));
         additionalInfoField.setWidthFull();
 
         // Image
@@ -135,7 +135,7 @@ public class CreateCustomerDialog extends BaseActionDialog {
                 .set("justify-content", "center");
         imagePlaceholder.add(new Icon(VaadinIcon.CAMERA));
 
-        uploadImageButton = new Button(I18n.t("customer.dialog.field.upload.image"), e -> openCropperDialog());
+        uploadImageButton = new Button(I18n.t("ims.customer.dialog.field.upload.image"), e -> openCropperDialog());
         uploadImageButton.setIcon(new Icon(VaadinIcon.UPLOAD));
     }
 
@@ -191,26 +191,26 @@ public class CreateCustomerDialog extends BaseActionDialog {
 
     private Div buildLayout() {
         Div main = new Div();
-        main.add(buildMainForm(), new H4(I18n.t("customer.dialog.field.address")), buildAddressForm(), buildImageRow());
+        main.add(buildMainForm(), new H4(I18n.t("ims.customer.dialog.field.address")), buildAddressForm(), buildImageRow());
         return main;
     }
 
     @Override
     protected boolean onOk() {
         if (nameField.getValue().isBlank()) {
-            append(I18n.t("customer.dialog.field.name.required"));
+            append(I18n.t("ims.customer.dialog.field.name.required"));
             return false;
         }
         if (emailField.getValue().isBlank()) {
-            append(I18n.t("customer.dialog.field.email.required"));
+            append(I18n.t("ims.customer.dialog.field.email.required"));
             return false;
         }
         if (phoneField.getValue().isBlank()) {
-            append(I18n.t("customer.dialog.field.phone.required"));
+            append(I18n.t("ims.customer.dialog.field.phone.required"));
             return false;
         }
         if (selectedImageFile == null) {
-            append(I18n.t("customer.dialog.create.image.required"));
+            append(I18n.t("ims.customer.dialog.create.image.required"));
             return false;
         }
 
@@ -240,30 +240,30 @@ public class CreateCustomerDialog extends BaseActionDialog {
 
             ResponseEntity<CustomerDto> createResponse = customerService.create(newCustomer);
             if (!createResponse.getStatusCode().is2xxSuccessful() || createResponse.getBody() == null) {
-                append(I18n.t("customer.dialog.create.failed", createResponse.getStatusCodeValue()));
+                append(I18n.t("ims.customer.dialog.create.failed", createResponse.getStatusCodeValue()));
                 return false;
             }
 
             Long customerId = createResponse.getBody().getId();
             if (customerId == null) {
-                append(I18n.t("customer.dialog.create.no.id"));
+                append(I18n.t("ims.customer.dialog.create.no.id"));
                 return false;
             }
 
             ResponseEntity<CustomerDto> uploadResponse = customerImageService.uploadImage(customerId, selectedImageFile);
             if (!uploadResponse.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("customer.dialog.create.image.failed", uploadResponse.getStatusCodeValue()));
+                append(I18n.t("ims.customer.dialog.create.image.failed", uploadResponse.getStatusCodeValue()));
                 return false;
             }
 
-            append(I18n.t("customer.dialog.create.success"));
+            append(I18n.t("ims.customer.dialog.create.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
 
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("customer.dialog.create.error", e.getMessage()));
+            append(I18n.t("ims.customer.dialog.create.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

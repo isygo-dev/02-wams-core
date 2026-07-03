@@ -51,9 +51,9 @@ public class CreateKeyDialog extends KeyDialogBase {
                            KmsApiService kmsApiService,
                            ObjectMapper objectMapper,
                            Runnable onSuccess) {
-        super(I18n.t("key.dialog.create.title"), parentView, kmsApiService, onSuccess);
+        super(I18n.t("kms.key.dialog.create.title"), parentView, kmsApiService, onSuccess);
         this.objectMapper = objectMapper;
-        setOkButtonText(I18n.t("key.dialog.create.button"));
+        setOkButtonText(I18n.t("kms.key.dialog.create.button"));
         buildCommonForm();
         buildCreateSpecificForm();
         add(createFullFormLayout());
@@ -61,12 +61,12 @@ public class CreateKeyDialog extends KeyDialogBase {
     }
 
     private void buildCreateSpecificForm() {
-        keyUsageCombo = new ComboBox<>(I18n.t("key.dialog.create.field.key.usage"));
+        keyUsageCombo = new ComboBox<>(I18n.t("kms.key.dialog.create.field.key.usage"));
         keyUsageCombo.setItems(IEnumKeyUsage.Types.values());
         keyUsageCombo.setValue(IEnumKeyUsage.Types.ENCRYPT_DECRYPT);
         keyUsageCombo.setRequiredIndicatorVisible(true);
 
-        keySpecCombo = new ComboBox<>(I18n.t("key.dialog.create.field.key.spec"));
+        keySpecCombo = new ComboBox<>(I18n.t("kms.key.dialog.create.field.key.spec"));
         keySpecCombo.setRequiredIndicatorVisible(true);
         updateKeySpecOptions(IEnumKeyUsage.Types.ENCRYPT_DECRYPT);
         keyUsageCombo.addValueChangeListener(e -> {
@@ -75,18 +75,18 @@ public class CreateKeyDialog extends KeyDialogBase {
             else keySpecCombo.setItems();
         });
 
-        originCombo = new ComboBox<>(I18n.t("key.dialog.create.field.origin"));
+        originCombo = new ComboBox<>(I18n.t("kms.key.dialog.create.field.origin"));
         originCombo.setItems(IEnumKeyOrigin.Types.values());
         originCombo.setValue(IEnumKeyOrigin.Types.WAMS_KMS);
         originCombo.setRequiredIndicatorVisible(true);
 
-        multiRegionCheckbox = new com.vaadin.flow.component.checkbox.Checkbox(I18n.t("key.dialog.create.field.multi.region"));
-        primaryRegionField = new TextField(I18n.t("key.dialog.create.field.primary.region"));
-        primaryRegionField.setPlaceholder(I18n.t("key.dialog.create.field.primary.region.placeholder"));
+        multiRegionCheckbox = new com.vaadin.flow.component.checkbox.Checkbox(I18n.t("kms.key.dialog.create.field.multi.region"));
+        primaryRegionField = new TextField(I18n.t("kms.key.dialog.create.field.primary.region"));
+        primaryRegionField.setPlaceholder(I18n.t("kms.key.dialog.create.field.primary.region.placeholder"));
         primaryRegionField.setValue("us-east-1");
         primaryRegionField.setVisible(false);
-        replicaRegionsField = new TextField(I18n.t("key.dialog.create.field.replica.regions"));
-        replicaRegionsField.setPlaceholder(I18n.t("key.dialog.create.field.replica.regions.placeholder"));
+        replicaRegionsField = new TextField(I18n.t("kms.key.dialog.create.field.replica.regions"));
+        replicaRegionsField.setPlaceholder(I18n.t("kms.key.dialog.create.field.replica.regions.placeholder"));
         replicaRegionsField.setVisible(false);
         multiRegionCheckbox.addValueChangeListener(e -> {
             boolean visible = e.getValue();
@@ -98,18 +98,18 @@ public class CreateKeyDialog extends KeyDialogBase {
             }
         });
 
-        bypassPolicyCheckbox = new com.vaadin.flow.component.checkbox.Checkbox(I18n.t("key.dialog.create.field.bypass.policy"));
+        bypassPolicyCheckbox = new com.vaadin.flow.component.checkbox.Checkbox(I18n.t("kms.key.dialog.create.field.bypass.policy"));
 
-        expirationModelCombo = new ComboBox<>(I18n.t("key.dialog.create.field.expiration.model"));
+        expirationModelCombo = new ComboBox<>(I18n.t("kms.key.dialog.create.field.expiration.model"));
         expirationModelCombo.setItems(IEnumKeyExpirationModel.Types.values());
         expirationModelCombo.setValue(IEnumKeyExpirationModel.Types.KEY_MATERIAL_DOES_NOT_EXPIRE);
-        expirationModelCombo.setHelperText(I18n.t("key.dialog.create.field.expiration.model.helper"));
+        expirationModelCombo.setHelperText(I18n.t("kms.key.dialog.create.field.expiration.model.helper"));
         expirationModelCombo.setVisible(false);
 
-        validToPicker = new DatePicker(I18n.t("key.dialog.create.field.valid.until"));
-        validToPicker.setPlaceholder(I18n.t("key.dialog.create.field.valid.until.placeholder"));
+        validToPicker = new DatePicker(I18n.t("kms.key.dialog.create.field.valid.until"));
+        validToPicker.setPlaceholder(I18n.t("kms.key.dialog.create.field.valid.until.placeholder"));
         validToPicker.setVisible(false);
-        validToPicker.setHelperText(I18n.t("key.dialog.create.field.valid.until.helper"));
+        validToPicker.setHelperText(I18n.t("kms.key.dialog.create.field.valid.until.helper"));
 
         originCombo.addValueChangeListener(e -> {
             boolean isExternal = e.getValue() == IEnumKeyOrigin.Types.EXTERNAL;
@@ -133,8 +133,8 @@ public class CreateKeyDialog extends KeyDialogBase {
             }
         });
 
-        policyField = new TextArea(I18n.t("key.dialog.create.field.policy"));
-        policyField.setPlaceholder(I18n.t("key.dialog.create.field.policy.placeholder"));
+        policyField = new TextArea(I18n.t("kms.key.dialog.create.field.policy"));
+        policyField.setPlaceholder(I18n.t("kms.key.dialog.create.field.policy.placeholder"));
         policyField.setWidthFull();
         policyField.setHeight("150px");
     }
@@ -165,9 +165,9 @@ public class CreateKeyDialog extends KeyDialogBase {
                 policyField);
 
         // Tags section
-        Button addTagButton = new Button(I18n.t("key.dialog.create.field.add.tag"), new com.vaadin.flow.component.icon.Icon(VaadinIcon.PLUS));
+        Button addTagButton = new Button(I18n.t("kms.key.dialog.create.field.add.tag"), new com.vaadin.flow.component.icon.Icon(VaadinIcon.PLUS));
         addTagButton.addClickListener(e -> addTagRow(null, null));
-        HorizontalLayout tagsHeader = new HorizontalLayout(new Span(I18n.t("key.dialog.create.field.add.tag")), addTagButton);
+        HorizontalLayout tagsHeader = new HorizontalLayout(new Span(I18n.t("kms.key.dialog.create.field.add.tag")), addTagButton);
         tagsHeader.setAlignItems(FlexComponent.Alignment.BASELINE);
         tagsHeader.setSpacing(true);
         VerticalLayout tagsSection = new VerticalLayout(tagsHeader, tagsContainer);
@@ -200,7 +200,7 @@ public class CreateKeyDialog extends KeyDialogBase {
                 policyMap = objectMapper.readValue(policyField.getValue(), new TypeReference<>() {
                 });
             } catch (Exception ex) {
-                append(I18n.t("key.dialog.create.invalid.policy"));
+                append(I18n.t("kms.key.dialog.create.invalid.policy"));
                 return false;
             }
         }
@@ -233,16 +233,16 @@ public class CreateKeyDialog extends KeyDialogBase {
 
             ResponseEntity<CreateKeyResponse> response = kmsApiService.createKey(request);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("key.dialog.create.failed", (response.getBody() != null ? response.getBody() : "unknown error")));
+                append(I18n.t("kms.key.dialog.create.failed", (response.getBody() != null ? response.getBody() : "unknown error")));
                 return false;
             }
 
-            append(I18n.t("key.dialog.create.success"));
+            append(I18n.t("kms.key.dialog.create.success"));
             return true;
         } catch (FeignException ex) {
             append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            append(I18n.t("key.dialog.create.failed", e.getMessage()));
+            append(I18n.t("kms.key.dialog.create.failed", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

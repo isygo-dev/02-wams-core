@@ -18,13 +18,13 @@ public class DeleteCustomKeyStoreDialog extends PinBaseActionDialog {
                                       KmsApiService kmsApiService,
                                       Runnable onSuccess,
                                       KmsDtos.DescribeCustomKeyStoreResponse.CustomKeyStore store) {
-        super(I18n.t("keystore.dialog.delete.title"),
-                I18n.t("keystore.dialog.delete.message"),
+        super(I18n.t("kms.keystore.dialog.delete.title"),
+                I18n.t("kms.keystore.dialog.delete.message"),
                 onSuccess);
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
         this.store = store;
-        setOkButtonText(I18n.t("keystore.dialog.delete.button"));
+        setOkButtonText(I18n.t("kms.keystore.dialog.delete.button"));
         addThemeVariantsOkButton(com.vaadin.flow.component.button.ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
@@ -32,7 +32,7 @@ public class DeleteCustomKeyStoreDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append(I18n.t("keystore.dialog.delete.invalid.code"));
+            append(I18n.t("kms.keystore.dialog.delete.invalid.code"));
             return false;
         }
 
@@ -41,17 +41,17 @@ public class DeleteCustomKeyStoreDialog extends PinBaseActionDialog {
             ResponseEntity<KmsDtos.DeleteCustomKeyStoreResponse> response =
                     kmsApiService.deleteCustomKeyStore(store.getCustomKeyStoreId());
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("keystore.dialog.delete.failed", response.getStatusCode()));
+                append(I18n.t("kms.keystore.dialog.delete.failed", response.getStatusCode()));
                 return false;
             }
 
-            append(I18n.t("keystore.dialog.delete.success"));
+            append(I18n.t("kms.keystore.dialog.delete.success"));
             return true;
 
         } catch (FeignException ex) {
             append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            append(I18n.t("keystore.dialog.delete.operation.failed", e.getMessage()));
+            append(I18n.t("kms.keystore.dialog.delete.operation.failed", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

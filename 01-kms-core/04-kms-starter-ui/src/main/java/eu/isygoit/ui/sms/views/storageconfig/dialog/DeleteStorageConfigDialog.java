@@ -17,14 +17,14 @@ public class DeleteStorageConfigDialog extends PinBaseActionDialog {
                                      StorageConfigService storageConfigService,
                                      Long configId,
                                      Runnable onSuccess) {
-        super(I18n.t("storageconfig.dialog.delete.title"),
-                I18n.t("storageconfig.dialog.delete.message"),
+        super(I18n.t("sms.storageconfig.dialog.delete.title"),
+                I18n.t("sms.storageconfig.dialog.delete.message"),
                 onSuccess);
         this.parentView = parentView;
         this.storageConfigService = storageConfigService;
         this.configId = configId;
 
-        setOkButtonText(I18n.t("storageconfig.dialog.delete.button"));
+        setOkButtonText(I18n.t("sms.storageconfig.dialog.delete.button"));
         addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
@@ -32,19 +32,19 @@ public class DeleteStorageConfigDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append(I18n.t("storageconfig.dialog.delete.invalid.code"));
+            append(I18n.t("sms.storageconfig.dialog.delete.invalid.code"));
             return false;
         }
 
         parentView.showLoading(true);
         try {
             storageConfigService.delete(configId);
-            append(I18n.t("storageconfig.dialog.delete.success"));
+            append(I18n.t("sms.storageconfig.dialog.delete.success"));
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("storageconfig.dialog.delete.error", e.getMessage()));
+            append(I18n.t("sms.storageconfig.dialog.delete.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

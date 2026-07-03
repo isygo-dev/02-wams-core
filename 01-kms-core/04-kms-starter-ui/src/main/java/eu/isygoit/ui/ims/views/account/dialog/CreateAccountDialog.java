@@ -67,14 +67,14 @@ public class CreateAccountDialog extends BaseActionDialog {
                                AccountImageService accountImageService,
                                TenantService tenantService,
                                Runnable onSuccess) {
-        super(I18n.t("account.dialog.create.title"), onSuccess);
+        super(I18n.t("ims.account.dialog.create.title"), onSuccess);
         this.parentView = parentView;
         this.accountService = accountService;
         this.accountImageService = accountImageService;
         this.tenantService = tenantService;
         this.onSuccess = onSuccess;
 
-        setOkButtonText(I18n.t("account.dialog.create.button"));
+        setOkButtonText(I18n.t("ims.account.dialog.create.button"));
         setWidth("700px");
         setMaxWidth("95%");
 
@@ -85,9 +85,9 @@ public class CreateAccountDialog extends BaseActionDialog {
 
     private void buildForm() {
         // Tenant selection
-        tenantCombo = new ComboBox<>(I18n.t("account.dialog.field.tenant"));
+        tenantCombo = new ComboBox<>(I18n.t("ims.account.dialog.field.tenant"));
         tenantCombo.setRequiredIndicatorVisible(true);
-        tenantCombo.setPlaceholder(I18n.t("account.dialog.field.tenant.placeholder"));
+        tenantCombo.setPlaceholder(I18n.t("ims.account.dialog.field.tenant.placeholder"));
         tenantCombo.setItemLabelGenerator(item -> {
             TenantDto tenant = findTenantByCode(item);
             return tenant != null ? tenant.getName() + " (" + tenant.getCode() + ")" : item;
@@ -95,7 +95,7 @@ public class CreateAccountDialog extends BaseActionDialog {
         tenantCombo.setAllowCustomValue(false);
         tenantCombo.setWidthFull();
 
-        accountTypeCombo = new ComboBox<>(I18n.t("account.dialog.field.account.type"));
+        accountTypeCombo = new ComboBox<>(I18n.t("ims.account.dialog.field.account.type"));
         accountTypeCombo.setRequiredIndicatorVisible(true);
         accountTypeCombo.setItems(
                 AccountTypeConstants.SUPER_ADMIN,
@@ -103,47 +103,47 @@ public class CreateAccountDialog extends BaseActionDialog {
                 AccountTypeConstants.TENANT_USER
         );
         accountTypeCombo.setAllowCustomValue(true);
-        accountTypeCombo.setPlaceholder(I18n.t("account.dialog.field.account.type.placeholder"));
+        accountTypeCombo.setPlaceholder(I18n.t("ims.account.dialog.field.account.type.placeholder"));
         accountTypeCombo.setValue(AccountTypeConstants.TENANT_USER);
         accountTypeCombo.setWidthFull();
 
-        emailField = new EmailField(I18n.t("account.dialog.field.email"));
+        emailField = new EmailField(I18n.t("ims.account.dialog.field.email"));
         emailField.setRequiredIndicatorVisible(true);
-        emailField.setPlaceholder(I18n.t("account.dialog.field.email.placeholder"));
+        emailField.setPlaceholder(I18n.t("ims.account.dialog.field.email.placeholder"));
         emailField.setWidthFull();
 
-        firstNameField = new TextField(I18n.t("account.dialog.field.first.name"));
-        firstNameField.setPlaceholder(I18n.t("account.dialog.field.first.name.placeholder"));
+        firstNameField = new TextField(I18n.t("ims.account.dialog.field.first.name"));
+        firstNameField.setPlaceholder(I18n.t("ims.account.dialog.field.first.name.placeholder"));
         firstNameField.setWidthFull();
 
-        lastNameField = new TextField(I18n.t("account.dialog.field.last.name"));
-        lastNameField.setPlaceholder(I18n.t("account.dialog.field.last.name.placeholder"));
+        lastNameField = new TextField(I18n.t("ims.account.dialog.field.last.name"));
+        lastNameField.setPlaceholder(I18n.t("ims.account.dialog.field.last.name.placeholder"));
         lastNameField.setWidthFull();
 
-        phoneNumberField = new TextField(I18n.t("account.dialog.field.phone"));
-        phoneNumberField.setPlaceholder(I18n.t("account.dialog.field.phone.placeholder"));
+        phoneNumberField = new TextField(I18n.t("ims.account.dialog.field.phone"));
+        phoneNumberField.setPlaceholder(I18n.t("ims.account.dialog.field.phone.placeholder"));
         phoneNumberField.setWidthFull();
 
-        languageCombo = new ComboBox<>(I18n.t("account.dialog.field.language"));
+        languageCombo = new ComboBox<>(I18n.t("ims.account.dialog.field.language"));
         languageCombo.setItems(IEnumLanguage.Types.values());
         languageCombo.setValue(IEnumLanguage.Types.EN);
         languageCombo.setWidthFull();
 
-        functionRoleField = new TextField(I18n.t("account.dialog.field.function.role"));
-        functionRoleField.setPlaceholder(I18n.t("account.dialog.field.function.role.placeholder"));
+        functionRoleField = new TextField(I18n.t("ims.account.dialog.field.function.role"));
+        functionRoleField.setPlaceholder(I18n.t("ims.account.dialog.field.function.role.placeholder"));
         functionRoleField.setWidthFull();
 
-        isAdminCheckbox = new Checkbox(I18n.t("account.dialog.field.is.admin"));
+        isAdminCheckbox = new Checkbox(I18n.t("ims.account.dialog.field.is.admin"));
         isAdminCheckbox.setWidthFull();
 
-        adminStatusCombo = new ComboBox<>(I18n.t("account.dialog.field.admin.status"));
+        adminStatusCombo = new ComboBox<>(I18n.t("ims.account.dialog.field.admin.status"));
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
         adminStatusCombo.setValue(IEnumEnabledBinaryStatus.Types.ENABLED);
         adminStatusCombo.setWidthFull();
 
-        passwordField = new PasswordField(I18n.t("account.dialog.field.password"));
+        passwordField = new PasswordField(I18n.t("ims.account.dialog.field.password"));
         passwordField.setRequiredIndicatorVisible(true);
-        passwordField.setPlaceholder(I18n.t("account.dialog.field.password.placeholder"));
+        passwordField.setPlaceholder(I18n.t("ims.account.dialog.field.password.placeholder"));
         passwordField.setWidthFull();
 
         // Image thumbnail + upload button
@@ -167,7 +167,7 @@ public class CreateAccountDialog extends BaseActionDialog {
                 .set("justify-content", "center");
         imagePlaceholder.add(new Icon(VaadinIcon.CAMERA));
 
-        uploadImageButton = new Button(I18n.t("account.dialog.field.upload.image"), e -> openCropperDialog());
+        uploadImageButton = new Button(I18n.t("ims.account.dialog.field.upload.image"), e -> openCropperDialog());
         uploadImageButton.setIcon(new Icon(VaadinIcon.UPLOAD));
     }
 
@@ -180,9 +180,9 @@ public class CreateAccountDialog extends BaseActionDialog {
                 tenantCombo.setItems(tenants.stream().map(TenantDto::getCode).collect(Collectors.toList()));
             }
         } catch (FeignException ex) {
-            append(I18n.t("account.dialog.load.tenants.error", extractErrorMessage(ex)));
+            append(I18n.t("ims.account.dialog.load.tenants.error", extractErrorMessage(ex)));
         } catch (Exception e) {
-            append(I18n.t("account.dialog.load.tenants.error", e.getMessage()));
+            append(I18n.t("ims.account.dialog.load.tenants.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }
@@ -246,23 +246,23 @@ public class CreateAccountDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (tenantCombo.getValue() == null || tenantCombo.getValue().isBlank()) {
-            append(I18n.t("account.dialog.tenant.required"));
+            append(I18n.t("ims.account.dialog.tenant.required"));
             return false;
         }
         if (accountTypeCombo.getValue() == null || accountTypeCombo.getValue().isBlank()) {
-            append(I18n.t("account.dialog.account.type.required"));
+            append(I18n.t("ims.account.dialog.account.type.required"));
             return false;
         }
         if (emailField.getValue().isBlank()) {
-            append(I18n.t("account.dialog.email.required"));
+            append(I18n.t("ims.account.dialog.email.required"));
             return false;
         }
         if (passwordField.getValue().isBlank()) {
-            append(I18n.t("account.dialog.password.required"));
+            append(I18n.t("ims.account.dialog.password.required"));
             return false;
         }
         if (selectedImageFile == null) {
-            append(I18n.t("account.dialog.create.image.required"));
+            append(I18n.t("ims.account.dialog.create.image.required"));
             return false;
         }
 
@@ -286,30 +286,30 @@ public class CreateAccountDialog extends BaseActionDialog {
 
             ResponseEntity<AccountDto> createResponse = accountService.create(newAccount);
             if (!createResponse.getStatusCode().is2xxSuccessful() || createResponse.getBody() == null) {
-                append(I18n.t("account.dialog.create.failed", createResponse.getStatusCodeValue()));
+                append(I18n.t("ims.account.dialog.create.failed", createResponse.getStatusCodeValue()));
                 return false;
             }
 
             Long accountId = createResponse.getBody().getId();
             if (accountId == null) {
-                append(I18n.t("account.dialog.create.no.id"));
+                append(I18n.t("ims.account.dialog.create.no.id"));
                 return false;
             }
 
             ResponseEntity<AccountDto> uploadResponse = accountImageService.uploadImage(accountId, selectedImageFile);
             if (!uploadResponse.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("account.dialog.create.image.failed", uploadResponse.getStatusCodeValue()));
+                append(I18n.t("ims.account.dialog.create.image.failed", uploadResponse.getStatusCodeValue()));
                 return false;
             }
 
-            append(I18n.t("account.dialog.create.success"));
+            append(I18n.t("ims.account.dialog.create.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
 
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("account.dialog.create.failed", e.getMessage()));
+            append(I18n.t("ims.account.dialog.create.failed", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

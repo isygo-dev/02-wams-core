@@ -45,11 +45,11 @@ public class UpdateCustomKeyStoreDialog extends BaseActionDialog {
                                       KmsApiService kmsApiService,
                                       Runnable onSuccess,
                                       KmsDtos.DescribeCustomKeyStoreResponse.CustomKeyStore store) {
-        super(I18n.t("keystore.dialog.update.title", store.getName()), onSuccess);
+        super(I18n.t("kms.keystore.dialog.update.title", store.getName()), onSuccess);
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
         this.store = store;
-        setOkButtonText(I18n.t("keystore.dialog.update.button"));
+        setOkButtonText(I18n.t("kms.keystore.dialog.update.button"));
         setWidth("700px");
         setMaxWidth("95%");
         setResizable(true);
@@ -96,17 +96,17 @@ public class UpdateCustomKeyStoreDialog extends BaseActionDialog {
             ResponseEntity<KmsDtos.UpdateCustomKeyStoreResponse> response =
                     kmsApiService.updateCustomKeyStore(store.getCustomKeyStoreId(), request);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("keystore.dialog.update.failed", response.getStatusCode()));
+                append(I18n.t("kms.keystore.dialog.update.failed", response.getStatusCode()));
                 return false;
             }
 
-            append(I18n.t("keystore.dialog.update.success"));
+            append(I18n.t("kms.keystore.dialog.update.success"));
             return true;
 
         } catch (FeignException ex) {
             append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            append(I18n.t("keystore.dialog.update.failed", e.getMessage()));
+            append(I18n.t("kms.keystore.dialog.update.failed", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }
@@ -117,68 +117,68 @@ public class UpdateCustomKeyStoreDialog extends BaseActionDialog {
     private void buildForm() {
         boolean isCloudHsm = IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM.name().equals(store.getCustomKeyStoreType());
 
-        nameField = new TextField(I18n.t("keystore.dialog.update.field.name"));
-        nameField.setPlaceholder(I18n.t("keystore.dialog.update.field.name.placeholder", store.getName()));
+        nameField = new TextField(I18n.t("kms.keystore.dialog.update.field.name"));
+        nameField.setPlaceholder(I18n.t("kms.keystore.dialog.update.field.name.placeholder", store.getName()));
 
         if (isCloudHsm) {
-            cloudHsmClusterId = new TextField(I18n.t("keystore.dialog.update.field.cloudhsm.cluster"));
+            cloudHsmClusterId = new TextField(I18n.t("kms.keystore.dialog.update.field.cloudhsm.cluster"));
             cloudHsmClusterId.setValue(nullToEmpty(store.getCloudHsmClusterId()));
-            cloudHsmClusterId.setPlaceholder(I18n.t("keystore.dialog.update.field.cloudhsm.cluster.placeholder"));
+            cloudHsmClusterId.setPlaceholder(I18n.t("kms.keystore.dialog.update.field.cloudhsm.cluster.placeholder"));
 
-            keyStorePassword = new PasswordField(I18n.t("keystore.dialog.update.field.password"));
-            keyStorePassword.setHelperText(I18n.t("keystore.dialog.update.field.password.helper"));
-            keyStorePassword.setPlaceholder(I18n.t("keystore.dialog.update.field.password.placeholder"));
+            keyStorePassword = new PasswordField(I18n.t("kms.keystore.dialog.update.field.password"));
+            keyStorePassword.setHelperText(I18n.t("kms.keystore.dialog.update.field.password.helper"));
+            keyStorePassword.setPlaceholder(I18n.t("kms.keystore.dialog.update.field.password.placeholder"));
 
-            trustAnchorCert = new TextArea(I18n.t("keystore.dialog.update.field.certificate"));
+            trustAnchorCert = new TextArea(I18n.t("kms.keystore.dialog.update.field.certificate"));
             trustAnchorCert.setHeight("120px");
             trustAnchorCert.setValue(nullToEmpty(store.getTrustAnchorCertificate()));
-            trustAnchorCert.setPlaceholder(I18n.t("keystore.dialog.update.field.certificate.placeholder"));
+            trustAnchorCert.setPlaceholder(I18n.t("kms.keystore.dialog.update.field.certificate.placeholder"));
         } else {
-            xksProxyUriEndpoint = new TextField(I18n.t("keystore.dialog.update.field.xks.endpoint"));
+            xksProxyUriEndpoint = new TextField(I18n.t("kms.keystore.dialog.update.field.xks.endpoint"));
             xksProxyUriEndpoint.setValue(nullToEmpty(store.getXksProxyUriEndpoint()));
-            xksProxyUriEndpoint.setPlaceholder(I18n.t("keystore.dialog.update.field.xks.endpoint.placeholder"));
+            xksProxyUriEndpoint.setPlaceholder(I18n.t("kms.keystore.dialog.update.field.xks.endpoint.placeholder"));
 
-            xksProxyUriPath = new TextField(I18n.t("keystore.dialog.update.field.xks.path"));
+            xksProxyUriPath = new TextField(I18n.t("kms.keystore.dialog.update.field.xks.path"));
             xksProxyUriPath.setValue(nullToEmpty(store.getXksProxyUriPath()));
 
-            xksProxyAuth = new PasswordField(I18n.t("keystore.dialog.update.field.xks.auth"));
-            xksProxyAuth.setHelperText(I18n.t("keystore.dialog.update.field.xks.auth.helper"));
+            xksProxyAuth = new PasswordField(I18n.t("kms.keystore.dialog.update.field.xks.auth"));
+            xksProxyAuth.setHelperText(I18n.t("kms.keystore.dialog.update.field.xks.auth.helper"));
 
-            xksProxyConnectivity = new TextField(I18n.t("keystore.dialog.update.field.xks.connectivity"));
+            xksProxyConnectivity = new TextField(I18n.t("kms.keystore.dialog.update.field.xks.connectivity"));
             xksProxyConnectivity.setValue(nullToEmpty(store.getXksProxyConnectivity()));
         }
 
-        maxKeysField = new IntegerField(I18n.t("keystore.dialog.update.field.max.keys"));
+        maxKeysField = new IntegerField(I18n.t("kms.keystore.dialog.update.field.max.keys"));
         if (store.getMaxKeys() != null) maxKeysField.setValue(store.getMaxKeys());
         maxKeysField.setMin(1);
         maxKeysField.setMax(10000);
 
-        timeoutField = new IntegerField(I18n.t("keystore.dialog.update.field.timeout"));
+        timeoutField = new IntegerField(I18n.t("kms.keystore.dialog.update.field.timeout"));
         if (store.getConnectionTimeoutSeconds() != null) timeoutField.setValue(store.getConnectionTimeoutSeconds());
         timeoutField.setMin(1);
 
-        healthIntervalField = new IntegerField(I18n.t("keystore.dialog.update.field.health"));
+        healthIntervalField = new IntegerField(I18n.t("kms.keystore.dialog.update.field.health"));
         if (store.getHealthCheckIntervalSeconds() != null)
             healthIntervalField.setValue(store.getHealthCheckIntervalSeconds());
         healthIntervalField.setMin(10);
 
-        autoReconnectCheck = new Checkbox(I18n.t("keystore.dialog.update.field.auto.reconnect"));
+        autoReconnectCheck = new Checkbox(I18n.t("kms.keystore.dialog.update.field.auto.reconnect"));
         if (store.getAutoReconnect() != null) autoReconnectCheck.setValue(store.getAutoReconnect());
 
-        metadataField = new TextArea(I18n.t("keystore.dialog.update.field.metadata"));
+        metadataField = new TextArea(I18n.t("kms.keystore.dialog.update.field.metadata"));
         metadataField.setValue(nullToEmpty(store.getMetadata()));
         metadataField.setHeight("100px");
-        metadataField.setPlaceholder(I18n.t("keystore.dialog.update.field.metadata.placeholder"));
+        metadataField.setPlaceholder(I18n.t("kms.keystore.dialog.update.field.metadata.placeholder"));
 
-        tagsField = new TextArea(I18n.t("keystore.dialog.update.field.tags"));
+        tagsField = new TextArea(I18n.t("kms.keystore.dialog.update.field.tags"));
         tagsField.setValue(nullToEmpty(store.getTags()));
         tagsField.setHeight("100px");
-        tagsField.setPlaceholder(I18n.t("keystore.dialog.update.field.tags.placeholder"));
+        tagsField.setPlaceholder(I18n.t("kms.keystore.dialog.update.field.tags.placeholder"));
 
-        typeSpecificDataField = new TextArea(I18n.t("keystore.dialog.update.field.type.specific"));
+        typeSpecificDataField = new TextArea(I18n.t("kms.keystore.dialog.update.field.type.specific"));
         typeSpecificDataField.setValue(nullToEmpty(store.getCustomKeyStoreTypeSpecificData()));
         typeSpecificDataField.setHeight("80px");
-        typeSpecificDataField.setPlaceholder(I18n.t("keystore.dialog.update.field.type.specific.placeholder"));
+        typeSpecificDataField.setPlaceholder(I18n.t("kms.keystore.dialog.update.field.type.specific.placeholder"));
     }
 
     private FormLayout createFormLayout() {
@@ -215,7 +215,7 @@ public class UpdateCustomKeyStoreDialog extends BaseActionDialog {
                 }
             }
         } catch (Exception e) {
-            append(I18n.t("keystore.dialog.error.invalid.json", e.getMessage()));
+            append(I18n.t("kms.keystore.dialog.error.invalid.json", e.getMessage()));
             return null;
         }
         return map.isEmpty() ? null : map;

@@ -21,27 +21,27 @@ public class DeleteSenderConfigDialog extends PinBaseActionDialog {
                                     SenderConfigService senderConfigService,
                                     SenderConfigDto config,
                                     Runnable onSuccess) {
-        super(I18n.t("sender.dialog.delete.title"),
+        super(I18n.t("mms.sender.dialog.delete.title"),
                 buildMessage(config),
                 onSuccess);
         this.parentView = parentView;
         this.senderConfigService = senderConfigService;
         this.config = config;
 
-        setOkButtonText(I18n.t("sender.dialog.delete.button"));
+        setOkButtonText(I18n.t("mms.sender.dialog.delete.button"));
         addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
         setWidth("450px");
     }
 
     private static String buildMessage(SenderConfigDto config) {
         String host = config.getHost() != null ? config.getHost() : "ID: " + config.getId();
-        return I18n.t("sender.dialog.delete.message", host);
+        return I18n.t("mms.sender.dialog.delete.message", host);
     }
 
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append(I18n.t("sender.dialog.delete.invalid.code"));
+            append(I18n.t("mms.sender.dialog.delete.invalid.code"));
             return false;
         }
 
@@ -51,18 +51,18 @@ public class DeleteSenderConfigDialog extends PinBaseActionDialog {
         try {
             ResponseEntity<?> response = senderConfigService.delete(config.getId());
             if (!response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("sender.dialog.delete.failed", "unknown error"));
+                append(I18n.t("mms.sender.dialog.delete.failed", I18n.t("mms.common.error.unknown")));
                 return false;
             }
-            showSuccess(I18n.t("sender.dialog.delete.success"));
+            showSuccess(I18n.t("mms.sender.dialog.delete.success"));
             return true;
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ?
                     ex.contentUTF8() : ex.getMessage();
-            append(I18n.t("sender.dialog.delete.error", errorMsg));
+            append(I18n.t("mms.sender.dialog.delete.error", errorMsg));
             log.error("Failed to delete sender config {}", config.getId(), ex);
         } catch (Exception e) {
-            append(I18n.t("sender.dialog.delete.error", e.getMessage()));
+            append(I18n.t("mms.sender.dialog.delete.error", e.getMessage()));
             log.error("Failed to delete sender config {}", config.getId(), e);
         } finally {
             if (parentView != null) {

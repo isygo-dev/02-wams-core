@@ -23,12 +23,12 @@ public class CreateCategoryDialog extends BaseActionDialog {
     public CreateCategoryDialog(CategoryManagementView parentView,
                                 CategoryService categoryService,
                                 Runnable onSuccess) {
-        super(I18n.t("category.dialog.create.title"), onSuccess);
+        super(I18n.t("dms.category.dialog.create.title"), onSuccess);
         this.parentView = parentView;
         this.categoryService = categoryService;
         this.onSuccess = onSuccess;
 
-        setOkButtonText(I18n.t("category.dialog.create.button"));
+        setOkButtonText(I18n.t("dms.category.dialog.create.button"));
         setWidth("500px");
         setMaxWidth("95%");
 
@@ -37,13 +37,13 @@ public class CreateCategoryDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        nameField = new TextField(I18n.t("category.dialog.field.name"));
+        nameField = new TextField(I18n.t("dms.category.dialog.field.name"));
         nameField.setRequiredIndicatorVisible(true);
-        nameField.setPlaceholder(I18n.t("category.dialog.field.name.placeholder"));
+        nameField.setPlaceholder(I18n.t("dms.category.dialog.field.name.placeholder"));
         nameField.setWidthFull();
 
-        descriptionArea = new TextArea(I18n.t("category.dialog.field.description"));
-        descriptionArea.setPlaceholder(I18n.t("category.dialog.field.description.placeholder"));
+        descriptionArea = new TextArea(I18n.t("dms.category.dialog.field.description"));
+        descriptionArea.setPlaceholder(I18n.t("dms.category.dialog.field.description.placeholder"));
         descriptionArea.setWidthFull();
         descriptionArea.setHeight("150px");
     }
@@ -60,7 +60,7 @@ public class CreateCategoryDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (nameField.getValue().isBlank()) {
-            append(I18n.t("category.dialog.field.name.required"));
+            append(I18n.t("dms.category.dialog.field.name.required"));
             return false;
         }
 
@@ -73,17 +73,17 @@ public class CreateCategoryDialog extends BaseActionDialog {
 
             ResponseEntity<CategoryDto> response = categoryService.create(newCategory);
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                append(I18n.t("category.dialog.create.failed", response.getStatusCodeValue()));
+                append(I18n.t("dms.category.dialog.create.failed", response.getStatusCodeValue()));
                 return false;
             }
 
-            append(I18n.t("category.dialog.create.success"));
+            append(I18n.t("dms.category.dialog.create.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("category.dialog.create.error", e.getMessage()));
+            append(I18n.t("dms.category.dialog.create.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

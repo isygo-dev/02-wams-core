@@ -86,18 +86,18 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button connectBtn = createIconButton(VaadinIcon.CONNECT, I18n.t("keystore.card.connect"));
+        Button connectBtn = createIconButton(VaadinIcon.CONNECT, I18n.t("kms.keystore.card.connect"));
         connectBtn.addClickListener(e -> confirmConnect());
         connectBtn.setEnabled(!"CONNECTED".equalsIgnoreCase(connectionState));
 
-        Button disconnectBtn = createIconButton(VaadinIcon.OUT, I18n.t("keystore.card.disconnect"));
+        Button disconnectBtn = createIconButton(VaadinIcon.OUT, I18n.t("kms.keystore.card.disconnect"));
         disconnectBtn.addClickListener(e -> confirmDisconnect());
         disconnectBtn.setEnabled("CONNECTED".equalsIgnoreCase(connectionState));
 
-        Button updateBtn = createIconButton(VaadinIcon.EDIT, I18n.t("keystore.card.update"));
+        Button updateBtn = createIconButton(VaadinIcon.EDIT, I18n.t("kms.keystore.card.update"));
         updateBtn.addClickListener(e -> updateCustomKeyStore());
 
-        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, I18n.t("keystore.card.delete"));
+        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, I18n.t("kms.keystore.card.delete"));
         deleteBtn.addClickListener(e -> confirmDelete());
 
         return List.of(connectBtn, disconnectBtn, updateBtn, deleteBtn);
@@ -106,59 +106,59 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
     @Override
     protected void buildBodyRows() {
         // Created
-        add(createIconRow(VaadinIcon.CALENDAR, I18n.t("keystore.card.created"), creationDate));
+        add(createIconRow(VaadinIcon.CALENDAR, I18n.t("kms.keystore.card.created"), creationDate));
 
         // Updated if present
         if (store.getUpdateDate() != null) {
-            add(createIconRow(VaadinIcon.REFRESH, I18n.t("keystore.card.updated"), DateHelper.formatToHumanReadable(store.getUpdateDate())));
+            add(createIconRow(VaadinIcon.REFRESH, I18n.t("kms.keystore.card.updated"), DateHelper.formatToHumanReadable(store.getUpdateDate())));
         }
 
         // CloudHSM or XKS details
         if (StringUtils.hasText(store.getCloudHsmClusterId())) {
-            add(createIconRow(VaadinIcon.CLOUD, I18n.t("keystore.card.cloudhsm.cluster"), store.getCloudHsmClusterId()));
+            add(createIconRow(VaadinIcon.CLOUD, I18n.t("kms.keystore.card.cloudhsm.cluster"), store.getCloudHsmClusterId()));
         } else if (StringUtils.hasText(store.getXksProxyUriEndpoint())) {
-            add(createIconRow(VaadinIcon.LINK, I18n.t("keystore.card.xks.endpoint"), store.getXksProxyUriEndpoint()));
+            add(createIconRow(VaadinIcon.LINK, I18n.t("kms.keystore.card.xks.endpoint"), store.getXksProxyUriEndpoint()));
             if (StringUtils.hasText(store.getXksProxyUriPath())) {
-                add(createIconRow(VaadinIcon.ROAD, I18n.t("keystore.card.xks.path"), store.getXksProxyUriPath()));
+                add(createIconRow(VaadinIcon.ROAD, I18n.t("kms.keystore.card.xks.path"), store.getXksProxyUriPath()));
             }
             if (StringUtils.hasText(store.getXksProxyConnectivity())) {
-                add(createIconRow(VaadinIcon.CONNECT, I18n.t("keystore.card.xks.connectivity"), store.getXksProxyConnectivity()));
+                add(createIconRow(VaadinIcon.CONNECT, I18n.t("kms.keystore.card.xks.connectivity"), store.getXksProxyConnectivity()));
             }
         }
 
         // Health, max keys, last connections
         if (StringUtils.hasText(store.getHealthStatus())) {
-            add(createIconRow(VaadinIcon.HEART, I18n.t("keystore.card.health"), store.getHealthStatus()));
+            add(createIconRow(VaadinIcon.HEART, I18n.t("kms.keystore.card.health"), store.getHealthStatus()));
         }
         if (store.getMaxKeys() != null) {
-            add(createIconRow(VaadinIcon.KEY, I18n.t("keystore.card.max.keys"), String.valueOf(store.getMaxKeys())));
+            add(createIconRow(VaadinIcon.KEY, I18n.t("kms.keystore.card.max.keys"), String.valueOf(store.getMaxKeys())));
         }
         if (store.getLastSuccessfulConnection() != null) {
-            add(createIconRow(VaadinIcon.CONNECT, I18n.t("keystore.card.last.connected"), DateHelper.formatToHumanReadable(store.getLastSuccessfulConnection())));
+            add(createIconRow(VaadinIcon.CONNECT, I18n.t("kms.keystore.card.last.connected"), DateHelper.formatToHumanReadable(store.getLastSuccessfulConnection())));
         }
         if (store.getLastConnectionAttempt() != null) {
-            add(createIconRow(VaadinIcon.CLOCK, I18n.t("keystore.card.last.attempt"), DateHelper.formatToHumanReadable(store.getLastConnectionAttempt())));
+            add(createIconRow(VaadinIcon.CLOCK, I18n.t("kms.keystore.card.last.attempt"), DateHelper.formatToHumanReadable(store.getLastConnectionAttempt())));
         }
 
         // Connection settings
         if (store.getConnectionTimeoutSeconds() != null) {
-            add(createIconRow(VaadinIcon.TIMER, I18n.t("keystore.card.timeout"), store.getConnectionTimeoutSeconds() + "s"));
+            add(createIconRow(VaadinIcon.TIMER, I18n.t("kms.keystore.card.timeout"), store.getConnectionTimeoutSeconds() + "s"));
         }
         if (store.getHealthCheckIntervalSeconds() != null) {
-            add(createIconRow(VaadinIcon.SPARK_LINE, I18n.t("keystore.card.health.interval"), store.getHealthCheckIntervalSeconds() + "s"));
+            add(createIconRow(VaadinIcon.SPARK_LINE, I18n.t("kms.keystore.card.health.interval"), store.getHealthCheckIntervalSeconds() + "s"));
         }
         if (store.getAutoReconnect() != null) {
-            add(createIconRow(VaadinIcon.REFRESH, I18n.t("keystore.card.auto.reconnect"), store.getAutoReconnect() ? I18n.t("keystore.card.on") : I18n.t("keystore.card.off")));
+            add(createIconRow(VaadinIcon.REFRESH, I18n.t("kms.keystore.card.auto.reconnect"), store.getAutoReconnect() ? I18n.t("kms.keystore.card.on") : I18n.t("kms.keystore.card.off")));
         }
 
         // Error code
         if (StringUtils.hasText(errorCode)) {
-            add(createIconRow(VaadinIcon.EXCLAMATION_CIRCLE, I18n.t("keystore.card.error"), errorCode));
+            add(createIconRow(VaadinIcon.EXCLAMATION_CIRCLE, I18n.t("kms.keystore.card.error"), errorCode));
         }
 
         // Metadata and tags (as key-value chips)
-        addKeyValueRow(I18n.t("keystore.card.metadata"), store.getMetadata());
-        addKeyValueRow(I18n.t("keystore.card.tags"), store.getTags());
+        addKeyValueRow(I18n.t("kms.keystore.card.metadata"), store.getMetadata());
+        addKeyValueRow(I18n.t("kms.keystore.card.tags"), store.getTags());
     }
 
     // ── Helper row builders ──────────────────────────────────────────────────
@@ -240,10 +240,10 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
 
     private void confirmConnect() {
         ConfirmDialog dlg = new ConfirmDialog();
-        dlg.setHeader(I18n.t("keystore.connect.confirm.title"));
-        dlg.setText(I18n.t("keystore.connect.confirm.message", storeName));
+        dlg.setHeader(I18n.t("kms.keystore.connect.confirm.title"));
+        dlg.setText(I18n.t("kms.keystore.connect.confirm.message", storeName));
         dlg.setCancelable(true);
-        dlg.setConfirmText(I18n.t("keystore.connect.confirm.button"));
+        dlg.setConfirmText(I18n.t("kms.keystore.connect.confirm.button"));
         dlg.setConfirmButtonTheme(ButtonVariant.LUMO_SUCCESS.getVariantName());
         dlg.addConfirmListener(e -> connectStore());
         dlg.open();
@@ -251,10 +251,10 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
 
     private void confirmDisconnect() {
         ConfirmDialog dlg = new ConfirmDialog();
-        dlg.setHeader(I18n.t("keystore.disconnect.confirm.title"));
-        dlg.setText(I18n.t("keystore.disconnect.confirm.message"));
+        dlg.setHeader(I18n.t("kms.keystore.disconnect.confirm.title"));
+        dlg.setText(I18n.t("kms.keystore.disconnect.confirm.message"));
         dlg.setCancelable(true);
-        dlg.setConfirmText(I18n.t("keystore.disconnect.confirm.button"));
+        dlg.setConfirmText(I18n.t("kms.keystore.disconnect.confirm.button"));
         dlg.setConfirmButtonTheme(ButtonVariant.LUMO_WARNING.getVariantName());
         dlg.addConfirmListener(e -> disconnectStore());
         dlg.open();
@@ -266,14 +266,14 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
             ResponseEntity<KmsDtos.ConnectCustomKeyStoreResponse> resp =
                     objectService.connectCustomKeyStore(storeId);
             boolean ok = resp.getStatusCode().is2xxSuccessful();
-            notify(ok ? I18n.t("keystore.connect.success") : I18n.t("keystore.connect.failed"), ok);
+            notify(ok ? I18n.t("kms.keystore.connect.success") : I18n.t("kms.keystore.connect.failed"), ok);
             if (ok) parentView.loadStores();
         } catch (FeignException ex) {
             String msg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            notify(I18n.t("keystore.action.error", msg), false);
+            notify(I18n.t("kms.keystore.action.error", msg), false);
             log.error("Failed to connect store {}", storeId, ex);
         } catch (Exception ex) {
-            notify(I18n.t("keystore.action.error", ex.getMessage()), false);
+            notify(I18n.t("kms.keystore.action.error", ex.getMessage()), false);
             log.error("Failed to connect store {}", storeId, ex);
         } finally {
             parentView.showLoading(false);
@@ -286,14 +286,14 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
             ResponseEntity<KmsDtos.DisconnectCustomKeyStoreResponse> resp =
                     objectService.disconnectCustomKeyStore(storeId);
             boolean ok = resp.getStatusCode().is2xxSuccessful();
-            notify(ok ? I18n.t("keystore.disconnect.success") : I18n.t("keystore.disconnect.failed"), ok);
+            notify(ok ? I18n.t("kms.keystore.disconnect.success") : I18n.t("kms.keystore.disconnect.failed"), ok);
             if (ok) parentView.loadStores();
         } catch (FeignException ex) {
             String msg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            notify(I18n.t("keystore.action.error", msg), false);
+            notify(I18n.t("kms.keystore.action.error", msg), false);
             log.error("Failed to disconnect store {}", storeId, ex);
         } catch (Exception ex) {
-            notify(I18n.t("keystore.action.error", ex.getMessage()), false);
+            notify(I18n.t("kms.keystore.action.error", ex.getMessage()), false);
             log.error("Failed to disconnect store {}", storeId, ex);
         } finally {
             parentView.showLoading(false);

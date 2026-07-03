@@ -46,14 +46,14 @@ public class DataKeyPanel extends VerticalLayout {
     }
 
     private void initUI() {
-        keySpecCombo = new ComboBox<>(I18n.t("crypto.data.key.spec"));
+        keySpecCombo = new ComboBox<>(I18n.t("kms.crypto.data.key.spec"));
         keySpecCombo.setItems("AES_128", "AES_256");
         keySpecCombo.setValue("AES_256");
 
-        keySizeField = new TextField(I18n.t("crypto.data.key.size"));
-        keySizeField.setPlaceholder(I18n.t("crypto.data.key.size.placeholder"));
+        keySizeField = new TextField(I18n.t("kms.crypto.data.key.size"));
+        keySizeField.setPlaceholder(I18n.t("kms.crypto.data.key.size.placeholder"));
 
-        Button generateBtn = new Button(I18n.t("crypto.data.key.generate.button"), new Icon(VaadinIcon.KEY));
+        Button generateBtn = new Button(I18n.t("kms.crypto.data.key.generate.button"), new Icon(VaadinIcon.KEY));
         generateBtn.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_PRIMARY);
 
         plaintextKeyArea = new TextArea();
@@ -67,8 +67,8 @@ public class DataKeyPanel extends VerticalLayout {
         generateBtn.addClickListener(e -> generateDataKey());
 
         add(keySpecCombo, keySizeField, generateBtn,
-                CryptoPanelUtils.createLabelledTextArea(I18n.t("crypto.data.key.plaintext"), plaintextKeyArea),
-                CryptoPanelUtils.createLabelledTextArea(I18n.t("crypto.data.key.ciphertext"), ciphertextKeyArea));
+                CryptoPanelUtils.createLabelledTextArea(I18n.t("kms.crypto.data.key.plaintext"), plaintextKeyArea),
+                CryptoPanelUtils.createLabelledTextArea(I18n.t("kms.crypto.data.key.ciphertext"), ciphertextKeyArea));
     }
 
     public void setKeyInfo(String keyId, IEnumKeyUsage.Types keyUsage) {
@@ -78,11 +78,11 @@ public class DataKeyPanel extends VerticalLayout {
     private void generateDataKey() {
         String keyId = keyIdSupplier.get();
         if (keyId == null) {
-            notifyWarning(I18n.t("crypto.data.key.select.key.first"));
+            notifyWarning(I18n.t("kms.crypto.data.key.select.key.first"));
             return;
         }
         if (keyUsageSupplier.get() != IEnumKeyUsage.Types.ENCRYPT_DECRYPT) {
-            notifyWarning(I18n.t("crypto.data.key.key.not.supported"));
+            notifyWarning(I18n.t("kms.crypto.data.key.key.not.supported"));
             return;
         }
         try {
@@ -94,14 +94,14 @@ public class DataKeyPanel extends VerticalLayout {
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 plaintextKeyArea.setValue(response.getBody().getPlaintext());
                 ciphertextKeyArea.setValue(response.getBody().getCiphertextBlob());
-                notifySuccess(I18n.t("crypto.data.key.generate.success"));
+                notifySuccess(I18n.t("kms.crypto.data.key.generate.success"));
             } else {
-                notifyError(I18n.t("crypto.data.key.generate.failed"));
+                notifyError(I18n.t("kms.crypto.data.key.generate.failed"));
             }
         } catch (FeignException ex) {
-            notifyError(I18n.t("crypto.data.key.generate.error", ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage())));
+            notifyError(I18n.t("kms.crypto.data.key.generate.error", ((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage())));
         } catch (Exception ex) {
-            notifyError(I18n.t("crypto.data.key.generate.error", ex.getMessage()));
+            notifyError(I18n.t("kms.crypto.data.key.generate.error", ex.getMessage()));
         }
     }
 

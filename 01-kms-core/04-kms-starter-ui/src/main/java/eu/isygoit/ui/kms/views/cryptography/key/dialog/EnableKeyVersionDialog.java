@@ -20,14 +20,14 @@ public class EnableKeyVersionDialog extends PinBaseActionDialog {
                                   String keyId,
                                   String versionId,
                                   Runnable onSuccess) {
-        super(I18n.t("key.dialog.enable.version.title"),
-                I18n.t("key.dialog.enable.version.message"),
+        super(I18n.t("kms.key.dialog.enable.version.title"),
+                I18n.t("kms.key.dialog.enable.version.message"),
                 onSuccess);
         this.kmsApiService = kmsApiService;
         this.keyId = keyId;
         this.versionId = versionId;
 
-        setOkButtonText(I18n.t("key.dialog.enable.version.button"));
+        setOkButtonText(I18n.t("kms.key.dialog.enable.version.button"));
         setWidth("450px");
     }
 
@@ -37,19 +37,19 @@ public class EnableKeyVersionDialog extends PinBaseActionDialog {
             ResponseEntity<KmsDtos.EnableKeyVersionResponse> response =
                     kmsApiService.enableKeyVersion(keyId, versionId);
             if (!response.getStatusCode().is2xxSuccessful()) {
-                String errorMsg = I18n.t("key.dialog.enable.version.failed", response.getStatusCode());
+                String errorMsg = I18n.t("kms.key.dialog.enable.version.failed", response.getStatusCode());
                 this.append(errorMsg);
                 return false;
             }
 
-            Notification.show(I18n.t("key.dialog.enable.version.success"), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("kms.key.dialog.enable.version.success"), 6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             return true;
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             this.append(errorMsg);
         } catch (Exception e) {
-            String errorMsg = I18n.t("key.dialog.enable.version.error", e.getMessage());
+            String errorMsg = I18n.t("kms.key.dialog.enable.version.error", e.getMessage());
             this.append(errorMsg);
         }
 

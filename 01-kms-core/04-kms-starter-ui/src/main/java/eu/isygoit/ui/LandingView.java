@@ -53,7 +53,7 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
 
     @Override
     protected String getTitle() {
-        return I18n.t("landing.title");
+        return I18n.t("common.landing.title");
     }
 
     @Override
@@ -127,7 +127,7 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("color", "var(--lumo-header-text-color)");
 
         // Animated text with gradient underline
-        Text titleText = new Text(I18n.t("landing.title.main"));
+        Text titleText = new Text(I18n.t("common.landing.title.main"));
         headline.add(titleText);
 
         // Animated underline
@@ -144,7 +144,7 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("animation", "underlineExpand 1.2s ease-out 0.5s forwards, shimmer 3s ease-in-out infinite 1.7s");
 
         // Subtitle with slide in
-        Paragraph subtitle = new Paragraph(I18n.t("landing.subtitle"));
+        Paragraph subtitle = new Paragraph(I18n.t("common.landing.subtitle"));
         subtitle.addClassName(LumoUtility.TextColor.SECONDARY);
         subtitle.addClassName("subtitle-text");
         subtitle.getStyle()
@@ -221,12 +221,12 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
 
         // All cards with staggered animations
         container.add(
-                createCard("KMS", VaadinIcon.KEY, "landing.kms", COLOR_KMS, GRADIENT_KMS, ButtonVariant.LUMO_PRIMARY, "0.1s"),
-                createCard("IMS", VaadinIcon.USERS, "landing.ims", COLOR_IMS, GRADIENT_IMS, ButtonVariant.LUMO_SUCCESS, "0.2s"),
-                createCard("MMS", VaadinIcon.ENVELOPE, "landing.mms", COLOR_MMS, GRADIENT_MMS, ButtonVariant.LUMO_WARNING, "0.3s"),
-                createCard("DMS", VaadinIcon.FILE_O, "landing.dms", COLOR_DMS, GRADIENT_DMS, ButtonVariant.LUMO_ERROR, "0.4s"),
-                createCard("SMS", VaadinIcon.DATABASE, "landing.sms", COLOR_SMS, GRADIENT_SMS, ButtonVariant.LUMO_CONTRAST, "0.5s"),
-                createCard("CMS", VaadinIcon.CALENDAR, "landing.cms", COLOR_CMS, GRADIENT_CMS, ButtonVariant.LUMO_PRIMARY, "0.6s")
+                createCard("KMS", VaadinIcon.KEY, "common.landing.kms", COLOR_KMS, GRADIENT_KMS, ButtonVariant.LUMO_PRIMARY, "0.1s"),
+                createCard("IMS", VaadinIcon.USERS, "common.landing.ims", COLOR_IMS, GRADIENT_IMS, ButtonVariant.LUMO_SUCCESS, "0.2s"),
+                createCard("MMS", VaadinIcon.ENVELOPE, "common.landing.mms", COLOR_MMS, GRADIENT_MMS, ButtonVariant.LUMO_WARNING, "0.3s"),
+                createCard("DMS", VaadinIcon.FILE_O, "common.landing.dms", COLOR_DMS, GRADIENT_DMS, ButtonVariant.LUMO_ERROR, "0.4s"),
+                createCard("SMS", VaadinIcon.DATABASE, "common.landing.sms", COLOR_SMS, GRADIENT_SMS, ButtonVariant.LUMO_CONTRAST, "0.5s"),
+                createCard("CMS", VaadinIcon.CALENDAR, "common.landing.cms", COLOR_CMS, GRADIENT_CMS, ButtonVariant.LUMO_PRIMARY, "0.6s")
         );
 
         return container;
@@ -484,7 +484,7 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
                 .set("width", "100%")
                 .set("animation", "fadeInUp 0.8s ease-out 1s both");
 
-        Paragraph footerText = new Paragraph(I18n.t("landing.footer"));
+        Paragraph footerText = new Paragraph(I18n.t("common.landing.footer"));
         footerText.addClassName(LumoUtility.FontSize.XXSMALL);
         footerText.addClassName(LumoUtility.TextColor.TERTIARY);
         footerText.getStyle().set("margin", "0");

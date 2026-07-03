@@ -66,7 +66,7 @@ public class TemplateStatisticsPanel extends VerticalLayout {
         title.addClassName(LumoUtility.Margin.NONE);
         title.getStyle().set("font-weight", "600");
 
-        Span badge = new Span("Live");
+        Span badge = new Span(I18n.t("mms.dashboard.template.stats.live"));
         badge.getStyle()
                 .set("background", "#10B98120")
                 .set("color", "#10B981")
@@ -87,10 +87,10 @@ public class TemplateStatisticsPanel extends VerticalLayout {
                 .set("gap", "var(--lumo-space-xs)")
                 .set("margin-bottom", "var(--lumo-space-s)");
 
-        grid.add(createMiniStatCard("Total", "120", VaadinIcon.FILE_TEXT, "#4F46E5"));
-        grid.add(createMiniStatCard("Active", "85", VaadinIcon.CHECK_CIRCLE, "#10B981"));
-        grid.add(createMiniStatCard("Draft", "25", VaadinIcon.PENCIL, "#F59E0B"));
-        grid.add(createMiniStatCard("Archived", "10", VaadinIcon.ARCHIVE, "#6B7280"));
+        grid.add(createMiniStatCard(I18n.t("mms.dashboard.template.stats.total"), "120", VaadinIcon.FILE_TEXT, "#4F46E5"));
+        grid.add(createMiniStatCard(I18n.t("mms.dashboard.template.stats.active"), "85", VaadinIcon.CHECK_CIRCLE, "#10B981"));
+        grid.add(createMiniStatCard(I18n.t("mms.dashboard.template.stats.draft"), "25", VaadinIcon.PENCIL, "#F59E0B"));
+        grid.add(createMiniStatCard(I18n.t("mms.dashboard.template.stats.archived"), "10", VaadinIcon.ARCHIVE, "#6B7280"));
 
         return grid;
     }
@@ -144,11 +144,11 @@ public class TemplateStatisticsPanel extends VerticalLayout {
         header.setAlignItems(FlexComponent.Alignment.CENTER);
         header.getStyle().set("margin-bottom", "var(--lumo-space-s)");
 
-        Span usageLabel = new Span("Top Templates");
+        Span usageLabel = new Span(I18n.t("mms.dashboard.template.stats.top.templates"));
         usageLabel.addClassName(LumoUtility.FontSize.XSMALL);
         usageLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
 
-        Span viewAll = new Span("View all →");
+        Span viewAll = new Span(I18n.t("mms.dashboard.viewAll"));
         viewAll.addClassName(LumoUtility.FontSize.XSMALL);
         viewAll.addClassName(LumoUtility.TextColor.PRIMARY);
         viewAll.getStyle().set("cursor", "pointer");
@@ -157,10 +157,10 @@ public class TemplateStatisticsPanel extends VerticalLayout {
         container.add(header);
 
         // Usage items with mini progress bars
-        container.add(createUsageItem("Welcome Email", 45, "#4F46E5"));
-        container.add(createUsageItem("Password Reset", 30, "#10B981"));
-        container.add(createUsageItem("Newsletter", 15, "#F59E0B"));
-        container.add(createUsageItem("Invoice", 8, "#EF4444"));
+        container.add(createUsageItem(I18n.t("mms.dashboard.template.stats.sample.welcome"), 45, "#4F46E5"));
+        container.add(createUsageItem(I18n.t("mms.dashboard.template.stats.sample.password.reset"), 30, "#10B981"));
+        container.add(createUsageItem(I18n.t("mms.dashboard.template.stats.sample.newsletter"), 15, "#F59E0B"));
+        container.add(createUsageItem(I18n.t("mms.dashboard.template.stats.sample.invoice"), 8, "#EF4444"));
 
         return container;
     }

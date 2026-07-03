@@ -49,13 +49,13 @@ public class CreateTenantDialog extends BaseActionDialog {
                               TenantService tenantService,
                               TenantImageService tenantImageService,
                               Runnable onSuccess) {
-        super(I18n.t("tenant.dialog.create.title"), onSuccess);
+        super(I18n.t("ims.tenant.dialog.create.title"), onSuccess);
         this.parentView = parentView;
         this.tenantService = tenantService;
         this.tenantImageService = tenantImageService;
         this.onSuccess = onSuccess;
 
-        setOkButtonText(I18n.t("tenant.dialog.create.button"));
+        setOkButtonText(I18n.t("ims.tenant.dialog.create.button"));
         setWidth("700px");
         setMaxWidth("95%");
 
@@ -64,38 +64,38 @@ public class CreateTenantDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        nameField = new TextField(I18n.t("tenant.dialog.field.name"));
+        nameField = new TextField(I18n.t("ims.tenant.dialog.field.name"));
         nameField.setRequiredIndicatorVisible(true);
-        nameField.setPlaceholder(I18n.t("tenant.dialog.field.name.placeholder"));
+        nameField.setPlaceholder(I18n.t("ims.tenant.dialog.field.name.placeholder"));
         nameField.setWidthFull();
 
-        codeField = new TextField(I18n.t("tenant.dialog.field.code"));
-        codeField.setPlaceholder(I18n.t("tenant.dialog.field.code.placeholder"));
+        codeField = new TextField(I18n.t("ims.tenant.dialog.field.code"));
+        codeField.setPlaceholder(I18n.t("ims.tenant.dialog.field.code.placeholder"));
         codeField.setWidthFull();
 
-        emailField = new EmailField(I18n.t("tenant.dialog.field.email"));
+        emailField = new EmailField(I18n.t("ims.tenant.dialog.field.email"));
         emailField.setRequiredIndicatorVisible(true);
-        emailField.setPlaceholder(I18n.t("tenant.dialog.field.email.placeholder"));
+        emailField.setPlaceholder(I18n.t("ims.tenant.dialog.field.email.placeholder"));
         emailField.setWidthFull();
 
-        phoneField = new TextField(I18n.t("tenant.dialog.field.phone"));
+        phoneField = new TextField(I18n.t("ims.tenant.dialog.field.phone"));
         phoneField.setRequiredIndicatorVisible(true);
-        phoneField.setPlaceholder(I18n.t("tenant.dialog.field.phone.placeholder"));
+        phoneField.setPlaceholder(I18n.t("ims.tenant.dialog.field.phone.placeholder"));
         phoneField.setWidthFull();
 
-        industryField = new TextField(I18n.t("tenant.dialog.field.industry"));
-        industryField.setPlaceholder(I18n.t("tenant.dialog.field.industry.placeholder"));
+        industryField = new TextField(I18n.t("ims.tenant.dialog.field.industry"));
+        industryField.setPlaceholder(I18n.t("ims.tenant.dialog.field.industry.placeholder"));
         industryField.setWidthFull();
 
-        urlField = new TextField(I18n.t("tenant.dialog.field.website"));
-        urlField.setPlaceholder(I18n.t("tenant.dialog.field.website.placeholder"));
+        urlField = new TextField(I18n.t("ims.tenant.dialog.field.website"));
+        urlField.setPlaceholder(I18n.t("ims.tenant.dialog.field.website.placeholder"));
         urlField.setWidthFull();
 
-        descriptionField = new TextArea(I18n.t("tenant.dialog.field.description"));
-        descriptionField.setPlaceholder(I18n.t("tenant.dialog.field.description.placeholder"));
+        descriptionField = new TextArea(I18n.t("ims.tenant.dialog.field.description"));
+        descriptionField.setPlaceholder(I18n.t("ims.tenant.dialog.field.description.placeholder"));
         descriptionField.setWidthFull();
 
-        adminStatusCombo = new ComboBox<>(I18n.t("tenant.dialog.field.admin.status"));
+        adminStatusCombo = new ComboBox<>(I18n.t("ims.tenant.dialog.field.admin.status"));
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
         adminStatusCombo.setValue(IEnumEnabledBinaryStatus.Types.ENABLED);
         adminStatusCombo.setWidthFull();
@@ -121,7 +121,7 @@ public class CreateTenantDialog extends BaseActionDialog {
                 .set("justify-content", "center");
         imagePlaceholder.add(new Icon(VaadinIcon.CAMERA));
 
-        uploadImageButton = new Button(I18n.t("tenant.dialog.field.upload.image"), e -> openCropperDialog());
+        uploadImageButton = new Button(I18n.t("ims.tenant.dialog.field.upload.image"), e -> openCropperDialog());
         uploadImageButton.setIcon(new Icon(VaadinIcon.UPLOAD));
     }
 
@@ -175,19 +175,19 @@ public class CreateTenantDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (nameField.getValue().isBlank()) {
-            append(I18n.t("tenant.dialog.field.name.required"));
+            append(I18n.t("ims.tenant.dialog.field.name.required"));
             return false;
         }
         if (emailField.getValue().isBlank()) {
-            append(I18n.t("tenant.dialog.field.email.required"));
+            append(I18n.t("ims.tenant.dialog.field.email.required"));
             return false;
         }
         if (phoneField.getValue().isBlank()) {
-            append(I18n.t("tenant.dialog.field.phone.required"));
+            append(I18n.t("ims.tenant.dialog.field.phone.required"));
             return false;
         }
         if (selectedImageFile == null) {
-            append(I18n.t("tenant.dialog.create.image.required"));
+            append(I18n.t("ims.tenant.dialog.create.image.required"));
             return false;
         }
 
@@ -206,30 +206,30 @@ public class CreateTenantDialog extends BaseActionDialog {
 
             ResponseEntity<TenantDto> createResponse = tenantService.create(newTenant);
             if (!createResponse.getStatusCode().is2xxSuccessful() || createResponse.getBody() == null) {
-                append(I18n.t("tenant.dialog.create.failed", createResponse.getStatusCodeValue()));
+                append(I18n.t("ims.tenant.dialog.create.failed", createResponse.getStatusCodeValue()));
                 return false;
             }
 
             Long tenantId = createResponse.getBody().getId();
             if (tenantId == null) {
-                append(I18n.t("tenant.dialog.create.no.id"));
+                append(I18n.t("ims.tenant.dialog.create.no.id"));
                 return false;
             }
 
             ResponseEntity<TenantDto> uploadResponse = tenantImageService.uploadImage(tenantId, selectedImageFile);
             if (!uploadResponse.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("tenant.dialog.create.image.failed", uploadResponse.getStatusCodeValue()));
+                append(I18n.t("ims.tenant.dialog.create.image.failed", uploadResponse.getStatusCodeValue()));
                 return false;
             }
 
-            append(I18n.t("tenant.dialog.create.success"));
+            append(I18n.t("ims.tenant.dialog.create.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
 
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("tenant.dialog.create.error", e.getMessage()));
+            append(I18n.t("ims.tenant.dialog.create.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

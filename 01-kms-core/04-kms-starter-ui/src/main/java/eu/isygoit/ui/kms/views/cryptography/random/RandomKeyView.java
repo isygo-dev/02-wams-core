@@ -45,7 +45,7 @@ public class RandomKeyView extends ManagementCompositeVerticalView {
     private final Div cardsContainer = new Div();
     private final TextField searchField = new TextField();
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
-    private final Button createButton = new Button(I18n.t("random.key.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
+    private final Button createButton = new Button(I18n.t("kms.random.key.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final ProgressBar loadingBar = new ProgressBar();
 
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
@@ -75,7 +75,7 @@ public class RandomKeyView extends ManagementCompositeVerticalView {
         layout.setSpacing(true);
         layout.addClassName("random-keys-view");
 
-        H2 header = new H2(I18n.t("random.key.title"));
+        H2 header = new H2(I18n.t("kms.random.key.title"));
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
         layout.add(header);
@@ -96,12 +96,12 @@ public class RandomKeyView extends ManagementCompositeVerticalView {
             currentPage = 0;
             loadKeys();
         });
-        refreshButton.setTooltipText(I18n.t("random.key.refresh.tooltip"));
+        refreshButton.setTooltipText(I18n.t("kms.random.key.refresh.tooltip"));
 
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         createButton.addClickListener(e -> new CreateRandomKeyDialog(keyService, this::loadKeys).open());
 
-        searchField.setPlaceholder(I18n.t("random.key.search.placeholder"));
+        searchField.setPlaceholder(I18n.t("kms.random.key.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.addValueChangeListener(e -> {
@@ -206,7 +206,7 @@ public class RandomKeyView extends ManagementCompositeVerticalView {
                 renderCards(pageItems);
             }
         } catch (Exception e) {
-            Notification.show(I18n.t("random.key.load.error", e.getMessage()), 5000,
+            Notification.show(I18n.t("kms.random.key.load.error", e.getMessage()), 5000,
                             Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
@@ -216,11 +216,11 @@ public class RandomKeyView extends ManagementCompositeVerticalView {
 
     private void updatePaginationDisplay() {
         if (totalPages > 0) {
-            pageInfoLabel.setText(I18n.t("random.key.page.info", currentPage + 1, totalPages));
+            pageInfoLabel.setText(I18n.t("kms.random.key.page.info", currentPage + 1, totalPages));
         } else {
-            pageInfoLabel.setText(I18n.t("random.key.page.info", 0, 0));
+            pageInfoLabel.setText(I18n.t("kms.random.key.page.info", 0, 0));
         }
-        totalCountLabel.setText(I18n.t("random.key.total.count", totalElements));
+        totalCountLabel.setText(I18n.t("kms.random.key.total.count", totalElements));
         prevButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(currentPage + 1 < totalPages);
     }
@@ -234,8 +234,8 @@ public class RandomKeyView extends ManagementCompositeVerticalView {
             Icon emptyIcon = VaadinIcon.KEY.create();
             emptyIcon.setSize("48px");
             emptyIcon.getStyle().set("color", "var(--lumo-secondary-text-color)");
-            H4 emptyTitle = new H4(I18n.t("random.key.empty.title"));
-            Paragraph emptyDesc = new Paragraph(I18n.t("random.key.empty.description"));
+            H4 emptyTitle = new H4(I18n.t("kms.random.key.empty.title"));
+            Paragraph emptyDesc = new Paragraph(I18n.t("kms.random.key.empty.description"));
             emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
             emptyState.add(emptyIcon, emptyTitle, emptyDesc);
             cardsContainer.add(emptyState);

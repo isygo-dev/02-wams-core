@@ -87,7 +87,7 @@ public class SenderConfigPanel extends VerticalLayout {
                 .set("margin-bottom", "var(--lumo-space-s)");
 
         container.add(createSenderItem(
-                "Production SMTP",
+                I18n.t("mms.dashboard.sender.sample.production.name"),
                 "smtp.prod.company.com",
                 true,
                 "#4F46E5",
@@ -96,7 +96,7 @@ public class SenderConfigPanel extends VerticalLayout {
         ));
 
         container.add(createSenderItem(
-                "Staging SMTP",
+                I18n.t("mms.dashboard.sender.sample.staging.name"),
                 "smtp.staging.company.com",
                 false,
                 "#6B7280",
@@ -105,7 +105,7 @@ public class SenderConfigPanel extends VerticalLayout {
         ));
 
         container.add(createSenderItem(
-                "SendGrid",
+                I18n.t("mms.dashboard.sender.sample.sendgrid.name"),
                 "api.sendgrid.com",
                 true,
                 "#10B981",
@@ -179,7 +179,7 @@ public class SenderConfigPanel extends VerticalLayout {
         details.setSpacing(true);
         details.getStyle().set("gap", "var(--lumo-space-s)");
 
-        Span portSpan = new Span("Port: " + port);
+        Span portSpan = new Span(I18n.t("mms.dashboard.sender.port", port));
         portSpan.addClassName(LumoUtility.TextColor.SECONDARY);
         portSpan.addClassName(LumoUtility.FontSize.XSMALL);
 
@@ -188,7 +188,7 @@ public class SenderConfigPanel extends VerticalLayout {
         info.add(nameSpan, details);
 
         // Status label
-        Span statusSpan = new Span(active ? "Active" : "Inactive");
+        Span statusSpan = new Span(active ? I18n.t("mms.dashboard.sender.status.active") : I18n.t("mms.dashboard.sender.status.inactive"));
         statusSpan.addClassName(LumoUtility.FontSize.XSMALL);
         statusSpan.getStyle()
                 .set("color", active ? "#10B981" : "#6B7280")
@@ -226,9 +226,9 @@ public class SenderConfigPanel extends VerticalLayout {
                 .set("gap", "var(--lumo-space-xs)")
                 .set("padding", "var(--lumo-space-xs) 0");
 
-        container.add(createSummaryItem("Total", "3", VaadinIcon.MAILBOX, "#4F46E5"));
-        container.add(createSummaryItem("Active", "2", VaadinIcon.CHECK, "#10B981"));
-        container.add(createSummaryItem("Inactive", "1", VaadinIcon.CLOSE, "#EF4444"));
+        container.add(createSummaryItem(I18n.t("mms.dashboard.sender.summary.total"), "3", VaadinIcon.MAILBOX, "#4F46E5"));
+        container.add(createSummaryItem(I18n.t("mms.dashboard.sender.status.active"), "2", VaadinIcon.CHECK, "#10B981"));
+        container.add(createSummaryItem(I18n.t("mms.dashboard.sender.status.inactive"), "1", VaadinIcon.CLOSE, "#EF4444"));
 
         return container;
     }

@@ -28,7 +28,7 @@ public class StorageConfigDetailsDialog extends NoActionDialog {
     public StorageConfigDetailsDialog(StorageConfigManagementView parentView,
                                       StorageConfigService storageConfigService,
                                       Long configId) {
-        super(I18n.t("storageconfig.details.title"));
+        super(I18n.t("sms.storageconfig.details.title"));
         this.parentView = parentView;
         this.storageConfigService = storageConfigService;
         this.configId = configId;
@@ -50,14 +50,14 @@ public class StorageConfigDetailsDialog extends NoActionDialog {
             if (response.getBody() != null) {
                 buildContent(response.getBody());
             } else {
-                add(new Span(I18n.t("storageconfig.details.not.found")));
+                add(new Span(I18n.t("sms.storageconfig.details.not.found")));
                 addCloseButton();
             }
         } catch (FeignException ex) {
-            add(new Span(I18n.t("storageconfig.details.load.error", extractErrorMessage(ex))));
+            add(new Span(I18n.t("sms.storageconfig.details.load.error", extractErrorMessage(ex))));
             addCloseButton();
         } catch (Exception e) {
-            add(new Span(I18n.t("storageconfig.details.load.error", e.getMessage())));
+            add(new Span(I18n.t("sms.storageconfig.details.load.error", e.getMessage())));
             addCloseButton();
         } finally {
             parentView.showLoading(false);
@@ -75,19 +75,19 @@ public class StorageConfigDetailsDialog extends NoActionDialog {
                 .set("grid-template-columns", "repeat(auto-fill, minmax(280px, 1fr))")
                 .set("gap", "var(--lumo-space-s)");
 
-        addFieldToGrid(infoGrid, VaadinIcon.TAG, I18n.t("storageconfig.details.field.id"), String.valueOf(config.getId()));
-        addFieldToGrid(infoGrid, VaadinIcon.BUILDING, I18n.t("storageconfig.details.field.tenant"), config.getTenant());
-        addFieldToGrid(infoGrid, VaadinIcon.COG, I18n.t("storageconfig.details.field.type"), config.getType() != null ? config.getType().name() : null);
-        addFieldToGrid(infoGrid, VaadinIcon.USER, I18n.t("storageconfig.details.field.username"), config.getUserName());
-        addFieldToGrid(infoGrid, VaadinIcon.LINK, I18n.t("storageconfig.details.field.url"), config.getUrl());
-        addFieldToGrid(infoGrid, VaadinIcon.USER_CHECK, I18n.t("storageconfig.details.field.created.by"), config.getCreatedBy());
-        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR, I18n.t("storageconfig.details.field.created.date"),
+        addFieldToGrid(infoGrid, VaadinIcon.TAG, I18n.t("sms.storageconfig.details.field.id"), String.valueOf(config.getId()));
+        addFieldToGrid(infoGrid, VaadinIcon.BUILDING, I18n.t("sms.storageconfig.details.field.tenant"), config.getTenant());
+        addFieldToGrid(infoGrid, VaadinIcon.COG, I18n.t("sms.storageconfig.details.field.type"), config.getType() != null ? config.getType().name() : null);
+        addFieldToGrid(infoGrid, VaadinIcon.USER, I18n.t("sms.storageconfig.details.field.username"), config.getUserName());
+        addFieldToGrid(infoGrid, VaadinIcon.LINK, I18n.t("sms.storageconfig.details.field.url"), config.getUrl());
+        addFieldToGrid(infoGrid, VaadinIcon.USER_CHECK, I18n.t("sms.storageconfig.details.field.created.by"), config.getCreatedBy());
+        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR, I18n.t("sms.storageconfig.details.field.created.date"),
                 config.getCreateDate() != null ? DateHelper.formatToHumanReadable(config.getCreateDate()) : null);
-        addFieldToGrid(infoGrid, VaadinIcon.EDIT, I18n.t("storageconfig.details.field.updated.by"), config.getUpdatedBy());
-        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR_O, I18n.t("storageconfig.details.field.updated.date"),
+        addFieldToGrid(infoGrid, VaadinIcon.EDIT, I18n.t("sms.storageconfig.details.field.updated.by"), config.getUpdatedBy());
+        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR_O, I18n.t("sms.storageconfig.details.field.updated.date"),
                 config.getUpdateDate() != null ? DateHelper.formatToHumanReadable(config.getUpdateDate()) : null);
 
-        mainLayout.add(createSection(I18n.t("storageconfig.details.section.info"), infoGrid));
+        mainLayout.add(createSection(I18n.t("sms.storageconfig.details.section.info"), infoGrid));
 
         add(mainLayout);
         addCloseButton();
@@ -133,7 +133,7 @@ public class StorageConfigDetailsDialog extends NoActionDialog {
     }
 
     private void addCloseButton() {
-        Button closeButton = new Button(I18n.t("storageconfig.details.close"), e -> close());
+        Button closeButton = new Button(I18n.t("sms.storageconfig.details.close"), e -> close());
         closeButton.addClassName(LumoUtility.Margin.Top.MEDIUM);
         HorizontalLayout buttonBar = new HorizontalLayout(closeButton);
         buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);

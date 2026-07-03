@@ -25,12 +25,12 @@ public class CreateParameterDialog extends BaseActionDialog {
     public CreateParameterDialog(ParameterManagementView parentView,
                                  AppParameterService parameterService,
                                  Runnable onSuccess) {
-        super(I18n.t("parameter.dialog.create.title"), onSuccess);
+        super(I18n.t("ims.parameter.dialog.create.title"), onSuccess);
         this.parentView = parentView;
         this.parameterService = parameterService;
         this.onSuccess = onSuccess;
 
-        setOkButtonText(I18n.t("parameter.dialog.create.button"));
+        setOkButtonText(I18n.t("ims.parameter.dialog.create.button"));
         setWidth("600px");
         setMaxWidth("95%");
 
@@ -39,22 +39,22 @@ public class CreateParameterDialog extends BaseActionDialog {
     }
 
     private void buildForm() {
-        nameField = new TextField(I18n.t("parameter.dialog.field.name"));
+        nameField = new TextField(I18n.t("ims.parameter.dialog.field.name"));
         nameField.setRequiredIndicatorVisible(true);
-        nameField.setPlaceholder(I18n.t("parameter.dialog.field.name.placeholder"));
+        nameField.setPlaceholder(I18n.t("ims.parameter.dialog.field.name.placeholder"));
         nameField.setWidthFull();
 
-        valueField = new TextField(I18n.t("parameter.dialog.field.value"));
+        valueField = new TextField(I18n.t("ims.parameter.dialog.field.value"));
         valueField.setRequiredIndicatorVisible(true);
-        valueField.setPlaceholder(I18n.t("parameter.dialog.field.value.placeholder"));
+        valueField.setPlaceholder(I18n.t("ims.parameter.dialog.field.value.placeholder"));
         valueField.setWidthFull();
 
-        tenantField = new TextField(I18n.t("parameter.dialog.field.tenant"));
-        tenantField.setPlaceholder(I18n.t("parameter.dialog.field.tenant.placeholder"));
+        tenantField = new TextField(I18n.t("ims.parameter.dialog.field.tenant"));
+        tenantField.setPlaceholder(I18n.t("ims.parameter.dialog.field.tenant.placeholder"));
         tenantField.setWidthFull();
 
-        descriptionArea = new TextArea(I18n.t("parameter.dialog.field.description"));
-        descriptionArea.setPlaceholder(I18n.t("parameter.dialog.field.description.placeholder"));
+        descriptionArea = new TextArea(I18n.t("ims.parameter.dialog.field.description"));
+        descriptionArea.setPlaceholder(I18n.t("ims.parameter.dialog.field.description.placeholder"));
         descriptionArea.setWidthFull();
     }
 
@@ -72,11 +72,11 @@ public class CreateParameterDialog extends BaseActionDialog {
     @Override
     protected boolean onOk() {
         if (nameField.getValue().isBlank()) {
-            append(I18n.t("parameter.dialog.field.name.required"));
+            append(I18n.t("ims.parameter.dialog.field.name.required"));
             return false;
         }
         if (valueField.getValue().isBlank()) {
-            append(I18n.t("parameter.dialog.field.value.required"));
+            append(I18n.t("ims.parameter.dialog.field.value.required"));
             return false;
         }
 
@@ -91,17 +91,17 @@ public class CreateParameterDialog extends BaseActionDialog {
 
             ResponseEntity<AppParameterDto> response = parameterService.create(newParam);
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                append(I18n.t("parameter.dialog.create.failed", response.getStatusCodeValue()));
+                append(I18n.t("ims.parameter.dialog.create.failed", response.getStatusCodeValue()));
                 return false;
             }
 
-            append(I18n.t("parameter.dialog.create.success"));
+            append(I18n.t("ims.parameter.dialog.create.success"));
             if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
         } catch (Exception e) {
-            append(I18n.t("parameter.dialog.create.error", e.getMessage()));
+            append(I18n.t("ims.parameter.dialog.create.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }

@@ -15,13 +15,13 @@ public class RevokeGrantDialog extends PinBaseActionDialog {
 
     public RevokeGrantDialog(String keyId, KmsDtos.ListGrantsResponse.Grant grant,
                              KmsApiService kmsApiService, Runnable onSuccess) {
-        super(I18n.t("grant.revoke.title"),
-                I18n.t("grant.revoke.message"),
+        super(I18n.t("kms.grant.revoke.title"),
+                I18n.t("kms.grant.revoke.message"),
                 onSuccess);
         this.keyId = keyId;
         this.grant = grant;
         this.kmsApiService = kmsApiService;
-        setOkButtonText(I18n.t("grant.revoke.button"));
+        setOkButtonText(I18n.t("kms.grant.revoke.button"));
         addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
         setWidth("500px");
     }
@@ -29,18 +29,18 @@ public class RevokeGrantDialog extends PinBaseActionDialog {
     @Override
     protected boolean onOk() {
         if (!validatePin()) {
-            append(I18n.t("grant.revoke.invalid.code"));
+            append(I18n.t("kms.grant.revoke.invalid.code"));
             return false;
         }
         try {
             kmsApiService.revokeGrant(keyId, grant.getGrantId());
 
-            append(I18n.t("grant.revoke.success"));
+            append(I18n.t("kms.grant.revoke.success"));
             return true;
         } catch (FeignException ex) {
             append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
         } catch (Exception e) {
-            append(I18n.t("grant.revoke.failed", e.getMessage()));
+            append(I18n.t("kms.grant.revoke.failed", e.getMessage()));
         }
 
         return false;
