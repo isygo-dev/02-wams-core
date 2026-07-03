@@ -9,6 +9,9 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    background: #ffffff;
+    border: 1px solid var(--lumo-contrast-20pct);
+    border-radius: var(--lumo-border-radius-l);
     transition: all 0.2s ease-in-out;
 }
 
