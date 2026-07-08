@@ -58,6 +58,8 @@ public class ViewMsgTemplateDialog extends Dialog {
         addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.name"), template.getName());
         addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.language"),
                 template.getLanguage() != null ? template.getLanguage().name() : I18n.t("mms.common.value.notAvailable"));
+        addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.defaultSender"),
+                template.getDefaultSender() != null ? template.getDefaultSender() : I18n.t("mms.common.value.notAvailable"));
         addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.description"),
                 template.getDescription() != null ? template.getDescription() : I18n.t("mms.common.value.notAvailable"));
         addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.file"),

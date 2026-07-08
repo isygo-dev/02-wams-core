@@ -26,4 +26,6 @@ public class SenderConfigDto extends AuditableIdAssignableDto<Long> {
     private Boolean smtpStarttlsEnable;
     private Boolean smtpStarttlsRequired;
     private Boolean debug;
+
+    private String defaultSender;
 }

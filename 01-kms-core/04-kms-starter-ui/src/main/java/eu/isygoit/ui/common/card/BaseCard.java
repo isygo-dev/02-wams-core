@@ -54,6 +54,23 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
 
     // ── Template method – call this in subclass constructor ─────────────────
 
+    /**
+     * Re-colors an existing chip (e.g. after a status change) by swapping its
+     * {@code wams-chip--*} class instead of setting inline background/foreground
+     * colors.
+     */
+    protected static void applyChipColor(Span chip, ChipColor color) {
+        chip.removeClassName(ChipColor.SUCCESS.cssClass());
+        chip.removeClassName(ChipColor.ERROR.cssClass());
+        chip.removeClassName(ChipColor.WARNING.cssClass());
+        chip.removeClassName(ChipColor.NEUTRAL.cssClass());
+        chip.removeClassName(ChipColor.INFO.cssClass());
+        chip.addClassName("wams-chip");
+        chip.addClassName(color.cssClass());
+    }
+
+    // ── Abstract contract ─────────────────────────────────────────────────────
+
     protected final void initCard() {
         applyCardShell();
         buildHeader();
@@ -62,8 +79,6 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         rearrangeToFlexLayout();
         addClassName(cardCssClassName());
     }
-
-    // ── Abstract contract ─────────────────────────────────────────────────────
 
     protected abstract String cardCssClassName();
 
@@ -77,18 +92,20 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
      */
     protected abstract List<Button> buildActionButtons();
 
+    // ── Optional hook ─────────────────────────────────────────────────────────
+
     /**
      * Adds body rows (meta rows, description, tags, …) using {@link #add(Component...)}.
      */
     protected abstract void buildBodyRows();
 
-    // ── Optional hook ─────────────────────────────────────────────────────────
+    // ── Shell styling ─────────────────────────────────────────────────────────
 
     protected void onCardAttach(AttachEvent event) {
         // no‑op
     }
 
-    // ── Shell styling ─────────────────────────────────────────────────────────
+    // ── Header assembly ───────────────────────────────────────────────────────
 
     private void applyCardShell() {
         setWidthFull();
@@ -102,7 +119,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         // Ensure flex column (VerticalLayout does this by default)
     }
 
-    // ── Header assembly ───────────────────────────────────────────────────────
+    // ── Footer assembly ───────────────────────────────────────────────────────
 
     protected void buildHeader() {
         headerLeft = new HorizontalLayout();
@@ -123,7 +140,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         // We add headerRow later after rearrangement
     }
 
-    // ── Footer assembly ───────────────────────────────────────────────────────
+    // ── Rearrangement into header / body / footer ────────────────────────────
 
     protected void buildFooter() {
         List<Button> buttons = buildActionButtons();
@@ -147,7 +164,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         footerRow.addClassName("wams-card__footer-row");
     }
 
-    // ── Rearrangement into header / body / footer ────────────────────────────
+    // ── Chip factory ──────────────────────────────────────────────────────────
 
     private void rearrangeToFlexLayout() {
         // Collect all children added so far (headerRow, body components, footerRow)
@@ -179,8 +196,6 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         }
     }
 
-    // ── Chip factory ──────────────────────────────────────────────────────────
-
     protected Span buildStatusChip(String text, ChipColor color) {
         Span chip = new Span(text);
         chip.addClassName(LumoUtility.FontSize.XSMALL);
@@ -195,21 +210,6 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
 
     protected Span buildStatusChip(String text, String status) {
         return buildStatusChip(text, ChipColor.fromStatus(status));
-    }
-
-    /**
-     * Re-colors an existing chip (e.g. after a status change) by swapping its
-     * {@code wams-chip--*} class instead of setting inline background/foreground
-     * colors.
-     */
-    protected static void applyChipColor(Span chip, ChipColor color) {
-        chip.removeClassName(ChipColor.SUCCESS.cssClass());
-        chip.removeClassName(ChipColor.ERROR.cssClass());
-        chip.removeClassName(ChipColor.WARNING.cssClass());
-        chip.removeClassName(ChipColor.NEUTRAL.cssClass());
-        chip.removeClassName(ChipColor.INFO.cssClass());
-        chip.addClassName("wams-chip");
-        chip.addClassName(color.cssClass());
     }
 
     // ── Title span factory ────────────────────────────────────────────────────

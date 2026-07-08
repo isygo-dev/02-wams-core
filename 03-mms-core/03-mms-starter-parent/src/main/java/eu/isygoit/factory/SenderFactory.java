@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -22,7 +21,7 @@ import java.util.Properties;
 @Component
 public class SenderFactory {
 
-    private final Map<String, JavaMailSenderImpl> senderMap = new HashMap<>();
+    private final Map<String, CustomJavaMailSender> senderMap = new HashMap<>();
 
     @Autowired
     private SenderConfigRepository senderConfigRepository;
@@ -45,7 +44,7 @@ public class SenderFactory {
      * @param tenant the tenant
      * @return the sender
      */
-    public JavaMailSenderImpl getSender(String tenant /*senderTenant*/) {
+    public CustomJavaMailSender getSender(String tenant /*senderTenant*/) {
         // get data from table config
         if (senderMap.containsKey(tenant)) {
             return senderMap.get(tenant);
@@ -58,10 +57,11 @@ public class SenderFactory {
 
         if (optional.isPresent()) {
             SenderConfig senderConfig = optional.get();
-            JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+            CustomJavaMailSender mailSender = new CustomJavaMailSender();
             mailSender.setHost(senderConfig.getHost());
             int port = Integer.parseInt(senderConfig.getPort());
             mailSender.setPort(port);
+            mailSender.setDefaultSender(senderConfig.getDefaultSender());
             mailSender.setUsername(senderConfig.getUsername());
             mailSender.setPassword(senderConfig.getPassword());
             Properties props = mailSender.getJavaMailProperties();
@@ -73,7 +73,7 @@ public class SenderFactory {
             senderMap.put(tenant, mailSender);
             return mailSender;
         } else {
-            return (JavaMailSenderImpl) defaultSender;
+            return (CustomJavaMailSender) defaultSender;
         }
     }
 }

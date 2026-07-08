@@ -3,6 +3,7 @@ package eu.isygoit.ui.mms.views.msgtemplate.dialog;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.MsgTemplateDto;
@@ -25,6 +26,7 @@ public class CreateMsgTemplateDialog extends BaseMsgTemplateDialog {
     private ComboBox<IEnumEmailTemplate.Types> nameCombo;
     private TextArea descriptionField;
     private ComboBox<IEnumLanguage.Types> languageCombo;
+    private EmailField defaultSenderField;
 
     public CreateMsgTemplateDialog(MsgTemplateManagementView parentView,
                                    MsgTemplateService templateService,
@@ -67,14 +69,21 @@ public class CreateMsgTemplateDialog extends BaseMsgTemplateDialog {
         languageCombo.setValue(IEnumLanguage.Types.EN);
         languageCombo.setWidthFull();
 
+        defaultSenderField = new EmailField(I18n.t("mms.msgtemplate.dialog.create.field.defaultSender"));
+        defaultSenderField.setPlaceholder(I18n.t("mms.msgtemplate.dialog.create.field.defaultSender.placeholder"));
+        defaultSenderField.setWidthFull();
+        defaultSenderField.setHelperText(I18n.t("mms.msgtemplate.dialog.create.field.defaultSender.helper"));
+
         // File upload section
         setupFileUpload(null);
 
-        form.add(codeField, tenantField, nameCombo, descriptionField, languageCombo);
+        form.add(codeField, tenantField, nameCombo, descriptionField, languageCombo, defaultSenderField);
         form.setColspan(codeField, 2);
         form.setColspan(tenantField, 2);
         form.setColspan(nameCombo, 2);
         form.setColspan(descriptionField, 2);
+        form.setColspan(languageCombo, 1);
+        form.setColspan(defaultSenderField, 1);
 
         contentArea.add(form);
 
@@ -102,6 +111,13 @@ public class CreateMsgTemplateDialog extends BaseMsgTemplateDialog {
             return false;
         }
 
+        // Validate default sender if provided
+        String defaultSender = defaultSenderField.getValue();
+        if (defaultSender != null && !defaultSender.isBlank() && !isValidEmail(defaultSender)) {
+            append(I18n.t("mms.msgtemplate.dialog.create.error.defaultSender.invalid"));
+            return false;
+        }
+
         if (!hasFileUploaded()) {
             append(I18n.t("mms.msgtemplate.dialog.create.error.file.required"));
             return false;
@@ -124,6 +140,8 @@ public class CreateMsgTemplateDialog extends BaseMsgTemplateDialog {
                     .description(descriptionField.getValue() != null ?
                             descriptionField.getValue().trim() : null)
                     .language(languageCombo.getValue())
+                    .defaultSender(defaultSender != null && !defaultSender.isBlank() ?
+                            defaultSender.trim() : null)
                     .build();
 
             // Use MsgTemplateFileService for create with file

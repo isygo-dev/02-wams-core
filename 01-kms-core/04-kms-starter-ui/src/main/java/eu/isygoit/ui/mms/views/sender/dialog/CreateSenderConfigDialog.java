@@ -2,6 +2,7 @@ package eu.isygoit.ui.mms.views.sender.dialog;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.SenderConfigDto;
@@ -25,6 +26,7 @@ public class CreateSenderConfigDialog extends BaseSenderConfigDialog {
     private Checkbox smtpStarttlsEnableCheckbox;
     private Checkbox smtpStarttlsRequiredCheckbox;
     private Checkbox debugCheckbox;
+    private EmailField defaultSenderField;
 
     public CreateSenderConfigDialog(SenderConfigManagementView parentView,
                                     SenderConfigService senderConfigService,
@@ -87,16 +89,22 @@ public class CreateSenderConfigDialog extends BaseSenderConfigDialog {
         debugCheckbox = new Checkbox(I18n.t("mms.sender.dialog.create.field.debug"));
         debugCheckbox.setValue(false);
 
+        defaultSenderField = new EmailField(I18n.t("mms.sender.dialog.create.field.defaultSender"));
+        defaultSenderField.setPlaceholder(I18n.t("mms.sender.dialog.create.field.defaultSender.placeholder"));
+        defaultSenderField.setWidthFull();
+        defaultSenderField.setHelperText(I18n.t("mms.sender.dialog.create.field.defaultSender.helper"));
+
         form.add(tenantField, hostField, portField, usernameField, passwordField,
                 transportProtocolField, smtpAuthField,
                 smtpStarttlsEnableCheckbox, smtpStarttlsRequiredCheckbox,
-                debugCheckbox);
+                debugCheckbox, defaultSenderField);
 
         // Set column spans
         form.setColspan(tenantField, 2);
         form.setColspan(hostField, 2);
         form.setColspan(usernameField, 2);
         form.setColspan(passwordField, 2);
+        form.setColspan(defaultSenderField, 2);
 
         contentArea.add(form);
     }
@@ -131,6 +139,13 @@ public class CreateSenderConfigDialog extends BaseSenderConfigDialog {
             return false;
         }
 
+        // Validate default sender if provided
+        String defaultSender = defaultSenderField.getValue();
+        if (defaultSender != null && !defaultSender.isBlank() && !isValidEmail(defaultSender)) {
+            append(I18n.t("mms.sender.dialog.create.error.defaultSender.invalid"));
+            return false;
+        }
+
         if (parentView != null) {
             parentView.showLoading(true);
         }
@@ -148,6 +163,8 @@ public class CreateSenderConfigDialog extends BaseSenderConfigDialog {
                     .smtpStarttlsEnable(smtpStarttlsEnableCheckbox.getValue())
                     .smtpStarttlsRequired(smtpStarttlsRequiredCheckbox.getValue())
                     .debug(debugCheckbox.getValue())
+                    .defaultSender(defaultSender != null && !defaultSender.isBlank() ?
+                            defaultSender.trim() : null)
                     .build();
 
             ResponseEntity<SenderConfigDto> response = senderConfigService.create(config);

@@ -64,6 +64,9 @@ public class MsgTemplate extends AuditableEntity<Long>
     @Column(name = SchemaColumnConstantName.C_LANGUAGE, length = IEnumLanguage.STR_ENUM_SIZE, nullable = false)
     private IEnumLanguage.Types language = IEnumLanguage.Types.EN;
 
+    @Column(name = SchemaColumnConstantName.C_DEFAULT_SENDER)
+    private String defaultSender;
+
     //BEGIN IFileEntity : SecondaryTable / MsgTemplateFile
     @Column(name = SchemaColumnConstantName.C_FILE_NAME, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
     private String fileName;

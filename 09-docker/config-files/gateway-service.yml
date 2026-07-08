@@ -1,0 +1,167 @@
+server:
+  tomcat:
+    max-swallow-size: -1
+    max-http-form-post-size: -1
+  port: 8060 #8060
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    #hostname: discovery-service
+  client:
+    serviceUrl:
+      defaultZone: http://discovery-service:8061/eureka/
+
+camel:
+  springboot:
+    routes-include-pattern: file:camel/*.xml
+    xmlRoutes: file:camel/*.xml
+
+logging:
+  level:
+    eu.isygoit: info
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-},%X{spanId:-}] ${LOG_LEVEL_PATTERN:-%5p} %m%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-},%X{spanId:-}] ${LOG_LEVEL_PATTERN:-%5p} %m%n"
+  file: gateway.log
+
+spring:
+  hazelcast:
+    config: classpath:cache/hazelcast.xml
+  output:
+    ansi:
+      enabled: always
+
+    gateway:
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: identity-management-service
+          uri: lb://identity-service
+          predicates:
+            - Path=/ims/**
+          filters:
+            - RewritePath=/ims/(?<path>.*), /$\{path}
+        - id: key-management-service
+          uri: lb://key-service
+          predicates:
+            - Path=/kms/**
+          filters:
+            - RewritePath=/kms/(?<path>.*), /$\{path}
+        - id: messaging-management-service
+          uri: lb://messaging-service
+          predicates:
+            - Path=/mms/**
+          filters:
+            - RewritePath=/mms/(?<path>.*), /$\{path}
+        - id: document-management-service
+          uri: lb://document-service
+          predicates:
+            - Path=/dms/**
+          filters:
+            - RewritePath=/dms/(?<path>.*), /$\{path}
+        - id: storage-management-service
+          uri: lb://storage-service
+          predicates:
+            - Path=/sms/**
+          filters:
+            - RewritePath=/sms/(?<path>.*), /$\{path}
+        - id: calendar-management-service
+          uri: lb://calendar-service
+          predicates:
+            - Path=/cms/**
+          filters:
+            - RewritePath=/cms/(?<path>.*), /$\{path}
+        - id: quiz-management-service
+          uri: lb://quiz-service
+          predicates:
+            - Path=/quiz/**
+          filters:
+            - RewritePath=/quiz/(?<path>.*), /$\{path}
+        - id: recruitment-management-service
+          uri: lb://recruitment-service
+          predicates:
+            - Path=/rpm/**
+          filters:
+            - RewritePath=/rpm/(?<path>.*), /$\{path}
+        - id: human-resources-management-service
+          uri: lb://human-resources-service
+          predicates:
+            - Path=/hrm/**
+          filters:
+            - RewritePath=/hrm/(?<path>.*), /$\{path}
+        - id: link-management-service
+          uri: lb://link-service
+          predicates:
+            - Path=/link/**
+          filters:
+            - RewritePath=/link/(?<path>.*), /$\{path}
+        - id: project-management-service
+          uri: lb://project-service
+          predicates:
+            - Path=/pms/**
+          filters:
+            - RewritePath=/pms/(?<path>.*), /$\{path}
+        - id: learning-management-service
+          uri: lb://learning-service
+          predicates:
+            - Path=/lms/**
+          filters:
+            - RewritePath=/lms/(?<path>.*), /$\{path}
+        - id: smekit-management-service
+          uri: lb://smekit-service
+          predicates:
+            - Path=/smekit/**
+          filters:
+            - RewritePath=/smekit/(?<path>.*), /$\{path}
+        - id: openapi
+          uri: http://localhost:${server.port}
+          predicates:
+            - Path=/v3/api-docs/**
+          filters:
+            - RewritePath=/v3/api-docs/(?<path>.*), /$\{path}/v3/api-docs
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: ims
+        url: /v3/api-docs/ims
+      - name: kms
+        url: /v3/api-docs/kms
+      - name: mms
+        url: /v3/api-docs/mms
+      - name: dms
+        url: /v3/api-docs/dms
+      - name: sms
+        url: /v3/api-docs/sms
+      - name: cms
+        url: /v3/api-docs/cms
+      - name: quiz
+        url: /v3/api-docs/quiz
+      - name: rpm
+        url: /v3/api-docs/rpm
+      - name: hrm
+        url: /v3/api-docs/hrm
+      - name: link
+        url: /v3/api-docs/link
+      - name: pms
+        url: /v3/api-docs/pms
+      - name: lms
+        url: /v3/api-docs/lms
+      - name: smekit
+        url: /v3/api-docs/smekit
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0

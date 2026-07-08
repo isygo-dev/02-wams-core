@@ -18,6 +18,7 @@ import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.mms.views.sender.dialog.DeleteSenderConfigDialog;
 import eu.isygoit.ui.mms.views.sender.dialog.EditSenderConfigDialog;
 import eu.isygoit.ui.mms.views.sender.dialog.TestConnectionDialog;
+import eu.isygoit.ui.mms.views.sender.dialog.ViewSenderConfigDialog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 
@@ -41,6 +42,7 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
     private Span usernameSpan;
     private Span tlsSpan;
     private Span debugSpan;
+    private Span defaultSenderSpan;
     private Button testButton;
     private Button editButton;
     private Button deleteButton;
@@ -59,6 +61,7 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         usernameSpan = new Span();
         tlsSpan = new Span();
         debugSpan = new Span();
+        defaultSenderSpan = new Span();
 
         bodyContainer.setPadding(false);
         bodyContainer.setSpacing(true);
@@ -104,6 +107,7 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
                     config.setDebug(updatedConfig.getDebug());
                     config.setTransportProtocol(updatedConfig.getTransportProtocol());
                     config.setSmtpAuth(updatedConfig.getSmtpAuth());
+                    config.setDefaultSender(updatedConfig.getDefaultSender());
 
                     updateDisplay();
                 }
@@ -136,6 +140,9 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         if (debugSpan == null) {
             debugSpan = new Span();
         }
+        if (defaultSenderSpan == null) {
+            defaultSenderSpan = new Span();
+        }
 
         String displayName = config.getHost() != null ? config.getHost() : I18n.t("mms.sender.card.fallback.name", config.getId());
         titleSpan.setText(displayName);
@@ -147,6 +154,7 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         hostSpan.setText(config.getHost() != null ? config.getHost() : I18n.t("mms.common.value.notAvailable"));
         portSpan.setText(config.getPort() != null ? config.getPort() : I18n.t("mms.common.value.notAvailable"));
         usernameSpan.setText(config.getUsername() != null ? config.getUsername() : I18n.t("mms.common.value.notAvailable"));
+        defaultSenderSpan.setText(config.getDefaultSender() != null ? config.getDefaultSender() : I18n.t("mms.common.value.notAvailable"));
 
         boolean tlsEnabled = Boolean.TRUE.equals(config.getSmtpStarttlsEnable());
         tlsSpan.setText(tlsEnabled ? I18n.t("mms.sender.card.tls.enabled") : I18n.t("mms.sender.card.tls.disabled"));
@@ -214,6 +222,11 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
     protected List<Button> buildActionButtons() {
         List<Button> buttons = new ArrayList<>();
 
+        // View Button
+        Button viewBtn = createIconButton(VaadinIcon.EYE, I18n.t("mms.sender.card.view.tooltip"));
+        viewBtn.addClickListener(e -> viewConfig());
+        buttons.add(viewBtn);
+
         // Test Connection Button
         testButton = createIconButton(VaadinIcon.START_COG, I18n.t("mms.sender.card.test.tooltip"));
         testButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
@@ -233,6 +246,11 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         buttons.add(deleteButton);
 
         return buttons;
+    }
+
+    // Add this method
+    private void viewConfig() {
+        new ViewSenderConfigDialog(config).open();
     }
 
     @Override
@@ -316,6 +334,15 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
                 VaadinIcon.BUG,
                 I18n.t("mms.sender.card.debug"),
                 debugSpan
+        ));
+
+        // Default Sender
+        String defaultSenderValue = config.getDefaultSender() != null ? config.getDefaultSender() : I18n.t("mms.common.value.notAvailable");
+        bodyContainer.add(createDetailRowWithCopy(
+                VaadinIcon.ENVELOPE,
+                I18n.t("mms.sender.card.defaultSender"),
+                defaultSenderValue,
+                defaultSenderValue
         ));
     }
 

@@ -2,6 +2,7 @@ package eu.isygoit.ui.mms.views.sender.dialog;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.SenderConfigDto;
@@ -24,6 +25,7 @@ public class EditSenderConfigDialog extends BaseSenderConfigDialog {
     private Checkbox smtpStarttlsEnableCheckbox;
     private Checkbox smtpStarttlsRequiredCheckbox;
     private Checkbox debugCheckbox;
+    private EmailField defaultSenderField;
 
     public EditSenderConfigDialog(SenderConfigService senderConfigService,
                                   SenderConfigDto config,
@@ -84,16 +86,22 @@ public class EditSenderConfigDialog extends BaseSenderConfigDialog {
         smtpStarttlsRequiredCheckbox = new Checkbox(I18n.t("mms.sender.dialog.edit.field.tls.required"));
         debugCheckbox = new Checkbox(I18n.t("mms.sender.dialog.edit.field.debug"));
 
+        defaultSenderField = new EmailField(I18n.t("mms.sender.dialog.edit.field.defaultSender"));
+        defaultSenderField.setPlaceholder(I18n.t("mms.sender.dialog.edit.field.defaultSender.placeholder"));
+        defaultSenderField.setWidthFull();
+        defaultSenderField.setHelperText(I18n.t("mms.sender.dialog.edit.field.defaultSender.helper"));
+
         form.add(tenantField, hostField, portField, usernameField, passwordField,
                 transportProtocolField, smtpAuthField,
                 smtpStarttlsEnableCheckbox, smtpStarttlsRequiredCheckbox,
-                debugCheckbox);
+                debugCheckbox, defaultSenderField);
 
         // Set column spans
         form.setColspan(tenantField, 2);
         form.setColspan(hostField, 2);
         form.setColspan(usernameField, 2);
         form.setColspan(passwordField, 2);
+        form.setColspan(defaultSenderField, 2);
 
         contentArea.add(form);
     }
@@ -112,6 +120,7 @@ public class EditSenderConfigDialog extends BaseSenderConfigDialog {
         smtpStarttlsRequiredCheckbox.setValue(config.getSmtpStarttlsRequired() != null &&
                 config.getSmtpStarttlsRequired());
         debugCheckbox.setValue(config.getDebug() != null && config.getDebug());
+        defaultSenderField.setValue(config.getDefaultSender() != null ? config.getDefaultSender() : "");
     }
 
     @Override
@@ -132,6 +141,13 @@ public class EditSenderConfigDialog extends BaseSenderConfigDialog {
             return false;
         }
 
+        // Validate default sender if provided
+        String defaultSender = defaultSenderField.getValue();
+        if (defaultSender != null && !defaultSender.isBlank() && !isValidEmail(defaultSender)) {
+            append(I18n.t("mms.sender.dialog.edit.error.defaultSender.invalid"));
+            return false;
+        }
+
         try {
             // Build updated config - keep existing values for fields not being updated
             SenderConfigDto updatedConfig = SenderConfigDto.builder()
@@ -149,6 +165,8 @@ public class EditSenderConfigDialog extends BaseSenderConfigDialog {
                     .smtpStarttlsEnable(smtpStarttlsEnableCheckbox.getValue())
                     .smtpStarttlsRequired(smtpStarttlsRequiredCheckbox.getValue())
                     .debug(debugCheckbox.getValue())
+                    .defaultSender(defaultSender != null && !defaultSender.isBlank() ?
+                            defaultSender.trim() : null)
                     .build();
 
             ResponseEntity<SenderConfigDto> response = senderConfigService.update(config.getId(), updatedConfig);

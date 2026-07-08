@@ -1,0 +1,190 @@
+server:
+  tomcat:
+    max-swallow-size: -1
+    max-http-form-post-size: -1
+  port: 60500
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    #hostname: discovery-service
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8061/eureka/
+
+camel:
+  springboot:
+    routes-include-pattern: file:camel/*.xml
+    xmlRoutes: file:camel/*.xml
+
+logging:
+  level:
+    eu.isygoit: info
+    org.apache.kafka: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-},%X{spanId:-}] ${LOG_LEVEL_PATTERN:-%5p} %m%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-},%X{spanId:-}] ${LOG_LEVEL_PATTERN:-%5p} %m%n"
+  file: kms.log
+
+springdoc:
+  packagesToScan: eu.isygoit
+  api-docs:
+    path=/api-docs:
+  swagger-ui:
+    path=/swagger-ui-custom:
+      html:
+    operationsSorter=method:
+
+spring:
+  cloud:
+    openfeign:
+      okhttp:
+        enabled: true
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.cassandra.CassandraDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.cassandra.CassandraReactiveDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration
+  cache:
+    jcache:
+      provider: com.hazelcast.cache.HazelcastMemberCachingProvider
+  cassandra:
+    contact-points: cassandra
+    keyspace-name: isygoit
+    port: 9042
+    local-datacenter: datacenter1
+    schema-action: CREATE_IF_NOT_EXISTS
+    create-keyspace: true
+    username: admin
+    password: admin
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 30MB
+      max-request-size: 30MB
+  hazelcast:
+    config: classpath:cache/hazelcast.xml
+  output:
+    ansi:
+      enabled: always
+  kafka:
+    topics:
+      register-api-permission: to-ims-register-api-permission
+      register-account: to-ims-register-account
+      send-email: to-mms-send-email
+    producer:
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+      key-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+      bootstrap-servers: localhost:9092
+    consumer:
+      auto-offset-reset: earliest
+      bootstrap-servers: localhost:9092
+      group-id: group-id
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  datasource:
+    continue-on-error: true
+    initialization-mode: always
+    mode: true
+    url: jdbc:postgresql://localhost:5432/postgres?currentSchema=kms
+    username: postgres
+    password: root
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 1.0.0
+    check-locations: true
+    default-schema: kms
+    enabled: false
+    group: true
+    locations: classpath:migration/01-dev
+    target: 1.0.231013.1
+    schemas: kms
+    table: schema_migration
+  jpa:
+    hibernate:
+      ddl-auto: update #create #update #validate #create-drop
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      show-sql: true
+    properties:
+      org:
+        hibernate:
+          envers:
+            audit_table_prefix: AUD_
+            revision_type_field_name: REV_TYPE
+            audit_table_suffix: ''
+            store_data_at_delete: 'true'
+            revision_field_name: REV_ID
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        temp:
+          use_jdbc_metadata_defaults: false
+  quartz:
+    properties:
+      org:
+        quartz:
+          jobStore:
+            useProperties: true
+            class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+            tablePrefix: QRTZ_
+    auto-startup: true
+    job-store-type: jdbc  #memory jdbc
+    overwrite-existing-jobs: false
+    scheduler-name: quartzScheduler
+    startup-delay: 30s
+    wait-for-jobs-to-complete-on-shutdown: false
+    jdbc:
+      initialize-schema: always #always never
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+
+app:
+  quartz:
+    password:
+      check-period-day: 1
+      less-remaining-days: 7
+  feign:
+    shouldNotFilterKey: ++SHOULD_NOT_FILTER$
+  email:
+    async: true
+    broker: kafka # kafka, rest
+  upload:
+    directory: /uploads/kms
+  i18n:
+    enabled: true
+    location: classpath:i18n/messages
+  jwt:
+    secretKey: JwTsEcReTkEy
+    deactivateOldTokens: false
+    signatureAlgorithm: HS256
+    life-time-ms: 14400000
+    storage-type: LOCAL
+  password:
+    pattern: '^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[/@#$%^&+-=(){}\[\]])(?=\S+$).{8,}$'
+    grammar:
+      ftl: pattern_grammar.ftl
+  create:
+    ifNotExists:
+      domain: true
+      user: true
+
+jasypt:
+  encryptor:
+    algorithm: 'PBEWithMD5AndDES'
+    password: 'sEcReTkEy'
+    password.algorithm: 'SHA-512' #DIGEST ALGORITHMS=[MD2, MD5, SHA, SHA-256, SHA-384, SHA-512]
+    pool:
+      size: 1
+    salt: 32
+    salt.generator.class: org.jasypt.salt.RandomSaltGenerator
+  generator:
+    key:
+      size: 8
+  password:
+    default: 'root'
+    pattern: '^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[/@#$%^&+-=(){}\[\]])(?=\S+$).{8,}$'

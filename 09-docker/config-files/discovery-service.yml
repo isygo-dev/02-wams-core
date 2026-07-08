@@ -1,0 +1,51 @@
+server:
+  tomcat:
+    max-swallow-size: -1
+    max-http-form-post-size: -1
+  port: 8061 #8061
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    #hostname: discovery-service
+  client:
+    registerWithEureka: false
+    fetchRegistry: false
+    serviceUrl:
+      defaultZone: http://discovery-service:8061/eureka/
+
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.cassandra.CassandraDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.cassandra.CassandraReactiveDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration
+  cassandra:
+    contact-points: cassandra
+    keyspace-name: isygoit
+    port: 9042
+    local-datacenter: datacenter1
+    schema-action: CREATE_IF_NOT_EXISTS
+    create-keyspace: true
+    username: admin
+    password: admin
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 30MB
+      max-request-size: 30MB
+  hazelcast:
+    config: classpath:cache/hazelcast.xml
+  output:
+    ansi:
+      enabled: always
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+
+camel:
+  springboot:
+    routes-include-pattern: file:camel/*.xml
+    xmlRoutes: file:camel/*.xml

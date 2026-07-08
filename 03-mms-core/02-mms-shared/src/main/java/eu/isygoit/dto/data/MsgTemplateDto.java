@@ -30,4 +30,6 @@ public class MsgTemplateDto extends AuditableIdAssignableDto<Long> implements IF
     private MultipartFile file;
     @Builder.Default
     private IEnumLanguage.Types language = IEnumLanguage.Types.EN;
+
+    private String defaultSender;
 }

@@ -73,7 +73,7 @@
     border-radius: var(--lumo-border-radius-s);
     margin: var(--lumo-space-xs) auto 0;
     animation: wams-underline-expand 1.2s ease-out 0.5s forwards,
-               wams-shimmer 3s ease-in-out infinite 1.7s;
+    wams-shimmer 3s ease-in-out infinite 1.7s;
 }
 
 .wams-subtitle-text {
@@ -326,54 +326,108 @@
 /* ── Keyframes ────────────────────────────────────────────────────────── */
 
 @keyframes wams-ripple {
-    0% { transform: scale(0); opacity: 1; }
-    100% { transform: scale(4); opacity: 0; }
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(4);
+        opacity: 0;
+    }
 }
 
 @keyframes wams-underline-expand {
-    0% { width: 0; opacity: 0; }
-    100% { width: 140px; opacity: 1; }
+    0% {
+        width: 0;
+        opacity: 0;
+    }
+    100% {
+        width: 140px;
+        opacity: 1;
+    }
 }
 
 @keyframes wams-shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
 }
 
 @keyframes wams-card-fade-in {
-    0% { opacity: 0; transform: translateY(30px) scale(0.95); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 @keyframes wams-chip-fade-in {
-    0% { opacity: 0; transform: scale(0.8); }
-    100% { opacity: 1; transform: scale(1); }
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 @keyframes wams-icon-pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.08); }
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.08);
+    }
 }
 
 @keyframes wams-float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    25% { transform: translateY(-15px) rotate(5deg); }
-    75% { transform: translateY(10px) rotate(-5deg); }
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    25% {
+        transform: translateY(-15px) rotate(5deg);
+    }
+    75% {
+        transform: translateY(10px) rotate(-5deg);
+    }
 }
 
 @keyframes wams-fade-in-down {
-    0% { opacity: 0; transform: translateY(-30px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes wams-fade-in-up {
-    0% { opacity: 0; transform: translateY(30px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes wams-bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(8px); }
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(8px);
+    }
 }
 
 /* ── Responsive ───────────────────────────────────────────────────────── */

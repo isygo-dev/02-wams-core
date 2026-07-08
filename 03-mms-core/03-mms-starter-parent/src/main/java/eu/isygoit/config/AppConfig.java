@@ -1,5 +1,6 @@
 package eu.isygoit.config;
 
+import eu.isygoit.factory.CustomJavaMailSender;
 import eu.isygoit.i18n.helper.LocaleResolver;
 import feign.codec.Encoder;
 import feign.form.spring.SpringFormEncoder;
@@ -12,7 +13,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -96,9 +96,10 @@ public class AppConfig {
      */
     @Bean(name = "defaultSender")
     public JavaMailSender defaultSender() {
-        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        CustomJavaMailSender mailSender = new CustomJavaMailSender();
         mailSender.setHost(appProperties.getMailHost());
         mailSender.setPort(appProperties.getMailPort());
+        mailSender.setDefaultSender(appProperties.getDefaultSender());
         mailSender.setUsername(appProperties.getMailUserName());
         mailSender.setPassword(appProperties.getMailPassword());
         mailSender.setProtocol(appProperties.getMailProtocol());

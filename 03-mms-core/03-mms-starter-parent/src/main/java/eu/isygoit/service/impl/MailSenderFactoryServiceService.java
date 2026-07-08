@@ -2,13 +2,13 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.exception.SenderConfigNotFoundException;
+import eu.isygoit.factory.CustomJavaMailSender;
 import eu.isygoit.model.SenderConfig;
 import eu.isygoit.repository.SenderConfigRepository;
 import eu.isygoit.service.IMailSenderFactoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +36,7 @@ public class MailSenderFactoryServiceService implements IMailSenderFactoryServic
      * @param tenant the tenant
      * @return the mail sender
      */
-    public MailSender senderFromConfig(String tenant /*senderTenant*/) {
+    public MailSender senderFromConfig(String tenant) {
         Optional<SenderConfig> optional = senderConfigRepository.findFirstByTenantIgnoreCase(tenant);
         if (!optional.isPresent()) {
             optional = senderConfigRepository.findFirstByTenantIgnoreCase(TenantConstants.DEFAULT_TENANT_NAME);
@@ -45,9 +45,10 @@ public class MailSenderFactoryServiceService implements IMailSenderFactoryServic
         if (optional.isPresent()) {
             SenderConfig senderConfig = optional.get();
 
-            JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+            CustomJavaMailSender mailSender = new CustomJavaMailSender();
             mailSender.setHost(senderConfig.getHost());
             mailSender.setPort(Integer.valueOf(senderConfig.getPort()));
+            mailSender.setDefaultSender(senderConfig.getDefaultSender());
             mailSender.setUsername(senderConfig.getUsername());
             mailSender.setPassword(senderConfig.getPassword());
             Properties props = mailSender.getJavaMailProperties();

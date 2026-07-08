@@ -7,6 +7,7 @@ import eu.isygoit.com.rest.service.cassandra.CassandraCrudTenantService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.dto.data.MailOptionsDto;
 import eu.isygoit.exception.StoreFileException;
+import eu.isygoit.factory.CustomJavaMailSender;
 import eu.isygoit.factory.SenderFactory;
 import eu.isygoit.model.MailMessage;
 import eu.isygoit.repository.MailMessageRepository;
@@ -22,7 +23,6 @@ import jakarta.mail.internet.MimeMultipart;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,7 +65,7 @@ public class MailMessageService extends CassandraCrudTenantService<UUID, MailMes
     }
 
     @Override
-    public boolean sendMail(JavaMailSenderImpl mailSender, MailMessage mailMessageData, boolean returnDelivered, boolean returnRead, Map<String, File> resources) {
+    public boolean sendMail(CustomJavaMailSender mailSender, MailMessage mailMessageData, boolean returnDelivered, boolean returnRead, Map<String, File> resources) {
         try {
             MimeMessage mail = mailSender.createMimeMessage();
             mail.setHeader("Content-Type", IMailMessageService.encodingOptions);
@@ -80,7 +80,7 @@ public class MailMessageService extends CassandraCrudTenantService<UUID, MailMes
 
             MimeMessageHelper mailMessage = new MimeMessageHelper(mail, true, IMailMessageService.encodingOptions);
             // FROM
-            mailMessage.setFrom(mailSender.getUsername());
+            mailMessage.setFrom(mailMessageData.getFromAddr());
 
             // TO
             if (StringUtils.hasText(mailMessageData.getToAddr())) {
@@ -140,7 +140,7 @@ public class MailMessageService extends CassandraCrudTenantService<UUID, MailMes
 
     @Override
     public boolean sendMail(String senderTenantName, MailMessage mailMessageData, MailOptionsDto options, Map<String, File> resources) {
-        JavaMailSenderImpl mailSender = senderFactory.getSender(senderTenantName);
+        CustomJavaMailSender mailSender = senderFactory.getSender(senderTenantName);
         boolean result = this.sendMail(mailSender,
                 mailMessageData
                 , options.isReturnDelivered()

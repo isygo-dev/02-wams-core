@@ -4,6 +4,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.MsgTemplateDto;
@@ -26,6 +27,7 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
     private ComboBox<IEnumEmailTemplate.Types> nameCombo;
     private TextArea descriptionField;
     private ComboBox<IEnumLanguage.Types> languageCombo;
+    private EmailField defaultSenderField;
 
     public EditMsgTemplateDialog(MsgTemplateService templateService,
                                  MsgTemplateFileService templateFileService,
@@ -75,14 +77,21 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
         languageCombo.setItems(IEnumLanguage.Types.values());
         languageCombo.setWidthFull();
 
+        defaultSenderField = new EmailField(I18n.t("mms.msgtemplate.dialog.edit.field.defaultSender"));
+        defaultSenderField.setPlaceholder(I18n.t("mms.msgtemplate.dialog.edit.field.defaultSender.placeholder"));
+        defaultSenderField.setWidthFull();
+        defaultSenderField.setHelperText(I18n.t("mms.msgtemplate.dialog.edit.field.defaultSender.helper"));
+
         // File upload section
         setupFileUpload(template.getOriginalFileName());
 
-        form.add(codeField, tenantField, nameCombo, descriptionField, languageCombo);
+        form.add(codeField, tenantField, nameCombo, descriptionField, languageCombo, defaultSenderField);
         form.setColspan(codeField, 2);
         form.setColspan(tenantField, 2);
         form.setColspan(nameCombo, 2);
         form.setColspan(descriptionField, 2);
+        form.setColspan(languageCombo, 1);
+        form.setColspan(defaultSenderField, 1);
 
         contentArea.add(form);
 
@@ -103,6 +112,7 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
                 IEnumEmailTemplate.Types.valueOf(template.getName()) : null);
         descriptionField.setValue(template.getDescription() != null ? template.getDescription() : "");
         languageCombo.setValue(template.getLanguage() != null ? template.getLanguage() : IEnumLanguage.Types.EN);
+        defaultSenderField.setValue(template.getDefaultSender() != null ? template.getDefaultSender() : "");
     }
 
     @Override
@@ -111,6 +121,13 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
 
         if (nameCombo.getValue() == null) {
             append(I18n.t("mms.msgtemplate.dialog.edit.error.name.required"));
+            return false;
+        }
+
+        // Validate default sender if provided
+        String defaultSender = defaultSenderField.getValue();
+        if (defaultSender != null && !defaultSender.isBlank() && !isValidEmail(defaultSender)) {
+            append(I18n.t("mms.msgtemplate.dialog.edit.error.defaultSender.invalid"));
             return false;
         }
 
@@ -123,6 +140,8 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
                     .description(descriptionField.getValue() != null ?
                             descriptionField.getValue().trim() : null)
                     .language(languageCombo.getValue())
+                    .defaultSender(defaultSender != null && !defaultSender.isBlank() ?
+                            defaultSender.trim() : null)
                     .build();
 
             ResponseEntity<MsgTemplateDto> response;

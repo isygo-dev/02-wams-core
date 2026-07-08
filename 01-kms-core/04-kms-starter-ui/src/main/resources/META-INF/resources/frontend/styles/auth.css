@@ -11,8 +11,14 @@
 /* ── Shared keyframes ─────────────────────────────────────────────────── */
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ── LoginView ────────────────────────────────────────────────────────── */
@@ -66,6 +72,7 @@
         border-radius: var(--lumo-border-radius-l);
         margin: var(--lumo-space-m);
     }
+
     .login-view .brand h2 {
         font-size: var(--lumo-font-size-xl);
     }
@@ -146,11 +153,13 @@
         border-radius: var(--lumo-border-radius-l);
         margin: var(--lumo-space-m);
     }
+
     .otp-login-view .otp-fields vaadin-text-field {
         width: 2.2em !important;
         height: 2.2em !important;
         font-size: 1em;
     }
+
     .otp-login-view .otp-fields {
         gap: 0.3em;
     }
@@ -266,9 +275,11 @@
         border-radius: var(--lumo-border-radius-l);
         margin: var(--lumo-space-m);
     }
+
     .qr-login-view .brand h2 {
         font-size: var(--lumo-font-size-l);
     }
+
     .qr-login-view .qr-image {
         width: 160px !important;
         height: 160px !important;
@@ -326,6 +337,7 @@
         border-radius: var(--lumo-border-radius-l);
         margin: var(--lumo-space-m);
     }
+
     .register-view .brand h2 {
         font-size: var(--lumo-font-size-l);
     }

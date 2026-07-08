@@ -2,6 +2,7 @@ package eu.isygoit.service;
 
 import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceOperations;
 import eu.isygoit.com.rest.service.tenancy.IFileTenantServiceOperations;
+import eu.isygoit.dto.data.MessageCompositionDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.model.MsgTemplate;
 import freemarker.template.TemplateException;
@@ -26,7 +27,7 @@ public interface IMsgTemplateService extends ICrudTenantServiceOperations<Long, 
      * @throws IOException       the io exception
      * @throws TemplateException the template exception
      */
-    String composeMessageBody(String senderTenantName,
-                              IEnumEmailTemplate.Types templateName,
-                              Map<String, String> variables) throws IOException, TemplateException;
+    MessageCompositionDto composeMessageBody(String senderTenantName,
+                                             IEnumEmailTemplate.Types templateName,
+                                             Map<String, String> variables) throws IOException, TemplateException;
 }

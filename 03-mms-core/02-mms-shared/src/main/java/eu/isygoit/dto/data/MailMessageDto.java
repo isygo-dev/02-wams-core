@@ -38,6 +38,7 @@ public class MailMessageDto extends AuditableIdAssignableDto<UUID> implements IE
     private boolean returnDelivered;
     private boolean returnRead;
     private String subject;
+    private String fromAddr;
     private String toAddr;
     private String ccAddr;
     private String bccAddr;

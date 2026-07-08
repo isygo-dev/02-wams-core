@@ -1,0 +1,140 @@
+server:
+  tomcat:
+    max-swallow-size: -1
+    max-http-form-post-size: -1
+  port: 40416
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    #hostname: discovery-service
+  client:
+    serviceUrl:
+      defaultZone: http://discovery-service:8061/eureka/
+
+camel:
+  springboot:
+    routes-include-pattern: file:camel/*.xml
+    xmlRoutes: file:camel/*.xml
+
+logging:
+  level:
+    eu.isygoit: info
+    org.apache.kafka: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-},%X{spanId:-}] ${LOG_LEVEL_PATTERN:-%5p} %m%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-},%X{spanId:-}] ${LOG_LEVEL_PATTERN:-%5p} %m%n"
+  file: smekit.log
+
+springdoc:
+  packagesToScan: eu.isygoit
+  api-docs:
+    path=/api-docs:
+  swagger-ui:
+    path=/swagger-ui-custom:
+      html:
+    operationsSorter=method:
+
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.cassandra.CassandraDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.cassandra.CassandraReactiveDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration
+  cassandra:
+    contact-points: cassandra
+    keyspace-name: isygoit
+    port: 9042
+    local-datacenter: datacenter1
+    schema-action: CREATE_IF_NOT_EXISTS
+    create-keyspace: true
+    username: admin
+    password: admin
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 30MB
+      max-request-size: 30MB
+  hazelcast:
+    config: classpath:cache/hazelcast.xml
+  output:
+    ansi:
+      enabled: always
+  kafka:
+    topics:
+      register-api-permission: to-ims-register-api-permission
+      register-account: to-ims-register-account
+      send-email: to-mms-send-email
+    producer:
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+      key-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+      bootstrap-servers: localhost:9092
+    consumer:
+      auto-offset-reset: earliest
+      bootstrap-servers: localhost:9092
+      group-id: group-id
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  datasource:
+    continue-on-error: true
+    initialization-mode: always
+    mode: true
+    url: jdbc:postgresql://localhost:5432/postgres?currentSchema=smekit
+    username: postgres
+    password: root
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 1.0.0
+    check-locations: true
+    default-schema: smekit
+    enabled: false
+    group: true
+    locations: classpath:migration/01-dev
+    target: 1.0.231013.1
+    schemas: smekit
+    table: schema_migration
+  jpa:
+    hibernate:
+      ddl-auto: update #create #update #validate #create-drop
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      show-sql: true
+    properties:
+      org:
+        hibernate:
+          envers:
+            audit_table_prefix: AUD_
+            revision_type_field_name: REV_TYPE
+            audit_table_suffix: ''
+            store_data_at_delete: 'true'
+            revision_field_name: REV_ID
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        temp:
+          use_jdbc_metadata_defaults: false
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+
+app:
+  feign:
+    shouldNotFilterKey: ++SHOULD_NOT_FILTER$
+    api:
+      internal-key: Bearer eyJleHAiOiJuZXZlciIsImtpZFZlcnNpb24iOiJ2LTYxYTc3ZTFkLTgzNzgtNGMxZi1iNGVjLWVjMmRkNzRhY2Y0MSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJyb290QHN1cGVyLXRlbmFudCIsImlzcyI6ImttcyIsImlhdCI6MTc4MjIyOTMxNCwiYXVkIjpbIktNUy4qIl0sImxvZy1hcHAiOiJpZGVudGl0eS1zZXJ2aWNlIiwic2VuZGVyLXVzZXIiOiJyb290Iiwic2VuZGVyLXRlbmFudCI6InN1cGVyLXRlbmFudCJ9.C28bn3qmq5Ig0nxPWNe20KwwZXBjTg_4gi1yXRdv5NzGd9jQ38igBxL0jA_DSD1kbfNMHcQXOjdyDQbGIV8PY2twdAMUrlNZCk5wTCAqb-4InAEcFfMflpTjyNQCv6H1h3xNgd5RvbbEg_fvH8MfOkOLlnNM-eqQ7MIZQcheIwmUQi5cfgqTP-OXfkPKwvHsn3jnyoyyc1KFhl4zOOWePS8-6eG49TLxtTJqLxuxrzOw49XhoWbU7qTJHyv_G_pFx4eBzX3O5ck9lRLpBWZlrC8FAr8ix4Qw2L0pkt2ybGaA6I2t4BAp6o7EbSA92VPHOOfwXn3nqCzmO9FlNtrceA
+
+  email:
+    async: true
+    broker: kafka # kafka, rest
+  upload:
+    directory: /uploads/smekit
+  i18n:
+    location: classpath:i18n/messages
+  jwt:
+    secretKey: JwTsEcReTkEy
+    deactivateOldTokens: false
+    signatureAlgorithm: HS256
+    life-time-ms: 14400000
+    storage-type: LOCAL

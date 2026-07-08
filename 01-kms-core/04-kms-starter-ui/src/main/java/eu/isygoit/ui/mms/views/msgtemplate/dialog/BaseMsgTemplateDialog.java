@@ -266,4 +266,13 @@ public abstract class BaseMsgTemplateDialog extends Dialog {
     }
 
     protected abstract boolean onOk();
+
+    protected boolean isValidEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return true; // Empty is allowed (optional field)
+        }
+        // Simple email validation
+        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+        return email.matches(emailRegex);
+    }
 }

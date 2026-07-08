@@ -19,6 +19,8 @@ public class AppProperties extends ComAppProperties {
     private Integer mailPort;
     @Value("${spring.mail.debug}")
     private String mailDebug;
+    @Value("${spring.mail.default-sender}")
+    private String defaultSender;
     @Value("${spring.mail.username}")
     private String mailUserName;
     @Value("${spring.mail.password}")

@@ -6,6 +6,7 @@ import eu.isygoit.annotation.InjectRepository;
 import eu.isygoit.com.rest.service.tenancy.FileTenantService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.TenantConstants;
+import eu.isygoit.dto.data.MessageCompositionDto;
 import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.enums.IEnumLanguage;
@@ -93,9 +94,9 @@ public class MsgTemplateService extends FileTenantService<Long, MsgTemplate, Msg
 
     @Transactional
     @Override
-    public String composeMessageBody(String tenant /*senderTenant*/,
-                                     IEnumEmailTemplate.Types templateName,
-                                     Map<String, String> variables)
+    public MessageCompositionDto composeMessageBody(String tenant,
+                                                    IEnumEmailTemplate.Types templateName,
+                                                    Map<String, String> variables)
             throws IOException, TemplateException {
         Optional<MsgTemplate> optional = templateRepository.findByTenantIgnoreCaseAndName(tenant, templateName);
         MsgTemplate template = null;
@@ -160,9 +161,12 @@ public class MsgTemplateService extends FileTenantService<Long, MsgTemplate, Msg
         }
         //get sender tenant variables
 
-        return FreeMarkerTemplateUtils.processTemplateIntoString(
-                freemarkerConfig.getConfiguration().getTemplate(template.getFileName()),
-                variables);
+        return MessageCompositionDto.builder()
+                .content(FreeMarkerTemplateUtils.processTemplateIntoString(
+                        freemarkerConfig.getConfiguration().getTemplate(template.getFileName()),
+                        variables))
+                .defaultSender(template.getDefaultSender())
+                .build();
     }
 
     @Override

@@ -32,12 +32,17 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 public class EditTemplateContentDialog extends Dialog {
 
+    private static final String[] STATUS_MODIFIER_CLASSES = {
+            "wams-dialog-status-area--success",
+            "wams-dialog-status-area--error",
+            "wams-dialog-status-area--warning",
+            "wams-dialog-status-area--info"
+    };
     private final MsgTemplateManagementView parentView;
     private final MsgTemplateService templateService;
     private final MsgTemplateFileService templateFileService;
     private final MsgTemplateDto template;
     private final Runnable onSuccess;
-
     private TextArea contentArea;
     private Div statusArea;
     private Button saveButton;
@@ -348,13 +353,6 @@ public class EditTemplateContentDialog extends Dialog {
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }
-
-    private static final String[] STATUS_MODIFIER_CLASSES = {
-            "wams-dialog-status-area--success",
-            "wams-dialog-status-area--error",
-            "wams-dialog-status-area--warning",
-            "wams-dialog-status-area--info"
-    };
 
     private void showStatus(String message, String type) {
         statusArea.setVisible(true);

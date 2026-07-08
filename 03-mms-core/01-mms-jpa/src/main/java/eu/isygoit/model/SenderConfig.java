@@ -63,4 +63,7 @@ public class SenderConfig extends AuditableEntity<Long> implements ITenantAssign
     @Builder.Default
     @Column(name = SchemaColumnConstantName.C_DEBUG, nullable = false)
     private Boolean debug = Boolean.FALSE;
+
+    @Column(name = SchemaColumnConstantName.C_DEFAULT_SENDER)
+    private String defaultSender;
 }

@@ -7,6 +7,7 @@ import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
 import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.dto.data.MailOptionsDto;
+import eu.isygoit.dto.data.MessageCompositionDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.exception.handler.MmsExceptionHandler;
 import eu.isygoit.mapper.MailMessageMapper;
@@ -49,9 +50,10 @@ public class MailMessageController extends MappedCrudTenantController<UUID, Mail
     public ResponseEntity<?> sendMail(String senderTenantName, IEnumEmailTemplate.Types template, MailMessageDto mailMessage) {
         try {
             if (template != null) {
-                String body = templateService.composeMessageBody(senderTenantName, template,
+                MessageCompositionDto messageComposition = templateService.composeMessageBody(senderTenantName, template,
                         mailMessage.getVariablesAsMap(mailMessage.getVariables()));
-                mailMessage.setBody(body);
+                mailMessage.setBody(messageComposition.getContent());
+                mailMessage.setFromAddr(messageComposition.getDefaultSender());
             } else if (!StringUtils.hasText(mailMessage.getBody())) {
                 mailMessage.setBody(mailMessage.getVariables());
             }

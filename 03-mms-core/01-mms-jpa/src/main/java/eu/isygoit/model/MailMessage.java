@@ -43,6 +43,10 @@ public class MailMessage extends AuditableEntity<UUID> implements ITenantAssigna
     private String body;
 
     @CassandraType(type = CassandraType.Name.TEXT)
+    @Column(SchemaColumnConstantName.C_FROM_ADDRESS)
+    private String fromAddr;
+
+    @CassandraType(type = CassandraType.Name.TEXT)
     @Column(SchemaColumnConstantName.C_TO_ADDRESS)
     private String toAddr;
 

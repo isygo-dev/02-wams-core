@@ -44,4 +44,7 @@ docker build -f .\09-docker\core-ims.Dockerfile -t core/ims-serv .
 docker build -f .\09-docker\core-dms.Dockerfile -t core/dms-serv .
 docker build -f .\09-docker\core-sms.Dockerfile -t core/sms-serv .
 docker build -f .\09-docker\core-cms.Dockerfile -t core/cms-serv .
+
+
+docker run --rm -p 1080:1080 -p 1025:1025 maildev/maildev
 ```

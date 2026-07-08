@@ -46,6 +46,7 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
     private Span codeSpan;
     private Span descriptionSpan;
     private Span fileNameSpan;
+    private Span defaultSenderSpan;
     private Button viewButton;
     private Button editButton;
     private Button deleteButton;
@@ -100,6 +101,7 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
                     template.setFileName(updatedTemplate.getFileName());
                     template.setOriginalFileName(updatedTemplate.getOriginalFileName());
                     template.setPath(updatedTemplate.getPath());
+                    template.setDefaultSender(updatedTemplate.getDefaultSender());
 
                     updateDisplay();
                 }
@@ -126,6 +128,9 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         if (fileNameSpan == null) {
             fileNameSpan = new Span();
         }
+        if (defaultSenderSpan == null) {
+            defaultSenderSpan = new Span();
+        }
 
         String displayName = template.getName() != null ? template.getName() : I18n.t("mms.msgtemplate.card.fallback.name", template.getId());
         titleSpan.setText(displayName);
@@ -139,6 +144,7 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         codeSpan.setText(template.getCode() != null ? template.getCode() : I18n.t("mms.common.value.notAvailable"));
         descriptionSpan.setText(template.getDescription() != null ? template.getDescription() : I18n.t("mms.msgtemplate.card.no.description"));
         fileNameSpan.setText(template.getOriginalFileName() != null ? template.getOriginalFileName() : I18n.t("mms.msgtemplate.card.no.file"));
+        defaultSenderSpan.setText(template.getDefaultSender() != null ? template.getDefaultSender() : I18n.t("mms.common.value.notAvailable"));
 
         boolean hasFile = template.getFileName() != null && !template.getFileName().isEmpty();
         if (downloadButton != null) {
@@ -276,6 +282,12 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
                 VaadinIcon.LOCATION_ARROW,
                 I18n.t("mms.msgtemplate.card.language"),
                 template.getLanguage() != null ? template.getLanguage().name() : I18n.t("mms.common.value.notAvailable")
+        ));
+
+        bodyContainer.add(createDetailRow(
+                VaadinIcon.ENVELOPE,
+                I18n.t("mms.msgtemplate.card.defaultSender"),
+                template.getDefaultSender() != null ? template.getDefaultSender() : I18n.t("mms.common.value.notAvailable")
         ));
 
         bodyContainer.add(createDetailRow(

@@ -94,4 +94,8 @@ public interface SchemaColumnConstantName extends ComSchemaColumnConstantName {
      * The constant C_MSG_TEMPLATE.
      */
     String C_MSG_TEMPLATE = "C_MSG_TEMPLATE";
+
+    String C_DEFAULT_SENDER = "DEFAULT_SENDER";
+
+    String C_FROM_ADDRESS = "FROM_ADDRESS";
 }
