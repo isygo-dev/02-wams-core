@@ -264,28 +264,28 @@ vaadin-side-nav-item[slot='children'] {
 /* ── Collapsed (icon-rail) mode: hide labels/section headers, show icons only.
    SideNavItem's label renders inside Vaadin's own internal, un-styleable
    default <slot> (declared with "flex: auto" in the component's own shadow
-   stylesheet) — that slot keeps claiming all the growable space in the link's
-   flex row even once its text is invisible, which is what was pinning the
-   icon to the left instead of centering it. justify-content on the link
-   can't fix that (the slot itself isn't reachable via ::part() or ::slotted()
-   from a page-level stylesheet), so instead of fighting the flex layout we
-   take the icon out of flow entirely and center it with absolute positioning.
-   The icon element itself IS reachable, via [slot='prefix'] — it's a normal
-   light-DOM element (the Icon component built in BaseMainLayout#navItem()),
-   just visually relocated by slot projection. font-size: 0 still hides the
-   (now layout-irrelevant) label glyphs. A native tooltip set on every nav
-   item surfaces the label on hover while collapsed. ─────────────────────── */
+   stylesheet) — that slot keeps claiming growable space in the link's flex
+   row even once its text is invisible, and padding-math attempts to leave it
+   "zero room" were still visibly off-center. Positioning the icon absolutely
+   against the OUTER [part='content'] wrapper (rather than [part='link'],
+   which can carry its own asymmetric padding — e.g. has-children items get
+   extra padding-inline-end to make room for the now-hidden toggle button)
+   sidesteps both problems: [part='content'] is the full-width box shared by
+   every item regardless of its own children/padding quirks.
+   font-size: 0 on the link hides the (now layout-irrelevant) label glyphs.
+   A native tooltip set on every nav item surfaces the label on hover while
+   collapsed. ──────────────────────────────────────────────────────────────── */
 
 .wams-sidebar-collapsed .wams-drawer-scroll-area [slot='label'] {
     display: none;
 }
 
-.wams-sidebar-collapsed vaadin-side-nav-item::part(link) {
+.wams-sidebar-collapsed vaadin-side-nav-item::part(content) {
     position: relative;
-    width: 100%;
     min-height: 40px;
-    padding: 0;
-    gap: 0;
+}
+
+.wams-sidebar-collapsed vaadin-side-nav-item::part(link) {
     font-size: 0;
     overflow: hidden;
     white-space: nowrap;
@@ -295,8 +295,8 @@ vaadin-side-nav-item[slot='children'] {
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%);
     margin: 0;
+    transform: translate(-50%, -50%);
 }
 
 .wams-sidebar-collapsed vaadin-side-nav-item::part(toggle-button) {
