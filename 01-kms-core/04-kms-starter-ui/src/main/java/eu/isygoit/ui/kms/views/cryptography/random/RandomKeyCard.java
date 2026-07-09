@@ -54,16 +54,19 @@ public class RandomKeyCard extends BaseCard<RandomKeyView, RandomKeyService> {
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsButton = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("kms.random.key.card.details.tooltip"));
-        detailsButton.addClickListener(e -> new RandomKeyDetailsDialog(parentView, objectService, dto).open());
+        // Standard order: Details → Edit → (entity-specific extras) → Toggle status → Delete.
+        // RandomKeyCard has no Edit/Toggle concept; "renew" is its one entity-specific extra
+        // action, placed between Details and Delete (which is always last).
+        Button detailsButton = createDetailsButton(I18n.t("kms.random.key.card.details.tooltip"),
+                () -> new RandomKeyDetailsDialog(parentView, objectService, dto).open());
 
         renewButton = createIconButton(VaadinIcon.REFRESH, I18n.t("kms.random.key.card.renew.tooltip"));
         renewButton.addClickListener(e -> new RenewRandomKeyDialog(objectService, dto.getName(),
                 () -> parentView.refreshCard(this)).open());
 
-        Button deleteButton = createDangerIconButton(VaadinIcon.TRASH, I18n.t("kms.random.key.card.delete.tooltip"));
-        deleteButton.addClickListener(e -> new DeleteRandomKeyDialog(objectService, dto.getName(),
-                () -> parentView.removeCard(this)).open());
+        Button deleteButton = createDeleteButton(I18n.t("kms.random.key.card.delete.tooltip"),
+                () -> new DeleteRandomKeyDialog(objectService, dto.getName(),
+                        () -> parentView.removeCard(this)).open());
 
         return List.of(detailsButton, renewButton, deleteButton);
     }

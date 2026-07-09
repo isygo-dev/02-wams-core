@@ -58,49 +58,63 @@ public class RandomKeyDetailsDialog extends NoActionDialog {
         mainLayout.setPadding(false);
         mainLayout.setSpacing(true);
 
-        Div infoGrid = new Div();
-        infoGrid.addClassName("wams-card__detail-grid");
+        // Section 1: Identity — name/tenant only.
+        Div identityGrid = new Div();
+        identityGrid.addClassName("wams-card__detail-grid");
+        addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("kms.random.key.dialog.details.field.name"), dto.getName());
+        addFieldToGrid(identityGrid, VaadinIcon.BUILDING, I18n.t("kms.random.key.dialog.details.field.tenant"), dto.getTenant());
+        mainLayout.add(createSection(I18n.t("kms.random.key.dialog.details.section.identity"), identityGrid));
 
-        addFieldToGrid(infoGrid, VaadinIcon.TAG, I18n.t("kms.random.key.dialog.details.field.name"), dto.getName());
-        addFieldToGrid(infoGrid, VaadinIcon.BUILDING, I18n.t("kms.random.key.dialog.details.field.tenant"), dto.getTenant());
-        addFieldToGrid(infoGrid, VaadinIcon.USER_CHECK, I18n.t("kms.random.key.dialog.details.field.created.by"), dto.getCreatedBy());
-        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR, I18n.t("kms.random.key.dialog.details.field.created.date"),
-                dto.getCreateDate() != null ? DateHelper.formatToHumanReadable(dto.getCreateDate()) : null);
-        addFieldToGrid(infoGrid, VaadinIcon.EDIT, I18n.t("kms.random.key.dialog.details.field.updated.by"), dto.getUpdatedBy());
-        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR_O, I18n.t("kms.random.key.dialog.details.field.updated.date"),
-                dto.getUpdateDate() != null ? DateHelper.formatToHumanReadable(dto.getUpdateDate()) : null);
-
-        mainLayout.add(createSection(I18n.t("kms.random.key.dialog.details.section.info"), infoGrid));
+        // Section 2: Key value — masked value + reveal/copy.
         mainLayout.add(createSection(I18n.t("kms.random.key.dialog.details.section.value"), buildValueRow()));
 
+        // Section 3: Audit — created/updated by/date.
+        Div auditGrid = new Div();
+        auditGrid.addClassName("wams-card__detail-grid");
+        addFieldToGrid(auditGrid, VaadinIcon.USER_CHECK, I18n.t("kms.random.key.dialog.details.field.created.by"), dto.getCreatedBy());
+        addFieldToGrid(auditGrid, VaadinIcon.CALENDAR, I18n.t("kms.random.key.dialog.details.field.created.date"),
+                dto.getCreateDate() != null ? DateHelper.formatToHumanReadable(dto.getCreateDate()) : null);
+        addFieldToGrid(auditGrid, VaadinIcon.EDIT, I18n.t("kms.random.key.dialog.details.field.updated.by"), dto.getUpdatedBy());
+        addFieldToGrid(auditGrid, VaadinIcon.CALENDAR_O, I18n.t("kms.random.key.dialog.details.field.updated.date"),
+                dto.getUpdateDate() != null ? DateHelper.formatToHumanReadable(dto.getUpdateDate()) : null);
+        mainLayout.add(createSection(I18n.t("kms.random.key.dialog.details.section.audit"), auditGrid));
+
         add(mainLayout);
-        addCloseButton();
     }
 
     /**
      * Same masked/reveal/copy UX as {@code RandomKeyCard}, just reused here in a full-width row.
      */
     private Component buildValueRow() {
-        HorizontalLayout row = new HorizontalLayout();
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.setSpacing(true);
-        row.setWidthFull();
-        row.addClassName("detail-field");
+        VerticalLayout field = new VerticalLayout();
+        field.setPadding(false);
+        field.setSpacing(false);
+        field.addClassName("wams-card__detail-field");
+
+        HorizontalLayout labelRow = new HorizontalLayout();
+        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        labelRow.setSpacing(false);
+        labelRow.addClassName("wams-card__detail-field-label-row");
 
         Icon keyIcon = VaadinIcon.KEY.create();
-        keyIcon.setSize("16px");
+        keyIcon.setSize("12px");
         keyIcon.addClassName("detail-field-icon");
 
         int keyLength = dto.getValue() != null ? dto.getValue().length() : 0;
         String labelText = I18n.t("kms.random.key.dialog.details.field.value") + " "
                 + I18n.t("kms.random.key.card.key.value.length", keyLength);
         Span labelSpan = new Span(labelText);
-        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.SMALL);
+        labelSpan.addClassName("wams-card__detail-field-label");
+
+        labelRow.add(keyIcon, labelSpan);
+
+        HorizontalLayout valueRow = new HorizontalLayout();
+        valueRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        valueRow.setSpacing(true);
+        valueRow.setWidthFull();
 
         valueSpan = new Span(maskKey(dto.getValue()));
-        valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.addClassName("detail-field-value");
+        valueSpan.addClassName("wams-card__detail-field-value");
 
         revealButton = new Button(new Icon(VaadinIcon.EYE));
         revealButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
@@ -110,9 +124,11 @@ public class RandomKeyDetailsDialog extends NoActionDialog {
         Button copyBtn = KmsMainView.createCopyButton(VaadinIcon.COPY, dto.getValue(), I18n.t("kms.random.key.card.copy.tooltip"));
         copyBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
 
-        row.add(keyIcon, labelSpan, valueSpan, revealButton, copyBtn);
-        row.expand(valueSpan);
-        return row;
+        valueRow.add(valueSpan, revealButton, copyBtn);
+        valueRow.expand(valueSpan);
+
+        field.add(labelRow, valueRow);
+        return field;
     }
 
     private void toggleReveal() {
@@ -133,27 +149,31 @@ public class RandomKeyDetailsDialog extends NoActionDialog {
 
     private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {
         if (value == null || value.isBlank()) return;
-        HorizontalLayout row = new HorizontalLayout();
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.setSpacing(true);
-        row.setWidthFull();
-        row.addClassName("detail-field");
+
+        VerticalLayout field = new VerticalLayout();
+        field.setPadding(false);
+        field.setSpacing(false);
+        field.addClassName("wams-card__detail-field");
+
+        HorizontalLayout labelRow = new HorizontalLayout();
+        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        labelRow.setSpacing(false);
+        labelRow.addClassName("wams-card__detail-field-label-row");
 
         Icon iconComponent = icon.create();
-        iconComponent.setSize("16px");
+        iconComponent.setSize("12px");
         iconComponent.addClassName("detail-field-icon");
 
-        Span labelSpan = new Span(label + ":");
-        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.SMALL);
+        Span labelSpan = new Span(label);
+        labelSpan.addClassName("wams-card__detail-field-label");
+
+        labelRow.add(iconComponent, labelSpan);
 
         Span valueSpan = new Span(value);
-        valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.addClassName("detail-field-value");
+        valueSpan.addClassName("wams-card__detail-field-value");
 
-        row.add(iconComponent, labelSpan, valueSpan);
-        row.expand(valueSpan);
-        container.add(row);
+        field.add(labelRow, valueSpan);
+        container.add(field);
     }
 
     private Component createSection(String title, Component content) {
@@ -166,14 +186,5 @@ public class RandomKeyDetailsDialog extends NoActionDialog {
         titleSpan.addClassName("wams-section-title");
         section.add(titleSpan, content);
         return section;
-    }
-
-    private void addCloseButton() {
-        Button closeButton = new Button(I18n.t("kms.random.key.dialog.details.close"), e -> close());
-        closeButton.addClassName(LumoUtility.Margin.Top.MEDIUM);
-        HorizontalLayout buttonBar = new HorizontalLayout(closeButton);
-        buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        buttonBar.setWidthFull();
-        add(buttonBar);
     }
 }

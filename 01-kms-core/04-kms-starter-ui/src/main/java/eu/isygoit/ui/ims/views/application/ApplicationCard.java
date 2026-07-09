@@ -64,10 +64,11 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
         titleLayout.setSpacing(false);
         titleLayout.setWidthFull();
 
-        // Row 1: image and action buttons
+        // Row 1: avatar image only — action buttons live exclusively in the
+        // card's footer (built once by BaseCard#buildFooter()).
         HorizontalLayout row1 = new HorizontalLayout();
         row1.setWidthFull();
-        row1.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        row1.setJustifyContentMode(FlexComponent.JustifyContentMode.START);
         row1.setAlignItems(FlexComponent.Alignment.CENTER);
         row1.setSpacing(true);
         row1.addClassName("card-row");
@@ -78,18 +79,7 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
         appImage.addClassName("card-avatar");
         appImage.setSrc(getSvgPlaceholder());
 
-        buttonBar = new HorizontalLayout();
-        buttonBar.setSpacing(true);
-        buttonBar.setPadding(false);
-        buttonBar.addClassName("card-row");
-        buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        buttonBar.addClassName(cardCssClassName() + "__button-bar");
-
-        List<Button> buttons = buildActionButtons();
-        buttons.forEach(buttonBar::add);
-
-        row1.add(appImage, buttonBar);
-        row1.expand(buttonBar);
+        row1.add(appImage);
 
         // Row 2: name + status chip
         HorizontalLayout row2 = new HorizontalLayout();
@@ -111,24 +101,25 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("ims.app.card.details.tooltip"));
-        detailsBtn.addClickListener(e -> new ApplicationDetailsDialog(parentView, objectService, application.getId()).open());
+        Button detailsBtn = createDetailsButton(I18n.t("ims.app.card.details.tooltip"),
+                () -> new ApplicationDetailsDialog(parentView, objectService, application.getId()).open());
 
-        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("ims.app.card.edit.tooltip"));
-        editBtn.addClickListener(e -> parentView.openUpdateApplicationDialog(application, () -> {
-            if (onRefresh != null) onRefresh.run();
-        }));
+        Button editBtn = createEditButton(I18n.t("ims.app.card.edit.tooltip"),
+                () -> parentView.openUpdateApplicationDialog(application, () -> {
+                    if (onRefresh != null) onRefresh.run();
+                }));
 
-        toggleStatusBtn = createIconButton(
-                application.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED ? VaadinIcon.LOCK : VaadinIcon.UNLOCK,
-                application.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("ims.app.card.disable.tooltip") : I18n.t("ims.app.card.enable.tooltip")
+        toggleStatusBtn = createToggleButton(
+                application.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED,
+                I18n.t("ims.app.card.enable.tooltip"),
+                I18n.t("ims.app.card.disable.tooltip"),
+                this::openToggleStatusDialog
         );
-        toggleStatusBtn.addClickListener(e -> openToggleStatusDialog());
 
-        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("ims.app.card.delete.tooltip"));
-        deleteBtn.addClickListener(e -> new DeleteApplicationDialog(parentView, objectService, application.getId(), () -> {
-            if (onRefresh != null) onRefresh.run();
-        }).open());
+        Button deleteBtn = createDeleteButton(I18n.t("ims.app.card.delete.tooltip"),
+                () -> new DeleteApplicationDialog(parentView, objectService, application.getId(), () -> {
+                    if (onRefresh != null) onRefresh.run();
+                }).open());
 
         return List.of(detailsBtn, editBtn, toggleStatusBtn, deleteBtn);
     }

@@ -310,36 +310,30 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
     @Override
     protected List<Button> buildActionButtons() {
         List<Button> buttons = new ArrayList<>();
+        boolean hasFile = template.getFileName() != null && !template.getFileName().isEmpty();
 
-        // View Button
-        Button viewBtn = createIconButton(VaadinIcon.EYE, I18n.t("mms.msgtemplate.card.view.tooltip"));
-        viewBtn.addClickListener(e -> viewTemplate());
-        buttons.add(viewBtn);
+        // Details/View
+        buttons.add(createDetailsButton(I18n.t("mms.msgtemplate.card.view.tooltip"), this::viewTemplate));
 
-        // Download Button
+        // Edit (metadata)
+        editButton = createEditButton(I18n.t("mms.msgtemplate.card.edit.tooltip"), this::openEditDialog);
+        buttons.add(editButton);
+
+        // Entity-specific extras: download, edit content
         downloadButton = createIconButton(VaadinIcon.DOWNLOAD, I18n.t("mms.msgtemplate.card.download.tooltip"));
         downloadButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
         downloadButton.addClickListener(e -> downloadTemplate());
-        boolean hasFile = template.getFileName() != null && !template.getFileName().isEmpty();
         downloadButton.setEnabled(hasFile);
         buttons.add(downloadButton);
 
-        // Edit Content Button - for online editing
         editContentButton = createIconButton(VaadinIcon.EDIT, I18n.t("mms.msgtemplate.card.edit.content.tooltip"));
         editContentButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
         editContentButton.addClickListener(e -> openEditContentDialog());
         editContentButton.setEnabled(hasFile);
         buttons.add(editContentButton);
 
-        // Edit Button (metadata)
-        editButton = createIconButton(VaadinIcon.PENCIL, I18n.t("mms.msgtemplate.card.edit.tooltip"));
-        editButton.addClickListener(e -> openEditDialog());
-        buttons.add(editButton);
-
-        // Delete Button
-        deleteButton = createIconButton(VaadinIcon.TRASH, I18n.t("mms.msgtemplate.card.delete.tooltip"));
-        deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        deleteButton.addClickListener(e -> openDeleteDialog());
+        // Delete – always last, always danger-styled
+        deleteButton = createDeleteButton(I18n.t("mms.msgtemplate.card.delete.tooltip"), this::openDeleteDialog);
         buttons.add(deleteButton);
 
         return buttons;

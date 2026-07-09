@@ -70,17 +70,18 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
 
     @Override
     protected List<Button> buildActionButtons() {
+        // Standard contract: Details -> Edit -> entity-specific extras -> Delete (last, danger)
+        Button detailsButton = createDetailsButton(I18n.t("kms.nextcode.card.details.tooltip"),
+                () -> new NextCodeDetailsDialog(dto).open());
+
         generateButton = createIconButton(VaadinIcon.COG, I18n.t("kms.nextcode.card.generate.tooltip"));
         generateButton.addClickListener(e -> generateNextCode());
 
-        Button detailsButton = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("kms.nextcode.card.details.tooltip"));
-        detailsButton.addClickListener(e -> new NextCodeDetailsDialog(dto).open());
+        Button deleteButton = createDeleteButton(I18n.t("kms.nextcode.card.delete.tooltip"),
+                () -> new DeleteNextCodeConfigDialog(objectService, dto.getId(),
+                        dto.getEntity(), dto.getAttribute(), deleteCallback).open());
 
-        Button deleteButton = createDangerIconButton(VaadinIcon.TRASH, I18n.t("kms.nextcode.card.delete.tooltip"));
-        deleteButton.addClickListener(e -> new DeleteNextCodeConfigDialog(objectService, dto.getId(),
-                dto.getEntity(), dto.getAttribute(), deleteCallback).open());
-
-        return List.of(generateButton, detailsButton, deleteButton);
+        return List.of(detailsButton, generateButton, deleteButton);
     }
 
     @Override

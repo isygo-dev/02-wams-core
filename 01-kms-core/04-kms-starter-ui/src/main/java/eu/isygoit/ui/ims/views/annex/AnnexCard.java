@@ -59,18 +59,18 @@ public class AnnexCard extends BaseCard<AnnexManagementView, AnnexService> {
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("ims.annex.card.details.tooltip"));
-        detailsBtn.addClickListener(e -> new AnnexDetailsDialog(parentView, objectService, annex.getId()).open());
+        Button detailsBtn = createDetailsButton(I18n.t("ims.annex.card.details.tooltip"),
+                () -> new AnnexDetailsDialog(parentView, objectService, annex.getId()).open());
 
-        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("ims.annex.card.edit.tooltip"));
-        editBtn.addClickListener(e -> parentView.openUpdateAnnexDialog(annex, () -> {
-            if (onRefresh != null) onRefresh.run();
-        }));
+        Button editBtn = createEditButton(I18n.t("ims.annex.card.edit.tooltip"),
+                () -> parentView.openUpdateAnnexDialog(annex, () -> {
+                    if (onRefresh != null) onRefresh.run();
+                }));
 
-        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("ims.annex.card.delete.tooltip"));
-        deleteBtn.addClickListener(e -> new DeleteAnnexDialog(parentView, objectService, annex.getId(), () -> {
-            if (onRefresh != null) onRefresh.run();
-        }).open());
+        Button deleteBtn = createDeleteButton(I18n.t("ims.annex.card.delete.tooltip"),
+                () -> new DeleteAnnexDialog(parentView, objectService, annex.getId(), () -> {
+                    if (onRefresh != null) onRefresh.run();
+                }).open());
 
         return List.of(detailsBtn, editBtn, deleteBtn);
     }

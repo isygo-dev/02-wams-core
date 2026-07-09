@@ -256,6 +256,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
     protected Button createIconButton(VaadinIcon icon, String tooltip) {
         Button btn = new Button(new Icon(icon));
         btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        btn.addClassName("wams-action-btn");
         btn.setTooltipText(tooltip);
         return btn;
     }
@@ -263,6 +264,44 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
     protected Button createDangerIconButton(VaadinIcon icon, String tooltip) {
         Button btn = createIconButton(icon, tooltip);
         btn.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        btn.addClassName("wams-action-btn--danger");
+        return btn;
+    }
+
+    /**
+     * Standard action-button contract used by every card in the app, so the
+     * action bar always reads the same way regardless of module:
+     * <b>Details → Edit → (entity-specific actions) → Toggle status → Delete</b>
+     * — Delete is always last and always styled as a danger action.
+     * Subclasses should build {@link #buildActionButtons()} by calling these
+     * factories in that order rather than assembling buttons ad hoc.
+     */
+    protected Button createDetailsButton(String tooltip, Runnable onClick) {
+        Button btn = createIconButton(VaadinIcon.INFO_CIRCLE, tooltip);
+        btn.addClickListener(e -> onClick.run());
+        return btn;
+    }
+
+    protected Button createEditButton(String tooltip, Runnable onClick) {
+        Button btn = createIconButton(VaadinIcon.EDIT, tooltip);
+        btn.addClickListener(e -> onClick.run());
+        return btn;
+    }
+
+    /**
+     * @param enabled current state; the icon/tooltip reflect the action that will
+     *                happen on click (a lock icon to disable an enabled entity, an
+     *                unlock icon to enable a disabled one) — consistent across all cards.
+     */
+    protected Button createToggleButton(boolean enabled, String enableTooltip, String disableTooltip, Runnable onClick) {
+        Button btn = createIconButton(enabled ? VaadinIcon.LOCK : VaadinIcon.UNLOCK, enabled ? disableTooltip : enableTooltip);
+        btn.addClickListener(e -> onClick.run());
+        return btn;
+    }
+
+    protected Button createDeleteButton(String tooltip, Runnable onClick) {
+        Button btn = createDangerIconButton(VaadinIcon.TRASH, tooltip);
+        btn.addClickListener(e -> onClick.run());
         return btn;
     }
 

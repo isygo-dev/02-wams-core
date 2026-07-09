@@ -58,26 +58,36 @@ public abstract class BaseSenderConfigDialog extends Dialog {
         mainLayout.setSpacing(true);
         mainLayout.setWidthFull();
 
-        // Error area
-        errorArea.setVisible(false);
-        errorArea.addClassName("wams-dialog-error-area");
-        mainLayout.add(errorArea);
-
         // Content area
         contentArea.addClassName("wams-dialog-content-area");
         mainLayout.add(contentArea);
 
-        // Footer
-        HorizontalLayout footer = buildFooter();
-        mainLayout.add(footer);
-
         add(mainLayout);
+
+        // Same footer contract as BaseActionDialog/NoActionDialog: an error-message
+        // slot above the action button row, inside Vaadin's dedicated footer slot
+        // (not just the last row of scrollable content).
+        errorArea.setVisible(false);
+        errorArea.addClassName("wams-dialog-error-area");
+        errorArea.addClassName("wams-dialog-error-span");
+        errorArea.setWidthFull();
+
+        HorizontalLayout buttonRow = buildFooter();
+
+        VerticalLayout footerLayout = new VerticalLayout(errorArea, buttonRow);
+        footerLayout.setWidthFull();
+        footerLayout.setSpacing(true);
+        footerLayout.setPadding(false);
+
+        getFooter().removeAll();
+        getFooter().add(footerLayout);
     }
 
     private HorizontalLayout buildFooter() {
         HorizontalLayout footer = new HorizontalLayout();
         footer.setWidthFull();
         footer.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+        footer.setAlignItems(FlexComponent.Alignment.CENTER);
         footer.setSpacing(true);
 
         cancelButton = new Button(I18n.t("common.dialog.cancel"), e -> close());

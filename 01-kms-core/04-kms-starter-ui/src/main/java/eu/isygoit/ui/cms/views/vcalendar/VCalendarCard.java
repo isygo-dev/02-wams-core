@@ -13,6 +13,7 @@ import eu.isygoit.dto.data.VCalendarDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.cms.VCalendarService;
 import eu.isygoit.ui.cms.views.vcalendar.dialog.DeleteVCalendarDialog;
+import eu.isygoit.ui.cms.views.vcalendar.dialog.ToggleVCalendarLockDialog;
 import eu.isygoit.ui.cms.views.vcalendar.dialog.VCalendarDetailsDialog;
 import eu.isygoit.ui.common.card.BaseCard;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,9 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
 
     private final VCalendarDto calendar;
     private final Runnable onRefresh;
+
+    private Span lockStatusChip;
+    private Button toggleLockBtn;
 
     public VCalendarCard(VCalendarManagementView parentView,
                          VCalendarService calendarService,
@@ -58,39 +62,59 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
         }
 
         // Locked status chip
-        if (calendar.getLocked() != null && calendar.getLocked()) {
-            Span lockChip = buildStatusChip(
-                    I18n.t("cms.calendar.card.status.locked"),
-                    "LOCKED"
-            );
-            titleLayout.add(lockChip);
-        } else {
-            Span unlockedChip = buildStatusChip(
-                    I18n.t("cms.calendar.card.status.unlocked"),
-                    "UNLOCKED"
-            );
-            titleLayout.add(unlockedChip);
-        }
+        boolean locked = calendar.getLocked() != null && calendar.getLocked();
+        lockStatusChip = buildStatusChip(
+                locked ? I18n.t("cms.calendar.card.status.locked") : I18n.t("cms.calendar.card.status.unlocked"),
+                locked ? "LOCKED" : "UNLOCKED"
+        );
+        titleLayout.add(lockStatusChip);
 
         return titleLayout;
     }
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("cms.calendar.card.details.tooltip"));
-        detailsBtn.addClickListener(e -> new VCalendarDetailsDialog(parentView, objectService, calendar.getId()).open());
+        Button detailsBtn = createDetailsButton(I18n.t("cms.calendar.card.details.tooltip"),
+                () -> new VCalendarDetailsDialog(parentView, objectService, calendar.getId()).open());
 
-        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("cms.calendar.card.edit.tooltip"));
-        editBtn.addClickListener(e -> parentView.openUpdateCalendarDialog(calendar, () -> {
+        Button editBtn = createEditButton(I18n.t("cms.calendar.card.edit.tooltip"),
+                () -> parentView.openUpdateCalendarDialog(calendar, () -> {
+                    if (onRefresh != null) onRefresh.run();
+                }));
+
+        boolean locked = calendar.getLocked() != null && calendar.getLocked();
+        toggleLockBtn = createToggleButton(locked,
+                I18n.t("cms.calendar.card.lock.tooltip"),
+                I18n.t("cms.calendar.card.unlock.tooltip"),
+                this::openToggleLockDialog);
+
+        Button deleteBtn = createDeleteButton(I18n.t("cms.calendar.card.delete.tooltip"),
+                () -> new DeleteVCalendarDialog(parentView, objectService, calendar.getId(), () -> {
+                    if (onRefresh != null) onRefresh.run();
+                }).open());
+
+        return List.of(detailsBtn, editBtn, toggleLockBtn, deleteBtn);
+    }
+
+    private void openToggleLockDialog() {
+        new ToggleVCalendarLockDialog(parentView, objectService, calendar, () -> {
+            updateLockStatusDisplay();
             if (onRefresh != null) onRefresh.run();
-        }));
+        }).open();
+    }
 
-        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("cms.calendar.card.delete.tooltip"));
-        deleteBtn.addClickListener(e -> new DeleteVCalendarDialog(parentView, objectService, calendar.getId(), () -> {
-            if (onRefresh != null) onRefresh.run();
-        }).open());
-
-        return List.of(detailsBtn, editBtn, deleteBtn);
+    private void updateLockStatusDisplay() {
+        boolean locked = calendar.getLocked() != null && calendar.getLocked();
+        if (lockStatusChip != null) {
+            String text = locked ? I18n.t("cms.calendar.card.status.locked") : I18n.t("cms.calendar.card.status.unlocked");
+            lockStatusChip.setText(text);
+            lockStatusChip.getElement().setAttribute("title", text);
+            applyChipColor(lockStatusChip, ChipColor.fromStatus(locked ? "LOCKED" : "UNLOCKED"));
+        }
+        if (toggleLockBtn != null) {
+            toggleLockBtn.setIcon(locked ? VaadinIcon.LOCK.create() : VaadinIcon.UNLOCK.create());
+            toggleLockBtn.setTooltipText(locked ? I18n.t("cms.calendar.card.unlock.tooltip") : I18n.t("cms.calendar.card.lock.tooltip"));
+        }
     }
 
     @Override

@@ -161,21 +161,30 @@ public class GrantsView extends ManagementVerticalView {
     }
 
     private void buildActionBar() {
+        // Same conceptual order as card action bars: refresh/create (neutral/primary),
+        // details/view (info-style), then destructive actions last, danger-styled and
+        // rightmost (retire before revoke — revoke is the more severe/irreversible action).
         HorizontalLayout actionBar = new HorizontalLayout(refreshButton, createGrantButton,
-                revokeGrantButton, retireGrantButton, viewDetailsButton);
+                viewDetailsButton, retireGrantButton, revokeGrantButton);
         actionBar.setSpacing(true);
         actionBar.addClassName("grants-action-bar");
 
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        refreshButton.addClassName("wams-action-btn");
         refreshButton.setTooltipText(I18n.t("kms.grants.view.refresh.grants.tooltip"));
         createGrantButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         createGrantButton.setTooltipText(I18n.t("kms.grants.view.create.grant.tooltip"));
-        revokeGrantButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        revokeGrantButton.setTooltipText(I18n.t("kms.grants.view.revoke.grant.tooltip"));
-        retireGrantButton.addThemeVariants(ButtonVariant.LUMO_WARNING);
-        retireGrantButton.setTooltipText(I18n.t("kms.grants.view.retire.grant.tooltip"));
         viewDetailsButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        viewDetailsButton.addClassName("wams-action-btn");
         viewDetailsButton.setTooltipText(I18n.t("kms.grants.view.details.tooltip"));
+        retireGrantButton.addThemeVariants(ButtonVariant.LUMO_WARNING);
+        retireGrantButton.addClassName("wams-action-btn");
+        retireGrantButton.addClassName("wams-action-btn--danger");
+        retireGrantButton.setTooltipText(I18n.t("kms.grants.view.retire.grant.tooltip"));
+        revokeGrantButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        revokeGrantButton.addClassName("wams-action-btn");
+        revokeGrantButton.addClassName("wams-action-btn--danger");
+        revokeGrantButton.setTooltipText(I18n.t("kms.grants.view.revoke.grant.tooltip"));
 
         add(actionBar);
     }

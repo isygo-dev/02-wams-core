@@ -38,6 +38,7 @@ public abstract class BaseActionDialog extends Dialog {
         setWidth("500px");
         setMaxWidth("90%");
         setResizable(false);
+        addClassName("wams-dialog-responsive");
 
         this.errorSpan = createErrorSpan();
         this.okButton = createOkButton();
@@ -66,6 +67,10 @@ public abstract class BaseActionDialog extends Dialog {
 
     protected void setOkButtonText(String text) {
         okButton.setText(text);
+    }
+
+    protected void setCancelButtonText(String text) {
+        cancelButton.setText(text);
     }
 
     protected void setCancelButtonClickListener(

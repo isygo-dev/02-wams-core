@@ -1,7 +1,6 @@
 package eu.isygoit.ui.ims.views.customer.dialog;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -52,14 +51,11 @@ public class CustomerDetailsDialog extends NoActionDialog {
                 buildContent(response.getBody());
             } else {
                 add(new Span(I18n.t("ims.customer.details.not.found")));
-                addCloseButton();
             }
         } catch (FeignException ex) {
             add(new Span(I18n.t("ims.customer.details.load.error", extractErrorMessage(ex))));
-            addCloseButton();
         } catch (Exception e) {
             add(new Span(I18n.t("ims.customer.details.load.error", e.getMessage())));
-            addCloseButton();
         } finally {
             parentView.showLoading(false);
         }
@@ -70,39 +66,43 @@ public class CustomerDetailsDialog extends NoActionDialog {
         mainLayout.setPadding(false);
         mainLayout.setSpacing(true);
 
-        // Basic info
-        Div basicInfo = new Div();
-        basicInfo.addClassName("wams-card__detail-grid");
+        // Identity — name/account code (text identifiers)
+        Div identityInfo = new Div();
+        identityInfo.addClassName("wams-card__detail-grid");
 
-        addFieldToGrid(basicInfo, VaadinIcon.USER, I18n.t("ims.customer.details.field.name"), customer.getName());
-        addFieldToGrid(basicInfo, VaadinIcon.ENVELOPE, I18n.t("ims.customer.details.field.email"), customer.getEmail());
-        addFieldToGrid(basicInfo, VaadinIcon.PHONE, I18n.t("ims.customer.details.field.phone"), customer.getPhoneNumber());
-        addFieldToGrid(basicInfo, VaadinIcon.KEY, I18n.t("ims.customer.details.field.account.code"), customer.getAccountCode());
-        addFieldToGrid(basicInfo, VaadinIcon.GLOBE, I18n.t("ims.customer.details.field.website"), customer.getUrl());
-        addFieldToGrid(basicInfo, VaadinIcon.BUILDING, I18n.t("ims.customer.details.field.tenant"), customer.getTenant());
-        addFieldToGrid(basicInfo, VaadinIcon.SHIELD, I18n.t("ims.customer.details.field.status"), customer.getAdminStatus() != null ? customer.getAdminStatus().name() : null);
+        addFieldToGrid(identityInfo, VaadinIcon.USER, I18n.t("ims.customer.details.field.name"), customer.getName());
+        addFieldToGrid(identityInfo, VaadinIcon.KEY, I18n.t("ims.customer.details.field.account.code"), customer.getAccountCode());
 
-        mainLayout.add(createSection(I18n.t("ims.customer.details.section.general"), basicInfo));
+        mainLayout.add(createSection(I18n.t("ims.customer.details.section.identity"), identityInfo));
+
+        // Classification & status
+        Div classificationInfo = new Div();
+        classificationInfo.addClassName("wams-card__detail-grid");
+
+        addFieldToGrid(classificationInfo, VaadinIcon.SHIELD, I18n.t("ims.customer.details.field.status"), customer.getAdminStatus() != null ? customer.getAdminStatus().name() : null);
+
+        mainLayout.add(createSection(I18n.t("ims.customer.details.section.classification"), classificationInfo));
+
+        // Contact / relations — email/phone/website/tenant
+        Div contactInfo = new Div();
+        contactInfo.addClassName("wams-card__detail-grid");
+
+        addFieldToGrid(contactInfo, VaadinIcon.ENVELOPE, I18n.t("ims.customer.details.field.email"), customer.getEmail());
+        addFieldToGrid(contactInfo, VaadinIcon.PHONE, I18n.t("ims.customer.details.field.phone"), customer.getPhoneNumber());
+        addFieldToGrid(contactInfo, VaadinIcon.GLOBE, I18n.t("ims.customer.details.field.website"), customer.getUrl());
+        addFieldToGrid(contactInfo, VaadinIcon.BUILDING, I18n.t("ims.customer.details.field.tenant"), customer.getTenant());
+
+        mainLayout.add(createSection(I18n.t("ims.customer.details.section.contact"), contactInfo));
 
         // Description
         if (customer.getDescription() != null && !customer.getDescription().isBlank()) {
-            HorizontalLayout descRow = new HorizontalLayout();
-            descRow.setAlignItems(FlexComponent.Alignment.START);
-            descRow.setSpacing(true);
-            descRow.setWidthFull();
-            Icon descIcon = VaadinIcon.FILE_TEXT.create();
-            descIcon.setSize("16px");
-            descIcon.addClassName("detail-field-icon");
-            Span descLabel = new Span(I18n.t("ims.customer.details.field.description"));
-            descLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-            Span descValue = new Span(customer.getDescription());
-            descValue.addClassName("detail-field-value");
-            descRow.add(descIcon, descLabel, descValue);
-            descRow.expand(descValue);
-            mainLayout.add(descRow);
+            Div descGrid = new Div();
+            descGrid.addClassName("wams-card__detail-grid");
+            addFieldToGrid(descGrid, VaadinIcon.FILE_TEXT, I18n.t("ims.customer.details.field.description"), customer.getDescription());
+            mainLayout.add(descGrid);
         }
 
-        // Address
+        // Address (part of contact / relations)
         if (customer.getAddress() != null) {
             AddressDto addr = customer.getAddress();
             Div addressInfo = new Div();
@@ -118,7 +118,7 @@ public class CustomerDetailsDialog extends NoActionDialog {
             mainLayout.add(createSection(I18n.t("ims.customer.details.section.address"), addressInfo));
         }
 
-        // Audit
+        // Audit — created/updated by & date
         Div auditInfo = new Div();
         auditInfo.addClassName("wams-card__detail-grid");
 
@@ -130,32 +130,35 @@ public class CustomerDetailsDialog extends NoActionDialog {
         mainLayout.add(createSection(I18n.t("ims.customer.details.section.audit"), auditInfo));
 
         add(mainLayout);
-        addCloseButton();
     }
 
     private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {
         if (value == null || value.isBlank()) return;
-        HorizontalLayout row = new HorizontalLayout();
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.setSpacing(true);
-        row.setWidthFull();
-        row.addClassName("detail-field");
+
+        VerticalLayout field = new VerticalLayout();
+        field.setPadding(false);
+        field.setSpacing(false);
+        field.addClassName("wams-card__detail-field");
+
+        HorizontalLayout labelRow = new HorizontalLayout();
+        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        labelRow.setSpacing(false);
+        labelRow.addClassName("wams-card__detail-field-label-row");
 
         Icon iconComponent = icon.create();
-        iconComponent.setSize("16px");
+        iconComponent.setSize("12px");
         iconComponent.addClassName("detail-field-icon");
 
-        Span labelSpan = new Span(label + ":");
-        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.SMALL);
+        Span labelSpan = new Span(label);
+        labelSpan.addClassName("wams-card__detail-field-label");
+
+        labelRow.add(iconComponent, labelSpan);
 
         Span valueSpan = new Span(value);
-        valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.addClassName("detail-field-value");
+        valueSpan.addClassName("wams-card__detail-field-value");
 
-        row.add(iconComponent, labelSpan, valueSpan);
-        row.expand(valueSpan);
-        container.add(row);
+        field.add(labelRow, valueSpan);
+        container.add(field);
     }
 
     private Component createSection(String title, Component content) {
@@ -168,15 +171,6 @@ public class CustomerDetailsDialog extends NoActionDialog {
         titleSpan.addClassName("wams-section-title");
         section.add(titleSpan, content);
         return section;
-    }
-
-    private void addCloseButton() {
-        Button closeButton = new Button(I18n.t("ims.customer.details.close"), e -> close());
-        closeButton.addClassName(LumoUtility.Margin.Top.MEDIUM);
-        HorizontalLayout buttonBar = new HorizontalLayout(closeButton);
-        buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        buttonBar.setWidthFull();
-        add(buttonBar);
     }
 
     private String extractErrorMessage(FeignException ex) {

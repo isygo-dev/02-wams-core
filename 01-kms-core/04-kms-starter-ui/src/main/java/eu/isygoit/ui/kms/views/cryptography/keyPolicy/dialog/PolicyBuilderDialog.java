@@ -105,8 +105,11 @@ public class PolicyBuilderDialog extends BaseActionDialog {
         HorizontalLayout layout = new HorizontalLayout();
         layout.setSpacing(true);
 
+        // Same conceptual order/styling as card action bars: edit-style action first,
+        // destructive action last and danger-styled (wams-action-btn / wams-action-btn--danger).
         Button editBtn = new Button(new Icon(VaadinIcon.EDIT));
         editBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
+        editBtn.addClassName("wams-action-btn");
         editBtn.setTooltipText(I18n.t("kms.policy.builder.edit.tooltip"));
         editBtn.addClickListener(e -> editStatement(stmt, updated -> {
             int idx = statements.indexOf(stmt);
@@ -116,6 +119,8 @@ public class PolicyBuilderDialog extends BaseActionDialog {
 
         Button deleteBtn = new Button(new Icon(VaadinIcon.TRASH));
         deleteBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_SMALL);
+        deleteBtn.addClassName("wams-action-btn");
+        deleteBtn.addClassName("wams-action-btn--danger");
         deleteBtn.setTooltipText(I18n.t("kms.policy.builder.delete.tooltip"));
         deleteBtn.addClickListener(e -> {
             statements.remove(stmt);

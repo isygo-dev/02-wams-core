@@ -1,7 +1,6 @@
 package eu.isygoit.ui.ims.views.tenant.dialog;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -51,14 +50,11 @@ public class TenantDetailsDialog extends NoActionDialog {
                 buildContent(response.getBody());
             } else {
                 add(new Span(I18n.t("ims.tenant.details.not.found")));
-                addCloseButton();
             }
         } catch (FeignException ex) {
             add(new Span(I18n.t("ims.tenant.details.load.error", extractErrorMessage(ex))));
-            addCloseButton();
         } catch (Exception e) {
             add(new Span(I18n.t("ims.tenant.details.load.error", e.getMessage())));
-            addCloseButton();
         } finally {
             parentView.showLoading(false);
         }
@@ -69,50 +65,43 @@ public class TenantDetailsDialog extends NoActionDialog {
         mainLayout.setPadding(false);
         mainLayout.setSpacing(true);
 
-        // Basic information - two-column grid
-        Div basicInfo = new Div();
-        basicInfo.addClassName("wams-card__detail-grid");
+        // Identity — name/code (text identifiers)
+        Div identityInfo = new Div();
+        identityInfo.addClassName("wams-card__detail-grid");
 
-        addFieldToGrid(basicInfo, VaadinIcon.BUILDING, I18n.t("ims.tenant.details.field.name"), tenant.getName());
-        addFieldToGrid(basicInfo, VaadinIcon.CODE, I18n.t("ims.tenant.details.field.code"), tenant.getCode());
-        addFieldToGrid(basicInfo, VaadinIcon.ENVELOPE, I18n.t("ims.tenant.details.field.email"), tenant.getEmail());
-        addFieldToGrid(basicInfo, VaadinIcon.PHONE, I18n.t("ims.tenant.details.field.phone"), tenant.getPhone());
-        addFieldToGrid(basicInfo, VaadinIcon.INSTITUTION, I18n.t("ims.tenant.details.field.industry"), tenant.getIndustry());
-        addFieldToGrid(basicInfo, VaadinIcon.GLOBE, I18n.t("ims.tenant.details.field.website"), tenant.getUrl());
+        addFieldToGrid(identityInfo, VaadinIcon.BUILDING, I18n.t("ims.tenant.details.field.name"), tenant.getName());
+        addFieldToGrid(identityInfo, VaadinIcon.CODE, I18n.t("ims.tenant.details.field.code"), tenant.getCode());
 
-        mainLayout.add(createSection(I18n.t("ims.tenant.details.section.general"), basicInfo));
+        mainLayout.add(createSection(I18n.t("ims.tenant.details.section.identity"), identityInfo));
+
+        // Classification & status — admin status/industry
+        Div classificationInfo = new Div();
+        classificationInfo.addClassName("wams-card__detail-grid");
+
+        addFieldToGrid(classificationInfo, VaadinIcon.SHIELD, I18n.t("ims.tenant.details.field.admin.status"), tenant.getAdminStatus() != null ? tenant.getAdminStatus().name() : null);
+        addFieldToGrid(classificationInfo, VaadinIcon.INSTITUTION, I18n.t("ims.tenant.details.field.industry"), tenant.getIndustry());
+
+        mainLayout.add(createSection(I18n.t("ims.tenant.details.section.classification"), classificationInfo));
+
+        // Contact / relations — email/phone/website
+        Div contactInfo = new Div();
+        contactInfo.addClassName("wams-card__detail-grid");
+
+        addFieldToGrid(contactInfo, VaadinIcon.ENVELOPE, I18n.t("ims.tenant.details.field.email"), tenant.getEmail());
+        addFieldToGrid(contactInfo, VaadinIcon.PHONE, I18n.t("ims.tenant.details.field.phone"), tenant.getPhone());
+        addFieldToGrid(contactInfo, VaadinIcon.GLOBE, I18n.t("ims.tenant.details.field.website"), tenant.getUrl());
+
+        mainLayout.add(createSection(I18n.t("ims.tenant.details.section.contact"), contactInfo));
 
         // Description (full width)
         if (tenant.getDescription() != null && !tenant.getDescription().isBlank()) {
-            HorizontalLayout descRow = new HorizontalLayout();
-            descRow.setAlignItems(FlexComponent.Alignment.START);
-            descRow.setSpacing(true);
-            descRow.setWidthFull();
-            Icon descIcon = VaadinIcon.FILE_TEXT.create();
-            descIcon.setSize("16px");
-            descIcon.addClassName("detail-field-icon");
-            Span descLabel = new Span(I18n.t("ims.tenant.details.field.description"));
-            descLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-            Span descValue = new Span(tenant.getDescription());
-            descValue.addClassName("detail-field-value");
-            descRow.add(descIcon, descLabel, descValue);
-            descRow.expand(descValue);
-            mainLayout.add(descRow);
+            Div descGrid = new Div();
+            descGrid.addClassName("wams-card__detail-grid");
+            addFieldToGrid(descGrid, VaadinIcon.FILE_TEXT, I18n.t("ims.tenant.details.field.description"), tenant.getDescription());
+            mainLayout.add(descGrid);
         }
 
-        // Status & audit section
-        Div statusInfo = new Div();
-        statusInfo.addClassName("wams-card__detail-grid");
-
-        addFieldToGrid(statusInfo, VaadinIcon.SHIELD, I18n.t("ims.tenant.details.field.admin.status"), tenant.getAdminStatus() != null ? tenant.getAdminStatus().name() : null);
-        addFieldToGrid(statusInfo, VaadinIcon.CALENDAR, I18n.t("ims.tenant.details.field.created"), tenant.getCreateDate() != null ? DateHelper.formatToHumanReadable(tenant.getCreateDate()) : null);
-        addFieldToGrid(statusInfo, VaadinIcon.USER_CHECK, I18n.t("ims.tenant.details.field.created.by"), tenant.getCreatedBy());
-        addFieldToGrid(statusInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.tenant.details.field.updated"), tenant.getUpdateDate() != null ? DateHelper.formatToHumanReadable(tenant.getUpdateDate()) : null);
-        addFieldToGrid(statusInfo, VaadinIcon.EDIT, I18n.t("ims.tenant.details.field.updated.by"), tenant.getUpdatedBy());
-
-        mainLayout.add(createSection(I18n.t("ims.tenant.details.section.status"), statusInfo));
-
-        // Social links (if present)
+        // Social links (part of contact / relations, if present)
         if (hasAnySocialLink(tenant)) {
             Div socialInfo = new Div();
             socialInfo.addClassName("wams-card__detail-grid");
@@ -124,7 +113,7 @@ public class TenantDetailsDialog extends NoActionDialog {
             mainLayout.add(createSection(I18n.t("ims.tenant.details.section.social"), socialInfo));
         }
 
-        // Address (if present)
+        // Address (part of contact / relations, if present)
         if (tenant.getAddress() != null) {
             Div addressInfo = new Div();
             addressInfo.addClassName("wams-card__detail-grid");
@@ -139,8 +128,18 @@ public class TenantDetailsDialog extends NoActionDialog {
             mainLayout.add(createSection(I18n.t("ims.tenant.details.section.address"), addressInfo));
         }
 
+        // Audit — created/updated by & date
+        Div auditInfo = new Div();
+        auditInfo.addClassName("wams-card__detail-grid");
+
+        addFieldToGrid(auditInfo, VaadinIcon.CALENDAR, I18n.t("ims.tenant.details.field.created"), tenant.getCreateDate() != null ? DateHelper.formatToHumanReadable(tenant.getCreateDate()) : null);
+        addFieldToGrid(auditInfo, VaadinIcon.USER_CHECK, I18n.t("ims.tenant.details.field.created.by"), tenant.getCreatedBy());
+        addFieldToGrid(auditInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.tenant.details.field.updated"), tenant.getUpdateDate() != null ? DateHelper.formatToHumanReadable(tenant.getUpdateDate()) : null);
+        addFieldToGrid(auditInfo, VaadinIcon.EDIT, I18n.t("ims.tenant.details.field.updated.by"), tenant.getUpdatedBy());
+
+        mainLayout.add(createSection(I18n.t("ims.tenant.details.section.audit"), auditInfo));
+
         add(mainLayout);
-        addCloseButton();
     }
 
     private boolean hasAnySocialLink(TenantDto tenant) {
@@ -151,27 +150,31 @@ public class TenantDetailsDialog extends NoActionDialog {
 
     private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {
         if (value == null || value.isBlank()) return;
-        HorizontalLayout row = new HorizontalLayout();
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.setSpacing(true);
-        row.setWidthFull();
-        row.addClassName("detail-field");
+
+        VerticalLayout field = new VerticalLayout();
+        field.setPadding(false);
+        field.setSpacing(false);
+        field.addClassName("wams-card__detail-field");
+
+        HorizontalLayout labelRow = new HorizontalLayout();
+        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        labelRow.setSpacing(false);
+        labelRow.addClassName("wams-card__detail-field-label-row");
 
         Icon iconComponent = icon.create();
-        iconComponent.setSize("16px");
+        iconComponent.setSize("12px");
         iconComponent.addClassName("detail-field-icon");
 
-        Span labelSpan = new Span(label + ":");
-        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.SMALL);
+        Span labelSpan = new Span(label);
+        labelSpan.addClassName("wams-card__detail-field-label");
+
+        labelRow.add(iconComponent, labelSpan);
 
         Span valueSpan = new Span(value);
-        valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.addClassName("detail-field-value");
+        valueSpan.addClassName("wams-card__detail-field-value");
 
-        row.add(iconComponent, labelSpan, valueSpan);
-        row.expand(valueSpan);
-        container.add(row);
+        field.add(labelRow, valueSpan);
+        container.add(field);
     }
 
     private Component createSection(String title, Component content) {
@@ -184,15 +187,6 @@ public class TenantDetailsDialog extends NoActionDialog {
         titleSpan.addClassName("wams-section-title");
         section.add(titleSpan, content);
         return section;
-    }
-
-    private void addCloseButton() {
-        Button closeButton = new Button(I18n.t("ims.tenant.details.close"), e -> close());
-        closeButton.addClassName(LumoUtility.Margin.Top.MEDIUM);
-        HorizontalLayout buttonBar = new HorizontalLayout(closeButton);
-        buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        buttonBar.setWidthFull();
-        add(buttonBar);
     }
 
     private String extractErrorMessage(FeignException ex) {

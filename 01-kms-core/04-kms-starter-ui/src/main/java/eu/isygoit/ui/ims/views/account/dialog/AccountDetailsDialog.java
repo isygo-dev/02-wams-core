@@ -1,7 +1,6 @@
 package eu.isygoit.ui.ims.views.account.dialog;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -54,14 +53,11 @@ public class AccountDetailsDialog extends NoActionDialog {
                 buildContent(response.getBody());
             } else {
                 add(new Span(I18n.t("ims.account.details.not.found")));
-                addCloseButton();
             }
         } catch (FeignException ex) {
             add(new Span(I18n.t("ims.account.details.load.error", extractErrorMessage(ex))));
-            addCloseButton();
         } catch (Exception e) {
             add(new Span(I18n.t("ims.account.details.load.error", e.getMessage())));
-            addCloseButton();
         } finally {
             parentView.showLoading(false);
         }
@@ -72,26 +68,44 @@ public class AccountDetailsDialog extends NoActionDialog {
         mainLayout.setPadding(false);
         mainLayout.setSpacing(true);
 
-        // Basic information section (compact two-column grid)
-        Div basicInfo = new Div();
-        basicInfo.addClassName("wams-card__detail-grid");
+        // Identity — name/email/code (text identifiers)
+        Div identityInfo = new Div();
+        identityInfo.addClassName("wams-card__detail-grid");
 
-        addFieldToGrid(basicInfo, VaadinIcon.USER, I18n.t("ims.account.details.field.full.name"), account.getFullName());
-        addFieldToGrid(basicInfo, VaadinIcon.ENVELOPE, I18n.t("ims.account.details.field.email"), account.getEmail());
-        addFieldToGrid(basicInfo, VaadinIcon.PHONE, I18n.t("ims.account.details.field.phone"), account.getPhoneNumber());
-        addFieldToGrid(basicInfo, VaadinIcon.BUILDING, I18n.t("ims.account.details.field.tenant"), account.getTenant());
-        addFieldToGrid(basicInfo, VaadinIcon.COG, I18n.t("ims.account.details.field.function.role"), account.getFunctionRole());
-        addFieldToGrid(basicInfo, VaadinIcon.TAGS, I18n.t("ims.account.details.field.account.type"), account.getAccountType());
-        addFieldToGrid(basicInfo, VaadinIcon.HASH, I18n.t("ims.account.details.field.code"), account.getCode());
-        addFieldToGrid(basicInfo, VaadinIcon.SIGN_IN, I18n.t("ims.account.details.field.auth.type"), account.getAuthType() != null ? account.getAuthType().name() : null);
-        addFieldToGrid(basicInfo, VaadinIcon.COMMENT, I18n.t("ims.account.details.field.chat.status"), account.getChatStatus() != null ? account.getChatStatus().name() : null);
-        addFieldToGrid(basicInfo, VaadinIcon.CLOUD, I18n.t("ims.account.details.field.origin"), account.getOrigin());
-        addFieldToGrid(basicInfo, VaadinIcon.LOCATION_ARROW_CIRCLE, I18n.t("ims.account.details.field.language"), account.getLanguage() != null ? account.getLanguage().name() : null);
+        addFieldToGrid(identityInfo, VaadinIcon.USER, I18n.t("ims.account.details.field.full.name"), account.getFullName());
+        addFieldToGrid(identityInfo, VaadinIcon.ENVELOPE, I18n.t("ims.account.details.field.email"), account.getEmail());
+        addFieldToGrid(identityInfo, VaadinIcon.HASH, I18n.t("ims.account.details.field.code"), account.getCode());
+
+        mainLayout.add(createSection(I18n.t("ims.account.details.section.identity"), identityInfo));
+
+        // Classification & status — type/role/status/flags/language
+        Div classificationInfo = new Div();
+        classificationInfo.addClassName("wams-card__detail-grid");
+
+        addFieldToGrid(classificationInfo, VaadinIcon.COG, I18n.t("ims.account.details.field.function.role"), account.getFunctionRole());
+        addFieldToGrid(classificationInfo, VaadinIcon.TAGS, I18n.t("ims.account.details.field.account.type"), account.getAccountType());
+        addFieldToGrid(classificationInfo, VaadinIcon.SIGN_IN, I18n.t("ims.account.details.field.auth.type"), account.getAuthType() != null ? account.getAuthType().name() : null);
+        addFieldToGrid(classificationInfo, VaadinIcon.COMMENT, I18n.t("ims.account.details.field.chat.status"), account.getChatStatus() != null ? account.getChatStatus().name() : null);
+        addFieldToGrid(classificationInfo, VaadinIcon.LOCATION_ARROW_CIRCLE, I18n.t("ims.account.details.field.language"), account.getLanguage() != null ? account.getLanguage().name() : null);
+        addFieldToGrid(classificationInfo, VaadinIcon.SHIELD, I18n.t("ims.account.details.field.admin"), Boolean.TRUE.equals(account.getIsAdmin()) ? I18n.t("ims.account.details.yes") : I18n.t("ims.account.details.no"));
+        addFieldToGrid(classificationInfo, VaadinIcon.LOCK, I18n.t("ims.account.details.field.admin.status"), account.getAdminStatus() != null ? account.getAdminStatus().name() : null);
+        addFieldToGrid(classificationInfo, VaadinIcon.STETHOSCOPE, I18n.t("ims.account.details.field.system.status"), account.getSystemStatus() != null ? account.getSystemStatus().name() : null);
+
+        mainLayout.add(createSection(I18n.t("ims.account.details.section.classification"), classificationInfo));
+
+        // Contact / relations — phone/tenant/origin/country/address/contacts/last login
+        Div contactInfo = new Div();
+        contactInfo.addClassName("wams-card__detail-grid");
+
+        addFieldToGrid(contactInfo, VaadinIcon.PHONE, I18n.t("ims.account.details.field.phone"), account.getPhoneNumber());
+        addFieldToGrid(contactInfo, VaadinIcon.BUILDING, I18n.t("ims.account.details.field.tenant"), account.getTenant());
+        addFieldToGrid(contactInfo, VaadinIcon.CLOUD, I18n.t("ims.account.details.field.origin"), account.getOrigin());
+        addFieldToGrid(contactInfo, VaadinIcon.CLOCK, I18n.t("ims.account.details.field.last.login"), account.getLastConnectionDate() != null ? DateHelper.formatToHumanReadable(account.getLastConnectionDate()) : null);
         if (account.getAccountDetails() != null) {
-            addFieldToGrid(basicInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.account.details.field.country"), account.getAccountDetails().getCountry());
+            addFieldToGrid(contactInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.account.details.field.country"), account.getAccountDetails().getCountry());
         }
 
-        mainLayout.add(createSection(I18n.t("ims.account.details.section.basic"), basicInfo));
+        mainLayout.add(createSection(I18n.t("ims.account.details.section.contact"), contactInfo));
 
         // Address (if present)
         if (account.getAccountDetails() != null && account.getAccountDetails().getAddress() != null) {
@@ -100,19 +114,10 @@ public class AccountDetailsDialog extends NoActionDialog {
                     (addr.getCity() != null ? ", " + addr.getCity() : "") +
                     (addr.getCountry() != null ? ", " + addr.getCountry() : "");
             if (!address.isBlank()) {
-                HorizontalLayout addrRow = new HorizontalLayout();
-                addrRow.setAlignItems(FlexComponent.Alignment.CENTER);
-                addrRow.setSpacing(true);
-                Icon addrIcon = VaadinIcon.MAP_MARKER.create();
-                addrIcon.setSize("16px");
-                addrIcon.addClassName("detail-field-icon");
-                Span addrLabel = new Span(I18n.t("ims.account.details.field.address"));
-                addrLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-                Span addrValue = new Span(address);
-                addrValue.addClassName("detail-field-value");
-                addrRow.add(addrIcon, addrLabel, addrValue);
-                addrRow.expand(addrValue);
-                mainLayout.add(addrRow);
+                Div addressGrid = new Div();
+                addressGrid.addClassName("wams-card__detail-grid");
+                addFieldToGrid(addressGrid, VaadinIcon.MAP_MARKER, I18n.t("ims.account.details.field.address"), address);
+                mainLayout.add(addressGrid);
             }
         }
 
@@ -125,20 +130,16 @@ public class AccountDetailsDialog extends NoActionDialog {
             mainLayout.add(createCompactList(VaadinIcon.PAPERPLANE, I18n.t("ims.account.details.field.contacts"), contactsText));
         }
 
-        // Status section
-        Div statusInfo = new Div();
-        statusInfo.addClassName("wams-card__detail-grid");
+        // Audit — created/updated by & date
+        Div auditInfo = new Div();
+        auditInfo.addClassName("wams-card__detail-grid");
 
-        addFieldToGrid(statusInfo, VaadinIcon.SHIELD, I18n.t("ims.account.details.field.admin"), Boolean.TRUE.equals(account.getIsAdmin()) ? I18n.t("ims.account.details.yes") : I18n.t("ims.account.details.no"));
-        addFieldToGrid(statusInfo, VaadinIcon.LOCK, I18n.t("ims.account.details.field.admin.status"), account.getAdminStatus() != null ? account.getAdminStatus().name() : null);
-        addFieldToGrid(statusInfo, VaadinIcon.STETHOSCOPE, I18n.t("ims.account.details.field.system.status"), account.getSystemStatus() != null ? account.getSystemStatus().name() : null);
-        addFieldToGrid(statusInfo, VaadinIcon.CLOCK, I18n.t("ims.account.details.field.last.login"), account.getLastConnectionDate() != null ? DateHelper.formatToHumanReadable(account.getLastConnectionDate()) : null);
-        addFieldToGrid(statusInfo, VaadinIcon.CALENDAR, I18n.t("ims.account.details.field.created"), account.getCreateDate() != null ? DateHelper.formatToHumanReadable(account.getCreateDate()) : null);
-        addFieldToGrid(statusInfo, VaadinIcon.USER_CHECK, I18n.t("ims.account.details.field.created.by"), account.getCreatedBy());
-        addFieldToGrid(statusInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.account.details.field.updated"), account.getUpdateDate() != null ? DateHelper.formatToHumanReadable(account.getUpdateDate()) : null);
-        addFieldToGrid(statusInfo, VaadinIcon.EDIT, I18n.t("ims.account.details.field.updated.by"), account.getUpdatedBy());
+        addFieldToGrid(auditInfo, VaadinIcon.CALENDAR, I18n.t("ims.account.details.field.created"), account.getCreateDate() != null ? DateHelper.formatToHumanReadable(account.getCreateDate()) : null);
+        addFieldToGrid(auditInfo, VaadinIcon.USER_CHECK, I18n.t("ims.account.details.field.created.by"), account.getCreatedBy());
+        addFieldToGrid(auditInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.account.details.field.updated"), account.getUpdateDate() != null ? DateHelper.formatToHumanReadable(account.getUpdateDate()) : null);
+        addFieldToGrid(auditInfo, VaadinIcon.EDIT, I18n.t("ims.account.details.field.updated.by"), account.getUpdatedBy());
 
-        mainLayout.add(createSection(I18n.t("ims.account.details.section.status"), statusInfo));
+        mainLayout.add(createSection(I18n.t("ims.account.details.section.audit"), auditInfo));
 
         // Roles (expandable)
         if (account.getRoleInfo() != null && !account.getRoleInfo().isEmpty()) {
@@ -164,32 +165,35 @@ public class AccountDetailsDialog extends NoActionDialog {
         }
 
         add(mainLayout);
-        addCloseButton();
     }
 
     private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {
         if (value == null || value.isBlank()) return;
-        HorizontalLayout row = new HorizontalLayout();
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.setSpacing(true);
-        row.setWidthFull();
-        row.addClassName("detail-field");
+
+        VerticalLayout field = new VerticalLayout();
+        field.setPadding(false);
+        field.setSpacing(false);
+        field.addClassName("wams-card__detail-field");
+
+        HorizontalLayout labelRow = new HorizontalLayout();
+        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        labelRow.setSpacing(false);
+        labelRow.addClassName("wams-card__detail-field-label-row");
 
         Icon iconComponent = icon.create();
-        iconComponent.setSize("16px");
+        iconComponent.setSize("12px");
         iconComponent.addClassName("detail-field-icon");
 
-        Span labelSpan = new Span(label + ":");
-        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.SMALL);
+        Span labelSpan = new Span(label);
+        labelSpan.addClassName("wams-card__detail-field-label");
+
+        labelRow.add(iconComponent, labelSpan);
 
         Span valueSpan = new Span(value);
-        valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.addClassName("detail-field-value");
+        valueSpan.addClassName("wams-card__detail-field-value");
 
-        row.add(iconComponent, labelSpan, valueSpan);
-        row.expand(valueSpan);
-        container.add(row);
+        field.add(labelRow, valueSpan);
+        container.add(field);
     }
 
     private Component createSection(String title, Component content) {
@@ -205,26 +209,31 @@ public class AccountDetailsDialog extends NoActionDialog {
     }
 
     private Component createCompactList(VaadinIcon icon, String title, String items) {
-        HorizontalLayout layout = new HorizontalLayout();
-        layout.setAlignItems(FlexComponent.Alignment.CENTER);
-        layout.setSpacing(true);
-        layout.setWidthFull();
-        layout.addClassName("compact-list");
+        VerticalLayout field = new VerticalLayout();
+        field.setPadding(false);
+        field.setSpacing(false);
+        field.addClassName("wams-card__detail-field");
+        field.addClassName("compact-list");
+
+        HorizontalLayout labelRow = new HorizontalLayout();
+        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        labelRow.setSpacing(false);
+        labelRow.addClassName("wams-card__detail-field-label-row");
 
         Icon iconComponent = icon.create();
-        iconComponent.setSize("18px");
+        iconComponent.setSize("12px");
         iconComponent.addClassName("detail-field-icon");
 
-        Span titleSpan = new Span(title + ":");
-        titleSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+        Span titleSpan = new Span(title);
+        titleSpan.addClassName("wams-card__detail-field-label");
+
+        labelRow.add(iconComponent, titleSpan);
 
         Span valueSpan = new Span(items);
-        valueSpan.addClassName("detail-field-value");
-        valueSpan.addClassName(LumoUtility.FontSize.SMALL);
+        valueSpan.addClassName("wams-card__detail-field-value");
 
-        layout.add(iconComponent, titleSpan, valueSpan);
-        layout.expand(valueSpan);
-        return layout;
+        field.add(labelRow, valueSpan);
+        return field;
     }
 
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
@@ -243,15 +252,6 @@ public class AccountDetailsDialog extends NoActionDialog {
         valueSpan.addClassName("connection-row-value");
         row.add(iconComponent, labelSpan, valueSpan);
         return row;
-    }
-
-    private void addCloseButton() {
-        Button closeButton = new Button(I18n.t("ims.account.details.close"), e -> close());
-        closeButton.addClassName(LumoUtility.Margin.Top.MEDIUM);
-        HorizontalLayout buttonBar = new HorizontalLayout(closeButton);
-        buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        buttonBar.setWidthFull();
-        add(buttonBar);
     }
 
     private String extractErrorMessage(FeignException ex) {

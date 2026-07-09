@@ -732,6 +732,17 @@
     margin-top: var(--lumo-space-m);
 }
 
+/* View template / sender config dialogs — section dividers, mirrors the
+   *-details-dialog convention used by ParameterDetailsDialog / RoleDetailsDialog /
+   PasswordConfigDetailsDialog / etc. (see ims.css / kms.css) */
+
+.msgtemplate-details-dialog .wams-section-title,
+.sender-config-details-dialog .wams-section-title {
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    margin-bottom: var(--lumo-space-s);
+    padding-bottom: var(--lumo-space-xs);
+}
+
 /* View template dialog detail rows */
 
 .wams-view-details {
@@ -740,17 +751,25 @@
 
 .wams-view-detail-row {
     display: flex;
+    flex-direction: column;
+    gap: 2px;
     padding: var(--lumo-space-xs) 0;
     border-bottom: 1px solid var(--lumo-contrast-10pct);
 }
 
 .wams-view-detail-label {
-    min-width: 120px;
+    font-size: var(--lumo-font-size-xxs);
+    font-weight: 600;
+    color: var(--lumo-secondary-text-color);
+    text-transform: uppercase;
+    letter-spacing: .03em;
 }
 
 .wams-view-detail-value {
     font-family: monospace;
-    word-break: break-all;
+    font-size: var(--lumo-font-size-s);
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 /* Test connection dialog */

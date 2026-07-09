@@ -1,7 +1,6 @@
 package eu.isygoit.ui.ims.views.roleinfo.dialog;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -54,14 +53,11 @@ public class RoleDetailsDialog extends NoActionDialog {
                 buildContent(response.getBody());
             } else {
                 add(new Span(I18n.t("ims.role.details.not.found")));
-                addCloseButton();
             }
         } catch (FeignException ex) {
             add(new Span(I18n.t("ims.role.details.load.error", extractErrorMessage(ex))));
-            addCloseButton();
         } catch (Exception e) {
             add(new Span(I18n.t("ims.role.details.load.error", e.getMessage())));
-            addCloseButton();
         } finally {
             parentView.showLoading(false);
         }
@@ -72,39 +68,50 @@ public class RoleDetailsDialog extends NoActionDialog {
         mainLayout.setPadding(false);
         mainLayout.setSpacing(true);
 
-        // Basic info grid
-        Div basicInfo = new Div();
-        basicInfo.addClassName("wams-card__detail-grid");
+        // Identity — name/code/template code (text identifiers)
+        Div identityInfo = new Div();
+        identityInfo.addClassName("wams-card__detail-grid");
 
-        addFieldToGrid(basicInfo, VaadinIcon.USER, I18n.t("ims.role.details.field.name"), role.getName());
-        addFieldToGrid(basicInfo, VaadinIcon.CODE, I18n.t("ims.role.details.field.code"), role.getCode());
-        addFieldToGrid(basicInfo, VaadinIcon.CLIPBOARD_TEXT, I18n.t("ims.role.details.field.template.code"), role.getTemplateCode());
-        addFieldToGrid(basicInfo, VaadinIcon.BUILDING, I18n.t("ims.role.details.field.tenant"), role.getTenant());
-        addFieldToGrid(basicInfo, VaadinIcon.SORT, I18n.t("ims.role.details.field.level"), String.valueOf(role.getLevel()));
-        addFieldToGrid(basicInfo, VaadinIcon.USERS, I18n.t("ims.role.details.field.users"), String.valueOf(role.getNumberOfUsers()));
-        addFieldToGrid(basicInfo, VaadinIcon.CALENDAR, I18n.t("ims.role.details.field.created"), role.getCreateDate() != null ? DateHelper.formatToHumanReadable(role.getCreateDate()) : null);
-        addFieldToGrid(basicInfo, VaadinIcon.USER_CHECK, I18n.t("ims.role.details.field.created.by"), role.getCreatedBy());
-        addFieldToGrid(basicInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.role.details.field.updated"), role.getUpdateDate() != null ? DateHelper.formatToHumanReadable(role.getUpdateDate()) : null);
-        addFieldToGrid(basicInfo, VaadinIcon.EDIT, I18n.t("ims.role.details.field.updated.by"), role.getUpdatedBy());
+        addFieldToGrid(identityInfo, VaadinIcon.USER, I18n.t("ims.role.details.field.name"), role.getName());
+        addFieldToGrid(identityInfo, VaadinIcon.CODE, I18n.t("ims.role.details.field.code"), role.getCode());
+        addFieldToGrid(identityInfo, VaadinIcon.CLIPBOARD_TEXT, I18n.t("ims.role.details.field.template.code"), role.getTemplateCode());
 
-        mainLayout.add(createSection(I18n.t("ims.role.details.section.general"), basicInfo));
+        mainLayout.add(createSection(I18n.t("ims.role.details.section.identity"), identityInfo));
+
+        // Classification & status — level/number of users
+        Div classificationInfo = new Div();
+        classificationInfo.addClassName("wams-card__detail-grid");
+
+        addFieldToGrid(classificationInfo, VaadinIcon.SORT, I18n.t("ims.role.details.field.level"), String.valueOf(role.getLevel()));
+        addFieldToGrid(classificationInfo, VaadinIcon.USERS, I18n.t("ims.role.details.field.users"), String.valueOf(role.getNumberOfUsers()));
+
+        mainLayout.add(createSection(I18n.t("ims.role.details.section.classification"), classificationInfo));
+
+        // Contact / relations — tenant/description
+        Div contactInfo = new Div();
+        contactInfo.addClassName("wams-card__detail-grid");
+
+        addFieldToGrid(contactInfo, VaadinIcon.BUILDING, I18n.t("ims.role.details.field.tenant"), role.getTenant());
+
+        mainLayout.add(createSection(I18n.t("ims.role.details.section.contact"), contactInfo));
 
         if (role.getDescription() != null && !role.getDescription().isBlank()) {
-            HorizontalLayout descRow = new HorizontalLayout();
-            descRow.setAlignItems(FlexComponent.Alignment.START);
-            descRow.setSpacing(true);
-            descRow.setWidthFull();
-            Icon descIcon = VaadinIcon.FILE_TEXT.create();
-            descIcon.setSize("16px");
-            descIcon.addClassName("detail-field-icon");
-            Span descLabel = new Span(I18n.t("ims.role.details.field.description"));
-            descLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-            Span descValue = new Span(role.getDescription());
-            descValue.addClassName("detail-field-value");
-            descRow.add(descIcon, descLabel, descValue);
-            descRow.expand(descValue);
-            mainLayout.add(descRow);
+            Div descGrid = new Div();
+            descGrid.addClassName("wams-card__detail-grid");
+            addFieldToGrid(descGrid, VaadinIcon.FILE_TEXT, I18n.t("ims.role.details.field.description"), role.getDescription());
+            mainLayout.add(descGrid);
         }
+
+        // Audit — created/updated by & date
+        Div auditInfo = new Div();
+        auditInfo.addClassName("wams-card__detail-grid");
+
+        addFieldToGrid(auditInfo, VaadinIcon.CALENDAR, I18n.t("ims.role.details.field.created"), role.getCreateDate() != null ? DateHelper.formatToHumanReadable(role.getCreateDate()) : null);
+        addFieldToGrid(auditInfo, VaadinIcon.USER_CHECK, I18n.t("ims.role.details.field.created.by"), role.getCreatedBy());
+        addFieldToGrid(auditInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.role.details.field.updated"), role.getUpdateDate() != null ? DateHelper.formatToHumanReadable(role.getUpdateDate()) : null);
+        addFieldToGrid(auditInfo, VaadinIcon.EDIT, I18n.t("ims.role.details.field.updated.by"), role.getUpdatedBy());
+
+        mainLayout.add(createSection(I18n.t("ims.role.details.section.audit"), auditInfo));
 
         // Allowed Applications
         if (role.getAllowedTools() != null && !role.getAllowedTools().isEmpty()) {
@@ -131,32 +138,35 @@ public class RoleDetailsDialog extends NoActionDialog {
         }
 
         add(mainLayout);
-        addCloseButton();
     }
 
     private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {
         if (value == null || value.isBlank()) return;
-        HorizontalLayout row = new HorizontalLayout();
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.setSpacing(true);
-        row.setWidthFull();
-        row.addClassName("detail-field");
+
+        VerticalLayout field = new VerticalLayout();
+        field.setPadding(false);
+        field.setSpacing(false);
+        field.addClassName("wams-card__detail-field");
+
+        HorizontalLayout labelRow = new HorizontalLayout();
+        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        labelRow.setSpacing(false);
+        labelRow.addClassName("wams-card__detail-field-label-row");
 
         Icon iconComponent = icon.create();
-        iconComponent.setSize("16px");
+        iconComponent.setSize("12px");
         iconComponent.addClassName("detail-field-icon");
 
-        Span labelSpan = new Span(label + ":");
-        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.SMALL);
+        Span labelSpan = new Span(label);
+        labelSpan.addClassName("wams-card__detail-field-label");
+
+        labelRow.add(iconComponent, labelSpan);
 
         Span valueSpan = new Span(value);
-        valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.addClassName("detail-field-value");
+        valueSpan.addClassName("wams-card__detail-field-value");
 
-        row.add(iconComponent, labelSpan, valueSpan);
-        row.expand(valueSpan);
-        container.add(row);
+        field.add(labelRow, valueSpan);
+        container.add(field);
     }
 
     private Component createSection(String title, Component content) {
@@ -169,15 +179,6 @@ public class RoleDetailsDialog extends NoActionDialog {
         titleSpan.addClassName("wams-section-title");
         section.add(titleSpan, content);
         return section;
-    }
-
-    private void addCloseButton() {
-        Button closeButton = new Button(I18n.t("ims.role.details.close"), e -> close());
-        closeButton.addClassName(LumoUtility.Margin.Top.MEDIUM);
-        HorizontalLayout buttonBar = new HorizontalLayout(closeButton);
-        buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        buttonBar.setWidthFull();
-        add(buttonBar);
     }
 
     private String extractErrorMessage(FeignException ex) {

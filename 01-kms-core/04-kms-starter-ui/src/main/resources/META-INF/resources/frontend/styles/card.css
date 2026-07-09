@@ -96,8 +96,20 @@
     min-width: 0;
 }
 
+.wams-card__detail-field-label-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.wams-card__detail-field-label-row .detail-field-icon {
+    flex-shrink: 0;
+    color: var(--lumo-secondary-text-color);
+}
+
 .wams-card__detail-field-label {
     font-size: var(--lumo-font-size-xxs);
+    font-weight: 600;
     color: var(--lumo-secondary-text-color);
     text-transform: uppercase;
     letter-spacing: .03em;
@@ -105,8 +117,10 @@
 
 .wams-card__detail-field-value {
     font-size: var(--lumo-font-size-s);
-    overflow: hidden;
-    text-overflow: ellipsis;
+    color: var(--lumo-body-text-color);
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: pre-wrap;
 }
 
 /* ── Generic stat card (dashboard summary tiles) ─────────────────────────── */
@@ -135,4 +149,60 @@
 .wams-stat-card__label {
     color: var(--lumo-secondary-text-color);
     font-size: var(--lumo-font-size-s);
+}
+
+/* ── Dashboard favorites/shortcuts bar (eu.isygoit.ui.common.component.DashboardShortcutsBar) ──
+   Shown at the top of every module dashboard, above the stat cards. */
+
+.wams-dashboard-shortcuts {
+    background: var(--lumo-contrast-5pct);
+    border: 1px solid var(--lumo-contrast-10pct);
+    border-radius: var(--lumo-border-radius-l);
+    padding: var(--lumo-space-s) var(--lumo-space-m);
+    margin-bottom: var(--lumo-space-m);
+    flex-wrap: wrap;
+    gap: var(--lumo-space-s);
+}
+
+.wams-dashboard-shortcuts__title {
+    font-size: var(--lumo-font-size-xs);
+    font-weight: 600;
+    color: var(--lumo-secondary-text-color);
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    white-space: nowrap;
+    margin-right: var(--lumo-space-s);
+}
+
+.wams-dashboard-shortcuts__items {
+    flex-wrap: wrap;
+    gap: var(--lumo-space-xs);
+}
+
+.wams-dashboard-shortcut {
+    border-radius: var(--lumo-border-radius-l);
+    background: var(--lumo-base-color);
+    border: 1px solid var(--lumo-contrast-10pct);
+}
+
+.wams-dashboard-shortcut:hover {
+    background: var(--lumo-primary-color-10pct);
+    border-color: var(--lumo-primary-color-50pct);
+    color: var(--lumo-primary-text-color);
+}
+
+@media (max-width: 640px) {
+    .wams-dashboard-shortcuts {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .wams-dashboard-shortcuts__title {
+        margin-right: 0;
+        margin-bottom: var(--lumo-space-xs);
+    }
+
+    .wams-dashboard-shortcuts__items {
+        justify-content: center;
+    }
 }

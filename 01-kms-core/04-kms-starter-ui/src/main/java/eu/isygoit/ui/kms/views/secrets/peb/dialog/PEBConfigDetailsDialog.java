@@ -43,11 +43,12 @@ public class PEBConfigDetailsDialog extends NoActionDialog {
         identityGrid.addClassName("wams-card__detail-grid");
         addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("kms.peb.details.field.code"), dto.getCode());
         addFieldToGrid(identityGrid, VaadinIcon.BUILDING, I18n.t("kms.peb.details.field.tenant"), dto.getTenant());
-        addFieldToGrid(identityGrid, VaadinIcon.COG, I18n.t("kms.peb.card.algorithm"), dto.getAlgorithm() != null ? dto.getAlgorithm().meaning() : null);
         mainLayout.add(createSection(I18n.t("kms.peb.details.section.identity"), identityGrid));
 
+        // Algorithm / cryptographic parameters — everything that shapes how encryption is performed.
         Div cryptoGrid = new Div();
         cryptoGrid.addClassName("wams-card__detail-grid");
+        addFieldToGrid(cryptoGrid, VaadinIcon.COG, I18n.t("kms.peb.card.algorithm"), dto.getAlgorithm() != null ? dto.getAlgorithm().meaning() : null);
         addFieldToGrid(cryptoGrid, VaadinIcon.ROTATE_RIGHT, I18n.t("kms.peb.card.iterations"), dto.getKeyObtentionIterations() != null ? String.valueOf(dto.getKeyObtentionIterations()) : null);
         addFieldToGrid(cryptoGrid, VaadinIcon.DROP, I18n.t("kms.peb.card.salt.generator"), dto.getSaltGenerator() != null ? dto.getSaltGenerator().meaning() : null);
         addFieldToGrid(cryptoGrid, VaadinIcon.RANDOM, I18n.t("kms.peb.card.iv.generator"), dto.getIvGenerator() != null ? dto.getIvGenerator().meaning() : null);
@@ -74,27 +75,31 @@ public class PEBConfigDetailsDialog extends NoActionDialog {
 
     private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {
         if (value == null || value.isBlank()) return;
-        HorizontalLayout row = new HorizontalLayout();
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.setSpacing(true);
-        row.setWidthFull();
-        row.addClassName("detail-field");
+
+        VerticalLayout field = new VerticalLayout();
+        field.setPadding(false);
+        field.setSpacing(false);
+        field.addClassName("wams-card__detail-field");
+
+        HorizontalLayout labelRow = new HorizontalLayout();
+        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        labelRow.setSpacing(false);
+        labelRow.addClassName("wams-card__detail-field-label-row");
 
         Icon iconComponent = icon.create();
-        iconComponent.setSize("16px");
+        iconComponent.setSize("12px");
         iconComponent.addClassName("detail-field-icon");
 
-        Span labelSpan = new Span(label + ":");
-        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.SMALL);
+        Span labelSpan = new Span(label);
+        labelSpan.addClassName("wams-card__detail-field-label");
+
+        labelRow.add(iconComponent, labelSpan);
 
         Span valueSpan = new Span(value);
-        valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.addClassName("detail-field-value");
+        valueSpan.addClassName("wams-card__detail-field-value");
 
-        row.add(iconComponent, labelSpan, valueSpan);
-        row.expand(valueSpan);
-        container.add(row);
+        field.add(labelRow, valueSpan);
+        container.add(field);
     }
 
     private VerticalLayout createSection(String title, Div content) {

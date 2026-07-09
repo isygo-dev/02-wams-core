@@ -1,14 +1,84 @@
 /*
  * Design tokens shared by every module (common, auth, ims, kms, dms, mms, sms, cms).
- * Custom properties that Lumo does not provide (warning/info palettes) are defined
- * once here; everything else reuses Lumo's built-in --lumo-* custom properties so
- * the app follows the active Lumo theme (including dark mode) automatically.
+ *
+ * Visual language is aligned to the Atlassian Design System (Jira's design
+ * system): interactive blue #0C66E4, semantic danger/success/warning colors,
+ * an 8px spacing grid, compact 3px control radii, and a denser type scale.
+ *
+ * This works by overriding Vaadin Lumo's own CSS custom properties at
+ * document scope. Because virtually every component in this app is already
+ * styled through var(--lumo-*) (Lumo utility classes, Button/Badge theme
+ * variants, etc.), re-pointing those variables re-skins the whole
+ * application without having to touch each component individually.
+ * Lumo's neutral/contrast ramp (--lumo-contrast-*) is already a cool
+ * blue-gray (hsl hue 214) close to Atlassian's own neutral ramp, so it is
+ * left as-is; only the semantic accents, radii, shadows, type scale and
+ * heading/body text colors are re-pointed below.
  */
 html {
-    --wams-warning-bg: #FFF4E5;
-    --wams-warning-fg: #B25600;
-    --wams-info-bg: #E9ECEF;
-    --wams-info-fg: #495057;
+    /* ── Brand / semantic accents (Atlassian Design System) ─────────────── */
+    --lumo-primary-color: #0C66E4;
+    --lumo-primary-color-50pct: rgba(12, 102, 228, 0.5);
+    --lumo-primary-color-10pct: rgba(12, 102, 228, 0.1);
+    --lumo-primary-text-color: #0C66E4;
+    --lumo-primary-contrast-color: #FFFFFF;
+
+    --lumo-error-color: #C9372C;
+    --lumo-error-color-50pct: rgba(201, 55, 44, 0.5);
+    --lumo-error-color-10pct: rgba(201, 55, 44, 0.1);
+    --lumo-error-text-color: #AE2E24;
+    --lumo-error-contrast-color: #FFFFFF;
+
+    --lumo-success-color: #1F845A;
+    --lumo-success-color-50pct: rgba(31, 132, 90, 0.5);
+    --lumo-success-color-10pct: rgba(31, 132, 90, 0.1);
+    --lumo-success-text-color: #216E4E;
+    --lumo-success-contrast-color: #FFFFFF;
+
+    /* Lumo has no native "warning" palette; every module reuses these two. */
+    --wams-warning-color: #A54800;
+    --wams-warning-bg: #FFF0B3;
+    --wams-warning-bg-subtle: #FFF7D6;
+    --wams-warning-border: #F5CD47;
+    --wams-info-bg: #E9F2FF;
+    --wams-info-fg: #0055CC;
+    --wams-discovery-color: #6E5DC6;
+    --wams-discovery-bg: #F3F0FD;
+
+    /* ── Text ─────────────────────────────────────────────────────────────── */
+    --lumo-header-text-color: #172B4D;
+    --lumo-body-text-color: #172B4D;
+    --lumo-secondary-text-color: #44546F;
+    --lumo-tertiary-text-color: #626F86;
+    --lumo-disabled-text-color: #8590A2;
+
+    /* ── Shape: compact, mostly-square controls (not pill-shaped) ────────── */
+    --lumo-border-radius-s: 3px;
+    --lumo-border-radius-m: 3px;
+    --lumo-border-radius-l: 6px;
+    --lumo-border-radius-xl: 8px;
+
+    /* ── Shadows: subtle, flat elevation (Jira avoids heavy drop shadows) ── */
+    --lumo-box-shadow-xs: 0 1px 1px rgba(9, 30, 66, 0.13);
+    --lumo-box-shadow-s: 0 1px 2px rgba(9, 30, 66, 0.16), 0 0 1px rgba(9, 30, 66, 0.1);
+    --lumo-box-shadow-m: 0 4px 8px -2px rgba(9, 30, 66, 0.18), 0 0 1px rgba(9, 30, 66, 0.12);
+    --lumo-box-shadow-l: 0 8px 16px -4px rgba(9, 30, 66, 0.22), 0 0 1px rgba(9, 30, 66, 0.12);
+    --lumo-box-shadow-xl: 0 12px 24px -6px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.12);
+
+    /* ── Type scale: denser than Lumo's default, matching Jira's UI density ── */
+    --lumo-font-size-xxs: 0.6875rem;  /* 11px */
+    --lumo-font-size-xs: 0.75rem;     /* 12px */
+    --lumo-font-size-s: 0.8125rem;    /* 13px */
+    --lumo-font-size-m: 0.875rem;     /* 14px — base body size */
+    --lumo-font-size-l: 1rem;         /* 16px */
+    --lumo-font-size-xl: 1.25rem;     /* 20px */
+    --lumo-font-size-xxl: 1.5rem;     /* 24px */
+    --lumo-font-size-xxxl: 1.75rem;   /* 28px */
+
+    /* ── Responsive breakpoints (shared reference, used via media queries — CSS
+       custom properties can't be used inside @media conditions, so these are
+       documented here as the single source of truth for every stylesheet in
+       this app to copy literally): 480px / 768px / 1024px / 1280px. ── */
 }
 
 /* ── Status / chip tokens ───────────────────────────────────────────────── */
@@ -16,21 +86,24 @@ html {
 .wams-chip {
     display: inline-block;
     white-space: nowrap;
+    border-radius: 3px;
+    font-weight: 600;
+    letter-spacing: .01em;
 }
 
 .wams-chip--success {
-    background-color: var(--lumo-success-color-10pct);
+    background-color: #DFFCEC;
     color: var(--lumo-success-text-color);
 }
 
 .wams-chip--error {
-    background-color: var(--lumo-error-color-10pct);
+    background-color: #FFECEB;
     color: var(--lumo-error-text-color);
 }
 
 .wams-chip--warning {
     background-color: var(--wams-warning-bg);
-    color: var(--wams-warning-fg);
+    color: var(--wams-warning-color);
 }
 
 .wams-chip--neutral {
@@ -41,4 +114,35 @@ html {
 .wams-chip--info {
     background-color: var(--wams-info-bg);
     color: var(--wams-info-fg);
+}
+
+/* ── Standard card action-button treatment ───────────────────────────────
+   Every BaseCard subclass's action buttons go through BaseCard's
+   createDetailsButton/createEditButton/createToggleButton/createDeleteButton
+   helpers (see BaseCard.java), which apply these classes consistently so
+   every card in the app hovers/focuses the same way regardless of module. */
+
+.wams-action-btn {
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.wams-action-btn:hover {
+    transform: translateY(-1px);
+}
+
+.wams-action-btn--danger:hover {
+    background-color: var(--lumo-error-color-10pct);
+    color: var(--lumo-error-text-color);
+}
+
+/* ── Responsive helpers shared across dialogs/cards/layouts ──────────────── */
+
+@media (max-width: 480px) {
+    .wams-dialog-responsive {
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        border-radius: 0 !important;
+    }
 }

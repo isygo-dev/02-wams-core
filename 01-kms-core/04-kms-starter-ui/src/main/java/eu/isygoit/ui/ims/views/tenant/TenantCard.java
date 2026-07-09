@@ -64,10 +64,11 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
         titleLayout.setSpacing(false);
         titleLayout.setWidthFull();
 
-        // Row 1: image and action buttons
+        // Row 1: avatar image only — action buttons live exclusively in the
+        // card's footer (built once by BaseCard#buildFooter()).
         HorizontalLayout row1 = new HorizontalLayout();
         row1.setWidthFull();
-        row1.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        row1.setJustifyContentMode(FlexComponent.JustifyContentMode.START);
         row1.setAlignItems(FlexComponent.Alignment.CENTER);
         row1.setSpacing(true);
         row1.addClassName("card-row");
@@ -78,18 +79,7 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
         tenantImage.addClassName("card-avatar");
         tenantImage.setSrc(getSvgPlaceholder());
 
-        buttonBar = new HorizontalLayout();
-        buttonBar.setSpacing(true);
-        buttonBar.setPadding(false);
-        buttonBar.addClassName("card-row");
-        buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        buttonBar.addClassName(cardCssClassName() + "__button-bar");
-
-        List<Button> buttons = buildActionButtons();
-        buttons.forEach(buttonBar::add);
-
-        row1.add(tenantImage, buttonBar);
-        row1.expand(buttonBar);
+        row1.add(tenantImage);
 
         // Row 2: name + status chip
         HorizontalLayout row2 = new HorizontalLayout();
@@ -111,24 +101,25 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("ims.tenant.card.details.tooltip"));
-        detailsBtn.addClickListener(e -> new TenantDetailsDialog(parentView, objectService, tenant.getId()).open());
+        Button detailsBtn = createDetailsButton(I18n.t("ims.tenant.card.details.tooltip"),
+                () -> new TenantDetailsDialog(parentView, objectService, tenant.getId()).open());
 
-        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("ims.tenant.card.edit.tooltip"));
-        editBtn.addClickListener(e -> parentView.openUpdateTenantDialog(tenant, () -> {
-            if (onRefresh != null) onRefresh.run();
-        }));
+        Button editBtn = createEditButton(I18n.t("ims.tenant.card.edit.tooltip"),
+                () -> parentView.openUpdateTenantDialog(tenant, () -> {
+                    if (onRefresh != null) onRefresh.run();
+                }));
 
-        toggleStatusBtn = createIconButton(
-                tenant.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED ? VaadinIcon.LOCK : VaadinIcon.UNLOCK,
-                tenant.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("ims.tenant.card.disable.tooltip") : I18n.t("ims.tenant.card.enable.tooltip")
+        toggleStatusBtn = createToggleButton(
+                tenant.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED,
+                I18n.t("ims.tenant.card.enable.tooltip"),
+                I18n.t("ims.tenant.card.disable.tooltip"),
+                this::openToggleStatusDialog
         );
-        toggleStatusBtn.addClickListener(e -> openToggleStatusDialog());
 
-        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("ims.tenant.card.delete.tooltip"));
-        deleteBtn.addClickListener(e -> new DeleteTenantDialog(parentView, objectService, tenant.getId(), () -> {
-            if (onRefresh != null) onRefresh.run();
-        }).open());
+        Button deleteBtn = createDeleteButton(I18n.t("ims.tenant.card.delete.tooltip"),
+                () -> new DeleteTenantDialog(parentView, objectService, tenant.getId(), () -> {
+                    if (onRefresh != null) onRefresh.run();
+                }).open());
 
         return List.of(detailsBtn, editBtn, toggleStatusBtn, deleteBtn);
     }

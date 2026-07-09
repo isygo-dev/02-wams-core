@@ -61,19 +61,21 @@ public class CategoryCard extends BaseCard<CategoryManagementView, CategoryServi
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("dms.category.card.details.tooltip"));
-        detailsBtn.addClickListener(e -> new CategoryDetailsDialog(parentView, objectService, category.getId()).open());
+        Button detailsBtn = createDetailsButton(I18n.t("dms.category.card.details.tooltip"),
+                () -> new CategoryDetailsDialog(parentView, objectService, category.getId()).open());
 
-        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("dms.category.card.edit.tooltip"));
-        editBtn.addClickListener(e -> parentView.openUpdateCategoryDialog(category, () -> {
-            if (onRefresh != null) onRefresh.run();
-        }));
+        Button editBtn = createEditButton(I18n.t("dms.category.card.edit.tooltip"),
+                () -> parentView.openUpdateCategoryDialog(category, () -> {
+                    if (onRefresh != null) onRefresh.run();
+                }));
 
-        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("dms.category.card.delete.tooltip"));
-        deleteBtn.addClickListener(e -> new DeleteCategoryDialog(parentView, objectService, category.getId(), () -> {
-            if (onRefresh != null) onRefresh.run();
-        }).open());
+        Button deleteBtn = createDeleteButton(I18n.t("dms.category.card.delete.tooltip"),
+                () -> new DeleteCategoryDialog(parentView, objectService, category.getId(), () -> {
+                    if (onRefresh != null) onRefresh.run();
+                }).open());
 
+        // Category has no enabled/disabled status, so there is no toggle button;
+        // standard order is otherwise Details -> Edit -> Delete (Delete last, danger-styled).
         return List.of(detailsBtn, editBtn, deleteBtn);
     }
 

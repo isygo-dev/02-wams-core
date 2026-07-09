@@ -59,18 +59,18 @@ public class RoleCard extends BaseCard<RoleManagementView, RoleInfoService> {
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("ims.role.card.details.tooltip"));
-        detailsBtn.addClickListener(e -> new RoleDetailsDialog(parentView, objectService, role.getId()).open());
+        Button detailsBtn = createDetailsButton(I18n.t("ims.role.card.details.tooltip"),
+                () -> new RoleDetailsDialog(parentView, objectService, role.getId()).open());
 
-        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("ims.role.card.edit.tooltip"));
-        editBtn.addClickListener(e -> parentView.openUpdateRoleDialog(role, () -> {
-            if (onRefresh != null) onRefresh.run();
-        }));
+        Button editBtn = createEditButton(I18n.t("ims.role.card.edit.tooltip"),
+                () -> parentView.openUpdateRoleDialog(role, () -> {
+                    if (onRefresh != null) onRefresh.run();
+                }));
 
-        Button deleteBtn = createIconButton(VaadinIcon.TRASH, I18n.t("ims.role.card.delete.tooltip"));
-        deleteBtn.addClickListener(e -> new DeleteRoleDialog(parentView, objectService, role.getId(), () -> {
-            if (onRefresh != null) onRefresh.run();
-        }).open());
+        Button deleteBtn = createDeleteButton(I18n.t("ims.role.card.delete.tooltip"),
+                () -> new DeleteRoleDialog(parentView, objectService, role.getId(), () -> {
+                    if (onRefresh != null) onRefresh.run();
+                }).open());
 
         return List.of(detailsBtn, editBtn, deleteBtn);
     }

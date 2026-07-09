@@ -82,6 +82,11 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
 
     @Override
     protected List<Button> buildActionButtons() {
+        // Standard contract: Details -> Edit -> entity-specific extras -> Delete (last, danger)
+        Button detailsBtn = createDetailsButton(I18n.t("kms.keystore.card.details"), this::showDetails);
+
+        Button updateBtn = createEditButton(I18n.t("kms.keystore.card.update"), this::updateCustomKeyStore);
+
         Button connectBtn = createIconButton(VaadinIcon.CONNECT, I18n.t("kms.keystore.card.connect"));
         connectBtn.addClickListener(e -> confirmConnect());
         connectBtn.setEnabled(!"CONNECTED".equalsIgnoreCase(connectionState));
@@ -90,16 +95,9 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
         disconnectBtn.addClickListener(e -> confirmDisconnect());
         disconnectBtn.setEnabled("CONNECTED".equalsIgnoreCase(connectionState));
 
-        Button updateBtn = createIconButton(VaadinIcon.EDIT, I18n.t("kms.keystore.card.update"));
-        updateBtn.addClickListener(e -> updateCustomKeyStore());
+        Button deleteBtn = createDeleteButton(I18n.t("kms.keystore.card.delete"), this::confirmDelete);
 
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("kms.keystore.card.details"));
-        detailsBtn.addClickListener(e -> showDetails());
-
-        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, I18n.t("kms.keystore.card.delete"));
-        deleteBtn.addClickListener(e -> confirmDelete());
-
-        return List.of(connectBtn, disconnectBtn, updateBtn, detailsBtn, deleteBtn);
+        return List.of(detailsBtn, updateBtn, connectBtn, disconnectBtn, deleteBtn);
     }
 
     @Override

@@ -1,8 +1,8 @@
 package eu.isygoit.ui.mms.views.msgtemplate.dialog;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -18,12 +18,19 @@ import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
 import eu.isygoit.remote.mms.SenderConfigService;
+import eu.isygoit.ui.common.dialog.NoActionDialog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
+/**
+ * Read-only details dialog for a {@link MsgTemplateDto}, split into sections
+ * by data type (Identity, Configuration, Relations, File) with a divider
+ * between each — same convention as {@code ParameterDetailsDialog} and other
+ * {@code *DetailsDialog} classes across the app.
+ */
 @Slf4j
-public class ViewMsgTemplateDialog extends Dialog {
+public class ViewMsgTemplateDialog extends NoActionDialog {
 
     private final MsgTemplateFileService templateFileService;
     private final SenderConfigService senderConfigService;
@@ -34,17 +41,18 @@ public class ViewMsgTemplateDialog extends Dialog {
     public ViewMsgTemplateDialog(MsgTemplateFileService templateFileService,
                                  SenderConfigService senderConfigService,
                                  MsgTemplateDto template) {
+        super(I18n.t("mms.msgtemplate.dialog.view.title",
+                template.getName() != null ? template.getName() : template.getId()));
         this.templateFileService = templateFileService;
         this.senderConfigService = senderConfigService;
         this.template = template;
 
-        setHeaderTitle(I18n.t("mms.msgtemplate.dialog.view.title",
-                template.getName() != null ? template.getName() : template.getId()));
         setWidth("600px");
         setMaxWidth("95vw");
         setModal(true);
         setDraggable(true);
         setResizable(true);
+        addClassName("msgtemplate-details-dialog");
 
         loadSenderConfigDetails();
         buildContent();
@@ -73,62 +81,70 @@ public class ViewMsgTemplateDialog extends Dialog {
     }
 
     private void buildContent() {
-        VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setPadding(true);
-        mainLayout.setSpacing(true);
-        mainLayout.setWidthFull();
+        // ── Identity ─────────────────────────────────────────────────────────
+        Div identityGrid = new Div();
+        identityGrid.addClassName("wams-view-details");
+        addDetailRow(identityGrid, I18n.t("mms.msgtemplate.dialog.view.id"), template.getId().toString());
+        addDetailRow(identityGrid, I18n.t("mms.msgtemplate.dialog.view.code"), template.getCode());
+        addDetailRow(identityGrid, I18n.t("mms.msgtemplate.dialog.view.tenant"), template.getTenant());
+        addDetailRow(identityGrid, I18n.t("mms.msgtemplate.dialog.view.name"), template.getName());
+        add(createSection(I18n.t("mms.msgtemplate.dialog.view.section.identity"), identityGrid));
 
-        // Template details
-        Div detailsDiv = new Div();
-        detailsDiv.addClassName("wams-view-details");
-
-        addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.id"), template.getId().toString());
-        addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.code"), template.getCode());
-        addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.tenant"), template.getTenant());
-        addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.name"), template.getName());
-        addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.language"),
+        // ── Configuration ────────────────────────────────────────────────────
+        Div configGrid = new Div();
+        configGrid.addClassName("wams-view-details");
+        addDetailRow(configGrid, I18n.t("mms.msgtemplate.dialog.view.language"),
                 template.getLanguage() != null ? template.getLanguage().name() : I18n.t("mms.common.value.notAvailable"));
-        addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.defaultSender"),
+        addDetailRow(configGrid, I18n.t("mms.msgtemplate.dialog.view.defaultSender"),
                 template.getDefaultSender() != null ? template.getDefaultSender() : I18n.t("mms.common.value.notAvailable"));
-
-        // Sender Config with tooltip
-        addDetailRowWithTooltip(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.senderConfig"),
-                senderConfigDisplayName, senderConfigTooltip);
-
-        addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.description"),
+        addDetailRow(configGrid, I18n.t("mms.msgtemplate.dialog.view.description"),
                 template.getDescription() != null ? template.getDescription() : I18n.t("mms.common.value.notAvailable"));
-        addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.file"),
-                template.getOriginalFileName() != null ? template.getOriginalFileName() : I18n.t("mms.common.value.notAvailable"));
-        addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.fileName"),
-                template.getFileName() != null ? template.getFileName() : I18n.t("mms.common.value.notAvailable"));
+        add(createSection(I18n.t("mms.msgtemplate.dialog.view.section.configuration"), configGrid));
 
+        // ── Relations (sender config reference) ─────────────────────────────
+        Div relationsGrid = new Div();
+        relationsGrid.addClassName("wams-view-details");
+        addDetailRowWithTooltip(relationsGrid, I18n.t("mms.msgtemplate.dialog.view.senderConfig"),
+                senderConfigDisplayName, senderConfigTooltip);
+        add(createSection(I18n.t("mms.msgtemplate.dialog.view.section.relations"), relationsGrid));
+
+        // ── File ─────────────────────────────────────────────────────────────
+        Div fileGrid = new Div();
+        fileGrid.addClassName("wams-view-details");
+        addDetailRow(fileGrid, I18n.t("mms.msgtemplate.dialog.view.file"),
+                template.getOriginalFileName() != null ? template.getOriginalFileName() : I18n.t("mms.common.value.notAvailable"));
+        addDetailRow(fileGrid, I18n.t("mms.msgtemplate.dialog.view.fileName"),
+                template.getFileName() != null ? template.getFileName() : I18n.t("mms.common.value.notAvailable"));
         if (template.getPath() != null) {
-            addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.path"), template.getPath());
+            addDetailRow(fileGrid, I18n.t("mms.msgtemplate.dialog.view.path"), template.getPath());
         }
 
-        mainLayout.add(detailsDiv);
-
-        // Actions
-        HorizontalLayout actions = new HorizontalLayout();
-        actions.setWidthFull();
-        actions.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        actions.setSpacing(true);
-
-        // Download button
         boolean hasFile = template.getFileName() != null && !template.getFileName().isEmpty();
+        HorizontalLayout downloadRow = new HorizontalLayout();
+        downloadRow.setWidthFull();
+        downloadRow.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
         Button downloadBtn = new Button(I18n.t("mms.msgtemplate.dialog.view.download"), new Icon(VaadinIcon.DOWNLOAD));
-        downloadBtn.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+        downloadBtn.addThemeVariants(ButtonVariant.LUMO_SUCCESS, ButtonVariant.LUMO_SMALL);
         downloadBtn.setEnabled(hasFile);
         downloadBtn.addClickListener(e -> downloadTemplate());
-        actions.add(downloadBtn);
+        downloadRow.add(downloadBtn);
 
-        // Close button
-        Button closeBtn = new Button(I18n.t("common.dialog.close"), e -> close());
-        closeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        actions.add(closeBtn);
+        VerticalLayout fileSection = new VerticalLayout(fileGrid, downloadRow);
+        fileSection.setPadding(false);
+        fileSection.setSpacing(true);
+        add(createSection(I18n.t("mms.msgtemplate.dialog.view.section.file"), fileSection));
+    }
 
-        mainLayout.add(actions);
-        add(mainLayout);
+    private Component createSection(String title, Component content) {
+        VerticalLayout section = new VerticalLayout();
+        section.setPadding(false);
+        section.setSpacing(false);
+        Span titleSpan = new Span(title);
+        titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
+        titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
+        titleSpan.addClassName("wams-section-title");
+        section.add(titleSpan, content);
+        return section;
     }
 
     private void addDetailRow(Div container, String label, String value) {

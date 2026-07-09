@@ -1,7 +1,6 @@
 package eu.isygoit.ui.ims.views.annex.dialog;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -51,14 +50,11 @@ public class AnnexDetailsDialog extends NoActionDialog {
                 buildContent(response.getBody());
             } else {
                 add(new Span(I18n.t("ims.annex.details.not.found")));
-                addCloseButton();
             }
         } catch (FeignException ex) {
             add(new Span(I18n.t("ims.annex.details.load.error", extractErrorMessage(ex))));
-            addCloseButton();
         } catch (Exception e) {
             add(new Span(I18n.t("ims.annex.details.load.error", e.getMessage())));
-            addCloseButton();
         } finally {
             parentView.showLoading(false);
         }
@@ -69,50 +65,75 @@ public class AnnexDetailsDialog extends NoActionDialog {
         mainLayout.setPadding(false);
         mainLayout.setSpacing(true);
 
-        Div infoGrid = new Div();
-        infoGrid.addClassName("wams-card__detail-grid");
+        // Identity — table code/value/reference/order (text identifiers)
+        Div identityInfo = new Div();
+        identityInfo.addClassName("wams-card__detail-grid");
 
-        addFieldToGrid(infoGrid, VaadinIcon.BUILDING, I18n.t("ims.annex.details.field.tenant"), annex.getTenant());
-        addFieldToGrid(infoGrid, VaadinIcon.CODE, I18n.t("ims.annex.details.field.table.code"), annex.getTableCode());
-        addFieldToGrid(infoGrid, VaadinIcon.LOCATION_ARROW_CIRCLE, I18n.t("ims.annex.details.field.language"), annex.getLanguage() != null ? annex.getLanguage().name() : null);
-        addFieldToGrid(infoGrid, VaadinIcon.FONT, I18n.t("ims.annex.details.field.value"), annex.getValue());
-        addFieldToGrid(infoGrid, VaadinIcon.FILE_TEXT, I18n.t("ims.annex.details.field.description"), annex.getDescription());
-        addFieldToGrid(infoGrid, VaadinIcon.LINK, I18n.t("ims.annex.details.field.reference"), annex.getReference());
-        addFieldToGrid(infoGrid, VaadinIcon.SORT, I18n.t("ims.annex.details.field.order"), annex.getAnnexOrder() != null ? String.valueOf(annex.getAnnexOrder()) : null);
-        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR, I18n.t("ims.annex.details.field.created"), annex.getCreateDate() != null ? DateHelper.formatToHumanReadable(annex.getCreateDate()) : null);
-        addFieldToGrid(infoGrid, VaadinIcon.USER_CHECK, I18n.t("ims.annex.details.field.created.by"), annex.getCreatedBy());
-        addFieldToGrid(infoGrid, VaadinIcon.CALENDAR_O, I18n.t("ims.annex.details.field.updated"), annex.getUpdateDate() != null ? DateHelper.formatToHumanReadable(annex.getUpdateDate()) : null);
-        addFieldToGrid(infoGrid, VaadinIcon.EDIT, I18n.t("ims.annex.details.field.updated.by"), annex.getUpdatedBy());
+        addFieldToGrid(identityInfo, VaadinIcon.CODE, I18n.t("ims.annex.details.field.table.code"), annex.getTableCode());
+        addFieldToGrid(identityInfo, VaadinIcon.FONT, I18n.t("ims.annex.details.field.value"), annex.getValue());
+        addFieldToGrid(identityInfo, VaadinIcon.LINK, I18n.t("ims.annex.details.field.reference"), annex.getReference());
+        addFieldToGrid(identityInfo, VaadinIcon.SORT, I18n.t("ims.annex.details.field.order"), annex.getAnnexOrder() != null ? String.valueOf(annex.getAnnexOrder()) : null);
 
-        mainLayout.add(createSection(I18n.t("ims.annex.details.section.info"), infoGrid));
+        mainLayout.add(createSection(I18n.t("ims.annex.details.section.identity"), identityInfo));
+
+        // Classification & status — language
+        Div classificationInfo = new Div();
+        classificationInfo.addClassName("wams-card__detail-grid");
+
+        addFieldToGrid(classificationInfo, VaadinIcon.LOCATION_ARROW_CIRCLE, I18n.t("ims.annex.details.field.language"), annex.getLanguage() != null ? annex.getLanguage().name() : null);
+
+        mainLayout.add(createSection(I18n.t("ims.annex.details.section.classification"), classificationInfo));
+
+        // Contact / relations — tenant/description
+        Div contactInfo = new Div();
+        contactInfo.addClassName("wams-card__detail-grid");
+
+        addFieldToGrid(contactInfo, VaadinIcon.BUILDING, I18n.t("ims.annex.details.field.tenant"), annex.getTenant());
+        addFieldToGrid(contactInfo, VaadinIcon.FILE_TEXT, I18n.t("ims.annex.details.field.description"), annex.getDescription());
+
+        mainLayout.add(createSection(I18n.t("ims.annex.details.section.contact"), contactInfo));
+
+        // Audit — created/updated by & date
+        Div auditInfo = new Div();
+        auditInfo.addClassName("wams-card__detail-grid");
+
+        addFieldToGrid(auditInfo, VaadinIcon.CALENDAR, I18n.t("ims.annex.details.field.created"), annex.getCreateDate() != null ? DateHelper.formatToHumanReadable(annex.getCreateDate()) : null);
+        addFieldToGrid(auditInfo, VaadinIcon.USER_CHECK, I18n.t("ims.annex.details.field.created.by"), annex.getCreatedBy());
+        addFieldToGrid(auditInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.annex.details.field.updated"), annex.getUpdateDate() != null ? DateHelper.formatToHumanReadable(annex.getUpdateDate()) : null);
+        addFieldToGrid(auditInfo, VaadinIcon.EDIT, I18n.t("ims.annex.details.field.updated.by"), annex.getUpdatedBy());
+
+        mainLayout.add(createSection(I18n.t("ims.annex.details.section.audit"), auditInfo));
 
         add(mainLayout);
-        addCloseButton();
     }
 
     private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {
         if (value == null || value.isBlank()) return;
-        HorizontalLayout row = new HorizontalLayout();
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.setSpacing(true);
-        row.setWidthFull();
-        row.addClassName("detail-field");
+
+        VerticalLayout field = new VerticalLayout();
+        field.setPadding(false);
+        field.setSpacing(false);
+        field.addClassName("wams-card__detail-field");
+
+        HorizontalLayout labelRow = new HorizontalLayout();
+        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        labelRow.setSpacing(false);
+        labelRow.addClassName("wams-card__detail-field-label-row");
 
         Icon iconComponent = icon.create();
-        iconComponent.setSize("16px");
+        iconComponent.setSize("12px");
         iconComponent.addClassName("detail-field-icon");
 
-        Span labelSpan = new Span(label + ":");
-        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.SMALL);
+        Span labelSpan = new Span(label);
+        labelSpan.addClassName("wams-card__detail-field-label");
+
+        labelRow.add(iconComponent, labelSpan);
 
         Span valueSpan = new Span(value);
-        valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.addClassName("detail-field-value");
+        valueSpan.addClassName("wams-card__detail-field-value");
 
-        row.add(iconComponent, labelSpan, valueSpan);
-        row.expand(valueSpan);
-        container.add(row);
+        field.add(labelRow, valueSpan);
+        container.add(field);
     }
 
     private Component createSection(String title, Component content) {
@@ -125,15 +146,6 @@ public class AnnexDetailsDialog extends NoActionDialog {
         titleSpan.addClassName("wams-section-title");
         section.add(titleSpan, content);
         return section;
-    }
-
-    private void addCloseButton() {
-        Button closeButton = new Button(I18n.t("ims.annex.details.close"), e -> close());
-        closeButton.addClassName(LumoUtility.Margin.Top.MEDIUM);
-        HorizontalLayout buttonBar = new HorizontalLayout(closeButton);
-        buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        buttonBar.setWidthFull();
-        add(buttonBar);
     }
 
     private String extractErrorMessage(FeignException ex) {

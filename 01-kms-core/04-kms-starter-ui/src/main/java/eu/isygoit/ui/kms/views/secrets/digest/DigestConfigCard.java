@@ -61,12 +61,11 @@ public class DigestConfigCard extends BaseCard<DigestConfigView, DigestConfigSer
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("kms.digest.card.details.tooltip"));
-        detailsBtn.addClickListener(e -> new DigestConfigDetailsDialog(dto).open());
-        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("kms.digest.card.edit.tooltip"));
-        editBtn.addClickListener(e -> openEditDialog());
-        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, I18n.t("kms.digest.card.delete.tooltip"));
-        deleteBtn.addClickListener(e -> new DeleteDigestConfigDialog(objectService, dto.getId(), dto.getCode(), onDeleteRefresh).open());
+        Button detailsBtn = createDetailsButton(I18n.t("kms.digest.card.details.tooltip"),
+                () -> new DigestConfigDetailsDialog(dto).open());
+        Button editBtn = createEditButton(I18n.t("kms.digest.card.edit.tooltip"), this::openEditDialog);
+        Button deleteBtn = createDeleteButton(I18n.t("kms.digest.card.delete.tooltip"),
+                () -> new DeleteDigestConfigDialog(objectService, dto.getId(), dto.getCode(), onDeleteRefresh).open());
         return List.of(detailsBtn, editBtn, deleteBtn);
     }
 

@@ -1,8 +1,12 @@
 package eu.isygoit.ui.kms.views.cryptography.key.dialog;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -22,6 +26,17 @@ import java.util.Map;
 
 /**
  * Dialog displaying detailed information about a KMS key, including metadata, tags, and policy.
+ *
+ * <p>Fields are grouped into sections strictly by data type/purpose, mirroring the
+ * {@code *-details-dialog} convention used elsewhere in this module (see
+ * {@code RandomKeyDetailsDialog}, {@code AliasDetailsDialog}, {@code CustomKeyStoreDetailsDialog}):
+ * <ul>
+ *   <li>Identity — free-text identifying fields (key id, WRN, tenant, alias, description, key manager)</li>
+ *   <li>Classification &amp; status — enums/booleans describing what the key is and its current state</li>
+ *   <li>Cryptographic configuration — rotation, current version, algorithm lists, multi-region config</li>
+ *   <li>Dates — every timestamp field (creation, update, expiry, pending-deletion window/date)</li>
+ *   <li>Tags / Policy — unchanged free-form sections at the end</li>
+ * </ul>
  */
 @Slf4j
 public class DescribeKeyDialog extends NoActionDialog {
@@ -60,56 +75,10 @@ public class DescribeKeyDialog extends NoActionDialog {
         content.setSpacing(true);
         content.setWidthFull();
 
-        // Basic metadata
-        content.add(detailRow(I18n.t("kms.key.dialog.describe.field.key.id"), metadata.getKeyId()),
-                detailRow(I18n.t("kms.key.dialog.describe.field.wrn"), metadata.getWrn()),
-                detailRow(I18n.t("kms.key.dialog.describe.field.tenant"), metadata.getTenant()),
-                detailRow(I18n.t("kms.key.dialog.describe.field.alias"), metadata.getKeyAlias()),
-                detailRow(I18n.t("kms.key.dialog.describe.field.description"), metadata.getDescription()),
-                detailRow(I18n.t("kms.key.dialog.describe.field.status"), metadata.getKeyStatus() != null ? metadata.getKeyStatus().name() : I18n.t("kms.key.dialog.describe.placeholder")),
-                detailRow(I18n.t("kms.key.dialog.describe.field.enabled"), metadata.getEnabled() != null ? metadata.getEnabled().toString() : I18n.t("kms.key.dialog.describe.placeholder")),
-                detailRow(I18n.t("kms.key.dialog.describe.field.key.spec"), metadata.getKeySpec() != null ? metadata.getKeySpec().name() : I18n.t("kms.key.dialog.describe.placeholder")),
-                detailRow(I18n.t("kms.key.dialog.describe.field.key.usage"), metadata.getKeyUsage() != null ? metadata.getKeyUsage().name() : I18n.t("kms.key.dialog.describe.placeholder")),
-                detailRow(I18n.t("kms.key.dialog.describe.field.customer.master.key.spec"), metadata.getCustomerMasterKeySpec()),
-                detailRow(I18n.t("kms.key.dialog.describe.field.origin"), metadata.getOrigin() != null ? metadata.getOrigin().name() : I18n.t("kms.key.dialog.describe.placeholder")),
-                detailRow(I18n.t("kms.key.dialog.describe.field.creation.date"), metadata.getCreateDate() != null ? metadata.getCreateDate().toString() : I18n.t("kms.key.dialog.describe.placeholder")),
-                detailRow(I18n.t("kms.key.dialog.describe.field.updated.date"), metadata.getUpdateDate() != null ? metadata.getUpdateDate().toString() : I18n.t("kms.key.dialog.describe.placeholder")),
-                detailRow(I18n.t("kms.key.dialog.describe.field.rotation.enabled"), metadata.getRotationEnabled() != null ? metadata.getRotationEnabled().toString() : I18n.t("kms.key.dialog.describe.placeholder")),
-                detailRow(I18n.t("kms.key.dialog.describe.field.rotation.period"), metadata.getRotationPeriodInDays() != null ? metadata.getRotationPeriodInDays().toString() : I18n.t("kms.key.dialog.describe.placeholder")),
-                detailRow(I18n.t("kms.key.dialog.describe.field.current.version"), metadata.getCurrentVersion()),
-                detailRow(I18n.t("kms.key.dialog.describe.field.key.manager"), metadata.getKeyManager()),
-                detailRow(I18n.t("kms.key.dialog.describe.field.expiration.model"), metadata.getExpirationModel() != null ? metadata.getExpirationModel().name() : I18n.t("kms.key.dialog.describe.placeholder")),
-                detailRow(I18n.t("kms.key.dialog.describe.field.valid.until"), metadata.getValidTo() != null ? metadata.getValidTo().toString() : I18n.t("kms.key.dialog.describe.placeholder")),
-                detailRow(I18n.t("kms.key.dialog.describe.field.multi.region"), metadata.getMultiRegion() != null ? metadata.getMultiRegion().toString() : Boolean.FALSE.toString()));
-
-        // Pending deletion (if applicable)
-        if (metadata.getPendingDeletionWindowDays() != null || metadata.getDeletionDate() != null) {
-            content.add(detailRow(I18n.t("kms.key.dialog.describe.field.pending.deletion.window"),
-                    metadata.getPendingDeletionWindowDays() != null ? metadata.getPendingDeletionWindowDays().toString() : I18n.t("kms.key.dialog.describe.placeholder")));
-            content.add(detailRow(I18n.t("kms.key.dialog.describe.field.deletion.date"),
-                    metadata.getDeletionDate() != null ? metadata.getDeletionDate().toString() : I18n.t("kms.key.dialog.describe.placeholder")));
-        }
-
-        // Multi‑region configuration (if present)
-        if (metadata.getMultiRegionConfiguration() != null) {
-            try {
-                String mrConfig = objectMapper.writerWithDefaultPrettyPrinter()
-                        .writeValueAsString(metadata.getMultiRegionConfiguration());
-                if (mrConfig != null && !mrConfig.isBlank()) {
-                    content.add(detailRow(I18n.t("kms.key.dialog.describe.field.multi.region.config"), mrConfig));
-                }
-            } catch (Exception e) {
-                content.add(detailRow(I18n.t("kms.key.dialog.describe.field.multi.region.config"), metadata.getMultiRegionConfiguration().toString()));
-            }
-        }
-
-        // Algorithm lists
-        if (metadata.getEncryptionAlgorithmSpecs() != null && !metadata.getEncryptionAlgorithmSpecs().isEmpty()) {
-            content.add(detailRow(I18n.t("kms.key.dialog.describe.field.encryption.algorithms"), String.join(", ", metadata.getEncryptionAlgorithmSpecs())));
-        }
-        if (metadata.getSigningAlgorithms() != null && !metadata.getSigningAlgorithms().isEmpty()) {
-            content.add(detailRow(I18n.t("kms.key.dialog.describe.field.signing.algorithms"), String.join(", ", metadata.getSigningAlgorithms())));
-        }
+        content.add(createSection(I18n.t("kms.key.dialog.describe.section.identity"), buildIdentityGrid()));
+        content.add(createSection(I18n.t("kms.key.dialog.describe.section.classification"), buildClassificationGrid()));
+        content.add(createSection(I18n.t("kms.key.dialog.describe.section.crypto"), buildCryptoGrid()));
+        content.add(createSection(I18n.t("kms.key.dialog.describe.section.dates"), buildDatesGrid()));
 
         // Tags (as chips)
         List<ListResourceTagsResponse.Tag> tags = fetchTags();
@@ -128,7 +97,7 @@ public class DescribeKeyDialog extends NoActionDialog {
                 chip.addClassName("tag-chip");
                 tagsContainer.add(chip);
             }
-            content.add(tagsContainer);
+            content.add(createSection(I18n.t("kms.key.dialog.describe.section.tags"), tagsContainer));
         }
 
         // Policy (pretty JSON)
@@ -144,16 +113,13 @@ public class DescribeKeyDialog extends NoActionDialog {
                     prettyPolicy = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(policyObj);
                 }
                 if (prettyPolicy != null && !prettyPolicy.isBlank()) {
-                    Span label = new Span(I18n.t("kms.key.dialog.describe.field.policy"));
-                    label.addClassName(LumoUtility.FontWeight.BOLD);
-                    content.add(label);
                     TextArea policyArea = new TextArea();
                     policyArea.setValue(prettyPolicy);
                     policyArea.setWidthFull();
                     policyArea.setHeight("300px");
                     policyArea.setReadOnly(true);
                     policyArea.addClassName("policy-textarea");
-                    content.add(policyArea);
+                    content.add(createSection(I18n.t("kms.key.dialog.describe.field.policy"), policyArea));
                 }
             }
         } catch (Exception e) {
@@ -163,18 +129,133 @@ public class DescribeKeyDialog extends NoActionDialog {
         add(content);
     }
 
-    private HorizontalLayout detailRow(String label, String value) {
-        HorizontalLayout row = new HorizontalLayout();
-        row.setWidthFull();
-        row.setSpacing(true);
-        row.addClassName("detail-row");
-        Span labelSpan = new Span(label + ":");
-        labelSpan.addClassName(LumoUtility.FontWeight.BOLD);
-        labelSpan.setWidth("30%");
-        Span valueSpan = new Span(value != null ? value : I18n.t("kms.key.dialog.describe.placeholder"));
-        valueSpan.setWidth("70%");
-        row.add(labelSpan, valueSpan);
-        return row;
+    // ─── Section builders (strictly grouped by data type) ───────────────────
+
+    /** Identity — free-text identifying fields. */
+    private Component buildIdentityGrid() {
+        Div grid = new Div();
+        grid.addClassName("wams-card__detail-grid");
+        addFieldToGrid(grid, VaadinIcon.KEY, I18n.t("kms.key.dialog.describe.field.key.id"), metadata.getKeyId());
+        addFieldToGrid(grid, VaadinIcon.HASH, I18n.t("kms.key.dialog.describe.field.wrn"), metadata.getWrn());
+        addFieldToGrid(grid, VaadinIcon.BUILDING, I18n.t("kms.key.dialog.describe.field.tenant"), metadata.getTenant());
+        addFieldToGrid(grid, VaadinIcon.TAG, I18n.t("kms.key.dialog.describe.field.alias"), metadata.getKeyAlias());
+        addFieldToGrid(grid, VaadinIcon.FILE_TEXT, I18n.t("kms.key.dialog.describe.field.description"), metadata.getDescription());
+        addFieldToGrid(grid, VaadinIcon.USER, I18n.t("kms.key.dialog.describe.field.key.manager"), metadata.getKeyManager());
+        return grid;
+    }
+
+    /** Classification &amp; status — enums/booleans describing what the key is and its current state. */
+    private Component buildClassificationGrid() {
+        Div grid = new Div();
+        grid.addClassName("wams-card__detail-grid");
+        addFieldToGrid(grid, VaadinIcon.FLAG, I18n.t("kms.key.dialog.describe.field.status"),
+                metadata.getKeyStatus() != null ? metadata.getKeyStatus().name() : I18n.t("kms.key.dialog.describe.placeholder"));
+        addFieldToGrid(grid, VaadinIcon.CHECK_CIRCLE, I18n.t("kms.key.dialog.describe.field.enabled"),
+                metadata.getEnabled() != null ? metadata.getEnabled().toString() : I18n.t("kms.key.dialog.describe.placeholder"));
+        addFieldToGrid(grid, VaadinIcon.COG, I18n.t("kms.key.dialog.describe.field.key.spec"),
+                metadata.getKeySpec() != null ? metadata.getKeySpec().name() : I18n.t("kms.key.dialog.describe.placeholder"));
+        addFieldToGrid(grid, VaadinIcon.COGS, I18n.t("kms.key.dialog.describe.field.key.usage"),
+                metadata.getKeyUsage() != null ? metadata.getKeyUsage().name() : I18n.t("kms.key.dialog.describe.placeholder"));
+        addFieldToGrid(grid, VaadinIcon.COG_O, I18n.t("kms.key.dialog.describe.field.customer.master.key.spec"), metadata.getCustomerMasterKeySpec());
+        addFieldToGrid(grid, VaadinIcon.CLOUD, I18n.t("kms.key.dialog.describe.field.origin"),
+                metadata.getOrigin() != null ? metadata.getOrigin().name() : I18n.t("kms.key.dialog.describe.placeholder"));
+        addFieldToGrid(grid, VaadinIcon.HOURGLASS, I18n.t("kms.key.dialog.describe.field.expiration.model"),
+                metadata.getExpirationModel() != null ? metadata.getExpirationModel().name() : I18n.t("kms.key.dialog.describe.placeholder"));
+        addFieldToGrid(grid, VaadinIcon.GLOBE, I18n.t("kms.key.dialog.describe.field.multi.region"),
+                metadata.getMultiRegion() != null ? metadata.getMultiRegion().toString() : Boolean.FALSE.toString());
+        return grid;
+    }
+
+    /** Cryptographic configuration — rotation, current version, algorithm lists, multi-region config. */
+    private Component buildCryptoGrid() {
+        Div grid = new Div();
+        grid.addClassName("wams-card__detail-grid");
+        addFieldToGrid(grid, VaadinIcon.REFRESH, I18n.t("kms.key.dialog.describe.field.rotation.enabled"),
+                metadata.getRotationEnabled() != null ? metadata.getRotationEnabled().toString() : I18n.t("kms.key.dialog.describe.placeholder"));
+        addFieldToGrid(grid, VaadinIcon.CLOCK, I18n.t("kms.key.dialog.describe.field.rotation.period"),
+                metadata.getRotationPeriodInDays() != null ? metadata.getRotationPeriodInDays().toString() : I18n.t("kms.key.dialog.describe.placeholder"));
+        addFieldToGrid(grid, VaadinIcon.CUBE, I18n.t("kms.key.dialog.describe.field.current.version"), metadata.getCurrentVersion());
+        addFieldToGrid(grid, VaadinIcon.LOCK, I18n.t("kms.key.dialog.describe.field.encryption.algorithms"),
+                (metadata.getEncryptionAlgorithmSpecs() != null && !metadata.getEncryptionAlgorithmSpecs().isEmpty())
+                        ? String.join(", ", metadata.getEncryptionAlgorithmSpecs()) : null);
+        addFieldToGrid(grid, VaadinIcon.SIGN_IN_ALT, I18n.t("kms.key.dialog.describe.field.signing.algorithms"),
+                (metadata.getSigningAlgorithms() != null && !metadata.getSigningAlgorithms().isEmpty())
+                        ? String.join(", ", metadata.getSigningAlgorithms()) : null);
+
+        if (metadata.getMultiRegionConfiguration() != null) {
+            try {
+                String mrConfig = objectMapper.writerWithDefaultPrettyPrinter()
+                        .writeValueAsString(metadata.getMultiRegionConfiguration());
+                addFieldToGrid(grid, VaadinIcon.CLUSTER, I18n.t("kms.key.dialog.describe.field.multi.region.config"), mrConfig);
+            } catch (Exception e) {
+                addFieldToGrid(grid, VaadinIcon.CLUSTER, I18n.t("kms.key.dialog.describe.field.multi.region.config"),
+                        metadata.getMultiRegionConfiguration().toString());
+            }
+        }
+        return grid;
+    }
+
+    /** Dates — every timestamp / date-window field. */
+    private Component buildDatesGrid() {
+        Div grid = new Div();
+        grid.addClassName("wams-card__detail-grid");
+        addFieldToGrid(grid, VaadinIcon.CALENDAR, I18n.t("kms.key.dialog.describe.field.creation.date"),
+                metadata.getCreateDate() != null ? metadata.getCreateDate().toString() : I18n.t("kms.key.dialog.describe.placeholder"));
+        addFieldToGrid(grid, VaadinIcon.CALENDAR_O, I18n.t("kms.key.dialog.describe.field.updated.date"),
+                metadata.getUpdateDate() != null ? metadata.getUpdateDate().toString() : I18n.t("kms.key.dialog.describe.placeholder"));
+        addFieldToGrid(grid, VaadinIcon.CALENDAR_CLOCK, I18n.t("kms.key.dialog.describe.field.valid.until"),
+                metadata.getValidTo() != null ? metadata.getValidTo().toString() : I18n.t("kms.key.dialog.describe.placeholder"));
+
+        if (metadata.getPendingDeletionWindowDays() != null || metadata.getDeletionDate() != null) {
+            addFieldToGrid(grid, VaadinIcon.EXCLAMATION_CIRCLE, I18n.t("kms.key.dialog.describe.field.pending.deletion.window"),
+                    metadata.getPendingDeletionWindowDays() != null ? metadata.getPendingDeletionWindowDays().toString() : I18n.t("kms.key.dialog.describe.placeholder"));
+            addFieldToGrid(grid, VaadinIcon.TRASH, I18n.t("kms.key.dialog.describe.field.deletion.date"),
+                    metadata.getDeletionDate() != null ? metadata.getDeletionDate().toString() : I18n.t("kms.key.dialog.describe.placeholder"));
+        }
+        return grid;
+    }
+
+    // ─── Shared row/section helpers (same convention as RandomKeyDetailsDialog / AliasDetailsDialog) ───
+
+    private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {
+        if (value == null || value.isBlank()) return;
+
+        VerticalLayout field = new VerticalLayout();
+        field.setPadding(false);
+        field.setSpacing(false);
+        field.addClassName("wams-card__detail-field");
+
+        HorizontalLayout labelRow = new HorizontalLayout();
+        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        labelRow.setSpacing(false);
+        labelRow.addClassName("wams-card__detail-field-label-row");
+
+        Icon iconComponent = icon.create();
+        iconComponent.setSize("12px");
+        iconComponent.addClassName("detail-field-icon");
+
+        Span labelSpan = new Span(label);
+        labelSpan.addClassName("wams-card__detail-field-label");
+
+        labelRow.add(iconComponent, labelSpan);
+
+        Span valueSpan = new Span(value);
+        valueSpan.addClassName("wams-card__detail-field-value");
+
+        field.add(labelRow, valueSpan);
+        container.add(field);
+    }
+
+    private Component createSection(String title, Component content) {
+        VerticalLayout section = new VerticalLayout();
+        section.setPadding(false);
+        section.setSpacing(false);
+        Span titleSpan = new Span(title);
+        titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
+        titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
+        titleSpan.addClassName("wams-section-title");
+        section.add(titleSpan, content);
+        return section;
     }
 
     private List<ListResourceTagsResponse.Tag> fetchTags() {

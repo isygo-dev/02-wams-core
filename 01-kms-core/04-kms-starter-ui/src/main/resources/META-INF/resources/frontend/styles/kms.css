@@ -1273,3 +1273,169 @@
 .token-config-details-dialog .detail-field-value {
     flex: 1;
 }
+
+/* ===== Part A3 (design rework additions) ===== */
+/*
+ * KMS group A (partA3) — temporary partial stylesheet.
+ * Covers: RandomKeyDetailsDialog section-divider styling (identity/value/audit).
+ * A later step merges this partial into kms.css alongside the other _kms_part*.css files.
+ */
+
+/* RandomKeyDetailsDialog — read-only field grid split into Identity / Key value /
+   Audit sections, mirrors the *-details-dialog convention used elsewhere in this
+   module (see kms.css "Part B2"/"Part C2"/"Part D2" — AliasDetailsDialog,
+   CustomKeyStoreDetailsDialog, NextCodeDetailsDialog, DigestConfigDetailsDialog, etc.). */
+
+.random-key-details-dialog .wams-section-title {
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    margin-bottom: var(--lumo-space-s);
+    padding-bottom: var(--lumo-space-xs);
+}
+
+.random-key-details-dialog .detail-field-icon {
+    color: var(--lumo-primary-color);
+}
+
+.random-key-details-dialog .detail-field-value {
+    flex: 1;
+    word-break: break-word;
+}
+
+/* ── Dashboard panel responsive gap fill ──────────────────────────────────────
+   .wams-stat-card (KeyStatisticsPanel/TokenStatisticsPanel main stat row) already
+   gets a 768px flex-basis rule in kms.css Part A. .kms-parta-usage-stat-card
+   (KeyUsageStatsPanel's small per-metric cards) had no equivalent, so on narrow
+   phones its fixed 160px width could force horizontal crowding — let it shrink
+   to full width and stack in a single column below 480px. */
+
+@media (max-width: 480px) {
+    .kms-parta-stats-wrap .kms-parta-usage-stat-card {
+        width: 100%;
+    }
+}
+
+/* ── ByokView / CryptoOperationsView narrow-phone refinement ─────────────────
+   The existing 768px breakpoint (kms.css Part A) already stacks the key-selection
+   toolbar and forms to full width. Below 480px, tighten the step-card padding and
+   let the crypto tabs remain horizontally scrollable without stretching. */
+
+@media (max-width: 480px) {
+    .kms-byok-view .kms-parta-step-card {
+        padding: var(--lumo-space-s);
+    }
+
+    .kms-crypto-view .kms-parta-crypto-tabs {
+        width: 100%;
+    }
+}
+
+/* ===== Part B3 (design rework additions) ===== */
+/*
+ * KMS group B (partB3) — temporary partial stylesheet.
+ * Covers: cryptography/key (DescribeKeyDialog re-sectioning), cryptography/keyTag
+ *         (TagsView responsive grid scrolling).
+ * A later step merges this partial into kms.css alongside the other
+ * _kms_part*.css files; kept separate here to avoid conflicting with other
+ * parallel KMS agents editing the shared stylesheet.
+ */
+
+/* DescribeKeyDialog — field rows now use the shared wams-card__detail-grid /
+   detail-field convention (see RandomKeyDetailsDialog / AliasDetailsDialog),
+   split into Identity / Classification & status / Cryptographic configuration /
+   Dates sections instead of one flat list. */
+
+.describe-key-dialog .wams-section-title {
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    margin-bottom: var(--lumo-space-s);
+    padding-bottom: var(--lumo-space-xs);
+}
+
+.describe-key-dialog .detail-field-icon {
+    color: var(--lumo-primary-color);
+}
+
+.describe-key-dialog .detail-field-value {
+    flex: 1;
+    word-break: break-word;
+}
+
+/* TagsView — the tag Grid can end up wider than its columns need on small
+   viewports; scroll the grid horizontally instead of letting it overflow the
+   page (same pattern as .kms-dashboard .audit-grid in kms.css "Part A"). */
+
+.tags-grid {
+    overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+    .kms-tags-view .tags-grid {
+        min-width: 0;
+    }
+}
+
+/* ===== Part C3 (design rework additions) ===== */
+/*
+ * KMS group C (partC3) — temporary partial stylesheet.
+ * Covers: GrantDetailsDialog section-divider styling (identity/constraints/audit),
+ * now sectioned the same way as CustomKeyStoreDetailsDialog / NextCodeDetailsDialog.
+ * A later step merges this partial into kms.css alongside the other _kms_part*.css files.
+ */
+
+.grant-details-dialog .wams-section-title {
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    margin-bottom: var(--lumo-space-s);
+    padding-bottom: var(--lumo-space-xs);
+}
+
+.grant-details-dialog .detail-field-icon {
+    color: var(--lumo-primary-color);
+}
+
+.grant-details-dialog .detail-field-value {
+    flex: 1;
+    word-break: break-word;
+}
+
+/* ── PoliciesView responsive gap fill ──────────────────────────────────────
+   kms.css's existing 768px rule for .policies-view only stacked
+   .policies-action-bar; .policies-key-layout (key ComboBox + refresh) and
+   .policies-action-checker (action TextField + check button) kept their row
+   layout with fixed-width children (400px / 300px), overflowing on phones. */
+
+@media (max-width: 768px) {
+    .policies-view .policies-key-layout,
+    .policies-view .policies-action-checker {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .policies-view .policies-key-layout > *,
+    .policies-view .policies-action-checker > * {
+        width: 100% !important;
+    }
+}
+
+/* ===== Part D3 (design rework additions) ===== */
+/*
+ * KMS group D (partD3) — temporary partial stylesheet.
+ * Covers: tokenizer/builder (ClaimsBuilderDialog claim-row responsive
+ *         stacking on narrow viewports).
+ * A later step merges this partial into kms.css alongside the other
+ * _kms_part*.css files; kept separate here to avoid conflicting with other
+ * parallel KMS agents editing the shared stylesheet.
+ */
+
+/* ClaimsBuilderDialog — each claim row lays out key (30%) / value (60%) /
+   remove button (10%) side by side. BaseActionDialog already goes full-screen
+   below 480px via wams-dialog-responsive, but the fixed percentage widths on
+   the key/value wrappers stay cramped at that size; stack them instead. */
+
+@media (max-width: 480px) {
+    .claims-builder-dialog .claim-row {
+        flex-wrap: wrap;
+    }
+
+    .claims-builder-dialog .claim-row > * {
+        width: 100% !important;
+    }
+}

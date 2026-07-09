@@ -180,12 +180,8 @@
 }
 
 /* ── Category details dialog ──────────────────────────────────────────────── */
-
-.category-details-dialog .details-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: var(--lumo-space-s);
-}
+/* Uses the shared .wams-card__detail-grid (card.css) for the identity/audit
+   grids; only field-level tweaks specific to this dialog live here. */
 
 .category-details-dialog .detail-field-icon {
     color: var(--lumo-primary-color);

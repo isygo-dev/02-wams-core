@@ -86,14 +86,10 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("kms.alias.card.details.tooltip"));
-        detailsBtn.addClickListener(e -> showDetails());
-
-        Button updateBtn = createIconButton(VaadinIcon.EDIT, I18n.t("kms.alias.card.update.tooltip"));
-        updateBtn.addClickListener(e -> updateAlias());
-
-        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, I18n.t("kms.alias.card.delete.tooltip"));
-        deleteBtn.addClickListener(e -> deleteAlias());
+        // Standard order: Details → Edit → Delete (Delete always last, always danger-styled).
+        Button detailsBtn = createDetailsButton(I18n.t("kms.alias.card.details.tooltip"), this::showDetails);
+        Button updateBtn = createEditButton(I18n.t("kms.alias.card.update.tooltip"), this::updateAlias);
+        Button deleteBtn = createDeleteButton(I18n.t("kms.alias.card.delete.tooltip"), this::deleteAlias);
 
         return List.of(detailsBtn, updateBtn, deleteBtn);
     }

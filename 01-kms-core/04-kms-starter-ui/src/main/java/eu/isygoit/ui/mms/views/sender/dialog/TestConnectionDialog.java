@@ -1,8 +1,5 @@
 package eu.isygoit.ui.mms.views.sender.dialog;
 
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -15,10 +12,11 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.SenderConfigService;
+import eu.isygoit.ui.common.dialog.NoActionDialog;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class TestConnectionDialog extends Dialog {
+public class TestConnectionDialog extends NoActionDialog {
 
     private final SenderConfigService senderConfigService;
     private final SenderConfigDto config;
@@ -26,31 +24,35 @@ public class TestConnectionDialog extends Dialog {
 
     private final Div statusArea = new Div();
     private final ProgressBar progressBar = new ProgressBar();
-    private final Button closeButton = new Button(I18n.t("common.dialog.close"));
 
     public TestConnectionDialog(SenderConfigService senderConfigService,
                                 SenderConfigDto config,
                                 Runnable onComplete) {
+        super(I18n.t("mms.sender.dialog.test.title", config.getHost()));
         this.senderConfigService = senderConfigService;
         this.config = config;
         this.onComplete = onComplete;
 
-        setHeaderTitle(I18n.t("mms.sender.dialog.test.title", config.getHost()));
         setWidth("500px");
         setMaxWidth("95vw");
         setModal(true);
         setDraggable(true);
+        // Prevent dismissing the dialog while the test is still running –
+        // re-enabled once a result (success/failure) is available.
+        setCloseOnEsc(false);
+        setCloseOnOutsideClick(false);
+
+        addOpenedChangeListener(e -> {
+            if (!e.isOpened() && onComplete != null) {
+                onComplete.run();
+            }
+        });
 
         buildLayout();
         runTest();
     }
 
     private void buildLayout() {
-        VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setPadding(true);
-        mainLayout.setSpacing(true);
-        mainLayout.setWidthFull();
-
         // Host info
         HorizontalLayout infoRow = new HorizontalLayout();
         infoRow.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -64,33 +66,16 @@ public class TestConnectionDialog extends Dialog {
         hostValue.addClassName("wams-dialog-host-value");
 
         infoRow.add(serverIcon, hostLabel, hostValue);
-        mainLayout.add(infoRow);
+        add(infoRow);
 
         // Progress bar
         progressBar.setIndeterminate(true);
         progressBar.setWidthFull();
-        mainLayout.add(progressBar);
+        add(progressBar);
 
         // Status area
         statusArea.addClassName("wams-dialog-status-box");
-        mainLayout.add(statusArea);
-
-        // Close button
-        HorizontalLayout footer = new HorizontalLayout();
-        footer.setWidthFull();
-        footer.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        closeButton.setEnabled(false);
-        closeButton.addClickListener(e -> {
-            close();
-            if (onComplete != null) {
-                onComplete.run();
-            }
-        });
-        footer.add(closeButton);
-        mainLayout.add(footer);
-
-        add(mainLayout);
+        add(statusArea);
     }
 
     private void runTest() {
@@ -133,7 +118,8 @@ public class TestConnectionDialog extends Dialog {
 
     private void showTestResult(boolean success, String message) {
         progressBar.setVisible(false);
-        closeButton.setEnabled(true);
+        setCloseOnEsc(true);
+        setCloseOnOutsideClick(true);
 
         statusArea.removeAll();
         statusArea.removeClassName("wams-dialog-status-box--info");

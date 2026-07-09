@@ -73,14 +73,13 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("kms.token.config.details.button"));
-        detailsBtn.addClickListener(e -> new TokenConfigDetailsDialog(dto).open());
+        Button detailsBtn = createDetailsButton(I18n.t("kms.token.config.details.button"),
+                () -> new TokenConfigDetailsDialog(dto).open());
 
-        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("kms.token.config.edit.button"));
-        editBtn.addClickListener(e -> openEditDialog());
+        Button editBtn = createEditButton(I18n.t("kms.token.config.edit.button"), this::openEditDialog);
 
-        Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, I18n.t("kms.token.config.delete.button"));
-        deleteBtn.addClickListener(e -> new DeleteTokenConfigDialog(objectService, dto.getId(), dto.getCode(), onDeleteRefresh).open());
+        Button deleteBtn = createDeleteButton(I18n.t("kms.token.config.delete.button"),
+                () -> new DeleteTokenConfigDialog(objectService, dto.getId(), dto.getCode(), onDeleteRefresh).open());
 
         return List.of(detailsBtn, editBtn, deleteBtn);
     }

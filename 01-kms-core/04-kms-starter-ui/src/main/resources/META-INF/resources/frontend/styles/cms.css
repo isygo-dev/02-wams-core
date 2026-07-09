@@ -180,11 +180,13 @@
 }
 
 /* ── Calendar details dialog ──────────────────────────────────────────────── */
+/* Sections (Identity / Status / Audit) reuse the shared wams-card__detail-grid
+   class from card.css (overriding its column width for the wider dialog
+   layout) and createSection()'s wams-section-title divider, matching the
+   convention used by ims.css/dms.css/sms.css details dialogs. */
 
-.calendar-details-dialog .details-grid {
-    display: grid;
+.calendar-details-dialog .wams-card__detail-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: var(--lumo-space-s);
 }
 
 .calendar-details-dialog .detail-field-icon {

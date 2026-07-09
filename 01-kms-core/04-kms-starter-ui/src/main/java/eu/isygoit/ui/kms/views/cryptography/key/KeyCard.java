@@ -164,12 +164,14 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
 
     @Override
     protected List<Button> buildActionButtons() {
-        Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("kms.key.card.edit.tooltip"));
-        editBtn.addClickListener(e -> updateKey());
+        // Standard order: Details → Edit → (entity-specific extras) → more-menu (holds Delete, always last).
+        Button describeBtn = createDetailsButton(I18n.t("kms.key.card.describe.tooltip"), this::describeKey);
 
-        Button describeBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("kms.key.card.describe.tooltip"));
-        describeBtn.addClickListener(e -> describeKey());
+        Button editBtn = createEditButton(I18n.t("kms.key.card.edit.tooltip"), this::updateKey);
 
+        // Rotation on/off is not the enable/disable status toggle, so it does not use
+        // createToggleButton() — just createIconButton() (which already applies the
+        // shared wams-action-btn hover class) with its own rotate icon on top.
         rotationBtn = createIconButton(VaadinIcon.ROTATE_RIGHT, "");
         rotationBtn.addClickListener(e -> toggleRotation());
         updateRotationButton();
@@ -177,10 +179,11 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         versionsBtn = createIconButton(VaadinIcon.CUBE, I18n.t("kms.key.card.versions.tooltip"));
         versionsBtn.addClickListener(e -> showVersionsDialog());
 
+        // More-menu is last since it contains Delete (and other destructive actions).
         moreBtn = createIconButton(VaadinIcon.ELLIPSIS_DOTS_V, I18n.t("kms.key.card.more.tooltip"));
         attachContextMenu(moreBtn);
 
-        return List.of(editBtn, describeBtn, rotationBtn, versionsBtn, moreBtn);
+        return List.of(describeBtn, editBtn, rotationBtn, versionsBtn, moreBtn);
     }
 
     @Override

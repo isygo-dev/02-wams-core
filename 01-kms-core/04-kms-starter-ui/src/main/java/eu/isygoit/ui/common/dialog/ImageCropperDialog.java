@@ -1,71 +1,56 @@
 package eu.isygoit.ui.common.dialog;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.component.ImageCropper;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.function.Consumer;
 
-public class ImageCropperDialog extends Dialog {
+/**
+ * Has a real commit action (crop + apply), so it extends {@link BaseActionDialog}
+ * rather than {@link NoActionDialog}.
+ */
+public class ImageCropperDialog extends BaseActionDialog {
 
     private final ImageCropper imageCropper;
-    private final Button applyButton;
+    private final Consumer<MultipartFile> onImageCropped;
 
     public ImageCropperDialog(Consumer<MultipartFile> onImageCropped) {
-        setHeaderTitle(I18n.t("common.dialog.image.cropper.title"));
+        super(I18n.t("common.dialog.image.cropper.title"));
+        this.onImageCropped = onImageCropped;
+
         setWidth("90%");
         setMaxWidth("500px");
         setDraggable(false);
         setResizable(false);
-        setCloseOnEsc(true);
-        setCloseOnOutsideClick(true);
+
+        setOkButtonText(I18n.t("common.dialog.image.cropper.apply"));
+        setCancelButtonText(I18n.t("common.dialog.image.cropper.cancel"));
+        addThemeVariantsOkButton(ButtonVariant.LUMO_PRIMARY);
+        enableOkButton(false);
 
         imageCropper = new ImageCropper();
         imageCropper.setWidthFull();
+        imageCropper.addValueChangeListener(event -> enableOkButton(event.getValue() != null));
 
-        applyButton = new Button(I18n.t("common.dialog.image.cropper.apply"), e -> {
-            MultipartFile cropped = imageCropper.getValue();
-            if (cropped != null && onImageCropped != null) {
-                onImageCropped.accept(cropped);
-                Notification.show(I18n.t("common.dialog.image.cropper.crop.success"), 3000, Notification.Position.BOTTOM_END)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            } else {
-                Notification.show(I18n.t("common.dialog.image.cropper.no.image"), 3000, Notification.Position.BOTTOM_END)
-                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
-            }
-            close();
-        });
-        applyButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        applyButton.setEnabled(false);
-
-        imageCropper.addValueChangeListener(event -> {
-            applyButton.setEnabled(event.getValue() != null);
-        });
-
-        Button cancelButton = new Button(I18n.t("common.dialog.image.cropper.cancel"), e -> close());
-        cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-
-        HorizontalLayout buttonLayout = new HorizontalLayout(cancelButton, applyButton);
-        buttonLayout.setSpacing(true);
-        buttonLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        buttonLayout.setWidthFull();
-
-        VerticalLayout layout = new VerticalLayout(imageCropper, buttonLayout);
-        layout.setPadding(true);
-        layout.setSpacing(true);
-        layout.setWidthFull();
-
-        Div content = new Div(layout);
+        Div content = new Div(imageCropper);
         content.addClassName("wams-image-cropper-dialog__content");
-        add(content);
+        addContent(content);
+    }
+
+    @Override
+    protected boolean onOk() {
+        MultipartFile cropped = imageCropper.getValue();
+        if (cropped == null) {
+            append(I18n.t("common.dialog.image.cropper.no.image"));
+            return false;
+        }
+        if (onImageCropped != null) {
+            onImageCropped.accept(cropped);
+        }
+        append(I18n.t("common.dialog.image.cropper.crop.success"));
+        return true;
     }
 }

@@ -161,7 +161,7 @@ public class KeyStatisticsPanel extends VerticalLayout {
                         new StatCard(I18n.t("kms.stats.key.pending.deletion"), String.valueOf(stats.pendingDeletion), VaadinIcon.CLOCK, "#F57C00", I18n.t("kms.stats.key.pending.deletion.tooltip")),
                         new StatCard(I18n.t("kms.stats.key.rotation.enabled"), String.valueOf(stats.rotationEnabled), VaadinIcon.ROTATE_RIGHT, "#8E24AA", I18n.t("kms.stats.key.rotation.enabled.tooltip")),
                         new StatCard(I18n.t("kms.stats.key.symmetric"), String.valueOf(stats.symmetricKeys), VaadinIcon.CIRCLE, "#43A047", I18n.t("kms.stats.key.symmetric.tooltip")),
-                        new StatCard(I18n.t("kms.stats.key.asymmetric"), String.valueOf(stats.asymmetricKeys), VaadinIcon.LOCK, "#FB8C00", I18n.t("kms.stats.key.asymmetric.tooltip")),
+                        new StatCard(I18n.t("kms.stats.key.asymmetric"), String.valueOf(stats.asymmetricKeys), VaadinIcon.KEY_O, "#FB8C00", I18n.t("kms.stats.key.asymmetric.tooltip")),
                         new StatCard(I18n.t("kms.stats.key.encrypt.decrypt"), String.valueOf(stats.encryptUsage), VaadinIcon.LOCK, "#1E88E5", I18n.t("kms.stats.key.encrypt.decrypt.tooltip")),
                         new StatCard(I18n.t("kms.stats.key.sign.verify"), String.valueOf(stats.signUsage), VaadinIcon.PENCIL, "#8E24AA", I18n.t("kms.stats.key.sign.verify.tooltip")),
                         new StatCard(I18n.t("kms.stats.key.mac"), String.valueOf(stats.macUsage), VaadinIcon.SIGNAL, "#D81B60", I18n.t("kms.stats.key.mac.tooltip")),

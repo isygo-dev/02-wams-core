@@ -94,14 +94,9 @@ public class DecodeJwtDialog extends NoActionDialog {
             mainLayout.add(createErrorCard(I18n.t("kms.decode.jwt.decode.failed", e.getMessage())));
         }
 
-        // Close button row
-        Button closeBtn = new Button(I18n.t("kms.decode.jwt.close"), e -> close());
-        closeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        HorizontalLayout buttonBar = new HorizontalLayout(closeBtn);
-        buttonBar.setWidthFull();
-        buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        mainLayout.add(buttonBar);
-
+        // No ad-hoc button row here: NoActionDialog already supplies the standard
+        // footer (error slot + Close button), so every dialog in the app shares
+        // the same footer shape.
         add(mainLayout);
     }
 

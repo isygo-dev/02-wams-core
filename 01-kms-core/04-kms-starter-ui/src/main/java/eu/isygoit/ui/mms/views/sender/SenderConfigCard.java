@@ -220,27 +220,22 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
     protected List<Button> buildActionButtons() {
         List<Button> buttons = new ArrayList<>();
 
-        // View Button
-        Button viewBtn = createIconButton(VaadinIcon.EYE, I18n.t("mms.sender.card.view.tooltip"));
-        viewBtn.addClickListener(e -> viewConfig());
-        buttons.add(viewBtn);
+        // Details/View
+        buttons.add(createDetailsButton(I18n.t("mms.sender.card.view.tooltip"), this::viewConfig));
 
-        // Test Connection Button
+        // Edit
+        editButton = createEditButton(I18n.t("mms.sender.card.edit.tooltip"), this::openEditDialog);
+        buttons.add(editButton);
+
+        // Entity-specific extra: test connection
         testButton = createIconButton(VaadinIcon.START_COG, I18n.t("mms.sender.card.test.tooltip"));
         testButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
         testButton.addClickListener(e -> testConnection());
         testButton.setEnabled(isActive());
         buttons.add(testButton);
 
-        // Edit Button
-        editButton = createIconButton(VaadinIcon.EDIT, I18n.t("mms.sender.card.edit.tooltip"));
-        editButton.addClickListener(e -> openEditDialog());
-        buttons.add(editButton);
-
-        // Delete Button
-        deleteButton = createIconButton(VaadinIcon.TRASH, I18n.t("mms.sender.card.delete.tooltip"));
-        deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        deleteButton.addClickListener(e -> openDeleteDialog());
+        // Delete – always last, always danger-styled
+        deleteButton = createDeleteButton(I18n.t("mms.sender.card.delete.tooltip"), this::openDeleteDialog);
         buttons.add(deleteButton);
 
         return buttons;

@@ -2,7 +2,6 @@ package eu.isygoit.ui.mms.views.msgtemplate.dialog;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -18,6 +17,7 @@ import eu.isygoit.dto.data.MsgTemplateDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
 import eu.isygoit.remote.mms.MsgTemplateService;
+import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import eu.isygoit.ui.mms.views.msgtemplate.MsgTemplateManagementView;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -29,61 +29,50 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Has a real commit action (save the edited content), so it extends
+ * {@link BaseActionDialog} — the error/success span and Save/Cancel buttons
+ * come from the shared footer contract. Download stays a content-level
+ * action (it doesn't commit or discard anything) and lives next to the file
+ * info bar rather than in the footer.
+ */
 @Slf4j
-public class EditTemplateContentDialog extends Dialog {
+public class EditTemplateContentDialog extends BaseActionDialog {
 
-    private static final String[] STATUS_MODIFIER_CLASSES = {
-            "wams-dialog-status-area--success",
-            "wams-dialog-status-area--error",
-            "wams-dialog-status-area--warning",
-            "wams-dialog-status-area--info"
-    };
     private final MsgTemplateManagementView parentView;
-    private final MsgTemplateService templateService;
     private final MsgTemplateFileService templateFileService;
     private final MsgTemplateDto template;
-    private final Runnable onSuccess;
     private TextArea contentArea;
     private Div statusArea;
-    private Button saveButton;
-    private Button cancelButton;
-    private Button downloadButton;
     private String originalContent;
-    private boolean contentLoaded = false;
 
     public EditTemplateContentDialog(MsgTemplateManagementView parentView,
                                      MsgTemplateService templateService,
                                      MsgTemplateFileService templateFileService,
                                      MsgTemplateDto template,
                                      Runnable onSuccess) {
+        super(I18n.t("mms.msgtemplate.dialog.edit.content.title",
+                template.getName() != null ? template.getName() : template.getId()), onSuccess);
         this.parentView = parentView;
-        this.templateService = templateService;
         this.templateFileService = templateFileService;
         this.template = template;
-        this.onSuccess = onSuccess;
 
-        setHeaderTitle(I18n.t("mms.msgtemplate.dialog.edit.content.title",
-                template.getName() != null ? template.getName() : template.getId()));
         setWidth("800px");
         setMaxWidth("95vw");
         setHeight("600px");
         setMaxHeight("90vh");
-        setModal(true);
-        setDraggable(true);
-        setResizable(true);
+
+        setOkButtonText(I18n.t("mms.msgtemplate.dialog.edit.content.save"));
+        addThemeVariantsOkButton(ButtonVariant.LUMO_PRIMARY);
+        enableOkButton(false);
 
         buildContent();
         loadTemplateContent();
     }
 
     private void buildContent() {
-        VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setPadding(true);
-        mainLayout.setSpacing(true);
-        mainLayout.setWidthFull();
-        mainLayout.setHeightFull();
-
-        // File info bar
+        // File info bar + download action (not a commit/discard action, so it
+        // stays in the content area rather than the footer).
         HorizontalLayout infoBar = new HorizontalLayout();
         infoBar.setWidthFull();
         infoBar.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -102,17 +91,20 @@ public class EditTemplateContentDialog extends Dialog {
         fileInfo.addClassName(LumoUtility.FontSize.XSMALL);
         fileInfo.addClassName(LumoUtility.TextColor.SECONDARY);
 
-        infoBar.add(fileIcon, fileName, fileInfo);
-        infoBar.expand(fileInfo);
-        mainLayout.add(infoBar);
+        Button downloadButton = new Button(I18n.t("mms.msgtemplate.dialog.edit.content.download"), new Icon(VaadinIcon.DOWNLOAD));
+        downloadButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SUCCESS);
+        downloadButton.addClickListener(e -> downloadTemplate());
 
-        // Status area
+        infoBar.add(fileIcon, fileName, fileInfo, downloadButton);
+        infoBar.expand(fileInfo);
+
+        // Transient loading/no-file status (informational, not a save error —
+        // real save errors go through the inherited error-span/Notification via onOk()).
         statusArea = new Div();
         statusArea.setVisible(false);
         statusArea.addClassName("wams-dialog-status-area");
-        mainLayout.add(statusArea);
+        statusArea.setWidthFull();
 
-        // Content editor
         contentArea = new TextArea();
         contentArea.setWidthFull();
         contentArea.setHeight("350px");
@@ -120,29 +112,8 @@ public class EditTemplateContentDialog extends Dialog {
         contentArea.addClassName("wams-dialog-content-editor");
         contentArea.addClassName(LumoUtility.Border.ALL);
         contentArea.addClassName(LumoUtility.BorderRadius.MEDIUM);
-        mainLayout.add(contentArea);
 
-        // Actions
-        HorizontalLayout actions = new HorizontalLayout();
-        actions.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        actions.addClassName("wams-dialog-actions");
-
-        downloadButton = new Button(I18n.t("mms.msgtemplate.dialog.edit.content.download"), new Icon(VaadinIcon.DOWNLOAD));
-        downloadButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
-        downloadButton.addClickListener(e -> downloadTemplate());
-
-        saveButton = new Button(I18n.t("mms.msgtemplate.dialog.edit.content.save"), new Icon(VaadinIcon.CHECK));
-        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        saveButton.setEnabled(false);
-        saveButton.addClickListener(e -> saveContent());
-
-        cancelButton = new Button(I18n.t("common.dialog.cancel"), e -> close());
-        cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-
-        actions.add(downloadButton, saveButton, cancelButton);
-        mainLayout.add(actions);
-
-        add(mainLayout);
+        addContent(infoBar, statusArea, contentArea);
     }
 
     private void loadTemplateContent() {
@@ -150,13 +121,13 @@ public class EditTemplateContentDialog extends Dialog {
             showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.no.file"), "warning");
             contentArea.setValue(I18n.t("mms.msgtemplate.dialog.edit.content.no.file.message"));
             contentArea.setReadOnly(true);
-            saveButton.setEnabled(false);
+            enableOkButton(false);
             return;
         }
 
         showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.loading"), "info");
         contentArea.setReadOnly(true);
-        saveButton.setEnabled(false);
+        enableOkButton(false);
 
         try {
             ResponseEntity<Resource> response = templateFileService.downloadFile(template.getId(), 0L);
@@ -166,42 +137,40 @@ public class EditTemplateContentDialog extends Dialog {
                 originalContent = content;
                 contentArea.setValue(content);
                 contentArea.setReadOnly(false);
-                saveButton.setEnabled(true);
-                contentLoaded = true;
+                enableOkButton(true);
                 hideStatus();
             } else {
-                showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.load.failed"), "error");
+                showError(I18n.t("mms.msgtemplate.dialog.edit.content.load.failed"));
             }
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ?
                     ex.contentUTF8() : ex.getMessage();
-            showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.load.error", errorMsg), "error");
+            showError(I18n.t("mms.msgtemplate.dialog.edit.content.load.error", errorMsg));
             log.error("Failed to load template content for {}", template.getId(), ex);
         } catch (Exception e) {
-            showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.load.error", e.getMessage()), "error");
+            showError(I18n.t("mms.msgtemplate.dialog.edit.content.load.error", e.getMessage()));
             log.error("Failed to load template content for {}", template.getId(), e);
         }
     }
 
-    private void saveContent() {
+    @Override
+    protected boolean onOk() {
         String newContent = contentArea.getValue();
         if (newContent == null || newContent.isEmpty()) {
-            showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.empty.error"), "error");
-            return;
+            append(I18n.t("mms.msgtemplate.dialog.edit.content.empty.error"));
+            return false;
         }
 
         if (newContent.equals(originalContent)) {
-            showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.no.changes"), "info");
-            return;
+            append(I18n.t("mms.msgtemplate.dialog.edit.content.no.changes"));
+            return false;
         }
 
         if (parentView != null) {
             parentView.showLoading(true);
         }
-        saveButton.setEnabled(false);
 
         try {
-            // Create MultipartFile from the content
             final byte[] contentBytes = newContent.getBytes(StandardCharsets.UTF_8);
             final String fileName = template.getOriginalFileName() != null ?
                     template.getOriginalFileName() : template.getFileName();
@@ -260,7 +229,6 @@ public class EditTemplateContentDialog extends Dialog {
                 }
             };
 
-            // Update template with new file content
             MsgTemplateDto updatedTemplate = MsgTemplateDto.builder()
                     .id(template.getId())
                     .code(template.getCode())
@@ -270,48 +238,32 @@ public class EditTemplateContentDialog extends Dialog {
                     .language(template.getLanguage())
                     .build();
 
-            // Use MsgTemplateFileService for update with file
             ResponseEntity<MsgTemplateDto> response = templateFileService.updateWithFile(
                     template.getId(), multipartFile, updatedTemplate);
 
             if (!response.getStatusCode().is2xxSuccessful()) {
-                showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.save.failed",
-                        response.getBody() != null ? response.getBody().toString() : I18n.t("mms.common.error.unknown")), "error");
-                saveButton.setEnabled(true);
-                return;
+                append(I18n.t("mms.msgtemplate.dialog.edit.content.save.failed",
+                        response.getBody() != null ? response.getBody().toString() : I18n.t("mms.common.error.unknown")));
+                return false;
             }
 
             originalContent = newContent;
-            showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.save.success"), "success");
-
-            // Refresh the template in the card
-            if (onSuccess != null) {
-                onSuccess.run();
-            }
-
-            // Close after a short delay
-            getUI().ifPresent(ui -> ui.access(() -> {
-                try {
-                    Thread.sleep(1500);
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                }
-                close();
-            }));
-
+            append(I18n.t("mms.msgtemplate.dialog.edit.content.save.success"));
+            return true;
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ?
                     ex.contentUTF8() : ex.getMessage();
-            showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.save.error", errorMsg), "error");
+            append(I18n.t("mms.msgtemplate.dialog.edit.content.save.error", errorMsg));
             log.error("Failed to save template content for {}", template.getId(), ex);
+            return false;
         } catch (Exception e) {
-            showStatus(I18n.t("mms.msgtemplate.dialog.edit.content.save.error", e.getMessage()), "error");
+            append(I18n.t("mms.msgtemplate.dialog.edit.content.save.error", e.getMessage()));
             log.error("Failed to save template content for {}", template.getId(), e);
+            return false;
         } finally {
             if (parentView != null) {
                 parentView.showLoading(false);
             }
-            saveButton.setEnabled(true);
         }
     }
 
@@ -323,9 +275,7 @@ public class EditTemplateContentDialog extends Dialog {
             ResponseEntity<Resource> response = templateFileService.downloadFile(template.getId(), 0L);
             if (response.getBody() != null) {
                 Resource resource = response.getBody();
-                // Read the resource content as bytes
                 byte[] content = resource.getInputStream().readAllBytes();
-                // Encode to Base64
                 String base64Content = java.util.Base64.getEncoder().encodeToString(content);
                 String fileName = template.getOriginalFileName() != null ?
                         template.getOriginalFileName() : template.getFileName();
@@ -358,26 +308,9 @@ public class EditTemplateContentDialog extends Dialog {
         statusArea.setVisible(true);
         statusArea.removeAll();
         statusArea.add(new Span(message));
-
-        for (String modifierClass : STATUS_MODIFIER_CLASSES) {
-            statusArea.removeClassName(modifierClass);
-        }
-
-        switch (type) {
-            case "success":
-                statusArea.addClassName("wams-dialog-status-area--success");
-                break;
-            case "error":
-                statusArea.addClassName("wams-dialog-status-area--error");
-                break;
-            case "warning":
-                statusArea.addClassName("wams-dialog-status-area--warning");
-                break;
-            case "info":
-            default:
-                statusArea.addClassName("wams-dialog-status-area--info");
-                break;
-        }
+        statusArea.removeClassName("wams-dialog-status-area--warning");
+        statusArea.removeClassName("wams-dialog-status-area--info");
+        statusArea.addClassName("warning".equals(type) ? "wams-dialog-status-area--warning" : "wams-dialog-status-area--info");
     }
 
     private void hideStatus() {

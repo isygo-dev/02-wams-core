@@ -43,18 +43,24 @@ public class TokenConfigDetailsDialog extends NoActionDialog {
         identityGrid.addClassName("wams-card__detail-grid");
         addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("kms.token.details.field.code"), dto.getCode());
         addFieldToGrid(identityGrid, VaadinIcon.BUILDING, I18n.t("kms.token.details.field.tenant"), dto.getTenant());
-        addFieldToGrid(identityGrid, VaadinIcon.KEY, I18n.t("kms.token.details.field.type"),
-                dto.getTokenType() != null ? dto.getTokenType().meaning() : null);
-        addFieldToGrid(identityGrid, VaadinIcon.CLOCK, I18n.t("kms.token.config.lifetime"),
-                dto.getLifeTimeInMs() != null ? formatLifetime(dto.getLifeTimeInMs()) : null);
         mainLayout.add(createSection(I18n.t("kms.token.details.section.identity"), identityGrid));
 
+        // Algorithm / cryptographic + token parameters — how the token is shaped and signed.
+        Div algorithmGrid = new Div();
+        algorithmGrid.addClassName("wams-card__detail-grid");
+        addFieldToGrid(algorithmGrid, VaadinIcon.KEY, I18n.t("kms.token.details.field.type"),
+                dto.getTokenType() != null ? dto.getTokenType().meaning() : null);
+        addFieldToGrid(algorithmGrid, VaadinIcon.CLOCK, I18n.t("kms.token.config.lifetime"),
+                dto.getLifeTimeInMs() != null ? formatLifetime(dto.getLifeTimeInMs()) : null);
+        addFieldToGrid(algorithmGrid, VaadinIcon.CODE, I18n.t("kms.token.config.algorithm"), dto.getSignatureAlgorithm());
+        mainLayout.add(createSection(I18n.t("kms.token.details.section.algorithm"), algorithmGrid));
+
+        // Claims — issuer/audience values embedded into the JWT payload.
         Div claimsGrid = new Div();
         claimsGrid.addClassName("wams-card__detail-grid");
         addFieldToGrid(claimsGrid, VaadinIcon.BUILDING, I18n.t("kms.token.config.issuer"), dto.getIssuer());
         addFieldToGrid(claimsGrid, VaadinIcon.GROUP, I18n.t("kms.token.config.audience"),
                 dto.getAudience() != null && !dto.getAudience().isEmpty() ? String.join(", ", dto.getAudience()) : null);
-        addFieldToGrid(claimsGrid, VaadinIcon.CODE, I18n.t("kms.token.config.algorithm"), dto.getSignatureAlgorithm());
         mainLayout.add(createSection(I18n.t("kms.token.details.section.claims"), claimsGrid));
 
         Div keyGrid = new Div();
@@ -94,27 +100,31 @@ public class TokenConfigDetailsDialog extends NoActionDialog {
 
     private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {
         if (value == null || value.isBlank()) return;
-        HorizontalLayout row = new HorizontalLayout();
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.setSpacing(true);
-        row.setWidthFull();
-        row.addClassName("detail-field");
+
+        VerticalLayout field = new VerticalLayout();
+        field.setPadding(false);
+        field.setSpacing(false);
+        field.addClassName("wams-card__detail-field");
+
+        HorizontalLayout labelRow = new HorizontalLayout();
+        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        labelRow.setSpacing(false);
+        labelRow.addClassName("wams-card__detail-field-label-row");
 
         Icon iconComponent = icon.create();
-        iconComponent.setSize("16px");
+        iconComponent.setSize("12px");
         iconComponent.addClassName("detail-field-icon");
 
-        Span labelSpan = new Span(label + ":");
-        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.SMALL);
+        Span labelSpan = new Span(label);
+        labelSpan.addClassName("wams-card__detail-field-label");
+
+        labelRow.add(iconComponent, labelSpan);
 
         Span valueSpan = new Span(value);
-        valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.addClassName("detail-field-value");
+        valueSpan.addClassName("wams-card__detail-field-value");
 
-        row.add(iconComponent, labelSpan, valueSpan);
-        row.expand(valueSpan);
-        container.add(row);
+        field.add(labelRow, valueSpan);
+        container.add(field);
     }
 
     private VerticalLayout createSection(String title, Div content) {

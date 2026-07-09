@@ -43,22 +43,24 @@ public class DigestConfigDetailsDialog extends NoActionDialog {
         identityGrid.addClassName("wams-card__detail-grid");
         addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("kms.digest.details.field.code"), dto.getCode());
         addFieldToGrid(identityGrid, VaadinIcon.BUILDING, I18n.t("kms.digest.details.field.tenant"), dto.getTenant());
-        addFieldToGrid(identityGrid, VaadinIcon.COG, I18n.t("kms.digest.card.algorithm"), dto.getAlgorithm() != null ? dto.getAlgorithm().meaning() : null);
-        addFieldToGrid(identityGrid, VaadinIcon.ROTATE_RIGHT, I18n.t("kms.digest.card.iterations"), dto.getIterations() != null ? String.valueOf(dto.getIterations()) : null);
         mainLayout.add(createSection(I18n.t("kms.digest.details.section.identity"), identityGrid));
 
-        Div saltGrid = new Div();
-        saltGrid.addClassName("wams-card__detail-grid");
-        addFieldToGrid(saltGrid, VaadinIcon.DROP, I18n.t("kms.digest.card.salt.size"), dto.getSaltSizeBytes() != null ? String.valueOf(dto.getSaltSizeBytes()) : null);
-        addFieldToGrid(saltGrid, VaadinIcon.DROP, I18n.t("kms.digest.card.salt.generator"), dto.getSaltGenerator() != null ? dto.getSaltGenerator().meaning() : null);
-        addFieldToGrid(saltGrid, VaadinIcon.FLIP_H, I18n.t("kms.digest.card.invert.salt.position"), booleanToText(dto.getInvertPositionOfSaltInMessageBeforeDigesting()));
-        addFieldToGrid(saltGrid, VaadinIcon.FLIP_H, I18n.t("kms.digest.card.invert.plain.salt"), booleanToText(dto.getInvertPositionOfPlainSaltInEncryptionResults()));
-        addFieldToGrid(saltGrid, VaadinIcon.CHECK, I18n.t("kms.digest.card.lenient.salt"), booleanToText(dto.getUseLenientSaltSizeCheck()));
-        mainLayout.add(createSection(I18n.t("kms.digest.details.section.salt"), saltGrid));
+        // Algorithm / cryptographic parameters — everything that shapes how the digest is computed.
+        Div algorithmGrid = new Div();
+        algorithmGrid.addClassName("wams-card__detail-grid");
+        addFieldToGrid(algorithmGrid, VaadinIcon.COG, I18n.t("kms.digest.card.algorithm"), dto.getAlgorithm() != null ? dto.getAlgorithm().meaning() : null);
+        addFieldToGrid(algorithmGrid, VaadinIcon.ROTATE_RIGHT, I18n.t("kms.digest.card.iterations"), dto.getIterations() != null ? String.valueOf(dto.getIterations()) : null);
+        addFieldToGrid(algorithmGrid, VaadinIcon.DROP, I18n.t("kms.digest.card.salt.size"), dto.getSaltSizeBytes() != null ? String.valueOf(dto.getSaltSizeBytes()) : null);
+        addFieldToGrid(algorithmGrid, VaadinIcon.DROP, I18n.t("kms.digest.card.salt.generator"), dto.getSaltGenerator() != null ? dto.getSaltGenerator().meaning() : null);
+        addFieldToGrid(algorithmGrid, VaadinIcon.FLIP_H, I18n.t("kms.digest.card.invert.salt.position"), booleanToText(dto.getInvertPositionOfSaltInMessageBeforeDigesting()));
+        addFieldToGrid(algorithmGrid, VaadinIcon.FLIP_H, I18n.t("kms.digest.card.invert.plain.salt"), booleanToText(dto.getInvertPositionOfPlainSaltInEncryptionResults()));
+        addFieldToGrid(algorithmGrid, VaadinIcon.CHECK, I18n.t("kms.digest.card.lenient.salt"), booleanToText(dto.getUseLenientSaltSizeCheck()));
+        addFieldToGrid(algorithmGrid, VaadinIcon.UPLOAD, I18n.t("kms.digest.card.output.type"), dto.getStringOutputType() != null ? dto.getStringOutputType().meaning() : null);
+        mainLayout.add(createSection(I18n.t("kms.digest.details.section.algorithm"), algorithmGrid));
 
+        // Advanced / pool settings — provider wiring, pooling, and text framing, not crypto behavior.
         Div advancedGrid = new Div();
         advancedGrid.addClassName("wams-card__detail-grid");
-        addFieldToGrid(advancedGrid, VaadinIcon.UPLOAD, I18n.t("kms.digest.card.output.type"), dto.getStringOutputType() != null ? dto.getStringOutputType().meaning() : null);
         addFieldToGrid(advancedGrid, VaadinIcon.SERVER, I18n.t("kms.digest.card.provider"), dto.getProviderName());
         addFieldToGrid(advancedGrid, VaadinIcon.CODE, I18n.t("kms.digest.dialog.field.provider.class"), dto.getProviderClassName());
         addFieldToGrid(advancedGrid, VaadinIcon.GROUP, I18n.t("kms.digest.card.pool.size"), dto.getPoolSize() != null ? String.valueOf(dto.getPoolSize()) : null);
@@ -84,27 +86,31 @@ public class DigestConfigDetailsDialog extends NoActionDialog {
 
     private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {
         if (value == null || value.isBlank()) return;
-        HorizontalLayout row = new HorizontalLayout();
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.setSpacing(true);
-        row.setWidthFull();
-        row.addClassName("detail-field");
+
+        VerticalLayout field = new VerticalLayout();
+        field.setPadding(false);
+        field.setSpacing(false);
+        field.addClassName("wams-card__detail-field");
+
+        HorizontalLayout labelRow = new HorizontalLayout();
+        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        labelRow.setSpacing(false);
+        labelRow.addClassName("wams-card__detail-field-label-row");
 
         Icon iconComponent = icon.create();
-        iconComponent.setSize("16px");
+        iconComponent.setSize("12px");
         iconComponent.addClassName("detail-field-icon");
 
-        Span labelSpan = new Span(label + ":");
-        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.SMALL);
+        Span labelSpan = new Span(label);
+        labelSpan.addClassName("wams-card__detail-field-label");
+
+        labelRow.add(iconComponent, labelSpan);
 
         Span valueSpan = new Span(value);
-        valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.addClassName("detail-field-value");
+        valueSpan.addClassName("wams-card__detail-field-value");
 
-        row.add(iconComponent, labelSpan, valueSpan);
-        row.expand(valueSpan);
-        container.add(row);
+        field.add(labelRow, valueSpan);
+        container.add(field);
     }
 
     private VerticalLayout createSection(String title, Div content) {

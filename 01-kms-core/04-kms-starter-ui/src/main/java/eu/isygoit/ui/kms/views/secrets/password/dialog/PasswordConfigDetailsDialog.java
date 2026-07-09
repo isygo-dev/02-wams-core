@@ -43,13 +43,14 @@ public class PasswordConfigDetailsDialog extends NoActionDialog {
         identityGrid.addClassName("wams-card__detail-grid");
         addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("kms.password.details.field.code"), dto.getCode());
         addFieldToGrid(identityGrid, VaadinIcon.BUILDING, I18n.t("kms.password.details.field.tenant"), dto.getTenant());
-        addFieldToGrid(identityGrid, VaadinIcon.USER, I18n.t("kms.password.card.type"), dto.getType() != null ? dto.getType().meaning() : null);
-        addFieldToGrid(identityGrid, VaadinIcon.ARROW_DOWN, I18n.t("kms.password.card.min.length"), dto.getMinLength() != null ? String.valueOf(dto.getMinLength()) : null);
-        addFieldToGrid(identityGrid, VaadinIcon.ARROW_UP, I18n.t("kms.password.card.max.length"), dto.getMaxLength() != null ? String.valueOf(dto.getMaxLength()) : null);
         mainLayout.add(createSection(I18n.t("kms.password.details.section.identity"), identityGrid));
 
+        // Policy / generation parameters — everything that shapes what a generated password looks like.
         Div policyGrid = new Div();
         policyGrid.addClassName("wams-card__detail-grid");
+        addFieldToGrid(policyGrid, VaadinIcon.USER, I18n.t("kms.password.card.type"), dto.getType() != null ? dto.getType().meaning() : null);
+        addFieldToGrid(policyGrid, VaadinIcon.ARROW_DOWN, I18n.t("kms.password.card.min.length"), dto.getMinLength() != null ? String.valueOf(dto.getMinLength()) : null);
+        addFieldToGrid(policyGrid, VaadinIcon.ARROW_UP, I18n.t("kms.password.card.max.length"), dto.getMaxLength() != null ? String.valueOf(dto.getMaxLength()) : null);
         addFieldToGrid(policyGrid, VaadinIcon.TEXT_INPUT, I18n.t("kms.password.card.pattern"), dto.getPattern());
         addFieldToGrid(policyGrid, VaadinIcon.FONT, I18n.t("kms.password.card.char.set"), dto.getCharSetType() != null ? dto.getCharSetType().meaning() : null);
         addFieldToGrid(policyGrid, VaadinIcon.CLOCK, I18n.t("kms.password.card.lifetime"), dto.getLifeTime() != null ? String.valueOf(dto.getLifeTime()) : null);
@@ -69,27 +70,31 @@ public class PasswordConfigDetailsDialog extends NoActionDialog {
 
     private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {
         if (value == null || value.isBlank()) return;
-        HorizontalLayout row = new HorizontalLayout();
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.setSpacing(true);
-        row.setWidthFull();
-        row.addClassName("detail-field");
+
+        VerticalLayout field = new VerticalLayout();
+        field.setPadding(false);
+        field.setSpacing(false);
+        field.addClassName("wams-card__detail-field");
+
+        HorizontalLayout labelRow = new HorizontalLayout();
+        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        labelRow.setSpacing(false);
+        labelRow.addClassName("wams-card__detail-field-label-row");
 
         Icon iconComponent = icon.create();
-        iconComponent.setSize("16px");
+        iconComponent.setSize("12px");
         iconComponent.addClassName("detail-field-icon");
 
-        Span labelSpan = new Span(label + ":");
-        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.SMALL);
+        Span labelSpan = new Span(label);
+        labelSpan.addClassName("wams-card__detail-field-label");
+
+        labelRow.add(iconComponent, labelSpan);
 
         Span valueSpan = new Span(value);
-        valueSpan.addClassName(LumoUtility.FontSize.SMALL);
-        valueSpan.addClassName("detail-field-value");
+        valueSpan.addClassName("wams-card__detail-field-value");
 
-        row.add(iconComponent, labelSpan, valueSpan);
-        row.expand(valueSpan);
-        container.add(row);
+        field.add(labelRow, valueSpan);
+        container.add(field);
     }
 
     private VerticalLayout createSection(String title, Div content) {

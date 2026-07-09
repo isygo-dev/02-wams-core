@@ -8,8 +8,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -17,7 +15,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.ui.common.dialog.NoActionDialog;
+import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -25,7 +23,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ClaimsBuilderDialog extends NoActionDialog {
+/**
+ * Lets a user compose custom JWT claims as key/value rows.
+ *
+ * <p>Extends {@link BaseActionDialog} (not {@code NoActionDialog}) because it
+ * has real action semantics — Apply commits the claims back to the caller via
+ * {@link ClaimsCallback}, Cancel discards — so it shares the same Ok/Cancel +
+ * error-span footer contract as every other action dialog in the app instead
+ * of building its own ad-hoc button bar in the content area.
+ */
+public class ClaimsBuilderDialog extends BaseActionDialog {
 
     private final ObjectMapper objectMapper;
     private final String existingClaimsJson;
@@ -47,6 +54,7 @@ public class ClaimsBuilderDialog extends NoActionDialog {
         setMaxWidth("95%");
         setResizable(true);
         setDraggable(true);
+        setOkButtonText(I18n.t("kms.claims.builder.apply.close"));
 
         buildUI();
     }
@@ -95,21 +103,8 @@ public class ClaimsBuilderDialog extends NoActionDialog {
         headerBar.setAlignItems(FlexComponent.Alignment.CENTER);
         headerBar.addClassName("header-bar");
 
-        // Action buttons
-        Button applyButton = new Button(I18n.t("kms.claims.builder.apply.close"), new Icon(VaadinIcon.CHECK));
-        applyButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        applyButton.addClickListener(e -> applyClaims());
-
-        Button cancelButton = new Button(I18n.t("kms.claims.builder.cancel"), e -> close());
-        cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-
-        HorizontalLayout buttonBar = new HorizontalLayout(applyButton, cancelButton);
-        buttonBar.setWidthFull();
-        buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        buttonBar.setSpacing(true);
-
-        mainLayout.add(headerBar, rowsContainer, validationHint, buttonBar);
-        add(mainLayout);
+        mainLayout.add(headerBar, rowsContainer, validationHint);
+        addContent(mainLayout);
     }
 
     private void loadExistingClaims() {
@@ -207,12 +202,12 @@ public class ClaimsBuilderDialog extends NoActionDialog {
         claimCounter.setText(counterText);
     }
 
-    private void applyClaims() {
+    @Override
+    protected boolean onOk() {
         validateAll();
         if (validationHint.isVisible()) {
-            Notification.show(I18n.t("kms.claims.builder.fix.errors"), 3000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_WARNING);
-            return;
+            append(I18n.t("kms.claims.builder.fix.errors"));
+            return false;
         }
 
         Map<String, Object> claimsMap = new LinkedHashMap<>();
@@ -231,12 +226,11 @@ public class ClaimsBuilderDialog extends NoActionDialog {
         try {
             String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(claimsMap);
             callback.onClaimsBuilt(prettyJson);
-            close();
-            Notification.show(I18n.t("kms.claims.builder.claims.applied"), 3000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            append(I18n.t("kms.claims.builder.claims.applied"));
+            return true;
         } catch (Exception ex) {
-            Notification.show(I18n.t("kms.claims.builder.json.failed", ex.getMessage()), 5000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            append(I18n.t("kms.claims.builder.json.failed", ex.getMessage()));
+            return false;
         }
     }
 

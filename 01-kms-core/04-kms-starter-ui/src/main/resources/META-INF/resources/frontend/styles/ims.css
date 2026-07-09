@@ -325,6 +325,7 @@
     .application-management-toolbar > *,
     .customer-management-toolbar > *,
     .parameter-management-toolbar > *,
+    .role-management-toolbar > *,
     .tenant-management-toolbar > * {
         width: 100% !important;
         justify-content: center;
