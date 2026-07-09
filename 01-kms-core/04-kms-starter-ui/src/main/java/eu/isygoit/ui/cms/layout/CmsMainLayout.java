@@ -1,11 +1,10 @@
 package eu.isygoit.ui.cms.layout;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.Scroller;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.sidenav.SideNav;
-import com.vaadin.flow.component.sidenav.SideNavItem;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.layout.BaseMainLayout;
 
@@ -23,19 +22,15 @@ public class CmsMainLayout extends BaseMainLayout {
     }
 
     @Override
-    protected void createDrawer() {
+    protected Component createDrawerContent() {
         SideNav nav = new SideNav();
+        nav.addItem(navItem(I18n.t("cms.nav.dashboard"), "cms", VaadinIcon.HOME));
+        // Calendars is the only CMS entity implemented today; standalone event
+        // and schedule browsing have no backing view/route yet, so they're
+        // intentionally left off the sidebar rather than pointing at a page
+        // that 404s.
+        nav.addItem(navItem(I18n.t("cms.nav.calendars"), "cms/calendars", VaadinIcon.CALENDAR));
 
-        SideNavItem dashboard = new SideNavItem(I18n.t("cms.nav.dashboard"), "cms", VaadinIcon.HOME.create());
-        SideNavItem calendars = new SideNavItem(I18n.t("cms.nav.calendars"), "cms/calendars", VaadinIcon.CALENDAR.create());
-        SideNavItem events = new SideNavItem(I18n.t("cms.nav.events"), "cms/events", VaadinIcon.CALENDAR_CLOCK.create());
-        SideNavItem schedules = new SideNavItem(I18n.t("cms.nav.schedules"), "cms/schedules", VaadinIcon.CLOCK.create());
-
-        nav.addItem(dashboard, calendars, events, schedules);
-
-        Scroller scroller = new Scroller(nav);
-        VerticalLayout layout = new VerticalLayout(scroller);
-        layout.setSizeFull();
-        addToDrawer(layout);
+        return new Scroller(nav);
     }
 }

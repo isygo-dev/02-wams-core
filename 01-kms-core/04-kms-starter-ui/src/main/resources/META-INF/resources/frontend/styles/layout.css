@@ -3,10 +3,18 @@
  * module's <Module>MainLayout (kms, ims, dms, mms, sms, cms) and by LandingView.
  */
 
+/* ── Header ───────────────────────────────────────────────────────────────── */
+
 .wams-main-header {
     flex-wrap: wrap;
     gap: var(--lumo-space-s);
+    height: var(--wams-header-height);
+    min-height: var(--wams-header-height);
+    box-sizing: border-box;
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
     border-top: 3px solid var(--wams-module-accent, transparent);
+    box-shadow: var(--lumo-box-shadow-xs);
+    background: var(--lumo-base-color);
 }
 
 .wams-main-header__left {
@@ -17,14 +25,54 @@
     margin-right: var(--lumo-space-m);
 }
 
-.wams-landing-button {
-    color: var(--lumo-primary-text-color);
-    margin-right: var(--lumo-space-s);
+/* ── Brand (click → landing) ──────────────────────────────────────────────── */
+
+.wams-brand {
+    cursor: pointer;
+    padding: var(--lumo-space-xs) var(--lumo-space-s);
+    border-radius: var(--lumo-border-radius-m);
+    transition: background-color 0.15s ease;
+}
+
+.wams-brand:hover {
+    background-color: var(--lumo-contrast-5pct);
+}
+
+.wams-brand__icon {
+    color: var(--lumo-primary-color);
+    width: 22px;
+    height: 22px;
+    margin-right: var(--lumo-space-xs);
+}
+
+.wams-brand__name {
+    font-size: var(--lumo-font-size-l);
+    font-weight: 700;
+    color: var(--lumo-header-text-color);
+    white-space: nowrap;
 }
 
 .wams-header-title {
     white-space: nowrap;
-    color: var(--wams-module-accent, var(--lumo-header-text-color));
+    font-size: var(--lumo-font-size-m);
+    font-weight: 500;
+    color: var(--wams-module-accent, var(--lumo-secondary-text-color));
+    padding-left: var(--lumo-space-s);
+    border-left: 1px solid var(--lumo-contrast-20pct);
+}
+
+/* ── Header icon buttons (notifications / settings) ──────────────────────── */
+
+.wams-header-icon-btn {
+    color: var(--lumo-secondary-text-color);
+}
+
+.wams-header-icon-btn:hover {
+    color: var(--lumo-primary-color);
+}
+
+.wams-header-popover {
+    padding: var(--lumo-space-s) var(--lumo-space-m);
 }
 
 .wams-avatar-bordered {
@@ -33,6 +81,8 @@
 
 @media (max-width: 640px) {
     .wams-main-header {
+        height: auto;
+        min-height: var(--wams-header-height);
         flex-direction: column;
         align-items: stretch;
     }
@@ -40,6 +90,26 @@
     .wams-main-header > :first-child {
         justify-content: space-between;
     }
+
+    .wams-app-search {
+        max-width: none;
+    }
+}
+
+/* ── Quick-navigation search (eu.isygoit.ui.common.component.AppSearchBar) ── */
+
+.wams-app-search {
+    width: 260px;
+    max-width: 260px;
+    border-radius: var(--lumo-border-radius-l);
+}
+
+.wams-app-search input {
+    border-radius: var(--lumo-border-radius-l) !important;
+}
+
+.wams-app-search__item-icon {
+    color: var(--lumo-secondary-text-color);
 }
 
 /* ── Language selector (eu.isygoit.ui.common.component.LanguageSelectorComponent) ── */
@@ -91,4 +161,132 @@
     --lumo-combo-box-overlay-width: auto;
     min-width: 0;
     padding: 0 var(--lumo-space-s);
+}
+
+/* ── Sidebar / drawer ─────────────────────────────────────────────────────
+   BaseMainLayout wraps whatever createDrawerContent() returns together with
+   the collapse toggle, in a single flex-column container so the toggle stays
+   pinned at the bottom while the nav content above it scrolls independently. */
+
+vaadin-app-layout {
+    --vaadin-app-layout-drawer-width: var(--wams-sidebar-width-expanded);
+}
+
+/* The drawer width transition isn't declared by Vaadin's own styles (only
+   transform/visibility are, for the open/close slide animation), so add it
+   here to make the expanded/collapsed width swap animate smoothly too. */
+vaadin-app-layout::part(drawer) {
+    transition: width 0.2s ease, transform var(--vaadin-app-layout-transition, 200ms), visibility var(--vaadin-app-layout-transition, 200ms);
+    background: var(--lumo-base-color);
+    border-right: 1px solid var(--lumo-contrast-10pct);
+}
+
+.wams-sidebar-collapsed {
+    --vaadin-app-layout-drawer-width: var(--wams-sidebar-width-collapsed);
+}
+
+.wams-drawer-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.wams-drawer-scroll-area {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+/* Section label above a group of flat nav items (SideNav#setLabel/constructor) */
+
+.wams-drawer-scroll-area [slot='label'] {
+    font-size: var(--lumo-font-size-xxs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--lumo-tertiary-text-color);
+    padding: var(--lumo-space-m) var(--lumo-space-m) var(--lumo-space-xs);
+    display: block;
+}
+
+vaadin-side-nav {
+    padding: 0 var(--lumo-space-xs);
+}
+
+/* Active item: blue left bar + tinted background + primary-colored text/icon,
+   using the "current" state attribute Vaadin's router already reflects onto
+   vaadin-side-nav-item — no custom Java route-matching needed. */
+
+vaadin-side-nav-item::part(link) {
+    border-radius: var(--lumo-border-radius-m);
+    font-size: 14px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+vaadin-side-nav-item::part(link):hover {
+    background-color: var(--lumo-contrast-5pct);
+}
+
+vaadin-side-nav-item[current]::part(link) {
+    background-color: var(--lumo-primary-color-10pct);
+    color: var(--lumo-primary-text-color);
+    font-weight: 600;
+    box-shadow: inset 3px 0 0 0 var(--lumo-primary-color);
+}
+
+vaadin-side-nav-item[current]::part(link) vaadin-icon,
+vaadin-side-nav-item[current]::part(link) [slot='prefix'] {
+    color: var(--lumo-primary-color);
+}
+
+/* Nested (child) items get extra start padding so hierarchy reads clearly. */
+
+vaadin-side-nav-item[slot='children'] {
+    padding-inline-start: var(--lumo-space-m);
+}
+
+/* ── Sidebar collapse toggle (pinned at the bottom, BaseMainLayout) ──────── */
+
+.wams-sidebar-collapse-toggle {
+    width: 100%;
+    justify-content: center;
+    border-top: 1px solid var(--lumo-contrast-10pct);
+    border-radius: 0;
+    color: var(--lumo-secondary-text-color);
+    flex-shrink: 0;
+}
+
+.wams-sidebar-collapse-toggle:hover {
+    background-color: var(--lumo-contrast-5pct);
+    color: var(--lumo-primary-color);
+}
+
+/* ── Collapsed (icon-rail) mode: hide labels/section headers, show icons only.
+   SideNavItem's label is a plain text node in the default slot — there's no
+   wrapping element to hide via a CSS class/part, so the reliable way to make
+   it disappear (without touching the icon) is to zero out the inherited
+   font-size on the link; the icon stays visible because navItem() gives it
+   an explicit pixel size (see BaseMainLayout), which doesn't scale with
+   font-size. A native tooltip (set on every nav item) surfaces the label on
+   hover while collapsed. ──────────────────────────────────────────────────── */
+
+.wams-sidebar-collapsed .wams-drawer-scroll-area [slot='label'] {
+    display: none;
+}
+
+.wams-sidebar-collapsed vaadin-side-nav-item::part(link) {
+    justify-content: center;
+    padding-inline: 0;
+    gap: 0;
+    font-size: 0;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.wams-sidebar-collapsed vaadin-side-nav-item::part(toggle-button) {
+    display: none;
+}
+
+.wams-sidebar-collapsed vaadin-side-nav-item[slot='children'] {
+    padding-inline-start: 0;
 }

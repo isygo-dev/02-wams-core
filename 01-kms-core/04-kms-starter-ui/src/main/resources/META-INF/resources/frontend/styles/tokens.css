@@ -79,6 +79,11 @@ html {
        custom properties can't be used inside @media conditions, so these are
        documented here as the single source of truth for every stylesheet in
        this app to copy literally): 480px / 768px / 1024px / 1280px. ── */
+
+    /* ── App shell (BaseMainLayout header + sidebar) ─────────────────────── */
+    --wams-header-height: 52px;
+    --wams-sidebar-width-expanded: 220px;
+    --wams-sidebar-width-collapsed: 60px;
 }
 
 /* ── Status / chip tokens ───────────────────────────────────────────────── */

@@ -59,8 +59,9 @@ public class LandingView extends BaseMainLayout implements BeforeEnterObserver {
     }
 
     @Override
-    protected void createDrawer() {
+    protected Component createDrawerContent() {
         // No drawer for landing page
+        return null;
     }
 
     // ─── MAIN CONTENT ────────────────────────────────────────────────────────
