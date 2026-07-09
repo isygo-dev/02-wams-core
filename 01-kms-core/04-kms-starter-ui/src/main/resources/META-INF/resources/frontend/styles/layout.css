@@ -250,29 +250,35 @@ vaadin-drawer-toggle {
         width: 100%;
         max-width: none;
     }
-}
 
-@media (max-width: 480px) {
-    /* Smallest phones: shrink the language selector combo. 90px (not the
-       flag/padding/native-dropdown-arrow's own ~60-63px footprint) is the
-       floor above which it can actually still fit — !important is required
-       because LanguageSelectorComponent sets min-width via Java (an inline
-       style, which otherwise always wins over a plain class rule regardless
-       of media query), the same reason .wams-dialog-responsive in tokens.css
-       needs it for Vaadin-set inline dialog sizing. Text still gracefully
-       truncates via the combo's own input-field part rather than overflowing. */
-    .wams-language-selector .wams-language-selector__combo {
-        min-width: 90px !important;
+    /* Language selector goes icon-only: the redundant standalone globe icon
+       is hidden (the flag prefix already shows the current language visually
+       and is more informative), and the selected language's name text is
+       hidden via font-size:0 on the native input — the same technique used
+       for the sidebar's icon-rail collapse, since the text has no wrapping
+       element of its own to target with a plain CSS class. min-width drops
+       to a small icon-sized floor; !important is required because
+       LanguageSelectorComponent sets min-width via Java (an inline style,
+       which otherwise always wins over a plain class rule regardless of
+       media query), the same reason .wams-dialog-responsive in tokens.css
+       needs it for Vaadin-set inline dialog sizing. The combo itself stays
+       fully present and clickable (not display:none), so its dropdown
+       overlay keeps anchoring correctly. */
+    .wams-language-selector__globe-icon {
+        display: none;
     }
 
-    .wams-language-selector__combo::part(input-field) {
-        overflow: hidden;
+    .wams-language-selector .wams-language-selector__combo {
+        min-width: 44px !important;
+        padding: 0 var(--lumo-space-xs);
     }
 
     .wams-language-selector__combo input {
-        text-overflow: ellipsis;
+        font-size: 0;
     }
+}
 
+@media (max-width: 480px) {
     .wams-header-icon-cluster {
         gap: var(--lumo-space-xs);
     }
