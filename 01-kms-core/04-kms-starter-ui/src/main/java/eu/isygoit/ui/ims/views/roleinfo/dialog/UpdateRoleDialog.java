@@ -91,7 +91,21 @@ public class UpdateRoleDialog extends BaseActionDialog {
         buildApplicationsGrid();
         buildPermissionsGrid();
         buildTabs();
-        addContent(createMainLayout());
+
+        // Not addContent(...): that shared helper only sets width:100% on its
+        // wrapper, not height, so main's setSizeFull() below has no definite
+        // ancestor height to resolve "100%" against even though this dialog
+        // itself has an explicit height (85vh) — the Permissions tab's tree
+        // was capped at a hardcoded 350px specifically to work around that.
+        // Sizing the wrapper here instead resolves the whole chain down to
+        // the tree without changing addContent()'s behavior for every other
+        // (typically auto-height) dialog that uses it.
+        VerticalLayout contentWrapper = new VerticalLayout(createMainLayout());
+        contentWrapper.setPadding(true);
+        contentWrapper.setSpacing(true);
+        contentWrapper.setSizeFull();
+        add(contentWrapper);
+
         loadDataAndPopulate();
     }
 
@@ -131,7 +145,10 @@ public class UpdateRoleDialog extends BaseActionDialog {
         applicationsGrid.addColumn(ApplicationDto::getName).setHeader(I18n.t("ims.role.dialog.apps.column.name")).setAutoWidth(true);
         applicationsGrid.addColumn(ApplicationDto::getTitle).setHeader(I18n.t("ims.role.dialog.apps.column.title")).setAutoWidth(true);
         applicationsGrid.addThemeVariants(GridVariant.LUMO_COMPACT, GridVariant.LUMO_NO_BORDER);
-        applicationsGrid.setHeight("350px");
+        // Same fix as permissionsTree below: fill the tab instead of a fixed
+        // pixel height (see updateTabContent() case 1 for the expand() call
+        // that actually grows this into the remaining space below topBar).
+        applicationsGrid.setSizeFull();
 
         appsSearchField = new TextField();
         appsSearchField.setPlaceholder(I18n.t("ims.role.dialog.apps.search"));
@@ -201,7 +218,12 @@ public class UpdateRoleDialog extends BaseActionDialog {
         // No remove button in update dialog – the matrix is fixed
 
         permissionsTree.addThemeVariants(GridVariant.LUMO_COMPACT, GridVariant.LUMO_NO_BORDER);
-        permissionsTree.setHeight("350px");
+        // Fill whatever height the Permissions tab actually has (see
+        // permsLayout in updateTabContent()) instead of a fixed pixel value —
+        // TreeGrid scrolls its own rows internally once it has a definite
+        // height, so this is also what keeps scrolling on the tree rather
+        // than the dialog.
+        permissionsTree.setSizeFull();
 
         refreshPermissionsTree();
 
@@ -398,7 +420,8 @@ public class UpdateRoleDialog extends BaseActionDialog {
             case 1:
                 VerticalLayout appsLayout = new VerticalLayout();
                 appsLayout.setPadding(false);
-                appsLayout.setSpacing(false);
+                appsLayout.setSpacing(true);
+                appsLayout.setSizeFull();
                 Button refreshAppsBtn = new Button(I18n.t("ims.role.dialog.apps.refresh"), VaadinIcon.REFRESH.create());
                 refreshAppsBtn.addThemeVariants(ButtonVariant.LUMO_SMALL);
                 refreshAppsBtn.addClickListener(e -> refreshApplications());
@@ -408,13 +431,16 @@ public class UpdateRoleDialog extends BaseActionDialog {
                 topBar.addClassName("apps-filter-bar");
                 topBar.expand(appsSearchField);
                 appsLayout.add(topBar, applicationsGrid);
+                appsLayout.expand(applicationsGrid);
                 tabContent.add(appsLayout);
                 break;
             case 2:
+                permSearchField.setWidthFull();
                 VerticalLayout permsLayout = new VerticalLayout(permSearchField, permissionsTree);
                 permsLayout.setPadding(false);
-                permsLayout.setSpacing(false);
-                permsLayout.setHeightFull();
+                permsLayout.setSpacing(true);
+                permsLayout.setSizeFull();
+                permsLayout.expand(permissionsTree);
                 tabContent.add(permsLayout);
                 break;
         }

@@ -444,6 +444,25 @@
 
 /* ── Responsive ───────────────────────────────────────────────────────── */
 
+/* .wams-landing-main centers its children vertically (LandingView sets
+   JustifyContentMode.CENTER) — a nice touch when the hero + one row of 6
+   cards fits inside the viewport, as it does on desktop. Below 1024px the
+   cards stack into 1-2 columns (see the card-width rules further down), so
+   hero + cards + footer routinely end up taller than the viewport. Centering
+   *overflowing* flex content pushes the overflow symmetrically above *and*
+   below the box; since the page can't scroll to a negative position, the
+   top overflow — the hero and the first 1-2 cards — becomes permanently
+   unreachable (reported: "first two cards not visible" on iPhone 14).
+   flex-start makes any overflow spill past the bottom instead, where normal
+   scrolling already reaches it. !important is required because
+   JustifyContentMode.CENTER is applied as an inline style, which otherwise
+   always wins over a plain class rule regardless of media query. */
+@media (max-width: 1024px) {
+    .wams-landing-main {
+        justify-content: flex-start !important;
+    }
+}
+
 @media (max-width: 480px) {
     .wams-domain-card {
         width: 100% !important;

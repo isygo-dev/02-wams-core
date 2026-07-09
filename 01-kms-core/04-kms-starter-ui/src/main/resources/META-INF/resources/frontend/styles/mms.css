@@ -534,6 +534,28 @@
         justify-content: center;
     }
 
+    /* DOM order is filters (leftGroup) → pagination (centerGroup) →
+       refresh/create (rightGroup), which otherwise stacks Create at the very
+       bottom, below pagination and filters, once the toolbar goes to a
+       column. Reorder so pagination + actions stay anchored near the top and
+       right-aligned; only the filters drop to the bottom. */
+    .template-toolbar > :nth-child(2),
+    .sender-toolbar > :nth-child(2),
+    .template-toolbar > :nth-child(3),
+    .sender-toolbar > :nth-child(3) {
+        justify-content: flex-end;
+    }
+
+    .template-toolbar > :nth-child(3),
+    .sender-toolbar > :nth-child(3) {
+        order: -2;
+    }
+
+    .template-toolbar > :nth-child(2),
+    .sender-toolbar > :nth-child(2) {
+        order: -1;
+    }
+
     .template-grid,
     .sender-grid {
         grid-template-columns: 1fr;

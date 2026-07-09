@@ -284,6 +284,22 @@
         justify-content: center;
     }
 
+    /* Same reorder as key-management-toolbar above: keep pagination + create
+       anchored near the top and right-aligned instead of falling to the
+       bottom of the stacked column. */
+    .randomkey-toolbar > :nth-child(2),
+    .randomkey-toolbar > :nth-child(3) {
+        justify-content: flex-end;
+    }
+
+    .randomkey-toolbar > :nth-child(3) {
+        order: -2;
+    }
+
+    .randomkey-toolbar > :nth-child(2) {
+        order: -1;
+    }
+
     .random-keys-grid {
         grid-template-columns: 1fr;
     }
@@ -495,6 +511,32 @@
     .tags-toolbar > * {
         width: 100% !important;
         justify-content: center;
+    }
+
+    /* DOM order is filters (leftGroup) → pagination (centerGroup) →
+       refresh/create (rightGroup), which otherwise stacks Create at the very
+       bottom, below pagination and filters, once the toolbar goes to a
+       column. Reorder so pagination + actions stay anchored near the top and
+       right-aligned; only the filters drop to the bottom. */
+    .key-management-toolbar > :nth-child(2),
+    .aliases-toolbar > :nth-child(2),
+    .tags-toolbar > :nth-child(2),
+    .key-management-toolbar > :nth-child(3),
+    .aliases-toolbar > :nth-child(3),
+    .tags-toolbar > :nth-child(3) {
+        justify-content: flex-end;
+    }
+
+    .key-management-toolbar > :nth-child(3),
+    .aliases-toolbar > :nth-child(3),
+    .tags-toolbar > :nth-child(3) {
+        order: -2;
+    }
+
+    .key-management-toolbar > :nth-child(2),
+    .aliases-toolbar > :nth-child(2),
+    .tags-toolbar > :nth-child(2) {
+        order: -1;
     }
 
     .keys-grid,
@@ -731,6 +773,22 @@
         justify-content: center;
     }
 
+    /* Same reorder as key-management-toolbar above: keep pagination + create
+       anchored near the top and right-aligned instead of falling to the
+       bottom of the stacked column. */
+    .custom-stores-toolbar > :nth-child(2),
+    .custom-stores-toolbar > :nth-child(3) {
+        justify-content: flex-end;
+    }
+
+    .custom-stores-toolbar > :nth-child(3) {
+        order: -2;
+    }
+
+    .custom-stores-toolbar > :nth-child(2) {
+        order: -1;
+    }
+
     .stores-grid {
         grid-template-columns: 1fr;
     }
@@ -763,6 +821,22 @@
     .incremental-toolbar > * {
         width: 100% !important;
         justify-content: center;
+    }
+
+    /* Same reorder as key-management-toolbar above: keep pagination + create
+       anchored near the top and right-aligned instead of falling to the
+       bottom of the stacked column. */
+    .incremental-toolbar > :nth-child(2),
+    .incremental-toolbar > :nth-child(3) {
+        justify-content: flex-end;
+    }
+
+    .incremental-toolbar > :nth-child(3) {
+        order: -2;
+    }
+
+    .incremental-toolbar > :nth-child(2) {
+        order: -1;
     }
 
     .incremental-keys-grid {
@@ -1012,6 +1086,34 @@
     .token-config-view .token-config-toolbar > * {
         width: 100% !important;
         justify-content: center;
+    }
+
+    /* Same reorder as key-management-toolbar above: keep pagination + create
+       anchored near the top and right-aligned instead of falling to the
+       bottom of the stacked column. */
+    .digest-config-view .digest-toolbar > :nth-child(2),
+    .password-config-view .password-toolbar > :nth-child(2),
+    .peb-config-view .peb-toolbar > :nth-child(2),
+    .token-config-view .token-config-toolbar > :nth-child(2),
+    .digest-config-view .digest-toolbar > :nth-child(3),
+    .password-config-view .password-toolbar > :nth-child(3),
+    .peb-config-view .peb-toolbar > :nth-child(3),
+    .token-config-view .token-config-toolbar > :nth-child(3) {
+        justify-content: flex-end;
+    }
+
+    .digest-config-view .digest-toolbar > :nth-child(3),
+    .password-config-view .password-toolbar > :nth-child(3),
+    .peb-config-view .peb-toolbar > :nth-child(3),
+    .token-config-view .token-config-toolbar > :nth-child(3) {
+        order: -2;
+    }
+
+    .digest-config-view .digest-toolbar > :nth-child(2),
+    .password-config-view .password-toolbar > :nth-child(2),
+    .peb-config-view .peb-toolbar > :nth-child(2),
+    .token-config-view .token-config-toolbar > :nth-child(2) {
+        order: -1;
     }
 
     .digest-configs-grid,
