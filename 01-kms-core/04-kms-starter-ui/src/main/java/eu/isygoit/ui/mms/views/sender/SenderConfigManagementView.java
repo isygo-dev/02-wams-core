@@ -226,10 +226,14 @@ public class SenderConfigManagementView extends ManagementVerticalView {
                     }
                     if (currentSearch != null && !currentSearch.isEmpty()) {
                         String searchLower = currentSearch.toLowerCase();
+                        String code = config.getCode() != null ? config.getCode().toLowerCase() : "";
+                        String name = config.getName() != null ? config.getName().toLowerCase() : "";
                         String host = config.getHost() != null ? config.getHost().toLowerCase() : "";
                         String username = config.getUsername() != null ? config.getUsername().toLowerCase() : "";
                         String tenant = config.getTenant() != null ? config.getTenant().toLowerCase() : "";
-                        return host.contains(searchLower) ||
+                        return code.contains(searchLower) ||
+                                name.contains(searchLower) ||
+                                host.contains(searchLower) ||
                                 username.contains(searchLower) ||
                                 tenant.contains(searchLower);
                     }

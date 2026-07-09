@@ -37,6 +37,9 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
     // UI components (updated on refresh)
     private Span titleSpan;
     private Span statusChip;
+    private Span codeSpan;
+    private Span nameSpan;
+    private Span descriptionSpan;
     private Span hostSpan;
     private Span portSpan;
     private Span usernameSpan;
@@ -56,6 +59,9 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         this.onRefresh = onRefresh;
 
         // Initialize spans to avoid NPE
+        codeSpan = new Span();
+        nameSpan = new Span();
+        descriptionSpan = new Span();
         hostSpan = new Span();
         portSpan = new Span();
         usernameSpan = new Span();
@@ -82,6 +88,10 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         return config.getId();
     }
 
+    public String getCode() {
+        return config.getCode();
+    }
+
     public String getHost() {
         return config.getHost();
     }
@@ -98,6 +108,9 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
                 ResponseEntity<SenderConfigDto> response = objectService.findById(config.getId());
                 if (response.getBody() != null) {
                     SenderConfigDto updatedConfig = response.getBody();
+                    config.setCode(updatedConfig.getCode());
+                    config.setName(updatedConfig.getName());
+                    config.setDescription(updatedConfig.getDescription());
                     config.setHost(updatedConfig.getHost());
                     config.setPort(updatedConfig.getPort());
                     config.setUsername(updatedConfig.getUsername());
@@ -125,6 +138,15 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         if (statusChip == null) {
             statusChip = buildStatusChip("", "");
         }
+        if (codeSpan == null) {
+            codeSpan = new Span();
+        }
+        if (nameSpan == null) {
+            nameSpan = new Span();
+        }
+        if (descriptionSpan == null) {
+            descriptionSpan = new Span();
+        }
         if (hostSpan == null) {
             hostSpan = new Span();
         }
@@ -144,13 +166,17 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
             defaultSenderSpan = new Span();
         }
 
-        String displayName = config.getHost() != null ? config.getHost() : I18n.t("mms.sender.card.fallback.name", config.getId());
+        String displayName = config.getName() != null ? config.getName() :
+                (config.getCode() != null ? config.getCode() : I18n.t("mms.sender.card.fallback.name", config.getId()));
         titleSpan.setText(displayName);
         titleSpan.getElement().setAttribute("title", displayName);
 
         statusChip.setText(isActive() ? I18n.t("mms.sender.card.status.active") : I18n.t("mms.sender.card.status.inactive"));
         applyChipColor(statusChip, isActive() ? ChipColor.SUCCESS : ChipColor.WARNING);
 
+        codeSpan.setText(config.getCode() != null ? config.getCode() : I18n.t("mms.common.value.notAvailable"));
+        nameSpan.setText(config.getName() != null ? config.getName() : I18n.t("mms.common.value.notAvailable"));
+        descriptionSpan.setText(config.getDescription() != null ? config.getDescription() : I18n.t("mms.sender.card.no.description"));
         hostSpan.setText(config.getHost() != null ? config.getHost() : I18n.t("mms.common.value.notAvailable"));
         portSpan.setText(config.getPort() != null ? config.getPort() : I18n.t("mms.common.value.notAvailable"));
         usernameSpan.setText(config.getUsername() != null ? config.getUsername() : I18n.t("mms.common.value.notAvailable"));
@@ -193,6 +219,17 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         left.setSpacing(true);
         left.addClassName("wams-title-row");
 
+        // Code badge
+        if (config.getCode() != null) {
+            Span codeBadge = new Span(config.getCode());
+            codeBadge.addClassName(LumoUtility.Background.CONTRAST_10);
+            codeBadge.addClassName(LumoUtility.Padding.XSMALL);
+            codeBadge.addClassName(LumoUtility.BorderRadius.SMALL);
+            codeBadge.addClassName(LumoUtility.FontSize.XSMALL);
+            codeBadge.addClassName("wams-code-badge");
+            left.add(codeBadge);
+        }
+
         // Tenant badge
         if (config.getTenant() != null) {
             Span tenantBadge = new Span(config.getTenant());
@@ -204,8 +241,9 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
             left.add(tenantBadge);
         }
 
-        // Title
-        String displayName = config.getHost() != null ? config.getHost() : I18n.t("mms.sender.card.fallback.name", config.getId());
+        // Title (name)
+        String displayName = config.getName() != null ? config.getName() :
+                (config.getCode() != null ? config.getCode() : I18n.t("mms.sender.card.fallback.name", config.getId()));
         titleSpan = buildTitleSpan(displayName, displayName);
         left.add(titleSpan);
 
@@ -248,7 +286,6 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         return buttons;
     }
 
-    // Add this method
     private void viewConfig() {
         new ViewSenderConfigDialog(config).open();
     }
@@ -256,6 +293,28 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
     @Override
     protected void buildBodyRows() {
         bodyContainer.removeAll();
+
+        // Code
+        bodyContainer.add(createDetailRowWithCopy(
+                VaadinIcon.CODE,
+                I18n.t("mms.sender.card.code"),
+                config.getCode() != null ? config.getCode() : I18n.t("mms.common.value.notAvailable"),
+                config.getCode() != null ? config.getCode() : ""
+        ));
+
+        // Name
+        bodyContainer.add(createDetailRow(
+                VaadinIcon.TAG,
+                I18n.t("mms.sender.card.name"),
+                config.getName() != null ? config.getName() : I18n.t("mms.common.value.notAvailable")
+        ));
+
+        // Description
+        bodyContainer.add(createDetailRow(
+                VaadinIcon.FILE_TEXT,
+                I18n.t("mms.sender.card.description"),
+                config.getDescription() != null ? config.getDescription() : I18n.t("mms.sender.card.no.description")
+        ));
 
         // Tenant
         bodyContainer.add(createDetailRow(

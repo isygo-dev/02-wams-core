@@ -17,6 +17,7 @@ import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.remote.ims.ImsPublicService;
 import eu.isygoit.remote.kms.KmsIncrementalKeyService;
 import eu.isygoit.repository.MsgTemplateRepository;
+import eu.isygoit.repository.SenderConfigRepository;
 import eu.isygoit.service.IMsgTemplateService;
 import eu.isygoit.types.MsgTemplateVariables;
 import freemarker.cache.FileTemplateLoader;
@@ -59,6 +60,9 @@ public class MsgTemplateService extends FileTenantService<Long, MsgTemplate, Msg
     private MsgTemplateRepository templateRepository;
 
     @Autowired
+    private SenderConfigRepository senderConfigRepository;
+
+    @Autowired
     private ImsPublicService imsPublicService;
 
     @Autowired
@@ -71,6 +75,22 @@ public class MsgTemplateService extends FileTenantService<Long, MsgTemplate, Msg
      */
     public MsgTemplateService(AppProperties appProperties) {
         this.appProperties = appProperties;
+    }
+
+    @Override
+    public MsgTemplate beforeCreate(String tenant, MsgTemplate object) {
+        senderConfigRepository.findById(object.getSenderConfigId()).ifPresent(senderConfig -> {
+            object.setSenderConfigId(senderConfig.getId());
+        });
+        return super.beforeCreate(object);
+    }
+
+    @Override
+    public MsgTemplate beforeUpdate(String tenant, MsgTemplate object) {
+        senderConfigRepository.findById(object.getSenderConfigId()).ifPresent(senderConfig -> {
+            object.setSenderConfigId(senderConfig.getId());
+        });
+        return super.beforeUpdate(object);
     }
 
     @Override
@@ -166,6 +186,7 @@ public class MsgTemplateService extends FileTenantService<Long, MsgTemplate, Msg
                         freemarkerConfig.getConfiguration().getTemplate(template.getFileName()),
                         variables))
                 .defaultSender(template.getDefaultSender())
+                .senderConfigId(template.getSenderConfigId())
                 .build();
     }
 

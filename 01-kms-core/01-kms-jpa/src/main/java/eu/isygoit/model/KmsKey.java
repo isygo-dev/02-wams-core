@@ -173,7 +173,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * WAMS equivalent: Description.
      * </p>
      */
-    @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = 1024)
+    @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = SchemaConstantSize.DESCRIPTION)
     private String description;
 
     // =========================================================================
@@ -376,7 +376,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     /**
      * Foreign key column for `customKeyStore` (denormalized).
      */
-    @Column(name = SchemaColumnConstantName.C_KEY_STORE_ID, insertable = false, updatable = false, length = 255)
+    @Column(name = SchemaColumnConstantName.C_KEY_STORE_ID)
     private Long keyStoreId;
 
     // =========================================================================

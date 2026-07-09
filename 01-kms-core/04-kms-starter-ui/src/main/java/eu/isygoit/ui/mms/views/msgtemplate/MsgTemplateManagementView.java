@@ -22,6 +22,7 @@ import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
 import eu.isygoit.remote.mms.MsgTemplateService;
+import eu.isygoit.remote.mms.SenderConfigService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.mms.layout.MmsMainLayout;
 import eu.isygoit.ui.mms.views.msgtemplate.dialog.CreateMsgTemplateDialog;
@@ -45,6 +46,7 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
 
     private final MsgTemplateService templateService;
     private final MsgTemplateFileService templateFileService;
+    private final SenderConfigService senderConfigService;
 
     private final Div cardsContainer = new Div();
     private final Button createButton = new Button(I18n.t("mms.msgtemplate.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
@@ -78,9 +80,11 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
 
     @Autowired
     public MsgTemplateManagementView(MsgTemplateService templateService,
-                                     MsgTemplateFileService templateFileService) {
+                                     MsgTemplateFileService templateFileService,
+                                     SenderConfigService senderConfigService) {
         this.templateService = templateService;
         this.templateFileService = templateFileService;
+        this.senderConfigService = senderConfigService;
         setSizeFull();
         setPadding(true);
         setSpacing(true);
@@ -237,7 +241,7 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
             currentNextToken = truncated ? String.valueOf(currentPage + 1) : null;
 
             currentPageCards = pageTemplates.stream()
-                    .map(template -> new MsgTemplateCard(this, templateService, templateFileService, template, this::resetPaginationAndLoad))
+                    .map(template -> new MsgTemplateCard(this, templateService, templateFileService, senderConfigService, template, this::resetPaginationAndLoad))
                     .collect(Collectors.toList());
 
             updatePaginationDisplay();
@@ -384,7 +388,7 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
     }
 
     private void openCreateTemplateDialog() {
-        new CreateMsgTemplateDialog(this, templateService, templateFileService, this::resetPaginationAndLoad).open();
+        new CreateMsgTemplateDialog(this, templateService, templateFileService, senderConfigService, this::resetPaginationAndLoad).open();
     }
 
     public record TemplateLanguageOption(String label, IEnumLanguage.Types value) {

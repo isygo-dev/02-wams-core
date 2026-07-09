@@ -16,5 +16,7 @@ import lombok.experimental.SuperBuilder;
 public class MessageCompositionDto {
 
     private String content;
+
+    private Long senderConfigId;
     private String defaultSender;
 }

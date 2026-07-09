@@ -4,6 +4,7 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.i18n.I18n;
@@ -16,6 +17,10 @@ import org.springframework.http.ResponseEntity;
 public class EditSenderConfigDialog extends BaseSenderConfigDialog {
 
     private final SenderConfigDto config;
+    private TextField tenantField;
+    private TextField codeField;
+    private TextField nameField;
+    private TextArea descriptionField;
     private TextField hostField;
     private TextField portField;
     private TextField usernameField;
@@ -49,10 +54,26 @@ public class EditSenderConfigDialog extends BaseSenderConfigDialog {
         );
 
         // Read-only tenant field
-        TextField tenantField = new TextField(I18n.t("mms.sender.dialog.edit.field.tenant"));
+        tenantField = new TextField(I18n.t("mms.sender.dialog.edit.field.tenant"));
         tenantField.setValue(config.getTenant() != null ? config.getTenant() : "");
         tenantField.setReadOnly(true);
         tenantField.setWidthFull();
+
+        // Read-only code field
+        codeField = new TextField(I18n.t("mms.sender.dialog.edit.field.code"));
+        codeField.setValue(config.getCode() != null ? config.getCode() : "");
+        codeField.setReadOnly(true);
+        codeField.setWidthFull();
+
+        nameField = new TextField(I18n.t("mms.sender.dialog.edit.field.name"));
+        nameField.setPlaceholder(I18n.t("mms.sender.dialog.edit.field.name.placeholder"));
+        nameField.setRequiredIndicatorVisible(true);
+        nameField.setWidthFull();
+
+        descriptionField = new TextArea(I18n.t("mms.sender.dialog.edit.field.description"));
+        descriptionField.setPlaceholder(I18n.t("mms.sender.dialog.edit.field.description.placeholder"));
+        descriptionField.setWidthFull();
+        descriptionField.setHeight("80px");
 
         hostField = new TextField(I18n.t("mms.sender.dialog.edit.field.host"));
         hostField.setPlaceholder(I18n.t("mms.sender.dialog.edit.field.host.placeholder"));
@@ -91,13 +112,17 @@ public class EditSenderConfigDialog extends BaseSenderConfigDialog {
         defaultSenderField.setWidthFull();
         defaultSenderField.setHelperText(I18n.t("mms.sender.dialog.edit.field.defaultSender.helper"));
 
-        form.add(tenantField, hostField, portField, usernameField, passwordField,
+        form.add(tenantField, codeField, nameField, descriptionField,
+                hostField, portField, usernameField, passwordField,
                 transportProtocolField, smtpAuthField,
                 smtpStarttlsEnableCheckbox, smtpStarttlsRequiredCheckbox,
                 debugCheckbox, defaultSenderField);
 
         // Set column spans
         form.setColspan(tenantField, 2);
+        form.setColspan(codeField, 2);
+        form.setColspan(nameField, 2);
+        form.setColspan(descriptionField, 2);
         form.setColspan(hostField, 2);
         form.setColspan(usernameField, 2);
         form.setColspan(passwordField, 2);
@@ -107,6 +132,10 @@ public class EditSenderConfigDialog extends BaseSenderConfigDialog {
     }
 
     private void prefillData() {
+        tenantField.setValue(config.getTenant() != null ? config.getTenant() : "");
+        codeField.setValue(config.getCode() != null ? config.getCode() : "");
+        nameField.setValue(config.getName() != null ? config.getName() : "");
+        descriptionField.setValue(config.getDescription() != null ? config.getDescription() : "");
         hostField.setValue(config.getHost() != null ? config.getHost() : "");
         portField.setValue(config.getPort() != null ? config.getPort() : "");
         usernameField.setValue(config.getUsername() != null ? config.getUsername() : "");
@@ -128,6 +157,10 @@ public class EditSenderConfigDialog extends BaseSenderConfigDialog {
         clearErrors();
 
         // Validate required fields
+        if (nameField.getValue() == null || nameField.getValue().isBlank()) {
+            append(I18n.t("mms.sender.dialog.edit.error.name.required"));
+            return false;
+        }
         if (hostField.getValue() == null || hostField.getValue().isBlank()) {
             append(I18n.t("mms.sender.dialog.edit.error.host.required"));
             return false;
@@ -153,6 +186,10 @@ public class EditSenderConfigDialog extends BaseSenderConfigDialog {
             SenderConfigDto updatedConfig = SenderConfigDto.builder()
                     .id(config.getId())
                     .tenant(config.getTenant())
+                    .code(config.getCode())
+                    .name(nameField.getValue().trim())
+                    .description(descriptionField.getValue() != null ?
+                            descriptionField.getValue().trim() : null)
                     .host(hostField.getValue().trim())
                     .port(portField.getValue().trim())
                     .username(usernameField.getValue().trim())

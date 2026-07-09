@@ -12,6 +12,7 @@ import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
 import eu.isygoit.remote.mms.MsgTemplateService;
+import eu.isygoit.remote.mms.SenderConfigService;
 import eu.isygoit.ui.mms.views.msgtemplate.MsgTemplateManagementView;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +32,9 @@ public class CreateMsgTemplateDialog extends BaseMsgTemplateDialog {
     public CreateMsgTemplateDialog(MsgTemplateManagementView parentView,
                                    MsgTemplateService templateService,
                                    MsgTemplateFileService templateFileService,
+                                   SenderConfigService senderConfigService,
                                    Runnable onSuccess) {
-        super(I18n.t("mms.msgtemplate.dialog.create.title"), parentView, templateService, templateFileService, onSuccess);
+        super(I18n.t("mms.msgtemplate.dialog.create.title"), parentView, templateService, templateFileService, senderConfigService, onSuccess);
         setOkButtonText(I18n.t("mms.msgtemplate.dialog.create.button"));
         buildContent();
     }
@@ -74,16 +76,21 @@ public class CreateMsgTemplateDialog extends BaseMsgTemplateDialog {
         defaultSenderField.setWidthFull();
         defaultSenderField.setHelperText(I18n.t("mms.msgtemplate.dialog.create.field.defaultSender.helper"));
 
+        // Sender Config Combo
+        senderConfigCombo = createSenderConfigCombo();
+        senderConfigCombo.setHelperText(I18n.t("mms.msgtemplate.dialog.create.field.senderConfig.helper"));
+
         // File upload section
         setupFileUpload(null);
 
-        form.add(codeField, tenantField, nameCombo, descriptionField, languageCombo, defaultSenderField);
+        form.add(codeField, tenantField, nameCombo, descriptionField, languageCombo, defaultSenderField, senderConfigCombo);
         form.setColspan(codeField, 2);
         form.setColspan(tenantField, 2);
         form.setColspan(nameCombo, 2);
         form.setColspan(descriptionField, 2);
         form.setColspan(languageCombo, 1);
         form.setColspan(defaultSenderField, 1);
+        form.setColspan(senderConfigCombo, 2);
 
         contentArea.add(form);
 
@@ -142,10 +149,10 @@ public class CreateMsgTemplateDialog extends BaseMsgTemplateDialog {
                     .language(languageCombo.getValue())
                     .defaultSender(defaultSender != null && !defaultSender.isBlank() ?
                             defaultSender.trim() : null)
+                    .senderConfigId(getSelectedSenderConfigId())
                     .build();
 
             // Use MsgTemplateFileService for create with file
-            // The API expects: @RequestPart(name = "file") MultipartFile file, @RequestPart(name = "dto") D dto
             ResponseEntity<MsgTemplateDto> response = templateFileService.createWithFile(
                     uploadedFile, template);
             if (!response.getStatusCode().is2xxSuccessful()) {

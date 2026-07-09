@@ -1,6 +1,8 @@
 package eu.isygoit.factory;
 
 import eu.isygoit.constants.TenantConstants;
+import eu.isygoit.enums.IEnumEmailTemplate;
+import eu.isygoit.model.MailMessage;
 import eu.isygoit.model.SenderConfig;
 import eu.isygoit.repository.SenderConfigRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -44,13 +46,21 @@ public class SenderFactory {
      * @param tenant the tenant
      * @return the sender
      */
-    public CustomJavaMailSender getSender(String tenant /*senderTenant*/) {
+    public CustomJavaMailSender getSender(String tenant, IEnumEmailTemplate.Types templateType, Long senderConfigId) {
         // get data from table config
-        if (senderMap.containsKey(tenant)) {
-            return senderMap.get(tenant);
+        if (senderMap.containsKey(tenant + "_" + templateType.name())) {
+            return senderMap.get(tenant + "_" + templateType.name());
         }
 
-        Optional<SenderConfig> optional = senderConfigRepository.findFirstByTenantIgnoreCase(tenant);
+        Optional<SenderConfig> optional = Optional.empty();
+        if(senderConfigId != null) {
+            optional = senderConfigRepository.findById(senderConfigId);
+        }
+
+        if(!optional.isPresent()) {
+            optional = senderConfigRepository.findFirstByTenantIgnoreCase(tenant);
+        }
+
         if (!optional.isPresent()) {
             optional = senderConfigRepository.findFirstByTenantIgnoreCase(TenantConstants.DEFAULT_TENANT_NAME);
         }
@@ -70,7 +80,7 @@ public class SenderFactory {
             props.put("mail.smtp.starttls.enable", senderConfig.getSmtpStarttlsRequired());
             props.put("mail.debug", senderConfig.getDebug());
 
-            senderMap.put(tenant, mailSender);
+            senderMap.put(tenant + "_" + templateType.name(), mailSender);
             return mailSender;
         } else {
             return (CustomJavaMailSender) defaultSender;

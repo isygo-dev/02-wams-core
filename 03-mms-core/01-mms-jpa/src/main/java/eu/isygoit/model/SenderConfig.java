@@ -26,9 +26,10 @@ import org.hibernate.annotations.DynamicUpdate;
 @Entity
 @Table(name = SchemaTableConstantName.T_MAIL_SENDER_CONFIG
         , uniqueConstraints = {
-        @UniqueConstraint(name = SchemaUcConstantName.UC_SENDER_CONFIG_TENANT, columnNames = {SchemaColumnConstantName.C_TENANT})
+        @UniqueConstraint(name = SchemaUcConstantName.UC_SENDER_CONFIG_TENANT,
+                columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_CODE})
 })
-public class SenderConfig extends AuditableEntity<Long> implements ITenantAssignable {
+public class SenderConfig extends AuditableEntity<Long> implements ICodeAssignable, ITenantAssignable {
 
     @Id
     @SequenceGenerator(name = "sender_config_sequence_generator", sequenceName = "sender_config_sequence", allocationSize = 1)
@@ -40,30 +41,50 @@ public class SenderConfig extends AuditableEntity<Long> implements ITenantAssign
     @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
     @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
+
+    //@Convert(converter = LowerCaseConverter.class)
+    @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
+    private String code;
+
+    @Column(name = SchemaColumnConstantName.C_NAME, nullable = false)
+    private String name;
+
+    @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = SchemaConstantSize.DESCRIPTION)
+    private String description;
+
     @Column(name = SchemaColumnConstantName.C_HOST, nullable = false)
     private String host;
+
     @Column(name = SchemaColumnConstantName.C_PORT, nullable = false)
     private String port;
+
     @Column(name = SchemaColumnConstantName.C_USER_NAME, nullable = false)
     private String username;
+
     @Column(name = SchemaColumnConstantName.C_PASSWORD, nullable = false)
     private String password;
+
     @Column(name = SchemaColumnConstantName.C_TRANSPORT_PROTOCOL, nullable = false)
     private String transportProtocol;
+
     @Column(name = SchemaColumnConstantName.C_SMTP_AUTH)
     private String smtpAuth;
+
     @Builder.Default
     @ColumnDefault("'false'")
     @Column(name = SchemaColumnConstantName.C_SMTP_STARTTLS_ENABLE, nullable = false)
     private Boolean smtpStarttlsEnable = Boolean.FALSE;
+
     @Builder.Default
     @ColumnDefault("'false'")
     @Column(name = SchemaColumnConstantName.C_SMTP_STARTTLS_REQUIRED, nullable = false)
     private Boolean smtpStarttlsRequired = Boolean.FALSE;
+
     @Builder.Default
     @Column(name = SchemaColumnConstantName.C_DEBUG, nullable = false)
     private Boolean debug = Boolean.FALSE;
 
+    //Default Sender email adr
     @Column(name = SchemaColumnConstantName.C_DEFAULT_SENDER)
     private String defaultSender;
 }

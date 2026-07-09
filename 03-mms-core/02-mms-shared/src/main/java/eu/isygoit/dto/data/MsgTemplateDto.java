@@ -31,5 +31,9 @@ public class MsgTemplateDto extends AuditableIdAssignableDto<Long> implements IF
     @Builder.Default
     private IEnumLanguage.Types language = IEnumLanguage.Types.EN;
 
+    //Default Sender email adr
     private String defaultSender;
+
+    //Sender config code
+    private Long senderConfigId;
 }

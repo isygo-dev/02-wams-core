@@ -14,8 +14,10 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.MsgTemplateDto;
+import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
+import eu.isygoit.remote.mms.SenderConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -24,11 +26,16 @@ import org.springframework.http.ResponseEntity;
 public class ViewMsgTemplateDialog extends Dialog {
 
     private final MsgTemplateFileService templateFileService;
+    private final SenderConfigService senderConfigService;
     private final MsgTemplateDto template;
+    private String senderConfigDisplayName;
+    private String senderConfigTooltip;
 
     public ViewMsgTemplateDialog(MsgTemplateFileService templateFileService,
+                                 SenderConfigService senderConfigService,
                                  MsgTemplateDto template) {
         this.templateFileService = templateFileService;
+        this.senderConfigService = senderConfigService;
         this.template = template;
 
         setHeaderTitle(I18n.t("mms.msgtemplate.dialog.view.title",
@@ -39,7 +46,30 @@ public class ViewMsgTemplateDialog extends Dialog {
         setDraggable(true);
         setResizable(true);
 
+        loadSenderConfigDetails();
         buildContent();
+    }
+
+    private void loadSenderConfigDetails() {
+        Long senderConfigId = template.getSenderConfigId();
+        if (senderConfigId != null) {
+            try {
+                ResponseEntity<SenderConfigDto> response = senderConfigService.findById(senderConfigId);
+                if (response.getBody() != null) {
+                    SenderConfigDto config = response.getBody();
+                    senderConfigDisplayName = config.getName() != null ? config.getName() : config.getCode();
+                    if (config.getDescription() != null) {
+                        senderConfigTooltip = config.getDescription();
+                    }
+                    return;
+                }
+            } catch (Exception e) {
+                log.error("Failed to load sender config details for id {}", senderConfigId, e);
+            }
+        }
+        senderConfigDisplayName = senderConfigId != null ?
+                String.valueOf(senderConfigId) : I18n.t("mms.common.value.notAvailable");
+        senderConfigTooltip = null;
     }
 
     private void buildContent() {
@@ -60,6 +90,11 @@ public class ViewMsgTemplateDialog extends Dialog {
                 template.getLanguage() != null ? template.getLanguage().name() : I18n.t("mms.common.value.notAvailable"));
         addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.defaultSender"),
                 template.getDefaultSender() != null ? template.getDefaultSender() : I18n.t("mms.common.value.notAvailable"));
+
+        // Sender Config with tooltip
+        addDetailRowWithTooltip(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.senderConfig"),
+                senderConfigDisplayName, senderConfigTooltip);
+
         addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.description"),
                 template.getDescription() != null ? template.getDescription() : I18n.t("mms.common.value.notAvailable"));
         addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.file"),
@@ -104,6 +139,31 @@ public class ViewMsgTemplateDialog extends Dialog {
 
         Span valueSpan = new Span(value != null ? value : I18n.t("mms.common.value.notAvailable"));
         valueSpan.addClassName("wams-view-detail-value");
+
+        row.add(labelSpan, valueSpan);
+        container.add(row);
+    }
+
+    private void addDetailRowWithTooltip(Div container, String label, String value, String tooltip) {
+        Div row = new Div();
+        row.addClassName("wams-view-detail-row");
+
+        Span labelSpan = new Span(label + ":");
+        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+        labelSpan.addClassName("wams-view-detail-label");
+
+        Span valueSpan = new Span(value != null ? value : I18n.t("mms.common.value.notAvailable"));
+        valueSpan.addClassName("wams-view-detail-value");
+        if (tooltip != null && !tooltip.isEmpty()) {
+            valueSpan.getElement().setAttribute("title", tooltip);
+            // Add a small info icon to indicate there's more info
+            Icon infoIcon = VaadinIcon.INFO_CIRCLE.create();
+            infoIcon.setSize("14px");
+            infoIcon.addClassName("wams-tooltip-icon");
+            infoIcon.getElement().setAttribute("title", tooltip);
+            row.add(labelSpan, valueSpan, infoIcon);
+            return;
+        }
 
         row.add(labelSpan, valueSpan);
         container.add(row);

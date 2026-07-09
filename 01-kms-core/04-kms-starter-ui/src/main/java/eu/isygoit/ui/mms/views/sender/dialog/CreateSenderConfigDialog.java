@@ -4,6 +4,7 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.i18n.I18n;
@@ -17,6 +18,9 @@ import org.springframework.http.ResponseEntity;
 public class CreateSenderConfigDialog extends BaseSenderConfigDialog {
 
     private TextField tenantField;
+    private TextField codeField;
+    private TextField nameField;
+    private TextArea descriptionField;
     private TextField hostField;
     private TextField portField;
     private TextField usernameField;
@@ -49,6 +53,21 @@ public class CreateSenderConfigDialog extends BaseSenderConfigDialog {
         tenantField.setPlaceholder(I18n.t("mms.sender.dialog.create.field.tenant.placeholder"));
         tenantField.setRequiredIndicatorVisible(true);
         tenantField.setWidthFull();
+
+        codeField = new TextField(I18n.t("mms.sender.dialog.create.field.code"));
+        codeField.setPlaceholder(I18n.t("mms.sender.dialog.create.field.code.placeholder"));
+        codeField.setRequiredIndicatorVisible(true);
+        codeField.setWidthFull();
+
+        nameField = new TextField(I18n.t("mms.sender.dialog.create.field.name"));
+        nameField.setPlaceholder(I18n.t("mms.sender.dialog.create.field.name.placeholder"));
+        nameField.setRequiredIndicatorVisible(true);
+        nameField.setWidthFull();
+
+        descriptionField = new TextArea(I18n.t("mms.sender.dialog.create.field.description"));
+        descriptionField.setPlaceholder(I18n.t("mms.sender.dialog.create.field.description.placeholder"));
+        descriptionField.setWidthFull();
+        descriptionField.setHeight("80px");
 
         hostField = new TextField(I18n.t("mms.sender.dialog.create.field.host"));
         hostField.setPlaceholder(I18n.t("mms.sender.dialog.create.field.host.placeholder"));
@@ -94,13 +113,17 @@ public class CreateSenderConfigDialog extends BaseSenderConfigDialog {
         defaultSenderField.setWidthFull();
         defaultSenderField.setHelperText(I18n.t("mms.sender.dialog.create.field.defaultSender.helper"));
 
-        form.add(tenantField, hostField, portField, usernameField, passwordField,
+        form.add(tenantField, codeField, nameField, descriptionField,
+                hostField, portField, usernameField, passwordField,
                 transportProtocolField, smtpAuthField,
                 smtpStarttlsEnableCheckbox, smtpStarttlsRequiredCheckbox,
                 debugCheckbox, defaultSenderField);
 
         // Set column spans
         form.setColspan(tenantField, 2);
+        form.setColspan(codeField, 2);
+        form.setColspan(nameField, 2);
+        form.setColspan(descriptionField, 2);
         form.setColspan(hostField, 2);
         form.setColspan(usernameField, 2);
         form.setColspan(passwordField, 2);
@@ -120,6 +143,14 @@ public class CreateSenderConfigDialog extends BaseSenderConfigDialog {
         // Validate required fields
         if (tenantField.getValue() == null || tenantField.getValue().isBlank()) {
             append(I18n.t("mms.sender.dialog.create.error.tenant.required"));
+            return false;
+        }
+        if (codeField.getValue() == null || codeField.getValue().isBlank()) {
+            append(I18n.t("mms.sender.dialog.create.error.code.required"));
+            return false;
+        }
+        if (nameField.getValue() == null || nameField.getValue().isBlank()) {
+            append(I18n.t("mms.sender.dialog.create.error.name.required"));
             return false;
         }
         if (hostField.getValue() == null || hostField.getValue().isBlank()) {
@@ -152,6 +183,10 @@ public class CreateSenderConfigDialog extends BaseSenderConfigDialog {
         try {
             SenderConfigDto config = SenderConfigDto.builder()
                     .tenant(tenantField.getValue().trim())
+                    .code(codeField.getValue().trim().toUpperCase())
+                    .name(nameField.getValue().trim())
+                    .description(descriptionField.getValue() != null ?
+                            descriptionField.getValue().trim() : null)
                     .host(hostField.getValue().trim())
                     .port(portField.getValue().trim())
                     .username(usernameField.getValue().trim())

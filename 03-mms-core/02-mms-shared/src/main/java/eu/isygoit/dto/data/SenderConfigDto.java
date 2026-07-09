@@ -17,6 +17,9 @@ public class SenderConfigDto extends AuditableIdAssignableDto<Long> {
 
     private Long id;
     private String tenant;
+    private String code;
+    private String name;
+    private String description;
     private String host;
     private String port;
     private String username;
@@ -27,5 +30,6 @@ public class SenderConfigDto extends AuditableIdAssignableDto<Long> {
     private Boolean smtpStarttlsRequired;
     private Boolean debug;
 
+    //Default Sender email adr
     private String defaultSender;
 }

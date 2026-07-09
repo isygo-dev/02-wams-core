@@ -48,6 +48,8 @@ public class MailMessageDto extends AuditableIdAssignableDto<UUID> implements IE
     private List<MultipartFile> resources;
     private String variables;
 
+    private Long senderConfigId;
+
     /**
      * Gets variables as string.
      *

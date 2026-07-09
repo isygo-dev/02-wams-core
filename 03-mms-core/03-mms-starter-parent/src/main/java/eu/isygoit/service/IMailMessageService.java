@@ -2,6 +2,7 @@ package eu.isygoit.service;
 
 import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceOperations;
 import eu.isygoit.dto.data.MailOptionsDto;
+import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.factory.CustomJavaMailSender;
 import eu.isygoit.model.MailMessage;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,7 +42,7 @@ public interface IMailMessageService extends ICrudTenantServiceOperations<UUID, 
      * @param resources        the resources
      * @return the boolean
      */
-    boolean sendMail(String senderTenantName, MailMessage mailMessageData, MailOptionsDto options, Map<String, File> resources);
+    boolean sendMail(String senderTenantName, IEnumEmailTemplate.Types templateType, MailMessage mailMessageData, MailOptionsDto options, Map<String, File> resources);
 
     /**
      * Multi part file to resource map.

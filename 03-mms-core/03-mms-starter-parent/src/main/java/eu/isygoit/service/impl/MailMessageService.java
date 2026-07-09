@@ -6,6 +6,7 @@ import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.service.cassandra.CassandraCrudTenantService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.dto.data.MailOptionsDto;
+import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.exception.StoreFileException;
 import eu.isygoit.factory.CustomJavaMailSender;
 import eu.isygoit.factory.SenderFactory;
@@ -139,15 +140,15 @@ public class MailMessageService extends CassandraCrudTenantService<UUID, MailMes
     }
 
     @Override
-    public boolean sendMail(String senderTenantName, MailMessage mailMessageData, MailOptionsDto options, Map<String, File> resources) {
-        CustomJavaMailSender mailSender = senderFactory.getSender(senderTenantName);
+    public boolean sendMail(String tenant, IEnumEmailTemplate.Types templateType, MailMessage mailMessage, MailOptionsDto options, Map<String, File> resources) {
+        CustomJavaMailSender mailSender = senderFactory.getSender(tenant, templateType, mailMessage.getSenderConfigId());
         boolean result = this.sendMail(mailSender,
-                mailMessageData
+                mailMessage
                 , options.isReturnDelivered()
                 , options.isReturnRead()
                 , resources);
-        mailMessageData.setId(Uuids.timeBased());
-        mailMessageRepository.save(mailMessageData);
+        mailMessage.setId(Uuids.timeBased());
+        mailMessageRepository.save(mailMessage);
         return result;
     }
 

@@ -98,4 +98,8 @@ public interface SchemaColumnConstantName extends ComSchemaColumnConstantName {
     String C_DEFAULT_SENDER = "DEFAULT_SENDER";
 
     String C_FROM_ADDRESS = "FROM_ADDRESS";
+
+    String C_SENDER_CONFIG = "SENDER_CONFIG";
+
+    String C_SENDER_CONFIG_ID = "SENDER_CONFIG_ID";
 }

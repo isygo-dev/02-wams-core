@@ -22,7 +22,7 @@ public class ViewSenderConfigDialog extends Dialog {
         this.config = config;
 
         setHeaderTitle(I18n.t("mms.sender.dialog.view.title",
-                config.getHost() != null ? config.getHost() : config.getId()));
+                config.getName() != null ? config.getName() : config.getId()));
         setWidth("600px");
         setMaxWidth("95vw");
         setModal(true);
@@ -43,8 +43,14 @@ public class ViewSenderConfigDialog extends Dialog {
         detailsDiv.addClassName("wams-view-details");
 
         addDetailRow(detailsDiv, I18n.t("mms.sender.dialog.view.id"), config.getId().toString());
+        addDetailRow(detailsDiv, I18n.t("mms.sender.dialog.view.code"),
+                config.getCode() != null ? config.getCode() : I18n.t("mms.common.value.notAvailable"));
         addDetailRow(detailsDiv, I18n.t("mms.sender.dialog.view.tenant"),
                 config.getTenant() != null ? config.getTenant() : I18n.t("mms.common.value.notAvailable"));
+        addDetailRow(detailsDiv, I18n.t("mms.sender.dialog.view.name"),
+                config.getName() != null ? config.getName() : I18n.t("mms.common.value.notAvailable"));
+        addDetailRow(detailsDiv, I18n.t("mms.sender.dialog.view.description"),
+                config.getDescription() != null ? config.getDescription() : I18n.t("mms.common.value.notAvailable"));
         addDetailRow(detailsDiv, I18n.t("mms.sender.dialog.view.host"),
                 config.getHost() != null ? config.getHost() : I18n.t("mms.common.value.notAvailable"));
         addDetailRow(detailsDiv, I18n.t("mms.sender.dialog.view.port"),

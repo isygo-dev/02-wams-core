@@ -47,17 +47,23 @@ public class MailMessageController extends MappedCrudTenantController<UUID, Mail
     @Autowired
     private IMsgTemplateService templateService;
 
-    public ResponseEntity<?> sendMail(String senderTenantName, IEnumEmailTemplate.Types template, MailMessageDto mailMessage) {
+    public ResponseEntity<?> sendMail(String senderTenantName, IEnumEmailTemplate.Types templateType, MailMessageDto mailMessage) {
         try {
-            if (template != null) {
-                MessageCompositionDto messageComposition = templateService.composeMessageBody(senderTenantName, template,
+            if (templateType != null) {
+                MessageCompositionDto messageComposition = templateService.composeMessageBody(senderTenantName, templateType,
                         mailMessage.getVariablesAsMap(mailMessage.getVariables()));
                 mailMessage.setBody(messageComposition.getContent());
-                mailMessage.setFromAddr(messageComposition.getDefaultSender());
+                if (StringUtils.hasText(messageComposition.getDefaultSender())) {
+                    mailMessage.setFromAddr(messageComposition.getDefaultSender());
+                }
+                if (messageComposition.getSenderConfigId() != null) {
+                    mailMessage.setSenderConfigId(messageComposition.getSenderConfigId());
+                }
             } else if (!StringUtils.hasText(mailMessage.getBody())) {
                 mailMessage.setBody(mailMessage.getVariables());
             }
             mailMessageService.sendMail(senderTenantName,
+                    templateType,
                     mailMessageMapper.dtoToEntity(mailMessage)
                     , MailOptionsDto.builder()
                             .returnDelivered(mailMessage.isReturnDelivered())

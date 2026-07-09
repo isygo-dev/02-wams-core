@@ -49,15 +49,19 @@ public class MsgTemplate extends AuditableEntity<Long>
     //@Convert(converter = LowerCaseConverter.class)
     @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;
+
     //@Convert(converter = LowerCaseConverter.class)
     @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
     @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
+
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_NAME, length = IEnumEmailTemplate.STR_ENUM_SIZE, nullable = false)
     private IEnumEmailTemplate.Types name;
+
     @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = SchemaConstantSize.DESCRIPTION)
     private String description;
+
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @ColumnDefault("'EN'")
@@ -67,16 +71,41 @@ public class MsgTemplate extends AuditableEntity<Long>
     @Column(name = SchemaColumnConstantName.C_DEFAULT_SENDER)
     private String defaultSender;
 
+    @Column(name = SchemaColumnConstantName.C_SENDER_CONFIG_ID)
+    private Long senderConfigId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns(foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_MSG_TEMP_REF_SENDER_CONF),
+            value = {
+                    @JoinColumn(
+                            name = SchemaColumnConstantName.C_TENANT,
+                            referencedColumnName = SchemaColumnConstantName.C_TENANT,
+                            insertable = false,
+                            updatable = false
+                    ),
+                    @JoinColumn(
+                            name = SchemaColumnConstantName.C_SENDER_CONFIG_ID,
+                            referencedColumnName = SchemaColumnConstantName.C_ID,
+                            insertable = false,
+                            updatable = false
+                    )
+            })
+    private SenderConfig senderConfig;
+
     //BEGIN IFileEntity : SecondaryTable / MsgTemplateFile
     @Column(name = SchemaColumnConstantName.C_FILE_NAME, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
     private String fileName;
+
     @Column(name = SchemaColumnConstantName.C_ORIGINAL_FILE_NAME, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
     private String originalFileName;
+
     @ColumnDefault("'NA'")
     @Column(name = SchemaColumnConstantName.C_PATH, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
     private String path;
+
     @Column(name = SchemaColumnConstantName.C_EXTENSION, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
     private String extension;
+
     @Column(name = SchemaColumnConstantName.C_TYPE, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
     private String type;
 

@@ -55,7 +55,7 @@ public class KmsKeyPolicy extends AuditableEntity<Long> implements ITenantAssign
     @Column(name = SchemaColumnConstantName.C_POLICY_DOCUMENT, nullable = false, columnDefinition = "jsonb")
     private String policyDocument;
 
-    @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = 1024)
+    @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = SchemaConstantSize.DESCRIPTION)
     private String description;
 
     public static String serializePolicy(Map<String, Object> policy) {

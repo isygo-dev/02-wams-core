@@ -14,28 +14,37 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.MsgTemplateDto;
+import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
 import eu.isygoit.remote.mms.MsgTemplateService;
+import eu.isygoit.remote.mms.SenderConfigService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.mms.views.msgtemplate.dialog.DeleteMsgTemplateDialog;
 import eu.isygoit.ui.mms.views.msgtemplate.dialog.EditMsgTemplateDialog;
 import eu.isygoit.ui.mms.views.msgtemplate.dialog.EditTemplateContentDialog;
 import eu.isygoit.ui.mms.views.msgtemplate.dialog.ViewMsgTemplateDialog;
+import eu.isygoit.ui.mms.views.sender.dialog.ViewSenderConfigDialog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateService> {
 
     private final MsgTemplateDto template;
     private final MsgTemplateFileService templateFileService;
+    private final SenderConfigService senderConfigService;
     private final Runnable onRefresh;
+
+    // Cache for sender config details
+    private final Map<Long, SenderConfigDto> senderConfigCache = new HashMap<>();
 
     // Dedicated body container – cleared and rebuilt on refresh
     private final VerticalLayout bodyContainer = new VerticalLayout();
@@ -47,6 +56,8 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
     private Span descriptionSpan;
     private Span fileNameSpan;
     private Span defaultSenderSpan;
+    private Span senderConfigSpan;
+    private Button viewSenderConfigButton;
     private Button viewButton;
     private Button editButton;
     private Button deleteButton;
@@ -56,11 +67,13 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
     public MsgTemplateCard(MsgTemplateManagementView parentView,
                            MsgTemplateService templateService,
                            MsgTemplateFileService templateFileService,
+                           SenderConfigService senderConfigService,
                            MsgTemplateDto template,
                            Runnable onRefresh) {
         super(parentView, templateService);
         this.template = template;
         this.templateFileService = templateFileService;
+        this.senderConfigService = senderConfigService;
         this.onRefresh = onRefresh;
 
         bodyContainer.setPadding(false);
@@ -70,6 +83,7 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         add(bodyContainer);
 
         initCard();
+        loadSenderConfigDetails();
     }
 
     // ─── Public Accessors ─────────────────────────────────────────────────────
@@ -84,6 +98,68 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
 
     public String getTemplateName() {
         return template.getName();
+    }
+
+    // ─── Load Sender Config Details ─────────────────────────────────────────
+
+    private void loadSenderConfigDetails() {
+        Long senderConfigId = template.getSenderConfigId();
+        if (senderConfigId != null) {
+            try {
+                ResponseEntity<SenderConfigDto> response = senderConfigService.findById(senderConfigId);
+                if (response.getBody() != null) {
+                    senderConfigCache.put(senderConfigId, response.getBody());
+                    updateDisplay();
+                }
+            } catch (Exception e) {
+                log.error("Failed to load sender config details for id {}", senderConfigId, e);
+            }
+        }
+    }
+
+    private String getSenderConfigDisplayName() {
+        Long id = template.getSenderConfigId();
+        if (id == null) {
+            return I18n.t("mms.common.value.notAvailable");
+        }
+        SenderConfigDto config = senderConfigCache.get(id);
+        if (config != null) {
+            return config.getName() != null ? config.getName() : config.getCode();
+        }
+        return String.valueOf(id);
+    }
+
+    private String getSenderConfigTooltip() {
+        Long id = template.getSenderConfigId();
+        if (id == null) {
+            return null;
+        }
+        SenderConfigDto config = senderConfigCache.get(id);
+        if (config != null) {
+            StringBuilder tooltip = new StringBuilder();
+            if (config.getName() != null) {
+                tooltip.append(config.getName());
+            }
+            if (config.getDescription() != null) {
+                if (tooltip.length() > 0) {
+                    tooltip.append(" - ");
+                }
+                tooltip.append(config.getDescription());
+            }
+            if (tooltip.length() == 0 && config.getCode() != null) {
+                tooltip.append(config.getCode());
+            }
+            return tooltip.toString();
+        }
+        return String.valueOf(id);
+    }
+
+    private SenderConfigDto getSenderConfig() {
+        Long id = template.getSenderConfigId();
+        if (id == null) {
+            return null;
+        }
+        return senderConfigCache.get(id);
     }
 
     // ─── Refresh – fully reloads the card ──────────────────────────────────
@@ -102,7 +178,11 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
                     template.setOriginalFileName(updatedTemplate.getOriginalFileName());
                     template.setPath(updatedTemplate.getPath());
                     template.setDefaultSender(updatedTemplate.getDefaultSender());
+                    template.setSenderConfigId(updatedTemplate.getSenderConfigId());
 
+                    // Reload sender config details
+                    senderConfigCache.clear();
+                    loadSenderConfigDetails();
                     updateDisplay();
                 }
             } catch (Exception e) {
@@ -131,6 +211,9 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         if (defaultSenderSpan == null) {
             defaultSenderSpan = new Span();
         }
+        if (senderConfigSpan == null) {
+            senderConfigSpan = new Span();
+        }
 
         String displayName = template.getName() != null ? template.getName() : I18n.t("mms.msgtemplate.card.fallback.name", template.getId());
         titleSpan.setText(displayName);
@@ -145,6 +228,23 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         descriptionSpan.setText(template.getDescription() != null ? template.getDescription() : I18n.t("mms.msgtemplate.card.no.description"));
         fileNameSpan.setText(template.getOriginalFileName() != null ? template.getOriginalFileName() : I18n.t("mms.msgtemplate.card.no.file"));
         defaultSenderSpan.setText(template.getDefaultSender() != null ? template.getDefaultSender() : I18n.t("mms.common.value.notAvailable"));
+
+        // Sender Config with name and tooltip
+        String senderConfigDisplay = getSenderConfigDisplayName();
+        senderConfigSpan.setText(senderConfigDisplay);
+        String tooltip = getSenderConfigTooltip();
+        if (tooltip != null) {
+            senderConfigSpan.getElement().setAttribute("title", tooltip);
+        }
+
+        // Update view sender config button
+        boolean hasSenderConfig = template.getSenderConfigId() != null;
+        if (viewSenderConfigButton != null) {
+            viewSenderConfigButton.setEnabled(hasSenderConfig);
+            viewSenderConfigButton.setTooltipText(hasSenderConfig ?
+                    I18n.t("mms.msgtemplate.card.view.sender.config.tooltip") :
+                    I18n.t("mms.msgtemplate.card.view.sender.config.disabled.tooltip"));
+        }
 
         boolean hasFile = template.getFileName() != null && !template.getFileName().isEmpty();
         if (downloadButton != null) {
@@ -290,6 +390,38 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
                 template.getDefaultSender() != null ? template.getDefaultSender() : I18n.t("mms.common.value.notAvailable")
         ));
 
+        // Sender Config row with tooltip and view button
+        String senderConfigDisplay = getSenderConfigDisplayName();
+        String tooltip = getSenderConfigTooltip();
+        SenderConfigDto senderConfig = getSenderConfig();
+
+        // Create sender config row with custom value span
+        Span valueSpan = new Span(senderConfigDisplay);
+        valueSpan.addClassName(LumoUtility.FontSize.SMALL);
+        valueSpan.addClassName("detail-value");
+        if (tooltip != null) {
+            valueSpan.getElement().setAttribute("title", tooltip);
+        }
+
+        // Create view sender config button (small, inline)
+        viewSenderConfigButton = new Button(new Icon(VaadinIcon.EYE));
+        viewSenderConfigButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
+        viewSenderConfigButton.setTooltipText(I18n.t("mms.msgtemplate.card.view.sender.config.tooltip"));
+        boolean hasSenderConfig = template.getSenderConfigId() != null && senderConfig != null;
+        viewSenderConfigButton.setEnabled(hasSenderConfig);
+        viewSenderConfigButton.addClickListener(e -> viewSenderConfig());
+
+        HorizontalLayout senderConfigRow = createDetailRow(
+                VaadinIcon.SERVER,
+                I18n.t("mms.msgtemplate.card.senderConfig"),
+                valueSpan
+        );
+
+        // Add the view button to the sender config row
+        senderConfigRow.add(viewSenderConfigButton);
+
+        bodyContainer.add(senderConfigRow);
+
         bodyContainer.add(createDetailRow(
                 VaadinIcon.FILE,
                 I18n.t("mms.msgtemplate.card.file"),
@@ -358,7 +490,35 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
     // ─── Action Methods ─────────────────────────────────────────────────────
 
     private void viewTemplate() {
-        new ViewMsgTemplateDialog(templateFileService, template).open();
+        new ViewMsgTemplateDialog(templateFileService, senderConfigService, template).open();
+    }
+
+    private void viewSenderConfig() {
+        Long senderConfigId = template.getSenderConfigId();
+        if (senderConfigId != null) {
+            SenderConfigDto config = senderConfigCache.get(senderConfigId);
+            if (config != null) {
+                new ViewSenderConfigDialog(config).open();
+            } else {
+                // Try to load it fresh
+                try {
+                    ResponseEntity<SenderConfigDto> response = senderConfigService.findById(senderConfigId);
+                    if (response.getBody() != null) {
+                        senderConfigCache.put(senderConfigId, response.getBody());
+                        new ViewSenderConfigDialog(response.getBody()).open();
+                    } else {
+                        Notification.show(I18n.t("mms.msgtemplate.card.view.sender.config.not.found"),
+                                        3000, Notification.Position.BOTTOM_END)
+                                .addThemeVariants(NotificationVariant.LUMO_WARNING);
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to load sender config for id {}", senderConfigId, e);
+                    Notification.show(I18n.t("mms.msgtemplate.card.view.sender.config.error", e.getMessage()),
+                                    5000, Notification.Position.BOTTOM_END)
+                            .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                }
+            }
+        }
     }
 
     private void downloadTemplate() {
@@ -408,7 +568,7 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
     }
 
     private void openEditDialog() {
-        new EditMsgTemplateDialog(objectService, templateFileService, template, () -> {
+        new EditMsgTemplateDialog(objectService, templateFileService, senderConfigService, template, () -> {
             refresh();
             if (onRefresh != null) {
                 onRefresh.run();

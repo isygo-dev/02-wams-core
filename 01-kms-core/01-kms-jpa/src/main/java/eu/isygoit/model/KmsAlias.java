@@ -47,7 +47,7 @@ public class KmsAlias extends AuditableEntity<Long> implements ITenantAssignable
     @Column(name = SchemaColumnConstantName.C_ALIAS_NAME, nullable = false, length = 256)
     private String aliasName;
 
-    @Column(name = SchemaColumnConstantName.C_KEY_ID, nullable = false)
+    @Column(name = SchemaColumnConstantName.C_KEY_ID)
     private String targetKeyId;
 
     @Builder.Default

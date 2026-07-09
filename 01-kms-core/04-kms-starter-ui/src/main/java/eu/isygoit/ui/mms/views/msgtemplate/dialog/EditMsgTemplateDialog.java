@@ -13,6 +13,7 @@ import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
 import eu.isygoit.remote.mms.MsgTemplateService;
+import eu.isygoit.remote.mms.SenderConfigService;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -31,12 +32,14 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
 
     public EditMsgTemplateDialog(MsgTemplateService templateService,
                                  MsgTemplateFileService templateFileService,
+                                 SenderConfigService senderConfigService,
                                  MsgTemplateDto template,
                                  Runnable onSuccess) {
         super(I18n.t("mms.msgtemplate.dialog.edit.title"),
                 null,
                 templateService,
                 templateFileService,
+                senderConfigService,
                 onSuccess);
         this.template = template;
         setOkButtonText(I18n.t("mms.msgtemplate.dialog.edit.button"));
@@ -82,16 +85,21 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
         defaultSenderField.setWidthFull();
         defaultSenderField.setHelperText(I18n.t("mms.msgtemplate.dialog.edit.field.defaultSender.helper"));
 
+        // Sender Config Combo
+        senderConfigCombo = createSenderConfigCombo();
+        senderConfigCombo.setHelperText(I18n.t("mms.msgtemplate.dialog.edit.field.senderConfig.helper"));
+
         // File upload section
         setupFileUpload(template.getOriginalFileName());
 
-        form.add(codeField, tenantField, nameCombo, descriptionField, languageCombo, defaultSenderField);
+        form.add(codeField, tenantField, nameCombo, descriptionField, languageCombo, defaultSenderField, senderConfigCombo);
         form.setColspan(codeField, 2);
         form.setColspan(tenantField, 2);
         form.setColspan(nameCombo, 2);
         form.setColspan(descriptionField, 2);
         form.setColspan(languageCombo, 1);
         form.setColspan(defaultSenderField, 1);
+        form.setColspan(senderConfigCombo, 2);
 
         contentArea.add(form);
 
@@ -113,6 +121,7 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
         descriptionField.setValue(template.getDescription() != null ? template.getDescription() : "");
         languageCombo.setValue(template.getLanguage() != null ? template.getLanguage() : IEnumLanguage.Types.EN);
         defaultSenderField.setValue(template.getDefaultSender() != null ? template.getDefaultSender() : "");
+        setSelectedSenderConfig(template.getSenderConfigId());
     }
 
     @Override
@@ -142,6 +151,7 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
                     .language(languageCombo.getValue())
                     .defaultSender(defaultSender != null && !defaultSender.isBlank() ?
                             defaultSender.trim() : null)
+                    .senderConfigId(getSelectedSenderConfigId())
                     .build();
 
             ResponseEntity<MsgTemplateDto> response;
@@ -152,7 +162,6 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
                     return false;
                 }
                 // Use MsgTemplateFileService for update with new file
-                // The API expects: @RequestPart(name = "file") MultipartFile file, @RequestPart(name = "dto") D dto
                 response = templateFileService.updateWithFile(
                         template.getId(), uploadedFile, updatedTemplate);
             } else {

@@ -1,11 +1,11 @@
 package eu.isygoit.repository;
 
 import eu.isygoit.model.SenderConfig;
-import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAssignableRepository;
+import eu.isygoit.repository.tenancy.JpaPagingAndSortingTenantAndCodeAssignableRepository;
 
 /**
  * The interface Sender config repository.
  */
-public interface SenderConfigRepository extends JpaPagingAndSortingTenantAssignableRepository<SenderConfig, Long> {
+public interface SenderConfigRepository extends JpaPagingAndSortingTenantAndCodeAssignableRepository<SenderConfig, Long> {
 
 }

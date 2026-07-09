@@ -34,8 +34,9 @@ public class DeleteSenderConfigDialog extends PinBaseActionDialog {
     }
 
     private static String buildMessage(SenderConfigDto config) {
-        String host = config.getHost() != null ? config.getHost() : "ID: " + config.getId();
-        return I18n.t("mms.sender.dialog.delete.message", host);
+        String displayName = config.getName() != null ? config.getName() :
+                (config.getCode() != null ? config.getCode() : "ID: " + config.getId());
+        return I18n.t("mms.sender.dialog.delete.message", displayName);
     }
 
     @Override
