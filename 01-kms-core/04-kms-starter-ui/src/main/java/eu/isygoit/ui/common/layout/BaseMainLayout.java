@@ -180,18 +180,34 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         rightSlot.add(createRightHeaderContent());
     }
 
+    /**
+     * Two independently-styleable groups rather than one flat row of 5
+     * disparate-width children: a search "slot" (whose width layout.css
+     * controls per breakpoint) and a fixed-size "icon cluster" (notifications,
+     * settings, language, profile — always kept together, never wrapped
+     * internally). This gives {@code .wams-app-search} a stable container to
+     * shrink/grow within at each breakpoint instead of fighting flex-wrap
+     * order across 5 mixed-size siblings.
+     */
     private Component createRightHeaderContent() {
         HorizontalLayout rightContent = new HorizontalLayout();
+        rightContent.addClassName("wams-header-right-content");
         rightContent.setAlignItems(FlexComponent.Alignment.CENTER);
         rightContent.setSpacing(true);
         rightContent.setPadding(false);
 
-        rightContent.add(new AppSearchBar());
-        rightContent.add(createNotificationsButton());
-        rightContent.add(createSettingsButton());
-        rightContent.add(new LanguageSelectorComponent());
-        rightContent.add(createProfileComponent());
+        Div searchSlot = new Div(new AppSearchBar());
+        searchSlot.addClassName("wams-header-search-slot");
 
+        HorizontalLayout iconCluster = new HorizontalLayout();
+        iconCluster.addClassName("wams-header-icon-cluster");
+        iconCluster.setAlignItems(FlexComponent.Alignment.CENTER);
+        iconCluster.setSpacing(true);
+        iconCluster.setPadding(false);
+        iconCluster.add(createNotificationsButton(), createSettingsButton(),
+                new LanguageSelectorComponent(), createProfileComponent());
+
+        rightContent.add(searchSlot, iconCluster);
         return rightContent;
     }
 

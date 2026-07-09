@@ -25,6 +25,29 @@
     margin-right: var(--lumo-space-m);
 }
 
+/* Touch-target sizing: Lumo's LUMO_TERTIARY_INLINE button variant strips
+   every bit of padding/min-size (by design, for inline text-adjacent icon
+   buttons), so the notifications/settings buttons render as bare icon
+   glyphs with no clickable margin at all. 36px keeps the app's compact/dense
+   visual language (not the full 44px WCAG target, which would look oversized
+   next to the rest of this Jira-style chrome) while still giving every
+   pointer/touch input a real box to hit. */
+
+.wams-header-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    min-height: 36px;
+    border-radius: var(--lumo-border-radius-m);
+    color: var(--lumo-secondary-text-color);
+}
+
+vaadin-drawer-toggle {
+    min-width: 36px;
+    min-height: 36px;
+}
+
 /* ── Brand (click → landing) ──────────────────────────────────────────────── */
 
 .wams-brand {
@@ -61,11 +84,8 @@
     border-left: 1px solid var(--lumo-contrast-20pct);
 }
 
-/* ── Header icon buttons (notifications / settings) ──────────────────────── */
-
-.wams-header-icon-btn {
-    color: var(--lumo-secondary-text-color);
-}
+/* ── Header icon buttons (notifications / settings): hover only, sizing is
+   in the shared .wams-header-icon-btn rule above ─────────────────────────── */
 
 .wams-header-icon-btn:hover {
     color: var(--lumo-primary-color);
@@ -79,24 +99,23 @@
     border: 2px solid var(--lumo-contrast-20pct);
 }
 
-@media (max-width: 640px) {
-    .wams-main-header {
-        height: auto;
-        min-height: var(--wams-header-height);
-        flex-direction: column;
-        align-items: stretch;
-    }
+/* ── Quick-navigation search (eu.isygoit.ui.common.component.AppSearchBar) ──
+   Desktop: fixed 260px. Tablet (≤1024px): shrunk to make room for the fixed-
+   size icon cluster alongside it. Mobile (≤640px): the header has already
+   stacked into 2 rows (see .wams-main-header below), so the search slot
+   fills whatever width remains next to the icon cluster on its own row. */
 
-    .wams-main-header > :first-child {
-        justify-content: space-between;
-    }
-
-    .wams-app-search {
-        max-width: none;
-    }
+.wams-header-right-content {
+    flex-wrap: nowrap;
 }
 
-/* ── Quick-navigation search (eu.isygoit.ui.common.component.AppSearchBar) ── */
+.wams-header-search-slot {
+    flex: 0 1 auto;
+}
+
+.wams-header-icon-cluster {
+    flex: 0 0 auto;
+}
 
 .wams-app-search {
     width: 260px;
@@ -161,6 +180,87 @@
     --lumo-combo-box-overlay-width: auto;
     min-width: 0;
     padding: 0 var(--lumo-space-s);
+}
+
+/* ── Header responsive breakpoints ────────────────────────────────────────
+   1024px / 640px / 480px — matches this codebase's real, de facto responsive
+   convention (see .wams-stat-grid in card.css, kms.css, etc.), not the
+   480/768/1024/1280 set documented in tokens.css, which nothing here or
+   elsewhere in the app actually uses; 640px is the single most common
+   breakpoint across every stylesheet in this module. Declared last/most-
+   specific-first (1024 → 640 → 480), each block only overriding what
+   actually changes at that width, mirroring .wams-stat-grid's style. */
+
+@media (max-width: 1024px) {
+    /* Tablet: shrink the search field so it, the brand/title, and the fixed-
+       size icon cluster can all still share one row. */
+    .wams-app-search {
+        width: 180px;
+        max-width: 180px;
+    }
+}
+
+@media (max-width: 640px) {
+    /* Mobile: header stacks into 2 rows — [hamburger + brand] then
+       [search + icon cluster] — matching the drawer's own automatic
+       push→overlay switch (Vaadin's AppLayout does this natively at
+       max-width:800px, so the drawer is already an overlay sheet by the
+       time the header itself needs to stack). The module title is dropped
+       here rather than shrunk further: the module-accent top border and the
+       (now-open) drawer's own content already make it obvious which module
+       you're in, so the redundant text isn't worth the row space. */
+    .wams-main-header {
+        height: auto;
+        min-height: var(--wams-header-height);
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .wams-main-header > :first-child {
+        justify-content: space-between;
+    }
+
+    .wams-header-title {
+        display: none;
+    }
+
+    .wams-main-header__right {
+        width: 100%;
+        margin-right: 0;
+        padding: var(--lumo-space-xs) var(--lumo-space-s);
+        box-sizing: border-box;
+    }
+
+    .wams-header-right-content {
+        width: 100%;
+    }
+
+    .wams-header-search-slot {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .wams-app-search {
+        width: 100%;
+        max-width: none;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Smallest phones: the language selector's name text is the least
+       essential remaining element (flag + chevron alone still communicate
+       "change language") — !important is required here because
+       LanguageSelectorComponent sets min-width via Java (an inline style,
+       which otherwise always wins over a plain class rule regardless of
+       media query), the same reason .wams-dialog-responsive in tokens.css
+       needs it for Vaadin-set inline dialog sizing. */
+    .wams-language-selector .wams-language-selector__combo {
+        min-width: 60px !important;
+    }
+
+    .wams-header-icon-cluster {
+        gap: var(--lumo-space-xs);
+    }
 }
 
 /* ── Sidebar / drawer ─────────────────────────────────────────────────────
