@@ -63,6 +63,12 @@ public class UpdateRoleDialog extends BaseActionDialog {
     private TreeGrid<Object> permissionsTree;
     private List<RolePermissionDto> allPermissions = new ArrayList<>();
     private TextField permSearchField;
+    private Button expandAllPermsButton;
+    private Button collapseAllPermsButton;
+    // Whatever TreeData is currently bound to permissionsTree (full or
+    // filtered) – expand/collapse-all act on its actual root items so they
+    // stay correct while a filter is active.
+    private TreeData<Object> currentPermissionsTreeData;
 
     private Tabs tabs;
     private VerticalLayout tabContent;
@@ -232,6 +238,24 @@ public class UpdateRoleDialog extends BaseActionDialog {
         permSearchField.setClearButtonVisible(true);
         permSearchField.setValueChangeMode(ValueChangeMode.LAZY);
         permSearchField.addValueChangeListener(e -> filterPermissionsTree());
+
+        expandAllPermsButton = new Button(VaadinIcon.ANGLE_DOUBLE_DOWN.create());
+        expandAllPermsButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
+        expandAllPermsButton.setTooltipText(I18n.t("ims.role.dialog.perms.expand.all"));
+        expandAllPermsButton.addClickListener(e -> {
+            if (currentPermissionsTreeData != null) {
+                permissionsTree.expand(currentPermissionsTreeData.getRootItems());
+            }
+        });
+
+        collapseAllPermsButton = new Button(VaadinIcon.ANGLE_DOUBLE_UP.create());
+        collapseAllPermsButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
+        collapseAllPermsButton.setTooltipText(I18n.t("ims.role.dialog.perms.collapse.all"));
+        collapseAllPermsButton.addClickListener(e -> {
+            if (currentPermissionsTreeData != null) {
+                permissionsTree.collapse(currentPermissionsTreeData.getRootItems());
+            }
+        });
     }
 
     private void refreshPermissionsTree() {
@@ -246,6 +270,7 @@ public class UpdateRoleDialog extends BaseActionDialog {
                 treeData.addItem(serviceName, perm);
             }
         }
+        currentPermissionsTreeData = treeData;
         permissionsTree.setTreeData(treeData);
     }
 
@@ -272,6 +297,7 @@ public class UpdateRoleDialog extends BaseActionDialog {
                 }
             }
         }
+        currentPermissionsTreeData = filtered;
         permissionsTree.setTreeData(filtered);
     }
 
@@ -435,8 +461,11 @@ public class UpdateRoleDialog extends BaseActionDialog {
                 tabContent.add(appsLayout);
                 break;
             case 2:
-                permSearchField.setWidthFull();
-                VerticalLayout permsLayout = new VerticalLayout(permSearchField, permissionsTree);
+                HorizontalLayout permsTopBar = new HorizontalLayout(permSearchField, expandAllPermsButton, collapseAllPermsButton);
+                permsTopBar.setWidthFull();
+                permsTopBar.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
+                permsTopBar.expand(permSearchField);
+                VerticalLayout permsLayout = new VerticalLayout(permsTopBar, permissionsTree);
                 permsLayout.setPadding(false);
                 permsLayout.setSpacing(true);
                 permsLayout.setSizeFull();
