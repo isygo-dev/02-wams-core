@@ -16,6 +16,19 @@
 }
 
 .wams-landing-main {
+    /* No hardcoded "100vh minus header height" here: AppLayout's navbar is
+       position:fixed and Vaadin compensates for it automatically by setting
+       padding-block on the <vaadin-app-layout> host to the navbar's actual,
+       dynamically-measured rendered height (see vaadin-app-layout-styles.js
+       --vaadin-app-layout-navbar-offset-top) — content already starts below
+       the header correctly at any header height, including when it wraps to
+       2 rows on mobile (see the @media rules in layout.css). This element
+       just needs flex:1 to fill whatever vertical space actually remains in
+       its flex-column parent (.wams-landing); a fixed pixel subtraction here
+       would just go stale again the next time the header's height changes,
+       exactly like the "calc(100vh - 80px)" it replaced (written when the
+       header was still a single fixed 80px row, and already wrong even on
+       desktop once the header became 52px). */
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -25,7 +38,6 @@
     max-width: 1400px;
     width: 100%;
     margin: 0 auto;
-    min-height: calc(100vh - 80px);
     background: radial-gradient(ellipse at top, var(--lumo-primary-color-5pct), transparent 70%);
 }
 

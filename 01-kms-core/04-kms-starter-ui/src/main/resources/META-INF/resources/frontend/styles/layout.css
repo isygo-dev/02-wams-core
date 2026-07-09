@@ -183,32 +183,42 @@ vaadin-drawer-toggle {
 }
 
 /* ── Header responsive breakpoints ────────────────────────────────────────
-   1024px / 640px / 480px — matches this codebase's real, de facto responsive
-   convention (see .wams-stat-grid in card.css, kms.css, etc.), not the
-   480/768/1024/1280 set documented in tokens.css, which nothing here or
-   elsewhere in the app actually uses; 640px is the single most common
-   breakpoint across every stylesheet in this module. Declared last/most-
-   specific-first (1024 → 640 → 480), each block only overriding what
-   actually changes at that width, mirroring .wams-stat-grid's style. */
+   Desktop >1024px / Tablet 768-1024px / Mobile <768px, per the app's
+   explicit responsive spec. Declared most-specific-first (1024 → 768 → 480),
+   each block only overriding what actually changes at that width.
+
+   The module title is hidden starting at the TABLET tier (≤1024px), not
+   just on mobile: it's the single largest, most locale-length-variable
+   element in the left-hand cluster (e.g. German "Schlüsselverwaltungssystem"
+   / "Dokumentenverwaltungssystem" are long, unbreakable compound nouns), and
+   an earlier version of this file that hid it only below 640px left the
+   768-1024px tablet band unable to actually fit DrawerToggle + brand + title
+   + search + the icon cluster in one row (measured ~850-900px of fixed-width
+   content trying to squeeze into a 768px viewport). Dropping the title at
+   ≤1024px removes ~200px+ of variable-length content from that math instead
+   of chasing an ever-smaller search width; the module-accent top border and
+   the drawer's own content already make the current module obvious without
+   the redundant text. */
 
 @media (max-width: 1024px) {
-    /* Tablet: shrink the search field so it, the brand/title, and the fixed-
-       size icon cluster can all still share one row. */
+    /* Tablet: title dropped (see above), search shrunk — brand + search +
+       icon cluster comfortably fit one row even at the 768px lower bound. */
+    .wams-header-title {
+        display: none;
+    }
+
     .wams-app-search {
         width: 180px;
         max-width: 180px;
     }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
     /* Mobile: header stacks into 2 rows — [hamburger + brand] then
        [search + icon cluster] — matching the drawer's own automatic
        push→overlay switch (Vaadin's AppLayout does this natively at
        max-width:800px, so the drawer is already an overlay sheet by the
-       time the header itself needs to stack). The module title is dropped
-       here rather than shrunk further: the module-accent top border and the
-       (now-open) drawer's own content already make it obvious which module
-       you're in, so the redundant text isn't worth the row space. */
+       time the header itself needs to stack). */
     .wams-main-header {
         height: auto;
         min-height: var(--wams-header-height);
@@ -218,10 +228,6 @@ vaadin-drawer-toggle {
 
     .wams-main-header > :first-child {
         justify-content: space-between;
-    }
-
-    .wams-header-title {
-        display: none;
     }
 
     .wams-main-header__right {
@@ -237,7 +243,7 @@ vaadin-drawer-toggle {
 
     .wams-header-search-slot {
         flex: 1 1 auto;
-        min-width: 0;
+        min-width: 60px;
     }
 
     .wams-app-search {
@@ -247,15 +253,24 @@ vaadin-drawer-toggle {
 }
 
 @media (max-width: 480px) {
-    /* Smallest phones: the language selector's name text is the least
-       essential remaining element (flag + chevron alone still communicate
-       "change language") — !important is required here because
-       LanguageSelectorComponent sets min-width via Java (an inline style,
-       which otherwise always wins over a plain class rule regardless of
-       media query), the same reason .wams-dialog-responsive in tokens.css
-       needs it for Vaadin-set inline dialog sizing. */
+    /* Smallest phones: shrink the language selector combo. 90px (not the
+       flag/padding/native-dropdown-arrow's own ~60-63px footprint) is the
+       floor above which it can actually still fit — !important is required
+       because LanguageSelectorComponent sets min-width via Java (an inline
+       style, which otherwise always wins over a plain class rule regardless
+       of media query), the same reason .wams-dialog-responsive in tokens.css
+       needs it for Vaadin-set inline dialog sizing. Text still gracefully
+       truncates via the combo's own input-field part rather than overflowing. */
     .wams-language-selector .wams-language-selector__combo {
-        min-width: 60px !important;
+        min-width: 90px !important;
+    }
+
+    .wams-language-selector__combo::part(input-field) {
+        overflow: hidden;
+    }
+
+    .wams-language-selector__combo input {
+        text-overflow: ellipsis;
     }
 
     .wams-header-icon-cluster {

@@ -161,7 +161,7 @@
    bold value, uppercase label, optional up/down change indicator, and a thin
    top accent bar whose color is set by the card's Variant (primary/success/
    warning/neutral). Arrange several in a eu.isygoit.ui.common.component.
-   StatCardGrid (.wams-stat-grid below) for the standard 4/3/1-column
+   StatCardGrid (.wams-stat-grid below) for the standard 4/2/1-column
    responsive layout. */
 
 .wams-stat-card {
@@ -301,7 +301,8 @@
 }
 
 /* ── Stat card grid (eu.isygoit.ui.common.component.StatCardGrid) ────────────
-   4 columns desktop, 3 tablet, 1 mobile. */
+   4 columns desktop (>1024px), 2 columns tablet (768-1024px), 1 column
+   mobile (<768px), per the app's responsive spec. */
 
 .wams-stat-grid {
     display: grid;
@@ -312,11 +313,11 @@
 
 @media (max-width: 1024px) {
     .wams-stat-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
     .wams-stat-grid {
         grid-template-columns: 1fr;
     }

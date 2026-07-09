@@ -147,7 +147,12 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         Span moduleTitle = new Span(getTitle());
         moduleTitle.addClassName("wams-header-title");
 
-        HorizontalLayout leftPart = new HorizontalLayout(new DrawerToggle(), brand, moduleTitle);
+        DrawerToggle drawerToggle = new DrawerToggle();
+        String menuToggleTooltip = I18n.t("common.layout.header.menu.toggle.tooltip");
+        drawerToggle.setAriaLabel(menuToggleTooltip);
+        Tooltip.forComponent(drawerToggle).setText(menuToggleTooltip);
+
+        HorizontalLayout leftPart = new HorizontalLayout(drawerToggle, brand, moduleTitle);
         leftPart.setAlignItems(FlexComponent.Alignment.CENTER);
         leftPart.setSpacing(true);
         leftPart.addClassName("wams-main-header__left");
@@ -215,7 +220,11 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         Button bell = new Button(VaadinIcon.BELL.create());
         bell.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         bell.addClassName("wams-header-icon-btn");
-        bell.setTooltipText(I18n.t("common.layout.header.notifications.tooltip"));
+        String tooltip = I18n.t("common.layout.header.notifications.tooltip");
+        bell.setTooltipText(tooltip);
+        // setTooltipText only wires aria-describedby (a description) — icon-only
+        // buttons still need an explicit accessible *name* for screen readers.
+        bell.setAriaLabel(tooltip);
 
         Popover popover = new Popover();
         popover.setTarget(bell);
@@ -232,7 +241,9 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         Button settings = new Button(VaadinIcon.COG_O.create());
         settings.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         settings.addClassName("wams-header-icon-btn");
-        settings.setTooltipText(I18n.t("common.layout.header.settings.tooltip"));
+        String tooltip = I18n.t("common.layout.header.settings.tooltip");
+        settings.setTooltipText(tooltip);
+        settings.setAriaLabel(tooltip);
         settings.addClickListener(e -> UI.getCurrent().navigate("settings"));
         return settings;
     }
