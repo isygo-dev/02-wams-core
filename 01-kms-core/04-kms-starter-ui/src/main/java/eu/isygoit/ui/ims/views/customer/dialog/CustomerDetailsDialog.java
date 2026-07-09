@@ -79,6 +79,7 @@ public class CustomerDetailsDialog extends NoActionDialog {
         addFieldToGrid(basicInfo, VaadinIcon.PHONE, I18n.t("ims.customer.details.field.phone"), customer.getPhoneNumber());
         addFieldToGrid(basicInfo, VaadinIcon.KEY, I18n.t("ims.customer.details.field.account.code"), customer.getAccountCode());
         addFieldToGrid(basicInfo, VaadinIcon.GLOBE, I18n.t("ims.customer.details.field.website"), customer.getUrl());
+        addFieldToGrid(basicInfo, VaadinIcon.BUILDING, I18n.t("ims.customer.details.field.tenant"), customer.getTenant());
         addFieldToGrid(basicInfo, VaadinIcon.SHIELD, I18n.t("ims.customer.details.field.status"), customer.getAdminStatus() != null ? customer.getAdminStatus().name() : null);
 
         mainLayout.add(createSection(I18n.t("ims.customer.details.section.general"), basicInfo));

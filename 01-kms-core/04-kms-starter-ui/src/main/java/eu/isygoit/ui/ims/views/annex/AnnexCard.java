@@ -82,17 +82,7 @@ public class AnnexCard extends BaseCard<AnnexManagementView, AnnexService> {
         body.setPadding(false);
         body.addClassName("card-row--spaced");
 
-        body.add(createIconRow(VaadinIcon.CODE, I18n.t("ims.annex.card.table.code"), annex.getTableCode()));
         body.add(createIconRow(VaadinIcon.FONT, I18n.t("ims.annex.card.value"), annex.getValue()));
-        if (annex.getDescription() != null && !annex.getDescription().isBlank()) {
-            body.add(createIconRow(VaadinIcon.FILE_TEXT, I18n.t("ims.annex.card.description"), annex.getDescription()));
-        }
-        if (annex.getReference() != null && !annex.getReference().isBlank()) {
-            body.add(createIconRow(VaadinIcon.LINK, I18n.t("ims.annex.card.reference"), annex.getReference()));
-        }
-        if (annex.getAnnexOrder() != null) {
-            body.add(createIconRow(VaadinIcon.SORT, I18n.t("ims.annex.card.order"), String.valueOf(annex.getAnnexOrder())));
-        }
         add(body);
     }
 

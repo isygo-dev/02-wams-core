@@ -1184,3 +1184,92 @@
     color: var(--lumo-error-text-color);
 }
 
+
+/* ===== Part B2 (Alias details dialog) ===== */
+/*
+ * KMS partial stylesheet — group B2 (key / keyAlias / keyTag card & dialog trimming).
+ * Merged into kms.css in a later consolidation step; kept separate here to avoid
+ * conflicting with other parallel KMS agents editing the shared stylesheet.
+ */
+
+/* AliasDetailsDialog — read-only field grid, mirrors the *-details-dialog
+   convention used by CategoryDetailsDialog / RoleDetailsDialog / etc. (see ims.css). */
+
+.alias-details-dialog .wams-section-title {
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    margin-bottom: var(--lumo-space-s);
+    padding-bottom: var(--lumo-space-xs);
+}
+
+.alias-details-dialog .detail-field-icon {
+    color: var(--lumo-primary-color);
+}
+
+.alias-details-dialog .detail-field-value {
+    flex: 1;
+}
+
+/* ===== Part C2 (KeyStore + NextCode details dialogs) ===== */
+/*
+ * KMS partial stylesheet — group C2 (custom key store / next-code
+ * card & dialog trimming). Merged into kms.css in a later consolidation
+ * step; kept separate here to avoid conflicting with other parallel KMS
+ * agents editing the shared stylesheet.
+ */
+
+/* CustomKeyStoreDetailsDialog / NextCodeDetailsDialog — read-only field grid,
+   mirrors the *-details-dialog convention used by CategoryDetailsDialog /
+   RoleDetailsDialog / PEBConfigDetailsDialog / TokenConfigDetailsDialog / etc. */
+
+.custom-keystore-details-dialog .wams-section-title,
+.next-code-details-dialog .wams-section-title {
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    margin-bottom: var(--lumo-space-s);
+    padding-bottom: var(--lumo-space-xs);
+}
+
+.custom-keystore-details-dialog .detail-field-icon,
+.next-code-details-dialog .detail-field-icon {
+    color: var(--lumo-primary-color);
+}
+
+.custom-keystore-details-dialog .detail-field-value,
+.next-code-details-dialog .detail-field-value {
+    flex: 1;
+    word-break: break-word;
+}
+
+/* ===== Part D2 (Digest/Password/PEB/TokenConfig details dialogs) ===== */
+/*
+ * KMS partial stylesheet — group D2 (digest / password / PEB / token config
+ * card & dialog trimming). Merged into kms.css in a later consolidation step;
+ * kept separate here to avoid conflicting with other parallel KMS agents
+ * editing the shared stylesheet.
+ */
+
+/* DigestConfigDetailsDialog / PasswordConfigDetailsDialog / PEBConfigDetailsDialog /
+   TokenConfigDetailsDialog — read-only field grid, mirrors the *-details-dialog
+   convention used by CategoryDetailsDialog / RoleDetailsDialog / AliasDetailsDialog / etc. */
+
+.digest-config-details-dialog .wams-section-title,
+.password-config-details-dialog .wams-section-title,
+.peb-config-details-dialog .wams-section-title,
+.token-config-details-dialog .wams-section-title {
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    margin-bottom: var(--lumo-space-s);
+    padding-bottom: var(--lumo-space-xs);
+}
+
+.digest-config-details-dialog .detail-field-icon,
+.password-config-details-dialog .detail-field-icon,
+.peb-config-details-dialog .detail-field-icon,
+.token-config-details-dialog .detail-field-icon {
+    color: var(--lumo-primary-color);
+}
+
+.digest-config-details-dialog .detail-field-value,
+.password-config-details-dialog .detail-field-value,
+.peb-config-details-dialog .detail-field-value,
+.token-config-details-dialog .detail-field-value {
+    flex: 1;
+}

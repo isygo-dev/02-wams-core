@@ -1,7 +1,5 @@
 package eu.isygoit.ui.kms.views.cryptography.keyStore;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -19,6 +17,7 @@ import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.kms.views.cryptography.keyStore.dialog.CustomKeyStoreDetailsDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyStore.dialog.DeleteCustomKeyStoreDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyStore.dialog.UpdateCustomKeyStoreDialog;
 import feign.FeignException;
@@ -27,12 +26,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
-
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final KmsDtos.DescribeCustomKeyStoreResponse.CustomKeyStore store;
     private final Long storeId;
@@ -97,68 +93,26 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
         Button updateBtn = createIconButton(VaadinIcon.EDIT, I18n.t("kms.keystore.card.update"));
         updateBtn.addClickListener(e -> updateCustomKeyStore());
 
+        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("kms.keystore.card.details"));
+        detailsBtn.addClickListener(e -> showDetails());
+
         Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, I18n.t("kms.keystore.card.delete"));
         deleteBtn.addClickListener(e -> confirmDelete());
 
-        return List.of(connectBtn, disconnectBtn, updateBtn, deleteBtn);
+        return List.of(connectBtn, disconnectBtn, updateBtn, detailsBtn, deleteBtn);
     }
 
     @Override
     protected void buildBodyRows() {
-        // Created
+        // Created (kept as the one always-present timestamp for quick scanning)
         add(createIconRow(VaadinIcon.CALENDAR, I18n.t("kms.keystore.card.created"), creationDate));
 
-        // Updated if present
-        if (store.getUpdateDate() != null) {
-            add(createIconRow(VaadinIcon.REFRESH, I18n.t("kms.keystore.card.updated"), DateHelper.formatToHumanReadable(store.getUpdateDate())));
-        }
-
-        // CloudHSM or XKS details
-        if (StringUtils.hasText(store.getCloudHsmClusterId())) {
-            add(createIconRow(VaadinIcon.CLOUD, I18n.t("kms.keystore.card.cloudhsm.cluster"), store.getCloudHsmClusterId()));
-        } else if (StringUtils.hasText(store.getXksProxyUriEndpoint())) {
-            add(createIconRow(VaadinIcon.LINK, I18n.t("kms.keystore.card.xks.endpoint"), store.getXksProxyUriEndpoint()));
-            if (StringUtils.hasText(store.getXksProxyUriPath())) {
-                add(createIconRow(VaadinIcon.ROAD, I18n.t("kms.keystore.card.xks.path"), store.getXksProxyUriPath()));
-            }
-            if (StringUtils.hasText(store.getXksProxyConnectivity())) {
-                add(createIconRow(VaadinIcon.CONNECT, I18n.t("kms.keystore.card.xks.connectivity"), store.getXksProxyConnectivity()));
-            }
-        }
-
-        // Health, max keys, last connections
-        if (StringUtils.hasText(store.getHealthStatus())) {
-            add(createIconRow(VaadinIcon.HEART, I18n.t("kms.keystore.card.health"), store.getHealthStatus()));
-        }
-        if (store.getMaxKeys() != null) {
-            add(createIconRow(VaadinIcon.KEY, I18n.t("kms.keystore.card.max.keys"), String.valueOf(store.getMaxKeys())));
-        }
-        if (store.getLastSuccessfulConnection() != null) {
-            add(createIconRow(VaadinIcon.CONNECT, I18n.t("kms.keystore.card.last.connected"), DateHelper.formatToHumanReadable(store.getLastSuccessfulConnection())));
-        }
-        if (store.getLastConnectionAttempt() != null) {
-            add(createIconRow(VaadinIcon.CLOCK, I18n.t("kms.keystore.card.last.attempt"), DateHelper.formatToHumanReadable(store.getLastConnectionAttempt())));
-        }
-
-        // Connection settings
-        if (store.getConnectionTimeoutSeconds() != null) {
-            add(createIconRow(VaadinIcon.TIMER, I18n.t("kms.keystore.card.timeout"), store.getConnectionTimeoutSeconds() + "s"));
-        }
-        if (store.getHealthCheckIntervalSeconds() != null) {
-            add(createIconRow(VaadinIcon.SPARK_LINE, I18n.t("kms.keystore.card.health.interval"), store.getHealthCheckIntervalSeconds() + "s"));
-        }
-        if (store.getAutoReconnect() != null) {
-            add(createIconRow(VaadinIcon.REFRESH, I18n.t("kms.keystore.card.auto.reconnect"), store.getAutoReconnect() ? I18n.t("kms.keystore.card.on") : I18n.t("kms.keystore.card.off")));
-        }
-
-        // Error code
+        // Health status / connection error — a broken connection must stay visible on the card
         if (StringUtils.hasText(errorCode)) {
             add(createIconRow(VaadinIcon.EXCLAMATION_CIRCLE, I18n.t("kms.keystore.card.error"), errorCode));
+        } else if (StringUtils.hasText(store.getHealthStatus())) {
+            add(createIconRow(VaadinIcon.HEART, I18n.t("kms.keystore.card.health"), store.getHealthStatus()));
         }
-
-        // Metadata and tags (as key-value chips)
-        addKeyValueRow(I18n.t("kms.keystore.card.metadata"), store.getMetadata());
-        addKeyValueRow(I18n.t("kms.keystore.card.tags"), store.getTags());
     }
 
     // ── Helper row builders ──────────────────────────────────────────────────
@@ -188,51 +142,11 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
         return row;
     }
 
-    private void addKeyValueRow(String label, String json) {
-        if (!StringUtils.hasText(json)) return;
-        try {
-            Map<String, String> map = MAPPER.readValue(json, new TypeReference<>() {
-            });
-            if (map == null || map.isEmpty()) return;
-
-            HorizontalLayout row = new HorizontalLayout();
-            row.setAlignItems(FlexComponent.Alignment.CENTER);
-            row.setSpacing(true);
-            row.setWidthFull();
-            row.addClassName("meta-row");
-
-            Icon icon = VaadinIcon.TAGS.create();
-            icon.setSize("16px");
-            icon.addClassName("kms-partc-row-icon");
-
-            Span labelSpan = new Span(label + ":");
-            labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-            labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
-            labelSpan.addClassName("kms-partc-row-label");
-
-            HorizontalLayout chips = new HorizontalLayout();
-            chips.setSpacing(true);
-            chips.addClassName("kms-partc-metadata-chips");
-
-            for (Map.Entry<String, String> entry : map.entrySet()) {
-                Span chip = new Span(entry.getKey() + "=" + entry.getValue());
-                chip.addClassName(LumoUtility.Background.CONTRAST_5);
-                chip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
-                chip.addClassName(LumoUtility.Padding.Vertical.XSMALL);
-                chip.addClassName(LumoUtility.BorderRadius.LARGE);
-                chip.addClassName(LumoUtility.FontSize.XSMALL);
-                chips.add(chip);
-            }
-
-            row.add(icon, labelSpan, chips);
-            row.expand(chips);
-            add(row);
-        } catch (Exception e) {
-            log.warn("Failed to parse {} JSON: {}", label, json, e);
-        }
-    }
-
     // ── Action handlers ──────────────────────────────────────────────────────
+
+    private void showDetails() {
+        new CustomKeyStoreDetailsDialog(store).open();
+    }
 
     private void confirmConnect() {
         ConfirmDialog dlg = new ConfirmDialog();

@@ -63,14 +63,17 @@ public class DescribeKeyDialog extends NoActionDialog {
         // Basic metadata
         content.add(detailRow(I18n.t("kms.key.dialog.describe.field.key.id"), metadata.getKeyId()),
                 detailRow(I18n.t("kms.key.dialog.describe.field.wrn"), metadata.getWrn()),
+                detailRow(I18n.t("kms.key.dialog.describe.field.tenant"), metadata.getTenant()),
                 detailRow(I18n.t("kms.key.dialog.describe.field.alias"), metadata.getKeyAlias()),
                 detailRow(I18n.t("kms.key.dialog.describe.field.description"), metadata.getDescription()),
                 detailRow(I18n.t("kms.key.dialog.describe.field.status"), metadata.getKeyStatus() != null ? metadata.getKeyStatus().name() : I18n.t("kms.key.dialog.describe.placeholder")),
+                detailRow(I18n.t("kms.key.dialog.describe.field.enabled"), metadata.getEnabled() != null ? metadata.getEnabled().toString() : I18n.t("kms.key.dialog.describe.placeholder")),
                 detailRow(I18n.t("kms.key.dialog.describe.field.key.spec"), metadata.getKeySpec() != null ? metadata.getKeySpec().name() : I18n.t("kms.key.dialog.describe.placeholder")),
                 detailRow(I18n.t("kms.key.dialog.describe.field.key.usage"), metadata.getKeyUsage() != null ? metadata.getKeyUsage().name() : I18n.t("kms.key.dialog.describe.placeholder")),
                 detailRow(I18n.t("kms.key.dialog.describe.field.customer.master.key.spec"), metadata.getCustomerMasterKeySpec()),
                 detailRow(I18n.t("kms.key.dialog.describe.field.origin"), metadata.getOrigin() != null ? metadata.getOrigin().name() : I18n.t("kms.key.dialog.describe.placeholder")),
                 detailRow(I18n.t("kms.key.dialog.describe.field.creation.date"), metadata.getCreateDate() != null ? metadata.getCreateDate().toString() : I18n.t("kms.key.dialog.describe.placeholder")),
+                detailRow(I18n.t("kms.key.dialog.describe.field.updated.date"), metadata.getUpdateDate() != null ? metadata.getUpdateDate().toString() : I18n.t("kms.key.dialog.describe.placeholder")),
                 detailRow(I18n.t("kms.key.dialog.describe.field.rotation.enabled"), metadata.getRotationEnabled() != null ? metadata.getRotationEnabled().toString() : I18n.t("kms.key.dialog.describe.placeholder")),
                 detailRow(I18n.t("kms.key.dialog.describe.field.rotation.period"), metadata.getRotationPeriodInDays() != null ? metadata.getRotationPeriodInDays().toString() : I18n.t("kms.key.dialog.describe.placeholder")),
                 detailRow(I18n.t("kms.key.dialog.describe.field.current.version"), metadata.getCurrentVersion()),
@@ -78,6 +81,14 @@ public class DescribeKeyDialog extends NoActionDialog {
                 detailRow(I18n.t("kms.key.dialog.describe.field.expiration.model"), metadata.getExpirationModel() != null ? metadata.getExpirationModel().name() : I18n.t("kms.key.dialog.describe.placeholder")),
                 detailRow(I18n.t("kms.key.dialog.describe.field.valid.until"), metadata.getValidTo() != null ? metadata.getValidTo().toString() : I18n.t("kms.key.dialog.describe.placeholder")),
                 detailRow(I18n.t("kms.key.dialog.describe.field.multi.region"), metadata.getMultiRegion() != null ? metadata.getMultiRegion().toString() : Boolean.FALSE.toString()));
+
+        // Pending deletion (if applicable)
+        if (metadata.getPendingDeletionWindowDays() != null || metadata.getDeletionDate() != null) {
+            content.add(detailRow(I18n.t("kms.key.dialog.describe.field.pending.deletion.window"),
+                    metadata.getPendingDeletionWindowDays() != null ? metadata.getPendingDeletionWindowDays().toString() : I18n.t("kms.key.dialog.describe.placeholder")));
+            content.add(detailRow(I18n.t("kms.key.dialog.describe.field.deletion.date"),
+                    metadata.getDeletionDate() != null ? metadata.getDeletionDate().toString() : I18n.t("kms.key.dialog.describe.placeholder")));
+        }
 
         // Multi‑region configuration (if present)
         if (metadata.getMultiRegionConfiguration() != null) {

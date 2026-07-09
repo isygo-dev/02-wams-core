@@ -72,6 +72,7 @@ public class AnnexDetailsDialog extends NoActionDialog {
         Div infoGrid = new Div();
         infoGrid.addClassName("wams-card__detail-grid");
 
+        addFieldToGrid(infoGrid, VaadinIcon.BUILDING, I18n.t("ims.annex.details.field.tenant"), annex.getTenant());
         addFieldToGrid(infoGrid, VaadinIcon.CODE, I18n.t("ims.annex.details.field.table.code"), annex.getTableCode());
         addFieldToGrid(infoGrid, VaadinIcon.LOCATION_ARROW_CIRCLE, I18n.t("ims.annex.details.field.language"), annex.getLanguage() != null ? annex.getLanguage().name() : null);
         addFieldToGrid(infoGrid, VaadinIcon.FONT, I18n.t("ims.annex.details.field.value"), annex.getValue());

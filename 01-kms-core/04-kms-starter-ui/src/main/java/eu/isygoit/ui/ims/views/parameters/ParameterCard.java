@@ -77,14 +77,7 @@ public class ParameterCard extends BaseCard<ParameterManagementView, AppParamete
         body.setPadding(false);
         body.addClassName("card-row--spaced");
 
-        body.add(createIconRow(VaadinIcon.KEY, I18n.t("ims.parameter.card.name"), parameter.getName()));
         body.add(createIconRow(VaadinIcon.INPUT, I18n.t("ims.parameter.card.value"), parameter.getValue()));
-        if (parameter.getTenant() != null && !parameter.getTenant().isBlank()) {
-            body.add(createIconRow(VaadinIcon.BUILDING, I18n.t("ims.parameter.card.tenant"), parameter.getTenant()));
-        }
-        if (parameter.getDescription() != null && !parameter.getDescription().isBlank()) {
-            body.add(createIconRow(VaadinIcon.FILE_TEXT, I18n.t("ims.parameter.card.description"), parameter.getDescription()));
-        }
         add(body);
     }
 

@@ -84,11 +84,6 @@ public class RoleCard extends BaseCard<RoleManagementView, RoleInfoService> {
 
         body.add(createInfoRow(VaadinIcon.CODE, I18n.t("ims.role.card.code"), role.getCode()));
         body.add(createInfoRow(VaadinIcon.USERS, I18n.t("ims.role.card.users"), String.valueOf(role.getNumberOfUsers())));
-        body.add(createInfoRow(VaadinIcon.FUNCTION, I18n.t("ims.role.card.allowed.apps"), String.valueOf(role.getAllowedTools() != null ? role.getAllowedTools().size() : 0)));
-        body.add(createInfoRow(VaadinIcon.LOCK, I18n.t("ims.role.card.permissions"), String.valueOf(role.getRolePermission() != null ? role.getRolePermission().size() : 0)));
-        if (role.getDescription() != null && !role.getDescription().isBlank()) {
-            body.add(createInfoRow(VaadinIcon.FILE_TEXT, I18n.t("ims.role.card.description"), role.getDescription()));
-        }
 
         add(body);
     }

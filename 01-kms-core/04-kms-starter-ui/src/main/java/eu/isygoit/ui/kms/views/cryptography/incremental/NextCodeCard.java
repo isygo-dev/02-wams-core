@@ -17,6 +17,7 @@ import eu.isygoit.remote.kms.KmsAppNextCodeService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.kms.KmsMainView;
 import eu.isygoit.ui.kms.views.cryptography.incremental.dialog.DeleteNextCodeConfigDialog;
+import eu.isygoit.ui.kms.views.cryptography.incremental.dialog.NextCodeDetailsDialog;
 
 import java.util.List;
 
@@ -72,11 +73,14 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
         generateButton = createIconButton(VaadinIcon.COG, I18n.t("kms.nextcode.card.generate.tooltip"));
         generateButton.addClickListener(e -> generateNextCode());
 
+        Button detailsButton = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("kms.nextcode.card.details.tooltip"));
+        detailsButton.addClickListener(e -> new NextCodeDetailsDialog(dto).open());
+
         Button deleteButton = createDangerIconButton(VaadinIcon.TRASH, I18n.t("kms.nextcode.card.delete.tooltip"));
         deleteButton.addClickListener(e -> new DeleteNextCodeConfigDialog(objectService, dto.getId(),
                 dto.getEntity(), dto.getAttribute(), deleteCallback).open());
 
-        return List.of(generateButton, deleteButton);
+        return List.of(generateButton, detailsButton, deleteButton);
     }
 
     @Override

@@ -141,16 +141,6 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
         body.addClassName("card-row--spaced");
 
         body.add(createIconRow(VaadinIcon.ENVELOPE, I18n.t("ims.tenant.card.email"), tenant.getEmail()));
-        body.add(createIconRow(VaadinIcon.PHONE, I18n.t("ims.tenant.card.phone"), tenant.getPhone()));
-        if (tenant.getIndustry() != null && !tenant.getIndustry().isBlank()) {
-            body.add(createIconRow(VaadinIcon.BUILDING, I18n.t("ims.tenant.card.industry"), tenant.getIndustry()));
-        }
-        if (tenant.getDescription() != null && !tenant.getDescription().isBlank()) {
-            body.add(createIconRow(VaadinIcon.FILE_TEXT, I18n.t("ims.tenant.card.description"), tenant.getDescription()));
-        }
-        if (tenant.getUrl() != null && !tenant.getUrl().isBlank()) {
-            body.add(createIconRow(VaadinIcon.GLOBE, I18n.t("ims.tenant.card.website"), tenant.getUrl()));
-        }
         add(body);
     }
 

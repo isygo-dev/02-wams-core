@@ -49,6 +49,13 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
 
         String displayName = calendar.getName() != null ? calendar.getName() : I18n.t("cms.calendar.card.default.name", calendar.getId());
         Span titleSpan = buildTitleSpan(displayName, calendar.getDescription());
+        titleLayout.add(titleSpan);
+
+        // Short code badge — how users commonly search/identify calendars (see search field)
+        if (calendar.getCode() != null && !calendar.getCode().isBlank()) {
+            Span codeChip = buildStatusChip(calendar.getCode(), "info");
+            titleLayout.add(codeChip);
+        }
 
         // Locked status chip
         if (calendar.getLocked() != null && calendar.getLocked()) {
@@ -56,13 +63,13 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
                     I18n.t("cms.calendar.card.status.locked"),
                     "LOCKED"
             );
-            titleLayout.add(titleSpan, lockChip);
+            titleLayout.add(lockChip);
         } else {
             Span unlockedChip = buildStatusChip(
                     I18n.t("cms.calendar.card.status.unlocked"),
                     "UNLOCKED"
             );
-            titleLayout.add(titleSpan, unlockedChip);
+            titleLayout.add(unlockedChip);
         }
 
         return titleLayout;
@@ -93,41 +100,14 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
         body.setPadding(false);
         body.addClassName("wams-body-rows");
 
-        body.add(createIconRow(VaadinIcon.CODE, I18n.t("cms.calendar.card.code"), calendar.getCode()));
-        body.add(createIconRow(VaadinIcon.BUILDING, I18n.t("cms.calendar.card.tenant"), calendar.getTenant()));
-        body.add(createIconRow(VaadinIcon.FILE, I18n.t("cms.calendar.card.ics.path"), calendar.getIcsPath()));
-        body.add(createIconRow(VaadinIcon.USER, I18n.t("cms.calendar.card.created.by"), calendar.getCreatedBy()));
-
+        // Only the description is shown in the body — code/tenant/icsPath/createdBy
+        // are secondary details and live in the "Details" dialog instead, to keep
+        // the card focused on quick scanning.
         if (calendar.getDescription() != null && !calendar.getDescription().isBlank()) {
             body.add(createDescriptionRow(calendar.getDescription()));
         }
 
         add(body);
-    }
-
-    private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
-        HorizontalLayout row = new HorizontalLayout();
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.setSpacing(true);
-        row.setWidthFull();
-        row.addClassName("meta-row");
-
-        com.vaadin.flow.component.icon.Icon iconComponent = icon.create();
-        iconComponent.setSize("14px");
-        iconComponent.addClassName("meta-row-icon");
-
-        Span labelSpan = new Span(label + ":");
-        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        labelSpan.addClassName("meta-row-label");
-
-        Span valueSpan = new Span(value != null ? value : "—");
-        valueSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        valueSpan.addClassName("meta-row-value");
-
-        row.add(iconComponent, labelSpan, valueSpan);
-        row.expand(valueSpan);
-        return row;
     }
 
     private HorizontalLayout createDescriptionRow(String description) {

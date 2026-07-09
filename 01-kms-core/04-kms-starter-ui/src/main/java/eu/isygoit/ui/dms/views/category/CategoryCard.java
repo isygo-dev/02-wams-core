@@ -88,10 +88,6 @@ public class CategoryCard extends BaseCard<CategoryManagementView, CategoryServi
         body.add(createIconRow(VaadinIcon.CALENDAR, I18n.t("dms.category.card.created.date"),
                 category.getCreateDate() != null ? category.getCreateDate().toString() : null));
 
-        if (category.getDescription() != null && !category.getDescription().isBlank()) {
-            body.add(createDescriptionRow(category.getDescription()));
-        }
-
         add(body);
     }
 
@@ -114,33 +110,6 @@ public class CategoryCard extends BaseCard<CategoryManagementView, CategoryServi
         Span valueSpan = new Span(value != null ? value : "—");
         valueSpan.addClassName(LumoUtility.FontSize.XXSMALL);
         valueSpan.addClassName("meta-row-value");
-
-        row.add(iconComponent, labelSpan, valueSpan);
-        row.expand(valueSpan);
-        return row;
-    }
-
-    private HorizontalLayout createDescriptionRow(String description) {
-        HorizontalLayout row = new HorizontalLayout();
-        row.setAlignItems(FlexComponent.Alignment.START);
-        row.setSpacing(true);
-        row.setWidthFull();
-        row.addClassName("meta-row");
-
-        com.vaadin.flow.component.icon.Icon iconComponent = VaadinIcon.FILE_TEXT.create();
-        iconComponent.setSize("14px");
-        iconComponent.addClassName("meta-row-icon");
-        iconComponent.addClassName("meta-row-icon--align-start");
-
-        Span labelSpan = new Span(I18n.t("dms.category.card.description") + ":");
-        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        labelSpan.addClassName("meta-row-label");
-
-        Span valueSpan = new Span(description);
-        valueSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        valueSpan.addClassName("meta-row-value");
-        valueSpan.addClassName("meta-row-value--wrap");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);

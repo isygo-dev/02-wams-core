@@ -54,8 +54,6 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
     private Span languageChip;
     private Span codeSpan;
     private Span descriptionSpan;
-    private Span fileNameSpan;
-    private Span defaultSenderSpan;
     private Span senderConfigSpan;
     private Button viewSenderConfigButton;
     private Button viewButton;
@@ -205,12 +203,6 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         if (descriptionSpan == null) {
             descriptionSpan = new Span();
         }
-        if (fileNameSpan == null) {
-            fileNameSpan = new Span();
-        }
-        if (defaultSenderSpan == null) {
-            defaultSenderSpan = new Span();
-        }
         if (senderConfigSpan == null) {
             senderConfigSpan = new Span();
         }
@@ -226,8 +218,6 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
 
         codeSpan.setText(template.getCode() != null ? template.getCode() : I18n.t("mms.common.value.notAvailable"));
         descriptionSpan.setText(template.getDescription() != null ? template.getDescription() : I18n.t("mms.msgtemplate.card.no.description"));
-        fileNameSpan.setText(template.getOriginalFileName() != null ? template.getOriginalFileName() : I18n.t("mms.msgtemplate.card.no.file"));
-        defaultSenderSpan.setText(template.getDefaultSender() != null ? template.getDefaultSender() : I18n.t("mms.common.value.notAvailable"));
 
         // Sender Config with name and tooltip
         String senderConfigDisplay = getSenderConfigDisplayName();
@@ -359,11 +349,9 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
     protected void buildBodyRows() {
         bodyContainer.removeAll();
 
-        bodyContainer.add(createDetailRow(
-                VaadinIcon.GLOBE,
-                I18n.t("mms.msgtemplate.card.tenant"),
-                template.getTenant() != null ? template.getTenant() : I18n.t("mms.common.value.notAvailable")
-        ));
+        // Essential fields only – quick-scan card. Everything else (tenant,
+        // default sender, original file name, storage path, ...) lives in
+        // ViewMsgTemplateDialog, which shows every MsgTemplateDto field.
 
         bodyContainer.add(createDetailRowWithCopy(
                 VaadinIcon.CODE,
@@ -376,18 +364,6 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
                 VaadinIcon.FILE_TEXT,
                 I18n.t("mms.msgtemplate.card.description"),
                 template.getDescription() != null ? template.getDescription() : I18n.t("mms.msgtemplate.card.no.description")
-        ));
-
-        bodyContainer.add(createDetailRow(
-                VaadinIcon.LOCATION_ARROW,
-                I18n.t("mms.msgtemplate.card.language"),
-                template.getLanguage() != null ? template.getLanguage().name() : I18n.t("mms.common.value.notAvailable")
-        ));
-
-        bodyContainer.add(createDetailRow(
-                VaadinIcon.ENVELOPE,
-                I18n.t("mms.msgtemplate.card.defaultSender"),
-                template.getDefaultSender() != null ? template.getDefaultSender() : I18n.t("mms.common.value.notAvailable")
         ));
 
         // Sender Config row with tooltip and view button
@@ -421,20 +397,6 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         senderConfigRow.add(viewSenderConfigButton);
 
         bodyContainer.add(senderConfigRow);
-
-        bodyContainer.add(createDetailRow(
-                VaadinIcon.FILE,
-                I18n.t("mms.msgtemplate.card.file"),
-                template.getOriginalFileName() != null ? template.getOriginalFileName() : I18n.t("mms.msgtemplate.card.no.file")
-        ));
-
-        if (template.getFileName() != null) {
-            bodyContainer.add(createDetailRow(
-                    VaadinIcon.FOLDER,
-                    I18n.t("mms.msgtemplate.card.path"),
-                    template.getPath() != null ? template.getPath() : I18n.t("mms.common.value.notAvailable")
-            ));
-        }
     }
 
     // ─── Helper Methods ──────────────────────────────────────────────────────

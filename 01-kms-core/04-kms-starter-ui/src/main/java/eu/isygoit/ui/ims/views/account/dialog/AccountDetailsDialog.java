@@ -82,10 +82,48 @@ public class AccountDetailsDialog extends NoActionDialog {
         addFieldToGrid(basicInfo, VaadinIcon.BUILDING, I18n.t("ims.account.details.field.tenant"), account.getTenant());
         addFieldToGrid(basicInfo, VaadinIcon.COG, I18n.t("ims.account.details.field.function.role"), account.getFunctionRole());
         addFieldToGrid(basicInfo, VaadinIcon.TAGS, I18n.t("ims.account.details.field.account.type"), account.getAccountType());
+        addFieldToGrid(basicInfo, VaadinIcon.HASH, I18n.t("ims.account.details.field.code"), account.getCode());
+        addFieldToGrid(basicInfo, VaadinIcon.SIGN_IN, I18n.t("ims.account.details.field.auth.type"), account.getAuthType() != null ? account.getAuthType().name() : null);
+        addFieldToGrid(basicInfo, VaadinIcon.COMMENT, I18n.t("ims.account.details.field.chat.status"), account.getChatStatus() != null ? account.getChatStatus().name() : null);
         addFieldToGrid(basicInfo, VaadinIcon.CLOUD, I18n.t("ims.account.details.field.origin"), account.getOrigin());
         addFieldToGrid(basicInfo, VaadinIcon.LOCATION_ARROW_CIRCLE, I18n.t("ims.account.details.field.language"), account.getLanguage() != null ? account.getLanguage().name() : null);
+        if (account.getAccountDetails() != null) {
+            addFieldToGrid(basicInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.account.details.field.country"), account.getAccountDetails().getCountry());
+        }
 
         mainLayout.add(createSection(I18n.t("ims.account.details.section.basic"), basicInfo));
+
+        // Address (if present)
+        if (account.getAccountDetails() != null && account.getAccountDetails().getAddress() != null) {
+            var addr = account.getAccountDetails().getAddress();
+            String address = (addr.getStreet() != null ? addr.getStreet() : "") +
+                    (addr.getCity() != null ? ", " + addr.getCity() : "") +
+                    (addr.getCountry() != null ? ", " + addr.getCountry() : "");
+            if (!address.isBlank()) {
+                HorizontalLayout addrRow = new HorizontalLayout();
+                addrRow.setAlignItems(FlexComponent.Alignment.CENTER);
+                addrRow.setSpacing(true);
+                Icon addrIcon = VaadinIcon.MAP_MARKER.create();
+                addrIcon.setSize("16px");
+                addrIcon.addClassName("detail-field-icon");
+                Span addrLabel = new Span(I18n.t("ims.account.details.field.address"));
+                addrLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+                Span addrValue = new Span(address);
+                addrValue.addClassName("detail-field-value");
+                addrRow.add(addrIcon, addrLabel, addrValue);
+                addrRow.expand(addrValue);
+                mainLayout.add(addrRow);
+            }
+        }
+
+        // Contacts (compact list, if present)
+        if (account.getAccountDetails() != null && account.getAccountDetails().getContacts() != null
+                && !account.getAccountDetails().getContacts().isEmpty()) {
+            String contactsText = account.getAccountDetails().getContacts().stream()
+                    .map(c -> (c.getType() != null ? c.getType().name() + ": " : "") + (c.getValue() != null ? c.getValue() : ""))
+                    .collect(Collectors.joining(" • "));
+            mainLayout.add(createCompactList(VaadinIcon.PAPERPLANE, I18n.t("ims.account.details.field.contacts"), contactsText));
+        }
 
         // Status section
         Div statusInfo = new Div();
@@ -97,6 +135,8 @@ public class AccountDetailsDialog extends NoActionDialog {
         addFieldToGrid(statusInfo, VaadinIcon.CLOCK, I18n.t("ims.account.details.field.last.login"), account.getLastConnectionDate() != null ? DateHelper.formatToHumanReadable(account.getLastConnectionDate()) : null);
         addFieldToGrid(statusInfo, VaadinIcon.CALENDAR, I18n.t("ims.account.details.field.created"), account.getCreateDate() != null ? DateHelper.formatToHumanReadable(account.getCreateDate()) : null);
         addFieldToGrid(statusInfo, VaadinIcon.USER_CHECK, I18n.t("ims.account.details.field.created.by"), account.getCreatedBy());
+        addFieldToGrid(statusInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.account.details.field.updated"), account.getUpdateDate() != null ? DateHelper.formatToHumanReadable(account.getUpdateDate()) : null);
+        addFieldToGrid(statusInfo, VaadinIcon.EDIT, I18n.t("ims.account.details.field.updated.by"), account.getUpdatedBy());
 
         mainLayout.add(createSection(I18n.t("ims.account.details.section.status"), statusInfo));
 

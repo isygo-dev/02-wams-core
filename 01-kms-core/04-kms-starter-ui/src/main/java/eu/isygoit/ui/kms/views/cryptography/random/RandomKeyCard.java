@@ -16,6 +16,7 @@ import eu.isygoit.remote.kms.RandomKeyService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.kms.KmsMainView;
 import eu.isygoit.ui.kms.views.cryptography.random.dialog.DeleteRandomKeyDialog;
+import eu.isygoit.ui.kms.views.cryptography.random.dialog.RandomKeyDetailsDialog;
 import eu.isygoit.ui.kms.views.cryptography.random.dialog.RenewRandomKeyDialog;
 
 import java.util.List;
@@ -53,6 +54,9 @@ public class RandomKeyCard extends BaseCard<RandomKeyView, RandomKeyService> {
 
     @Override
     protected List<Button> buildActionButtons() {
+        Button detailsButton = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("kms.random.key.card.details.tooltip"));
+        detailsButton.addClickListener(e -> new RandomKeyDetailsDialog(parentView, objectService, dto).open());
+
         renewButton = createIconButton(VaadinIcon.REFRESH, I18n.t("kms.random.key.card.renew.tooltip"));
         renewButton.addClickListener(e -> new RenewRandomKeyDialog(objectService, dto.getName(),
                 () -> parentView.refreshCard(this)).open());
@@ -61,7 +65,7 @@ public class RandomKeyCard extends BaseCard<RandomKeyView, RandomKeyService> {
         deleteButton.addClickListener(e -> new DeleteRandomKeyDialog(objectService, dto.getName(),
                 () -> parentView.removeCard(this)).open());
 
-        return List.of(renewButton, deleteButton);
+        return List.of(detailsButton, renewButton, deleteButton);
     }
 
     @Override

@@ -201,25 +201,6 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
             body.add(createIconRow(VaadinIcon.BUILDING, I18n.t("ims.account.card.tenant"), minAccount.getTenant()));
         }
 
-        if (minAccount.getFullName() != null && !minAccount.getFullName().equals(minAccount.getEmail())) {
-            body.add(createIconRow(VaadinIcon.USER, I18n.t("ims.account.card.full.name"), minAccount.getFullName()));
-        }
-
-        if (minAccount.getFunctionRole() != null && !minAccount.getFunctionRole().isBlank()) {
-            body.add(createIconRow(VaadinIcon.COG, I18n.t("ims.account.card.function.role"), minAccount.getFunctionRole()));
-        }
-
-        String adminFlag = Boolean.TRUE.equals(minAccount.getIsAdmin()) ? I18n.t("ims.account.card.yes") : I18n.t("ims.account.card.no");
-        body.add(createIconRow(VaadinIcon.SHIELD, I18n.t("ims.account.card.admin"), adminFlag));
-
-        if (minAccount.getAccountType() != null && !minAccount.getAccountType().isBlank()) {
-            body.add(createIconRow(VaadinIcon.TAGS, I18n.t("ims.account.card.account.type"), minAccount.getAccountType()));
-        }
-
-        if (minAccount.getLastConnectionDate() != null) {
-            body.add(createIconRow(VaadinIcon.CLOCK, I18n.t("ims.account.card.last.login"), minAccount.getLastConnectionDate().toString()));
-        }
-
         add(body);
     }
 

@@ -14,6 +14,7 @@ import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.kms.views.tokenizer.config.dialog.DeleteTokenConfigDialog;
+import eu.isygoit.ui.kms.views.tokenizer.config.dialog.TokenConfigDetailsDialog;
 import eu.isygoit.ui.kms.views.tokenizer.config.dialog.UpdateTokenConfigDialog;
 
 import java.util.List;
@@ -72,20 +73,20 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
 
     @Override
     protected List<Button> buildActionButtons() {
+        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("kms.token.config.details.button"));
+        detailsBtn.addClickListener(e -> new TokenConfigDetailsDialog(dto).open());
+
         Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("kms.token.config.edit.button"));
         editBtn.addClickListener(e -> openEditDialog());
 
         Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, I18n.t("kms.token.config.delete.button"));
         deleteBtn.addClickListener(e -> new DeleteTokenConfigDialog(objectService, dto.getId(), dto.getCode(), onDeleteRefresh).open());
 
-        return List.of(editBtn, deleteBtn);
+        return List.of(detailsBtn, editBtn, deleteBtn);
     }
 
     @Override
     protected void buildBodyRows() {
-        add(createIconRow(VaadinIcon.BUILDING, I18n.t("kms.token.config.issuer"), dto.getIssuer() != null ? dto.getIssuer() : "—"));
-        add(createIconRow(VaadinIcon.GROUP, I18n.t("kms.token.config.audience"), formatAudienceList()));
-        add(createIconRow(VaadinIcon.CODE, I18n.t("kms.token.config.algorithm"), dto.getSignatureAlgorithm() != null ? dto.getSignatureAlgorithm() : "—"));
         add(createIconRow(VaadinIcon.CLOCK, I18n.t("kms.token.config.lifetime"), formatLifetime(dto.getLifeTimeInMs())));
     }
 
@@ -112,11 +113,6 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
         return row;
-    }
-
-    private String formatAudienceList() {
-        if (dto.getAudience() == null || dto.getAudience().isEmpty()) return "—";
-        return String.join(", ", dto.getAudience());
     }
 
     private String formatLifetime(Integer lifeTimeInMs) {

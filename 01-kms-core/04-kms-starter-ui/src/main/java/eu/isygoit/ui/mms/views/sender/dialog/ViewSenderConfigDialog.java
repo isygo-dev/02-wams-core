@@ -57,6 +57,12 @@ public class ViewSenderConfigDialog extends Dialog {
                 config.getPort() != null ? config.getPort() : I18n.t("mms.common.value.notAvailable"));
         addDetailRow(detailsDiv, I18n.t("mms.sender.dialog.view.username"),
                 config.getUsername() != null ? config.getUsername() : I18n.t("mms.common.value.notAvailable"));
+
+        // Password – never render the raw secret, only whether one is configured
+        boolean hasPassword = config.getPassword() != null && !config.getPassword().isEmpty();
+        addDetailRow(detailsDiv, I18n.t("mms.sender.dialog.view.password"),
+                hasPassword ? I18n.t("mms.sender.dialog.view.password.set") : I18n.t("mms.sender.dialog.view.password.notSet"));
+
         addDetailRow(detailsDiv, I18n.t("mms.sender.dialog.view.protocol"),
                 config.getTransportProtocol() != null ? config.getTransportProtocol() : "smtp");
         addDetailRow(detailsDiv, I18n.t("mms.sender.dialog.view.smtp.auth"),

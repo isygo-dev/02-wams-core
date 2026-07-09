@@ -149,16 +149,6 @@ public class CustomerCard extends BaseCard<CustomerManagementView, CustomerServi
         body.addClassName("card-row--spaced");
 
         body.add(createIconRow(VaadinIcon.ENVELOPE, I18n.t("ims.customer.card.email"), customer.getEmail()));
-        body.add(createIconRow(VaadinIcon.PHONE, I18n.t("ims.customer.card.phone"), customer.getPhoneNumber()));
-        if (customer.getAccountCode() != null && !customer.getAccountCode().isBlank()) {
-            body.add(createIconRow(VaadinIcon.KEY, I18n.t("ims.customer.card.account.code"), customer.getAccountCode()));
-        }
-        if (customer.getUrl() != null && !customer.getUrl().isBlank()) {
-            body.add(createIconRow(VaadinIcon.GLOBE, I18n.t("ims.customer.card.website"), customer.getUrl()));
-        }
-        if (customer.getDescription() != null && !customer.getDescription().isBlank()) {
-            body.add(createIconRow(VaadinIcon.FILE_TEXT, I18n.t("ims.customer.card.description"), customer.getDescription()));
-        }
         add(body);
     }
 

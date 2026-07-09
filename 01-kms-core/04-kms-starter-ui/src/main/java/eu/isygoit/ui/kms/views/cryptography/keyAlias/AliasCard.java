@@ -14,6 +14,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.kms.KmsMainView;
+import eu.isygoit.ui.kms.views.cryptography.keyAlias.dialog.AliasDetailsDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyAlias.dialog.DeleteAliasDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyAlias.dialog.UpdateAliasDialog;
 
@@ -26,11 +27,13 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
     private final String aliasWrn;
     private final Boolean primaryKey;
     private final String createDate;
+    private final KmsDtos.ListAliasesResponse.AliasEntry entry;
 
     AliasCard(AliasesView aliasesView,
               KmsApiService kmsApiService,
               KmsDtos.ListAliasesResponse.AliasEntry entry) {
         super(aliasesView, kmsApiService);
+        this.entry = entry;
         this.aliasName = entry.getAliasName();
         this.targetKeyId = entry.getTargetKeyId();
         this.aliasWrn = entry.getAliasWrn();
@@ -83,13 +86,16 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
 
     @Override
     protected List<Button> buildActionButtons() {
+        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("kms.alias.card.details.tooltip"));
+        detailsBtn.addClickListener(e -> showDetails());
+
         Button updateBtn = createIconButton(VaadinIcon.EDIT, I18n.t("kms.alias.card.update.tooltip"));
         updateBtn.addClickListener(e -> updateAlias());
 
         Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, I18n.t("kms.alias.card.delete.tooltip"));
         deleteBtn.addClickListener(e -> deleteAlias());
 
-        return List.of(updateBtn, deleteBtn);
+        return List.of(detailsBtn, updateBtn, deleteBtn);
     }
 
     @Override
@@ -161,6 +167,10 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
     }
 
     // ── Actions ───────────────────────────────────────────────────────────────
+    private void showDetails() {
+        new AliasDetailsDialog(entry).open();
+    }
+
     private void deleteAlias() {
         new DeleteAliasDialog(parentView, objectService, parentView::resetPaginationAndLoad,
                 aliasName, primaryKey).open();

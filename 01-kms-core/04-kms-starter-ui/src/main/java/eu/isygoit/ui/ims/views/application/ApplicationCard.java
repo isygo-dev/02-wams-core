@@ -141,13 +141,6 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
         body.addClassName("card-row--spaced");
 
         body.add(createIconRow(VaadinIcon.DESKTOP, I18n.t("ims.app.card.category"), application.getCategory()));
-        body.add(createIconRow(VaadinIcon.GLOBE, I18n.t("ims.app.card.url"), application.getUrl()));
-        if (application.getOrder() != null) {
-            body.add(createIconRow(VaadinIcon.SORT, I18n.t("ims.app.card.order"), String.valueOf(application.getOrder())));
-        }
-        if (application.getDescription() != null && !application.getDescription().isBlank()) {
-            body.add(createIconRow(VaadinIcon.FILE_TEXT, I18n.t("ims.app.card.description"), application.getDescription()));
-        }
         add(body);
     }
 

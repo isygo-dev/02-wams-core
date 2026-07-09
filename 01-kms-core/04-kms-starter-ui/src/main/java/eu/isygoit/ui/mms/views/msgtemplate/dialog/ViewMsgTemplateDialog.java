@@ -99,6 +99,8 @@ public class ViewMsgTemplateDialog extends Dialog {
                 template.getDescription() != null ? template.getDescription() : I18n.t("mms.common.value.notAvailable"));
         addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.file"),
                 template.getOriginalFileName() != null ? template.getOriginalFileName() : I18n.t("mms.common.value.notAvailable"));
+        addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.fileName"),
+                template.getFileName() != null ? template.getFileName() : I18n.t("mms.common.value.notAvailable"));
 
         if (template.getPath() != null) {
             addDetailRow(detailsDiv, I18n.t("mms.msgtemplate.dialog.view.path"), template.getPath());
@@ -162,6 +164,7 @@ public class ViewMsgTemplateDialog extends Dialog {
             infoIcon.addClassName("wams-tooltip-icon");
             infoIcon.getElement().setAttribute("title", tooltip);
             row.add(labelSpan, valueSpan, infoIcon);
+            container.add(row);
             return;
         }
 

@@ -72,6 +72,7 @@ public class VCalendarDetailsDialog extends NoActionDialog {
         Div infoGrid = new Div();
         infoGrid.addClassName("details-grid");
 
+        addFieldToGrid(infoGrid, VaadinIcon.HASH, I18n.t("cms.calendar.details.field.id"), calendar.getId() != null ? String.valueOf(calendar.getId()) : null);
         addFieldToGrid(infoGrid, VaadinIcon.TAG, I18n.t("cms.calendar.details.field.name"), calendar.getName());
         addFieldToGrid(infoGrid, VaadinIcon.CODE, I18n.t("cms.calendar.details.field.code"), calendar.getCode());
         addFieldToGrid(infoGrid, VaadinIcon.BUILDING, I18n.t("cms.calendar.details.field.tenant"), calendar.getTenant());

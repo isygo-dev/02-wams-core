@@ -75,6 +75,7 @@ public class ApplicationDetailsDialog extends NoActionDialog {
         addFieldToGrid(basicInfo, VaadinIcon.PLAY, I18n.t("ims.app.details.field.name"), app.getName());
         addFieldToGrid(basicInfo, VaadinIcon.FUNCTION, I18n.t("ims.app.details.field.title"), app.getTitle());
         addFieldToGrid(basicInfo, VaadinIcon.CODE, I18n.t("ims.app.details.field.code"), app.getCode());
+        addFieldToGrid(basicInfo, VaadinIcon.BUILDING, I18n.t("ims.app.details.field.tenant"), app.getTenant());
         addFieldToGrid(basicInfo, VaadinIcon.DESKTOP, I18n.t("ims.app.details.field.category"), app.getCategory());
         addFieldToGrid(basicInfo, VaadinIcon.GLOBE, I18n.t("ims.app.details.field.url"), app.getUrl());
         addFieldToGrid(basicInfo, VaadinIcon.SORT, I18n.t("ims.app.details.field.order"), app.getOrder() != null ? String.valueOf(app.getOrder()) : null);

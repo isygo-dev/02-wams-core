@@ -72,8 +72,8 @@ public class CategoryDetailsDialog extends NoActionDialog {
         Div infoGrid = new Div();
         infoGrid.addClassName("details-grid");
 
+        addFieldToGrid(infoGrid, VaadinIcon.HASH, I18n.t("dms.category.details.field.id"), category.getId() != null ? String.valueOf(category.getId()) : null);
         addFieldToGrid(infoGrid, VaadinIcon.TAG, I18n.t("dms.category.details.field.name"), category.getName());
-        addFieldToGrid(infoGrid, VaadinIcon.EDIT, I18n.t("dms.category.details.field.description"), category.getDescription());
         addFieldToGrid(infoGrid, VaadinIcon.USER_CHECK, I18n.t("dms.category.details.field.created.by"), category.getCreatedBy());
         addFieldToGrid(infoGrid, VaadinIcon.CALENDAR, I18n.t("dms.category.details.field.created.date"),
                 category.getCreateDate() != null ? DateHelper.formatToHumanReadable(category.getCreateDate()) : null);
@@ -82,6 +82,13 @@ public class CategoryDetailsDialog extends NoActionDialog {
                 category.getUpdateDate() != null ? DateHelper.formatToHumanReadable(category.getUpdateDate()) : null);
 
         mainLayout.add(createSection(I18n.t("dms.category.details.section.info"), infoGrid));
+
+        // Description is rendered as its own full-width block so long text is
+        // never clipped/truncated by the fixed-width info grid columns.
+        if (category.getDescription() != null && !category.getDescription().isBlank()) {
+            mainLayout.add(createSection(I18n.t("dms.category.details.section.description"),
+                    createDescriptionBlock(category.getDescription())));
+        }
 
         add(mainLayout);
         addCloseButton();
@@ -110,6 +117,21 @@ public class CategoryDetailsDialog extends NoActionDialog {
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
         container.add(row);
+    }
+
+    private Component createDescriptionBlock(String description) {
+        Span descriptionSpan = new Span(description);
+        descriptionSpan.addClassName(LumoUtility.FontSize.SMALL);
+        descriptionSpan.addClassName("detail-field-value");
+        // Guarantee the full text is always visible: wrap on words/lines and
+        // never clip with an ellipsis, regardless of how long the description is.
+        descriptionSpan.getStyle()
+                .set("display", "block")
+                .set("white-space", "pre-wrap")
+                .set("word-break", "break-word")
+                .set("overflow", "visible")
+                .set("text-overflow", "unset");
+        return descriptionSpan;
     }
 
     private Component createSection(String title, Component content) {

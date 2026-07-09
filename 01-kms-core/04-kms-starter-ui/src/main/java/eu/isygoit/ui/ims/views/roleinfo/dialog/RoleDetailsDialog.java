@@ -78,10 +78,14 @@ public class RoleDetailsDialog extends NoActionDialog {
 
         addFieldToGrid(basicInfo, VaadinIcon.USER, I18n.t("ims.role.details.field.name"), role.getName());
         addFieldToGrid(basicInfo, VaadinIcon.CODE, I18n.t("ims.role.details.field.code"), role.getCode());
+        addFieldToGrid(basicInfo, VaadinIcon.CLIPBOARD_TEXT, I18n.t("ims.role.details.field.template.code"), role.getTemplateCode());
+        addFieldToGrid(basicInfo, VaadinIcon.BUILDING, I18n.t("ims.role.details.field.tenant"), role.getTenant());
         addFieldToGrid(basicInfo, VaadinIcon.SORT, I18n.t("ims.role.details.field.level"), String.valueOf(role.getLevel()));
         addFieldToGrid(basicInfo, VaadinIcon.USERS, I18n.t("ims.role.details.field.users"), String.valueOf(role.getNumberOfUsers()));
         addFieldToGrid(basicInfo, VaadinIcon.CALENDAR, I18n.t("ims.role.details.field.created"), role.getCreateDate() != null ? DateHelper.formatToHumanReadable(role.getCreateDate()) : null);
         addFieldToGrid(basicInfo, VaadinIcon.USER_CHECK, I18n.t("ims.role.details.field.created.by"), role.getCreatedBy());
+        addFieldToGrid(basicInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.role.details.field.updated"), role.getUpdateDate() != null ? DateHelper.formatToHumanReadable(role.getUpdateDate()) : null);
+        addFieldToGrid(basicInfo, VaadinIcon.EDIT, I18n.t("ims.role.details.field.updated.by"), role.getUpdatedBy());
 
         mainLayout.add(createSection(I18n.t("ims.role.details.section.general"), basicInfo));
 

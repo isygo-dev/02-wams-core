@@ -17,9 +17,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
 import eu.isygoit.dto.KmsDtos.ListKeyVersionsResponse;
 import eu.isygoit.dto.KmsDtos.ListResourceTagsResponse;
-import eu.isygoit.enums.IEnumKeyOrigin;
 import eu.isygoit.enums.IEnumKeyStatus;
-import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.card.BaseCard;
@@ -189,50 +187,19 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
     protected void buildBodyRows() {
         bodyContainer.removeAll();
 
-        // Description (with icon)
+        // Description (with icon) — kept short for quick scanning
         bodyContainer.add(createIconRow(VaadinIcon.FILE_TEXT, I18n.t("kms.key.card.description"),
                 metadata != null && metadata.getDescription() != null ? metadata.getDescription() : I18n.t("kms.key.card.no.description")));
 
-        // Key spec & usage
-        bodyContainer.add(createIconRow(VaadinIcon.COG, I18n.t("kms.key.card.key.spec"),
-                metadata != null && metadata.getKeySpec() != null ? metadata.getKeySpec().name() : "N/A"));
-        bodyContainer.add(createIconRow(VaadinIcon.SHIELD, I18n.t("kms.key.card.key.usage"),
-                metadata != null && metadata.getKeyUsage() != null ? metadata.getKeyUsage().name() : "N/A"));
-
-        // Created & region
-        String created = metadata != null && metadata.getCreateDate() != null
-                ? DateHelper.formatToHumanReadable(metadata.getCreateDate()) : I18n.t("kms.key.card.unknown");
-        bodyContainer.add(createIconRow(VaadinIcon.CALENDAR, I18n.t("kms.key.card.created"), created));
-        bodyContainer.add(createIconRow(VaadinIcon.GLOBE, I18n.t("kms.key.card.region"),
-                metadata != null && Boolean.TRUE.equals(metadata.getMultiRegion()) ? I18n.t("kms.key.card.multi.region") : I18n.t("kms.key.card.single.region")));
-
-        // Key ID with copy
-        bodyContainer.add(createIconRowWithCopy(VaadinIcon.KEY, I18n.t("kms.key.card.key.id"), keyId, keyId));
-
-        // Origin with color coding
-        String originLabel = metadata != null && metadata.getOrigin() != null ? metadata.getOrigin().name() : "N/A";
-        String originColor = getOriginColor(originLabel);
-        bodyContainer.add(createIconRowWithColor(VaadinIcon.CLOUD, I18n.t("kms.key.card.origin"), originLabel, originColor));
-
-        // Rotation with color coding
-        String rotationLabel = metadata != null && Boolean.TRUE.equals(metadata.getRotationEnabled())
-                ? I18n.t("kms.key.card.rotation.on", metadata.getRotationPeriodInDays()) : I18n.t("kms.key.card.rotation.off");
-        String rotationColor = Boolean.TRUE.equals(metadata.getRotationEnabled()) ? "var(--lumo-success-color)" : "var(--lumo-tertiary-text-color)";
-        bodyContainer.add(createIconRowWithColor(VaadinIcon.REFRESH, I18n.t("kms.key.card.rotation"), rotationLabel, rotationColor));
-
-        // Deletion warning
+        // Deletion warning — operationally important, stays visible on the card
         createDeletionWarningSpan();
         updateDeletionWarning();
         bodyContainer.add(deletionWarningSpan);
     }
 
-    // ─── Helper row builders with color support ─────────────────────────────
+    // ─── Helper row builders ─────────────────────────────────────────────────
 
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
-        return createIconRowWithColor(icon, label, value, "var(--lumo-primary-text-color)");
-    }
-
-    private HorizontalLayout createIconRowWithColor(VaadinIcon icon, String label, String value, String color) {
         HorizontalLayout row = new HorizontalLayout();
         row.setAlignItems(FlexComponent.Alignment.CENTER);
         row.setSpacing(true);
@@ -251,31 +218,11 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         Span valueSpan = new Span(value);
         valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
         valueSpan.addClassName("key-card__row-value");
-        // Color is data-driven (origin/rotation state) — kept inline.
-        valueSpan.getStyle().set("color", color);
+        valueSpan.getStyle().set("color", "var(--lumo-primary-text-color)");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
         return row;
-    }
-
-    private HorizontalLayout createIconRowWithCopy(VaadinIcon icon, String label, String value, String copyValue) {
-        HorizontalLayout row = createIconRow(icon, label, value);
-        Button copyBtn = KmsMainView.createCopyButton(VaadinIcon.COPY, copyValue, I18n.t("kms.key.card.copy.version.tooltip"));
-        copyBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
-        row.add(copyBtn);
-        return row;
-    }
-
-    private String getOriginColor(String origin) {
-        if (origin == null) return "var(--lumo-tertiary-text-color)";
-        if (origin.equalsIgnoreCase(IEnumKeyOrigin.Types.WAMS_KMS.name())) {
-            return "var(--lumo-primary-color)";
-        }
-        if (origin.equalsIgnoreCase(IEnumKeyOrigin.Types.EXTERNAL.name())) {
-            return "var(--lumo-warning-color)";
-        }
-        return "var(--lumo-tertiary-text-color)";
     }
 
     // ─── Internal update helpers ─────────────────────────────────────────────

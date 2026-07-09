@@ -112,30 +112,41 @@ public class TenantDetailsDialog extends NoActionDialog {
 
         mainLayout.add(createSection(I18n.t("ims.tenant.details.section.status"), statusInfo));
 
+        // Social links (if present)
+        if (hasAnySocialLink(tenant)) {
+            Div socialInfo = new Div();
+            socialInfo.addClassName("wams-card__detail-grid");
+
+            addFieldToGrid(socialInfo, VaadinIcon.LINK, I18n.t("ims.tenant.details.field.facebook"), tenant.getLnk_facebook());
+            addFieldToGrid(socialInfo, VaadinIcon.LINK, I18n.t("ims.tenant.details.field.linkedin"), tenant.getLnk_linkedin());
+            addFieldToGrid(socialInfo, VaadinIcon.LINK, I18n.t("ims.tenant.details.field.xing"), tenant.getLnk_xing());
+
+            mainLayout.add(createSection(I18n.t("ims.tenant.details.section.social"), socialInfo));
+        }
+
         // Address (if present)
-        if (tenant.getAddress() != null &&
-                (tenant.getAddress().getStreet() != null || tenant.getAddress().getCity() != null)) {
-            String address = (tenant.getAddress().getStreet() != null ? tenant.getAddress().getStreet() : "") +
-                    (tenant.getAddress().getCity() != null ? ", " + tenant.getAddress().getCity() : "") +
-                    (tenant.getAddress().getCountry() != null ? ", " + tenant.getAddress().getCountry() : "");
-            if (!address.isBlank()) {
-                HorizontalLayout addrRow = new HorizontalLayout();
-                addrRow.setAlignItems(FlexComponent.Alignment.CENTER);
-                addrRow.setSpacing(true);
-                Icon addrIcon = VaadinIcon.MAP_MARKER.create();
-                addrIcon.setSize("16px");
-                addrIcon.addClassName("detail-field-icon");
-                Span addrLabel = new Span(I18n.t("ims.tenant.details.field.address"));
-                addrLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-                Span addrValue = new Span(address);
-                addrRow.add(addrIcon, addrLabel, addrValue);
-                addrRow.expand(addrValue);
-                mainLayout.add(addrRow);
-            }
+        if (tenant.getAddress() != null) {
+            Div addressInfo = new Div();
+            addressInfo.addClassName("wams-card__detail-grid");
+
+            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.tenant.details.field.country"), tenant.getAddress().getCountry());
+            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.tenant.details.field.state"), tenant.getAddress().getState());
+            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.tenant.details.field.city"), tenant.getAddress().getCity());
+            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.tenant.details.field.street"), tenant.getAddress().getStreet());
+            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.tenant.details.field.zip.code"), tenant.getAddress().getZipCode());
+            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.tenant.details.field.additional.info"), tenant.getAddress().getAdditionalInfo());
+
+            mainLayout.add(createSection(I18n.t("ims.tenant.details.section.address"), addressInfo));
         }
 
         add(mainLayout);
         addCloseButton();
+    }
+
+    private boolean hasAnySocialLink(TenantDto tenant) {
+        return (tenant.getLnk_facebook() != null && !tenant.getLnk_facebook().isBlank())
+                || (tenant.getLnk_linkedin() != null && !tenant.getLnk_linkedin().isBlank())
+                || (tenant.getLnk_xing() != null && !tenant.getLnk_xing().isBlank());
     }
 
     private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {

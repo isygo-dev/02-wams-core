@@ -13,6 +13,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.PEBConfigService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.kms.views.secrets.peb.dialog.DeletePEBConfigDialog;
+import eu.isygoit.ui.kms.views.secrets.peb.dialog.PEBConfigDetailsDialog;
 import eu.isygoit.ui.kms.views.secrets.peb.dialog.UpdatePEBConfigDialog;
 
 import java.util.List;
@@ -60,22 +61,18 @@ public class PEBConfigCard extends BaseCard<PEBConfigView, PEBConfigService> {
 
     @Override
     protected List<Button> buildActionButtons() {
+        Button detailsBtn = createIconButton(VaadinIcon.INFO_CIRCLE, I18n.t("kms.peb.card.details.tooltip"));
+        detailsBtn.addClickListener(e -> new PEBConfigDetailsDialog(dto).open());
         Button editBtn = createIconButton(VaadinIcon.EDIT, I18n.t("kms.peb.card.edit.tooltip"));
         editBtn.addClickListener(e -> openEditDialog());
         Button deleteBtn = createDangerIconButton(VaadinIcon.TRASH, I18n.t("kms.peb.card.delete.tooltip"));
         deleteBtn.addClickListener(e -> new DeletePEBConfigDialog(objectService, dto.getId(), dto.getCode(), onDeleteRefresh).open());
-        return List.of(editBtn, deleteBtn);
+        return List.of(detailsBtn, editBtn, deleteBtn);
     }
 
     @Override
     protected void buildBodyRows() {
         add(createIconRow(VaadinIcon.COG, I18n.t("kms.peb.card.algorithm"), dto.getAlgorithm() != null ? dto.getAlgorithm().meaning() : "—"));
-        add(createIconRow(VaadinIcon.ROTATE_RIGHT, I18n.t("kms.peb.card.iterations"), String.valueOf(dto.getKeyObtentionIterations())));
-        add(createIconRow(VaadinIcon.DROP, I18n.t("kms.peb.card.salt.generator"), dto.getSaltGenerator() != null ? dto.getSaltGenerator().meaning() : "—"));
-        add(createIconRow(VaadinIcon.RANDOM, I18n.t("kms.peb.card.iv.generator"), dto.getIvGenerator() != null ? dto.getIvGenerator().meaning() : "—"));
-        add(createIconRow(VaadinIcon.UPLOAD, I18n.t("kms.peb.card.output.type"), dto.getStringOutputType() != null ? dto.getStringOutputType().meaning() : "—"));
-        add(createIconRow(VaadinIcon.SERVER, I18n.t("kms.peb.card.provider"), dto.getProviderName() != null ? dto.getProviderName() : "—"));
-        add(createIconRow(VaadinIcon.GROUP, I18n.t("kms.peb.card.pool.size"), String.valueOf(dto.getPoolSize())));
     }
 
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {

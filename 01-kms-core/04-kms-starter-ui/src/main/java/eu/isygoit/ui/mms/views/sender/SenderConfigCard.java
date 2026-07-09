@@ -39,12 +39,7 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
     private Span statusChip;
     private Span codeSpan;
     private Span nameSpan;
-    private Span descriptionSpan;
     private Span hostSpan;
-    private Span portSpan;
-    private Span usernameSpan;
-    private Span tlsSpan;
-    private Span debugSpan;
     private Span defaultSenderSpan;
     private Button testButton;
     private Button editButton;
@@ -61,12 +56,7 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         // Initialize spans to avoid NPE
         codeSpan = new Span();
         nameSpan = new Span();
-        descriptionSpan = new Span();
         hostSpan = new Span();
-        portSpan = new Span();
-        usernameSpan = new Span();
-        tlsSpan = new Span();
-        debugSpan = new Span();
         defaultSenderSpan = new Span();
 
         bodyContainer.setPadding(false);
@@ -144,23 +134,8 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         if (nameSpan == null) {
             nameSpan = new Span();
         }
-        if (descriptionSpan == null) {
-            descriptionSpan = new Span();
-        }
         if (hostSpan == null) {
             hostSpan = new Span();
-        }
-        if (portSpan == null) {
-            portSpan = new Span();
-        }
-        if (usernameSpan == null) {
-            usernameSpan = new Span();
-        }
-        if (tlsSpan == null) {
-            tlsSpan = new Span();
-        }
-        if (debugSpan == null) {
-            debugSpan = new Span();
         }
         if (defaultSenderSpan == null) {
             defaultSenderSpan = new Span();
@@ -176,23 +151,8 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
 
         codeSpan.setText(config.getCode() != null ? config.getCode() : I18n.t("mms.common.value.notAvailable"));
         nameSpan.setText(config.getName() != null ? config.getName() : I18n.t("mms.common.value.notAvailable"));
-        descriptionSpan.setText(config.getDescription() != null ? config.getDescription() : I18n.t("mms.sender.card.no.description"));
         hostSpan.setText(config.getHost() != null ? config.getHost() : I18n.t("mms.common.value.notAvailable"));
-        portSpan.setText(config.getPort() != null ? config.getPort() : I18n.t("mms.common.value.notAvailable"));
-        usernameSpan.setText(config.getUsername() != null ? config.getUsername() : I18n.t("mms.common.value.notAvailable"));
         defaultSenderSpan.setText(config.getDefaultSender() != null ? config.getDefaultSender() : I18n.t("mms.common.value.notAvailable"));
-
-        boolean tlsEnabled = Boolean.TRUE.equals(config.getSmtpStarttlsEnable());
-        tlsSpan.setText(tlsEnabled ? I18n.t("mms.sender.card.tls.enabled") : I18n.t("mms.sender.card.tls.disabled"));
-        tlsSpan.removeClassName("detail-value--enabled");
-        tlsSpan.removeClassName("detail-value--disabled");
-        tlsSpan.addClassName(tlsEnabled ? "detail-value--enabled" : "detail-value--disabled");
-
-        boolean debugEnabled = Boolean.TRUE.equals(config.getDebug());
-        debugSpan.setText(debugEnabled ? I18n.t("mms.sender.card.debug.on") : I18n.t("mms.sender.card.debug.off"));
-        debugSpan.removeClassName("detail-value--warning");
-        debugSpan.removeClassName("detail-value--muted");
-        debugSpan.addClassName(debugEnabled ? "detail-value--warning" : "detail-value--muted");
 
         if (testButton != null) {
             testButton.setEnabled(isActive());
@@ -294,6 +254,11 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
     protected void buildBodyRows() {
         bodyContainer.removeAll();
 
+        // Essential fields only – quick-scan card. Configuration minutiae
+        // (description, tenant, port, username, transport protocol, smtp
+        // auth, starttls enabled/required, debug) live in ViewSenderConfigDialog,
+        // which shows every SenderConfigDto field.
+
         // Code
         bodyContainer.add(createDetailRowWithCopy(
                 VaadinIcon.CODE,
@@ -309,20 +274,6 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
                 config.getName() != null ? config.getName() : I18n.t("mms.common.value.notAvailable")
         ));
 
-        // Description
-        bodyContainer.add(createDetailRow(
-                VaadinIcon.FILE_TEXT,
-                I18n.t("mms.sender.card.description"),
-                config.getDescription() != null ? config.getDescription() : I18n.t("mms.sender.card.no.description")
-        ));
-
-        // Tenant
-        bodyContainer.add(createDetailRow(
-                VaadinIcon.GLOBE,
-                I18n.t("mms.sender.card.tenant"),
-                config.getTenant() != null ? config.getTenant() : I18n.t("mms.common.value.notAvailable")
-        ));
-
         // Host with copy
         String hostValue = config.getHost() != null ? config.getHost() : I18n.t("mms.common.value.notAvailable");
         bodyContainer.add(createDetailRowWithCopy(
@@ -330,69 +281,6 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
                 I18n.t("mms.sender.card.host"),
                 hostValue,
                 hostValue
-        ));
-
-        // Port
-        String portValue = config.getPort() != null ? config.getPort() : I18n.t("mms.common.value.notAvailable");
-        bodyContainer.add(createDetailRowWithCopy(
-                VaadinIcon.COG,
-                I18n.t("mms.sender.card.port"),
-                portValue,
-                portValue
-        ));
-
-        // Username
-        String usernameValue = config.getUsername() != null ? config.getUsername() : I18n.t("mms.common.value.notAvailable");
-        bodyContainer.add(createDetailRowWithCopy(
-                VaadinIcon.USER,
-                I18n.t("mms.sender.card.username"),
-                usernameValue,
-                usernameValue
-        ));
-
-        // Transport Protocol
-        bodyContainer.add(createDetailRow(
-                VaadinIcon.CLOUD,
-                I18n.t("mms.sender.card.protocol"),
-                config.getTransportProtocol() != null ? config.getTransportProtocol() : "smtp"
-        ));
-
-        // SMTP Auth
-        bodyContainer.add(createDetailRow(
-                VaadinIcon.SHIELD,
-                I18n.t("mms.sender.card.smtp.auth"),
-                config.getSmtpAuth() != null ? config.getSmtpAuth() : "true"
-        ));
-
-        // TLS
-        boolean tlsEnabled = Boolean.TRUE.equals(config.getSmtpStarttlsEnable());
-        tlsSpan.setText(tlsEnabled ? I18n.t("mms.sender.card.tls.enabled") : I18n.t("mms.sender.card.tls.disabled"));
-        tlsSpan.removeClassName("detail-value--enabled");
-        tlsSpan.removeClassName("detail-value--disabled");
-        tlsSpan.addClassName(tlsEnabled ? "detail-value--enabled" : "detail-value--disabled");
-        bodyContainer.add(createDetailRow(
-                VaadinIcon.LOCK,
-                I18n.t("mms.sender.card.tls"),
-                tlsSpan
-        ));
-
-        // TLS Required
-        bodyContainer.add(createDetailRow(
-                VaadinIcon.CHECK_CIRCLE,
-                I18n.t("mms.sender.card.tls.required"),
-                Boolean.TRUE.equals(config.getSmtpStarttlsRequired()) ? I18n.t("mms.sender.card.tls.required.yes") : I18n.t("mms.sender.card.tls.required.no")
-        ));
-
-        // Debug
-        boolean debugEnabled = Boolean.TRUE.equals(config.getDebug());
-        debugSpan.setText(debugEnabled ? I18n.t("mms.sender.card.debug.on") : I18n.t("mms.sender.card.debug.off"));
-        debugSpan.removeClassName("detail-value--warning");
-        debugSpan.removeClassName("detail-value--muted");
-        debugSpan.addClassName(debugEnabled ? "detail-value--warning" : "detail-value--muted");
-        bodyContainer.add(createDetailRow(
-                VaadinIcon.BUG,
-                I18n.t("mms.sender.card.debug"),
-                debugSpan
         ));
 
         // Default Sender
