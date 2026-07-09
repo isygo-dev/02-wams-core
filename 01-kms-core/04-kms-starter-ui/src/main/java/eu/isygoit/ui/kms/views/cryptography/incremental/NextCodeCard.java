@@ -17,7 +17,7 @@ import eu.isygoit.remote.kms.KmsAppNextCodeService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.kms.KmsMainView;
 import eu.isygoit.ui.kms.views.cryptography.incremental.dialog.DeleteNextCodeConfigDialog;
-import eu.isygoit.ui.kms.views.cryptography.incremental.dialog.NextCodeDetailsDialog;
+import eu.isygoit.ui.kms.views.cryptography.incremental.dialog.NextCodeDetailsViewDialog;
 
 import java.util.List;
 
@@ -72,7 +72,7 @@ public class NextCodeCard extends BaseCard<IncrementalKeyView, KmsAppNextCodeSer
     protected List<Button> buildActionButtons() {
         // Standard contract: Details -> Edit -> entity-specific extras -> Delete (last, danger)
         Button detailsButton = createDetailsButton(I18n.t("kms.nextcode.card.details.tooltip"),
-                () -> new NextCodeDetailsDialog(dto).open());
+                () -> new NextCodeDetailsViewDialog(dto).open());
 
         generateButton = createIconButton(VaadinIcon.COG, I18n.t("kms.nextcode.card.generate.tooltip"));
         generateButton.addClickListener(e -> generateNextCode());

@@ -19,7 +19,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountImageService;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.ui.common.card.BaseCard;
-import eu.isygoit.ui.ims.views.account.dialog.AccountDetailsDialog;
+import eu.isygoit.ui.ims.views.account.dialog.AccountDetailsViewDialog;
 import eu.isygoit.ui.ims.views.account.dialog.DeleteAccountDialog;
 import eu.isygoit.ui.ims.views.account.dialog.EnableDisableAccountDialog;
 import feign.FeignException;
@@ -112,7 +112,7 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
     @Override
     protected List<Button> buildActionButtons() {
         Button detailsBtn = createDetailsButton(I18n.t("ims.account.card.details.tooltip"),
-                () -> new AccountDetailsDialog(parentView, objectService, minAccount.getId()).open());
+                () -> new AccountDetailsViewDialog(parentView, objectService, minAccount.getId()).open());
 
         Button editBtn = createEditButton(I18n.t("ims.account.card.edit.tooltip"),
                 () -> parentView.openUpdateAccountDialog(minAccount.getId(), () -> {

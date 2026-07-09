@@ -11,57 +11,10 @@
     margin-bottom: 10px;
 }
 
-.mms-dashboard .stats-overview {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--lumo-space-m);
-    margin-bottom: var(--lumo-space-l);
-}
-
-.mms-dashboard .stat-card {
-    background: var(--lumo-base-color);
-    padding: var(--lumo-space-m);
-    border-radius: var(--lumo-border-radius-l);
-    box-shadow: var(--lumo-box-shadow-xs);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    flex: 1;
-    min-width: 150px;
-}
-
-.mms-dashboard .stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--lumo-box-shadow-m);
-}
-
-.mms-dashboard .wams-quick-actions {
-    gap: 10px;
-    margin-top: 24px;
-}
-
-.mms-dashboard .quick-link {
-    padding: var(--lumo-space-xs) var(--lumo-space-s);
-    border-radius: var(--lumo-border-radius-m);
-    transition: background 0.2s;
-    cursor: pointer;
-}
-
-.mms-dashboard .quick-link:hover {
-    background: var(--lumo-primary-color-10pct);
-}
-
-.mms-dashboard .quick-link-icon {
-    color: var(--lumo-primary-color);
-}
-
-@media (max-width: 768px) {
-    .mms-dashboard .stat-card {
-        flex-basis: calc(50% - 16px);
-    }
-
-    .mms-dashboard .stats-overview {
-        flex-direction: column;
-    }
-}
+/* Top-level overview stats now use the shared eu.isygoit.ui.common.component.
+   StatCard/StatCardGrid (.wams-stat-card/.wams-stat-grid in card.css) instead
+   of this module's own .stat-card/.stats-overview. The .wams-mini-stats-grid
+   rule below is still used by EmailStatisticsPanel/TemplateStatisticsPanel. */
 
 /* ── Dashboard panels (EmailStatisticsPanel / SenderConfigPanel / TemplateStatisticsPanel) ── */
 
@@ -330,6 +283,12 @@
     border-radius: var(--lumo-border-radius-m);
 }
 
+@media (max-width: 768px) {
+    .wams-mini-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 @media (max-width: 640px) {
     .wams-mini-stat-card {
         padding: var(--lumo-space-xs);
@@ -450,6 +409,23 @@
 @media (max-width: 480px) {
     .sender-item-details {
         flex-wrap: wrap;
+    }
+
+    .sender-item-status {
+        display: none;
+    }
+
+    .sender-item-actions {
+        flex-shrink: 0;
+    }
+
+    .wams-summary-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+    }
+
+    .wams-summary-item {
+        padding: 4px;
     }
 }
 
@@ -736,41 +712,12 @@
    *-details-dialog convention used by ParameterDetailsDialog / RoleDetailsDialog /
    PasswordConfigDetailsDialog / etc. (see ims.css / kms.css) */
 
-.msgtemplate-details-dialog .wams-section-title,
-.sender-config-details-dialog .wams-section-title {
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
-    margin-bottom: var(--lumo-space-s);
-    padding-bottom: var(--lumo-space-xs);
-}
+/* .wams-section-title's underline is now a single shared rule in card.css. */
 
-/* View template dialog detail rows */
-
-.wams-view-details {
-    padding: var(--lumo-space-m);
-}
-
-.wams-view-detail-row {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: var(--lumo-space-xs) 0;
-    border-bottom: 1px solid var(--lumo-contrast-10pct);
-}
-
-.wams-view-detail-label {
-    font-size: var(--lumo-font-size-xxs);
-    font-weight: 600;
-    color: var(--lumo-secondary-text-color);
-    text-transform: uppercase;
-    letter-spacing: .03em;
-}
-
-.wams-view-detail-value {
-    font-family: monospace;
-    font-size: var(--lumo-font-size-s);
-    overflow-wrap: break-word;
-    word-break: break-word;
-}
+/* Both dialogs now use the shared DetailsViewDialog field/grid pattern
+   (wams-card__detail-grid / wams-card__detail-field*, centralized in
+   card.css) instead of the old wams-view-detail* row layout, so those rules
+   have been removed. */
 
 /* Test connection dialog */
 

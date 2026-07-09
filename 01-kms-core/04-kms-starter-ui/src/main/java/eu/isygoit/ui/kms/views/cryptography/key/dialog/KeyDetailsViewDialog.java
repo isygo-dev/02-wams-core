@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -16,7 +13,7 @@ import eu.isygoit.dto.KmsDtos.GetKeyPolicyResponse;
 import eu.isygoit.dto.KmsDtos.ListResourceTagsResponse;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.common.dialog.NoActionDialog;
+import eu.isygoit.ui.common.dialog.DetailsViewDialog;
 import eu.isygoit.ui.kms.views.cryptography.key.KeyManagementView;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +25,8 @@ import java.util.Map;
  * Dialog displaying detailed information about a KMS key, including metadata, tags, and policy.
  *
  * <p>Fields are grouped into sections strictly by data type/purpose, mirroring the
- * {@code *-details-dialog} convention used elsewhere in this module (see
- * {@code RandomKeyDetailsDialog}, {@code AliasDetailsDialog}, {@code CustomKeyStoreDetailsDialog}):
+ * {@code *DetailsViewDialog} convention used elsewhere in this module (see
+ * {@code RandomKeyDetailsViewDialog}, {@code AliasDetailsViewDialog}, {@code CustomKeyStoreDetailsViewDialog}):
  * <ul>
  *   <li>Identity — free-text identifying fields (key id, WRN, tenant, alias, description, key manager)</li>
  *   <li>Classification &amp; status — enums/booleans describing what the key is and its current state</li>
@@ -39,7 +36,7 @@ import java.util.Map;
  * </ul>
  */
 @Slf4j
-public class DescribeKeyDialog extends NoActionDialog {
+public class KeyDetailsViewDialog extends DetailsViewDialog {
 
     private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;
@@ -47,7 +44,7 @@ public class DescribeKeyDialog extends NoActionDialog {
     private final String keyId;
     private final DescribeKeyResponse.KeyMetadata metadata;
 
-    public DescribeKeyDialog(KeyManagementView parentView,
+    public KeyDetailsViewDialog(KeyManagementView parentView,
                              KmsApiService kmsApiService,
                              ObjectMapper objectMapper,
                              String keyId,
@@ -133,12 +130,11 @@ public class DescribeKeyDialog extends NoActionDialog {
 
     /** Identity — free-text identifying fields. */
     private Component buildIdentityGrid() {
-        Div grid = new Div();
-        grid.addClassName("wams-card__detail-grid");
-        addFieldToGrid(grid, VaadinIcon.KEY, I18n.t("kms.key.dialog.describe.field.key.id"), metadata.getKeyId());
-        addFieldToGrid(grid, VaadinIcon.HASH, I18n.t("kms.key.dialog.describe.field.wrn"), metadata.getWrn());
+        Div grid = createDetailGrid();
+        addFieldToGrid(grid, VaadinIcon.KEY, I18n.t("kms.key.dialog.describe.field.key.id"), metadata.getKeyId(), true);
+        addFieldToGrid(grid, VaadinIcon.HASH, I18n.t("kms.key.dialog.describe.field.wrn"), metadata.getWrn(), true);
         addFieldToGrid(grid, VaadinIcon.BUILDING, I18n.t("kms.key.dialog.describe.field.tenant"), metadata.getTenant());
-        addFieldToGrid(grid, VaadinIcon.TAG, I18n.t("kms.key.dialog.describe.field.alias"), metadata.getKeyAlias());
+        addFieldToGrid(grid, VaadinIcon.TAG, I18n.t("kms.key.dialog.describe.field.alias"), metadata.getKeyAlias(), true);
         addFieldToGrid(grid, VaadinIcon.FILE_TEXT, I18n.t("kms.key.dialog.describe.field.description"), metadata.getDescription());
         addFieldToGrid(grid, VaadinIcon.USER, I18n.t("kms.key.dialog.describe.field.key.manager"), metadata.getKeyManager());
         return grid;
@@ -146,8 +142,7 @@ public class DescribeKeyDialog extends NoActionDialog {
 
     /** Classification &amp; status — enums/booleans describing what the key is and its current state. */
     private Component buildClassificationGrid() {
-        Div grid = new Div();
-        grid.addClassName("wams-card__detail-grid");
+        Div grid = createDetailGrid();
         addFieldToGrid(grid, VaadinIcon.FLAG, I18n.t("kms.key.dialog.describe.field.status"),
                 metadata.getKeyStatus() != null ? metadata.getKeyStatus().name() : I18n.t("kms.key.dialog.describe.placeholder"));
         addFieldToGrid(grid, VaadinIcon.CHECK_CIRCLE, I18n.t("kms.key.dialog.describe.field.enabled"),
@@ -168,13 +163,12 @@ public class DescribeKeyDialog extends NoActionDialog {
 
     /** Cryptographic configuration — rotation, current version, algorithm lists, multi-region config. */
     private Component buildCryptoGrid() {
-        Div grid = new Div();
-        grid.addClassName("wams-card__detail-grid");
+        Div grid = createDetailGrid();
         addFieldToGrid(grid, VaadinIcon.REFRESH, I18n.t("kms.key.dialog.describe.field.rotation.enabled"),
                 metadata.getRotationEnabled() != null ? metadata.getRotationEnabled().toString() : I18n.t("kms.key.dialog.describe.placeholder"));
         addFieldToGrid(grid, VaadinIcon.CLOCK, I18n.t("kms.key.dialog.describe.field.rotation.period"),
                 metadata.getRotationPeriodInDays() != null ? metadata.getRotationPeriodInDays().toString() : I18n.t("kms.key.dialog.describe.placeholder"));
-        addFieldToGrid(grid, VaadinIcon.CUBE, I18n.t("kms.key.dialog.describe.field.current.version"), metadata.getCurrentVersion());
+        addFieldToGrid(grid, VaadinIcon.CUBE, I18n.t("kms.key.dialog.describe.field.current.version"), metadata.getCurrentVersion(), true);
         addFieldToGrid(grid, VaadinIcon.LOCK, I18n.t("kms.key.dialog.describe.field.encryption.algorithms"),
                 (metadata.getEncryptionAlgorithmSpecs() != null && !metadata.getEncryptionAlgorithmSpecs().isEmpty())
                         ? String.join(", ", metadata.getEncryptionAlgorithmSpecs()) : null);
@@ -197,8 +191,7 @@ public class DescribeKeyDialog extends NoActionDialog {
 
     /** Dates — every timestamp / date-window field. */
     private Component buildDatesGrid() {
-        Div grid = new Div();
-        grid.addClassName("wams-card__detail-grid");
+        Div grid = createDetailGrid();
         addFieldToGrid(grid, VaadinIcon.CALENDAR, I18n.t("kms.key.dialog.describe.field.creation.date"),
                 metadata.getCreateDate() != null ? metadata.getCreateDate().toString() : I18n.t("kms.key.dialog.describe.placeholder"));
         addFieldToGrid(grid, VaadinIcon.CALENDAR_O, I18n.t("kms.key.dialog.describe.field.updated.date"),
@@ -213,49 +206,6 @@ public class DescribeKeyDialog extends NoActionDialog {
                     metadata.getDeletionDate() != null ? metadata.getDeletionDate().toString() : I18n.t("kms.key.dialog.describe.placeholder"));
         }
         return grid;
-    }
-
-    // ─── Shared row/section helpers (same convention as RandomKeyDetailsDialog / AliasDetailsDialog) ───
-
-    private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {
-        if (value == null || value.isBlank()) return;
-
-        VerticalLayout field = new VerticalLayout();
-        field.setPadding(false);
-        field.setSpacing(false);
-        field.addClassName("wams-card__detail-field");
-
-        HorizontalLayout labelRow = new HorizontalLayout();
-        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        labelRow.setSpacing(false);
-        labelRow.addClassName("wams-card__detail-field-label-row");
-
-        Icon iconComponent = icon.create();
-        iconComponent.setSize("12px");
-        iconComponent.addClassName("detail-field-icon");
-
-        Span labelSpan = new Span(label);
-        labelSpan.addClassName("wams-card__detail-field-label");
-
-        labelRow.add(iconComponent, labelSpan);
-
-        Span valueSpan = new Span(value);
-        valueSpan.addClassName("wams-card__detail-field-value");
-
-        field.add(labelRow, valueSpan);
-        container.add(field);
-    }
-
-    private Component createSection(String title, Component content) {
-        VerticalLayout section = new VerticalLayout();
-        section.setPadding(false);
-        section.setSpacing(false);
-        Span titleSpan = new Span(title);
-        titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
-        titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
-        titleSpan.addClassName("wams-section-title");
-        section.add(titleSpan, content);
-        return section;
     }
 
     private List<ListResourceTagsResponse.Tag> fetchTags() {

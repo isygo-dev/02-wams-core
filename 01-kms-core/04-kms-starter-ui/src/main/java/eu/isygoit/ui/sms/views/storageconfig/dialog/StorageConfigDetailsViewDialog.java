@@ -1,30 +1,25 @@
 package eu.isygoit.ui.sms.views.storageconfig.dialog;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.StorageConfigDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.StorageConfigService;
-import eu.isygoit.ui.common.dialog.NoActionDialog;
+import eu.isygoit.ui.common.dialog.DetailsViewDialog;
 import eu.isygoit.ui.sms.views.storageconfig.StorageConfigManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class StorageConfigDetailsDialog extends NoActionDialog {
+public class StorageConfigDetailsViewDialog extends DetailsViewDialog {
 
     private final StorageConfigManagementView parentView;
     private final StorageConfigService storageConfigService;
     private final Long configId;
 
-    public StorageConfigDetailsDialog(StorageConfigManagementView parentView,
+    public StorageConfigDetailsViewDialog(StorageConfigManagementView parentView,
                                       StorageConfigService storageConfigService,
                                       Long configId) {
         super(I18n.t("sms.storageconfig.details.title"));
@@ -65,21 +60,20 @@ public class StorageConfigDetailsDialog extends NoActionDialog {
         mainLayout.setPadding(false);
         mainLayout.setSpacing(true);
 
-        Div identityGrid = new Div();
-        identityGrid.addClassName("details-grid");
-        addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("sms.storageconfig.details.field.id"), String.valueOf(config.getId()));
+        Div identityGrid = createDetailGrid();
+        // ID is a copyable identifier, force the copy button on even though it's short.
+        addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("sms.storageconfig.details.field.id"), String.valueOf(config.getId()), true);
         addFieldToGrid(identityGrid, VaadinIcon.BUILDING, I18n.t("sms.storageconfig.details.field.tenant"), config.getTenant());
         addFieldToGrid(identityGrid, VaadinIcon.COG, I18n.t("sms.storageconfig.details.field.type"), config.getType() != null ? config.getType().name() : null);
         addFieldToGrid(identityGrid, VaadinIcon.USER, I18n.t("sms.storageconfig.details.field.username"), config.getUserName());
         mainLayout.add(createSection(I18n.t("sms.storageconfig.details.section.identity"), identityGrid));
 
-        Div connectionGrid = new Div();
-        connectionGrid.addClassName("details-grid");
-        addFieldToGrid(connectionGrid, VaadinIcon.LINK, I18n.t("sms.storageconfig.details.field.url"), config.getUrl());
+        Div connectionGrid = createDetailGrid();
+        // URL is a connection endpoint users would copy/paste elsewhere — force copyable.
+        addFieldToGrid(connectionGrid, VaadinIcon.LINK, I18n.t("sms.storageconfig.details.field.url"), config.getUrl(), true);
         mainLayout.add(createSection(I18n.t("sms.storageconfig.details.section.connection"), connectionGrid));
 
-        Div auditGrid = new Div();
-        auditGrid.addClassName("details-grid");
+        Div auditGrid = createDetailGrid();
         addFieldToGrid(auditGrid, VaadinIcon.USER_CHECK, I18n.t("sms.storageconfig.details.field.created.by"), config.getCreatedBy());
         addFieldToGrid(auditGrid, VaadinIcon.CALENDAR, I18n.t("sms.storageconfig.details.field.created.date"),
                 config.getCreateDate() != null ? DateHelper.formatToHumanReadable(config.getCreateDate()) : null);
@@ -89,47 +83,6 @@ public class StorageConfigDetailsDialog extends NoActionDialog {
         mainLayout.add(createSection(I18n.t("sms.storageconfig.details.section.audit"), auditGrid));
 
         add(mainLayout);
-    }
-
-    private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {
-        if (value == null || value.isBlank()) return;
-
-        VerticalLayout field = new VerticalLayout();
-        field.setPadding(false);
-        field.setSpacing(false);
-        field.addClassName("wams-card__detail-field");
-
-        HorizontalLayout labelRow = new HorizontalLayout();
-        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        labelRow.setSpacing(false);
-        labelRow.addClassName("wams-card__detail-field-label-row");
-
-        Icon iconComponent = icon.create();
-        iconComponent.setSize("12px");
-        iconComponent.addClassName("detail-field-icon");
-
-        Span labelSpan = new Span(label);
-        labelSpan.addClassName("wams-card__detail-field-label");
-
-        labelRow.add(iconComponent, labelSpan);
-
-        Span valueSpan = new Span(value);
-        valueSpan.addClassName("wams-card__detail-field-value");
-
-        field.add(labelRow, valueSpan);
-        container.add(field);
-    }
-
-    private Component createSection(String title, Component content) {
-        VerticalLayout section = new VerticalLayout();
-        section.setPadding(false);
-        section.setSpacing(false);
-        Span titleSpan = new Span(title);
-        titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
-        titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
-        titleSpan.addClassName("wams-section-title");
-        section.add(titleSpan, content);
-        return section;
     }
 
     private String extractErrorMessage(FeignException ex) {

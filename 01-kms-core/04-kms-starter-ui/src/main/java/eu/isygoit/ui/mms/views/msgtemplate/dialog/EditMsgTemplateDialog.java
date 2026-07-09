@@ -101,8 +101,6 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
         form.setColspan(defaultSenderField, 1);
         form.setColspan(senderConfigCombo, 2);
 
-        contentArea.add(form);
-
         // Add file upload section
         Div uploadSection = new Div();
         uploadSection.addClassName("wams-dialog-upload-section");
@@ -110,7 +108,8 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
         Span uploadLabel = new Span(I18n.t("mms.msgtemplate.dialog.edit.upload.new.file"));
         uploadLabel.addClassName("wams-dialog-upload-label");
         uploadSection.add(uploadLabel, fileUpload, fileInfoArea);
-        contentArea.add(uploadSection);
+
+        addContent(form, uploadSection);
     }
 
     private void prefillData() {
@@ -126,7 +125,7 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
 
     @Override
     protected boolean onOk() {
-        clearErrors();
+        clearError();
 
         if (nameCombo.getValue() == null) {
             append(I18n.t("mms.msgtemplate.dialog.edit.error.name.required"));
@@ -175,7 +174,7 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
                 return false;
             }
 
-            showSuccess(I18n.t("mms.msgtemplate.dialog.edit.success"));
+            append(I18n.t("mms.msgtemplate.dialog.edit.success"));
             return true;
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ?

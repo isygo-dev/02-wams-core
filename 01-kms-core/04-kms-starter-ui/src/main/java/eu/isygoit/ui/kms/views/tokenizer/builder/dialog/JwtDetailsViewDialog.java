@@ -2,35 +2,37 @@ package eu.isygoit.ui.kms.views.tokenizer.builder.dialog;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.ui.common.dialog.NoActionDialog;
+import eu.isygoit.ui.common.component.ClipboardCopyButton;
+import eu.isygoit.ui.common.dialog.DetailsViewDialog;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 
-public class DecodeJwtDialog extends NoActionDialog {
+/**
+ * Read-only dialog showing the decoded Header/Payload/Signature of a JWT.
+ * Structurally different from the field-grid "…DetailsViewDialog"s: content
+ * is multi-line JSON rendered in read-only {@link TextArea}s inside titled
+ * section-cards, rather than label/value fields.
+ */
+public class JwtDetailsViewDialog extends DetailsViewDialog {
 
     private static final DateTimeFormatter DATE_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'UTC'").withZone(ZoneId.of("UTC"));
     private final ObjectMapper objectMapper;
     private final String jwtToken;
 
-    public DecodeJwtDialog(ObjectMapper objectMapper, String jwtToken) {
+    public JwtDetailsViewDialog(ObjectMapper objectMapper, String jwtToken) {
         super(I18n.t("kms.decode.jwt.title"));
         this.objectMapper = objectMapper;
         this.jwtToken = jwtToken;
@@ -86,9 +88,7 @@ public class DecodeJwtDialog extends NoActionDialog {
             // Signature info
             if (parts[2] != null && !parts[2].isEmpty()) {
                 String signature = parts[2];
-                Span sigInfo = new Span(I18n.t("kms.decode.jwt.signature", signature.substring(0, Math.min(20, signature.length()))));
-                sigInfo.addClassName("signature-info");
-                mainLayout.add(sigInfo);
+                mainLayout.add(createSignatureRow(signature));
             }
         } catch (Exception e) {
             mainLayout.add(createErrorCard(I18n.t("kms.decode.jwt.decode.failed", e.getMessage())));
@@ -104,17 +104,14 @@ public class DecodeJwtDialog extends NoActionDialog {
         Card card = new Card();
         card.setWidthFull();
 
-        // Title row with copy button
+        // Title row with shared copy-to-clipboard button
         Span titleSpan = new Span(title);
         titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
         titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
+        titleSpan.addClassName("wams-section-title");
+        titleSpan.setTitle(tooltip);
 
-        Button copyButton = new Button(new Icon(VaadinIcon.COPY));
-        copyButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
-        copyButton.setTooltipText(I18n.t("kms.decode.jwt.copy"));
-        copyButton.addClickListener(e -> copyToClipboard(content));
-
-        HorizontalLayout titleRow = new HorizontalLayout(titleSpan, copyButton);
+        HorizontalLayout titleRow = new HorizontalLayout(titleSpan, new ClipboardCopyButton(content));
         titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
         titleRow.setSpacing(true);
         titleRow.addClassName("section-title-row");
@@ -136,6 +133,16 @@ public class DecodeJwtDialog extends NoActionDialog {
         return card;
     }
 
+    private HorizontalLayout createSignatureRow(String signature) {
+        Span sigInfo = new Span(I18n.t("kms.decode.jwt.signature", signature.substring(0, Math.min(20, signature.length()))));
+        sigInfo.addClassName("signature-info");
+
+        HorizontalLayout row = new HorizontalLayout(sigInfo, new ClipboardCopyButton(signature));
+        row.setAlignItems(FlexComponent.Alignment.CENTER);
+        row.setSpacing(true);
+        return row;
+    }
+
     private Card createErrorCard(String message) {
         Card card = new Card();
         card.setWidthFull();
@@ -143,31 +150,6 @@ public class DecodeJwtDialog extends NoActionDialog {
         errorSpan.addClassName("error-message");
         card.add(errorSpan);
         return card;
-    }
-
-    private void copyToClipboard(String text) {
-        if (text == null || text.isBlank()) {
-            Notification.show(I18n.t("kms.decode.jwt.nothing.to.copy"), 2000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_WARNING);
-            return;
-        }
-        getUI().ifPresent(ui -> ui.getPage().executeJs(
-                "navigator.clipboard.writeText($0).then(() => {" +
-                        "  const notification = document.createElement('div');" +
-                        "  notification.textContent = $1;" +
-                        "  notification.style.position = 'fixed';" +
-                        "  notification.style.bottom = '20px';" +
-                        "  notification.style.left = '50%';" +
-                        "  notification.style.transform = 'translateX(-50%)';" +
-                        "  notification.style.backgroundColor = '#4caf50';" +
-                        "  notification.style.color = 'white';" +
-                        "  notification.style.padding = '8px 16px';" +
-                        "  notification.style.borderRadius = '4px';" +
-                        "  notification.style.zIndex = '10000';" +
-                        "  document.body.appendChild(notification);" +
-                        "  setTimeout(() => notification.remove(), 2000);" +
-                        "});",
-                text, I18n.t("kms.token.builder.copy.success")));
     }
 
     private String transformPayloadWithInlineDates(String prettyJson, JsonNode payloadNode) {

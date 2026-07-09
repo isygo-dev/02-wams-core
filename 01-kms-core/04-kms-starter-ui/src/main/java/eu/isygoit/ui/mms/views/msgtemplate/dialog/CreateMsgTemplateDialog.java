@@ -92,18 +92,17 @@ public class CreateMsgTemplateDialog extends BaseMsgTemplateDialog {
         form.setColspan(defaultSenderField, 1);
         form.setColspan(senderConfigCombo, 2);
 
-        contentArea.add(form);
-
         // Add file upload section
         Div uploadSection = new Div();
         uploadSection.addClassName("wams-dialog-upload-section");
         uploadSection.add(fileUpload, fileInfoArea);
-        contentArea.add(uploadSection);
+
+        addContent(form, uploadSection);
     }
 
     @Override
     protected boolean onOk() {
-        clearErrors();
+        clearError();
 
         if (codeField.getValue() == null || codeField.getValue().isBlank()) {
             append(I18n.t("mms.msgtemplate.dialog.create.error.code.required"));
@@ -161,7 +160,7 @@ public class CreateMsgTemplateDialog extends BaseMsgTemplateDialog {
                 return false;
             }
 
-            showSuccess(I18n.t("mms.msgtemplate.dialog.create.success"));
+            append(I18n.t("mms.msgtemplate.dialog.create.success"));
             return true;
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ?

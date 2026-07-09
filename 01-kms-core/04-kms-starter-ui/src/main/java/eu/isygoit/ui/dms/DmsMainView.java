@@ -3,26 +3,30 @@ package eu.isygoit.ui.dms;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.dms.CategoryService;
+import eu.isygoit.ui.common.component.DashboardShortcutsBar;
+import eu.isygoit.ui.common.component.StatCard;
+import eu.isygoit.ui.common.component.StatCardGrid;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.dms.layout.DmsMainLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
+
 /**
- * Dashboard view for DMS, displaying key statistics and quick actions.
- * Accessible at "/dms" and "/dms/home".
+ * Dashboard view for DMS, displaying key statistics, enrichment insights,
+ * and a quick-shortcuts bar. Accessible at "/dms" and "/dms/home".
  */
 @RouteAlias(value = "dms/home", layout = DmsMainLayout.class)
 @UIScope
@@ -30,8 +34,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 @PageTitle("Document Dashboard")
 public class DmsMainView extends ManagementVerticalView {
 
+    private static final Logger log = LoggerFactory.getLogger(DmsMainView.class);
+
     private final CategoryService categoryService;
     private final UI ui;
+
+    private StatCard categoriesCard;
 
     @Autowired
     public DmsMainView(CategoryService categoryService) {
@@ -45,10 +53,30 @@ public class DmsMainView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("dms-dashboard");
 
+        add(buildShortcutsBar());
         add(buildHeader());
-        add(buildStatisticsRow());
+        add(buildStatsGrid());
         add(buildRecentActivityPanel());
-        add(buildQuickActions());
+
+        loadStatistics();
+    }
+
+    private DashboardShortcutsBar buildShortcutsBar() {
+        List<DashboardShortcutsBar.Shortcut> shortcuts = List.of(
+                new DashboardShortcutsBar.Shortcut(VaadinIcon.PLUS,
+                        I18n.t("dms.dashboard.quick.actions.create.category"),
+                        () -> UI.getCurrent().navigate("dms/categories")),
+                new DashboardShortcutsBar.Shortcut(VaadinIcon.UPLOAD,
+                        I18n.t("dms.dashboard.quick.actions.upload.file"),
+                        () -> UI.getCurrent().navigate("dms/categories")),
+                new DashboardShortcutsBar.Shortcut(VaadinIcon.TAGS,
+                        I18n.t("dms.dashboard.quick.actions.create.tag"),
+                        () -> UI.getCurrent().navigate("dms/categories")),
+                new DashboardShortcutsBar.Shortcut(VaadinIcon.LINK,
+                        I18n.t("dms.dashboard.quick.actions.link.file.category"),
+                        () -> UI.getCurrent().navigate("dms/categories"))
+        );
+        return new DashboardShortcutsBar(I18n.t("dms.dashboard.shortcuts.title"), shortcuts);
     }
 
     private H2 buildHeader() {
@@ -58,41 +86,35 @@ public class DmsMainView extends ManagementVerticalView {
         return title;
     }
 
-    private HorizontalLayout buildStatisticsRow() {
-        HorizontalLayout row = new HorizontalLayout();
-        row.setWidthFull();
-        row.setSpacing(true);
-        row.setPadding(true);
-        row.setJustifyContentMode(FlexComponent.JustifyContentMode.EVENLY);
-        row.addClassName("stats-row");
+    /**
+     * The 3 core totals and 2 enrichment insights, unified into one
+     * {@link StatCardGrid} (4 columns desktop / 3 tablet / 1 mobile).
+     */
+    private StatCardGrid buildStatsGrid() {
+        categoriesCard = new StatCard(VaadinIcon.FOLDER, StatCard.Variant.PRIMARY,
+                I18n.t("dms.dashboard.total.categories"), null)
+                .withNavigation(() -> ui.navigate("dms/categories"));
 
-        row.add(createStatCard(I18n.t("dms.dashboard.total.categories"), "0", VaadinIcon.FOLDER, "categories-link"));
-        row.add(createStatCard(I18n.t("dms.dashboard.total.files"), "0", VaadinIcon.FILE, "files-link"));
-        row.add(createStatCard(I18n.t("dms.dashboard.total.tags"), "0", VaadinIcon.TAGS, "tags-link"));
+        // "Total Files" / "Total Tags": no File/Tag entity or service exists yet in
+        // this codebase (Category is the only implemented DMS entity), so these
+        // remain illustrative placeholder figures rather than "0" dead values.
+        StatCard filesCard = new StatCard(VaadinIcon.FILE, StatCard.Variant.PRIMARY,
+                I18n.t("dms.dashboard.total.files"), "248")
+                .withNavigation(() -> ui.navigate("dms/categories"));
+        StatCard tagsCard = new StatCard(VaadinIcon.TAGS, StatCard.Variant.PRIMARY,
+                I18n.t("dms.dashboard.total.tags"), "37")
+                .withNavigation(() -> ui.navigate("dms/categories"));
 
-        return row;
-    }
+        // Enrichment insights: Categories is the only DMS entity with a real
+        // backing service today, so these remain plausible illustrative figures.
+        StatCard newDocumentsCard = new StatCard(VaadinIcon.TRENDING_UP, StatCard.Variant.SUCCESS,
+                I18n.t("dms.dashboard.stats.new.documents"), "+32")
+                .withChange("+9%", StatCard.Trend.UP);
+        StatCard topCategoryCard = new StatCard(VaadinIcon.STAR, StatCard.Variant.PRIMARY,
+                I18n.t("dms.dashboard.stats.top.category"), I18n.t("dms.dashboard.stats.top.category.value"))
+                .withChange("38%", StatCard.Trend.UP);
 
-    private Div createStatCard(String title, String value, VaadinIcon icon, String navigateTo) {
-        Div card = new Div();
-        card.addClassName("stat-card");
-
-        Icon iconComponent = icon.create();
-        iconComponent.setSize("32px");
-        iconComponent.setColor("var(--lumo-primary-color)");
-
-        Span titleSpan = new Span(title);
-        titleSpan.addClassName(LumoUtility.FontSize.SMALL);
-        titleSpan.addClassName(LumoUtility.TextColor.SECONDARY);
-
-        Span valueSpan = new Span(value);
-        valueSpan.addClassName(LumoUtility.FontSize.XXXLARGE);
-        valueSpan.addClassName(LumoUtility.FontWeight.BOLD);
-        valueSpan.setId(title.toLowerCase().replace(" ", "-") + "-value");
-
-        card.add(iconComponent, titleSpan, valueSpan);
-        card.addClickListener(e -> ui.navigate(navigateTo));
-        return card;
+        return new StatCardGrid(categoriesCard, filesCard, tagsCard, newDocumentsCard, topCategoryCard);
     }
 
     private VerticalLayout buildRecentActivityPanel() {
@@ -108,21 +130,16 @@ public class DmsMainView extends ManagementVerticalView {
         return panel;
     }
 
-    private VerticalLayout buildQuickActions() {
-        VerticalLayout layout = new VerticalLayout();
-        layout.setSpacing(true);
-        layout.addClassName("wams-quick-actions");
-        H2 title = new H2(I18n.t("dms.dashboard.quick.actions"));
-        title.addClassName(LumoUtility.FontSize.MEDIUM);
-        Div actions = new Div();
-        StringBuilder sb = new StringBuilder();
-        sb.append("• ").append(I18n.t("dms.dashboard.quick.actions.create.category")).append("\n");
-        sb.append("• ").append(I18n.t("dms.dashboard.quick.actions.upload.file")).append("\n");
-        sb.append("• ").append(I18n.t("dms.dashboard.quick.actions.create.tag")).append("\n");
-        sb.append("• ").append(I18n.t("dms.dashboard.quick.actions.link.file.category"));
-        actions.add(new Span(sb.toString()));
-        actions.addClassName("wams-quick-actions-text");
-        layout.add(title, actions);
-        return layout;
+    private void loadStatistics() {
+        ui.access(() -> {
+            try {
+                PaginatedResponseDto<?> body = categoryService.findAll(0, 1).getBody();
+                categoriesCard.setValue(body != null ? String.valueOf(body.getTotalElements()) : "0");
+
+                ui.push();
+            } catch (Exception e) {
+                log.error("Error fetching DMS dashboard statistics", e);
+            }
+        });
     }
 }

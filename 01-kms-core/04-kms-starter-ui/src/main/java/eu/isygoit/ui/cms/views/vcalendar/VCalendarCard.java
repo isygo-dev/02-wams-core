@@ -14,7 +14,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.cms.VCalendarService;
 import eu.isygoit.ui.cms.views.vcalendar.dialog.DeleteVCalendarDialog;
 import eu.isygoit.ui.cms.views.vcalendar.dialog.ToggleVCalendarLockDialog;
-import eu.isygoit.ui.cms.views.vcalendar.dialog.VCalendarDetailsDialog;
+import eu.isygoit.ui.cms.views.vcalendar.dialog.VCalendarDetailsViewDialog;
 import eu.isygoit.ui.common.card.BaseCard;
 import lombok.extern.slf4j.Slf4j;
 
@@ -75,7 +75,7 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
     @Override
     protected List<Button> buildActionButtons() {
         Button detailsBtn = createDetailsButton(I18n.t("cms.calendar.card.details.tooltip"),
-                () -> new VCalendarDetailsDialog(parentView, objectService, calendar.getId()).open());
+                () -> new VCalendarDetailsViewDialog(parentView, objectService, calendar.getId()).open());
 
         Button editBtn = createEditButton(I18n.t("cms.calendar.card.edit.tooltip"),
                 () -> parentView.openUpdateCalendarDialog(calendar, () -> {

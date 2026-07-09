@@ -13,7 +13,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.PasswordConfigService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.kms.views.secrets.password.dialog.DeletePasswordConfigDialog;
-import eu.isygoit.ui.kms.views.secrets.password.dialog.PasswordConfigDetailsDialog;
+import eu.isygoit.ui.kms.views.secrets.password.dialog.PasswordConfigDetailsViewDialog;
 import eu.isygoit.ui.kms.views.secrets.password.dialog.UpdatePasswordConfigDialog;
 
 import java.util.List;
@@ -62,7 +62,7 @@ public class PasswordConfigCard extends BaseCard<PasswordConfigView, PasswordCon
     @Override
     protected List<Button> buildActionButtons() {
         Button detailsBtn = createDetailsButton(I18n.t("kms.password.card.details.tooltip"),
-                () -> new PasswordConfigDetailsDialog(dto).open());
+                () -> new PasswordConfigDetailsViewDialog(dto).open());
         Button editBtn = createEditButton(I18n.t("kms.password.card.edit.tooltip"), this::openEditDialog);
         Button deleteBtn = createDeleteButton(I18n.t("kms.password.card.delete.tooltip"),
                 () -> new DeletePasswordConfigDialog(objectService, dto.getId(), dto.getCode(), onDeleteRefresh).open());

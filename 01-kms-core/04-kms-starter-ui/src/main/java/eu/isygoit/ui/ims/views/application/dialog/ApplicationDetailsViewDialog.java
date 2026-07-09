@@ -1,30 +1,25 @@
 package eu.isygoit.ui.ims.views.application.dialog;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.ApplicationDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.ApplicationService;
-import eu.isygoit.ui.common.dialog.NoActionDialog;
+import eu.isygoit.ui.common.dialog.DetailsViewDialog;
 import eu.isygoit.ui.ims.views.application.ApplicationManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class ApplicationDetailsDialog extends NoActionDialog {
+public class ApplicationDetailsViewDialog extends DetailsViewDialog {
 
     private final ApplicationManagementView parentView;
     private final ApplicationService applicationService;
     private final Long applicationId;
 
-    public ApplicationDetailsDialog(ApplicationManagementView parentView,
+    public ApplicationDetailsViewDialog(ApplicationManagementView parentView,
                                     ApplicationService applicationService,
                                     Long applicationId) {
         super(I18n.t("ims.app.details.title"));
@@ -71,7 +66,7 @@ public class ApplicationDetailsDialog extends NoActionDialog {
 
         addFieldToGrid(identityInfo, VaadinIcon.PLAY, I18n.t("ims.app.details.field.name"), app.getName());
         addFieldToGrid(identityInfo, VaadinIcon.FUNCTION, I18n.t("ims.app.details.field.title"), app.getTitle());
-        addFieldToGrid(identityInfo, VaadinIcon.CODE, I18n.t("ims.app.details.field.code"), app.getCode());
+        addFieldToGrid(identityInfo, VaadinIcon.CODE, I18n.t("ims.app.details.field.code"), app.getCode(), true);
 
         mainLayout.add(createSection(I18n.t("ims.app.details.section.identity"), identityInfo));
 
@@ -89,15 +84,15 @@ public class ApplicationDetailsDialog extends NoActionDialog {
         Div contactInfo = new Div();
         contactInfo.addClassName("wams-card__detail-grid");
 
-        addFieldToGrid(contactInfo, VaadinIcon.BUILDING, I18n.t("ims.app.details.field.tenant"), app.getTenant());
-        addFieldToGrid(contactInfo, VaadinIcon.GLOBE, I18n.t("ims.app.details.field.url"), app.getUrl());
+        addFieldToGrid(contactInfo, VaadinIcon.BUILDING, I18n.t("ims.app.details.field.tenant"), app.getTenant(), true);
+        addFieldToGrid(contactInfo, VaadinIcon.GLOBE, I18n.t("ims.app.details.field.url"), app.getUrl(), true);
 
         mainLayout.add(createSection(I18n.t("ims.app.details.section.contact"), contactInfo));
 
         if (app.getDescription() != null && !app.getDescription().isBlank()) {
             Div descGrid = new Div();
             descGrid.addClassName("wams-card__detail-grid");
-            addFieldToGrid(descGrid, VaadinIcon.FILE_TEXT, I18n.t("ims.app.details.field.description"), app.getDescription());
+            addFieldToGrid(descGrid, VaadinIcon.FILE_TEXT, I18n.t("ims.app.details.field.description"), app.getDescription(), false);
             mainLayout.add(descGrid);
         }
 
@@ -113,47 +108,6 @@ public class ApplicationDetailsDialog extends NoActionDialog {
         mainLayout.add(createSection(I18n.t("ims.app.details.section.audit"), auditInfo));
 
         add(mainLayout);
-    }
-
-    private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {
-        if (value == null || value.isBlank()) return;
-
-        VerticalLayout field = new VerticalLayout();
-        field.setPadding(false);
-        field.setSpacing(false);
-        field.addClassName("wams-card__detail-field");
-
-        HorizontalLayout labelRow = new HorizontalLayout();
-        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        labelRow.setSpacing(false);
-        labelRow.addClassName("wams-card__detail-field-label-row");
-
-        Icon iconComponent = icon.create();
-        iconComponent.setSize("12px");
-        iconComponent.addClassName("detail-field-icon");
-
-        Span labelSpan = new Span(label);
-        labelSpan.addClassName("wams-card__detail-field-label");
-
-        labelRow.add(iconComponent, labelSpan);
-
-        Span valueSpan = new Span(value);
-        valueSpan.addClassName("wams-card__detail-field-value");
-
-        field.add(labelRow, valueSpan);
-        container.add(field);
-    }
-
-    private Component createSection(String title, Component content) {
-        VerticalLayout section = new VerticalLayout();
-        section.setPadding(false);
-        section.setSpacing(false);
-        Span titleSpan = new Span(title);
-        titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
-        titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
-        titleSpan.addClassName("wams-section-title");
-        section.add(titleSpan, content);
-        return section;
     }
 
     private String extractErrorMessage(FeignException ex) {

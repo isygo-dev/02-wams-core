@@ -13,7 +13,7 @@ import eu.isygoit.dto.data.CategoryDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.dms.CategoryService;
 import eu.isygoit.ui.common.card.BaseCard;
-import eu.isygoit.ui.dms.views.category.dialog.CategoryDetailsDialog;
+import eu.isygoit.ui.dms.views.category.dialog.CategoryDetailsViewDialog;
 import eu.isygoit.ui.dms.views.category.dialog.DeleteCategoryDialog;
 import lombok.extern.slf4j.Slf4j;
 
@@ -62,7 +62,7 @@ public class CategoryCard extends BaseCard<CategoryManagementView, CategoryServi
     @Override
     protected List<Button> buildActionButtons() {
         Button detailsBtn = createDetailsButton(I18n.t("dms.category.card.details.tooltip"),
-                () -> new CategoryDetailsDialog(parentView, objectService, category.getId()).open());
+                () -> new CategoryDetailsViewDialog(parentView, objectService, category.getId()).open());
 
         Button editBtn = createEditButton(I18n.t("dms.category.card.edit.tooltip"),
                 () -> parentView.openUpdateCategoryDialog(category, () -> {

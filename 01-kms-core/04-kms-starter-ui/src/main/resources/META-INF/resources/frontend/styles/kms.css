@@ -65,20 +65,12 @@
     margin-bottom: 10px;
 }
 
-.kms-parta-quick-links {
-    gap: 10px;
-    margin-top: 24px;
-}
-
-.kms-parta-quick-links__actions {
-    white-space: pre-line;
-}
-
 /* ── Shared dashboard-panel spacing (AuditLogPanel, KeyUsageStatsPanel) ──────
-   (both used to inject an identical "margin-top: 24px" inline style)         */
+   Tightened to the Jira-style compact density used across the dashboard
+   (was a looser custom 24px margin). */
 
 .kms-parta-panel-spaced {
-    margin-top: 24px;
+    margin-top: var(--lumo-space-m);
 }
 
 /* ── Shared filter-bar wrapping (AuditLogPanel, KeyUsageStatsPanel, ByokView) */
@@ -93,6 +85,36 @@
 .kms-parta-stats-wrap {
     flex-wrap: wrap;
     gap: 16px;
+}
+
+/* ── KeyStatisticsPanel — stat cards grouped into scannable sub-rows by
+   category (Status / Type / Usage / Resources) instead of one long
+   undifferentiated wrapping row of 15 cards. ─────────────────────────────── */
+
+.kms-parta-stats-groups {
+    gap: var(--lumo-space-s);
+}
+
+.kms-parta-stats-group {
+    gap: var(--lumo-space-xs);
+}
+
+.kms-parta-stats-group__title {
+    font-size: var(--lumo-font-size-xs);
+    font-weight: 600;
+    color: var(--lumo-secondary-text-color);
+    text-transform: uppercase;
+    letter-spacing: .03em;
+}
+
+.kms-parta-stats-group .kms-parta-stats-wrap .wams-stat-card {
+    flex: 1 1 160px;
+}
+
+@media (max-width: 768px) {
+    .kms-parta-stats-group .kms-parta-stats-wrap .wams-stat-card {
+        flex-basis: calc(50% - 16px);
+    }
 }
 
 /* ── KeyUsageStatsPanel small stat card (formerly built entirely with
@@ -1154,7 +1176,7 @@
     margin-bottom: var(--lumo-space-xs);
 }
 
-/* ── DecodeJwtDialog ───────────────────────────────────────────────────────── */
+/* ── JwtDetailsViewDialog ─────────────────────────────────────────────────── */
 
 .decode-jwt-dialog .section-title-row {
     margin-bottom: var(--lumo-space-s);
@@ -1195,12 +1217,6 @@
 /* AliasDetailsDialog — read-only field grid, mirrors the *-details-dialog
    convention used by CategoryDetailsDialog / RoleDetailsDialog / etc. (see ims.css). */
 
-.alias-details-dialog .wams-section-title {
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
-    margin-bottom: var(--lumo-space-s);
-    padding-bottom: var(--lumo-space-xs);
-}
-
 .alias-details-dialog .detail-field-icon {
     color: var(--lumo-primary-color);
 }
@@ -1217,16 +1233,9 @@
  * agents editing the shared stylesheet.
  */
 
-/* CustomKeyStoreDetailsDialog / NextCodeDetailsDialog — read-only field grid,
+/* CustomKeyStoreDetailsViewDialog / NextCodeDetailsDialog — read-only field grid,
    mirrors the *-details-dialog convention used by CategoryDetailsDialog /
-   RoleDetailsDialog / PEBConfigDetailsDialog / TokenConfigDetailsDialog / etc. */
-
-.custom-keystore-details-dialog .wams-section-title,
-.next-code-details-dialog .wams-section-title {
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
-    margin-bottom: var(--lumo-space-s);
-    padding-bottom: var(--lumo-space-xs);
-}
+   RoleDetailsDialog / PEBConfigDetailsViewDialog / TokenConfigDetailsViewDialog / etc. */
 
 .custom-keystore-details-dialog .detail-field-icon,
 .next-code-details-dialog .detail-field-icon {
@@ -1247,18 +1256,9 @@
  * editing the shared stylesheet.
  */
 
-/* DigestConfigDetailsDialog / PasswordConfigDetailsDialog / PEBConfigDetailsDialog /
-   TokenConfigDetailsDialog — read-only field grid, mirrors the *-details-dialog
+/* DigestConfigDetailsViewDialog / PasswordConfigDetailsViewDialog / PEBConfigDetailsViewDialog /
+   TokenConfigDetailsViewDialog — read-only field grid, mirrors the *-details-dialog
    convention used by CategoryDetailsDialog / RoleDetailsDialog / AliasDetailsDialog / etc. */
-
-.digest-config-details-dialog .wams-section-title,
-.password-config-details-dialog .wams-section-title,
-.peb-config-details-dialog .wams-section-title,
-.token-config-details-dialog .wams-section-title {
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
-    margin-bottom: var(--lumo-space-s);
-    padding-bottom: var(--lumo-space-xs);
-}
 
 .digest-config-details-dialog .detail-field-icon,
 .password-config-details-dialog .detail-field-icon,
@@ -1284,13 +1284,7 @@
 /* RandomKeyDetailsDialog — read-only field grid split into Identity / Key value /
    Audit sections, mirrors the *-details-dialog convention used elsewhere in this
    module (see kms.css "Part B2"/"Part C2"/"Part D2" — AliasDetailsDialog,
-   CustomKeyStoreDetailsDialog, NextCodeDetailsDialog, DigestConfigDetailsDialog, etc.). */
-
-.random-key-details-dialog .wams-section-title {
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
-    margin-bottom: var(--lumo-space-s);
-    padding-bottom: var(--lumo-space-xs);
-}
+   CustomKeyStoreDetailsViewDialog, NextCodeDetailsDialog, DigestConfigDetailsViewDialog, etc.). */
 
 .random-key-details-dialog .detail-field-icon {
     color: var(--lumo-primary-color);
@@ -1344,12 +1338,6 @@
    split into Identity / Classification & status / Cryptographic configuration /
    Dates sections instead of one flat list. */
 
-.describe-key-dialog .wams-section-title {
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
-    margin-bottom: var(--lumo-space-s);
-    padding-bottom: var(--lumo-space-xs);
-}
-
 .describe-key-dialog .detail-field-icon {
     color: var(--lumo-primary-color);
 }
@@ -1377,15 +1365,9 @@
 /*
  * KMS group C (partC3) — temporary partial stylesheet.
  * Covers: GrantDetailsDialog section-divider styling (identity/constraints/audit),
- * now sectioned the same way as CustomKeyStoreDetailsDialog / NextCodeDetailsDialog.
+ * now sectioned the same way as CustomKeyStoreDetailsViewDialog / NextCodeDetailsDialog.
  * A later step merges this partial into kms.css alongside the other _kms_part*.css files.
  */
-
-.grant-details-dialog .wams-section-title {
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
-    margin-bottom: var(--lumo-space-s);
-    padding-bottom: var(--lumo-space-xs);
-}
 
 .grant-details-dialog .detail-field-icon {
     color: var(--lumo-primary-color);

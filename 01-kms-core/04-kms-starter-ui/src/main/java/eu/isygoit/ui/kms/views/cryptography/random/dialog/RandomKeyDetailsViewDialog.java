@@ -10,24 +10,23 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.RandomKeyDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.RandomKeyService;
-import eu.isygoit.ui.common.dialog.NoActionDialog;
-import eu.isygoit.ui.kms.KmsMainView;
+import eu.isygoit.ui.common.component.ClipboardCopyButton;
+import eu.isygoit.ui.common.dialog.DetailsViewDialog;
 import eu.isygoit.ui.kms.views.cryptography.random.RandomKeyView;
 
 /**
  * Read-only "Details" dialog for a {@link RandomKeyDto}.
  *
- * <p>Unlike other *DetailsDialog implementations in this codebase, {@code RandomKeyServiceApi}
+ * <p>Unlike other *DetailsViewDialog implementations in this codebase, {@code RandomKeyServiceApi}
  * exposes no {@code findById}/{@code findByName} lookup for a single random key (only listing,
  * creation, renewal and deletion by name). The dialog therefore renders the {@link RandomKeyDto}
  * already held by the card/view instead of re-fetching it from the service.</p>
  */
-public class RandomKeyDetailsDialog extends NoActionDialog {
+public class RandomKeyDetailsViewDialog extends DetailsViewDialog {
 
     private final RandomKeyView parentView;
     private final RandomKeyService keyService;
@@ -37,7 +36,7 @@ public class RandomKeyDetailsDialog extends NoActionDialog {
     private Span valueSpan;
     private Button revealButton;
 
-    public RandomKeyDetailsDialog(RandomKeyView parentView, RandomKeyService keyService, RandomKeyDto dto) {
+    public RandomKeyDetailsViewDialog(RandomKeyView parentView, RandomKeyService keyService, RandomKeyDto dto) {
         super(I18n.t("kms.random.key.dialog.details.title"));
         this.parentView = parentView;
         this.keyService = keyService;
@@ -59,9 +58,8 @@ public class RandomKeyDetailsDialog extends NoActionDialog {
         mainLayout.setSpacing(true);
 
         // Section 1: Identity — name/tenant only.
-        Div identityGrid = new Div();
-        identityGrid.addClassName("wams-card__detail-grid");
-        addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("kms.random.key.dialog.details.field.name"), dto.getName());
+        Div identityGrid = createDetailGrid();
+        addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("kms.random.key.dialog.details.field.name"), dto.getName(), true);
         addFieldToGrid(identityGrid, VaadinIcon.BUILDING, I18n.t("kms.random.key.dialog.details.field.tenant"), dto.getTenant());
         mainLayout.add(createSection(I18n.t("kms.random.key.dialog.details.section.identity"), identityGrid));
 
@@ -69,8 +67,7 @@ public class RandomKeyDetailsDialog extends NoActionDialog {
         mainLayout.add(createSection(I18n.t("kms.random.key.dialog.details.section.value"), buildValueRow()));
 
         // Section 3: Audit — created/updated by/date.
-        Div auditGrid = new Div();
-        auditGrid.addClassName("wams-card__detail-grid");
+        Div auditGrid = createDetailGrid();
         addFieldToGrid(auditGrid, VaadinIcon.USER_CHECK, I18n.t("kms.random.key.dialog.details.field.created.by"), dto.getCreatedBy());
         addFieldToGrid(auditGrid, VaadinIcon.CALENDAR, I18n.t("kms.random.key.dialog.details.field.created.date"),
                 dto.getCreateDate() != null ? DateHelper.formatToHumanReadable(dto.getCreateDate()) : null);
@@ -121,7 +118,7 @@ public class RandomKeyDetailsDialog extends NoActionDialog {
         revealButton.setTooltipText(I18n.t("kms.random.key.dialog.details.reveal.tooltip"));
         revealButton.addClickListener(e -> toggleReveal());
 
-        Button copyBtn = KmsMainView.createCopyButton(VaadinIcon.COPY, dto.getValue(), I18n.t("kms.random.key.card.copy.tooltip"));
+        Button copyBtn = new ClipboardCopyButton(dto.getValue(), I18n.t("kms.random.key.card.copy.tooltip"));
         copyBtn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY_INLINE);
 
         valueRow.add(valueSpan, revealButton, copyBtn);
@@ -145,46 +142,5 @@ public class RandomKeyDetailsDialog extends NoActionDialog {
         if (full == null) return I18n.t("kms.random.key.card.masked");
         if (full.length() <= 8) return "****";
         return full.substring(0, 4) + "..." + full.substring(full.length() - 4);
-    }
-
-    private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {
-        if (value == null || value.isBlank()) return;
-
-        VerticalLayout field = new VerticalLayout();
-        field.setPadding(false);
-        field.setSpacing(false);
-        field.addClassName("wams-card__detail-field");
-
-        HorizontalLayout labelRow = new HorizontalLayout();
-        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        labelRow.setSpacing(false);
-        labelRow.addClassName("wams-card__detail-field-label-row");
-
-        Icon iconComponent = icon.create();
-        iconComponent.setSize("12px");
-        iconComponent.addClassName("detail-field-icon");
-
-        Span labelSpan = new Span(label);
-        labelSpan.addClassName("wams-card__detail-field-label");
-
-        labelRow.add(iconComponent, labelSpan);
-
-        Span valueSpan = new Span(value);
-        valueSpan.addClassName("wams-card__detail-field-value");
-
-        field.add(labelRow, valueSpan);
-        container.add(field);
-    }
-
-    private Component createSection(String title, Component content) {
-        VerticalLayout section = new VerticalLayout();
-        section.setPadding(false);
-        section.setSpacing(false);
-        Span titleSpan = new Span(title);
-        titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
-        titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
-        titleSpan.addClassName("wams-section-title");
-        section.add(titleSpan, content);
-        return section;
     }
 }

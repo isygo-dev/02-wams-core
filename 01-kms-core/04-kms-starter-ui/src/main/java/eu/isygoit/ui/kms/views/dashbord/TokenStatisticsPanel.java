@@ -15,6 +15,7 @@ import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
 import eu.isygoit.ui.common.component.StatCard;
+import eu.isygoit.ui.common.component.StatCardGrid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,12 @@ public class TokenStatisticsPanel extends VerticalLayout {
     private final KmsTokenConfigService tokenConfigService;
     private final UI ui;
     private final ProgressBar loadingBar = new ProgressBar();
-    private HorizontalLayout statsContainer;
+
+    private StatCard totalCard;
+    private StatCard accessCard;
+    private StatCard refreshCard;
+    private StatCard rstpwdCard;
+    private StatCard authorityCard;
 
     public TokenStatisticsPanel(KmsTokenConfigService tokenConfigService, UI ui) {
         this.tokenConfigService = tokenConfigService;
@@ -52,29 +58,18 @@ public class TokenStatisticsPanel extends VerticalLayout {
         titleRow.add(title, loadingBar);
         add(titleRow);
 
-        statsContainer = new HorizontalLayout();
-        statsContainer.setWidthFull();
-        statsContainer.setSpacing(true);
-        statsContainer.addClassName("kms-parta-stats-wrap");
-        add(statsContainer);
-        showPlaceholderCards();
-    }
+        totalCard = new StatCard(VaadinIcon.COG, StatCard.Variant.NEUTRAL, I18n.t("kms.stats.token.total"), null, I18n.t("kms.stats.token.total.tooltip"));
+        accessCard = new StatCard(VaadinIcon.KEY, StatCard.Variant.PRIMARY, I18n.t("kms.stats.token.access"), null, I18n.t("kms.stats.token.access.tooltip"));
+        refreshCard = new StatCard(VaadinIcon.REFRESH, StatCard.Variant.PRIMARY, I18n.t("kms.stats.token.refresh"), null, I18n.t("kms.stats.token.refresh.tooltip"));
+        rstpwdCard = new StatCard(VaadinIcon.LOCK, StatCard.Variant.WARNING, I18n.t("kms.stats.token.rstpwd"), null, I18n.t("kms.stats.token.rstpwd.tooltip"));
+        authorityCard = new StatCard(VaadinIcon.USER, StatCard.Variant.PRIMARY, I18n.t("kms.stats.token.authority"), null, I18n.t("kms.stats.token.authority.tooltip"));
 
-    private void showPlaceholderCards() {
-        statsContainer.removeAll();
-        statsContainer.add(
-                new StatCard(I18n.t("kms.stats.token.total"), "…", VaadinIcon.COG, "#607D8B", I18n.t("kms.stats.token.total.tooltip")),
-                new StatCard(I18n.t("kms.stats.token.access"), "…", VaadinIcon.KEY, "#1E88E5", I18n.t("kms.stats.token.access.tooltip")),
-                new StatCard(I18n.t("kms.stats.token.refresh"), "…", VaadinIcon.REFRESH, "#43A047", I18n.t("kms.stats.token.refresh.tooltip")),
-                new StatCard(I18n.t("kms.stats.token.rstpwd"), "…", VaadinIcon.LOCK, "#F57C00", I18n.t("kms.stats.token.rstpwd.tooltip")),
-                new StatCard(I18n.t("kms.stats.token.authority"), "…", VaadinIcon.USER, "#8E24AA", I18n.t("kms.stats.token.authority.tooltip"))
-        );
+        add(new StatCardGrid(totalCard, accessCard, refreshCard, rstpwdCard, authorityCard));
     }
 
     public void loadStatistics() {
         ui.access(() -> {
             loadingBar.setVisible(true);
-            statsContainer.removeAll();
 
             try {
                 TokenStats stats = new TokenStats();
@@ -92,13 +87,11 @@ public class TokenStatisticsPanel extends VerticalLayout {
                     stats.authority = configs.stream().filter(c -> c.getTokenType() == IEnumToken.Types.AUTHORITY).count();
                 }
 
-                statsContainer.add(
-                        new StatCard(I18n.t("kms.stats.token.total"), String.valueOf(stats.total), VaadinIcon.COG, "#607D8B", I18n.t("kms.stats.token.total.tooltip")),
-                        new StatCard(I18n.t("kms.stats.token.access"), String.valueOf(stats.access), VaadinIcon.KEY, "#1E88E5", I18n.t("kms.stats.token.access.tooltip")),
-                        new StatCard(I18n.t("kms.stats.token.refresh"), String.valueOf(stats.refresh), VaadinIcon.REFRESH, "#43A047", I18n.t("kms.stats.token.refresh.tooltip")),
-                        new StatCard(I18n.t("kms.stats.token.rstpwd"), String.valueOf(stats.rstpwd), VaadinIcon.LOCK, "#F57C00", I18n.t("kms.stats.token.rstpwd.tooltip")),
-                        new StatCard(I18n.t("kms.stats.token.authority"), String.valueOf(stats.authority), VaadinIcon.USER, "#8E24AA", I18n.t("kms.stats.token.authority.tooltip"))
-                );
+                totalCard.setValue(String.valueOf(stats.total));
+                accessCard.setValue(String.valueOf(stats.access));
+                refreshCard.setValue(String.valueOf(stats.refresh));
+                rstpwdCard.setValue(String.valueOf(stats.rstpwd));
+                authorityCard.setValue(String.valueOf(stats.authority));
 
                 loadingBar.setVisible(false);
                 ui.push();

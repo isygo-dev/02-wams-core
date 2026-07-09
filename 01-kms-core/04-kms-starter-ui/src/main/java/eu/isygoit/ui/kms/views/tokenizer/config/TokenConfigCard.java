@@ -14,7 +14,7 @@ import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.kms.views.tokenizer.config.dialog.DeleteTokenConfigDialog;
-import eu.isygoit.ui.kms.views.tokenizer.config.dialog.TokenConfigDetailsDialog;
+import eu.isygoit.ui.kms.views.tokenizer.config.dialog.TokenConfigDetailsViewDialog;
 import eu.isygoit.ui.kms.views.tokenizer.config.dialog.UpdateTokenConfigDialog;
 
 import java.util.List;
@@ -74,7 +74,7 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
     @Override
     protected List<Button> buildActionButtons() {
         Button detailsBtn = createDetailsButton(I18n.t("kms.token.config.details.button"),
-                () -> new TokenConfigDetailsDialog(dto).open());
+                () -> new TokenConfigDetailsViewDialog(dto).open());
 
         Button editBtn = createEditButton(I18n.t("kms.token.config.edit.button"), this::openEditDialog);
 

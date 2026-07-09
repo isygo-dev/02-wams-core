@@ -4,6 +4,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -37,7 +38,26 @@ public class KeyStatisticsPanel extends VerticalLayout {
     private final UI ui;
     private final ProgressBar loadingBar = new ProgressBar();
     private final Button refreshButton = new Button(I18n.t("kms.stats.key.refresh.button"), VaadinIcon.REFRESH.create());
-    private HorizontalLayout statsContainer;
+
+    // Status group
+    private StatCard totalCard;
+    private StatCard activeCard;
+    private StatCard disabledCard;
+    private StatCard pendingDeletionCard;
+    // Type group
+    private StatCard symmetricCard;
+    private StatCard asymmetricCard;
+    private StatCard rotationEnabledCard;
+    // Usage group
+    private StatCard encryptDecryptCard;
+    private StatCard signVerifyCard;
+    private StatCard macCard;
+    // Resources group
+    private StatCard aliasesCard;
+    private StatCard grantsCard;
+    private StatCard customStoresCard;
+    private StatCard incrementalConfigsCard;
+    private StatCard randomKeysCard;
 
     public KeyStatisticsPanel(KmsApiService kmsApiService,
                               KmsAppNextCodeService nextCodeService,
@@ -68,18 +88,68 @@ public class KeyStatisticsPanel extends VerticalLayout {
         titleRow.add(statsTitle, refreshButton, loadingBar);
         add(titleRow);
 
-        statsContainer = new HorizontalLayout();
+        totalCard = new StatCard(VaadinIcon.KEY, StatCard.Variant.PRIMARY, I18n.t("kms.stats.key.total"), null, I18n.t("kms.stats.key.total.tooltip"));
+        activeCard = new StatCard(VaadinIcon.CHECK_CIRCLE, StatCard.Variant.SUCCESS, I18n.t("kms.stats.key.active"), null, I18n.t("kms.stats.key.active.tooltip"));
+        disabledCard = new StatCard(VaadinIcon.BAN, StatCard.Variant.NEUTRAL, I18n.t("kms.stats.key.disabled"), null, I18n.t("kms.stats.key.disabled.tooltip"));
+        pendingDeletionCard = new StatCard(VaadinIcon.CLOCK, StatCard.Variant.WARNING, I18n.t("kms.stats.key.pending.deletion"), null, I18n.t("kms.stats.key.pending.deletion.tooltip"));
+
+        symmetricCard = new StatCard(VaadinIcon.CIRCLE, StatCard.Variant.PRIMARY, I18n.t("kms.stats.key.symmetric"), null, I18n.t("kms.stats.key.symmetric.tooltip"));
+        asymmetricCard = new StatCard(VaadinIcon.KEY_O, StatCard.Variant.PRIMARY, I18n.t("kms.stats.key.asymmetric"), null, I18n.t("kms.stats.key.asymmetric.tooltip"));
+        rotationEnabledCard = new StatCard(VaadinIcon.ROTATE_RIGHT, StatCard.Variant.SUCCESS, I18n.t("kms.stats.key.rotation.enabled"), null, I18n.t("kms.stats.key.rotation.enabled.tooltip"));
+
+        encryptDecryptCard = new StatCard(VaadinIcon.LOCK, StatCard.Variant.PRIMARY, I18n.t("kms.stats.key.encrypt.decrypt"), null, I18n.t("kms.stats.key.encrypt.decrypt.tooltip"));
+        signVerifyCard = new StatCard(VaadinIcon.PENCIL, StatCard.Variant.PRIMARY, I18n.t("kms.stats.key.sign.verify"), null, I18n.t("kms.stats.key.sign.verify.tooltip"));
+        macCard = new StatCard(VaadinIcon.SIGNAL, StatCard.Variant.PRIMARY, I18n.t("kms.stats.key.mac"), null, I18n.t("kms.stats.key.mac.tooltip"));
+
+        aliasesCard = new StatCard(VaadinIcon.TAG, StatCard.Variant.NEUTRAL, I18n.t("kms.stats.key.aliases"), null, I18n.t("kms.stats.key.aliases.tooltip"));
+        grantsCard = new StatCard(VaadinIcon.SHARE, StatCard.Variant.NEUTRAL, I18n.t("kms.stats.key.grants"), null, I18n.t("kms.stats.key.grants.tooltip"));
+        customStoresCard = new StatCard(VaadinIcon.STORAGE, StatCard.Variant.NEUTRAL, I18n.t("kms.stats.key.custom.stores"), null, I18n.t("kms.stats.key.custom.stores.tooltip"));
+        incrementalConfigsCard = new StatCard(VaadinIcon.CODE, StatCard.Variant.NEUTRAL, I18n.t("kms.stats.key.incremental.configs"), null, I18n.t("kms.stats.key.incremental.configs.tooltip"));
+        randomKeysCard = new StatCard(VaadinIcon.RANDOM, StatCard.Variant.NEUTRAL, I18n.t("kms.stats.key.random.keys"), null, I18n.t("kms.stats.key.random.keys.tooltip"));
+
+        VerticalLayout statsContainer = new VerticalLayout();
         statsContainer.setWidthFull();
-        statsContainer.setSpacing(true);
-        statsContainer.addClassName("kms-parta-stats-wrap");
+        statsContainer.setSpacing(false);
+        statsContainer.setPadding(false);
+        statsContainer.addClassName("kms-parta-stats-groups");
+        statsContainer.add(
+                buildStatGroup(I18n.t("kms.stats.key.group.status"), totalCard, activeCard, disabledCard, pendingDeletionCard),
+                buildStatGroup(I18n.t("kms.stats.key.group.type"), symmetricCard, asymmetricCard, rotationEnabledCard),
+                buildStatGroup(I18n.t("kms.stats.key.group.usage"), encryptDecryptCard, signVerifyCard, macCard),
+                buildStatGroup(I18n.t("kms.stats.key.group.resources"), aliasesCard, grantsCard, customStoresCard, incrementalConfigsCard, randomKeysCard)
+        );
         add(statsContainer);
+    }
+
+    /**
+     * Wraps a category of stat cards (e.g. "Status", "Type") in its own compact
+     * sub-row with a small uppercase sub-header, so 15+ cards read as a few
+     * scannable groups instead of one long undifferentiated wrapping row.
+     */
+    private VerticalLayout buildStatGroup(String groupTitle, StatCard... cards) {
+        VerticalLayout group = new VerticalLayout();
+        group.setSpacing(false);
+        group.setPadding(false);
+        group.addClassName("kms-parta-stats-group");
+
+        Span header = new Span(groupTitle);
+        header.addClassName("kms-parta-stats-group__title");
+        group.add(header);
+
+        HorizontalLayout row = new HorizontalLayout();
+        row.setWidthFull();
+        row.setSpacing(true);
+        row.addClassName("kms-parta-stats-wrap");
+        row.add(cards);
+        group.add(row);
+
+        return group;
     }
 
     public void loadStatistics() {
         ui.access(() -> {
             loadingBar.setVisible(true);
             refreshButton.setEnabled(false);
-            statsContainer.removeAll();
 
             try {
                 log.info("Starting KMS statistics collection...");
@@ -153,24 +223,24 @@ public class KeyStatisticsPanel extends VerticalLayout {
                     log.error("Failed to load Random Keys statistics", e);
                 }
 
-                // Build stat cards
-                statsContainer.add(
-                        new StatCard(I18n.t("kms.stats.key.total"), String.valueOf(stats.totalKeys), VaadinIcon.KEY, "#1E88E5", I18n.t("kms.stats.key.total.tooltip")),
-                        new StatCard(I18n.t("kms.stats.key.active"), String.valueOf(stats.activeKeys), VaadinIcon.CHECK_CIRCLE, "#2E7D32", I18n.t("kms.stats.key.active.tooltip")),
-                        new StatCard(I18n.t("kms.stats.key.disabled"), String.valueOf(stats.disabledKeys), VaadinIcon.BAN, "#D32F2F", I18n.t("kms.stats.key.disabled.tooltip")),
-                        new StatCard(I18n.t("kms.stats.key.pending.deletion"), String.valueOf(stats.pendingDeletion), VaadinIcon.CLOCK, "#F57C00", I18n.t("kms.stats.key.pending.deletion.tooltip")),
-                        new StatCard(I18n.t("kms.stats.key.rotation.enabled"), String.valueOf(stats.rotationEnabled), VaadinIcon.ROTATE_RIGHT, "#8E24AA", I18n.t("kms.stats.key.rotation.enabled.tooltip")),
-                        new StatCard(I18n.t("kms.stats.key.symmetric"), String.valueOf(stats.symmetricKeys), VaadinIcon.CIRCLE, "#43A047", I18n.t("kms.stats.key.symmetric.tooltip")),
-                        new StatCard(I18n.t("kms.stats.key.asymmetric"), String.valueOf(stats.asymmetricKeys), VaadinIcon.KEY_O, "#FB8C00", I18n.t("kms.stats.key.asymmetric.tooltip")),
-                        new StatCard(I18n.t("kms.stats.key.encrypt.decrypt"), String.valueOf(stats.encryptUsage), VaadinIcon.LOCK, "#1E88E5", I18n.t("kms.stats.key.encrypt.decrypt.tooltip")),
-                        new StatCard(I18n.t("kms.stats.key.sign.verify"), String.valueOf(stats.signUsage), VaadinIcon.PENCIL, "#8E24AA", I18n.t("kms.stats.key.sign.verify.tooltip")),
-                        new StatCard(I18n.t("kms.stats.key.mac"), String.valueOf(stats.macUsage), VaadinIcon.SIGNAL, "#D81B60", I18n.t("kms.stats.key.mac.tooltip")),
-                        new StatCard(I18n.t("kms.stats.key.aliases"), String.valueOf(stats.totalAliases), VaadinIcon.TAG, "#00ACC1", I18n.t("kms.stats.key.aliases.tooltip")),
-                        new StatCard(I18n.t("kms.stats.key.grants"), String.valueOf(stats.totalGrants), VaadinIcon.SHARE, "#546E7A", I18n.t("kms.stats.key.grants.tooltip")),
-                        new StatCard(I18n.t("kms.stats.key.custom.stores"), String.valueOf(stats.totalStores), VaadinIcon.STORAGE, "#37474F", I18n.t("kms.stats.key.custom.stores.tooltip")),
-                        new StatCard(I18n.t("kms.stats.key.incremental.configs"), String.valueOf(stats.nextCodeTotal), VaadinIcon.CODE, "#607D8B", I18n.t("kms.stats.key.incremental.configs.tooltip")),
-                        new StatCard(I18n.t("kms.stats.key.random.keys"), String.valueOf(stats.randomKeysTotal), VaadinIcon.RANDOM, "#8E24AA", I18n.t("kms.stats.key.random.keys.tooltip"))
-                );
+                totalCard.setValue(String.valueOf(stats.totalKeys));
+                activeCard.setValue(String.valueOf(stats.activeKeys));
+                disabledCard.setValue(String.valueOf(stats.disabledKeys));
+                pendingDeletionCard.setValue(String.valueOf(stats.pendingDeletion));
+
+                symmetricCard.setValue(String.valueOf(stats.symmetricKeys));
+                asymmetricCard.setValue(String.valueOf(stats.asymmetricKeys));
+                rotationEnabledCard.setValue(String.valueOf(stats.rotationEnabled));
+
+                encryptDecryptCard.setValue(String.valueOf(stats.encryptUsage));
+                signVerifyCard.setValue(String.valueOf(stats.signUsage));
+                macCard.setValue(String.valueOf(stats.macUsage));
+
+                aliasesCard.setValue(String.valueOf(stats.totalAliases));
+                grantsCard.setValue(String.valueOf(stats.totalGrants));
+                customStoresCard.setValue(String.valueOf(stats.totalStores));
+                incrementalConfigsCard.setValue(String.valueOf(stats.nextCodeTotal));
+                randomKeysCard.setValue(String.valueOf(stats.randomKeysTotal));
 
                 loadingBar.setVisible(false);
                 refreshButton.setEnabled(true);

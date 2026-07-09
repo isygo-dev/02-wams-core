@@ -17,7 +17,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.ApplicationImageService;
 import eu.isygoit.remote.ims.ApplicationService;
 import eu.isygoit.ui.common.card.BaseCard;
-import eu.isygoit.ui.ims.views.application.dialog.ApplicationDetailsDialog;
+import eu.isygoit.ui.ims.views.application.dialog.ApplicationDetailsViewDialog;
 import eu.isygoit.ui.ims.views.application.dialog.DeleteApplicationDialog;
 import eu.isygoit.ui.ims.views.application.dialog.ToggleApplicationStatusDialog;
 import feign.FeignException;
@@ -102,7 +102,7 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
     @Override
     protected List<Button> buildActionButtons() {
         Button detailsBtn = createDetailsButton(I18n.t("ims.app.card.details.tooltip"),
-                () -> new ApplicationDetailsDialog(parentView, objectService, application.getId()).open());
+                () -> new ApplicationDetailsViewDialog(parentView, objectService, application.getId()).open());
 
         Button editBtn = createEditButton(I18n.t("ims.app.card.edit.tooltip"),
                 () -> parentView.openUpdateApplicationDialog(application, () -> {

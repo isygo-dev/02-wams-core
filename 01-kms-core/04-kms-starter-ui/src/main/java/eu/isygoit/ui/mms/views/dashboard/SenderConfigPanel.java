@@ -56,11 +56,20 @@ public class SenderConfigPanel extends VerticalLayout {
         title.addClassName(LumoUtility.Margin.NONE);
         title.addClassName("wams-panel-title");
 
+        Span sampleBadge = new Span(I18n.t("mms.dashboard.sample.data.badge"));
+        sampleBadge.addClassName("wams-panel-period-badge");
+        sampleBadge.addClassName(LumoUtility.FontSize.XSMALL);
+        sampleBadge.addClassName(LumoUtility.TextColor.SECONDARY);
+
+        HorizontalLayout titleGroup = new HorizontalLayout(title, sampleBadge);
+        titleGroup.setAlignItems(FlexComponent.Alignment.CENTER);
+        titleGroup.setSpacing(true);
+
         Button addBtn = new Button(VaadinIcon.PLUS.create());
         addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
         addBtn.setTooltipText(I18n.t("mms.dashboard.sender.add"));
 
-        header.add(title, addBtn);
+        header.add(titleGroup, addBtn);
         return header;
     }
 

@@ -13,7 +13,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.DigestConfigService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.kms.views.secrets.digest.dialog.DeleteDigestConfigDialog;
-import eu.isygoit.ui.kms.views.secrets.digest.dialog.DigestConfigDetailsDialog;
+import eu.isygoit.ui.kms.views.secrets.digest.dialog.DigestConfigDetailsViewDialog;
 import eu.isygoit.ui.kms.views.secrets.digest.dialog.UpdateDigestConfigDialog;
 
 import java.util.List;
@@ -62,7 +62,7 @@ public class DigestConfigCard extends BaseCard<DigestConfigView, DigestConfigSer
     @Override
     protected List<Button> buildActionButtons() {
         Button detailsBtn = createDetailsButton(I18n.t("kms.digest.card.details.tooltip"),
-                () -> new DigestConfigDetailsDialog(dto).open());
+                () -> new DigestConfigDetailsViewDialog(dto).open());
         Button editBtn = createEditButton(I18n.t("kms.digest.card.edit.tooltip"), this::openEditDialog);
         Button deleteBtn = createDeleteButton(I18n.t("kms.digest.card.delete.tooltip"),
                 () -> new DeleteDigestConfigDialog(objectService, dto.getId(), dto.getCode(), onDeleteRefresh).open());

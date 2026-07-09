@@ -14,7 +14,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AppParameterService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.ims.views.parameters.dialog.DeleteParameterDialog;
-import eu.isygoit.ui.ims.views.parameters.dialog.ParameterDetailsDialog;
+import eu.isygoit.ui.ims.views.parameters.dialog.ParameterDetailsViewDialog;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -55,7 +55,7 @@ public class ParameterCard extends BaseCard<ParameterManagementView, AppParamete
     @Override
     protected List<Button> buildActionButtons() {
         Button detailsBtn = createDetailsButton(I18n.t("ims.parameter.card.details.tooltip"),
-                () -> new ParameterDetailsDialog(parentView, objectService, parameter.getId()).open());
+                () -> new ParameterDetailsViewDialog(parentView, objectService, parameter.getId()).open());
 
         Button editBtn = createEditButton(I18n.t("ims.parameter.card.edit.tooltip"),
                 () -> parentView.openUpdateParameterDialog(parameter, () -> {

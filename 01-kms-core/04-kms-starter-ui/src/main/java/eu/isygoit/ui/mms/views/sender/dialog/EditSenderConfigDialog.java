@@ -128,7 +128,7 @@ public class EditSenderConfigDialog extends BaseSenderConfigDialog {
         form.setColspan(passwordField, 2);
         form.setColspan(defaultSenderField, 2);
 
-        contentArea.add(form);
+        addContent(form);
     }
 
     private void prefillData() {
@@ -154,7 +154,7 @@ public class EditSenderConfigDialog extends BaseSenderConfigDialog {
 
     @Override
     protected boolean onOk() {
-        clearErrors();
+        clearError();
 
         // Validate required fields
         if (nameField.getValue() == null || nameField.getValue().isBlank()) {
@@ -213,7 +213,7 @@ public class EditSenderConfigDialog extends BaseSenderConfigDialog {
                 return false;
             }
 
-            showSuccess(I18n.t("mms.sender.dialog.edit.success"));
+            append(I18n.t("mms.sender.dialog.edit.success"));
             return true;
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ?

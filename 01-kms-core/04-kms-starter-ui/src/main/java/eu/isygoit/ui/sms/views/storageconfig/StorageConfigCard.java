@@ -14,7 +14,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.StorageConfigService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.sms.views.storageconfig.dialog.DeleteStorageConfigDialog;
-import eu.isygoit.ui.sms.views.storageconfig.dialog.StorageConfigDetailsDialog;
+import eu.isygoit.ui.sms.views.storageconfig.dialog.StorageConfigDetailsViewDialog;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -60,7 +60,7 @@ public class StorageConfigCard extends BaseCard<StorageConfigManagementView, Sto
     @Override
     protected List<Button> buildActionButtons() {
         Button detailsBtn = createDetailsButton(I18n.t("sms.storageconfig.card.details.tooltip"),
-                () -> new StorageConfigDetailsDialog(parentView, objectService, config.getId()).open());
+                () -> new StorageConfigDetailsViewDialog(parentView, objectService, config.getId()).open());
 
         Button editBtn = createEditButton(I18n.t("sms.storageconfig.card.edit.tooltip"),
                 () -> parentView.openUpdateStorageConfigDialog(config, () -> {

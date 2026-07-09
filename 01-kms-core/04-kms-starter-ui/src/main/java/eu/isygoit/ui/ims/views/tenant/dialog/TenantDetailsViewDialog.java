@@ -1,30 +1,25 @@
 package eu.isygoit.ui.ims.views.tenant.dialog;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.TenantService;
-import eu.isygoit.ui.common.dialog.NoActionDialog;
+import eu.isygoit.ui.common.dialog.DetailsViewDialog;
 import eu.isygoit.ui.ims.views.tenant.TenantManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class TenantDetailsDialog extends NoActionDialog {
+public class TenantDetailsViewDialog extends DetailsViewDialog {
 
     private final TenantManagementView parentView;
     private final TenantService tenantService;
     private final Long tenantId;
 
-    public TenantDetailsDialog(TenantManagementView parentView,
+    public TenantDetailsViewDialog(TenantManagementView parentView,
                                TenantService tenantService,
                                Long tenantId) {
         super(I18n.t("ims.tenant.details.title"));
@@ -70,7 +65,7 @@ public class TenantDetailsDialog extends NoActionDialog {
         identityInfo.addClassName("wams-card__detail-grid");
 
         addFieldToGrid(identityInfo, VaadinIcon.BUILDING, I18n.t("ims.tenant.details.field.name"), tenant.getName());
-        addFieldToGrid(identityInfo, VaadinIcon.CODE, I18n.t("ims.tenant.details.field.code"), tenant.getCode());
+        addFieldToGrid(identityInfo, VaadinIcon.CODE, I18n.t("ims.tenant.details.field.code"), tenant.getCode(), true);
 
         mainLayout.add(createSection(I18n.t("ims.tenant.details.section.identity"), identityInfo));
 
@@ -87,9 +82,9 @@ public class TenantDetailsDialog extends NoActionDialog {
         Div contactInfo = new Div();
         contactInfo.addClassName("wams-card__detail-grid");
 
-        addFieldToGrid(contactInfo, VaadinIcon.ENVELOPE, I18n.t("ims.tenant.details.field.email"), tenant.getEmail());
-        addFieldToGrid(contactInfo, VaadinIcon.PHONE, I18n.t("ims.tenant.details.field.phone"), tenant.getPhone());
-        addFieldToGrid(contactInfo, VaadinIcon.GLOBE, I18n.t("ims.tenant.details.field.website"), tenant.getUrl());
+        addFieldToGrid(contactInfo, VaadinIcon.ENVELOPE, I18n.t("ims.tenant.details.field.email"), tenant.getEmail(), true);
+        addFieldToGrid(contactInfo, VaadinIcon.PHONE, I18n.t("ims.tenant.details.field.phone"), tenant.getPhone(), true);
+        addFieldToGrid(contactInfo, VaadinIcon.GLOBE, I18n.t("ims.tenant.details.field.website"), tenant.getUrl(), true);
 
         mainLayout.add(createSection(I18n.t("ims.tenant.details.section.contact"), contactInfo));
 
@@ -97,7 +92,7 @@ public class TenantDetailsDialog extends NoActionDialog {
         if (tenant.getDescription() != null && !tenant.getDescription().isBlank()) {
             Div descGrid = new Div();
             descGrid.addClassName("wams-card__detail-grid");
-            addFieldToGrid(descGrid, VaadinIcon.FILE_TEXT, I18n.t("ims.tenant.details.field.description"), tenant.getDescription());
+            addFieldToGrid(descGrid, VaadinIcon.FILE_TEXT, I18n.t("ims.tenant.details.field.description"), tenant.getDescription(), false);
             mainLayout.add(descGrid);
         }
 
@@ -106,9 +101,9 @@ public class TenantDetailsDialog extends NoActionDialog {
             Div socialInfo = new Div();
             socialInfo.addClassName("wams-card__detail-grid");
 
-            addFieldToGrid(socialInfo, VaadinIcon.LINK, I18n.t("ims.tenant.details.field.facebook"), tenant.getLnk_facebook());
-            addFieldToGrid(socialInfo, VaadinIcon.LINK, I18n.t("ims.tenant.details.field.linkedin"), tenant.getLnk_linkedin());
-            addFieldToGrid(socialInfo, VaadinIcon.LINK, I18n.t("ims.tenant.details.field.xing"), tenant.getLnk_xing());
+            addFieldToGrid(socialInfo, VaadinIcon.LINK, I18n.t("ims.tenant.details.field.facebook"), tenant.getLnk_facebook(), true);
+            addFieldToGrid(socialInfo, VaadinIcon.LINK, I18n.t("ims.tenant.details.field.linkedin"), tenant.getLnk_linkedin(), true);
+            addFieldToGrid(socialInfo, VaadinIcon.LINK, I18n.t("ims.tenant.details.field.xing"), tenant.getLnk_xing(), true);
 
             mainLayout.add(createSection(I18n.t("ims.tenant.details.section.social"), socialInfo));
         }
@@ -122,7 +117,7 @@ public class TenantDetailsDialog extends NoActionDialog {
             addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.tenant.details.field.state"), tenant.getAddress().getState());
             addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.tenant.details.field.city"), tenant.getAddress().getCity());
             addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.tenant.details.field.street"), tenant.getAddress().getStreet());
-            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.tenant.details.field.zip.code"), tenant.getAddress().getZipCode());
+            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.tenant.details.field.zip.code"), tenant.getAddress().getZipCode(), true);
             addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.tenant.details.field.additional.info"), tenant.getAddress().getAdditionalInfo());
 
             mainLayout.add(createSection(I18n.t("ims.tenant.details.section.address"), addressInfo));
@@ -146,47 +141,6 @@ public class TenantDetailsDialog extends NoActionDialog {
         return (tenant.getLnk_facebook() != null && !tenant.getLnk_facebook().isBlank())
                 || (tenant.getLnk_linkedin() != null && !tenant.getLnk_linkedin().isBlank())
                 || (tenant.getLnk_xing() != null && !tenant.getLnk_xing().isBlank());
-    }
-
-    private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {
-        if (value == null || value.isBlank()) return;
-
-        VerticalLayout field = new VerticalLayout();
-        field.setPadding(false);
-        field.setSpacing(false);
-        field.addClassName("wams-card__detail-field");
-
-        HorizontalLayout labelRow = new HorizontalLayout();
-        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        labelRow.setSpacing(false);
-        labelRow.addClassName("wams-card__detail-field-label-row");
-
-        Icon iconComponent = icon.create();
-        iconComponent.setSize("12px");
-        iconComponent.addClassName("detail-field-icon");
-
-        Span labelSpan = new Span(label);
-        labelSpan.addClassName("wams-card__detail-field-label");
-
-        labelRow.add(iconComponent, labelSpan);
-
-        Span valueSpan = new Span(value);
-        valueSpan.addClassName("wams-card__detail-field-value");
-
-        field.add(labelRow, valueSpan);
-        container.add(field);
-    }
-
-    private Component createSection(String title, Component content) {
-        VerticalLayout section = new VerticalLayout();
-        section.setPadding(false);
-        section.setSpacing(false);
-        Span titleSpan = new Span(title);
-        titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
-        titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
-        titleSpan.addClassName("wams-section-title");
-        section.add(titleSpan, content);
-        return section;
     }
 
     private String extractErrorMessage(FeignException ex) {

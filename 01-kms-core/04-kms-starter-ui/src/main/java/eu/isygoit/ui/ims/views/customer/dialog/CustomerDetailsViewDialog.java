@@ -1,31 +1,26 @@
 package eu.isygoit.ui.ims.views.customer.dialog;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.AddressDto;
 import eu.isygoit.dto.data.CustomerDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.CustomerService;
-import eu.isygoit.ui.common.dialog.NoActionDialog;
+import eu.isygoit.ui.common.dialog.DetailsViewDialog;
 import eu.isygoit.ui.ims.views.customer.CustomerManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class CustomerDetailsDialog extends NoActionDialog {
+public class CustomerDetailsViewDialog extends DetailsViewDialog {
 
     private final CustomerManagementView parentView;
     private final CustomerService customerService;
     private final Long customerId;
 
-    public CustomerDetailsDialog(CustomerManagementView parentView,
+    public CustomerDetailsViewDialog(CustomerManagementView parentView,
                                  CustomerService customerService,
                                  Long customerId) {
         super(I18n.t("ims.customer.details.title"));
@@ -71,7 +66,7 @@ public class CustomerDetailsDialog extends NoActionDialog {
         identityInfo.addClassName("wams-card__detail-grid");
 
         addFieldToGrid(identityInfo, VaadinIcon.USER, I18n.t("ims.customer.details.field.name"), customer.getName());
-        addFieldToGrid(identityInfo, VaadinIcon.KEY, I18n.t("ims.customer.details.field.account.code"), customer.getAccountCode());
+        addFieldToGrid(identityInfo, VaadinIcon.KEY, I18n.t("ims.customer.details.field.account.code"), customer.getAccountCode(), true);
 
         mainLayout.add(createSection(I18n.t("ims.customer.details.section.identity"), identityInfo));
 
@@ -87,10 +82,10 @@ public class CustomerDetailsDialog extends NoActionDialog {
         Div contactInfo = new Div();
         contactInfo.addClassName("wams-card__detail-grid");
 
-        addFieldToGrid(contactInfo, VaadinIcon.ENVELOPE, I18n.t("ims.customer.details.field.email"), customer.getEmail());
-        addFieldToGrid(contactInfo, VaadinIcon.PHONE, I18n.t("ims.customer.details.field.phone"), customer.getPhoneNumber());
-        addFieldToGrid(contactInfo, VaadinIcon.GLOBE, I18n.t("ims.customer.details.field.website"), customer.getUrl());
-        addFieldToGrid(contactInfo, VaadinIcon.BUILDING, I18n.t("ims.customer.details.field.tenant"), customer.getTenant());
+        addFieldToGrid(contactInfo, VaadinIcon.ENVELOPE, I18n.t("ims.customer.details.field.email"), customer.getEmail(), true);
+        addFieldToGrid(contactInfo, VaadinIcon.PHONE, I18n.t("ims.customer.details.field.phone"), customer.getPhoneNumber(), true);
+        addFieldToGrid(contactInfo, VaadinIcon.GLOBE, I18n.t("ims.customer.details.field.website"), customer.getUrl(), true);
+        addFieldToGrid(contactInfo, VaadinIcon.BUILDING, I18n.t("ims.customer.details.field.tenant"), customer.getTenant(), true);
 
         mainLayout.add(createSection(I18n.t("ims.customer.details.section.contact"), contactInfo));
 
@@ -98,7 +93,7 @@ public class CustomerDetailsDialog extends NoActionDialog {
         if (customer.getDescription() != null && !customer.getDescription().isBlank()) {
             Div descGrid = new Div();
             descGrid.addClassName("wams-card__detail-grid");
-            addFieldToGrid(descGrid, VaadinIcon.FILE_TEXT, I18n.t("ims.customer.details.field.description"), customer.getDescription());
+            addFieldToGrid(descGrid, VaadinIcon.FILE_TEXT, I18n.t("ims.customer.details.field.description"), customer.getDescription(), false);
             mainLayout.add(descGrid);
         }
 
@@ -112,7 +107,7 @@ public class CustomerDetailsDialog extends NoActionDialog {
             addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.customer.details.field.state"), addr.getState());
             addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.customer.details.field.city"), addr.getCity());
             addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.customer.details.field.street"), addr.getStreet());
-            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.customer.details.field.zip.code"), addr.getZipCode());
+            addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.customer.details.field.zip.code"), addr.getZipCode(), true);
             addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.customer.details.field.additional.info"), addr.getAdditionalInfo());
 
             mainLayout.add(createSection(I18n.t("ims.customer.details.section.address"), addressInfo));
@@ -130,47 +125,6 @@ public class CustomerDetailsDialog extends NoActionDialog {
         mainLayout.add(createSection(I18n.t("ims.customer.details.section.audit"), auditInfo));
 
         add(mainLayout);
-    }
-
-    private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {
-        if (value == null || value.isBlank()) return;
-
-        VerticalLayout field = new VerticalLayout();
-        field.setPadding(false);
-        field.setSpacing(false);
-        field.addClassName("wams-card__detail-field");
-
-        HorizontalLayout labelRow = new HorizontalLayout();
-        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        labelRow.setSpacing(false);
-        labelRow.addClassName("wams-card__detail-field-label-row");
-
-        Icon iconComponent = icon.create();
-        iconComponent.setSize("12px");
-        iconComponent.addClassName("detail-field-icon");
-
-        Span labelSpan = new Span(label);
-        labelSpan.addClassName("wams-card__detail-field-label");
-
-        labelRow.add(iconComponent, labelSpan);
-
-        Span valueSpan = new Span(value);
-        valueSpan.addClassName("wams-card__detail-field-value");
-
-        field.add(labelRow, valueSpan);
-        container.add(field);
-    }
-
-    private Component createSection(String title, Component content) {
-        VerticalLayout section = new VerticalLayout();
-        section.setPadding(false);
-        section.setSpacing(false);
-        Span titleSpan = new Span(title);
-        titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
-        titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
-        titleSpan.addClassName("wams-section-title");
-        section.add(titleSpan, content);
-        return section;
     }
 
     private String extractErrorMessage(FeignException ex) {

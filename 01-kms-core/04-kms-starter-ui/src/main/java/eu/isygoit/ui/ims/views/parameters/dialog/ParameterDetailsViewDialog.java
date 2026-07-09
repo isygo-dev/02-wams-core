@@ -1,30 +1,25 @@
 package eu.isygoit.ui.ims.views.parameters.dialog;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.AppParameterDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AppParameterService;
-import eu.isygoit.ui.common.dialog.NoActionDialog;
+import eu.isygoit.ui.common.dialog.DetailsViewDialog;
 import eu.isygoit.ui.ims.views.parameters.ParameterManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class ParameterDetailsDialog extends NoActionDialog {
+public class ParameterDetailsViewDialog extends DetailsViewDialog {
 
     private final ParameterManagementView parentView;
     private final AppParameterService parameterService;
     private final Long parameterId;
 
-    public ParameterDetailsDialog(ParameterManagementView parentView,
+    public ParameterDetailsViewDialog(ParameterManagementView parentView,
                                   AppParameterService parameterService,
                                   Long parameterId) {
         super(I18n.t("ims.parameter.details.title"));
@@ -69,8 +64,8 @@ public class ParameterDetailsDialog extends NoActionDialog {
         Div identityInfo = new Div();
         identityInfo.addClassName("wams-card__detail-grid");
 
-        addFieldToGrid(identityInfo, VaadinIcon.KEY, I18n.t("ims.parameter.details.field.name"), param.getName());
-        addFieldToGrid(identityInfo, VaadinIcon.INPUT, I18n.t("ims.parameter.details.field.value"), param.getValue());
+        addFieldToGrid(identityInfo, VaadinIcon.KEY, I18n.t("ims.parameter.details.field.name"), param.getName(), true);
+        addFieldToGrid(identityInfo, VaadinIcon.INPUT, I18n.t("ims.parameter.details.field.value"), param.getValue(), true);
 
         mainLayout.add(createSection(I18n.t("ims.parameter.details.section.identity"), identityInfo));
 
@@ -78,8 +73,8 @@ public class ParameterDetailsDialog extends NoActionDialog {
         Div contactInfo = new Div();
         contactInfo.addClassName("wams-card__detail-grid");
 
-        addFieldToGrid(contactInfo, VaadinIcon.BUILDING, I18n.t("ims.parameter.details.field.tenant"), param.getTenant());
-        addFieldToGrid(contactInfo, VaadinIcon.FILE_TEXT, I18n.t("ims.parameter.details.field.description"), param.getDescription());
+        addFieldToGrid(contactInfo, VaadinIcon.BUILDING, I18n.t("ims.parameter.details.field.tenant"), param.getTenant(), true);
+        addFieldToGrid(contactInfo, VaadinIcon.FILE_TEXT, I18n.t("ims.parameter.details.field.description"), param.getDescription(), false);
 
         mainLayout.add(createSection(I18n.t("ims.parameter.details.section.contact"), contactInfo));
 
@@ -95,47 +90,6 @@ public class ParameterDetailsDialog extends NoActionDialog {
         mainLayout.add(createSection(I18n.t("ims.parameter.details.section.audit"), auditInfo));
 
         add(mainLayout);
-    }
-
-    private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {
-        if (value == null || value.isBlank()) return;
-
-        VerticalLayout field = new VerticalLayout();
-        field.setPadding(false);
-        field.setSpacing(false);
-        field.addClassName("wams-card__detail-field");
-
-        HorizontalLayout labelRow = new HorizontalLayout();
-        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        labelRow.setSpacing(false);
-        labelRow.addClassName("wams-card__detail-field-label-row");
-
-        Icon iconComponent = icon.create();
-        iconComponent.setSize("12px");
-        iconComponent.addClassName("detail-field-icon");
-
-        Span labelSpan = new Span(label);
-        labelSpan.addClassName("wams-card__detail-field-label");
-
-        labelRow.add(iconComponent, labelSpan);
-
-        Span valueSpan = new Span(value);
-        valueSpan.addClassName("wams-card__detail-field-value");
-
-        field.add(labelRow, valueSpan);
-        container.add(field);
-    }
-
-    private Component createSection(String title, Component content) {
-        VerticalLayout section = new VerticalLayout();
-        section.setPadding(false);
-        section.setSpacing(false);
-        Span titleSpan = new Span(title);
-        titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
-        titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
-        titleSpan.addClassName("wams-section-title");
-        section.add(titleSpan, content);
-        return section;
     }
 
     private String extractErrorMessage(FeignException ex) {

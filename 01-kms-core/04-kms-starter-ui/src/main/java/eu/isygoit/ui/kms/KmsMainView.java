@@ -3,13 +3,11 @@ package eu.isygoit.ui.kms;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -20,6 +18,7 @@ import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsAppNextCodeService;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
 import eu.isygoit.remote.kms.RandomKeyService;
+import eu.isygoit.ui.common.component.DashboardShortcutsBar;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.dashbord.AuditLogPanel;
@@ -66,6 +65,7 @@ public class KmsMainView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("kms-dashboard");
 
+        add(buildShortcutsBar());
         add(buildHeader());
         keyStatsPanel = new KeyStatisticsPanel(kmsApiService, nextCodeService, randomKeyService, ui);
         add(keyStatsPanel);
@@ -75,7 +75,6 @@ public class KmsMainView extends ManagementVerticalView {
         add(usageStatsPanel);
         auditLogPanel = new AuditLogPanel(kmsApiService, ui);
         add(auditLogPanel);
-        add(buildQuickLinks());
 
         loadKeyOptions();
     }
@@ -148,28 +147,23 @@ public class KmsMainView extends ManagementVerticalView {
         return keyId;
     }
 
-    private VerticalLayout buildQuickLinks() {
-        VerticalLayout layout = new VerticalLayout();
-        layout.setSpacing(true);
-        layout.addClassName("kms-parta-quick-links");
-        H2 title = new H2(I18n.t("kms.dashboard.quick.actions"));
-        title.addClassName(LumoUtility.FontSize.MEDIUM);
-        Div actions = new Div();
-        StringBuilder sb = new StringBuilder();
-        sb.append("• ").append(I18n.t("kms.dashboard.quick.actions.create.key")).append("\n");
-        sb.append("• ").append(I18n.t("kms.dashboard.quick.actions.encrypt.decrypt")).append("\n");
-        sb.append("• ").append(I18n.t("kms.dashboard.quick.actions.manage.aliases")).append("\n");
-        sb.append("• ").append(I18n.t("kms.dashboard.quick.actions.configure.policies")).append("\n");
-        sb.append("• ").append(I18n.t("kms.dashboard.quick.actions.manage.grants"));
-        actions.add(new Span(sb.toString()));
-        actions.addClassName("kms-parta-quick-links__actions");
-        layout.add(title, actions);
-        return layout;
-    }
-
-    private static class Span extends com.vaadin.flow.component.html.Span {
-        public Span(String text) {
-            super(text);
-        }
+    private DashboardShortcutsBar buildShortcutsBar() {
+        return new DashboardShortcutsBar(I18n.t("kms.dashboard.quick.actions"), List.of(
+                new DashboardShortcutsBar.Shortcut(VaadinIcon.KEY,
+                        I18n.t("kms.dashboard.quick.actions.create.key"),
+                        () -> UI.getCurrent().navigate("kms/keys")),
+                new DashboardShortcutsBar.Shortcut(VaadinIcon.LOCK,
+                        I18n.t("kms.dashboard.quick.actions.encrypt.decrypt"),
+                        () -> UI.getCurrent().navigate("kms/crypto")),
+                new DashboardShortcutsBar.Shortcut(VaadinIcon.LINK,
+                        I18n.t("kms.dashboard.quick.actions.manage.aliases"),
+                        () -> UI.getCurrent().navigate("kms/aliases")),
+                new DashboardShortcutsBar.Shortcut(VaadinIcon.DIPLOMA,
+                        I18n.t("kms.dashboard.quick.actions.configure.policies"),
+                        () -> UI.getCurrent().navigate("kms/policies")),
+                new DashboardShortcutsBar.Shortcut(VaadinIcon.SHIELD,
+                        I18n.t("kms.dashboard.quick.actions.manage.grants"),
+                        () -> UI.getCurrent().navigate("kms/grants"))
+        ));
     }
 }

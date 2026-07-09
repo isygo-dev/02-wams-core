@@ -16,7 +16,7 @@ import eu.isygoit.remote.kms.RandomKeyService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.kms.KmsMainView;
 import eu.isygoit.ui.kms.views.cryptography.random.dialog.DeleteRandomKeyDialog;
-import eu.isygoit.ui.kms.views.cryptography.random.dialog.RandomKeyDetailsDialog;
+import eu.isygoit.ui.kms.views.cryptography.random.dialog.RandomKeyDetailsViewDialog;
 import eu.isygoit.ui.kms.views.cryptography.random.dialog.RenewRandomKeyDialog;
 
 import java.util.List;
@@ -58,7 +58,7 @@ public class RandomKeyCard extends BaseCard<RandomKeyView, RandomKeyService> {
         // RandomKeyCard has no Edit/Toggle concept; "renew" is its one entity-specific extra
         // action, placed between Details and Delete (which is always last).
         Button detailsButton = createDetailsButton(I18n.t("kms.random.key.card.details.tooltip"),
-                () -> new RandomKeyDetailsDialog(parentView, objectService, dto).open());
+                () -> new RandomKeyDetailsViewDialog(parentView, objectService, dto).open());
 
         renewButton = createIconButton(VaadinIcon.REFRESH, I18n.t("kms.random.key.card.renew.tooltip"));
         renewButton.addClickListener(e -> new RenewRandomKeyDialog(objectService, dto.getName(),

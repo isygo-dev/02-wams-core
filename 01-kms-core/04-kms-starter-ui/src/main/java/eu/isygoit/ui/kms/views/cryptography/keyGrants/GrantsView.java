@@ -28,7 +28,7 @@ import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.cryptography.keyGrants.dialog.CreateGrantDialog;
-import eu.isygoit.ui.kms.views.cryptography.keyGrants.dialog.GrantDetailsDialog;
+import eu.isygoit.ui.kms.views.cryptography.keyGrants.dialog.GrantDetailsViewDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyGrants.dialog.RetireGrantDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyGrants.dialog.RevokeGrantDialog;
 import feign.FeignException;
@@ -379,7 +379,7 @@ public class GrantsView extends ManagementVerticalView {
             showWarning(I18n.t("kms.grants.view.no.grant.selected"));
             return;
         }
-        GrantDetailsDialog dialog = new GrantDetailsDialog(selected, objectMapper);
+        GrantDetailsViewDialog dialog = new GrantDetailsViewDialog(selected, objectMapper);
         dialog.open();
     }
 

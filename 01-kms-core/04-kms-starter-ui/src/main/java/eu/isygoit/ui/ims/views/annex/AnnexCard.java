@@ -13,7 +13,7 @@ import eu.isygoit.dto.data.AnnexDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AnnexService;
 import eu.isygoit.ui.common.card.BaseCard;
-import eu.isygoit.ui.ims.views.annex.dialog.AnnexDetailsDialog;
+import eu.isygoit.ui.ims.views.annex.dialog.AnnexDetailsViewDialog;
 import eu.isygoit.ui.ims.views.annex.dialog.DeleteAnnexDialog;
 import lombok.extern.slf4j.Slf4j;
 
@@ -60,7 +60,7 @@ public class AnnexCard extends BaseCard<AnnexManagementView, AnnexService> {
     @Override
     protected List<Button> buildActionButtons() {
         Button detailsBtn = createDetailsButton(I18n.t("ims.annex.card.details.tooltip"),
-                () -> new AnnexDetailsDialog(parentView, objectService, annex.getId()).open());
+                () -> new AnnexDetailsViewDialog(parentView, objectService, annex.getId()).open());
 
         Button editBtn = createEditButton(I18n.t("ims.annex.card.edit.tooltip"),
                 () -> parentView.openUpdateAnnexDialog(annex, () -> {

@@ -1,30 +1,25 @@
 package eu.isygoit.ui.cms.views.vcalendar.dialog;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.VCalendarDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.cms.VCalendarService;
 import eu.isygoit.ui.cms.views.vcalendar.VCalendarManagementView;
-import eu.isygoit.ui.common.dialog.NoActionDialog;
+import eu.isygoit.ui.common.dialog.DetailsViewDialog;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class VCalendarDetailsDialog extends NoActionDialog {
+public class VCalendarDetailsViewDialog extends DetailsViewDialog {
 
     private final VCalendarManagementView parentView;
     private final VCalendarService calendarService;
     private final Long calendarId;
 
-    public VCalendarDetailsDialog(VCalendarManagementView parentView,
+    public VCalendarDetailsViewDialog(VCalendarManagementView parentView,
                                   VCalendarService calendarService,
                                   Long calendarId) {
         super(I18n.t("cms.calendar.details.title"));
@@ -66,20 +61,21 @@ public class VCalendarDetailsDialog extends NoActionDialog {
         mainLayout.setSpacing(true);
 
         // Identity — name/code/description: what the calendar is
-        Div identityGrid = new Div();
-        identityGrid.addClassName("wams-card__detail-grid");
+        Div identityGrid = createDetailGrid();
 
-        addFieldToGrid(identityGrid, VaadinIcon.HASH, I18n.t("cms.calendar.details.field.id"), calendar.getId() != null ? String.valueOf(calendar.getId()) : null);
+        // ID is a copyable identifier, force the copy button on even though it's short.
+        addFieldToGrid(identityGrid, VaadinIcon.HASH, I18n.t("cms.calendar.details.field.id"), calendar.getId() != null ? String.valueOf(calendar.getId()) : null, true);
         addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("cms.calendar.details.field.name"), calendar.getName());
-        addFieldToGrid(identityGrid, VaadinIcon.CODE, I18n.t("cms.calendar.details.field.code"), calendar.getCode());
-        addFieldToGrid(identityGrid, VaadinIcon.FILE, I18n.t("cms.calendar.details.field.ics.path"), calendar.getIcsPath());
+        // Code is a short identifier users look up/search by elsewhere — force copyable.
+        addFieldToGrid(identityGrid, VaadinIcon.CODE, I18n.t("cms.calendar.details.field.code"), calendar.getCode(), true);
+        // ICS path is a file path users would paste into other tools — force copyable.
+        addFieldToGrid(identityGrid, VaadinIcon.FILE, I18n.t("cms.calendar.details.field.ics.path"), calendar.getIcsPath(), true);
         addFieldToGrid(identityGrid, VaadinIcon.FILE_TEXT, I18n.t("cms.calendar.details.field.description"), calendar.getDescription());
 
         mainLayout.add(createSection(I18n.t("cms.calendar.details.section.identity"), identityGrid));
 
         // Status — locked flag/tenant: current operational state
-        Div statusGrid = new Div();
-        statusGrid.addClassName("wams-card__detail-grid");
+        Div statusGrid = createDetailGrid();
 
         addFieldToGrid(statusGrid, VaadinIcon.BUILDING, I18n.t("cms.calendar.details.field.tenant"), calendar.getTenant());
         addFieldToGrid(statusGrid, VaadinIcon.LOCK, I18n.t("cms.calendar.details.field.locked"),
@@ -90,8 +86,7 @@ public class VCalendarDetailsDialog extends NoActionDialog {
         mainLayout.add(createSection(I18n.t("cms.calendar.details.section.status"), statusGrid));
 
         // Audit — created/updated by/date
-        Div auditGrid = new Div();
-        auditGrid.addClassName("wams-card__detail-grid");
+        Div auditGrid = createDetailGrid();
 
         addFieldToGrid(auditGrid, VaadinIcon.USER_CHECK, I18n.t("cms.calendar.details.field.created.by"), calendar.getCreatedBy());
         addFieldToGrid(auditGrid, VaadinIcon.CALENDAR, I18n.t("cms.calendar.details.field.created.date"),
@@ -103,47 +98,6 @@ public class VCalendarDetailsDialog extends NoActionDialog {
         mainLayout.add(createSection(I18n.t("cms.calendar.details.section.audit"), auditGrid));
 
         add(mainLayout);
-    }
-
-    private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {
-        if (value == null || value.isBlank()) return;
-
-        VerticalLayout field = new VerticalLayout();
-        field.setPadding(false);
-        field.setSpacing(false);
-        field.addClassName("wams-card__detail-field");
-
-        HorizontalLayout labelRow = new HorizontalLayout();
-        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        labelRow.setSpacing(false);
-        labelRow.addClassName("wams-card__detail-field-label-row");
-
-        Icon iconComponent = icon.create();
-        iconComponent.setSize("12px");
-        iconComponent.addClassName("detail-field-icon");
-
-        Span labelSpan = new Span(label);
-        labelSpan.addClassName("wams-card__detail-field-label");
-
-        labelRow.add(iconComponent, labelSpan);
-
-        Span valueSpan = new Span(value);
-        valueSpan.addClassName("wams-card__detail-field-value");
-
-        field.add(labelRow, valueSpan);
-        container.add(field);
-    }
-
-    private Component createSection(String title, Component content) {
-        VerticalLayout section = new VerticalLayout();
-        section.setPadding(false);
-        section.setSpacing(false);
-        Span titleSpan = new Span(title);
-        titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
-        titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
-        titleSpan.addClassName("wams-section-title");
-        section.add(titleSpan, content);
-        return section;
     }
 
     private String extractErrorMessage(FeignException ex) {

@@ -13,7 +13,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.PEBConfigService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.kms.views.secrets.peb.dialog.DeletePEBConfigDialog;
-import eu.isygoit.ui.kms.views.secrets.peb.dialog.PEBConfigDetailsDialog;
+import eu.isygoit.ui.kms.views.secrets.peb.dialog.PEBConfigDetailsViewDialog;
 import eu.isygoit.ui.kms.views.secrets.peb.dialog.UpdatePEBConfigDialog;
 
 import java.util.List;
@@ -62,7 +62,7 @@ public class PEBConfigCard extends BaseCard<PEBConfigView, PEBConfigService> {
     @Override
     protected List<Button> buildActionButtons() {
         Button detailsBtn = createDetailsButton(I18n.t("kms.peb.card.details.tooltip"),
-                () -> new PEBConfigDetailsDialog(dto).open());
+                () -> new PEBConfigDetailsViewDialog(dto).open());
         Button editBtn = createEditButton(I18n.t("kms.peb.card.edit.tooltip"), this::openEditDialog);
         Button deleteBtn = createDeleteButton(I18n.t("kms.peb.card.delete.tooltip"),
                 () -> new DeletePEBConfigDialog(objectService, dto.getId(), dto.getCode(), onDeleteRefresh).open());

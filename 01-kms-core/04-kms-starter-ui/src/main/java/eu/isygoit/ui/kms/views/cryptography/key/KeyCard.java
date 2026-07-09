@@ -376,7 +376,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
     }
 
     private void describeKey() {
-        new DescribeKeyDialog(parentView, objectService, objectMapper, keyId, metadata).open();
+        new KeyDetailsViewDialog(parentView, objectService, objectMapper, keyId, metadata).open();
     }
 
     private void toggleRotation() {

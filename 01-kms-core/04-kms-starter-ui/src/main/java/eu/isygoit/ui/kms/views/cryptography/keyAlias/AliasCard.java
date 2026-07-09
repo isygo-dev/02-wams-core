@@ -14,7 +14,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.kms.KmsMainView;
-import eu.isygoit.ui.kms.views.cryptography.keyAlias.dialog.AliasDetailsDialog;
+import eu.isygoit.ui.kms.views.cryptography.keyAlias.dialog.AliasDetailsViewDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyAlias.dialog.DeleteAliasDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyAlias.dialog.UpdateAliasDialog;
 
@@ -164,7 +164,7 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
 
     // ── Actions ───────────────────────────────────────────────────────────────
     private void showDetails() {
-        new AliasDetailsDialog(entry).open();
+        new AliasDetailsViewDialog(entry).open();
     }
 
     private void deleteAlias() {

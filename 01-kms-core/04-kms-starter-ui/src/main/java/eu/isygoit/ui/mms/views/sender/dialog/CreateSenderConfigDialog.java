@@ -129,7 +129,7 @@ public class CreateSenderConfigDialog extends BaseSenderConfigDialog {
         form.setColspan(passwordField, 2);
         form.setColspan(defaultSenderField, 2);
 
-        contentArea.add(form);
+        addContent(form);
     }
 
     private void prefillData() {
@@ -138,7 +138,7 @@ public class CreateSenderConfigDialog extends BaseSenderConfigDialog {
 
     @Override
     protected boolean onOk() {
-        clearErrors();
+        clearError();
 
         // Validate required fields
         if (tenantField.getValue() == null || tenantField.getValue().isBlank()) {
@@ -209,7 +209,7 @@ public class CreateSenderConfigDialog extends BaseSenderConfigDialog {
                 return false;
             }
 
-            showSuccess(I18n.t("mms.sender.dialog.create.success"));
+            append(I18n.t("mms.sender.dialog.create.success"));
             return true;
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ?

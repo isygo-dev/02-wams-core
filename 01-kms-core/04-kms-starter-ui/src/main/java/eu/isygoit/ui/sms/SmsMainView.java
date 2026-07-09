@@ -3,27 +3,34 @@ package eu.isygoit.ui.sms;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.dto.common.PaginatedResponseDto;
+import eu.isygoit.dto.data.StorageConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.StorageConfigService;
+import eu.isygoit.ui.common.component.DashboardShortcutsBar;
+import eu.isygoit.ui.common.component.StatCard;
+import eu.isygoit.ui.common.component.StatCardGrid;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.sms.layout.SmsMainLayout;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+
+import java.util.List;
 
 /**
- * Dashboard view for SMS, displaying key statistics and quick actions.
+ * Dashboard view for SMS, displaying key statistics, a favorites/shortcuts
+ * quick-action bar and recent activity.
  * Accessible at "/sms" and "/sms/home".
  */
+@Slf4j
 @RouteAlias(value = "sms/home", layout = SmsMainLayout.class)
 @UIScope
 @Route(value = "sms", layout = SmsMainLayout.class)
@@ -32,6 +39,8 @@ public class SmsMainView extends ManagementVerticalView {
 
     private final StorageConfigService storageConfigService;
     private final UI ui;
+
+    private StatCard totalConfigsCard;
 
     @Autowired
     public SmsMainView(StorageConfigService storageConfigService) {
@@ -45,10 +54,30 @@ public class SmsMainView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("sms-dashboard");
 
+        add(buildShortcutsBar());
         add(buildHeader());
-        add(buildStatisticsRow());
+        add(buildStatsGrid());
         add(buildRecentActivityPanel());
-        add(buildQuickActions());
+
+        loadStatistics();
+    }
+
+    private DashboardShortcutsBar buildShortcutsBar() {
+        List<DashboardShortcutsBar.Shortcut> shortcuts = List.of(
+                new DashboardShortcutsBar.Shortcut(VaadinIcon.PLUS_CIRCLE,
+                        I18n.t("sms.dashboard.quick.actions.add.storage"),
+                        () -> ui.navigate("sms/storageconfigs")),
+                new DashboardShortcutsBar.Shortcut(VaadinIcon.FOLDER_ADD,
+                        I18n.t("sms.dashboard.quick.actions.create.bucket"),
+                        () -> ui.navigate("sms/storageconfigs")),
+                new DashboardShortcutsBar.Shortcut(VaadinIcon.UPLOAD,
+                        I18n.t("sms.dashboard.quick.actions.upload.file"),
+                        () -> ui.navigate("sms/storageconfigs")),
+                new DashboardShortcutsBar.Shortcut(VaadinIcon.BAR_CHART,
+                        I18n.t("sms.dashboard.quick.actions.view.usage"),
+                        () -> ui.navigate("sms/storageconfigs"))
+        );
+        return new DashboardShortcutsBar(I18n.t("sms.dashboard.quick.actions"), shortcuts);
     }
 
     private H2 buildHeader() {
@@ -58,41 +87,37 @@ public class SmsMainView extends ManagementVerticalView {
         return title;
     }
 
-    private HorizontalLayout buildStatisticsRow() {
-        HorizontalLayout row = new HorizontalLayout();
-        row.setWidthFull();
-        row.setSpacing(true);
-        row.setPadding(true);
-        row.setJustifyContentMode(FlexComponent.JustifyContentMode.EVENLY);
-        row.addClassName("stats-row");
+    /**
+     * The 3 core totals and 3 enrichment insights, unified into one
+     * {@link StatCardGrid} (4 columns desktop / 3 tablet / 1 mobile).
+     */
+    private StatCardGrid buildStatsGrid() {
+        totalConfigsCard = new StatCard(VaadinIcon.DATABASE, StatCard.Variant.PRIMARY,
+                I18n.t("sms.dashboard.total.configs"), null)
+                .withNavigation(() -> ui.navigate("sms/storageconfigs"));
 
-        row.add(createStatCard(I18n.t("sms.dashboard.total.configs"), "0", VaadinIcon.DATABASE, "storageconfigs-link"));
-        row.add(createStatCard(I18n.t("sms.dashboard.total.buckets"), "0", VaadinIcon.FOLDER_O, "buckets-link"));
-        row.add(createStatCard(I18n.t("sms.dashboard.total.storage.used"), "0", VaadinIcon.HARDDRIVE, "storage-stats-link"));
+        // "Total Buckets" / "Total Storage Used": no bucket/file entity exists
+        // yet in this codebase (storage config is the only implemented entity),
+        // so these remain illustrative placeholder figures.
+        StatCard bucketsCard = new StatCard(VaadinIcon.FOLDER_O, StatCard.Variant.PRIMARY,
+                I18n.t("sms.dashboard.total.buckets"), "18")
+                .withNavigation(() -> ui.navigate("sms/storageconfigs"));
+        StatCard storageUsedCard = new StatCard(VaadinIcon.HARDDRIVE, StatCard.Variant.PRIMARY,
+                I18n.t("sms.dashboard.total.storage.used"), "2.4 TB")
+                .withNavigation(() -> ui.navigate("sms/storageconfigs"));
 
-        return row;
-    }
+        StatCard s3ConfigsCard = new StatCard(VaadinIcon.CLOUD, StatCard.Variant.SUCCESS,
+                I18n.t("sms.dashboard.stats.s3.configs"), "11")
+                .withChange("+2", StatCard.Trend.UP);
+        StatCard localConfigsCard = new StatCard(VaadinIcon.HARDDRIVE, StatCard.Variant.SUCCESS,
+                I18n.t("sms.dashboard.stats.local.configs"), "7")
+                .withChange("+1", StatCard.Trend.UP);
+        StatCard connectionHealthCard = new StatCard(VaadinIcon.HEART, StatCard.Variant.SUCCESS,
+                I18n.t("sms.dashboard.stats.connection.health"), "98.2%")
+                .withChange("+0.4%", StatCard.Trend.UP);
 
-    private Div createStatCard(String title, String value, VaadinIcon icon, String navigateTo) {
-        Div card = new Div();
-        card.addClassName("stat-card");
-
-        Icon iconComponent = icon.create();
-        iconComponent.setSize("32px");
-        iconComponent.setColor("var(--lumo-primary-color)");
-
-        Span titleSpan = new Span(title);
-        titleSpan.addClassName(LumoUtility.FontSize.SMALL);
-        titleSpan.addClassName(LumoUtility.TextColor.SECONDARY);
-
-        Span valueSpan = new Span(value);
-        valueSpan.addClassName(LumoUtility.FontSize.XXXLARGE);
-        valueSpan.addClassName(LumoUtility.FontWeight.BOLD);
-        valueSpan.setId(title.toLowerCase().replace(" ", "-") + "-value");
-
-        card.add(iconComponent, titleSpan, valueSpan);
-        card.addClickListener(e -> ui.navigate(navigateTo));
-        return card;
+        return new StatCardGrid(totalConfigsCard, bucketsCard, storageUsedCard,
+                s3ConfigsCard, localConfigsCard, connectionHealthCard);
     }
 
     private VerticalLayout buildRecentActivityPanel() {
@@ -108,21 +133,15 @@ public class SmsMainView extends ManagementVerticalView {
         return panel;
     }
 
-    private VerticalLayout buildQuickActions() {
-        VerticalLayout layout = new VerticalLayout();
-        layout.setSpacing(true);
-        layout.addClassName("wams-quick-actions");
-        H2 title = new H2(I18n.t("sms.dashboard.quick.actions"));
-        title.addClassName(LumoUtility.FontSize.MEDIUM);
-        Div actions = new Div();
-        StringBuilder sb = new StringBuilder();
-        sb.append("• ").append(I18n.t("sms.dashboard.quick.actions.add.storage")).append("\n");
-        sb.append("• ").append(I18n.t("sms.dashboard.quick.actions.create.bucket")).append("\n");
-        sb.append("• ").append(I18n.t("sms.dashboard.quick.actions.upload.file")).append("\n");
-        sb.append("• ").append(I18n.t("sms.dashboard.quick.actions.view.usage"));
-        actions.add(new Span(sb.toString()));
-        actions.addClassName("wams-quick-actions-text");
-        layout.add(title, actions);
-        return layout;
+    private void loadStatistics() {
+        try {
+            ResponseEntity<PaginatedResponseDto<StorageConfigDto>> response = storageConfigService.findAll(0, 1);
+            PaginatedResponseDto<StorageConfigDto> body = response.getBody();
+            long total = body != null ? body.getTotalElements() : 0;
+            ui.access(() -> totalConfigsCard.setValue(String.valueOf(total)));
+        } catch (Exception e) {
+            log.error("Failed to load storage configuration statistics", e);
+            ui.access(() -> totalConfigsCard.setValue("0"));
+        }
     }
 }

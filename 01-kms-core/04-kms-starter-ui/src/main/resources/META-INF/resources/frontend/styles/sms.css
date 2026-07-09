@@ -10,25 +10,9 @@
     margin-bottom: 10px;
 }
 
-.sms-dashboard .stat-card {
-    background: var(--lumo-base-color);
-    border-radius: var(--lumo-border-radius-l);
-    box-shadow: var(--lumo-box-shadow-xs);
-    padding: var(--lumo-space-m);
-    text-align: center;
-    flex: 1;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.sms-dashboard .stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--lumo-box-shadow-m);
-}
-
-.sms-dashboard .stats-row {
-    flex-wrap: wrap;
-}
+/* Stat cards now use the shared eu.isygoit.ui.common.component.StatCard /
+   StatCardGrid (.wams-stat-card / .wams-stat-grid in card.css) instead of
+   this module's own .stat-card/.stats-row/.sms-mini-stats-grid overrides. */
 
 .sms-dashboard .wams-recent-activity-panel {
     margin-top: 24px;
@@ -38,26 +22,6 @@
     padding: var(--lumo-space-m);
     background: var(--lumo-base-color);
     border-radius: var(--lumo-border-radius-m);
-}
-
-.sms-dashboard .wams-quick-actions {
-    gap: 10px;
-    margin-top: 24px;
-}
-
-.sms-dashboard .wams-quick-actions-text {
-    white-space: pre-line;
-}
-
-@media (max-width: 768px) {
-    .sms-dashboard .stat-card {
-        flex-basis: calc(50% - 16px);
-        margin-bottom: 16px;
-    }
-
-    .sms-dashboard .stats-row {
-        gap: 16px;
-    }
 }
 
 /* ── Storage config management view ───────────────────────────────────────── */
@@ -186,8 +150,4 @@
     flex: 1;
 }
 
-.storageconfig-details-dialog .wams-section-title {
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
-    margin-bottom: var(--lumo-space-s);
-    padding-bottom: var(--lumo-space-xs);
-}
+/* .wams-section-title's underline is now a single shared rule in card.css. */

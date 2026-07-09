@@ -24,8 +24,8 @@ import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.mms.views.msgtemplate.dialog.DeleteMsgTemplateDialog;
 import eu.isygoit.ui.mms.views.msgtemplate.dialog.EditMsgTemplateDialog;
 import eu.isygoit.ui.mms.views.msgtemplate.dialog.EditTemplateContentDialog;
-import eu.isygoit.ui.mms.views.msgtemplate.dialog.ViewMsgTemplateDialog;
-import eu.isygoit.ui.mms.views.sender.dialog.ViewSenderConfigDialog;
+import eu.isygoit.ui.mms.views.msgtemplate.dialog.MsgTemplateDetailsViewDialog;
+import eu.isygoit.ui.mms.views.sender.dialog.SenderConfigDetailsViewDialog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -345,7 +345,7 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
 
         // Essential fields only – quick-scan card. Everything else (tenant,
         // default sender, original file name, storage path, ...) lives in
-        // ViewMsgTemplateDialog, which shows every MsgTemplateDto field.
+        // MsgTemplateDetailsViewDialog, which shows every MsgTemplateDto field.
 
         bodyContainer.add(createDetailRowWithCopy(
                 VaadinIcon.CODE,
@@ -446,7 +446,7 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
     // ─── Action Methods ─────────────────────────────────────────────────────
 
     private void viewTemplate() {
-        new ViewMsgTemplateDialog(templateFileService, senderConfigService, template).open();
+        new MsgTemplateDetailsViewDialog(templateFileService, senderConfigService, template).open();
     }
 
     private void viewSenderConfig() {
@@ -454,14 +454,14 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         if (senderConfigId != null) {
             SenderConfigDto config = senderConfigCache.get(senderConfigId);
             if (config != null) {
-                new ViewSenderConfigDialog(config).open();
+                new SenderConfigDetailsViewDialog(config).open();
             } else {
                 // Try to load it fresh
                 try {
                     ResponseEntity<SenderConfigDto> response = senderConfigService.findById(senderConfigId);
                     if (response.getBody() != null) {
                         senderConfigCache.put(senderConfigId, response.getBody());
-                        new ViewSenderConfigDialog(response.getBody()).open();
+                        new SenderConfigDetailsViewDialog(response.getBody()).open();
                     } else {
                         Notification.show(I18n.t("mms.msgtemplate.card.view.sender.config.not.found"),
                                         3000, Notification.Position.BOTTOM_END)

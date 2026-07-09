@@ -18,7 +18,7 @@ import eu.isygoit.remote.ims.TenantImageService;
 import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.ims.views.tenant.dialog.DeleteTenantDialog;
-import eu.isygoit.ui.ims.views.tenant.dialog.TenantDetailsDialog;
+import eu.isygoit.ui.ims.views.tenant.dialog.TenantDetailsViewDialog;
 import eu.isygoit.ui.ims.views.tenant.dialog.ToggleTenantStatusDialog;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -102,7 +102,7 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
     @Override
     protected List<Button> buildActionButtons() {
         Button detailsBtn = createDetailsButton(I18n.t("ims.tenant.card.details.tooltip"),
-                () -> new TenantDetailsDialog(parentView, objectService, tenant.getId()).open());
+                () -> new TenantDetailsViewDialog(parentView, objectService, tenant.getId()).open());
 
         Button editBtn = createEditButton(I18n.t("ims.tenant.card.edit.tooltip"),
                 () -> parentView.openUpdateTenantDialog(tenant, () -> {

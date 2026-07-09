@@ -18,7 +18,7 @@ import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.remote.ims.CustomerImageService;
 import eu.isygoit.remote.ims.CustomerService;
 import eu.isygoit.ui.common.card.BaseCard;
-import eu.isygoit.ui.ims.views.customer.dialog.CustomerDetailsDialog;
+import eu.isygoit.ui.ims.views.customer.dialog.CustomerDetailsViewDialog;
 import eu.isygoit.ui.ims.views.customer.dialog.DeleteCustomerDialog;
 import eu.isygoit.ui.ims.views.customer.dialog.LinkCustomerAccountDialog;
 import eu.isygoit.ui.ims.views.customer.dialog.ToggleCustomerStatusDialog;
@@ -107,7 +107,7 @@ public class CustomerCard extends BaseCard<CustomerManagementView, CustomerServi
     @Override
     protected List<Button> buildActionButtons() {
         Button detailsBtn = createDetailsButton(I18n.t("ims.customer.card.details.tooltip"),
-                () -> new CustomerDetailsDialog(parentView, objectService, customer.getId()).open());
+                () -> new CustomerDetailsViewDialog(parentView, objectService, customer.getId()).open());
 
         Button editBtn = createEditButton(I18n.t("ims.customer.card.edit.tooltip"),
                 () -> parentView.openUpdateCustomerDialog(customer, () -> {

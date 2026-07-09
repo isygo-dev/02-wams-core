@@ -1,25 +1,32 @@
 package eu.isygoit.ui.mms;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.remote.mms.MsgTemplateService;
+import eu.isygoit.remote.mms.SenderConfigService;
+import eu.isygoit.ui.common.component.DashboardShortcutsBar;
+import eu.isygoit.ui.common.component.StatCard;
+import eu.isygoit.ui.common.component.StatCardGrid;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.mms.layout.MmsMainLayout;
 import eu.isygoit.ui.mms.views.dashboard.EmailStatisticsPanel;
 import eu.isygoit.ui.mms.views.dashboard.SenderConfigPanel;
 import eu.isygoit.ui.mms.views.dashboard.TemplateStatisticsPanel;
 import jakarta.annotation.security.PermitAll;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
+
+@Slf4j
 @RouteAlias(value = "mms/home", layout = MmsMainLayout.class)
 @UIScope
 @Route(value = "mms", layout = MmsMainLayout.class)
@@ -27,26 +34,45 @@ import org.springframework.beans.factory.annotation.Autowired;
 @PermitAll
 public class MmsMainView extends ManagementVerticalView {
 
+    private final SenderConfigService senderConfigService;
+    private final MsgTemplateService templateService;
+
     private final EmailStatisticsPanel emailStatsPanel;
     private final TemplateStatisticsPanel templateStatsPanel;
     private final SenderConfigPanel senderConfigPanel;
 
     @Autowired
-    public MmsMainView() {
+    public MmsMainView(SenderConfigService senderConfigService, MsgTemplateService templateService) {
+        this.senderConfigService = senderConfigService;
+        this.templateService = templateService;
+
         setSizeFull();
         setPadding(true);
         setSpacing(true);
         addClassName("mms-dashboard");
 
+        add(buildShortcutsBar());
         add(buildHeader());
-        add(buildStatsOverview());
+        add(buildStatsGrid());
         emailStatsPanel = new EmailStatisticsPanel();
         add(emailStatsPanel);
         templateStatsPanel = new TemplateStatisticsPanel();
         add(templateStatsPanel);
         senderConfigPanel = new SenderConfigPanel();
         add(senderConfigPanel);
-        add(buildQuickLinks());
+    }
+
+    private DashboardShortcutsBar buildShortcutsBar() {
+        return new DashboardShortcutsBar(I18n.t("mms.dashboard.quick.actions"), List.of(
+                new DashboardShortcutsBar.Shortcut(VaadinIcon.PLUS_CIRCLE, I18n.t("mms.dashboard.quick.create.sender"),
+                        () -> UI.getCurrent().navigate("mms/sender-config")),
+                new DashboardShortcutsBar.Shortcut(VaadinIcon.PLUS_CIRCLE, I18n.t("mms.dashboard.quick.create.template"),
+                        () -> UI.getCurrent().navigate("mms/templates")),
+                new DashboardShortcutsBar.Shortcut(VaadinIcon.START_COG, I18n.t("mms.dashboard.quick.compose.email"),
+                        () -> UI.getCurrent().navigate("mms/templates")),
+                new DashboardShortcutsBar.Shortcut(VaadinIcon.COG, I18n.t("mms.dashboard.quick.settings"),
+                        () -> UI.getCurrent().navigate("mms/sender-config"))
+        ));
     }
 
     private H2 buildHeader() {
@@ -56,91 +82,48 @@ public class MmsMainView extends ManagementVerticalView {
         return title;
     }
 
-    private HorizontalLayout buildStatsOverview() {
-        HorizontalLayout stats = new HorizontalLayout();
-        stats.setWidthFull();
-        stats.setSpacing(true);
-        stats.addClassName("stats-overview");
+    /**
+     * The 5 overview stats, unified into one {@link StatCardGrid} (4 columns
+     * desktop / 3 tablet / 1 mobile). Each card's subtitle (e.g. "Active
+     * configurations") is preserved as its tooltip.
+     */
+    private StatCardGrid buildStatsGrid() {
+        StatCard sendersCard = new StatCard(VaadinIcon.MAILBOX, StatCard.Variant.PRIMARY,
+                I18n.t("mms.dashboard.senders"), fetchSenderCount(), I18n.t("mms.dashboard.senders.subtitle"))
+                .withNavigation(() -> UI.getCurrent().navigate("mms/sender-config"));
+        StatCard templatesCard = new StatCard(VaadinIcon.FILE_TEXT, StatCard.Variant.PRIMARY,
+                I18n.t("mms.dashboard.templates"), fetchTemplateCount(), I18n.t("mms.dashboard.templates.subtitle"))
+                .withNavigation(() -> UI.getCurrent().navigate("mms/templates"));
+        // "Emails Sent" / "Queued": this app doesn't actually send/track emails
+        // yet, so these remain illustrative placeholder figures.
+        StatCard emailsSentCard = new StatCard(VaadinIcon.ENVELOPE, StatCard.Variant.PRIMARY,
+                I18n.t("mms.dashboard.emails.sent"), "1,234", I18n.t("mms.dashboard.emails.sent.subtitle"));
+        StatCard queuedCard = new StatCard(VaadinIcon.INFO_CIRCLE, StatCard.Variant.WARNING,
+                I18n.t("mms.dashboard.queued"), "12", I18n.t("mms.dashboard.queued.subtitle"));
+        StatCard deliveryRateCard = new StatCard(VaadinIcon.TRENDING_UP, StatCard.Variant.SUCCESS,
+                I18n.t("mms.dashboard.delivery.rate"), "98.4%", I18n.t("mms.dashboard.delivery.rate.subtitle"));
 
-        stats.add(createStatCard(VaadinIcon.MAILBOX, "mms.dashboard.senders", "2", I18n.t("mms.dashboard.senders.subtitle")));
-        stats.add(createStatCard(VaadinIcon.FILE_TEXT, "mms.dashboard.templates", "5", I18n.t("mms.dashboard.templates.subtitle")));
-        stats.add(createStatCard(VaadinIcon.ENVELOPE, "mms.dashboard.emails.sent", "1,234", I18n.t("mms.dashboard.emails.sent.subtitle")));
-        stats.add(createStatCard(VaadinIcon.INFO_CIRCLE, "mms.dashboard.queued", "12", I18n.t("mms.dashboard.queued.subtitle")));
-
-        return stats;
+        return new StatCardGrid(sendersCard, templatesCard, emailsSentCard, queuedCard, deliveryRateCard);
     }
 
-    private VerticalLayout createStatCard(VaadinIcon icon, String titleKey, String value, String subtitle) {
-        VerticalLayout card = new VerticalLayout();
-        card.addClassName("stat-card");
-        card.setSpacing(false);
-        card.setPadding(true);
-
-        Icon iconComponent = icon.create();
-        iconComponent.setSize("32px");
-        iconComponent.setColor("var(--lumo-primary-color)");
-
-        H2 valueLabel = new H2(value);
-        valueLabel.addClassName(LumoUtility.FontSize.XLARGE);
-        valueLabel.addClassName(LumoUtility.Margin.NONE);
-
-        Paragraph titleLabel = new Paragraph(I18n.t(titleKey));
-        titleLabel.addClassName(LumoUtility.TextColor.SECONDARY);
-        titleLabel.addClassName(LumoUtility.FontSize.SMALL);
-        titleLabel.addClassName(LumoUtility.Margin.NONE);
-
-        Paragraph subtitleLabel = new Paragraph(subtitle);
-        subtitleLabel.addClassName(LumoUtility.TextColor.TERTIARY);
-        subtitleLabel.addClassName(LumoUtility.FontSize.XSMALL);
-        subtitleLabel.addClassName(LumoUtility.Margin.NONE);
-
-        card.add(iconComponent, valueLabel, titleLabel, subtitleLabel);
-        card.setAlignItems(Alignment.START);
-
-        return card;
+    private String fetchSenderCount() {
+        try {
+            PaginatedResponseDto<?> body = senderConfigService.findAll(0, 1).getBody();
+            return body != null ? String.valueOf(body.getTotalElements()) : "0";
+        } catch (Exception e) {
+            log.warn("Unable to fetch sender configuration count for MMS dashboard: {}", e.getMessage());
+            return I18n.t("mms.common.value.notAvailable");
+        }
     }
 
-    private VerticalLayout buildQuickLinks() {
-        VerticalLayout layout = new VerticalLayout();
-        layout.setSpacing(true);
-        layout.addClassName("wams-quick-actions");
-
-        H2 title = new H2(I18n.t("mms.dashboard.quick.actions"));
-        title.addClassName(LumoUtility.FontSize.MEDIUM);
-
-        VerticalLayout actions = new VerticalLayout();
-        actions.setSpacing(false);
-        actions.add(
-                createQuickLink(VaadinIcon.PLUS_CIRCLE, "mms.dashboard.quick.create.sender"),
-                createQuickLink(VaadinIcon.PLUS_CIRCLE, "mms.dashboard.quick.create.template"),
-                createQuickLink(VaadinIcon.START_COG, "mms.dashboard.quick.compose.email"),
-                createQuickLink(VaadinIcon.COG, "mms.dashboard.quick.settings")
-        );
-
-        layout.add(title, actions);
-        return layout;
+    private String fetchTemplateCount() {
+        try {
+            PaginatedResponseDto<?> body = templateService.findAll(0, 1).getBody();
+            return body != null ? String.valueOf(body.getTotalElements()) : "0";
+        } catch (Exception e) {
+            log.warn("Unable to fetch template count for MMS dashboard: {}", e.getMessage());
+            return I18n.t("mms.common.value.notAvailable");
+        }
     }
 
-    private HorizontalLayout createQuickLink(VaadinIcon icon, String labelKey) {
-        HorizontalLayout link = new HorizontalLayout();
-        link.setSpacing(true);
-        link.setAlignItems(Alignment.CENTER);
-        link.addClassName("quick-link");
-
-        Icon iconComponent = icon.create();
-        iconComponent.setSize("16px");
-        iconComponent.setColor("var(--lumo-primary-color)");
-        iconComponent.addClassName("quick-link-icon");
-
-        Paragraph label = new Paragraph(I18n.t(labelKey));
-        label.addClassName(LumoUtility.FontSize.SMALL);
-        label.addClassName(LumoUtility.Margin.NONE);
-
-        link.add(iconComponent, label);
-        link.addClickListener(e -> {
-            // Navigate to appropriate view
-        });
-
-        return link;
-    }
 }

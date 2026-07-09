@@ -33,7 +33,7 @@ import eu.isygoit.remote.kms.KmsTokenService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.tokenizer.builder.dialog.ClaimsBuilderDialog;
-import eu.isygoit.ui.kms.views.tokenizer.builder.dialog.DecodeJwtDialog;
+import eu.isygoit.ui.kms.views.tokenizer.builder.dialog.JwtDetailsViewDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.http.ResponseEntity;
@@ -209,7 +209,7 @@ public class TokenBuilderView extends ManagementVerticalView {
     }
 
     private void showDecodeDialog(String jwtToken) {
-        new DecodeJwtDialog(objectMapper, jwtToken).open();
+        new JwtDetailsViewDialog(objectMapper, jwtToken).open();
     }
 
     private void buildToken() {

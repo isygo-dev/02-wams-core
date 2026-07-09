@@ -123,32 +123,203 @@
     white-space: pre-wrap;
 }
 
-/* ── Generic stat card (dashboard summary tiles) ─────────────────────────── */
+.wams-card__detail-field-value-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+}
+
+.wams-card__detail-field-value-row .wams-card__detail-field-value {
+    flex: 1 1 auto;
+}
+
+/* ── Section title (classifies a group of detail-grid fields by data type) ──
+   Shared by every "…DetailsViewDialog" via DetailsViewDialog#createSection();
+   the underline is what visually separates one data-type section from the
+   next, so it lives here once instead of being redeclared per module. */
+
+.wams-section-title {
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    margin-bottom: var(--lumo-space-s);
+    padding-bottom: var(--lumo-space-xs);
+}
+
+/* ── Copy-to-clipboard button (eu.isygoit.ui.common.component.ClipboardCopyButton) ── */
+
+.wams-copy-button {
+    color: var(--lumo-secondary-text-color);
+    flex-shrink: 0;
+}
+
+.wams-copy-button:hover {
+    color: var(--lumo-primary-color);
+}
+
+/* ── Stat card (eu.isygoit.ui.common.component.StatCard) ─────────────────────
+   Canonical dashboard KPI tile used by every module: circular colored icon,
+   bold value, uppercase label, optional up/down change indicator, and a thin
+   top accent bar whose color is set by the card's Variant (primary/success/
+   warning/neutral). Arrange several in a eu.isygoit.ui.common.component.
+   StatCardGrid (.wams-stat-grid below) for the standard 4/3/1-column
+   responsive layout. */
 
 .wams-stat-card {
-    border: 1px solid var(--lumo-contrast-20pct);
+    position: relative;
+    align-items: stretch;
+    gap: var(--lumo-space-s);
+    border: 1px solid var(--lumo-contrast-10pct);
     border-radius: var(--lumo-border-radius-l);
     box-shadow: var(--lumo-box-shadow-xs);
-    align-items: center;
-    flex: 1 1 180px;
     background-color: var(--lumo-base-color);
-    text-align: center;
-    transition: all 0.2s ease;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wams-stat-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--wams-stat-accent, var(--lumo-primary-color));
+}
+
+.wams-stat-card--primary {
+    --wams-stat-accent: var(--lumo-primary-color);
+    --wams-stat-icon-bg: var(--lumo-primary-color-10pct);
+    --wams-stat-icon-color: var(--lumo-primary-color);
+}
+
+.wams-stat-card--success {
+    --wams-stat-accent: var(--lumo-success-color);
+    --wams-stat-icon-bg: var(--lumo-success-color-10pct);
+    --wams-stat-icon-color: var(--lumo-success-color);
+}
+
+.wams-stat-card--warning {
+    --wams-stat-accent: var(--wams-warning-color);
+    --wams-stat-icon-bg: var(--wams-warning-bg-subtle);
+    --wams-stat-icon-color: var(--wams-warning-color);
+}
+
+.wams-stat-card--neutral {
+    --wams-stat-accent: var(--lumo-contrast-40pct);
+    --wams-stat-icon-bg: var(--lumo-contrast-10pct);
+    --wams-stat-icon-color: var(--lumo-secondary-text-color);
+}
+
+.wams-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--lumo-box-shadow-m);
+}
+
+.wams-stat-card--clickable {
+    cursor: pointer;
+}
+
+.wams-stat-card__header {
+    width: 100%;
+}
+
+.wams-stat-card__icon-circle {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--wams-stat-icon-bg, var(--lumo-primary-color-10pct));
 }
 
 .wams-stat-card__icon {
+    width: 20px;
+    height: 20px;
     color: var(--wams-stat-icon-color, var(--lumo-primary-color));
 }
 
 .wams-stat-card__value {
-    font-size: 28px;
-    font-weight: bold;
-    margin-top: 8px;
+    font-size: 30px;
+    line-height: 1.15;
+    font-weight: 700;
+    color: var(--lumo-header-text-color);
 }
 
 .wams-stat-card__label {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
     color: var(--lumo-secondary-text-color);
-    font-size: var(--lumo-font-size-s);
+}
+
+.wams-stat-card__change {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: var(--lumo-font-size-xs);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.wams-stat-card__change-arrow {
+    width: 12px;
+    height: 12px;
+}
+
+.wams-stat-card__change--up {
+    color: var(--lumo-success-color);
+}
+
+.wams-stat-card__change--down {
+    color: var(--lumo-error-color);
+}
+
+/* ── Skeleton loading state (StatCard#setValue(null)) ─────────────────────── */
+
+@keyframes wams-skeleton-shimmer {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+.wams-skeleton {
+    display: inline-block;
+    min-width: 3em;
+    min-height: 1em;
+    color: transparent !important;
+    background: linear-gradient(90deg, var(--lumo-contrast-10pct) 25%, var(--lumo-contrast-20pct) 37%, var(--lumo-contrast-10pct) 63%);
+    background-size: 400px 100%;
+    animation: wams-skeleton-shimmer 1.4s ease infinite;
+    border-radius: var(--lumo-border-radius-s);
+    user-select: none;
+}
+
+/* ── Stat card grid (eu.isygoit.ui.common.component.StatCardGrid) ────────────
+   4 columns desktop, 3 tablet, 1 mobile. */
+
+.wams-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--lumo-space-m);
+    width: 100%;
+}
+
+@media (max-width: 1024px) {
+    .wams-stat-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .wams-stat-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ── Dashboard favorites/shortcuts bar (eu.isygoit.ui.common.component.DashboardShortcutsBar) ──

@@ -3,28 +3,25 @@ package eu.isygoit.ui.dms.views.category.dialog;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.CategoryDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.dms.CategoryService;
-import eu.isygoit.ui.common.dialog.NoActionDialog;
+import eu.isygoit.ui.common.dialog.DetailsViewDialog;
 import eu.isygoit.ui.dms.views.category.CategoryManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class CategoryDetailsDialog extends NoActionDialog {
+public class CategoryDetailsViewDialog extends DetailsViewDialog {
 
     private final CategoryManagementView parentView;
     private final CategoryService categoryService;
     private final Long categoryId;
 
-    public CategoryDetailsDialog(CategoryManagementView parentView,
+    public CategoryDetailsViewDialog(CategoryManagementView parentView,
                                  CategoryService categoryService,
                                  Long categoryId) {
         super(I18n.t("dms.category.details.title"));
@@ -66,10 +63,10 @@ public class CategoryDetailsDialog extends NoActionDialog {
         mainLayout.setSpacing(true);
 
         // Identity section: the fields that identify/describe the category itself.
-        Div identityGrid = new Div();
-        identityGrid.addClassName("wams-card__detail-grid");
+        Div identityGrid = createDetailGrid();
 
-        addFieldToGrid(identityGrid, VaadinIcon.HASH, I18n.t("dms.category.details.field.id"), category.getId() != null ? String.valueOf(category.getId()) : null);
+        // ID is a copyable identifier, force the copy button on even though it's short.
+        addFieldToGrid(identityGrid, VaadinIcon.HASH, I18n.t("dms.category.details.field.id"), category.getId() != null ? String.valueOf(category.getId()) : null, true);
         addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("dms.category.details.field.name"), category.getName());
 
         mainLayout.add(createSection(I18n.t("dms.category.details.section.identity"), identityGrid));
@@ -82,8 +79,7 @@ public class CategoryDetailsDialog extends NoActionDialog {
         }
 
         // Audit section: who created/updated the category and when.
-        Div auditGrid = new Div();
-        auditGrid.addClassName("wams-card__detail-grid");
+        Div auditGrid = createDetailGrid();
 
         addFieldToGrid(auditGrid, VaadinIcon.USER_CHECK, I18n.t("dms.category.details.field.created.by"), category.getCreatedBy());
         addFieldToGrid(auditGrid, VaadinIcon.CALENDAR, I18n.t("dms.category.details.field.created.date"),
@@ -95,35 +91,6 @@ public class CategoryDetailsDialog extends NoActionDialog {
         mainLayout.add(createSection(I18n.t("dms.category.details.section.audit"), auditGrid));
 
         add(mainLayout);
-    }
-
-    private void addFieldToGrid(Div container, VaadinIcon icon, String label, String value) {
-        if (value == null || value.isBlank()) return;
-
-        VerticalLayout field = new VerticalLayout();
-        field.setPadding(false);
-        field.setSpacing(false);
-        field.addClassName("wams-card__detail-field");
-
-        HorizontalLayout labelRow = new HorizontalLayout();
-        labelRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        labelRow.setSpacing(false);
-        labelRow.addClassName("wams-card__detail-field-label-row");
-
-        Icon iconComponent = icon.create();
-        iconComponent.setSize("12px");
-        iconComponent.addClassName("detail-field-icon");
-
-        Span labelSpan = new Span(label);
-        labelSpan.addClassName("wams-card__detail-field-label");
-
-        labelRow.add(iconComponent, labelSpan);
-
-        Span valueSpan = new Span(value);
-        valueSpan.addClassName("wams-card__detail-field-value");
-
-        field.add(labelRow, valueSpan);
-        container.add(field);
     }
 
     private Component createDescriptionBlock(String description) {
@@ -139,18 +106,6 @@ public class CategoryDetailsDialog extends NoActionDialog {
                 .set("overflow", "visible")
                 .set("text-overflow", "unset");
         return descriptionSpan;
-    }
-
-    private Component createSection(String title, Component content) {
-        VerticalLayout section = new VerticalLayout();
-        section.setPadding(false);
-        section.setSpacing(false);
-        Span titleSpan = new Span(title);
-        titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
-        titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
-        titleSpan.addClassName("wams-section-title");
-        section.add(titleSpan, content);
-        return section;
     }
 
     private String extractErrorMessage(FeignException ex) {

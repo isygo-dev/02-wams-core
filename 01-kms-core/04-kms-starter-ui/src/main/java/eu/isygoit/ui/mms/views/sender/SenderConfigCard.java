@@ -18,7 +18,7 @@ import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.mms.views.sender.dialog.DeleteSenderConfigDialog;
 import eu.isygoit.ui.mms.views.sender.dialog.EditSenderConfigDialog;
 import eu.isygoit.ui.mms.views.sender.dialog.TestConnectionDialog;
-import eu.isygoit.ui.mms.views.sender.dialog.ViewSenderConfigDialog;
+import eu.isygoit.ui.mms.views.sender.dialog.SenderConfigDetailsViewDialog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 
@@ -242,7 +242,7 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
     }
 
     private void viewConfig() {
-        new ViewSenderConfigDialog(config).open();
+        new SenderConfigDetailsViewDialog(config).open();
     }
 
     @Override
@@ -251,7 +251,7 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
 
         // Essential fields only – quick-scan card. Configuration minutiae
         // (description, tenant, port, username, transport protocol, smtp
-        // auth, starttls enabled/required, debug) live in ViewSenderConfigDialog,
+        // auth, starttls enabled/required, debug) live in SenderConfigDetailsViewDialog,
         // which shows every SenderConfigDto field.
 
         // Code

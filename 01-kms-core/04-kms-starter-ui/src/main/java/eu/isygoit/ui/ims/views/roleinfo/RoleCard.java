@@ -14,7 +14,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.RoleInfoService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.ims.views.roleinfo.dialog.DeleteRoleDialog;
-import eu.isygoit.ui.ims.views.roleinfo.dialog.RoleDetailsDialog;
+import eu.isygoit.ui.ims.views.roleinfo.dialog.RoleDetailsViewDialog;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -60,7 +60,7 @@ public class RoleCard extends BaseCard<RoleManagementView, RoleInfoService> {
     @Override
     protected List<Button> buildActionButtons() {
         Button detailsBtn = createDetailsButton(I18n.t("ims.role.card.details.tooltip"),
-                () -> new RoleDetailsDialog(parentView, objectService, role.getId()).open());
+                () -> new RoleDetailsViewDialog(parentView, objectService, role.getId()).open());
 
         Button editBtn = createEditButton(I18n.t("ims.role.card.edit.tooltip"),
                 () -> parentView.openUpdateRoleDialog(role, () -> {

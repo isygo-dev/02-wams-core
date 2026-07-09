@@ -17,7 +17,7 @@ import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.card.BaseCard;
-import eu.isygoit.ui.kms.views.cryptography.keyStore.dialog.CustomKeyStoreDetailsDialog;
+import eu.isygoit.ui.kms.views.cryptography.keyStore.dialog.CustomKeyStoreDetailsViewDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyStore.dialog.DeleteCustomKeyStoreDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyStore.dialog.UpdateCustomKeyStoreDialog;
 import feign.FeignException;
@@ -143,7 +143,7 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
     // ── Action handlers ──────────────────────────────────────────────────────
 
     private void showDetails() {
-        new CustomKeyStoreDetailsDialog(store).open();
+        new CustomKeyStoreDetailsViewDialog(store).open();
     }
 
     private void confirmConnect() {

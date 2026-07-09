@@ -169,17 +169,7 @@
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
-.account-details-dialog .wams-section-title,
-.annex-details-dialog .wams-section-title,
-.application-details-dialog .wams-section-title,
-.customer-details-dialog .wams-section-title,
-.parameter-details-dialog .wams-section-title,
-.tenant-details-dialog .wams-section-title,
-.role-details-dialog .wams-section-title {
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
-    margin-bottom: var(--lumo-space-s);
-    padding-bottom: var(--lumo-space-xs);
-}
+/* .wams-section-title's underline is now a single shared rule in card.css. */
 
 .account-details-dialog .detail-field-icon,
 .annex-details-dialog .detail-field-icon,
@@ -343,61 +333,25 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   ImsMainView — dashboard (stat cards, activity panel, quick actions)
+   ImsMainView — dashboard (shortcuts bar, stat cards, mini-stats, activity)
    ══════════════════════════════════════════════════════════════════════════ */
 
 .ims-dashboard .dashboard-title {
-    margin-bottom: 10px;
+    margin-bottom: var(--lumo-space-s);
 }
 
-.ims-dashboard .stats-row {
-    flex-wrap: wrap;
-}
-
-.ims-dashboard .stat-card {
-    background: var(--lumo-base-color);
-    border-radius: var(--lumo-border-radius-l);
-    box-shadow: var(--lumo-box-shadow-xs);
-    padding: var(--lumo-space-m);
-    text-align: center;
-    flex: 1;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.ims-dashboard .stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--lumo-box-shadow-m);
-}
+/* Stat cards now use the shared eu.isygoit.ui.common.component.StatCard /
+   StatCardGrid (.wams-stat-card / .wams-stat-grid in card.css) instead of
+   this module's own .stat-card/.stats-row/.wams-mini-stats-grid overrides. */
 
 .ims-dashboard .activity-panel {
-    margin-top: 24px;
+    margin-top: var(--lumo-space-m);
 }
 
 .ims-dashboard .activity-panel-content {
     padding: var(--lumo-space-m);
     background: var(--lumo-base-color);
     border-radius: var(--lumo-border-radius-m);
-}
-
-.ims-dashboard .quick-actions {
-    gap: 10px;
-    margin-top: 24px;
-}
-
-.ims-dashboard .quick-actions-list {
-    white-space: pre-line;
-}
-
-@media (max-width: 768px) {
-    .ims-dashboard .stat-card {
-        flex-basis: calc(50% - 16px);
-        margin-bottom: 16px;
-    }
-
-    .ims-dashboard .stats-row {
-        gap: 16px;
-    }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
