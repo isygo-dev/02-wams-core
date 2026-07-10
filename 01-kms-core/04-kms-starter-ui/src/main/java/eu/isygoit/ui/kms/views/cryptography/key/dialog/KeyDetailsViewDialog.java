@@ -45,10 +45,10 @@ public class KeyDetailsViewDialog extends DetailsViewDialog {
     private final DescribeKeyResponse.KeyMetadata metadata;
 
     public KeyDetailsViewDialog(KeyManagementView parentView,
-                             KmsApiService kmsApiService,
-                             ObjectMapper objectMapper,
-                             String keyId,
-                             DescribeKeyResponse.KeyMetadata metadata) {
+                                KmsApiService kmsApiService,
+                                ObjectMapper objectMapper,
+                                String keyId,
+                                DescribeKeyResponse.KeyMetadata metadata) {
         super(I18n.t("kms.key.dialog.describe.title"));
         this.parentView = parentView;
         this.kmsApiService = kmsApiService;
@@ -128,7 +128,9 @@ public class KeyDetailsViewDialog extends DetailsViewDialog {
 
     // ─── Section builders (strictly grouped by data type) ───────────────────
 
-    /** Identity — free-text identifying fields. */
+    /**
+     * Identity — free-text identifying fields.
+     */
     private Component buildIdentityGrid() {
         Div grid = createDetailGrid();
         addFieldToGrid(grid, VaadinIcon.KEY, I18n.t("kms.key.dialog.describe.field.key.id"), metadata.getKeyId(), true);
@@ -140,7 +142,9 @@ public class KeyDetailsViewDialog extends DetailsViewDialog {
         return grid;
     }
 
-    /** Classification &amp; status — enums/booleans describing what the key is and its current state. */
+    /**
+     * Classification &amp; status — enums/booleans describing what the key is and its current state.
+     */
     private Component buildClassificationGrid() {
         Div grid = createDetailGrid();
         addFieldToGrid(grid, VaadinIcon.FLAG, I18n.t("kms.key.dialog.describe.field.status"),
@@ -161,7 +165,9 @@ public class KeyDetailsViewDialog extends DetailsViewDialog {
         return grid;
     }
 
-    /** Cryptographic configuration — rotation, current version, algorithm lists, multi-region config. */
+    /**
+     * Cryptographic configuration — rotation, current version, algorithm lists, multi-region config.
+     */
     private Component buildCryptoGrid() {
         Div grid = createDetailGrid();
         addFieldToGrid(grid, VaadinIcon.REFRESH, I18n.t("kms.key.dialog.describe.field.rotation.enabled"),
@@ -189,7 +195,9 @@ public class KeyDetailsViewDialog extends DetailsViewDialog {
         return grid;
     }
 
-    /** Dates — every timestamp / date-window field. */
+    /**
+     * Dates — every timestamp / date-window field.
+     */
     private Component buildDatesGrid() {
         Div grid = createDetailGrid();
         addFieldToGrid(grid, VaadinIcon.CALENDAR, I18n.t("kms.key.dialog.describe.field.creation.date"),

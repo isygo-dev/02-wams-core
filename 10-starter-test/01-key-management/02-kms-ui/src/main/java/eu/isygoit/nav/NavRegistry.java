@@ -21,26 +21,6 @@ import java.util.List;
  */
 public final class NavRegistry implements INavRegistry {
 
-    /**
-     * i18n key for a module's full display name (e.g. "Identity Management"
-     * for "ims") shown as the group header above that module's results in
-     * {@link AppSearchBar}. Deliberately shorter than the landing page's
-     * "... Service" card titles ({@code common.landing.<key>.title}) — this
-     * is a compact dropdown group header, not a full module-picker card.
-     */
-    public String moduleLabelKey(String moduleKey) {
-        return "common.nav.module." + moduleKey;
-    }
-
-    /**
-     * Get all navigation targets.
-     *
-     * @return list of all navigation targets
-     */
-    public List<NavTarget> getAll() {
-        return ALL;
-    }
-
     private static final List<NavTarget> ALL = List.of(
             // IMS
             new NavTarget("ims.nav.dashboard", "ims", VaadinIcon.HOME, "ims"),
@@ -89,5 +69,25 @@ public final class NavRegistry implements INavRegistry {
     );
 
     NavRegistry() {
+    }
+
+    /**
+     * i18n key for a module's full display name (e.g. "Identity Management"
+     * for "ims") shown as the group header above that module's results in
+     * {@link AppSearchBar}. Deliberately shorter than the landing page's
+     * "... Service" card titles ({@code common.landing.<key>.title}) — this
+     * is a compact dropdown group header, not a full module-picker card.
+     */
+    public String moduleLabelKey(String moduleKey) {
+        return "common.nav.module." + moduleKey;
+    }
+
+    /**
+     * Get all navigation targets.
+     *
+     * @return list of all navigation targets
+     */
+    public List<NavTarget> getAll() {
+        return ALL;
     }
 }

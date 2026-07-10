@@ -23,8 +23,8 @@ public class RoleDetailsViewDialog extends DetailsViewDialog {
     private final Long roleId;
 
     public RoleDetailsViewDialog(RoleManagementView parentView,
-                             RoleInfoService roleService,
-                             Long roleId) {
+                                 RoleInfoService roleService,
+                                 Long roleId) {
         super(I18n.t("ims.role.details.title"));
         this.parentView = parentView;
         this.roleService = roleService;

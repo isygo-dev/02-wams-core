@@ -20,8 +20,8 @@ public class VCalendarDetailsViewDialog extends DetailsViewDialog {
     private final Long calendarId;
 
     public VCalendarDetailsViewDialog(VCalendarManagementView parentView,
-                                  VCalendarService calendarService,
-                                  Long calendarId) {
+                                      VCalendarService calendarService,
+                                      Long calendarId) {
         super(I18n.t("cms.calendar.details.title"));
         this.parentView = parentView;
         this.calendarService = calendarService;

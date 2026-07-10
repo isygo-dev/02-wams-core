@@ -20,8 +20,8 @@ public class ParameterDetailsViewDialog extends DetailsViewDialog {
     private final Long parameterId;
 
     public ParameterDetailsViewDialog(ParameterManagementView parentView,
-                                  AppParameterService parameterService,
-                                  Long parameterId) {
+                                      AppParameterService parameterService,
+                                      Long parameterId) {
         super(I18n.t("ims.parameter.details.title"));
         this.parentView = parentView;
         this.parameterService = parameterService;

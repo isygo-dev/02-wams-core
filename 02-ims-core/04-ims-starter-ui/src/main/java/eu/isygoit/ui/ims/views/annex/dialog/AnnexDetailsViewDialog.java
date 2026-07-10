@@ -20,8 +20,8 @@ public class AnnexDetailsViewDialog extends DetailsViewDialog {
     private final Long annexId;
 
     public AnnexDetailsViewDialog(AnnexManagementView parentView,
-                              AnnexService annexService,
-                              Long annexId) {
+                                  AnnexService annexService,
+                                  Long annexId) {
         super(I18n.t("ims.annex.details.title"));
         this.parentView = parentView;
         this.annexService = annexService;

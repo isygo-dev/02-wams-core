@@ -66,14 +66,14 @@ html {
     --lumo-box-shadow-xl: 0 12px 24px -6px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.12);
 
     /* ── Type scale: denser than Lumo's default, matching Jira's UI density ── */
-    --lumo-font-size-xxs: 0.6875rem;  /* 11px */
-    --lumo-font-size-xs: 0.75rem;     /* 12px */
-    --lumo-font-size-s: 0.8125rem;    /* 13px */
-    --lumo-font-size-m: 0.875rem;     /* 14px — base body size */
-    --lumo-font-size-l: 1rem;         /* 16px */
-    --lumo-font-size-xl: 1.25rem;     /* 20px */
-    --lumo-font-size-xxl: 1.5rem;     /* 24px */
-    --lumo-font-size-xxxl: 1.75rem;   /* 28px */
+    --lumo-font-size-xxs: 0.6875rem; /* 11px */
+    --lumo-font-size-xs: 0.75rem; /* 12px */
+    --lumo-font-size-s: 0.8125rem; /* 13px */
+    --lumo-font-size-m: 0.875rem; /* 14px — base body size */
+    --lumo-font-size-l: 1rem; /* 16px */
+    --lumo-font-size-xl: 1.25rem; /* 20px */
+    --lumo-font-size-xxl: 1.5rem; /* 24px */
+    --lumo-font-size-xxxl: 1.75rem; /* 28px */
 
     /* ── Responsive breakpoints (shared reference, used via media queries — CSS
        custom properties can't be used inside @media conditions, so these are

@@ -34,55 +34,6 @@ import java.util.stream.IntStream;
 public abstract class BaseLandingView extends BaseMainLayout {
 
     /**
-     * Module record containing all metadata for a module.
-     *
-     * @param shortName  Display name
-     * @param moduleKey  Unique identifier
-     * @param icon       VaadinIcon for the module
-     * @param route      Navigation route (defaults to moduleKey)
-     */
-    public record ModuleInfo(
-            String shortName,
-            String moduleKey,
-            VaadinIcon icon,
-            String route
-    ) {
-        /**
-         * Convenience constructor with default route = moduleKey.
-         */
-        public ModuleInfo(String shortName, String moduleKey, VaadinIcon icon) {
-            this(shortName, moduleKey, icon, moduleKey);
-        }
-
-        /**
-         * Get the i18n prefix for this module.
-         *
-         * @return i18n key prefix for module-specific strings
-         */
-        public String getI18nPrefix() {
-            return "common.landing." + moduleKey;
-        }
-
-        /**
-         * Get the CSS module class name.
-         *
-         * @return CSS class for module theming
-         */
-        public String getModuleClass() {
-            return "wams-module-" + moduleKey;
-        }
-
-        /**
-         * Get the CSS accent class name for module colors.
-         *
-         * @return CSS class for accent styling
-         */
-        public String getAccentClass() {
-            return "wams-accent-" + moduleKey;
-        }
-    }
-
-    /**
      * Decor position configuration for floating icons.
      */
     private static final String[][] DECOR_POSITIONS = {
@@ -93,7 +44,6 @@ public abstract class BaseLandingView extends BaseMainLayout {
             {"70px", "50%", "0.5s"},
             {"190px", "10%", "1s"}
     };
-
     private final transient UI ui;
 
     /**
@@ -129,8 +79,6 @@ public abstract class BaseLandingView extends BaseMainLayout {
         return "";
     }
 
-    // ─── MAIN CONTENT ────────────────────────────────────────────────────────
-
     private Component buildMainContent() {
         VerticalLayout main = new VerticalLayout();
         main.setPadding(false);
@@ -147,7 +95,7 @@ public abstract class BaseLandingView extends BaseMainLayout {
         return main;
     }
 
-    // ─── HERO SECTION ──────────────────────────────────────────────────────
+    // ─── MAIN CONTENT ────────────────────────────────────────────────────────
 
     private Div buildHero() {
         Div hero = new Div();
@@ -200,6 +148,8 @@ public abstract class BaseLandingView extends BaseMainLayout {
         return hero;
     }
 
+    // ─── HERO SECTION ──────────────────────────────────────────────────────
+
     private Div createFloatingDecor(VaadinIcon icon, String moduleKey, String offsetX, String offsetY, String delay) {
         Div decor = new Div();
         decor.addClassName("wams-floating-decor");
@@ -215,8 +165,6 @@ public abstract class BaseLandingView extends BaseMainLayout {
 
         return decor;
     }
-
-    // ─── CARDS CONTAINER ──────────────────────────────────────────────────
 
     private HorizontalLayout buildCardsContainer() {
         HorizontalLayout container = new HorizontalLayout();
@@ -236,6 +184,8 @@ public abstract class BaseLandingView extends BaseMainLayout {
 
         return container;
     }
+
+    // ─── CARDS CONTAINER ──────────────────────────────────────────────────
 
     private Div createCard(ModuleInfo module, String delay) {
         String i18nPrefix = module.getI18nPrefix();
@@ -341,9 +291,9 @@ public abstract class BaseLandingView extends BaseMainLayout {
     /**
      * Ripple effect positioned at the click point.
      *
-     * @param card     The card element
-     * @param clientX  X coordinate of the click
-     * @param clientY  Y coordinate of the click
+     * @param card    The card element
+     * @param clientX X coordinate of the click
+     * @param clientY Y coordinate of the click
      */
     private void triggerRippleEffect(Div card, double clientX, double clientY) {
         UI.getCurrent().getPage().executeJs(
@@ -371,8 +321,6 @@ public abstract class BaseLandingView extends BaseMainLayout {
         }
     }
 
-    // ─── FOOTER ──────────────────────────────────────────────────────────────
-
     private Div buildFooter() {
         Div footer = new Div();
         footer.addClassName("wams-landing-footer");
@@ -386,7 +334,7 @@ public abstract class BaseLandingView extends BaseMainLayout {
         return footer;
     }
 
-    // ─── UTILITY METHODS ──────────────────────────────────────────────────
+    // ─── FOOTER ──────────────────────────────────────────────────────────────
 
     /**
      * Get a module by its key.
@@ -400,6 +348,8 @@ public abstract class BaseLandingView extends BaseMainLayout {
                 .findFirst()
                 .orElse(null);
     }
+
+    // ─── UTILITY METHODS ──────────────────────────────────────────────────
 
     /**
      * Get the icon for a module key.
@@ -420,5 +370,54 @@ public abstract class BaseLandingView extends BaseMainLayout {
      */
     public boolean moduleExists(String moduleKey) {
         return getModuleByKey(moduleKey) != null;
+    }
+
+    /**
+     * Module record containing all metadata for a module.
+     *
+     * @param shortName Display name
+     * @param moduleKey Unique identifier
+     * @param icon      VaadinIcon for the module
+     * @param route     Navigation route (defaults to moduleKey)
+     */
+    public record ModuleInfo(
+            String shortName,
+            String moduleKey,
+            VaadinIcon icon,
+            String route
+    ) {
+        /**
+         * Convenience constructor with default route = moduleKey.
+         */
+        public ModuleInfo(String shortName, String moduleKey, VaadinIcon icon) {
+            this(shortName, moduleKey, icon, moduleKey);
+        }
+
+        /**
+         * Get the i18n prefix for this module.
+         *
+         * @return i18n key prefix for module-specific strings
+         */
+        public String getI18nPrefix() {
+            return "common.landing." + moduleKey;
+        }
+
+        /**
+         * Get the CSS module class name.
+         *
+         * @return CSS class for module theming
+         */
+        public String getModuleClass() {
+            return "wams-module-" + moduleKey;
+        }
+
+        /**
+         * Get the CSS accent class name for module colors.
+         *
+         * @return CSS class for accent styling
+         */
+        public String getAccentClass() {
+            return "wams-accent-" + moduleKey;
+        }
     }
 }

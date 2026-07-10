@@ -20,8 +20,8 @@ public class TenantDetailsViewDialog extends DetailsViewDialog {
     private final Long tenantId;
 
     public TenantDetailsViewDialog(TenantManagementView parentView,
-                               TenantService tenantService,
-                               Long tenantId) {
+                                   TenantService tenantService,
+                                   Long tenantId) {
         super(I18n.t("ims.tenant.details.title"));
         this.parentView = parentView;
         this.tenantService = tenantService;

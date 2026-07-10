@@ -33,15 +33,6 @@ public class AppSearchBar extends ComboBox<AppSearchBar.SearchItem> {
 
     private INavRegistry navRegistry;
 
-    public sealed interface SearchItem permits ModuleHeader, TargetItem {
-    }
-
-    public record ModuleHeader(String moduleKey) implements SearchItem {
-    }
-
-    public record TargetItem(INavRegistry.NavTarget target) implements SearchItem {
-    }
-
     public AppSearchBar(INavRegistry navRegistry) {
         this.navRegistry = navRegistry;
         addClassName("wams-app-search");
@@ -139,5 +130,14 @@ public class AppSearchBar extends ComboBox<AppSearchBar.SearchItem> {
         return this.navRegistry.getAll().stream()
                 .filter(target -> target.moduleKey().equals(header.moduleKey()))
                 .anyMatch(target -> I18n.t(target.labelKey()).toLowerCase().contains(term));
+    }
+
+    public sealed interface SearchItem permits ModuleHeader, TargetItem {
+    }
+
+    public record ModuleHeader(String moduleKey) implements SearchItem {
+    }
+
+    public record TargetItem(INavRegistry.NavTarget target) implements SearchItem {
     }
 }

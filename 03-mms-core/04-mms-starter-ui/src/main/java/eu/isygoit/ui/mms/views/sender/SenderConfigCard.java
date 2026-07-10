@@ -17,8 +17,8 @@ import eu.isygoit.remote.mms.SenderConfigService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.mms.views.sender.dialog.DeleteSenderConfigDialog;
 import eu.isygoit.ui.mms.views.sender.dialog.EditSenderConfigDialog;
-import eu.isygoit.ui.mms.views.sender.dialog.TestConnectionDialog;
 import eu.isygoit.ui.mms.views.sender.dialog.SenderConfigDetailsViewDialog;
+import eu.isygoit.ui.mms.views.sender.dialog.TestConnectionDialog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 

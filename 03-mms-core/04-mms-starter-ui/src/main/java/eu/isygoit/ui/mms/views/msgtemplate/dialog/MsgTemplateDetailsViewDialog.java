@@ -40,8 +40,8 @@ public class MsgTemplateDetailsViewDialog extends DetailsViewDialog {
     private String senderConfigTooltip;
 
     public MsgTemplateDetailsViewDialog(MsgTemplateFileService templateFileService,
-                                         SenderConfigService senderConfigService,
-                                         MsgTemplateDto template) {
+                                        SenderConfigService senderConfigService,
+                                        MsgTemplateDto template) {
         super(I18n.t("mms.msgtemplate.dialog.view.title",
                 template.getName() != null ? template.getName() : template.getId()));
         this.templateFileService = templateFileService;

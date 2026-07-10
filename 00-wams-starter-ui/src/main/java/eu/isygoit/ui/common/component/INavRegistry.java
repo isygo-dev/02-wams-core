@@ -19,9 +19,6 @@ import java.util.List;
  */
 public interface INavRegistry {
 
-    public record NavTarget(String labelKey, String route, VaadinIcon icon, String moduleKey) {
-    }
-
     /**
      * i18n key for a module's full display name (e.g. "Identity Management"
      * for "ims") shown as the group header above that module's results in
@@ -37,4 +34,7 @@ public interface INavRegistry {
      * @return list of all navigation targets
      */
     public List<NavTarget> getAll();
+
+    public record NavTarget(String labelKey, String route, VaadinIcon icon, String moduleKey) {
+    }
 }

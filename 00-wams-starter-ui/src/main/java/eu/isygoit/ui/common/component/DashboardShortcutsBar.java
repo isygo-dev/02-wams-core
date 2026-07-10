@@ -17,9 +17,6 @@ import java.util.List;
  */
 public class DashboardShortcutsBar extends HorizontalLayout {
 
-    public record Shortcut(VaadinIcon icon, String label, Runnable action) {
-    }
-
     public DashboardShortcutsBar(String title, List<Shortcut> shortcuts) {
         addClassName("wams-dashboard-shortcuts");
         setWidthFull();
@@ -45,5 +42,8 @@ public class DashboardShortcutsBar extends HorizontalLayout {
 
         add(items);
         expand(items);
+    }
+
+    public record Shortcut(VaadinIcon icon, String label, Runnable action) {
     }
 }

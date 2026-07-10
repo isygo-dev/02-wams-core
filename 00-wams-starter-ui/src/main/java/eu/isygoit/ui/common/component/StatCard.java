@@ -18,26 +18,14 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
  */
 public class StatCard extends VerticalLayout {
 
-    /** Semantic color coding, mapped to Lumo theme colors. */
-    public enum Variant {
-        PRIMARY, SUCCESS, WARNING, NEUTRAL
-    }
-
-    /** Direction of the optional change indicator (e.g. "+12%", "-3"). */
-    public enum Trend {
-        UP, DOWN, NONE
-    }
-
     private final Div iconCircle;
     private final Span valueSpan;
     private final Span changeSpan;
     private final Icon changeArrow;
     private final Span changeText;
-
     public StatCard(VaadinIcon icon, Variant variant, String label, String value) {
         this(icon, variant, label, value, null);
     }
-
     public StatCard(VaadinIcon icon, Variant variant, String label, String value, String tooltip) {
         setSpacing(false);
         setPadding(true);
@@ -126,5 +114,19 @@ public class StatCard extends VerticalLayout {
         changeArrow.getElement().setAttribute("icon",
                 trend == Trend.UP ? "vaadin:arrow-up" : "vaadin:arrow-down");
         changeText.setText(changeLabel);
+    }
+
+    /**
+     * Semantic color coding, mapped to Lumo theme colors.
+     */
+    public enum Variant {
+        PRIMARY, SUCCESS, WARNING, NEUTRAL
+    }
+
+    /**
+     * Direction of the optional change indicator (e.g. "+12%", "-3").
+     */
+    public enum Trend {
+        UP, DOWN, NONE
     }
 }

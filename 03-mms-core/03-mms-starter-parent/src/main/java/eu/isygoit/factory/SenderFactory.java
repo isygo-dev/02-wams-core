@@ -2,7 +2,6 @@ package eu.isygoit.factory;
 
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumEmailTemplate;
-import eu.isygoit.model.MailMessage;
 import eu.isygoit.model.SenderConfig;
 import eu.isygoit.repository.SenderConfigRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -53,11 +52,11 @@ public class SenderFactory {
         }
 
         Optional<SenderConfig> optional = Optional.empty();
-        if(senderConfigId != null) {
+        if (senderConfigId != null) {
             optional = senderConfigRepository.findById(senderConfigId);
         }
 
-        if(!optional.isPresent()) {
+        if (!optional.isPresent()) {
             optional = senderConfigRepository.findFirstByTenantIgnoreCase(tenant);
         }
 

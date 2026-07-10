@@ -20,8 +20,8 @@ public class StorageConfigDetailsViewDialog extends DetailsViewDialog {
     private final Long configId;
 
     public StorageConfigDetailsViewDialog(StorageConfigManagementView parentView,
-                                      StorageConfigService storageConfigService,
-                                      Long configId) {
+                                          StorageConfigService storageConfigService,
+                                          Long configId) {
         super(I18n.t("sms.storageconfig.details.title"));
         this.parentView = parentView;
         this.storageConfigService = storageConfigService;

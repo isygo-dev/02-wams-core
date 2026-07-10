@@ -91,23 +91,6 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         createDrawer();
     }
 
-    protected abstract String getTitle();
-
-    /**
-     * Builds this module's navigation content (typically one or more
-     * {@code SideNav} instances wrapped in a {@code Scroller}). The base
-     * layout wraps the result together with the sidebar's icon-rail collapse
-     * toggle, so subclasses should NOT call {@code addToDrawer(...)}
-     * themselves. Return {@code null} for layouts with no sidebar at all
-     * (e.g. {@code LandingView}) — no drawer content or collapse toggle is
-     * added in that case.
-     */
-    protected abstract Component createDrawerContent();
-
-    protected String getModuleKey() {
-        return "";
-    }
-
     /**
      * Builds a leaf navigation item with its label also set as a Vaadin
      * tooltip, so it stays readable on hover when the sidebar is collapsed
@@ -126,6 +109,23 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         SideNavItem item = new SideNavItem(label, route, iconComponent);
         item.setTooltipText(label);
         return item;
+    }
+
+    protected abstract String getTitle();
+
+    /**
+     * Builds this module's navigation content (typically one or more
+     * {@code SideNav} instances wrapped in a {@code Scroller}). The base
+     * layout wraps the result together with the sidebar's icon-rail collapse
+     * toggle, so subclasses should NOT call {@code addToDrawer(...)}
+     * themselves. Return {@code null} for layouts with no sidebar at all
+     * (e.g. {@code LandingView}) — no drawer content or collapse toggle is
+     * added in that case.
+     */
+    protected abstract Component createDrawerContent();
+
+    protected String getModuleKey() {
+        return "";
     }
 
     private void createHeader() {

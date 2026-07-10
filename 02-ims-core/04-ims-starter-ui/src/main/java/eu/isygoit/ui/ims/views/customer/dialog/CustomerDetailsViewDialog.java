@@ -21,8 +21,8 @@ public class CustomerDetailsViewDialog extends DetailsViewDialog {
     private final Long customerId;
 
     public CustomerDetailsViewDialog(CustomerManagementView parentView,
-                                 CustomerService customerService,
-                                 Long customerId) {
+                                     CustomerService customerService,
+                                     Long customerId) {
         super(I18n.t("ims.customer.details.title"));
         this.parentView = parentView;
         this.customerService = customerService;

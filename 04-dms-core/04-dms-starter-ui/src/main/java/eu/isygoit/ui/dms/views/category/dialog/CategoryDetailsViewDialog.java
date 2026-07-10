@@ -22,8 +22,8 @@ public class CategoryDetailsViewDialog extends DetailsViewDialog {
     private final Long categoryId;
 
     public CategoryDetailsViewDialog(CategoryManagementView parentView,
-                                 CategoryService categoryService,
-                                 Long categoryId) {
+                                     CategoryService categoryService,
+                                     Long categoryId) {
         super(I18n.t("dms.category.details.title"));
         this.parentView = parentView;
         this.categoryService = categoryService;
