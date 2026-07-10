@@ -1,7 +1,7 @@
 package eu.isygoit.config;
 
 import com.vaadin.flow.i18n.I18NProvider;
-import eu.isygoit.i18n.AbstractI18nProvider;
+import eu.isygoit.i18n.CustomI18nProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +18,7 @@ public class VaadinConfig {
      * Enregistre le I18nProvider comme fournisseur de traductions Vaadin
      */
     @Bean
-    public I18NProvider i18nProvider(AbstractI18nProvider i18nProvider) {
+    public I18NProvider i18nProvider(CustomI18nProvider i18nProvider) {
         return i18nProvider;
     }
 }

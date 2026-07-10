@@ -15,12 +15,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
- * Header quick-navigation search: filters {@link NavRegistry#ALL} by its
+ * Header quick-navigation search: filters {@link INavRegistry#getAll()} by its
  * (locale-resolved) label as the user types, and navigates on selection.
  * Rounded, compact styling lives in {@code wams-app-search} (see layout.css).
  *
  * <p>Results are presented as a tree: a module header (full name, e.g.
- * "Identity Management" — see {@link NavRegistry#moduleLabelKey}) followed
+ * "Identity Management" — see {@link INavRegistry#moduleLabelKey}) followed
  * by that module's targets, indented underneath it. ComboBox has no native
  * optgroup/tree support, so this is built as a flat list of a sealed
  * {@link SearchItem} — a non-navigable {@link ModuleHeader} or a real
@@ -31,16 +31,19 @@ import java.util.List;
  */
 public class AppSearchBar extends ComboBox<AppSearchBar.SearchItem> {
 
+    private INavRegistry navRegistry;
+
     public sealed interface SearchItem permits ModuleHeader, TargetItem {
     }
 
     public record ModuleHeader(String moduleKey) implements SearchItem {
     }
 
-    public record TargetItem(NavRegistry.NavTarget target) implements SearchItem {
+    public record TargetItem(INavRegistry.NavTarget target) implements SearchItem {
     }
 
-    public AppSearchBar() {
+    public AppSearchBar(INavRegistry navRegistry) {
+        this.navRegistry = navRegistry;
         addClassName("wams-app-search");
         setPlaceholder(I18n.t("common.layout.header.search.placeholder"));
         setClearButtonVisible(true);
@@ -66,14 +69,14 @@ public class AppSearchBar extends ComboBox<AppSearchBar.SearchItem> {
         });
     }
 
-    private static List<SearchItem> buildTree() {
+    private List<SearchItem> buildTree() {
         List<SearchItem> result = new ArrayList<>();
         LinkedHashSet<String> moduleOrder = new LinkedHashSet<>();
-        NavRegistry.ALL.forEach(target -> moduleOrder.add(target.moduleKey()));
+        this.navRegistry.getAll().forEach(target -> moduleOrder.add(target.moduleKey()));
 
         for (String moduleKey : moduleOrder) {
             result.add(new ModuleHeader(moduleKey));
-            NavRegistry.ALL.stream()
+            this.navRegistry.getAll().stream()
                     .filter(target -> target.moduleKey().equals(moduleKey))
                     .map(TargetItem::new)
                     .forEach(result::add);
@@ -83,7 +86,7 @@ public class AppSearchBar extends ComboBox<AppSearchBar.SearchItem> {
 
     private String labelOf(SearchItem item) {
         return item instanceof ModuleHeader header
-                ? I18n.t(NavRegistry.moduleLabelKey(header.moduleKey()))
+                ? I18n.t(this.navRegistry.moduleLabelKey(header.moduleKey()))
                 : I18n.t(((TargetItem) item).target().labelKey());
     }
 
@@ -93,11 +96,11 @@ public class AppSearchBar extends ComboBox<AppSearchBar.SearchItem> {
         row.setSpacing(false);
         row.addClassName("wams-app-search__group-header");
         row.addClassName("wams-module-" + header.moduleKey());
-        row.add(new Span(I18n.t(NavRegistry.moduleLabelKey(header.moduleKey()))));
+        row.add(new Span(I18n.t(this.navRegistry.moduleLabelKey(header.moduleKey()))));
         return row;
     }
 
-    private HorizontalLayout buildTargetRow(NavRegistry.NavTarget target) {
+    private HorizontalLayout buildTargetRow(INavRegistry.NavTarget target) {
         HorizontalLayout row = new HorizontalLayout();
         row.setSpacing(true);
         row.setPadding(false);
@@ -124,16 +127,16 @@ public class AppSearchBar extends ComboBox<AppSearchBar.SearchItem> {
         }
         String term = filterText.trim().toLowerCase();
         if (item instanceof TargetItem targetItem) {
-            NavRegistry.NavTarget target = targetItem.target();
+            INavRegistry.NavTarget target = targetItem.target();
             return I18n.t(target.labelKey()).toLowerCase().contains(term)
                     || target.moduleKey().toLowerCase().contains(term);
         }
         ModuleHeader header = (ModuleHeader) item;
-        if (I18n.t(NavRegistry.moduleLabelKey(header.moduleKey())).toLowerCase().contains(term)
+        if (I18n.t(this.navRegistry.moduleLabelKey(header.moduleKey())).toLowerCase().contains(term)
                 || header.moduleKey().toLowerCase().contains(term)) {
             return true;
         }
-        return NavRegistry.ALL.stream()
+        return this.navRegistry.getAll().stream()
                 .filter(target -> target.moduleKey().equals(header.moduleKey()))
                 .anyMatch(target -> I18n.t(target.labelKey()).toLowerCase().contains(term));
     }

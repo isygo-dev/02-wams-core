@@ -1,6 +1,8 @@
-package eu.isygoit.ui.common.component;
+package eu.isygoit.nav;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
+import eu.isygoit.ui.common.component.AppSearchBar;
+import eu.isygoit.ui.common.component.INavRegistry;
 
 import java.util.List;
 
@@ -17,10 +19,7 @@ import java.util.List;
  * <p>{@code moduleKey} (kms/ims/dms/sms/cms/mms) classifies each target by
  * module so {@link AppSearchBar} can group/filter results by module.
  */
-public final class NavRegistry {
-
-    public record NavTarget(String labelKey, String route, VaadinIcon icon, String moduleKey) {
-    }
+public final class NavRegistry implements INavRegistry {
 
     /**
      * i18n key for a module's full display name (e.g. "Identity Management"
@@ -29,11 +28,20 @@ public final class NavRegistry {
      * "... Service" card titles ({@code common.landing.<key>.title}) — this
      * is a compact dropdown group header, not a full module-picker card.
      */
-    public static String moduleLabelKey(String moduleKey) {
+    public String moduleLabelKey(String moduleKey) {
         return "common.nav.module." + moduleKey;
     }
 
-    public static final List<NavTarget> ALL = List.of(
+    /**
+     * Get all navigation targets.
+     *
+     * @return list of all navigation targets
+     */
+    public List<NavTarget> getAll() {
+        return ALL;
+    }
+
+    private static final List<NavTarget> ALL = List.of(
             // IMS
             new NavTarget("ims.nav.dashboard", "ims", VaadinIcon.HOME, "ims"),
             new NavTarget("ims.nav.accounts", "ims/accounts", VaadinIcon.USER, "ims"),
@@ -80,6 +88,6 @@ public final class NavRegistry {
             new NavTarget("kms.nav.token.builder", "kms/token-builder", VaadinIcon.COG, "kms")
     );
 
-    private NavRegistry() {
+    NavRegistry() {
     }
 }

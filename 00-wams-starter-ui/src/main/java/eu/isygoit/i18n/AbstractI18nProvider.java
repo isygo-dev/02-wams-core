@@ -2,7 +2,6 @@ package eu.isygoit.i18n;
 
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
-import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.server.VaadinSession;
 
 import java.io.IOException;
@@ -15,7 +14,7 @@ import java.util.*;
  * Abstract base class for i18n providers that loads translations from multiple module-specific bundles.
  * Subclasses must provide the list of modules and supported locales.
  */
-public abstract class AbstractI18nProvider implements I18NProvider, LocaleChangeObserver {
+public abstract class AbstractI18nProvider implements CustomI18nProvider, LocaleChangeObserver {
 
     private final Map<Locale, Map<String, String>> translationsByLocale = new HashMap<>();
     private Locale defaultLocale;
@@ -61,7 +60,8 @@ public abstract class AbstractI18nProvider implements I18NProvider, LocaleChange
      *
      * @return the base path (default: "i18n/")
      */
-    protected String getBasePath() {
+    @Override
+    public String getBasePath() {
         return "i18n/";
     }
 
@@ -71,7 +71,8 @@ public abstract class AbstractI18nProvider implements I18NProvider, LocaleChange
      *
      * @return the file extension (default: ".properties")
      */
-    protected String getFileExtension() {
+    @Override
+    public String getFileExtension() {
         return ".properties";
     }
 
@@ -145,6 +146,7 @@ public abstract class AbstractI18nProvider implements I18NProvider, LocaleChange
     /**
      * Get a translation using the current session locale.
      */
+    @Override
     public String get(String key, Object... params) {
         Locale locale = VaadinSession.getCurrent() != null ?
                 VaadinSession.getCurrent().getLocale() :
@@ -155,6 +157,7 @@ public abstract class AbstractI18nProvider implements I18NProvider, LocaleChange
     /**
      * Get a translation for a specific locale.
      */
+    @Override
     public String get(String key, Locale locale, Object... params) {
         return getTranslation(key, locale, params);
     }
@@ -162,6 +165,7 @@ public abstract class AbstractI18nProvider implements I18NProvider, LocaleChange
     /**
      * Set the current locale.
      */
+    @Override
     public void setLocale(Locale locale) {
         if (VaadinSession.getCurrent() != null) {
             VaadinSession.getCurrent().setLocale(locale);
@@ -171,6 +175,7 @@ public abstract class AbstractI18nProvider implements I18NProvider, LocaleChange
     /**
      * Get the current locale.
      */
+    @Override
     public Locale getCurrentLocale() {
         return VaadinSession.getCurrent() != null ?
                 VaadinSession.getCurrent().getLocale() :
@@ -180,6 +185,7 @@ public abstract class AbstractI18nProvider implements I18NProvider, LocaleChange
     /**
      * Get the default locale.
      */
+    @Override
     public Locale getDefaultLocaleValue() {
         return defaultLocale;
     }
@@ -188,6 +194,7 @@ public abstract class AbstractI18nProvider implements I18NProvider, LocaleChange
      * Reload translations for a specific locale.
      * Useful for dynamic updates.
      */
+    @Override
     public void reloadLocale(Locale locale) {
         translationsByLocale.put(locale, loadMergedBundle(locale));
     }
@@ -195,6 +202,7 @@ public abstract class AbstractI18nProvider implements I18NProvider, LocaleChange
     /**
      * Reload all translations.
      */
+    @Override
     public void reloadAll() {
         for (Locale locale : getSupportedLocales()) {
             reloadLocale(locale);

@@ -18,9 +18,9 @@ public class I18n implements ApplicationContextAware {
 
     private static ApplicationContext context;
 
-    private static AbstractI18nProvider getProvider() {
+    private static CustomI18nProvider getProvider() {
         if (context != null) {
-            return context.getBean(AbstractI18nProvider.class);
+            return context.getBean(CustomI18nProvider.class);
         }
         return null;
     }
@@ -29,7 +29,7 @@ public class I18n implements ApplicationContextAware {
      * Obtient une traduction pour la clé donnée, en utilisant la locale de la session courante
      */
     public static String t(String key) {
-        AbstractI18nProvider provider = getProvider();
+        CustomI18nProvider provider = getProvider();
         if (provider != null) {
             return provider.get(key);
         }
@@ -41,7 +41,7 @@ public class I18n implements ApplicationContextAware {
      * Utilise MessageFormat pour substituer les paramètres {0}, {1}, etc.
      */
     public static String t(String key, Object... params) {
-        AbstractI18nProvider provider = getProvider();
+        CustomI18nProvider provider = getProvider();
         if (provider != null) {
             String message = provider.get(key);
             if (params != null && params.length > 0) {
@@ -59,7 +59,7 @@ public class I18n implements ApplicationContextAware {
      * Obtient une traduction pour une locale spécifique
      */
     public static String t(String key, Locale locale) {
-        AbstractI18nProvider provider = getProvider();
+        CustomI18nProvider provider = getProvider();
         if (provider != null) {
             return provider.get(key, locale);
         }
@@ -71,7 +71,7 @@ public class I18n implements ApplicationContextAware {
      * Utilise MessageFormat pour substituer les paramètres {0}, {1}, etc.
      */
     public static String t(String key, Locale locale, Object... params) {
-        AbstractI18nProvider provider = getProvider();
+        CustomI18nProvider provider = getProvider();
         if (provider != null) {
             String message = provider.get(key, locale);
             if (params != null && params.length > 0) {
@@ -89,7 +89,7 @@ public class I18n implements ApplicationContextAware {
      * Change la locale courante
      */
     public static void setLocale(Locale locale) {
-        AbstractI18nProvider provider = getProvider();
+        CustomI18nProvider provider = getProvider();
         if (provider != null) {
             provider.setLocale(locale);
         }
@@ -99,7 +99,7 @@ public class I18n implements ApplicationContextAware {
      * Obtient la locale courante
      */
     public static Locale getCurrentLocale() {
-        AbstractI18nProvider provider = getProvider();
+        CustomI18nProvider provider = getProvider();
         if (provider != null) {
             return provider.getCurrentLocale();
         }
@@ -110,7 +110,7 @@ public class I18n implements ApplicationContextAware {
      * Obtient la liste des locales supportées
      */
     public static List<Locale> getSupportedLocales() {
-        AbstractI18nProvider provider = getProvider();
+        CustomI18nProvider provider = getProvider();
         if (provider != null) {
             return provider.getProvidedLocales();
         }
@@ -121,7 +121,7 @@ public class I18n implements ApplicationContextAware {
      * Vérifie si une clé de traduction existe
      */
     public static boolean hasKey(String key) {
-        AbstractI18nProvider provider = getProvider();
+        CustomI18nProvider provider = getProvider();
         if (provider != null) {
             String result = provider.get(key);
             return result != null && !result.equals(key) && !result.equals("!" + key + "!");
@@ -133,7 +133,7 @@ public class I18n implements ApplicationContextAware {
      * Obtient une traduction avec une valeur par défaut si la clé n'existe pas
      */
     public static String tWithDefault(String key, String defaultValue, Object... params) {
-        AbstractI18nProvider provider = getProvider();
+        CustomI18nProvider provider = getProvider();
         if (provider != null) {
             String result = provider.get(key);
             // Check if translation is missing (returns "!key!") or key itself

@@ -32,6 +32,7 @@ import eu.isygoit.remote.ims.AccountImageService;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.ui.common.component.AppSearchBar;
 import eu.isygoit.ui.common.component.LanguageSelectorComponent;
+import eu.isygoit.ui.common.nav.NavRegistryProvider;
 import eu.isygoit.ui.common.spring.SpringContextUtil;
 import eu.isygoit.util.SecurityUtils;
 import feign.FeignException;
@@ -64,6 +65,7 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
 
     private static final String SIDEBAR_COLLAPSED_SESSION_KEY = "wams-sidebar-collapsed";
 
+    private final NavRegistryProvider navRegistryProvider;
     private final AccountService accountService;
     private final AccountImageService accountImageService;
     private Div rightSlot; // container for search/notifications/settings/language/profile
@@ -74,6 +76,7 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         // Retrieve services statically (layout is not a Spring bean)
         this.accountService = SpringContextUtil.getBean(AccountService.class);
         this.accountImageService = SpringContextUtil.getBean(AccountImageService.class);
+        this.navRegistryProvider = SpringContextUtil.getBean(NavRegistryProvider.class);
 
         if (!getModuleKey().isBlank()) {
             addClassName("wams-module-" + getModuleKey());
@@ -195,7 +198,7 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         rightContent.setSpacing(true);
         rightContent.setPadding(false);
 
-        Div searchSlot = new Div(new AppSearchBar());
+        Div searchSlot = new Div(new AppSearchBar(navRegistryProvider.getNavRegistry()));
         searchSlot.addClassName("wams-header-search-slot");
 
         HorizontalLayout iconCluster = new HorizontalLayout();
