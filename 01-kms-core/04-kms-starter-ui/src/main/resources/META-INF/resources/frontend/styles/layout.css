@@ -121,6 +121,10 @@ vaadin-drawer-toggle {
     width: 260px;
     max-width: 260px;
     border-radius: var(--lumo-border-radius-l);
+    /* Wider than the input itself so the tree's indented item rows have
+       room without wrapping — same technique used for
+       LanguageSelectorComponent's overlay. */
+    --lumo-combo-box-overlay-width: 300px;
 }
 
 .wams-app-search input {
@@ -129,6 +133,34 @@ vaadin-drawer-toggle {
 
 .wams-app-search__item-icon {
     color: var(--lumo-secondary-text-color);
+}
+
+/* Module group header (AppSearchBar.ModuleHeader) — the "parent" row of the
+   results tree: full module name, colored via the same --wams-module-accent
+   custom property as the landing page's module cards and the header's
+   module-accent top border (see modules.css), picked up from the
+   "wams-module-<key>" class the renderer puts on the row itself. Never
+   navigable (see AppSearchBar's value-change listener), so styled to read
+   as a label rather than a clickable item. */
+.wams-app-search__group-header {
+    padding: var(--lumo-space-xs) var(--lumo-space-s);
+    font-size: var(--lumo-font-size-xxs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--wams-module-accent, var(--lumo-secondary-text-color));
+    cursor: default;
+}
+
+.wams-app-search__group-header:not(:first-of-type) {
+    margin-top: var(--lumo-space-xs);
+    border-top: 1px solid var(--lumo-contrast-10pct);
+}
+
+/* Target row (AppSearchBar.TargetItem) — indented underneath its module
+   header to read as that header's child in the tree. */
+.wams-app-search__item-row {
+    padding-left: var(--lumo-space-m);
 }
 
 /* ── Language selector (eu.isygoit.ui.common.component.LanguageSelectorComponent) ── */
