@@ -23,6 +23,7 @@
         <module>01-ims-jpa</module>
         <module>02-ims-shared</module>
         <module>03-ims-starter-parent</module>
+        <module>04-ims-starter-ui</module>
     </modules>
 
     <build>

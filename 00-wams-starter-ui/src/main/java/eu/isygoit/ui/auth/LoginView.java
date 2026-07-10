@@ -58,7 +58,7 @@ public class LoginView extends BaseLoginView {
         // Brand
         Div brand = new Div();
         brand.addClassName("brand");
-        Avatar logo = new Avatar("KMS/IMS");
+        Avatar logo = new Avatar("IsyGo");
         logo.setColorIndex(0);
         logo.setWidth("64px");
         logo.setHeight("64px");

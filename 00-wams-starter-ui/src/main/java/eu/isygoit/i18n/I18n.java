@@ -18,9 +18,9 @@ public class I18n implements ApplicationContextAware {
 
     private static ApplicationContext context;
 
-    private static I18nProvider getProvider() {
+    private static AbstractI18nProvider getProvider() {
         if (context != null) {
-            return context.getBean(I18nProvider.class);
+            return context.getBean(AbstractI18nProvider.class);
         }
         return null;
     }
@@ -29,7 +29,7 @@ public class I18n implements ApplicationContextAware {
      * Obtient une traduction pour la clé donnée, en utilisant la locale de la session courante
      */
     public static String t(String key) {
-        I18nProvider provider = getProvider();
+        AbstractI18nProvider provider = getProvider();
         if (provider != null) {
             return provider.get(key);
         }
@@ -41,7 +41,7 @@ public class I18n implements ApplicationContextAware {
      * Utilise MessageFormat pour substituer les paramètres {0}, {1}, etc.
      */
     public static String t(String key, Object... params) {
-        I18nProvider provider = getProvider();
+        AbstractI18nProvider provider = getProvider();
         if (provider != null) {
             String message = provider.get(key);
             if (params != null && params.length > 0) {
@@ -59,7 +59,7 @@ public class I18n implements ApplicationContextAware {
      * Obtient une traduction pour une locale spécifique
      */
     public static String t(String key, Locale locale) {
-        I18nProvider provider = getProvider();
+        AbstractI18nProvider provider = getProvider();
         if (provider != null) {
             return provider.get(key, locale);
         }
@@ -71,7 +71,7 @@ public class I18n implements ApplicationContextAware {
      * Utilise MessageFormat pour substituer les paramètres {0}, {1}, etc.
      */
     public static String t(String key, Locale locale, Object... params) {
-        I18nProvider provider = getProvider();
+        AbstractI18nProvider provider = getProvider();
         if (provider != null) {
             String message = provider.get(key, locale);
             if (params != null && params.length > 0) {
@@ -89,7 +89,7 @@ public class I18n implements ApplicationContextAware {
      * Change la locale courante
      */
     public static void setLocale(Locale locale) {
-        I18nProvider provider = getProvider();
+        AbstractI18nProvider provider = getProvider();
         if (provider != null) {
             provider.setLocale(locale);
         }
@@ -99,32 +99,32 @@ public class I18n implements ApplicationContextAware {
      * Obtient la locale courante
      */
     public static Locale getCurrentLocale() {
-        I18nProvider provider = getProvider();
+        AbstractI18nProvider provider = getProvider();
         if (provider != null) {
             return provider.getCurrentLocale();
         }
-        return new Locale("en", "US");
+        return Locale.US;
     }
 
     /**
      * Obtient la liste des locales supportées
      */
     public static List<Locale> getSupportedLocales() {
-        I18nProvider provider = getProvider();
+        AbstractI18nProvider provider = getProvider();
         if (provider != null) {
             return provider.getProvidedLocales();
         }
-        return List.of(new Locale("en", "US"));
+        return List.of(Locale.US);
     }
 
     /**
      * Vérifie si une clé de traduction existe
      */
     public static boolean hasKey(String key) {
-        I18nProvider provider = getProvider();
+        AbstractI18nProvider provider = getProvider();
         if (provider != null) {
             String result = provider.get(key);
-            return result != null && !result.equals(key);
+            return result != null && !result.equals(key) && !result.equals("!" + key + "!");
         }
         return false;
     }
@@ -133,14 +133,25 @@ public class I18n implements ApplicationContextAware {
      * Obtient une traduction avec une valeur par défaut si la clé n'existe pas
      */
     public static String tWithDefault(String key, String defaultValue, Object... params) {
-        String result = t(key, params);
-        if (result == null || result.equals(key) || result.isBlank()) {
-            if (params != null && params.length > 0) {
-                return MessageFormat.format(defaultValue, params);
+        AbstractI18nProvider provider = getProvider();
+        if (provider != null) {
+            String result = provider.get(key);
+            // Check if translation is missing (returns "!key!") or key itself
+            if (result == null || result.equals(key) || result.equals("!" + key + "!") || result.isBlank()) {
+                if (params != null && params.length > 0) {
+                    return MessageFormat.format(defaultValue, params);
+                }
+                return defaultValue;
             }
-            return defaultValue;
+            if (params != null && params.length > 0) {
+                return MessageFormat.format(result, params);
+            }
+            return result;
         }
-        return result;
+        if (params != null && params.length > 0) {
+            return MessageFormat.format(defaultValue, params);
+        }
+        return defaultValue;
     }
 
     /**

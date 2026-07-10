@@ -68,7 +68,7 @@ public class RegisterView extends VerticalLayout implements BeforeEnterObserver 
         // Brand
         Div brand = new Div();
         brand.addClassName("brand");
-        Avatar logo = new Avatar("KMS/IMS");
+        Avatar logo = new Avatar("IsyGo");
         logo.setColorIndex(1);
         logo.setWidth("56px");
         logo.setHeight("56px");

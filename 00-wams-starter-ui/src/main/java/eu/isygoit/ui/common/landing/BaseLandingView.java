@@ -29,26 +29,6 @@ import java.util.stream.IntStream;
  * cards, and footer. Subclasses must implement {@link #getModules()} to provide
  * the list of modules to display.</p>
  *
- * <p>Each module is defined as a {@link ModuleInfo} record containing:
- * <ul>
- *   <li>shortName - Display name (e.g., "KMS")</li>
- *   <li>moduleKey - Unique identifier (e.g., "kms")</li>
- *   <li>icon - VaadinIcon for the module</li>
- *   <li>route - Navigation route (defaults to moduleKey)</li>
- * </ul>
- * </p>
- *
- * <p>Features:
- * <ul>
- *   <li>Automatic card generation from module list</li>
- *   <li>Staggered animation delays</li>
- *   <li>Floating decoration icons</li>
- *   <li>Ripple effect on card click</li>
- *   <li>i18n support for titles, descriptions, features, and buttons</li>
- *   <li>Module-specific CSS classes for theming</li>
- * </ul>
- * </p>
- *
  * @see ModuleInfo
  */
 public abstract class BaseLandingView extends BaseMainLayout {
@@ -56,8 +36,8 @@ public abstract class BaseLandingView extends BaseMainLayout {
     /**
      * Module record containing all metadata for a module.
      *
-     * @param shortName  Display name (e.g., "KMS")
-     * @param moduleKey  Unique identifier (e.g., "kms")
+     * @param shortName  Display name
+     * @param moduleKey  Unique identifier
      * @param icon       VaadinIcon for the module
      * @param route      Navigation route (defaults to moduleKey)
      */

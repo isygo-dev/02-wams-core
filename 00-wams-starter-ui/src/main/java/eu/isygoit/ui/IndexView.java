@@ -25,7 +25,6 @@ public class IndexView extends Div implements BeforeEnterObserver {
             if (redirect != null) {
                 event.forwardTo(redirect);
             } else {
-                // Forward to the landing page where user can choose KMS or IMS
                 event.forwardTo("landing");
             }
         } else {

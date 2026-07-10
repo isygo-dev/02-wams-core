@@ -19,12 +19,6 @@ public abstract class BaseLoginView extends VerticalLayout implements BeforeEnte
 
     protected String redirectTarget;
 
-    /**
-     * Common before‑enter logic for all login views:
-     * 1. Capture redirect from session (first) or query parameter.
-     * 2. If the user is already logged in, forward to the target (or default "/kms").
-     * 3. Otherwise, the view renders normally – subclasses may override {@link #onBeforeEnter(BeforeEnterEvent)}.
-     */
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         // Always try session first

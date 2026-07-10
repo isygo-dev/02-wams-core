@@ -23,6 +23,7 @@
         <module>01-mms-jpa</module>
         <module>02-mms-shared</module>
         <module>03-mms-starter-parent</module>
+        <module>04-mms-starter-ui</module>
     </modules>
 
     <build>

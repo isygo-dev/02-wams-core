@@ -23,6 +23,7 @@
         <module>01-dms-jpa</module>
         <module>02-dms-shared</module>
         <module>03-dms-starter-parent</module>
+        <module>04-dms-starter-ui</module>
     </modules>
 
     <build>

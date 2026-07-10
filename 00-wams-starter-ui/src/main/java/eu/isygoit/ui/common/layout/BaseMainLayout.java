@@ -101,12 +101,6 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
      */
     protected abstract Component createDrawerContent();
 
-    /**
-     * Short module key (kms, ims, mms, dms, sms, cms) used to apply this
-     * module's brand accent color via the {@code wams-module-<key>} CSS class
-     * (see {@code styles/modules.css}). Returns an empty string for layouts
-     * that should not carry a module accent (e.g. the landing page).
-     */
     protected String getModuleKey() {
         return "";
     }

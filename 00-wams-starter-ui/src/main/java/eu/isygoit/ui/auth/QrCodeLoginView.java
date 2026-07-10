@@ -66,7 +66,7 @@ public class QrCodeLoginView extends BaseLoginView {
         // Brand
         Div brand = new Div();
         brand.addClassName("brand");
-        Avatar logo = new Avatar("KMS/IMS");
+        Avatar logo = new Avatar("IsyGo");
         logo.setColorIndex(3);
         logo.setWidth("56px");
         logo.setHeight("56px");

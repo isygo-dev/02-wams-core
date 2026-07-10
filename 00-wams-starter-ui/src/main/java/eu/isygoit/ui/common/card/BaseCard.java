@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Abstract base for all KMS card components.
+ * Abstract base for all card components.
  *
  * <p>Features:
  * <ul>

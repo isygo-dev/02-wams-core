@@ -23,6 +23,7 @@
         <module>01-cms-jpa</module>
         <module>02-cms-shared</module>
         <module>03-cms-starter-parent</module>
+        <module>04-cms-starter-ui</module>
     </modules>
 
     <build>

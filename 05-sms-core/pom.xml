@@ -23,6 +23,7 @@
         <module>01-sms-jpa</module>
         <module>02-sms-shared</module>
         <module>03-sms-starter-parent</module>
+        <module>04-sms-starter-ui</module>
     </modules>
 
     <build>
