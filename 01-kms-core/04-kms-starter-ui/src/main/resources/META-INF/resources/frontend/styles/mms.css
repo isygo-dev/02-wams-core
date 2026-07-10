@@ -556,9 +556,55 @@
         order: -1;
     }
 
+    /* leftGroup (.wams-toolbar-group) already wraps unconditionally above;
+       centerGroup/rightGroup don't carry that class, so they need it here. */
+    .template-toolbar > :nth-child(2),
+    .sender-toolbar > :nth-child(2),
+    .template-toolbar > :nth-child(3),
+    .sender-toolbar > :nth-child(3) {
+        flex-wrap: wrap;
+        row-gap: var(--lumo-space-xs);
+    }
+
+    .template-toolbar > :nth-child(1) vaadin-text-field,
+    .sender-toolbar > :nth-child(1) vaadin-text-field,
+    .template-toolbar > :nth-child(1) vaadin-combo-box,
+    .sender-toolbar > :nth-child(1) vaadin-combo-box {
+        width: 100% !important;
+    }
+
+    .template-toolbar > :nth-child(2) vaadin-combo-box,
+    .sender-toolbar > :nth-child(2) vaadin-combo-box {
+        width: 90px !important;
+    }
+
     .template-grid,
     .sender-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    /* totalCountLabel shares .wams-page-info-label with pageInfoLabel here,
+       so it can't be targeted by class alone — use its structural position
+       instead: centerGroup.add(prevButton, pageInfoLabel, nextButton,
+       totalCountLabel, pageSizeSelect) makes it the group's 4th child. */
+    .template-toolbar > :nth-child(2) > :nth-child(4),
+    .sender-toolbar > :nth-child(2) > :nth-child(4) {
+        display: none;
+    }
+
+    /* Lumo sizes button icons via width/height:1.5em (--lumo-icon-size-m),
+       which collapses to 0 along with the button's own font-size unless
+       restored — see key-management-toolbar in kms.css for the full story. */
+    .template-toolbar > :nth-child(3) vaadin-button,
+    .sender-toolbar > :nth-child(3) vaadin-button {
+        font-size: 0;
+    }
+
+    .template-toolbar > :nth-child(3) vaadin-button vaadin-icon,
+    .sender-toolbar > :nth-child(3) vaadin-button vaadin-icon {
+        font-size: var(--lumo-font-size-m);
     }
 }
 

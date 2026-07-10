@@ -1,13 +1,18 @@
 package eu.isygoit.ui.common.component;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.StyleSheet;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.popover.Popover;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -26,6 +31,13 @@ public class LanguageSelectorComponent extends HorizontalLayout {
     private final ComboBox<Locale> languageCombo;
     private final Icon globeIcon;
     private final Span flagPrefixSpan;
+    // Icon-only trigger shown instead of languageCombo on mobile (see
+    // .wams-language-selector__mobile-trigger in layout.css) – a shrunk
+    // ComboBox still carries its own input/dropdown-arrow chrome and doesn't
+    // read as "just an icon", so mobile gets a real icon button + Popover
+    // instead, matching the notifications/settings buttons' pattern.
+    private final Button mobileTriggerButton;
+    private final Popover mobilePopover;
 
     public LanguageSelectorComponent() {
         setAlignItems(FlexComponent.Alignment.CENTER);
@@ -47,27 +59,7 @@ public class LanguageSelectorComponent extends HorizontalLayout {
         // Language combo box with flag icons
         languageCombo = new ComboBox<>();
         languageCombo.setItems(I18n.getSupportedLocales());
-        languageCombo.setRenderer(new ComponentRenderer<>(locale -> {
-            HorizontalLayout itemLayout = new HorizontalLayout();
-            itemLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-            itemLayout.setSpacing(true);
-            itemLayout.setPadding(false);
-
-            // Flag span
-            Span flagSpan = new Span();
-            flagSpan.addClassName("flag-icon");
-            flagSpan.addClassName(getFlagCssClass(locale));
-            flagSpan.addClassName("wams-language-selector__item-flag");
-
-            // Language name
-            String languageName = getLanguageName(locale);
-            Span nameSpan = new Span(languageName);
-            nameSpan.addClassName(LumoUtility.FontSize.SMALL);
-            nameSpan.addClassName("wams-language-selector__item-name");
-
-            itemLayout.add(flagSpan, nameSpan);
-            return itemLayout;
-        }));
+        languageCombo.setRenderer(new ComponentRenderer<>(this::buildLocaleItemContent));
 
         // Show selected value as flag + language name
         languageCombo.setItemLabelGenerator(locale -> {
@@ -91,24 +83,78 @@ public class LanguageSelectorComponent extends HorizontalLayout {
         // Add change listener – update prefix flag and reload page
         languageCombo.addValueChangeListener(event -> {
             if (event.getValue() != null) {
-                // Update the prefix flag
-                String newFlagClass = getFlagCssClass(event.getValue());
-                flagPrefixSpan.setClassName("flag-icon wams-language-selector__flag " + newFlagClass);
-
-                // Also update the prefix tooltip (optional)
-                flagPrefixSpan.setTitle(getLanguageName(event.getValue()));
-
-                I18n.setLocale(event.getValue());
-                VaadinSession.getCurrent().setAttribute("locale", event.getValue());
-                // Refresh the entire UI to apply new language
-                UI.getCurrent().getPage().reload();
+                applyLocaleChange(event.getValue());
             }
         });
 
         // Add a tooltip to the prefix flag
         flagPrefixSpan.setTitle(getLanguageName(I18n.getCurrentLocale()));
 
-        add(globeIcon, languageCombo);
+        // Mobile trigger: icon-only button + Popover listing the same
+        // locales, swapped in for globeIcon/languageCombo below 768px.
+        mobileTriggerButton = new Button(VaadinIcon.GLOBE.create());
+        mobileTriggerButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        mobileTriggerButton.addClassName("wams-header-icon-btn");
+        mobileTriggerButton.addClassName("wams-language-selector__mobile-trigger");
+        String languageTooltip = I18n.t("common.layout.header.language.tooltip");
+        mobileTriggerButton.setTooltipText(languageTooltip);
+        mobileTriggerButton.setAriaLabel(languageTooltip);
+
+        mobilePopover = new Popover();
+        mobilePopover.setTarget(mobileTriggerButton);
+        mobilePopover.addClassName("wams-header-popover");
+        mobilePopover.addClassName("wams-language-selector__popover");
+
+        VerticalLayout popoverContent = new VerticalLayout();
+        popoverContent.setPadding(false);
+        popoverContent.setSpacing(false);
+        for (Locale locale : I18n.getSupportedLocales()) {
+            Div item = new Div(buildLocaleItemContent(locale));
+            item.addClassName("wams-language-selector__popover-item");
+            item.addClickListener(e -> applyLocaleChange(locale));
+            popoverContent.add(item);
+        }
+        mobilePopover.add(popoverContent);
+
+        add(globeIcon, languageCombo, mobileTriggerButton);
+    }
+
+    /**
+     * Flag + language-name row shared by the desktop combo's dropdown items
+     * and the mobile Popover's picker rows.
+     */
+    private HorizontalLayout buildLocaleItemContent(Locale locale) {
+        HorizontalLayout itemLayout = new HorizontalLayout();
+        itemLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        itemLayout.setSpacing(true);
+        itemLayout.setPadding(false);
+
+        Span flagSpan = new Span();
+        flagSpan.addClassName("flag-icon");
+        flagSpan.addClassName(getFlagCssClass(locale));
+        flagSpan.addClassName("wams-language-selector__item-flag");
+
+        Span nameSpan = new Span(getLanguageName(locale));
+        nameSpan.addClassName(LumoUtility.FontSize.SMALL);
+        nameSpan.addClassName("wams-language-selector__item-name");
+
+        itemLayout.add(flagSpan, nameSpan);
+        return itemLayout;
+    }
+
+    /**
+     * Applies a newly-picked locale (from either the desktop combo or the
+     * mobile Popover) and reloads so the whole UI re-renders in the new
+     * language.
+     */
+    private void applyLocaleChange(Locale locale) {
+        String newFlagClass = getFlagCssClass(locale);
+        flagPrefixSpan.setClassName("flag-icon wams-language-selector__flag " + newFlagClass);
+        flagPrefixSpan.setTitle(getLanguageName(locale));
+
+        I18n.setLocale(locale);
+        VaadinSession.getCurrent().setAttribute("locale", locale);
+        UI.getCurrent().getPage().reload();
     }
 
     /**

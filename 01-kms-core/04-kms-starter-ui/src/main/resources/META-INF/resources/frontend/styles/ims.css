@@ -363,6 +363,68 @@
         order: -1;
     }
 
+    /* Each group (filters / pagination / actions) is still an internal
+       row-direction HorizontalLayout — width:100% on the group alone isn't
+       enough, since its fixed-px children (200px search field, 140-150px
+       filter combo, 100-120px page-size select) still overflow a group
+       stacked into a ~320-340px column. Wrapping each group's own children,
+       and forcing text fields/combo boxes (not buttons/labels) to fill the
+       row, lands each control on its own line instead of overflowing past
+       the right edge. */
+    .account-management-toolbar > :nth-child(1),
+    .annex-management-toolbar > :nth-child(1),
+    .application-management-toolbar > :nth-child(1),
+    .customer-management-toolbar > :nth-child(1),
+    .parameter-management-toolbar > :nth-child(1),
+    .role-management-toolbar > :nth-child(1),
+    .tenant-management-toolbar > :nth-child(1),
+    .account-management-toolbar > :nth-child(2),
+    .annex-management-toolbar > :nth-child(2),
+    .application-management-toolbar > :nth-child(2),
+    .customer-management-toolbar > :nth-child(2),
+    .parameter-management-toolbar > :nth-child(2),
+    .role-management-toolbar > :nth-child(2),
+    .tenant-management-toolbar > :nth-child(2),
+    .account-management-toolbar > :nth-child(3),
+    .annex-management-toolbar > :nth-child(3),
+    .application-management-toolbar > :nth-child(3),
+    .customer-management-toolbar > :nth-child(3),
+    .parameter-management-toolbar > :nth-child(3),
+    .role-management-toolbar > :nth-child(3),
+    .tenant-management-toolbar > :nth-child(3) {
+        flex-wrap: wrap;
+        row-gap: var(--lumo-space-xs);
+    }
+
+    .account-management-toolbar > :nth-child(1) vaadin-text-field,
+    .annex-management-toolbar > :nth-child(1) vaadin-text-field,
+    .application-management-toolbar > :nth-child(1) vaadin-text-field,
+    .customer-management-toolbar > :nth-child(1) vaadin-text-field,
+    .parameter-management-toolbar > :nth-child(1) vaadin-text-field,
+    .role-management-toolbar > :nth-child(1) vaadin-text-field,
+    .tenant-management-toolbar > :nth-child(1) vaadin-text-field,
+    .account-management-toolbar > :nth-child(1) vaadin-combo-box,
+    .annex-management-toolbar > :nth-child(1) vaadin-combo-box,
+    .application-management-toolbar > :nth-child(1) vaadin-combo-box,
+    .customer-management-toolbar > :nth-child(1) vaadin-combo-box,
+    .parameter-management-toolbar > :nth-child(1) vaadin-combo-box,
+    .role-management-toolbar > :nth-child(1) vaadin-combo-box,
+    .tenant-management-toolbar > :nth-child(1) vaadin-combo-box {
+        width: 100% !important;
+    }
+
+    /* Pagination stays compact (per spec) rather than full-width — just
+       shrink the page-size picker further than its desktop 100-140px. */
+    .account-management-toolbar > :nth-child(2) vaadin-combo-box,
+    .annex-management-toolbar > :nth-child(2) vaadin-combo-box,
+    .application-management-toolbar > :nth-child(2) vaadin-combo-box,
+    .customer-management-toolbar > :nth-child(2) vaadin-combo-box,
+    .parameter-management-toolbar > :nth-child(2) vaadin-combo-box,
+    .role-management-toolbar > :nth-child(2) vaadin-combo-box,
+    .tenant-management-toolbar > :nth-child(2) vaadin-combo-box {
+        width: 90px !important;
+    }
+
     .account-cards-grid,
     .annex-cards-grid,
     .application-cards-grid,
@@ -371,6 +433,57 @@
     .role-cards-grid,
     .tenant-cards-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Simplified page info: the separate total-count label is redundant
+       with page-info-label's own "Page X of Y (Z items)" text. It has no
+       dedicated CSS class in these 7 views (only pageInfoLabel does), so
+       target it structurally instead — centerGroup.add(prevButton,
+       pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect) is
+       identical across every *ManagementView#buildToolbar(), making
+       totalCountLabel reliably the group's 4th child. */
+    .account-management-toolbar > :nth-child(2) > :nth-child(4),
+    .annex-management-toolbar > :nth-child(2) > :nth-child(4),
+    .application-management-toolbar > :nth-child(2) > :nth-child(4),
+    .customer-management-toolbar > :nth-child(2) > :nth-child(4),
+    .parameter-management-toolbar > :nth-child(2) > :nth-child(4),
+    .role-management-toolbar > :nth-child(2) > :nth-child(4),
+    .tenant-management-toolbar > :nth-child(2) > :nth-child(4) {
+        display: none;
+    }
+
+    /* Icon-only actions: same font-size:0 technique already used for the
+       sidebar's icon-rail collapse (see .wams-sidebar-collapsed in
+       layout.css) — the button's label is a plain text node with no
+       wrapping element to hide via a class. Unlike the sidebar's nav icons
+       (explicit setSize("20px") in Java, so an inline style wins over any
+       shadow-DOM sizing), these buttons' icons rely on Lumo's own default
+       sizing — [part]::slotted(vaadin-icon) { width/height:
+       var(--lumo-icon-size-m) } in vaadin-button-styles.js, where
+       --lumo-icon-size-m is "1.5em" — so font-size:0 on the button was also
+       collapsing the icon to 0x0 (button appeared to vanish entirely).
+       Restoring the icon's own font-size lets that 1.5em formula resolve
+       correctly again. */
+    .account-management-toolbar > :nth-child(3) vaadin-button,
+    .annex-management-toolbar > :nth-child(3) vaadin-button,
+    .application-management-toolbar > :nth-child(3) vaadin-button,
+    .customer-management-toolbar > :nth-child(3) vaadin-button,
+    .parameter-management-toolbar > :nth-child(3) vaadin-button,
+    .role-management-toolbar > :nth-child(3) vaadin-button,
+    .tenant-management-toolbar > :nth-child(3) vaadin-button {
+        font-size: 0;
+    }
+
+    .account-management-toolbar > :nth-child(3) vaadin-button vaadin-icon,
+    .annex-management-toolbar > :nth-child(3) vaadin-button vaadin-icon,
+    .application-management-toolbar > :nth-child(3) vaadin-button vaadin-icon,
+    .customer-management-toolbar > :nth-child(3) vaadin-button vaadin-icon,
+    .parameter-management-toolbar > :nth-child(3) vaadin-button vaadin-icon,
+    .role-management-toolbar > :nth-child(3) vaadin-button vaadin-icon,
+    .tenant-management-toolbar > :nth-child(3) vaadin-button vaadin-icon {
+        font-size: var(--lumo-font-size-m);
     }
 }
 

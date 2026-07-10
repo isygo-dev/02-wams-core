@@ -50,9 +50,15 @@
 }
 
 @media (max-width: 640px) {
+    /* Desktop keeps this row horizontally centered (align-items:center in the
+       base rule above, since flex-direction is row there). Stacking it into
+       a column here flips the cross axis to horizontal, but the alignment
+       was left at flex-start — pinning the icon/title/badge to the card's
+       left edge with a wide empty gap on the right once the card itself is
+       full-width on a phone, instead of preserving the desktop centering. */
     .wams-card .wams-card__header-row {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
     }
 
     .wams-card .wams-card__footer-row {

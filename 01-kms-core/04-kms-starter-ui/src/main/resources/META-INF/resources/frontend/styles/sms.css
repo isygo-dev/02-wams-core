@@ -94,8 +94,41 @@
         order: -1;
     }
 
+    .storageconfig-management-toolbar > :nth-child(1),
+    .storageconfig-management-toolbar > :nth-child(2),
+    .storageconfig-management-toolbar > :nth-child(3) {
+        flex-wrap: wrap;
+        row-gap: var(--lumo-space-xs);
+    }
+
+    .storageconfig-management-toolbar > :nth-child(1) vaadin-text-field,
+    .storageconfig-management-toolbar > :nth-child(1) vaadin-combo-box {
+        width: 100% !important;
+    }
+
+    .storageconfig-management-toolbar > :nth-child(2) vaadin-combo-box {
+        width: 90px !important;
+    }
+
     .storageconfig-cards-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .storageconfig-management-toolbar > :nth-child(2) > :nth-child(4) {
+        display: none;
+    }
+
+    /* Lumo sizes button icons via width/height:1.5em (--lumo-icon-size-m),
+       which collapses to 0 along with the button's own font-size unless
+       restored — see key-management-toolbar in kms.css for the full story. */
+    .storageconfig-management-toolbar > :nth-child(3) vaadin-button {
+        font-size: 0;
+    }
+
+    .storageconfig-management-toolbar > :nth-child(3) vaadin-button vaadin-icon {
+        font-size: var(--lumo-font-size-m);
     }
 }
 

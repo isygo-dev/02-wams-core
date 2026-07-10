@@ -182,6 +182,22 @@ vaadin-drawer-toggle {
     padding: 0 var(--lumo-space-s);
 }
 
+/* Icon-only mobile trigger (see @media max-width:768px below): hidden by
+   default on desktop/tablet, where the full flag+text combo is shown instead. */
+.wams-language-selector__mobile-trigger {
+    display: none;
+}
+
+.wams-language-selector__popover-item {
+    padding: var(--lumo-space-xs) var(--lumo-space-s);
+    border-radius: var(--lumo-border-radius-m);
+    cursor: pointer;
+}
+
+.wams-language-selector__popover-item:hover {
+    background-color: var(--lumo-contrast-5pct);
+}
+
 /* ── Header responsive breakpoints ────────────────────────────────────────
    Desktop >1024px / Tablet 768-1024px / Mobile <768px, per the app's
    explicit responsive spec. Declared most-specific-first (1024 → 768 → 480),
@@ -251,30 +267,31 @@ vaadin-drawer-toggle {
         max-width: none;
     }
 
-    /* Language selector goes icon-only: the redundant standalone globe icon
-       is hidden (the flag prefix already shows the current language visually
-       and is more informative), and the selected language's name text is
-       hidden via font-size:0 on the native input — the same technique used
-       for the sidebar's icon-rail collapse, since the text has no wrapping
-       element of its own to target with a plain CSS class. min-width drops
-       to a small icon-sized floor; !important is required because
-       LanguageSelectorComponent sets min-width via Java (an inline style,
-       which otherwise always wins over a plain class rule regardless of
-       media query), the same reason .wams-dialog-responsive in tokens.css
-       needs it for Vaadin-set inline dialog sizing. The combo itself stays
-       fully present and clickable (not display:none), so its dropdown
-       overlay keeps anchoring correctly. */
-    .wams-language-selector__globe-icon {
+    /* Language selector goes icon-only: even shrunk down, the ComboBox still
+       carries its own input box + dropdown-arrow chrome and doesn't read as
+       "just an icon" — so below this breakpoint the whole combo (and its
+       globe-icon prefix) is replaced by a single icon button that opens a
+       Popover listing the same locales (LanguageSelectorComponent builds
+       both up front; only visibility is toggled here). The wrapping
+       .wams-language-selector pill styling is stripped too, since its only
+       visible content is now a plain icon button matching the notifications/
+       settings buttons alongside it. */
+    .wams-language-selector {
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        height: auto;
+        cursor: default;
+    }
+
+    .wams-language-selector__globe-icon,
+    .wams-language-selector .wams-language-selector__combo {
         display: none;
     }
 
-    .wams-language-selector .wams-language-selector__combo {
-        min-width: 44px !important;
-        padding: 0 var(--lumo-space-xs);
-    }
-
-    .wams-language-selector__combo input {
-        font-size: 0;
+    .wams-language-selector__mobile-trigger {
+        display: inline-flex;
     }
 }
 
