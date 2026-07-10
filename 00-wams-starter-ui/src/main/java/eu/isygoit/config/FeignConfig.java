@@ -1,6 +1,6 @@
 package eu.isygoit.config;
 
-import eu.isygoit.security.interceptor.BearerTokenRequestInterceptor;
+import eu.isygoit.interceptor.BearerTokenRequestInterceptor;
 import feign.RequestInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;

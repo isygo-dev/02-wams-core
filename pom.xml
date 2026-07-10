@@ -150,6 +150,7 @@
     </dependencyManagement>
 
     <modules>
+        <module>00-wams-starter-ui</module>
         <module>01-kms-core</module>
         <module>02-ims-core</module>
         <module>03-mms-core</module>

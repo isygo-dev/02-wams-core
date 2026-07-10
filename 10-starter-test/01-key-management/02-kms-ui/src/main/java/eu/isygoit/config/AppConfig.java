@@ -2,9 +2,6 @@ package eu.isygoit.config;
 
 import eu.isygoit.i18n.helper.LocaleResolver;
 import lombok.extern.slf4j.Slf4j;
-import org.jasypt.digest.StringDigester;
-import org.jasypt.encryption.StringEncryptor;
-import org.jasypt.util.password.PasswordEncryptor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -49,36 +46,6 @@ public class AppConfig {
      */
     @Bean("messageMap")
     public Map<String, String> messageMap() {
-        return new HashMap<>();
-    }
-
-    /**
-     * Peb encriptor map map.
-     *
-     * @return the map
-     */
-    @Bean("pebEncriptorMap")
-    public Map<String, StringEncryptor> pebEncriptorMap() {
-        return new HashMap<>();
-    }
-
-    /**
-     * Digest encriptor map map.
-     *
-     * @return the map
-     */
-    @Bean("digestEncriptorMap")
-    public Map<String, StringDigester> digestEncriptorMap() {
-        return new HashMap<>();
-    }
-
-    /**
-     * Password encriptor map map.
-     *
-     * @return the map
-     */
-    @Bean("passwordEncriptorMap")
-    public Map<String, PasswordEncryptor> passwordEncriptorMap() {
         return new HashMap<>();
     }
 }

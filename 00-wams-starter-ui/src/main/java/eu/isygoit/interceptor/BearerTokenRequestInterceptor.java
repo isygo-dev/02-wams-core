@@ -1,4 +1,4 @@
-package eu.isygoit.security.interceptor;
+package eu.isygoit.interceptor;
 
 import com.vaadin.flow.server.VaadinSession;
 import feign.RequestInterceptor;
