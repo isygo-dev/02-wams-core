@@ -14,6 +14,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.layout.BaseMainLayout;
@@ -28,6 +29,10 @@ import java.util.stream.IntStream;
  * including hero section with floating decorations, cards container with module
  * cards, and footer. Subclasses must implement {@link #getModules()} to provide
  * the list of modules to display.</p>
+ * <p>
+ * If only one module is returned by {@link #getModules()}, the view will
+ * automatically redirect to that module's route without displaying the landing page.
+ * </p>
  *
  * @see ModuleInfo
  */
@@ -48,10 +53,20 @@ public abstract class BaseLandingView extends BaseMainLayout {
 
     /**
      * Constructor initializes the landing page with module-based content.
+     * If only one module exists, redirects directly to that module's route.
      */
     protected BaseLandingView() {
         this.ui = UI.getCurrent();
         addClassName("wams-landing");
+
+        List<ModuleInfo> modules = getModules();
+
+        // If only one module exists, redirect directly to it
+        if (modules != null && modules.size() == 1) {
+            redirectToSingleModule(modules.get(0));
+            return;
+        }
+
         setContent(buildMainContent());
     }
 
@@ -77,6 +92,60 @@ public abstract class BaseLandingView extends BaseMainLayout {
     protected String getModuleKey() {
         // Landing page has no module accent
         return "";
+    }
+
+    /**
+     * Redirects to the single module's route with a loading indicator.
+     *
+     * @param module The single module to redirect to
+     */
+    private void redirectToSingleModule(ModuleInfo module) {
+        // Show loading indicator before redirect
+        setContent(buildRedirectingContent(module));
+
+        // Navigate after a short delay for visual feedback
+        ui.getPage().executeJs(
+                "setTimeout(() => { window.location = $0; }, 400);",
+                module.route()
+        );
+    }
+
+    /**
+     * Builds a loading indicator page for redirection.
+     *
+     * @param module The module being redirected to
+     * @return Component with loading indicator
+     */
+    private Component buildRedirectingContent(ModuleInfo module) {
+        VerticalLayout loadingLayout = new VerticalLayout();
+        loadingLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        loadingLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+        loadingLayout.setSizeFull();
+        loadingLayout.addClassName("wams-redirecting");
+
+        // Icon
+        Icon moduleIcon = module.icon().create();
+        moduleIcon.setSize("48px");
+        moduleIcon.addClassName("wams-redirect-icon");
+
+        // Redirecting text
+        H2 redirectingText = new H2(I18n.t("common.landing.redirecting", module.shortName()));
+        redirectingText.addClassName(LumoUtility.TextColor.PRIMARY);
+        redirectingText.addClassName("wams-redirect-title");
+
+        // Subtitle
+        Paragraph subtitle = new Paragraph(I18n.t("common.landing.redirecting.subtitle"));
+        subtitle.addClassName(LumoUtility.TextColor.SECONDARY);
+        subtitle.addClassName("wams-redirect-subtitle");
+
+        // Progress bar
+        ProgressBar progressBar = new ProgressBar();
+        progressBar.setIndeterminate(true);
+        progressBar.setWidth("300px");
+        progressBar.addClassName("wams-redirect-progress");
+
+        loadingLayout.add(moduleIcon, redirectingText, subtitle, progressBar);
+        return loadingLayout;
     }
 
     private Component buildMainContent() {

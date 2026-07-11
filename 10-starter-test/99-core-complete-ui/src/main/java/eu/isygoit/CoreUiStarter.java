@@ -13,16 +13,16 @@ import org.springframework.context.annotation.PropertySource;
 /**
  * The type Kms starter.
  */
-//http://localhost:60500/swagger-ui/index.html
+//http://localhost:60600/swagger-ui/index.html
 @SpringBootApplication
 @EnableFeignClients
 @EnableConfigurationProperties
 @ConfigurationPropertiesScan
 @EntityScan(basePackages = {"eu.isygoit.model"})
 @PropertySource(encoding = "UTF-8", value = {"classpath:i18n/messages.properties"})
-public class KmsUiStarter {
+public class CoreUiStarter {
 
-    protected KmsUiStarter() {
+    protected CoreUiStarter() {
         super();
     }
 
@@ -32,7 +32,7 @@ public class KmsUiStarter {
      * @param args the input arguments
      */
     public static void main(String[] args) {
-        SpringApplication.run(KmsUiStarter.class, args);
+        SpringApplication.run(CoreUiStarter.class, args);
     }
 
     @Bean

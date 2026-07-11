@@ -78,41 +78,6 @@
             <version>WC-1.0.260408-T1636</version>
             <scope>compile</scope>
         </dependency>
-
-        <dependency>
-            <groupId>eu.isygo-it.services</groupId>
-            <artifactId>identity-management-starter-ui</artifactId>
-            <version>WC-1.0.260408-T1636</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>eu.isygo-it.services</groupId>
-            <artifactId>messaging-management-starter-ui</artifactId>
-            <version>WC-1.0.260408-T1636</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>eu.isygo-it.services</groupId>
-            <artifactId>document-management-starter-ui</artifactId>
-            <version>WC-1.0.260408-T1636</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>eu.isygo-it.services</groupId>
-            <artifactId>storage-management-starter-ui</artifactId>
-            <version>WC-1.0.260408-T1636</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>eu.isygo-it.services</groupId>
-            <artifactId>calendar-management-starter-ui</artifactId>
-            <version>WC-1.0.260408-T1636</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
 
     <build>

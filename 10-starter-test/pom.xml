@@ -35,6 +35,7 @@
         <module>40-document-management</module>
         <module>50-storage-management</module>
         <module>60-calendar-management</module>
+        <module>99-core-complete-ui</module>
     </modules>
 
     <build>

@@ -23,6 +23,11 @@ import java.util.stream.Stream;
 public final class NavRegistry implements INavRegistry {
 
     private static final List<NavTarget> ALL = Stream.of(
+                    new ImsNavRegistry().getAll(),
+                    new DmsNavRegistry().getAll(),
+                    new SmsNavRegistry().getAll(),
+                    new CmsNavRegistry().getAll(),
+                    new MmsNavRegistry().getAll(),
                     new KmsNavRegistry().getAll()
             ).flatMap(List::stream)
             .toList();
