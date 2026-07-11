@@ -30,8 +30,12 @@ import java.util.stream.IntStream;
  * cards, and footer. Subclasses must implement {@link #getModules()} to provide
  * the list of modules to display.</p>
  * <p>
- * If only one module is returned by {@link #getModules()}, the view will
- * automatically redirect to that module's route without displaying the landing page.
+ * If only one module is returned by {@link #getModules()}, the view skips the
+ * landing page entirely and goes straight to the same redirect-with-progress
+ * screen used when picking a module from a multi-module landing page — one
+ * mechanism ({@link #redirectToModule(ModuleInfo)}) drives both cases, so the
+ * navigation experience (a brief "Redirecting to..." screen before moving on)
+ * is identical whether there's one module or several.
  * </p>
  *
  * @see ModuleInfo
@@ -63,7 +67,7 @@ public abstract class BaseLandingView extends BaseMainLayout {
 
         // If only one module exists, redirect directly to it
         if (modules != null && modules.size() == 1) {
-            redirectToSingleModule(modules.get(0));
+            redirectToModule(modules.get(0));
             return;
         }
 
@@ -95,7 +99,11 @@ public abstract class BaseLandingView extends BaseMainLayout {
     }
 
     /**
-     * Redirects to the single module's route with a loading indicator.
+     * Shows the "Redirecting to..." progress screen, then navigates to the
+     * module's route. Used both when {@link #getModules()} returns a single
+     * module (the whole landing page is skipped in favor of this) and when a
+     * module is picked from a multi-module landing page (card or "Enter"
+     * button), so the transition looks and behaves the same either way.
      *
      * <p>Navigates through Vaadin's own client-side router ({@link UI#navigate})
      * rather than assigning {@code window.location} directly: the latter is a
@@ -107,9 +115,9 @@ public abstract class BaseLandingView extends BaseMainLayout {
      * is actually visible) is kept, just driven by a client-side promise that
      * calls back into the server to do the real navigation once it resolves.
      *
-     * @param module The single module to redirect to
+     * @param module The module to redirect to
      */
-    private void redirectToSingleModule(ModuleInfo module) {
+    private void redirectToModule(ModuleInfo module) {
         // Show loading indicator before redirect
         setContent(buildRedirectingContent(module));
 
@@ -311,12 +319,12 @@ public abstract class BaseLandingView extends BaseMainLayout {
         enterBtn.addClassName("wams-enter-button--accent");
         enterBtn.addClassName(LumoUtility.Width.FULL);
         enterBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        enterBtn.addClickListener(e -> navigateTo(module.route()));
+        enterBtn.addClickListener(e -> redirectToModule(module));
 
         // Card click handler
         card.addClickListener(e -> {
             triggerRippleEffect(card, e.getClientX(), e.getClientY());
-            navigateTo(module.route());
+            redirectToModule(module);
         });
 
         // Assemble content
@@ -383,19 +391,6 @@ public abstract class BaseLandingView extends BaseMainLayout {
                         "setTimeout(() => ripple.remove(), 600);",
                 card.getElement(), clientX, clientY
         );
-    }
-
-    /**
-     * Navigate to the specified route.
-     *
-     * @param route The route to navigate to
-     */
-    private void navigateTo(String route) {
-        if (ui != null) {
-            ui.navigate(route);
-        } else {
-            UI.getCurrent().navigate(route);
-        }
     }
 
     private Div buildFooter() {
