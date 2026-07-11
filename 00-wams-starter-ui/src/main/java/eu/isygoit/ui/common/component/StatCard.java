@@ -23,9 +23,11 @@ public class StatCard extends VerticalLayout {
     private final Span changeSpan;
     private final Icon changeArrow;
     private final Span changeText;
+
     public StatCard(VaadinIcon icon, Variant variant, String label, String value) {
         this(icon, variant, label, value, null);
     }
+
     public StatCard(VaadinIcon icon, Variant variant, String label, String value, String tooltip) {
         setSpacing(false);
         setPadding(true);
