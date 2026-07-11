@@ -97,17 +97,25 @@ public abstract class BaseLandingView extends BaseMainLayout {
     /**
      * Redirects to the single module's route with a loading indicator.
      *
+     * <p>Navigates through Vaadin's own client-side router ({@link UI#navigate})
+     * rather than assigning {@code window.location} directly: the latter is a
+     * bare relative path (e.g. "kms", not "/kms"), so the browser resolves it
+     * against whatever the current URL happens to be (trailing slash and all)
+     * instead of the app's actual route — and even when it does land on the
+     * right place, it forces a full page reload instead of an in-app
+     * navigation. The 400ms visual delay (so the "Redirecting to..." screen
+     * is actually visible) is kept, just driven by a client-side promise that
+     * calls back into the server to do the real navigation once it resolves.
+     *
      * @param module The single module to redirect to
      */
     private void redirectToSingleModule(ModuleInfo module) {
         // Show loading indicator before redirect
         setContent(buildRedirectingContent(module));
 
-        // Navigate after a short delay for visual feedback
-        ui.getPage().executeJs(
-                "setTimeout(() => { window.location = $0; }, 400);",
-                module.route()
-        );
+        ui.getPage()
+                .executeJs("return new Promise(resolve => setTimeout(resolve, 400));")
+                .then(ignored -> ui.navigate(module.route()));
     }
 
     /**
