@@ -1,11 +1,10 @@
 package eu.isygoit.nav;
 
+import com.vaadin.flow.component.icon.VaadinIcon;
 import eu.isygoit.ui.common.component.AppSearchBar;
 import eu.isygoit.ui.common.component.INavRegistry;
-import eu.isygoit.ui.kms.nav.KmsNavRegistry;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * Static registry of every real, navigable destination in the app (one entry
@@ -20,19 +19,21 @@ import java.util.stream.Stream;
  * <p>{@code moduleKey} (kms/ims/dms/sms/cms/mms) classifies each target by
  * module so {@link AppSearchBar} can group/filter results by module.
  */
-public final class NavRegistry implements INavRegistry {
+public final class ImsNavRegistry implements INavRegistry {
 
-    private static final List<NavTarget> ALL = Stream.of(
-                    new ImsNavRegistry().getAll(),
-                    new DmsNavRegistry().getAll(),
-                    new SmsNavRegistry().getAll(),
-                    new CmsNavRegistry().getAll(),
-                    new MmsNavRegistry().getAll(),
-                    new KmsNavRegistry().getAll()
-            ).flatMap(List::stream)
-            .toList();
+    private static final List<NavTarget> ALL = List.of(
+            // IMS
+            new NavTarget("ims.nav.dashboard", "ims", VaadinIcon.HOME, "ims"),
+            new NavTarget("ims.nav.accounts", "ims/accounts", VaadinIcon.USER, "ims"),
+            new NavTarget("ims.nav.customers", "ims/customers", VaadinIcon.GROUP, "ims"),
+            new NavTarget("ims.nav.tenants", "ims/tenants", VaadinIcon.BUILDING, "ims"),
+            new NavTarget("ims.nav.applications", "ims/applications", VaadinIcon.PAPERCLIP, "ims"),
+            new NavTarget("ims.nav.roles", "ims/roles", VaadinIcon.SHIELD, "ims"),
+            new NavTarget("ims.nav.parameters", "ims/parameters", VaadinIcon.KEYBOARD, "ims"),
+            new NavTarget("ims.nav.annexes", "ims/annexes", VaadinIcon.FOLDER_OPEN, "ims")
+    );
 
-    public NavRegistry() {
+    public ImsNavRegistry() {
     }
 
     /**

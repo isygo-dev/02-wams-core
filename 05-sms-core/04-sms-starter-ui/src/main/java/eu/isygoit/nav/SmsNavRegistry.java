@@ -1,11 +1,10 @@
 package eu.isygoit.nav;
 
+import com.vaadin.flow.component.icon.VaadinIcon;
 import eu.isygoit.ui.common.component.AppSearchBar;
 import eu.isygoit.ui.common.component.INavRegistry;
-import eu.isygoit.ui.kms.nav.KmsNavRegistry;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * Static registry of every real, navigable destination in the app (one entry
@@ -20,19 +19,15 @@ import java.util.stream.Stream;
  * <p>{@code moduleKey} (kms/ims/dms/sms/cms/mms) classifies each target by
  * module so {@link AppSearchBar} can group/filter results by module.
  */
-public final class NavRegistry implements INavRegistry {
+public final class SmsNavRegistry implements INavRegistry {
 
-    private static final List<NavTarget> ALL = Stream.of(
-                    new ImsNavRegistry().getAll(),
-                    new DmsNavRegistry().getAll(),
-                    new SmsNavRegistry().getAll(),
-                    new CmsNavRegistry().getAll(),
-                    new MmsNavRegistry().getAll(),
-                    new KmsNavRegistry().getAll()
-            ).flatMap(List::stream)
-            .toList();
+    private static final List<NavTarget> ALL = List.of(
+            // SMS
+            new NavTarget("sms.nav.dashboard", "sms", VaadinIcon.HOME, "sms"),
+            new NavTarget("sms.nav.storage.configs", "sms/storageconfigs", VaadinIcon.DATABASE, "sms")
+    );
 
-    public NavRegistry() {
+    public SmsNavRegistry() {
     }
 
     /**
