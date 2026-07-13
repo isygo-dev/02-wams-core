@@ -76,7 +76,7 @@ public class PasswordService implements IPasswordService {
     }
 
     @Override
-    public AccessKeyResponseDto generateRandomPassword(String tenant /*senderTenant*/, String tenantUrl, String email, String userName, String fullName, IEnumAuth.Types authType) throws JsonProcessingException {
+    public AccessKeyResponseDto generateRandomPassword(String tenant, String tenantUrl, String email, String userName, String fullName, IEnumAuth.Types authType) throws JsonProcessingException {
         //Verify the account
         Account account = tenantService.checkAccountIfExists(tenant, tenantUrl, email, userName, fullName, true);
         if (account == null) {
@@ -109,6 +109,7 @@ public class PasswordService implements IPasswordService {
                         .subject(EmailSubjects.USER_CREATED_EMAIL_SUBJECT)
                         .tenant(tenant)
                         .toAddr(account.getEmail())
+                        .fromAddr("noreply@" + tenant + ".com")
                         .templateName(IEnumEmailTemplate.Types.USER_CREATED_TEMPLATE)
                         .variables(MailMessageDto.getVariablesAsString(Map.of(
                                 //Common vars
@@ -131,6 +132,7 @@ public class PasswordService implements IPasswordService {
                         .subject(EmailSubjects.OTP_CODE_ACCESS_EMAIL_SUBJECT)
                         .tenant(tenant)
                         .toAddr(account.getEmail())
+                        .fromAddr("noreply@" + tenant + ".com")
                         .templateName(IEnumEmailTemplate.Types.AUTH_OTP_TEMPLATE)
                         .variables(MailMessageDto.getVariablesAsString(Map.of(
                                 //Common vars

@@ -90,7 +90,7 @@ public interface MsgTemplateVariables {
     /**
      * The constant V_PWD_EXP_REMAINING_DAYS.
      */
-    String V_PWD_EXP_REMAINING_DAYS = "V_PWD_EXP_REMAINIG_DAYS";
+    String V_PWD_EXP_REMAINING_DAYS = "V_PWD_EXP_REMAINING_DAYS";
     /**
      * The constant V_TENANT_ADDRESS.
      */

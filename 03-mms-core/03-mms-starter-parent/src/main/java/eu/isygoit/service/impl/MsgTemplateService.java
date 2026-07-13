@@ -79,17 +79,21 @@ public class MsgTemplateService extends FileTenantService<Long, MsgTemplate, Msg
 
     @Override
     public MsgTemplate beforeCreate(String tenant, MsgTemplate object) {
-        senderConfigRepository.findById(object.getSenderConfigId()).ifPresent(senderConfig -> {
-            object.setSenderConfigId(senderConfig.getId());
-        });
+        if(object.getSenderConfigId() != null) {
+            senderConfigRepository.findById(object.getSenderConfigId()).ifPresent(senderConfig -> {
+                object.setSenderConfigId(senderConfig.getId());
+            });
+        }
         return super.beforeCreate(object);
     }
 
     @Override
     public MsgTemplate beforeUpdate(String tenant, MsgTemplate object) {
-        senderConfigRepository.findById(object.getSenderConfigId()).ifPresent(senderConfig -> {
-            object.setSenderConfigId(senderConfig.getId());
-        });
+        if(object.getSenderConfigId() != null) {
+            senderConfigRepository.findById(object.getSenderConfigId()).ifPresent(senderConfig -> {
+                object.setSenderConfigId(senderConfig.getId());
+            });
+        }
         return super.beforeUpdate(object);
     }
 
