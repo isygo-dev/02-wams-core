@@ -318,6 +318,7 @@ public class ProfilePageView extends ManagementVerticalView {
         VerticalLayout content = new VerticalLayout();
         content.setPadding(true);
         content.setSpacing(true);
+        content.setWidthFull();
         content.addClassName("profile-tab-panel");
 
         Div card = new Div();
@@ -360,7 +361,7 @@ public class ProfilePageView extends ManagementVerticalView {
         labelRow.addClassName("wams-card__detail-field-label-row");
         Icon iconEl = icon.create();
         iconEl.addClassName("detail-field-icon");
-        iconEl.setSize("14px");
+        iconEl.setSize("16px");
         Span labelSpan = new Span(label);
         labelSpan.addClassName("wams-card__detail-field-label");
         labelRow.add(iconEl, labelSpan);
@@ -380,6 +381,7 @@ public class ProfilePageView extends ManagementVerticalView {
         VerticalLayout content = new VerticalLayout();
         content.setPadding(true);
         content.setSpacing(true);
+        content.setWidthFull();
         content.addClassName("profile-tab-panel");
 
         Div card = new Div();
@@ -442,6 +444,7 @@ public class ProfilePageView extends ManagementVerticalView {
         VerticalLayout content = new VerticalLayout();
         content.setPadding(true);
         content.setSpacing(true);
+        content.setWidthFull();
         content.addClassName("profile-tab-panel");
 
         List<ConnectionTrackingDto> history = loadConnectionHistory();
@@ -454,6 +457,7 @@ public class ProfilePageView extends ManagementVerticalView {
                 new StatCard(VaadinIcon.CALENDAR, StatCard.Variant.NEUTRAL,
                         I18n.t("profile.connections.stat.month"), String.valueOf(countWithinDays(history, 30)))
         );
+        miniStats.addClassName("profile-mini-stat-grid");
 
         Div chartCard = new Div();
         chartCard.addClassName("profile-section-card");
@@ -603,7 +607,7 @@ public class ProfilePageView extends ManagementVerticalView {
         svg.append("<svg viewBox=\"0 0 ").append(width).append(' ').append(totalHeight)
                 .append("\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"")
                 .append(I18n.t("profile.connections.chart.aria", total, days))
-                .append("\" class=\"profile-chart-svg\">");
+                .append("\" preserveAspectRatio=\"none\" class=\"profile-chart-svg\">");
 
         int x = 0;
         int index = 0;
@@ -645,6 +649,7 @@ public class ProfilePageView extends ManagementVerticalView {
         VerticalLayout content = new VerticalLayout();
         content.setPadding(true);
         content.setSpacing(true);
+        content.setWidthFull();
         content.addClassName("profile-tab-panel");
 
         Div card = new Div();
