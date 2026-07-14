@@ -53,6 +53,7 @@ public class ImsExceptionHandler extends ControllerExceptionHandler {
                         .subject(EmailSubjects.UNMANAGED_EXCEPTION)
                         .tenant(TenantConstants.DEFAULT_TENANT_NAME)
                         .toAddr(techAdminEmail)
+                        .fromAddr("noreply@" + TenantConstants.DEFAULT_TENANT_NAME.toLowerCase() + ".com")
                         .templateName(IEnumEmailTemplate.Types.UNMANAGED_EXCEPTION_TEMPLATE)
                         .variables(MailMessageDto.getVariablesAsString(Map.of(
                                 //Common vars

@@ -201,7 +201,8 @@ public class TokenService implements ITokenBuilderService {
                 .subject(EmailSubjects.FORGOT_PASSWORD_EMAIL_SUBJECT)
                 .tenant(tenant)
                 .toAddr(account.getEmail())
-                .templateName(IEnumEmailTemplate.Types.FORGOT_PASSWORD_TEMPLATE)
+                .fromAddr("noreply@" + tenant + ".com")
+                        .templateName(IEnumEmailTemplate.Types.FORGOT_PASSWORD_TEMPLATE)
                 .variables(MailMessageDto.getVariablesAsString(Map.of(
                         //Common vars
                         MsgTemplateVariables.V_USER_NAME, account.getCode(),
