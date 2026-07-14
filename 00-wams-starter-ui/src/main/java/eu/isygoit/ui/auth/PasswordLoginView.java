@@ -1,18 +1,13 @@
 package eu.isygoit.ui.auth;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.PageTitle;
@@ -20,7 +15,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.UIScope;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.dto.response.AuthResponseDto;
 import eu.isygoit.enums.IEnumAuth;
@@ -46,7 +40,7 @@ public class PasswordLoginView extends BaseLoginView {
 
     private final PasswordField passwordField = new PasswordField(I18n.t("auth.password.field.password.label"));
     private final Button loginButton = new Button(I18n.t("auth.otp.button.signIn"), VaadinIcon.SIGN_IN.create());
-    private final Div errorContainer = new Div();
+    private final Div errorBanner = createErrorBanner();
 
     private String tenant;
     private String username;
@@ -55,68 +49,30 @@ public class PasswordLoginView extends BaseLoginView {
     private PublicAuthService authService;
 
     public PasswordLoginView() {
-        setSizeFull();
-        setPadding(false);
-        setSpacing(false);
-        setAlignItems(Alignment.CENTER);
-        setJustifyContentMode(JustifyContentMode.CENTER);
-        addClassName("password-view");
+        configureAsAuthPage("password-view");
 
-        // Brand
-        Div brand = new Div();
-        brand.addClassName("brand");
-        Avatar logo = new Avatar("IsyGo");
-        logo.setColorIndex(1);
-        logo.setWidth("56px");
-        logo.setHeight("56px");
-        H2 title = new H2(I18n.t("auth.password.title"));
-        title.addClassName(LumoUtility.FontWeight.BOLD);
-        title.addClassName(LumoUtility.Margin.NONE);
-        brand.add(logo, title);
-
-        // Password field
         passwordField.setWidthFull();
         passwordField.setPlaceholder(I18n.t("auth.password.field.password.placeholder"));
         passwordField.setPrefixComponent(VaadinIcon.LOCK.create());
 
-        // Login button
         loginButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        loginButton.setWidthFull();
+        loginButton.addClassName("wams-auth-primary-btn");
         loginButton.addClickListener(e -> handlePasswordLogin());
+        loginButton.addClickShortcut(com.vaadin.flow.component.Key.ENTER);
 
-        // Error container
-        errorContainer.addClassName("error-container");
-        errorContainer.setVisible(false);
+        Anchor backLink = createLink("login", I18n.t("auth.common.link.back"));
 
-        // Back link
-        Anchor backLink = new Anchor("login", I18n.t("auth.common.link.back"));
-        backLink.addClassName("back-link");
+        var card = createCard();
+        card.add(createBrand(I18n.t("auth.password.title"), null),
+                passwordField, loginButton, errorBanner, backLink, createFooter());
 
-        // Footer
-        Paragraph footer = new Paragraph(I18n.t("auth.common.footer"));
-        footer.addClassName(LumoUtility.TextColor.TERTIARY);
-        footer.addClassName(LumoUtility.FontSize.XXSMALL);
-        footer.addClassName(LumoUtility.Margin.Top.MEDIUM);
-
-        VerticalLayout wrapper = new VerticalLayout(brand, passwordField, loginButton,
-                errorContainer, backLink, footer);
-        wrapper.setAlignItems(FlexComponent.Alignment.CENTER);
-        wrapper.setMaxWidth("400px");
-        wrapper.setWidthFull();
-        wrapper.setPadding(true);
-        wrapper.setSpacing(true);
-        wrapper.addClassName("password-wrapper");
-
-        add(wrapper);
+        add(card);
     }
 
     private void handlePasswordLogin() {
         String password = passwordField.getValue();
         if (password.isBlank()) {
-            String message = I18n.t("auth.password.error.required");
-            showError(message);
-            errorContainer.setText(message);
-            errorContainer.setVisible(true);
+            showError(errorBanner, I18n.t("auth.password.error.required"));
             return;
         }
 
@@ -142,7 +98,7 @@ public class PasswordLoginView extends BaseLoginView {
                 httpSession.setAttribute("user", username);
                 httpSession.setAttribute("accessToken", authResponse.getAccessToken());
 
-                log.info("✅ User logged in: {} (session id: {})", username, vaadinSession.getSession().getId());
+                log.info("User logged in: {} (session id: {})", username, vaadinSession.getSession().getId());
 
                 String target = (redirectTarget != null && SecurityUtils.isSafeInternalPath(redirectTarget))
                         ? redirectTarget
@@ -152,23 +108,17 @@ public class PasswordLoginView extends BaseLoginView {
                 Notification.show(I18n.t("auth.common.notification.welcome", username), 2000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } else {
-                String message = I18n.t("auth.password.error.invalidCredentials");
-                showError(message);
-                errorContainer.setText(message);
-                errorContainer.setVisible(true);
+                showError(errorBanner, I18n.t("auth.password.error.invalidCredentials"));
             }
         } catch (Exception ex) {
-            String message = I18n.t("auth.password.error.serviceError");
-            showError(message);
-            errorContainer.setText(message);
-            errorContainer.setVisible(true);
+            showError(errorBanner, I18n.t("auth.password.error.serviceError"));
         }
     }
 
     @Override
     protected void onBeforeEnter(BeforeEnterEvent event) {
-        errorContainer.setVisible(false);
-        errorContainer.setText("");
+        errorBanner.setVisible(false);
+        errorBanner.setText("");
 
         Optional<String> tenantOpt = event.getLocation().getQueryParameters().getSingleParameter("tenant");
         Optional<String> usernameOpt = event.getLocation().getQueryParameters().getSingleParameter("username");

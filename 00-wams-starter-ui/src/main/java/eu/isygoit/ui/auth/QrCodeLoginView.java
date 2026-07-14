@@ -1,22 +1,20 @@
 package eu.isygoit.ui.auth;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.UIScope;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.request.AccountAuthTypeRequest;
 import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.dto.response.AuthResponseDto;
@@ -56,58 +54,25 @@ public class QrCodeLoginView extends BaseLoginView {
     private PublicAuthService authService;
 
     public QrCodeLoginView() {
-        setSizeFull();
-        setPadding(false);
-        setSpacing(false);
-        setAlignItems(Alignment.CENTER);
-        setJustifyContentMode(JustifyContentMode.CENTER);
-        addClassName("qr-login-view");
+        configureAsAuthPage("qr-login-view");
 
-        // Brand
-        Div brand = new Div();
-        brand.addClassName("brand");
-        Avatar logo = new Avatar("IsyGo");
-        logo.setColorIndex(3);
-        logo.setWidth("56px");
-        logo.setHeight("56px");
-        H2 title = new H2(I18n.t("auth.qrcode.title"));
-        title.addClassName(LumoUtility.FontWeight.BOLD);
-        title.addClassName(LumoUtility.Margin.NONE);
-        brand.add(logo, title);
-
-        // QR Code Image
         qrImage.setWidth("200px");
         qrImage.setHeight("200px");
-        qrImage.addClassName("qr-image");
+        qrImage.addClassName("wams-qr-image");
 
-        // Status text
-        statusContainer.addClassName("status-text");
-        statusContainer.addClassName("status-text--info");
+        statusContainer.addClassName("wams-qr-status");
+        statusContainer.addClassName("wams-qr-status--info");
 
-        // Refresh button
         refreshQrButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         refreshQrButton.addClickListener(e -> generateQrCode());
 
-        // Back link
-        Anchor backToLogin = new Anchor("login", I18n.t("auth.common.link.backToSignIn"));
-        backToLogin.addClassName("back-link");
+        Anchor backToLogin = createLink("login", I18n.t("auth.common.link.backToSignIn"));
 
-        // Footer
-        Paragraph footer = new Paragraph(I18n.t("auth.common.footer"));
-        footer.addClassName(LumoUtility.TextColor.TERTIARY);
-        footer.addClassName(LumoUtility.FontSize.XXSMALL);
-        footer.addClassName(LumoUtility.Margin.Top.MEDIUM);
+        var card = createCard();
+        card.add(createBrand(I18n.t("auth.qrcode.title"), null),
+                qrImage, statusContainer, refreshQrButton, backToLogin, createFooter());
 
-        VerticalLayout wrapper = new VerticalLayout(brand, qrImage, statusContainer, refreshQrButton,
-                backToLogin, footer);
-        wrapper.setAlignItems(FlexComponent.Alignment.CENTER);
-        wrapper.setMaxWidth("400px");
-        wrapper.setWidthFull();
-        wrapper.setPadding(true);
-        wrapper.setSpacing(true);
-        wrapper.addClassName("qr-wrapper");
-
-        add(wrapper);
+        add(card);
 
         addAttachListener(event -> {
             // Simulate QR scan after 5 seconds (demo)
@@ -138,8 +103,8 @@ public class QrCodeLoginView extends BaseLoginView {
                 String qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encoded;
                 qrImage.setSrc(qrUrl);
                 statusContainer.setText(I18n.t("auth.qrcode.status.scanHint"));
-                statusContainer.removeClassName("status-text--error");
-                statusContainer.addClassName("status-text--info");
+                statusContainer.removeClassName("wams-qr-status--error");
+                statusContainer.addClassName("wams-qr-status--info");
             } else {
                 statusContainer.setText(I18n.t("auth.qrcode.status.tokenFailed"));
             }
@@ -171,7 +136,7 @@ public class QrCodeLoginView extends BaseLoginView {
                 httpSession.setAttribute("user", username);
                 httpSession.setAttribute("accessToken", authResponse.getAccessToken());
 
-                log.info("✅ User logged in: {} (session id: {})", username, vaadinSession.getSession().getId());
+                log.info("User logged in: {} (session id: {})", username, vaadinSession.getSession().getId());
 
                 String target = (redirectTarget != null && SecurityUtils.isSafeInternalPath(redirectTarget))
                         ? redirectTarget
@@ -182,13 +147,13 @@ public class QrCodeLoginView extends BaseLoginView {
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } else {
                 statusContainer.setText(I18n.t("auth.qrcode.status.authFailed"));
-                statusContainer.removeClassName("status-text--info");
-                statusContainer.addClassName("status-text--error");
+                statusContainer.removeClassName("wams-qr-status--info");
+                statusContainer.addClassName("wams-qr-status--error");
             }
         } catch (Exception ex) {
             statusContainer.setText(I18n.t("auth.common.error.authenticationError"));
-            statusContainer.removeClassName("status-text--info");
-            statusContainer.addClassName("status-text--error");
+            statusContainer.removeClassName("wams-qr-status--info");
+            statusContainer.addClassName("wams-qr-status--error");
         }
     }
 

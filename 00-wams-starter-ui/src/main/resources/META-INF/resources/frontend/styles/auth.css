@@ -1,19 +1,20 @@
 /*
- * Styling for the eu.isygoit.ui.auth views (LoginView, OtpLoginView,
+ * Shared styling for every eu.isygoit.ui.auth view (LoginView, OtpLoginView,
  * PasswordLoginView, QrCodeLoginView, RegisterView).
- * Previously each view injected its own <style> block at runtime via
- * UI.getPage().executeJs(...) on every attach, appending a fresh duplicate
- * <style> tag to <head> on each page load. It is now a single static
- * stylesheet imported once via @CssImport on BaseLoginView (and directly on
- * RegisterView, which does not extend BaseLoginView).
+ *
+ * All five views now render through the same BaseLoginView-provided
+ * building blocks (createAuthPage/createBrand/createErrorBanner/createFooter/
+ * createLink) and share this single class vocabulary — .wams-auth-* — instead
+ * of each view owning its own near-duplicate rule set. This mirrors
+ * Atlassian's own auth experience (id.atlassian.com): a flat neutral page,
+ * one centered card, a single brand mark, and identical field/button/link
+ * treatment on every screen. Imported once via @CssImport on BaseLoginView.
  */
 
-/* ── Shared keyframes ─────────────────────────────────────────────────── */
-
-@keyframes fadeIn {
+@keyframes wams-auth-fade-in {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(12px);
     }
     to {
         opacity: 1;
@@ -21,324 +22,202 @@
     }
 }
 
-/* ── LoginView ────────────────────────────────────────────────────────── */
+/* ── Page shell ───────────────────────────────────────────────────────── */
 
-.login-view {
-    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+.wams-auth-page {
     min-height: 100vh;
-    animation: fadeIn 0.5s ease-out;
+    width: 100%;
+    background: radial-gradient(ellipse at top, var(--lumo-primary-color-10pct), var(--lumo-shade-5pct) 60%);
 }
 
-.login-wrapper {
+/* ── Card ─────────────────────────────────────────────────────────────── */
+
+.wams-auth-card {
     background: var(--lumo-base-color);
-    border-radius: var(--lumo-border-radius-xl);
+    border: 1px solid var(--lumo-contrast-10pct);
+    border-radius: var(--lumo-border-radius-l);
     box-shadow: var(--lumo-box-shadow-m);
-    padding: var(--lumo-space-l);
+    padding: var(--lumo-space-xl) var(--lumo-space-l);
+    width: 100%;
+    max-width: 400px;
+    animation: wams-auth-fade-in 0.35s ease-out;
 }
 
-.login-view .brand {
+.wams-auth-card--wide {
+    max-width: 440px;
+}
+
+/* ── Brand ────────────────────────────────────────────────────────────── */
+
+.wams-auth-brand {
     text-align: center;
     margin-bottom: var(--lumo-space-m);
 }
 
-.login-view .brand h2 {
-    font-size: var(--lumo-font-size-xxl);
-    letter-spacing: -0.5px;
+.wams-auth-logo {
+    margin: 0 auto var(--lumo-space-s);
 }
 
-.login-view vaadin-text-field {
+.wams-auth-title {
+    font-size: var(--lumo-font-size-xxl);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: var(--lumo-header-text-color);
+}
+
+.wams-auth-subtitle {
+    font-size: var(--lumo-font-size-s);
+    color: var(--lumo-secondary-text-color);
+    margin: var(--lumo-space-xs) 0 0;
+}
+
+/* ── Form elements ────────────────────────────────────────────────────── */
+
+.wams-auth-card vaadin-text-field,
+.wams-auth-card vaadin-password-field,
+.wams-auth-card vaadin-email-field,
+.wams-auth-card vaadin-form-layout {
     width: 100%;
 }
 
-.login-view .error-container {
+.wams-auth-field-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--lumo-space-s);
+}
+
+.wams-auth-primary-btn {
+    width: 100%;
+    margin-top: var(--lumo-space-xs);
+    font-weight: 600;
+}
+
+/* ── Error banner ─────────────────────────────────────────────────────── */
+
+.wams-auth-error {
     background: var(--lumo-error-color-10pct);
+    border: 1px solid var(--lumo-error-color-50pct);
     color: var(--lumo-error-text-color);
-    padding: var(--lumo-space-s);
+    padding: var(--lumo-space-s) var(--lumo-space-m);
     border-radius: var(--lumo-border-radius-m);
-    font-size: var(--lumo-font-size-xs);
+    font-size: var(--lumo-font-size-s);
     width: 100%;
     text-align: center;
+    box-sizing: border-box;
 }
 
-.login-view .register-link {
+/* ── Links & footer ───────────────────────────────────────────────────── */
+
+.wams-auth-link {
     color: var(--lumo-primary-text-color);
     font-size: var(--lumo-font-size-s);
-    margin-top: var(--lumo-space-s);
+    font-weight: 500;
+    text-decoration: none;
 }
 
-@media (max-width: 480px) {
-    .login-wrapper {
-        padding: var(--lumo-space-m);
-        border-radius: var(--lumo-border-radius-l);
-        margin: var(--lumo-space-m);
-    }
-
-    .login-view .brand h2 {
-        font-size: var(--lumo-font-size-xl);
-    }
+.wams-auth-link:hover {
+    text-decoration: underline;
 }
 
-/* ── OtpLoginView ─────────────────────────────────────────────────────── */
-
-.otp-login-view {
-    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-    min-height: 100vh;
-    animation: fadeIn 0.5s ease-out;
-}
-
-.otp-wrapper {
-    background: var(--lumo-base-color);
-    border-radius: var(--lumo-border-radius-xl);
-    box-shadow: var(--lumo-box-shadow-m);
-    padding: var(--lumo-space-l);
-}
-
-.otp-login-view .brand {
+.wams-auth-footer {
+    width: 100%;
     text-align: center;
-    margin-bottom: var(--lumo-space-m);
+    margin-top: var(--lumo-space-m);
+    padding-top: var(--lumo-space-m);
+    border-top: 1px solid var(--lumo-contrast-5pct);
 }
 
-.otp-login-view .brand h2 {
-    font-size: var(--lumo-font-size-xl);
-    letter-spacing: -0.5px;
+.wams-auth-footer-text {
+    color: var(--lumo-tertiary-text-color);
+    font-size: var(--lumo-font-size-xxs);
+    margin: var(--lumo-space-xs) 0 0;
 }
 
-.otp-login-view vaadin-text-field {
+/* ── OTP digit fields ─────────────────────────────────────────────────── */
+
+.wams-otp-fields {
+    gap: var(--lumo-space-xs);
+    margin: var(--lumo-space-s) 0;
     width: 100%;
 }
 
-.otp-login-view .otp-fields vaadin-text-field {
-    width: 2.8em !important;
-    height: 2.8em !important;
-    text-align: center;
-    font-size: 1.2em;
-    --lumo-text-field-size: 2.8em;
+.wams-otp-fields vaadin-text-field {
+    width: 3em !important;
+    flex: 0 0 auto;
+    --lumo-text-field-size: 3em;
 }
 
-.otp-login-view .otp-fields vaadin-text-field input {
+.wams-otp-fields vaadin-text-field input {
     text-align: center;
     padding: 0;
-    font-size: 1em;
-}
-
-.otp-login-view .otp-fields vaadin-text-field::placeholder {
-    font-size: 0.8em;
-    color: var(--lumo-tertiary-text-color);
-}
-
-.otp-login-view .otp-fields {
-    gap: 0.4em;
-    margin: var(--lumo-space-s) 0;
-}
-
-.otp-login-view .error-container {
-    background: var(--lumo-error-color-10pct);
-    color: var(--lumo-error-text-color);
-    padding: var(--lumo-space-s);
-    border-radius: var(--lumo-border-radius-m);
-    font-size: var(--lumo-font-size-xs);
-    width: 100%;
-    text-align: center;
-}
-
-.otp-login-view .back-link {
-    color: var(--lumo-primary-text-color);
-    font-size: var(--lumo-font-size-s);
-    margin-top: var(--lumo-space-m);
-}
-
-@media (max-width: 480px) {
-    .otp-wrapper {
-        padding: var(--lumo-space-m);
-        border-radius: var(--lumo-border-radius-l);
-        margin: var(--lumo-space-m);
-    }
-
-    .otp-login-view .otp-fields vaadin-text-field {
-        width: 2.2em !important;
-        height: 2.2em !important;
-        font-size: 1em;
-    }
-
-    .otp-login-view .otp-fields {
-        gap: 0.3em;
-    }
-}
-
-/* ── PasswordLoginView ────────────────────────────────────────────────── */
-
-.password-view {
-    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-    min-height: 100vh;
-    animation: fadeIn 0.5s ease-out;
-}
-
-.password-wrapper {
-    background: var(--lumo-base-color);
-    border-radius: var(--lumo-border-radius-xl);
-    box-shadow: var(--lumo-box-shadow-m);
-    padding: var(--lumo-space-l);
-}
-
-.password-view .brand {
-    text-align: center;
-    margin-bottom: var(--lumo-space-m);
-}
-
-.password-view .brand h2 {
     font-size: var(--lumo-font-size-xl);
-    letter-spacing: -0.5px;
+    font-weight: 600;
 }
 
-.password-view vaadin-password-field {
-    width: 100%;
-}
+/* ── QR code ──────────────────────────────────────────────────────────── */
 
-.password-view .error-container {
-    background: var(--lumo-error-color-10pct);
-    color: var(--lumo-error-text-color);
-    padding: var(--lumo-space-s);
+.wams-qr-image {
+    display: block;
+    margin: 0 auto;
+    border: 1px solid var(--lumo-contrast-10pct);
     border-radius: var(--lumo-border-radius-m);
-    font-size: var(--lumo-font-size-xs);
-    width: 100%;
-    text-align: center;
-}
-
-.password-view .back-link {
-    color: var(--lumo-primary-text-color);
-    font-size: var(--lumo-font-size-s);
-    margin-top: var(--lumo-space-m);
-}
-
-@media (max-width: 480px) {
-    .password-wrapper {
-        padding: var(--lumo-space-m);
-        border-radius: var(--lumo-border-radius-l);
-        margin: var(--lumo-space-m);
-    }
-}
-
-/* ── QrCodeLoginView ──────────────────────────────────────────────────── */
-
-.qr-login-view {
-    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-    min-height: 100vh;
-    animation: fadeIn 0.5s ease-out;
-}
-
-.qr-wrapper {
+    box-shadow: var(--lumo-box-shadow-xs);
+    padding: var(--lumo-space-xs);
     background: var(--lumo-base-color);
-    border-radius: var(--lumo-border-radius-xl);
-    box-shadow: var(--lumo-box-shadow-m);
-    padding: var(--lumo-space-l);
 }
 
-.qr-login-view .brand {
-    text-align: center;
-    margin-bottom: var(--lumo-space-m);
-}
-
-.qr-login-view .brand h2 {
-    font-size: var(--lumo-font-size-xl);
-    letter-spacing: -0.5px;
-}
-
-.qr-login-view .back-link {
-    color: var(--lumo-primary-text-color);
-    font-size: var(--lumo-font-size-s);
-    margin-top: var(--lumo-space-m);
-}
-
-.qr-login-view .status-text {
-    min-height: 3em;
+.wams-qr-status {
+    min-height: 2.5em;
     font-size: var(--lumo-font-size-s);
     text-align: center;
-    margin: var(--lumo-space-s) 0;
+    margin: var(--lumo-space-s) 0 0;
 }
 
-.qr-login-view .status-text--info {
+.wams-qr-status--info {
     color: var(--lumo-secondary-text-color);
 }
 
-.qr-login-view .status-text--error {
+.wams-qr-status--error {
     color: var(--lumo-error-text-color);
 }
 
-.qr-login-view .qr-image {
-    border-radius: var(--lumo-border-radius-m);
-    box-shadow: var(--lumo-box-shadow-xs);
-}
+/* ── Responsive ───────────────────────────────────────────────────────── */
 
 @media (max-width: 480px) {
-    .qr-wrapper {
+    .wams-auth-page {
         padding: var(--lumo-space-m);
+        box-sizing: border-box;
+    }
+
+    .wams-auth-card {
+        padding: var(--lumo-space-l) var(--lumo-space-m);
         border-radius: var(--lumo-border-radius-l);
-        margin: var(--lumo-space-m);
+        box-shadow: none;
     }
 
-    .qr-login-view .brand h2 {
-        font-size: var(--lumo-font-size-l);
+    .wams-auth-title {
+        font-size: var(--lumo-font-size-xl);
     }
 
-    .qr-login-view .qr-image {
+    .wams-otp-fields vaadin-text-field {
+        width: 2.4em !important;
+        --lumo-text-field-size: 2.4em;
+    }
+
+    .wams-otp-fields {
+        gap: 6px;
+    }
+
+    .wams-qr-image {
         width: 160px !important;
         height: 160px !important;
     }
 }
 
-/* ── RegisterView ─────────────────────────────────────────────────────── */
-
-.register-view {
-    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-    min-height: 100vh;
-    animation: fadeIn 0.5s ease-out;
-}
-
-.register-wrapper {
-    background: var(--lumo-base-color);
-    border-radius: var(--lumo-border-radius-xl);
-    box-shadow: var(--lumo-box-shadow-m);
-    padding: var(--lumo-space-l);
-}
-
-.register-view .brand {
-    text-align: center;
-    margin-bottom: var(--lumo-space-m);
-}
-
-.register-view .brand h2 {
-    font-size: var(--lumo-font-size-xl);
-    letter-spacing: -0.5px;
-}
-
-.register-view .register-form {
-    width: 100%;
-}
-
-.register-view .error-container {
-    background: var(--lumo-error-color-10pct);
-    color: var(--lumo-error-text-color);
-    padding: var(--lumo-space-s);
-    border-radius: var(--lumo-border-radius-m);
-    font-size: var(--lumo-font-size-xs);
-    width: 100%;
-    text-align: center;
-}
-
-.register-view .login-link {
-    color: var(--lumo-primary-text-color);
-    font-size: var(--lumo-font-size-s);
-    margin-top: var(--lumo-space-s);
-}
-
-@media (max-width: 480px) {
-    .register-wrapper {
-        padding: var(--lumo-space-m);
-        border-radius: var(--lumo-border-radius-l);
-        margin: var(--lumo-space-m);
-    }
-
-    .register-view .brand h2 {
-        font-size: var(--lumo-font-size-l);
+@media (prefers-reduced-motion: reduce) {
+    .wams-auth-card {
+        animation-duration: 0.01ms !important;
     }
 }

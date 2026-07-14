@@ -1,20 +1,16 @@
 package eu.isygoit.ui.auth;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -23,7 +19,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.UIScope;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.dto.response.AuthResponseDto;
 import eu.isygoit.enums.IEnumAuth;
@@ -54,80 +49,44 @@ public class OtpLoginView extends BaseLoginView {
     private final HorizontalLayout otpFieldsLayout = new HorizontalLayout();
     private final Button requestOtpButton = new Button(I18n.t("auth.otp.button.requestOtp"), new Icon(VaadinIcon.ENVELOPE));
     private final Button loginButton = new Button(I18n.t("auth.otp.button.signIn"), new Icon(VaadinIcon.SIGN_IN));
-    private final Div errorContainer = new Div();
+    private final Div errorBanner = createErrorBanner();
 
     private String tenant;
     private String username;
     private int otpLength = 6;
-    private List<TextField> digitFields = new ArrayList<>();
+    private final List<TextField> digitFields = new ArrayList<>();
 
     @Autowired
     private PublicAuthService authService;
 
     public OtpLoginView() {
-        setSizeFull();
-        setPadding(false);
-        setSpacing(false);
-        setAlignItems(Alignment.CENTER);
-        setJustifyContentMode(JustifyContentMode.CENTER);
-        addClassName("otp-login-view");
+        configureAsAuthPage("otp-login-view");
 
-        // Brand
-        Div brand = new Div();
-        brand.addClassName("brand");
-        Avatar logo = new Avatar("IsyGo");
-        logo.setColorIndex(2);
-        logo.setWidth("56px");
-        logo.setHeight("56px");
-        H2 title = new H2(I18n.t("auth.otp.title"));
-        title.addClassName(LumoUtility.FontWeight.BOLD);
-        title.addClassName(LumoUtility.Margin.NONE);
-        brand.add(logo, title);
-
-        // Username field (prefilled, read-only)
         usernameField.setWidthFull();
         usernameField.setReadOnly(true);
 
-        // OTP fields container
         otpFieldsLayout.setSpacing(true);
         otpFieldsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         otpFieldsLayout.setWidthFull();
-        otpFieldsLayout.addClassName("otp-fields");
+        otpFieldsLayout.addClassName("wams-otp-fields");
 
-        // Buttons
         requestOtpButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         requestOtpButton.setWidthFull();
         requestOtpButton.addClickListener(e -> requestOtp());
 
         loginButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        loginButton.setWidthFull();
+        loginButton.addClassName("wams-auth-primary-btn");
         loginButton.setEnabled(false);
         loginButton.addClickListener(e -> handleOtpLogin());
 
-        // Error container
-        errorContainer.addClassName("error-container");
-        errorContainer.setVisible(false);
+        Anchor backToLogin = createLink("login", I18n.t("auth.common.link.backToSignIn"));
 
-        // Back link
-        Anchor backToLogin = new Anchor("login", I18n.t("auth.common.link.backToSignIn"));
-        backToLogin.addClassName("back-link");
+        var card = createCard();
+        card.add(createBrand(I18n.t("auth.otp.title"), null),
+                usernameField, requestOtpButton, otpFieldsLayout, loginButton,
+                errorBanner, backToLogin, createFooter());
 
-        // Footer
-        Paragraph footer = new Paragraph(I18n.t("auth.common.footer"));
-        footer.addClassName(LumoUtility.TextColor.TERTIARY);
-        footer.addClassName(LumoUtility.FontSize.XXSMALL);
-        footer.addClassName(LumoUtility.Margin.Top.MEDIUM);
-
-        VerticalLayout wrapper = new VerticalLayout(brand, usernameField, requestOtpButton,
-                otpFieldsLayout, loginButton, errorContainer, backToLogin, footer);
-        wrapper.setAlignItems(FlexComponent.Alignment.CENTER);
-        wrapper.setMaxWidth("400px");
-        wrapper.setWidthFull();
-        wrapper.setPadding(true);
-        wrapper.setSpacing(true);
-        wrapper.addClassName("otp-wrapper");
-
-        add(wrapper);
+        add(card);
     }
 
     private void buildOtpFields(int length) {
@@ -180,7 +139,7 @@ public class OtpLoginView extends BaseLoginView {
             digitFields.get(0).focus();
         }
         loginButton.setEnabled(false);
-        errorContainer.setVisible(false);
+        errorBanner.setVisible(false);
 
         // In production, call the actual OTP service.
         // For demo, simulate success.
@@ -191,10 +150,7 @@ public class OtpLoginView extends BaseLoginView {
     private void handleOtpLogin() {
         String otp = getOtpFromFields();
         if (otp.length() != otpLength) {
-            String message = I18n.t("auth.otp.error.incomplete");
-            showError(message);
-            errorContainer.setText(message);
-            errorContainer.setVisible(true);
+            showError(errorBanner, I18n.t("auth.otp.error.incomplete"));
             return;
         }
 
@@ -220,7 +176,7 @@ public class OtpLoginView extends BaseLoginView {
                 httpSession.setAttribute("user", username);
                 httpSession.setAttribute("accessToken", authResponse.getAccessToken());
 
-                log.info("✅ User logged in: {} (session id: {})", username, vaadinSession.getSession().getId());
+                log.info("User logged in: {} (session id: {})", username, vaadinSession.getSession().getId());
 
                 String target = (redirectTarget != null && SecurityUtils.isSafeInternalPath(redirectTarget))
                         ? redirectTarget
@@ -232,16 +188,10 @@ public class OtpLoginView extends BaseLoginView {
                 Notification.show(I18n.t("auth.common.notification.welcome", username), 2000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } else {
-                String message = I18n.t("auth.otp.error.invalidOtp");
-                showError(message);
-                errorContainer.setText(message);
-                errorContainer.setVisible(true);
+                showError(errorBanner, I18n.t("auth.otp.error.invalidOtp"));
             }
         } catch (Exception ex) {
-            String message = I18n.t("auth.common.error.authenticationError");
-            showError(message);
-            errorContainer.setText(message);
-            errorContainer.setVisible(true);
+            showError(errorBanner, I18n.t("auth.common.error.authenticationError"));
         }
     }
 
@@ -249,8 +199,8 @@ public class OtpLoginView extends BaseLoginView {
     @Override
     protected void onBeforeEnter(BeforeEnterEvent event) {
         // Clear error container
-        errorContainer.setVisible(false);
-        errorContainer.setText("");
+        errorBanner.setVisible(false);
+        errorBanner.setText("");
 
         // DO NOT overwrite redirectTarget here — BaseLoginView already did it
         // Only extract tenant/username/otpLength
