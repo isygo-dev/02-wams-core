@@ -11,7 +11,7 @@ import eu.isygoit.dto.common.SystemInfoResponseDto;
 import eu.isygoit.dto.common.UserContextRequestDto;
 import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.dto.data.ThemeDto;
-import eu.isygoit.dto.request.AccountAuthTypeRequest;
+import eu.isygoit.dto.request.AuthenticationContextRequest;
 import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.dto.request.RegisteredUserDto;
 import eu.isygoit.dto.request.RequestTrackingDto;
@@ -181,9 +181,9 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     }
 
     @Override
-    public ResponseEntity<UserContext> getAuthenticationType(AccountAuthTypeRequest accountAuthTypeRequest) {
+    public ResponseEntity<UserContext> resolveAuthContext(AuthenticationContextRequest authenticationContextRequest) {
         try {
-            return ResponseFactory.responseOk(accountService.getAuthenticationType(accountAuthTypeRequest));
+            return ResponseFactory.responseOk(accountService.resolveAuthContext(authenticationContextRequest));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -202,10 +202,10 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
 
     @Override
     public ResponseEntity<Boolean> switchAuthType(
-            AccountAuthTypeRequest accountAuthTypeRequest) {
+            AuthenticationContextRequest authenticationContextRequest) {
         try {
             return ResponseFactory.responseOk(accountService.switchAuthType(requestContextService.getCurrentContext().getSenderTenant(),
-                    accountAuthTypeRequest));
+                    authenticationContextRequest));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

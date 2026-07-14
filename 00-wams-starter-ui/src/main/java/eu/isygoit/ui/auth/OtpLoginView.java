@@ -19,8 +19,10 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.UIScope;
+import eu.isygoit.dto.request.AuthenticationContextRequest;
 import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.dto.response.AuthResponseDto;
+import eu.isygoit.dto.response.UserContext;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.PublicAuthService;
@@ -141,10 +143,22 @@ public class OtpLoginView extends BaseLoginView {
         loginButton.setEnabled(false);
         errorBanner.setVisible(false);
 
-        // In production, call the actual OTP service.
-        // For demo, simulate success.
-        Notification.show(I18n.t("auth.otp.notification.otpSent"), 4000, Notification.Position.BOTTOM_END)
-                .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        AuthenticationContextRequest request = AuthenticationContextRequest.builder()
+                .tenant(tenant)
+                .userName(username)
+                .build();
+
+        try {
+            ResponseEntity<UserContext> response = authService.resolveAuthContext(request);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                Notification.show(I18n.t("auth.otp.notification.otpSent"), 4000, Notification.Position.BOTTOM_END)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            } else {
+                showError(errorBanner, I18n.t("auth.common.error.OtpError"));
+            }
+        } catch (Exception ex) {
+            showError(errorBanner, I18n.t("auth.common.error.OtpError"));
+        }
     }
 
     private void handleOtpLogin() {

@@ -13,7 +13,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
-import eu.isygoit.dto.request.AccountAuthTypeRequest;
+import eu.isygoit.dto.request.AuthenticationContextRequest;
 import eu.isygoit.dto.response.UserContext;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.i18n.I18n;
@@ -75,13 +75,13 @@ public class LoginView extends BaseLoginView {
             return;
         }
 
-        AccountAuthTypeRequest request = AccountAuthTypeRequest.builder()
+        AuthenticationContextRequest request = AuthenticationContextRequest.builder()
                 .tenant(tenant)
                 .userName(username)
                 .build();
 
         try {
-            ResponseEntity<UserContext> response = authService.getAuthenticationType(request);
+            ResponseEntity<UserContext> response = authService.resolveAuthContext(request);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 UserContext userContext = response.getBody();
                 IEnumAuth.Types authType = userContext.getAuthTypeMode();

@@ -13,7 +13,7 @@ import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.common.TokenRequestDto;
 import eu.isygoit.dto.common.TokenResponseDto;
 import eu.isygoit.dto.data.*;
-import eu.isygoit.dto.request.AccountAuthTypeRequest;
+import eu.isygoit.dto.request.AuthenticationContextRequest;
 import eu.isygoit.dto.request.GeneratePwdRequestDto;
 import eu.isygoit.dto.response.UserAccountDto;
 import eu.isygoit.dto.response.UserContext;
@@ -217,16 +217,16 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     }
 
     @Override
-    public UserContext getAuthenticationType(AccountAuthTypeRequest accountAuthTypeRequest) throws AccountNotFoundException {
+    public UserContext resolveAuthContext(AuthenticationContextRequest authenticationContextRequest) throws AccountNotFoundException {
         //Remove left & right spaces
-        accountAuthTypeRequest.setTenant(accountAuthTypeRequest.getTenant().trim());
-        accountAuthTypeRequest.setUserName(accountAuthTypeRequest.getUserName().trim());
+        authenticationContextRequest.setTenant(authenticationContextRequest.getTenant().trim());
+        authenticationContextRequest.setUserName(authenticationContextRequest.getUserName().trim());
 
-        if (!tenantService.isEnabled(accountAuthTypeRequest.getTenant())) {
-            throw new AccountAuthenticationException("tenant disabled: " + accountAuthTypeRequest.getTenant());
+        if (!tenantService.isEnabled(authenticationContextRequest.getTenant())) {
+            throw new AccountAuthenticationException("tenant disabled: " + authenticationContextRequest.getTenant());
         }
 
-        Account account = findByTenantAndUserName(accountAuthTypeRequest.getTenant(), accountAuthTypeRequest.getUserName());
+        Account account = findByTenantAndUserName(authenticationContextRequest.getTenant(), authenticationContextRequest.getUserName());
         if (account != null) {
             if (IEnumAuth.Types.OTP == account.getAuthType()) {
                 try {
@@ -257,7 +257,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
                             IEnumToken.Types.QRC,
                             TokenRequestDto.builder()
                                     .subject(account.getCode())
-                                    .claims(Map.of(JwtConstants.JWT_SENDER_TENANT, accountAuthTypeRequest.getTenant(),
+                                    .claims(Map.of(JwtConstants.JWT_SENDER_TENANT, authenticationContextRequest.getTenant(),
                                             JwtConstants.JWT_LOG_APP, IEnumAuth.Types.QRC.meaning(),
                                             JwtConstants.JWT_SENDER_USER, account.getCode()))
                                     .build());
@@ -280,7 +280,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
             }
 
         } else {
-            throw new AccountNotFoundException("with tenant: " + accountAuthTypeRequest.getTenant() + " and username with " + accountAuthTypeRequest.getUserName());
+            throw new AccountNotFoundException("with tenant: " + authenticationContextRequest.getTenant() + " and username with " + authenticationContextRequest.getUserName());
         }
     }
 
@@ -310,22 +310,22 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     }
 
     @Override
-    public boolean switchAuthType(String tenant /*senderTenant*/, AccountAuthTypeRequest accountAuthTypeRequest) throws AccountNotFoundException {
-        Account account = findByTenantAndUserName(accountAuthTypeRequest.getTenant(), accountAuthTypeRequest.getUserName());
+    public boolean switchAuthType(String tenant /*senderTenant*/, AuthenticationContextRequest authenticationContextRequest) throws AccountNotFoundException {
+        Account account = findByTenantAndUserName(authenticationContextRequest.getTenant(), authenticationContextRequest.getUserName());
         if (account != null) {
-            if (accountAuthTypeRequest.getAuthType() == null) {
+            if (authenticationContextRequest.getAuthType() == null) {
                 if (account.getAuthType().equals(IEnumAuth.Types.OTP)) {
                     account.setAuthType(IEnumAuth.Types.PWD);
                 } else {
                     account.setAuthType(IEnumAuth.Types.OTP);
                 }
             } else {
-                account.setAuthType(accountAuthTypeRequest.getAuthType());
+                account.setAuthType(authenticationContextRequest.getAuthType());
             }
             this.update(tenant, account);
             return true;
         } else {
-            throw new AccountNotFoundException("with tenant: " + accountAuthTypeRequest.getTenant() + " and username with " + accountAuthTypeRequest.getUserName());
+            throw new AccountNotFoundException("with tenant: " + authenticationContextRequest.getTenant() + " and username with " + authenticationContextRequest.getUserName());
         }
     }
 

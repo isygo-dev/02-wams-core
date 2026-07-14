@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class AccountAuthTypeRequest {
+public class AuthenticationContextRequest {
 
     @NotEmpty
     private String tenant;

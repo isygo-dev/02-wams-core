@@ -108,7 +108,10 @@ public class RegisterView extends BaseLoginView {
                         Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 UI.getCurrent().navigate("login");
             } else {
-                showError(errorBanner, I18n.t("auth.register.error.failed"));
+                String errorMsg = (response.getStatusCode().value() == 500 || response.getStatusCode().value() == 400)
+                        ? response.getBody().toString()
+                        : response.getStatusCode().toString();
+                showError(errorBanner, I18n.t("auth.register.error.failed") + ": " + errorMsg);
             }
         } catch (Exception ex) {
             showError(errorBanner, I18n.t("auth.register.error.serviceError"));

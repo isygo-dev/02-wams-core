@@ -4,7 +4,7 @@ import eu.isygoit.com.rest.controller.impl.tenancy.IImageTenantServiceOperations
 import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceOperations;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.*;
-import eu.isygoit.dto.request.AccountAuthTypeRequest;
+import eu.isygoit.dto.request.AuthenticationContextRequest;
 import eu.isygoit.dto.response.UserAccountDto;
 import eu.isygoit.dto.response.UserContext;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
@@ -90,20 +90,20 @@ public interface IAccountService extends ICrudTenantServiceOperations<Long, Acco
     /**
      * Gets authentication type.
      *
-     * @param accountAuthTypeRequest the account auth type request
+     * @param authenticationContextRequest the account auth type request
      * @return the authentication type
      * @throws AccountNotFoundException the account not found exception
      */
-    UserContext getAuthenticationType(AccountAuthTypeRequest accountAuthTypeRequest) throws AccountNotFoundException;
+    UserContext resolveAuthContext(AuthenticationContextRequest authenticationContextRequest) throws AccountNotFoundException;
 
     /**
      * Switch auth type boolean.
      *
-     * @param accountAuthTypeRequest the account auth type request
+     * @param authenticationContextRequest the account auth type request
      * @return the boolean
      * @throws AccountNotFoundException the account not found exception
      */
-    boolean switchAuthType(String tenant /*senderTenant*/, AccountAuthTypeRequest accountAuthTypeRequest) throws AccountNotFoundException;
+    boolean switchAuthType(String tenant /*senderTenant*/, AuthenticationContextRequest authenticationContextRequest) throws AccountNotFoundException;
 
     /**
      * Update language account.

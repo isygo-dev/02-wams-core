@@ -15,7 +15,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.UIScope;
-import eu.isygoit.dto.request.AccountAuthTypeRequest;
+import eu.isygoit.dto.request.AuthenticationContextRequest;
 import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.dto.response.AuthResponseDto;
 import eu.isygoit.dto.response.UserContext;
@@ -85,13 +85,13 @@ public class QrCodeLoginView extends BaseLoginView {
     }
 
     private void generateQrCode() {
-        AccountAuthTypeRequest request = AccountAuthTypeRequest.builder()
+        AuthenticationContextRequest request = AuthenticationContextRequest.builder()
                 .tenant(tenant)
                 .userName(username)
                 .build();
 
         try {
-            ResponseEntity<UserContext> response = authService.getAuthenticationType(request);
+            ResponseEntity<UserContext> response = authService.resolveAuthContext(request);
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 UserContext userContext = response.getBody();
                 qrCodeToken = userContext.getQrCodeToken();

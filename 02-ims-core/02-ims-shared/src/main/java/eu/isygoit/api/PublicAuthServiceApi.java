@@ -3,7 +3,7 @@ package eu.isygoit.api;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.common.UserContextRequestDto;
 import eu.isygoit.dto.data.TenantDto;
-import eu.isygoit.dto.request.AccountAuthTypeRequest;
+import eu.isygoit.dto.request.AuthenticationContextRequest;
 import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.dto.request.RegisteredUserDto;
 import eu.isygoit.dto.response.AuthResponseDto;
@@ -65,7 +65,7 @@ public interface PublicAuthServiceApi {
     /**
      * Gets authentication type.
      *
-     * @param accountAuthTypeRequest the switch auth type request
+     * @param authenticationContextRequest the switch auth type request
      * @return the authentication type
      */
     @Operation(summary = "Get Authentication Type Api",
@@ -77,7 +77,7 @@ public interface PublicAuthServiceApi {
                             schema = @Schema(implementation = UserContext.class))})
     })
     @PostMapping(path = "/authType")
-    ResponseEntity<UserContext> getAuthenticationType(@Valid @RequestBody AccountAuthTypeRequest accountAuthTypeRequest);
+    ResponseEntity<UserContext> resolveAuthContext(@Valid @RequestBody AuthenticationContextRequest authenticationContextRequest);
 
     @Operation(summary = "Get Available Email Accounts Api",
             description = "Get Available Email Accounts")
@@ -93,7 +93,7 @@ public interface PublicAuthServiceApi {
     /**
      * Switch auth type response entity.
      *
-     * @param accountAuthTypeRequest the switch auth type request
+     * @param authenticationContextRequest the switch auth type request
      * @return the response entity
      */
     @Operation(summary = "switchAuthType Api",
@@ -106,7 +106,7 @@ public interface PublicAuthServiceApi {
     })
     @PostMapping(path = "/updateAuthType")
     ResponseEntity<Boolean> switchAuthType(
-            @Valid @RequestBody AccountAuthTypeRequest accountAuthTypeRequest);
+            @Valid @RequestBody AuthenticationContextRequest authenticationContextRequest);
 
     /**
      * Register new account response entity.
