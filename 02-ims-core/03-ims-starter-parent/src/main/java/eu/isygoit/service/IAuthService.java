@@ -3,7 +3,7 @@ package eu.isygoit.service;
 import eu.isygoit.dto.request.RequestTrackingDto;
 import eu.isygoit.dto.response.AuthResponseDto;
 import eu.isygoit.enums.IEnumAuth;
-import eu.isygoit.model.RegistredUser;
+import eu.isygoit.model.RegisteredUser;
 
 /**
  * The interface Auth service.
@@ -16,7 +16,7 @@ public interface IAuthService {
      * @param registredNewAccount the registred new account
      * @return the boolean
      */
-    boolean registerUser(RegistredUser registredNewAccount);
+    boolean registerUser(RegisteredUser registredNewAccount);
 
     /**
      * Authenticate auth response dto.

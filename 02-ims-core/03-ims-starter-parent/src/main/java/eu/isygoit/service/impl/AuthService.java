@@ -8,7 +8,7 @@ import eu.isygoit.dto.response.AuthResponseDto;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.exception.*;
 import eu.isygoit.model.ConnectionTracking;
-import eu.isygoit.model.RegistredUser;
+import eu.isygoit.model.RegisteredUser;
 import eu.isygoit.remote.kms.KmsPublicPasswordService;
 import eu.isygoit.repository.RegistredUserRepository;
 import eu.isygoit.security.CustomAuthentification;
@@ -141,7 +141,7 @@ public class AuthService implements IAuthService {
     }
 
     @Override
-    public boolean registerUser(RegistredUser registredNewAccount) {
+    public boolean registerUser(RegisteredUser registredNewAccount) {
         registredUserRepository.save(registredNewAccount);
         //send validation email
         return true;

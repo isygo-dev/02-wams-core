@@ -27,6 +27,7 @@ public final class ImsNavRegistry implements INavRegistry {
             new NavTarget("ims.nav.accounts", "ims/accounts", VaadinIcon.USER, "ims"),
             new NavTarget("ims.nav.customers", "ims/customers", VaadinIcon.GROUP, "ims"),
             new NavTarget("ims.nav.tenants", "ims/tenants", VaadinIcon.BUILDING, "ims"),
+            new NavTarget("ims.nav.registeredUsers", "ims/registered-users", VaadinIcon.CLIPBOARD_USER, "ims"),
             new NavTarget("ims.nav.applications", "ims/applications", VaadinIcon.PAPERCLIP, "ims"),
             new NavTarget("ims.nav.roles", "ims/roles", VaadinIcon.SHIELD, "ims"),
             new NavTarget("ims.nav.parameters", "ims/parameters", VaadinIcon.KEYBOARD, "ims"),

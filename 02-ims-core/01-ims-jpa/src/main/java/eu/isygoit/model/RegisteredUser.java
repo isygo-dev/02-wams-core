@@ -1,5 +1,6 @@
 package eu.isygoit.model;
 
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumAccountOrigin;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
@@ -10,6 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
 
 
@@ -24,13 +26,18 @@ import org.hibernate.annotations.DynamicUpdate;
 @Table(name = SchemaTableConstantName.T_REGISTRED_USER, uniqueConstraints = {
         @UniqueConstraint(columnNames = {SchemaColumnConstantName.C_EMAIL})
 })
-public class RegistredUser extends AuditableEntity<Long> {
+public class RegisteredUser extends AuditableEntity<Long> implements ITenantAssignable{
 
     @Id
     @SequenceGenerator(name = "registred_user_sequence_generator", sequenceName = "registred_user_sequence", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "registred_user_sequence_generator")
     @Column(name = SchemaColumnConstantName.C_ID, updatable = false, nullable = false)
     private Long id;
+
+    //@Convert(converter = LowerCaseConverter.class)
+    @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
+    @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
+    private String tenant;
 
     //@Convert(converter = CamelCaseConverter.class)
     @Column(name = SchemaColumnConstantName.C_FIRST_NAME, length = SchemaConstantSize.S_NAME, nullable = false)

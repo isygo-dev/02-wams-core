@@ -32,6 +32,7 @@ public class ImsMainLayout extends BaseMainLayout {
         directory.addItem(navItem(I18n.t("ims.nav.accounts"), "ims/accounts", VaadinIcon.USER));
         directory.addItem(navItem(I18n.t("ims.nav.customers"), "ims/customers", VaadinIcon.GROUP));
         directory.addItem(navItem(I18n.t("ims.nav.tenants"), "ims/tenants", VaadinIcon.BUILDING));
+        directory.addItem(navItem(I18n.t("ims.nav.registeredUsers"), "ims/registered-users", VaadinIcon.CLIPBOARD_USER));
 
         // Access control: what can reach the system, and with which permissions.
         SideNav access = new SideNav(I18n.t("ims.nav.section.access"));

@@ -42,13 +42,17 @@ public class Application extends AuditableEntity<Long> implements ITenantAssigna
     @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
     @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
+
     //@Convert(converter = LowerCaseConverter.class)
     @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;
+
     @Column(name = SchemaColumnConstantName.C_NAME, length = SchemaConstantSize.S_NAME, updatable = false, nullable = false)
     private String name;
+
     @Column(name = SchemaColumnConstantName.C_TITLE, length = SchemaConstantSize.S_NAME, nullable = false)
     private String title;
+
     @Builder.Default
     @ColumnDefault("'PRM Store'")
     @Column(name = SchemaColumnConstantName.C_CATEGORY, length = SchemaConstantSize.S_NAME, nullable = false)

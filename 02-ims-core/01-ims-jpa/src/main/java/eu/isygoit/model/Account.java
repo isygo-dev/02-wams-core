@@ -58,43 +58,53 @@ public class Account extends AccountModel<Long> implements IImageEntity {
 
     @Column(name = SchemaColumnConstantName.C_PHONE_NUMBER, length = SchemaConstantSize.PHONE_NUMBER, nullable = false)
     private String phoneNumber;
+
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @ColumnDefault("'EN'")
     @Column(name = SchemaColumnConstantName.C_LANGUAGE_CODE, length = IEnumLanguage.STR_ENUM_SIZE, nullable = false)
     private IEnumLanguage.Types language = IEnumLanguage.Types.EN;
+
     @ManyToMany(fetch = FetchType.LAZY /* NO CASCADE */)
     @JoinTable(name = SchemaTableConstantName.T_ASSO_ROLE_INFO_ACCOUNT,
             joinColumns = @JoinColumn(name = SchemaColumnConstantName.C_ROLE_INFO_CODE, referencedColumnName = SchemaColumnConstantName.C_CODE),
             inverseJoinColumns = @JoinColumn(name = SchemaColumnConstantName.C_ACCOUNT_CODE, referencedColumnName = SchemaColumnConstantName.C_CODE))
     private List<RoleInfo> roleInfo;
+
     @ColumnDefault("'" + AccountTypeConstants.TENANT_USER + "'")
     @Column(name = SchemaColumnConstantName.C_FUNCTION_ROLE, length = SchemaConstantSize.S_NAME, nullable = false)
     private String functionRole = AccountTypeConstants.TENANT_USER;
+
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL /* CASCADE only for OneToOne*/)
     @JoinColumn(name = SchemaColumnConstantName.C_ACCOUNT_DETAILS_ID, referencedColumnName = SchemaColumnConstantName.C_ID
             , foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_ACCOUNT_REF_DETAILS))
     private AccountDetails accountDetails;
+
     @Column(name = SchemaColumnConstantName.C_PHOTO)
     private String imagePath;
+
     @Builder.Default
     @ColumnDefault("'false'")
     @Column(name = SchemaColumnConstantName.C_IS_ADMIN)
     private Boolean isAdmin = Boolean.FALSE;
+
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @ColumnDefault("'OTP'")
     @Column(name = SchemaColumnConstantName.C_AUTH_TYPE, length = IEnumAuth.STR_ENUM_SIZE, nullable = false)
     private IEnumAuth.Types authType = IEnumAuth.Types.OTP;
+
     @OrderBy(SchemaColumnConstantName.C_LOGIN_DATE + " DESC")
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL /* Cascade only for OneToMany*/)
     @JoinColumn(name = SchemaColumnConstantName.C_ACCOUNT_CODE, referencedColumnName = SchemaColumnConstantName.C_CODE
             , foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_CONNECTION_TRACKING_REF_ACCOUNT))
     private List<ConnectionTracking> connectionTracking;
+
     @Builder.Default
     @ColumnDefault("'" + AccountTypeConstants.TENANT_USER + "'")
     @Column(name = SchemaColumnConstantName.C_TYPE, length = SchemaConstantSize.ACCOUNT_TYPE)
     private String accountType = AccountTypeConstants.TENANT_USER;
+
     @Builder.Default
     @ColumnDefault("'SYS_ADMIN'")
     @Column(name = SchemaColumnConstantName.C_ORIGIN, nullable = false)

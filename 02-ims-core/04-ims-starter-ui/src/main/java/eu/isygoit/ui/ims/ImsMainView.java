@@ -41,6 +41,7 @@ public class ImsMainView extends ManagementVerticalView {
     private final ApplicationService applicationService;
     private final CustomerService customerService;
     private final RoleInfoService roleInfoService;
+    private final RegisteredUserService registeredUserService;
     private final UI ui;
 
     private StatCard accountsCard;
@@ -48,18 +49,21 @@ public class ImsMainView extends ManagementVerticalView {
     private StatCard applicationsCard;
     private StatCard customersCard;
     private StatCard rolesCard;
+    private StatCard registeredUsersCard;
 
     @Autowired
     public ImsMainView(AccountService accountService,
                        TenantService tenantService,
                        ApplicationService applicationService,
                        CustomerService customerService,
-                       RoleInfoService roleInfoService) {
+                       RoleInfoService roleInfoService,
+                       RegisteredUserService registeredUserService) {
         this.accountService = accountService;
         this.tenantService = tenantService;
         this.applicationService = applicationService;
         this.customerService = customerService;
         this.roleInfoService = roleInfoService;
+        this.registeredUserService = registeredUserService;
         this.ui = UI.getCurrent();
 
         ui.getPushConfiguration().setPushMode(com.vaadin.flow.shared.communication.PushMode.AUTOMATIC);
@@ -93,7 +97,10 @@ public class ImsMainView extends ManagementVerticalView {
                         () -> UI.getCurrent().navigate("ims/customers")),
                 new DashboardShortcutsBar.Shortcut(VaadinIcon.SHIELD,
                         I18n.t("ims.dashboard.quick.actions.assign.role"),
-                        () -> UI.getCurrent().navigate("ims/roles"))
+                        () -> UI.getCurrent().navigate("ims/roles")),
+                new DashboardShortcutsBar.Shortcut(VaadinIcon.CLIPBOARD_USER,
+                        I18n.t("ims.dashboard.quick.actions.add.registered.user"),
+                        () -> UI.getCurrent().navigate("ims/registered-users"))
         );
         return new DashboardShortcutsBar(I18n.t("ims.dashboard.shortcuts.title"), shortcuts);
     }
@@ -106,10 +113,10 @@ public class ImsMainView extends ManagementVerticalView {
     }
 
     /**
-     * The 5 real entity totals and 3 enrichment insights, unified into one
+     * The 6 real entity totals and 3 enrichment insights, unified into one
      * unbroken {@link StatCardGrid} (4 columns desktop / 3 tablet / 1 mobile)
      * instead of two visually different rows — this is the module's
-     * 8-tile stat-card showcase.
+     * 9-tile stat-card showcase.
      */
     private StatCardGrid buildStatsGrid() {
         accountsCard = new StatCard(VaadinIcon.USER, StatCard.Variant.PRIMARY,
@@ -127,6 +134,9 @@ public class ImsMainView extends ManagementVerticalView {
         rolesCard = new StatCard(VaadinIcon.SHIELD, StatCard.Variant.PRIMARY,
                 I18n.t("ims.dashboard.total.roles"), null)
                 .withNavigation(() -> ui.navigate("ims/roles"));
+        registeredUsersCard = new StatCard(VaadinIcon.CLIPBOARD_USER, StatCard.Variant.PRIMARY,
+                I18n.t("ims.dashboard.total.registeredUsers"), null)
+                .withNavigation(() -> ui.navigate("ims/registered-users"));
 
         // Enrichment insights: no cheap real data source exists yet for
         // month-over-month account growth, enabled/disabled ratios, or tenant
@@ -142,7 +152,7 @@ public class ImsMainView extends ManagementVerticalView {
                 .withChange("-2%", StatCard.Trend.DOWN);
 
         return new StatCardGrid(accountsCard, tenantsCard, applicationsCard, customersCard, rolesCard,
-                newAccountsCard, activeRatioCard, pendingTenantsCard);
+                registeredUsersCard, newAccountsCard, activeRatioCard, pendingTenantsCard);
     }
 
     private VerticalLayout buildRecentActivityPanel() {
@@ -166,6 +176,7 @@ public class ImsMainView extends ManagementVerticalView {
                 setCount(applicationsCard, applicationService.findAll(0, 1).getBody());
                 setCount(customersCard, customerService.findAll(0, 1).getBody());
                 setCount(rolesCard, roleInfoService.findAll(0, 1).getBody());
+                setCount(registeredUsersCard, registeredUserService.findAll(0, 1).getBody());
 
                 ui.push();
             } catch (Exception e) {
