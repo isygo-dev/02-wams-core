@@ -154,10 +154,10 @@ public class OtpLoginView extends BaseLoginView {
                 Notification.show(I18n.t("auth.otp.notification.otpSent"), 4000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } else {
-                showError(errorBanner, I18n.t("auth.common.error.OtpError"));
+                showError(errorBanner, I18n.t("auth.otp.error.requestFailed"));
             }
         } catch (Exception ex) {
-            showError(errorBanner, I18n.t("auth.common.error.OtpError"));
+            showError(errorBanner, I18n.t("auth.otp.error.requestFailed"));
         }
     }
 
