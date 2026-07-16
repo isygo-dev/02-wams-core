@@ -3,6 +3,7 @@ package eu.isygoit.ui.ims.views.registered;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -11,7 +12,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.request.RegisteredUserDto;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.remote.ims.RegisteredUserService;
+import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.ims.views.registered.dialog.DeleteRegisteredUserDialog;
 import eu.isygoit.ui.ims.views.registered.dialog.RegisteredUserDetailsViewDialog;
@@ -23,14 +26,20 @@ import java.util.List;
 public class RegisteredCard extends BaseCard<RegisteredManagementView, RegisteredUserService> {
 
     private final RegisteredUserDto registeredUser;
+    private final AccountService accountService;
+    private final TenantService tenantService;
     private final Runnable onRefresh;
 
     public RegisteredCard(RegisteredManagementView parentView,
                           RegisteredUserService registeredUserService,
+                          AccountService accountService,
+                          TenantService tenantService,
                           RegisteredUserDto registeredUser,
                           Runnable onRefresh) {
         super(parentView, registeredUserService);
         this.registeredUser = registeredUser;
+        this.accountService = accountService;
+        this.tenantService = tenantService;
         this.onRefresh = onRefresh;
         initCard();
     }
@@ -50,13 +59,41 @@ public class RegisteredCard extends BaseCard<RegisteredManagementView, Registere
         String fullName = (registeredUser.getFirstName() != null ? registeredUser.getFirstName() : "") +
                 " " + (registeredUser.getLastName() != null ? registeredUser.getLastName() : "");
         Span titleSpan = buildTitleSpan(fullName.trim(), registeredUser.getEmail());
+
+        // Origin chip
         Span originChip = buildStatusChip(
-                registeredUser.getOrigin() != null ? registeredUser.getOrigin() : I18n.t("ims.registered.card.status.unknown"),
-                registeredUser.getOrigin() != null ? registeredUser.getOrigin() : I18n.t("ims.registered.card.status.unknown")
+                registeredUser.getOrigin() != null
+                        ? registeredUser.getOrigin().name()
+                        : I18n.t("ims.registered.card.status.unknown"),
+                registeredUser.getOrigin() != null
+                        ? registeredUser.getOrigin().name()
+                        : I18n.t("ims.registered.card.status.unknown")
         );
 
-        titleLayout.add(titleSpan, originChip);
+        // Processed chip
+        Span processedChip = buildProcessedChip();
+
+        titleLayout.add(titleSpan, originChip, processedChip);
         return titleLayout;
+    }
+
+    private Span buildProcessedChip() {
+        boolean isProcessed = registeredUser.getProcessed() != null && registeredUser.getProcessed();
+
+        Span chip = new Span();
+        chip.addClassName("wams-chip");
+
+        if (isProcessed) {
+            chip.setText(I18n.t("ims.registered.card.processed.yes"));
+            chip.addClassName("wams-chip--success");
+            chip.getElement().setAttribute("title", I18n.t("ims.registered.card.processed.tooltip"));
+        } else {
+            chip.setText(I18n.t("ims.registered.card.processed.no"));
+            chip.addClassName("wams-chip--warning");
+            chip.getElement().setAttribute("title", I18n.t("ims.registered.card.processed.pending.tooltip"));
+        }
+
+        return chip;
     }
 
     @Override
@@ -69,12 +106,36 @@ public class RegisteredCard extends BaseCard<RegisteredManagementView, Registere
                     if (onRefresh != null) onRefresh.run();
                 }));
 
+        Button createAccountBtn = createCreateAccountButton();
+
         Button deleteBtn = createDeleteButton(I18n.t("ims.registered.card.delete.tooltip"),
                 () -> new DeleteRegisteredUserDialog(parentView, objectService, registeredUser.getId(), () -> {
                     if (onRefresh != null) onRefresh.run();
                 }).open());
 
-        return List.of(detailsBtn, editBtn, deleteBtn);
+        return List.of(detailsBtn, editBtn, createAccountBtn, deleteBtn);
+    }
+
+    private Button createCreateAccountButton() {
+        Button btn = new Button();
+        btn.setIcon(VaadinIcon.USER_CHECK.create());
+        btn.setTooltipText(I18n.t("ims.registered.card.create.account.tooltip"));
+        btn.addThemeVariants(ButtonVariant.LUMO_SUCCESS, ButtonVariant.LUMO_TERTIARY);
+        btn.addClassName("card-action-btn");
+
+        // Disable if already processed
+        if (registeredUser.getProcessed() != null && registeredUser.getProcessed()) {
+            btn.setEnabled(false);
+            btn.setTooltipText(I18n.t("ims.registered.card.create.account.disabled.tooltip"));
+        }
+
+        btn.addClickListener(e -> parentView.openCreateAccountFromRegisteredDialog(
+                registeredUser,
+                () -> {
+                    if (onRefresh != null) onRefresh.run();
+                }
+        ));
+        return btn;
     }
 
     @Override
@@ -86,6 +147,7 @@ public class RegisteredCard extends BaseCard<RegisteredManagementView, Registere
 
         body.add(createIconRow(VaadinIcon.ENVELOPE, I18n.t("ims.registered.card.email"), registeredUser.getEmail()));
         body.add(createIconRow(VaadinIcon.PHONE, I18n.t("ims.registered.card.phone"), registeredUser.getPhoneNumber()));
+
         add(body);
     }
 

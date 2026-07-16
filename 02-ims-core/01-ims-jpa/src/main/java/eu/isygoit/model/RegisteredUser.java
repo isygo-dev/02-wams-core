@@ -57,6 +57,11 @@ public class RegisteredUser extends AuditableEntity<Long> implements ITenantAssi
     private String organisation;
 
     @Builder.Default
+    @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_ORIGIN, length = IEnumAccountOrigin.STR_ENUM_SIZE, nullable = false)
-    private String origin = IEnumAccountOrigin.Types.SYS_ADMIN.name();
+    private IEnumAccountOrigin.Types origin = IEnumAccountOrigin.Types.SIGNUP;
+
+    @ColumnDefault("'false'")
+    @Column(name = SchemaColumnConstantName.C_PROCESSED, nullable = false)
+    private Boolean processed = Boolean.FALSE;
 }

@@ -164,4 +164,6 @@ public interface SchemaColumnConstantName extends ComSchemaColumnConstantName {
     String R_NEW_ID = "NEW_ACCOUNT_ID";
 
     String C_ORGANISATION = "ORGANISATION";
+
+    String C_PROCESSED = "PROCESSED";
 }

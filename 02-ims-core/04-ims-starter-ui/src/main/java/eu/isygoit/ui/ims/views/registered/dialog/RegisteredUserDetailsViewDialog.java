@@ -76,8 +76,10 @@ public class RegisteredUserDetailsViewDialog extends DetailsViewDialog {
         Div classificationInfo = new Div();
         classificationInfo.addClassName("wams-card__detail-grid");
 
-        addFieldToGrid(classificationInfo, VaadinIcon.SITEMAP, I18n.t("ims.registered.details.field.origin"), registeredUser.getOrigin());
-        addFieldToGrid(classificationInfo, VaadinIcon.BRIEFCASE, I18n.t("ims.registered.details.field.function.role"), registeredUser.getFunctionRole());
+        addFieldToGrid(classificationInfo, VaadinIcon.SITEMAP, I18n.t("ims.registered.details.field.origin"),
+                registeredUser.getOrigin().name());
+        addFieldToGrid(classificationInfo, VaadinIcon.BRIEFCASE, I18n.t("ims.registered.details.field.function.role"),
+                registeredUser.getFunctionRole());
 
         mainLayout.add(createSection(I18n.t("ims.registered.details.section.classification"), classificationInfo));
 

@@ -20,6 +20,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.request.RegisteredUserDto;
+import eu.isygoit.enums.IEnumAccountOrigin;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.PublicAuthService;
 import jakarta.annotation.security.PermitAll;
@@ -106,6 +107,7 @@ public class RegisterView extends BaseLoginView {
 
         RegisteredUserDto dto = new RegisteredUserDto();
         binder.writeBeanIfValid(dto);
+        dto.setOrigin(IEnumAccountOrigin.Types.SIGNUP);
         dto.setTenant(TenantConstants.DEFAULT_TENANT_NAME);
 
         try {

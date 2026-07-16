@@ -109,7 +109,9 @@ public class CreateRegisteredUserDialog extends BaseActionDialog {
                     .lastName(lastNameField.getValue())
                     .email(emailField.getValue())
                     .phoneNumber(phoneField.getValue())
-                    .origin(originCombo.getValue() != null ? originCombo.getValue().name() : IEnumAccountOrigin.Types.SYS_ADMIN.name())
+                    .origin(originCombo.getValue() != null
+                            ? originCombo.getValue()
+                            : IEnumAccountOrigin.Types.SYS_ADMIN)
                     .functionRole(functionRoleField.getValue())
                     .build();
 

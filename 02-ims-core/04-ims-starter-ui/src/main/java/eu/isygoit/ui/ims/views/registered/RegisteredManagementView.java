@@ -21,9 +21,12 @@ import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.request.RegisteredUserDto;
 import eu.isygoit.enums.IEnumAccountOrigin;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.remote.ims.RegisteredUserService;
+import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.ims.layout.ImsMainLayout;
+import eu.isygoit.ui.ims.views.registered.dialog.CreateAccountFromRegisteredDialog;
 import eu.isygoit.ui.ims.views.registered.dialog.CreateRegisteredUserDialog;
 import eu.isygoit.ui.ims.views.registered.dialog.UpdateRegisteredUserDialog;
 import feign.FeignException;
@@ -44,6 +47,8 @@ import java.util.stream.Collectors;
 public class RegisteredManagementView extends ManagementVerticalView {
 
     private final RegisteredUserService registeredUserService;
+    private final AccountService accountService;
+    private final TenantService tenantService;
 
     private final Div cardsContainer = new Div();
     private final Button createButton = new Button(I18n.t("ims.registered.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
@@ -68,8 +73,12 @@ public class RegisteredManagementView extends ManagementVerticalView {
     private IEnumAccountOrigin.Types currentOrigin = null;
 
     @Autowired
-    public RegisteredManagementView(RegisteredUserService registeredUserService) {
+    public RegisteredManagementView(RegisteredUserService registeredUserService,
+                                    AccountService accountService,
+                                    TenantService tenantService) {
         this.registeredUserService = registeredUserService;
+        this.accountService = accountService;
+        this.tenantService = tenantService;
         setSizeFull();
         setPadding(true);
         setSpacing(true);
@@ -202,7 +211,14 @@ public class RegisteredManagementView extends ManagementVerticalView {
             cardsContainer.add(emptyState);
         } else {
             for (RegisteredUserDto registeredUser : filtered) {
-                cardsContainer.add(new RegisteredCard(this, registeredUserService, registeredUser, this::loadPageZero));
+                cardsContainer.add(new RegisteredCard(
+                        this,
+                        registeredUserService,
+                        accountService,
+                        tenantService,
+                        registeredUser,
+                        this::loadPageZero
+                ));
             }
         }
     }
@@ -256,6 +272,25 @@ public class RegisteredManagementView extends ManagementVerticalView {
 
     public void openUpdateRegisteredUserDialog(RegisteredUserDto registeredUser, Runnable onSuccess) {
         new UpdateRegisteredUserDialog(this, registeredUserService, registeredUser, onSuccess).open();
+    }
+
+    public void openCreateAccountFromRegisteredDialog(RegisteredUserDto registeredUser, Runnable onSuccess) {
+        new CreateAccountFromRegisteredDialog(
+                this,
+                registeredUserService,
+                accountService,
+                tenantService,
+                registeredUser,
+                onSuccess
+        ).open();
+    }
+
+    public AccountService getAccountService() {
+        return accountService;
+    }
+
+    public TenantService getTenantService() {
+        return tenantService;
     }
 
     public void loadPageZero() {

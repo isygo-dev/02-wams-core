@@ -23,7 +23,7 @@ public class RegisteredUserDto extends AuditableIdAssignableDto<Long> {
     @Builder.Default
     private String tenant = TenantConstants.DEFAULT_TENANT_NAME;
     @Builder.Default
-    private String origin = IEnumAccountOrigin.Types.SYS_ADMIN.name();
+    private IEnumAccountOrigin.Types origin = IEnumAccountOrigin.Types.SIGNUP;
 
     @NotEmpty
     private String firstName;
@@ -38,4 +38,6 @@ public class RegisteredUserDto extends AuditableIdAssignableDto<Long> {
     private String organisation;
 
     private String functionRole;
+
+    private Boolean processed;
 }

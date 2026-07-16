@@ -88,7 +88,7 @@ public class UpdateRegisteredUserDialog extends BaseActionDialog {
         phoneField.setValue(registeredUser.getPhoneNumber() != null ? registeredUser.getPhoneNumber() : "");
         if (registeredUser.getOrigin() != null) {
             try {
-                originCombo.setValue(IEnumAccountOrigin.Types.valueOf(registeredUser.getOrigin()));
+                originCombo.setValue(registeredUser.getOrigin());
             } catch (IllegalArgumentException ignored) {
             }
         }
@@ -115,7 +115,9 @@ public class UpdateRegisteredUserDialog extends BaseActionDialog {
             registeredUser.setFirstName(firstNameField.getValue());
             registeredUser.setLastName(lastNameField.getValue());
             registeredUser.setPhoneNumber(phoneField.getValue());
-            registeredUser.setOrigin(originCombo.getValue() != null ? originCombo.getValue().name() : registeredUser.getOrigin());
+            registeredUser.setOrigin(originCombo.getValue() != null
+                    ? originCombo.getValue()
+                    : registeredUser.getOrigin());
             registeredUser.setFunctionRole(functionRoleField.getValue());
 
             ResponseEntity<RegisteredUserDto> response = registeredUserService.update(registeredUser.getId(), registeredUser);
