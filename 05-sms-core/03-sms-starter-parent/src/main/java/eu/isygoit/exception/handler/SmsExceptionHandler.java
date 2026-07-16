@@ -52,7 +52,7 @@ public class SmsExceptionHandler extends ControllerExceptionHandler {
                             .tenant(TenantConstants.DEFAULT_TENANT_NAME)
                             .toAddr(techAdminEmail)
                             .fromAddr("noreply@" + TenantConstants.DEFAULT_TENANT_NAME.toLowerCase() + ".com")
-                        .templateName(IEnumEmailTemplate.Types.UNMANAGED_EXCEPTION_TEMPLATE)
+                            .templateName(IEnumEmailTemplate.Types.UNMANAGED_EXCEPTION_TEMPLATE)
                             .variables(MailMessageDto.getVariablesAsString(Map.of(
                                     //Common vars
                                     MsgTemplateVariables.V_EXCEPTION, message

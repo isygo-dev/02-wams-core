@@ -69,7 +69,7 @@ public class ProfileController extends ControllerExceptionHandler implements Pro
      *
      * @return the authenticated account
      * @throws OperationNotAllowedException if user is not authenticated
-     * @throws AccountNotFoundException if account is not found
+     * @throws AccountNotFoundException     if account is not found
      */
     private Account getAuthenticatedAccount() {
         RequestContextDto requestContext = requestContextService.getCurrentContext();

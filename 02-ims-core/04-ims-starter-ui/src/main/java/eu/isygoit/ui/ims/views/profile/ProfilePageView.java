@@ -143,7 +143,8 @@ public class ProfilePageView extends ManagementVerticalView {
         List<ConnectionTrackingDto> history = ProfileFormatUtils.connectionHistory(currentAccount);
         return switch (tabId) {
             case "activity" -> new ProfileActivityPanel(history);
-            case "connections" -> new ProfileConnectionsPanel(currentAccount, accountStats, history, () -> scrollToTab("activity"));
+            case "connections" ->
+                    new ProfileConnectionsPanel(currentAccount, accountStats, history, () -> scrollToTab("activity"));
             case "settings" -> new ProfileSettingsPanel(profileService);
             default -> new ProfileOverviewPanel(currentAccount, accountStats);
         };

@@ -26,7 +26,7 @@ import org.hibernate.annotations.DynamicUpdate;
 @Table(name = SchemaTableConstantName.T_REGISTRED_USER, uniqueConstraints = {
         @UniqueConstraint(columnNames = {SchemaColumnConstantName.C_EMAIL})
 })
-public class RegisteredUser extends AuditableEntity<Long> implements ITenantAssignable{
+public class RegisteredUser extends AuditableEntity<Long> implements ITenantAssignable {
 
     @Id
     @SequenceGenerator(name = "registred_user_sequence_generator", sequenceName = "registred_user_sequence", allocationSize = 1)

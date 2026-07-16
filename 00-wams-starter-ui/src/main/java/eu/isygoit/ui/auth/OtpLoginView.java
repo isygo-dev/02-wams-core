@@ -52,12 +52,10 @@ public class OtpLoginView extends BaseLoginView {
     private final Button requestOtpButton = new Button(I18n.t("auth.otp.button.requestOtp"), new Icon(VaadinIcon.ENVELOPE));
     private final Button loginButton = new Button(I18n.t("auth.otp.button.signIn"), new Icon(VaadinIcon.SIGN_IN));
     private final Div errorBanner = createErrorBanner();
-
+    private final List<TextField> digitFields = new ArrayList<>();
     private String tenant;
     private String username;
     private int otpLength = 6;
-    private final List<TextField> digitFields = new ArrayList<>();
-
     @Autowired
     private PublicAuthService authService;
 

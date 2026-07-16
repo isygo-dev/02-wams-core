@@ -1,6 +1,5 @@
 package eu.isygoit.remote.ims;
 
-import eu.isygoit.api.AccountServiceApi;
 import eu.isygoit.api.ProfileServiceApi;
 import eu.isygoit.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;

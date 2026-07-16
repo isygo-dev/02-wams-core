@@ -39,6 +39,15 @@ public class EditProfileDialog extends BaseActionDialog {
         addContent(buildForm());
     }
 
+    private static AccountDetailsDto ensureAccountDetails(AccountDto dto) {
+        AccountDetailsDto details = dto.getAccountDetails();
+        if (details == null) {
+            details = new AccountDetailsDto();
+            dto.setAccountDetails(details);
+        }
+        return details;
+    }
+
     private FormLayout buildForm() {
         FormLayout form = new FormLayout();
         form.addClassName("profile-form");
@@ -120,14 +129,5 @@ public class EditProfileDialog extends BaseActionDialog {
             append(I18n.t("profile.update.error"));
             return false;
         }
-    }
-
-    private static AccountDetailsDto ensureAccountDetails(AccountDto dto) {
-        AccountDetailsDto details = dto.getAccountDetails();
-        if (details == null) {
-            details = new AccountDetailsDto();
-            dto.setAccountDetails(details);
-        }
-        return details;
     }
 }
