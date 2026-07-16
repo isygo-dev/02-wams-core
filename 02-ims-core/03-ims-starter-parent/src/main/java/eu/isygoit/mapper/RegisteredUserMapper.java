@@ -9,5 +9,5 @@ import org.mapstruct.NullValueCheckStrategy;
  * The interface Register new account mapper.
  */
 @Mapper(nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS, componentModel = "spring")
-public interface RegistredUserMapper extends EntityMapper<RegisteredUser, RegisteredUserDto> {
+public interface RegisteredUserMapper extends EntityMapper<RegisteredUser, RegisteredUserDto> {
 }

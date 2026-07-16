@@ -21,7 +21,7 @@ import eu.isygoit.dto.response.UserContext;
 import eu.isygoit.dto.response.UserDataResponseDto;
 import eu.isygoit.enums.IEnumWebToken;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
-import eu.isygoit.mapper.RegistredUserMapper;
+import eu.isygoit.mapper.RegisteredUserMapper;
 import eu.isygoit.mapper.TenantMapper;
 import eu.isygoit.mapper.ThemeMapper;
 import eu.isygoit.model.Account;
@@ -55,7 +55,7 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
      * The Register new account mapper.
      */
     @Autowired
-    private RegistredUserMapper registredUserMapper;
+    private RegisteredUserMapper registeredUserMapper;
     @Autowired
     private KmsPublicPasswordService kmsPublicPasswordService;
     @Autowired
@@ -162,7 +162,7 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     @Override
     public ResponseEntity<Boolean> registerUser(RegisteredUserDto registeredUserDto) {
         try {
-            return ResponseFactory.responseOk(authService.registerUser(registredUserMapper.dtoToEntity(registeredUserDto)));
+            return ResponseFactory.responseOk(authService.registerUser(registeredUserMapper.dtoToEntity(registeredUserDto)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

@@ -1,8 +1,8 @@
 /*
  * Shared styling for every eu.isygoit.ui.auth view (LoginView, OtpLoginView,
- * PasswordLoginView, QrCodeLoginView, RegisterView).
+ * PasswordLoginView, QrCodeLoginView, RegisterView, RegisterConfirmationView).
  *
- * All five views now render through the same BaseLoginView-provided
+ * All views now render through the same BaseLoginView-provided
  * building blocks (createAuthPage/createBrand/createErrorBanner/createFooter/
  * createLink) and share this single class vocabulary — .wams-auth-* — instead
  * of each view owning its own near-duplicate rule set. This mirrors
@@ -19,6 +19,20 @@
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@keyframes wams-auth-scale-in {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
     }
 }
 
@@ -183,6 +197,107 @@
     color: var(--lumo-error-text-color);
 }
 
+/* ── Registration Confirmation View ──────────────────────────────────── */
+
+.wams-auth-card--confirmation {
+    max-width: 440px !important;
+    border-radius: 16px !important;
+}
+
+.wams-auth-confirmation-content {
+    padding: var(--lumo-space-l);
+}
+
+.wams-auth-confirmation-title {
+    font-size: var(--lumo-font-size-xl);
+    font-weight: 600;
+    margin: var(--lumo-space-m) 0 var(--lumo-space-xs) 0;
+    color: var(--lumo-body-text-color);
+    text-align: center;
+}
+
+.wams-auth-confirmation-description {
+    font-size: var(--lumo-font-size-m);
+    color: var(--lumo-secondary-text-color);
+    text-align: center;
+    margin: 0 0 var(--lumo-space-m) 0;
+    font-weight: 500;
+}
+
+.wams-auth-confirmation-instructions {
+    font-size: var(--lumo-font-size-s);
+    line-height: 1.6;
+    color: var(--lumo-secondary-text-color);
+    margin: 0;
+}
+
+.wams-auth-confirmation-resend-link {
+    color: var(--lumo-primary-color);
+    text-decoration: none;
+    font-size: var(--lumo-font-size-s);
+    cursor: pointer;
+    padding: var(--lumo-space-xs) 0;
+    transition: color 0.2s ease;
+}
+
+.wams-auth-confirmation-resend-link:hover {
+    color: var(--lumo-primary-text-color);
+    text-decoration: underline;
+}
+
+.wams-confirmation-icon-container {
+    animation: wams-auth-scale-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    background: linear-gradient(135deg, var(--lumo-success-color), var(--lumo-success-color-50pct));
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    box-shadow: 0 8px 24px rgba(0, 184, 148, 0.3);
+}
+
+.wams-confirmation-icon {
+    font-size: 48px;
+    color: white;
+}
+
+.wams-confirmation-instructions-container {
+    width: 100%;
+    margin: var(--lumo-space-s) 0;
+}
+
+.wams-confirmation-instructions-layout {
+    padding: var(--lumo-space-m);
+    background: var(--lumo-contrast-5pct);
+    border-radius: var(--lumo-border-radius);
+    width: 100%;
+}
+
+.wams-confirmation-email-icon {
+    font-size: 20px;
+    color: var(--lumo-primary-color);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.wams-confirmation-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--lumo-contrast-10pct);
+    margin: var(--lumo-space-m) 0;
+}
+
+.wams-confirmation-actions {
+    width: 100%;
+}
+
+.wams-confirmation-back-link {
+    font-size: var(--lumo-font-size-s);
+    padding: var(--lumo-space-xs) 0;
+}
+
 /* ── Responsive ───────────────────────────────────────────────────────── */
 
 @media (max-width: 480px) {
@@ -214,10 +329,34 @@
         width: 160px !important;
         height: 160px !important;
     }
+
+    /* Confirmation view responsive */
+    .wams-auth-card--confirmation {
+        margin: var(--lumo-space-m) !important;
+        padding: var(--lumo-space-m) !important;
+    }
+
+    .wams-confirmation-icon-container {
+        width: 60px !important;
+        height: 60px !important;
+    }
+
+    .wams-confirmation-icon {
+        font-size: 32px !important;
+    }
+
+    .wams-auth-confirmation-content {
+        padding: var(--lumo-space-m);
+    }
+
+    .wams-confirmation-instructions-layout {
+        padding: var(--lumo-space-s);
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .wams-auth-card {
+    .wams-auth-card,
+    .wams-confirmation-icon-container {
         animation-duration: 0.01ms !important;
     }
 }

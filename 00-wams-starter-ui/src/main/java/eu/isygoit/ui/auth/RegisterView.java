@@ -18,6 +18,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.request.RegisteredUserDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.PublicAuthService;
@@ -37,6 +38,7 @@ public class RegisterView extends BaseLoginView {
     private final TextField lastNameField = new TextField(I18n.t("auth.register.field.lastName.label"));
     private final EmailField emailField = new EmailField(I18n.t("auth.register.field.email.label"));
     private final TextField phoneField = new TextField(I18n.t("auth.register.field.phone.label"));
+    private final TextField organisationField = new TextField(I18n.t("auth.register.field.organisation.label"));
     private final TextField roleField = new TextField(I18n.t("auth.register.field.role.label"));
     private final Button registerButton = new Button(I18n.t("auth.register.button.createAccount"), VaadinIcon.USER_STAR.create());
     private final Div errorBanner = createErrorBanner();
@@ -50,7 +52,7 @@ public class RegisterView extends BaseLoginView {
 
         FormLayout form = new FormLayout();
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
-        form.add(firstNameField, lastNameField, emailField, phoneField, roleField);
+        form.add(firstNameField, lastNameField, emailField, phoneField, organisationField, roleField);
         form.setWidthFull();
 
         registerButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -80,6 +82,11 @@ public class RegisterView extends BaseLoginView {
                 .withValidator(new StringLengthValidator(I18n.t("auth.register.validation.phone.invalid"), 5, 20))
                 .bind(RegisteredUserDto::getPhoneNumber, RegisteredUserDto::setPhoneNumber);
 
+        binder.forField(organisationField)
+                .asRequired(I18n.t("auth.register.validation.organisation.required"))
+                .withValidator(new StringLengthValidator(I18n.t("auth.register.validation.organisation.minLength"), 2, 100))
+                .bind(RegisteredUserDto::getOrganisation, RegisteredUserDto::setOrganisation);
+
         binder.forField(roleField)
                 .bind(RegisteredUserDto::getFunctionRole, RegisteredUserDto::setFunctionRole);
 
@@ -99,14 +106,15 @@ public class RegisterView extends BaseLoginView {
 
         RegisteredUserDto dto = new RegisteredUserDto();
         binder.writeBeanIfValid(dto);
-        dto.setTenant("default");
+        dto.setTenant(TenantConstants.DEFAULT_TENANT_NAME);
 
         try {
             ResponseEntity<Boolean> response = authService.registerUser(dto);
             if (response.getStatusCode().is2xxSuccessful() && Boolean.TRUE.equals(response.getBody())) {
                 Notification.show(I18n.t("auth.register.notification.success"), 5000,
                         Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                UI.getCurrent().navigate("login");
+
+                UI.getCurrent().navigate("register-confirmation");
             } else {
                 String errorMsg = (response.getStatusCode().value() == 500 || response.getStatusCode().value() == 400)
                         ? response.getBody().toString()

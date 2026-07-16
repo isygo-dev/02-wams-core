@@ -34,5 +34,8 @@ public class RegisteredUserDto extends AuditableIdAssignableDto<Long> {
     @NotEmpty
     private String phoneNumber;
 
+    @NotEmpty
+    private String organisation;
+
     private String functionRole;
 }

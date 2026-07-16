@@ -7,7 +7,7 @@ import eu.isygoit.com.rest.service.tenancy.CrudTenantService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.model.RegisteredUser;
 import eu.isygoit.remote.kms.KmsIncrementalKeyService;
-import eu.isygoit.repository.RegistredUserRepository;
+import eu.isygoit.repository.RegisteredUserRepository;
 import eu.isygoit.service.IRegisteredUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,8 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @InjectCodeGen(value = NextCodeService.class)
 @InjectCodeGenKms(value = KmsIncrementalKeyService.class)
-@InjectRepository(value = RegistredUserRepository.class)
-public class RegisteredUserService extends CrudTenantService<Long, RegisteredUser, RegistredUserRepository>
+@InjectRepository(value = RegisteredUserRepository.class)
+public class RegisteredUserService extends CrudTenantService<Long, RegisteredUser, RegisteredUserRepository>
         implements IRegisteredUserService {
 
     private final AppProperties appProperties;

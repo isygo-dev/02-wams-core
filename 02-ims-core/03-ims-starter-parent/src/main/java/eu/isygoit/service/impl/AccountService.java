@@ -30,7 +30,7 @@ import eu.isygoit.remote.kms.KmsPublicPasswordService;
 import eu.isygoit.remote.kms.KmsTokenService;
 import eu.isygoit.remote.mms.MmsChatMessageService;
 import eu.isygoit.repository.AccountRepository;
-import eu.isygoit.repository.RegistredUserRepository;
+import eu.isygoit.repository.RegisteredUserRepository;
 import eu.isygoit.service.IAccountService;
 import eu.isygoit.service.IAppParameterService;
 import eu.isygoit.service.IRoleInfoService;
@@ -85,7 +85,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
      * @param appProperties                 the app properties
      * @param registredNewAccountRepository the registred new account repository
      */
-    public AccountService(AppProperties appProperties, RegistredUserRepository registredNewAccountRepository) {
+    public AccountService(AppProperties appProperties, RegisteredUserRepository registredNewAccountRepository) {
         this.appProperties = appProperties;
     }
 

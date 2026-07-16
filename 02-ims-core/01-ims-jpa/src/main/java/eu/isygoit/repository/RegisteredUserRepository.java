@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
  * The interface Registred new account repository.
  */
 @Repository
-public interface RegistredUserRepository extends JpaPagingAndSortingTenantAssignableRepository<RegisteredUser, Long> {
+public interface RegisteredUserRepository extends JpaPagingAndSortingTenantAssignableRepository<RegisteredUser, Long> {
 }

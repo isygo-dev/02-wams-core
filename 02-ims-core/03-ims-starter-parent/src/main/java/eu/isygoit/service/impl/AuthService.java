@@ -10,7 +10,7 @@ import eu.isygoit.exception.*;
 import eu.isygoit.model.ConnectionTracking;
 import eu.isygoit.model.RegisteredUser;
 import eu.isygoit.remote.kms.KmsPublicPasswordService;
-import eu.isygoit.repository.RegistredUserRepository;
+import eu.isygoit.repository.RegisteredUserRepository;
 import eu.isygoit.security.CustomAuthentification;
 import eu.isygoit.security.CustomUserDetails;
 import eu.isygoit.service.IAccountService;
@@ -50,7 +50,7 @@ public class AuthService implements IAuthService {
     @Autowired
     private IAppParameterService parameterService;
     @Autowired
-    private RegistredUserRepository registredUserRepository;
+    private RegisteredUserRepository registredUserRepository;
 
     @Override
     public AuthResponseDto authenticate(RequestTrackingDto requestTracking, String tenant, String userName, String application, String password, IEnumAuth.Types authType) {
@@ -141,8 +141,8 @@ public class AuthService implements IAuthService {
     }
 
     @Override
-    public boolean registerUser(RegisteredUser registredNewAccount) {
-        registredUserRepository.save(registredNewAccount);
+    public boolean registerUser(RegisteredUser registeredNewAccount) {
+        registredUserRepository.save(registeredNewAccount);
         //send validation email
         return true;
     }

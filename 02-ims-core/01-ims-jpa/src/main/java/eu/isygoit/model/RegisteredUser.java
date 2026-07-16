@@ -53,6 +53,9 @@ public class RegisteredUser extends AuditableEntity<Long> implements ITenantAssi
     @Column(name = SchemaColumnConstantName.C_PHONE_NUMBER, length = SchemaConstantSize.PHONE_NUMBER, nullable = false)
     private String phoneNumber;
 
+    @Column(name = SchemaColumnConstantName.C_ORGANISATION, length = SchemaConstantSize.S_NAME, nullable = false)
+    private String organisation;
+
     @Builder.Default
     @Column(name = SchemaColumnConstantName.C_ORIGIN, length = IEnumAccountOrigin.STR_ENUM_SIZE, nullable = false)
     private String origin = IEnumAccountOrigin.Types.SYS_ADMIN.name();
