@@ -198,7 +198,7 @@ public class CreateAccountFromRegisteredDialog extends BaseActionDialog {
             ResponseEntity<List<TenantDto>> response = tenantService.findAllList();
             if (response.getBody() != null) {
                 tenants = response.getBody();
-                tenantCombo.setItems(tenants.stream().map(TenantDto::getCode).collect(Collectors.toList()));
+                tenantCombo.setItems(tenants.stream().map(TenantDto::getName).collect(Collectors.toList()));
             }
         } catch (FeignException ex) {
             append(I18n.t("ims.registered.dialog.create.account.load.tenants.error", extractErrorMessage(ex)));
@@ -352,13 +352,13 @@ public class CreateAccountFromRegisteredDialog extends BaseActionDialog {
     protected boolean onOk() {
         boolean isLinkExisting = linkExistingTenantCheckbox.getValue();
 
-        String tenantCode;
+        String tenantName;
         if (isLinkExisting) {
             if (tenantCombo.getValue() == null || tenantCombo.getValue().isBlank()) {
                 append(I18n.t("ims.registered.dialog.create.account.tenant.required"));
                 return false;
             }
-            tenantCode = tenantCombo.getValue();
+            tenantName = tenantCombo.getValue();
         } else {
             if (tenantNameField.getValue().isBlank()) {
                 append(I18n.t("ims.tenant.dialog.field.name.required"));
@@ -372,7 +372,7 @@ public class CreateAccountFromRegisteredDialog extends BaseActionDialog {
                 append(I18n.t("ims.tenant.dialog.field.phone.required"));
                 return false;
             }
-            tenantCode = null;
+            tenantName = null;
         }
 
         if (passwordField.getValue().isBlank()) {
@@ -400,13 +400,13 @@ public class CreateAccountFromRegisteredDialog extends BaseActionDialog {
                             createTenantResponse.getStatusCodeValue()));
                     return false;
                 }
-                tenantCode = createTenantResponse.getBody().getCode();
+                tenantName = createTenantResponse.getBody().getName();
                 append(I18n.t("ims.registered.dialog.create.account.tenant.created",
                         createTenantResponse.getBody().getName()));
             }
 
             AccountDto newAccount = new AccountDto();
-            newAccount.setTenant(tenantCode);
+            newAccount.setTenant(tenantName);
             newAccount.setAccountType(accountTypeCombo.getValue());
             newAccount.setEmail(registeredUser.getEmail());
             newAccount.setPhoneNumber(registeredUser.getPhoneNumber());
@@ -428,7 +428,6 @@ public class CreateAccountFromRegisteredDialog extends BaseActionDialog {
                 return false;
             }
 
-            registeredUser.setProcessed(true);
             registeredUserService.update(registeredUser.getId(), registeredUser);
 
             append(I18n.t("ims.registered.dialog.create.account.success"));

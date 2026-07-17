@@ -11,11 +11,13 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.request.RegisteredUserDto;
+import eu.isygoit.enums.IEnumRegistrationStatus;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.remote.ims.RegisteredUserService;
 import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.ims.views.registered.dialog.CreateAccountConfirmationDialog;
 import eu.isygoit.ui.ims.views.registered.dialog.DeleteRegisteredUserDialog;
 import eu.isygoit.ui.ims.views.registered.dialog.RegisteredUserDetailsViewDialog;
 import lombok.extern.slf4j.Slf4j;
@@ -70,27 +72,47 @@ public class RegisteredCard extends BaseCard<RegisteredManagementView, Registere
                         : I18n.t("ims.registered.card.status.unknown")
         );
 
-        // Processed chip
-        Span processedChip = buildProcessedChip();
+        // Status chip
+        Span statusChip = buildStatusChip();
 
-        titleLayout.add(titleSpan, originChip, processedChip);
+        titleLayout.add(titleSpan, originChip, statusChip);
         return titleLayout;
     }
 
-    private Span buildProcessedChip() {
-        boolean isProcessed = registeredUser.getProcessed() != null && registeredUser.getProcessed();
+    private Span buildStatusChip() {
+        IEnumRegistrationStatus.Types status = registeredUser.getStatus();
 
         Span chip = new Span();
         chip.addClassName("wams-chip");
 
-        if (isProcessed) {
-            chip.setText(I18n.t("ims.registered.card.processed.yes"));
-            chip.addClassName("wams-chip--success");
-            chip.getElement().setAttribute("title", I18n.t("ims.registered.card.processed.tooltip"));
-        } else {
-            chip.setText(I18n.t("ims.registered.card.processed.no"));
-            chip.addClassName("wams-chip--warning");
-            chip.getElement().setAttribute("title", I18n.t("ims.registered.card.processed.pending.tooltip"));
+        if (status == null) {
+            chip.setText(I18n.t("ims.registered.card.status.unknown"));
+            chip.addClassName("wams-chip--neutral");
+            return chip;
+        }
+
+        switch (status) {
+            case PROCESSED:
+                chip.setText(I18n.t("ims.registered.card.status.processed"));
+                chip.addClassName("wams-chip--success");
+                chip.getElement().setAttribute("title", I18n.t("ims.registered.card.status.processed.tooltip"));
+                break;
+            case CONFIRMED:
+                chip.setText(I18n.t("ims.registered.card.status.confirmed"));
+                chip.addClassName("wams-chip--primary");
+                chip.getElement().setAttribute("title", I18n.t("ims.registered.card.status.confirmed.tooltip"));
+                break;
+            case REJECTED:
+                chip.setText(I18n.t("ims.registered.card.status.rejected"));
+                chip.addClassName("wams-chip--error");
+                chip.getElement().setAttribute("title", I18n.t("ims.registered.card.status.rejected.tooltip"));
+                break;
+            case NEW:
+            default:
+                chip.setText(I18n.t("ims.registered.card.status.new"));
+                chip.addClassName("wams-chip--warning");
+                chip.getElement().setAttribute("title", I18n.t("ims.registered.card.status.new.tooltip"));
+                break;
         }
 
         return chip;
@@ -119,23 +141,56 @@ public class RegisteredCard extends BaseCard<RegisteredManagementView, Registere
     private Button createCreateAccountButton() {
         Button btn = new Button();
         btn.setIcon(VaadinIcon.USER_CHECK.create());
-        btn.setTooltipText(I18n.t("ims.registered.card.create.account.tooltip"));
         btn.addThemeVariants(ButtonVariant.LUMO_SUCCESS, ButtonVariant.LUMO_TERTIARY);
         btn.addClassName("card-action-btn");
 
-        // Disable if already processed
-        if (registeredUser.getProcessed() != null && registeredUser.getProcessed()) {
-            btn.setEnabled(false);
-            btn.setTooltipText(I18n.t("ims.registered.card.create.account.disabled.tooltip"));
+        IEnumRegistrationStatus.Types status = registeredUser.getStatus();
+
+        // Enable only if status is CONFIRMED or NEW
+        boolean isEnabled = status == IEnumRegistrationStatus.Types.CONFIRMED ||
+                status == IEnumRegistrationStatus.Types.NEW;
+
+        btn.setEnabled(isEnabled);
+
+        if (status == IEnumRegistrationStatus.Types.PROCESSED) {
+            btn.setTooltipText(I18n.t("ims.registered.card.create.account.disabled.processed.tooltip"));
+        } else if (status == IEnumRegistrationStatus.Types.REJECTED) {
+            btn.setTooltipText(I18n.t("ims.registered.card.create.account.disabled.rejected.tooltip"));
+        } else if (isEnabled) {
+            btn.setTooltipText(I18n.t("ims.registered.card.create.account.tooltip"));
         }
 
-        btn.addClickListener(e -> parentView.openCreateAccountFromRegisteredDialog(
+        btn.addClickListener(e -> {
+            if (status == IEnumRegistrationStatus.Types.NEW) {
+                // Show PIN confirmation dialog for NEW status
+                showCreateAccountConfirmationDialog();
+            } else if (status == IEnumRegistrationStatus.Types.CONFIRMED) {
+                // Proceed directly for CONFIRMED status
+                proceedWithAccountCreation();
+            }
+        });
+
+        return btn;
+    }
+
+    private void showCreateAccountConfirmationDialog() {
+        new CreateAccountConfirmationDialog(
+                parentView,
+                registeredUser.getEmail(),
+                this::proceedWithAccountCreation,
+                () -> {
+                    if (onRefresh != null) onRefresh.run();
+                }
+        ).open();
+    }
+
+    private void proceedWithAccountCreation() {
+        parentView.openCreateAccountFromRegisteredDialog(
                 registeredUser,
                 () -> {
                     if (onRefresh != null) onRefresh.run();
                 }
-        ));
-        return btn;
+        );
     }
 
     @Override
@@ -147,6 +202,7 @@ public class RegisteredCard extends BaseCard<RegisteredManagementView, Registere
 
         body.add(createIconRow(VaadinIcon.ENVELOPE, I18n.t("ims.registered.card.email"), registeredUser.getEmail()));
         body.add(createIconRow(VaadinIcon.PHONE, I18n.t("ims.registered.card.phone"), registeredUser.getPhoneNumber()));
+        body.add(createIconRow(VaadinIcon.BUILDING, I18n.t("ims.registered.card.organisation"), registeredUser.getOrganisation()));
 
         add(body);
     }

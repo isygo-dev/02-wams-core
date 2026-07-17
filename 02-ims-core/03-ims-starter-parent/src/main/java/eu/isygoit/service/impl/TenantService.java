@@ -77,12 +77,8 @@ public class TenantService extends ImageTenantService<Long, Tenant, TenantReposi
     }
 
     @Override
-    public Tenant findByName(String name) {
-        Optional<Tenant> optional = repository().findByNameIgnoreCase(name);
-        if (optional.isPresent()) {
-            return optional.get();
-        }
-        return null;
+    public Optional<Tenant> findByName(String name) {
+        return repository().findByNameIgnoreCase(name);
     }
 
     @Override

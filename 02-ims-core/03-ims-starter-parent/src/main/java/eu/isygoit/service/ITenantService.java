@@ -6,6 +6,7 @@ import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.Tenant;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The interface Tenant service.
@@ -51,7 +52,15 @@ public interface ITenantService extends ICrudTenantServiceOperations<Long, Tenan
      * @param name the name
      * @return the tenant
      */
-    Tenant findByName(String name);
+    Optional<Tenant> findByName(String name);
+
+    /**
+     * Find by code tenant.
+     *
+     * @param code the code
+     * @return the tenant
+     */
+    Optional<Tenant> findByCode(String code);
 
     /**
      * Is enabled boolean.

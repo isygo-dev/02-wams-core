@@ -5,6 +5,7 @@ import eu.isygoit.com.rest.service.tenancy.CrudTenantService;
 import eu.isygoit.constants.AppParameterConstants;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.AppParameter;
+import eu.isygoit.model.Tenant;
 import eu.isygoit.repository.AppParameterRepository;
 import eu.isygoit.service.IAppParameterService;
 import eu.isygoit.service.ITenantService;
@@ -62,13 +63,21 @@ public class AppParameterService extends CrudTenantService<Long, AppParameter, A
 
     @Override
     public String getTechnicalAdminEmail() {
-        String techAdminEmail = this.getValueByTenantAndName(TenantConstants.SUPER_TENANT_NAME,
+        String techAdminEmail = this.getValueByTenantAndName(
+                TenantConstants.SUPER_TENANT_NAME,
                 AppParameterConstants.TECHNICAL_ADMIN_EMAIL,
                 false,
                 "NA");
-        if (!StringUtils.hasText(techAdminEmail)) {
-            techAdminEmail = tenantService.findByName(TenantConstants.SUPER_TENANT_NAME).getEmail();
+
+        // Quick check - most common case should be that the parameter is set
+        if (StringUtils.hasText(techAdminEmail) && !"NA".equals(techAdminEmail)) {
+            return techAdminEmail;
         }
-        return techAdminEmail;
+
+        // Fallback only when really needed
+        return tenantService.findByName(TenantConstants.SUPER_TENANT_NAME)
+                .map(Tenant::getEmail)
+                .filter(StringUtils::hasText)
+                .orElse(techAdminEmail);  // fall back to original "NA" or empty
     }
 }

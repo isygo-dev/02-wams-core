@@ -21,7 +21,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The type Tenant controller.
@@ -102,7 +104,8 @@ public class TenantController extends MappedCrudTenantController<Long, Tenant, T
     public ResponseEntity<TenantDto> getByName() {
         log.info("get by name {}", getRequestContextService().getCurrentContext().getSenderTenant());
         try {
-            return ResponseFactory.responseOk(mapper().entityToDto(crudService().findByName(getRequestContextService().getCurrentContext().getSenderTenant())));
+            Optional<Tenant> tenant = crudService().findByName(getRequestContextService().getCurrentContext().getSenderTenant());
+            return ResponseFactory.responseOk(mapper().entityToDto(tenant.orElse(null)));
         } catch (Throwable e) {
             log.error("<Error>: get by name : {} ", e);
             return getBackExceptionResponse(e);

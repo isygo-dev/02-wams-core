@@ -301,7 +301,7 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
                     return UserAccountDto.builder()
                             .code(account.getCode())
                             .tenant(account.getTenant())
-                            .tenantId(tenantService.findByName(account.getTenant()).getId())
+                            .tenantId(tenantService.findByName(account.getTenant()).map(Tenant::getId).orElse(null))
                             .fullName(account.getFullName())
                             .functionRole(account.getFunctionRole())
                             .build();
@@ -375,8 +375,9 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
             return Collections.EMPTY_LIST;
         }
         try {
+            Optional<Tenant> optionalTenant = tenantService.findByName(tenant);
             ResponseEntity<List<WsConnectDto>> result = mmsChatMessageService.getChatStatus(
-                    tenantService.findByName(tenant).getId());
+                    optionalTenant.map(Tenant::getId).orElse(null));
             if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
                 List<WsConnectDto> connections = result.getBody();
                 if (!CollectionUtils.isEmpty(connections)) {
@@ -404,10 +405,11 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
             Optional<Account> optional = this.findById(tenant, id);
             if (optional.isPresent()) {
                 Account account = optional.get();
+                Optional<Tenant> optionalTenant = tenantService.findByName(account.getTenant());
                 ResponseEntity<Integer> result = kmsPasswordService.generatePwd(
                         GeneratePwdRequestDto.builder()
                                 .tenant(account.getTenant())
-                                .tenantUrl(tenantService.findByName(account.getTenant()).getUrl())
+                                .tenantUrl(optionalTenant.map(Tenant::getUrl).orElse(null))
                                 .email(account.getEmail())
                                 .userName(account.getCode())
                                 .fullName(account.getFullName())

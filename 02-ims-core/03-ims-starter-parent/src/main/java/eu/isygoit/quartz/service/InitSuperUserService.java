@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * The type Init super user service.
@@ -46,9 +47,9 @@ public class InitSuperUserService extends AbstractJobService {
     public void performJob(JobExecutionContext jobExecutionContext) {
 
         //Check default tenant existence
-        Tenant defaultTenant = tenantService.findByName(TenantConstants.DEFAULT_TENANT_NAME);
-        if (defaultTenant == null) {
-            defaultTenant = tenantService.create(TenantConstants.SUPER_TENANT_NAME,
+        Optional<Tenant> defaultTenant = tenantService.findByName(TenantConstants.DEFAULT_TENANT_NAME);
+        if (!defaultTenant.isPresent()) {
+            tenantService.create(TenantConstants.SUPER_TENANT_NAME,
                     Tenant.builder()
                             .name(TenantConstants.DEFAULT_TENANT_NAME)
                             .description(TenantConstants.DEFAULT_TENANT_NAME)
@@ -57,9 +58,9 @@ public class InitSuperUserService extends AbstractJobService {
         }
 
         //Check super tenant existence
-        Tenant superTenant = tenantService.findByName(TenantConstants.SUPER_TENANT_NAME);
-        if (superTenant == null) {
-            superTenant = tenantService.create(TenantConstants.SUPER_TENANT_NAME,
+        Optional<Tenant> optionalTenant = tenantService.findByName(TenantConstants.SUPER_TENANT_NAME);
+        if (!optionalTenant.isPresent()) {
+            tenantService.create(TenantConstants.SUPER_TENANT_NAME,
                     Tenant.builder()
                             .name(TenantConstants.SUPER_TENANT_NAME)
                             .description(TenantConstants.SUPER_TENANT_NAME)

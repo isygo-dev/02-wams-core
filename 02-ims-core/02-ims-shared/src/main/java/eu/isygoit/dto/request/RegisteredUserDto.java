@@ -3,6 +3,7 @@ package eu.isygoit.dto.request;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.extendable.AuditableIdAssignableDto;
 import eu.isygoit.enums.IEnumAccountOrigin;
+import eu.isygoit.enums.IEnumRegistrationStatus;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,5 +40,6 @@ public class RegisteredUserDto extends AuditableIdAssignableDto<Long> {
 
     private String functionRole;
 
-    private Boolean processed;
+    @Builder.Default
+    private IEnumRegistrationStatus.Types status = IEnumRegistrationStatus.Types.NEW;
 }

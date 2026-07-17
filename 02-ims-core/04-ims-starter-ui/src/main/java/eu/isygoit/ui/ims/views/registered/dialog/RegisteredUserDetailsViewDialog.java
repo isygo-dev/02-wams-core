@@ -5,6 +5,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.request.RegisteredUserDto;
+import eu.isygoit.enums.IEnumRegistrationStatus;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.RegisteredUserService;
@@ -60,7 +61,7 @@ public class RegisteredUserDetailsViewDialog extends DetailsViewDialog {
         mainLayout.setPadding(false);
         mainLayout.setSpacing(true);
 
-        // Identity — name/email/phone
+        // Identity — name/email/phone/organisation
         Div identityInfo = new Div();
         identityInfo.addClassName("wams-card__detail-grid");
 
@@ -69,17 +70,21 @@ public class RegisteredUserDetailsViewDialog extends DetailsViewDialog {
         addFieldToGrid(identityInfo, VaadinIcon.USER, I18n.t("ims.registered.details.field.name"), fullName.trim(), false);
         addFieldToGrid(identityInfo, VaadinIcon.ENVELOPE, I18n.t("ims.registered.details.field.email"), registeredUser.getEmail(), true);
         addFieldToGrid(identityInfo, VaadinIcon.PHONE, I18n.t("ims.registered.details.field.phone"), registeredUser.getPhoneNumber());
+        addFieldToGrid(identityInfo, VaadinIcon.BUILDING, I18n.t("ims.registered.details.field.organisation"), registeredUser.getOrganisation());
 
         mainLayout.add(createSection(I18n.t("ims.registered.details.section.identity"), identityInfo));
 
-        // Classification & status — origin, function role
+        // Classification & status — origin, function role, status
         Div classificationInfo = new Div();
         classificationInfo.addClassName("wams-card__detail-grid");
 
         addFieldToGrid(classificationInfo, VaadinIcon.SITEMAP, I18n.t("ims.registered.details.field.origin"),
-                registeredUser.getOrigin().name());
+                registeredUser.getOrigin() != null ? registeredUser.getOrigin().name() : null);
         addFieldToGrid(classificationInfo, VaadinIcon.BRIEFCASE, I18n.t("ims.registered.details.field.function.role"),
                 registeredUser.getFunctionRole());
+
+        // Status chip field
+        addStatusFieldToGrid(classificationInfo, I18n.t("ims.registered.details.field.status"), registeredUser.getStatus());
 
         mainLayout.add(createSection(I18n.t("ims.registered.details.section.classification"), classificationInfo));
 
@@ -87,7 +92,7 @@ public class RegisteredUserDetailsViewDialog extends DetailsViewDialog {
         Div contactInfo = new Div();
         contactInfo.addClassName("wams-card__detail-grid");
 
-        addFieldToGrid(contactInfo, VaadinIcon.BUILDING, I18n.t("ims.registered.details.field.tenant"), registeredUser.getTenant(), true);
+        addFieldToGrid(contactInfo, VaadinIcon.BUILDING_O, I18n.t("ims.registered.details.field.tenant"), registeredUser.getTenant(), true);
 
         mainLayout.add(createSection(I18n.t("ims.registered.details.section.contact"), contactInfo));
 
@@ -103,6 +108,49 @@ public class RegisteredUserDetailsViewDialog extends DetailsViewDialog {
         mainLayout.add(createSection(I18n.t("ims.registered.details.section.audit"), auditInfo));
 
         add(mainLayout);
+    }
+
+    private void addStatusFieldToGrid(Div container, String label, IEnumRegistrationStatus.Types status) {
+        Div field = new Div();
+        field.addClassName("detail-field");
+
+        Span labelSpan = new Span(label + ":");
+        labelSpan.addClassName("detail-field-label");
+
+        Span valueSpan = new Span();
+        valueSpan.addClassName("wams-chip");
+
+        if (status == null) {
+            valueSpan.setText(I18n.t("ims.registered.card.status.unknown"));
+            valueSpan.addClassName("wams-chip--neutral");
+        } else {
+            switch (status) {
+                case PROCESSED:
+                    valueSpan.setText(I18n.t("ims.registered.card.status.processed"));
+                    valueSpan.addClassName("wams-chip--success");
+                    valueSpan.getElement().setAttribute("title", I18n.t("ims.registered.card.status.processed.tooltip"));
+                    break;
+                case CONFIRMED:
+                    valueSpan.setText(I18n.t("ims.registered.card.status.confirmed"));
+                    valueSpan.addClassName("wams-chip--primary");
+                    valueSpan.getElement().setAttribute("title", I18n.t("ims.registered.card.status.confirmed.tooltip"));
+                    break;
+                case REJECTED:
+                    valueSpan.setText(I18n.t("ims.registered.card.status.rejected"));
+                    valueSpan.addClassName("wams-chip--error");
+                    valueSpan.getElement().setAttribute("title", I18n.t("ims.registered.card.status.rejected.tooltip"));
+                    break;
+                case NEW:
+                default:
+                    valueSpan.setText(I18n.t("ims.registered.card.status.new"));
+                    valueSpan.addClassName("wams-chip--warning");
+                    valueSpan.getElement().setAttribute("title", I18n.t("ims.registered.card.status.new.tooltip"));
+                    break;
+            }
+        }
+
+        field.add(labelSpan, valueSpan);
+        container.add(field);
     }
 
     private String extractErrorMessage(FeignException ex) {

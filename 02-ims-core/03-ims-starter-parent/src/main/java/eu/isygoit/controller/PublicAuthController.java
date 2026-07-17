@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The type Public auth controller.
@@ -105,8 +106,12 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
                     authRequestDto.getAuthType());
 
             Account account = accountService.findByTenantAndUserName(authRequestDto.getTenant(), authRequestDto.getUserName());
-            Tenant tenant = tenantService.findByName(authRequestDto.getTenant());
-            ThemeDto theme = themeMapper.entityToDto(themeService.findThemeByAccountCodeAndTenantCode(account.getCode(), tenant.getCode()));
+            Optional<Tenant> tenantOptional = tenantService.findByName(authRequestDto.getTenant());
+            if(!tenantOptional.isPresent()) {
+                log.error("Tenant not found: {}", authRequestDto.getTenant());
+                return ResponseFactory.responseBadRequest();
+            }
+            ThemeDto theme = themeMapper.entityToDto(themeService.findThemeByAccountCodeAndTenantCode(account.getCode(), tenantOptional.get().getCode()));
             UserDataResponseDto userDataResponseDto = UserDataResponseDto.builder()
                     .id(account.getId())
                     .userName(account.getCode())
@@ -114,8 +119,8 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
                     .lastName(account.getAccountDetails().getLastName())
                     .applications(accountService.buildAllowedTools(account, authenticate.getAccessToken()))
                     .email(account.getEmail())
-                    .tenantId(tenant.getId())
-                    .tenantImagePath(tenant.getImagePath())
+                    .tenantId(tenantOptional.get().getId())
+                    .tenantImagePath(tenantOptional.get().getImagePath())
                     .language(account.getLanguage())
                     .role(account.getFunctionRole())
                     .build();
@@ -173,7 +178,8 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     public ResponseEntity<TenantDto> getTenantByName(String tenant) {
         log.info("get tenant by name {}", tenant);
         try {
-            return ResponseFactory.responseOk(tenantMapper.entityToDto(tenantService.findByName(tenant)));
+            Optional<Tenant> tenantOptional = tenantService.findByName(tenant);
+            return ResponseFactory.responseOk(tenantMapper.entityToDto(tenantOptional.orElse(null)));
         } catch (Throwable e) {
             log.error("<Error>: get by name : {} ", e);
             return getBackExceptionResponse(e);

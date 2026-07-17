@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The type Account controller.
@@ -80,10 +81,11 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     @Override
     public Account afterCreate(Account account) {
         try {
+            Optional<Tenant> tenant = tenantService.findByName(account.getTenant());
             ResponseEntity<Integer> result = kmsPasswordService.generatePwd(
                     GeneratePwdRequestDto.builder()
                             .tenant(account.getTenant())
-                            .tenantUrl(tenantService.findByName(account.getTenant()).getUrl())
+                            .tenantUrl(tenant.map(Tenant::getUrl).orElse(null))
                             .email(account.getEmail())
                             .userName(account.getCode())
                             .fullName(account.getFullName())
@@ -176,7 +178,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     public ResponseEntity<UserDataResponseDto> connectedUser() {
         try {
             Account account = accountService.findByTenantAndUserName(getRequestContextService().getCurrentContext().getSenderTenant(), getRequestContextService().getCurrentContext().getSenderUser());
-            Tenant tenant = tenantService.findByName(getRequestContextService().getCurrentContext().getSenderTenant());
+            Optional<Tenant> optionalTenant = tenantService.findByName(getRequestContextService().getCurrentContext().getSenderTenant());
             //ThemeDto theme = themeMapper.entityToDto(themeService.findThemeByAccountCodeAndTenantCode(account.getCode(), tenant.getCode()));
             UserDataResponseDto userDataResponseDto = UserDataResponseDto.builder()
                     .id(account.getId())
@@ -185,8 +187,8 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
                     .lastName(account.getAccountDetails().getLastName())
                     //.applications(accountService.buildAllowedTools(account, authenticate.getAccessToken()))
                     .email(account.getEmail())
-                    .tenantId(tenant.getId())
-                    .tenantImagePath(tenant.getImagePath())
+                    .tenantId(optionalTenant.map(Tenant::getId).orElse(null))
+                    .tenantImagePath(optionalTenant.map(Tenant::getImagePath).orElse(null))
                     .language(account.getLanguage())
                     .role(account.getFunctionRole())
                     .build();

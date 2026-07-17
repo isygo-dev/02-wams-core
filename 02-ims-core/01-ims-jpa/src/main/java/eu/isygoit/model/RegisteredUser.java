@@ -2,6 +2,7 @@ package eu.isygoit.model;
 
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumAccountOrigin;
+import eu.isygoit.enums.IEnumRegistrationStatus;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaConstantSize;
@@ -58,10 +59,13 @@ public class RegisteredUser extends AuditableEntity<Long> implements ITenantAssi
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
+    @ColumnDefault("'SIGNUP'")
     @Column(name = SchemaColumnConstantName.C_ORIGIN, length = IEnumAccountOrigin.STR_ENUM_SIZE, nullable = false)
     private IEnumAccountOrigin.Types origin = IEnumAccountOrigin.Types.SIGNUP;
 
-    @ColumnDefault("'false'")
-    @Column(name = SchemaColumnConstantName.C_PROCESSED, nullable = false)
-    private Boolean processed = Boolean.FALSE;
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @ColumnDefault("'NEW'")
+    @Column(name = SchemaColumnConstantName.C_STATUS, length = IEnumAccountOrigin.STR_ENUM_SIZE, nullable = false)
+    private IEnumRegistrationStatus.Types status = IEnumRegistrationStatus.Types.NEW;
 }
