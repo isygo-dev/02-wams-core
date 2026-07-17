@@ -19,7 +19,7 @@ public interface ITenantService extends ICrudTenantServiceOperations<Long, Tenan
      * @param tenant the tenant
      * @return the all tenant names
      */
-    List<String> getAllTenantNames(String tenant /*senderTenant*/);
+    List<String> getAllTenantNames(String tenant);
 
     /**
      * Update admin status tenant.
@@ -68,7 +68,7 @@ public interface ITenantService extends ICrudTenantServiceOperations<Long, Tenan
      * @param tenant the tenant
      * @return the boolean
      */
-    boolean isEnabled(String tenant /*senderTenant*/);
+    boolean isEnabled(String tenant);
 
     /**
      * Update social link tenant.
@@ -79,5 +79,5 @@ public interface ITenantService extends ICrudTenantServiceOperations<Long, Tenan
      * @param link   the link
      * @return the tenant
      */
-    Tenant updateSocialLink(String tenant /*senderTenant*/, Long id, String social, String link);
+    Tenant updateSocialLink(String tenant, Long id, String social, String link);
 }

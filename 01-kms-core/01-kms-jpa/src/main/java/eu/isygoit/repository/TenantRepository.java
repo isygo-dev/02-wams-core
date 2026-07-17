@@ -29,7 +29,7 @@ public interface TenantRepository extends JpaPagingAndSortingRepository<Tenant, 
      * @return the int
      */
     @Modifying
-    @Query("UPDATE Tenant d SET d.adminStatus = :newStatus WHERE d.name = :tenant")
+    @Query("UPDATE Tenant d SET d.adminStatus = :newStatus WHERE lower(d.name) = lower(:tenant)")
     int updateAdminStatus(@Param("tenant") String tenant,
                           @Param("newStatus") IEnumEnabledBinaryStatus.Types newStatus);
 
@@ -39,6 +39,6 @@ public interface TenantRepository extends JpaPagingAndSortingRepository<Tenant, 
      * @param tenant the tenant
      * @return the admin status
      */
-    @Query("select d.adminStatus from Tenant d where d.name = :tenant")
+    @Query("select d.adminStatus from Tenant d where lower(d.name) = lower(:tenant)")
     IEnumEnabledBinaryStatus.Types getAdminStatus(@Param("tenant") String tenant);
 }

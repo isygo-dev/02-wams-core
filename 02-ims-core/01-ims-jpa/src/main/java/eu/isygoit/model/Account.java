@@ -44,7 +44,14 @@ import java.util.List;
 @Entity
 @Table(name = SchemaTableConstantName.T_ACCOUNT
         , uniqueConstraints = {
-        @UniqueConstraint(name = SchemaUcConstantName.UC_ACCOUNT_CODE, columnNames = {SchemaColumnConstantName.C_CODE})
+        @UniqueConstraint(
+                name = SchemaUcConstantName.UC_ACCOUNT_CODE,
+                columnNames = {SchemaColumnConstantName.C_CODE}
+        ),
+        @UniqueConstraint(
+                name = SchemaUcConstantName.UC_TENANT_EMAIL,
+                columnNames = {SchemaColumnConstantName.C_TENANT, SchemaColumnConstantName.C_EMAIL}
+        )
 })
 @SQLDelete(sql = "update " + SchemaTableConstantName.T_ACCOUNT + " set " + SchemaColumnConstantName.C_CHECK_CANCEL + "= true , " + SchemaColumnConstantName.C_CANCEL_DATE + " = current_timestamp WHERE id = ?")
 @Where(clause = SchemaColumnConstantName.C_CHECK_CANCEL + "=false")

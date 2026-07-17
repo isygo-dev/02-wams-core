@@ -278,8 +278,6 @@ public class RegisteredManagementView extends ManagementVerticalView {
         new CreateAccountFromRegisteredDialog(
                 this,
                 registeredUserService,
-                accountService,
-                tenantService,
                 registeredUser,
                 onSuccess
         ).open();

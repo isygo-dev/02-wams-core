@@ -82,12 +82,12 @@ public class TenantService extends ImageTenantService<Long, Tenant, TenantReposi
     }
 
     @Override
-    public boolean isEnabled(String tenant /*senderTenant*/) {
+    public boolean isEnabled(String tenant) {
         return repository().getAdminStatus(tenant) == IEnumEnabledBinaryStatus.Types.ENABLED;
     }
 
     @Override
-    public Tenant updateSocialLink(String tenant /*senderTenant*/, Long id, String social, String link) {
+    public Tenant updateSocialLink(String tenant, Long id, String social, String link) {
         Optional<Tenant> optional = repository().findById(id);
         if (!optional.isPresent()) {
             throw new TenantNotFoundException("with id " + id);

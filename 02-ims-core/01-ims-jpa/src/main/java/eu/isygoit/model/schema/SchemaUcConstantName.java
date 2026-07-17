@@ -72,4 +72,6 @@ public interface SchemaUcConstantName extends ComSchemaUcConstantName {
      * The constant UC_ROLE_INFO_TENANT_NAME.
      */
     String UC_ROLE_INFO_TENANT_NAME = "UC_ROLE_INFO_TENANT_NAME";
+
+    String UC_TENANT_EMAIL = "UC_TENANT_EMAIL";
 }
