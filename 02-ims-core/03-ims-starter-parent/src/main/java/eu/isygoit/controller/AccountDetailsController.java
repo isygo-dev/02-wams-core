@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api/v1/private/account/details")
 public class AccountDetailsController extends MappedCrudController<Long, AccountDetails, AccountDetailsDto, AccountDetailsDto, AccountDetailsService> {
 
-    @Autowired
-    private RequestContextService requestContextService;
+    
 
 }

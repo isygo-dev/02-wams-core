@@ -7,6 +7,7 @@ import eu.isygoit.api.KmsServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
+import eu.isygoit.com.rest.controller.impl.ControllerUtils;
 import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.enums.IKmsActionType;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
@@ -57,7 +58,7 @@ import java.util.stream.Collectors;
 @InjectExceptionHandler(KmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/kms")
 @Tag(name = "KMS Keys", description = "Key Management Service - All cryptographic operations and key management endpoints")
-public class KmsController extends ControllerExceptionHandler implements KmsServiceApi {
+public class KmsController extends ControllerUtils implements KmsServiceApi {
 
     @Autowired
     private IKeyManagementService keyManagementService;
@@ -80,8 +81,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     @Autowired
     private IAuditService auditService;
 
-    @Autowired
-    private RequestContextService requestContextService;
+    
 
     @Autowired
     private IMultiRegionService multiRegionService;
@@ -102,7 +102,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                 request.getKeyUsage());
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
 
             CreateKeyResponse response = keyManagementService.createKey(tenant, request);
 
@@ -110,8 +110,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.CREATE_KEY,
                     String.valueOf(response.getKeyMetadata().getKeyId()),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseCreated(response);
@@ -127,7 +127,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Describing key: {}", keyId);
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             keyId = dataKeyService.resolveKeyId(tenant, keyId);
 
             DescribeKeyResponse response = keyManagementService.describeKey(tenant, keyId, null);
@@ -136,8 +136,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.DESCRIBE_KEY,
                     keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -156,7 +156,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Listing keys with limit: {}", limit);
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
 
             ListKeysResponse response = keyManagementService.listKeys(tenant, limit, nextToken);
 
@@ -164,8 +164,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.LIST_KEYS,
                     null,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -185,7 +185,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         request.setKeyId(keyId); // ensure consistency
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
 
             UpdateKeyDescriptionResponse response =
@@ -195,8 +195,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.UPDATE_KEY_DESCRIPTION,
                     keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -212,7 +212,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Enabling key: {}", keyId);
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             keyId = dataKeyService.resolveKeyId(tenant, keyId);
 
             EnableKeyResponse response = keyManagementService.enableKey(tenant, keyId);
@@ -221,8 +221,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.ENABLE_KEY,
                     keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -238,7 +238,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Disabling key: {}", keyId);
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             keyId = dataKeyService.resolveKeyId(tenant, keyId);
 
             DisableKeyResponse response = keyManagementService.disableKey(tenant, keyId);
@@ -247,8 +247,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.DISABLE_KEY,
                     keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -264,7 +264,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Disabling key: {} v: {}", keyId, keyVersionId);
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             keyId = dataKeyService.resolveKeyId(tenant, keyId);
 
             DisableKeyVersionResponse response = keyVersionService.disableKeyVersion(tenant, keyId, keyVersionId);
@@ -273,8 +273,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.DISABLE_KEY_VERSION,
                     keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -290,7 +290,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Disabling key: {} v: {}", keyId, keyVersionId);
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             keyId = dataKeyService.resolveKeyId(tenant, keyId);
 
             EnableKeyVersionResponse response = keyVersionService.enableKeyVersion(tenant, keyId, keyVersionId);
@@ -299,8 +299,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.ENABLE_KEY_VERSION,
                     keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -319,7 +319,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Scheduling deletion for key: {} with window: {} days", keyId, pendingWindowInDays);
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             keyId = dataKeyService.resolveKeyId(tenant, keyId);
 
             ScheduleKeyDeletionResponse response =
@@ -329,8 +329,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.SCHEDULE_KEY_DELETION,
                     keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -346,7 +346,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Cancelling deletion for key: {}", keyId);
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             keyId = dataKeyService.resolveKeyId(tenant, keyId);
 
             CancelKeyDeletionResponse response = keyManagementService.cancelKeyDeletion(tenant, keyId);
@@ -355,8 +355,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.CANCEL_KEY_DELETION,
                     keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -372,7 +372,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Permanently deleting key: {}", keyId);
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             keyId = dataKeyService.resolveKeyId(tenant, keyId);
 
             keyManagementService.deleteKey(tenant, keyId);
@@ -381,8 +381,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.DELETE_KEY,
                     keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk();
@@ -406,7 +406,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         request.setKeyId(keyId);
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
 
             UpdateKeyRotationResponse response =
@@ -416,8 +416,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.UPDATE_KEY_ROTATION,
                     keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -433,7 +433,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Rotating key: {}", keyId);
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             keyId = dataKeyService.resolveKeyId(tenant, keyId);
 
             RotateKeyResponse response = keyManagementService.rotateKey(tenant, keyId);
@@ -442,8 +442,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.ROTATE_KEY_ON_DEMAND,
                     keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -459,7 +459,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Getting rotation status for key: {}", keyId);
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             keyId = dataKeyService.resolveKeyId(tenant, keyId);
 
             GetKeyRotationStatusResponse response = keyManagementService.getKeyRotationStatus(tenant, keyId);
@@ -468,8 +468,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.GET_KEY_ROTATION_STATUS,
                     keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -489,7 +489,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Listing key rotations for: {}", keyId);
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
 
             ListKeyRotationsResponse response =
                     keyManagementService.listKeyRotations(tenant, keyId, limit, nextToken);
@@ -498,8 +498,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.LIST_KEY_ROTATIONS,
                     keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -512,13 +512,13 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
     @Override
     public ResponseEntity<EnableKeyRotationResponse> enableKeyRotation(String keyId) {
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
             keyManagementService.enableKeyRotation(tenant, keyId);
             auditService.logAction(tenant, IKmsActionType.Types.UPDATE_KEY_ROTATION, keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
             return ResponseFactory.responseOk(new EnableKeyRotationResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -527,13 +527,13 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
     @Override
     public ResponseEntity<DisableKeyRotationResponse> disableKeyRotation(String keyId) {
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
             keyManagementService.disableKeyRotation(tenant, keyId);
             auditService.logAction(tenant, IKmsActionType.Types.UPDATE_KEY_ROTATION, keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
             return ResponseFactory.responseOk(new DisableKeyRotationResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -549,7 +549,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Encrypting with keyId: {}", request.getKeyId());
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
 
             EncryptResponse response = encryptionService.encrypt(tenant, request);
@@ -558,8 +558,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.ENCRYPT,
                     request.getKeyId(),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -575,7 +575,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Decrypting data");
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
 
             DecryptResponse response = encryptionService.decrypt(tenant, request);
@@ -584,8 +584,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.DECRYPT,
                     response.getKeyId(),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -601,7 +601,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Re-encrypting to destination key: {}", request.getDestinationKeyId());
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             request.setSourceKeyId(dataKeyService.resolveKeyId(tenant, request.getSourceKeyId()));
             request.setDestinationKeyId(dataKeyService.resolveKeyId(tenant, request.getDestinationKeyId()));
 
@@ -611,8 +611,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.RE_ENCRYPT,
                     request.getDestinationKeyId(),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -628,7 +628,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Generating data key with keyId: {}", request.getKeyId());
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
 
             GenerateDataKeyResponse response = dataKeyService.generateDataKey(tenant, request);
@@ -637,8 +637,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.GENERATE_DATA_KEY,
                     request.getKeyId(),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -655,7 +655,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Generating data key without plaintext");
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
 
             GenerateDataKeyWithoutPlaintextResponse response =
@@ -665,8 +665,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.GENERATE_DATA_KEY_WITHOUT_PLAINTEXT,
                     request.getKeyId(),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -683,7 +683,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Generating data key pair");
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
 
             GenerateDataKeyPairResponse response = dataKeyService.generateDataKeyPair(tenant, request);
@@ -692,8 +692,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.GENERATE_DATA_KEY_PAIR,
                     request.getKeyId(),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -710,7 +710,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Generating data key pair without plaintext");
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
 
             GenerateDataKeyPairWithoutPlaintextResponse response =
@@ -720,8 +720,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.GENERATE_DATA_KEY_PAIR_WITHOUT_PLAINTEXT,
                     request.getKeyId(),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -737,7 +737,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Signing with keyId: {}", request.getKeyId());
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
 
             SignResponse response = signingService.sign(tenant, request);
@@ -746,8 +746,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.SIGN,
                     request.getKeyId(),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -762,12 +762,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<VerifyResponse> verify(VerifyRequest request) {
         log.info("Verifying signature with keyId: {}", request.getKeyId());
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
             VerifyResponse response = signingService.verify(tenant, request);
             auditService.logAction(tenant, IKmsActionType.Types.VERIFY, request.getKeyId(),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -779,12 +779,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<GenerateMacResponse> generateMac(GenerateMacRequest request) {
         log.info("Generating MAC with keyId: {}", request.getKeyId());
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
             GenerateMacResponse response = signingService.generateMac(tenant, request);
             auditService.logAction(tenant, IKmsActionType.Types.GENERATE_MAC, request.getKeyId(),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -796,12 +796,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<VerifyMacResponse> verifyMac(VerifyMacRequest request) {
         log.info("Verifying MAC with keyId: {}", request.getKeyId());
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
             VerifyMacResponse response = signingService.verifyMac(tenant, request);
             auditService.logAction(tenant, IKmsActionType.Types.VERIFY_MAC, request.getKeyId(),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -813,12 +813,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<GetPublicKeyResponse> getPublicKey(String keyId) {
         log.info("Getting public key for: {}", keyId);
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             keyId = dataKeyService.resolveKeyId(tenant, keyId);
             GetPublicKeyResponse response = keyManagementService.getPublicKey(tenant, keyId);
             auditService.logAction(tenant, IKmsActionType.Types.GET_PUBLIC_KEY, keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -839,7 +839,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
         log.info("Listing key versions for: {}", keyId);
 
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             keyId = dataKeyService.resolveKeyId(tenant, keyId);
 
             ListKeyVersionsResponse response =
@@ -849,8 +849,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.LIST_KEY_VERSIONS,
                     keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -865,12 +865,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<ActiveVersionResponse> getActiveVersion(String keyId) {
         log.info("Getting active version for: {}", keyId);
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             keyId = dataKeyService.resolveKeyId(tenant, keyId);
             ActiveVersionResponse response = keyVersionService.getActiveVersion(tenant, keyId);
             auditService.logAction(tenant, IKmsActionType.Types.GET_ACTIVE_VERSION, keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -885,12 +885,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
         log.info("Updating primary region for key: {} to region: {}", keyId, request.getPrimaryRegion());
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             keyId = dataKeyService.resolveKeyId(tenant, keyId);
             UpdatePrimaryRegionResponse response = multiRegionService.updatePrimaryRegion(tenant, keyId, request);
             auditService.logAction(tenant, IKmsActionType.Types.UPDATE_PRIMARY_REGION, keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -905,12 +905,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
         log.info("Replicating key: {} to region: {}", keyId, request.getReplicaRegion());
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             keyId = dataKeyService.resolveKeyId(tenant, keyId);
             ReplicateKeyResponse response = multiRegionService.replicateKey(tenant, keyId, request);
             auditService.logAction(tenant, IKmsActionType.Types.REPLICATE_KEY, keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -924,12 +924,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
         log.info("Synchronizing multi-region key: {}", keyId);
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             keyId = dataKeyService.resolveKeyId(tenant, keyId);
             SynchronizeMultiRegionKeyResponse response = multiRegionService.synchronizeMultiRegionKey(tenant, keyId);
             auditService.logAction(tenant, IKmsActionType.Types.SYNCHRONIZE_MULTI_REGION_KEY, keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -943,12 +943,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
     @Override
     public ResponseEntity<CreateAliasResponse> createAlias(CreateAliasRequest request) {
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         try {
             keyManagementService.createAlias(tenant, request);
             auditService.logAction(tenant, IKmsActionType.Types.CREATE_ALIAS, request.getTargetKeyId(),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
             return ResponseFactory.responseOk(new CreateAliasResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -960,12 +960,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             @PathVariable("aliasName") String aliasName,
             UpdateAliasRequest request) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         try {
             keyManagementService.updateAlias(tenant, aliasName, request);
             auditService.logAction(tenant, IKmsActionType.Types.UPDATE_ALIAS, aliasName,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
             return ResponseFactory.responseOk(new UpdateAliasResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -974,12 +974,12 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
     @Override
     public ResponseEntity<DeleteAliasResponse> deleteAlias(@PathVariable("aliasName") String aliasName) {
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         try {
             keyManagementService.deleteAlias(tenant, aliasName);
             auditService.logAction(tenant, IKmsActionType.Types.DELETE_ALIAS, aliasName,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
             return ResponseFactory.responseOk(new DeleteAliasResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -991,7 +991,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             Integer limit,
             String nextToken) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
 
         try {
             ListAliasesResponse response = keyManagementService.listAliases(tenant, limit, nextToken);
@@ -1000,8 +1000,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.LIST_ALIASES,
                     null,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {
@@ -1015,7 +1015,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             Integer limit,
             String nextToken) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
             ListAliasesResponse response = keyManagementService.listAliasesForKey(tenant, keyId, limit, nextToken);
@@ -1024,8 +1024,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.LIST_ALIASES_FOR_KEY,
                     String.valueOf(keyId),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {
@@ -1052,13 +1052,13 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             String keyId,
             PutKeyPolicyRequest request) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
         try {
             keyPolicyService.setKeyPolicy(tenant, keyId, request);
             auditService.logAction(tenant, IKmsActionType.Types.PUT_KEY_POLICY, keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
             return ResponseFactory.responseOk(new PutKeyPolicyResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -1069,7 +1069,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<GetKeyPolicyResponse> getKeyPolicy(
             String keyId) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
             Map<String, Object> policyMap = keyPolicyService.getKeyPolicy(tenant, keyId);
@@ -1083,8 +1083,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.GET_KEY_POLICY,
                     String.valueOf(keyId),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
             return ResponseFactory.responseOk(response);
         } catch (Throwable e) {
@@ -1101,14 +1101,14 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             String keyId,
             CreateGrantRequest request) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
         try {
             GrantResponse internalRes = keyPolicyService.createGrant(tenant, keyId, request);
 
             auditService.logAction(tenant, IKmsActionType.Types.CREATE_GRANT, keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
 
             CreateGrantResponse response = CreateGrantResponse.builder()
                     .grantId(internalRes.getGrantId())
@@ -1119,8 +1119,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.CREATE_GRANT,
                     String.valueOf(keyId),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -1137,7 +1137,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             String grantId,
             String granteePrincipal) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
             ListGrantsResponse response = keyPolicyService.listGrants(tenant, keyId, limit, nextToken);
@@ -1146,8 +1146,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.LIST_GRANTS,
                     String.valueOf(keyId),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -1161,13 +1161,13 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             String keyId,
             String grantId) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
             keyPolicyService.revokeGrant(tenant, keyId, grantId);
             auditService.logAction(tenant, IKmsActionType.Types.REVOKE_GRANT, keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
             return ResponseFactory.responseOk(new RevokeGrantResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -1176,13 +1176,13 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
     @Override
     public ResponseEntity<RetireGrantResponse> retireGrant(RetireGrantRequest request) {
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
         try {
             keyPolicyService.retireGrant(tenant, request.getGrantId(), request);
             auditService.logAction(tenant, IKmsActionType.Types.RETIRE_GRANT, request.getGrantId(),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
             return ResponseFactory.responseOk(new RetireGrantResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -1194,15 +1194,15 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             String retiringPrincipal,
             Integer limit,
             String nextToken) {
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         ListRetirableGrantsResponse response = keyPolicyService.listRetirableGrants(tenant, retiringPrincipal, limit, nextToken);
 
         auditService.logAction(
                 tenant,
                 IKmsActionType.Types.LIST_RETIRED_GRANTS,
                 String.valueOf(retiringPrincipal),
-                requestContextService.getCurrentContext().getSenderUser(),
-                requestContextService.getCurrentContext().getIpOrigin()
+                requestContextService().getCurrentContext().getSenderUser(),
+                requestContextService().getCurrentContext().getIpOrigin()
         );
 
         return ResponseFactory.responseOk(response);
@@ -1217,13 +1217,13 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             String keyId,
             TagResourceRequest request) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
         try {
             keyManagementService.tagResource(tenant, keyId, request);
             auditService.logAction(tenant, IKmsActionType.Types.TAG_RESOURCE, keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
             return ResponseFactory.responseOk(new TagResourceResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -1235,13 +1235,13 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             String keyId,
             UntagResourceRequest request) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
         try {
             keyManagementService.untagResource(tenant, keyId, request);
             auditService.logAction(tenant, IKmsActionType.Types.UNTAG_RESOURCE, keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
             return ResponseFactory.responseOk(new UntagResourceResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -1254,7 +1254,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             Integer limit,
             String nextToken) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
             ListResourceTagsResponse internal = keyManagementService.listResourceTags(tenant, keyId, limit, nextToken);
@@ -1271,8 +1271,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.LIST_RESOURCE_TAGS,
                     String.valueOf(keyId),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -1290,7 +1290,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             String keyId,
             GetParametersForImportRequest request) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
             ImportParametersResponse internal = keyManagementService.getParametersForImport(tenant, keyId);
@@ -1305,8 +1305,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.GET_PARAMETERS_FOR_IMPORT,
                     String.valueOf(keyId),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -1320,14 +1320,14 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             String keyId,
             ImportKeyMaterialRequest request) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         request.setKeyId(dataKeyService.resolveKeyId(tenant, request.getKeyId()));
         try {
             // The request already contains Base64 strings; the service layer expects Base64 strings
             keyManagementService.importKeyMaterial(tenant, keyId, request);
             auditService.logAction(tenant, IKmsActionType.Types.IMPORT_KEY_MATERIAL, keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
             return ResponseFactory.responseOk(new ImportKeyMaterialResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -1338,13 +1338,13 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<DeleteImportedKeyMaterialResponse> deleteImportedKeyMaterial(
             String keyId) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
             keyManagementService.deleteImportedKeyMaterial(tenant, keyId);
             auditService.logAction(tenant, IKmsActionType.Types.DELETE_IMPORTED_KEY_MATERIAL, keyId,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
             return ResponseFactory.responseOk(new DeleteImportedKeyMaterialResponse());
         } catch (Throwable e) {
             return getBackExceptionResponse(e);
@@ -1359,7 +1359,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<CreateCustomKeyStoreResponse> createCustomKeyStore(
             CreateCustomKeyStoreRequest request) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         try {
             DescribeCustomKeyStoreResponse.CustomKeyStore internalRes = customKeyStoreService.createCustomKeyStore(tenant, request);
             CreateCustomKeyStoreResponse response = CreateCustomKeyStoreResponse.builder()
@@ -1375,7 +1375,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<DescribeCustomKeyStoreResponse> describeCustomKeyStore(
             @PathVariable("customKeyStoreId") Long customKeyStoreId) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         try {
             DescribeCustomKeyStoreResponse.CustomKeyStore customKeyStore = customKeyStoreService.describeCustomKeyStore(tenant, customKeyStoreId);
             DescribeCustomKeyStoreResponse response = DescribeCustomKeyStoreResponse.builder()
@@ -1386,8 +1386,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.DELETE_CUSTOM_KEY_STORE,
                     String.valueOf(customKeyStoreId),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -1401,7 +1401,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             @PathVariable("customKeyStoreId") Long customKeyStoreId,
             UpdateCustomKeyStoreRequest request) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         try {
             customKeyStoreService.updateCustomKeyStore(tenant, customKeyStoreId, request);
             return ResponseFactory.responseOk(new UpdateCustomKeyStoreResponse());
@@ -1414,7 +1414,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<DeleteCustomKeyStoreResponse> deleteCustomKeyStore(
             Long customKeyStoreId) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         try {
             customKeyStoreService.deleteCustomKeyStore(tenant, customKeyStoreId);
             return ResponseFactory.responseOk(new DeleteCustomKeyStoreResponse());
@@ -1427,7 +1427,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<ConnectCustomKeyStoreResponse> connectCustomKeyStore(
             Long customKeyStoreId) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         try {
             customKeyStoreService.connectCustomKeyStore(tenant, customKeyStoreId);
             return ResponseFactory.responseOk(new ConnectCustomKeyStoreResponse());
@@ -1440,7 +1440,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
     public ResponseEntity<DisconnectCustomKeyStoreResponse> disconnectCustomKeyStore(
             Long customKeyStoreId) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         try {
             customKeyStoreService.disconnectCustomKeyStore(tenant, customKeyStoreId);
             return ResponseFactory.responseOk(new DisconnectCustomKeyStoreResponse());
@@ -1455,7 +1455,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             String nextToken
     ) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         try {
             ListCustomKeyStoresResponse response = customKeyStoreService.listCustomKeyStores(tenant, limit, nextToken);
 
@@ -1463,8 +1463,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.LIST_CUSTOM_KEY_STORE,
                     null,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -1484,7 +1484,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
             LocalDateTime toDate,
             Integer limit) {
 
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
             AuditLogResponse response = auditService.getAuditLogs(tenant, keyId, fromDate, toDate, limit);
@@ -1496,7 +1496,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
     @Override
     public ResponseEntity<KeyUsageStatsResponse> getKeyUsageStats(String keyId) {
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
             KeyUsageStatsResponse response = keyManagementService.getKeyUsageStats(tenant, keyId);
@@ -1508,19 +1508,19 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
     @Override
     public ResponseEntity<GenerateRandomResponse> generateRandom(GenerateRandomRequest request) {
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         try {
             GenerateRandomResponse response = dataKeyService.generateRandom(request);
             auditService.logAction(tenant, IKmsActionType.Types.GENERATE_RANDOM, null,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin());
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin());
 
             auditService.logAction(
                     tenant,
                     IKmsActionType.Types.GENERATE_RANDOM,
                     null,
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);
@@ -1531,7 +1531,7 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
 
     @Override
     public ResponseEntity<ValidateKeyResponse> validateKey(String keyId) {
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         keyId = dataKeyService.resolveKeyId(tenant, keyId);
         try {
             keyManagementService.isValidKey(tenant, keyId);
@@ -1541,8 +1541,8 @@ public class KmsController extends ControllerExceptionHandler implements KmsServ
                     tenant,
                     IKmsActionType.Types.VALIDATE_KEY,
                     String.valueOf(keyId),
-                    requestContextService.getCurrentContext().getSenderUser(),
-                    requestContextService.getCurrentContext().getIpOrigin()
+                    requestContextService().getCurrentContext().getSenderUser(),
+                    requestContextService().getCurrentContext().getIpOrigin()
             );
 
             return ResponseFactory.responseOk(response);

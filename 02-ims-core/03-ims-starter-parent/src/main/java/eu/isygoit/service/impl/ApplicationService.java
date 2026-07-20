@@ -41,7 +41,7 @@ public class ApplicationService extends ImageTenantService<Long, Application, Ap
     @Override
     public AppNextCode initCodeGenerator() {
         return AppNextCode.builder()
-                .tenant(TenantConstants.DEFAULT_TENANT_NAME)
+                .tenant(TenantConstants.SUPER_TENANT_NAME)
                 .entity(Application.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("APP")

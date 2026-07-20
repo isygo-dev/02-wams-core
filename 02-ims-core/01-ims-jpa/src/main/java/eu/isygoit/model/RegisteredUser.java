@@ -25,7 +25,8 @@ import org.hibernate.annotations.DynamicUpdate;
 @DynamicUpdate
 @Entity
 @Table(name = SchemaTableConstantName.T_REGISTRED_USER, uniqueConstraints = {
-        @UniqueConstraint(columnNames = {SchemaColumnConstantName.C_EMAIL})
+        @UniqueConstraint(columnNames = {SchemaColumnConstantName.C_EMAIL}),
+        @UniqueConstraint(columnNames = {SchemaColumnConstantName.C_TENANT})
 })
 public class RegisteredUser extends AuditableEntity<Long> implements ITenantAssignable {
 
@@ -56,6 +57,9 @@ public class RegisteredUser extends AuditableEntity<Long> implements ITenantAssi
 
     @Column(name = SchemaColumnConstantName.C_ORGANISATION, length = SchemaConstantSize.S_NAME, nullable = false)
     private String organisation;
+
+    @Column(name = SchemaColumnConstantName.C_FUNCTION_ROLE, length = SchemaConstantSize.S_NAME, nullable = false)
+    private String functionRole;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)

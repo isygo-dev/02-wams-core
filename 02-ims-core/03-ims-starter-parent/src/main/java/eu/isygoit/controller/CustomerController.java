@@ -56,7 +56,7 @@ public class CustomerController extends MappedCrudTenantController<Long, Custome
             @RequestParam(name = RestApiConstants.ACCOUNT_CODE) String accountCode) {
         log.info("Link to existing account");
         try {
-            return ResponseFactory.responseOk(mapper().entityToDto(crudService().linkToAccount(getRequestContextService().getCurrentContext().getSenderTenant(),
+            return ResponseFactory.responseOk(mapper().entityToDto(crudService().linkToAccount(requestContextService().getCurrentContext().getSenderTenant(),
                     id, accountCode)));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);

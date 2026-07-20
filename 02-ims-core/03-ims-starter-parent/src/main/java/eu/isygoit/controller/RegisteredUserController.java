@@ -40,7 +40,7 @@ public class RegisteredUserController extends MappedCrudTenantController<Long, R
 
         try {
             return ResponseEntity.ok(accountMapper.entityToDto(crudService().createAccountFromRegistered(
-                    getRequestContextService().getCurrentContext().getSenderTenant(),
+                    requestContextService().getCurrentContext().getSenderTenant(),
                     request)));
         } catch (Throwable e) {
             log.error("<Error>: Call api createAccountFromRegistered {} / {}", request.getEmail(), e);

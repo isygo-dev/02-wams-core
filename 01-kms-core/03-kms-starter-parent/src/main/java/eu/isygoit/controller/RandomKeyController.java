@@ -4,6 +4,7 @@ import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
+import eu.isygoit.com.rest.controller.impl.ControllerUtils;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.common.RandomKeyDto;
 import eu.isygoit.enums.IEnumCharSet;
@@ -31,14 +32,13 @@ import org.springframework.web.bind.annotation.RestController;
 @InjectExceptionHandler(KmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/key")
 @Tag(name = "KMS Keys", description = "Key Management Service - All cryptographic operations and key management endpoints")
-public class RandomKeyController extends ControllerExceptionHandler implements RandomKeyServiceApi {
+public class RandomKeyController extends ControllerUtils implements RandomKeyServiceApi {
 
     @Autowired
     private RandomKeyMapper randomKeyMapper;
     @Autowired
     private IKeyService keyService;
-    @Autowired
-    private RequestContextService requestContextService;
+    
 
     /*
      * Create new random key without saving
@@ -46,7 +46,7 @@ public class RandomKeyController extends ControllerExceptionHandler implements R
     @Override
     public ResponseEntity<String> newRandomKey(Integer length, IEnumCharSet.Types charSetType) {
         log.info("Call generateRandomKey");
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         try {
             return ResponseFactory.responseOk(keyService.generateRandomKey(length, charSetType));
         } catch (Throwable e) {
@@ -62,7 +62,7 @@ public class RandomKeyController extends ControllerExceptionHandler implements R
     public ResponseEntity<String> renewRandomKey(String keyName,
                                                  Integer length, IEnumCharSet.Types charSetType) {
         log.info("Call generateRandomKeyName");
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         try {
             String keyValue = keyService.generateRandomKey(length, charSetType);
             keyService.createOrUpdateKeyByName(tenant, keyName, keyValue);
@@ -79,7 +79,7 @@ public class RandomKeyController extends ControllerExceptionHandler implements R
     @Override
     public ResponseEntity<String> getRandomKey(String keyName) {
         log.info("Call getRandomKeyName");
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         try {
             return ResponseFactory.responseOk(keyService.getKeyByName(tenant, keyName));
         } catch (Throwable e) {
@@ -91,7 +91,7 @@ public class RandomKeyController extends ControllerExceptionHandler implements R
     @Override
     public ResponseEntity<PaginatedResponseDto<RandomKeyDto>> listRandomKeys(int page, int size) {
         log.info("Call listRandomKeys");
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         try {
             Page<RandomKey> randomKeys = keyService.listRandomKeys(tenant, page, size);
             if (randomKeys.isEmpty()) {
@@ -113,7 +113,7 @@ public class RandomKeyController extends ControllerExceptionHandler implements R
     @Override
     public ResponseEntity<Void> deleteRandomKey(String keyName) {
         log.info("Call deleteRandomKey");
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         try {
             keyService.deleteByTenantAndName(tenant, keyName);
             return ResponseFactory.responseOk();

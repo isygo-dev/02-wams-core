@@ -24,7 +24,7 @@ public class DigestConfigService extends CodeAssignableTenantService<Long, Diges
     @Override
     public AppNextCode initCodeGenerator() {
         return AppNextCode.builder()
-                .tenant(TenantConstants.DEFAULT_TENANT_NAME)
+                .tenant(TenantConstants.SUPER_TENANT_NAME)
                 .entity(DigestConfig.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("DIG")

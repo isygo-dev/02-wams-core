@@ -5,6 +5,7 @@ import eu.isygoit.api.PasswordServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
+import eu.isygoit.com.rest.controller.impl.ControllerUtils;
 import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
 import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.response.AccessKeyResponseDto;
@@ -32,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @InjectExceptionHandler(KmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/password")
-public class PasswordController extends ControllerExceptionHandler implements PasswordServiceApi {
+public class PasswordController extends ControllerUtils implements PasswordServiceApi {
 
     @Autowired
     private IAccountService accountService;
@@ -40,8 +41,7 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
     private AccountMapper accountMapper;
     @Autowired
     private IPasswordService passwordService;
-    @Autowired
-    private RequestContextService requestContextService;
+    
 
     @Override
     public ResponseEntity<Integer> generateToken(
@@ -49,12 +49,13 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
         log.info("Call generate password for tenant {}", generatePwdRequest);
         try {
             AccessKeyResponseDto accessKeyResponse = passwordService.generateRandomPassword(
-                    generatePwdRequest.getTenant()
-                    , generatePwdRequest.getTenantUrl()
-                    , generatePwdRequest.getEmail()
-                    , generatePwdRequest.getUserName()
-                    , generatePwdRequest.getFullName()
-                    , IEnumAuth.Types.TOKEN);
+                    requestContextService().getCurrentContext().getSenderTenant(),
+                    generatePwdRequest.getTenant(),
+                    generatePwdRequest.getTenantUrl(),
+                    generatePwdRequest.getEmail(),
+                    generatePwdRequest.getUserName(),
+                    generatePwdRequest.getFullName(),
+                    IEnumAuth.Types.TOKEN);
             //Never return the password
             log.info("password generated for {}/{} : {}", generatePwdRequest.getTenant(), generatePwdRequest.getUserName(), accessKeyResponse.getKey());
             return ResponseFactory.responseOk(accessKeyResponse.getLength());
@@ -70,12 +71,13 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
         log.info("Call generate password for tenant {}", generatePwdRequest);
         try {
             AccessKeyResponseDto accessKeyResponse = passwordService.generateRandomPassword(
-                    generatePwdRequest.getTenant()
-                    , generatePwdRequest.getTenantUrl()
-                    , generatePwdRequest.getEmail()
-                    , generatePwdRequest.getUserName()
-                    , generatePwdRequest.getFullName()
-                    , IEnumAuth.Types.PWD);
+                    requestContextService().getCurrentContext().getSenderTenant(),
+                    generatePwdRequest.getTenant(),
+                    generatePwdRequest.getTenantUrl(),
+                    generatePwdRequest.getEmail(),
+                    generatePwdRequest.getUserName(),
+                    generatePwdRequest.getFullName(),
+                    IEnumAuth.Types.PWD);
             //Never return the password
             log.info("password generated for {}/{} : {}", generatePwdRequest.getTenant(), generatePwdRequest.getUserName(), accessKeyResponse.getKey());
             return ResponseFactory.responseOk(accessKeyResponse.getLength());
@@ -102,8 +104,8 @@ public class PasswordController extends ControllerExceptionHandler implements Pa
             String oldPassword,
             String newPassword) {
         try {
-            passwordService.changePassword(requestContextService.getCurrentContext().getSenderTenant(),
-                    requestContextService.getCurrentContext().getSenderUser(),
+            passwordService.changePassword(requestContextService().getCurrentContext().getSenderTenant(),
+                    requestContextService().getCurrentContext().getSenderUser(),
                     oldPassword, newPassword);
             return ResponseFactory.responseOk("password changed successfully");
         } catch (Throwable e) {

@@ -10,7 +10,6 @@ import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.data.MinAccountDto;
 import eu.isygoit.dto.data.TenantAdminDto;
-import eu.isygoit.dto.request.GeneratePwdRequestDto;
 import eu.isygoit.dto.request.UpdateAccountRequestDto;
 import eu.isygoit.dto.response.UserDataResponseDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
@@ -55,8 +54,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     private ITenantService tenantService;
     @Autowired
     private MinAccountMapper minAccountMapper;
-    @Autowired
-    private RequestContextService requestContextService;
+    
 
     @Override
     public AccountDto beforeUpdate(Long id, AccountDto account) {
@@ -79,32 +77,10 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     }
 
     @Override
-    public Account afterCreate(Account account) {
-        try {
-            Optional<Tenant> tenant = tenantService.findByName(account.getTenant());
-            ResponseEntity<Integer> result = kmsPasswordService.generatePwd(
-                    GeneratePwdRequestDto.builder()
-                            .tenant(account.getTenant())
-                            .tenantUrl(tenant.map(Tenant::getUrl).orElse(null))
-                            .email(account.getEmail())
-                            .userName(account.getCode())
-                            .fullName(account.getFullName())
-                            .build());
-            if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
-                return super.afterCreate(account);
-            }
-        } catch (Exception e) {
-            log.error("Remote feign call failed : ", e);
-            //throw new RemoteCallFailedException(e);
-        }
-        return super.afterCreate(account);
-    }
-
-    @Override
     public ResponseEntity<List<String>> getEmailsByTenant() {
         log.info("get accounts email by tenant");
         try {
-            return ResponseFactory.responseOk(accountService.findEmailsByTenant(getRequestContextService().getCurrentContext().getSenderTenant()));
+            return ResponseFactory.responseOk(accountService.findEmailsByTenant(requestContextService().getCurrentContext().getSenderTenant()));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -116,7 +92,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     public ResponseEntity<List<MinAccountDto>> getAccounts() {
         log.info("get accounts mini data");
         try {
-            return ResponseFactory.responseOk(accountService.getMinInfoByTenant(getRequestContextService().getCurrentContext().getSenderTenant()));
+            return ResponseFactory.responseOk(accountService.getMinInfoByTenant(requestContextService().getCurrentContext().getSenderTenant()));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -177,8 +153,8 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     @Override
     public ResponseEntity<UserDataResponseDto> connectedUser() {
         try {
-            Account account = accountService.findByTenantAndUserName(getRequestContextService().getCurrentContext().getSenderTenant(), getRequestContextService().getCurrentContext().getSenderUser());
-            Optional<Tenant> optionalTenant = tenantService.findByName(getRequestContextService().getCurrentContext().getSenderTenant());
+            Account account = accountService.findByTenantAndUserName(requestContextService().getCurrentContext().getSenderTenant(), requestContextService().getCurrentContext().getSenderUser());
+            Optional<Tenant> optionalTenant = tenantService.findByName(requestContextService().getCurrentContext().getSenderTenant());
             //ThemeDto theme = themeMapper.entityToDto(themeService.findThemeByAccountCodeAndTenantCode(account.getCode(), tenant.getCode()));
             UserDataResponseDto userDataResponseDto = UserDataResponseDto.builder()
                     .id(account.getId())
@@ -218,8 +194,8 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     @Override
     public ResponseEntity<AccountDto> connectedUserFullData() {
         try {
-            return ResponseFactory.responseOk(mapper().entityToDto(accountService.findByTenantAndUserName(getRequestContextService().getCurrentContext().getSenderTenant(),
-                    getRequestContextService().getCurrentContext().getSenderUser())));
+            return ResponseFactory.responseOk(mapper().entityToDto(accountService.findByTenantAndUserName(requestContextService().getCurrentContext().getSenderTenant(),
+                    requestContextService().getCurrentContext().getSenderUser())));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -230,10 +206,10 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     public ResponseEntity<AccountDto> updateConnectedUserAccountData(
             AccountDto accountDto) {
         try {
-            Account account = accountService.findByTenantAndUserName(getRequestContextService().getCurrentContext().getSenderTenant(), getRequestContextService().getCurrentContext().getSenderUser());
+            Account account = accountService.findByTenantAndUserName(requestContextService().getCurrentContext().getSenderTenant(), requestContextService().getCurrentContext().getSenderUser());
             accountDto.setId(account.getId());
             this.beforeUpdate(accountDto.getId(), accountDto);
-            return ResponseFactory.responseOk(mapper().entityToDto(accountService.update(getRequestContextService().getCurrentContext().getSenderTenant(),
+            return ResponseFactory.responseOk(mapper().entityToDto(accountService.update(requestContextService().getCurrentContext().getSenderTenant(),
                     mapper().dtoToEntity(accountDto))));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -248,7 +224,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
         try {
             accountDto.setId(id);
             this.beforeUpdate(accountDto.getId(), accountDto);
-            return ResponseFactory.responseOk(mapper().entityToDto(accountService.update(getRequestContextService().getCurrentContext().getSenderTenant(), mapper().dtoToEntity(accountDto))));
+            return ResponseFactory.responseOk(mapper().entityToDto(accountService.update(requestContextService().getCurrentContext().getSenderTenant(), mapper().dtoToEntity(accountDto))));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -271,7 +247,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     public ResponseEntity<List<MinAccountDto>> accountsByTenant() {
         log.info("get accounts by sender tenant");
         try {
-            List<MinAccountDto> list = minAccountMapper.listEntityToDto(accountService.getByTenant(getRequestContextService().getCurrentContext().getSenderTenant()));
+            List<MinAccountDto> list = minAccountMapper.listEntityToDto(accountService.getByTenant(requestContextService().getCurrentContext().getSenderTenant()));
             if (CollectionUtils.isEmpty(list)) {
                 return ResponseFactory.responseNoContent();
             }
@@ -301,7 +277,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     public ResponseEntity<List<MinAccountDto>> chatAccountsByTenant() {
         log.info("get chat accounts by tenant");
         try {
-            List<MinAccountDto> list = minAccountMapper.listEntityToDto(accountService.chatAccountsByTenant(getRequestContextService().getCurrentContext().getSenderTenant()));
+            List<MinAccountDto> list = minAccountMapper.listEntityToDto(accountService.chatAccountsByTenant(requestContextService().getCurrentContext().getSenderTenant()));
             if (CollectionUtils.isEmpty(list)) {
                 return ResponseFactory.responseNoContent();
             }
@@ -315,7 +291,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     @Override
     public ResponseEntity<?> resendCreationEmail(Long id) {
         try {
-            accountService.resendCreationEmail(getRequestContextService().getCurrentContext().getSenderTenant(), id);
+            accountService.resendCreationEmail(requestContextService().getCurrentContext().getSenderTenant(), id);
             return ResponseFactory.responseOk();
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
@@ -326,7 +302,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     @Override
     public ResponseEntity<Long> getConfirmedResumeAccountsCount() {
         try {
-            return ResponseFactory.responseOk(accountService.stat_GetConfirmedResumeAccountsCount(getRequestContextService().getCurrentContext()));
+            return ResponseFactory.responseOk(accountService.stat_GetConfirmedResumeAccountsCount(requestContextService().getCurrentContext()));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -336,7 +312,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     @Override
     public ResponseEntity<Long> getConfirmedAccountNumberByEmployee() {
         try {
-            return ResponseFactory.responseOk(accountService.stat_GetConfirmedEmployeeAccountsCount(getRequestContextService().getCurrentContext()));
+            return ResponseFactory.responseOk(accountService.stat_GetConfirmedEmployeeAccountsCount(requestContextService().getCurrentContext()));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

@@ -57,7 +57,7 @@ public class PasswordExpiredService extends AbstractJobService {
                         try {
                             mailMessageDto = MailMessageDto.builder()
                                     .subject(EmailSubjects.PASSWORD_WILL_EXPIRE_EMAIL_SUBJECT)
-                                    .tenant(account.getTenant())
+                                    .senderTenant(account.getTenant())
                                     .toAddr(account.getEmail())
                                     .fromAddr("noreply@" + account.getTenant() + ".com")
                                     .templateName(IEnumEmailTemplate.Types.PASSWORD_EXPIRE_TEMPLATE)

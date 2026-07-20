@@ -26,7 +26,7 @@ public class MsgService implements IMsgService {
         if (async) {
             camelRepository.asyncSendBody(ICamelRepository.send_email_queue, mailMessage);
         } else {
-            this.messageService.sendMail(senderTenantName, mailMessage.getTemplateName(), mailMessage);
+            this.messageService.sendMail(mailMessage.getTemplateName(), mailMessage);
         }
     }
 }

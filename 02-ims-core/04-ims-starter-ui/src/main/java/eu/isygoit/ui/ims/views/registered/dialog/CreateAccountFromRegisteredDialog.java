@@ -126,6 +126,7 @@ public class CreateAccountFromRegisteredDialog extends BaseActionDialog {
         functionRoleField.setRequiredIndicatorVisible(true);
         functionRoleField.setPlaceholder(I18n.t("ims.account.dialog.field.function.role.placeholder"));
         functionRoleField.setWidthFull();
+        functionRoleField.setValue(registeredUser.getFunctionRole() != null ? registeredUser.getFunctionRole() : "");
 
         isAdminCheckbox = new Checkbox(I18n.t("ims.account.dialog.field.is.admin"));
         isAdminCheckbox.setWidthFull();

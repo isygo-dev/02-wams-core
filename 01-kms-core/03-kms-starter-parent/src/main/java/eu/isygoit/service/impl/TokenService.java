@@ -199,7 +199,7 @@ public class TokenService implements ITokenBuilderService {
 
         MailMessageDto mailMessageDto = MailMessageDto.builder()
                 .subject(EmailSubjects.FORGOT_PASSWORD_EMAIL_SUBJECT)
-                .tenant(tenant)
+                .senderTenant(tenant)
                 .toAddr(account.getEmail())
                 .fromAddr("noreply@" + tenant + ".com")
                 .templateName(IEnumEmailTemplate.Types.FORGOT_PASSWORD_TEMPLATE)

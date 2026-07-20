@@ -5,6 +5,7 @@ import eu.isygoit.api.IncrementalKeyServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
+import eu.isygoit.com.rest.controller.impl.ControllerUtils;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.common.NextCodeDto;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
@@ -28,17 +29,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @InjectExceptionHandler(KmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/key")
-public class IncrementalKeyController extends ControllerExceptionHandler implements IncrementalKeyServiceApi {
+public class IncrementalKeyController extends ControllerUtils implements IncrementalKeyServiceApi {
 
     @Autowired
     private IKeyService keyService;
 
-    @Autowired
-    private RequestContextService requestContextService;
-
     @Override
     public ResponseEntity<String> generateNextCode(String entity, String attribute) {
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         log.info("Call generate next code for: {}/{}/{}", tenant, entity, attribute);
         try {
             return ResponseFactory.responseOk(keyService.getIncrementalKey(tenant, entity, attribute));
@@ -50,7 +48,7 @@ public class IncrementalKeyController extends ControllerExceptionHandler impleme
 
     @Override
     public ResponseEntity<String> subscribeNextCode(NextCodeDto incrementalConfig) {
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        String tenant = requestContextService().getCurrentContext().getSenderTenant();
         log.info("Call subscribe next code generator for: {}/{}", tenant, incrementalConfig);
         try {
             keyService.subscribeIncrementalKeyGenerator(AppNextCode.builder()

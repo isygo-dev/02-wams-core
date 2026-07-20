@@ -5,6 +5,7 @@ import eu.isygoit.api.PasswordServiceApi;
 import eu.isygoit.api.ProfileServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
+import eu.isygoit.com.rest.controller.impl.ControllerUtils;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.dto.common.ChangePasswordRequestDto;
 import eu.isygoit.dto.common.RequestContextDto;
@@ -42,12 +43,11 @@ import java.io.IOException;
 @RestController
 @InjectExceptionHandler(ImsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/profile")
-public class ProfileController extends ControllerExceptionHandler implements ProfileServiceApi {
+public class ProfileController extends ControllerUtils implements ProfileServiceApi {
 
     private final AppProperties appProperties;
 
-    @Autowired
-    private RequestContextService requestContextService;
+    
     @Autowired
     private IAccountService accountService;
     @Autowired
@@ -72,7 +72,7 @@ public class ProfileController extends ControllerExceptionHandler implements Pro
      * @throws AccountNotFoundException     if account is not found
      */
     private Account getAuthenticatedAccount() {
-        RequestContextDto requestContext = requestContextService.getCurrentContext();
+        RequestContextDto requestContext = requestContextService().getCurrentContext();
 
         if (requestContext == null) {
             log.error("Request context is null");

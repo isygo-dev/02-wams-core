@@ -28,7 +28,13 @@ public interface IPasswordService {
      * @return the access key response dto
      * @throws JsonProcessingException the json processing exception
      */
-    AccessKeyResponseDto generateRandomPassword(String tenant /*senderTenant*/, String tenantUrl, String email, String userName, String fullName, IEnumAuth.Types authType) throws JsonProcessingException;
+    AccessKeyResponseDto generateRandomPassword(String senderTenant,
+                                                String tenant,
+                                                String tenantUrl,
+                                                String email,
+                                                String userName,
+                                                String fullName,
+                                                IEnumAuth.Types authType) throws JsonProcessingException;
 
 
     /**

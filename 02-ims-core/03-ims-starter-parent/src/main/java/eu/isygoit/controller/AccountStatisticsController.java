@@ -4,6 +4,7 @@ import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
+import eu.isygoit.com.rest.controller.impl.ControllerUtils;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.data.AccountGlobalStatDto;
 import eu.isygoit.dto.data.AccountStatDto;
@@ -34,12 +35,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @InjectExceptionHandler(ImsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/account/stat")
-public class AccountStatisticsController extends ControllerExceptionHandler {
+public class AccountStatisticsController extends ControllerUtils {
 
     @Autowired
     private IAccountService accountService;
-    @Autowired
-    private RequestContextService requestContextService;
+    
 
     /**
      * Gets global statistics.
@@ -60,7 +60,7 @@ public class AccountStatisticsController extends ControllerExceptionHandler {
             @RequestParam(name = RestApiConstants.STAT_TYPE) IEnumSharedStatType.Types statType) {
         log.info("Get global statistics");
         try {
-            return ResponseFactory.responseOk(accountService.getGlobalStatistics(statType, requestContextService.getCurrentContext()));
+            return ResponseFactory.responseOk(accountService.getGlobalStatistics(statType, requestContextService().getCurrentContext()));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

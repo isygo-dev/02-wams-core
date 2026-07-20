@@ -5,6 +5,7 @@ import eu.isygoit.api.PublicAuthServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
+import eu.isygoit.com.rest.controller.impl.ControllerUtils;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.config.JwtProperties;
 import eu.isygoit.dto.common.SystemInfoResponseDto;
@@ -47,7 +48,7 @@ import java.util.Optional;
 @RestController
 @InjectExceptionHandler(ImsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/public/auth")
-public class PublicAuthController extends ControllerExceptionHandler implements PublicAuthServiceApi {
+public class PublicAuthController extends ControllerUtils implements PublicAuthServiceApi {
 
     private final AppProperties appProperties;
     private final JwtProperties jwtProperties;
@@ -71,8 +72,7 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     private ThemeMapper themeMapper;
     @Autowired
     private TenantMapper tenantMapper;
-    @Autowired
-    private RequestContextService requestContextService;
+    
 
     /**
      * Instantiates a new Public auth controller.
@@ -94,10 +94,10 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
             authRequestDto.setPassword(authRequestDto.getPassword().trim());
 
             AuthResponseDto authenticate = authService.authenticate(RequestTrackingDto.builder()
-                            .device(requestContextService.getCurrentContext().getDevice())
-                            .appOrigin(requestContextService.getCurrentContext().getAppOrigin())
-                            .ipOrigin(requestContextService.getCurrentContext().getIpOrigin())
-                            .browser(requestContextService.getCurrentContext().getBrowser())
+                            .device(requestContextService().getCurrentContext().getDevice())
+                            .appOrigin(requestContextService().getCurrentContext().getAppOrigin())
+                            .ipOrigin(requestContextService().getCurrentContext().getIpOrigin())
+                            .browser(requestContextService().getCurrentContext().getBrowser())
                             .build(),
                     authRequestDto.getTenant(),
                     authRequestDto.getUserName(),
@@ -210,7 +210,7 @@ public class PublicAuthController extends ControllerExceptionHandler implements 
     public ResponseEntity<Boolean> switchAuthType(
             AuthenticationContextRequest authenticationContextRequest) {
         try {
-            return ResponseFactory.responseOk(accountService.switchAuthType(requestContextService.getCurrentContext().getSenderTenant(),
+            return ResponseFactory.responseOk(accountService.switchAuthType(requestContextService().getCurrentContext().getSenderTenant(),
                     authenticationContextRequest));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);

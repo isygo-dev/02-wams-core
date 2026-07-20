@@ -5,6 +5,7 @@ import eu.isygoit.api.PublicPasswordServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
+import eu.isygoit.com.rest.controller.impl.ControllerUtils;
 import eu.isygoit.dto.common.UserContextRequestDto;
 import eu.isygoit.dto.request.AccessRequestDto;
 import eu.isygoit.dto.request.GeneratePwdRequestDto;
@@ -21,6 +22,7 @@ import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.service.IPasswordService;
 import eu.isygoit.service.ITenantService;
 import eu.isygoit.service.ITokenBuilderService;
+import eu.isygoit.service.RequestContextService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +42,7 @@ import java.util.Set;
 @RestController
 @InjectExceptionHandler(KmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/public/password")
-public class PublicPasswordController extends ControllerExceptionHandler implements PublicPasswordServiceApi {
+public class PublicPasswordController extends ControllerUtils implements PublicPasswordServiceApi {
 
     @Autowired
     private ITokenBuilderService tokenService;
@@ -50,6 +52,8 @@ public class PublicPasswordController extends ControllerExceptionHandler impleme
 
     @Autowired
     private ITenantService tenantService;
+
+    
 
     @Override
     public ResponseEntity<AccessTokenResponseDto> getAccess(
@@ -187,12 +191,13 @@ public class PublicPasswordController extends ControllerExceptionHandler impleme
         log.info("Call generate password for tenant {}", generatePwdRequest);
         try {
             AccessKeyResponseDto accessKeyResponse = passwordService.generateRandomPassword(
-                    generatePwdRequest.getTenant()
-                    , generatePwdRequest.getTenantUrl()
-                    , generatePwdRequest.getEmail()
-                    , generatePwdRequest.getUserName()
-                    , generatePwdRequest.getFullName()
-                    , IEnumAuth.Types.OTP);
+                    requestContextService().getCurrentContext().getSenderTenant(),
+                    generatePwdRequest.getTenant(),
+                    generatePwdRequest.getTenantUrl(),
+                    generatePwdRequest.getEmail(),
+                    generatePwdRequest.getUserName(),
+                    generatePwdRequest.getFullName(),
+                    IEnumAuth.Types.OTP);
             //Never return the password
             log.info("password generated for {}/{} : {}", generatePwdRequest.getTenant(), generatePwdRequest.getUserName(), accessKeyResponse.getKey());
             return ResponseFactory.responseOk(accessKeyResponse.getLength());
@@ -208,12 +213,13 @@ public class PublicPasswordController extends ControllerExceptionHandler impleme
         log.info("Call generate password for tenant {}", generatePwdRequest);
         try {
             AccessKeyResponseDto accessKeyResponse = passwordService.generateRandomPassword(
-                    generatePwdRequest.getTenant()
-                    , generatePwdRequest.getTenantUrl()
-                    , generatePwdRequest.getEmail()
-                    , generatePwdRequest.getUserName()
-                    , generatePwdRequest.getFullName()
-                    , IEnumAuth.Types.QRC);
+                    requestContextService().getCurrentContext().getSenderTenant(),
+                    generatePwdRequest.getTenant(),
+                    generatePwdRequest.getTenantUrl(),
+                    generatePwdRequest.getEmail(),
+                    generatePwdRequest.getUserName(),
+                    generatePwdRequest.getFullName(),
+                    IEnumAuth.Types.QRC);
             //Never return the password
             log.info("password generated for {}/{} : {}", generatePwdRequest.getTenant(), generatePwdRequest.getUserName(), accessKeyResponse.getKey());
             return ResponseFactory.responseOk(accessKeyResponse.getLength());

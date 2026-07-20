@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.InjectCodeGen;
+import eu.isygoit.annotation.InjectCodeGenKms;
 import eu.isygoit.annotation.InjectRepository;
 import eu.isygoit.com.rest.service.tenancy.CodeAssignableTenantService;
 import eu.isygoit.constants.TenantConstants;
@@ -24,7 +25,7 @@ public class PasswordConfigService extends CodeAssignableTenantService<Long, Pas
     @Override
     public AppNextCode initCodeGenerator() {
         return AppNextCode.builder()
-                .tenant(TenantConstants.DEFAULT_TENANT_NAME)
+                .tenant(TenantConstants.SUPER_TENANT_NAME)
                 .entity(PasswordConfig.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("PWD")

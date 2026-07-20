@@ -43,7 +43,7 @@ public class AppParameterService extends CrudTenantService<Long, AppParameter, A
                 return optional.get().getValue();
             } else {
                 this.create(tenant, AppParameter.builder()
-                        .tenant(TenantConstants.DEFAULT_TENANT_NAME)
+                        .tenant(TenantConstants.SUPER_TENANT_NAME)
                         .name(name)
                         .description(name)
                         .value(defaultValue)

@@ -29,7 +29,7 @@ import java.util.UUID;
  * The type Mail message controller.
  */
 //http://localhost:8060/webjars/swagger-ui/index.html#/
-//http://localhost:8060/messaging/mms/private/account
+//http://localhost:8060/messaging/mms/private/mail
 @Slf4j
 @Validated
 @RestController
@@ -47,11 +47,20 @@ public class MailMessageController extends MappedCrudTenantController<UUID, Mail
     @Autowired
     private IMsgTemplateService templateService;
 
-    public ResponseEntity<?> sendMail(String senderTenantName, IEnumEmailTemplate.Types templateType, MailMessageDto mailMessage) {
+    public ResponseEntity<?> sendMail(IEnumEmailTemplate.Types templateType, MailMessageDto mailMessage) {
         try {
+            // Get tenant once and reuse
+            var senderTenant = mailMessage.getSenderTenant() != null
+                    ? mailMessage.getSenderTenant()
+                    : requestContextService().getCurrentContext().getSenderTenant();
+
             if (templateType != null) {
-                MessageCompositionDto messageComposition = templateService.composeMessageBody(senderTenantName, templateType,
-                        mailMessage.getVariablesAsMap(mailMessage.getVariables()));
+                MessageCompositionDto messageComposition = templateService.composeMessageBody(
+                        senderTenant,
+                        templateType,
+                        mailMessage.getVariablesAsMap(mailMessage.getVariables())
+                );
+
                 mailMessage.setBody(messageComposition.getContent());
                 if (StringUtils.hasText(messageComposition.getDefaultSender())) {
                     mailMessage.setFromAddr(messageComposition.getDefaultSender());
@@ -62,14 +71,21 @@ public class MailMessageController extends MappedCrudTenantController<UUID, Mail
             } else if (!StringUtils.hasText(mailMessage.getBody())) {
                 mailMessage.setBody(mailMessage.getVariables());
             }
-            mailMessageService.sendMail(senderTenantName,
+
+            mailMessageService.sendMail(
+                    senderTenant,
                     templateType,
                     mailMessageMapper.dtoToEntity(mailMessage)
                     , MailOptionsDto.builder()
                             .returnDelivered(mailMessage.isReturnDelivered())
                             .returnRead(mailMessage.isReturnRead())
                             .build()
-                    , mailMessageService.multiPartFileToResource(senderTenantName, mailMessage.getResources())); //convert multipart file list to resources
+                    //convert multipart file list to resources
+                    , mailMessageService.multiPartFileToResource(
+                            senderTenant,
+                            mailMessage.getResources())
+            );
+
             return ResponseFactory.responseOk();
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);

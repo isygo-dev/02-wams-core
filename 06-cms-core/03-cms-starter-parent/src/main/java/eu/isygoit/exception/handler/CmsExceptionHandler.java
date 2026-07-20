@@ -7,7 +7,6 @@ import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.service.IMsgService;
-import eu.isygoit.service.RequestContextService;
 import eu.isygoit.types.EmailSubjects;
 import eu.isygoit.types.MsgTemplateVariables;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +30,6 @@ public class CmsExceptionHandler extends ControllerExceptionHandler {
     private IMsgService msgService;
     @Autowired
     private AppParameterServiceApi appParameterService;
-    @Autowired
-    private RequestContextService requestContextService;
 
     public CmsExceptionHandler(AppProperties appProperties) {
         this.appProperties = appProperties;
@@ -49,7 +46,7 @@ public class CmsExceptionHandler extends ControllerExceptionHandler {
                 try {
                     MailMessageDto mailMessageDto = MailMessageDto.builder()
                             .subject(EmailSubjects.UNMANAGED_EXCEPTION)
-                            .tenant(TenantConstants.DEFAULT_TENANT_NAME)
+                            .senderTenant(TenantConstants.SUPER_TENANT_NAME)
                             .toAddr(techAdminEmail)
                             .fromAddr("noreply@" + TenantConstants.DEFAULT_TENANT_NAME.toLowerCase() + ".com")
                             .templateName(IEnumEmailTemplate.Types.UNMANAGED_EXCEPTION_TEMPLATE)

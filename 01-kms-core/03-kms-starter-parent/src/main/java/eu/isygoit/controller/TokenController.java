@@ -3,6 +3,7 @@ package eu.isygoit.controller;
 import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
+import eu.isygoit.com.rest.controller.impl.ControllerUtils;
 import eu.isygoit.dto.common.TokenRequestDto;
 import eu.isygoit.dto.common.TokenResponseDto;
 import eu.isygoit.enums.IEnumToken;
@@ -30,13 +31,12 @@ import java.util.Set;
 @RestController
 @InjectExceptionHandler(KmsExceptionHandler.class)
 @RequestMapping(path = "/api/v1/private/token")
-public class TokenController extends ControllerExceptionHandler implements TokenServiceApi {
+public class TokenController extends ControllerUtils implements TokenServiceApi {
 
     @Autowired
     private ITokenBuilderService tokenService;
 
-    @Autowired
-    private RequestContextService requestContextService;
+    
 
     @Override
     public ResponseEntity<TokenResponseDto> buildToken(
@@ -61,7 +61,7 @@ public class TokenController extends ControllerExceptionHandler implements Token
             String subject) {
         log.info("Call is Token Valid");
         try {
-            String tenant = requestContextService.getCurrentContext().getSenderTenant();
+            String tenant = requestContextService().getCurrentContext().getSenderTenant();
             return ResponseFactory.responseOk(tokenService.isTokenValid(tenant, audience, tokenType, token, subject));
         } catch (Throwable e) {
             log.error("<Error>: Invalid token: {} ", e);

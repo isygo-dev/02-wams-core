@@ -143,7 +143,7 @@ public class VEventController extends MappedCrudTenantController<Long, VCalendar
     @Override
     public ResponseEntity<VCalendarEventDto> saveEvent(VCalendarEventDto event) {
         try {
-            return ResponseFactory.responseOk(this.mapper().entityToDto(this.crudService().create(getRequestContextService().getCurrentContext().getSenderTenant(),
+            return ResponseFactory.responseOk(this.mapper().entityToDto(this.crudService().create(requestContextService().getCurrentContext().getSenderTenant(),
                     this.mapper().dtoToEntity(event))));
         } catch (Exception ex) {
             return getBackExceptionResponse(ex);
@@ -155,8 +155,8 @@ public class VEventController extends MappedCrudTenantController<Long, VCalendar
             Long id,
             VCalendarEventDto event) {
         try {
-            this.crudService().findById(getRequestContextService().getCurrentContext().getSenderTenant(), id);
-            return ResponseFactory.responseOk(this.mapper().entityToDto(this.crudService().update(getRequestContextService().getCurrentContext().getSenderTenant(),
+            this.crudService().findById(requestContextService().getCurrentContext().getSenderTenant(), id);
+            return ResponseFactory.responseOk(this.mapper().entityToDto(this.crudService().update(requestContextService().getCurrentContext().getSenderTenant(),
                     this.mapper().dtoToEntity(event))));
         } catch (Exception ex) {
             return getBackExceptionResponse(ex);

@@ -32,6 +32,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import java.io.File;
@@ -118,22 +119,25 @@ public class MsgTemplateService extends FileTenantService<Long, MsgTemplate, Msg
 
     @Transactional
     @Override
-    public MessageCompositionDto composeMessageBody(String tenant,
+    public MessageCompositionDto composeMessageBody(String senderTenant,
                                                     IEnumEmailTemplate.Types templateName,
                                                     Map<String, String> variables)
             throws IOException, TemplateException {
-        Optional<MsgTemplate> optional = templateRepository.findByTenantIgnoreCaseAndName(tenant, templateName);
+        if(StringUtils.isEmpty(senderTenant)) {
+            senderTenant = TenantConstants.DEFAULT_TENANT_NAME;
+        }
+        Optional<MsgTemplate> optional = templateRepository.findByTenantIgnoreCaseAndName(senderTenant, templateName);
         MsgTemplate template = null;
         if (optional.isPresent()) {
             template = optional.get();
         } else {
-            log.warn("Template {} is not present for tenant {}, we will create a default one!", templateName, tenant);
+            log.warn("Template {} is not present for senderTenant {}, we will create a default one!", templateName, senderTenant);
             Path filePath = Path.of(this.getUploadDirectory())
-                    .resolve(tenant)
+                    .resolve(senderTenant)
                     .resolve(MsgTemplate.class.getSimpleName().toLowerCase());
-            template = this.create(tenant,
+            template = this.create(senderTenant,
                     MsgTemplate.builder()
-                            .tenant(tenant)
+                            .tenant(senderTenant)
                             .name(templateName)
                             .description(templateName.meaning())
                             .path(filePath.toString())
@@ -147,7 +151,7 @@ public class MsgTemplateService extends FileTenantService<Long, MsgTemplate, Msg
                 template.setOriginalFileName(templateName.name().toLowerCase() + ".ftl");
                 template.setFileName(template.getCode().toLowerCase() + "." + FilenameUtils.getExtension(resource.getFilename()));
                 template.setExtension(FilenameUtils.getExtension(resource.getFilename()));
-                this.update(tenant, template);
+                this.update(senderTenant, template);
                 FileHelper.createDirectoryIfAbsent(filePath);
                 FileUtils.copyURLToFile(resource.getURL(), new File(filePath.toString(), template.getFileName()));
             } else {
@@ -160,7 +164,7 @@ public class MsgTemplateService extends FileTenantService<Long, MsgTemplate, Msg
         freemarkerConfig.getConfiguration().setTemplateLoader(templateLoader);
 
         try {
-            ResponseEntity<TenantDto> result = imsPublicService.getTenantByName(tenant);
+            ResponseEntity<TenantDto> result = imsPublicService.getTenantByName(senderTenant);
             if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
                 TenantDto tenantDto = result.getBody();
                 variables.put(MsgTemplateVariables.V_TENANT_URL, tenantDto.getUrl() != null ? tenantDto.getUrl() : "Missed");
@@ -183,7 +187,7 @@ public class MsgTemplateService extends FileTenantService<Long, MsgTemplate, Msg
             log.error("Remote feign call failed : ", e);
             //throw new RemoteCallFailedException(e);
         }
-        //get sender tenant variables
+        //get sender senderTenant variables
 
         return MessageCompositionDto.builder()
                 .content(FreeMarkerTemplateUtils.processTemplateIntoString(
@@ -197,7 +201,7 @@ public class MsgTemplateService extends FileTenantService<Long, MsgTemplate, Msg
     @Override
     public AppNextCode initCodeGenerator() {
         return AppNextCode.builder()
-                .tenant(TenantConstants.DEFAULT_TENANT_NAME)
+                .tenant(TenantConstants.SUPER_TENANT_NAME)
                 .entity(MsgTemplate.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("MTP")

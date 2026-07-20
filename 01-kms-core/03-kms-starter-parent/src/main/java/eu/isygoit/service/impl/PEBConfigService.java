@@ -24,7 +24,7 @@ public class PEBConfigService extends CodeAssignableTenantService<Long, PEBConfi
     @Override
     public AppNextCode initCodeGenerator() {
         return AppNextCode.builder()
-                .tenant(TenantConstants.DEFAULT_TENANT_NAME)
+                .tenant(TenantConstants.SUPER_TENANT_NAME)
                 .entity(PEBConfig.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("PEB")

@@ -123,7 +123,7 @@ public class VEventService extends CodeAssignableTenantService<Long, VCalendarEv
     @Override
     public AppNextCode initCodeGenerator() {
         return AppNextCode.builder()
-                .tenant(TenantConstants.DEFAULT_TENANT_NAME)
+                .tenant(TenantConstants.SUPER_TENANT_NAME)
                 .entity(VCalendarEvent.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("EVT")

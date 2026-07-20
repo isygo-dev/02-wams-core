@@ -90,19 +90,6 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     }
 
     @Override
-    public AppNextCode initCodeGenerator() {
-        return AppNextCode.builder()
-                .tenant(TenantConstants.DEFAULT_TENANT_NAME)
-                .entity(Account.class.getSimpleName())
-                .attribute(SchemaColumnConstantName.C_CODE)
-                .prefix("ACT")
-                .valueLength(6L)
-                .codeValue(1L)
-                .increment(1)
-                .build();
-    }
-
-    @Override
     public Account findByTenantAndUserName(String tenant /*senderTenant*/, String userName) {
         Optional<Account> optional = repository().findByTenantIgnoreCaseAndCodeIgnoreCase(tenant, userName);
         if (optional.isPresent()) {
@@ -400,35 +387,6 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     }
 
     @Override
-    public boolean resendCreationEmail(String tenant /*senderTenant*/, Long id) {
-        try {
-            Optional<Account> optional = this.findById(tenant, id);
-            if (optional.isPresent()) {
-                Account account = optional.get();
-                Optional<Tenant> optionalTenant = tenantService.findByName(account.getTenant());
-                ResponseEntity<Integer> result = kmsPasswordService.generatePwd(
-                        GeneratePwdRequestDto.builder()
-                                .tenant(account.getTenant())
-                                .tenantUrl(optionalTenant.map(Tenant::getUrl).orElse(null))
-                                .email(account.getEmail())
-                                .userName(account.getCode())
-                                .fullName(account.getFullName())
-                                .build());
-                if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
-                    return true;
-                } else {
-                    throw new SendEmailException("Account email reminder");
-                }
-            } else {
-                throw new AccountNotFoundException("with id " + id);
-            }
-        } catch (Exception e) {
-            log.error("Remote feign call failed : ", e);
-            throw new RemoteCallFailedException(e);
-        }
-    }
-
-    @Override
     public AccountGlobalStatDto getGlobalStatistics(IEnumSharedStatType.Types statType, RequestContextDto requestContext) {
         AccountGlobalStatDto.AccountGlobalStatDtoBuilder builder = AccountGlobalStatDto.builder();
         switch (statType) {
@@ -532,5 +490,69 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     //@Cacheable(cacheNames = SchemaTableConstantName.T_ACCOUNT)
     public List<MinAccountDto> getAllAccountsMin(String tenant /*senderTenant*/) {
         return minAccountMapper.listEntityToDto(this.findAll(tenant));
+    }
+
+    @Override
+    public boolean resendCreationEmail(String tenant, Long id) {
+        try {
+            Optional<Account> optionalAccount = this.findById(tenant, id);
+            if (optionalAccount.isPresent()) {
+                Account account = optionalAccount.get();
+                Optional<Tenant> optionalTenant = tenantService.findByName(account.getTenant());
+                ResponseEntity<Integer> result = kmsPasswordService.generatePwd(
+                        GeneratePwdRequestDto.builder()
+                                .tenant(account.getTenant())
+                                .tenantUrl(optionalTenant.map(Tenant::getUrl).orElse(null))
+                                .email(account.getEmail())
+                                .userName(account.getCode())
+                                .fullName(account.getFullName())
+                                .build());
+                if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
+                    return true;
+                } else {
+                    throw new SendEmailException("Account email reminder");
+                }
+            } else {
+                throw new AccountNotFoundException("with id " + id);
+            }
+        } catch (Exception e) {
+            log.error("Remote feign call failed : ", e);
+            throw new RemoteCallFailedException(e);
+        }
+    }
+
+    @Override
+    public Account afterCreate(String tenant, Account account) {
+        try {
+            Optional<Tenant> accountTenant = tenantService.findByName(account.getTenant());
+            ResponseEntity<Integer> result = kmsPasswordService.generatePwd(
+                    GeneratePwdRequestDto.builder()
+                            .tenant(account.getTenant())
+                            .tenantUrl(accountTenant.map(Tenant::getUrl).orElse(null))
+                            .email(account.getEmail())
+                            .userName(account.getCode())
+                            .fullName(account.getFullName())
+                            .build());
+            if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
+                return super.afterCreate(account);
+            }
+        } catch (Exception e) {
+            log.error("Remote feign call failed : ", e);
+            //throw new RemoteCallFailedException(e);
+        }
+        return super.afterCreate(account);
+    }
+
+    @Override
+    public AppNextCode initCodeGenerator() {
+        return AppNextCode.builder()
+                .tenant(TenantConstants.SUPER_TENANT_NAME)
+                .entity(Account.class.getSimpleName())
+                .attribute(SchemaColumnConstantName.C_CODE)
+                .prefix("ACT")
+                .valueLength(6L)
+                .codeValue(1L)
+                .increment(1)
+                .build();
     }
 }

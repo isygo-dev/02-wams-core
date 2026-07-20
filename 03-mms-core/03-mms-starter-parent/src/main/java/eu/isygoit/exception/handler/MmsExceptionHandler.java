@@ -7,7 +7,6 @@ import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
-import eu.isygoit.service.RequestContextService;
 import eu.isygoit.types.EmailSubjects;
 import eu.isygoit.types.MsgTemplateVariables;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +30,7 @@ public class MmsExceptionHandler extends ControllerExceptionHandler {
     private MailMessageServiceApi msgService;
     @Autowired
     private AppParameterServiceApi appParameterService;
-    @Autowired
-    private RequestContextService requestContextService;
+    
 
     public MmsExceptionHandler(AppProperties appProperties) {
         this.appProperties = appProperties;
@@ -50,7 +48,7 @@ public class MmsExceptionHandler extends ControllerExceptionHandler {
                 try {
                     mailMessageDto = MailMessageDto.builder()
                             .subject(EmailSubjects.UNMANAGED_EXCEPTION)
-                            .tenant(TenantConstants.DEFAULT_TENANT_NAME)
+                            .senderTenant(TenantConstants.SUPER_TENANT_NAME)
                             .toAddr(techAdminEmail)
                             .fromAddr("noreply@" + TenantConstants.DEFAULT_TENANT_NAME.toLowerCase() + ".com")
                             .templateName(IEnumEmailTemplate.Types.UNMANAGED_EXCEPTION_TEMPLATE)
@@ -63,7 +61,7 @@ public class MmsExceptionHandler extends ControllerExceptionHandler {
                     log.error("<Error>: send unmanaged exception email : {} ", e);
                 }
                 //Send the email message
-                msgService.sendMail(TenantConstants.SUPER_TENANT_NAME, mailMessageDto.getTemplateName(), mailMessageDto);
+                msgService.sendMail(mailMessageDto.getTemplateName(), mailMessageDto);
             } else {
                 log.error("<Error>: technical email not found");
             }

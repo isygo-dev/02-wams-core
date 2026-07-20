@@ -52,7 +52,7 @@ public class CustomerService extends ImageTenantService<Long, Customer, Customer
     @Override
     public AppNextCode initCodeGenerator() {
         return AppNextCode.builder()
-                .tenant(TenantConstants.DEFAULT_TENANT_NAME)
+                .tenant(TenantConstants.SUPER_TENANT_NAME)
                 .entity(Customer.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("CUS")

@@ -33,7 +33,7 @@ public class MailMessageDto extends AuditableIdAssignableDto<UUID> implements IE
     @JsonDeserialize(using = UuidDeserializer.class)
     private UUID id;
 
-    private String tenant;
+    private String senderTenant;
     private IEnumEmailTemplate.Types templateName;
     private boolean returnDelivered;
     private boolean returnRead;

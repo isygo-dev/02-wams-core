@@ -91,9 +91,9 @@ public class TenantController extends MappedCrudTenantController<Long, Tenant, T
 
     @Override
     public ResponseEntity<List<String>> getAllTenantNames() {
-        log.info("getAllTenantNames {}", getRequestContextService().getCurrentContext().getSenderTenant());
+        log.info("getAllTenantNames {}", requestContextService().getCurrentContext().getSenderTenant());
         try {
-            return ResponseFactory.responseOk(crudService().getAllTenantNames(getRequestContextService().getCurrentContext().getSenderTenant()));
+            return ResponseFactory.responseOk(crudService().getAllTenantNames(requestContextService().getCurrentContext().getSenderTenant()));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -102,9 +102,9 @@ public class TenantController extends MappedCrudTenantController<Long, Tenant, T
 
     @Override
     public ResponseEntity<TenantDto> getByName() {
-        log.info("get by name {}", getRequestContextService().getCurrentContext().getSenderTenant());
+        log.info("get by name {}", requestContextService().getCurrentContext().getSenderTenant());
         try {
-            Optional<Tenant> tenant = crudService().findByName(getRequestContextService().getCurrentContext().getSenderTenant());
+            Optional<Tenant> tenant = crudService().findByName(requestContextService().getCurrentContext().getSenderTenant());
             return ResponseFactory.responseOk(mapper().entityToDto(tenant.orElse(null)));
         } catch (Throwable e) {
             log.error("<Error>: get by name : {} ", e);
@@ -116,7 +116,7 @@ public class TenantController extends MappedCrudTenantController<Long, Tenant, T
     public ResponseEntity<TenantDto> updateSocialLink(Long id, String social, String link) {
         log.info("update Social Link ");
         try {
-            return ResponseFactory.responseOk(mapper().entityToDto(crudService().updateSocialLink(getRequestContextService().getCurrentContext().getSenderTenant(), id, social, link)));
+            return ResponseFactory.responseOk(mapper().entityToDto(crudService().updateSocialLink(requestContextService().getCurrentContext().getSenderTenant(), id, social, link)));
         } catch (Throwable e) {
             log.error("<Error>: update Social Link : {} ", e);
             return getBackExceptionResponse(e);

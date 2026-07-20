@@ -283,7 +283,7 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
     @Override
     public NextCodeModel initCodeGenerator() {
         return AppNextCode.builder()
-                .tenant(TenantConstants.DEFAULT_TENANT_NAME)
+                .tenant(TenantConstants.SUPER_TENANT_NAME)
                 .entity(LinkedFile.class.getSimpleName())
                 .attribute(SchemaColumnConstantName.C_CODE)
                 .prefix("FLE")

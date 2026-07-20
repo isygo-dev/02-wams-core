@@ -5,6 +5,7 @@ import eu.isygoit.annotation.InjectRepository;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.service.cassandra.CassandraCrudTenantService;
 import eu.isygoit.config.AppProperties;
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.data.MailOptionsDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.exception.StoreFileException;
@@ -66,7 +67,11 @@ public class MailMessageService extends CassandraCrudTenantService<UUID, MailMes
     }
 
     @Override
-    public boolean sendMail(CustomJavaMailSender mailSender, MailMessage mailMessageData, boolean returnDelivered, boolean returnRead, Map<String, File> resources) {
+    public boolean sendMail(CustomJavaMailSender mailSender,
+                            MailMessage mailMessageData,
+                            boolean returnDelivered,
+                            boolean returnRead,
+                            Map<String, File> resources) {
         try {
             MimeMessage mail = mailSender.createMimeMessage();
             mail.setHeader("Content-Type", IMailMessageService.encodingOptions);
@@ -140,8 +145,15 @@ public class MailMessageService extends CassandraCrudTenantService<UUID, MailMes
     }
 
     @Override
-    public boolean sendMail(String tenant, IEnumEmailTemplate.Types templateType, MailMessage mailMessage, MailOptionsDto options, Map<String, File> resources) {
-        CustomJavaMailSender mailSender = senderFactory.getSender(tenant, templateType, mailMessage.getSenderConfigId());
+    public boolean sendMail(String senderTenant,
+                            IEnumEmailTemplate.Types templateType,
+                            MailMessage mailMessage,
+                            MailOptionsDto options,
+                            Map<String, File> resources) {
+        if(StringUtils.isEmpty(senderTenant)) {
+            senderTenant = TenantConstants.DEFAULT_TENANT_NAME;
+        }
+        CustomJavaMailSender mailSender = senderFactory.getSender(senderTenant, templateType, mailMessage.getSenderConfigId());
         boolean result = this.sendMail(mailSender,
                 mailMessage
                 , options.isReturnDelivered()
@@ -153,14 +165,14 @@ public class MailMessageService extends CassandraCrudTenantService<UUID, MailMes
     }
 
     @Override
-    public Map<String, File> multiPartFileToResource(String senderTenantName, List<MultipartFile> resources) {
+    public Map<String, File> multiPartFileToResource(String senderTenant, List<MultipartFile> resources) {
         if (CollectionUtils.isEmpty(resources)) {
             return null;
         }
 
         return resources.stream().map(multipartFile -> {
             File file = new File(Path.of(appProperties.getUploadDirectory())
-                    .resolve(senderTenantName)
+                    .resolve(senderTenant)
                     .resolve("resources")
                     .resolve(multipartFile.getOriginalFilename()).toUri());
             try {
@@ -171,7 +183,7 @@ public class MailMessageService extends CassandraCrudTenantService<UUID, MailMes
             }
         }).collect(Collectors.toMap(multipartFile -> multipartFile.getOriginalFilename(), multipartFile
                 -> new File(Path.of(appProperties.getUploadDirectory())
-                .resolve(senderTenantName)
+                .resolve(senderTenant)
                 .resolve("resources")
                 .resolve(multipartFile.getOriginalFilename()).toUri())));
     }
