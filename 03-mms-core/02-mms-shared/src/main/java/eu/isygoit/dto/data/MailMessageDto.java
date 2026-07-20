@@ -30,8 +30,8 @@ import java.util.UUID;
 @SuperBuilder
 public class MailMessageDto extends AuditableIdAssignableDto<UUID> implements IExchangeObjectDto {
 
-    public static final String KAFKA = "kafka";
-    public static final String REST = "rest";
+    public static final String THROUGH_KAFKA = "kafka";
+    public static final String THROUGH_REST = "rest";
 
     @JsonDeserialize(using = UuidDeserializer.class)
     private UUID id;
