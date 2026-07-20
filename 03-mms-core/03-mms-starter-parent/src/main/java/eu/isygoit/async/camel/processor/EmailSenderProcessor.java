@@ -24,7 +24,10 @@ public class EmailSenderProcessor extends AbstractCamelProcessor<MailMessageDto>
     public void performProcessor(Exchange exchange, MailMessageDto mailMessageDto) throws Exception {
         exchange.getIn().setHeader("toEmail", mailMessageDto.getToAddr());
         exchange.getIn().setHeader("subject", mailMessageDto.getSubject());
+
+        //This will use internally the api MailMessageServiceApi::sendMail
         this.messageService.sendMail(mailMessageDto.getTemplateName(), mailMessageDto);
+
         exchange.getIn().setHeader(AbstractCamelProcessor.RETURN_HEADER, true);
     }
 }
