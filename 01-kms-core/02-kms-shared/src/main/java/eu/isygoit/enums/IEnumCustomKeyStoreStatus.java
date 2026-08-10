@@ -1,5 +1,7 @@
 package eu.isygoit.enums;
 
+import eu.isygoit.exception.UnknownCustomKeyStoreStatusException;
+
 /**
  * WAMS KMS Custom Key Store Status alignment.
  * <p>
@@ -56,7 +58,7 @@ public interface IEnumCustomKeyStoreStatus {
                     return status;
                 }
             }
-            throw new IllegalArgumentException("Unknown custom key store status: " + value);
+            throw new UnknownCustomKeyStoreStatusException("Unknown custom key store status: " + value);
         }
 
         @Override

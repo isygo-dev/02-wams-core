@@ -20,6 +20,7 @@ import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.NextCodeDto;
 import eu.isygoit.dto.common.PaginatedResponseDto;
+import eu.isygoit.exception.GenerationFailedException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsAppNextCodeService;
 import eu.isygoit.remote.kms.KmsIncrementalKeyService;
@@ -288,7 +289,7 @@ public class IncrementalKeyView extends ManagementCompositeVerticalView {
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
             return response.getBody();
         }
-        throw new RuntimeException("Generation failed with status: " + response.getStatusCode());
+        throw new GenerationFailedException("Generation failed with status: " + response.getStatusCode());
     }
 
     private void openSubscribeDialog() {

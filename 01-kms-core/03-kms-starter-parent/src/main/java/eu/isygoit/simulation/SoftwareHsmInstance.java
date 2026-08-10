@@ -2,6 +2,7 @@ package eu.isygoit.simulation;
 
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.enums.IEnumKeySpec;
+import eu.isygoit.exception.*;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -54,7 +55,7 @@ public class SoftwareHsmInstance {
     }
 
     public SecretKey generateKey(String algorithm, int keySize, String keyId) throws Exception {
-        if (!connected) throw new IllegalStateException("HSM not connected");
+        if (!connected) throw new HsmNotConnectedException("HSM not connected");
         KeyGenerator kg = KeyGenerator.getInstance(algorithm);
         kg.init(keySize);
         SecretKey key = kg.generateKey();
@@ -64,7 +65,7 @@ public class SoftwareHsmInstance {
 
     public byte[] encrypt(String keyId, byte[] plaintext, Map<String, String> context) throws Exception {
         SecretKey key = symmetricKeys.get(keyId);
-        if (key == null) throw new IllegalArgumentException("Key not found: " + keyId);
+        if (key == null) throw new KeyNotFoundInHsmException("Key not found: " + keyId);
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
         byte[] iv = new byte[12];
         SecureRandom random = new SecureRandom();
@@ -81,7 +82,7 @@ public class SoftwareHsmInstance {
 
     public byte[] decrypt(String keyId, byte[] ciphertextWithIv, Map<String, String> context) throws Exception {
         SecretKey key = symmetricKeys.get(keyId);
-        if (key == null) throw new IllegalArgumentException("Key not found: " + keyId);
+        if (key == null) throw new KeyNotFoundInHsmException("Key not found: " + keyId);
         byte[] iv = Arrays.copyOfRange(ciphertextWithIv, 0, 12);
         byte[] ciphertext = Arrays.copyOfRange(ciphertextWithIv, 12, ciphertextWithIv.length);
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
@@ -92,7 +93,7 @@ public class SoftwareHsmInstance {
 
     public byte[] sign(String keyId, byte[] message, String algorithm) throws Exception {
         KeyPair kp = asymmetricKeys.get(keyId);
-        if (kp == null) throw new IllegalArgumentException("Private key not found");
+        if (kp == null) throw new PrivateKeyNotFoundException("Private key not found");
         Signature sig = Signature.getInstance(algorithm);
         sig.initSign(kp.getPrivate());
         sig.update(message);
@@ -101,7 +102,7 @@ public class SoftwareHsmInstance {
 
     public boolean verify(String keyId, byte[] message, byte[] signature, String algorithm) throws Exception {
         KeyPair kp = asymmetricKeys.get(keyId);
-        if (kp == null) throw new IllegalArgumentException("Public key not found");
+        if (kp == null) throw new PublicKeyNotFoundException("Public key not found");
         Signature sig = Signature.getInstance(algorithm);
         sig.initVerify(kp.getPublic());
         sig.update(message);
@@ -131,7 +132,7 @@ public class SoftwareHsmInstance {
             kpg = KeyPairGenerator.getInstance("EC");
             kpg.initialize(new ECGenParameterSpec("secp256r1"));
         } else {
-            throw new IllegalArgumentException("Unsupported key pair spec");
+            throw new UnsupportedKeyPairSpecException("Unsupported key pair spec");
         }
         KeyPair kp = kpg.generateKeyPair();
         byte[] privateKeyEncrypted = encrypt(keyId, kp.getPrivate().getEncoded(), context);

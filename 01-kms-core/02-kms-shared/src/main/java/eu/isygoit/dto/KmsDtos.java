@@ -6,6 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import eu.isygoit.annotation.ValidCreateCustomKeyStoreRequest;
 import eu.isygoit.dto.data.KeyPairMaterial;
 import eu.isygoit.enums.*;
+import eu.isygoit.exception.InvalidReasonException;
+import eu.isygoit.exception.InvalidRotationPeriodException;
+import eu.isygoit.exception.MissingEnabledRotationException;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -699,7 +702,7 @@ public final class KmsDtos {
 
         public static UpdateKeyRotationRequest withCustomPeriod(Integer periodDays) {
             if (periodDays < 90 || periodDays > 365) {
-                throw new IllegalArgumentException("Rotation period must be between 90 and 365 days");
+                throw new InvalidRotationPeriodException("Rotation period must be between 90 and 365 days");
             }
             return UpdateKeyRotationRequest.builder()
                     .enableRotation(true)
@@ -709,12 +712,12 @@ public final class KmsDtos {
         }
 
         public void validate() {
-            if (enableRotation == null) throw new IllegalArgumentException("enableRotation is required");
+            if (enableRotation == null) throw new MissingEnabledRotationException("enableRotation is required");
             if (enableRotation && rotationPeriodInDays != null && (rotationPeriodInDays < 90 || rotationPeriodInDays > 365)) {
-                throw new IllegalArgumentException("Rotation period must be between 90 and 365 days");
+                throw new InvalidRotationPeriodException("Rotation period must be between 90 and 365 days");
             }
             if (reason != null && reason.length() > 512)
-                throw new IllegalArgumentException("Reason too long (max 512)");
+                throw new InvalidReasonException("Reason too long (max 512)");
         }
 
         public Integer getEffectiveRotationPeriod() {

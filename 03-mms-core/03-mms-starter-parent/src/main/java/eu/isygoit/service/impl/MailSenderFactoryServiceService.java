@@ -69,7 +69,7 @@ public class MailSenderFactoryServiceService implements IMailSenderFactoryServic
      * @param tenant the tenant
      * @return the sender
      */
-    public MailSender getSender(String tenant /*senderTenant*/) {
+    public MailSender getSender(String tenant) {
         if (mailSenders.containsKey(tenant)) {
             return mailSenders.get(tenant);
         }

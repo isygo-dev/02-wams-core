@@ -2,6 +2,8 @@ package eu.isygoit.simulation;
 
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.enums.IEnumKeySpec;
+import eu.isygoit.exception.KeyNotFoundInHsmException;
+import eu.isygoit.exception.UnsupportedKeyPairSpecException;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -63,7 +65,7 @@ public class ExternalKeyProxyInstance {
 
     public byte[] encrypt(String keyId, byte[] plaintext, Map<String, String> context) throws Exception {
         byte[] keyBytes = remoteKeys.get(keyId);
-        if (keyBytes == null) throw new IllegalArgumentException("Key not found");
+        if (keyBytes == null) throw new KeyNotFoundInHsmException("Key not found");
         SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
         byte[] iv = new byte[12];
@@ -80,7 +82,7 @@ public class ExternalKeyProxyInstance {
 
     public byte[] decrypt(String keyId, byte[] ciphertextWithIv, Map<String, String> context) throws Exception {
         byte[] keyBytes = remoteKeys.get(keyId);
-        if (keyBytes == null) throw new IllegalArgumentException("Key not found");
+        if (keyBytes == null) throw new KeyNotFoundInHsmException("Key not found");
         SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
         byte[] iv = Arrays.copyOfRange(ciphertextWithIv, 0, 12);
         byte[] ciphertext = Arrays.copyOfRange(ciphertextWithIv, 12, ciphertextWithIv.length);
@@ -93,7 +95,7 @@ public class ExternalKeyProxyInstance {
     public byte[] sign(String keyId, byte[] message, String algorithm) throws Exception {
         // For simulation, use HMAC-SHA256
         byte[] keyBytes = remoteKeys.get(keyId);
-        if (keyBytes == null) throw new IllegalArgumentException("Key not found");
+        if (keyBytes == null) throw new KeyNotFoundInHsmException("Key not found");
         Mac mac = Mac.getInstance("HmacSHA256");
         SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "HmacSHA256");
         mac.init(keySpec);
@@ -128,7 +130,7 @@ public class ExternalKeyProxyInstance {
             kpg = KeyPairGenerator.getInstance("EC");
             kpg.initialize(new ECGenParameterSpec("secp256r1"));
         } else {
-            throw new IllegalArgumentException("Unsupported key pair spec");
+            throw new UnsupportedKeyPairSpecException("Unsupported key pair spec");
         }
         KeyPair kp = kpg.generateKeyPair();
         byte[] privateKeyEncrypted = encrypt(keyId, kp.getPrivate().getEncoded(), context);

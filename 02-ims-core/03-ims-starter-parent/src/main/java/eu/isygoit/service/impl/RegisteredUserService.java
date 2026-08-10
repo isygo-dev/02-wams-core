@@ -7,7 +7,9 @@ import eu.isygoit.com.rest.service.tenancy.CrudTenantService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.dto.request.CreateAccountFromRegisteredRequestDto;
 import eu.isygoit.enums.IEnumRegistrationStatus;
+import eu.isygoit.exception.AccountAlreadyExistsException;
 import eu.isygoit.exception.RegisteredUserNotFoundException;
+import eu.isygoit.exception.TenantAlreadyExistsException;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.AccountDetails;
 import eu.isygoit.model.RegisteredUser;
@@ -19,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 /**
  * The type Account service.
@@ -50,6 +54,11 @@ public class RegisteredUserService extends CrudTenantService<Long, RegisteredUse
         RegisteredUser registeredUser = repository().findByEmail(request.getEmail())
                 .orElseThrow(() -> new RegisteredUserNotFoundException("Registered user not found with email: " + request.getEmail()));
 
+        Optional<Tenant> exitingTenant = tenantService.findByName(registeredUser.getOrganisation());
+        if (exitingTenant.isPresent()) {
+            throw new TenantAlreadyExistsException("with name " + registeredUser.getOrganisation());
+        }
+
         if (request.getTenantInfo() != null) {
             Tenant newTenant = Tenant.builder()
                     .name(registeredUser.getOrganisation())
@@ -62,6 +71,11 @@ public class RegisteredUserService extends CrudTenantService<Long, RegisteredUse
                     .build();
 
             tenantService.create(senderTenant, newTenant);
+        }
+
+        Optional<Account> exitingAccount = accountService.findByEmail(registeredUser.getOrganisation(), registeredUser.getEmail());
+        if (exitingAccount.isPresent()) {
+            throw new AccountAlreadyExistsException("with email " + registeredUser.getEmail());
         }
 
         if (request.getAccountInfo() != null) {

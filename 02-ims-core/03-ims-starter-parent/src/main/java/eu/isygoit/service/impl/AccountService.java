@@ -78,6 +78,8 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     private MmsChatMessageService mmsChatMessageService;
     @Autowired
     private IRoleInfoService roleInfoService;
+    @Autowired
+    private AccountRepository accountRepository;
 
     /**
      * Instantiates a new Account service.
@@ -294,6 +296,11 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
                             .build();
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<Account> findByEmail(String tenant, String email) {
+        return accountRepository.findByTenantIgnoreCaseAndEmailIgnoreCase(tenant, email);
     }
 
     @Override

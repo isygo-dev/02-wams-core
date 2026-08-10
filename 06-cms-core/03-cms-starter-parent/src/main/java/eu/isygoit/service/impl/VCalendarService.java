@@ -9,6 +9,7 @@ import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.exception.CalendarAlreadyExistsException;
 import eu.isygoit.exception.EmptyPathException;
+import eu.isygoit.exception.FileReadException;
 import eu.isygoit.exception.ResourceNotFoundException;
 import eu.isygoit.jasycal.ICalendarBuilder;
 import eu.isygoit.model.AppNextCode;
@@ -79,7 +80,7 @@ public class VCalendarService extends CodeAssignableTenantService<Long, VCalenda
     public Resource download(String tenant /*senderTenant*/, String name) throws IOException {
         Optional<VCalendar> vCalendar = vCalendarRepository.findByTenantIgnoreCaseAndName(tenant, name);
         if (!vCalendar.isPresent()) {
-            throw new RuntimeException("Could not read the file!");
+            throw new FileReadException("Could not read the file!");
         } else {
             if (StringUtils.hasText(vCalendar.get().getIcsPath())) {
                 Resource resource = new UrlResource(Path.of(vCalendar.get().getIcsPath()).toUri());

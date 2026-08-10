@@ -1,5 +1,7 @@
 package eu.isygoit.enums;
 
+import eu.isygoit.exception.UnsupportedEncryptionAlgorithmException;
+
 /**
  * Supported encryption algorithms for KMS.
  * Maps KMS algorithm names to Java Cipher transformations.
@@ -34,7 +36,7 @@ public enum IEnumEncryptionAlgorithm {
                 return algo;
             }
         }
-        throw new IllegalArgumentException("Unsupported encryption algorithm: " + kmsName);
+        throw new UnsupportedEncryptionAlgorithmException("Unsupported encryption algorithm: " + kmsName);
     }
 
     public String getKmsName() {

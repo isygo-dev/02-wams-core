@@ -1,11 +1,12 @@
 package eu.isygoit.enums;
 
+import eu.isygoit.exception.UnsupportedMacAlgorithmException;
+
 /**
  * Supported MAC (Message Authentication Code) algorithms for KMS.
  * Maps KMS algorithm names to Java Security algorithm names and key sizes.
  */
 public enum IEnumMacAlgorithm {
-
     HMAC_SHA_224("HMAC_SHA_224", "HmacSHA224", 224),
     HMAC_SHA_256("HMAC_SHA_256", "HmacSHA256", 256),
     HMAC_SHA_384("HMAC_SHA_384", "HmacSHA384", 384),
@@ -34,7 +35,7 @@ public enum IEnumMacAlgorithm {
                 return algo;
             }
         }
-        throw new IllegalArgumentException("Unsupported MAC algorithm: " + kmsName);
+        throw new UnsupportedMacAlgorithmException("Unsupported MAC algorithm: " + kmsName);
     }
 
     public String getKmsName() {

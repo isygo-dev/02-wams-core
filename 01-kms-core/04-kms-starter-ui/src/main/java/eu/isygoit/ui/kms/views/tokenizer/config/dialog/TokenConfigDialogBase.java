@@ -22,6 +22,8 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.enums.IEnumToken;
+import eu.isygoit.exception.InvalidUnitException;
+import eu.isygoit.exception.UnsupportedAsymmetricAlgorithmException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
@@ -438,7 +440,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
                     jcaAlgorithm = "Ed25519";
                     break;
                 default:
-                    throw new IllegalArgumentException("Unsupported asymmetric algorithm: " + algorithm);
+                    throw new UnsupportedAsymmetricAlgorithmException("Unsupported asymmetric algorithm: " + algorithm);
             }
 
             KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(jcaAlgorithm);
@@ -557,7 +559,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         } else if (I18n.t("kms.dialog.token.lifetime.unit.days").equals(unit)) {
             ms = value * 24 * 60 * 60 * 1000;
         } else {
-            throw new IllegalStateException("Unknown unit: " + unit);
+            throw new InvalidUnitException("Unknown unit: " + unit);
         }
         return ms;
     }

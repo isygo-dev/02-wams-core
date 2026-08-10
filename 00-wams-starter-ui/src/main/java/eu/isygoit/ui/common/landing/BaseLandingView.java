@@ -1,7 +1,6 @@
 package eu.isygoit.ui.common.landing;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -15,20 +14,22 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.layout.BaseMainLayout;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 /**
  * Abstract base class for landing pages that display modules as interactive cards.
  *
- * <p>This class handles all the UI rendering for a module-based landing page,
- * including hero section with floating decorations, cards container with module
- * cards, and footer. Subclasses must implement {@link #getModules()} to provide
- * the list of modules to display.</p>
+ * <p>This class handles all the UI rendering for a module-based landing page:
+ * a hero section, a cards container with one card per module, and a footer.
+ * Subclasses must implement {@link #getModules()} to provide the list of
+ * modules to display.</p>
  * <p>
  * If only one module is returned by {@link #getModules()}, the view skips the
  * landing page entirely and goes straight to the same redirect-with-progress
@@ -42,18 +43,9 @@ import java.util.stream.IntStream;
  */
 public abstract class BaseLandingView extends BaseMainLayout {
 
-    /**
-     * Decor position configuration for floating icons.
-     */
-    private static final String[][] DECOR_POSITIONS = {
-            {"-80px", "10%", "0s"},
-            {"80px", "10%", "1s"},
-            {"240px", "10%", "2s"},
-            {"-60px", "50%", "2s"},
-            {"70px", "50%", "0.5s"},
-            {"190px", "10%", "1s"}
-    };
     private final transient UI ui;
+    private final List<CardEntry> cardEntries = new ArrayList<>();
+    private Div emptyState;
 
     /**
      * Constructor initializes the landing page with module-based content.
@@ -169,165 +161,159 @@ public abstract class BaseLandingView extends BaseMainLayout {
         main.setPadding(false);
         main.setSpacing(false);
         main.setSizeFull();
-        main.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+        // Top-aligned rather than centered: centering a flex column whose
+        // content (hero + card grid + footer) is taller than the viewport
+        // pushes the overflow symmetrically above the box as well as below
+        // it — since the page can't scroll to a negative position, the top
+        // portion (hero + first card row) becomes permanently unreachable.
+        // Starting from the top means any overflow spills past the bottom
+        // instead, where normal scrolling already reaches it, regardless of
+        // viewport size or module count.
+        main.setJustifyContentMode(FlexComponent.JustifyContentMode.START);
         main.setAlignItems(FlexComponent.Alignment.CENTER);
         main.addClassName("wams-landing-main");
 
         main.add(buildHero());
+        main.add(buildSearchField());
         main.add(buildCardsContainer());
         main.add(buildFooter());
 
         return main;
     }
 
-    // ─── MAIN CONTENT ────────────────────────────────────────────────────────
+    // ─── AREA FILTER ─────────────────────────────────────────────────────────
+
+    private TextField buildSearchField() {
+        TextField searchField = new TextField();
+        searchField.addClassName("wams-landing-search");
+        searchField.setPlaceholder(I18n.t("common.landing.search.placeholder"));
+        searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
+        searchField.setClearButtonVisible(true);
+        searchField.setValueChangeMode(ValueChangeMode.EAGER);
+        searchField.addValueChangeListener(e -> filterCards(e.getValue()));
+        return searchField;
+    }
+
+    private void filterCards(String query) {
+        String needle = query == null ? "" : query.trim().toLowerCase();
+        boolean anyVisible = false;
+        for (CardEntry entry : cardEntries) {
+            boolean matches = needle.isEmpty() || entry.searchText().contains(needle);
+            entry.card().setVisible(matches);
+            anyVisible = anyVisible || matches;
+        }
+        if (emptyState != null) {
+            emptyState.setVisible(!anyVisible);
+        }
+    }
+
+    private Div buildEmptyState() {
+        Div empty = new Div();
+        empty.addClassName("wams-landing-empty");
+        empty.setVisible(false);
+
+        Icon icon = VaadinIcon.SEARCH_MINUS.create();
+        icon.setSize("32px");
+        icon.addClassName("wams-landing-empty__icon");
+
+        H2 title = new H2(I18n.t("common.landing.search.empty.title"));
+        title.addClassName("wams-landing-empty__title");
+
+        Paragraph description = new Paragraph(I18n.t("common.landing.search.empty.description"));
+        description.addClassName(LumoUtility.TextColor.SECONDARY);
+
+        empty.add(icon, title, description);
+        return empty;
+    }
+
+    private String buildSearchText(ModuleInfo module) {
+        String i18nPrefix = module.getI18nPrefix();
+        return String.join(" ",
+                module.shortName(),
+                module.moduleKey(),
+                I18n.t(i18nPrefix + ".title"),
+                I18n.t(i18nPrefix + ".description")
+        ).toLowerCase();
+    }
+
+    // ─── HERO SECTION ──────────────────────────────────────────────────────
 
     private Div buildHero() {
         Div hero = new Div();
         hero.addClassName("wams-hero-section");
 
-        List<ModuleInfo> modules = getModules();
-
-        // Create floating decor for each module
-        IntStream.range(0, Math.min(modules.size(), DECOR_POSITIONS.length))
-                .forEach(i -> {
-                    ModuleInfo module = modules.get(i);
-                    String[] pos = DECOR_POSITIONS[i % DECOR_POSITIONS.length];
-                    hero.add(createFloatingDecor(
-                            module.icon(),
-                            module.moduleKey(),
-                            pos[0],
-                            pos[1],
-                            pos[2]
-                    ));
-                });
-
-        Div titleContainer = new Div();
-        titleContainer.addClassName("wams-title-container");
-
-        H1 headline = new H1();
+        H1 headline = new H1(I18n.t("common.landing.title.main"));
         headline.addClassName("wams-hero-title");
-        headline.add(new Text(I18n.t("common.landing.title.main")));
-
-        Div underline = new Div();
-        underline.addClassName("wams-hero-underline");
 
         Paragraph subtitle = new Paragraph(I18n.t("common.landing.subtitle"));
         subtitle.addClassName(LumoUtility.TextColor.SECONDARY);
         subtitle.addClassName("wams-subtitle-text");
 
-        Div scrollIndicator = new Div();
-        scrollIndicator.addClassName("wams-scroll-indicator");
-
-        Icon scrollIcon = VaadinIcon.ANGLE_DOUBLE_DOWN.create();
-        scrollIcon.setSize("24px");
-        scrollIcon.setColor("var(--lumo-secondary-text-color)");
-        scrollIndicator.add(scrollIcon);
-        scrollIndicator.addClickListener(e -> UI.getCurrent().getPage().executeJs(
-                "document.querySelector('.wams-cards-container').scrollIntoView({ behavior: 'smooth', block: 'start' });"
-        ));
-
-        titleContainer.add(headline);
-        hero.add(titleContainer, underline, subtitle, scrollIndicator);
-
+        hero.add(headline, subtitle);
         return hero;
     }
 
-    // ─── HERO SECTION ──────────────────────────────────────────────────────
+    // ─── CARDS CONTAINER ──────────────────────────────────────────────────
 
-    private Div createFloatingDecor(VaadinIcon icon, String moduleKey, String offsetX, String offsetY, String delay) {
-        Div decor = new Div();
-        decor.addClassName("wams-floating-decor");
-        decor.addClassName("wams-module-" + moduleKey);
-        decor.getStyle()
-                .set("left", offsetX)
-                .set("top", offsetY)
-                .set("--wams-delay", delay);
-
-        Icon decorIcon = icon.create();
-        decorIcon.setSize("40px");
-        decor.add(decorIcon);
-
-        return decor;
-    }
-
-    private HorizontalLayout buildCardsContainer() {
+    private Component buildCardsContainer() {
         HorizontalLayout container = new HorizontalLayout();
         container.addClassName("wams-cards-container");
         container.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         container.setAlignItems(FlexComponent.Alignment.STRETCH);
         container.setSpacing(true);
 
-        List<ModuleInfo> modules = getModules();
+        getModules().forEach(module -> {
+            Div card = createCard(module);
+            container.add(card);
+            cardEntries.add(new CardEntry(card, buildSearchText(module)));
+        });
 
-        IntStream.range(0, modules.size())
-                .forEach(i -> {
-                    ModuleInfo module = modules.get(i);
-                    String delay = (0.1 * (i + 1)) + "s";
-                    container.add(createCard(module, delay));
-                });
+        emptyState = buildEmptyState();
 
-        return container;
+        VerticalLayout wrapper = new VerticalLayout(container, emptyState);
+        wrapper.setPadding(false);
+        wrapper.setSpacing(false);
+        wrapper.setWidthFull();
+        wrapper.setAlignItems(FlexComponent.Alignment.CENTER);
+        return wrapper;
     }
 
-    // ─── CARDS CONTAINER ──────────────────────────────────────────────────
-
-    private Div createCard(ModuleInfo module, String delay) {
+    private Div createCard(ModuleInfo module) {
         String i18nPrefix = module.getI18nPrefix();
 
         Div card = new Div();
         card.addClassName("wams-domain-card");
         card.addClassName(module.getModuleClass());
-        card.getStyle().set("--wams-delay", delay);
 
-        // Accent bar
-        Div accentBar = new Div();
-        accentBar.addClassName("wams-accent-bar");
-        card.add(accentBar);
-
-        // Card content
         VerticalLayout content = new VerticalLayout();
         content.setPadding(false);
         content.setSpacing(false);
         content.setAlignItems(FlexComponent.Alignment.CENTER);
         content.addClassName("wams-domain-card-content");
 
-        // Icon
         Icon cardIcon = module.icon().create();
         cardIcon.setSize("28px");
         cardIcon.addClassName("wams-card-icon");
 
-        // Badge
         Div badge = new Div(module.shortName());
         badge.addClassName("wams-card-badge");
 
-        // Title
         H2 cardTitle = new H2(I18n.t(i18nPrefix + ".title"));
         cardTitle.addClassName("wams-card-title");
 
-        // Description
         Paragraph desc = new Paragraph(I18n.t(i18nPrefix + ".description"));
         desc.addClassName(LumoUtility.TextColor.SECONDARY);
         desc.addClassName("wams-card-description");
 
-        // Features
         Div featuresContainer = buildFeaturesContainer(i18nPrefix);
 
-        // Enter button
         Button enterBtn = new Button(I18n.t(i18nPrefix + ".button"), VaadinIcon.ARROW_RIGHT.create());
         enterBtn.addClassName("wams-enter-button");
-        enterBtn.addClassName("wams-enter-button--accent");
-        enterBtn.addClassName(LumoUtility.Width.FULL);
-        enterBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        enterBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         enterBtn.addClickListener(e -> redirectToModule(module));
 
-        // Card click handler
-        card.addClickListener(e -> {
-            triggerRippleEffect(card, e.getClientX(), e.getClientY());
-            redirectToModule(module);
-        });
+        card.addClickListener(e -> redirectToModule(module));
 
-        // Assemble content
         content.add(cardIcon, badge, cardTitle, desc, featuresContainer, enterBtn);
         card.add(content);
 
@@ -345,53 +331,21 @@ public abstract class BaseLandingView extends BaseMainLayout {
         Div featuresContainer = new Div();
         featuresContainer.addClassName("wams-features-container");
 
-        // Try to load up to 3 features
-        String[] featureKeys = {".feature.1", ".feature.2", ".feature.3"};
-        boolean hasFeatures = false;
-
-        for (String key : featureKeys) {
+        for (String key : new String[]{".feature.1", ".feature.2", ".feature.3"}) {
             String fullKey = i18nPrefix + key;
             String featureText = I18n.t(fullKey);
-            // Check if the translation exists (not the key itself)
+            // Skip keys with no translation (I18n.t returns the key itself).
             if (!featureText.equals(fullKey)) {
                 Div chip = new Div(featureText);
                 chip.addClassName("wams-feature-chip");
                 featuresContainer.add(chip);
-                hasFeatures = true;
             }
-        }
-
-        // If no features were loaded, add default ones
-        if (!hasFeatures) {
-            Div chip1 = new Div("Feature 1");
-            chip1.addClassName("wams-feature-chip");
-            Div chip2 = new Div("Feature 2");
-            chip2.addClassName("wams-feature-chip");
-            featuresContainer.add(chip1, chip2);
         }
 
         return featuresContainer;
     }
 
-    /**
-     * Ripple effect positioned at the click point.
-     *
-     * @param card    The card element
-     * @param clientX X coordinate of the click
-     * @param clientY Y coordinate of the click
-     */
-    private void triggerRippleEffect(Div card, double clientX, double clientY) {
-        UI.getCurrent().getPage().executeJs(
-                "const rect = $0.getBoundingClientRect();" +
-                        "const ripple = document.createElement('div');" +
-                        "ripple.className = 'wams-ripple-effect';" +
-                        "ripple.style.left = ($1 - rect.left) + 'px';" +
-                        "ripple.style.top = ($2 - rect.top) + 'px';" +
-                        "$0.appendChild(ripple);" +
-                        "setTimeout(() => ripple.remove(), 600);",
-                card.getElement(), clientX, clientY
-        );
-    }
+    // ─── FOOTER ──────────────────────────────────────────────────────────────
 
     private Div buildFooter() {
         Div footer = new Div();
@@ -406,7 +360,7 @@ public abstract class BaseLandingView extends BaseMainLayout {
         return footer;
     }
 
-    // ─── FOOTER ──────────────────────────────────────────────────────────────
+    // ─── UTILITY METHODS ──────────────────────────────────────────────────
 
     /**
      * Get a module by its key.
@@ -420,8 +374,6 @@ public abstract class BaseLandingView extends BaseMainLayout {
                 .findFirst()
                 .orElse(null);
     }
-
-    // ─── UTILITY METHODS ──────────────────────────────────────────────────
 
     /**
      * Get the icon for a module key.
@@ -482,14 +434,13 @@ public abstract class BaseLandingView extends BaseMainLayout {
         public String getModuleClass() {
             return "wams-module-" + moduleKey;
         }
+    }
 
-        /**
-         * Get the CSS accent class name for module colors.
-         *
-         * @return CSS class for accent styling
-         */
-        public String getAccentClass() {
-            return "wams-accent-" + moduleKey;
-        }
+    /**
+     * Pairs a rendered card with its pre-computed, lower-cased searchable
+     * text (name/key/title/description), so {@link #filterCards} can match
+     * against it without re-resolving i18n strings on every keystroke.
+     */
+    private record CardEntry(Div card, String searchText) {
     }
 }

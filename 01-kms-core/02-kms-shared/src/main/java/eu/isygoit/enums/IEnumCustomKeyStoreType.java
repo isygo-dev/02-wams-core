@@ -1,5 +1,7 @@
 package eu.isygoit.enums;
 
+import eu.isygoit.exception.UnknownCustomKeyStoreTypeException;
+
 /**
  * WAMS KMS Custom Key Store types.
  * <p>
@@ -33,7 +35,7 @@ public interface IEnumCustomKeyStoreType {
                     return type;
                 }
             }
-            throw new IllegalArgumentException("Unknown custom key store type: " + value);
+            throw new UnknownCustomKeyStoreTypeException("Unknown custom key store type: " + value);
         }
 
         @Override

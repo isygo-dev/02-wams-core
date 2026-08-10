@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The interface Account repository.
@@ -85,4 +86,6 @@ public interface AccountRepository extends JpaPagingAndSortingTenantAndCodeAssig
     Long countByIsAdminTrue();
 
     List<Account> findByEmailIgnoreCase(String email);
+
+    Optional<Account> findByTenantIgnoreCaseAndEmailIgnoreCase(String tenant, String email);
 }

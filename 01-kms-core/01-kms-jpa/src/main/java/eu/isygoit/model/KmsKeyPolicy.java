@@ -3,6 +3,7 @@ package eu.isygoit.model;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.isygoit.constants.TenantConstants;
+import eu.isygoit.exception.InvalidPolicyFormatException;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.*;
 import jakarta.persistence.*;
@@ -64,7 +65,7 @@ public class KmsKeyPolicy extends AuditableEntity<Long> implements ITenantAssign
         try {
             return OBJECT_MAPPER.writeValueAsString(policy);
         } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Invalid policy format", e);
+            throw new InvalidPolicyFormatException("Invalid policy format", e);
         }
     }
 }

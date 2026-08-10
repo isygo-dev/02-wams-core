@@ -4,7 +4,6 @@ import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.api.PublicPasswordServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
-import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.com.rest.controller.impl.ControllerUtils;
 import eu.isygoit.dto.common.UserContextRequestDto;
 import eu.isygoit.dto.request.AccessRequestDto;
@@ -22,7 +21,6 @@ import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.service.IPasswordService;
 import eu.isygoit.service.ITenantService;
 import eu.isygoit.service.ITokenBuilderService;
-import eu.isygoit.service.RequestContextService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -190,7 +188,7 @@ public class PublicPasswordController extends ControllerUtils implements PublicP
             GeneratePwdRequestDto generatePwdRequest) {
         log.info("Call generate password for tenant {}", generatePwdRequest);
         try {
-            AccessKeyResponseDto accessKeyResponse = passwordService.generateRandomPassword(
+            AccessKeyResponseDto accessKeyResponse = passwordService.generateAccountPasswordAndSendEmail(
                     requestContextService().getCurrentContext().getSenderTenant(),
                     generatePwdRequest.getTenant(),
                     generatePwdRequest.getTenantUrl(),
@@ -212,7 +210,7 @@ public class PublicPasswordController extends ControllerUtils implements PublicP
             GeneratePwdRequestDto generatePwdRequest) {
         log.info("Call generate password for tenant {}", generatePwdRequest);
         try {
-            AccessKeyResponseDto accessKeyResponse = passwordService.generateRandomPassword(
+            AccessKeyResponseDto accessKeyResponse = passwordService.generateAccountPasswordAndSendEmail(
                     requestContextService().getCurrentContext().getSenderTenant(),
                     generatePwdRequest.getTenant(),
                     generatePwdRequest.getTenantUrl(),

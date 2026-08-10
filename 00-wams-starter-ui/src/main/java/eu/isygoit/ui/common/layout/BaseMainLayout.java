@@ -61,6 +61,7 @@ import java.nio.charset.StandardCharsets;
 @CssImport("./styles/layout.css")
 @CssImport("./styles/modules.css")
 @CssImport("./styles/landing.css")
+@CssImport("./styles/nav.css")
 public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObserver {
 
     private static final String SIDEBAR_COLLAPSED_SESSION_KEY = "wams-sidebar-collapsed";

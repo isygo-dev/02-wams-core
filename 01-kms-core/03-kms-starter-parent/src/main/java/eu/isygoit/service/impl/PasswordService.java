@@ -2,11 +2,12 @@ package eu.isygoit.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.isygoit.config.AppProperties;
-import eu.isygoit.constants.AppParameterConstants;
 import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
-import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.dto.response.AccessKeyResponseDto;
-import eu.isygoit.enums.*;
+import eu.isygoit.enums.IEnumAuth;
+import eu.isygoit.enums.IEnumCharSet;
+import eu.isygoit.enums.IEnumPasswordStatus;
+import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.exception.*;
 import eu.isygoit.helper.CRC16Helper;
 import eu.isygoit.helper.CRC32Helper;
@@ -15,15 +16,14 @@ import eu.isygoit.model.AccessToken;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.PasswordConfig;
 import eu.isygoit.model.PasswordInfo;
-import eu.isygoit.remote.ims.ImsAppParameterService;
 import eu.isygoit.repository.PasswordConfigRepository;
 import eu.isygoit.repository.PasswordInfoRepository;
-import eu.isygoit.service.*;
-import eu.isygoit.types.EmailSubjects;
-import eu.isygoit.types.MsgTemplateVariables;
+import eu.isygoit.service.IAccessTokenService;
+import eu.isygoit.service.ICryptoService;
+import eu.isygoit.service.IPasswordService;
+import eu.isygoit.service.ITenantService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -31,7 +31,10 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * The type Password service.
@@ -58,13 +61,9 @@ public class PasswordService implements IPasswordService {
     @Autowired
     private TokenService tokenService;
     @Autowired
-    private ITokenConfigService tokenConfigService;
+    private EmailSenderService emailSenderService;
     @Autowired
     private IAccessTokenService accessTokenService;
-    @Autowired
-    private IMsgService msgService;
-    @Autowired
-    private ImsAppParameterService imsAppParameterService;
 
     /**
      * Instantiates a new Password service.
@@ -75,14 +74,16 @@ public class PasswordService implements IPasswordService {
         this.appProperties = appProperties;
     }
 
+    //Called when creating a new account, this method will create a new random password
+    // and send credentials to the account email
     @Override
-    public AccessKeyResponseDto generateRandomPassword(String senderTenant,
-                                                       String tenant,
-                                                       String tenantUrl,
-                                                       String email,
-                                                       String userName,
-                                                       String fullName,
-                                                       IEnumAuth.Types authType) throws JsonProcessingException {
+    public AccessKeyResponseDto generateAccountPasswordAndSendEmail(String senderTenant,
+                                                                    String tenant,
+                                                                    String tenantUrl,
+                                                                    String email,
+                                                                    String userName,
+                                                                    String fullName,
+                                                                    IEnumAuth.Types authType) throws JsonProcessingException {
         //Verify the account
         Account account = tenantService.checkAccountIfExists(tenant, tenantUrl, email, userName, fullName, true);
         if (account == null) {
@@ -95,62 +96,15 @@ public class PasswordService implements IPasswordService {
 
         switch (authType) {
             case PWD -> {
-                //Get gateway url
-                String gatewayUrl = "http://localhost:4001";
-                try {
-                    ResponseEntity<String> result = imsAppParameterService.getValueByTenantAndName(
-                            tenant, AppParameterConstants.GATEWAY_URL, true, gatewayUrl);
-                    if (result.getStatusCode().is2xxSuccessful() && result.hasBody() && StringUtils.hasText(result.getBody())) {
-                        gatewayUrl = result.getBody();
-                    }
-                } catch (Exception e) {
-                    log.error("Remote feign call failed : ", e);
-                    //throw new RemoteCallFailedException(e);
-                }
-
                 //Generate password
                 AccessKeyResponseDto accessKeyResponse = this.registerNewPassword(tenant, account, null, authType);
-                //Build message data object
-                MailMessageDto mailMessageDto = MailMessageDto.builder()
-                        .subject(EmailSubjects.USER_CREATED_EMAIL_SUBJECT)
-                        .senderTenant(senderTenant)
-                        .toAddr(account.getEmail())
-                        .fromAddr("noreply@" + senderTenant + ".com")
-                        .templateName(IEnumEmailTemplate.Types.USER_CREATED_TEMPLATE)
-                        .variables(MailMessageDto.getVariablesAsString(Map.of(
-                                //Common vars
-                                MsgTemplateVariables.V_USER_NAME, account.getCode(),
-                                MsgTemplateVariables.V_FULLNAME, account.getFullName(),
-                                MsgTemplateVariables.V_TENANT_NAME, account.getTenant(),
-                                //Specific vars
-                                MsgTemplateVariables.V_GATEWAY_URL, gatewayUrl,
-                                MsgTemplateVariables.V_PASSWORD, accessKeyResponse.getKey())))
-                        .build();
-                //Send the message
-                msgService.sendMessage(senderTenant, mailMessageDto, appProperties.isSendAsyncEmail());
+                emailSenderService.sendAccountCreatedEmail(senderTenant, account, accessKeyResponse.getKey());
                 return accessKeyResponse;
             }
             case OTP -> {
                 //Generate OTP code
                 AccessKeyResponseDto accessKeyResponse = this.registerNewPassword(tenant, account, null, authType);
-                //Build message data object
-                MailMessageDto mailMessageDto = MailMessageDto.builder()
-                        .subject(EmailSubjects.OTP_CODE_ACCESS_EMAIL_SUBJECT)
-                        .senderTenant(tenant)
-                        .toAddr(account.getEmail())
-                        .fromAddr("noreply@" + tenant + ".com")
-                        .templateName(IEnumEmailTemplate.Types.AUTH_OTP_TEMPLATE)
-                        .variables(MailMessageDto.getVariablesAsString(Map.of(
-                                //Common vars
-                                MsgTemplateVariables.V_USER_NAME, account.getCode(),
-                                MsgTemplateVariables.V_FULLNAME, account.getFullName(),
-                                MsgTemplateVariables.V_TENANT_NAME, account.getTenant(),
-                                //Specific vars
-                                MsgTemplateVariables.V_OTP_CODE, accessKeyResponse.getKey(),
-                                MsgTemplateVariables.V_OTP_LIFETIME_IN_M, String.valueOf(accessKeyResponse.getLifeTime()))))
-                        .build();
-                //Send the message
-                msgService.sendMessage(tenant, mailMessageDto, appProperties.isSendAsyncEmail());
+                emailSenderService.sendOTPEmail(senderTenant, account, accessKeyResponse.getKey(), accessKeyResponse.getLifeTime());
                 return accessKeyResponse;
             }
             case QRC -> {
@@ -164,34 +118,37 @@ public class PasswordService implements IPasswordService {
         }
     }
 
+    //Used by the administrator to force generating a new password for an account and send it on the account email
     @Override
-    public void forceChangePassword(String tenant /*senderTenant*/, String userName, String newPassword) {
-        Account account = tenantService.checkAccountIfExists(tenant, null, null, userName, null, false);
+    public void forceChangePassword(String senderTenant, String userName, String newPassword) throws JsonProcessingException {
+        Account account = tenantService.checkAccountIfExists(senderTenant, null, null, userName, null, false);
         if (account == null) {
-            throw new UserNotFoundException("tenant/username: " + tenant + "/" + userName);
+            throw new UserNotFoundException("tenant/username: " + senderTenant + "/" + userName);
         }
-        registerNewPassword(tenant, account, newPassword, IEnumAuth.Types.PWD);
-        //TODO add email to inform and validate user that the password has been changed
+
+        AccessKeyResponseDto accessKeyResponse = registerNewPassword(senderTenant, account, newPassword, IEnumAuth.Types.PWD);
+        emailSenderService.sendPasswordRenewEmail(senderTenant, account, accessKeyResponse.getKey());
     }
 
+    //Once the user conncted , he can change his password on profile/settings/security page
     @Override
-    public void changePassword(String tenant /*senderTenant*/, String userName, String oldPassword, String newPassword) {
-        IEnumPasswordStatus.Types passwordMatches = matches(tenant, userName, oldPassword, IEnumAuth.Types.PWD);
+    public void volontaryChangePassword(String senderTenant, String userName, String oldPassword, String newPassword) throws JsonProcessingException {
+        IEnumPasswordStatus.Types passwordMatches = matches(senderTenant, userName, oldPassword, IEnumAuth.Types.PWD);
         if (passwordMatches == IEnumPasswordStatus.Types.VALID) {
-            forceChangePassword(tenant, userName, newPassword);
+            forceChangePassword(senderTenant, userName, newPassword);
         } else {
             throw new PasswordNotValidException("Password not valid");
         }
     }
 
     @Override
-    public AccessKeyResponseDto registerNewPassword(String tenant /*senderTenant*/, Account account, String newPassword, IEnumAuth.Types authType)
+    public AccessKeyResponseDto registerNewPassword(String senderTenant, Account account, String newPassword, IEnumAuth.Types authType)
             throws UnsuportedAuthTypeException {
         LocalDateTime expiryDate = null;
         Integer length = null;
         IEnumCharSet.Types charSetType = null;
         Integer lifetime = null;
-        Optional<PasswordConfig> passwordConfigOptional = passwordConfigRepository.findByTenantIgnoreCaseAndType(tenant, authType);
+        Optional<PasswordConfig> passwordConfigOptional = passwordConfigRepository.findByTenantIgnoreCaseAndType(senderTenant, authType);
         if (passwordConfigOptional.isPresent()) {
             PasswordConfig passwordConfig = passwordConfigOptional.get();
             switch (authType) {
@@ -239,7 +196,7 @@ public class PasswordService implements IPasswordService {
             newPassword = randomKeyGenerator.nextGuid(length, charSetType);
         }
 
-        String encodedPassword = cryptoService.getPasswordEncryptor(tenant).encryptPassword(newPassword);
+        String encodedPassword = cryptoService.getPasswordEncryptor(senderTenant).encryptPassword(newPassword);
         long[] crc = this.signPassword(encodedPassword);
 
         //Deactivate all old passwords before saving a new one
@@ -265,20 +222,20 @@ public class PasswordService implements IPasswordService {
     }
 
     @Override
-    public boolean checkForPattern(String tenant /*senderTenant*/, String plainPassword) {
-        Optional<PasswordConfig> passwordConfigOptional = passwordConfigRepository.findByTenantIgnoreCaseAndType(tenant, IEnumAuth.Types.PWD);
+    public boolean checkForPattern(String senderTenant, String plainPassword) {
+        Optional<PasswordConfig> passwordConfigOptional = passwordConfigRepository.findByTenantIgnoreCaseAndType(senderTenant, IEnumAuth.Types.PWD);
         if (passwordConfigOptional.isPresent() && StringUtils.hasText(passwordConfigOptional.get().getPattern())) {
             return plainPassword.matches(passwordConfigOptional.get().getPattern());
         }
 
-        log.warn("password config not found for tenant: {}" + tenant);
+        log.warn("password config not found for tenant: {}" + senderTenant);
         return plainPassword.matches("^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[/@#$%^&+-=(){}\\[\\]])(?=\\S+$).{8,}$");
     }
 
     @Override
-    public IEnumPasswordStatus.Types matches(String tenant, String userName, String plainPassword, IEnumAuth.Types authType)
+    public IEnumPasswordStatus.Types matches(String senderTenant, String userName, String plainPassword, IEnumAuth.Types authType)
             throws UserPasswordNotFoundException, UserNotFoundException {
-        Account account = tenantService.checkAccountIfExists(tenant, null, null, userName, null, false);
+        Account account = tenantService.checkAccountIfExists(senderTenant, null, null, userName, null, false);
         if (account != null) {
             if (IEnumAuth.Types.TOKEN == authType) {
                 return IEnumPasswordStatus.Types.VALID;
@@ -300,7 +257,7 @@ public class PasswordService implements IPasswordService {
                             newStatus = IEnumPasswordStatus.Types.BROKEN;
                         } else if (passwordInfo.isExpired()) {
                             newStatus = IEnumPasswordStatus.Types.EXPIRED;
-                        } else if (!cryptoService.getPasswordEncryptor(tenant).checkPassword(plainPassword, passwordInfo.getPassword())) {
+                        } else if (!cryptoService.getPasswordEncryptor(senderTenant).checkPassword(plainPassword, passwordInfo.getPassword())) {
                             newStatus = IEnumPasswordStatus.Types.BAD;
                         }
                         break;
@@ -316,7 +273,7 @@ public class PasswordService implements IPasswordService {
                 throw new UserPasswordNotFoundException("for user name " + userName);
             }
         } else {
-            throw new UserNotFoundException("tenant/username: " + tenant + "/" + userName);
+            throw new UserNotFoundException("tenant/username: " + senderTenant + "/" + userName);
         }
     }
 
@@ -326,9 +283,9 @@ public class PasswordService implements IPasswordService {
     }
 
     @Override
-    public Boolean isExpired(String tenant, String email, String userName, IEnumAuth.Types authType)
+    public Boolean isExpired(String senderTenant, String email, String userName, IEnumAuth.Types authType)
             throws UserPasswordNotFoundException, UserNotFoundException {
-        Account account = tenantService.checkAccountIfExists(tenant, null, null, userName, null, false);
+        Account account = tenantService.checkAccountIfExists(senderTenant, null, null, userName, null, false);
         if (account != null) {
             if (IEnumAuth.Types.TOKEN == authType) {
                 return Boolean.FALSE;
@@ -341,12 +298,13 @@ public class PasswordService implements IPasswordService {
                 throw new UserPasswordNotFoundException("for user name " + userName);
             }
         }
-        throw new UserNotFoundException("tenant/username: " + tenant + "/" + userName);
+        throw new UserNotFoundException("tenant/username: " + senderTenant + "/" + userName);
     }
 
+    //User can use the forgot password feature to receive a password reinitialization email
     @Override
     public void resetPasswordViaToken(ResetPwdViaTokenRequestDto resetPwdViaTokenRequestDto)
-            throws TokenInvalidException {
+            throws TokenInvalidException, JsonProcessingException {
         Optional<String> optional = jwtService.extractSubject(resetPwdViaTokenRequestDto.getToken());
         if (optional.isPresent()) {
             String tokenSubject = optional.get();

@@ -28,49 +28,49 @@ public interface IPasswordService {
      * @return the access key response dto
      * @throws JsonProcessingException the json processing exception
      */
-    AccessKeyResponseDto generateRandomPassword(String senderTenant,
-                                                String tenant,
-                                                String tenantUrl,
-                                                String email,
-                                                String userName,
-                                                String fullName,
-                                                IEnumAuth.Types authType) throws JsonProcessingException;
+    AccessKeyResponseDto generateAccountPasswordAndSendEmail(String senderTenant,
+                                                             String tenant,
+                                                             String tenantUrl,
+                                                             String email,
+                                                             String userName,
+                                                             String fullName,
+                                                             IEnumAuth.Types authType) throws JsonProcessingException;
 
 
     /**
      * Force change password.
      *
-     * @param tenant     the tenant
+     * @param senderTenant the sender tenant
      * @param userName   the user name
      * @param newPasswor the new passwor
      */
-    void forceChangePassword(String tenant /*senderTenant*/, String userName, String newPasswor);
+    void forceChangePassword(String senderTenant, String userName, String newPasswor) throws JsonProcessingException;
 
 
     /**
      * Change password.
      *
-     * @param tenant      the tenant
+     * @param senderTenant the sender tenant
      * @param userName    the user name
      * @param oldPassword the old password
      * @param newPassword the new password
      */
-    void changePassword(String tenant /*senderTenant*/, String userName, String oldPassword, String newPassword);
+    void volontaryChangePassword(String senderTenant, String userName, String oldPassword, String newPassword) throws JsonProcessingException;
 
 
     /**
      * Check for pattern boolean.
      *
-     * @param tenant        the tenant
+     * @param senderTenant        the tenant
      * @param plainPassword the plain password
      * @return the boolean
      */
-    boolean checkForPattern(String tenant /*senderTenant*/, String plainPassword);
+    boolean checkForPattern(String senderTenant, String plainPassword);
 
     /**
      * Matches enum password status . types.
      *
-     * @param tenant        the tenant
+     * @param senderTenant        the tenant
      * @param userName      the user name
      * @param plainPassword the plain password
      * @param authType      the auth type
@@ -78,7 +78,7 @@ public interface IPasswordService {
      * @throws UserPasswordNotFoundException the user password not found exception
      * @throws UserNotFoundException         the user not found exception
      */
-    IEnumPasswordStatus.Types matches(String tenant /*senderTenant*/, String userName, String plainPassword, IEnumAuth.Types authType) throws UserPasswordNotFoundException, UserNotFoundException;
+    IEnumPasswordStatus.Types matches(String senderTenant, String userName, String plainPassword, IEnumAuth.Types authType) throws UserPasswordNotFoundException, UserNotFoundException;
 
 
     /**
@@ -108,7 +108,7 @@ public interface IPasswordService {
      * @param resetPwdViaTokenRequestDto the reset pwd via token request dto
      * @throws TokenInvalidException the token invalid exception
      */
-    void resetPasswordViaToken(ResetPwdViaTokenRequestDto resetPwdViaTokenRequestDto) throws TokenInvalidException;
+    void resetPasswordViaToken(ResetPwdViaTokenRequestDto resetPwdViaTokenRequestDto) throws TokenInvalidException, JsonProcessingException;
 
     /**
      * Register new password access key response dto.
@@ -120,5 +120,5 @@ public interface IPasswordService {
      * @return the access key response dto
      * @throws UnsuportedAuthTypeException the unsuported auth type exception
      */
-    AccessKeyResponseDto registerNewPassword(String tenant /*senderTenant*/, Account account, String newPassword, IEnumAuth.Types authType) throws UnsuportedAuthTypeException;
+    AccessKeyResponseDto registerNewPassword(String tenant, Account account, String newPassword, IEnumAuth.Types authType) throws UnsuportedAuthTypeException;
 }

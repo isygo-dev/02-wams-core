@@ -1,11 +1,10 @@
 /*
  * Styling for eu.isygoit.ui.LandingView (the platform's module picker).
- * Previously this was ~300 lines of Java .getStyle().set(...) calls plus two
- * <style> blocks injected at runtime via UI.getPage().executeJs(...). It is now
- * a static stylesheet; per-module colors come from the --wams-module-accent /
- * --wams-module-accent-gradient custom properties defined in modules.css and
- * applied to each card via a "wams-module-<key>" class. Hover effects that used
- * to be JS mouseenter/mouseleave listeners are now plain CSS :hover rules.
+ * Per-module colors come from the --wams-module-accent custom property
+ * defined in modules.css and applied to each card via a "wams-module-<key>"
+ * class. Kept deliberately flat/minimal (a thin accent border + colored
+ * icon, no heavy shadows or continuous animation) to match the rest of the
+ * app's design language (see tokens.css).
  */
 
 .wams-landing {
@@ -19,91 +18,59 @@
     /* No hardcoded "100vh minus header height" here: AppLayout's navbar is
        position:fixed and Vaadin compensates for it automatically by setting
        padding-block on the <vaadin-app-layout> host to the navbar's actual,
-       dynamically-measured rendered height (see vaadin-app-layout-styles.js
-       --vaadin-app-layout-navbar-offset-top) — content already starts below
-       the header correctly at any header height, including when it wraps to
-       2 rows on mobile (see the @media rules in layout.css). This element
-       just needs flex:1 to fill whatever vertical space actually remains in
-       its flex-column parent (.wams-landing); a fixed pixel subtraction here
-       would just go stale again the next time the header's height changes,
-       exactly like the "calc(100vh - 80px)" it replaced (written when the
-       header was still a single fixed 80px row, and already wrong even on
-       desktop once the header became 52px). */
+       dynamically-measured rendered height — content already starts below
+       the header correctly at any header height. This element just needs
+       flex:1 to fill whatever vertical space remains in its flex-column
+       parent (.wams-landing). It is top-aligned (see BaseLandingView's
+       JustifyContentMode.START) rather than centered: centering a flex
+       column taller than the viewport pushes the overflow above the box as
+       well as below it, and since the page can't scroll to a negative
+       position that top portion becomes permanently unreachable. Starting
+       from the top means overflow only ever spills past the bottom, where
+       normal scrolling already reaches it — true at any viewport size or
+       module count, so no viewport-width media-query workaround is needed. */
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: var(--lumo-space-l) var(--lumo-space-m);
-    max-width: 1400px;
     width: 100%;
+    max-width: 1200px;
     margin: 0 auto;
-    background: radial-gradient(ellipse at top, var(--lumo-primary-color-5pct), transparent 70%);
+    padding: var(--lumo-space-xl) var(--lumo-space-m) var(--lumo-space-l);
+    box-sizing: border-box;
 }
 
 /* ── Hero ─────────────────────────────────────────────────────────────── */
 
 .wams-hero-section {
     text-align: center;
-    margin-bottom: var(--lumo-space-l);
     width: 100%;
-    padding: var(--lumo-space-s) 0;
-    position: relative;
-}
-
-.wams-floating-decor {
-    position: absolute;
-    opacity: 0.08;
-    pointer-events: none;
-    animation: wams-float 8s ease-in-out infinite;
-    animation-delay: var(--wams-delay, 0s);
-}
-
-.wams-title-container {
-    position: relative;
-    display: inline-block;
-    margin-bottom: var(--lumo-space-xs);
-    animation: wams-fade-in-down 0.8s ease-out;
+    max-width: 640px;
+    margin-bottom: var(--lumo-space-l);
+    animation: wams-fade-in-up 0.4s ease-out;
 }
 
 .wams-hero-title {
-    font-size: clamp(2rem, 5vw, 4rem);
-    font-weight: 800;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 700;
     margin: 0;
-    line-height: 1.15;
-    letter-spacing: -0.03em;
-    position: relative;
-    z-index: 1;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
     color: var(--lumo-header-text-color);
 }
 
-.wams-hero-underline {
-    width: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #6366f1, #06b6d4, #10b981, #f59e0b);
-    background-size: 300% 100%;
-    border-radius: var(--lumo-border-radius-s);
-    margin: var(--lumo-space-xs) auto 0;
-    animation: wams-underline-expand 1.2s ease-out 0.5s forwards,
-    wams-shimmer 3s ease-in-out infinite 1.7s;
-}
-
 .wams-subtitle-text {
-    font-size: clamp(0.9rem, 1.2vw, 1.25rem);
+    font-size: var(--lumo-font-size-l);
     margin: var(--lumo-space-xs) 0 0;
-    font-weight: 400;
-    letter-spacing: 0.02em;
-    animation: wams-fade-in-up 0.8s ease-out 0.6s both;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
 }
 
-.wams-scroll-indicator {
-    margin-top: var(--lumo-space-m);
-    animation: wams-bounce 2s ease-in-out infinite 1.5s;
-    opacity: 0.5;
-    cursor: pointer;
+/* ── Area filter ──────────────────────────────────────────────────────── */
+
+.wams-landing-search {
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: var(--lumo-space-l);
+    animation: wams-fade-in-up 0.4s ease-out 0.05s both;
 }
 
 /* ── Cards container ─────────────────────────────────────────────────── */
@@ -113,57 +80,30 @@
     gap: var(--lumo-space-m);
     width: 100%;
     justify-content: center;
-    padding: var(--lumo-space-s) 0;
 }
 
 .wams-domain-card {
     background: var(--lumo-base-color);
+    border: 1px solid var(--lumo-contrast-10pct);
+    border-top: 3px solid var(--wams-module-accent, var(--lumo-primary-color));
     border-radius: var(--lumo-border-radius-l);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    box-shadow: var(--lumo-box-shadow-xs);
     padding: var(--lumo-space-m);
-    width: 180px;
-    min-height: 260px;
+    width: 220px;
     display: flex;
     flex-direction: column;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid var(--lumo-contrast-10pct);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
     cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    opacity: 0;
-    animation: wams-card-fade-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) var(--wams-delay, 0s) forwards;
-}
-
-.wams-domain-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, transparent 50%, rgba(255, 255, 255, 0.05) 100%);
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
 }
 
 .wams-domain-card:hover {
-    transform: translateY(-8px) scale(1.03);
-    box-shadow: var(--lumo-box-shadow-l);
-    border-color: color-mix(in srgb, var(--wams-module-accent, var(--lumo-contrast-10pct)) 40%, transparent);
-}
-
-.wams-domain-card:hover::after {
-    opacity: 1;
-}
-
-.wams-domain-card:hover .wams-card-badge {
-    transform: scale(1.05);
-}
-
-.wams-domain-card:hover .wams-card-icon {
-    transform: scale(1.1) rotate(5deg);
+    transform: translateY(-2px);
+    box-shadow: var(--lumo-box-shadow-s);
+    border-color: var(--wams-module-accent, var(--lumo-contrast-20pct));
 }
 
 .wams-domain-card:active {
-    transform: scale(0.97) !important;
+    transform: translateY(0);
 }
 
 .wams-domain-card:focus-visible {
@@ -175,34 +115,14 @@
     width: 100%;
 }
 
-.wams-accent-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--wams-module-accent-gradient, var(--lumo-primary-color));
-    background-size: 200% 100%;
-    border-radius: var(--lumo-border-radius-l) var(--lumo-border-radius-l) 0 0;
-    animation: wams-shimmer 3s ease-in-out infinite var(--wams-delay, 0s);
-}
-
 .wams-domain-card-content {
     flex: 1;
-    padding-top: var(--lumo-space-s);
     gap: var(--lumo-space-xs);
 }
 
 .wams-card-icon {
     margin-bottom: var(--lumo-space-xs);
-    animation: wams-icon-pulse 3s ease-in-out infinite var(--wams-delay, 0s);
-    transition: transform 0.3s ease;
     color: var(--wams-module-accent, var(--lumo-primary-color));
-    filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--wams-module-accent, transparent) 20%, transparent));
-}
-
-.wams-floating-decor vaadin-icon {
-    color: var(--wams-module-accent, var(--lumo-contrast-50pct));
 }
 
 .wams-card-badge {
@@ -211,15 +131,13 @@
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    background: color-mix(in srgb, var(--wams-module-accent, var(--lumo-primary-color)) 15%, transparent);
+    background: color-mix(in srgb, var(--wams-module-accent, var(--lumo-primary-color)) 12%, transparent);
     padding: 2px var(--lumo-space-s);
     border-radius: var(--lumo-border-radius-s);
-    border: 1px solid color-mix(in srgb, var(--wams-module-accent, var(--lumo-primary-color)) 30%, transparent);
-    transition: all 0.3s ease;
 }
 
 .wams-card-title {
-    font-size: var(--lumo-font-size-s);
+    font-size: var(--lumo-font-size-m);
     font-weight: 600;
     margin: 0;
     text-align: center;
@@ -254,54 +172,45 @@
     padding: 1px var(--lumo-space-s);
     font-size: var(--lumo-font-size-xxs);
     color: var(--lumo-secondary-text-color);
-    border: 1px solid var(--lumo-contrast-10pct);
     white-space: nowrap;
-    transition: all 0.2s ease;
-    animation: wams-chip-fade-in 0.4s ease-out var(--wams-delay, 0.8s) both;
-}
-
-.wams-feature-chip:hover {
-    background: var(--lumo-contrast-10pct);
-    transform: translateY(-2px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .wams-enter-button {
     width: 100%;
     margin-top: auto;
     font-weight: 500;
-    font-size: var(--lumo-font-size-xs);
-    padding: var(--lumo-space-xs) var(--lumo-space-m);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    position: relative;
-    overflow: hidden;
 }
 
-.wams-enter-button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
+/* ── Empty state (no card matches the area filter) ───────────────────── */
 
-.wams-enter-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
+/* Default to hidden (matches the initial setVisible(false)); Vaadin
+   reflects component visibility onto the standard "hidden" attribute, but
+   since this rule already declares its own "display", the native
+   [hidden]{display:none} user-agent rule needs restating in our own
+   stylesheet layer to still take effect once a component sets "display"
+   itself — author rules otherwise unconditionally win over the UA default,
+   which would make the element visible even while hidden. */
+.wams-landing-empty {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--lumo-space-xl) var(--lumo-space-m);
     width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s ease;
 }
 
-.wams-enter-button:hover::before {
-    left: 100%;
+.wams-landing-empty:not([hidden]) {
+    display: flex;
 }
 
-/* Accent gradient background for the highlighted "enter" button of each module */
-.wams-enter-button--accent {
-    background: var(--wams-module-accent-gradient, var(--lumo-primary-color));
-    color: white;
-    border: none;
+.wams-landing-empty__icon {
+    color: var(--lumo-tertiary-text-color);
+    margin-bottom: var(--lumo-space-s);
+}
+
+.wams-landing-empty__title {
+    font-size: var(--lumo-font-size-l);
+    margin: 0 0 var(--lumo-space-xs);
 }
 
 /* ── Footer ───────────────────────────────────────────────────────────── */
@@ -310,247 +219,65 @@
     padding: var(--lumo-space-s) 0;
     text-align: center;
     border-top: 1px solid var(--lumo-contrast-5pct);
-    background: transparent;
-    flex-shrink: 0;
-    margin-top: var(--lumo-space-m);
+    margin-top: var(--lumo-space-l);
     width: 100%;
-    animation: wams-fade-in-up 0.8s ease-out 1s both;
 }
 
 .wams-footer-text {
     margin: 0;
 }
 
-/* ── Click ripple ─────────────────────────────────────────────────────── */
-
-.wams-ripple-effect {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    width: 100px;
-    height: 100px;
-    margin-top: -50px;
-    margin-left: -50px;
-    animation: wams-ripple 0.6s ease-out forwards;
-    pointer-events: none;
-}
-
 /* ── Keyframes ────────────────────────────────────────────────────────── */
 
-@keyframes wams-ripple {
-    0% {
-        transform: scale(0);
-        opacity: 1;
-    }
-    100% {
-        transform: scale(4);
-        opacity: 0;
-    }
-}
-
-@keyframes wams-underline-expand {
-    0% {
-        width: 0;
-        opacity: 0;
-    }
-    100% {
-        width: 140px;
-        opacity: 1;
-    }
-}
-
-@keyframes wams-shimmer {
-    0% {
-        background-position: -200% 0;
-    }
-    100% {
-        background-position: 200% 0;
-    }
-}
-
-@keyframes wams-card-fade-in {
-    0% {
-        opacity: 0;
-        transform: translateY(30px) scale(0.95);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-@keyframes wams-chip-fade-in {
-    0% {
-        opacity: 0;
-        transform: scale(0.8);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-@keyframes wams-icon-pulse {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.08);
-    }
-}
-
-@keyframes wams-float {
-    0%, 100% {
-        transform: translateY(0px) rotate(0deg);
-    }
-    25% {
-        transform: translateY(-15px) rotate(5deg);
-    }
-    75% {
-        transform: translateY(10px) rotate(-5deg);
-    }
-}
-
-@keyframes wams-fade-in-down {
-    0% {
-        opacity: 0;
-        transform: translateY(-30px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 @keyframes wams-fade-in-up {
-    0% {
+    from {
         opacity: 0;
-        transform: translateY(30px);
+        transform: translateY(12px);
     }
-    100% {
+    to {
         opacity: 1;
         transform: translateY(0);
-    }
-}
-
-@keyframes wams-bounce {
-    0%, 100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(8px);
     }
 }
 
 /* ── Responsive ───────────────────────────────────────────────────────── */
 
-/* .wams-landing-main centers its children vertically (LandingView sets
-   JustifyContentMode.CENTER) — a nice touch when the hero + one row of 6
-   cards fits inside the viewport, as it does on desktop. Below 1024px the
-   cards stack into 1-2 columns (see the card-width rules further down), so
-   hero + cards + footer routinely end up taller than the viewport. Centering
-   *overflowing* flex content pushes the overflow symmetrically above *and*
-   below the box; since the page can't scroll to a negative position, the
-   top overflow — the hero and the first 1-2 cards — becomes permanently
-   unreachable (reported: "first two cards not visible" on iPhone 14).
-   flex-start makes any overflow spill past the bottom instead, where normal
-   scrolling already reaches it. !important is required because
-   JustifyContentMode.CENTER is applied as an inline style, which otherwise
-   always wins over a plain class rule regardless of media query. */
-@media (max-width: 1024px) {
-    .wams-landing-main {
-        justify-content: flex-start !important;
-    }
-}
-
 @media (max-width: 480px) {
+    .wams-landing-main {
+        padding: var(--lumo-space-l) var(--lumo-space-m);
+    }
+
     .wams-domain-card {
-        width: 100% !important;
-        min-height: 200px;
-        padding: var(--lumo-space-m);
-    }
-
-    .wams-domain-card vaadin-icon {
-        width: 24px !important;
-        height: 24px !important;
-    }
-
-    .wams-floating-decor,
-    .wams-scroll-indicator {
-        display: none !important;
-    }
-
-    .wams-hero-section {
-        padding: var(--lumo-space-xs) 0 !important;
-        margin-bottom: var(--lumo-space-m) !important;
+        width: 100%;
     }
 }
 
 @media (min-width: 481px) and (max-width: 768px) {
     .wams-domain-card {
         width: calc(50% - var(--lumo-space-m));
-        min-height: 220px;
         flex: 0 0 calc(50% - var(--lumo-space-m));
-    }
-
-    .wams-floating-decor {
-        display: none !important;
     }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
     .wams-domain-card {
         width: calc(33.33% - var(--lumo-space-m));
-        min-height: 240px;
         flex: 0 0 calc(33.33% - var(--lumo-space-m));
     }
-
-    .wams-domain-card .wams-feature-chip {
-        font-size: var(--lumo-font-size-xxs) !important;
-    }
 }
 
-@media (min-width: 1025px) and (max-width: 1200px) {
+@media (min-width: 1025px) {
     .wams-domain-card {
-        width: calc(20% - var(--lumo-space-m));
-        min-height: 260px;
-        flex: 0 0 calc(20% - var(--lumo-space-m));
-    }
-}
-
-@media (min-width: 1201px) {
-    .wams-domain-card {
-        width: 190px;
-        min-height: 260px;
-        flex: 0 0 190px;
+        width: 220px;
+        flex: 0 0 220px;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .wams-domain-card,
-    .wams-floating-decor,
-    .wams-scroll-indicator,
-    .wams-ripple-effect,
-    .wams-hero-underline,
-    .wams-card-icon,
-    .wams-accent-bar,
-    .wams-feature-chip,
-    .wams-title-container,
-    .wams-subtitle-text,
-    .wams-landing-footer {
+    .wams-hero-section,
+    .wams-landing-search {
         animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
-    }
-
-    .wams-domain-card {
-        opacity: 1 !important;
-        transform: none !important;
-    }
-
-    .wams-floating-decor,
-    .wams-scroll-indicator,
-    .wams-ripple-effect {
-        display: none !important;
     }
 }

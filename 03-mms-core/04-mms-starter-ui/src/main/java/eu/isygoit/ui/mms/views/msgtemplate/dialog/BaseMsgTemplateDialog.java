@@ -9,6 +9,7 @@ import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import eu.isygoit.dto.data.SenderConfigDto;
+import eu.isygoit.exception.TransferNotSupportedException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
 import eu.isygoit.remote.mms.MsgTemplateService;
@@ -268,7 +269,7 @@ public abstract class BaseMsgTemplateDialog extends BaseActionDialog {
                     @Override
                     public void transferTo(java.io.File dest) throws IllegalStateException {
                         // Not implemented - use getBytes() or getInputStream() instead
-                        throw new UnsupportedOperationException("transferTo not supported");
+                        throw new TransferNotSupportedException("transferTo not supported");
                     }
                 };
             }

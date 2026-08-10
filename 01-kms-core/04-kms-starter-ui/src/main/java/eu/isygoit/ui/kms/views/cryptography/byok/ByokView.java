@@ -156,9 +156,11 @@ public class ByokView extends ManagementVerticalView {
     private VerticalLayout createStepCard(String title, String hint, Component... components) {
         VerticalLayout card = new VerticalLayout();
         card.setWidthFull();
-        card.addClassName(LumoUtility.Border.ALL);
+        card.setPadding(true);
         card.addClassName(LumoUtility.BorderRadius.LARGE);
-        card.addClassName(LumoUtility.Padding.MEDIUM);
+        card.addClassName(LumoUtility.Background.BASE);
+        card.addClassName(LumoUtility.BoxShadow.XSMALL);
+        card.addClassName("wams-card");
         card.addClassName("kms-parta-step-card");
 
         H3 stepTitle = new H3(title);

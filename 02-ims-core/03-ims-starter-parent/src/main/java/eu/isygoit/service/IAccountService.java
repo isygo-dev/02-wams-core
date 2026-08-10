@@ -17,6 +17,7 @@ import eu.isygoit.model.ConnectionTracking;
 import jakarta.transaction.NotSupportedException;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The interface Account service.
@@ -207,4 +208,6 @@ public interface IAccountService extends ICrudTenantServiceOperations<Long, Acco
      * @throws AccountNotFoundException the account not found exception
      */
     List<UserAccountDto> getAvailableEmailAccounts(String email) throws AccountNotFoundException;
+
+    Optional<Account> findByEmail(String tenant, String email);
 }

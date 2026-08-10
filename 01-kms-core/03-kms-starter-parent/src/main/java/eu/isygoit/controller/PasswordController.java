@@ -4,7 +4,6 @@ import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.api.PasswordServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
-import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.com.rest.controller.impl.ControllerUtils;
 import eu.isygoit.dto.common.ResetPwdViaTokenRequestDto;
 import eu.isygoit.dto.request.*;
@@ -15,7 +14,6 @@ import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.mapper.AccountMapper;
 import eu.isygoit.service.IAccountService;
 import eu.isygoit.service.IPasswordService;
-import eu.isygoit.service.RequestContextService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +46,7 @@ public class PasswordController extends ControllerUtils implements PasswordServi
             GeneratePwdRequestDto generatePwdRequest) {
         log.info("Call generate password for tenant {}", generatePwdRequest);
         try {
-            AccessKeyResponseDto accessKeyResponse = passwordService.generateRandomPassword(
+            AccessKeyResponseDto accessKeyResponse = passwordService.generateAccountPasswordAndSendEmail(
                     requestContextService().getCurrentContext().getSenderTenant(),
                     generatePwdRequest.getTenant(),
                     generatePwdRequest.getTenantUrl(),
@@ -70,7 +68,7 @@ public class PasswordController extends ControllerUtils implements PasswordServi
             GeneratePwdRequestDto generatePwdRequest) {
         log.info("Call generate password for tenant {}", generatePwdRequest);
         try {
-            AccessKeyResponseDto accessKeyResponse = passwordService.generateRandomPassword(
+            AccessKeyResponseDto accessKeyResponse = passwordService.generateAccountPasswordAndSendEmail(
                     requestContextService().getCurrentContext().getSenderTenant(),
                     generatePwdRequest.getTenant(),
                     generatePwdRequest.getTenantUrl(),
@@ -104,7 +102,7 @@ public class PasswordController extends ControllerUtils implements PasswordServi
             String oldPassword,
             String newPassword) {
         try {
-            passwordService.changePassword(requestContextService().getCurrentContext().getSenderTenant(),
+            passwordService.volontaryChangePassword(requestContextService().getCurrentContext().getSenderTenant(),
                     requestContextService().getCurrentContext().getSenderUser(),
                     oldPassword, newPassword);
             return ResponseFactory.responseOk("password changed successfully");

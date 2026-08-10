@@ -7,6 +7,7 @@ import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.exception.GrantConstraintException;
 import eu.isygoit.exception.GrantNotFoundException;
 import eu.isygoit.exception.KeyGrantException;
+import eu.isygoit.exception.PolicySerializationException;
 import eu.isygoit.model.KmsKeyGrant;
 import eu.isygoit.model.KmsKeyPolicy;
 import eu.isygoit.repository.KmsKeyGrantRepository;
@@ -58,7 +59,7 @@ public class KeyPolicyService implements IKeyPolicyService {
             return request.getPolicy();
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize policy", e);
-            throw new RuntimeException("Failed to serialize policy", e);
+            throw new PolicySerializationException("Failed to serialize policy", e);
         }
     }
 

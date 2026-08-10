@@ -68,7 +68,7 @@ public class EncryptionService implements IEncryptionService {
             byte[] keyMaterial;
             if (kmsKey.getKeySpec() != null && kmsKey.getKeySpec().isAsymmetric()) {
                 if (version.getPublicKey() == null)
-                    throw new RuntimeException("Asymmetric key has no public key");
+                    throw new AsymmetricKeyMissingPublicKeyException("Asymmetric key has no public key");
                 keyMaterial = version.getPublicKey(); // use public key from version
             } else {
                 keyMaterial = version.getKeyMaterial();
@@ -100,7 +100,7 @@ public class EncryptionService implements IEncryptionService {
     public DecryptResponse decrypt(String tenant, DecryptRequest request) {
         log.info("Decrypt for tenant {}", tenant);
         String keyId = request.getKeyId();
-        if (keyId == null) throw new RuntimeException("keyId required");
+        if (keyId == null) throw new MissingKeyIdException("keyId required");
 
         KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
                 .orElseThrow(() -> new RuntimeException("KMS Key not found"));
@@ -153,7 +153,7 @@ public class EncryptionService implements IEncryptionService {
                     } catch (Exception ignored) {
                     }
                 }
-                throw new RuntimeException("No key version could decrypt the data");
+                throw new DecryptionFailedException("No key version could decrypt the data");
             }
 
             // Decrypt with the resolved version
@@ -197,6 +197,6 @@ public class EncryptionService implements IEncryptionService {
     @Override
     public ReEncryptResponse reEncrypt(String tenant, ReEncryptRequest request) {
         // Similar pattern: decrypt with source version, encrypt with current version
-        throw new UnsupportedOperationException("reEncrypt not yet implemented");
+        throw new ReEncryptNotImplementedException("reEncrypt not yet implemented");
     }
 }

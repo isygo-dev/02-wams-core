@@ -1,5 +1,7 @@
 package eu.isygoit.enums;
 
+import eu.isygoit.exception.UnsupportedSignatureAlgorithmException;
+
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
 
@@ -34,7 +36,7 @@ public enum IEnumSignatureAlgorithm {
                 return algo;
             }
         }
-        throw new IllegalArgumentException("Unsupported signature algorithm: " + kmsName);
+        throw new UnsupportedSignatureAlgorithmException("Unsupported signature algorithm: " + kmsName);
     }
 
     private static PSSParameterSpec createPSSParameterSpec(String hashAlgo, int saltLength) {

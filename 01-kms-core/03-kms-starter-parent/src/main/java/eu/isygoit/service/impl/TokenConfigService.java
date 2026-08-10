@@ -8,6 +8,7 @@ import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.enums.IEnumToken;
+import eu.isygoit.exception.InvalidJwtKeySpecException;
 import eu.isygoit.exception.KmsKeyNotFoundException;
 import eu.isygoit.exception.NoActiveVersionException;
 import eu.isygoit.model.AppNextCode;
@@ -58,7 +59,7 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
     public static String mapKeySpecToJwtAlgorithm(IEnumKeySpec.Types keySpec) {
         switch (keySpec) {
             case SYMMETRIC_DEFAULT:
-                throw new IllegalArgumentException("SYMMETRIC_DEFAULT is not a valid key spec for JWT signing. Use HMAC_256, HMAC_384, or HMAC_512.");
+                throw new InvalidJwtKeySpecException("SYMMETRIC_DEFAULT is not a valid key spec for JWT signing. Use HMAC_256, HMAC_384, or HMAC_512.");
             case RSA_2048:
                 return "RS256";
             case RSA_3072:
@@ -66,7 +67,7 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
             case RSA_4096:
                 return "RS512";
             case HMAC_224:
-                throw new IllegalArgumentException("HMAC_224 is not supported by JJWT. Use HS256, HS384, or HS512.");
+                throw new InvalidJwtKeySpecException("HMAC_224 is not supported by JJWT. Use HS256, HS384, or HS512.");
             case HMAC_256:
                 return "HS256";
             case HMAC_384:
@@ -82,9 +83,9 @@ public class TokenConfigService extends CodeAssignableTenantService<Long, TokenC
             case ECC_SECG_P256K1:
                 return "ES256K";
             case SM2:
-                throw new IllegalArgumentException("SM2 is not supported by JJWT. Use RSA or EC (NIST) instead.");
+                throw new InvalidJwtKeySpecException("SM2 is not supported by JJWT. Use RSA or EC (NIST) instead.");
             default:
-                throw new IllegalArgumentException("Unsupported key spec for JWT signing: " + keySpec);
+                throw new InvalidJwtKeySpecException("Unsupported key spec for JWT signing: " + keySpec);
         }
     }
 

@@ -3,6 +3,7 @@ package eu.isygoit.service.impl;
 import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.enums.IEnumKeyOrigin;
 import eu.isygoit.enums.IEnumKeyStatus;
+import eu.isygoit.exception.InvalidMultiRegionKeyException;
 import eu.isygoit.exception.KeyNotFoundException;
 import eu.isygoit.exception.KmsException;
 import eu.isygoit.model.KmsKey;
@@ -31,7 +32,7 @@ public class MultiRegionService implements IMultiRegionService {
                 .orElseThrow(() -> new KeyNotFoundException(keyId));
 
         if (Boolean.FALSE.equals(key.getMultiRegion())) {
-            throw new RuntimeException("Key is not a multi-region key");
+            throw new InvalidMultiRegionKeyException("Key is not a multi-region key");
         }
 
         key.setPrimaryRegion(request.getPrimaryRegion());

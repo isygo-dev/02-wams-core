@@ -13,6 +13,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.MsgTemplateDto;
+import eu.isygoit.exception.TransferNotSupportedException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
 import eu.isygoit.remote.mms.MsgTemplateService;
@@ -224,7 +225,7 @@ public class EditTemplateContentDialog extends BaseActionDialog {
 
                 @Override
                 public void transferTo(java.io.File dest) throws IllegalStateException {
-                    throw new UnsupportedOperationException("transferTo not supported");
+                    throw new TransferNotSupportedException("transferTo not supported");
                 }
             };
 

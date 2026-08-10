@@ -542,7 +542,7 @@ public class CustomKeyStoreService implements ICustomKeyStoreService {
             byte[] hash = md.digest(password.getBytes());
             return Base64.getEncoder().encodeToString(hash);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Hashing algorithm not available", e);
+            throw new HashingAlgorithmUnavailableException("Hashing algorithm not available", e);
         }
     }
 
