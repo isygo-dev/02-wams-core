@@ -24,7 +24,8 @@ public final class DmsNavRegistry implements INavRegistry {
     private static final List<NavTarget> ALL = List.of(
             // DMS
             new NavTarget("dms.nav.dashboard", "dms", VaadinIcon.HOME, "dms"),
-            new NavTarget("dms.nav.categories", "dms/categories", VaadinIcon.FOLDER, "dms")
+            new NavTarget("dms.nav.categories", "dms/categories", VaadinIcon.FOLDER, "dms"),
+            new NavTarget("dms.nav.linkedFiles", "dms/linked-files", VaadinIcon.FILE, "dms")
     );
 
     public DmsNavRegistry() {

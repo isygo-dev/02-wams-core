@@ -3,15 +3,18 @@ package eu.isygoit.api;
 import eu.isygoit.com.rest.api.ILinkedFileApi;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.common.LinkedFileRequestDto;
+import eu.isygoit.dto.common.LinkedFileResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.IOException;
 import java.util.List;
 
 
@@ -23,7 +26,6 @@ public interface LinkedFileApi extends ILinkedFileApi<LinkedFileRequestDto> {
     /**
      * Search by tags response entity.
      *
-     * @param tenant the tenant
      * @param tags   the tags
      * @return the response entity
      */
@@ -33,19 +35,16 @@ public interface LinkedFileApi extends ILinkedFileApi<LinkedFileRequestDto> {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = LinkedFileRequestDto.class))})
+                            schema = @Schema(implementation = LinkedFileResponseDto.class))})
     })
     @GetMapping(path = "/searchByTags")
-    ResponseEntity<List<LinkedFileRequestDto>> searchByTags(
-            @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
-            @RequestParam(name = RestApiConstants.TAGS) String tags);
+    ResponseEntity<List<LinkedFileResponseDto>> searchByTags(
+            @RequestParam(name = RestApiConstants.TAGS) List<String> tags);
 
 
     /**
      * Search by original name response entity.
      *
-     * @param requestContext   the request context
-     * @param tenant           the tenant
      * @param originalFileName the original file name
      * @return the response entity
      */
@@ -55,17 +54,15 @@ public interface LinkedFileApi extends ILinkedFileApi<LinkedFileRequestDto> {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = LinkedFileRequestDto.class))})
+                            schema = @Schema(implementation = LinkedFileResponseDto.class))})
     })
     @GetMapping(path = "/searchByOriginalName")
-    ResponseEntity<LinkedFileRequestDto> searchByOriginalName(
-            @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
+    ResponseEntity<LinkedFileResponseDto> searchByOriginalName(
             @RequestParam(name = RestApiConstants.ORIGINAL_FILE_NAME) String originalFileName);
 
     /**
      * Rename file response entity.
      *
-     * @param tenant  the tenant
      * @param code    the code
      * @param newName the new name
      * @return the response entity
@@ -76,18 +73,16 @@ public interface LinkedFileApi extends ILinkedFileApi<LinkedFileRequestDto> {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = LinkedFileRequestDto.class))})
+                            schema = @Schema(implementation = LinkedFileResponseDto.class))})
     })
     @GetMapping(path = "/renameFile")
-    ResponseEntity<LinkedFileRequestDto> renameFile(
-            @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
+    ResponseEntity<LinkedFileResponseDto> renameFile(
             @RequestParam(name = RestApiConstants.CODE) String code,
             @RequestParam(name = RestApiConstants.NEW_NAME) String newName);
 
     /**
      * Search by categories response entity.
      *
-     * @param tenant     the tenant
      * @param categories the categories
      * @return the response entity
      */
@@ -97,10 +92,9 @@ public interface LinkedFileApi extends ILinkedFileApi<LinkedFileRequestDto> {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = LinkedFileRequestDto.class))})
+                            schema = @Schema(implementation = LinkedFileResponseDto.class))})
     })
     @GetMapping(path = "/searchByCategories")
-    ResponseEntity<List<LinkedFileRequestDto>> searchByCategories(
-            @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
-            @RequestParam(name = RestApiConstants.CATEGORIES) String categories);
+    ResponseEntity<List<LinkedFileResponseDto>> searchByCategories(
+            @RequestParam(name = RestApiConstants.CATEGORIES) List<String> categories);
 }

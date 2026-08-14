@@ -25,10 +25,8 @@ public class DmsMainLayout extends BaseMainLayout {
     protected Component createDrawerContent() {
         SideNav nav = new SideNav();
         nav.addItem(navItem(I18n.t("dms.nav.dashboard"), "dms", VaadinIcon.HOME));
-        // Categories is the only DMS entity implemented today; linked-file and
-        // tag browsing have no backing view/route yet, so they're intentionally
-        // left off the sidebar rather than pointing at a page that 404s.
         nav.addItem(navItem(I18n.t("dms.nav.categories"), "dms/categories", VaadinIcon.FOLDER));
+        nav.addItem(navItem(I18n.t("dms.nav.linkedFiles"), "dms/linked-files", VaadinIcon.FILE));
 
         return new Scroller(nav);
     }

@@ -40,14 +40,14 @@ public interface LinkedFileRepository extends JpaPagingAndSortingTenantAndCodeAs
      * @param tags   the tags
      * @return the list
      */
-    List<LinkedFile> findByTenantIgnoreCaseAndTagsContaining(String tenant /*senderTenant*/, String tags);
+    List<LinkedFile> findByTenantIgnoreCaseAndTagsIn(String tenant, List<String> tags);
 
     /**
      * Find by tenant ignore case and categories in and check cancel false list.
      *
      * @param tenant     the tenant
-     * @param categories the categories
+     * @param categoryNames the categories
      * @return the list
      */
-    List<LinkedFile> findByTenantIgnoreCaseAndCategoriesIn(String tenant /*senderTenant*/, List<String> categories);
+    List<LinkedFile> findByTenantIgnoreCaseAndCategories_NameIn(String tenant, List<String> categoryNames);
 }

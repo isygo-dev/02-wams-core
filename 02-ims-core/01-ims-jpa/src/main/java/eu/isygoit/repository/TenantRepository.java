@@ -35,6 +35,8 @@ public interface TenantRepository extends JpaPagingAndSortingTenantAndCodeAssign
      */
     Optional<Tenant> findByNameIgnoreCase(String name);
 
+    Optional<Tenant> findByName(String name);
+
     /**
      * Gets all names.
      *

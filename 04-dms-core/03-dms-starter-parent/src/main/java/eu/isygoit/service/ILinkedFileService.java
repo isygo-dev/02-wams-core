@@ -21,7 +21,7 @@ public interface ILinkedFileService extends ICrudTenantServiceOperations<Long, L
      * @return the string
      * @throws IOException the io exception
      */
-    String upload(LinkedFileRequestDto linkedFile, MultipartFile file) throws IOException;
+    String upload(String senderTenant, LinkedFileRequestDto linkedFile, MultipartFile file) throws IOException;
 
     /**
      * Search by tags list.
@@ -31,7 +31,7 @@ public interface ILinkedFileService extends ICrudTenantServiceOperations<Long, L
      * @return the list
      * @throws IOException the io exception
      */
-    List<LinkedFile> searchByTags(String tenant /*senderTenant*/, String tags) throws IOException;
+    List<LinkedFile> searchByTags(String tenant, List<String> tags) throws IOException;
 
     /**
      * Delete file.
@@ -40,7 +40,7 @@ public interface ILinkedFileService extends ICrudTenantServiceOperations<Long, L
      * @param code   the code
      * @throws IOException the io exception
      */
-    void deleteFile(String tenant /*senderTenant*/, String code) throws IOException;
+    void deleteFile(String tenant, String code) throws IOException;
 
     /**
      * Search by original name linked file.
@@ -50,7 +50,7 @@ public interface ILinkedFileService extends ICrudTenantServiceOperations<Long, L
      * @return the linked file
      * @throws IOException the io exception
      */
-    LinkedFile searchByOriginalFileName(String tenant /*senderTenant*/, String originalFileName) throws IOException;
+    LinkedFile searchByOriginalFileName(String tenant, String originalFileName) throws IOException;
 
     /**
      * Rename file linked file.
@@ -61,7 +61,7 @@ public interface ILinkedFileService extends ICrudTenantServiceOperations<Long, L
      * @return the linked file
      * @throws IOException the io exception
      */
-    LinkedFile renameFile(String tenant /*senderTenant*/, String code, String newName) throws IOException;
+    LinkedFile renameFile(String tenant, String code, String newName) throws IOException;
 
 
     /**
@@ -72,16 +72,14 @@ public interface ILinkedFileService extends ICrudTenantServiceOperations<Long, L
      * @return the list
      * @throws IOException the io exception
      */
-    List<LinkedFile> searchByCategories(String tenant /*senderTenant*/, List<String> categories) throws IOException;
+    List<LinkedFile> searchByCategories(String tenant, List<String> categories) throws IOException;
 
     /**
      * Download resource.
      *
-     * @param originalFileName the original file name
      * @param tenant           the tenant
-     * @param version          the version
      * @return the resource
      * @throws IOException the io exception
      */
-    Resource download(String tenant /*senderTenant*/, String code) throws IOException;
+    Resource download(String tenant, String code) throws IOException;
 }
