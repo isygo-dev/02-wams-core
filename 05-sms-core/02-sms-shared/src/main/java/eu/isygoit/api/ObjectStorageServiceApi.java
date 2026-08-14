@@ -2,6 +2,7 @@ package eu.isygoit.api;
 
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.data.BucketDto;
+import eu.isygoit.dto.data.FileStorageDto;
 import eu.isygoit.dto.data.FileTagsDto;
 import eu.isygoit.dto.extendable.IdAssignableDto;
 import eu.isygoit.enums.IEnumLogicalOperator;
@@ -117,10 +118,10 @@ public interface ObjectStorageServiceApi {
             @ApiResponse(responseCode = "200",
                     description = "Api executed successfully",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = IdAssignableDto.class))})
+                            schema = @Schema(implementation = FileStorageDto.class))})
     })
     @GetMapping(path = "/getObjects")
-    ResponseEntity<Object> getObjects(
+    ResponseEntity<List<FileStorageDto>> getObjects(
             @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
             @RequestParam(name = RestApiConstants.BUCKET_NAME) String bucketName);
 
@@ -143,7 +144,7 @@ public interface ObjectStorageServiceApi {
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
     @GetMapping(path = "/filterObjects")
-    ResponseEntity<Object> filterObjects(
+    ResponseEntity<List<FileStorageDto>> filterObjects(
             @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
             @RequestParam(name = RestApiConstants.BUCKET_NAME) String bucketName,
             @RequestParam(name = RestApiConstants.TAGS) String tags,

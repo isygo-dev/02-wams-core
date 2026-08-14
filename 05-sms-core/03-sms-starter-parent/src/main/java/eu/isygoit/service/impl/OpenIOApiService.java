@@ -4,7 +4,6 @@ package eu.isygoit.service.impl;
 import eu.isygoit.dto.data.BucketDto;
 import eu.isygoit.dto.exception.MinIoObjectException;
 import eu.isygoit.enums.IEnumLogicalOperator;
-import eu.isygoit.model.FileStorage;
 import eu.isygoit.model.StorageConfig;
 import eu.isygoit.service.IOpenIOApiService;
 import io.minio.*;
@@ -19,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import eu.isygoit.dto.data.FileStorageDto;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -145,12 +145,12 @@ public class OpenIOApiService implements IOpenIOApiService {
         }
     }
 
-    public List<FileStorage> getObjectByTags(StorageConfig config, String bucketName, Map<String, String> tags, IEnumLogicalOperator.Types condition) {
+    public List<FileStorageDto> getObjectByTags(StorageConfig config, String bucketName, Map<String, String> tags, IEnumLogicalOperator.Types condition) {
         try {
-            List<FileStorage> listFileStorage = new ArrayList<>();
-            List<FileStorage> allObject = this.getObjects(config, bucketName);
+            List<FileStorageDto> listFileStorageDto = new ArrayList<>();
+            List<FileStorageDto> allObject = this.getObjects(config, bucketName);
 
-            for (FileStorage object : allObject) {
+            for (FileStorageDto object : allObject) {
                 MinioClient minioClientConnection = this.getConnection(config);
                 Tags tagsList = minioClientConnection.getObjectTags(GetObjectTagsArgs.builder().
                         bucket(bucketName).
@@ -170,10 +170,10 @@ public class OpenIOApiService implements IOpenIOApiService {
                 }
 
                 if (accepted) {
-                    listFileStorage.add(object);
+                    listFileStorageDto.add(object);
                 }
             }
-            return listFileStorage;
+            return listFileStorageDto;
 
         } catch (Throwable e) {
             log.error("<Error>: Happened error when get list objects from minio: {} ", e);
@@ -181,23 +181,23 @@ public class OpenIOApiService implements IOpenIOApiService {
         }
     }
 
-    public List<FileStorage> getObjects(StorageConfig config, String bucketName) {
+    public List<FileStorageDto> getObjects(StorageConfig config, String bucketName) {
         try {
             MinioClient minioClientConnection = this.getConnection(config);
             Iterable<Result<Item>> results = minioClientConnection.listObjects(ListObjectsArgs.builder()
                     .bucket(bucketName)
                     .build());
-            List<FileStorage> listFileStorage = new ArrayList<>();
+            List<FileStorageDto> listFileStorageDto = new ArrayList<>();
             for (Result<Item> result : results) {
-                FileStorage fileObject = new FileStorage();
+                FileStorageDto fileObject = new FileStorageDto();
                 Item item = result.get();
                 fileObject.objectName = item.objectName();
                 fileObject.size = item.size();
                 fileObject.etag = item.etag();
                 fileObject.lastModified = item.lastModified();
-                listFileStorage.add(fileObject);
+                listFileStorageDto.add(fileObject);
             }
-            return listFileStorage;
+            return listFileStorageDto;
 
         } catch (Throwable e) {
             log.error("<Error>: Happened error when get list objects from minio: {} ", e);

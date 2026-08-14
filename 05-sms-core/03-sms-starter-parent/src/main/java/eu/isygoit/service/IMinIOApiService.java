@@ -3,10 +3,10 @@ package eu.isygoit.service;
 
 import eu.isygoit.dto.data.BucketDto;
 import eu.isygoit.enums.IEnumLogicalOperator;
-import eu.isygoit.model.FileStorage;
 import eu.isygoit.model.StorageConfig;
 import io.minio.messages.DeleteObject;
 import org.springframework.web.multipart.MultipartFile;
+import eu.isygoit.dto.data.FileStorageDto;
 
 import java.util.List;
 import java.util.Map;
@@ -75,7 +75,7 @@ public interface IMinIOApiService {
      * @param condition  the condition
      * @return the object by tags
      */
-    List<FileStorage> getObjectByTags(StorageConfig config, String bucketName, Map<String, String> tags, IEnumLogicalOperator.Types condition);
+    List<FileStorageDto> getObjectByTags(StorageConfig config, String bucketName, Map<String, String> tags, IEnumLogicalOperator.Types condition);
 
     /**
      * Gets objects.
@@ -84,7 +84,7 @@ public interface IMinIOApiService {
      * @param bucketName the bucket name
      * @return the objects
      */
-    List<FileStorage> getObjects(StorageConfig config, String bucketName);
+    List<FileStorageDto> getObjects(StorageConfig config, String bucketName);
 
     /**
      * Update tags.

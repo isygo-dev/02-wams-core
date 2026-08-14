@@ -11,7 +11,6 @@ import eu.isygoit.dto.exception.MinIoObjectException;
 import eu.isygoit.enums.IEnumLogicalOperator;
 import eu.isygoit.exception.handler.SmsExceptionHandler;
 import eu.isygoit.factory.StorageFactoryService;
-import eu.isygoit.model.FileStorage;
 import eu.isygoit.model.StorageConfig;
 import eu.isygoit.service.IStorageConfigService;
 import io.minio.messages.DeleteObject;
@@ -24,6 +23,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import eu.isygoit.dto.data.FileStorageDto;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -116,7 +116,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Object> getObjects(
+    public ResponseEntity<List<FileStorageDto>> getObjects(
             String tenant, String bucketName) {
         log.info("get objects request received");
         try {
@@ -131,7 +131,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     }
 
     @Override
-    public ResponseEntity<Object> filterObjects(
+    public ResponseEntity<List<FileStorageDto>> filterObjects(
             String tenant,
             String bucketName,
             String tags,
@@ -145,7 +145,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
                         .collect(Collectors.toMap(s -> s, s -> s));
             }
             StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);
-            List<FileStorage> results = storageFactoryService
+            List<FileStorageDto> results = storageFactoryService
                     .getService(config.getType())
                     .getObjectByTags(config,
                             bucketName.toLowerCase(),

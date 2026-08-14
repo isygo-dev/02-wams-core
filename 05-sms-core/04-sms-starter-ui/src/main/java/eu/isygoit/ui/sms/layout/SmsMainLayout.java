@@ -25,11 +25,9 @@ public class SmsMainLayout extends BaseMainLayout {
     protected Component createDrawerContent() {
         SideNav nav = new SideNav();
         nav.addItem(navItem(I18n.t("sms.nav.dashboard"), "sms", VaadinIcon.HOME));
-        // Storage configs is the only SMS entity implemented today; bucket
-        // browsing and a dedicated stats page have no backing view/route yet,
-        // so they're intentionally left off the sidebar rather than pointing
-        // at a page that 404s.
         nav.addItem(navItem(I18n.t("sms.nav.storage.configs"), "sms/storageconfigs", VaadinIcon.DATABASE));
+        nav.addItem(navItem(I18n.t("sms.nav.buckets"), "sms/buckets", VaadinIcon.FOLDER));
+        nav.addItem(navItem(I18n.t("sms.nav.object.storage"), "sms/objectstorage", VaadinIcon.CLOUD));
 
         return new Scroller(nav);
     }

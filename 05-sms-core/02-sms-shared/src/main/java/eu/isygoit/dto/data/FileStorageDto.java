@@ -1,4 +1,4 @@
-package eu.isygoit.model;
+package eu.isygoit.dto.data;
 
 
 import java.time.ZonedDateTime;
@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * The type File storage.
  */
-public class FileStorage {
+public class FileStorageDto {
 
     /**
      * The Object name.

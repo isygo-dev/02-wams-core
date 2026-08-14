@@ -3,7 +3,6 @@ package eu.isygoit.service.impl;
 import eu.isygoit.dto.data.BucketDto;
 import eu.isygoit.dto.exception.MinIoObjectException;
 import eu.isygoit.enums.IEnumLogicalOperator;
-import eu.isygoit.model.FileStorage;
 import eu.isygoit.model.StorageConfig;
 import eu.isygoit.service.IObjectStorageService;
 import io.minio.messages.DeleteObject;
@@ -12,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import eu.isygoit.dto.data.FileStorageDto;
 
 import java.util.List;
 import java.util.Map;
@@ -38,7 +38,7 @@ public class CephStorageService implements IObjectStorageService {
     }
 
     @Override
-    public List<FileStorage> getObjects(StorageConfig config, String bucketName) {
+    public List<FileStorageDto> getObjects(StorageConfig config, String bucketName) {
         try {
             return cephApiService.getObjects(config, bucketName);
         } catch (Exception e) {
@@ -74,7 +74,7 @@ public class CephStorageService implements IObjectStorageService {
     }
 
     @Override
-    public List<FileStorage> getObjectByTags(StorageConfig config, String bucketName, Map<String, String> tags, IEnumLogicalOperator.Types condition) {
+    public List<FileStorageDto> getObjectByTags(StorageConfig config, String bucketName, Map<String, String> tags, IEnumLogicalOperator.Types condition) {
         try {
             return cephApiService.getObjectByTags(config, bucketName, tags, condition);
         } catch (Exception e) {
