@@ -146,6 +146,9 @@ app:
       less-remaining-days: 7
   feign:
     shouldNotFilterKey: ++SHOULD_NOT_FILTER$
+    api:
+      internal-key: Bearer eyJleHAiOiJuZXZlciIsImtpZFZlcnNpb24iOiJ2LTNmZjAyNTJkLWU2OWUtNDhkZC1hMTljLWMxMmY3MGJhODMyMSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJyb290QHN1cGVyLXRlbmFudCIsImlzcyI6ImttcyIsImlhdCI6MTc4NjcwODA1NiwiYXVkIjpbIktNUy4qIl0sImxvZy1hcHAiOiJpZGVudGl0eS1zZXJ2aWNlIiwic2VuZGVyLXVzZXIiOiJyb290Iiwic2VuZGVyLXRlbmFudCI6InN1cGVyLXRlbmFudCJ9.C_4AB2oFLx3LBW4OfIlxyhoEIy2PU09hpRuWFCHjelM9BgGn_6agp9PpgF-BqTQICPN9T39aCsGsFRiumaPq-25m4rMI-4rk6ly4gD4Tqu-nh0PuivLRnnHxFUl-Eg-ZXFsgCEbaCdvEXr3yGkcagUOA_QtZDfd0_SPyD6Z6TAXlq1Xj_5_Jof3mGJj1BbWhkPtbwXUrNE89iZ6ezx50Gf7FjTFbv5TPqOTz47tTfuyStOd2jijb4NhNj2BIvp940uY6ZF4gfQvJYhIUNmEDf632w19TJ-9arXDtIs18LexB2cJ1tcrCnfUXFumOMCDR-GSFpOzMfdqziKb2HYGl5Q
+        
   email:
     async: true
     broker: kafka # kafka, rest
@@ -155,7 +158,7 @@ app:
     enabled: true
     location: classpath:i18n/messages
   jwt:
-    secretKey: o9ZqX8kL2mNpR4tY7uVwB1cD3eF5gH6jK8lM0nP2rS4tU6vW8xY0z
+    secretKey: o9ZqX8kL2mNpR4tY7uVwB1cD3eFo9ZqX8kL2mNpR4tY7uVwB1cD3eF5gH6jK8lM0nP2rS4tU6vW8xY0z5gH6jK8lM0nP2rS4tU6vW8xY0z
     deactivateOldTokens: true
     signatureAlgorithm: HS256
     life-time-ms: 14400000

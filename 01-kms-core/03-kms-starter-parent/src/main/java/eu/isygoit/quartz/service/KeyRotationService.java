@@ -103,8 +103,7 @@ public class KeyRotationService extends AbstractJobService {
             }
 
             // Calculate next rotation due date
-            //LocalDateTime dueDate = baseDate.plusDays(key.getRotationPeriodInDays());
-            LocalDateTime dueDate = baseDate.plusMinutes(5);
+            LocalDateTime dueDate = baseDate.plusDays(key.getRotationPeriodInDays());
             if (dueDate.isBefore(now) || dueDate.isEqual(now)) {
                 try {
                     log.info("Rotating key: {} (tenant: {}, last rotation: {}, period: {} days)",

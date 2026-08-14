@@ -124,15 +124,15 @@ app:
   feign:
     shouldNotFilterKey: ++SHOULD_NOT_FILTER$
     api:
-      internal-key: Bearer eyJleHAiOiJuZXZlciIsImtpZFZlcnNpb24iOiJ2LTYxYTc3ZTFkLTgzNzgtNGMxZi1iNGVjLWVjMmRkNzRhY2Y0MSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJyb290QHN1cGVyLXRlbmFudCIsImlzcyI6ImttcyIsImlhdCI6MTc4MjIyOTMxNCwiYXVkIjpbIktNUy4qIl0sImxvZy1hcHAiOiJpZGVudGl0eS1zZXJ2aWNlIiwic2VuZGVyLXVzZXIiOiJyb290Iiwic2VuZGVyLXRlbmFudCI6InN1cGVyLXRlbmFudCJ9.C28bn3qmq5Ig0nxPWNe20KwwZXBjTg_4gi1yXRdv5NzGd9jQ38igBxL0jA_DSD1kbfNMHcQXOjdyDQbGIV8PY2twdAMUrlNZCk5wTCAqb-4InAEcFfMflpTjyNQCv6H1h3xNgd5RvbbEg_fvH8MfOkOLlnNM-eqQ7MIZQcheIwmUQi5cfgqTP-OXfkPKwvHsn3jnyoyyc1KFhl4zOOWePS8-6eG49TLxtTJqLxuxrzOw49XhoWbU7qTJHyv_G_pFx4eBzX3O5ck9lRLpBWZlrC8FAr8ix4Qw2L0pkt2ybGaA6I2t4BAp6o7EbSA92VPHOOfwXn3nqCzmO9FlNtrceA
-
+      internal-key: Bearer eyJleHAiOiJuZXZlciIsImtpZFZlcnNpb24iOiJ2LTNmZjAyNTJkLWU2OWUtNDhkZC1hMTljLWMxMmY3MGJhODMyMSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJyb290QHN1cGVyLXRlbmFudCIsImlzcyI6ImttcyIsImlhdCI6MTc4NjcwODA1NiwiYXVkIjpbIktNUy4qIl0sImxvZy1hcHAiOiJpZGVudGl0eS1zZXJ2aWNlIiwic2VuZGVyLXVzZXIiOiJyb290Iiwic2VuZGVyLXRlbmFudCI6InN1cGVyLXRlbmFudCJ9.C_4AB2oFLx3LBW4OfIlxyhoEIy2PU09hpRuWFCHjelM9BgGn_6agp9PpgF-BqTQICPN9T39aCsGsFRiumaPq-25m4rMI-4rk6ly4gD4Tqu-nh0PuivLRnnHxFUl-Eg-ZXFsgCEbaCdvEXr3yGkcagUOA_QtZDfd0_SPyD6Z6TAXlq1Xj_5_Jof3mGJj1BbWhkPtbwXUrNE89iZ6ezx50Gf7FjTFbv5TPqOTz47tTfuyStOd2jijb4NhNj2BIvp940uY6ZF4gfQvJYhIUNmEDf632w19TJ-9arXDtIs18LexB2cJ1tcrCnfUXFumOMCDR-GSFpOzMfdqziKb2HYGl5Q
+        
   email:
     async: true
     broker: kafka # kafka, rest
   upload:
     directory: /uploads/dms
   dms:
-    local-storage: true
+    local-storage: false
     no-duplicate: true
   i18n:
     enabled: true

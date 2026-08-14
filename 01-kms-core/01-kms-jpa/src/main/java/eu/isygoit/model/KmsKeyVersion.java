@@ -54,8 +54,10 @@ public class KmsKeyVersion extends AuditableEntity<Long> implements ITenantAssig
     @Column(name = SchemaColumnConstantName.C_VERSION_ID, length = 255, nullable = false)
     private String versionId;
 
+    @ColumnDefault("'ENABLED'")
+    @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_STATUS, length = 50, nullable = false)
-    private IEnumKeyStatus.Types keyStatus;
+    private IEnumKeyStatus.Types keyStatus = IEnumKeyStatus.Types.ENABLED;
 
     @Lob
     @Column(name = SchemaColumnConstantName.C_KEY_MATERIAL, nullable = false)
