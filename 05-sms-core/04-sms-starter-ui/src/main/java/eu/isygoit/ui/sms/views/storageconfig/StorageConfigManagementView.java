@@ -157,11 +157,11 @@ public class StorageConfigManagementView extends ManagementVerticalView {
             filterAndDisplayCards();
         } catch (FeignException ex) {
             String errorMsg = extractErrorMessage(ex);
-            Notification.show(I18n.t("sms.storageconfig.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("sms.storageconfig.view.load.error", errorMsg), 5000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load storage configs", ex);
         } catch (Exception e) {
-            Notification.show(I18n.t("sms.storageconfig.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
+            Notification.show(I18n.t("sms.storageconfig.view.load.error", e.getMessage()), 5000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load storage configs", e);
         } finally {
@@ -207,7 +207,7 @@ public class StorageConfigManagementView extends ManagementVerticalView {
     }
 
     private void updatePaginationDisplay() {
-        pageInfoLabel.setText(I18n.t("sms.storageconfig.view.page.info", currentPage + 1, totalPages));
+        pageInfoLabel.setText(I18n.t("sms.storageconfig.view.page.info", totalPages == 0 ? 0 : currentPage + 1, totalPages));
         totalCountLabel.setText(I18n.t("sms.storageconfig.view.total.count", totalElements));
         prevButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(currentPage + 1 < totalPages);
@@ -225,7 +225,7 @@ public class StorageConfigManagementView extends ManagementVerticalView {
         HorizontalLayout leftGroup = new HorizontalLayout();
         leftGroup.setSpacing(true);
         leftGroup.setAlignItems(FlexComponent.Alignment.END);
-        searchField.setWidth("200px");
+        searchField.setWidth("250px");
         typeFilter.setWidth("150px");
         leftGroup.add(searchField, typeFilter);
 
@@ -236,6 +236,7 @@ public class StorageConfigManagementView extends ManagementVerticalView {
         nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         pageSizeSelect.setWidth("100px");
         pageInfoLabel.addClassName("wams-page-info-label");
+        totalCountLabel.addClassName("wams-total-count-label");
         centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
 
         HorizontalLayout rightGroup = new HorizontalLayout();

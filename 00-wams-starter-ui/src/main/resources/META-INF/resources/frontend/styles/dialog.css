@@ -39,6 +39,13 @@
     width: 100%;
 }
 
+/* Small secondary-colored helper/rules text shown below a form field (e.g.
+   naming-rules hints in "Create <X>" dialogs) — styles live in CSS, not Java. */
+.wams-dialog-hint-text {
+    font-size: var(--lumo-font-size-xs);
+    color: var(--lumo-secondary-text-color);
+}
+
 /* ── Image cropper (eu.isygoit.ui.common.{dialog.ImageCropperDialog, component.ImageCropper}) ── */
 
 .wams-image-cropper-dialog__content {

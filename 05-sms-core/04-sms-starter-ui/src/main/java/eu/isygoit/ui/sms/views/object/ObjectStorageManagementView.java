@@ -11,7 +11,6 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -170,15 +169,7 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
         H2 header = new H2(I18n.t("sms.objects.view.title"));
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
-
-        Span subtitle = new Span(I18n.t("sms.objects.view.subtitle"));
-        subtitle.addClassName(LumoUtility.TextColor.SECONDARY);
-        subtitle.addClassName(LumoUtility.FontSize.SMALL);
-
-        VerticalLayout headerContent = new VerticalLayout(header, subtitle);
-        headerContent.setSpacing(false);
-        headerContent.setPadding(false);
-        return headerContent;
+        return header;
     }
 
     private Component buildStats() {
@@ -268,7 +259,7 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
                 bucketSelector.setItems(buckets);
                 bucketSelector.setItemLabelGenerator(BucketDto::getName);
                 if (!buckets.isEmpty()) bucketSelector.setValue(buckets.get(0));
-                else showInfo(I18n.t("sms.objects.view.no.buckets"));
+                else showWarning(I18n.t("sms.objects.view.no.buckets"));
             }
         } catch (FeignException ex) { showError(I18n.t("sms.objects.view.load.buckets.error", extractErrorMessage(ex))); log.error("Failed to load buckets for tenant: {}", tenant, ex); }
         catch (Exception e) { showError(I18n.t("sms.objects.view.load.buckets.error", e.getMessage())); log.error("Failed to load buckets for tenant: {}", tenant, e); }
@@ -282,7 +273,7 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
             List<FileItem> files = parseFileResponse(response.getBody());
             allFiles = files != null ? files : new ArrayList<>();
             updateStats();
-            if (allFiles.isEmpty()) showInfo(I18n.t("sms.objects.view.no.files"));
+            if (allFiles.isEmpty()) showWarning(I18n.t("sms.objects.view.no.files"));
             applyFiltersAndPagination();
         } catch (FeignException ex) { showError(I18n.t("sms.objects.view.load.files.error", extractErrorMessage(ex))); log.error("Failed to load files from bucket: {}", bucketName, ex); }
         catch (Exception e) { showError(I18n.t("sms.objects.view.load.files.error", e.getMessage())); log.error("Failed to load files from bucket: {}", bucketName, e); }
@@ -423,9 +414,9 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
         tenantSelector.setWidth("220px");
         bucketSelector.setPlaceholder(I18n.t("sms.objects.view.select.bucket"));
         bucketSelector.setWidth("180px");
-        searchField.setWidth("200px");
+        searchField.setWidth("250px");
         searchField.setPlaceholder(I18n.t("sms.objects.view.search.placeholder"));
-        leftGroup.add(tenantSelector, bucketSelector, createBucketButton, searchField);
+        leftGroup.add(tenantSelector, bucketSelector, searchField);
 
         HorizontalLayout centerGroup = new HorizontalLayout();
         centerGroup.setSpacing(true);
@@ -434,6 +425,7 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
         nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         pageSizeSelect.setWidth("100px");
         pageInfoLabel.addClassName("wams-page-info-label");
+        totalCountLabel.addClassName("wams-total-count-label");
         centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
 
         HorizontalLayout rightGroup = new HorizontalLayout();
@@ -442,7 +434,7 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
         uploadFileButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         uploadFileButton.setEnabled(false);
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        rightGroup.add(refreshButton, uploadFileButton);
+        rightGroup.add(refreshButton, createBucketButton, uploadFileButton);
 
         toolbar.add(leftGroup, centerGroup, rightGroup);
         return toolbar;
@@ -483,7 +475,6 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
     // ----- Helpers -----
     private void showError(String msg) { Notification.show(msg, 5000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_ERROR); }
     private void showWarning(String msg) { Notification.show(msg, 5000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_WARNING); }
-    private void showInfo(String msg) { Notification.show(msg, 3000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_SUCCESS); }
 
     private String formatSize(long size) {
         if (size < 1024) return size + " B";

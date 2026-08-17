@@ -1,6 +1,5 @@
 package eu.isygoit.ui.sms.views.bucket;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -11,7 +10,6 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -25,6 +23,8 @@ import eu.isygoit.dto.data.StorageConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.ObjectStorageService;
 import eu.isygoit.remote.sms.StorageConfigService;
+import eu.isygoit.ui.common.component.StatCard;
+import eu.isygoit.ui.common.component.StatCardGrid;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.sms.layout.SmsMainLayout;
 import eu.isygoit.ui.sms.views.bucket.dialog.CreateBucketDialog;
@@ -50,7 +50,6 @@ public class BucketManagementView extends ManagementVerticalView {
     private final StorageConfigService storageConfigService;
 
     private final Div cardsContainer = new Div();
-    private final Div statsContainer = new Div();
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button createBucketButton = new Button(I18n.t("sms.buckets.view.create.bucket"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final TextField searchField = new TextField();
@@ -72,7 +71,7 @@ public class BucketManagementView extends ManagementVerticalView {
     private int pageSize = 10;
     private int totalPages = 0;
     private long totalElements = 0;
-    private Span totalBucketsLabel;
+    private StatCard totalBucketsCard;
 
     @Autowired
     public BucketManagementView(ObjectStorageService objectStorageService,
@@ -84,8 +83,12 @@ public class BucketManagementView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("bucket-management-view");
 
-        buildHeader();
-        buildStats();
+        H2 header = new H2(I18n.t("sms.buckets.view.title"));
+        header.addClassName(LumoUtility.FontSize.XXLARGE);
+        header.addClassName(LumoUtility.Margin.Bottom.NONE);
+        add(header);
+
+        add(buildStats());
         add(buildToolbar());
         cardsContainer.setWidthFull();
         cardsContainer.addClassName("buckets-cards-grid");
@@ -99,70 +102,14 @@ public class BucketManagementView extends ManagementVerticalView {
         loadStorageConfigs();
     }
 
-    private void buildHeader() {
-        HorizontalLayout headerLayout = new HorizontalLayout();
-        headerLayout.setWidthFull();
-        headerLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        headerLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-
-        H2 header = new H2(I18n.t("sms.buckets.view.title"));
-        header.addClassName(LumoUtility.FontSize.XXLARGE);
-        header.addClassName(LumoUtility.Margin.Bottom.NONE);
-
-        Span subtitle = new Span(I18n.t("sms.buckets.view.subtitle"));
-        subtitle.addClassName(LumoUtility.TextColor.SECONDARY);
-        subtitle.addClassName(LumoUtility.FontSize.SMALL);
-
-        VerticalLayout headerContent = new VerticalLayout();
-        headerContent.setSpacing(false);
-        headerContent.setPadding(false);
-        headerContent.add(header, subtitle);
-
-        headerLayout.add(headerContent);
-        add(headerLayout);
-    }
-
-    private void buildStats() {
-        statsContainer.setWidthFull();
-        statsContainer.addClassName("bucket-stats-container");
-        statsContainer.getStyle().set("display", "flex");
-        statsContainer.getStyle().set("gap", "var(--lumo-space-m)");
-        statsContainer.getStyle().set("margin-bottom", "var(--lumo-space-l)");
-        statsContainer.getStyle().set("flex-wrap", "wrap");
-
-        totalBucketsLabel = createStatCard(VaadinIcon.DATABASE, I18n.t("sms.buckets.stats.total.buckets"), "0");
-        statsContainer.add(totalBucketsLabel);
-        add(statsContainer);
-    }
-
-    private Span createStatCard(VaadinIcon icon, String label, String value) {
-        Div card = new Div();
-        card.addClassName("bucket-stat-card");
-        card.getStyle().set("background", "var(--lumo-base-color)");
-        card.getStyle().set("border", "1px solid var(--lumo-contrast-10pct)");
-        card.getStyle().set("border-radius", "var(--lumo-border-radius)");
-        card.getStyle().set("padding", "var(--lumo-space-m)");
-        card.getStyle().set("min-width", "150px");
-        card.getStyle().set("flex", "1");
-
-        Icon iconComponent = icon.create();
-        iconComponent.setSize("24px");
-        iconComponent.getStyle().set("color", "var(--lumo-primary-color)");
-
-        Span labelSpan = new Span(label);
-        labelSpan.addClassName(LumoUtility.TextColor.SECONDARY);
-        labelSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-
-        Span valueSpan = new Span(value);
-        valueSpan.addClassName(LumoUtility.FontSize.LARGE);
-        valueSpan.addClassName(LumoUtility.FontWeight.BOLD);
-
-        card.add(iconComponent, labelSpan, valueSpan);
-        return valueSpan;
+    private StatCardGrid buildStats() {
+        totalBucketsCard = new StatCard(VaadinIcon.DATABASE, StatCard.Variant.PRIMARY,
+                I18n.t("sms.buckets.stats.total.buckets"), "0");
+        return new StatCardGrid(totalBucketsCard);
     }
 
     private void updateStats() {
-        totalBucketsLabel.setText(String.valueOf(allBuckets.size()));
+        totalBucketsCard.setValue(String.valueOf(allBuckets.size()));
     }
 
     private void initEventHandlers() {
@@ -214,7 +161,7 @@ public class BucketManagementView extends ManagementVerticalView {
             if (response.getBody() != null) {
                 allBuckets = response.getBody();
                 updateStats();
-                if (allBuckets.isEmpty()) showInfo(I18n.t("sms.buckets.view.no.buckets"));
+                if (allBuckets.isEmpty()) showWarning(I18n.t("sms.buckets.view.no.buckets"));
                 applyFiltersAndPagination();
             }
         } catch (FeignException ex) { showError(I18n.t("sms.buckets.view.load.buckets.error", extractErrorMessage(ex))); log.error("Failed to load buckets for tenant: {}", tenant, ex); }
@@ -260,7 +207,7 @@ public class BucketManagementView extends ManagementVerticalView {
     }
 
     private void updatePaginationDisplay() {
-        pageInfoLabel.setText(I18n.t("sms.buckets.view.page.info", currentPage + 1, totalPages));
+        pageInfoLabel.setText(I18n.t("sms.buckets.view.page.info", totalPages == 0 ? 0 : currentPage + 1, totalPages));
         totalCountLabel.setText(I18n.t("sms.buckets.view.total.count", totalElements));
         prevButton.setEnabled(currentPage > 0);
         nextButton.setEnabled(currentPage + 1 < totalPages);
@@ -302,7 +249,7 @@ public class BucketManagementView extends ManagementVerticalView {
         leftGroup.setAlignItems(FlexComponent.Alignment.END);
         tenantSelector.setPlaceholder(I18n.t("sms.buckets.view.select.tenant"));
         tenantSelector.setWidth("250px");
-        searchField.setWidth("200px");
+        searchField.setWidth("250px");
         leftGroup.add(tenantSelector, searchField);
 
         HorizontalLayout centerGroup = new HorizontalLayout();
@@ -312,6 +259,7 @@ public class BucketManagementView extends ManagementVerticalView {
         nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         pageSizeSelect.setWidth("100px");
         pageInfoLabel.addClassName("wams-page-info-label");
+        totalCountLabel.addClassName("wams-total-count-label");
         centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
 
         HorizontalLayout rightGroup = new HorizontalLayout();
@@ -347,12 +295,9 @@ public class BucketManagementView extends ManagementVerticalView {
 
     private void showError(String msg) { Notification.show(msg, 5000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_ERROR); }
     private void showWarning(String msg) { Notification.show(msg, 5000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_WARNING); }
-    private void showInfo(String msg) { Notification.show(msg, 3000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_SUCCESS); }
 
     private String extractErrorMessage(FeignException ex) {
         try { if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank()) return ex.contentUTF8(); } catch (Exception ignored) {}
         return ex.getMessage() != null ? ex.getMessage() : "Unknown error";
     }
-
-    @Override protected void onAttach(AttachEvent attachEvent) { super.onAttach(attachEvent); }
 }

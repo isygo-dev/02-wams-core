@@ -1,13 +1,11 @@
 package eu.isygoit.ui.sms.views.storageconfig;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.StorageConfigDto;
 import eu.isygoit.i18n.I18n;
@@ -51,7 +49,7 @@ public class StorageConfigCard extends BaseCard<StorageConfigManagementView, Sto
         Span titleSpan = buildTitleSpan(displayName, config.getUrl());
 
         String typeLabel = config.getType() != null ? config.getType().name() : I18n.t("sms.storageconfig.card.type.unknown");
-        Span typeChip = buildStatusChip(typeLabel, typeLabel);
+        Span typeChip = buildStatusChip(typeLabel, BaseCard.ChipColor.INFO);
 
         titleLayout.add(titleSpan, typeChip);
         return titleLayout;
@@ -77,17 +75,10 @@ public class StorageConfigCard extends BaseCard<StorageConfigManagementView, Sto
 
     @Override
     protected void buildBodyRows() {
-        VerticalLayout body = new VerticalLayout();
-        body.setSpacing(false);
-        body.setPadding(false);
-        body.addClassName("wams-body-rows");
-
-        body.add(createIconRow(VaadinIcon.BUILDING, I18n.t("sms.storageconfig.card.tenant"), config.getTenant()));
-        body.add(createIconRow(VaadinIcon.USER, I18n.t("sms.storageconfig.card.username"), config.getUserName()));
-        body.add(createIconRow(VaadinIcon.LINK, I18n.t("sms.storageconfig.card.url"), config.getUrl()));
-        body.add(createIconRow(VaadinIcon.KEY, I18n.t("sms.storageconfig.card.password"), "••••••••"));
-
-        add(body);
+        add(createIconRow(VaadinIcon.BUILDING, I18n.t("sms.storageconfig.card.tenant"), config.getTenant()));
+        add(createIconRow(VaadinIcon.USER, I18n.t("sms.storageconfig.card.username"), config.getUserName()));
+        add(createIconRow(VaadinIcon.LINK, I18n.t("sms.storageconfig.card.url"), config.getUrl()));
+        add(createIconRow(VaadinIcon.KEY, I18n.t("sms.storageconfig.card.password"), "••••••••"));
     }
 
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
@@ -98,25 +89,20 @@ public class StorageConfigCard extends BaseCard<StorageConfigManagementView, Sto
         row.addClassName("meta-row");
 
         com.vaadin.flow.component.icon.Icon iconComponent = icon.create();
-        iconComponent.setSize("14px");
+        iconComponent.setSize("16px");
         iconComponent.addClassName("meta-row-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.XXSMALL);
+        labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
         labelSpan.addClassName("meta-row-label");
 
         Span valueSpan = new Span(value != null ? value : "—");
-        valueSpan.addClassName(LumoUtility.FontSize.XXSMALL);
+        valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
         valueSpan.addClassName("meta-row-value");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
         return row;
-    }
-
-    @Override
-    protected void onCardAttach(AttachEvent event) {
-        // nothing special
     }
 }

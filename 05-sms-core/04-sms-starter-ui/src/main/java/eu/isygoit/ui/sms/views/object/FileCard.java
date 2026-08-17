@@ -1,6 +1,5 @@
 package eu.isygoit.ui.sms.views.object;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -11,7 +10,6 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.i18n.I18n;
@@ -169,22 +167,15 @@ public class FileCard extends BaseCard<ObjectStorageManagementView, ObjectStorag
 
     @Override
     protected void buildBodyRows() {
-        VerticalLayout body = new VerticalLayout();
-        body.setSpacing(false);
-        body.setPadding(false);
-        body.addClassName("wams-body-rows");
-
-        body.add(createIconRow(VaadinIcon.FOLDER, I18n.t("sms.objects.card.path"),
+        add(createIconRow(VaadinIcon.FOLDER, I18n.t("sms.objects.card.path"),
                 file.getPath() != null && !file.getPath().isBlank() ? file.getPath() : I18n.t("sms.objects.card.path.root")));
-        body.add(createIconRow(VaadinIcon.HARDDRIVE, I18n.t("sms.objects.card.size"), file.getSizeDisplay()));
-        body.add(createIconRow(VaadinIcon.CALENDAR, I18n.t("sms.objects.card.modified"),
+        add(createIconRow(VaadinIcon.HARDDRIVE, I18n.t("sms.objects.card.size"), file.getSizeDisplay()));
+        add(createIconRow(VaadinIcon.CALENDAR, I18n.t("sms.objects.card.modified"),
                 file.getModifiedDate() != null ? file.getModifiedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : null));
 
         if (file.getTags() != null && !file.getTags().isEmpty()) {
-            body.add(createTagsRow(file.getTags()));
+            add(createTagsRow(file.getTags()));
         }
-
-        add(body);
     }
 
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
@@ -195,16 +186,16 @@ public class FileCard extends BaseCard<ObjectStorageManagementView, ObjectStorag
         row.addClassName("meta-row");
 
         com.vaadin.flow.component.icon.Icon iconComponent = icon.create();
-        iconComponent.setSize("14px");
+        iconComponent.setSize("16px");
         iconComponent.addClassName("meta-row-icon");
 
         Span labelSpan = new Span(label + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.XXSMALL);
+        labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
         labelSpan.addClassName("meta-row-label");
 
         Span valueSpan = new Span(value != null ? value : "—");
-        valueSpan.addClassName(LumoUtility.FontSize.XXSMALL);
+        valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
         valueSpan.addClassName("meta-row-value");
 
         row.add(iconComponent, labelSpan, valueSpan);
@@ -220,30 +211,23 @@ public class FileCard extends BaseCard<ObjectStorageManagementView, ObjectStorag
         row.addClassName("meta-row");
 
         com.vaadin.flow.component.icon.Icon iconComponent = VaadinIcon.TAGS.create();
-        iconComponent.setSize("14px");
+        iconComponent.setSize("16px");
         iconComponent.addClassName("meta-row-icon");
 
         Span labelSpan = new Span(I18n.t("sms.objects.card.tags") + ":");
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.XXSMALL);
+        labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
         labelSpan.addClassName("meta-row-label");
 
         HorizontalLayout tagsLayout = new HorizontalLayout();
         tagsLayout.setSpacing(true);
         tagsLayout.addClassName("wams-tags-wrap");
         for (String tag : tags) {
-            Span tagBadge = new Span(tag);
-            tagBadge.addClassName("tag-badge");
-            tagsLayout.add(tagBadge);
+            tagsLayout.add(buildStatusChip(tag, BaseCard.ChipColor.INFO));
         }
 
         row.add(iconComponent, labelSpan, tagsLayout);
         row.expand(tagsLayout);
         return row;
-    }
-
-    @Override
-    protected void onCardAttach(AttachEvent event) {
-        // nothing special
     }
 }

@@ -20,7 +20,6 @@ public class CreateBucketDialog extends BaseActionDialog {
     private final BucketManagementView parentView;
     private final ObjectStorageService objectStorageService;
     private final String tenant;
-    private final Runnable onSuccess;
     private TextField bucketNameField;
     private Binder<BucketDto> binder;
 
@@ -30,7 +29,6 @@ public class CreateBucketDialog extends BaseActionDialog {
         this.parentView = parentView;
         this.objectStorageService = objectStorageService;
         this.tenant = tenant;
-        this.onSuccess = onSuccess;
 
         setOkButtonText(I18n.t("sms.buckets.dialog.create.bucket.button"));
         setWidth("500px");
@@ -72,8 +70,7 @@ public class CreateBucketDialog extends BaseActionDialog {
         FormLayout form = new FormLayout();
         form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
         Span rulesSpan = new Span(I18n.t("sms.buckets.dialog.field.bucket.name.rules"));
-        rulesSpan.getStyle().set("font-size", "var(--lumo-font-size-xs)");
-        rulesSpan.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        rulesSpan.addClassName("wams-dialog-hint-text");
         form.add(bucketNameField, rulesSpan);
         return form;
     }
@@ -94,7 +91,6 @@ public class CreateBucketDialog extends BaseActionDialog {
         try {
             objectStorageService.saveBucket(tenant, bucketName.trim().toLowerCase());
             append(I18n.t("sms.buckets.dialog.create.bucket.success", bucketName));
-            if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
