@@ -12,6 +12,7 @@ import eu.isygoit.enums.IEnumLogicalOperator;
 import eu.isygoit.exception.handler.SmsExceptionHandler;
 import eu.isygoit.factory.StorageFactoryService;
 import eu.isygoit.model.StorageConfig;
+import eu.isygoit.s3.object.MetaData;
 import eu.isygoit.service.IStorageConfigService;
 import io.minio.messages.DeleteObject;
 import lombok.extern.slf4j.Slf4j;
@@ -262,6 +263,53 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
             storageFactoryService.getService(config.getType()).deletebucket(config,
                     bucketName.toLowerCase());
             return ResponseFactory.responseOk();
+        } catch (Throwable e) {
+            log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
+            return getBackExceptionResponse(e);
+        }
+    }
+
+    @Override
+    public ResponseEntity<MetaData> getMetadata(
+            String tenant,
+            String bucketName,
+            String path,
+            String fileName,
+            String versionID) {
+        log.info("getMetadata request received for tenant: {}, bucket: {}, path: {}, fileName: {}",
+                tenant, bucketName, path, fileName);
+        try {
+            StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);
+            // Combine path and fileName into the full object name
+            String objectName = path.replace("#", "/").toLowerCase() + "/" + fileName;
+            MetaData metaData = storageFactoryService.getService(config.getType())
+                    .getMetaData(config,
+                            bucketName.toLowerCase(),
+                            objectName,
+                            versionID);
+            return ResponseEntity.ok(metaData);
+        } catch (Throwable e) {
+            log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
+            return getBackExceptionResponse(e);
+        }
+    }
+
+    @Override
+    public ResponseEntity<String> getPresignedUrl(
+            String tenant,
+            String bucketName,
+            String path,
+            String fileName) {
+        log.info("getPresignedUrl request received for tenant: {}, bucket: {}, path: {}, fileName: {}",
+                tenant, bucketName, path, fileName);
+        try {
+            StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);
+            String objectName = path.replace("#", "/").toLowerCase() + "/" + fileName;
+            String url = storageFactoryService.getService(config.getType())
+                    .getPresignedUrl(config,
+                            bucketName.toLowerCase(),
+                            objectName);
+            return ResponseEntity.ok(url);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);

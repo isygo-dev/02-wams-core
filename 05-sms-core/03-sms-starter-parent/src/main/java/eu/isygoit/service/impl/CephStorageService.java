@@ -4,6 +4,7 @@ import eu.isygoit.dto.data.BucketDto;
 import eu.isygoit.dto.exception.MinIoObjectException;
 import eu.isygoit.enums.IEnumLogicalOperator;
 import eu.isygoit.model.StorageConfig;
+import eu.isygoit.s3.object.MetaData;
 import eu.isygoit.service.IObjectStorageService;
 import io.minio.messages.DeleteObject;
 import lombok.extern.slf4j.Slf4j;
@@ -125,5 +126,15 @@ public class CephStorageService implements IObjectStorageService {
         } catch (Exception e) {
             throw new MinIoObjectException(e);
         }
+    }
+
+    @Override
+    public MetaData getMetaData(StorageConfig config, String lowerCase, String objectName, String versionID) {
+        return null;
+    }
+
+    @Override
+    public String getPresignedUrl(StorageConfig config, String lowerCase, String objectName) {
+        return "";
     }
 }

@@ -3,6 +3,7 @@ package eu.isygoit.dto.data;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The type File storage.
@@ -39,6 +40,10 @@ public class FileStorageDto {
      * The Current version.
      */
     public boolean currentVersion;
+
+    public Map<String, String> metadata;
+
+    public String pathType;
 }
 
 

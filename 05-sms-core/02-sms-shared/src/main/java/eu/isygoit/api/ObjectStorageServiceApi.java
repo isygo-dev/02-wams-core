@@ -6,6 +6,7 @@ import eu.isygoit.dto.data.FileStorageDto;
 import eu.isygoit.dto.data.FileTagsDto;
 import eu.isygoit.dto.extendable.IdAssignableDto;
 import eu.isygoit.enums.IEnumLogicalOperator;
+import eu.isygoit.s3.object.MetaData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -271,4 +272,33 @@ public interface ObjectStorageServiceApi {
     ResponseEntity<Object> deleteBucket(
             @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
             @RequestParam(name = RestApiConstants.BUCKET_NAME) String bucketName);
+
+    @Operation(summary = "Get object metadata",
+            description = "Retrieves metadata (size, content type, ETag, version, tags, etc.) of an object.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Metadata retrieved successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = MetaData.class))})
+    })
+    @GetMapping(path = "/metadata")
+    ResponseEntity<MetaData> getMetadata(
+            @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
+            @RequestParam(name = RestApiConstants.BUCKET_NAME) String bucketName,
+            @RequestParam(name = RestApiConstants.PATH) String path,
+            @RequestParam(name = RestApiConstants.FILE_NAME) String fileName,
+            @RequestParam(name = RestApiConstants.VERSION_ID, required = false) String versionID);
+
+    @Operation(summary = "Generate pre‑signed URL",
+            description = "Returns a time‑limited URL for direct download of an object.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Pre‑signed URL generated",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = String.class))})
+    })
+    @GetMapping(path = "/presignedUrl")
+    ResponseEntity<String> getPresignedUrl(
+            @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
+            @RequestParam(name = RestApiConstants.BUCKET_NAME) String bucketName,
+            @RequestParam(name = RestApiConstants.PATH) String path,
+            @RequestParam(name = RestApiConstants.FILE_NAME) String fileName);
 }

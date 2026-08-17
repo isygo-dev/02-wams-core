@@ -26,15 +26,21 @@
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>service-stack-shared</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>eu.isygo-it.services</groupId>
+            <artifactId>service-stack-storage</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct-processor</artifactId>
         </dependency>
-
     </dependencies>
 </project>
 

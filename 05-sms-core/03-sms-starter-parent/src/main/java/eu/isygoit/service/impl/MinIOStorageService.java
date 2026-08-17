@@ -182,4 +182,24 @@ public class MinIOStorageService implements IObjectStorageService {
             throw new MinIoObjectException(e);
         }
     }
+
+    @Override
+    public MetaData getMetaData(StorageConfig config, String lowerCase, String objectName, String versionID) {
+        try {
+            S3Config s3Config = s3ConfigMapper.entityToDto(config);
+            return minioService.getMetaData(s3Config, lowerCase, objectName, versionID);
+        } catch (Exception e) {
+            throw new MinIoObjectException(e);
+        }
+    }
+
+    @Override
+    public String getPresignedUrl(StorageConfig config, String lowerCase, String objectName) {
+        try {
+            S3Config s3Config = s3ConfigMapper.entityToDto(config);
+            return minioService.getPresignedObjectUrl(s3Config, lowerCase, objectName);
+        } catch (Exception e) {
+            throw new MinIoObjectException(e);
+        }
+    }
 }
