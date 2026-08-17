@@ -4,9 +4,10 @@ import eu.isygoit.annotation.InjectRepository;
 import eu.isygoit.com.rest.service.tenancy.CrudTenantService;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.exception.StorageConfigNotFoundException;
+import eu.isygoit.mapper.S3ConfigMapper;
 import eu.isygoit.model.StorageConfig;
 import eu.isygoit.repository.StorageConfigRepository;
-import eu.isygoit.service.IMinIOApiService;
+import eu.isygoit.service.ISmsMinIOApiService;
 import eu.isygoit.service.IStorageConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,10 +26,13 @@ public class StorageConfigService extends CrudTenantService<Long, StorageConfig,
     @Autowired
     private StorageConfigRepository storageConfigRepository;
     @Autowired
-    private IMinIOApiService minIOApiService;
+    private ISmsMinIOApiService minIOApiService;
+
+    @Autowired
+    private S3ConfigMapper s3ConfigMapper;
 
     @Override
-    public StorageConfig findByTenantIgnoreCase(String tenant /*senderTenant*/) {
+    public StorageConfig findByTenantIgnoreCase(String tenant) {
         Optional<StorageConfig> optional = storageConfigRepository.findFirstByTenantIgnoreCase(tenant);
         if (!optional.isPresent()) {
             optional = storageConfigRepository.findFirstByTenantIgnoreCase(TenantConstants.DEFAULT_TENANT_NAME);
@@ -42,10 +46,10 @@ public class StorageConfigService extends CrudTenantService<Long, StorageConfig,
     }
 
     @Override
-    public StorageConfig afterUpdate(String tenant /*senderTenant*/, StorageConfig storageConfig) {
+    public StorageConfig afterUpdate(String senderTenant, StorageConfig storageConfig) {
         switch (storageConfig.getType()) {
             case MINIO_STORAGE: {
-                minIOApiService.updateConnection(storageConfig);
+                minIOApiService.updateConnection(s3ConfigMapper.entityToDto(storageConfig));
             }
             break;
             case CEPH_STORAGE: {
@@ -61,6 +65,6 @@ public class StorageConfigService extends CrudTenantService<Long, StorageConfig,
             }
             break;
         }
-        return super.afterUpdate(tenant, storageConfig);
+        return super.afterUpdate(senderTenant, storageConfig);
     }
 }

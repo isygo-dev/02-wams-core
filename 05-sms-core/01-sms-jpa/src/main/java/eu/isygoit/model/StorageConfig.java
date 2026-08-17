@@ -54,4 +54,10 @@ public class StorageConfig extends AuditableEntity<Long> implements ITenantAssig
 
     @Column(name = SchemaColumnConstantName.C_URL, nullable = false)
     private String url;
+
+    @Column(name = SchemaColumnConstantName.C_NAMESPACE)
+    private String namespace;
+
+    @Column(name = SchemaColumnConstantName.C_REGION)
+    private String region;
 }

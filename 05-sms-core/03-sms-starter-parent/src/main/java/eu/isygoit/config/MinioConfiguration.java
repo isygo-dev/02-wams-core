@@ -15,13 +15,4 @@ import java.util.Map;
 @Configuration
 public class MinioConfiguration {
 
-    /**
-     * Min io map map.
-     *
-     * @return the map
-     */
-    @Bean
-    public Map<String, MinioClient> minIoMap() {
-        return new HashMap<>();
-    }
 }

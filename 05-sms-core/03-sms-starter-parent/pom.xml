@@ -80,6 +80,12 @@
             <artifactId>storage-management-shared</artifactId>
             <version>WC-1.0.260408-T1636</version>
         </dependency>
+
+        <dependency>
+            <groupId>eu.isygo-it.services</groupId>
+            <artifactId>service-stack-storage</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>messaging-management-shared</artifactId>
@@ -89,7 +95,6 @@
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>service-stack-web</artifactId>
         </dependency>
-
 
         <dependency>
             <groupId>eu.isygo-it.services</groupId>

@@ -33,4 +33,6 @@ public interface SchemaColumnConstantName extends ComSchemaColumnConstantName {
      * The constant C_USER_NAME.
      */
     String C_USER_NAME = "USER_NAME";
+    String C_NAMESPACE = "NAMESPACE";
+    String C_REGION = "REGION";
 }
