@@ -32,6 +32,13 @@
     letter-spacing: 4px;
 }
 
+/* Vaadin's <vaadin-upload> used by every "Upload <X>" dialog
+   (UploadLinkedFileDialog, UploadFileDialog, ...) — full width of its
+   dialog form regardless of module. */
+.wams-upload-component {
+    width: 100%;
+}
+
 /* ── Image cropper (eu.isygoit.ui.common.{dialog.ImageCropperDialog, component.ImageCropper}) ── */
 
 .wams-image-cropper-dialog__content {

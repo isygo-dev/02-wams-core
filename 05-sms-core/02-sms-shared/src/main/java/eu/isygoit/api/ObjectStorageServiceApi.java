@@ -79,7 +79,7 @@ public interface ObjectStorageServiceApi {
             @RequestParam(name = RestApiConstants.BUCKET_NAME) String bucketName,
             @RequestParam(name = RestApiConstants.PATH) String path,
             @RequestParam(name = RestApiConstants.FILE_NAME) String fileName,
-            @RequestParam(name = RestApiConstants.VERSION_ID) String versionID);
+            @RequestParam(name = RestApiConstants.VERSION_ID, required = false) String versionID);
 
     /**
      * Delete response entity.

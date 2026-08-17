@@ -3,9 +3,9 @@ package eu.isygoit.ui.sms.views.object.dialog;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.FileTagsDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.ObjectStorageService;
@@ -23,20 +23,18 @@ public class FileTagsDialog extends BaseActionDialog {
     private final String tenant;
     private final String bucketName;
     private final ObjectStorageManagementView.FileItem file;
-    private final Runnable onSuccess;
 
     private VerticalLayout tagsContainer;
     private List<TextField> tagFields = new ArrayList<>();
 
     public FileTagsDialog(ObjectStorageManagementView parentView, ObjectStorageService objectStorageService,
                           String tenant, String bucketName, ObjectStorageManagementView.FileItem file, Runnable onSuccess) {
-        super(I18n.t("sms.objects.dialog.tags.title", file.getName()), onSuccess);
+        super(I18n.t("sms.objects.dialog.tags.title", file.getFileName()), onSuccess);
         this.parentView = parentView;
         this.objectStorageService = objectStorageService;
         this.tenant = tenant;
         this.bucketName = bucketName;
         this.file = file;
-        this.onSuccess = onSuccess;
 
         setOkButtonText(I18n.t("sms.objects.dialog.tags.save"));
         setWidth("500px");
@@ -107,12 +105,11 @@ public class FileTagsDialog extends BaseActionDialog {
             FileTagsDto dto = new FileTagsDto();
             dto.setTenant(tenant);
             dto.setBucketName(bucketName);
-            dto.setFiletName(file.getName());
+            dto.setPath(file.getPath());
+            dto.setFiletName(file.getFileName());
             dto.setTags(tags);
             objectStorageService.updateTags(dto);
-            file.setTags(tags);
             append(I18n.t("sms.objects.dialog.tags.success"));
-            if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));
@@ -123,6 +120,7 @@ public class FileTagsDialog extends BaseActionDialog {
         }
         return false;
     }
+
 
     private String extractErrorMessage(FeignException ex) {
         try { if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank()) return ex.contentUTF8(); } catch (Exception ignored) {}

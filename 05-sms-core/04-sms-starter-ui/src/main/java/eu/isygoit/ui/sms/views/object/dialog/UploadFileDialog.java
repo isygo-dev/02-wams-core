@@ -19,6 +19,7 @@ import eu.isygoit.ui.sms.views.object.ObjectStorageManagementView;
 import eu.isygoit.util.ByteArrayMultipartFile;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -33,7 +34,6 @@ public class UploadFileDialog extends BaseActionDialog {
     private final ObjectStorageService objectStorageService;
     private final String tenant;
     private final String bucketName;
-    private final Runnable onSuccess;
 
     private MemoryBuffer memoryBuffer;
     private Upload upload;
@@ -56,7 +56,6 @@ public class UploadFileDialog extends BaseActionDialog {
         this.objectStorageService = objectStorageService;
         this.tenant = tenant;
         this.bucketName = bucketName;
-        this.onSuccess = onSuccess;
 
         setOkButtonText(I18n.t("sms.objects.dialog.upload.file.button"));
         setWidth("650px");
@@ -78,7 +77,6 @@ public class UploadFileDialog extends BaseActionDialog {
                 "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 "text/plain", "application/zip", "application/json", "text/csv");
         upload.addClassName("wams-upload-component");
-        upload.getStyle().set("width", "100%");
 
         upload.addSucceededListener(event -> {
             uploadedFileName = event.getFileName();
@@ -93,23 +91,17 @@ public class UploadFileDialog extends BaseActionDialog {
             }
             fileNameDisplay.setText(I18n.t("sms.objects.dialog.upload.file.name", uploadedFileName));
             fileSizeDisplay.setText(I18n.t("sms.objects.dialog.upload.file.size", formatFileSize(uploadedFile.getSize())));
-            uploadStatus.setText(I18n.t("sms.objects.dialog.upload.success"));
-            uploadStatus.getStyle().set("color", "var(--lumo-success-color)");
-            uploadIcon.getStyle().set("color", "var(--lumo-success-color)");
+            setUploadStatus(true, I18n.t("sms.objects.dialog.upload.success"));
             enableOkButton(true);
         });
 
         upload.addFailedListener(event -> {
-            uploadStatus.setText(I18n.t("sms.objects.dialog.upload.failed", event.getReason().getMessage()));
-            uploadStatus.getStyle().set("color", "var(--lumo-error-color)");
-            uploadIcon.getStyle().set("color", "var(--lumo-error-color)");
+            setUploadStatus(false, I18n.t("sms.objects.dialog.upload.failed", event.getReason().getMessage()));
             enableOkButton(false);
         });
 
         upload.addFileRejectedListener(event -> {
-            uploadStatus.setText(I18n.t("sms.objects.dialog.upload.rejected", event.getErrorMessage()));
-            uploadStatus.getStyle().set("color", "var(--lumo-error-color)");
-            uploadIcon.getStyle().set("color", "var(--lumo-error-color)");
+            setUploadStatus(false, I18n.t("sms.objects.dialog.upload.rejected", event.getErrorMessage()));
             enableOkButton(false);
         });
 
@@ -130,12 +122,32 @@ public class UploadFileDialog extends BaseActionDialog {
 
         allowedFileTypes = new Span(I18n.t("sms.objects.dialog.upload.allowed.types"));
         allowedFileTypes.addClassName(LumoUtility.FontSize.XXSMALL);
-        allowedFileTypes.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        allowedFileTypes.addClassName(LumoUtility.TextColor.SECONDARY);
 
-        fileNameDisplay = new Span(); fileSizeDisplay = new Span(); uploadStatus = new Span();
         uploadIcon = VaadinIcon.UPLOAD.create();
         uploadIcon.setSize("20px");
-        uploadIcon.getStyle().set("color", "var(--lumo-primary-color)");
+        uploadIcon.addClassName("wams-upload-icon");
+
+        fileNameDisplay = new Span(I18n.t("sms.objects.dialog.upload.no.file.selected"));
+        fileNameDisplay.addClassName(LumoUtility.TextColor.SECONDARY);
+        fileSizeDisplay = new Span();
+        uploadStatus = new Span();
+    }
+
+    /**
+     * Toggles the success/error state of the status line and its icon via
+     * CSS classes (see {@code .wams-upload-status--success/error} in
+     * sms.css) instead of setting inline colors from Java.
+     */
+    private void setUploadStatus(boolean success, String message) {
+        uploadStatus.setText(message);
+        uploadStatus.removeClassName("wams-upload-status--success");
+        uploadStatus.removeClassName("wams-upload-status--error");
+        uploadStatus.addClassName(success ? "wams-upload-status--success" : "wams-upload-status--error");
+
+        uploadIcon.removeClassName("wams-upload-icon--success");
+        uploadIcon.removeClassName("wams-upload-icon--error");
+        uploadIcon.addClassName(success ? "wams-upload-icon--success" : "wams-upload-icon--error");
     }
 
     private FormLayout buildFormLayout() {
@@ -147,7 +159,7 @@ public class UploadFileDialog extends BaseActionDialog {
         uploadLayout.setPadding(false);
         Span instruction = new Span(I18n.t("sms.objects.dialog.upload.instruction"));
         instruction.addClassName(LumoUtility.FontSize.SMALL);
-        instruction.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        instruction.addClassName(LumoUtility.TextColor.SECONDARY);
         uploadLayout.add(instruction);
         uploadLayout.add(upload);
         uploadLayout.add(allowedFileTypes);
@@ -155,12 +167,6 @@ public class UploadFileDialog extends BaseActionDialog {
         HorizontalLayout fileInfoLayout = new HorizontalLayout();
         fileInfoLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         fileInfoLayout.setSpacing(true);
-        uploadIcon = VaadinIcon.UPLOAD.create();
-        uploadIcon.setSize("20px");
-        uploadIcon.getStyle().set("color", "var(--lumo-primary-color)");
-        fileNameDisplay = new Span(I18n.t("sms.objects.dialog.upload.no.file.selected"));
-        fileNameDisplay.getStyle().set("color", "var(--lumo-secondary-text-color)");
-        fileSizeDisplay = new Span("");
         fileInfoLayout.add(uploadIcon, fileNameDisplay, fileSizeDisplay);
         uploadLayout.add(fileInfoLayout);
         uploadLayout.add(uploadStatus);
@@ -198,9 +204,13 @@ public class UploadFileDialog extends BaseActionDialog {
                 }
             }
 
-            objectStorageService.upload(tenant, bucketName, path, fileName, tags, uploadedFile);
+            ResponseEntity<Object> response = objectStorageService.upload(tenant, bucketName, path, fileName, tags, uploadedFile);
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                append(I18n.t("sms.objects.dialog.upload.failed", response.getStatusCodeValue()));
+                return false;
+            }
+
             append(I18n.t("sms.objects.dialog.upload.success"));
-            if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
             append(extractErrorMessage(ex));

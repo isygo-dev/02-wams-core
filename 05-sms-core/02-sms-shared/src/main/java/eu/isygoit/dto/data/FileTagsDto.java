@@ -18,6 +18,7 @@ public class FileTagsDto {
 
     private String tenant;
     private String bucketName;
+    private String path;
     private String filetName;
     private List<String> tags;
 }

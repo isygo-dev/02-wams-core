@@ -6,6 +6,7 @@ import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.dto.data.BucketDto;
+import eu.isygoit.dto.data.FileStorageDto;
 import eu.isygoit.dto.data.FileTagsDto;
 import eu.isygoit.dto.exception.MinIoObjectException;
 import eu.isygoit.enums.IEnumLogicalOperator;
@@ -24,7 +25,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import eu.isygoit.dto.data.FileStorageDto;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -171,8 +171,14 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
                         .collect(Collectors.toMap(s -> s, s -> s));
             }
             StorageConfig config = storageConfigService.findByTenantIgnoreCase(fileTags.getTenant());
+            // Combine path and file name into the full object key, same as
+            // download/delete/getMetadata — without this, tagging a file that
+            // lives under a non-empty path would silently miss (or hit the
+            // wrong) object.
+            String path = fileTags.getPath() != null ? fileTags.getPath() : "";
+            String objectName = path.replace("#", "/").toLowerCase() + "/" + fileTags.getFiletName();
             storageFactoryService.getService(config.getType())
-                    .updateTags(config, fileTags.getBucketName(), fileTags.getFiletName(), tagMap);
+                    .updateTags(config, fileTags.getBucketName().toLowerCase(), objectName, tagMap);
 
             return ResponseFactory.responseOk();
         } catch (Throwable e) {
