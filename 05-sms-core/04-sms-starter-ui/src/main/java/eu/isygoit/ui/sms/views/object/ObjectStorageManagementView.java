@@ -15,6 +15,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.BeforeEvent;
+import com.vaadin.flow.router.HasUrlParameter;
+import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
@@ -49,13 +52,19 @@ import java.util.stream.Collectors;
  * tenant's storage buckets. Aligned to the same header/stats/3-group-toolbar/
  * pagination/card-grid shape used by every other management view in the app
  * (see e.g. CategoryManagementView) rather than a bespoke layout.
+ *
+ * <p>Accepts an optional {@code /sms/objectstorage/{bucketName}} URL segment
+ * (plus an optional {@code ?tenant=} query parameter) so other views — e.g.
+ * the "Browse Files" action on {@code BucketManagementView} — can deep-link
+ * straight into a specific bucket instead of always landing on the default
+ * tenant/bucket selection.
  */
 @Slf4j
 @VaadinSessionScope
 @Route(value = "sms/objectstorage", layout = SmsMainLayout.class)
 @PageTitle("Object Storage - File Management")
 @PermitAll
-public class ObjectStorageManagementView extends ManagementVerticalView {
+public class ObjectStorageManagementView extends ManagementVerticalView implements HasUrlParameter<String> {
 
     private final ObjectStorageService objectStorageService;
     private final StorageConfigService storageConfigService;
@@ -117,7 +126,43 @@ public class ObjectStorageManagementView extends ManagementVerticalView {
         add(loadingBar);
 
         initEventHandlers();
+    }
+
+    /**
+     * Called by the router on every navigation to this view — including
+     * subsequent ones, since the view is {@code @VaadinSessionScope} and thus
+     * reused across navigations within the same session. Owns the initial
+     * data load so a plain {@code /sms/objectstorage} visit and a deep link
+     * with a bucket segment both go through the same path.
+     */
+    @Override
+    public void setParameter(BeforeEvent event, @OptionalParameter String bucketName) {
+        String tenantParam = event.getLocation().getQueryParameters().getSingleParameter("tenant").orElse(null);
         loadStorageConfigs();
+        applyDeepLinkSelection(tenantParam, bucketName);
+    }
+
+    private void applyDeepLinkSelection(String tenantParam, String bucketName) {
+        if (tenantParam != null && !tenantParam.isBlank()) {
+            StorageConfigDto match = storageConfigs.stream()
+                    .filter(c -> tenantParam.equalsIgnoreCase(c.getTenant()))
+                    .findFirst().orElse(null);
+            if (match != null && !match.equals(tenantSelector.getValue())) {
+                tenantSelector.setValue(match);
+            }
+        }
+
+        if (bucketName == null || bucketName.isBlank()) {
+            return;
+        }
+        BucketDto match = buckets.stream()
+                .filter(b -> bucketName.equalsIgnoreCase(b.getName()))
+                .findFirst().orElse(null);
+        if (match != null) {
+            bucketSelector.setValue(match);
+        } else {
+            showWarning(I18n.t("sms.objects.view.bucket.not.found", bucketName));
+        }
     }
 
     // ----- Header & Stats -----

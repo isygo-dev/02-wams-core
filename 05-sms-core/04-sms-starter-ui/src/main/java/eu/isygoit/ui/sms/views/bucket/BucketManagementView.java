@@ -16,6 +16,7 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -27,6 +28,7 @@ import eu.isygoit.remote.sms.StorageConfigService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.sms.layout.SmsMainLayout;
 import eu.isygoit.ui.sms.views.bucket.dialog.CreateBucketDialog;
+import eu.isygoit.ui.sms.views.object.ObjectStorageManagementView;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
@@ -279,8 +281,11 @@ public class BucketManagementView extends ManagementVerticalView {
 
     public String getSelectedTenant() { return selectedStorageConfig != null ? selectedStorageConfig.getTenant() : null; }
 
-    public void navigateToObjectStorage(BucketDto bucket) {
-        getUI().ifPresent(ui -> ui.navigate("sms/objectstorage"));
+    public void navigateToObjectStorage(String tenant, BucketDto bucket) {
+        QueryParameters queryParameters = (tenant != null && !tenant.isBlank())
+                ? QueryParameters.of("tenant", tenant)
+                : QueryParameters.empty();
+        getUI().ifPresent(ui -> ui.navigate(ObjectStorageManagementView.class, bucket.getName(), queryParameters));
     }
 
     private HorizontalLayout buildToolbar() {

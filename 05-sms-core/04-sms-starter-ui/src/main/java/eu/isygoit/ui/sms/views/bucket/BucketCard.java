@@ -58,7 +58,7 @@ public class BucketCard extends BaseCard<BucketManagementView, ObjectStorageServ
         Button detailsBtn = createDetailsButton(I18n.t("sms.buckets.action.details"),
                 () -> new BucketDetailsDialog(parentView, objectService, parentView.getSelectedTenant(), bucket).open());
         Button browseBtn = createBrowseButton(I18n.t("sms.buckets.action.browse"),
-                () -> parentView.navigateToObjectStorage(bucket));
+                () -> parentView.navigateToObjectStorage(parentView.getSelectedTenant(), bucket));
         Button deleteBtn = createDeleteButton(I18n.t("sms.buckets.action.delete"),
                 () -> new DeleteBucketDialog(parentView, objectService, parentView.getSelectedTenant(), bucket.getName(), () -> {
                     if (onRefresh != null) onRefresh.run();
