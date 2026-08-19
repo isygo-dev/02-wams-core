@@ -36,9 +36,15 @@
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-bom</artifactId>
-                <version>24.9.2</version>
+                <version>24.10.9</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-spring-boot-starter</artifactId>
+                <version>24.10.9</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

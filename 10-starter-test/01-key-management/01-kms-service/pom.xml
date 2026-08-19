@@ -148,7 +148,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>3.5.13</version>
+                <version>3.5.16</version>
                 <configuration>
                     <mainClass>eu.isygoit.KmsStarter</mainClass>
                     <executable>true</executable>
