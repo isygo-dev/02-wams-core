@@ -8,7 +8,7 @@ import java.util.Locale;
 public class I18nProvider extends AbstractI18nProvider {
 
     private static final String[] MODULES = {
-            "common", "auth", "ims", "kms", "dms", "mms", "sms", "cms"
+            "common", "auth", "kms"
     };
 
     private static final Locale[] SUPPORTED_LOCALES = {

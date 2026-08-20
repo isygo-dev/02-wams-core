@@ -1,4 +1,4 @@
-package eu.isygoit.nav;
+package eu.isygoit.ui.kms.nav;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
 import eu.isygoit.ui.common.component.AppSearchBar;

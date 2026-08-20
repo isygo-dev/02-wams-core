@@ -1,10 +1,16 @@
-package eu.isygoit.nav;
+package eu.isygoit.ui.nav;
 
-import com.vaadin.flow.component.icon.VaadinIcon;
+import eu.isygoit.ui.cms.nav.CmsNavRegistry;
 import eu.isygoit.ui.common.component.AppSearchBar;
 import eu.isygoit.ui.common.component.INavRegistry;
+import eu.isygoit.ui.dms.nav.DmsNavRegistry;
+import eu.isygoit.ui.ims.nav.ImsNavRegistry;
+import eu.isygoit.ui.kms.nav.KmsNavRegistry;
+import eu.isygoit.ui.mms.nav.MmsNavRegistry;
+import eu.isygoit.ui.sms.nav.SmsNavRegistry;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Static registry of every real, navigable destination in the app (one entry
@@ -19,16 +25,19 @@ import java.util.List;
  * <p>{@code moduleKey} (kms/ims/dms/sms/cms/mms) classifies each target by
  * module so {@link AppSearchBar} can group/filter results by module.
  */
-public final class MmsNavRegistry implements INavRegistry {
+public final class NavRegistry implements INavRegistry {
 
-    private static final List<NavTarget> ALL = List.of(
-            // MMS
-            new NavTarget("mms.nav.dashboard", "mms/home", VaadinIcon.HOME, "mms"),
-            new NavTarget("mms.nav.sender.config", "mms/sender-config", VaadinIcon.MAILBOX, "mms"),
-            new NavTarget("mms.nav.templates", "mms/templates", VaadinIcon.FILE_TEXT, "mms")
-    );
+    private static final List<NavTarget> ALL = Stream.of(
+                    new ImsNavRegistry().getAll(),
+                    new DmsNavRegistry().getAll(),
+                    new SmsNavRegistry().getAll(),
+                    new CmsNavRegistry().getAll(),
+                    new MmsNavRegistry().getAll(),
+                    new KmsNavRegistry().getAll()
+            ).flatMap(List::stream)
+            .toList();
 
-    public MmsNavRegistry() {
+    public NavRegistry() {
     }
 
     /**

@@ -1,4 +1,4 @@
-package eu.isygoit.nav;
+package eu.isygoit.ui.cms.nav;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
 import eu.isygoit.ui.common.component.AppSearchBar;
@@ -19,15 +19,15 @@ import java.util.List;
  * <p>{@code moduleKey} (kms/ims/dms/sms/cms/mms) classifies each target by
  * module so {@link AppSearchBar} can group/filter results by module.
  */
-public final class SmsNavRegistry implements INavRegistry {
+public final class CmsNavRegistry implements INavRegistry {
 
     private static final List<NavTarget> ALL = List.of(
-            // SMS
-            new NavTarget("sms.nav.dashboard", "sms", VaadinIcon.HOME, "sms"),
-            new NavTarget("sms.nav.storage.configs", "sms/storageconfigs", VaadinIcon.DATABASE, "sms")
+            // CMS
+            new NavTarget("cms.nav.dashboard", "cms", VaadinIcon.HOME, "cms"),
+            new NavTarget("cms.nav.calendars", "cms/calendars", VaadinIcon.CALENDAR, "cms")
     );
 
-    public SmsNavRegistry() {
+    public CmsNavRegistry() {
     }
 
     /**

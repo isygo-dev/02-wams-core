@@ -1,4 +1,4 @@
-package eu.isygoit.nav;
+package eu.isygoit.ui.nav;
 
 import eu.isygoit.ui.common.component.INavRegistry;
 import eu.isygoit.ui.common.nav.NavRegistryProvider;

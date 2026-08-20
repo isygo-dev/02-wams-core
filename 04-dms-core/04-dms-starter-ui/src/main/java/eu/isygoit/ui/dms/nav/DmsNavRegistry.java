@@ -1,11 +1,10 @@
-package eu.isygoit.nav;
+package eu.isygoit.ui.dms.nav;
 
+import com.vaadin.flow.component.icon.VaadinIcon;
 import eu.isygoit.ui.common.component.AppSearchBar;
 import eu.isygoit.ui.common.component.INavRegistry;
-import eu.isygoit.ui.kms.nav.KmsNavRegistry;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * Static registry of every real, navigable destination in the app (one entry
@@ -20,19 +19,16 @@ import java.util.stream.Stream;
  * <p>{@code moduleKey} (kms/ims/dms/sms/cms/mms) classifies each target by
  * module so {@link AppSearchBar} can group/filter results by module.
  */
-public final class NavRegistry implements INavRegistry {
+public final class DmsNavRegistry implements INavRegistry {
 
-    private static final List<NavTarget> ALL = Stream.of(
-                    new ImsNavRegistry().getAll(),
-                    new DmsNavRegistry().getAll(),
-                    new SmsNavRegistry().getAll(),
-                    new CmsNavRegistry().getAll(),
-                    new MmsNavRegistry().getAll(),
-                    new KmsNavRegistry().getAll()
-            ).flatMap(List::stream)
-            .toList();
+    private static final List<NavTarget> ALL = List.of(
+            // DMS
+            new NavTarget("dms.nav.dashboard", "dms", VaadinIcon.HOME, "dms"),
+            new NavTarget("dms.nav.categories", "dms/categories", VaadinIcon.FOLDER, "dms"),
+            new NavTarget("dms.nav.linkedFiles", "dms/linked-files", VaadinIcon.FILE, "dms")
+    );
 
-    public NavRegistry() {
+    public DmsNavRegistry() {
     }
 
     /**
