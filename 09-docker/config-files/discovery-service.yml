@@ -2,6 +2,7 @@ server:
   tomcat:
     max-swallow-size: -1
     max-http-form-post-size: -1
+  #valid range 0–65535
   port: 8061 #8061
 
 eureka:

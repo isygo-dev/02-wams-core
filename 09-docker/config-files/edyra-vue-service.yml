@@ -3,7 +3,7 @@ server:
     max-swallow-size: -1
     max-http-form-post-size: -1
   #valid range 0–65535
-  port: 40400
+  port: 60402
 
 eureka:
   instance:
@@ -25,7 +25,7 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-},%X{spanId:-}] ${LOG_LEVEL_PATTERN:-%5p} %m%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-},%X{spanId:-}] ${LOG_LEVEL_PATTERN:-%5p} %m%n"
-  file: sms.log
+  file: edyra-vue.log
 
 springdoc:
   packagesToScan: eu.isygoit
@@ -43,6 +43,9 @@ spring:
       - org.springframework.boot.autoconfigure.data.cassandra.CassandraDataAutoConfiguration
       - org.springframework.boot.autoconfigure.data.cassandra.CassandraReactiveDataAutoConfiguration
       - org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration
+  cache:
+    jcache:
+      provider: com.hazelcast.cache.HazelcastMemberCachingProvider
   cassandra:
     contact-points: cassandra
     keyspace-name: isygoit
@@ -81,7 +84,7 @@ spring:
     continue-on-error: true
     initialization-mode: always
     mode: true
-    url: jdbc:postgresql://localhost:5432/postgres?currentSchema=sms
+    url: jdbc:postgresql://localhost:5432/postgres?currentSchema=edyra-vue
     username: postgres
     password: root
     hikari:
@@ -103,12 +106,12 @@ spring:
     baseline-on-migrate: true
     baseline-version: 1.0.0
     check-locations: true
-    default-schema: sms
+    default-schema: edyra-vue
     enabled: false
     group: true
     locations: classpath:migration/01-dev
     target: 1.0.231013.1
-    schemas: sms
+    schemas: edyra-vue
     table: schema_migration
   jpa:
     hibernate:
@@ -130,13 +133,33 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         temp:
           use_jdbc_metadata_defaults: false
-
+  quartz:
+    properties:
+      org:
+        quartz:
+          jobStore:
+            useProperties: true
+            class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+            tablePrefix: QRTZ_
+    auto-startup: true
+    job-store-type: jdbc  #memory jdbc
+    overwrite-existing-jobs: false
+    scheduler-name: quartzScheduler
+    startup-delay: 30s
+    wait-for-jobs-to-complete-on-shutdown: false
+    jdbc:
+      initialize-schema: always #always never
 management:
   tracing:
     sampling:
       probability: 1.0
 
 app:
+  quartz:
+    password:
+      check-period-day: 1
+      less-remaining-days: 7
   feign:
     shouldNotFilterKey: ++SHOULD_NOT_FILTER$
     api:
@@ -146,13 +169,13 @@ app:
     async: true
     broker: kafka # kafka, rest
   upload:
-    directory: /uploads/sms
+    directory: /uploads/edyra-vue
   i18n:
     enabled: true
     location: classpath:i18n/messages
   jwt:
-    secretKey: JwTsEcReTkEy
-    deactivateOldTokens: false
+    secretKey: o9ZqX8kL2mNpR4tY7uVwB1cD3eFo9ZqX8kL2mNpR4tY7uVwB1cD3eF5gH6jK8lM0nP2rS4tU6vW8xY0z5gH6jK8lM0nP2rS4tU6vW8xY0z
+    deactivateOldTokens: true
     signatureAlgorithm: HS256
     life-time-ms: 14400000
     storage-type: LOCAL
@@ -160,6 +183,10 @@ app:
     pattern: '^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[/@#$%^&+-=(){}\[\]])(?=\S+$).{8,}$'
     grammar:
       ftl: pattern_grammar.ftl
+  create:
+    ifNotExists:
+      domain: true
+      user: true
 
 jasypt:
   encryptor:
@@ -176,11 +203,3 @@ jasypt:
   password:
     default: 'root'
     pattern: '^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[/@#$%^&+-=(){}\[\]])(?=\S+$).{8,}$'
-
-minio:
-  access:
-    key: admin #admin
-    secret: password #password
-  url: minio-server:9001 #http://127.0.0.1:9001
-  bucket:
-    name: isygoit.eu

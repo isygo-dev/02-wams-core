@@ -3,7 +3,7 @@ server:
     max-swallow-size: -1
     max-http-form-post-size: -1
   #valid range 0–65535
-  port: 40400
+  port: 60600
 
 eureka:
   instance:
@@ -15,17 +15,17 @@ eureka:
 
 camel:
   springboot:
-    routes-include-pattern: classpath:camel/*.xml #file:camel/*.xml
+    routes-include-pattern: file:camel/*.xml
+    xmlRoutes: file:camel/*.xml
 
 logging:
   level:
-    eu.isygoit: INFO
+    eu.isygoit: info
     org.apache.kafka: INFO
-    org.apache.camel: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-},%X{spanId:-}] ${LOG_LEVEL_PATTERN:-%5p} %m%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-},%X{spanId:-}] ${LOG_LEVEL_PATTERN:-%5p} %m%n"
-  file: sms.log
+  file: edyra-pilot.log
 
 springdoc:
   packagesToScan: eu.isygoit
@@ -36,13 +36,20 @@ springdoc:
       html:
     operationsSorter=method:
 
-
 spring:
+  cloud:
+    openfeign:
+      okhttp:
+        enabled: true
+
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.data.cassandra.CassandraDataAutoConfiguration
       - org.springframework.boot.autoconfigure.data.cassandra.CassandraReactiveDataAutoConfiguration
       - org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration
+  cache:
+    jcache:
+      provider: com.hazelcast.cache.HazelcastMemberCachingProvider
   cassandra:
     contact-points: cassandra
     keyspace-name: isygoit
@@ -81,7 +88,7 @@ spring:
     continue-on-error: true
     initialization-mode: always
     mode: true
-    url: jdbc:postgresql://localhost:5432/postgres?currentSchema=sms
+    url: jdbc:postgresql://localhost:5432/postgres?currentSchema=edyra-pilot
     username: postgres
     password: root
     hikari:
@@ -103,12 +110,12 @@ spring:
     baseline-on-migrate: true
     baseline-version: 1.0.0
     check-locations: true
-    default-schema: sms
+    default-schema: edyra-pilot
     enabled: false
     group: true
     locations: classpath:migration/01-dev
     target: 1.0.231013.1
-    schemas: sms
+    schemas: edyra-pilot
     table: schema_migration
   jpa:
     hibernate:
@@ -130,23 +137,40 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         temp:
           use_jdbc_metadata_defaults: false
-
+  quartz:
+    properties:
+      org:
+        quartz:
+          jobStore:
+            useProperties: true
+            class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+            tablePrefix: QRTZ_
+    auto-startup: true
+    job-store-type: jdbc  #memory jdbc
+    overwrite-existing-jobs: false
+    scheduler-name: quartzScheduler
+    startup-delay: 30s
+    wait-for-jobs-to-complete-on-shutdown: false
+    jdbc:
+      initialize-schema: always #always never
 management:
   tracing:
     sampling:
       probability: 1.0
 
 app:
+  quartz:
+    password:
+      check-period-day: 1
+      less-remaining-days: 7
   feign:
     shouldNotFilterKey: ++SHOULD_NOT_FILTER$
-    api:
-      internal-key: Bearer eyJleHAiOiJuZXZlciIsImtpZFZlcnNpb24iOiJ2LTNmZjAyNTJkLWU2OWUtNDhkZC1hMTljLWMxMmY3MGJhODMyMSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJyb290QHN1cGVyLXRlbmFudCIsImlzcyI6ImttcyIsImlhdCI6MTc4NjcwODA1NiwiYXVkIjpbIktNUy4qIl0sImxvZy1hcHAiOiJpZGVudGl0eS1zZXJ2aWNlIiwic2VuZGVyLXVzZXIiOiJyb290Iiwic2VuZGVyLXRlbmFudCI6InN1cGVyLXRlbmFudCJ9.C_4AB2oFLx3LBW4OfIlxyhoEIy2PU09hpRuWFCHjelM9BgGn_6agp9PpgF-BqTQICPN9T39aCsGsFRiumaPq-25m4rMI-4rk6ly4gD4Tqu-nh0PuivLRnnHxFUl-Eg-ZXFsgCEbaCdvEXr3yGkcagUOA_QtZDfd0_SPyD6Z6TAXlq1Xj_5_Jof3mGJj1BbWhkPtbwXUrNE89iZ6ezx50Gf7FjTFbv5TPqOTz47tTfuyStOd2jijb4NhNj2BIvp940uY6ZF4gfQvJYhIUNmEDf632w19TJ-9arXDtIs18LexB2cJ1tcrCnfUXFumOMCDR-GSFpOzMfdqziKb2HYGl5Q
-        
   email:
     async: true
     broker: kafka # kafka, rest
   upload:
-    directory: /uploads/sms
+    directory: /uploads/edyra-pilot
   i18n:
     enabled: true
     location: classpath:i18n/messages
@@ -160,6 +184,10 @@ app:
     pattern: '^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[/@#$%^&+-=(){}\[\]])(?=\S+$).{8,}$'
     grammar:
       ftl: pattern_grammar.ftl
+  create:
+    ifNotExists:
+      domain: true
+      user: true
 
 jasypt:
   encryptor:
@@ -176,11 +204,3 @@ jasypt:
   password:
     default: 'root'
     pattern: '^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[/@#$%^&+-=(){}\[\]])(?=\S+$).{8,}$'
-
-minio:
-  access:
-    key: admin #admin
-    secret: password #password
-  url: minio-server:9001 #http://127.0.0.1:9001
-  bucket:
-    name: isygoit.eu
