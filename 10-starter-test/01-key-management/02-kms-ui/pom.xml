@@ -12,6 +12,9 @@
     <artifactId>key-management-ui</artifactId>
     <packaging>jar</packaging>
 
+    <name>Key Management UI</name>
+    <description>Key Management UI</description>
+
     <parent>
         <groupId>eu.isygo-it.services</groupId>
         <artifactId>service-stack-parent</artifactId>

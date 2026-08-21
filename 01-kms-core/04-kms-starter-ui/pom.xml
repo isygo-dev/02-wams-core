@@ -3,6 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <version>WC-1.0.260408-T1636</version>
 
+    <groupId>eu.isygo-it.services</groupId>
     <artifactId>key-management-starter-ui</artifactId>
     <packaging>jar</packaging>
 

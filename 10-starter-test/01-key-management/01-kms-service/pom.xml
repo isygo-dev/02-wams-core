@@ -12,6 +12,9 @@
     <artifactId>key-management-service</artifactId>
     <packaging>jar</packaging>
 
+    <name>Key Management Service</name>
+    <description>Key Management Service</description>
+
     <parent>
         <groupId>eu.isygo-it.services</groupId>
         <artifactId>service-stack-parent</artifactId>

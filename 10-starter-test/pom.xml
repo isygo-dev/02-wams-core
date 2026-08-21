@@ -11,11 +11,10 @@
 
     <groupId>eu.isygo-it.services</groupId>
     <artifactId>starter-test-core</artifactId>
-
-    <name>starter-test-core</name>
-    <description>starter-test-core</description>
-
     <packaging>pom</packaging>
+
+    <name>Starter Test Core</name>
+    <description>Starter Test Core</description>
 
     <parent>
         <groupId>eu.isygo-it.services</groupId>
