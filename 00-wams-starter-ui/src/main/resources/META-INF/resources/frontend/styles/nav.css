@@ -1,0 +1,129 @@
+/*
+ * Styling for eu.isygoit.ui.common.component.CollapsibleNavSection, used by
+ * every <Module>MainLayout to group sidebar navigation under a clickable,
+ * collapsible header. All visual behavior lives here — the Java class only
+ * assembles DOM structure and toggles the --expanded modifier class.
+ * Imported once via @CssImport on BaseMainLayout.
+ */
+
+.wams-collapsible-nav-section {
+    width: 100%;
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
+}
+
+/* ── Header (click target) ───────────────────────────────────────────── */
+
+.wams-collapsible-nav-section__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    padding: var(--lumo-space-s) var(--lumo-space-m);
+    color: var(--lumo-secondary-text-color);
+    background: transparent;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.wams-collapsible-nav-section__header:hover {
+    background-color: var(--lumo-contrast-5pct);
+}
+
+.wams-collapsible-nav-section--expanded > .wams-collapsible-nav-section__header {
+    color: var(--lumo-primary-text-color);
+}
+
+.wams-collapsible-nav-section__title {
+    font-size: var(--lumo-font-size-s);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.wams-collapsible-nav-section__toggle-icon {
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
+
+.wams-collapsible-nav-section--expanded .wams-collapsible-nav-section__toggle-icon {
+    transform: rotate(90deg);
+}
+
+/* ── Content (collapsible body) ──────────────────────────────────────── */
+
+.wams-collapsible-nav-section__content {
+    overflow: hidden;
+    max-height: 0;
+    background: var(--lumo-base-color);
+    transition: max-height 0.3s ease-in-out;
+}
+
+.wams-collapsible-nav-section--expanded .wams-collapsible-nav-section__content {
+    max-height: 600px;
+}
+
+.wams-collapsible-nav-section__items {
+    padding: 0;
+}
+
+.wams-collapsible-nav-section__items vaadin-side-nav-item {
+    padding-inline-start: var(--lumo-space-l);
+}
+
+/* ── Collapsed sidebar (icon-only rail) ──────────────────────────────────
+   BaseMainLayout adds 'wams-sidebar-collapsed' to the layout's root element.
+   The header (title + chevron) disappears — same treatment as a plain
+   SideNav's [slot='label'] in layout.css — and every item stays visible as
+   an icon regardless of accordion state, matching how a plain (non-
+   collapsible) SideNav group behaves once the sidebar itself collapses. ── */
+
+.wams-sidebar-collapsed .wams-collapsible-nav-section__title,
+.wams-sidebar-collapsed .wams-collapsible-nav-section__toggle-icon {
+    display: none;
+}
+
+.wams-sidebar-collapsed .wams-collapsible-nav-section__header {
+    justify-content: center;
+    padding: var(--lumo-space-s);
+    position: relative;
+}
+
+.wams-sidebar-collapsed .wams-collapsible-nav-section__content {
+    max-height: none;
+    overflow: visible;
+}
+
+.wams-sidebar-collapsed .wams-collapsible-nav-section__items vaadin-side-nav-item {
+    padding-inline-start: 0;
+}
+
+/* Section title surfaces as a hover tooltip next to the icon rail. */
+
+.wams-sidebar-collapsed .wams-collapsible-nav-section__header:hover::after {
+    content: attr(data-title);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: var(--lumo-space-xs);
+    background: var(--lumo-base-color);
+    color: var(--lumo-body-text-color);
+    border: 1px solid var(--lumo-contrast-10pct);
+    padding: var(--lumo-space-xs) var(--lumo-space-s);
+    border-radius: var(--lumo-border-radius-s);
+    box-shadow: var(--lumo-box-shadow-s);
+    font-size: var(--lumo-font-size-s);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
+    white-space: nowrap;
+    z-index: 100;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wams-collapsible-nav-section__toggle-icon,
+    .wams-collapsible-nav-section__content,
+    .wams-collapsible-nav-section__header {
+        transition-duration: 0.01ms !important;
+    }
+}

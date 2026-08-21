@@ -1,0 +1,572 @@
+/* Profile Page Styles - Modern, Clean, Mobile-First, Responsive */
+
+.profile-page-view {
+    background: var(--lumo-base-color);
+}
+
+.profile-main-content {
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ── Header card ──────────────────────────────────────────────────────── */
+
+.profile-header-card {
+    background: var(--lumo-base-color);
+    border: 1px solid var(--lumo-contrast-20pct);
+    border-radius: var(--lumo-border-radius-l);
+    box-shadow: var(--lumo-box-shadow-xs);
+    padding: var(--lumo-space-xl);
+    margin: var(--lumo-space-m) var(--lumo-space-m) 0;
+    transition: box-shadow 0.2s ease;
+}
+
+.profile-avatar-section {
+    position: relative;
+    flex-shrink: 0;
+    margin-right: var(--lumo-space-xl);
+    width: 112px;
+    height: 112px;
+}
+
+.profile-avatar {
+    border-radius: 50%;
+    border: 4px solid var(--lumo-primary-color-10pct);
+}
+
+.avatar-upload-overlay {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: var(--lumo-primary-color);
+    color: var(--lumo-primary-contrast-color);
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+    border: 2px solid var(--lumo-base-color);
+}
+
+.avatar-upload-overlay vaadin-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.avatar-upload-overlay:hover {
+    transform: scale(1.08);
+}
+
+.profile-info-section {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.profile-name-row {
+    flex-wrap: wrap;
+}
+
+.profile-name {
+    font-size: var(--lumo-font-size-xxl);
+    font-weight: 600;
+    margin: 0;
+    color: var(--lumo-header-text-color);
+    word-break: break-word;
+}
+
+.profile-email-row {
+    color: var(--lumo-secondary-text-color);
+    font-size: var(--lumo-font-size-m);
+    gap: var(--lumo-space-xs);
+    margin-top: var(--lumo-space-xs);
+}
+
+.profile-email-row vaadin-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.profile-badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--lumo-space-xs);
+    margin-top: var(--lumo-space-m);
+}
+
+.profile-badge,
+.profile-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px var(--lumo-space-s);
+    font-size: var(--lumo-font-size-xs);
+}
+
+.profile-badge vaadin-icon {
+    flex-shrink: 0;
+}
+
+.profile-header-actions {
+    margin-top: var(--lumo-space-m);
+}
+
+/* ── Tabs ──────────────────────────────────────────────────────────────── */
+
+.profile-tabs {
+    padding: 0 var(--lumo-space-m);
+    margin: var(--lumo-space-m) 0 0;
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
+}
+
+.profile-tabs vaadin-tab {
+    font-weight: 500;
+    padding: var(--lumo-space-m) var(--lumo-space-l);
+}
+
+.profile-tabs vaadin-tab[selected] {
+    color: var(--lumo-primary-color);
+}
+
+.profile-tab-content {
+    width: 100%;
+    box-sizing: border-box;
+    padding: var(--lumo-space-l) var(--lumo-space-m) var(--lumo-space-m);
+    animation: profile-fade-in 0.25s ease;
+}
+
+.profile-tab-panel {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.profile-tab-panel > .wams-stat-grid,
+.profile-tab-panel > .profile-section-card {
+    width: 100%;
+}
+
+@keyframes profile-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Shared section card (Overview / Activity / Connections / Settings) ── */
+
+.profile-section-card {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--lumo-base-color);
+    border: 1px solid var(--lumo-contrast-20pct);
+    border-radius: var(--lumo-border-radius-l);
+    box-shadow: var(--lumo-box-shadow-xs);
+    padding: var(--lumo-space-xl);
+    margin-bottom: var(--lumo-space-l);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.profile-section-card:hover {
+    box-shadow: var(--lumo-box-shadow-s);
+}
+
+.section-title {
+    font-size: var(--lumo-font-size-l);
+    font-weight: 600;
+    color: var(--lumo-header-text-color);
+    margin: 0 0 var(--lumo-space-l);
+    padding-bottom: var(--lumo-space-s);
+    border-bottom: 2px solid var(--lumo-primary-color-10pct);
+}
+
+/* Overview detail grid: wider cells and larger value text than the compact
+   list-card usage of the same shared .wams-card__detail-grid elsewhere. */
+.profile-section-card .wams-card__detail-grid {
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: var(--lumo-space-l) var(--lumo-space-xl);
+}
+
+.profile-section-card .wams-card__detail-field-value {
+    font-size: var(--lumo-font-size-m);
+}
+
+/* Connections mini-stats: 3 even columns instead of the default 4 so three
+   cards fill the row instead of leaving a gap. */
+.profile-mini-stat-grid {
+    grid-template-columns: repeat(3, 1fr);
+    margin-bottom: var(--lumo-space-l);
+}
+
+/* Edit-profile dialog form (chrome-free — the Dialog itself is the card) */
+.profile-form {
+    padding-top: var(--lumo-space-xs);
+}
+
+.password-form {
+    padding-top: var(--lumo-space-xs);
+}
+
+.profile-save-btn {
+    margin-top: var(--lumo-space-s);
+}
+
+/* ── Password strength ────────────────────────────────────────────────── */
+
+.password-strength-bar {
+    flex: 1;
+    height: 4px;
+    border-radius: var(--lumo-border-radius-s);
+    background: var(--lumo-contrast-10pct);
+}
+
+.password-strength-bar::part(value) {
+    background: var(--strength-color, var(--lumo-error-color));
+    border-radius: var(--lumo-border-radius-s);
+    transition: width 0.3s ease;
+}
+
+.password-strength-label {
+    font-size: var(--lumo-font-size-xs);
+    color: var(--lumo-secondary-text-color);
+    min-width: 80px;
+}
+
+/* ── Empty state ──────────────────────────────────────────────────────── */
+
+.profile-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--lumo-space-s);
+    padding: var(--lumo-space-xl) var(--lumo-space-m);
+    color: var(--lumo-secondary-text-color);
+    text-align: center;
+}
+
+.profile-empty-state__icon {
+    width: 32px;
+    height: 32px;
+    color: var(--lumo-contrast-40pct);
+}
+
+/* ── Activity timeline ────────────────────────────────────────────────── */
+
+.profile-timeline {
+    position: relative;
+    padding-left: 0;
+}
+
+.profile-timeline::before {
+    content: '';
+    position: absolute;
+    left: 16px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: var(--lumo-contrast-10pct);
+}
+
+.profile-timeline-item {
+    position: relative;
+    display: flex;
+    gap: var(--lumo-space-l);
+    padding-bottom: var(--lumo-space-xl);
+}
+
+.profile-timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.profile-timeline-dot {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--lumo-base-color);
+    border: 2px solid var(--lumo-primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-timeline-dot vaadin-icon {
+    width: 15px;
+    height: 15px;
+    color: var(--lumo-primary-color);
+}
+
+.profile-timeline-body {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    padding-top: 6px;
+}
+
+.profile-timeline-title {
+    font-weight: 600;
+    color: var(--lumo-body-text-color);
+    font-size: var(--lumo-font-size-m);
+}
+
+.profile-timeline-meta {
+    font-size: var(--lumo-font-size-xs);
+    color: var(--lumo-secondary-text-color);
+    word-break: break-word;
+}
+
+.profile-timeline-time {
+    font-size: var(--lumo-font-size-xxs);
+    color: var(--lumo-tertiary-text-color);
+}
+
+/* ── Connections: mini stats already use .wams-stat-grid / .wams-stat-card ── */
+
+.profile-chart-header {
+    flex-wrap: wrap;
+    gap: var(--lumo-space-s);
+    margin-bottom: var(--lumo-space-m);
+}
+
+.profile-chart-toggle-row {
+    flex-wrap: nowrap;
+}
+
+.profile-chart-holder {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.profile-chart-svg-wrapper {
+    width: 100%;
+}
+
+.profile-chart-svg {
+    width: 100%;
+    height: 220px;
+    display: block;
+}
+
+.profile-chart-bar {
+    fill: var(--lumo-primary-color);
+    transition: opacity 0.15s ease;
+}
+
+.profile-chart-bar:hover {
+    opacity: 0.7;
+}
+
+.profile-chart-label {
+    fill: var(--lumo-secondary-text-color);
+    font-size: 8px;
+}
+
+.profile-connections-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--lumo-space-s);
+    margin-bottom: var(--lumo-space-m);
+}
+
+.profile-connection-item {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: var(--lumo-space-m);
+    padding: var(--lumo-space-m);
+    border: 1px solid var(--lumo-contrast-10pct);
+    border-radius: var(--lumo-border-radius-m);
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.profile-connection-item:hover {
+    background: var(--lumo-contrast-5pct);
+    border-color: var(--lumo-contrast-20pct);
+}
+
+.profile-connection-icon {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--lumo-primary-color-10pct);
+    color: var(--lumo-primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-connection-icon vaadin-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.profile-connection-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.profile-connection-primary {
+    font-weight: 500;
+    font-size: var(--lumo-font-size-m);
+    color: var(--lumo-body-text-color);
+}
+
+.profile-connection-meta {
+    font-size: var(--lumo-font-size-xs);
+    color: var(--lumo-secondary-text-color);
+    overflow-wrap: break-word;
+}
+
+.profile-connection-chip {
+    flex-shrink: 0;
+    padding: 3px var(--lumo-space-s);
+    font-size: var(--lumo-font-size-xs);
+}
+
+.profile-view-all-btn {
+    margin-top: var(--lumo-space-xs);
+}
+
+/* ── Footer ────────────────────────────────────────────────────────────── */
+
+.profile-footer {
+    padding: var(--lumo-space-m) var(--lumo-space-l);
+    margin: 0 var(--lumo-space-m) var(--lumo-space-m);
+    border-top: 1px solid var(--lumo-contrast-10pct);
+    flex-wrap: wrap;
+    gap: var(--lumo-space-s);
+}
+
+.profile-last-active {
+    gap: var(--lumo-space-xs);
+    color: var(--lumo-tertiary-text-color);
+    font-size: var(--lumo-font-size-xs);
+}
+
+.profile-last-active vaadin-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.profile-logout-btn {
+    flex-shrink: 0;
+}
+
+/* ── Responsive Design - Mobile First ─────────────────────────────────── */
+
+@media (max-width: 1024px) {
+    .profile-header-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .profile-avatar-section {
+        margin-right: 0;
+        margin-bottom: var(--lumo-space-m);
+    }
+
+    .profile-name-row,
+    .profile-email-row,
+    .profile-badge-row {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-timeline-item {
+        gap: var(--lumo-space-s);
+    }
+}
+
+@media (max-width: 600px) {
+    .profile-header-card {
+        padding: var(--lumo-space-m);
+        margin: var(--lumo-space-s);
+    }
+
+    .profile-name {
+        font-size: var(--lumo-font-size-xl);
+    }
+
+    .profile-avatar-section {
+        width: 80px;
+        height: 80px;
+    }
+
+    .profile-avatar {
+        width: 80px !important;
+        height: 80px !important;
+    }
+
+    .avatar-upload-overlay {
+        width: 28px;
+        height: 28px;
+    }
+
+    .profile-tabs vaadin-tab {
+        padding: var(--lumo-space-s) var(--lumo-space-m);
+        font-size: var(--lumo-font-size-s);
+    }
+
+    .profile-section-card {
+        padding: var(--lumo-space-m);
+    }
+
+    .profile-tab-content {
+        padding: var(--lumo-space-s);
+    }
+
+    .profile-chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .profile-connection-item {
+        flex-wrap: wrap;
+    }
+
+    .profile-connection-chip {
+        margin-left: 54px;
+    }
+
+    .profile-footer {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+
+    .profile-last-active {
+        justify-content: center;
+    }
+}
+
+/* ── Dark Mode Support ─────────────────────────────────────────────────── */
+
+@media (prefers-color-scheme: dark) {
+    .profile-header-card,
+    .profile-section-card,
+    .profile-connection-item {
+        background: var(--lumo-shade-20pct);
+    }
+
+    .profile-connection-item:hover {
+        background: var(--lumo-shade-30pct);
+    }
+}
