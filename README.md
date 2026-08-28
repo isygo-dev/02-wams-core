@@ -48,3 +48,20 @@ docker build -f .\09-docker\core-cms.Dockerfile -t core/cms-serv .
 
 docker run --rm -p 1080:1080 -p 1025:1025 maildev/maildev
 ```
+
+### Setup node
+```bash
+# Install nvm if you don't have it
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+# Install and use Node.js 18
+nvm install 18
+nvm use 18
+
+# Verify the upgrade
+node -v  # Should show v18.x.x
+npm -v   # Should show v9.x.x or higher
+
+# Now run your install
+npm install
+```
