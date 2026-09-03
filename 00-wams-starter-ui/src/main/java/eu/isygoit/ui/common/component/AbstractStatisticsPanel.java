@@ -12,6 +12,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.service.DashboardService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,12 +25,15 @@ public abstract class AbstractStatisticsPanel extends VerticalLayout {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractStatisticsPanel.class);
 
+    private final DashboardService dashboardService;
+
     protected final UI ui;
     protected final ProgressBar loadingBar = new ProgressBar();
     protected final Button refreshButton = new Button(I18n.t("common.stats.refresh.button"), VaadinIcon.REFRESH.create());
 
-    public AbstractStatisticsPanel(UI ui) {
+    public AbstractStatisticsPanel(UI ui, DashboardService dashboardService) {
         this.ui = ui;
+        this.dashboardService = dashboardService;
         buildUI();
         buildSections();
         loadStatistics();
