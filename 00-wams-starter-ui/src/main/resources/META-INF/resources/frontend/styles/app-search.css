@@ -1,0 +1,66 @@
+/*
+ * Styling for eu.isygoit.ui.common.component.AppSearchBar.
+ * Kept separate from the generic layout shell so the quick-navigation search
+ * remains easy to reason about and to theme independently.
+ */
+
+.wams-header-right-content {
+    flex-wrap: nowrap;
+}
+
+.wams-header-search-slot {
+    flex: 0 1 auto;
+}
+
+.wams-app-search {
+    width: 260px;
+    max-width: 260px;
+    border-radius: var(--lumo-border-radius-l);
+    --lumo-combo-box-overlay-width: 300px;
+}
+
+.wams-app-search input {
+    border-radius: var(--lumo-border-radius-l) !important;
+}
+
+.wams-app-search__item-icon {
+    color: var(--lumo-secondary-text-color);
+}
+
+.wams-app-search__group-header {
+    padding: var(--lumo-space-xs) var(--lumo-space-s);
+    font-size: var(--lumo-font-size-xxs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--wams-module-accent, var(--lumo-secondary-text-color));
+    cursor: default;
+}
+
+.wams-app-search__group-header:not(:first-of-type) {
+    margin-top: var(--lumo-space-xs);
+    border-top: 1px solid var(--lumo-contrast-10pct);
+}
+
+.wams-app-search__item-row {
+    padding-left: var(--lumo-space-m);
+}
+
+@media (max-width: 1024px) {
+    .wams-app-search {
+        width: 180px;
+        max-width: 180px;
+    }
+}
+
+@media (max-width: 768px) {
+    .wams-header-search-slot {
+        flex: 1 1 auto;
+        min-width: 60px;
+    }
+
+    .wams-app-search {
+        width: 100%;
+        max-width: none;
+    }
+}

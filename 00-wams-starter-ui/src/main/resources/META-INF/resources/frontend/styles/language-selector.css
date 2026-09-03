@@ -1,0 +1,88 @@
+/*
+ * Styling for eu.isygoit.ui.common.component.LanguageSelectorComponent.
+ * Kept separate from the general app shell so locale switching remains a
+ * self-contained, reusable component instead of a pile of layout CSS.
+ */
+
+.wams-language-selector {
+    padding: 2px var(--lumo-space-s);
+    background: var(--lumo-contrast-5pct);
+    border-radius: var(--lumo-border-radius-l);
+    border: 1px solid var(--lumo-contrast-20pct);
+    height: var(--lumo-size-m);
+    box-shadow: var(--lumo-box-shadow-xs);
+    cursor: pointer;
+    transition: all 0.25s ease-in-out;
+}
+
+.wams-language-selector:hover {
+    background: var(--lumo-contrast-10pct);
+    box-shadow: var(--lumo-box-shadow-s);
+    border-color: var(--lumo-primary-color);
+}
+
+.wams-language-selector:active {
+    background: var(--lumo-contrast-20pct);
+    transform: scale(0.98);
+}
+
+.wams-language-selector__globe-icon {
+    color: var(--lumo-secondary-text-color);
+    margin-right: var(--lumo-space-xs);
+}
+
+.wams-language-selector__flag {
+    font-size: 1.2em;
+    margin-right: var(--lumo-space-xs);
+}
+
+.wams-language-selector__item-flag {
+    font-size: 1.2em;
+}
+
+.wams-language-selector__item-name {
+    white-space: nowrap;
+}
+
+.wams-language-selector__combo {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    --lumo-combo-box-overlay-width: auto;
+    min-width: 0;
+    padding: 0 var(--lumo-space-s);
+}
+
+.wams-language-selector__mobile-trigger {
+    display: none;
+}
+
+.wams-language-selector__popover-item {
+    padding: var(--lumo-space-xs) var(--lumo-space-s);
+    border-radius: var(--lumo-border-radius-m);
+    cursor: pointer;
+}
+
+.wams-language-selector__popover-item:hover {
+    background-color: var(--lumo-contrast-5pct);
+}
+
+@media (max-width: 768px) {
+    .wams-language-selector {
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        height: auto;
+        cursor: default;
+    }
+
+    .wams-language-selector__globe-icon,
+    .wams-language-selector .wams-language-selector__combo {
+        display: none;
+    }
+
+    .wams-language-selector__mobile-trigger {
+        display: inline-flex;
+    }
+}

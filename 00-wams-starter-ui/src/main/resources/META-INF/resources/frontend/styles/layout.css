@@ -99,135 +99,15 @@ vaadin-drawer-toggle {
     border: 2px solid var(--lumo-contrast-20pct);
 }
 
-/* ── Quick-navigation search (eu.isygoit.ui.common.component.AppSearchBar) ──
-   Desktop: fixed 260px. Tablet (≤1024px): shrunk to make room for the fixed-
-   size icon cluster alongside it. Mobile (≤640px): the header has already
-   stacked into 2 rows (see .wams-main-header below), so the search slot
-   fills whatever width remains next to the icon cluster on its own row. */
-
-.wams-header-right-content {
-    flex-wrap: nowrap;
-}
-
-.wams-header-search-slot {
-    flex: 0 1 auto;
-}
+/*
+ * Shared frame and shell layout for the main app chrome.
+ * Component-specific rules are split into dedicated CSS modules to keep the UI
+ * easier to maintain and to align with the package structure in
+ * eu.isygoit.ui.common.component.
+ */
 
 .wams-header-icon-cluster {
-    flex: 0 0 auto;
-}
-
-.wams-app-search {
-    width: 260px;
-    max-width: 260px;
-    border-radius: var(--lumo-border-radius-l);
-    /* Wider than the input itself so the tree's indented item rows have
-       room without wrapping — same technique used for
-       LanguageSelectorComponent's overlay. */
-    --lumo-combo-box-overlay-width: 300px;
-}
-
-.wams-app-search input {
-    border-radius: var(--lumo-border-radius-l) !important;
-}
-
-.wams-app-search__item-icon {
-    color: var(--lumo-secondary-text-color);
-}
-
-/* Module group header (AppSearchBar.ModuleHeader) — the "parent" row of the
-   results tree: full module name, colored via the same --wams-module-accent
-   custom property as the landing page's module cards and the header's
-   module-accent top border (see modules.css), picked up from the
-   "wams-module-<key>" class the renderer puts on the row itself. Never
-   navigable (see AppSearchBar's value-change listener), so styled to read
-   as a label rather than a clickable item. */
-.wams-app-search__group-header {
-    padding: var(--lumo-space-xs) var(--lumo-space-s);
-    font-size: var(--lumo-font-size-xxs);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    color: var(--wams-module-accent, var(--lumo-secondary-text-color));
-    cursor: default;
-}
-
-.wams-app-search__group-header:not(:first-of-type) {
-    margin-top: var(--lumo-space-xs);
-    border-top: 1px solid var(--lumo-contrast-10pct);
-}
-
-/* Target row (AppSearchBar.TargetItem) — indented underneath its module
-   header to read as that header's child in the tree. */
-.wams-app-search__item-row {
-    padding-left: var(--lumo-space-m);
-}
-
-/* ── Language selector (eu.isygoit.ui.common.component.LanguageSelectorComponent) ── */
-
-.wams-language-selector {
-    padding: 2px var(--lumo-space-s);
-    background: var(--lumo-contrast-5pct);
-    border-radius: var(--lumo-border-radius-l);
-    border: 1px solid var(--lumo-contrast-20pct);
-    height: var(--lumo-size-m);
-    box-shadow: var(--lumo-box-shadow-xs);
-    cursor: pointer;
-    transition: all 0.25s ease-in-out;
-}
-
-.wams-language-selector:hover {
-    background: var(--lumo-contrast-10pct);
-    box-shadow: var(--lumo-box-shadow-s);
-    border-color: var(--lumo-primary-color);
-}
-
-.wams-language-selector:active {
-    background: var(--lumo-contrast-20pct);
-    transform: scale(0.98);
-}
-
-.wams-language-selector__globe-icon {
-    color: var(--lumo-secondary-text-color);
-    margin-right: var(--lumo-space-xs);
-}
-
-.wams-language-selector__flag {
-    font-size: 1.2em;
-    margin-right: var(--lumo-space-xs);
-}
-
-.wams-language-selector__item-flag {
-    font-size: 1.2em;
-}
-
-.wams-language-selector__item-name {
-    white-space: nowrap;
-}
-
-.wams-language-selector__combo {
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    --lumo-combo-box-overlay-width: auto;
-    min-width: 0;
-    padding: 0 var(--lumo-space-s);
-}
-
-/* Icon-only mobile trigger (see @media max-width:768px below): hidden by
-   default on desktop/tablet, where the full flag+text combo is shown instead. */
-.wams-language-selector__mobile-trigger {
-    display: none;
-}
-
-.wams-language-selector__popover-item {
-    padding: var(--lumo-space-xs) var(--lumo-space-s);
-    border-radius: var(--lumo-border-radius-m);
-    cursor: pointer;
-}
-
-.wams-language-selector__popover-item:hover {
-    background-color: var(--lumo-contrast-5pct);
+   flex: 0 0 auto;
 }
 
 /* ── Header responsive breakpoints ────────────────────────────────────────
@@ -249,88 +129,35 @@ vaadin-drawer-toggle {
    the redundant text. */
 
 @media (max-width: 1024px) {
-    /* Tablet: title dropped (see above), search shrunk — brand + search +
-       icon cluster comfortably fit one row even at the 768px lower bound. */
-    .wams-header-title {
-        display: none;
-    }
-
-    .wams-app-search {
-        width: 180px;
-        max-width: 180px;
-    }
+   .wams-header-title {
+       display: none;
+   }
 }
 
 @media (max-width: 768px) {
-    /* Mobile: header stacks into 2 rows — [hamburger + brand] then
-       [search + icon cluster] — matching the drawer's own automatic
-       push→overlay switch (Vaadin's AppLayout does this natively at
-       max-width:800px, so the drawer is already an overlay sheet by the
-       time the header itself needs to stack). */
-    .wams-main-header {
-        height: auto;
-        min-height: var(--wams-header-height);
-        flex-direction: column;
-        align-items: stretch;
-    }
+   .wams-main-header {
+       height: auto;
+       min-height: var(--wams-header-height);
+       flex-direction: column;
+       align-items: stretch;
+   }
 
-    .wams-main-header > :first-child {
-        justify-content: space-between;
-    }
+   .wams-main-header > :first-child {
+       justify-content: space-between;
+   }
 
-    .wams-main-header__right {
-        width: 100%;
-        margin-right: 0;
-        padding: var(--lumo-space-xs) var(--lumo-space-s);
-        box-sizing: border-box;
-    }
-
-    .wams-header-right-content {
-        width: 100%;
-    }
-
-    .wams-header-search-slot {
-        flex: 1 1 auto;
-        min-width: 60px;
-    }
-
-    .wams-app-search {
-        width: 100%;
-        max-width: none;
-    }
-
-    /* Language selector goes icon-only: even shrunk down, the ComboBox still
-       carries its own input box + dropdown-arrow chrome and doesn't read as
-       "just an icon" — so below this breakpoint the whole combo (and its
-       globe-icon prefix) is replaced by a single icon button that opens a
-       Popover listing the same locales (LanguageSelectorComponent builds
-       both up front; only visibility is toggled here). The wrapping
-       .wams-language-selector pill styling is stripped too, since its only
-       visible content is now a plain icon button matching the notifications/
-       settings buttons alongside it. */
-    .wams-language-selector {
-        padding: 0;
-        background: transparent;
-        border: none;
-        box-shadow: none;
-        height: auto;
-        cursor: default;
-    }
-
-    .wams-language-selector__globe-icon,
-    .wams-language-selector .wams-language-selector__combo {
-        display: none;
-    }
-
-    .wams-language-selector__mobile-trigger {
-        display: inline-flex;
-    }
+   .wams-main-header__right {
+       width: 100%;
+       margin-right: 0;
+       padding: var(--lumo-space-xs) var(--lumo-space-s);
+       box-sizing: border-box;
+   }
 }
 
 @media (max-width: 480px) {
-    .wams-header-icon-cluster {
-        gap: var(--lumo-space-xs);
-    }
+   .wams-header-icon-cluster {
+       gap: var(--lumo-space-xs);
+   }
 }
 
 /* ── Sidebar / drawer ─────────────────────────────────────────────────────

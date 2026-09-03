@@ -1,0 +1,346 @@
+/*
+ * Shared styling for eu.isygoit.ui.common.time.*
+ * Kept with the package instead of the global app shell so the weekly and
+ * monthly calendar components remain self-contained and reusable.
+ */
+
+/* Monthly calendar */
+.monthly-grid-wrapper {
+    width: 100%;
+    background: var(--lumo-base-color);
+    border: 1px solid var(--lumo-contrast-10pct);
+    border-radius: var(--lumo-border-radius-l);
+    box-shadow: var(--lumo-box-shadow-xs);
+    overflow: hidden;
+}
+
+.monthly-grid {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    width: 100%;
+}
+
+.monthly-grid-header {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    background: var(--lumo-contrast-5pct);
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
+    font-size: var(--lumo-font-size-s);
+    color: var(--lumo-secondary-text-color);
+    font-weight: 600;
+}
+
+.monthly-grid-header-cell {
+    padding: var(--lumo-space-s) var(--lumo-space-xs);
+    text-align: center;
+}
+
+.monthly-grid-inner {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-auto-rows: minmax(120px, 1fr);
+}
+
+.monthly-grid-cell {
+    position: relative;
+    min-height: 120px;
+    padding: var(--lumo-space-xs);
+    border-right: 1px solid var(--lumo-contrast-5pct);
+    border-bottom: 1px solid var(--lumo-contrast-5pct);
+    background: var(--lumo-base-color);
+    transition: background-color 0.12s ease;
+}
+
+.monthly-grid-cell:hover {
+    background: var(--lumo-contrast-5pct);
+}
+
+.monthly-grid-cell--empty {
+    background: var(--lumo-contrast-5pct);
+}
+
+.monthly-grid-cell--today {
+    background: var(--lumo-primary-color-10pct);
+}
+
+.monthly-grid-cell--weekend {
+    background: var(--lumo-contrast-5pct);
+}
+
+.monthly-grid-day-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.75rem;
+    min-height: 1.75rem;
+    border-radius: 50%;
+    font-size: var(--lumo-font-size-s);
+    font-weight: 600;
+    color: var(--lumo-body-text-color);
+}
+
+.monthly-grid-cell--today .monthly-grid-day-number {
+    background: var(--lumo-primary-color);
+    color: var(--lumo-primary-contrast-color);
+}
+
+.monthly-grid-events {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: var(--lumo-space-xs);
+    align-items: center;
+}
+
+.monthly-grid-event-dot-enhanced {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.monthly-grid-event-more {
+    font-size: var(--lumo-font-size-xxs);
+    font-weight: 600;
+    color: var(--lumo-secondary-text-color);
+}
+
+.monthly-grid-event-menu {
+    margin-left: auto;
+}
+
+/* Weekly timetable grid */
+.timetable-grid-wrapper {
+    --tt-row-full: 56px;
+    --tt-row-half: 28px;
+    --tt-row-end: 20px;
+
+    background: var(--lumo-base-color);
+    border-radius: var(--lumo-border-radius-l);
+    border: 1px solid var(--lumo-contrast-10pct);
+    padding: 0;
+    box-shadow: var(--lumo-box-shadow-xs);
+    overflow-x: auto;
+}
+
+.timetable-grid {
+    position: relative;
+    display: grid;
+    min-width: 800px;
+    width: 100%;
+    margin: 8px 0;
+}
+
+.timetable-grid-header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--lumo-base-color);
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
+    padding: var(--lumo-space-s) var(--lumo-space-xs);
+}
+
+.timetable-grid-header-day {
+    color: var(--lumo-secondary-text-color);
+    border-bottom: 2px solid transparent;
+}
+
+.timetable-grid-header-day--today {
+    color: var(--lumo-primary-text-color);
+    border-bottom: 2px solid var(--lumo-primary-color);
+}
+
+.timetable-time-label {
+    display: block;
+    align-self: start;
+    transform: translateY(calc(-0.6em + 8px));
+    white-space: nowrap;
+    padding-right: var(--lumo-space-xs);
+    text-align: right;
+}
+
+.timetable-time-label--end {
+    opacity: 0.7;
+}
+
+.timetable-bg-cell {
+    position: relative;
+    border-right: 1px solid var(--lumo-contrast-5pct);
+    background: var(--lumo-base-color);
+    transition: background 0.12s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    overflow: hidden;
+}
+
+.timetable-bg-cell.hour-full {
+    border-top: 1px solid var(--lumo-contrast-20pct);
+}
+
+.timetable-bg-cell.hour-half {
+    border-top: 1px solid var(--lumo-contrast-10pct);
+}
+
+.timetable-grid-col-today {
+    background: var(--lumo-primary-color-10pct);
+}
+
+.timetable-grid-cell--empty.timetable-grid-col-today:hover {
+    background: var(--lumo-primary-color-10pct);
+}
+
+.timetable-grid-cell--empty {
+    cursor: pointer;
+    border-radius: var(--lumo-border-radius-s);
+}
+
+.timetable-grid-cell--empty:hover {
+    background: var(--lumo-contrast-5pct);
+}
+
+.timetable-empty-plus {
+    display: none;
+    color: var(--lumo-secondary-text-color);
+    font-size: 1.1rem;
+    font-weight: 300;
+}
+
+.timetable-grid-cell--empty:hover .timetable-empty-plus {
+    display: block;
+}
+
+.timetable-slot-chip {
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
+    margin: 1px;
+}
+
+.timetable-slot-content {
+    width: calc(100% - 2px);
+    height: calc(100% - 2px);
+    padding: 3px 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    text-align: left;
+    background: var(--slot-bg, var(--lumo-primary-color-10pct));
+    border-left: 3px solid var(--slot-accent, var(--lumo-primary-color));
+    border-radius: var(--lumo-border-radius-s);
+    box-shadow: none;
+    transition: box-shadow 0.12s ease;
+    overflow: hidden;
+}
+
+.timetable-slot-chip:hover .timetable-slot-content {
+    box-shadow: var(--lumo-box-shadow-s);
+}
+
+.timetable-slot-title {
+    font-size: var(--lumo-font-size-xs);
+    font-weight: 600;
+    color: var(--slot-accent, var(--lumo-primary-text-color));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+.timetable-slot-meta {
+    font-size: var(--lumo-font-size-xxs);
+    color: var(--lumo-secondary-text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+.timetable-slot-time-range {
+    font-size: 0.6rem;
+    opacity: 0.75;
+    margin-top: 1px;
+}
+
+.timetable-slot-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+    opacity: 0;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: var(--lumo-border-radius-s);
+    transition: opacity 0.12s ease;
+    z-index: 3;
+}
+
+.timetable-slot-chip:hover .timetable-slot-actions,
+.timetable-slot-actions:focus-within {
+    opacity: 1;
+}
+
+.timetable-now-indicator {
+    position: absolute;
+    height: 2px;
+    background: var(--lumo-error-color, #D13438);
+    z-index: 20;
+    pointer-events: none;
+}
+
+.timetable-now-dot {
+    position: absolute;
+    left: -5px;
+    top: -4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--lumo-error-color, #D13438);
+}
+
+@media (max-width: 768px) {
+    .timetable-grid-wrapper {
+        --tt-row-full: 46px;
+        --tt-row-half: 23px;
+        --tt-row-end: 16px;
+    }
+
+    .timetable-grid {
+        min-width: 600px;
+        font-size: var(--lumo-font-size-xxs);
+    }
+
+    .timetable-grid-header {
+        font-size: var(--lumo-font-size-xxs);
+        padding: var(--lumo-space-xs) 0;
+    }
+
+    .timetable-slot-content {
+        font-size: 0.55rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .timetable-grid-wrapper {
+        --tt-row-full: 38px;
+        --tt-row-half: 19px;
+        --tt-row-end: 14px;
+    }
+
+    .timetable-grid {
+        min-width: 400px;
+    }
+
+    .timetable-grid-header {
+        padding: var(--lumo-space-xs) 0;
+        font-size: 0.5rem;
+    }
+
+    .timetable-slot-content {
+        font-size: 0.45rem;
+        padding: 2px;
+    }
+}

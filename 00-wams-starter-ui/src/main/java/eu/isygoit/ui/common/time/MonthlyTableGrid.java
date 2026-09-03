@@ -1,6 +1,7 @@
 package eu.isygoit.ui.common.time;
 
 import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -19,6 +20,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@CssImport("./styles/time-grid.css")
 public class MonthlyTableGrid<E> extends VerticalLayout {
 
     private final MonthlyTableGridConfig<E> config;

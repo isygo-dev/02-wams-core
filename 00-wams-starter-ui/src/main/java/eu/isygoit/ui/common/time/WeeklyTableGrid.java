@@ -1,6 +1,7 @@
 package eu.isygoit.ui.common.time;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.html.Div;
@@ -25,6 +26,7 @@ import java.util.*;
  *
  * @param <S> the type of a single slot
  */
+@CssImport("./styles/time-grid.css")
 public class WeeklyTableGrid<S extends TimeSlot> extends VerticalLayout {
 
     private final WeeklyTableGridConfig<S> config;
