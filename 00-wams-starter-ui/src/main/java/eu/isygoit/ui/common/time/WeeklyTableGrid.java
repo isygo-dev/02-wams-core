@@ -11,7 +11,8 @@ import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.shared.Tooltip;
-import com.vaadin.flow.theme.lumo.LumoUtility;import eu.isygoit.dto.common.TimeSlot;
+import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.dto.common.TimeSlot;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
