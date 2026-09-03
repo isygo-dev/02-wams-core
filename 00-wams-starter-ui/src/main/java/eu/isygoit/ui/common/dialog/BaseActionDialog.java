@@ -55,6 +55,10 @@ public abstract class BaseActionDialog extends Dialog {
         okButton.setEnabled(enable);
     }
 
+    public void enableCancelButton(boolean enable) {
+        cancelButton.setEnabled(enable);
+    }
+
     public void addThemeVariantsOkButton(ButtonVariant... variants) {
         okButton.addThemeVariants(variants);
     }
