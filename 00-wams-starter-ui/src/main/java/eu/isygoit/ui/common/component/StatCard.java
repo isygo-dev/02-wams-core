@@ -1,5 +1,6 @@
 package eu.isygoit.ui.common.component;
 
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -16,6 +17,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
  * for the full {@code wams-stat-card} rule set (hover-lift, skeleton-loading,
  * responsive grid via {@link StatCardGrid}).
  */
+@CssImport("./styles/card.css")
 public class StatCard extends VerticalLayout {
 
     private final Div iconCircle;

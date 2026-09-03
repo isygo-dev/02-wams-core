@@ -3,6 +3,7 @@ package eu.isygoit.ui.common.component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory;
  * Gère l'en-tête commun (titre, rafraîchissement, chargement) et délègue
  * la construction des sections et le chargement des données aux sous-classes.
  */
+@CssImport("./styles/card.css")
 public abstract class AbstractStatisticsPanel extends VerticalLayout {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractStatisticsPanel.class);

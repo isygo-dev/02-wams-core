@@ -3,6 +3,7 @@ package eu.isygoit.ui.common.card;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -31,6 +32,7 @@ import java.util.List;
  * @param <V> the parent view type
  * @param <S> the service type used by this card
  */
+@CssImport("./styles/card.css")
 public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
 
     // ── Infrastructure ────────────────────────────────────────────────────────

@@ -1,5 +1,6 @@
 package eu.isygoit.ui.common.component;
 
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -18,10 +19,11 @@ import java.util.List;
  * This component only assembles DOM structure and toggles state via CSS
  * class names — every visual detail (colors, spacing, hover, the expand/
  * collapse transition, and hiding the header when the whole sidebar
- * collapses to its icon-only rail) lives in {@code styles/nav.css}, imported
- * once by {@code BaseMainLayout}. Used by every {@code <Module>MainLayout}
- * so grouped navigation looks and behaves identically across modules.
+ * collapses to its icon-only rail) lives in {@code styles/nav.css}. Used by
+ * every {@code <Module>MainLayout} so grouped navigation looks and behaves
+ * identically across modules.
  */
+@CssImport("./styles/nav.css")
 public class CollapsibleNavSection extends Div {
 
     private static final String EXPANDED_CLASS = "wams-collapsible-nav-section--expanded";

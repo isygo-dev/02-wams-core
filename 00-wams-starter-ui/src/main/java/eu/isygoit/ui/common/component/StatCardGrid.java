@@ -1,5 +1,6 @@
 package eu.isygoit.ui.common.component;
 
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 
 /**
@@ -9,6 +10,7 @@ import com.vaadin.flow.component.html.Div;
  * layout is identical everywhere instead of each dashboard hand-rolling its
  * own {@code HorizontalLayout}/CSS.
  */
+@CssImport("./styles/card.css")
 public class StatCardGrid extends Div {
 
     public StatCardGrid(StatCard... cards) {

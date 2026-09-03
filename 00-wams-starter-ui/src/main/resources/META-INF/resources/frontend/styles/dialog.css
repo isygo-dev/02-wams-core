@@ -1,6 +1,7 @@
 /*
  * Shared styling for eu.isygoit.ui.common.dialog.* (BaseActionDialog,
  * PinBaseActionDialog, NoActionDialog and their subclasses across all modules).
+ * Imported directly by the dialog base classes via @CssImport.
  */
 
 .wams-dialog-error-span {

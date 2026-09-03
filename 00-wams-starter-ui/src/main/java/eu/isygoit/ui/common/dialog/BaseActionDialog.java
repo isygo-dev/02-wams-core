@@ -3,6 +3,7 @@ package eu.isygoit.ui.common.dialog;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
@@ -18,6 +19,7 @@ import eu.isygoit.i18n.I18n;
  * Modern, compact base dialog with a header, a content area, and a footer
  * with Ok/Cancel buttons. Subclasses must implement {@link #onOk()}.
  */
+@CssImport("./styles/dialog.css")
 public abstract class BaseActionDialog extends Dialog {
 
     private final Span errorSpan;

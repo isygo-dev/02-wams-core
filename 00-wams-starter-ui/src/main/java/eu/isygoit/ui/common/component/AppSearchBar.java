@@ -2,6 +2,7 @@ package eu.isygoit.ui.common.component;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -29,6 +30,7 @@ import java.util.List;
  * whenever at least one of its module's targets still matches, so the tree
  * structure survives filtering.
  */
+@CssImport("./styles/app-search.css")
 public class AppSearchBar extends ComboBox<AppSearchBar.SearchItem> {
 
     private INavRegistry navRegistry;

@@ -3,7 +3,7 @@
  * every <Module>MainLayout to group sidebar navigation under a clickable,
  * collapsible header. All visual behavior lives here — the Java class only
  * assembles DOM structure and toggles the --expanded modifier class.
- * Imported once via @CssImport on BaseMainLayout.
+ * Imported directly by the component via @CssImport.
  */
 
 .wams-collapsible-nav-section {
