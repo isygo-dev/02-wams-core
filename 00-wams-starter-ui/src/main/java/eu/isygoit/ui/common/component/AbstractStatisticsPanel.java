@@ -25,15 +25,12 @@ public abstract class AbstractStatisticsPanel extends VerticalLayout {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractStatisticsPanel.class);
 
-    private final DashboardService dashboardService;
-
     protected final UI ui;
     protected final ProgressBar loadingBar = new ProgressBar();
     protected final Button refreshButton = new Button(I18n.t("common.stats.refresh.button"), VaadinIcon.REFRESH.create());
 
-    public AbstractStatisticsPanel(UI ui, DashboardService dashboardService) {
+    public AbstractStatisticsPanel(UI ui) {
         this.ui = ui;
-        this.dashboardService = dashboardService;
         buildUI();
         buildSections();
         loadStatistics();
