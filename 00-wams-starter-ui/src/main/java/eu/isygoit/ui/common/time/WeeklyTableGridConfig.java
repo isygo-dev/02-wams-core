@@ -15,7 +15,7 @@ import java.util.function.*;
  *
  * @param <S> the type of a single slot
  */
-public class TimeTableGridConfig<S> {
+public class WeeklyTableGridConfig<S> {
 
     // ---- Data extractors ----
     private final Function<S, DayOfWeek> dayOfWeekExtractor;
@@ -52,7 +52,7 @@ public class TimeTableGridConfig<S> {
     private final boolean showNowIndicator;
 
     // ---- Builder ----
-    private TimeTableGridConfig(Builder<S> builder) {
+    private WeeklyTableGridConfig(Builder<S> builder) {
         this.dayOfWeekExtractor = builder.dayOfWeekExtractor;
         this.startTimeExtractor = builder.startTimeExtractor;
         this.endTimeExtractor = builder.endTimeExtractor;
@@ -239,7 +239,7 @@ public class TimeTableGridConfig<S> {
             return this;
         }
 
-        public TimeTableGridConfig<S> build() {
+        public WeeklyTableGridConfig<S> build() {
             // Validate required fields
             if (dayOfWeekExtractor == null || startTimeExtractor == null || endTimeExtractor == null ||
                     subjectNameExtractor == null || teacherNameExtractor == null || roomNameExtractor == null ||
@@ -262,7 +262,7 @@ public class TimeTableGridConfig<S> {
                     // default: do nothing
                 };
             }
-            return new TimeTableGridConfig<>(this);
+            return new WeeklyTableGridConfig<>(this);
         }
     }
 }

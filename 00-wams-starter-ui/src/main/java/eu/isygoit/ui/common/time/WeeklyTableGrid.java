@@ -20,20 +20,20 @@ import java.util.*;
 
 /**
  * A reusable, generic timetable grid that renders slots in a weekly view.
- * All behaviour and rendering is controlled via {@link TimeTableGridConfig}.
+ * All behaviour and rendering is controlled via {@link WeeklyTableGridConfig}.
  *
  * @param <S> the type of a single slot
  */
-public class TimeTableGrid<S extends TimeSlot> extends VerticalLayout {
+public class WeeklyTableGrid<S extends TimeSlot> extends VerticalLayout {
 
-    private final TimeTableGridConfig<S> config;
+    private final WeeklyTableGridConfig<S> config;
     private final Div gridContainer = new Div();
     private final List<LocalTime> timeSlots = new ArrayList<>();
 
     private List<S> slots = Collections.emptyList();
     private boolean editable = true;
 
-    public TimeTableGrid(TimeTableGridConfig<S> config) {
+    public WeeklyTableGrid(WeeklyTableGridConfig<S> config) {
         this.config = config;
         setPadding(false);
         setSpacing(false);
