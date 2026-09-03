@@ -21,12 +21,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * A monthly calendar grid that displays events as colored dots.
- * All behaviour and rendering is controlled via {@link MonthlyTableGridConfig}.
- *
- * @param <E> the type of a single event
- */
 public class MonthlyTableGrid<E> extends VerticalLayout {
 
     private final MonthlyTableGridConfig<E> config;
@@ -47,9 +41,6 @@ public class MonthlyTableGrid<E> extends VerticalLayout {
         add(gridContainer);
     }
 
-    /**
-     * Sets the month to display and the list of events for that month.
-     */
     public void setMonth(YearMonth yearMonth, List<E> events) {
         this.yearMonth = yearMonth;
         this.events = events != null ? events : List.of();
@@ -59,7 +50,7 @@ public class MonthlyTableGrid<E> extends VerticalLayout {
     private void buildGrid() {
         gridContainer.removeAll();
 
-        // Header: days of week (Monday to Saturday, start from Monday)
+        // Header
         Div headerRow = new Div();
         headerRow.addClassName("monthly-grid-header");
         for (DayOfWeek day : DayOfWeek.values()) {
@@ -70,12 +61,11 @@ public class MonthlyTableGrid<E> extends VerticalLayout {
         }
         gridContainer.add(headerRow);
 
-        // Grid inner container
+        // Grid inner
         Div gridInner = new Div();
         gridInner.addClassName("monthly-grid-inner");
         gridContainer.add(gridInner);
 
-        // Calculate first day and offset
         LocalDate firstDay = yearMonth.atDay(1);
         int dayOfWeekOffset = firstDay.getDayOfWeek().getValue() - DayOfWeek.MONDAY.getValue();
         if (dayOfWeekOffset < 0) dayOfWeekOffset += 7;
@@ -83,11 +73,9 @@ public class MonthlyTableGrid<E> extends VerticalLayout {
         int daysInMonth = yearMonth.lengthOfMonth();
         int totalCells = ((dayOfWeekOffset + daysInMonth + 6) / 7) * 7;
 
-        // Group events by date
         Map<LocalDate, List<E>> eventsByDate = events.stream()
                 .collect(Collectors.groupingBy(config.getDateExtractor()));
 
-        // Build cells
         for (int i = 0; i < totalCells; i++) {
             int dayNumber = i - dayOfWeekOffset + 1;
             LocalDate date = null;
@@ -108,26 +96,22 @@ public class MonthlyTableGrid<E> extends VerticalLayout {
             return cell;
         }
 
-        // Day number
         Span daySpan = new Span(String.valueOf(dayNumber));
         daySpan.addClassName("monthly-grid-day-number");
 
-        // Today highlight
         if (date.equals(LocalDate.now())) {
             cell.addClassName("monthly-grid-cell--today");
         }
-
-        // Weekend
         if (date.getDayOfWeek() == DayOfWeek.SATURDAY || date.getDayOfWeek() == DayOfWeek.SUNDAY) {
             cell.addClassName("monthly-grid-cell--weekend");
         }
 
-        // Events indicators
+        // ─── Enhanced Events Container ────────────────────────────────
         Div eventsContainer = new Div();
         eventsContainer.addClassName("monthly-grid-events");
         List<E> dayEvents = eventsByDate.getOrDefault(date, List.of());
 
-        int maxDots = 3;
+        int maxDots = 4; // Increased from 3 to 4
         int count = 0;
         for (E evt : dayEvents) {
             if (count >= maxDots) {
@@ -136,44 +120,86 @@ public class MonthlyTableGrid<E> extends VerticalLayout {
                 eventsContainer.add(more);
                 break;
             }
-            // Build event dot
-            Div dot = new Div();
-            dot.addClassName("monthly-grid-event-dot");
-            String color = config.getColorExtractor().apply(evt);
-            dot.getStyle().set("background-color", color != null ? color : "#1976D2");
-            dot.getElement().setAttribute("title", config.getTitleExtractor().apply(evt));
-
-            // Click on dot triggers event click
-            if (config.getOnEventClick() != null) {
-                dot.addClickListener(e -> config.getOnEventClick().accept(evt));
-            }
-
-            // Context menu for event (optional delete)
-            if (config.getOnEventDelete() != null) {
-                MenuBar menuBar = new MenuBar();
-                menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE, MenuBarVariant.LUMO_ICON, MenuBarVariant.LUMO_SMALL);
-                menuBar.addClassName("monthly-grid-event-menu");
-                MenuItem rootItem = menuBar.addItem(new Icon(VaadinIcon.ELLIPSIS_DOTS_V));
-                SubMenu subMenu = rootItem.getSubMenu();
-                subMenu.addItem("Supprimer", e -> config.getOnEventDelete().accept(evt));
-                // Prevent click propagation to the dot
-                menuBar.getElement().executeJs("this.addEventListener('click', (e) => e.stopPropagation());");
-                dot.add(menuBar);
-            }
-
-            // Custom populator (optional)
-            config.getEventDotPopulator().accept(dot, evt);
-
+            // ─── Enhanced Event Dot ────────────────────────────────────
+            Div dot = buildEnhancedEventDot(evt);
             eventsContainer.add(dot);
             count++;
         }
 
-        // Click on cell opens day view
         if (config.getOnDayClick() != null) {
             cell.addClickListener(e -> config.getOnDayClick().accept(date));
         }
 
         cell.add(daySpan, eventsContainer);
         return cell;
+    }
+
+    /**
+     * Builds an enhanced event dot with better visibility:
+     * - Larger size (16px)
+     * - White border for contrast
+     * - Box-shadow for depth
+     * - Tooltip with event details
+     * - Clickable to open event
+     */
+    private Div buildEnhancedEventDot(E evt) {
+        Div dot = new Div();
+        dot.addClassName("monthly-grid-event-dot-enhanced");
+
+        // Color
+        String color = config.getColorExtractor().apply(evt);
+        dot.getStyle().set("background-color", color != null ? color : "#1976D2");
+
+        // Tooltip with full event details
+        String tooltip = buildTooltipText(evt);
+        dot.getElement().setAttribute("title", tooltip);
+
+        // Click on dot triggers event click
+        if (config.getOnEventClick() != null) {
+            dot.addClickListener(e -> config.getOnEventClick().accept(evt));
+        }
+
+        // Context menu for delete (if configured)
+        if (config.getOnEventDelete() != null) {
+            MenuBar menuBar = new MenuBar();
+            menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE,
+                    MenuBarVariant.LUMO_ICON, MenuBarVariant.LUMO_SMALL);
+            menuBar.addClassName("monthly-grid-event-menu");
+            MenuItem rootItem = menuBar.addItem(new Icon(VaadinIcon.ELLIPSIS_DOTS_V));
+            SubMenu subMenu = rootItem.getSubMenu();
+            subMenu.addItem("Supprimer", e -> config.getOnEventDelete().accept(evt));
+            menuBar.getElement().executeJs("this.addEventListener('click', (e) => e.stopPropagation());");
+            dot.add(menuBar);
+        }
+
+        // Custom populator (optional)
+        config.getEventDotPopulator().accept(dot, evt);
+
+        return dot;
+    }
+
+    /**
+     * Builds a rich tooltip text for the event dot.
+     */
+    private String buildTooltipText(E evt) {
+        StringBuilder sb = new StringBuilder();
+        String title = config.getTitleExtractor().apply(evt);
+        String desc = config.getDescriptionExtractor().apply(evt);
+        LocalDate date = config.getDateExtractor().apply(evt);
+
+        sb.append(title != null ? title : "Event");
+        if (desc != null && !desc.isBlank()) {
+            sb.append("\n").append(desc);
+        }
+        if (date != null) {
+            sb.append("\n").append(date.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        }
+        return sb.toString();
+    }
+
+    @Override
+    protected void onAttach(com.vaadin.flow.component.AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        // Nothing to do
     }
 }
