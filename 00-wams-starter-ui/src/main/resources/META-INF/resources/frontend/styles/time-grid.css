@@ -4,63 +4,61 @@
  * monthly calendar components remain self-contained and reusable.
  */
 
-/* Monthly calendar */
+/* ─── Monthly Grid ───────────────────────────────────────────── */
+
 .monthly-grid-wrapper {
     width: 100%;
-    background: var(--lumo-base-color);
-    border: 1px solid var(--lumo-contrast-10pct);
-    border-radius: var(--lumo-border-radius-l);
-    box-shadow: var(--lumo-box-shadow-xs);
-    overflow: hidden;
 }
 
 .monthly-grid {
-    display: grid;
-    grid-template-rows: auto 1fr;
     width: 100%;
 }
 
 .monthly-grid-header {
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    background: var(--lumo-contrast-5pct);
-    border-bottom: 1px solid var(--lumo-contrast-10pct);
-    font-size: var(--lumo-font-size-s);
-    color: var(--lumo-secondary-text-color);
-    font-weight: 600;
+    display: contents;
 }
 
 .monthly-grid-header-cell {
-    padding: var(--lumo-space-s) var(--lumo-space-xs);
+    padding: var(--lumo-space-xs);
+    font-weight: 600;
+    font-size: var(--lumo-font-size-s);
     text-align: center;
+    color: var(--lumo-secondary-text-color);
+    background: var(--lumo-contrast-5pct);
+    border-radius: var(--lumo-border-radius-s);
 }
 
 .monthly-grid-inner {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    grid-auto-rows: minmax(120px, 1fr);
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
 }
 
 .monthly-grid-cell {
-    position: relative;
-    min-height: 120px;
-    padding: var(--lumo-space-xs);
-    border-right: 1px solid var(--lumo-contrast-5pct);
-    border-bottom: 1px solid var(--lumo-contrast-5pct);
     background: var(--lumo-base-color);
-    transition: background-color 0.12s ease;
+    border-radius: var(--lumo-border-radius-s);
+    padding: var(--lumo-space-xs);
+    min-height: 80px;
+    position: relative;
+    cursor: pointer;
+    border: 1px solid var(--lumo-contrast-10pct);
+    transition: var(--wams-stats-transition);
 }
 
 .monthly-grid-cell:hover {
     background: var(--lumo-contrast-5pct);
+    border-color: var(--lumo-primary-color-50pct);
 }
 
 .monthly-grid-cell--empty {
     background: var(--lumo-contrast-5pct);
+    border-color: transparent;
+    cursor: default;
 }
 
 .monthly-grid-cell--today {
     background: var(--lumo-primary-color-10pct);
+    border-color: var(--lumo-primary-color);
 }
 
 .monthly-grid-cell--weekend {
@@ -68,48 +66,78 @@
 }
 
 .monthly-grid-day-number {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 1.75rem;
-    min-height: 1.75rem;
-    border-radius: 50%;
     font-size: var(--lumo-font-size-s);
     font-weight: 600;
-    color: var(--lumo-body-text-color);
-}
-
-.monthly-grid-cell--today .monthly-grid-day-number {
-    background: var(--lumo-primary-color);
-    color: var(--lumo-primary-contrast-color);
+    color: var(--lumo-primary-text-color);
 }
 
 .monthly-grid-events {
+    margin-top: var(--lumo-space-xs);
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
-    margin-top: var(--lumo-space-xs);
     align-items: center;
 }
 
+/* ─── Enhanced Event Dot ──────────────────────────────────────── */
+
 .monthly-grid-event-dot-enhanced {
-    width: 12px;
-    height: 12px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.9);
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     cursor: pointer;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
     flex-shrink: 0;
 }
 
-.monthly-grid-event-more {
-    font-size: var(--lumo-font-size-xxs);
-    font-weight: 600;
-    color: var(--lumo-secondary-text-color);
+.monthly-grid-event-dot-enhanced:hover {
+    transform: scale(1.3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    z-index: 10;
 }
 
-.monthly-grid-event-menu {
-    margin-left: auto;
+.monthly-grid-event-dot-enhanced .monthly-grid-event-menu {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.monthly-grid-event-dot-enhanced:hover .monthly-grid-event-menu {
+    opacity: 1;
+}
+
+.monthly-grid-event-dot-enhanced[title] {
+    position: relative;
+}
+
+.monthly-grid-cell--today .monthly-grid-event-dot-enhanced {
+    border-color: var(--lumo-primary-color-10pct);
+}
+
+.monthly-grid-cell--weekend .monthly-grid-event-dot-enhanced {
+    border-color: var(--lumo-base-color);
+}
+
+/* ─── Event More Indicator ────────────────────────────────────── */
+
+.monthly-grid-event-more {
+    font-size: var(--lumo-font-size-xs);
+    font-weight: 600;
+    color: var(--lumo-secondary-text-color);
+    background: var(--lumo-contrast-10pct);
+    padding: 0 6px;
+    border-radius: var(--lumo-border-radius-s);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.monthly-grid-event-more:hover {
+    background: var(--lumo-contrast-20pct);
 }
 
 /* Weekly timetable grid */
