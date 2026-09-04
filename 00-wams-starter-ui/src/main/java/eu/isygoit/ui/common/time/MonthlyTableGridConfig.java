@@ -109,8 +109,8 @@ public class MonthlyTableGridConfig<E extends DayTimeSlot> {
     // ---- Getters ----
     public Function<E, LocalDate> getDateExtractor() { return dateExtractor; }
     public Function<E, String> getTitleExtractor() { return titleExtractor; }
-    public Function<E, String> getColorExtractor() { return colorExtractor; }
     public Function<E, String> getDescriptionExtractor() { return descriptionExtractor; }
+    public Function<E, String> getColorExtractor() { return colorExtractor; }
     public Function<E, String> getOwnerExtractor() { return ownerExtractor; }          // NEW
     public Function<E, String> getLocationExtractor() { return locationExtractor; }    // NEW
     public Function<E, LocalTime> getStartTimeExtractor() { return startTimeExtractor; } // NEW

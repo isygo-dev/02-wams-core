@@ -25,15 +25,15 @@ import java.util.*;
 
 @CssImport("./styles/time-grid.css")
 @CssImport("./styles/split/18-calendar.css")
-public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
+public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
 
-    private final WeeklyTableGridConfig<S> config;
+    private final WeeklyTableGridConfig<E> config;
     private final Div gridContainer = new Div();
     private final List<LocalTime> timeSlots = new ArrayList<>();
-    private List<S> slots = Collections.emptyList();
+    private List<E> slots = Collections.emptyList();
     private boolean editable = true;
 
-    public WeeklyTableGrid(WeeklyTableGridConfig<S> config) {
+    public WeeklyTableGrid(WeeklyTableGridConfig<E> config) {
         this.config = config;
         setPadding(false);
         setSpacing(false);
@@ -56,7 +56,7 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
         add(gridContainer);
     }
 
-    public void setItems(List<S> slots, boolean editable) {
+    public void setItems(List<E> slots, boolean editable) {
         this.slots = slots != null ? slots : Collections.emptyList();
         this.editable = editable;
         buildGrid();
@@ -83,9 +83,9 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
             rowIndexByTime.put(bookableStarts.get(i), i);
         }
 
-        Map<DayOfWeek, Map<Integer, S>> slotsByDayRow = new HashMap<>();
+        Map<DayOfWeek, Map<Integer, E>> slotsByDayRow = new HashMap<>();
         Set<String> coveredRows = new HashSet<>();
-        for (S slot : slots) {
+        for (E slot : slots) {
             LocalTime start = config.getStartTimeExtractor().apply(slot);
             Integer rowIndex = rowIndexByTime.get(start);
             if (rowIndex == null) continue;
@@ -119,7 +119,7 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
                 buildBackgroundCell(day, dayIndex, rowIndex, start, today, isStart || isCovered);
 
                 if (isStart) {
-                    S slot = slotsByDayRow.get(day).get(rowIndex);
+                    E slot = slotsByDayRow.get(day).get(rowIndex);
                     buildSlotChip(slot, dayIndex, rowIndex, spanFor(slot));
                 }
             }
@@ -132,7 +132,7 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
         }
     }
 
-    private int spanFor(S slot) {
+    private int spanFor(E slot) {
         LocalTime start = config.getStartTimeExtractor().apply(slot);
         LocalTime end = config.getEndTimeExtractor().apply(slot);
         int durationMinutes = (int) java.time.Duration.between(start, end).toMinutes();
@@ -194,7 +194,7 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
         gridContainer.add(cell);
     }
 
-    private void buildSlotChip(S slot, int dayIndex, int rowIndex, int span) {
+    private void buildSlotChip(E slot, int dayIndex, int rowIndex, int span) {
         VerticalLayout content = new VerticalLayout();
         content.setPadding(false);
         content.setSpacing(false);
@@ -230,7 +230,7 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
         gridContainer.add(content);
     }
 
-    private MenuBar buildActionsMenu(S slot) {
+    private MenuBar buildActionsMenu(E slot) {
         MenuBar menuBar = new MenuBar();
         menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE,
                 MenuBarVariant.LUMO_ICON,
@@ -256,41 +256,40 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
         return menuBar;
     }
 
-    private String buildTooltipText(S slot) {
+    private String buildTooltipText(E evt) {
         StringBuilder sb = new StringBuilder();
-
         // Title
-        sb.append(config.getTitleExtractor().apply(slot));
+        sb.append(config.getTitleExtractor().apply(evt));
 
         // Description
-        String desc = config.getDescriptionExtractor().apply(slot);
+        String desc = config.getDescriptionExtractor().apply(evt);
         if (desc != null && !desc.isBlank()) {
             sb.append("\n").append(desc);
         }
 
         // Date (if date extractor is provided)
         if (config.getDateExtractor() != null) {
-            LocalDate date = config.getDateExtractor().apply(slot);
+            LocalDate date = config.getDateExtractor().apply(evt);
             if (date != null) {
                 sb.append("\n").append(date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             }
         }
 
         // Time from – to
-        LocalTime start = config.getStartTimeExtractor().apply(slot);
-        LocalTime end = config.getEndTimeExtractor().apply(slot);
+        LocalTime start = config.getStartTimeExtractor().apply(evt);
+        LocalTime end = config.getEndTimeExtractor().apply(evt);
         sb.append("\n").append(start).append(" – ").append(end);
 
         // Owner (if extractor exists)
         if (config.getOwnerExtractor() != null) {
-            String owner = config.getOwnerExtractor().apply(slot);
+            String owner = config.getOwnerExtractor().apply(evt);
             if (owner != null && !owner.isBlank()) {
                 sb.append("\n").append(I18n.t("calendar.grid.owner")).append(" ").append(owner);
             }
         }
 
         // Location
-        String location = config.getLocationExtractor().apply(slot);
+        String location = config.getLocationExtractor().apply(evt);
         if (location != null && !location.isBlank()) {
             sb.append("\n").append(I18n.t("calendar.grid.location")).append(" ").append(location);
         }

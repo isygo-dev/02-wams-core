@@ -179,10 +179,8 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
 
     private String buildTooltipText(E evt) {
         StringBuilder sb = new StringBuilder();
-
         // Title
-        String title = config.getTitleExtractor().apply(evt);
-        sb.append(title != null ? title : I18n.t("calendar.grid.event"));
+        sb.append(config.getTitleExtractor().apply(evt));
 
         // Description
         String desc = config.getDescriptionExtractor().apply(evt);
