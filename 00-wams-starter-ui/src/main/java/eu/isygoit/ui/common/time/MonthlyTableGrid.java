@@ -10,6 +10,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import eu.isygoit.dto.common.CalendarTimeSlot;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -21,7 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @CssImport("./styles/time-grid.css")
-public class MonthlyTableGrid<E> extends VerticalLayout {
+public class MonthlyTableGrid<E extends CalendarTimeSlot> extends VerticalLayout {
 
     private final MonthlyTableGridConfig<E> config;
     private final Div gridContainer = new Div();
@@ -54,7 +55,7 @@ public class MonthlyTableGrid<E> extends VerticalLayout {
         Div headerRow = new Div();
         headerRow.addClassName("monthly-grid-header");
         for (DayOfWeek day : DayOfWeek.values()) {
-            if (day == DayOfWeek.SUNDAY) continue;
+            //if (day == DayOfWeek.SUNDAY) continue;
             Span dayLabel = new Span(day.getDisplayName(TextStyle.SHORT, Locale.FRENCH));
             dayLabel.addClassName("monthly-grid-header-cell");
             headerRow.add(dayLabel);

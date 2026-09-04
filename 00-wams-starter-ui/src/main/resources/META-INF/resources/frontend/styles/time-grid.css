@@ -15,14 +15,23 @@
 }
 
 .monthly-grid-header {
-    display: contents;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 2px;
+    margin-bottom: 2px;
 }
 
 .monthly-grid-header-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
     padding: var(--lumo-space-xs);
     font-weight: 600;
     font-size: var(--lumo-font-size-s);
+    line-height: 1;
     text-align: center;
+    white-space: nowrap;
     color: var(--lumo-secondary-text-color);
     background: var(--lumo-contrast-5pct);
     border-radius: var(--lumo-border-radius-s);
@@ -30,7 +39,7 @@
 
 .monthly-grid-inner {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 2px;
 }
 

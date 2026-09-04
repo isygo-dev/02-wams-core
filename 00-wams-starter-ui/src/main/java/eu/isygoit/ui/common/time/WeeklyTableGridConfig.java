@@ -191,8 +191,9 @@ public class WeeklyTableGridConfig<S> {
 
         private List<DayOfWeek> daysOfWeek = List.of(
                 DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
-                DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY
+                DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY
         );
+
         private Function<DayOfWeek, String> dayLabelExtractor = day -> day.name().substring(0, 1);
         private Predicate<DayOfWeek> isTodayPredicate = day -> day == DayOfWeek.from(LocalDate.now());
 

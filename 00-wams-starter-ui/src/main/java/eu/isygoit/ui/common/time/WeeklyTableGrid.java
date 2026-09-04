@@ -13,11 +13,12 @@ import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import eu.isygoit.dto.common.TimeSlot;
+import eu.isygoit.dto.common.DayTimeSlot;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.TextStyle;
 import java.util.*;
 
 /**
@@ -27,7 +28,7 @@ import java.util.*;
  * @param <S> the type of a single slot
  */
 @CssImport("./styles/time-grid.css")
-public class WeeklyTableGrid<S extends TimeSlot> extends VerticalLayout {
+public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
 
     private final WeeklyTableGridConfig<S> config;
     private final Div gridContainer = new Div();
@@ -162,7 +163,7 @@ public class WeeklyTableGrid<S extends TimeSlot> extends VerticalLayout {
         for (int dayIndex = 0; dayIndex < days.size(); dayIndex++) {
             DayOfWeek day = days.get(dayIndex);
             String label = config.getDayLabelExtractor().apply(day);
-            Span dayLabel = new Span(label);
+            Span dayLabel = new Span(day.getDisplayName(TextStyle.SHORT, Locale.FRENCH));
             dayLabel.addClassName("timetable-grid-header");
             dayLabel.addClassName("timetable-grid-header-day");
             dayLabel.addClassName(LumoUtility.TextAlignment.CENTER);
