@@ -22,11 +22,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @CssImport("./styles/time-grid.css")
+@CssImport("./styles/split/18-calendar.css")
 public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
 
     private final MonthlyTableGridConfig<E> config;
     private final Div gridContainer = new Div();
-
     private YearMonth yearMonth;
     private List<E> events;
 
@@ -36,6 +36,7 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         setSpacing(false);
         setWidthFull();
         addClassName("monthly-grid-wrapper");
+        addClassName("calendar-view-container");   // unified container style
 
         gridContainer.setWidthFull();
         gridContainer.addClassName("monthly-grid");
@@ -55,7 +56,6 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         Div headerRow = new Div();
         headerRow.addClassName("monthly-grid-header");
         for (DayOfWeek day : DayOfWeek.values()) {
-            //if (day == DayOfWeek.SUNDAY) continue;
             Span dayLabel = new Span(day.getDisplayName(TextStyle.SHORT, Locale.FRENCH));
             dayLabel.addClassName("monthly-grid-header-cell");
             headerRow.add(dayLabel);
@@ -107,12 +107,12 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
             cell.addClassName("monthly-grid-cell--weekend");
         }
 
-        // ─── Enhanced Events Container ────────────────────────────────
+        // Events container
         Div eventsContainer = new Div();
         eventsContainer.addClassName("monthly-grid-events");
         List<E> dayEvents = eventsByDate.getOrDefault(date, List.of());
 
-        int maxDots = 4; // Increased from 3 to 4
+        int maxDots = 4;
         int count = 0;
         for (E evt : dayEvents) {
             if (count >= maxDots) {
@@ -121,7 +121,6 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
                 eventsContainer.add(more);
                 break;
             }
-            // ─── Enhanced Event Dot ────────────────────────────────────
             Div dot = buildEnhancedEventDot(evt);
             eventsContainer.add(dot);
             count++;
@@ -135,53 +134,45 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         return cell;
     }
 
-    /**
-     * Builds an enhanced event dot with better visibility:
-     * - Larger size (16px)
-     * - White border for contrast
-     * - Box-shadow for depth
-     * - Tooltip with event details
-     * - Clickable to open event
-     */
     private Div buildEnhancedEventDot(E evt) {
         Div dot = new Div();
         dot.addClassName("monthly-grid-event-dot-enhanced");
 
-        // Color
         String color = config.getColorExtractor().apply(evt);
         dot.getStyle().set("background-color", color != null ? color : "#1976D2");
 
-        // Tooltip with full event details
         String tooltip = buildTooltipText(evt);
         dot.getElement().setAttribute("title", tooltip);
 
-        // Click on dot triggers event click
         if (config.getOnEventClick() != null) {
             dot.addClickListener(e -> config.getOnEventClick().accept(evt));
         }
 
-        // Context menu for delete (if configured)
-        if (config.getOnEventDelete() != null) {
+        // Context menu with Edit and Delete
+        if (config.getOnEventDelete() != null || config.getOnEventEdit() != null) {
             MenuBar menuBar = new MenuBar();
             menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE,
                     MenuBarVariant.LUMO_ICON, MenuBarVariant.LUMO_SMALL);
             menuBar.addClassName("monthly-grid-event-menu");
+            menuBar.getElement().executeJs("this.addEventListener('click', (e) => e.stopPropagation());");
+
             MenuItem rootItem = menuBar.addItem(new Icon(VaadinIcon.ELLIPSIS_DOTS_V));
             SubMenu subMenu = rootItem.getSubMenu();
-            subMenu.addItem("Supprimer", e -> config.getOnEventDelete().accept(evt));
-            menuBar.getElement().executeJs("this.addEventListener('click', (e) => e.stopPropagation());");
+
+            if (config.getOnEventEdit() != null) {
+                subMenu.addItem("Modifier", e -> config.getOnEventEdit().accept(evt));
+            }
+            if (config.getOnEventDelete() != null) {
+                MenuItem deleteItem = subMenu.addItem("Supprimer", e -> config.getOnEventDelete().accept(evt));
+                deleteItem.getStyle().set("color", "var(--lumo-error-text-color)");
+            }
             dot.add(menuBar);
         }
 
-        // Custom populator (optional)
         config.getEventDotPopulator().accept(dot, evt);
-
         return dot;
     }
 
-    /**
-     * Builds a rich tooltip text for the event dot.
-     */
     private String buildTooltipText(E evt) {
         StringBuilder sb = new StringBuilder();
         String title = config.getTitleExtractor().apply(evt);
@@ -201,6 +192,5 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
     @Override
     protected void onAttach(com.vaadin.flow.component.AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        // Nothing to do
     }
 }

@@ -21,19 +21,13 @@ import java.time.LocalTime;
 import java.time.format.TextStyle;
 import java.util.*;
 
-/**
- * A reusable, generic timetable grid that renders slots in a weekly view.
- * All behaviour and rendering is controlled via {@link WeeklyTableGridConfig}.
- *
- * @param <S> the type of a single slot
- */
 @CssImport("./styles/time-grid.css")
+@CssImport("./styles/split/18-calendar.css")
 public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
 
     private final WeeklyTableGridConfig<S> config;
     private final Div gridContainer = new Div();
     private final List<LocalTime> timeSlots = new ArrayList<>();
-
     private List<S> slots = Collections.emptyList();
     private boolean editable = true;
 
@@ -43,8 +37,8 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
         setSpacing(false);
         setWidthFull();
         addClassName("timetable-grid-wrapper");
+        addClassName("calendar-view-container");   // unified container style
 
-        // Generate time slots
         int startHour = config.getStartHour();
         int endHour = config.getEndHour();
         int step = config.getStepMinutes();
@@ -53,7 +47,6 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
                 timeSlots.add(LocalTime.of(h, m));
             }
         }
-        // add the end marker (e.g. 20:00) as the last time slot (not bookable)
         timeSlots.add(LocalTime.of(endHour, 0));
 
         gridContainer.setWidthFull();
@@ -61,9 +54,6 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
         add(gridContainer);
     }
 
-    /**
-     * Sets the slots to display and whether the timetable is editable.
-     */
     public void setItems(List<S> slots, boolean editable) {
         this.slots = slots != null ? slots : Collections.emptyList();
         this.editable = editable;
@@ -74,9 +64,8 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
         gridContainer.removeAll();
         if (slots.isEmpty()) {
             Div empty = new Div();
-            empty.setText("No slots to display"); // override via i18n if needed
-            empty.addClassName(LumoUtility.TextColor.SECONDARY);
-            empty.addClassName(LumoUtility.Padding.LARGE);
+            empty.setText("Aucun événement pour cette semaine");
+            empty.addClassName("calendar-day-no-events");
             gridContainer.add(empty);
             return;
         }
@@ -84,7 +73,6 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
         List<DayOfWeek> days = config.getDaysOfWeek();
         DayOfWeek today = LocalDate.now().getDayOfWeek();
 
-        // Bookable time slots: all except the last marker
         List<LocalTime> bookableStarts = timeSlots.subList(0, timeSlots.size() - 1);
         LocalTime endMarker = timeSlots.get(timeSlots.size() - 1);
 
@@ -93,7 +81,6 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
             rowIndexByTime.put(bookableStarts.get(i), i);
         }
 
-        // Map slots to their starting row and calculate spans
         Map<DayOfWeek, Map<Integer, S>> slotsByDayRow = new HashMap<>();
         Set<String> coveredRows = new HashSet<>();
         for (S slot : slots) {
@@ -108,7 +95,6 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
             }
         }
 
-        // Build row template
         StringBuilder rowTemplate = new StringBuilder("auto ");
         for (LocalTime start : bookableStarts) {
             rowTemplate.append(start.getMinute() == 0 ? "var(--tt-row-full) " : "var(--tt-row-half) ");
@@ -117,10 +103,8 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
         gridContainer.getStyle().set("grid-template-columns", "64px repeat(" + days.size() + ", 1fr)");
         gridContainer.getStyle().set("grid-template-rows", rowTemplate.toString().trim());
 
-        // Header
         buildHeader(today);
 
-        // Time labels and cells
         for (int rowIndex = 0; rowIndex < bookableStarts.size(); rowIndex++) {
             LocalTime start = bookableStarts.get(rowIndex);
             buildTimeLabel(start, rowIndex, false);
@@ -220,7 +204,6 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
             content.addClassName("timetable-grid-cell--multi-hour");
         }
 
-        // Apply category colours
         Object key = config.getCategoryKeyExtractor().apply(slot);
         List<String[]> palette = config.getPalette();
         int idx = key != null ? Math.floorMod(key.hashCode(), palette.size()) : 0;
@@ -228,23 +211,19 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
         content.getStyle().set("--slot-bg", colors[0]);
         content.getStyle().set("--slot-accent", colors[1]);
 
-        // Populate content via config (default or custom)
         config.getSlotContentPopulator().accept(content, slot);
 
-        // Add actions menu if editable
         if (editable && config.getIsEditable().test(slot)) {
             content.add(buildActionsMenu(slot));
         }
 
-        // Tooltip
         String tooltipText = buildTooltipText(slot);
         Tooltip.forComponent(content).setText(tooltipText);
 
         placeInGrid(content, rowIndex + 2, dayIndex + 2, span, 1);
 
-        // Click on slot
-        if (editable && config.getOnSlotClick() != null) {
-            content.getElement().addEventListener("click", e -> config.getOnSlotClick().accept(slot));
+        if (editable && config.getOnEventClick() != null) {
+            content.getElement().addEventListener("click", e -> config.getOnEventClick().accept(slot));
         }
 
         gridContainer.add(content);
@@ -261,15 +240,15 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
         MenuItem rootItem = menuBar.addItem(new Icon(VaadinIcon.ELLIPSIS_DOTS_V));
         SubMenu subMenu = rootItem.getSubMenu();
 
-        // Let config add custom items
+        // Custom actions from config
         config.getActionsMenuBuilder().apply(slot, menuBar);
 
-        // Default: add edit and delete if config provides handlers
-        if (config.getOnSlotClick() != null) {
-            subMenu.addItem("Edit", e -> config.getOnSlotClick().accept(slot));
+        // Default edit/delete from config
+        if (config.getOnEventEdit() != null) {
+            subMenu.addItem("Modifier", e -> config.getOnEventEdit().accept(slot));
         }
-        if (config.getOnSlotDelete() != null) {
-            MenuItem deleteItem = subMenu.addItem("Delete", e -> config.getOnSlotDelete().accept(slot));
+        if (config.getOnEventDelete() != null) {
+            MenuItem deleteItem = subMenu.addItem("Supprimer", e -> config.getOnEventDelete().accept(slot));
             deleteItem.getStyle().set("color", "var(--lumo-error-text-color)");
         }
 
@@ -278,19 +257,16 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
 
     private String buildTooltipText(S slot) {
         StringBuilder sb = new StringBuilder();
-        String subject = config.getSubjectNameExtractor().apply(slot);
-        String teacher = config.getTeacherNameExtractor().apply(slot);
-        String room = config.getRoomNameExtractor().apply(slot);
-        LocalTime start = config.getStartTimeExtractor().apply(slot);
-        LocalTime end = config.getEndTimeExtractor().apply(slot);
+        sb.append(config.getTitleExtractor().apply(slot));
         String desc = config.getDescriptionExtractor().apply(slot);
-
-        sb.append(subject)
-                .append(" • ").append(teacher)
-                .append(" • ").append(room)
-                .append(" • ").append(start).append("–").append(end);
         if (desc != null && !desc.isBlank()) {
-            sb.append(" — ").append(desc);
+            sb.append("\n").append(desc);
+        }
+        sb.append("\n").append(config.getStartTimeExtractor().apply(slot))
+                .append(" – ").append(config.getEndTimeExtractor().apply(slot));
+        String loc = config.getLocationExtractor().apply(slot);
+        if (loc != null && !loc.isBlank()) {
+            sb.append(" • ").append(loc);
         }
         return sb.toString();
     }
@@ -306,7 +282,6 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
 
     private void installNowIndicator() {
         int startMinutes = timeSlots.get(0).getHour() * 60 + timeSlots.get(0).getMinute();
-
         gridContainer.getElement().executeJs(
                 "const el = this;" +
                         "if (el._nowInterval) { clearInterval(el._nowInterval); }" +
@@ -348,5 +323,10 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
                         "update();" +
                         "el._nowInterval = setInterval(update, 60000);"
         );
+    }
+
+    @Override
+    protected void onAttach(com.vaadin.flow.component.AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
     }
 }

@@ -110,7 +110,13 @@ public class DailyTableGridConfig<E> {
         this.onEmptyCellClick = handler; return this;
     }
 
-    public DailyTableGridConfig<E> build() { return this; }
+    public DailyTableGridConfig<E> build() {
+        // Validate required fields
+        if (startTimeExtractor == null || endTimeExtractor == null || titleExtractor == null) {
+            throw new IllegalStateException("startTimeExtractor, endTimeExtractor, and titleExtractor are required");
+        }
+        return this;
+    }
 
     // ---- Getters ----
     public Function<E, LocalTime> getStartTimeExtractor() { return startTimeExtractor; }

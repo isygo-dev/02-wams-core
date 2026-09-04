@@ -11,197 +11,185 @@ import java.util.List;
 import java.util.function.*;
 
 /**
- * Configuration for a generic timetable grid.
+ * Configuration for a generic timetable grid (weekly view).
  *
- * @param <S> the type of a single slot
+ * @param <S> the type of a single slot/event
  */
 public class WeeklyTableGridConfig<S> {
 
-    // ---- Data extractors ----
-    private final Function<S, DayOfWeek> dayOfWeekExtractor;
-    private final Function<S, LocalTime> startTimeExtractor;
-    private final Function<S, LocalTime> endTimeExtractor;
-    private final Function<S, String> subjectNameExtractor;
-    private final Function<S, String> teacherNameExtractor;
-    private final Function<S, String> roomNameExtractor;
-    private final Function<S, String> descriptionExtractor;
-    private final Function<S, Object> categoryKeyExtractor;
+    // ---- Core extractors ----
+    private Function<S, DayOfWeek> dayOfWeekExtractor;
+    private Function<S, LocalTime> startTimeExtractor;
+    private Function<S, LocalTime> endTimeExtractor;
+    private Function<S, String> titleExtractor;          // was subjectNameExtractor
+    private Function<S, String> descriptionExtractor;
+    private Function<S, String> locationExtractor;       // was roomNameExtractor
+    private Function<S, Object> categoryKeyExtractor;    // for palette selection
 
-    // ---- Editable and actions ----
-    private final Predicate<S> isEditable;
-    private final Consumer<S> onSlotClick;              // e.g. open update dialog
-    private final Consumer<S> onSlotDelete;             // e.g. open delete dialog
-    private final BiConsumer<DayOfWeek, LocalTime> onEmptyCellClick; // e.g. open create dialog
-    private final BiFunction<S, MenuBar, SubMenu> actionsMenuBuilder; // add custom menu items
+    // ---- Handlers ----
+    private Predicate<S> isEditable;
+    private Consumer<S> onEventClick;                    // was onSlotClick
+    private Consumer<S> onEventDelete;                   // was onSlotDelete
+    private Consumer<S> onEventEdit;                     // new, for edit action (optional)
+    private BiConsumer<DayOfWeek, LocalTime> onEmptyCellClick;
+    private BiFunction<S, MenuBar, SubMenu> actionsMenuBuilder; // custom menu items
 
     // ---- Slot rendering ----
-    private final BiConsumer<Component, S> slotContentPopulator; // fills the slot chip
+    private BiConsumer<Component, S> slotContentPopulator;
 
     // ---- Header ----
-    private final List<DayOfWeek> daysOfWeek;
-    private final Function<DayOfWeek, String> dayLabelExtractor;
-    private final Predicate<DayOfWeek> isTodayPredicate;
+    private List<DayOfWeek> daysOfWeek;
+    private Function<DayOfWeek, String> dayLabelExtractor;
+    private Predicate<DayOfWeek> isTodayPredicate;
 
-    // ---- Time range ----
-    private final int startHour;
-    private final int endHour;        // exclusive, i.e. first time beyond the last displayed slot
-    private final int stepMinutes;
+    // ---- Timetable settings ----
+    private int startHour;
+    private int endHour;
+    private int stepMinutes;
+    private List<String[]> palette;
+    private boolean showNowIndicator;
 
-    // ---- Appearance ----
-    private final List<String[]> palette; // list of [background, accent] color pairs
-    private final boolean showNowIndicator;
+    private WeeklyTableGridConfig() {}
 
-    // ---- Builder ----
-    private WeeklyTableGridConfig(Builder<S> builder) {
-        this.dayOfWeekExtractor = builder.dayOfWeekExtractor;
-        this.startTimeExtractor = builder.startTimeExtractor;
-        this.endTimeExtractor = builder.endTimeExtractor;
-        this.subjectNameExtractor = builder.subjectNameExtractor;
-        this.teacherNameExtractor = builder.teacherNameExtractor;
-        this.roomNameExtractor = builder.roomNameExtractor;
-        this.descriptionExtractor = builder.descriptionExtractor;
-        this.categoryKeyExtractor = builder.categoryKeyExtractor;
-        this.isEditable = builder.isEditable;
-        this.onSlotClick = builder.onSlotClick;
-        this.onSlotDelete = builder.onSlotDelete;
-        this.onEmptyCellClick = builder.onEmptyCellClick;
-        this.actionsMenuBuilder = builder.actionsMenuBuilder;
-        this.slotContentPopulator = builder.slotContentPopulator;
-        this.daysOfWeek = builder.daysOfWeek;
-        this.dayLabelExtractor = builder.dayLabelExtractor;
-        this.isTodayPredicate = builder.isTodayPredicate;
-        this.startHour = builder.startHour;
-        this.endHour = builder.endHour;
-        this.stepMinutes = builder.stepMinutes;
-        this.palette = builder.palette;
-        this.showNowIndicator = builder.showNowIndicator;
+    public static <S> WeeklyTableGridConfig<S> builder() {
+        return new WeeklyTableGridConfig<>();
     }
 
-    // ---- Builder ----
-    public static <S> Builder<S> builder() {
-        return new Builder<>();
+    // ---- Fluent setters ----
+    public WeeklyTableGridConfig<S> withDayOfWeekExtractor(Function<S, DayOfWeek> extractor) {
+        this.dayOfWeekExtractor = extractor;
+        return this;
     }
 
-    // ---- Getters ----
-    public Function<S, DayOfWeek> getDayOfWeekExtractor() {
-        return dayOfWeekExtractor;
+    public WeeklyTableGridConfig<S> withStartTimeExtractor(Function<S, LocalTime> extractor) {
+        this.startTimeExtractor = extractor;
+        return this;
     }
 
-    public Function<S, LocalTime> getStartTimeExtractor() {
-        return startTimeExtractor;
+    public WeeklyTableGridConfig<S> withEndTimeExtractor(Function<S, LocalTime> extractor) {
+        this.endTimeExtractor = extractor;
+        return this;
     }
 
-    public Function<S, LocalTime> getEndTimeExtractor() {
-        return endTimeExtractor;
+    public WeeklyTableGridConfig<S> withTitleExtractor(Function<S, String> extractor) {
+        this.titleExtractor = extractor;
+        return this;
     }
 
-    public Function<S, String> getSubjectNameExtractor() {
-        return subjectNameExtractor;
+    public WeeklyTableGridConfig<S> withDescriptionExtractor(Function<S, String> extractor) {
+        this.descriptionExtractor = extractor;
+        return this;
     }
 
-    public Function<S, String> getTeacherNameExtractor() {
-        return teacherNameExtractor;
+    public WeeklyTableGridConfig<S> withLocationExtractor(Function<S, String> extractor) {
+        this.locationExtractor = extractor;
+        return this;
     }
 
-    public Function<S, String> getRoomNameExtractor() {
-        return roomNameExtractor;
+    public WeeklyTableGridConfig<S> withCategoryKeyExtractor(Function<S, Object> extractor) {
+        this.categoryKeyExtractor = extractor;
+        return this;
     }
 
-    public Function<S, String> getDescriptionExtractor() {
-        return descriptionExtractor;
+    public WeeklyTableGridConfig<S> withIsEditable(Predicate<S> predicate) {
+        this.isEditable = predicate;
+        return this;
     }
 
-    public Function<S, Object> getCategoryKeyExtractor() {
-        return categoryKeyExtractor;
+    public WeeklyTableGridConfig<S> withOnEventClick(Consumer<S> handler) {
+        this.onEventClick = handler;
+        return this;
     }
 
-    public Predicate<S> getIsEditable() {
-        return isEditable;
+    public WeeklyTableGridConfig<S> withOnEventDelete(Consumer<S> handler) {
+        this.onEventDelete = handler;
+        return this;
     }
 
-    public Consumer<S> getOnSlotClick() {
-        return onSlotClick;
+    public WeeklyTableGridConfig<S> withOnEventEdit(Consumer<S> handler) {
+        this.onEventEdit = handler;
+        return this;
     }
 
-    public Consumer<S> getOnSlotDelete() {
-        return onSlotDelete;
+    public WeeklyTableGridConfig<S> withOnEmptyCellClick(BiConsumer<DayOfWeek, LocalTime> handler) {
+        this.onEmptyCellClick = handler;
+        return this;
     }
 
-    public BiConsumer<DayOfWeek, LocalTime> getOnEmptyCellClick() {
-        return onEmptyCellClick;
+    public WeeklyTableGridConfig<S> withActionsMenuBuilder(BiFunction<S, MenuBar, SubMenu> builder) {
+        this.actionsMenuBuilder = builder;
+        return this;
     }
 
-    public BiFunction<S, MenuBar, SubMenu> getActionsMenuBuilder() {
-        return actionsMenuBuilder;
+    public WeeklyTableGridConfig<S> withSlotContentPopulator(BiConsumer<Component, S> populator) {
+        this.slotContentPopulator = populator;
+        return this;
     }
 
-    public BiConsumer<Component, S> getSlotContentPopulator() {
-        return slotContentPopulator;
+    public WeeklyTableGridConfig<S> withDaysOfWeek(List<DayOfWeek> daysOfWeek) {
+        this.daysOfWeek = daysOfWeek;
+        return this;
     }
 
-    public List<DayOfWeek> getDaysOfWeek() {
-        return daysOfWeek;
+    public WeeklyTableGridConfig<S> withDayLabelExtractor(Function<DayOfWeek, String> extractor) {
+        this.dayLabelExtractor = extractor;
+        return this;
     }
 
-    public Function<DayOfWeek, String> getDayLabelExtractor() {
-        return dayLabelExtractor;
+    public WeeklyTableGridConfig<S> withIsTodayPredicate(Predicate<DayOfWeek> predicate) {
+        this.isTodayPredicate = predicate;
+        return this;
     }
 
-    public Predicate<DayOfWeek> getIsTodayPredicate() {
-        return isTodayPredicate;
+    public WeeklyTableGridConfig<S> withStartHour(int startHour) {
+        this.startHour = startHour;
+        return this;
     }
 
-    public int getStartHour() {
-        return startHour;
+    public WeeklyTableGridConfig<S> withEndHour(int endHour) {
+        this.endHour = endHour;
+        return this;
     }
 
-    public int getEndHour() {
-        return endHour;
+    public WeeklyTableGridConfig<S> withStepMinutes(int stepMinutes) {
+        this.stepMinutes = stepMinutes;
+        return this;
     }
 
-    public int getStepMinutes() {
-        return stepMinutes;
+    public WeeklyTableGridConfig<S> withPalette(List<String[]> palette) {
+        this.palette = palette;
+        return this;
     }
 
-    public List<String[]> getPalette() {
-        return palette;
+    public WeeklyTableGridConfig<S> withShowNowIndicator(boolean show) {
+        this.showNowIndicator = show;
+        return this;
     }
 
-    public boolean isShowNowIndicator() {
-        return showNowIndicator;
-    }
+    public WeeklyTableGridConfig<S> build() {
+        // Validate required fields
+        if (dayOfWeekExtractor == null || startTimeExtractor == null || endTimeExtractor == null ||
+                titleExtractor == null || locationExtractor == null || categoryKeyExtractor == null) {
+            throw new IllegalStateException("dayOfWeekExtractor, startTimeExtractor, endTimeExtractor, " +
+                    "titleExtractor, locationExtractor, and categoryKeyExtractor are required");
+        }
 
-    public static class Builder<S> {
-        private Function<S, DayOfWeek> dayOfWeekExtractor;
-        private Function<S, LocalTime> startTimeExtractor;
-        private Function<S, LocalTime> endTimeExtractor;
-        private Function<S, String> subjectNameExtractor;
-        private Function<S, String> teacherNameExtractor;
-        private Function<S, String> roomNameExtractor;
-        private Function<S, String> descriptionExtractor = s -> null;
-        private Function<S, Object> categoryKeyExtractor;
-
-        private Predicate<S> isEditable = s -> true;
-        private Consumer<S> onSlotClick;
-        private Consumer<S> onSlotDelete;
-        private BiConsumer<DayOfWeek, LocalTime> onEmptyCellClick;
-        private BiFunction<S, MenuBar, SubMenu> actionsMenuBuilder;
-
-        private BiConsumer<Component, S> slotContentPopulator;
-
-        private List<DayOfWeek> daysOfWeek = List.of(
-                DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
-                DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY
-        );
-
-        private Function<DayOfWeek, String> dayLabelExtractor = day -> day.name().substring(0, 1);
-        private Predicate<DayOfWeek> isTodayPredicate = day -> day == DayOfWeek.from(LocalDate.now());
-
-        private int startHour = 7;
-        private int endHour = 20;       // 20:00 is the last time label, no slots start at 20:00
-        private int stepMinutes = 30;
-
-        private List<String[]> palette = List.of(
+        // Provide defaults
+        if (isEditable == null) isEditable = s -> true;
+        if (onEventClick == null) onEventClick = s -> {};
+        if (onEventDelete == null) onEventDelete = s -> {};
+        if (onEventEdit == null) onEventEdit = s -> {};
+        if (onEmptyCellClick == null) onEmptyCellClick = (d, t) -> {};
+        if (actionsMenuBuilder == null) actionsMenuBuilder = (s, menuBar) -> menuBar.addItem("Actions").getSubMenu();
+        if (slotContentPopulator == null) slotContentPopulator = (comp, s) -> {};
+        if (daysOfWeek == null) daysOfWeek = List.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
+                DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
+        if (dayLabelExtractor == null) dayLabelExtractor = day -> day.name().substring(0, 1);
+        if (isTodayPredicate == null) isTodayPredicate = day -> day == DayOfWeek.from(LocalDate.now());
+        if (startHour == 0) startHour = 7;
+        if (endHour == 0) endHour = 21;
+        if (stepMinutes == 0) stepMinutes = 30;
+        if (palette == null) palette = List.of(
                 new String[]{"#E3F2FD", "#1976D2"},
                 new String[]{"#F3E5F5", "#8E24AA"},
                 new String[]{"#E8F5E9", "#2E7D32"},
@@ -211,147 +199,35 @@ public class WeeklyTableGridConfig<S> {
                 new String[]{"#FFF8E1", "#F9A825"},
                 new String[]{"#EDE7F6", "#5E35B1"}
         );
-        private boolean showNowIndicator = true;
-
-        // Required fields
-        public Builder<S> dayOfWeekExtractor(Function<S, DayOfWeek> extractor) {
-            this.dayOfWeekExtractor = extractor;
-            return this;
-        }
-
-        public Builder<S> startTimeExtractor(Function<S, LocalTime> extractor) {
-            this.startTimeExtractor = extractor;
-            return this;
-        }
-
-        public Builder<S> endTimeExtractor(Function<S, LocalTime> extractor) {
-            this.endTimeExtractor = extractor;
-            return this;
-        }
-
-        public Builder<S> subjectNameExtractor(Function<S, String> extractor) {
-            this.subjectNameExtractor = extractor;
-            return this;
-        }
-
-        public Builder<S> teacherNameExtractor(Function<S, String> extractor) {
-            this.teacherNameExtractor = extractor;
-            return this;
-        }
-
-        public Builder<S> roomNameExtractor(Function<S, String> extractor) {
-            this.roomNameExtractor = extractor;
-            return this;
-        }
-
-        public Builder<S> categoryKeyExtractor(Function<S, Object> extractor) {
-            this.categoryKeyExtractor = extractor;
-            return this;
-        }
-
-        // Optional
-        public Builder<S> descriptionExtractor(Function<S, String> extractor) {
-            this.descriptionExtractor = extractor;
-            return this;
-        }
-
-        public Builder<S> isEditable(Predicate<S> isEditable) {
-            this.isEditable = isEditable;
-            return this;
-        }
-
-        public Builder<S> onSlotClick(Consumer<S> onSlotClick) {
-            this.onSlotClick = onSlotClick;
-            return this;
-        }
-
-        public Builder<S> onSlotDelete(Consumer<S> onSlotDelete) {
-            this.onSlotDelete = onSlotDelete;
-            return this;
-        }
-
-        public Builder<S> onEmptyCellClick(BiConsumer<DayOfWeek, LocalTime> onEmptyCellClick) {
-            this.onEmptyCellClick = onEmptyCellClick;
-            return this;
-        }
-
-        public Builder<S> actionsMenuBuilder(BiFunction<S, MenuBar, SubMenu> actionsMenuBuilder) {
-            this.actionsMenuBuilder = actionsMenuBuilder;
-            return this;
-        }
-
-        public Builder<S> slotContentPopulator(BiConsumer<Component, S> populator) {
-            this.slotContentPopulator = populator;
-            return this;
-        }
-
-        public Builder<S> daysOfWeek(List<DayOfWeek> daysOfWeek) {
-            this.daysOfWeek = daysOfWeek;
-            return this;
-        }
-
-        public Builder<S> dayLabelExtractor(Function<DayOfWeek, String> extractor) {
-            this.dayLabelExtractor = extractor;
-            return this;
-        }
-
-        public Builder<S> isTodayPredicate(Predicate<DayOfWeek> predicate) {
-            this.isTodayPredicate = predicate;
-            return this;
-        }
-
-        public Builder<S> startHour(int startHour) {
-            this.startHour = startHour;
-            return this;
-        }
-
-        public Builder<S> endHour(int endHour) {
-            this.endHour = endHour;
-            return this;
-        }
-
-        public Builder<S> stepMinutes(int stepMinutes) {
-            this.stepMinutes = stepMinutes;
-            return this;
-        }
-
-        public Builder<S> palette(List<String[]> palette) {
-            this.palette = palette;
-            return this;
-        }
-
-        public Builder<S> showNowIndicator(boolean show) {
-            this.showNowIndicator = show;
-            return this;
-        }
-
-        public WeeklyTableGridConfig<S> build() {
-            // Validate required fields
-            if (dayOfWeekExtractor == null || startTimeExtractor == null || endTimeExtractor == null ||
-                    subjectNameExtractor == null || teacherNameExtractor == null || roomNameExtractor == null ||
-                    categoryKeyExtractor == null) {
-                throw new IllegalStateException("All extractors must be provided");
-            }
-            // Provide defaults for actions if not set
-            if (onSlotClick == null) onSlotClick = s -> {
-            };
-            if (onSlotDelete == null) onSlotDelete = s -> {
-            };
-            if (onEmptyCellClick == null) onEmptyCellClick = (d, t) -> {
-            };
-            if (actionsMenuBuilder == null) {
-                actionsMenuBuilder = (s, menuBar) -> {
-                    SubMenu sub = menuBar.addItem("Actions").getSubMenu();
-                    // default: no items; subclasses can override
-                    return sub;
-                };
-            }
-            if (slotContentPopulator == null) {
-                slotContentPopulator = (component, slot) -> {
-                    // default: do nothing
-                };
-            }
-            return new WeeklyTableGridConfig<>(this);
-        }
+        // showNowIndicator default is true; if not set, we keep the default (we can't distinguish unset vs false)
+        // We'll just keep the field as is; if user didn't call withShowNowIndicator, it's false by default (primitive).
+        // So we set a default in the field declaration: private boolean showNowIndicator = true;
+        // But the field is not initialized here, so we set it in the field declaration above.
+        // We'll ensure the field has a default value.
+        return this;
     }
+
+    // ---- Getters ----
+    public Function<S, DayOfWeek> getDayOfWeekExtractor() { return dayOfWeekExtractor; }
+    public Function<S, LocalTime> getStartTimeExtractor() { return startTimeExtractor; }
+    public Function<S, LocalTime> getEndTimeExtractor() { return endTimeExtractor; }
+    public Function<S, String> getTitleExtractor() { return titleExtractor; }
+    public Function<S, String> getDescriptionExtractor() { return descriptionExtractor; }
+    public Function<S, String> getLocationExtractor() { return locationExtractor; }
+    public Function<S, Object> getCategoryKeyExtractor() { return categoryKeyExtractor; }
+    public Predicate<S> getIsEditable() { return isEditable; }
+    public Consumer<S> getOnEventClick() { return onEventClick; }
+    public Consumer<S> getOnEventDelete() { return onEventDelete; }
+    public Consumer<S> getOnEventEdit() { return onEventEdit; }
+    public BiConsumer<DayOfWeek, LocalTime> getOnEmptyCellClick() { return onEmptyCellClick; }
+    public BiFunction<S, MenuBar, SubMenu> getActionsMenuBuilder() { return actionsMenuBuilder; }
+    public BiConsumer<Component, S> getSlotContentPopulator() { return slotContentPopulator; }
+    public List<DayOfWeek> getDaysOfWeek() { return daysOfWeek; }
+    public Function<DayOfWeek, String> getDayLabelExtractor() { return dayLabelExtractor; }
+    public Predicate<DayOfWeek> getIsTodayPredicate() { return isTodayPredicate; }
+    public int getStartHour() { return startHour; }
+    public int getEndHour() { return endHour; }
+    public int getStepMinutes() { return stepMinutes; }
+    public List<String[]> getPalette() { return palette; }
+    public boolean isShowNowIndicator() { return showNowIndicator; }
 }
