@@ -10,7 +10,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import eu.isygoit.dto.common.CalendarTimeSlot;
+import eu.isygoit.dto.common.DayTimeSlot;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @CssImport("./styles/time-grid.css")
-public class MonthlyTableGrid<E extends CalendarTimeSlot> extends VerticalLayout {
+public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
 
     private final MonthlyTableGridConfig<E> config;
     private final Div gridContainer = new Div();
