@@ -3,6 +3,7 @@ package eu.isygoit.ui.common.time;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.menubar.MenuBar;
+import eu.isygoit.dto.common.DayTimeSlot;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -13,29 +14,31 @@ import java.util.function.*;
 /**
  * Configuration for a generic timetable grid (weekly view).
  *
- * @param <S> the type of a single slot/event
+ * @param <E> the type of a single slot/event
  */
-public class WeeklyTableGridConfig<S> {
+public class WeeklyTableGridConfig<E extends DayTimeSlot> {
 
     // ---- Core extractors ----
-    private Function<S, DayOfWeek> dayOfWeekExtractor;
-    private Function<S, LocalTime> startTimeExtractor;
-    private Function<S, LocalTime> endTimeExtractor;
-    private Function<S, String> titleExtractor;          // was subjectNameExtractor
-    private Function<S, String> descriptionExtractor;
-    private Function<S, String> locationExtractor;       // was roomNameExtractor
-    private Function<S, Object> categoryKeyExtractor;    // for palette selection
+    private Function<E, DayOfWeek> dayOfWeekExtractor;
+    private Function<E, LocalTime> startTimeExtractor;
+    private Function<E, LocalTime> endTimeExtractor;
+    private Function<E, String> titleExtractor;          // was subjectNameExtractor
+    private Function<E, String> descriptionExtractor;
+    private Function<E, String> locationExtractor;       // was roomNameExtractor
+    private Function<E, Object> categoryKeyExtractor;    // for palette selection
+    private Function<E, String> ownerExtractor;          // NEW
+    private Function<E, LocalDate> dateExtractor;        // NEW
 
     // ---- Handlers ----
-    private Predicate<S> isEditable;
-    private Consumer<S> onEventClick;                    // was onSlotClick
-    private Consumer<S> onEventDelete;                   // was onSlotDelete
-    private Consumer<S> onEventEdit;                     // new, for edit action (optional)
+    private Predicate<E> isEditable;
+    private Consumer<E> onEventClick;                    // was onSlotClick
+    private Consumer<E> onEventDelete;                   // was onSlotDelete
+    private Consumer<E> onEventEdit;                     // new, for edit action (optional)
     private BiConsumer<DayOfWeek, LocalTime> onEmptyCellClick;
-    private BiFunction<S, MenuBar, SubMenu> actionsMenuBuilder; // custom menu items
+    private BiFunction<E, MenuBar, SubMenu> actionsMenuBuilder; // custom menu items
 
     // ---- Slot rendering ----
-    private BiConsumer<Component, S> slotContentPopulator;
+    private BiConsumer<Component, E> slotContentPopulator;
 
     // ---- Header ----
     private List<DayOfWeek> daysOfWeek;
@@ -51,122 +54,132 @@ public class WeeklyTableGridConfig<S> {
 
     private WeeklyTableGridConfig() {}
 
-    public static <S> WeeklyTableGridConfig<S> builder() {
+    public static <E extends DayTimeSlot> WeeklyTableGridConfig<E> builder() {
         return new WeeklyTableGridConfig<>();
     }
 
     // ---- Fluent setters ----
-    public WeeklyTableGridConfig<S> withDayOfWeekExtractor(Function<S, DayOfWeek> extractor) {
+    public WeeklyTableGridConfig<E> withDayOfWeekExtractor(Function<E, DayOfWeek> extractor) {
         this.dayOfWeekExtractor = extractor;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withStartTimeExtractor(Function<S, LocalTime> extractor) {
+    public WeeklyTableGridConfig<E> withStartTimeExtractor(Function<E, LocalTime> extractor) {
         this.startTimeExtractor = extractor;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withEndTimeExtractor(Function<S, LocalTime> extractor) {
+    public WeeklyTableGridConfig<E> withEndTimeExtractor(Function<E, LocalTime> extractor) {
         this.endTimeExtractor = extractor;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withTitleExtractor(Function<S, String> extractor) {
+    public WeeklyTableGridConfig<E> withTitleExtractor(Function<E, String> extractor) {
         this.titleExtractor = extractor;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withDescriptionExtractor(Function<S, String> extractor) {
+    public WeeklyTableGridConfig<E> withDescriptionExtractor(Function<E, String> extractor) {
         this.descriptionExtractor = extractor;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withLocationExtractor(Function<S, String> extractor) {
+    public WeeklyTableGridConfig<E> withLocationExtractor(Function<E, String> extractor) {
         this.locationExtractor = extractor;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withCategoryKeyExtractor(Function<S, Object> extractor) {
+    public WeeklyTableGridConfig<E> withCategoryKeyExtractor(Function<E, Object> extractor) {
         this.categoryKeyExtractor = extractor;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withIsEditable(Predicate<S> predicate) {
+    public WeeklyTableGridConfig<E> withOwnerExtractor(Function<E, String> extractor) {  // NEW
+        this.ownerExtractor = extractor;
+        return this;
+    }
+
+    public WeeklyTableGridConfig<E> withDateExtractor(Function<E, LocalDate> extractor) {  // NEW
+        this.dateExtractor = extractor;
+        return this;
+    }
+
+    public WeeklyTableGridConfig<E> withIsEditable(Predicate<E> predicate) {
         this.isEditable = predicate;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withOnEventClick(Consumer<S> handler) {
+    public WeeklyTableGridConfig<E> withOnEventClick(Consumer<E> handler) {
         this.onEventClick = handler;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withOnEventDelete(Consumer<S> handler) {
+    public WeeklyTableGridConfig<E> withOnEventDelete(Consumer<E> handler) {
         this.onEventDelete = handler;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withOnEventEdit(Consumer<S> handler) {
+    public WeeklyTableGridConfig<E> withOnEventEdit(Consumer<E> handler) {
         this.onEventEdit = handler;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withOnEmptyCellClick(BiConsumer<DayOfWeek, LocalTime> handler) {
+    public WeeklyTableGridConfig<E> withOnEmptyCellClick(BiConsumer<DayOfWeek, LocalTime> handler) {
         this.onEmptyCellClick = handler;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withActionsMenuBuilder(BiFunction<S, MenuBar, SubMenu> builder) {
+    public WeeklyTableGridConfig<E> withActionsMenuBuilder(BiFunction<E, MenuBar, SubMenu> builder) {
         this.actionsMenuBuilder = builder;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withSlotContentPopulator(BiConsumer<Component, S> populator) {
+    public WeeklyTableGridConfig<E> withSlotContentPopulator(BiConsumer<Component, E> populator) {
         this.slotContentPopulator = populator;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withDaysOfWeek(List<DayOfWeek> daysOfWeek) {
+    public WeeklyTableGridConfig<E> withDaysOfWeek(List<DayOfWeek> daysOfWeek) {
         this.daysOfWeek = daysOfWeek;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withDayLabelExtractor(Function<DayOfWeek, String> extractor) {
+    public WeeklyTableGridConfig<E> withDayLabelExtractor(Function<DayOfWeek, String> extractor) {
         this.dayLabelExtractor = extractor;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withIsTodayPredicate(Predicate<DayOfWeek> predicate) {
+    public WeeklyTableGridConfig<E> withIsTodayPredicate(Predicate<DayOfWeek> predicate) {
         this.isTodayPredicate = predicate;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withStartHour(int startHour) {
+    public WeeklyTableGridConfig<E> withStartHour(int startHour) {
         this.startHour = startHour;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withEndHour(int endHour) {
+    public WeeklyTableGridConfig<E> withEndHour(int endHour) {
         this.endHour = endHour;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withStepMinutes(int stepMinutes) {
+    public WeeklyTableGridConfig<E> withStepMinutes(int stepMinutes) {
         this.stepMinutes = stepMinutes;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withPalette(List<String[]> palette) {
+    public WeeklyTableGridConfig<E> withPalette(List<String[]> palette) {
         this.palette = palette;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> withShowNowIndicator(boolean show) {
+    public WeeklyTableGridConfig<E> withShowNowIndicator(boolean show) {
         this.showNowIndicator = show;
         return this;
     }
 
-    public WeeklyTableGridConfig<S> build() {
+    public WeeklyTableGridConfig<E> build() {
         // Validate required fields
         if (dayOfWeekExtractor == null || startTimeExtractor == null || endTimeExtractor == null ||
                 titleExtractor == null || locationExtractor == null || categoryKeyExtractor == null) {
@@ -199,29 +212,29 @@ public class WeeklyTableGridConfig<S> {
                 new String[]{"#FFF8E1", "#F9A825"},
                 new String[]{"#EDE7F6", "#5E35B1"}
         );
-        // showNowIndicator default is true; if not set, we keep the default (we can't distinguish unset vs false)
-        // We'll just keep the field as is; if user didn't call withShowNowIndicator, it's false by default (primitive).
-        // So we set a default in the field declaration: private boolean showNowIndicator = true;
-        // But the field is not initialized here, so we set it in the field declaration above.
-        // We'll ensure the field has a default value.
+        // default showNowIndicator to true if not set; field defaults to false, so we set if not explicitly set
+        // but we can't detect if user set false, so we'll set default in field declaration: private boolean showNowIndicator = true;
+        // We'll ensure that.
         return this;
     }
 
     // ---- Getters ----
-    public Function<S, DayOfWeek> getDayOfWeekExtractor() { return dayOfWeekExtractor; }
-    public Function<S, LocalTime> getStartTimeExtractor() { return startTimeExtractor; }
-    public Function<S, LocalTime> getEndTimeExtractor() { return endTimeExtractor; }
-    public Function<S, String> getTitleExtractor() { return titleExtractor; }
-    public Function<S, String> getDescriptionExtractor() { return descriptionExtractor; }
-    public Function<S, String> getLocationExtractor() { return locationExtractor; }
-    public Function<S, Object> getCategoryKeyExtractor() { return categoryKeyExtractor; }
-    public Predicate<S> getIsEditable() { return isEditable; }
-    public Consumer<S> getOnEventClick() { return onEventClick; }
-    public Consumer<S> getOnEventDelete() { return onEventDelete; }
-    public Consumer<S> getOnEventEdit() { return onEventEdit; }
+    public Function<E, DayOfWeek> getDayOfWeekExtractor() { return dayOfWeekExtractor; }
+    public Function<E, LocalTime> getStartTimeExtractor() { return startTimeExtractor; }
+    public Function<E, LocalTime> getEndTimeExtractor() { return endTimeExtractor; }
+    public Function<E, String> getTitleExtractor() { return titleExtractor; }
+    public Function<E, String> getDescriptionExtractor() { return descriptionExtractor; }
+    public Function<E, String> getLocationExtractor() { return locationExtractor; }
+    public Function<E, Object> getCategoryKeyExtractor() { return categoryKeyExtractor; }
+    public Function<E, String> getOwnerExtractor() { return ownerExtractor; }      // NEW
+    public Function<E, LocalDate> getDateExtractor() { return dateExtractor; }    // NEW
+    public Predicate<E> getIsEditable() { return isEditable; }
+    public Consumer<E> getOnEventClick() { return onEventClick; }
+    public Consumer<E> getOnEventDelete() { return onEventDelete; }
+    public Consumer<E> getOnEventEdit() { return onEventEdit; }
     public BiConsumer<DayOfWeek, LocalTime> getOnEmptyCellClick() { return onEmptyCellClick; }
-    public BiFunction<S, MenuBar, SubMenu> getActionsMenuBuilder() { return actionsMenuBuilder; }
-    public BiConsumer<Component, S> getSlotContentPopulator() { return slotContentPopulator; }
+    public BiFunction<E, MenuBar, SubMenu> getActionsMenuBuilder() { return actionsMenuBuilder; }
+    public BiConsumer<Component, E> getSlotContentPopulator() { return slotContentPopulator; }
     public List<DayOfWeek> getDaysOfWeek() { return daysOfWeek; }
     public Function<DayOfWeek, String> getDayLabelExtractor() { return dayLabelExtractor; }
     public Predicate<DayOfWeek> getIsTodayPredicate() { return isTodayPredicate; }

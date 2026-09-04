@@ -1,7 +1,10 @@
 package eu.isygoit.ui.common.time;
 
 import com.vaadin.flow.component.Component;
+import eu.isygoit.dto.common.DayTimeSlot;
+
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -11,13 +14,17 @@ import java.util.function.Function;
  *
  * @param <E> the type of a single event
  */
-public class MonthlyTableGridConfig<E> {
+public class MonthlyTableGridConfig<E extends DayTimeSlot> {
 
     // ---- Core extractors ----
     private Function<E, LocalDate> dateExtractor;
     private Function<E, String> titleExtractor;
     private Function<E, String> colorExtractor;
     private Function<E, String> descriptionExtractor;
+    private Function<E, String> ownerExtractor;          // NEW
+    private Function<E, String> locationExtractor;       // NEW
+    private Function<E, LocalTime> startTimeExtractor;   // NEW
+    private Function<E, LocalTime> endTimeExtractor;     // NEW
 
     // ---- Handlers ----
     private Consumer<LocalDate> onDayClick;
@@ -30,7 +37,7 @@ public class MonthlyTableGridConfig<E> {
 
     private MonthlyTableGridConfig() {}
 
-    public static <E> MonthlyTableGridConfig<E> builder() {
+    public static <E extends DayTimeSlot> MonthlyTableGridConfig<E> builder() {
         return new MonthlyTableGridConfig<>();
     }
 
@@ -49,6 +56,22 @@ public class MonthlyTableGridConfig<E> {
 
     public MonthlyTableGridConfig<E> withDescriptionExtractor(Function<E, String> extractor) {
         this.descriptionExtractor = extractor; return this;
+    }
+
+    public MonthlyTableGridConfig<E> withOwnerExtractor(Function<E, String> extractor) {  // NEW
+        this.ownerExtractor = extractor; return this;
+    }
+
+    public MonthlyTableGridConfig<E> withLocationExtractor(Function<E, String> extractor) {  // NEW
+        this.locationExtractor = extractor; return this;
+    }
+
+    public MonthlyTableGridConfig<E> withStartTimeExtractor(Function<E, LocalTime> extractor) {  // NEW
+        this.startTimeExtractor = extractor; return this;
+    }
+
+    public MonthlyTableGridConfig<E> withEndTimeExtractor(Function<E, LocalTime> extractor) {  // NEW
+        this.endTimeExtractor = extractor; return this;
     }
 
     public MonthlyTableGridConfig<E> withOnDayClick(Consumer<LocalDate> handler) {
@@ -88,6 +111,10 @@ public class MonthlyTableGridConfig<E> {
     public Function<E, String> getTitleExtractor() { return titleExtractor; }
     public Function<E, String> getColorExtractor() { return colorExtractor; }
     public Function<E, String> getDescriptionExtractor() { return descriptionExtractor; }
+    public Function<E, String> getOwnerExtractor() { return ownerExtractor; }          // NEW
+    public Function<E, String> getLocationExtractor() { return locationExtractor; }    // NEW
+    public Function<E, LocalTime> getStartTimeExtractor() { return startTimeExtractor; } // NEW
+    public Function<E, LocalTime> getEndTimeExtractor() { return endTimeExtractor; }   // NEW
     public Consumer<LocalDate> getOnDayClick() { return onDayClick; }
     public Consumer<E> getOnEventClick() { return onEventClick; }
     public Consumer<E> getOnEventDelete() { return onEventDelete; }

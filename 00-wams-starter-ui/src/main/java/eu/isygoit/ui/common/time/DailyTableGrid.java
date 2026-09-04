@@ -13,6 +13,8 @@ import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.shared.Tooltip;
+import eu.isygoit.dto.common.DayTimeSlot;
+import eu.isygoit.i18n.I18n;
 
 import java.io.Serializable;
 import java.time.Duration;
@@ -28,7 +30,7 @@ import java.util.stream.Collectors;
  */
 @CssImport("./styles/time-grid.css")
 @CssImport("./styles/split/18-calendar.css")
-public class DailyTableGrid<E> extends VerticalLayout {
+public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
 
     private final DailyTableGridConfig<E> config;
     private final Div gridContainer = new Div();
@@ -42,7 +44,7 @@ public class DailyTableGrid<E> extends VerticalLayout {
         setSpacing(false);
         setWidthFull();
         addClassName("timetable-grid-wrapper");
-        addClassName("calendar-view-container");  // shares the same container as monthly
+        addClassName("calendar-view-container");
 
         // Build time slots
         int startHour = config.getStartHour();
@@ -83,7 +85,7 @@ public class DailyTableGrid<E> extends VerticalLayout {
         if (dayEvents.isEmpty() && events.isEmpty()) {
             // No events at all – show empty state
             Div empty = new Div();
-            empty.setText("Aucun événement pour ce jour");
+            empty.setText(I18n.t("calendar.grid.empty.day"));
             empty.addClassName("calendar-day-no-events");
             gridContainer.add(empty);
             return;
@@ -170,7 +172,6 @@ public class DailyTableGrid<E> extends VerticalLayout {
                 LocalTime endTime = (rowIndex + 1 < bookableStarts.size())
                         ? bookableStarts.get(rowIndex + 1)
                         : LocalTime.of(config.getEndHour(), 0);
-                // We can also use the step to compute end time
                 cell.addClickListener(e -> {
                     config.getOnEmptyCellClick().accept(start, endTime);
                 });
@@ -263,10 +264,10 @@ public class DailyTableGrid<E> extends VerticalLayout {
         SubMenu subMenu = rootItem.getSubMenu();
 
         if (config.getOnEventEdit() != null) {
-            subMenu.addItem("Modifier", e -> config.getOnEventEdit().accept(evt));
+            subMenu.addItem(I18n.t("calendar.grid.edit"), e -> config.getOnEventEdit().accept(evt));
         }
         if (config.getOnEventDelete() != null) {
-            MenuItem deleteItem = subMenu.addItem("Supprimer", e -> config.getOnEventDelete().accept(evt));
+            MenuItem deleteItem = subMenu.addItem(I18n.t("calendar.grid.delete"), e -> config.getOnEventDelete().accept(evt));
             deleteItem.getStyle().set("color", "var(--lumo-error-text-color)");
         }
         return menuBar;
@@ -274,13 +275,41 @@ public class DailyTableGrid<E> extends VerticalLayout {
 
     private String buildTooltipText(E evt) {
         StringBuilder sb = new StringBuilder();
+        // Title
         sb.append(config.getTitleExtractor().apply(evt));
+
+        // Description
         String desc = config.getDescriptionExtractor().apply(evt);
         if (desc != null && !desc.isBlank()) {
             sb.append("\n").append(desc);
         }
-        sb.append("\n").append(config.getStartTimeExtractor().apply(evt))
-                .append(" – ").append(config.getEndTimeExtractor().apply(evt));
+
+        // Date
+        if (currentDate != null) {
+            sb.append("\n").append(currentDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        }
+
+        // Time from – to
+        LocalTime start = config.getStartTimeExtractor().apply(evt);
+        LocalTime end = config.getEndTimeExtractor().apply(evt);
+        sb.append("\n").append(start).append(" – ").append(end);
+
+        // Owner (if extractor exists)
+        if (config.getOwnerExtractor() != null) {
+            String owner = config.getOwnerExtractor().apply(evt);
+            if (owner != null && !owner.isBlank()) {
+                sb.append("\n").append(I18n.t("calendar.grid.owner")).append(" ").append(owner);
+            }
+        }
+
+        // Location (if extractor exists)
+        if (config.getLocationExtractor() != null) {
+            String location = config.getLocationExtractor().apply(evt);
+            if (location != null && !location.isBlank()) {
+                sb.append("\n").append(I18n.t("calendar.grid.location")).append(" ").append(location);
+            }
+        }
+
         return sb.toString();
     }
 

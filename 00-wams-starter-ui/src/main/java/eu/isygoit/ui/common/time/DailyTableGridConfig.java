@@ -8,12 +8,13 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import eu.isygoit.dto.common.DayTimeSlot;
 
 /**
  * Configuration for {@link DailyTableGrid}.
  * Uses the same pattern as WeeklyTableGridConfig.
  */
-public class DailyTableGridConfig<E> {
+public class DailyTableGridConfig<E extends DayTimeSlot> {
 
     // ---- Core extractors ----
     private Function<E, LocalTime> startTimeExtractor;
@@ -23,6 +24,7 @@ public class DailyTableGridConfig<E> {
     private Function<E, String> colorExtractor;          // fallback (not used if palette is used)
     private Function<E, String> locationExtractor;
     private Function<E, Object> categoryKeyExtractor;    // for palette selection
+    private Function<E, String> ownerExtractor;          // NEW
 
     // ---- Handlers ----
     private Consumer<E> onEventClick;
@@ -52,7 +54,7 @@ public class DailyTableGridConfig<E> {
 
     private DailyTableGridConfig() {}
 
-    public static <E> DailyTableGridConfig<E> builder() { return new DailyTableGridConfig<>(); }
+    public static <E extends DayTimeSlot> DailyTableGridConfig<E> builder() { return new DailyTableGridConfig<>(); }
 
     // ---- Fluent setters ----
     public DailyTableGridConfig<E> withStartTimeExtractor(Function<E, LocalTime> extractor) {
@@ -75,6 +77,9 @@ public class DailyTableGridConfig<E> {
     }
     public DailyTableGridConfig<E> withCategoryKeyExtractor(Function<E, Object> extractor) {
         this.categoryKeyExtractor = extractor; return this;
+    }
+    public DailyTableGridConfig<E> withOwnerExtractor(Function<E, String> extractor) {  // NEW
+        this.ownerExtractor = extractor; return this;
     }
     public DailyTableGridConfig<E> withOnEventClick(Consumer<E> handler) {
         this.onEventClick = handler; return this;
@@ -126,6 +131,7 @@ public class DailyTableGridConfig<E> {
     public Function<E, String> getColorExtractor() { return colorExtractor; }
     public Function<E, String> getLocationExtractor() { return locationExtractor; }
     public Function<E, Object> getCategoryKeyExtractor() { return categoryKeyExtractor; }
+    public Function<E, String> getOwnerExtractor() { return ownerExtractor; }  // NEW
     public Consumer<E> getOnEventClick() { return onEventClick; }
     public Consumer<E> getOnEventDelete() { return onEventDelete; }
     public Consumer<E> getOnEventEdit() { return onEventEdit; }

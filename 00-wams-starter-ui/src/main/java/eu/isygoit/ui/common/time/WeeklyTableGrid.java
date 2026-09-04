@@ -14,10 +14,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.DayTimeSlot;
+import eu.isygoit.i18n.I18n;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.*;
 
@@ -37,7 +39,7 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
         setSpacing(false);
         setWidthFull();
         addClassName("timetable-grid-wrapper");
-        addClassName("calendar-view-container");   // unified container style
+        addClassName("calendar-view-container");
 
         int startHour = config.getStartHour();
         int endHour = config.getEndHour();
@@ -64,7 +66,7 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
         gridContainer.removeAll();
         if (slots.isEmpty()) {
             Div empty = new Div();
-            empty.setText("Aucun événement pour cette semaine");
+            empty.setText(I18n.t("calendar.grid.empty.week"));
             empty.addClassName("calendar-day-no-events");
             gridContainer.add(empty);
             return;
@@ -146,7 +148,6 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
         List<DayOfWeek> days = config.getDaysOfWeek();
         for (int dayIndex = 0; dayIndex < days.size(); dayIndex++) {
             DayOfWeek day = days.get(dayIndex);
-            String label = config.getDayLabelExtractor().apply(day);
             Span dayLabel = new Span(day.getDisplayName(TextStyle.SHORT, Locale.FRENCH));
             dayLabel.addClassName("timetable-grid-header");
             dayLabel.addClassName("timetable-grid-header-day");
@@ -245,10 +246,10 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
 
         // Default edit/delete from config
         if (config.getOnEventEdit() != null) {
-            subMenu.addItem("Modifier", e -> config.getOnEventEdit().accept(slot));
+            subMenu.addItem(I18n.t("calendar.grid.edit"), e -> config.getOnEventEdit().accept(slot));
         }
         if (config.getOnEventDelete() != null) {
-            MenuItem deleteItem = subMenu.addItem("Supprimer", e -> config.getOnEventDelete().accept(slot));
+            MenuItem deleteItem = subMenu.addItem(I18n.t("calendar.grid.delete"), e -> config.getOnEventDelete().accept(slot));
             deleteItem.getStyle().set("color", "var(--lumo-error-text-color)");
         }
 
@@ -257,17 +258,43 @@ public class WeeklyTableGrid<S extends DayTimeSlot> extends VerticalLayout {
 
     private String buildTooltipText(S slot) {
         StringBuilder sb = new StringBuilder();
+
+        // Title
         sb.append(config.getTitleExtractor().apply(slot));
+
+        // Description
         String desc = config.getDescriptionExtractor().apply(slot);
         if (desc != null && !desc.isBlank()) {
             sb.append("\n").append(desc);
         }
-        sb.append("\n").append(config.getStartTimeExtractor().apply(slot))
-                .append(" – ").append(config.getEndTimeExtractor().apply(slot));
-        String loc = config.getLocationExtractor().apply(slot);
-        if (loc != null && !loc.isBlank()) {
-            sb.append(" • ").append(loc);
+
+        // Date (if date extractor is provided)
+        if (config.getDateExtractor() != null) {
+            LocalDate date = config.getDateExtractor().apply(slot);
+            if (date != null) {
+                sb.append("\n").append(date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            }
         }
+
+        // Time from – to
+        LocalTime start = config.getStartTimeExtractor().apply(slot);
+        LocalTime end = config.getEndTimeExtractor().apply(slot);
+        sb.append("\n").append(start).append(" – ").append(end);
+
+        // Owner (if extractor exists)
+        if (config.getOwnerExtractor() != null) {
+            String owner = config.getOwnerExtractor().apply(slot);
+            if (owner != null && !owner.isBlank()) {
+                sb.append("\n").append(I18n.t("calendar.grid.owner")).append(" ").append(owner);
+            }
+        }
+
+        // Location
+        String location = config.getLocationExtractor().apply(slot);
+        if (location != null && !location.isBlank()) {
+            sb.append("\n").append(I18n.t("calendar.grid.location")).append(" ").append(location);
+        }
+
         return sb.toString();
     }
 
