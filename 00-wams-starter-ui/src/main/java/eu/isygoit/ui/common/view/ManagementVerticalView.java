@@ -3,6 +3,7 @@ package eu.isygoit.ui.common.view;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -13,6 +14,7 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.util.SecurityUtils;
 
+@CssImport("./styles/view.css")
 public class ManagementVerticalView extends VerticalLayout implements BeforeEnterObserver {
 
     @Override

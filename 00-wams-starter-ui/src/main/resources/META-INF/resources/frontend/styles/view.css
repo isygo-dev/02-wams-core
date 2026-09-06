@@ -1,0 +1,17 @@
+.management-view {
+    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+    min-height: 100vh;
+    animation: wams-fade-in 0.5s ease-out;
+    padding: var(--lumo-space-m);
+}
+
+@keyframes wams-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
