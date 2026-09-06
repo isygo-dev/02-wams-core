@@ -3,8 +3,8 @@ package eu.isygoit.ui.common.card;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -12,6 +12,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -198,20 +199,40 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         }
     }
 
-    protected Span buildStatusChip(String text, ChipColor color) {
-        Span chip = new Span(text);
+    protected Span buildStatusChip(String label, ChipColor color) {
+        Span chip = new Span(label);
         chip.addClassName(LumoUtility.FontSize.XSMALL);
         chip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
         chip.addClassName(LumoUtility.Padding.Vertical.XSMALL);
         chip.addClassName(LumoUtility.BorderRadius.LARGE);
         chip.addClassName("status-chip");
         chip.addClassName(color.cssClass());
-        chip.getElement().setAttribute("title", text);
+        chip.getElement().setAttribute("title", label);
         return chip;
     }
 
-    protected Span buildStatusChip(String text, String status) {
-        return buildStatusChip(text, ChipColor.fromStatus(status));
+    protected Span buildStatusChip(String label, String status) {
+        Span chip = new Span(status);
+        chip.getElement().setAttribute("title", label.toLowerCase());
+        chip.addClassName("status-chip");
+        if (StringUtils.hasText(status)) {
+            chip.addClassName("status-chip--" + status.toLowerCase());
+        } else {
+            chip.addClassName("status-chip--neutral");
+        }
+        return chip;
+    }
+
+    protected Span buildStatusChip(String label, String status, String translated) {
+        Span chip = new Span(translated);
+        chip.getElement().setAttribute("title", label.toLowerCase());
+        chip.addClassName("status-chip");
+        if (StringUtils.hasText(status)) {
+            chip.addClassName("status-chip--" + status.toLowerCase());
+        } else {
+            chip.addClassName("status-chip--neutral");
+        }
+        return chip;
     }
 
     // ── Title span factory ────────────────────────────────────────────────────
