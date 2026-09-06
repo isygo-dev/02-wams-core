@@ -58,7 +58,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
 
     /**
      * Re-colors an existing chip (e.g. after a status change) by swapping its
-     * {@code wams-chip--*} class instead of setting inline background/foreground
+     * {@code status-chip--*} class instead of setting inline background/foreground
      * colors.
      */
     protected static void applyChipColor(Span chip, ChipColor color) {
@@ -67,7 +67,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         chip.removeClassName(ChipColor.WARNING.cssClass());
         chip.removeClassName(ChipColor.NEUTRAL.cssClass());
         chip.removeClassName(ChipColor.INFO.cssClass());
-        chip.addClassName("wams-chip");
+        chip.addClassName("status-chip");
         chip.addClassName(color.cssClass());
     }
 
@@ -204,7 +204,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         chip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
         chip.addClassName(LumoUtility.Padding.Vertical.XSMALL);
         chip.addClassName(LumoUtility.BorderRadius.LARGE);
-        chip.addClassName("wams-chip");
+        chip.addClassName("status-chip");
         chip.addClassName(color.cssClass());
         chip.getElement().setAttribute("title", text);
         return chip;
@@ -318,11 +318,11 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
     // ── Inner types ───────────────────────────────────────────────────────────
 
     public record ChipColor(String cssClass) {
-        public static final ChipColor SUCCESS = new ChipColor("wams-chip--success");
-        public static final ChipColor ERROR = new ChipColor("wams-chip--error");
-        public static final ChipColor WARNING = new ChipColor("wams-chip--warning");
-        public static final ChipColor NEUTRAL = new ChipColor("wams-chip--neutral");
-        public static final ChipColor INFO = new ChipColor("wams-chip--info");
+        public static final ChipColor SUCCESS = new ChipColor("status-chip--success");
+        public static final ChipColor ERROR = new ChipColor("status-chip--error");
+        public static final ChipColor WARNING = new ChipColor("status-chip--warning");
+        public static final ChipColor NEUTRAL = new ChipColor("status-chip--neutral");
+        public static final ChipColor INFO = new ChipColor("status-chip--info");
 
         public static ChipColor fromStatus(String status) {
             if (status == null) return NEUTRAL;

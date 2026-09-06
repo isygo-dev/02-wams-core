@@ -208,23 +208,23 @@ public class GrantsView extends ManagementVerticalView {
             Span chip = new Span(status);
             chip.addClassNames(LumoUtility.FontSize.XSMALL, LumoUtility.Padding.Horizontal.SMALL,
                     LumoUtility.Padding.Vertical.XSMALL, LumoUtility.BorderRadius.LARGE);
-            chip.addClassName("wams-chip");
+            chip.addClassName("status-chip");
             String statusDisplay;
             switch (status.toUpperCase()) {
                 case "ACTIVE":
-                    chip.addClassName("wams-chip--success");
+                    chip.addClassName("status-chip--success");
                     statusDisplay = I18n.t("kms.grants.view.status.active");
                     break;
                 case "REVOKED":
-                    chip.addClassName("wams-chip--error");
+                    chip.addClassName("status-chip--error");
                     statusDisplay = I18n.t("kms.grants.view.status.revoked");
                     break;
                 case "RETIRED":
-                    chip.addClassName("wams-chip--neutral");
+                    chip.addClassName("status-chip--neutral");
                     statusDisplay = I18n.t("kms.grants.view.status.retired");
                     break;
                 default:
-                    chip.addClassName("wams-chip--neutral");
+                    chip.addClassName("status-chip--neutral");
                     statusDisplay = status;
             }
             chip.setText(statusDisplay);

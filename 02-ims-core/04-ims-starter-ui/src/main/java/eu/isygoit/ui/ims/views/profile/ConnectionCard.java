@@ -39,8 +39,8 @@ class ConnectionCard extends Div {
         text.add(primary, meta);
 
         Span appChip = new Span(c.getLogApp() != null && !c.getLogApp().isBlank() ? c.getLogApp() : I18n.t("profile.history.unknown.app"));
-        appChip.addClassName("wams-chip");
-        appChip.addClassName("wams-chip--info");
+        appChip.addClassName("status-chip");
+        appChip.addClassName("status-chip--info");
         appChip.addClassName("profile-connection-chip");
 
         add(iconCircle, text, appChip);

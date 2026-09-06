@@ -90,7 +90,7 @@ public class KeyDetailsViewDialog extends DetailsViewDialog {
                 chip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
                 chip.addClassName(LumoUtility.Padding.Vertical.XSMALL);
                 chip.addClassName(LumoUtility.BorderRadius.LARGE);
-                chip.addClassName("wams-chip--info");
+                chip.addClassName("status-chip--info");
                 chip.addClassName("tag-chip");
                 tagsContainer.add(chip);
             }

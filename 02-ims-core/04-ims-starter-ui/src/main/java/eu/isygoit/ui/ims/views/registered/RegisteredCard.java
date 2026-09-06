@@ -83,34 +83,34 @@ public class RegisteredCard extends BaseCard<RegisteredManagementView, Registere
         IEnumRegistrationStatus.Types status = registeredUser.getStatus();
 
         Span chip = new Span();
-        chip.addClassName("wams-chip");
+        chip.addClassName("status-chip");
 
         if (status == null) {
             chip.setText(I18n.t("ims.registered.card.status.unknown"));
-            chip.addClassName("wams-chip--neutral");
+            chip.addClassName("status-chip--neutral");
             return chip;
         }
 
         switch (status) {
             case PROCESSED:
                 chip.setText(I18n.t("ims.registered.card.status.processed"));
-                chip.addClassName("wams-chip--success");
+                chip.addClassName("status-chip--success");
                 chip.getElement().setAttribute("title", I18n.t("ims.registered.card.status.processed.tooltip"));
                 break;
             case CONFIRMED:
                 chip.setText(I18n.t("ims.registered.card.status.confirmed"));
-                chip.addClassName("wams-chip--primary");
+                chip.addClassName("status-chip--primary");
                 chip.getElement().setAttribute("title", I18n.t("ims.registered.card.status.confirmed.tooltip"));
                 break;
             case REJECTED:
                 chip.setText(I18n.t("ims.registered.card.status.rejected"));
-                chip.addClassName("wams-chip--error");
+                chip.addClassName("status-chip--error");
                 chip.getElement().setAttribute("title", I18n.t("ims.registered.card.status.rejected.tooltip"));
                 break;
             case NEW:
             default:
                 chip.setText(I18n.t("ims.registered.card.status.new"));
-                chip.addClassName("wams-chip--warning");
+                chip.addClassName("status-chip--warning");
                 chip.getElement().setAttribute("title", I18n.t("ims.registered.card.status.new.tooltip"));
                 break;
         }

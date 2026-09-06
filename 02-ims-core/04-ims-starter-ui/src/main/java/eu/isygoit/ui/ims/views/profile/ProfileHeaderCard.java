@@ -65,8 +65,8 @@ class ProfileHeaderCard extends HorizontalLayout {
 
         boolean active = account.getAdminStatus() != null && "ENABLED".equals(account.getAdminStatus().name());
         Span statusBadge = new Span(active ? I18n.t("profile.status.active") : I18n.t("profile.status.inactive"));
-        statusBadge.addClassName("wams-chip");
-        statusBadge.addClassName(active ? "wams-chip--success" : "wams-chip--error");
+        statusBadge.addClassName("status-chip");
+        statusBadge.addClassName(active ? "status-chip--success" : "status-chip--error");
         statusBadge.addClassName("profile-status-badge");
 
         HorizontalLayout topRow = new HorizontalLayout(name, statusBadge);
@@ -81,11 +81,11 @@ class ProfileHeaderCard extends HorizontalLayout {
 
         Div badgeRow = new Div();
         badgeRow.addClassName("profile-badge-row");
-        badgeRow.add(buildBadge(VaadinIcon.BRIEFCASE, account.getFunctionRole(), "wams-chip--info"));
-        badgeRow.add(buildBadge(VaadinIcon.OFFICE, account.getTenant(), "wams-chip--neutral"));
-        badgeRow.add(buildBadge(VaadinIcon.KEY, ProfileFormatUtils.formatAccountType(account.getAccountType()), "wams-chip--neutral"));
+        badgeRow.add(buildBadge(VaadinIcon.BRIEFCASE, account.getFunctionRole(), "status-chip--info"));
+        badgeRow.add(buildBadge(VaadinIcon.OFFICE, account.getTenant(), "status-chip--neutral"));
+        badgeRow.add(buildBadge(VaadinIcon.KEY, ProfileFormatUtils.formatAccountType(account.getAccountType()), "status-chip--neutral"));
         if (Boolean.TRUE.equals(account.getIsAdmin())) {
-            badgeRow.add(buildBadge(VaadinIcon.STAR, I18n.t("profile.badge.admin"), "wams-chip--warning"));
+            badgeRow.add(buildBadge(VaadinIcon.STAR, I18n.t("profile.badge.admin"), "status-chip--warning"));
         }
 
         Button editButton = new Button(I18n.t("profile.edit"), VaadinIcon.EDIT.create());
@@ -114,7 +114,7 @@ class ProfileHeaderCard extends HorizontalLayout {
 
     private Component buildBadge(VaadinIcon icon, String label, String variantClass) {
         Span badge = new Span();
-        badge.addClassName("wams-chip");
+        badge.addClassName("status-chip");
         badge.addClassName(variantClass);
         badge.addClassName("profile-badge");
         if (label == null || label.isBlank()) {

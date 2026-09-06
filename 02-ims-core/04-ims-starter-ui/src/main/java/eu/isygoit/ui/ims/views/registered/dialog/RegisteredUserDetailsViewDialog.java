@@ -118,32 +118,32 @@ public class RegisteredUserDetailsViewDialog extends DetailsViewDialog {
         labelSpan.addClassName("detail-field-label");
 
         Span valueSpan = new Span();
-        valueSpan.addClassName("wams-chip");
+        valueSpan.addClassName("status-chip");
 
         if (status == null) {
             valueSpan.setText(I18n.t("ims.registered.card.status.unknown"));
-            valueSpan.addClassName("wams-chip--neutral");
+            valueSpan.addClassName("status-chip--neutral");
         } else {
             switch (status) {
                 case PROCESSED:
                     valueSpan.setText(I18n.t("ims.registered.card.status.processed"));
-                    valueSpan.addClassName("wams-chip--success");
+                    valueSpan.addClassName("status-chip--success");
                     valueSpan.getElement().setAttribute("title", I18n.t("ims.registered.card.status.processed.tooltip"));
                     break;
                 case CONFIRMED:
                     valueSpan.setText(I18n.t("ims.registered.card.status.confirmed"));
-                    valueSpan.addClassName("wams-chip--primary");
+                    valueSpan.addClassName("status-chip--primary");
                     valueSpan.getElement().setAttribute("title", I18n.t("ims.registered.card.status.confirmed.tooltip"));
                     break;
                 case REJECTED:
                     valueSpan.setText(I18n.t("ims.registered.card.status.rejected"));
-                    valueSpan.addClassName("wams-chip--error");
+                    valueSpan.addClassName("status-chip--error");
                     valueSpan.getElement().setAttribute("title", I18n.t("ims.registered.card.status.rejected.tooltip"));
                     break;
                 case NEW:
                 default:
                     valueSpan.setText(I18n.t("ims.registered.card.status.new"));
-                    valueSpan.addClassName("wams-chip--warning");
+                    valueSpan.addClassName("status-chip--warning");
                     valueSpan.getElement().setAttribute("title", I18n.t("ims.registered.card.status.new.tooltip"));
                     break;
             }

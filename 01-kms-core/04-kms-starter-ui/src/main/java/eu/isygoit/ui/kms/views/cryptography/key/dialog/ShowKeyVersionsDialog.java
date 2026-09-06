@@ -79,19 +79,19 @@ public class ShowKeyVersionsDialog extends BaseActionDialog {
             chip.addClassName("status-chip");
             switch (status) {
                 case "ENABLED":
-                    chip.addClassName("wams-chip--success");
+                    chip.addClassName("status-chip--success");
                     displayStatus = I18n.t("kms.key.dialog.versions.status.enabled");
                     break;
                 case "DISABLED":
-                    chip.addClassName("wams-chip--error");
+                    chip.addClassName("status-chip--error");
                     displayStatus = I18n.t("kms.key.dialog.versions.status.disabled");
                     break;
                 case "PENDING_DELETION":
-                    chip.addClassName("wams-chip--warning");
+                    chip.addClassName("status-chip--warning");
                     displayStatus = I18n.t("kms.key.dialog.versions.status.pending.deletion");
                     break;
                 default:
-                    chip.addClassName("wams-chip--neutral");
+                    chip.addClassName("status-chip--neutral");
                     displayStatus = I18n.t("kms.key.dialog.versions.status.unknown");
             }
             chip.setText(displayStatus);

@@ -686,7 +686,7 @@
 }
 
 /* ── ShowKeyVersionsDialog — grid status chip ─────────────────────────────────
-   Reuses the shared .wams-chip / .wams-chip--* classes from tokens.css instead
+   Reuses the shared .status-chip / .status-chip--* classes from tokens.css instead
    of setting inline background/foreground colors per row.                    */
 
 .show-key-versions-dialog .status-chip {
@@ -1090,7 +1090,7 @@
 }
 
 /* ── GrantsView grid status chip ──────────────────────────────────────────── */
-/* Reuses the shared .wams-chip / .wams-chip--* classes from tokens.css instead
+/* Reuses the shared .status-chip / .status-chip--* classes from tokens.css instead
    of setting inline background/foreground colors per row.                   */
 
 /* ── Shared empty-state icon (CustomKeyStoresView, IncrementalKeyView) ───── */

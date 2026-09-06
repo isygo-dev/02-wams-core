@@ -747,7 +747,7 @@
    Chips - Shared chip styles for all IMS cards
    ══════════════════════════════════════════════════════════════════════════ */
 
-.wams-chip {
+.status-chip {
     display: inline-flex;
     align-items: center;
     padding: 0.125rem 0.625rem;
@@ -761,83 +761,83 @@
 }
 
 /* Success chip - Green */
-.wams-chip--success {
+.status-chip--success {
     background: var(--lumo-success-color-10pct);
     color: var(--lumo-success-text-color);
     border: 1px solid var(--lumo-success-color-50pct);
 }
 
 /* Warning chip - Orange/Amber */
-.wams-chip--warning {
+.status-chip--warning {
     background: var(--lumo-warning-color-10pct);
     color: var(--lumo-warning-text-color);
     border: 1px solid var(--lumo-warning-color-50pct);
 }
 
 /* Error chip - Red */
-.wams-chip--error {
+.status-chip--error {
     background: var(--lumo-error-color-10pct);
     color: var(--lumo-error-text-color);
     border: 1px solid var(--lumo-error-color-50pct);
 }
 
 /* Primary chip - Blue */
-.wams-chip--primary {
+.status-chip--primary {
     background: var(--lumo-primary-color-10pct);
     color: var(--lumo-primary-text-color);
     border: 1px solid var(--lumo-primary-color-50pct);
 }
 
 /* Neutral chip - Gray */
-.wams-chip--neutral {
+.status-chip--neutral {
     background: var(--lumo-contrast-10pct);
     color: var(--lumo-secondary-text-color);
     border: 1px solid var(--lumo-contrast-20pct);
 }
 
 /* Chip with icon */
-.wams-chip--with-icon {
+.status-chip--with-icon {
     gap: var(--lumo-space-xs);
 }
 
-.wams-chip--with-icon .wams-chip-icon {
+.status-chip--with-icon .status-chip-icon {
     font-size: var(--lumo-font-size-xs);
 }
 
 /* Chip sizes */
-.wams-chip--sm {
+.status-chip--sm {
     font-size: var(--lumo-font-size-xxs);
     padding: 0.0625rem 0.5rem;
 }
 
-.wams-chip--md {
+.status-chip--md {
     font-size: var(--lumo-font-size-xs);
     padding: 0.125rem 0.75rem;
 }
 
-.wams-chip--lg {
+.status-chip--lg {
     font-size: var(--lumo-font-size-s);
     padding: 0.25rem 1rem;
 }
 
 /* Clickable chips */
-.wams-chip--clickable {
+.status-chip--clickable {
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.wams-chip--clickable:hover {
+.status-chip--clickable:hover {
     transform: scale(1.05);
     box-shadow: var(--lumo-box-shadow-xs);
 }
 
 /* Chip animation */
-@keyframes wams-chip-pulse {
+@keyframes status-chip-pulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.05); }
     100% { transform: scale(1); }
 }
 
-.wams-chip--pulse {
-    animation: wams-chip-pulse 2s ease-in-out infinite;
+.status-chip--pulse {
+    animation: status-chip-pulse 2s ease-in-out infinite;
 }

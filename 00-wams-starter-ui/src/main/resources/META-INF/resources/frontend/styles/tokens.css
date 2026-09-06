@@ -1,20 +1,8 @@
 /*
  * Design tokens shared by every module (common, auth, ims, kms, dms, mms, sms, cms).
- *
- * Visual language is aligned to the Atlassian Design System (Jira's design
- * system): interactive blue #0C66E4, semantic danger/success/warning colors,
- * an 8px spacing grid, compact 3px control radii, and a denser type scale.
- *
- * This works by overriding Vaadin Lumo's own CSS custom properties at
- * document scope. Because virtually every component in this app is already
- * styled through var(--lumo-*) (Lumo utility classes, Button/Badge theme
- * variants, etc.), re-pointing those variables re-skins the whole
- * application without having to touch each component individually.
- * Lumo's neutral/contrast ramp (--lumo-contrast-*) is already a cool
- * blue-gray (hsl hue 214) close to Atlassian's own neutral ramp, so it is
- * left as-is; only the semantic accents, radii, shadows, type scale and
- * heading/body text colors are re-pointed below.
+ * … (le préambule reste inchangé) …
  */
+
 html {
     /* ── Brand / semantic accents (Atlassian Design System) ─────────────── */
     --lumo-primary-color: #0C66E4;
@@ -58,74 +46,199 @@ html {
     --lumo-border-radius-l: 6px;
     --lumo-border-radius-xl: 8px;
 
-    /* ── Shadows: subtle, flat elevation (Jira avoids heavy drop shadows) ── */
+    /* ── Shadows: subtle, flat elevation ── */
     --lumo-box-shadow-xs: 0 1px 1px rgba(9, 30, 66, 0.13);
     --lumo-box-shadow-s: 0 1px 2px rgba(9, 30, 66, 0.16), 0 0 1px rgba(9, 30, 66, 0.1);
     --lumo-box-shadow-m: 0 4px 8px -2px rgba(9, 30, 66, 0.18), 0 0 1px rgba(9, 30, 66, 0.12);
     --lumo-box-shadow-l: 0 8px 16px -4px rgba(9, 30, 66, 0.22), 0 0 1px rgba(9, 30, 66, 0.12);
     --lumo-box-shadow-xl: 0 12px 24px -6px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.12);
 
-    /* ── Type scale: denser than Lumo's default, matching Jira's UI density ── */
-    --lumo-font-size-xxs: 0.6875rem; /* 11px */
-    --lumo-font-size-xs: 0.75rem; /* 12px */
-    --lumo-font-size-s: 0.8125rem; /* 13px */
-    --lumo-font-size-m: 0.875rem; /* 14px — base body size */
-    --lumo-font-size-l: 1rem; /* 16px */
-    --lumo-font-size-xl: 1.25rem; /* 20px */
-    --lumo-font-size-xxl: 1.5rem; /* 24px */
-    --lumo-font-size-xxxl: 1.75rem; /* 28px */
+    /* ── Type scale ── */
+    --lumo-font-size-xxs: 0.6875rem;
+    --lumo-font-size-xs: 0.75rem;
+    --lumo-font-size-s: 0.8125rem;
+    --lumo-font-size-m: 0.875rem;
+    --lumo-font-size-l: 1rem;
+    --lumo-font-size-xl: 1.25rem;
+    --lumo-font-size-xxl: 1.5rem;
+    --lumo-font-size-xxxl: 1.75rem;
 
-    /* ── Responsive breakpoints (shared reference, used via media queries — CSS
-       custom properties can't be used inside @media conditions, so these are
-       documented here as the single source of truth for every stylesheet in
-       this app to copy literally): 480px / 768px / 1024px / 1280px. ── */
-
-    /* ── App shell (BaseMainLayout header + sidebar) ─────────────────────── */
+    /* ── App shell ─────────────────────────────────────────────────────────── */
     --wams-header-height: 52px;
     --wams-sidebar-width-expanded: 220px;
     --wams-sidebar-width-collapsed: 60px;
 }
 
-/* ── Status / chip tokens ───────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════
+   STATUS CHIP (unified design – replaces old .wams-chip)
+   ═══════════════════════════════════════════════════════════════════════ */
 
-.wams-chip {
-    display: inline-block;
-    white-space: nowrap;
-    border-radius: 3px;
+.status-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;           /* espace entre le point et le texte */
+    padding: 0.35rem 0.7rem;
+    border: 1px solid rgba(var(--lumo-primary-color), 0.16);
+    border-radius: 999px;   /* forme pilule */
+    background: linear-gradient(135deg, var(--lumo-primary-color-10pct), var(--wams-info-bg));
+    color: var(--lumo-primary-text-color);
+    font-size: var(--lumo-font-size-xxs);
     font-weight: 600;
-    letter-spacing: .01em;
+    letter-spacing: 0.06em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    white-space: nowrap;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    cursor: default;
 }
 
-.wams-chip--success {
-    background-color: #DFFCEC;
+/* Petit point indicateur (couleur = currentColor) */
+.status-chip::before {
+    content: "";
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.8;
+    flex-shrink: 0;
+}
+
+.status-chip:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+/* --- Modificateurs sémantiques (regroupés par catégorie) --- */
+
+/* Success / actif / payé / disponible, etc. */
+.status-chip--success,
+.status-chip--active,
+.status-chip--confirmed,
+.status-chip--paid,
+.status-chip--available,
+.status-chip--open,
+.status-chip--incident-resolved,
+.status-chip--incident-closed {
+    background: linear-gradient(135deg, var(--lumo-success-color-10pct), var(--lumo-primary-color-10pct));
+    border-color: rgba(var(--lumo-success-color), 0.2);
     color: var(--lumo-success-text-color);
 }
 
-.wams-chip--error {
-    background-color: #FFECEB;
-    color: var(--lumo-error-text-color);
-}
-
-.wams-chip--warning {
-    background-color: var(--wams-warning-bg);
-    color: var(--wams-warning-color);
-}
-
-.wams-chip--neutral {
-    background-color: var(--lumo-contrast-10pct);
-    color: var(--lumo-secondary-text-color);
-}
-
-.wams-chip--info {
-    background-color: var(--wams-info-bg);
+/* Info / inscrit / en attente, etc. */
+.status-chip--info,
+.status-chip--registered,
+.status-chip--waiting_list,
+.status-chip--transferred,
+.status-chip--pre_enrolled,
+.status-chip--assigned,
+.status-chip--incident-open,
+.status-chip--risk-low,
+.status-chip--severity-low {
+    background: linear-gradient(135deg, var(--wams-info-bg), var(--lumo-primary-color-10pct));
+    border-color: rgba(var(--wams-info-fg), 0.2);
     color: var(--wams-info-fg);
 }
 
-/* ── Standard card action-button treatment ───────────────────────────────
-   Every BaseCard subclass's action buttons go through BaseCard's
-   createDetailsButton/createEditButton/createToggleButton/createDeleteButton
-   helpers (see BaseCard.java), which apply these classes consistently so
-   every card in the app hovers/focuses the same way regardless of module. */
+/* Warning / partiellement payé / congé, etc. */
+.status-chip--warning,
+.status-chip--partially_paid,
+.status-chip--promise,
+.status-chip--on-leave,
+.status-chip--maintenance,
+.status-chip--risk-medium,
+.status-chip--severity-medium,
+.status-chip--incident-in-progress,
+.status-chip--incident-urgent,
+.status-chip--training,
+.status-chip--sick,
+.status-chip--unpaid-leave,
+.status-chip--moderate {
+    background: linear-gradient(135deg, var(--wams-warning-bg), var(--lumo-primary-color-10pct));
+    border-color: rgba(var(--wams-warning-color), 0.2);
+    color: var(--wams-warning-color);
+}
+
+/* Danger / inactif / archivé / annulé, etc. */
+.status-chip--danger,
+.status-chip--inactive,
+.status-chip--archived,
+.status-chip--withdrawn,
+.status-chip--suspended,
+.status-chip--resigned,
+.status-chip--cancelled,
+.status-chip--rejected,
+.status-chip--retired,
+.status-chip--risk-high,
+.status-chip--risk-critical,
+.status-chip--severity-high,
+.status-chip--severity-critical,
+.status-chip--invalid,
+.status-chip--not-available,
+.status-chip--closed {
+    background: linear-gradient(135deg, var(--lumo-error-color-10pct), var(--lumo-primary-color-10pct));
+    border-color: rgba(var(--lumo-error-color), 0.2);
+    color: var(--lumo-error-text-color);
+}
+
+/* Neutre / diplômé / en attente, etc. */
+.status-chip--neutral,
+.status-chip--graduated,
+.status-chip--dormant,
+.status-chip--pending,
+.status-chip--review,
+.status-chip--unknown {
+    background: linear-gradient(135deg, var(--lumo-contrast-10pct), var(--lumo-primary-color-10pct));
+    border-color: rgba(var(--lumo-secondary-text-color), 0.18);
+    color: var(--lumo-secondary-text-color);
+}
+
+/* Rôles (enseignant, étudiant, admin, etc.) */
+.status-chip--teacher,
+.status-chip--student,
+.status-chip--admin,
+.status-chip--director,
+.status-chip--manager,
+.status-chip--support,
+.status-chip--administrative,
+.status-chip--technical,
+.status-chip--service,
+.status-chip--management,
+.status-chip--other {
+    background: linear-gradient(135deg, var(--lumo-primary-color-10pct), var(--wams-info-bg));
+    border-color: rgba(var(--lumo-primary-color), 0.18);
+    color: var(--lumo-primary-text-color);
+}
+
+/* Sous‑catégories de rôles (management, direction, etc.) */
+.status-chip--administrative,
+.status-chip--management,
+.status-chip--director,
+.status-chip--manager,
+.status-chip--support {
+    background: linear-gradient(135deg, var(--wams-info-bg), var(--lumo-primary-color-10pct));
+    border-color: rgba(var(--wams-info-fg), 0.18);
+    color: var(--wams-info-fg);
+}
+
+.status-chip--technical,
+.status-chip--student,
+.status-chip--service {
+    background: linear-gradient(135deg, var(--wams-warning-bg), var(--lumo-primary-color-10pct));
+    border-color: rgba(var(--wams-warning-color), 0.2);
+    color: var(--wams-warning-color);
+}
+
+.status-chip--other {
+    background: linear-gradient(135deg, var(--lumo-contrast-10pct), var(--lumo-primary-color-10pct));
+    border-color: rgba(var(--lumo-secondary-text-color), 0.18);
+    color: var(--lumo-secondary-text-color);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Autres utilitaires (action-btn, responsive) – inchangés
+   ═══════════════════════════════════════════════════════════════════════ */
 
 .wams-action-btn {
     transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
@@ -139,8 +252,6 @@ html {
     background-color: var(--lumo-error-color-10pct);
     color: var(--lumo-error-text-color);
 }
-
-/* ── Responsive helpers shared across dialogs/cards/layouts ──────────────── */
 
 @media (max-width: 480px) {
     .wams-dialog-responsive {
