@@ -57,6 +57,8 @@
     text-align: center;
 }
 
+/* ── Icon preview (ComboBox<VaadinIcon> renderer, details dialog) ── */
+
 .icon-preview {
     width: 18px;
     height: 18px;
@@ -64,4 +66,100 @@
     color: var(--lumo-primary-text-color);
 }
 
+/* ── Details dialog — composite value rows (colour, icon, ...) ── */
+/* Used by details dialogs that render a value as a component instead of
+   plain text (e.g. SchoolLevelDetailsViewDialog). Mirrors the label/icon/
+   value layout produced by DetailsViewDialog#addFieldToGrid. */
 
+.detail-field-row {
+    display: flex;
+    align-items: center;
+    gap: var(--lumo-space-s);
+    width: 100%;
+    padding: var(--lumo-space-xs) 0;
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
+}
+
+.detail-field-row:last-child {
+    border-bottom: none;
+}
+
+.detail-field-row__icon {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    color: var(--lumo-secondary-text-color);
+}
+
+.detail-field-row__label {
+    flex: 0 0 auto;
+    min-width: 100px;
+    font-weight: 500;
+    font-size: var(--lumo-font-size-xs);
+    color: var(--lumo-secondary-text-color);
+}
+
+.detail-field-row__value {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* ── Details dialog — colour swatch ── */
+
+.detail-color-row {
+    display: flex;
+    align-items: center;
+    gap: var(--lumo-space-s);
+}
+
+.detail-color-swatch {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: var(--lumo-border-radius-s);
+    border: 1px solid var(--lumo-contrast-20pct);
+    flex: 0 0 auto;
+}
+
+.detail-color-value {
+    font-family: var(--lumo-font-family-monospace, monospace);
+    font-size: var(--lumo-font-size-xs);
+    color: var(--lumo-body-text-color);
+}
+
+/* ── Details dialog — icon preview row ── */
+
+.detail-icon-row {
+    display: flex;
+    align-items: center;
+    gap: var(--lumo-space-s);
+}
+
+.detail-icon-preview {
+    width: 20px;
+    height: 20px;
+    color: var(--lumo-primary-text-color);
+    flex: 0 0 auto;
+}
+
+.detail-icon-label {
+    font-size: var(--lumo-font-size-xs);
+    color: var(--lumo-body-text-color);
+}
+
+/* ── Responsive tweaks for details composite rows ── */
+
+@media (max-width: 600px) {
+    .detail-field-row {
+        flex-wrap: wrap;
+    }
+
+    .detail-field-row__label {
+        min-width: 0;
+        flex-basis: 100%;
+    }
+
+    .detail-field-row__value {
+        flex-basis: 100%;
+    }
+}
