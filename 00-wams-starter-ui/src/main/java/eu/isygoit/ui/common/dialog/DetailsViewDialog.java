@@ -1,6 +1,7 @@
 package eu.isygoit.ui.common.dialog;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -19,6 +20,7 @@ import eu.isygoit.ui.common.component.ClipboardCopyButton;
  * Values long enough to be painful to select by hand (IDs, hashes, keys,
  * paths, URLs, ...) automatically get an inline {@link ClipboardCopyButton}.
  */
+@CssImport("./styles/dialog.css")
 public abstract class DetailsViewDialog extends NoActionDialog {
 
     /**

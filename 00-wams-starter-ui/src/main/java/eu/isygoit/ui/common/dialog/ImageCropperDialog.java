@@ -1,6 +1,7 @@
 package eu.isygoit.ui.common.dialog;
 
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.component.ImageCropper;
@@ -12,6 +13,7 @@ import java.util.function.Consumer;
  * Has a real commit action (crop + apply), so it extends {@link BaseActionDialog}
  * rather than {@link NoActionDialog}.
  */
+@CssImport("./styles/dialog.css")
 public class ImageCropperDialog extends BaseActionDialog {
 
     private final ImageCropper imageCropper;

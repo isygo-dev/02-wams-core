@@ -1,5 +1,6 @@
 package eu.isygoit.ui.common.dialog;
 
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -18,6 +19,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * Base dialog that adds a 9‑digit PIN confirmation for destructive actions.
  * Displays a warning icon before the warning message in the content area.
  */
+@CssImport("./styles/dialog.css")
 public abstract class PinBaseActionDialog extends BaseActionDialog {
 
     protected final String confirmationCode;
