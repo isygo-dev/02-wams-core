@@ -56,3 +56,12 @@
 .wams-image-cropper__container {
     text-align: center;
 }
+
+.icon-preview {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    color: var(--lumo-primary-text-color);
+}
+
+
