@@ -211,9 +211,9 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         return chip;
     }
 
-    protected Span buildStatusChip(String label, String status) {
-        Span chip = new Span(status);
-        chip.getElement().setAttribute("title", label.toLowerCase());
+    protected Span buildStatusChip(String translated, String status) {
+        Span chip = new Span(translated);
+        chip.getElement().setAttribute("title", status.toLowerCase());
         chip.addClassName("status-chip");
         if (StringUtils.hasText(status)) {
             chip.addClassName("status-chip--" + status.toLowerCase());
