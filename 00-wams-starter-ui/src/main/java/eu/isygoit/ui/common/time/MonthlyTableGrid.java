@@ -22,6 +22,7 @@ import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @CssImport("./styles/time-grid.css")
@@ -167,7 +168,8 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
                 subMenu.addItem(I18n.t("calendar.grid.edit"), e -> config.getOnEventEdit().accept(evt));
             }
             if (config.getOnEventDelete() != null) {
-                MenuItem deleteItem = subMenu.addItem(I18n.t("calendar.grid.delete"), e -> config.getOnEventDelete().accept(evt));
+                MenuItem deleteItem = subMenu.addItem(I18n.t("calendar.grid.delete"),
+                        e -> config.getOnEventDelete().accept(evt));
                 deleteItem.getStyle().set("color", "var(--lumo-error-text-color)");
             }
             dot.add(menuBar);
@@ -177,24 +179,30 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         return dot;
     }
 
+    /**
+     * Builds a tooltip from the configured extractors.
+     * Every extractor access is null-safe so a config that forgot to set an
+     * optional extractor will not throw NPE here.
+     */
     private String buildTooltipText(E evt) {
         StringBuilder sb = new StringBuilder();
+
         // Title
-        sb.append(config.getTitleExtractor().apply(evt));
+        sb.append(safeApply(config.getTitleExtractor(), evt, ""));
 
         // Description
-        String desc = config.getDescriptionExtractor().apply(evt);
+        String desc = safeApply(config.getDescriptionExtractor(), evt, null);
         if (desc != null && !desc.isBlank()) {
             sb.append("\n").append(desc);
         }
 
         // Date
-        LocalDate date = config.getDateExtractor().apply(evt);
+        LocalDate date = safeApply(config.getDateExtractor(), evt, null);
         if (date != null) {
             sb.append("\n").append(date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         }
 
-        // Time from – to (if start/end time extractors exist)
+        // Time range
         if (config.getStartTimeExtractor() != null && config.getEndTimeExtractor() != null) {
             LocalTime start = config.getStartTimeExtractor().apply(evt);
             LocalTime end = config.getEndTimeExtractor().apply(evt);
@@ -203,23 +211,29 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
             }
         }
 
-        // Owner (if extractor exists)
-        if (config.getOwnerExtractor() != null) {
-            String owner = config.getOwnerExtractor().apply(evt);
-            if (owner != null && !owner.isBlank()) {
-                sb.append("\n").append(I18n.t("calendar.grid.owner")).append(" ").append(owner);
-            }
+        // Owner
+        String owner = safeApply(config.getOwnerExtractor(), evt, null);
+        if (owner != null && !owner.isBlank()) {
+            sb.append("\n").append(I18n.t("calendar.grid.owner")).append(" ").append(owner);
         }
 
-        // Location (if extractor exists)
-        if (config.getLocationExtractor() != null) {
-            String location = config.getLocationExtractor().apply(evt);
-            if (location != null && !location.isBlank()) {
-                sb.append("\n").append(I18n.t("calendar.grid.location")).append(" ").append(location);
-            }
+        // Location
+        String location = safeApply(config.getLocationExtractor(), evt, null);
+        if (location != null && !location.isBlank()) {
+            sb.append("\n").append(I18n.t("calendar.grid.location")).append(" ").append(location);
         }
 
         return sb.toString();
+    }
+
+    private static <T, R> R safeApply(Function<T, R> fn, T value, R fallback) {
+        if (fn == null) return fallback;
+        try {
+            R result = fn.apply(value);
+            return result != null ? result : fallback;
+        } catch (Exception ex) {
+            return fallback;
+        }
     }
 
     @Override

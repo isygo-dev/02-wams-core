@@ -22,6 +22,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.*;
+import java.util.function.Function;
 
 @CssImport("./styles/time-grid.css")
 @CssImport("./styles/split/18-calendar.css")
@@ -190,7 +191,6 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
             plus.addClassName("timetable-empty-plus");
             cell.add(plus);
         }
-
         gridContainer.add(cell);
     }
 
@@ -226,43 +226,45 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         if (editable && config.getOnEventClick() != null) {
             content.getElement().addEventListener("click", e -> config.getOnEventClick().accept(slot));
         }
-
         gridContainer.add(content);
     }
 
     private MenuBar buildActionsMenu(E slot) {
         MenuBar menuBar = new MenuBar();
         menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE,
-                MenuBarVariant.LUMO_ICON,
-                MenuBarVariant.LUMO_SMALL);
+                MenuBarVariant.LUMO_ICON, MenuBarVariant.LUMO_SMALL);
         menuBar.addClassName("timetable-slot-actions");
         menuBar.getElement().executeJs("this.addEventListener('click', (e) => e.stopPropagation());");
 
         MenuItem rootItem = menuBar.addItem(new Icon(VaadinIcon.ELLIPSIS_DOTS_V));
         SubMenu subMenu = rootItem.getSubMenu();
 
-        // Custom actions from config
         config.getActionsMenuBuilder().apply(slot, menuBar);
 
-        // Default edit/delete from config
         if (config.getOnEventEdit() != null) {
             subMenu.addItem(I18n.t("calendar.grid.edit"), e -> config.getOnEventEdit().accept(slot));
         }
         if (config.getOnEventDelete() != null) {
-            MenuItem deleteItem = subMenu.addItem(I18n.t("calendar.grid.delete"), e -> config.getOnEventDelete().accept(slot));
+            MenuItem deleteItem = subMenu.addItem(I18n.t("calendar.grid.delete"),
+                    e -> config.getOnEventDelete().accept(slot));
             deleteItem.getStyle().set("color", "var(--lumo-error-text-color)");
         }
-
         return menuBar;
     }
 
+    /**
+     * Builds a tooltip from the configured extractors.
+     * Every extractor access is null-safe so a config that forgot to set an
+     * optional extractor will not throw NPE here.
+     */
     private String buildTooltipText(E evt) {
         StringBuilder sb = new StringBuilder();
+
         // Title
-        sb.append(config.getTitleExtractor().apply(evt));
+        sb.append(safeApply(config.getTitleExtractor(), evt, ""));
 
         // Description
-        String desc = config.getDescriptionExtractor().apply(evt);
+        String desc = safeApply(config.getDescriptionExtractor(), evt, null);
         if (desc != null && !desc.isBlank()) {
             sb.append("\n").append(desc);
         }
@@ -275,21 +277,19 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
             }
         }
 
-        // Time from – to
-        LocalTime start = config.getStartTimeExtractor().apply(evt);
-        LocalTime end = config.getEndTimeExtractor().apply(evt);
+        // Time range
+        LocalTime start = safeApply(config.getStartTimeExtractor(), evt, LocalTime.MIDNIGHT);
+        LocalTime end   = safeApply(config.getEndTimeExtractor(), evt, LocalTime.MIDNIGHT);
         sb.append("\n").append(start).append(" – ").append(end);
 
-        // Owner (if extractor exists)
-        if (config.getOwnerExtractor() != null) {
-            String owner = config.getOwnerExtractor().apply(evt);
-            if (owner != null && !owner.isBlank()) {
-                sb.append("\n").append(I18n.t("calendar.grid.owner")).append(" ").append(owner);
-            }
+        // Owner
+        String owner = safeApply(config.getOwnerExtractor(), evt, null);
+        if (owner != null && !owner.isBlank()) {
+            sb.append("\n").append(I18n.t("calendar.grid.owner")).append(" ").append(owner);
         }
 
         // Location
-        String location = config.getLocationExtractor().apply(evt);
+        String location = safeApply(config.getLocationExtractor(), evt, null);
         if (location != null && !location.isBlank()) {
             sb.append("\n").append(I18n.t("calendar.grid.location")).append(" ").append(location);
         }
@@ -297,9 +297,21 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         return sb.toString();
     }
 
+    private static <T, R> R safeApply(Function<T, R> fn, T value, R fallback) {
+        if (fn == null) return fallback;
+        try {
+            R result = fn.apply(value);
+            return result != null ? result : fallback;
+        } catch (Exception ex) {
+            return fallback;
+        }
+    }
+
     private void placeInGrid(Component component, int rowStart, int colStart, int rowSpan, int colSpan) {
-        component.getElement().getStyle().set("grid-row", rowStart + (rowSpan > 1 ? " / span " + rowSpan : ""));
-        component.getElement().getStyle().set("grid-column", colStart + (colSpan > 1 ? " / span " + colSpan : ""));
+        component.getElement().getStyle().set("grid-row",
+                rowStart + (rowSpan > 1 ? " / span " + rowSpan : ""));
+        component.getElement().getStyle().set("grid-column",
+                colStart + (colSpan > 1 ? " / span " + colSpan : ""));
     }
 
     private String formatHour(LocalTime time) {

@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -70,19 +71,12 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
     private void buildGrid() {
         gridContainer.removeAll();
 
-        // Filter events for the selected date (in case we weren't pre-filtered)
         List<E> dayEvents = events.stream()
-                .filter(e -> {
-                    LocalTime start = config.getStartTimeExtractor().apply(e);
-                    // We assume the caller passes only events for the date, but we can also check
-                    // using a date extractor if needed – but we don't have one in config, so trust the caller.
-                    return true;
-                })
+                .filter(e -> true)
                 .sorted(Comparator.comparing(e -> config.getStartTimeExtractor().apply(e)))
                 .collect(Collectors.toList());
 
         if (dayEvents.isEmpty() && events.isEmpty()) {
-            // No events at all – show empty state
             Div empty = new Div();
             empty.setText(I18n.t("calendar.grid.empty.day"));
             empty.addClassName("calendar-day-no-events");
@@ -90,8 +84,8 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
             return;
         }
 
-        // ---- Build grid with 2 columns: time labels + day column ----
-        int totalRows = timeSlots.size(); // includes end marker
+        // ---- Grid template ----
+        int totalRows = timeSlots.size();
         StringBuilder rowTemplate = new StringBuilder("auto ");
         for (int i = 0; i < totalRows - 1; i++) {
             rowTemplate.append(timeSlots.get(i).getMinute() == 0 ? "var(--tt-row-full) " : "var(--tt-row-half) ");
@@ -101,13 +95,11 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         gridContainer.getStyle().set("grid-template-rows", rowTemplate.toString().trim());
 
         // ---- Header row ----
-        // Corner
         Div corner = new Div();
         corner.addClassName("timetable-grid-header");
         placeInGrid(corner, 1, 1, 1, 1);
         gridContainer.add(corner);
 
-        // Day label (only one)
         Span dayLabel = new Span(currentDate.format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.FRENCH)));
         dayLabel.addClassName("timetable-grid-header");
         dayLabel.addClassName("timetable-grid-header-day");
@@ -119,7 +111,7 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         placeInGrid(dayLabel, 1, 2, 1, 1);
         gridContainer.add(dayLabel);
 
-        // ---- Map events to row indices and spans ----
+        // ---- Map events to rows ----
         List<LocalTime> bookableStarts = timeSlots.subList(0, timeSlots.size() - 1);
         Map<LocalTime, Integer> rowIndexByTime = new HashMap<>();
         for (int i = 0; i < bookableStarts.size(); i++) {
@@ -141,11 +133,10 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
             }
         }
 
-        // ---- Build time labels and background cells ----
+        // ---- Time labels and background cells ----
         for (int rowIndex = 0; rowIndex < bookableStarts.size(); rowIndex++) {
             LocalTime start = bookableStarts.get(rowIndex);
 
-            // Time label
             Span timeLabel = new Span(start.getMinute() == 0 ? formatHour(start) : "");
             timeLabel.addClassName("timetable-time-label");
             timeLabel.addClassName("text-xs");
@@ -153,7 +144,6 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
             placeInGrid(timeLabel, rowIndex + 2, 1, 1, 1);
             gridContainer.add(timeLabel);
 
-            // Background cell (in day column)
             Div cell = new Div();
             cell.addClassName("timetable-bg-cell");
             cell.addClassName(start.getMinute() == 0 ? "hour-full" : "hour-half");
@@ -162,18 +152,13 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
             }
             placeInGrid(cell, rowIndex + 2, 2, 1, 1);
 
-            // Check if this row is covered by an event
             boolean isCovered = coveredRows.contains("day-" + rowIndex);
             if (!isCovered && config.getOnEmptyCellClick() != null) {
-                // Empty cell – clickable to create a new event
                 cell.addClassName("timetable-grid-cell--empty");
-                // Determine end time (next slot or end of hour)
                 LocalTime endTime = (rowIndex + 1 < bookableStarts.size())
                         ? bookableStarts.get(rowIndex + 1)
                         : LocalTime.of(config.getEndHour(), 0);
-                cell.addClickListener(e -> {
-                    config.getOnEmptyCellClick().accept(start, endTime);
-                });
+                cell.addClickListener(e -> config.getOnEmptyCellClick().accept(start, endTime));
                 Span plus = new Span("+");
                 plus.addClassName("timetable-empty-plus");
                 cell.add(plus);
@@ -181,7 +166,7 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
             gridContainer.add(cell);
         }
 
-        // ---- Place event chips on top of cells ----
+        // ---- Event chips ----
         for (Map.Entry<Integer, E> entry : slotMap.entrySet()) {
             int rowIndex = entry.getKey();
             E evt = entry.getValue();
@@ -215,47 +200,43 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
             content.addClassName("timetable-grid-cell--multi-hour");
         }
 
-        // Color from palette (same as weekly)
-        Object key = config.getCategoryKeyExtractor() != null ? config.getCategoryKeyExtractor().apply(evt) : null;
+        Object key = config.getCategoryKeyExtractor() != null
+                ? config.getCategoryKeyExtractor().apply(evt) : null;
         List<String[]> palette = config.getPalette();
         int idx = key != null ? Math.floorMod(key.hashCode(), palette.size()) : 0;
         String[] colors = palette.get(idx);
         content.getStyle().set("--slot-bg", colors[0]);
         content.getStyle().set("--slot-accent", colors[1]);
 
-        // Populate content (custom or default)
         if (config.getSlotContentPopulator() != null) {
             config.getSlotContentPopulator().accept(content, evt);
         } else {
-            Span title = new Span(config.getTitleExtractor().apply(evt));
+            Span title = new Span(safeApply(config.getTitleExtractor(), evt, ""));
             title.addClassName("timetable-slot-title");
             content.add(title);
-            Span meta = new Span(config.getLocationExtractor().apply(evt));
+            Span meta = new Span(safeApply(config.getLocationExtractor(), evt, ""));
             meta.addClassName("timetable-slot-meta");
             content.add(meta);
         }
 
-        // Actions menu
         if (config.getIsEditable().test(evt)) {
             MenuBar menu = buildActionsMenu(evt);
             content.add(menu);
         }
 
-        // Tooltip
         String tooltip = buildTooltipText(evt);
         Tooltip.forComponent(content).setText(tooltip);
 
-        // Click on slot
         if (config.getOnEventClick() != null) {
             content.addClickListener(e -> config.getOnEventClick().accept(evt));
         }
-
         return content;
     }
 
     private MenuBar buildActionsMenu(E evt) {
         MenuBar menuBar = new MenuBar();
-        menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE, MenuBarVariant.LUMO_ICON, MenuBarVariant.LUMO_SMALL);
+        menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE,
+                MenuBarVariant.LUMO_ICON, MenuBarVariant.LUMO_SMALL);
         menuBar.addClassName("timetable-slot-actions");
         menuBar.getElement().executeJs("this.addEventListener('click', (e) => e.stopPropagation());");
 
@@ -266,19 +247,26 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
             subMenu.addItem(I18n.t("calendar.grid.edit"), e -> config.getOnEventEdit().accept(evt));
         }
         if (config.getOnEventDelete() != null) {
-            MenuItem deleteItem = subMenu.addItem(I18n.t("calendar.grid.delete"), e -> config.getOnEventDelete().accept(evt));
+            MenuItem deleteItem = subMenu.addItem(I18n.t("calendar.grid.delete"),
+                    e -> config.getOnEventDelete().accept(evt));
             deleteItem.getStyle().set("color", "var(--lumo-error-text-color)");
         }
         return menuBar;
     }
 
+    /**
+     * Builds a tooltip from the configured extractors.
+     * Every extractor access is null-safe so a config that forgot to set an
+     * optional extractor will not throw NPE here.
+     */
     private String buildTooltipText(E evt) {
         StringBuilder sb = new StringBuilder();
+
         // Title
-        sb.append(config.getTitleExtractor().apply(evt));
+        sb.append(safeApply(config.getTitleExtractor(), evt, ""));
 
         // Description
-        String desc = config.getDescriptionExtractor().apply(evt);
+        String desc = safeApply(config.getDescriptionExtractor(), evt, null);
         if (desc != null && !desc.isBlank()) {
             sb.append("\n").append(desc);
         }
@@ -288,28 +276,35 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
             sb.append("\n").append(currentDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         }
 
-        // Time from – to
-        LocalTime start = config.getStartTimeExtractor().apply(evt);
-        LocalTime end = config.getEndTimeExtractor().apply(evt);
+        // Time range
+        LocalTime start = safeApply(config.getStartTimeExtractor(), evt, LocalTime.MIDNIGHT);
+        LocalTime end   = safeApply(config.getEndTimeExtractor(), evt, LocalTime.MIDNIGHT);
         sb.append("\n").append(start).append(" – ").append(end);
 
-        // Owner (if extractor exists)
-        if (config.getOwnerExtractor() != null) {
-            String owner = config.getOwnerExtractor().apply(evt);
-            if (owner != null && !owner.isBlank()) {
-                sb.append("\n").append(I18n.t("calendar.grid.owner")).append(" ").append(owner);
-            }
+        // Owner
+        String owner = safeApply(config.getOwnerExtractor(), evt, null);
+        if (owner != null && !owner.isBlank()) {
+            sb.append("\n").append(I18n.t("calendar.grid.owner")).append(" ").append(owner);
         }
 
-        // Location (if extractor exists)
-        if (config.getLocationExtractor() != null) {
-            String location = config.getLocationExtractor().apply(evt);
-            if (location != null && !location.isBlank()) {
-                sb.append("\n").append(I18n.t("calendar.grid.location")).append(" ").append(location);
-            }
+        // Location
+        String location = safeApply(config.getLocationExtractor(), evt, null);
+        if (location != null && !location.isBlank()) {
+            sb.append("\n").append(I18n.t("calendar.grid.location")).append(" ").append(location);
         }
 
         return sb.toString();
+    }
+
+    /** Null-safe helper — invokes the extractor only if it is non-null. */
+    private static <T, R> R safeApply(Function<T, R> fn, T value, R fallback) {
+        if (fn == null) return fallback;
+        try {
+            R result = fn.apply(value);
+            return result != null ? result : fallback;
+        } catch (Exception ex) {
+            return fallback;
+        }
     }
 
     private String formatHour(LocalTime time) {
@@ -317,12 +312,13 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
     }
 
     private void placeInGrid(Component component, int rowStart, int colStart, int rowSpan, int colSpan) {
-        component.getElement().getStyle().set("grid-row", rowStart + (rowSpan > 1 ? " / span " + rowSpan : ""));
-        component.getElement().getStyle().set("grid-column", colStart + (colSpan > 1 ? " / span " + colSpan : ""));
+        component.getElement().getStyle().set("grid-row",
+                rowStart + (rowSpan > 1 ? " / span " + rowSpan : ""));
+        component.getElement().getStyle().set("grid-column",
+                colStart + (colSpan > 1 ? " / span " + colSpan : ""));
     }
 
     private void installNowIndicator() {
-        // Same JS as weekly, adapted to a single column
         int startMinutes = config.getStartHour() * 60;
         int endMinutes = config.getEndHour() * 60;
         gridContainer.getElement().executeJs(
