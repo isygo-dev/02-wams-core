@@ -182,17 +182,17 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
      * Stores the file in the local filesystem.
      */
     private void storeInLocalFileSystem(String senderTenant, LinkedFileRequestDto dto, MultipartFile file) throws IOException {
-        if(!StringUtils.hasText(appProperties.getUploadDirectory())) {
+        if (!StringUtils.hasText(appProperties.getUploadDirectory())) {
             log.error("Local storage upload directory is empty for tenant: {}, file: {}", senderTenant, file.getOriginalFilename());
             throw new StoreFileException("Local storage upload directory is empty for tenant: " + senderTenant + ", file: " + file.getOriginalFilename());
         }
 
-        if(!StringUtils.hasText(senderTenant)) {
+        if (!StringUtils.hasText(senderTenant)) {
             log.error("Tenant is empty for file: {}", file.getOriginalFilename());
             throw new StoreFileException("Tenant is empty for file: " + file.getOriginalFilename());
         }
 
-        if(!StringUtils.hasText(dto.getPath())) {
+        if (!StringUtils.hasText(dto.getPath())) {
             log.error("Local storage path is empty for tenant: {}, file: {}", senderTenant, file.getOriginalFilename());
             throw new StoreFileException("Local storage path is empty for tenant: " + senderTenant + ", file: " + file.getOriginalFilename());
         }

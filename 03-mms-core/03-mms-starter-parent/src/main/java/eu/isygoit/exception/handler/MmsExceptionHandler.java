@@ -30,7 +30,7 @@ public class MmsExceptionHandler extends ControllerExceptionHandler {
     private MailMessageServiceApi msgService;
     @Autowired
     private AppParameterServiceApi appParameterService;
-    
+
 
     public MmsExceptionHandler(AppProperties appProperties) {
         this.appProperties = appProperties;

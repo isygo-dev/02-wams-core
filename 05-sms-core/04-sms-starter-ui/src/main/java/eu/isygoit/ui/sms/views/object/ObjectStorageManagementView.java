@@ -14,11 +14,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.BeforeEvent;
-import com.vaadin.flow.router.HasUrlParameter;
-import com.vaadin.flow.router.OptionalParameter;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.BucketDto;
@@ -207,7 +203,10 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
         searchField.setPlaceholder(I18n.t("sms.objects.view.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
-        searchField.addValueChangeListener(e -> { currentSearch = e.getValue(); applyFiltersAndPagination(); });
+        searchField.addValueChangeListener(e -> {
+            currentSearch = e.getValue();
+            applyFiltersAndPagination();
+        });
 
         tenantSelector.addValueChangeListener(e -> {
             selectedStorageConfig = e.getValue();
@@ -226,10 +225,25 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
 
         pageSizeSelect.setItems(5, 10, 20, 50);
         pageSizeSelect.setValue(10);
-        pageSizeSelect.addValueChangeListener(e -> { if (e.getValue() != null) { pageSize = e.getValue(); applyFiltersAndPagination(); } });
+        pageSizeSelect.addValueChangeListener(e -> {
+            if (e.getValue() != null) {
+                pageSize = e.getValue();
+                applyFiltersAndPagination();
+            }
+        });
 
-        prevButton.addClickListener(e -> { if (currentPage > 0) { currentPage--; applyFiltersAndPagination(); } });
-        nextButton.addClickListener(e -> { if (currentPage + 1 < totalPages) { currentPage++; applyFiltersAndPagination(); } });
+        prevButton.addClickListener(e -> {
+            if (currentPage > 0) {
+                currentPage--;
+                applyFiltersAndPagination();
+            }
+        });
+        nextButton.addClickListener(e -> {
+            if (currentPage + 1 < totalPages) {
+                currentPage++;
+                applyFiltersAndPagination();
+            }
+        });
     }
 
     // ----- Data loading -----
@@ -245,9 +259,15 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
             } else {
                 showWarning(I18n.t("sms.objects.view.no.configs"));
             }
-        } catch (FeignException ex) { showError(I18n.t("sms.objects.view.load.configs.error", extractErrorMessage(ex))); log.error("Failed to load storage configs", ex); }
-        catch (Exception e) { showError(I18n.t("sms.objects.view.load.configs.error", e.getMessage())); log.error("Failed to load storage configs", e); }
-        finally { showLoading(false); }
+        } catch (FeignException ex) {
+            showError(I18n.t("sms.objects.view.load.configs.error", extractErrorMessage(ex)));
+            log.error("Failed to load storage configs", ex);
+        } catch (Exception e) {
+            showError(I18n.t("sms.objects.view.load.configs.error", e.getMessage()));
+            log.error("Failed to load storage configs", e);
+        } finally {
+            showLoading(false);
+        }
     }
 
     private void loadBuckets(String tenant) {
@@ -261,9 +281,15 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
                 if (!buckets.isEmpty()) bucketSelector.setValue(buckets.get(0));
                 else showWarning(I18n.t("sms.objects.view.no.buckets"));
             }
-        } catch (FeignException ex) { showError(I18n.t("sms.objects.view.load.buckets.error", extractErrorMessage(ex))); log.error("Failed to load buckets for tenant: {}", tenant, ex); }
-        catch (Exception e) { showError(I18n.t("sms.objects.view.load.buckets.error", e.getMessage())); log.error("Failed to load buckets for tenant: {}", tenant, e); }
-        finally { showLoading(false); }
+        } catch (FeignException ex) {
+            showError(I18n.t("sms.objects.view.load.buckets.error", extractErrorMessage(ex)));
+            log.error("Failed to load buckets for tenant: {}", tenant, ex);
+        } catch (Exception e) {
+            showError(I18n.t("sms.objects.view.load.buckets.error", e.getMessage()));
+            log.error("Failed to load buckets for tenant: {}", tenant, e);
+        } finally {
+            showLoading(false);
+        }
     }
 
     private void loadFiles(String tenant, String bucketName) {
@@ -275,9 +301,15 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
             updateStats();
             if (allFiles.isEmpty()) showWarning(I18n.t("sms.objects.view.no.files"));
             applyFiltersAndPagination();
-        } catch (FeignException ex) { showError(I18n.t("sms.objects.view.load.files.error", extractErrorMessage(ex))); log.error("Failed to load files from bucket: {}", bucketName, ex); }
-        catch (Exception e) { showError(I18n.t("sms.objects.view.load.files.error", e.getMessage())); log.error("Failed to load files from bucket: {}", bucketName, e); }
-        finally { showLoading(false); }
+        } catch (FeignException ex) {
+            showError(I18n.t("sms.objects.view.load.files.error", extractErrorMessage(ex)));
+            log.error("Failed to load files from bucket: {}", bucketName, ex);
+        } catch (Exception e) {
+            showError(I18n.t("sms.objects.view.load.files.error", e.getMessage()));
+            log.error("Failed to load files from bucket: {}", bucketName, e);
+        } finally {
+            showLoading(false);
+        }
     }
 
     // ----- File parsing with path extraction -----
@@ -473,8 +505,13 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
     }
 
     // ----- Helpers -----
-    private void showError(String msg) { Notification.show(msg, 5000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_ERROR); }
-    private void showWarning(String msg) { Notification.show(msg, 5000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_WARNING); }
+    private void showError(String msg) {
+        Notification.show(msg, 5000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_ERROR);
+    }
+
+    private void showWarning(String msg) {
+        Notification.show(msg, 5000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_WARNING);
+    }
 
     private String formatSize(long size) {
         if (size < 1024) return size + " B";
@@ -484,7 +521,10 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
     }
 
     private String extractErrorMessage(FeignException ex) {
-        try { if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank()) return ex.contentUTF8(); } catch (Exception ignored) {}
+        try {
+            if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank()) return ex.contentUTF8();
+        } catch (Exception ignored) {
+        }
         return ex.getMessage() != null ? ex.getMessage() : "Unknown error";
     }
 
@@ -529,19 +569,41 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
         public String getFileName() {
             return fileName;
         }
-        public String getType() { return type; }
-        public long getSize() { return size; }
+
+        public String getType() {
+            return type;
+        }
+
+        public long getSize() {
+            return size;
+        }
+
         public String getSizeDisplay() {
             if (size < 1024) return size + " B";
             if (size < 1024 * 1024) return String.format("%.1f KB", size / 1024.0);
             if (size < 1024 * 1024 * 1024) return String.format("%.1f MB", size / (1024.0 * 1024));
             return String.format("%.1f GB", size / (1024.0 * 1024 * 1024));
         }
-        public LocalDateTime getModifiedDate() { return modifiedDate; }
-        public List<String> getTags() { return tags; }
-        public String getEtag() { return etag; }
-        public String getVersionID() { return versionID; }
-        public boolean isCurrentVersion() { return currentVersion; }
+
+        public LocalDateTime getModifiedDate() {
+            return modifiedDate;
+        }
+
+        public List<String> getTags() {
+            return tags;
+        }
+
+        public String getEtag() {
+            return etag;
+        }
+
+        public String getVersionID() {
+            return versionID;
+        }
+
+        public boolean isCurrentVersion() {
+            return currentVersion;
+        }
 
         public Map<String, String> getMetadata() {
             return metadata;

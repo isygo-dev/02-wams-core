@@ -52,7 +52,8 @@ public class WeeklyTableGridConfig<E extends DayTimeSlot> {
     private List<String[]> palette;
     private boolean showNowIndicator;
 
-    private WeeklyTableGridConfig() {}
+    private WeeklyTableGridConfig() {
+    }
 
     public static <E extends DayTimeSlot> WeeklyTableGridConfig<E> builder() {
         return new WeeklyTableGridConfig<>();
@@ -189,12 +190,17 @@ public class WeeklyTableGridConfig<E extends DayTimeSlot> {
 
         // Provide defaults
         if (isEditable == null) isEditable = s -> true;
-        if (onEventClick == null) onEventClick = s -> {};
-        if (onEventDelete == null) onEventDelete = s -> {};
-        if (onEventEdit == null) onEventEdit = s -> {};
-        if (onEmptyCellClick == null) onEmptyCellClick = (d, t) -> {};
+        if (onEventClick == null) onEventClick = s -> {
+        };
+        if (onEventDelete == null) onEventDelete = s -> {
+        };
+        if (onEventEdit == null) onEventEdit = s -> {
+        };
+        if (onEmptyCellClick == null) onEmptyCellClick = (d, t) -> {
+        };
         if (actionsMenuBuilder == null) actionsMenuBuilder = (s, menuBar) -> menuBar.addItem("Actions").getSubMenu();
-        if (slotContentPopulator == null) slotContentPopulator = (comp, s) -> {};
+        if (slotContentPopulator == null) slotContentPopulator = (comp, s) -> {
+        };
         if (daysOfWeek == null) daysOfWeek = List.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
                 DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
         if (dayLabelExtractor == null) dayLabelExtractor = day -> day.name().substring(0, 1);
@@ -219,28 +225,99 @@ public class WeeklyTableGridConfig<E extends DayTimeSlot> {
     }
 
     // ---- Getters ----
-    public Function<E, DayOfWeek> getDayOfWeekExtractor() { return dayOfWeekExtractor; }
-    public Function<E, LocalTime> getStartTimeExtractor() { return startTimeExtractor; }
-    public Function<E, LocalTime> getEndTimeExtractor() { return endTimeExtractor; }
-    public Function<E, String> getTitleExtractor() { return titleExtractor; }
-    public Function<E, String> getDescriptionExtractor() { return descriptionExtractor; }
-    public Function<E, String> getLocationExtractor() { return locationExtractor; }
-    public Function<E, Object> getCategoryKeyExtractor() { return categoryKeyExtractor; }
-    public Function<E, String> getOwnerExtractor() { return ownerExtractor; }      // NEW
-    public Function<E, LocalDate> getDateExtractor() { return dateExtractor; }    // NEW
-    public Predicate<E> getIsEditable() { return isEditable; }
-    public Consumer<E> getOnEventClick() { return onEventClick; }
-    public Consumer<E> getOnEventDelete() { return onEventDelete; }
-    public Consumer<E> getOnEventEdit() { return onEventEdit; }
-    public BiConsumer<DayOfWeek, LocalTime> getOnEmptyCellClick() { return onEmptyCellClick; }
-    public BiFunction<E, MenuBar, SubMenu> getActionsMenuBuilder() { return actionsMenuBuilder; }
-    public BiConsumer<Component, E> getSlotContentPopulator() { return slotContentPopulator; }
-    public List<DayOfWeek> getDaysOfWeek() { return daysOfWeek; }
-    public Function<DayOfWeek, String> getDayLabelExtractor() { return dayLabelExtractor; }
-    public Predicate<DayOfWeek> getIsTodayPredicate() { return isTodayPredicate; }
-    public int getStartHour() { return startHour; }
-    public int getEndHour() { return endHour; }
-    public int getStepMinutes() { return stepMinutes; }
-    public List<String[]> getPalette() { return palette; }
-    public boolean isShowNowIndicator() { return showNowIndicator; }
+    public Function<E, DayOfWeek> getDayOfWeekExtractor() {
+        return dayOfWeekExtractor;
+    }
+
+    public Function<E, LocalTime> getStartTimeExtractor() {
+        return startTimeExtractor;
+    }
+
+    public Function<E, LocalTime> getEndTimeExtractor() {
+        return endTimeExtractor;
+    }
+
+    public Function<E, String> getTitleExtractor() {
+        return titleExtractor;
+    }
+
+    public Function<E, String> getDescriptionExtractor() {
+        return descriptionExtractor;
+    }
+
+    public Function<E, String> getLocationExtractor() {
+        return locationExtractor;
+    }
+
+    public Function<E, Object> getCategoryKeyExtractor() {
+        return categoryKeyExtractor;
+    }
+
+    public Function<E, String> getOwnerExtractor() {
+        return ownerExtractor;
+    }      // NEW
+
+    public Function<E, LocalDate> getDateExtractor() {
+        return dateExtractor;
+    }    // NEW
+
+    public Predicate<E> getIsEditable() {
+        return isEditable;
+    }
+
+    public Consumer<E> getOnEventClick() {
+        return onEventClick;
+    }
+
+    public Consumer<E> getOnEventDelete() {
+        return onEventDelete;
+    }
+
+    public Consumer<E> getOnEventEdit() {
+        return onEventEdit;
+    }
+
+    public BiConsumer<DayOfWeek, LocalTime> getOnEmptyCellClick() {
+        return onEmptyCellClick;
+    }
+
+    public BiFunction<E, MenuBar, SubMenu> getActionsMenuBuilder() {
+        return actionsMenuBuilder;
+    }
+
+    public BiConsumer<Component, E> getSlotContentPopulator() {
+        return slotContentPopulator;
+    }
+
+    public List<DayOfWeek> getDaysOfWeek() {
+        return daysOfWeek;
+    }
+
+    public Function<DayOfWeek, String> getDayLabelExtractor() {
+        return dayLabelExtractor;
+    }
+
+    public Predicate<DayOfWeek> getIsTodayPredicate() {
+        return isTodayPredicate;
+    }
+
+    public int getStartHour() {
+        return startHour;
+    }
+
+    public int getEndHour() {
+        return endHour;
+    }
+
+    public int getStepMinutes() {
+        return stepMinutes;
+    }
+
+    public List<String[]> getPalette() {
+        return palette;
+    }
+
+    public boolean isShowNowIndicator() {
+        return showNowIndicator;
+    }
 }

@@ -107,7 +107,7 @@ vaadin-drawer-toggle {
  */
 
 .wams-header-icon-cluster {
-   flex: 0 0 auto;
+    flex: 0 0 auto;
 }
 
 /* ── Header responsive breakpoints ────────────────────────────────────────
@@ -129,35 +129,35 @@ vaadin-drawer-toggle {
    the redundant text. */
 
 @media (max-width: 1024px) {
-   .wams-header-title {
-       display: none;
-   }
+    .wams-header-title {
+        display: none;
+    }
 }
 
 @media (max-width: 768px) {
-   .wams-main-header {
-       height: auto;
-       min-height: var(--wams-header-height);
-       flex-direction: column;
-       align-items: stretch;
-   }
+    .wams-main-header {
+        height: auto;
+        min-height: var(--wams-header-height);
+        flex-direction: column;
+        align-items: stretch;
+    }
 
-   .wams-main-header > :first-child {
-       justify-content: space-between;
-   }
+    .wams-main-header > :first-child {
+        justify-content: space-between;
+    }
 
-   .wams-main-header__right {
-       width: 100%;
-       margin-right: 0;
-       padding: var(--lumo-space-xs) var(--lumo-space-s);
-       box-sizing: border-box;
-   }
+    .wams-main-header__right {
+        width: 100%;
+        margin-right: 0;
+        padding: var(--lumo-space-xs) var(--lumo-space-s);
+        box-sizing: border-box;
+    }
 }
 
 @media (max-width: 480px) {
-   .wams-header-icon-cluster {
-       gap: var(--lumo-space-xs);
-   }
+    .wams-header-icon-cluster {
+        gap: var(--lumo-space-xs);
+    }
 }
 
 /* ── Sidebar / drawer ─────────────────────────────────────────────────────

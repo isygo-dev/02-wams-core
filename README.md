@@ -50,6 +50,7 @@ docker run --rm -p 1080:1080 -p 1025:1025 maildev/maildev
 ```
 
 ### Setup node
+
 ```bash
 # Install nvm if you don't have it
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash

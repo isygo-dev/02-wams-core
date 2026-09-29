@@ -121,7 +121,10 @@ public class BucketManagementView extends ManagementVerticalView {
         searchField.setPlaceholder(I18n.t("sms.buckets.view.search.placeholder"));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
-        searchField.addValueChangeListener(e -> { currentSearch = e.getValue(); applyFiltersAndPagination(); });
+        searchField.addValueChangeListener(e -> {
+            currentSearch = e.getValue();
+            applyFiltersAndPagination();
+        });
 
         tenantSelector.addValueChangeListener(e -> {
             selectedStorageConfig = e.getValue();
@@ -131,10 +134,25 @@ public class BucketManagementView extends ManagementVerticalView {
 
         pageSizeSelect.setItems(5, 10, 20, 50);
         pageSizeSelect.setValue(10);
-        pageSizeSelect.addValueChangeListener(e -> { if (e.getValue() != null) { pageSize = e.getValue(); applyFiltersAndPagination(); } });
+        pageSizeSelect.addValueChangeListener(e -> {
+            if (e.getValue() != null) {
+                pageSize = e.getValue();
+                applyFiltersAndPagination();
+            }
+        });
 
-        prevButton.addClickListener(e -> { if (currentPage > 0) { currentPage--; applyFiltersAndPagination(); } });
-        nextButton.addClickListener(e -> { if (currentPage + 1 < totalPages) { currentPage++; applyFiltersAndPagination(); } });
+        prevButton.addClickListener(e -> {
+            if (currentPage > 0) {
+                currentPage--;
+                applyFiltersAndPagination();
+            }
+        });
+        nextButton.addClickListener(e -> {
+            if (currentPage + 1 < totalPages) {
+                currentPage++;
+                applyFiltersAndPagination();
+            }
+        });
     }
 
     private void loadStorageConfigs() {
@@ -149,9 +167,15 @@ public class BucketManagementView extends ManagementVerticalView {
             } else {
                 showWarning(I18n.t("sms.buckets.view.no.configs"));
             }
-        } catch (FeignException ex) { showError(I18n.t("sms.buckets.view.load.configs.error", extractErrorMessage(ex))); log.error("Failed to load storage configs", ex); }
-        catch (Exception e) { showError(I18n.t("sms.buckets.view.load.configs.error", e.getMessage())); log.error("Failed to load storage configs", e); }
-        finally { showLoading(false); }
+        } catch (FeignException ex) {
+            showError(I18n.t("sms.buckets.view.load.configs.error", extractErrorMessage(ex)));
+            log.error("Failed to load storage configs", ex);
+        } catch (Exception e) {
+            showError(I18n.t("sms.buckets.view.load.configs.error", e.getMessage()));
+            log.error("Failed to load storage configs", e);
+        } finally {
+            showLoading(false);
+        }
     }
 
     private void loadBuckets(String tenant) {
@@ -164,9 +188,15 @@ public class BucketManagementView extends ManagementVerticalView {
                 if (allBuckets.isEmpty()) showWarning(I18n.t("sms.buckets.view.no.buckets"));
                 applyFiltersAndPagination();
             }
-        } catch (FeignException ex) { showError(I18n.t("sms.buckets.view.load.buckets.error", extractErrorMessage(ex))); log.error("Failed to load buckets for tenant: {}", tenant, ex); }
-        catch (Exception e) { showError(I18n.t("sms.buckets.view.load.buckets.error", e.getMessage())); log.error("Failed to load buckets for tenant: {}", tenant, e); }
-        finally { showLoading(false); }
+        } catch (FeignException ex) {
+            showError(I18n.t("sms.buckets.view.load.buckets.error", extractErrorMessage(ex)));
+            log.error("Failed to load buckets for tenant: {}", tenant, ex);
+        } catch (Exception e) {
+            showError(I18n.t("sms.buckets.view.load.buckets.error", e.getMessage()));
+            log.error("Failed to load buckets for tenant: {}", tenant, e);
+        } finally {
+            showLoading(false);
+        }
     }
 
     private void applyFiltersAndPagination() {
@@ -226,7 +256,9 @@ public class BucketManagementView extends ManagementVerticalView {
         updatePaginationDisplay();
     }
 
-    public String getSelectedTenant() { return selectedStorageConfig != null ? selectedStorageConfig.getTenant() : null; }
+    public String getSelectedTenant() {
+        return selectedStorageConfig != null ? selectedStorageConfig.getTenant() : null;
+    }
 
     public void navigateToObjectStorage(String tenant, BucketDto bucket) {
         QueryParameters queryParameters = (tenant != null && !tenant.isBlank())
@@ -293,11 +325,19 @@ public class BucketManagementView extends ManagementVerticalView {
         nextButton.setEnabled(!show && currentPage + 1 < totalPages);
     }
 
-    private void showError(String msg) { Notification.show(msg, 5000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_ERROR); }
-    private void showWarning(String msg) { Notification.show(msg, 5000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_WARNING); }
+    private void showError(String msg) {
+        Notification.show(msg, 5000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_ERROR);
+    }
+
+    private void showWarning(String msg) {
+        Notification.show(msg, 5000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_WARNING);
+    }
 
     private String extractErrorMessage(FeignException ex) {
-        try { if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank()) return ex.contentUTF8(); } catch (Exception ignored) {}
+        try {
+            if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank()) return ex.contentUTF8();
+        } catch (Exception ignored) {
+        }
         return ex.getMessage() != null ? ex.getMessage() : "Unknown error";
     }
 }

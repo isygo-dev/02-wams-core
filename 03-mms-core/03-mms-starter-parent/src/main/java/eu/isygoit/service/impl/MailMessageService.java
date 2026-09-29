@@ -150,7 +150,7 @@ public class MailMessageService extends CassandraCrudTenantService<UUID, MailMes
                             MailMessage mailMessage,
                             MailOptionsDto options,
                             Map<String, File> resources) {
-        if(StringUtils.isEmpty(senderTenant)) {
+        if (StringUtils.isEmpty(senderTenant)) {
             senderTenant = TenantConstants.DEFAULT_TENANT_NAME;
         }
         CustomJavaMailSender mailSender = senderFactory.getSender(senderTenant, templateType, mailMessage.getSenderConfigId());

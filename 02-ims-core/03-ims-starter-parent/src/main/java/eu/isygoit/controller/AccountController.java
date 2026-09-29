@@ -22,7 +22,6 @@ import eu.isygoit.model.Tenant;
 import eu.isygoit.remote.kms.KmsPasswordService;
 import eu.isygoit.service.IAccountService;
 import eu.isygoit.service.ITenantService;
-import eu.isygoit.service.RequestContextService;
 import eu.isygoit.service.impl.AccountService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +53,7 @@ public class AccountController extends MappedCrudTenantController<Long, Account,
     private ITenantService tenantService;
     @Autowired
     private MinAccountMapper minAccountMapper;
-    
+
 
     @Override
     public AccountDto beforeUpdate(Long id, AccountDto account) {

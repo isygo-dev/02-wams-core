@@ -4,7 +4,8 @@ public interface DashboardService<T> {
 
     /**
      * Returns aggregated dashboard statistics.
+     *
      * @return DashboardStatsDto containing all KPIs
      */
-     T getDashboardStats();
+    T getDashboardStats();
 }

@@ -1,6 +1,5 @@
 package eu.isygoit.remote.dms;
 
-import eu.isygoit.api.CategoryServiceApi;
 import eu.isygoit.api.LinkedFileApi;
 import eu.isygoit.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;

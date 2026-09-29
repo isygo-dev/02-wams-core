@@ -123,7 +123,10 @@ public class FileTagsDialog extends BaseActionDialog {
 
 
     private String extractErrorMessage(FeignException ex) {
-        try { if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank()) return ex.contentUTF8(); } catch (Exception ignored) {}
+        try {
+            if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank()) return ex.contentUTF8();
+        } catch (Exception ignored) {
+        }
         return ex.getMessage();
     }
 }

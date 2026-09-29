@@ -77,7 +77,7 @@ public interface ILinkedFileService extends ICrudTenantServiceOperations<Long, L
     /**
      * Download resource.
      *
-     * @param tenant           the tenant
+     * @param tenant the tenant
      * @return the resource
      * @throws IOException the io exception
      */

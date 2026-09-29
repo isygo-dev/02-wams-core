@@ -13,7 +13,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.service.DashboardService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

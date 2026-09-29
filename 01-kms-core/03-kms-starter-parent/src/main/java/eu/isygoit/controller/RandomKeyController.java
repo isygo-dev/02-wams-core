@@ -3,7 +3,6 @@ package eu.isygoit.controller;
 import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
-import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.com.rest.controller.impl.ControllerUtils;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.common.RandomKeyDto;
@@ -13,7 +12,6 @@ import eu.isygoit.mapper.RandomKeyMapper;
 import eu.isygoit.model.RandomKey;
 import eu.isygoit.service.IKeyService;
 import eu.isygoit.service.RandomKeyServiceApi;
-import eu.isygoit.service.RequestContextService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +36,7 @@ public class RandomKeyController extends ControllerUtils implements RandomKeySer
     private RandomKeyMapper randomKeyMapper;
     @Autowired
     private IKeyService keyService;
-    
+
 
     /*
      * Create new random key without saving

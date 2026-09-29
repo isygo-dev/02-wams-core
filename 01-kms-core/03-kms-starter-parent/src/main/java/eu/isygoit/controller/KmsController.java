@@ -6,7 +6,6 @@ import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.api.KmsServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
-import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.com.rest.controller.impl.ControllerUtils;
 import eu.isygoit.dto.KmsDtos.*;
 import eu.isygoit.enums.IKmsActionType;
@@ -81,7 +80,6 @@ public class KmsController extends ControllerUtils implements KmsServiceApi {
     @Autowired
     private IAuditService auditService;
 
-    
 
     @Autowired
     private IMultiRegionService multiRegionService;

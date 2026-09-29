@@ -2,6 +2,7 @@ package eu.isygoit.service.impl;
 
 
 import eu.isygoit.dto.data.BucketDto;
+import eu.isygoit.dto.data.FileStorageDto;
 import eu.isygoit.dto.exception.MinIoObjectException;
 import eu.isygoit.enums.IEnumLogicalOperator;
 import eu.isygoit.model.StorageConfig;
@@ -18,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import eu.isygoit.dto.data.FileStorageDto;
 
 import java.io.InputStream;
 import java.util.ArrayList;

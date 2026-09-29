@@ -24,8 +24,8 @@ public interface MailMessageServiceApi {
     /**
      * Send mail response entity.
      *
-     * @param template         the template
-     * @param mailMessage      the mail message
+     * @param template    the template
+     * @param mailMessage the mail message
      * @return the response entity
      */
     @Operation(summary = "sendMail Api",

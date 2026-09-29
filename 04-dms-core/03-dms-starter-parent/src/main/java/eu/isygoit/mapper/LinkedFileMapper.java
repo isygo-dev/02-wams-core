@@ -1,6 +1,5 @@
 package eu.isygoit.mapper;
 
-import eu.isygoit.dto.common.LinkedFileRequestDto;
 import eu.isygoit.dto.common.LinkedFileResponseDto;
 import eu.isygoit.model.Category;
 import eu.isygoit.model.LinkedFile;

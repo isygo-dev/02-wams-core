@@ -30,7 +30,7 @@ public class KmsExceptionHandler extends ControllerExceptionHandler {
     private IMsgService msgService;
     @Autowired
     private AppParameterServiceApi appParameterService;
-    
+
 
     /**
      * Instantiates a new Kms exception handler.

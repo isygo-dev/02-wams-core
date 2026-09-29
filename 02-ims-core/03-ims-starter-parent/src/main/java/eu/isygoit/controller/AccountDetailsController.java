@@ -6,10 +6,8 @@ import eu.isygoit.dto.data.AccountDetailsDto;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.mapper.AccountDetailsMapper;
 import eu.isygoit.model.AccountDetails;
-import eu.isygoit.service.RequestContextService;
 import eu.isygoit.service.impl.AccountDetailsService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +22,5 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api/v1/private/account/details")
 public class AccountDetailsController extends MappedCrudController<Long, AccountDetails, AccountDetailsDto, AccountDetailsDto, AccountDetailsService> {
 
-    
 
 }

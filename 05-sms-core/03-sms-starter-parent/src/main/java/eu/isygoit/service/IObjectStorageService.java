@@ -1,12 +1,12 @@
 package eu.isygoit.service;
 
 import eu.isygoit.dto.data.BucketDto;
+import eu.isygoit.dto.data.FileStorageDto;
 import eu.isygoit.enums.IEnumLogicalOperator;
 import eu.isygoit.model.StorageConfig;
 import eu.isygoit.s3.object.MetaData;
 import io.minio.messages.DeleteObject;
 import org.springframework.web.multipart.MultipartFile;
-import eu.isygoit.dto.data.FileStorageDto;
 
 import java.util.List;
 import java.util.Map;

@@ -35,9 +35,8 @@ import java.util.List;
 public class LinkedFileCard extends BaseCard<LinkedFileManagementView, LinkedFileService> {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
-
-    private LinkedFileResponseDto file;
     private final Runnable onRefresh;
+    private LinkedFileResponseDto file;
 
     public LinkedFileCard(LinkedFileManagementView parentView,
                           LinkedFileService linkedFileService,
@@ -122,7 +121,9 @@ public class LinkedFileCard extends BaseCard<LinkedFileManagementView, LinkedFil
                         parentView,
                         objectService,
                         file.getCode(),
-                        file.getOriginalFileName(), () -> {if (onRefresh != null) onRefresh.run();}
+                        file.getOriginalFileName(), () -> {
+                    if (onRefresh != null) onRefresh.run();
+                }
                 ).open());
 
         return List.of(detailsBtn, downloadBtn, renameBtn, deleteBtn);

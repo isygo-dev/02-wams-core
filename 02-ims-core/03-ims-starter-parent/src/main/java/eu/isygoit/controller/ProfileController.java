@@ -4,7 +4,6 @@ import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.api.PasswordServiceApi;
 import eu.isygoit.api.ProfileServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
-import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.com.rest.controller.impl.ControllerUtils;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.dto.common.ChangePasswordRequestDto;
@@ -21,7 +20,6 @@ import eu.isygoit.mapper.AccountMapper;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.AccountDetails;
 import eu.isygoit.service.IAccountService;
-import eu.isygoit.service.RequestContextService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -47,7 +45,7 @@ public class ProfileController extends ControllerUtils implements ProfileService
 
     private final AppProperties appProperties;
 
-    
+
     @Autowired
     private IAccountService accountService;
     @Autowired

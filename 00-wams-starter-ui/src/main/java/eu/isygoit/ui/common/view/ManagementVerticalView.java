@@ -17,16 +17,6 @@ import eu.isygoit.util.SecurityUtils;
 @CssImport("./styles/view.css")
 public class ManagementVerticalView extends VerticalLayout implements BeforeEnterObserver {
 
-    @Override
-    public final void beforeEnter(BeforeEnterEvent event) {
-        String currentPath = event.getLocation().getPathWithQueryParameters(); // Better: includes query params if any
-        if (!SecurityUtils.isUserLoggedIn()) {
-            UI.getCurrent().getPage().setLocation("login?redirect=" + java.net.URLEncoder.encode(currentPath, java.nio.charset.StandardCharsets.UTF_8));
-        } else {
-            SecurityUtils.storeRedirect(currentPath);
-        }
-    }
-
     public static Button createCopyButton(VaadinIcon icon, String textToCopy, String tooltip) {
         Button btn = new Button(new Icon(icon));
         btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
@@ -44,5 +34,15 @@ public class ManagementVerticalView extends VerticalLayout implements BeforeEnte
         );
         Notification.show(notificationText, 1500, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+    }
+
+    @Override
+    public final void beforeEnter(BeforeEnterEvent event) {
+        String currentPath = event.getLocation().getPathWithQueryParameters(); // Better: includes query params if any
+        if (!SecurityUtils.isUserLoggedIn()) {
+            UI.getCurrent().getPage().setLocation("login?redirect=" + java.net.URLEncoder.encode(currentPath, java.nio.charset.StandardCharsets.UTF_8));
+        } else {
+            SecurityUtils.storeRedirect(currentPath);
+        }
     }
 }

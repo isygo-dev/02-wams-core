@@ -29,7 +29,7 @@ public class ImsExceptionHandler extends ControllerExceptionHandler {
     private IMsgService msgService;
     @Autowired
     private IAppParameterService appParameterService;
-    
+
 
     /**
      * Instantiates a new Ims exception handler.

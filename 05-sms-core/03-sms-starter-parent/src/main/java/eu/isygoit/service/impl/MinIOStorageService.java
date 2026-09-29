@@ -1,6 +1,7 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.data.BucketDto;
+import eu.isygoit.dto.data.FileStorageDto;
 import eu.isygoit.dto.exception.MinIoObjectException;
 import eu.isygoit.enums.IEnumLogicalOperator;
 import eu.isygoit.mapper.FileStorageMapper;
@@ -9,8 +10,8 @@ import eu.isygoit.model.StorageConfig;
 import eu.isygoit.s3.config.S3Config;
 import eu.isygoit.s3.object.FileStorage;
 import eu.isygoit.s3.object.MetaData;
-import eu.isygoit.service.ISmsMinIOApiService;
 import eu.isygoit.service.IObjectStorageService;
+import eu.isygoit.service.ISmsMinIOApiService;
 import io.minio.messages.Bucket;
 import io.minio.messages.DeleteObject;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import eu.isygoit.dto.data.FileStorageDto;
 
 import java.util.List;
 import java.util.Map;
@@ -117,7 +117,7 @@ public class MinIOStorageService implements IObjectStorageService {
     public List<FileStorageDto> getObjects(StorageConfig config, String bucketName) {
         try {
             S3Config s3Config = s3ConfigMapper.entityToDto(config);
-            List<FileStorage> fileStorageList =  minioService.getObjects(s3Config, bucketName.toLowerCase());
+            List<FileStorage> fileStorageList = minioService.getObjects(s3Config, bucketName.toLowerCase());
             return fileStorageList.stream()
                     .map(fileStorageMapper::entityToDto)
                     .collect(Collectors.toList());
@@ -172,12 +172,12 @@ public class MinIOStorageService implements IObjectStorageService {
             S3Config s3Config = s3ConfigMapper.entityToDto(config);
             List<Bucket> buckets = minioService.getBuckets(s3Config);
             return buckets.stream().map(bucket -> BucketDto.builder()
-                    .name(bucket.name())
-                    .creationDate(bucket.creationDate().toLocalDateTime())
-                    //.bucketRegion(bucket.region())
-                    //.bucketArn(bucket.arn())
-                    .build())
-            .collect(Collectors.toList());
+                            .name(bucket.name())
+                            .creationDate(bucket.creationDate().toLocalDateTime())
+                            //.bucketRegion(bucket.region())
+                            //.bucketArn(bucket.arn())
+                            .build())
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             throw new MinIoObjectException(e);
         }

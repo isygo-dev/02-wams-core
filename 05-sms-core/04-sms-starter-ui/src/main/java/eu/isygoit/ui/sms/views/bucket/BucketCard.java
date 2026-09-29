@@ -31,7 +31,10 @@ public class BucketCard extends BaseCard<BucketManagementView, ObjectStorageServ
         initCard();
     }
 
-    @Override protected String cardCssClassName() { return "bucket-card"; }
+    @Override
+    protected String cardCssClassName() {
+        return "bucket-card";
+    }
 
     @Override
     protected Component buildTitle() {

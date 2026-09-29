@@ -41,8 +41,8 @@ public interface IPasswordService {
      * Force change password.
      *
      * @param senderTenant the sender tenant
-     * @param userName   the user name
-     * @param newPasswor the new passwor
+     * @param userName     the user name
+     * @param newPasswor   the new passwor
      */
     void forceChangePassword(String senderTenant, String userName, String newPasswor) throws JsonProcessingException;
 
@@ -51,9 +51,9 @@ public interface IPasswordService {
      * Change password.
      *
      * @param senderTenant the sender tenant
-     * @param userName    the user name
-     * @param oldPassword the old password
-     * @param newPassword the new password
+     * @param userName     the user name
+     * @param oldPassword  the old password
+     * @param newPassword  the new password
      */
     void volontaryChangePassword(String senderTenant, String userName, String oldPassword, String newPassword) throws JsonProcessingException;
 
@@ -61,7 +61,7 @@ public interface IPasswordService {
     /**
      * Check for pattern boolean.
      *
-     * @param senderTenant        the tenant
+     * @param senderTenant  the tenant
      * @param plainPassword the plain password
      * @return the boolean
      */
@@ -70,7 +70,7 @@ public interface IPasswordService {
     /**
      * Matches enum password status . types.
      *
-     * @param senderTenant        the tenant
+     * @param senderTenant  the tenant
      * @param userName      the user name
      * @param plainPassword the plain password
      * @param authType      the auth type

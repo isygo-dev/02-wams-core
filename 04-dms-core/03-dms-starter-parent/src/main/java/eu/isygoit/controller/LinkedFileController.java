@@ -7,7 +7,6 @@ import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.dto.common.LinkedFileRequestDto;
 import eu.isygoit.dto.common.LinkedFileResponseDto;
-import eu.isygoit.dto.extendable.AuditableDto;
 import eu.isygoit.exception.handler.DmsExceptionHandler;
 import eu.isygoit.mapper.LinkedFileMapper;
 import eu.isygoit.service.ILinkedFileService;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 /**

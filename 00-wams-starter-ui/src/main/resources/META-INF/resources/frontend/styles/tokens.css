@@ -77,10 +77,10 @@ html {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.35rem;           /* espace entre le point et le texte */
+    gap: 0.35rem; /* espace entre le point et le texte */
     padding: 0.35rem 0.7rem;
     border: 1px solid rgba(var(--lumo-primary-color), 0.16);
-    border-radius: 999px;   /* forme pilule */
+    border-radius: 999px; /* forme pilule */
     background: linear-gradient(135deg, var(--lumo-primary-color-10pct), var(--wams-info-bg));
     color: var(--lumo-primary-text-color);
     font-size: var(--lumo-font-size-xxs);

@@ -123,7 +123,7 @@ public class MsgTemplateService extends FileTenantService<Long, MsgTemplate, Msg
                                                     IEnumEmailTemplate.Types templateName,
                                                     Map<String, String> variables)
             throws IOException, TemplateException {
-        if(StringUtils.isEmpty(senderTenant)) {
+        if (StringUtils.isEmpty(senderTenant)) {
             senderTenant = TenantConstants.DEFAULT_TENANT_NAME;
         }
         Optional<MsgTemplate> optional = templateRepository.findByTenantIgnoreCaseAndName(senderTenant, templateName);

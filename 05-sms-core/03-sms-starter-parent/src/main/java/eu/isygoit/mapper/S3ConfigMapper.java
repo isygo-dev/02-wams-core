@@ -1,6 +1,5 @@
 package eu.isygoit.mapper;
 
-import eu.isygoit.dto.data.StorageConfigDto;
 import eu.isygoit.model.StorageConfig;
 import eu.isygoit.s3.config.S3Config;
 import org.mapstruct.Mapper;

@@ -3,7 +3,6 @@ package eu.isygoit.controller;
 import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
-import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.com.rest.controller.impl.ControllerUtils;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.data.AccountGlobalStatDto;
@@ -11,7 +10,6 @@ import eu.isygoit.dto.data.AccountStatDto;
 import eu.isygoit.enums.IEnumSharedStatType;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.service.IAccountService;
-import eu.isygoit.service.RequestContextService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -39,7 +37,7 @@ public class AccountStatisticsController extends ControllerUtils {
 
     @Autowired
     private IAccountService accountService;
-    
+
 
     /**
      * Gets global statistics.

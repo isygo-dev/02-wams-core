@@ -2,14 +2,12 @@ package eu.isygoit.controller;
 
 import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.com.rest.controller.ResponseFactory;
-import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.com.rest.controller.impl.ControllerUtils;
 import eu.isygoit.dto.common.TokenRequestDto;
 import eu.isygoit.dto.common.TokenResponseDto;
 import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.exception.handler.KmsExceptionHandler;
 import eu.isygoit.service.ITokenBuilderService;
-import eu.isygoit.service.RequestContextService;
 import eu.isygoit.service.TokenServiceApi;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +34,6 @@ public class TokenController extends ControllerUtils implements TokenServiceApi 
     @Autowired
     private ITokenBuilderService tokenService;
 
-    
 
     @Override
     public ResponseEntity<TokenResponseDto> buildToken(

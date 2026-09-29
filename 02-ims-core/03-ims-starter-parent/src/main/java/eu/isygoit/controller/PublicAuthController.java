@@ -4,7 +4,6 @@ import eu.isygoit.annotation.InjectExceptionHandler;
 import eu.isygoit.api.PublicAuthServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
-import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
 import eu.isygoit.com.rest.controller.impl.ControllerUtils;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.config.JwtProperties;
@@ -28,7 +27,10 @@ import eu.isygoit.mapper.ThemeMapper;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.Tenant;
 import eu.isygoit.remote.kms.KmsPublicPasswordService;
-import eu.isygoit.service.*;
+import eu.isygoit.service.IAccountService;
+import eu.isygoit.service.IAuthService;
+import eu.isygoit.service.ITenantService;
+import eu.isygoit.service.IThemeService;
 import jakarta.servlet.http.Cookie;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +74,7 @@ public class PublicAuthController extends ControllerUtils implements PublicAuthS
     private ThemeMapper themeMapper;
     @Autowired
     private TenantMapper tenantMapper;
-    
+
 
     /**
      * Instantiates a new Public auth controller.
@@ -107,7 +109,7 @@ public class PublicAuthController extends ControllerUtils implements PublicAuthS
 
             Account account = accountService.findByTenantAndUserName(authRequestDto.getTenant(), authRequestDto.getUserName());
             Optional<Tenant> tenantOptional = tenantService.findByName(authRequestDto.getTenant());
-            if(!tenantOptional.isPresent()) {
+            if (!tenantOptional.isPresent()) {
                 log.error("Tenant not found: {}", authRequestDto.getTenant());
                 return ResponseFactory.responseBadRequest();
             }

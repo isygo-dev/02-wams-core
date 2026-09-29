@@ -2,10 +2,8 @@ package eu.isygoit.ui.ims.views.registered.dialog;
 
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.remote.ims.RegisteredUserService;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.registered.RegisteredManagementView;
-import feign.FeignException;
 
 /**
  * Confirmation dialog for creating an account from a NEW registration.

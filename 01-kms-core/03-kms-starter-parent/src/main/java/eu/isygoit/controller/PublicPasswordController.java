@@ -51,7 +51,6 @@ public class PublicPasswordController extends ControllerUtils implements PublicP
     @Autowired
     private ITenantService tenantService;
 
-    
 
     @Override
     public ResponseEntity<AccessTokenResponseDto> getAccess(

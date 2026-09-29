@@ -30,7 +30,7 @@ public class DmsExceptionHandler extends ControllerExceptionHandler {
     private IMsgService msgService;
     @Autowired
     private AppParameterServiceApi appParameterService;
-    
+
 
     public DmsExceptionHandler(AppProperties appProperties) {
         this.appProperties = appProperties;

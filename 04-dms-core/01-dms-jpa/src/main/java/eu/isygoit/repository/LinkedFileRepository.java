@@ -45,7 +45,7 @@ public interface LinkedFileRepository extends JpaPagingAndSortingTenantAndCodeAs
     /**
      * Find by tenant ignore case and categories in and check cancel false list.
      *
-     * @param tenant     the tenant
+     * @param tenant        the tenant
      * @param categoryNames the categories
      * @return the list
      */

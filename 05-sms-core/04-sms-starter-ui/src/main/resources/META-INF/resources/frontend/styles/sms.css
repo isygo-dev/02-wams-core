@@ -275,25 +275,30 @@
         flex-direction: column;
         align-items: stretch;
     }
+
     .buckets-toolbar > *,
     .objects-toolbar > * {
         width: 100% !important;
         justify-content: center;
     }
+
     .buckets-toolbar > :nth-child(2),
     .buckets-toolbar > :nth-child(3),
     .objects-toolbar > :nth-child(2),
     .objects-toolbar > :nth-child(3) {
         justify-content: flex-end;
     }
+
     .buckets-toolbar > :nth-child(3),
     .objects-toolbar > :nth-child(3) {
         order: -2;
     }
+
     .buckets-toolbar > :nth-child(2),
     .objects-toolbar > :nth-child(2) {
         order: -1;
     }
+
     .buckets-toolbar > :nth-child(1),
     .buckets-toolbar > :nth-child(2),
     .buckets-toolbar > :nth-child(3),
@@ -303,16 +308,19 @@
         flex-wrap: wrap;
         row-gap: var(--lumo-space-xs);
     }
+
     .buckets-toolbar > :nth-child(1) vaadin-text-field,
     .buckets-toolbar > :nth-child(1) vaadin-combo-box,
     .objects-toolbar > :nth-child(1) vaadin-text-field,
     .objects-toolbar > :nth-child(1) vaadin-combo-box {
         width: 100% !important;
     }
+
     .buckets-toolbar > :nth-child(2) vaadin-combo-box,
     .objects-toolbar > :nth-child(2) vaadin-combo-box {
         width: 90px !important;
     }
+
     .buckets-cards-grid,
     .objects-cards-grid {
         grid-template-columns: 1fr;
@@ -340,6 +348,7 @@
     .file-card .meta-row {
         flex-wrap: wrap;
     }
+
     .bucket-card .meta-row > :not(:first-child),
     .file-card .meta-row > :not(:first-child) {
         margin-left: 28px;

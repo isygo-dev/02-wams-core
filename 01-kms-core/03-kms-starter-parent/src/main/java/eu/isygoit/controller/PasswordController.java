@@ -39,7 +39,7 @@ public class PasswordController extends ControllerUtils implements PasswordServi
     private AccountMapper accountMapper;
     @Autowired
     private IPasswordService passwordService;
-    
+
 
     @Override
     public ResponseEntity<Integer> generateToken(

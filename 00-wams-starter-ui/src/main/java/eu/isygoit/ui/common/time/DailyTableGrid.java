@@ -16,7 +16,6 @@ import com.vaadin.flow.component.shared.Tooltip;
 import eu.isygoit.dto.common.DayTimeSlot;
 import eu.isygoit.i18n.I18n;
 
-import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -34,9 +33,9 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
 
     private final DailyTableGridConfig<E> config;
     private final Div gridContainer = new Div();
+    private final List<LocalTime> timeSlots = new ArrayList<>();
     private LocalDate currentDate;
     private List<E> events;
-    private final List<LocalTime> timeSlots = new ArrayList<>();
 
     public DailyTableGrid(DailyTableGridConfig<E> config) {
         this.config = config;

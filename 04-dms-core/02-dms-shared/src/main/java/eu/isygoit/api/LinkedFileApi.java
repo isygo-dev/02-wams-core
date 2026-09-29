@@ -9,12 +9,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.io.IOException;
 import java.util.List;
 
 
@@ -26,7 +24,7 @@ public interface LinkedFileApi extends ILinkedFileApi<LinkedFileRequestDto> {
     /**
      * Search by tags response entity.
      *
-     * @param tags   the tags
+     * @param tags the tags
      * @return the response entity
      */
     @Operation(summary = "searchByTags Api",
