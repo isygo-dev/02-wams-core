@@ -25,9 +25,9 @@ import java.util.List;
  *   <li>Card shell (background, shadow, radius, transition)</li>
  *   <li>Header row (left title area)</li>
  *   <li>Body container with flex‑grow (pushes footer to bottom)</li>
- *   <li><b>Enum-tags row</b> placed at the bottom of the body,
- *       immediately above the footer separator (see {@link #buildEnumTags()}).
- *       The row wraps onto multiple lines on narrow cards.</li>
+ *   <li><b>Enum-tags row</b> placed at the bottom of the body, immediately
+ *       above the footer separator (see {@link #buildEnumTags()}). The row
+ *       wraps onto multiple lines on narrow cards.</li>
  *   <li>Footer row with action buttons (right‑aligned, bordered top)</li>
  *   <li>Status chip factory, meta‑row builder, icon buttons</li>
  *   <li>Responsive CSS (header, footer and enum tags wrap on narrow screens)</li>
@@ -73,6 +73,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         chip.removeClassName(ChipColor.WARNING.cssClass());
         chip.removeClassName(ChipColor.NEUTRAL.cssClass());
         chip.removeClassName(ChipColor.INFO.cssClass());
+        chip.removeClassName(ChipColor.CONTRAST.cssClass());
         chip.addClassName("status-chip");
         chip.addClassName(color.cssClass());
     }
@@ -177,7 +178,6 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         enumTagsRow.setPadding(false);
         enumTagsRow.setAlignItems(FlexComponent.Alignment.CENTER);
         enumTagsRow.addClassName("wams-card__enum-tags");
-        // ── responsive: wrap tags when the row is too narrow ─────────────
         enumTagsRow.getStyle()
                 .set("flex-wrap", "wrap")
                 .set("row-gap", "var(--lumo-space-xs)")
@@ -380,20 +380,73 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
     // ── Inner types ───────────────────────────────────────────────────────────
 
     public record ChipColor(String cssClass) {
-        public static final ChipColor SUCCESS = new ChipColor("status-chip--success");
-        public static final ChipColor ERROR   = new ChipColor("status-chip--error");
-        public static final ChipColor WARNING = new ChipColor("status-chip--warning");
-        public static final ChipColor NEUTRAL = new ChipColor("status-chip--neutral");
-        public static final ChipColor INFO    = new ChipColor("status-chip--info");
+        public static final ChipColor SUCCESS  = new ChipColor("status-chip--success");
+        public static final ChipColor ERROR    = new ChipColor("status-chip--error");
+        public static final ChipColor WARNING  = new ChipColor("status-chip--warning");
+        public static final ChipColor NEUTRAL  = new ChipColor("status-chip--neutral");
+        public static final ChipColor INFO     = new ChipColor("status-chip--info");
+        public static final ChipColor CONTRAST = new ChipColor("status-chip--contrast");
 
+        /** Legacy mapping — kept for backwards compatibility. */
         public static ChipColor fromStatus(String status) {
             if (status == null) return NEUTRAL;
             return switch (status.toUpperCase()) {
                 case "ENABLED", "CONNECTED" -> SUCCESS;
-                case "DISABLED" -> ERROR;
-                case "DISCONNECTED" -> NEUTRAL;
-                case "PENDING_DELETION" -> WARNING;
-                default -> NEUTRAL;
+                case "DISABLED"             -> ERROR;
+                case "DISCONNECTED"         -> NEUTRAL;
+                case "PENDING_DELETION"     -> WARNING;
+                default                     -> NEUTRAL;
+            };
+        }
+
+        /** Color mapping for {@link eu.isygoit.enums.IEnumStudentStatus.Types}. */
+        public static ChipColor fromStudentStatus(String status) {
+            if (status == null) return NEUTRAL;
+            return switch (status.toUpperCase()) {
+                // Active lifecycle
+                case "ACTIVE"                 -> SUCCESS;
+                case "PROBATIONARY"           -> WARNING;
+                case "PRE_ENROLLED"           -> INFO;
+                case "APPLICANT"              -> INFO;
+                // Temporary absences
+                case "ON_LEAVE",
+                     "MEDICAL_LEAVE",
+                     "EXCHANGE"               -> WARNING;
+                // Restricted
+                case "SUSPENDED"              -> ERROR;
+                // End of cycle
+                case "GRADUATED"              -> SUCCESS;
+                case "TRANSFERRED",
+                     "WITHDRAWN"              -> NEUTRAL;
+                case "DROPPED_OUT",
+                     "EXPELLED"               -> ERROR;
+                // Fallback
+                default                       -> NEUTRAL;
+            };
+        }
+
+        /** Color mapping for {@link eu.isygoit.enums.IEnumStaffStatus.Types}. */
+        public static ChipColor fromStaffStatus(String status) {
+            if (status == null) return NEUTRAL;
+            return switch (status.toUpperCase()) {
+                // Active lifecycle
+                case "ACTIVE"                 -> SUCCESS;
+                case "PROBATION"              -> WARNING;
+                // Temporary absences
+                case "ON_LEAVE",
+                     "UNPAID_LEAVE",
+                     "SICK_LEAVE",
+                     "MATERNITY_LEAVE",
+                     "PATERNITY_LEAVE"        -> INFO;
+                case "TRAINING"               -> INFO;
+                // Restricted
+                case "SUSPENDED"              -> ERROR;
+                // End of cycle
+                case "RESIGNED",
+                     "TERMINATED"             -> ERROR;
+                case "RETIRED"                -> NEUTRAL;
+                // Fallback
+                default                       -> NEUTRAL;
             };
         }
     }

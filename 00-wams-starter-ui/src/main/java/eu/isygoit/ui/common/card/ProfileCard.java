@@ -10,6 +10,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.enums.IEnum;
 import eu.isygoit.i18n.I18n;
 import org.springframework.util.StringUtils;
 
@@ -23,18 +24,6 @@ import org.springframework.util.StringUtils;
  *       the footer, via {@link BaseCard#buildEnumTags()}; the tags row wraps
  *       on narrow cards)</li>
  * </ul>
- *
- * <p>Subclasses only need to expose the profile values and their body rows /
- * enum tags / actions:
- * <pre>
- *   profileImagePath()   → avatar source (nullable)
- *   profileFullName()    → header title
- *   profileSubtitle()    → header subtitle (nullable)
- *   profileStatusTag()   → footer status chip (nullable)
- *   buildBodyRows()      → icon rows / meta rows
- *   buildEnumTags()      → bottom-of-body enum tags (nullable)
- *   buildActionButtons() → footer actions
- * </pre>
  *
  * @param <V> parent view type
  * @param <S> service type
@@ -54,7 +43,7 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
      * Contract — subclasses expose profile info
      * ══════════════════════════════════════════════════════════════ */
 
-    /** Path/URL to the profile picture. May be {@code null}/{@code blank} to fall back to a user icon. */
+    /** Path/URL to the profile picture. May be {@code null}/{@code blank} → user icon. */
     protected abstract String profileImagePath();
 
     /** Full display name, e.g. {@code "Mme Yasmine Trabelsi"}. Never {@code null}. */
@@ -157,9 +146,7 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
      * Shared body helpers
      * ══════════════════════════════════════════════════════════════ */
 
-    /**
-     * Standard body row: {@code [icon] Label: value}.
-     */
+    /** Standard body row: {@code [icon] Label: value}. */
     protected HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
         HorizontalLayout row = new HorizontalLayout();
         row.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -203,14 +190,12 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
         row.setPadding(false);
         row.setAlignItems(FlexComponent.Alignment.CENTER);
         row.addClassName("card__tags-row");
-        // ── responsive: allow the row to wrap onto multiple lines ────────
         row.getStyle()
                 .set("flex-wrap", "wrap")
                 .set("row-gap", "var(--lumo-space-xs)")
                 .set("column-gap", "var(--lumo-space-s)");
         for (Span tag : tags) {
             if (tag != null) {
-                // prevent long tags from being squashed by flex
                 tag.getStyle().set("flex-shrink", "0");
                 row.add(tag);
             }
@@ -219,8 +204,10 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
     }
 
     /**
-     * Convenience: builds a tag for an enum value using the app's I18n resolver.
-     * Key convention: {@code <keyPrefix>.<enum-name-lowercase>}.
+     * Builds an enum chip with i18n lookup, falling back to the enum's
+     * {@link IEnum#meaning()} when no translation key is registered.
+     *
+     * <p>Key convention: {@code <keyPrefix>.<enum-name-lowercase>}.
      *
      * @param enumValue  the enum constant (nullable → returns null)
      * @param keyPrefix  e.g. {@code "student.gender"}
@@ -232,10 +219,28 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
             return null;
         }
         String key = keyPrefix + "." + enumValue.name().toLowerCase();
-        Span chip = buildStatusChip(I18n.t(key), color);
-        if (tooltipKey != null) {
-            chip.getElement().setAttribute("title", I18n.t(tooltipKey));
-        }
+        String label = translate(key, enumValue);
+        Span chip = buildStatusChip(label, color);
+
+        String tooltip = tooltipKey != null ? I18n.t(tooltipKey) : null;
+        chip.getElement().setAttribute("title",
+                tooltip != null && !tooltip.equals(tooltipKey) ? tooltip : label);
         return chip;
+    }
+
+    /**
+     * Resolves a translation key; if missing (translation equals the key or is
+     * blank), falls back to the enum's {@code meaning()}.
+     */
+    protected static String translate(String key, Enum<?> enumValue) {
+        String value = I18n.t(key);
+        if (value == null || value.isBlank() || value.equals(key)) {
+            if (enumValue instanceof IEnum ienum) {
+                String meaning = ienum.meaning();
+                return meaning != null ? meaning : enumValue.name();
+            }
+            return enumValue.name();
+        }
+        return value;
     }
 }
