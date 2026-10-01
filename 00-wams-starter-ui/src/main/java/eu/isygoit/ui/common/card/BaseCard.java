@@ -25,9 +25,12 @@ import java.util.List;
  *   <li>Card shell (background, shadow, radius, transition)</li>
  *   <li>Header row (left title area)</li>
  *   <li>Body container with flex‑grow (pushes footer to bottom)</li>
+ *   <li><b>Enum-tags row</b> placed at the bottom of the body,
+ *       immediately above the footer separator (see {@link #buildEnumTags()}).
+ *       The row wraps onto multiple lines on narrow cards.</li>
  *   <li>Footer row with action buttons (right‑aligned, bordered top)</li>
  *   <li>Status chip factory, meta‑row builder, icon buttons</li>
- *   <li>Responsive CSS (header and footer wrap on narrow screens)</li>
+ *   <li>Responsive CSS (header, footer and enum tags wrap on narrow screens)</li>
  * </ul>
  *
  * @param <V> the parent view type
@@ -47,6 +50,8 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
     protected HorizontalLayout headerLeft;
     protected HorizontalLayout footerRow;
     protected HorizontalLayout buttonBar;
+    /** Row of enum tags, added at the bottom of the body (above the footer). */
+    protected HorizontalLayout enumTagsRow;
 
     // ── Constructor ───────────────────────────────────────────────────────────
 
@@ -78,6 +83,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         applyCardShell();
         buildHeader();
         buildBodyRows();
+        buildEnumTagsSection();
         buildFooter();
         rearrangeToFlexLayout();
         addClassName(cardCssClassName());
@@ -95,12 +101,23 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
      */
     protected abstract List<Button> buildActionButtons();
 
-    // ── Optional hook ─────────────────────────────────────────────────────────
-
     /**
      * Adds body rows (meta rows, description, tags, …) using {@link #add(Component...)}.
      */
     protected abstract void buildBodyRows();
+
+    // ── Enum-tags hook ────────────────────────────────────────────────────────
+
+    /**
+     * Hook for subclasses to provide a row of tags representing enum fields
+     * (gender, category, type, …). The returned component is placed at the
+     * <b>bottom of the body</b>, immediately above the footer separator.
+     *
+     * <p>Return {@code null} (default) to skip the enum-tags row entirely.
+     */
+    protected Component buildEnumTags() {
+        return null;
+    }
 
     // ── Shell styling ─────────────────────────────────────────────────────────
 
@@ -108,21 +125,18 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         // no‑op
     }
 
-    // ── Header assembly ───────────────────────────────────────────────────────
-
     private void applyCardShell() {
         setWidthFull();
-        setHeightFull();                  // allows flex‑grow to work when parent stretches
+        setHeightFull();
         setMargin(false);
         setPadding(true);
         addClassName(LumoUtility.BorderRadius.LARGE);
         addClassName(LumoUtility.Background.BASE);
         addClassName(LumoUtility.BoxShadow.XSMALL);
         addClassName("wams-card");
-        // Ensure flex column (VerticalLayout does this by default)
     }
 
-    // ── Footer assembly ───────────────────────────────────────────────────────
+    // ── Header assembly ───────────────────────────────────────────────────────
 
     protected void buildHeader() {
         headerLeft = new HorizontalLayout();
@@ -139,15 +153,43 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
         headerRow.setSpacing(true);
         headerRow.addClassName("wams-card__header-row");
-
-        // We add headerRow later after rearrangement
     }
 
-    // ── Rearrangement into header / body / footer ────────────────────────────
+    // ── Enum-tags assembly ────────────────────────────────────────────────────
+
+    /**
+     * Builds the enum-tags wrapper from {@link #buildEnumTags()}. The wrapper
+     * is stored in {@link #enumTagsRow} and placed by
+     * {@link #rearrangeToFlexLayout()} just above the footer.
+     *
+     * <p>The wrapper wraps onto multiple lines on narrow cards so that a long
+     * set of tags never overflows horizontally.
+     */
+    private void buildEnumTagsSection() {
+        Component tags = buildEnumTags();
+        if (tags == null) {
+            enumTagsRow = null;
+            return;
+        }
+        enumTagsRow = new HorizontalLayout();
+        enumTagsRow.setWidthFull();
+        enumTagsRow.setSpacing(true);
+        enumTagsRow.setPadding(false);
+        enumTagsRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        enumTagsRow.addClassName("wams-card__enum-tags");
+        // ── responsive: wrap tags when the row is too narrow ─────────────
+        enumTagsRow.getStyle()
+                .set("flex-wrap", "wrap")
+                .set("row-gap", "var(--lumo-space-xs)")
+                .set("column-gap", "var(--lumo-space-s)");
+        enumTagsRow.add(tags);
+    }
+
+    // ── Footer assembly ───────────────────────────────────────────────────────
 
     protected void buildFooter() {
         List<Button> buttons = buildActionButtons();
-        if (buttons.isEmpty()) {
+        if (buttons == null || buttons.isEmpty()) {
             footerRow = null;
             return;
         }
@@ -167,17 +209,16 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         footerRow.addClassName("wams-card__footer-row");
     }
 
-    // ── Chip factory ──────────────────────────────────────────────────────────
+    // ── Rearrangement into header / body / enum-tags / footer ────────────────
 
     private void rearrangeToFlexLayout() {
-        // Collect all children added so far (headerRow, body components, footerRow)
         List<Component> children = new ArrayList<>(getChildren().toList());
         removeAll();
 
-        // Header is the first component we built
+        // Header
         add(headerRow);
 
-        // Body container: flex‑grow to push footer down
+        // Body container: flex‑grow pushes everything below it to the bottom
         VerticalLayout bodyContainer = new VerticalLayout();
         bodyContainer.setPadding(false);
         bodyContainer.setSpacing(true);
@@ -185,19 +226,25 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         bodyContainer.setFlexGrow(1);
         bodyContainer.addClassName("wams-card__body");
 
-        // Move all remaining components (except header and footer) into the body container
         for (Component child : children) {
-            if (child != headerRow && child != footerRow) {
+            if (child != headerRow && child != footerRow && child != enumTagsRow) {
                 bodyContainer.add(child);
             }
         }
         add(bodyContainer);
 
-        // Footer at the bottom (if any)
+        // Enum tags — right above the footer separator
+        if (enumTagsRow != null) {
+            add(enumTagsRow);
+        }
+
+        // Footer at the bottom
         if (footerRow != null) {
             add(footerRow);
         }
     }
+
+    // ── Chip factories ────────────────────────────────────────────────────────
 
     protected Span buildStatusChip(String label, ChipColor color) {
         Span chip = new Span(label);
@@ -296,8 +343,6 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
      * action bar always reads the same way regardless of module:
      * <b>Details → Edit → (entity-specific actions) → Toggle status → Delete</b>
      * — Delete is always last and always styled as a danger action.
-     * Subclasses should build {@link #buildActionButtons()} by calling these
-     * factories in that order rather than assembling buttons ad hoc.
      */
     protected Button createDetailsButton(String tooltip, Runnable onClick) {
         Button btn = createIconButton(VaadinIcon.INFO_CIRCLE, tooltip);
@@ -311,13 +356,9 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         return btn;
     }
 
-    /**
-     * @param enabled current state; the icon/tooltip reflect the action that will
-     *                happen on click (a lock icon to disable an enabled entity, an
-     *                unlock icon to enable a disabled one) — consistent across all cards.
-     */
     protected Button createToggleButton(boolean enabled, String enableTooltip, String disableTooltip, Runnable onClick) {
-        Button btn = createIconButton(enabled ? VaadinIcon.LOCK : VaadinIcon.UNLOCK, enabled ? disableTooltip : enableTooltip);
+        Button btn = createIconButton(enabled ? VaadinIcon.LOCK : VaadinIcon.UNLOCK,
+                enabled ? disableTooltip : enableTooltip);
         btn.addClickListener(e -> onClick.run());
         return btn;
     }
@@ -340,10 +381,10 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
 
     public record ChipColor(String cssClass) {
         public static final ChipColor SUCCESS = new ChipColor("status-chip--success");
-        public static final ChipColor ERROR = new ChipColor("status-chip--error");
+        public static final ChipColor ERROR   = new ChipColor("status-chip--error");
         public static final ChipColor WARNING = new ChipColor("status-chip--warning");
         public static final ChipColor NEUTRAL = new ChipColor("status-chip--neutral");
-        public static final ChipColor INFO = new ChipColor("status-chip--info");
+        public static final ChipColor INFO    = new ChipColor("status-chip--info");
 
         public static ChipColor fromStatus(String status) {
             if (status == null) return NEUTRAL;
