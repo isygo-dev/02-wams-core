@@ -449,5 +449,27 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
                 default                       -> NEUTRAL;
             };
         }
+
+        /** Color mapping for {@link eu.isygoit.enums.IEnumEnabledBinaryStatus.Types}. */
+        public static ChipColor fromEnabledStatus(String status) {
+            if (status == null) return NEUTRAL;
+            return switch (status.toUpperCase()) {
+                case "ENABLED"  -> SUCCESS;
+                case "DISABLED" -> NEUTRAL;
+                default         -> NEUTRAL;
+            };
+        }
+
+        /** Color mapping for {@link eu.isygoit.enums.IEnumTeacherStatus.Types}. */
+        public static ChipColor fromTeacherStatus(String status) {
+            if (status == null) return NEUTRAL;
+            return switch (status.toUpperCase()) {
+                case "ACTIVE"    -> SUCCESS;
+                case "ON_LEAVE"  -> WARNING;
+                case "RESIGNED"  -> ERROR;
+                default          -> NEUTRAL;
+            };
+        }
     }
+
 }
