@@ -32,7 +32,7 @@ import static eu.isygoit.ui.common.files.LinkedFilesSupport.PendingFile;
  * Similar to {@link AdditionalFilesManager} but for a single file field.
  */
 @Slf4j
-@CssImport(value = "./styles/upload-file-list-theme.css", themeFor = "vaadin-upload")
+@CssImport(value = "./styles/upload-file-list-theme.scss", themeFor = "vaadin-upload")
 public class OneFilesManager extends VerticalLayout {
 
     private final VerticalLayout container = new VerticalLayout();

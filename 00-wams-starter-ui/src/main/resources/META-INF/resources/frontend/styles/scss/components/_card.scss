@@ -189,7 +189,7 @@
 
 .chip--contrast {
     background: var(--lumo-contrast-10pct);
-    color: var(--lumo-contrast-text-color);
+    color: var(--lumo-secondary-text-color);
 }
 
 .chip--active { @extend .chip--success; }

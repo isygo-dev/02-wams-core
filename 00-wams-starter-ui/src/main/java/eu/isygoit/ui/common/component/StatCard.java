@@ -13,7 +13,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
  * Canonical dashboard stat tile, used by every module's dashboard/statistics
  * panel: a circular colored icon, a bold metric value, an uppercase label,
  * and an optional colored up/down change indicator. A thin accent bar along
- * the top edge signals the metric's {@link Variant}. See {@code styles/card.css}
+ * the top edge signals the metric's {@link Variant}. See {@code styles/scss/components/_card.scss}
  * for the full {@code wams-stat-card} rule set (hover-lift, skeleton-loading,
  * responsive grid via {@link StatCardGrid}).
  */

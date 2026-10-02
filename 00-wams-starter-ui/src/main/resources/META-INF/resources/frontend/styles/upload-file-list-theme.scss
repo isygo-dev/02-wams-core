@@ -1,0 +1,14 @@
+/*
+ * Injected into <vaadin-upload>'s shadow root through @CssImport's themeFor.
+ * The file list is rendered inside that shadow root, so page-level selectors
+ * cannot hide it.
+ */
+::slotted([slot="file-list"]),
+[part="file-list"] {
+    display: none !important;
+}
+
+:host([nodrop]) [part="file-list"],
+[part="drop-label-container"] + [part="file-list"] {
+    display: none !important;
+}

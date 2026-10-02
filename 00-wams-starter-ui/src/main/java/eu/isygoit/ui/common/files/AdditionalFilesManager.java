@@ -91,7 +91,7 @@ import static eu.isygoit.ui.common.files.LinkedFilesSupport.PendingFile;
  * @param <F> the concrete linked-file DTO type
  */
 @Slf4j
-@CssImport(value = "./styles/upload-file-list-theme.css", themeFor = "vaadin-upload")
+@CssImport(value = "./styles/upload-file-list-theme.scss", themeFor = "vaadin-upload")
 public class AdditionalFilesManager<F extends LinkedFileMinDto<Long>> extends VerticalLayout {
 
     /* ═══════════════════════════════════════════════════════════════

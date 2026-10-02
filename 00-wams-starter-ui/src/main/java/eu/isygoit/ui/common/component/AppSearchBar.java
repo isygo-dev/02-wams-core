@@ -18,7 +18,8 @@ import java.util.List;
 /**
  * Header quick-navigation search: filters {@link INavRegistry#getAll()} by its
  * (locale-resolved) label as the user types, and navigates on selection.
- * Rounded, compact styling lives in {@code wams-app-search} (see layout.css).
+ * Rounded, compact styling lives in {@code wams-app-search}
+ * (see {@code styles/scss/app-search.scss}).
  *
  * <p>Results are presented as a tree: a module header (full name, e.g.
  * "Identity Management" — see {@link INavRegistry#moduleLabelKey}) followed

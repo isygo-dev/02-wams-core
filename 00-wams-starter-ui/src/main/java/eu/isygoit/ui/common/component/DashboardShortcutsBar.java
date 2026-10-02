@@ -12,7 +12,7 @@ import java.util.List;
  * Compact "favorites/shortcuts" bar shown at the top of every module
  * dashboard: a handful of one-click shortcuts to the module's most common
  * actions (create X, jump to Y). Shared by every module so the pattern looks
- * and behaves identically everywhere — see {@code styles/card.css} for the
+ * and behaves identically everywhere — see {@code styles/scss/components/_card.scss} for the
  * {@code wams-dashboard-shortcuts}/{@code wams-dashboard-shortcut} rules.
  */
 public class DashboardShortcutsBar extends HorizontalLayout {

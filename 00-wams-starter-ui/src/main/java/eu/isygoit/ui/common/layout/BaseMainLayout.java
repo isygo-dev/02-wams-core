@@ -94,7 +94,8 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
     /**
      * Builds a leaf navigation item with its label also set as a Vaadin
      * tooltip, so it stays readable on hover when the sidebar is collapsed
-     * to its icon-only rail (see {@code .wams-sidebar-collapsed} in layout.css).
+     * to its icon-only rail (see {@code .wams-sidebar-collapsed} in
+     * {@code styles/scss/layout/_app-shell.scss}).
      *
      * <p>The icon is given an explicit pixel size (not em-based) so it stays
      * fully visible even when collapsed mode zeroes out the link's font-size
@@ -126,6 +127,10 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
 
     protected String getModuleKey() {
         return "";
+    }
+
+    protected String getProfileRoute() {
+        return "profile";
     }
 
     private void createHeader() {
@@ -184,8 +189,9 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
 
     /**
      * Two independently-styleable groups rather than one flat row of 5
-     * disparate-width children: a search "slot" (whose width layout.css
-     * controls per breakpoint) and a fixed-size "icon cluster" (notifications,
+     * disparate-width children: a search "slot" (whose width is styled by
+     * {@code styles/scss/app-search.scss} at each breakpoint) and a fixed-size
+     * "icon cluster" (notifications,
      * settings, language, profile — always kept together, never wrapped
      * internally). This gives {@code .wams-app-search} a stable container to
      * shrink/grow within at each breakpoint instead of fighting flex-wrap
@@ -305,7 +311,7 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         }
 
         subMenu.addItem(menuEntry(VaadinIcon.USER, I18n.t("common.layout.avatar.profile")),
-                e -> UI.getCurrent().navigate("profile"));
+                e -> UI.getCurrent().navigate(getProfileRoute()));
         subMenu.addItem(menuEntry(VaadinIcon.COG_O, I18n.t("common.layout.avatar.settings")),
                 e -> UI.getCurrent().navigate("settings"));
         subMenu.add(new Hr());
@@ -344,7 +350,8 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
     /**
      * Persistent affordance pinned at the bottom of every module's sidebar
      * that collapses it to an icon-only rail (~60px) or expands it back
-     * (~220px) — see {@code .wams-sidebar-collapsed} in layout.css. The
+     * (~220px) — see {@code .wams-sidebar-collapsed} in
+     * {@code styles/scss/layout/_app-shell.scss}. The
      * choice is stored in the {@link VaadinSession} (not just this layout
      * instance) so it survives navigating between modules, each of which
      * instantiates a fresh {@code <Module>MainLayout}.

@@ -1,20 +1,20 @@
-// Design tokens for 03-edyra-pilot
-$color-primary: #4a90d9;
-$color-primary-10: rgba(74, 144, 217, 0.1);
-$color-primary-50: rgba(74, 144, 217, 0.5);
+// Atlassian-inspired palette and compact geometry shared by WAMS views.
+$color-primary: #0c66e4;
+$color-primary-10: rgba(12, 102, 228, 0.1);
+$color-primary-50: rgba(12, 102, 228, 0.5);
 
-$color-success: #50c878;
-$color-warning: #f5a623;
-$color-danger: #ff6b6b;
-$color-info: #7b68ee;
+$color-success: #1f845a;
+$color-warning: #a54800;
+$color-danger: #c9372c;
+$color-info: #0055cc;
 
-$color-text: #1f2937;
-$color-text-muted: #6b7280;
-$color-text-soft: #9ca3af;
+$color-text: #172b4d;
+$color-text-muted: #44546f;
+$color-text-soft: #626f86;
 $color-surface: #ffffff;
-$color-surface-alt: #f8fafc;
-$color-border: rgba(15, 23, 42, 0.08);
-$color-shadow: rgba(15, 23, 42, 0.08);
+$color-surface-alt: #f7f8f9;
+$color-border: rgba(9, 30, 66, 0.14);
+$color-shadow: rgba(9, 30, 66, 0.13);
 
 $space-1: 0.25rem;
 $space-2: 0.5rem;
@@ -26,12 +26,12 @@ $space-8: 2rem;
 $space-10: 2.5rem;
 $space-12: 3rem;
 
-$radius-sm: 0.5rem;
-$radius-md: 0.75rem;
-$radius-lg: 1rem;
-$radius-xl: 1.25rem;
+$radius-sm: 3px;
+$radius-md: 3px;
+$radius-lg: 6px;
+$radius-xl: 8px;
 
-$font-family-base: "Inter", "Segoe UI", sans-serif;
+$font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
 $font-size-xxs: 0.625rem;
 $font-size-xs: 0.75rem;
@@ -66,8 +66,8 @@ $bp-panel-wide: 1200px;
 $card-grid-min: 320px;
 
 $container-max-width: 1400px;
-$header-height: 72px;
-$toolbar-height: 64px;
+$header-height: 52px;
+$toolbar-height: 52px;
 
 $shadow-sm: 0 2px 8px $color-shadow;
 $shadow-md: 0 4px 16px $color-shadow;

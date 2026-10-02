@@ -9,7 +9,7 @@
 // ─── Why there are almost no breakpoints here ────────────────────
 // These panels render inside the AppLayout content area, i.e.
 // `viewport − drawer`, and the drawer is 220px expanded / 60px collapsed
-// (tokens.css). One viewport width therefore maps to two very different
+// (tokens.scss). One viewport width therefore maps to two very different
 // toolbar widths, so a viewport-keyed @media query cannot know when the
 // controls stop fitting: on a 1366px laptop with the drawer open the
 // toolbar only has ~1100px, yet a `max-width: 1200px` rule never fires

@@ -2,7 +2,8 @@
  * Per-module brand accent. Applied as a class (wams-module-<key>) on the root
  * element of each module's MainLayout (see BaseMainLayout#getModuleKey()) and
  * on the landing page's module-picker cards. Shared components (cards, dialogs,
- * buttons, chips) never use these directly — only layout.css / landing.css do,
+ * buttons, chips) never use these directly — only layout/_app-shell.scss /
+ * landing.scss do,
  * via the --wams-module-accent / --wams-module-accent-gradient custom properties.
  */
 

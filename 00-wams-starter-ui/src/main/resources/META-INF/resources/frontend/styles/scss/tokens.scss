@@ -8,28 +8,33 @@ html {
     --lumo-primary-color: #0C66E4;
     --lumo-primary-color-50pct: rgba(12, 102, 228, 0.5);
     --lumo-primary-color-10pct: rgba(12, 102, 228, 0.1);
+    --wams-primary-rgb: 12, 102, 228;
     --lumo-primary-text-color: #0C66E4;
     --lumo-primary-contrast-color: #FFFFFF;
 
     --lumo-error-color: #C9372C;
     --lumo-error-color-50pct: rgba(201, 55, 44, 0.5);
     --lumo-error-color-10pct: rgba(201, 55, 44, 0.1);
+    --wams-error-rgb: 201, 55, 44;
     --lumo-error-text-color: #AE2E24;
     --lumo-error-contrast-color: #FFFFFF;
 
     --lumo-success-color: #1F845A;
     --lumo-success-color-50pct: rgba(31, 132, 90, 0.5);
     --lumo-success-color-10pct: rgba(31, 132, 90, 0.1);
+    --wams-success-rgb: 31, 132, 90;
     --lumo-success-text-color: #216E4E;
     --lumo-success-contrast-color: #FFFFFF;
 
     /* Lumo has no native "warning" palette; every module reuses these two. */
     --wams-warning-color: #A54800;
+    --wams-warning-rgb: 165, 72, 0;
     --wams-warning-bg: #FFF0B3;
     --wams-warning-bg-subtle: #FFF7D6;
     --wams-warning-border: #F5CD47;
     --wams-info-bg: #E9F2FF;
     --wams-info-fg: #0055CC;
+    --wams-info-rgb: 0, 85, 204;
     --wams-discovery-color: #6E5DC6;
     --wams-discovery-bg: #F3F0FD;
 
@@ -39,6 +44,7 @@ html {
     --lumo-secondary-text-color: #44546F;
     --lumo-tertiary-text-color: #626F86;
     --lumo-disabled-text-color: #8590A2;
+    --wams-secondary-text-rgb: 68, 84, 111;
 
     /* ── Shape: compact, mostly-square controls (not pill-shaped) ────────── */
     --lumo-border-radius-s: 3px;
@@ -77,20 +83,18 @@ html {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.35rem; /* espace entre le point et le texte */
-    padding: 0.35rem 0.7rem;
-    border: 1px solid rgba(var(--lumo-primary-color), 0.16);
-    border-radius: 999px; /* forme pilule */
-    background: linear-gradient(135deg, var(--lumo-primary-color-10pct), var(--wams-info-bg));
+    gap: 0.35rem;
+    padding: 0.2rem 0.5rem;
+    border: 1px solid rgba(var(--wams-primary-rgb), 0.16);
+    border-radius: var(--lumo-border-radius-m);
+    background: var(--lumo-primary-color-10pct);
     color: var(--lumo-primary-text-color);
     font-size: var(--lumo-font-size-xxs);
     font-weight: 600;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.04em;
     line-height: 1.2;
     text-transform: uppercase;
     white-space: nowrap;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     cursor: default;
 }
 
@@ -105,11 +109,6 @@ html {
     flex-shrink: 0;
 }
 
-.status-chip:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
-}
-
 /* --- Modificateurs sémantiques (regroupés par catégorie) --- */
 
 /* Success / actif / payé / disponible, etc. */
@@ -121,8 +120,8 @@ html {
 .status-chip--open,
 .status-chip--incident-resolved,
 .status-chip--incident-closed {
-    background: linear-gradient(135deg, var(--lumo-success-color-10pct), var(--lumo-primary-color-10pct));
-    border-color: rgba(var(--lumo-success-color), 0.2);
+    background: var(--lumo-success-color-10pct);
+    border-color: rgba(var(--wams-success-rgb), 0.2);
     color: var(--lumo-success-text-color);
 }
 
@@ -136,8 +135,8 @@ html {
 .status-chip--incident-open,
 .status-chip--risk-low,
 .status-chip--severity-low {
-    background: linear-gradient(135deg, var(--wams-info-bg), var(--lumo-primary-color-10pct));
-    border-color: rgba(var(--wams-info-fg), 0.2);
+    background: var(--wams-info-bg);
+    border-color: rgba(var(--wams-info-rgb), 0.2);
     color: var(--wams-info-fg);
 }
 
@@ -155,8 +154,8 @@ html {
 .status-chip--sick,
 .status-chip--unpaid-leave,
 .status-chip--moderate {
-    background: linear-gradient(135deg, var(--wams-warning-bg), var(--lumo-primary-color-10pct));
-    border-color: rgba(var(--wams-warning-color), 0.2);
+    background: var(--wams-warning-bg-subtle);
+    border-color: rgba(var(--wams-warning-rgb), 0.2);
     color: var(--wams-warning-color);
 }
 
@@ -177,8 +176,8 @@ html {
 .status-chip--invalid,
 .status-chip--not-available,
 .status-chip--closed {
-    background: linear-gradient(135deg, var(--lumo-error-color-10pct), var(--lumo-primary-color-10pct));
-    border-color: rgba(var(--lumo-error-color), 0.2);
+    background: var(--lumo-error-color-10pct);
+    border-color: rgba(var(--wams-error-rgb), 0.2);
     color: var(--lumo-error-text-color);
 }
 
@@ -189,8 +188,8 @@ html {
 .status-chip--pending,
 .status-chip--review,
 .status-chip--unknown {
-    background: linear-gradient(135deg, var(--lumo-contrast-10pct), var(--lumo-primary-color-10pct));
-    border-color: rgba(var(--lumo-secondary-text-color), 0.18);
+    background: var(--lumo-contrast-10pct);
+    border-color: rgba(var(--wams-secondary-text-rgb), 0.18);
     color: var(--lumo-secondary-text-color);
 }
 
@@ -206,8 +205,8 @@ html {
 .status-chip--service,
 .status-chip--management,
 .status-chip--other {
-    background: linear-gradient(135deg, var(--lumo-primary-color-10pct), var(--wams-info-bg));
-    border-color: rgba(var(--lumo-primary-color), 0.18);
+    background: var(--lumo-primary-color-10pct);
+    border-color: rgba(var(--wams-primary-rgb), 0.18);
     color: var(--lumo-primary-text-color);
 }
 
@@ -217,22 +216,22 @@ html {
 .status-chip--director,
 .status-chip--manager,
 .status-chip--support {
-    background: linear-gradient(135deg, var(--wams-info-bg), var(--lumo-primary-color-10pct));
-    border-color: rgba(var(--wams-info-fg), 0.18);
+    background: var(--wams-info-bg);
+    border-color: rgba(var(--wams-info-rgb), 0.18);
     color: var(--wams-info-fg);
 }
 
 .status-chip--technical,
 .status-chip--student,
 .status-chip--service {
-    background: linear-gradient(135deg, var(--wams-warning-bg), var(--lumo-primary-color-10pct));
-    border-color: rgba(var(--wams-warning-color), 0.2);
+    background: var(--wams-warning-bg-subtle);
+    border-color: rgba(var(--wams-warning-rgb), 0.2);
     color: var(--wams-warning-color);
 }
 
 .status-chip--other {
-    background: linear-gradient(135deg, var(--lumo-contrast-10pct), var(--lumo-primary-color-10pct));
-    border-color: rgba(var(--lumo-secondary-text-color), 0.18);
+    background: var(--lumo-contrast-10pct);
+    border-color: rgba(var(--wams-secondary-text-rgb), 0.18);
     color: var(--lumo-secondary-text-color);
 }
 
@@ -241,11 +240,7 @@ html {
    ═══════════════════════════════════════════════════════════════════════ */
 
 .wams-action-btn {
-    transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
-}
-
-.wams-action-btn:hover {
-    transform: translateY(-1px);
+    transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .wams-action-btn--danger:hover {

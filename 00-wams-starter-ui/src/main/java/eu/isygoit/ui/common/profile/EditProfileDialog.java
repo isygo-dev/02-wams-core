@@ -1,4 +1,4 @@
-package eu.isygoit.ui.ims.views.profile;
+package eu.isygoit.ui.common.profile;
 
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -7,10 +7,10 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.data.validator.StringLengthValidator;
+import eu.isygoit.api.ProfileServiceApi;
 import eu.isygoit.dto.data.AccountDetailsDto;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.remote.ims.ProfileService;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import org.springframework.http.ResponseEntity;
 
@@ -23,12 +23,12 @@ import java.util.function.Consumer;
  */
 public class EditProfileDialog extends BaseActionDialog {
 
-    private final transient ProfileService profileService;
+    private final transient ProfileServiceApi profileService;
     private final transient AccountDto account;
     private final transient Consumer<AccountDto> onSaved;
     private final transient Binder<AccountDto> binder = new Binder<>(AccountDto.class);
 
-    public EditProfileDialog(ProfileService profileService, AccountDto account, Consumer<AccountDto> onSaved) {
+    public EditProfileDialog(ProfileServiceApi profileService, AccountDto account, Consumer<AccountDto> onSaved) {
         super(I18n.t("profile.edit"));
         this.profileService = profileService;
         this.account = account;

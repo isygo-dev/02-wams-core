@@ -1,4 +1,4 @@
-package eu.isygoit.ui.ims.views.profile;
+package eu.isygoit.ui.common.profile;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;

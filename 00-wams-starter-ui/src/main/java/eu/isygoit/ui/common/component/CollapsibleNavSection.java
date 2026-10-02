@@ -19,7 +19,7 @@ import java.util.List;
  * This component only assembles DOM structure and toggles state via CSS
  * class names — every visual detail (colors, spacing, hover, the expand/
  * collapse transition, and hiding the header when the whole sidebar
- * collapses to its icon-only rail) lives in {@code styles/nav.css}. Used by
+ * collapses to its icon-only rail) lives in {@code styles/scss/nav.scss}. Used by
  * every {@code <Module>MainLayout} so grouped navigation looks and behaves
  * identically across modules.
  */

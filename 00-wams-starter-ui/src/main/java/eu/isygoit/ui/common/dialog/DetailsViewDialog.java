@@ -36,7 +36,8 @@ public abstract class DetailsViewDialog extends NoActionDialog {
     /**
      * A titled section that visually classifies one group of fields (e.g.
      * "Identity", "Status", "Audit"). The title gets an underline via the
-     * shared {@code wams-section-title} rule in {@code card.css}.
+     * shared {@code wams-section-title} rule in
+     * {@code styles/scss/components/_card.scss}.
      */
     protected Component createSection(String title, Component content) {
         VerticalLayout section = new VerticalLayout();

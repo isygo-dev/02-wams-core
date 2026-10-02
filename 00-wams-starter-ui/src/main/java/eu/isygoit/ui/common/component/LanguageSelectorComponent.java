@@ -34,7 +34,8 @@ public class LanguageSelectorComponent extends HorizontalLayout {
     private final Icon globeIcon;
     private final Span flagPrefixSpan;
     // Icon-only trigger shown instead of languageCombo on mobile (see
-    // .wams-language-selector__mobile-trigger in layout.css) – a shrunk
+    // .wams-language-selector__mobile-trigger in
+    // styles/scss/layout/_app-shell.scss) – a shrunk
     // ComboBox still carries its own input/dropdown-arrow chrome and doesn't
     // read as "just an icon", so mobile gets a real icon button + Popover
     // instead, matching the notifications/settings buttons' pattern.

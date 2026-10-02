@@ -1,4 +1,4 @@
-package eu.isygoit.ui.ims.views.profile;
+package eu.isygoit.ui.common.profile;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -15,9 +15,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.api.ProfileServiceApi;
 import eu.isygoit.dto.common.ChangePasswordRequestDto;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.remote.ims.ProfileService;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -25,9 +25,9 @@ import org.springframework.http.ResponseEntity;
  */
 class ProfileSettingsPanel extends VerticalLayout {
 
-    private final transient ProfileService profileService;
+    private final transient ProfileServiceApi profileService;
 
-    ProfileSettingsPanel(ProfileService profileService) {
+    ProfileSettingsPanel(ProfileServiceApi profileService) {
         this.profileService = profileService;
 
         setPadding(true);

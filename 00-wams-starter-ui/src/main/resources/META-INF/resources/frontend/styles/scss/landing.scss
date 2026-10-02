@@ -1,10 +1,10 @@
 /*
  * Styling for eu.isygoit.ui.LandingView (the platform's module picker).
  * Per-module colors come from the --wams-module-accent custom property
- * defined in modules.css and applied to each card via a "wams-module-<key>"
+ * defined in _modules.scss and applied to each card via a "wams-module-<key>"
  * class. Kept deliberately flat/minimal (a thin accent border + colored
  * icon, no heavy shadows or continuous animation) to match the rest of the
- * app's design language (see tokens.css).
+ * app's design language (see tokens.scss).
  */
 
 .wams-landing {

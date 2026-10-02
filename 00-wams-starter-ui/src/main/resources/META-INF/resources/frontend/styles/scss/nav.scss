@@ -73,7 +73,7 @@
 /* ── Collapsed sidebar (icon-only rail) ──────────────────────────────────
    BaseMainLayout adds 'wams-sidebar-collapsed' to the layout's root element.
    The header (title + chevron) disappears — same treatment as a plain
-   SideNav's [slot='label'] in layout.css — and every item stays visible as
+   SideNav's [slot='label'] in layout/_app-shell.scss — and every item stays visible as
    an icon regardless of accordion state, matching how a plain (non-
    collapsible) SideNav group behaves once the sidebar itself collapses. ── */
 

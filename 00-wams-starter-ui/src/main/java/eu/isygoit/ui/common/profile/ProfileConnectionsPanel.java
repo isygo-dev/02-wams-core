@@ -1,4 +1,4 @@
-package eu.isygoit.ui.ims.views.profile;
+package eu.isygoit.ui.common.profile;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
