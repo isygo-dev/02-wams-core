@@ -133,6 +133,10 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         return "profile";
     }
 
+    protected String getSettingsRoute() {
+        return "settings";
+    }
+
     private void createHeader() {
         HorizontalLayout brand = new HorizontalLayout();
         brand.addClassName("wams-brand");
@@ -266,7 +270,7 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         String tooltip = I18n.t("common.layout.header.settings.tooltip");
         settings.setTooltipText(tooltip);
         settings.setAriaLabel(tooltip);
-        settings.addClickListener(e -> UI.getCurrent().navigate("settings"));
+        settings.addClickListener(e -> UI.getCurrent().navigate(getSettingsRoute()));
         return settings;
     }
 
@@ -313,7 +317,7 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         subMenu.addItem(menuEntry(VaadinIcon.USER, I18n.t("common.layout.avatar.profile")),
                 e -> UI.getCurrent().navigate(getProfileRoute()));
         subMenu.addItem(menuEntry(VaadinIcon.COG_O, I18n.t("common.layout.avatar.settings")),
-                e -> UI.getCurrent().navigate("settings"));
+                e -> UI.getCurrent().navigate(getSettingsRoute()));
         subMenu.add(new Hr());
         MenuItem logout = subMenu.addItem(menuEntry(VaadinIcon.SIGN_OUT, I18n.t("common.layout.avatar.logout")),
                 e -> logout());
