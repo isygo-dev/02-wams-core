@@ -1,0 +1,93 @@
+@import "../abstracts/variables";
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: $space-4;
+  align-items: stretch;
+}
+
+.stat-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 150px;
+  padding: $space-4;
+  background: linear-gradient(180deg, rgba($color-surface, 0.96), rgba($color-surface-alt, 0.98));
+  border: 1px solid $color-border;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 4px;
+    background: linear-gradient(90deg, $color-primary, $color-info);
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    border-color: rgba($color-primary, 0.24);
+    box-shadow: $shadow-md;
+  }
+
+  &__content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+    height: 100%;
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.85rem;
+    background: linear-gradient(135deg, rgba($color-primary, 0.18), rgba($color-info, 0.18));
+    color: $color-primary;
+    box-shadow: inset 0 0 0 1px rgba($color-primary, 0.08);
+
+    vaadin-icon,
+    iron-icon,
+    svg {
+      width: 1.2rem;
+      height: 1.2rem;
+    }
+  }
+
+  &__value {
+    margin: 0;
+    color: $color-text;
+    font-size: clamp(1.6rem, 2vw, 2.15rem);
+    font-weight: $font-weight-bold;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+  }
+
+  &__label {
+    margin-top: auto;
+    color: $color-text-muted;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+}
+
+@media (max-width: $breakpoint-sm) {
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    min-height: 132px;
+  }
+}

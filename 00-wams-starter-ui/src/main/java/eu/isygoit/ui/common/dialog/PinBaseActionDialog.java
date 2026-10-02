@@ -19,7 +19,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * Base dialog that adds a 9‑digit PIN confirmation for destructive actions.
  * Displays a warning icon before the warning message in the content area.
  */
-@CssImport("./styles/dialog.css")
+@CssImport("./styles/scss/dialog.scss")
 public abstract class PinBaseActionDialog extends BaseActionDialog {
 
     protected final String confirmationCode;

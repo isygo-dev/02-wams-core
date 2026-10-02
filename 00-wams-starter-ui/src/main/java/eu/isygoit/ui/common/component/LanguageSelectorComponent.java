@@ -26,7 +26,7 @@ import java.util.Locale;
  * Uses flag-icon-css library (CDN) for reliable flag display.
  * Seamlessly integrates with Lumo theming (dark/light modes).
  */
-@CssImport("./styles/language-selector.css")
+@CssImport("./styles/scss/language-selector.scss")
 @StyleSheet("https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css")
 public class LanguageSelectorComponent extends HorizontalLayout {
 

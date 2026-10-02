@@ -1,0 +1,56 @@
+@import "../abstracts/variables";
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-wrapper {
+  width: min(100%, $container-max-width);
+  margin: 0 auto;
+  padding: $space-4;
+}
+
+.main-content {
+  flex: 1;
+  display: block;
+}
+
+.content-grid {
+  display: grid;
+  gap: $space-4;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+// ─── Card grid ────────────────────────────────────────────────────
+// Shared by ~20 list views. One auto-fill rule rather than a ladder of
+// fixed column counts: the grid then tracks the *available* width (which
+// the collapsible side nav changes independently of the viewport) instead
+// of the viewport width. `min()` keeps the last column from overflowing a
+// narrow phone.
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, #{$card-grid-min}), 1fr));
+  gap: $space-4;
+  width: 100%;
+  padding: $space-2 0;
+  transition: opacity 0.2s ease;
+
+  // Beyond four columns the cards grow wider than they are readable.
+  @media (min-width: 1600px) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  @media (max-width: $bp-panel-compact) {
+    gap: $space-3;
+  }
+
+  // Set while a refresh is in flight (BaseAdministrationPanel#showLoading):
+  // the current results stay in place, dimmed, instead of collapsing the
+  // page height and making it jump back when the new ones arrive.
+  &.is-loading {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+}

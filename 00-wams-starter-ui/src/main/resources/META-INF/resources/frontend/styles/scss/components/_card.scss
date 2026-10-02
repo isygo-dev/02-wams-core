@@ -5,6 +5,12 @@
  * runtime) inside each concrete card subclass.
  */
 
+.wams-card-shell {
+    border-radius: var(--lumo-border-radius-l);
+    background: var(--lumo-base-color);
+    box-shadow: var(--lumo-box-shadow-xs);
+}
+
 .wams-card {
     display: flex;
     flex-direction: column;
@@ -21,6 +27,92 @@
     gap: var(--lumo-space-s);
     align-items: center;
     width: 100%;
+}
+
+.wams-card__enum-tags {
+    flex-wrap: wrap;
+    row-gap: var(--lumo-space-xs);
+    column-gap: var(--lumo-space-s);
+}
+
+/* Profile Card Styling */
+.wams-profile-card__hero {
+    gap: 14px;
+    flex-wrap: nowrap;
+}
+
+.wams-profile-card__avatar-wrap {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    align-self: center;
+    background: var(--lumo-contrast-5pct);
+    border: 3px solid var(--lumo-primary-color-50pct);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.wams-profile-card__avatar-img {
+    object-fit: cover;
+}
+
+.wams-profile-card__avatar-icon {
+    width: 34px;
+    height: 34px;
+    color: var(--lumo-secondary-text-color);
+}
+
+.wams-profile-card__name-block {
+    gap: 4px;
+    min-width: 0;
+}
+
+.wams-profile-card__full-name {
+    line-height: 1.2;
+    white-space: normal;
+}
+
+.wams-profile-card__subtitle {
+    font-size: var(--lumo-font-size-xs);
+    color: var(--lumo-secondary-text-color);
+    word-break: break-all;
+}
+
+.wams-profile-card__row {
+    margin-top: var(--lumo-space-xs);
+    flex-wrap: wrap;
+}
+
+.wams-profile-card__row-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    color: var(--lumo-secondary-text-color);
+}
+
+.wams-profile-card__row-label {
+    font-weight: 600;
+    font-size: var(--lumo-font-size-xs);
+    color: var(--lumo-secondary-text-color);
+}
+
+.wams-profile-card__row-value {
+    font-size: var(--lumo-font-size-xs);
+    word-break: break-word;
+}
+
+.wams-profile-card__tags-row {
+    flex-wrap: wrap;
+    row-gap: var(--lumo-space-xs);
+    column-gap: var(--lumo-space-s);
+}
+
+.wams-profile-card__tag {
+    flex-shrink: 0;
 }
 
 .wams-card__body {
@@ -47,6 +139,66 @@
 
 .wams-card__title {
     word-break: break-word;
+}
+
+.wams-card__title-text {
+    font-weight: 700;
+    font-size: var(--lumo-font-size-m);
+    color: var(--lumo-primary-text-color);
+}
+
+.wams-chip {
+    font-size: var(--lumo-font-size-xxs);
+    padding: var(--lumo-space-xs) var(--lumo-space-s);
+    border-radius: var(--lumo-border-radius-l);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.chip--primary {
+    background: var(--lumo-primary-color-10pct);
+    color: var(--lumo-primary-text-color);
+}
+
+.chip--success {
+    background: var(--lumo-success-color-10pct);
+    color: var(--lumo-success-text-color);
+}
+
+.chip--warning {
+    background: var(--wams-warning-bg-subtle);
+    color: var(--wams-warning-color);
+}
+
+.chip--error {
+    background: var(--lumo-error-color-10pct);
+    color: var(--lumo-error-text-color);
+}
+
+.chip--neutral {
+    background: var(--lumo-contrast-10pct);
+    color: var(--lumo-secondary-text-color);
+}
+
+.chip--info {
+    background: var(--lumo-primary-color-10pct);
+    color: var(--lumo-primary-text-color);
+}
+
+.chip--contrast {
+    background: var(--lumo-contrast-10pct);
+    color: var(--lumo-contrast-text-color);
+}
+
+.chip--active { @extend .chip--success; }
+.chip--inactive { @extend .chip--neutral; }
+.chip--on_leave { @extend .chip--warning; }
+.chip--resigned { @extend .chip--error; }
+.chip--neutral {
+    background: var(--lumo-contrast-10pct);
+    color: var(--lumo-secondary-text-color);
 }
 
 @media (max-width: 640px) {
@@ -77,6 +229,12 @@
 .wams-card__meta-row {
     margin-top: var(--lumo-space-xs);
     flex-wrap: wrap;
+    font-size: var(--lumo-font-size-xs);
+    color: var(--lumo-tertiary-text-color);
+}
+
+.wams-card__meta-dot {
+    margin: 0 var(--lumo-space-xs);
 }
 
 /* ── Detail grid (label/value pairs shown in card bodies and details dialogs) ── */

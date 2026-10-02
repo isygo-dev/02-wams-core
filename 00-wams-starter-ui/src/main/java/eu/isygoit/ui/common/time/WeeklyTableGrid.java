@@ -24,8 +24,7 @@ import java.time.format.TextStyle;
 import java.util.*;
 import java.util.function.Function;
 
-@CssImport("./styles/time-grid.css")
-@CssImport("./styles/split/18-calendar.css")
+@CssImport("./styles/scss/time-grid.scss")
 public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
 
     private final WeeklyTableGridConfig<E> config;

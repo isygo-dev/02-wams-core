@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  * Has a real commit action (crop + apply), so it extends {@link BaseActionDialog}
  * rather than {@link NoActionDialog}.
  */
-@CssImport("./styles/dialog.css")
+@CssImport("./styles/scss/dialog.scss")
 public class ImageCropperDialog extends BaseActionDialog {
 
     private final ImageCropper imageCropper;

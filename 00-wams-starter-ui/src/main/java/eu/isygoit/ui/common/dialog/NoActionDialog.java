@@ -20,7 +20,7 @@ import eu.isygoit.i18n.I18n;
  * action button(s), so every dialog in the app — action or read-only — has an
  * identical footer shape.
  */
-@CssImport("./styles/dialog.css")
+@CssImport("./styles/scss/dialog.scss")
 public class NoActionDialog extends Dialog {
 
     private final VerticalLayout contentWrapper;

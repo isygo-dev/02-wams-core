@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
  * form fields instead of re-declaring the same layout/CSS wiring five times.
  */
 @Slf4j
-@CssImport("./styles/auth.css")
+@CssImport("./styles/scss/auth.scss")
 public abstract class BaseLoginView extends VerticalLayout implements BeforeEnterObserver {
 
     protected String redirectTarget;

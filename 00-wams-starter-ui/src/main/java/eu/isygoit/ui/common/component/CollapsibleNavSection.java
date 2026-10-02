@@ -23,7 +23,7 @@ import java.util.List;
  * every {@code <Module>MainLayout} so grouped navigation looks and behaves
  * identically across modules.
  */
-@CssImport("./styles/nav.css")
+@CssImport("./styles/scss/nav.scss")
 public class CollapsibleNavSection extends Div {
 
     private static final String EXPANDED_CLASS = "wams-collapsible-nav-section--expanded";

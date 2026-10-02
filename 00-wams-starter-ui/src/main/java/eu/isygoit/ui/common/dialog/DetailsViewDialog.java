@@ -20,7 +20,7 @@ import eu.isygoit.ui.common.component.ClipboardCopyButton;
  * Values long enough to be painful to select by hand (IDs, hashes, keys,
  * paths, URLs, ...) automatically get an inline {@link ClipboardCopyButton}.
  */
-@CssImport("./styles/dialog.css")
+@CssImport("./styles/scss/dialog.scss")
 public abstract class DetailsViewDialog extends NoActionDialog {
 
     /**

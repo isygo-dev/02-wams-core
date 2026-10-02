@@ -1,0 +1,73 @@
+// ═══════════════════════════════════════════════════════════════════
+// PANEL STATES — loading · empty
+//
+// Generic feedback states any list panel can render, independent of the
+// entity it shows. Emitted by BaseAdministrationPanel (#showLoading /
+// #buildEmptyState) and reusable by the other panel families.
+//
+// RTL: the app ships an ar_SA locale — use logical properties.
+// ═══════════════════════════════════════════════════════════════════
+
+@import "../abstracts/variables";
+
+// ─── Loading ──────────────────────────────────────────────────────
+// A slim indeterminate bar directly under the toolbar, rather than a
+// block that pushes the results down while it is visible.
+.panel__loading {
+  width: 100%;
+  height: 3px;
+  flex: 0 0 auto;
+}
+
+// ─── Empty ────────────────────────────────────────────────────────
+.panel__empty {
+  grid-column: 1 / -1; // span the whole grid, whatever the columns
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $space-2;
+  padding: $space-12 $space-4;
+  text-align: center;
+  border: 1px dashed $color-border;
+  border-radius: $radius-lg;
+  background: rgba($color-surface, 0.6);
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    margin-bottom: $space-1;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba($color-primary, 0.12), rgba($color-info, 0.1));
+    color: $color-primary;
+
+    vaadin-icon,
+    iron-icon,
+    svg {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-md;
+    font-weight: $font-weight-semibold;
+    color: $color-text;
+  }
+
+  &__description {
+    margin: 0;
+    max-width: 42ch;
+    color: $color-text-muted;
+    font-size: $font-size-sm;
+    line-height: 1.55;
+  }
+
+  @media (max-width: $bp-panel-compact) {
+    padding: $space-8 $space-3;
+  }
+}

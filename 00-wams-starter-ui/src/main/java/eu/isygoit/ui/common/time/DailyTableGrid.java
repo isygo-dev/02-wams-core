@@ -28,8 +28,7 @@ import java.util.stream.Collectors;
  * Daily timetable grid – one column for the day, time labels on the left.
  * Matches the weekly timetable in styling and behaviour.
  */
-@CssImport("./styles/time-grid.css")
-@CssImport("./styles/split/18-calendar.css")
+@CssImport("./styles/scss/time-grid.scss")
 public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
 
     private final DailyTableGridConfig<E> config;

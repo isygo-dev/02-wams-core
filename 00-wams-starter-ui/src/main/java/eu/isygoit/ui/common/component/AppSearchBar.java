@@ -30,7 +30,7 @@ import java.util.List;
  * whenever at least one of its module's targets still matches, so the tree
  * structure survives filtering.
  */
-@CssImport("./styles/app-search.css")
+@CssImport("./styles/scss/app-search.scss")
 public class AppSearchBar extends ComboBox<AppSearchBar.SearchItem> {
 
     private INavRegistry navRegistry;

@@ -14,7 +14,7 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.util.SecurityUtils;
 
-@CssImport("./styles/view.css")
+@CssImport("./styles/scss/view.scss")
 public class ManagementVerticalView extends VerticalLayout implements BeforeEnterObserver {
 
     public static Button createCopyButton(VaadinIcon icon, String textToCopy, String tooltip) {

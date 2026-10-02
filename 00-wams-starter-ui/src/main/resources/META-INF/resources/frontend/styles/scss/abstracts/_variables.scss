@@ -1,0 +1,73 @@
+// Design tokens for 03-edyra-pilot
+$color-primary: #4a90d9;
+$color-primary-10: rgba(74, 144, 217, 0.1);
+$color-primary-50: rgba(74, 144, 217, 0.5);
+
+$color-success: #50c878;
+$color-warning: #f5a623;
+$color-danger: #ff6b6b;
+$color-info: #7b68ee;
+
+$color-text: #1f2937;
+$color-text-muted: #6b7280;
+$color-text-soft: #9ca3af;
+$color-surface: #ffffff;
+$color-surface-alt: #f8fafc;
+$color-border: rgba(15, 23, 42, 0.08);
+$color-shadow: rgba(15, 23, 42, 0.08);
+
+$space-1: 0.25rem;
+$space-2: 0.5rem;
+$space-3: 0.75rem;
+$space-4: 1rem;
+$space-5: 1.25rem;
+$space-6: 1.5rem;
+$space-8: 2rem;
+$space-10: 2.5rem;
+$space-12: 3rem;
+
+$radius-sm: 0.5rem;
+$radius-md: 0.75rem;
+$radius-lg: 1rem;
+$radius-xl: 1.25rem;
+
+$font-family-base: "Inter", "Segoe UI", sans-serif;
+
+$font-size-xxs: 0.625rem;
+$font-size-xs: 0.75rem;
+$font-size-sm: 0.875rem;
+$font-size-md: 1rem;
+$font-size-lg: 1.125rem;
+$font-size-xl: 1.5rem;
+$font-size-xxl: 2rem;
+
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+
+// Panel/toolbar breakpoints. These are deliberately *not* the $breakpoint-*
+// scale above: they mark the widths at which a search field + N filter
+// combos + an add button stop fitting on one row, which happens earlier
+// than the generic layout breakpoints. Shared by components/_toolbar.scss,
+// components/_panel.scss and the view partials so a panel and its toolbar
+// always reflow at the same width.
+$bp-panel-mobile: 520px;
+$bp-panel-compact: 720px;
+$bp-panel-tablet: 900px;
+$bp-panel-wide: 1200px;
+
+// Narrowest a list card may get before the grid rewraps.
+$card-grid-min: 320px;
+
+$container-max-width: 1400px;
+$header-height: 72px;
+$toolbar-height: 64px;
+
+$shadow-sm: 0 2px 8px $color-shadow;
+$shadow-md: 0 4px 16px $color-shadow;

@@ -1,0 +1,184 @@
+/*
+ * Shared styling for file upload components and file rows.
+ * Aligned with the project design tokens and Lumo variables.
+ */
+
+// -----------------------------------------------------------------------------
+// 1. Upload drop zone
+// -----------------------------------------------------------------------------
+
+.upload-dragger {
+  // !important is required here: vaadin-upload's own Lumo shadow styles set
+  // border/background on the host with equal-or-higher effective specificity.
+  width: 100% !important;
+  border: 2px dashed var(--lumo-primary-color-50pct) !important;
+  border-radius: var(--lumo-border-radius-l) !important;
+  padding: var(--lumo-space-m) !important;
+  background: var(--lumo-contrast-5pct) !important;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+
+  &:hover {
+    border-color: var(--lumo-primary-color) !important;
+    background: var(--lumo-primary-color-10pct) !important;
+  }
+
+  [slot="drop-label"] {
+    color: var(--lumo-secondary-text-color);
+    font-size: var(--lumo-font-size-xs);
+  }
+
+  vaadin-button[slot="add-button"] {
+    --lumo-button-size: auto;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// 2. File rows (shared by Create / Update / Details dialogs)
+// -----------------------------------------------------------------------------
+
+.file-row {
+  display: flex;
+  align-items: center;
+  gap: var(--lumo-space-s);
+  width: 100%;
+  padding: var(--lumo-space-s) var(--lumo-space-m);
+  border-bottom: 1px solid var(--lumo-contrast-10pct);
+  background: var(--lumo-base-color);
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: var(--lumo-contrast-5pct);
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  // --- File icon ---
+  &__icon,
+  vaadin-icon.file-row__icon {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    color: var(--lumo-primary-color);
+  }
+
+  // --- File name ---
+  &__name {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-weight: 500;
+    font-size: var(--lumo-font-size-xs);
+    color: var(--lumo-body-text-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // --- File size ---
+  &__size {
+    flex: 0 0 auto;
+    margin-left: var(--lumo-space-s);
+    color: var(--lumo-secondary-text-color);
+    font-size: var(--lumo-font-size-xxs);
+  }
+
+  // --- Download link / icon ---
+  &__download {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--lumo-primary-color);
+    text-decoration: none;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--lumo-primary-text-color);
+      filter: brightness(80%);
+    }
+  }
+
+  &__download-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  // --- Action container (download + delete buttons) ---
+  &__actions {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--lumo-space-xs);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// 3. Files section container
+// -----------------------------------------------------------------------------
+
+.files-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lumo-space-s);
+  width: 100%;
+
+  &__title {
+    font-weight: 600;
+    font-size: var(--lumo-font-size-m);
+    color: var(--lumo-header-text-color);
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border: 1px solid var(--lumo-contrast-10pct);
+    border-radius: var(--lumo-border-radius-l);
+    overflow: hidden;
+
+    .file-row:last-child {
+      border-bottom: none;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// 4. Details dialog – status row
+// -----------------------------------------------------------------------------
+
+.detail-status-row {
+  display: flex;
+  align-items: center;
+  gap: var(--lumo-space-s);
+
+  &__icon {
+    width: 18px;
+    height: 18px;
+    color: var(--lumo-secondary-text-color);
+    flex: 0 0 auto;
+  }
+
+  &__label {
+    font-weight: 500;
+    color: var(--lumo-secondary-text-color);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// 5. Responsive tweaks
+// -----------------------------------------------------------------------------
+
+@media (max-width: 600px) {
+  .file-row {
+    flex-wrap: wrap;
+
+    &__name {
+      flex-basis: 100%;
+    }
+
+    &__size {
+      margin-left: 0;
+    }
+  }
+}

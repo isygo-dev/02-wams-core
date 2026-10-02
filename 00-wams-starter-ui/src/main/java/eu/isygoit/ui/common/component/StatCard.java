@@ -17,7 +17,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
  * for the full {@code wams-stat-card} rule set (hover-lift, skeleton-loading,
  * responsive grid via {@link StatCardGrid}).
  */
-@CssImport("./styles/card.css")
+@CssImport("./styles/scss/common.scss")
 public class StatCard extends VerticalLayout {
 
     private final Div iconCircle;

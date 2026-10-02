@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * Gère l'en-tête commun (titre, rafraîchissement, chargement) et délègue
  * la construction des sections et le chargement des données aux sous-classes.
  */
-@CssImport("./styles/card.css")
+@CssImport("./styles/scss/common.scss")
 public abstract class AbstractStatisticsPanel extends VerticalLayout {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractStatisticsPanel.class);

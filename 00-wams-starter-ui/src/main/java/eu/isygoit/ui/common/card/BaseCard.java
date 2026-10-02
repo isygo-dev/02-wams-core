@@ -11,7 +11,6 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -36,7 +35,7 @@ import java.util.List;
  * @param <V> the parent view type
  * @param <S> the service type used by this card
  */
-@CssImport("./styles/card.css")
+@CssImport("./styles/scss/common.scss")
 public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
 
     // ── Infrastructure ────────────────────────────────────────────────────────
@@ -131,9 +130,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         setHeightFull();
         setMargin(false);
         setPadding(true);
-        addClassName(LumoUtility.BorderRadius.LARGE);
-        addClassName(LumoUtility.Background.BASE);
-        addClassName(LumoUtility.BoxShadow.XSMALL);
+        addClassName("wams-card-shell");
         addClassName("wams-card");
     }
 
@@ -178,10 +175,6 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         enumTagsRow.setPadding(false);
         enumTagsRow.setAlignItems(FlexComponent.Alignment.CENTER);
         enumTagsRow.addClassName("wams-card__enum-tags");
-        enumTagsRow.getStyle()
-                .set("flex-wrap", "wrap")
-                .set("row-gap", "var(--lumo-space-xs)")
-                .set("column-gap", "var(--lumo-space-s)");
         enumTagsRow.add(tags);
     }
 
@@ -248,12 +241,10 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
 
     protected Span buildStatusChip(String label, ChipColor color) {
         Span chip = new Span(label);
-        chip.addClassName(LumoUtility.FontSize.XSMALL);
-        chip.addClassName(LumoUtility.Padding.Horizontal.SMALL);
-        chip.addClassName(LumoUtility.Padding.Vertical.XSMALL);
-        chip.addClassName(LumoUtility.BorderRadius.LARGE);
-        chip.addClassName("status-chip");
-        chip.addClassName(color.cssClass());
+        chip.addClassName("wams-chip");
+        if (color != null) {
+            chip.addClassName(color.cssClass());
+        }
         chip.getElement().setAttribute("title", label);
         return chip;
     }
@@ -261,11 +252,11 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
     protected Span buildStatusChip(String translated, String status) {
         Span chip = new Span(translated);
         chip.getElement().setAttribute("title", status.toLowerCase());
-        chip.addClassName("status-chip");
+        chip.addClassName("wams-chip");
         if (StringUtils.hasText(status)) {
-            chip.addClassName("status-chip--" + status.toLowerCase());
+            chip.addClassName("chip--" + status.toLowerCase());
         } else {
-            chip.addClassName("status-chip--neutral");
+            chip.addClassName("chip--neutral");
         }
         return chip;
     }
@@ -273,11 +264,11 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
     protected Span buildStatusChip(String label, String status, String translated) {
         Span chip = new Span(translated);
         chip.getElement().setAttribute("title", label.toLowerCase());
-        chip.addClassName("status-chip");
+        chip.addClassName("wams-chip");
         if (StringUtils.hasText(status)) {
-            chip.addClassName("status-chip--" + status.toLowerCase());
+            chip.addClassName("chip--" + status.toLowerCase());
         } else {
-            chip.addClassName("status-chip--neutral");
+            chip.addClassName("chip--neutral");
         }
         return chip;
     }
@@ -286,10 +277,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
 
     protected Span buildTitleSpan(String displayText, String fullValue) {
         Span span = new Span(displayText);
-        span.addClassName(LumoUtility.FontWeight.BOLD);
-        span.addClassName(LumoUtility.FontSize.MEDIUM);
-        span.addClassName(LumoUtility.TextColor.PRIMARY);
-        span.addClassName("wams-card__title");
+        span.addClassName("wams-card__title-text");
         span.getElement().setAttribute("title", fullValue != null ? fullValue : displayText);
         return span;
     }
@@ -305,13 +293,17 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
 
         HorizontalLayout row = new HorizontalLayout();
         row.setSpacing(true);
-        row.addClassName(LumoUtility.FontSize.XSMALL);
-        row.addClassName(LumoUtility.TextColor.TERTIARY);
         row.addClassName("wams-card__meta-row");
 
         for (int i = 0; i < valid.size(); i++) {
-            if (i > 0) row.add(new Span("•"));
-            row.add(new Span(valid.get(i)));
+            if (i > 0) {
+                Span dot = new Span("•");
+                dot.addClassName("wams-card__meta-dot");
+                row.add(dot);
+            }
+            Span item = new Span(valid.get(i));
+            item.addClassName("wams-card__meta-item");
+            row.add(item);
         }
         return row;
     }
@@ -380,12 +372,12 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
     // ── Inner types ───────────────────────────────────────────────────────────
 
     public record ChipColor(String cssClass) {
-        public static final ChipColor SUCCESS  = new ChipColor("status-chip--success");
-        public static final ChipColor ERROR    = new ChipColor("status-chip--error");
-        public static final ChipColor WARNING  = new ChipColor("status-chip--warning");
-        public static final ChipColor NEUTRAL  = new ChipColor("status-chip--neutral");
-        public static final ChipColor INFO     = new ChipColor("status-chip--info");
-        public static final ChipColor CONTRAST = new ChipColor("status-chip--contrast");
+        public static final ChipColor SUCCESS = new ChipColor("chip--success");
+        public static final ChipColor ERROR = new ChipColor("chip--error");
+        public static final ChipColor WARNING = new ChipColor("chip--warning");
+        public static final ChipColor NEUTRAL = new ChipColor("chip--neutral");
+        public static final ChipColor INFO = new ChipColor("chip--info");
+        public static final ChipColor CONTRAST = new ChipColor("chip--contrast");
 
         /** Legacy mapping — kept for backwards compatibility. */
         public static ChipColor fromStatus(String status) {
@@ -399,7 +391,9 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
             };
         }
 
-        /** Color mapping for {@link eu.isygoit.enums.IEnumStudentStatus.Types}. */
+        /**
+         * Color mapping for student status.
+         */
         public static ChipColor fromStudentStatus(String status) {
             if (status == null) return NEUTRAL;
             return switch (status.toUpperCase()) {
@@ -425,7 +419,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
             };
         }
 
-        /** Color mapping for {@link eu.isygoit.enums.IEnumStaffStatus.Types}. */
+        /** Color mapping for staff status. */
         public static ChipColor fromStaffStatus(String status) {
             if (status == null) return NEUTRAL;
             return switch (status.toUpperCase()) {
@@ -450,7 +444,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
             };
         }
 
-        /** Color mapping for {@link eu.isygoit.enums.IEnumEnabledBinaryStatus.Types}. */
+        /** Color mapping for enabled status. */
         public static ChipColor fromEnabledStatus(String status) {
             if (status == null) return NEUTRAL;
             return switch (status.toUpperCase()) {
@@ -460,7 +454,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
             };
         }
 
-        /** Color mapping for {@link eu.isygoit.enums.IEnumTeacherStatus.Types}. */
+        /** Color mapping for teacher status. */
         public static ChipColor fromTeacherStatus(String status) {
             if (status == null) return NEUTRAL;
             return switch (status.toUpperCase()) {

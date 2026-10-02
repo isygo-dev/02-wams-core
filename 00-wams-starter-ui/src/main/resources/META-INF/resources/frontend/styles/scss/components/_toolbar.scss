@@ -1,0 +1,228 @@
+// ═══════════════════════════════════════════════════════════════════
+// TOOLBAR — search + filters + primary action
+//
+// Shared by every list panel (administration, compliance, academic, …).
+// View partials must only add view-specific *decoration* on top of these
+// (see .administration-view .toolbar-add-btn); the layout, wrapping and
+// responsive behaviour live here so all panels reflow identically.
+//
+// ─── Why there are almost no breakpoints here ────────────────────
+// These panels render inside the AppLayout content area, i.e.
+// `viewport − drawer`, and the drawer is 220px expanded / 60px collapsed
+// (tokens.css). One viewport width therefore maps to two very different
+// toolbar widths, so a viewport-keyed @media query cannot know when the
+// controls stop fitting: on a 1366px laptop with the drawer open the
+// toolbar only has ~1100px, yet a `max-width: 1200px` rule never fires
+// and the row gets crushed to its min-widths.
+//
+// So the layout is intrinsic instead: an auto-fit grid for the filters
+// and `min()` flex bases, both of which resolve against the *available*
+// width. Where a genuine threshold is still needed, it is expressed as a
+// @container query (see toolbar-stacked below), never as @media.
+//
+// Contract: never set a width in Java on a toolbar child — it defeats
+// the shrink rules below.
+//
+// RTL: the app ships an ar_SA locale, so use logical properties
+// (inline-start/end, margin-inline, …) rather than left/right.
+// ═══════════════════════════════════════════════════════════════════
+
+@import "../abstracts/variables";
+@import "../abstracts/mixins";
+
+$toolbar-overlay-width: 260px; // filter combo-box dropdown width
+$toolbar-search-max: 420px; // a search box wider than this just looks empty
+$toolbar-left-basis: 520px; // below this the left cluster drops under the action
+$toolbar-filter-min: 170px; // narrowest a filter control stays usable at
+$toolbar-filter-max: 240px; // …and widest before it just looks stretched
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-3;
+  flex-wrap: wrap;
+  padding: $space-3 $space-4;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    flex-wrap: wrap;
+  }
+
+  &__search {
+    min-width: 220px;
+    flex: 1;
+  }
+
+  @include mobile {
+    flex-direction: column;
+    align-items: stretch;
+
+    &__search {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+}
+
+// ─── Left cluster — search + every extra filter ──────────────────
+// Two stacked rows (search, then filters) rather than one long row: with
+// three to five filters a single row never fits beside the action button
+// at real content widths, and stacking is predictable at every size.
+.toolbar-left {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: $space-2;
+  min-width: 0;
+
+  // `min()` — not a bare 520px — so the basis can never exceed the
+  // container and force an overflow before the wrap kicks in.
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: min(100%, #{$toolbar-left-basis});
+}
+
+// ─── Right cluster — primary action ──────────────────────────────
+.toolbar-right {
+  display: flex;
+  align-items: flex-end;
+  flex: 0 0 auto;
+  margin-inline-start: auto; // pins to the end when wrapping
+}
+
+// ─── Search field ────────────────────────────────────────────────
+.toolbar-search {
+  flex: 1 1 100%; // own row inside the left cluster
+  max-width: $toolbar-search-max; // …but never wider than it needs to be
+  min-width: 0;
+
+  // Prefix search glyph, when the panel sets one.
+  vaadin-icon {
+    color: $color-text-soft;
+  }
+
+  &:focus-within vaadin-icon {
+    color: $color-primary;
+  }
+}
+
+// ─── Add button ──────────────────────────────────────────────────
+// Neutral base only. Accent/brand treatment belongs to the view partial
+// that opts into it, so restyling one view never leaks into the others.
+.toolbar-add-btn {
+  flex: 0 0 auto;
+  font-weight: $font-weight-semibold;
+  white-space: nowrap;
+}
+
+// ─── Filter bar (built by BaseAdministrationPanel#buildFilterBar) ─
+.panel__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: $space-2;
+  flex: 1 1 100%; // own row, under the search
+  min-width: 0;
+
+  // Bounded growth is what makes this container-relative without a single
+  // breakpoint: as many filters per row as fit at $toolbar-filter-min,
+  // then they share the slack — but only up to $toolbar-filter-max, so a
+  // short last row never balloons to full width (the failure the old
+  // `flex: 1 1 200px` rule had) and a wide monitor never stretches them.
+  //
+  // An auto-fit grid was the obvious alternative and is wrong here: with a
+  // definite track max, auto-fit derives the column count from the *max*,
+  // so capping tracks at 240px silently dropped a 1146px toolbar from five
+  // columns to three.
+  > vaadin-combo-box {
+    flex: 1 1 #{$toolbar-filter-min};
+    max-width: $toolbar-filter-max;
+    min-width: 0; // else the field's intrinsic 12em overflows
+    --vaadin-combo-box-overlay-width: #{$toolbar-overlay-width};
+  }
+
+  // A tertiary text button stretched to field width reads as a mis-sized
+  // input; keep it at its natural size.
+  > vaadin-button {
+    flex: 0 0 auto;
+  }
+}
+
+// ─── Clear filters button ────────────────────────────────────────
+.toolbar-clear-filters {
+  color: $color-text-muted;
+
+  &:hover {
+    color: $color-danger;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// NARROW LAYOUTS
+// ═══════════════════════════════════════════════════════════════════
+// Two thresholds, because they answer two different questions. Both are
+// exposed as mixins since the condition differs by context: panels inside
+// a size container query the container (see .admin-panel), everything
+// else falls back to the viewport.
+
+// ≤ compact — the action button can no longer sit beside the filters.
+// The filters themselves are left alone: the bounded flex above still
+// packs three per row at this width, and the 240px cap is what keeps a
+// lone filter on the last row from stretching across the whole panel.
+@mixin toolbar-stacked {
+  .toolbar-left,
+  .toolbar-right {
+    width: 100%;
+    margin-inline-start: 0;
+  }
+
+  .toolbar-right {
+    justify-content: stretch;
+
+    vaadin-button {
+      width: 100%;
+    }
+  }
+
+  .toolbar-search {
+    max-width: none;
+  }
+
+  .toolbar-clear-filters {
+    justify-content: flex-start;
+  }
+}
+
+// ≤ mobile — two filters side by side would be too cramped to read, so
+// go to one per row. Only here is the cap lifted, because "full width" is
+// now unambiguous rather than "whatever is left on a ragged row".
+// Stays in the flex model rather than switching to a one-column grid:
+// Vaadin fields carry their own `width: 12em`, which `justify-self:
+// stretch` cannot override, so a grid track left them at 168px instead of
+// filling the row. `flex-basis` does override width, so this actually
+// reaches full width.
+@mixin toolbar-single-column {
+  .panel__filters > vaadin-combo-box {
+    flex-basis: 100%;
+    max-width: none;
+  }
+
+  .panel__filters > vaadin-button {
+    flex: 1 1 100%;
+  }
+}
+
+// Fallback for toolbars that are not inside a size container.
+@media (max-width: $bp-panel-compact) {
+  @include toolbar-stacked;
+}
+
+@media (max-width: $bp-panel-mobile) {
+  @include toolbar-single-column;
+}

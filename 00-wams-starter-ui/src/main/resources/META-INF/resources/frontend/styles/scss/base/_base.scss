@@ -1,0 +1,21 @@
+@import "../abstracts/variables";
+
+body {
+  font-family: var(--lumo-font-family);
+  background: var(--lumo-contrast-5pct);
+  color: var(--lumo-body-text-color);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: var(--lumo-primary-color);
+  text-decoration: none;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}

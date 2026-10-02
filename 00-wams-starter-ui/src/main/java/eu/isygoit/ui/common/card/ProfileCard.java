@@ -9,7 +9,6 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.enums.IEnum;
 import eu.isygoit.i18n.I18n;
 import org.springframework.util.StringUtils;
@@ -70,9 +69,7 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
         hero.setAlignItems(FlexComponent.Alignment.CENTER);
         hero.setSpacing(true);
         hero.setWidthFull();
-        hero.addClassName("card__title-row");
-        hero.getStyle().set("gap", "14px");
-        hero.getStyle().set("flex-wrap", "nowrap");
+        hero.addClassName("wams-profile-card__hero");
 
         Component avatar = buildProfileAvatar();
         Component info   = buildProfileNameBlock();
@@ -85,31 +82,18 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
     /** Round avatar. Uses {@link #profileImagePath()} when non-blank, else a user icon. */
     protected Component buildProfileAvatar() {
         Div wrap = new Div();
-        wrap.getStyle()
-                .set("width", "72px")
-                .set("height", "72px")
-                .set("border-radius", "50%")
-                .set("overflow", "hidden")
-                .set("display", "flex")
-                .set("align-items", "center")
-                .set("justify-content", "center")
-                .set("flex-shrink", "0")
-                .set("align-self", "center")
-                .set("background", "var(--lumo-contrast-5pct)")
-                .set("border", "3px solid var(--lumo-primary-color-50pct)")
-                .set("box-shadow", "0 2px 8px rgba(0,0,0,0.06)");
+        wrap.addClassName("wams-profile-card__avatar-wrap");
 
         String path = profileImagePath();
         if (StringUtils.hasText(path)) {
             Image img = new Image(path, "");
             img.setWidth("100%");
             img.setHeight("100%");
-            img.getStyle().set("object-fit", "cover");
+            img.addClassName("wams-profile-card__avatar-img");
             wrap.add(img);
         } else {
             Icon icon = VaadinIcon.USER.create();
-            icon.setSize("34px");
-            icon.getStyle().set("color", "var(--lumo-contrast-40pct)");
+            icon.addClassName("wams-profile-card__avatar-icon");
             wrap.add(icon);
         }
         return wrap;
@@ -121,22 +105,17 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
         info.setPadding(false);
         info.setSpacing(false);
         info.setWidthFull();
-        info.getStyle().set("gap", "4px");
-        info.getStyle().set("min-width", "0");
+        info.addClassName("wams-profile-card__name-block");
 
         String fullName = profileFullName();
         Span nameSpan = buildTitleSpan(fullName, fullName);
-        nameSpan.addClassName("card__title");
-        nameSpan.getStyle().set("line-height", "1.2");
-        nameSpan.getStyle().set("white-space", "normal");
+        nameSpan.addClassName("wams-profile-card__full-name");
         info.add(nameSpan);
 
         String subtitle = profileSubtitle();
         if (StringUtils.hasText(subtitle)) {
             Span sub = new Span(subtitle);
-            sub.addClassName(LumoUtility.FontSize.XSMALL);
-            sub.addClassName(LumoUtility.TextColor.SECONDARY);
-            sub.getStyle().set("word-break", "break-all");
+            sub.addClassName("wams-profile-card__subtitle");
             info.add(sub);
         }
         return info;
@@ -152,20 +131,16 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
         row.setAlignItems(FlexComponent.Alignment.CENTER);
         row.setSpacing(true);
         row.setWidthFull();
-        row.addClassName("meta-row");
+        row.addClassName("wams-profile-card__row");
 
         Icon iconComponent = icon.create();
-        iconComponent.addClassName("card__row-icon");
+        iconComponent.addClassName("wams-profile-card__row-icon");
 
         Span labelSpan = new Span(label + ":");
-        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        labelSpan.addClassName("card__row-label");
+        labelSpan.addClassName("wams-profile-card__row-label");
 
         Span valueSpan = new Span(value == null || value.isBlank() ? "-" : value);
-        valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        valueSpan.addClassName("card__row-value");
-        valueSpan.getStyle().set("word-break", "break-word");
+        valueSpan.addClassName("wams-profile-card__row-value");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -189,14 +164,11 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
         row.setSpacing(true);
         row.setPadding(false);
         row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.addClassName("card__tags-row");
-        row.getStyle()
-                .set("flex-wrap", "wrap")
-                .set("row-gap", "var(--lumo-space-xs)")
-                .set("column-gap", "var(--lumo-space-s)");
+        row.addClassName("wams-profile-card__tags-row");
+
         for (Span tag : tags) {
             if (tag != null) {
-                tag.getStyle().set("flex-shrink", "0");
+                tag.addClassName("wams-profile-card__tag");
                 row.add(tag);
             }
         }

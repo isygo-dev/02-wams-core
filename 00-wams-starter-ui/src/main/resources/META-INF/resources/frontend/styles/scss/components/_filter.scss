@@ -1,0 +1,502 @@
+// ═══════════════════════════════════════════════════════════════════
+// FILTER & TOOLBAR
+//   .administration-toolbar  — search + add-button surface
+//   .toolbar-search          — search input inside the toolbar
+//   .filter-card*            — Jira-style filter bar (card)
+//   .filter-select           — pill dropdowns inside the card
+//   .filter-date-range       — pair of pill date pickers (from → to)
+//   .filter-date             — single pill date picker
+//   .filter-chip*            — removable active-filter chips
+//
+// All selectors live here so the entire "filter strip" is owned by
+// one partial. Nothing filter-related remains in views/_administration.scss.
+//
+// Control labels — unified look across all four controls
+//   The visual result must be identical for combos, the search field,
+//   and the date pickers. The CSS mechanism, however, differs by
+//   component, because Vaadin does not expose the same hooks in both.
+//
+//   Combos + search field
+//     Their <label> is a top-level `part="label"` on the host, so a
+//     direct `::part(label)` selector reaches it and can override
+//     every property.
+//
+//   Date pickers
+//     The <label> sits inside a nested <vaadin-input-container>
+//     shadow root that `::part(label)` on the host cannot pierce.
+//     Only two things reliably cross that boundary:
+//       • inherited properties that the shadow tree does not set
+//         → text-transform, letter-spacing
+//       • CSS custom properties the shadow tree reads
+//         → --lumo-font-size-s (used for the label font-size)
+//     font-weight is set in the shadow tree (500) and has no CSS
+//     variable backing it, so we do not override it — 500 is what
+//     Vaadin gives combos too, so the two families match by default.
+//
+//   Net values — identical across all controls
+//     font-size     0.6875rem
+//     font-weight   500  (Vaadin default, untouched)
+//     letter-spacing 0.06em
+//     text-transform uppercase
+//     color         --lumo-secondary-text-color
+// ═══════════════════════════════════════════════════════════════════
+
+@import "../abstracts/variables";
+
+// ══════════════════════════════════════════════════════════════════
+// Toolbar surface — search on the left, add button on the right
+// ══════════════════════════════════════════════════════════════════
+
+.administration-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: $space-2 $space-4;
+  width: 100%;
+  padding: $space-3 $space-4;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  background: $color-surface;
+  box-shadow: $shadow-sm;
+}
+
+// Narrow *content area* — not necessarily a narrow screen. This is the
+// case the old viewport breakpoints kept missing: a 1366px laptop with
+// the drawer open leaves the toolbar ~1100px, and a phone-width @media
+// query never fires for it.
+@container panel (max-width: #{$bp-panel-compact}) {
+  .administration-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: $space-2;
+    padding: $space-3;
+    border-radius: $radius-md;
+  }
+
+  @include toolbar-stacked;
+}
+
+@container panel (max-width: #{$bp-panel-mobile}) {
+  @include toolbar-single-column;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// Filter card — Jira-style container
+// ══════════════════════════════════════════════════════════════════
+
+.filter-card {
+  position: relative; // anchor for the top-center handle
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.5rem 1.25rem 1rem;
+  margin: -0.75rem 0;
+  box-sizing: border-box;
+
+  background: var(--lumo-base-color);
+  border: 1px solid var(--lumo-contrast-10pct);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(9, 30, 66, 0.06),
+  0 0 1px rgba(9, 30, 66, 0.10);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 2px 6px rgba(9, 30, 66, 0.08),
+    0 0 1px rgba(9, 30, 66, 0.12);
+  }
+
+  /* ── Collapse handle — pill straddling the top edge ─────────── */
+  &__collapse {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+
+    min-width: 3.5rem;
+    height: 1.5rem;
+    padding: 0 0.75rem;
+    box-sizing: border-box;
+
+    color: var(--lumo-secondary-text-color);
+    background: var(--lumo-base-color);
+    border: 1px solid var(--lumo-contrast-10pct);
+    border-radius: 999px;
+    box-shadow: 0 1px 2px rgba(9, 30, 66, 0.08),
+    0 0 1px rgba(9, 30, 66, 0.12);
+
+    cursor: pointer;
+    transition: color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+    &::part(label) {
+      padding: 0;
+      line-height: 1;
+    }
+
+    &::part(prefix) {
+      margin: 0;
+      padding: 0;
+    }
+
+    &:hover {
+      color: var(--lumo-primary-text-color);
+      border-color: var(--lumo-primary-color-50pct);
+      box-shadow: 0 2px 4px rgba(9, 30, 66, 0.10),
+      0 0 1px rgba(9, 30, 66, 0.14);
+    }
+
+    &:focus-visible {
+      outline: none;
+      border-color: var(--lumo-primary-color);
+      box-shadow: 0 0 0 3px var(--lumo-primary-color-10pct);
+    }
+  }
+
+  &--collapsed.filter-card--has-active &__collapse {
+    color: var(--lumo-primary-text-color);
+    border-color: var(--lumo-primary-color-50pct);
+  }
+
+  &--collapsed &__header {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  /* ── Header: ⚙ Filters ─────────────────────────────────────── */
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
+  }
+
+  &__icon {
+    width: 16px;
+    height: 16px;
+    color: var(--lumo-primary-color);
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--lumo-body-text-color);
+    // The header title is intentionally *not* uppercased — it plays the
+    // role of the card's section title, not of a control label.
+  }
+
+  /* ── Body wrapper — hidden when collapsed ──────────────────── */
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  /* ── Row 1: filter controls ────────────────────────────────── */
+  &__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem 1rem;
+    width: 100%;
+  }
+
+  /* ── Row 2: active chips ───────────────────────────────────── */
+  &__chips {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    width: 100%;
+    padding-top: 0.875rem;
+    border-top: 1px dashed var(--lumo-contrast-15pct);
+  }
+
+  &__chips-label {
+    flex-shrink: 0;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--lumo-secondary-text-color);
+  }
+
+  &__chips-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    flex: 0 1 auto;
+  }
+
+  /* ── "Clear all" — Jira-style text link ─────────────────────── */
+  &__clear {
+    flex-shrink: 0;
+    margin-left: auto;
+
+    background: transparent;
+    border: none;
+    padding: 0;
+    min-width: 0;
+    height: auto;
+    box-shadow: none;
+    border-radius: 0;
+
+    color: var(--lumo-primary-text-color);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.15s ease;
+
+    &::part(label) {
+      padding: 0;
+      font-weight: 500;
+    }
+
+    &:hover,
+    &:focus-visible {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: none;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// LABEL TYPOGRAPHY — one visual contract, two CSS mechanisms.
+//
+// Rule 1 — combos + search field
+//   Direct part selector. Font-size, tracking, casing, colour all
+//   overridable in one shot.
+//
+// Rule 2 — date pickers
+//   ::part(label) cannot reach the label from the host, so:
+//     • font-size via `--lumo-font-size-s` (custom property that
+//       cascades into the nested shadow root),
+//     • text-transform + letter-spacing via inheritance (the shadow
+//       tree does not set either),
+//     • font-weight left at Vaadin's default 500 for a combo label
+//       too, so the two families match without any override.
+//
+// Deliberately no `font-weight` in either rule — the default is what
+// keeps the two families visually identical.
+// ══════════════════════════════════════════════════════════════════
+
+.toolbar-search::part(label),
+.filter-select::part(label) {
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--lumo-secondary-text-color);
+}
+
+.filter-date {
+  /* Reaches the nested label font-size through the Lumo variable
+     the shadow tree reads. Custom properties cross every shadow
+     boundary unconditionally. */
+  --lumo-font-size-s: 0.6875rem;
+
+  /* Reach the nested label text-transform + letter-spacing through
+     plain inheritance. The shadow tree does not set either, so the
+     inherited values win. */
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// LABEL → PILL SPACING
+//
+// Uniform across all three controls: same gap, same source. Applied
+// on the input-field part — a top-level part on every one of them —
+// so the value is guaranteed to reach every control identically.
+// ══════════════════════════════════════════════════════════════════
+
+.toolbar-search::part(input-field),
+.filter-select::part(input-field),
+.filter-date::part(input-field) {
+  margin-top: 0.375rem;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// PILL STYLING
+// ══════════════════════════════════════════════════════════════════
+
+/* ── Combo pills ────────────────────────────────────────────── */
+.filter-select {
+  min-width: 180px;
+  max-width: 260px;
+  margin: 0;
+
+  &::part(input-field) {
+    height: 2.25rem;
+    padding: 0 0.875rem;
+    border-radius: 999px;
+    background: var(--lumo-contrast-5pct);
+    border: 1px solid transparent;
+    transition: background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+  }
+
+  &:hover::part(input-field) {
+    background: var(--lumo-contrast-10pct);
+    border-color: var(--lumo-contrast-15pct);
+  }
+
+  &[focus]::part(input-field) {
+    background: var(--lumo-base-color);
+    border-color: var(--lumo-primary-color);
+    box-shadow: 0 0 0 3px var(--lumo-primary-color-10pct);
+  }
+}
+
+/* ── Date-range pair ────────────────────────────────────────── */
+.filter-date-range {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+/* ── Date pills ─────────────────────────────────────────────── */
+.filter-date {
+  min-width: 150px;
+  max-width: 180px;
+  margin: 0;
+
+  &::part(input-field) {
+    /* Reset whatever the host-level --lumo-font-size-s override
+       might otherwise leak into the input itself, and reset
+       casing for the picked date. */
+    font-size: 0.875rem;
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--lumo-body-text-color);
+
+    height: 2.25rem;
+    padding: 0 0.75rem 0 0.875rem;
+    border-radius: 999px;
+    background: var(--lumo-contrast-5pct);
+    border: 1px solid transparent;
+    transition: background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+  }
+
+  &:hover::part(input-field) {
+    background: var(--lumo-contrast-10pct);
+    border-color: var(--lumo-contrast-15pct);
+  }
+
+  &[focus]::part(input-field) {
+    background: var(--lumo-base-color);
+    border-color: var(--lumo-primary-color);
+    box-shadow: 0 0 0 3px var(--lumo-primary-color-10pct);
+  }
+
+  &::part(value) {
+    font-size: 0.875rem;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
+  &::part(toggle-button) {
+    margin-inline-end: -0.25rem;
+  }
+}
+
+/* ── Removable chip — Jira lozenge ──────────────────────────── */
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3125rem 0.375rem 0.3125rem 0.75rem;
+  border-radius: 999px;
+  background: var(--lumo-primary-color-10pct);
+  color: var(--lumo-primary-text-color);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  cursor: default;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: var(--lumo-primary-color-20pct);
+  }
+
+  &__label {
+    font-weight: 400;
+    opacity: 0.75;
+
+    &::after {
+      content: ':';
+    }
+  }
+
+  &__value {
+    font-weight: 600;
+  }
+
+  &__remove {
+    width: 12px;
+    height: 12px;
+    margin-left: 0.25rem;
+    padding: 2px;
+    border-radius: 50%;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.15s ease, background 0.15s ease;
+
+    &:hover {
+      opacity: 1;
+      background: var(--lumo-primary-color-20pct);
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// Narrow content area — tighten the card without changing structure
+// ══════════════════════════════════════════════════════════════════
+
+@container panel (max-width: #{$bp-panel-compact}) {
+  .filter-card {
+    padding: 1.5rem 1rem 0.875rem;
+
+    &__collapse {
+      min-width: 3rem;
+      height: 1.4rem;
+      padding: 0 0.625rem;
+    }
+
+    &__controls {
+      gap: 0.625rem 0.75rem;
+    }
+  }
+
+  .filter-date-range {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .filter-date {
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+  }
+}

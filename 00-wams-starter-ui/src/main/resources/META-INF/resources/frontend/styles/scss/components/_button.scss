@@ -1,0 +1,41 @@
+@import "../abstracts/variables";
+@import "../abstracts/mixins";
+
+.btn,
+button {
+  border: 0;
+  border-radius: var(--lumo-border-radius-m);
+  padding: var(--lumo-space-s) var(--lumo-space-m);
+  font-weight: 500;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.btn--primary {
+  background: var(--lumo-primary-color);
+  color: var(--lumo-primary-contrast-color);
+}
+
+.btn--secondary {
+  background: var(--lumo-contrast-5pct);
+  color: var(--lumo-body-text-color);
+  border: 1px solid var(--lumo-contrast-10pct);
+}
+
+.btn--success {
+  background: var(--lumo-success-color);
+  color: var(--lumo-success-contrast-color);
+}
+
+.btn--danger {
+  background: var(--lumo-error-color);
+  color: var(--lumo-error-contrast-color);
+}

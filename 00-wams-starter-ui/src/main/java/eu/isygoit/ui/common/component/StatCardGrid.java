@@ -10,7 +10,7 @@ import com.vaadin.flow.component.html.Div;
  * layout is identical everywhere instead of each dashboard hand-rolling its
  * own {@code HorizontalLayout}/CSS.
  */
-@CssImport("./styles/card.css")
+@CssImport("./styles/scss/common.scss")
 public class StatCardGrid extends Div {
 
     public StatCardGrid(StatCard... cards) {
