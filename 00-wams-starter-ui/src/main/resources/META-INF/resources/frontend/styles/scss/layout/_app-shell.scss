@@ -62,26 +62,32 @@ vaadin-drawer-toggle {
 }
 
 .wams-brand__icon {
-    color: var(--lumo-primary-color);
-    width: 22px;
-    height: 22px;
-    margin-right: var(--lumo-space-xs);
+    box-sizing: border-box;
+    width: 28px;
+    height: 28px;
+    padding: 5px;
+    margin-right: var(--lumo-space-s);
+    border-radius: var(--lumo-border-radius-l);
+    color: var(--lumo-primary-contrast-color);
+    background: linear-gradient(135deg, var(--lumo-primary-color), var(--wams-module-accent, #0055CC));
 }
 
 .wams-brand__name {
     font-size: var(--lumo-font-size-l);
     font-weight: 700;
+    letter-spacing: -0.01em;
     color: var(--lumo-header-text-color);
     white-space: nowrap;
 }
 
 .wams-header-title {
     white-space: nowrap;
-    font-size: var(--lumo-font-size-m);
-    font-weight: 500;
+    font-size: var(--lumo-font-size-s);
+    font-weight: 600;
     color: var(--wams-module-accent, var(--lumo-secondary-text-color));
-    padding-left: var(--lumo-space-s);
-    border-left: 1px solid var(--lumo-contrast-20pct);
+    padding: 2px var(--lumo-space-s);
+    border-radius: var(--lumo-border-radius-l);
+    background: var(--lumo-contrast-5pct);
 }
 
 /* ── Header icon buttons (notifications / settings): hover only, sizing is
@@ -89,6 +95,14 @@ vaadin-drawer-toggle {
 
 .wams-header-icon-btn:hover {
     color: var(--lumo-primary-color);
+    background-color: var(--lumo-contrast-5pct);
+}
+
+.wams-header-icon-btn:focus-visible,
+.wams-brand:focus-visible,
+vaadin-drawer-toggle:focus-visible {
+    outline: 2px solid var(--lumo-primary-color);
+    outline-offset: 1px;
 }
 
 .wams-header-popover {
@@ -96,7 +110,57 @@ vaadin-drawer-toggle {
 }
 
 .wams-avatar-bordered {
-    border: 2px solid var(--lumo-contrast-20pct);
+    border: 2px solid transparent;
+    transition: border-color 0.15s ease;
+}
+
+.wams-profile-menu:hover .wams-avatar-bordered {
+    border-color: var(--lumo-primary-color-50pct);
+}
+
+/* ── Profile dropdown ─────────────────────────────────────────────────── */
+
+.wams-profile-menu__identity {
+    display: flex;
+    flex-direction: column;
+    max-width: 260px;
+    padding: var(--lumo-space-xs) var(--lumo-space-s);
+}
+
+.wams-profile-menu__header {
+    opacity: 1;
+    cursor: default;
+}
+
+.wams-profile-menu__name {
+    font-weight: 600;
+    color: var(--lumo-header-text-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wams-profile-menu__email {
+    font-size: var(--lumo-font-size-xs);
+    color: var(--lumo-secondary-text-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wams-menu-entry {
+    display: flex;
+    align-items: center;
+    gap: var(--lumo-space-s);
+}
+
+.wams-menu-entry__icon {
+    width: 16px;
+    height: 16px;
+    color: var(--lumo-secondary-text-color);
+}
+
+.wams-profile-menu__logout .wams-menu-entry,
+.wams-profile-menu__logout .wams-menu-entry__icon {
+    color: var(--lumo-error-text-color);
 }
 
 /*
@@ -134,23 +198,73 @@ vaadin-drawer-toggle {
     }
 }
 
+/* Mobile: one compact row (toggle · brand … search-icon · icons). The right
+   wrappers use display:contents so the search slot and icon cluster become
+   direct flex items of the header; the search field then drops to its own
+   full-width row only while .wams-search-open is set on the layout. */
+
+.wams-header-search-toggle {
+    display: none;
+}
+
 @media (max-width: 768px) {
     .wams-main-header {
         height: auto;
         min-height: var(--wams-header-height);
-        flex-direction: column;
-        align-items: stretch;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        padding: 0 var(--lumo-space-s);
     }
 
-    .wams-main-header > :first-child {
-        justify-content: space-between;
+    .wams-main-header__right,
+    .wams-header-right-content {
+        display: contents;
     }
 
-    .wams-main-header__right {
-        width: 100%;
-        margin-right: 0;
-        padding: var(--lumo-space-xs) var(--lumo-space-s);
-        box-sizing: border-box;
+    .wams-main-header__left {
+        order: 1;
+    }
+
+    .wams-header-icon-cluster {
+        order: 2;
+    }
+
+    .wams-header-search-toggle {
+        display: inline-flex;
+    }
+
+    .wams-header-search-slot {
+        display: none;
+        order: 3;
+        flex: 1 0 100%;
+        padding: 0 0 var(--lumo-space-s);
+    }
+
+    .wams-search-open .wams-header-search-slot {
+        display: block;
+    }
+
+    .wams-search-open .wams-header-search-toggle {
+        color: var(--lumo-primary-color);
+        background-color: var(--lumo-primary-color-10pct);
+    }
+
+    .wams-brand__name {
+        font-size: var(--lumo-font-size-m);
+    }
+}
+
+/* Overlay drawer (Vaadin switches below 800px): always full width, never the
+   icon rail, and the rail toggle is meaningless there. */
+
+@media (max-width: 800px) {
+    .wams-sidebar-collapsed {
+        --vaadin-app-layout-drawer-width: var(--wams-sidebar-width-expanded);
+    }
+
+    .wams-sidebar-collapse-toggle {
+        display: none;
     }
 }
 
@@ -192,6 +306,9 @@ vaadin-app-layout::part(drawer) {
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
+    padding-top: var(--lumo-space-xs);
+    scrollbar-width: thin;
+    scrollbar-color: var(--lumo-contrast-20pct) transparent;
 }
 
 /* Section label above a group of flat nav items (SideNav#setLabel/constructor) */
@@ -217,7 +334,13 @@ vaadin-side-nav {
 vaadin-side-nav-item::part(link) {
     border-radius: var(--lumo-border-radius-m);
     font-size: 14px;
+    min-height: 36px;
     transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+vaadin-side-nav-item::part(link):focus-visible {
+    outline: 2px solid var(--lumo-primary-color);
+    outline-offset: -2px;
 }
 
 vaadin-side-nav-item::part(link):hover {
@@ -273,33 +396,35 @@ vaadin-side-nav-item[slot='children'] {
    A native tooltip set on every nav item surfaces the label on hover while
    collapsed. ──────────────────────────────────────────────────────────────── */
 
-.wams-sidebar-collapsed .wams-drawer-scroll-area [slot='label'] {
-    display: none;
-}
+@media (min-width: 801px) {
+    .wams-sidebar-collapsed .wams-drawer-scroll-area [slot='label'] {
+        display: none;
+    }
 
-.wams-sidebar-collapsed vaadin-side-nav-item::part(content) {
-    position: relative;
-    min-height: 40px;
-}
+    .wams-sidebar-collapsed vaadin-side-nav-item::part(content) {
+        position: relative;
+        min-height: 40px;
+    }
 
-.wams-sidebar-collapsed vaadin-side-nav-item::part(link) {
-    font-size: 0;
-    overflow: hidden;
-    white-space: nowrap;
-}
+    .wams-sidebar-collapsed vaadin-side-nav-item::part(link) {
+        font-size: 0;
+        overflow: hidden;
+        white-space: nowrap;
+    }
 
-.wams-sidebar-collapsed vaadin-side-nav-item [slot='prefix'] {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    margin: 0;
-    transform: translate(-50%, -50%);
-}
+    .wams-sidebar-collapsed vaadin-side-nav-item [slot='prefix'] {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        margin: 0;
+        transform: translate(-50%, -50%);
+    }
 
-.wams-sidebar-collapsed vaadin-side-nav-item::part(toggle-button) {
-    display: none;
-}
+    .wams-sidebar-collapsed vaadin-side-nav-item::part(toggle-button) {
+        display: none;
+    }
 
-.wams-sidebar-collapsed vaadin-side-nav-item[slot='children'] {
-    padding-inline-start: 0;
+    .wams-sidebar-collapsed vaadin-side-nav-item[slot='children'] {
+        padding-inline-start: 0;
+    }
 }

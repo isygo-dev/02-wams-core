@@ -8,8 +8,10 @@ import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -36,6 +38,7 @@ import eu.isygoit.ui.common.nav.NavRegistryProvider;
 import eu.isygoit.ui.common.spring.SpringContextUtil;
 import eu.isygoit.util.SecurityUtils;
 import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -56,6 +59,7 @@ import java.nio.charset.StandardCharsets;
  * the {@link VaadinSession} so it survives navigation between modules).
  */
 
+@Slf4j
 @CssImport("./styles/scss/common.scss")
 public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObserver {
 
@@ -202,11 +206,30 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         iconCluster.setAlignItems(FlexComponent.Alignment.CENTER);
         iconCluster.setSpacing(true);
         iconCluster.setPadding(false);
-        iconCluster.add(createNotificationsButton(), createSettingsButton(),
+        iconCluster.add(createSearchToggleButton(), createNotificationsButton(), createSettingsButton(),
                 new LanguageSelectorComponent(), createProfileComponent());
 
         rightContent.add(searchSlot, iconCluster);
         return rightContent;
+    }
+
+    /**
+     * Only visible on narrow viewports (see layout CSS): reveals the search
+     * field as a full-width second row instead of squeezing it next to the
+     * icon cluster.
+     */
+    private Component createSearchToggleButton() {
+        Button toggle = new Button(VaadinIcon.SEARCH.create());
+        toggle.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        toggle.addClassNames("wams-header-icon-btn", "wams-header-search-toggle");
+        String tooltip = I18n.t("common.layout.header.search.toggle.tooltip");
+        toggle.setTooltipText(tooltip);
+        toggle.setAriaLabel(tooltip);
+        toggle.addClickListener(e -> {
+            boolean open = !getElement().getClassList().contains("wams-search-open");
+            getElement().getClassList().set("wams-search-open", open);
+        });
+        return toggle;
     }
 
     private Component createNotificationsButton() {
@@ -244,7 +267,7 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
     private Component createProfileComponent() {
         MenuBar menuBar = new MenuBar();
         menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE);
-        menuBar.setOpenOnHover(true);
+        menuBar.addClassName("wams-profile-menu");
 
         AccountDto currentAccount = getCurrentAccount();
 
@@ -265,15 +288,41 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         }
 
         MenuItem menuItem = menuBar.addItem(avatar);
-        menuItem.getSubMenu().addItem(I18n.t("common.layout.avatar.profile"), e -> UI.getCurrent().navigate("profile"));
-        menuItem.getSubMenu().addItem(I18n.t("common.layout.avatar.settings"), e -> UI.getCurrent().navigate("settings"));
-        menuItem.getSubMenu().addItem(I18n.t("common.layout.avatar.logout"), e -> logout());
+        menuItem.getElement().setAttribute("aria-label", I18n.t("common.layout.avatar.profile"));
+        SubMenu subMenu = menuItem.getSubMenu();
 
-        VerticalLayout profileContainer = new VerticalLayout(menuBar);
-        profileContainer.setPadding(false);
-        profileContainer.setSpacing(false);
-        profileContainer.setAlignItems(FlexComponent.Alignment.END);
-        return profileContainer;
+        if (currentAccount != null) {
+            Span name = new Span(avatar.getName());
+            name.addClassName("wams-profile-menu__name");
+            Span email = new Span(currentAccount.getEmail() != null ? currentAccount.getEmail() : "");
+            email.addClassName("wams-profile-menu__email");
+            Div identity = new Div(name, email);
+            identity.addClassName("wams-profile-menu__identity");
+            MenuItem header = subMenu.addItem(identity);
+            header.addClassName("wams-profile-menu__header");
+            header.setEnabled(false);
+            subMenu.add(new Hr());
+        }
+
+        subMenu.addItem(menuEntry(VaadinIcon.USER, I18n.t("common.layout.avatar.profile")),
+                e -> UI.getCurrent().navigate("profile"));
+        subMenu.addItem(menuEntry(VaadinIcon.COG_O, I18n.t("common.layout.avatar.settings")),
+                e -> UI.getCurrent().navigate("settings"));
+        subMenu.add(new Hr());
+        MenuItem logout = subMenu.addItem(menuEntry(VaadinIcon.SIGN_OUT, I18n.t("common.layout.avatar.logout")),
+                e -> logout());
+        logout.addClassName("wams-profile-menu__logout");
+
+        return menuBar;
+    }
+
+    private static Component menuEntry(VaadinIcon icon, String label) {
+        Icon ic = icon.create();
+        ic.addClassName("wams-menu-entry__icon");
+        Span text = new Span(label);
+        Div row = new Div(ic, text);
+        row.addClassName("wams-menu-entry");
+        return row;
     }
 
     private void createDrawer() {
@@ -360,26 +409,27 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
     }
 
     private void loadProfileImage(Avatar avatar, Long accountId) {
-        if (accountId == null) return;
-        new Thread(() -> {
+        UI ui = UI.getCurrent();
+        if (accountId == null || ui == null) return;
+        // UI.getCurrent() is null on a plain thread, so the UI is captured up front.
+        Thread loader = new Thread(() -> {
             try {
                 ResponseEntity<Resource> response = accountImageService.downloadImage(accountId);
                 if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                     byte[] imageBytes = response.getBody().getContentAsByteArray();
-                    UI.getCurrent().access(() -> {
-                        StreamResource resource = new StreamResource("profile_" + accountId + ".jpg",
-                                () -> new ByteArrayInputStream(imageBytes));
-                        avatar.setImageResource(resource);
-                    });
+                    ui.access(() -> avatar.setImageResource(new StreamResource(
+                            "profile_" + accountId + ".jpg", () -> new ByteArrayInputStream(imageBytes))));
                 }
             } catch (FeignException ex) {
                 if (ex.status() != 404) {
-                    ex.printStackTrace();
+                    log.warn("Failed to load profile image for account {}", accountId, ex);
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException | RuntimeException ex) {
+                log.warn("Failed to load profile image for account {}", accountId, ex);
             }
-        }).start();
+        }, "wams-profile-image-loader");
+        loader.setDaemon(true);
+        loader.start();
     }
 
     private void logout() {
