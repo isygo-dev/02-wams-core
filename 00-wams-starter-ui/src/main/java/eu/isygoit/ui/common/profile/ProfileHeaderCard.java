@@ -64,7 +64,10 @@ class ProfileHeaderCard extends HorizontalLayout {
         name.addClassName(LumoUtility.Margin.Bottom.NONE);
 
         boolean active = account.getAdminStatus() != null && "ENABLED".equals(account.getAdminStatus().name());
-        Span statusBadge = new Span(active ? I18n.t("profile.status.active") : I18n.t("profile.status.inactive"));
+        String statusLabel = account.getAdminStatus() != null
+                ? I18n.enumLabel(account.getAdminStatus())
+                : I18n.t("profile.status.inactive");
+        Span statusBadge = new Span(statusLabel);
         statusBadge.addClassName("status-chip");
         statusBadge.addClassName(active ? "status-chip--success" : "status-chip--error");
         statusBadge.addClassName("profile-status-badge");

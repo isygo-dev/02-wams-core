@@ -4,6 +4,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.menubar.MenuBar;
 import eu.isygoit.dto.common.DayTimeSlot;
+import eu.isygoit.i18n.I18n;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -205,7 +206,9 @@ public class WeeklyTableGridConfig<E extends DayTimeSlot> {
             daysOfWeek = List.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
                     DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
         }
-        if (dayLabelExtractor == null) dayLabelExtractor = day -> day.name().substring(0, 1);
+        if (dayLabelExtractor == null) {
+            dayLabelExtractor = I18n::enumLabel;
+        }
         if (isTodayPredicate == null)  isTodayPredicate  = day -> day == DayOfWeek.from(LocalDate.now());
         if (startHour == 0)            startHour         = 7;
         if (endHour == 0)              endHour           = 21;

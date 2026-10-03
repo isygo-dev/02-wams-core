@@ -9,7 +9,6 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import eu.isygoit.enums.IEnum;
 import eu.isygoit.i18n.I18n;
 import org.springframework.util.StringUtils;
 
@@ -176,8 +175,8 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
     }
 
     /**
-     * Builds an enum chip with i18n lookup, falling back to the enum's
-     * {@link IEnum#meaning()} when no translation key is registered.
+     * Builds an enum chip with i18n lookup, falling back to the exact enum
+     * constant name when no key is registered.
      *
      * <p>Key convention: {@code <keyPrefix>.<enum-name-lowercase>}.
      *
@@ -190,7 +189,7 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
         if (enumValue == null) {
             return null;
         }
-        String key = keyPrefix + "." + enumValue.name().toLowerCase();
+        String key = keyPrefix + "." + enumValue.name();
         String label = translate(key, enumValue);
         Span chip = buildStatusChip(label, color);
 
@@ -201,17 +200,13 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
     }
 
     /**
-     * Resolves a translation key; if missing (translation equals the key or is
-     * blank), falls back to the enum's {@code meaning()}.
+     * Resolves a translation key; if missing, falls back to the enum constant
+     * name through the shared enum translation key.
      */
     protected static String translate(String key, Enum<?> enumValue) {
         String value = I18n.t(key);
-        if (value == null || value.isBlank() || value.equals(key)) {
-            if (enumValue instanceof IEnum ienum) {
-                String meaning = ienum.meaning();
-                return meaning != null ? meaning : enumValue.name();
-            }
-            return enumValue.name();
+        if (value == null || value.isBlank() || value.equals(key) || value.equals("!" + key + "!")) {
+            return I18n.enumLabel(enumValue);
         }
         return value;
     }

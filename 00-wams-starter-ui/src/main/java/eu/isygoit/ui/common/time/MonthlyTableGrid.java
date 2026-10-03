@@ -18,9 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.time.format.TextStyle;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -59,7 +57,7 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         Div headerRow = new Div();
         headerRow.addClassName("monthly-grid-header");
         for (DayOfWeek day : DayOfWeek.values()) {
-            Span dayLabel = new Span(day.getDisplayName(TextStyle.SHORT, Locale.FRENCH));
+            Span dayLabel = new Span(I18n.enumLabel(day));
             dayLabel.addClassName("monthly-grid-header-cell");
             headerRow.add(dayLabel);
         }

@@ -82,6 +82,14 @@ final class ProfileFormatUtils {
         return sb.toString();
     }
 
+    static String formatLanguage(Enum<?> language) {
+        return I18n.enumLabel(language);
+    }
+
+    static String formatAdminStatus(Enum<?> status) {
+        return I18n.enumLabel(status);
+    }
+
     static Date toDate(LocalDateTime dateTime) {
         return dateTime != null ? Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant()) : null;
     }

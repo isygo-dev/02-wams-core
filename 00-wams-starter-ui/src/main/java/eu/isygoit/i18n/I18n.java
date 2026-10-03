@@ -37,6 +37,22 @@ public class I18n implements ApplicationContextAware {
     }
 
     /**
+     * Returns the translation registered for an enum constant, or its exact
+     * constant name when no translation is available.
+     */
+    public static String enumLabel(Enum<?> value) {
+        if (value == null) {
+            return null;
+        }
+        String key = "enum." + value.name();
+        String translation = t(key);
+        return translation != null && !translation.isBlank()
+                && !translation.equals(key) && !translation.equals("!" + key + "!")
+                ? translation
+                : value.name();
+    }
+
+    /**
      * Obtient une traduction formatée avec les paramètres donnés
      * Utilise MessageFormat pour substituer les paramètres {0}, {1}, etc.
      */

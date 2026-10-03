@@ -177,11 +177,12 @@ public class FilterBar extends Div {
     }
 
     /**
-     * Adds an enum-backed filter using {@link Enum#name()} as the item label.
+     * Adds an enum-backed filter using {@code enum.<CONSTANT>} translations,
+     * falling back to the exact enum constant name.
      */
     public <E extends Enum<E>> ComboBox<E> addEnumFilter(
             String labelKey, E[] values, Consumer<E> onChange) {
-        return addEnumFilter(labelKey, values, Enum::name, onChange);
+        return addEnumFilter(labelKey, values, I18n::enumLabel, onChange);
     }
 
     /**
