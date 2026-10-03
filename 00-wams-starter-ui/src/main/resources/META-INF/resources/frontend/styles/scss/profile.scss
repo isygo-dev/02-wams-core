@@ -341,35 +341,37 @@
 
 .profile-chart-toggle-row {
     flex-wrap: nowrap;
+    gap: var(--lumo-space-xs);
+    flex-shrink: 0;
 }
 
+.profile-chart-toggle-btn {
+    min-width: 4.5rem;
+    text-transform: none;
+}
+
+/* Chart holder — wraps the <vaadin-chart> element produced by
+   LoginActivityChart. The chart manages its own inline height (300px from
+   the Java side); the holder just guarantees full width and a floor. */
 .profile-chart-holder {
     width: 100%;
-    overflow-x: auto;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    padding-block: var(--lumo-space-xs);
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
-.profile-chart-svg-wrapper {
+.profile-login-activity-chart {
     width: 100%;
-}
-
-.profile-chart-svg {
-    width: 100%;
-    height: 220px;
     display: block;
 }
 
-.profile-chart-bar {
-    fill: var(--lumo-primary-color);
-    transition: opacity 0.15s ease;
-}
-
-.profile-chart-bar:hover {
-    opacity: 0.7;
-}
-
-.profile-chart-label {
-    fill: var(--lumo-secondary-text-color);
-    font-size: 8px;
+/* Highcharts injects its container inside the shadow DOM; ensure it
+   stretches to fill the host element regardless of Vaadin's defaults. */
+.profile-login-activity-chart::part(chart) {
+    width: 100%;
 }
 
 .profile-connections-list {
@@ -441,6 +443,8 @@
 
 .profile-view-all-btn {
     margin-top: var(--lumo-space-xs);
+    align-self: flex-end;
+    text-transform: none;
 }
 
 /* ── Footer ────────────────────────────────────────────────────────────── */
@@ -468,6 +472,30 @@
     flex-shrink: 0;
 }
 
+/* ── RTL (Arabic) ──────────────────────────────────────────────────────── */
+
+[dir="rtl"] {
+    .profile-avatar-section {
+        margin-right: 0;
+        margin-left: var(--lumo-space-xl);
+    }
+
+    .avatar-upload-overlay {
+        right: auto;
+        left: 0;
+    }
+
+    .profile-view-all-btn vaadin-icon {
+        /* mirror the trailing arrow so it points "forward" in RTL reading order */
+        transform: scaleX(-1);
+    }
+
+    /* Highcharts axes read left → right regardless of UI direction. */
+    .profile-chart-holder {
+        direction: ltr;
+    }
+}
+
 /* ── Responsive Design - Mobile First ─────────────────────────────────── */
 
 @media (max-width: 1024px) {
@@ -492,6 +520,15 @@
 @media (max-width: 768px) {
     .profile-timeline-item {
         gap: var(--lumo-space-s);
+    }
+
+    .profile-chart-holder {
+        min-height: 260px;
+    }
+
+    .profile-login-activity-chart {
+        /* the Java side fixes 300px inline; keep the wrapper free to shrink */
+        height: 260px !important;
     }
 }
 
@@ -538,12 +575,30 @@
         align-items: flex-start;
     }
 
+    .profile-chart-toggle-row {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .profile-chart-holder {
+        min-height: 220px;
+    }
+
+    .profile-login-activity-chart {
+        height: 220px !important;
+    }
+
     .profile-connection-item {
         flex-wrap: wrap;
     }
 
     .profile-connection-chip {
         margin-left: 54px;
+    }
+
+    .profile-view-all-btn {
+        align-self: stretch;
+        justify-content: center;
     }
 
     .profile-footer {
@@ -568,5 +623,11 @@
 
     .profile-connection-item:hover {
         background: var(--lumo-shade-30pct);
+    }
+
+    /* Highcharts honours its own theme colours; only soften the frame so the
+       chart doesn't glare against the dark card. */
+    .profile-chart-holder {
+        background: transparent;
     }
 }
