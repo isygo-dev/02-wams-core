@@ -113,6 +113,13 @@
   }
 }
 
+.file-row--existing {
+  padding: 8px 12px;
+  border: 1px solid var(--lumo-contrast-20pct);
+  border-radius: 10px;
+  background: var(--lumo-contrast-5pct);
+}
+
 // -----------------------------------------------------------------------------
 // 3. Files section container
 // -----------------------------------------------------------------------------

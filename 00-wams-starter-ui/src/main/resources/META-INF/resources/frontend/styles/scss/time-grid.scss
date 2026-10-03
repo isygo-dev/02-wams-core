@@ -100,6 +100,7 @@
     position: relative;
     transition: transform 0.2s, box-shadow 0.2s;
     flex-shrink: 0;
+    background-color: attr(data-event-color type(<color>), #1976D2);
 }
 
 .monthly-grid-event-dot-enhanced:hover {
@@ -169,6 +170,29 @@
     min-width: 800px;
     width: 100%;
     margin: 8px 0;
+}
+
+.timetable-grid--daily {
+    grid-template-columns: 64px 1fr;
+}
+
+.timetable-grid[data-day-count] {
+    grid-template-columns: 64px repeat(attr(data-day-count type(<integer>)), 1fr);
+}
+
+.timetable-grid[data-grid-template-rows] {
+    grid-template-rows: attr(data-grid-template-rows type(*));
+}
+
+[data-grid-row-start][data-grid-row-span][data-grid-column-start][data-grid-column-span] {
+    grid-row-start: attr(data-grid-row-start type(<integer>));
+    grid-row-end: span attr(data-grid-row-span type(<integer>));
+    grid-column-start: attr(data-grid-column-start type(<integer>));
+    grid-column-end: span attr(data-grid-column-span type(<integer>));
+}
+
+.timetable-delete-menu-item {
+    color: var(--lumo-error-text-color);
 }
 
 .timetable-grid-header {
@@ -267,8 +291,9 @@
     justify-content: flex-start;
     align-items: flex-start;
     text-align: left;
-    background: var(--slot-bg, var(--lumo-primary-color-10pct));
-    border-left: 3px solid var(--slot-accent, var(--lumo-primary-color));
+    --slot-accent: attr(data-slot-accent type(<color>), var(--lumo-primary-color));
+    background: attr(data-slot-bg type(<color>), var(--lumo-primary-color-10pct));
+    border-left: 3px solid var(--slot-accent);
     border-radius: var(--lumo-border-radius-s);
     box-shadow: none;
     transition: box-shadow 0.12s ease;

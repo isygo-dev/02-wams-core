@@ -34,7 +34,6 @@ public abstract class AbstractStatisticsPanel extends VerticalLayout {
         this.ui = ui;
         buildUI();
         buildSections();
-        loadStatistics();
     }
 
     private void buildUI() {

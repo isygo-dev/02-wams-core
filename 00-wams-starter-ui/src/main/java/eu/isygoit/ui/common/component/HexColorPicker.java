@@ -2,6 +2,7 @@ package eu.isygoit.ui.common.component;
 
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.customfield.CustomField;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -24,6 +25,7 @@ import com.vaadin.flow.component.textfield.TextField;
  *     String hex = colorField.getValue();
  * </pre>
  */
+@CssImport("./styles/scss/common.scss")
 public class HexColorPicker extends CustomField<String> implements HasHelper {
 
     private static final String HEX_PATTERN = "^#([A-Fa-f0-9]{6})$";
@@ -42,11 +44,7 @@ public class HexColorPicker extends CustomField<String> implements HasHelper {
         }
 
         swatch.getElement().setAttribute("type", "color");
-        swatch.getElement().getStyle().set("width", "40px");
-        swatch.getElement().getStyle().set("height", "40px");
-        swatch.getElement().getStyle().set("padding", "0");
-        swatch.getElement().getStyle().set("border", "none");
-        swatch.getElement().getStyle().set("cursor", "pointer");
+        swatch.addClassName("hex-color-picker__swatch");
         swatch.getElement().addEventListener("input", e -> {
             String value = e.getEventData().getString("element.value");
             hexField.setValue(value != null ? value : "");

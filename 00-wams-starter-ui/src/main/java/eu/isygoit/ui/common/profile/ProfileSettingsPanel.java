@@ -63,6 +63,7 @@ class ProfileSettingsPanel extends VerticalLayout {
         strengthBar.setWidthFull();
         strengthBar.setValue(0);
         strengthBar.addClassName("password-strength-bar");
+        strengthBar.addClassName("password-strength-bar--weak");
 
         Span strengthLabel = new Span(I18n.t("profile.password.strength.weak"));
         strengthLabel.addClassName("password-strength-label");
@@ -71,7 +72,9 @@ class ProfileSettingsPanel extends VerticalLayout {
             int strength = calculatePasswordStrength(e.getValue());
             strengthBar.setValue(strength / 100.0);
             strengthLabel.setText(getStrengthText(strength));
-            strengthBar.getStyle().set("--strength-color", getStrengthColor(strength));
+            strengthBar.removeClassNames("password-strength-bar--weak",
+                    "password-strength-bar--medium", "password-strength-bar--strong");
+            strengthBar.addClassName(getStrengthClass(strength));
         });
 
         HorizontalLayout strengthRow = new HorizontalLayout(strengthBar, strengthLabel);
@@ -149,9 +152,9 @@ class ProfileSettingsPanel extends VerticalLayout {
         return I18n.t("profile.password.strength.very.strong");
     }
 
-    private String getStrengthColor(int strength) {
-        if (strength < 30) return "var(--lumo-error-color)";
-        if (strength < 60) return "var(--lumo-warning-color, var(--wams-warning-color))";
-        return "var(--lumo-success-color)";
+    private String getStrengthClass(int strength) {
+        if (strength < 30) return "password-strength-bar--weak";
+        if (strength < 60) return "password-strength-bar--medium";
+        return "password-strength-bar--strong";
     }
 }

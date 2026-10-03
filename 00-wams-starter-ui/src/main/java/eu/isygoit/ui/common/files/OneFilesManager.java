@@ -33,6 +33,7 @@ import static eu.isygoit.ui.common.files.LinkedFilesSupport.PendingFile;
  */
 @Slf4j
 @CssImport(value = "./styles/upload-file-list-theme.scss", themeFor = "vaadin-upload")
+@CssImport("./styles/scss/common.scss")
 public class OneFilesManager extends VerticalLayout {
 
     private final VerticalLayout container = new VerticalLayout();
@@ -164,12 +165,7 @@ public class OneFilesManager extends VerticalLayout {
         existingFileRow.setAlignItems(FlexComponent.Alignment.CENTER);
         existingFileRow.setSpacing(true);
         existingFileRow.setWidthFull();
-        existingFileRow.addClassName("file-row");
-        existingFileRow.getStyle()
-                .set("padding", "8px 12px")
-                .set("border-radius", "10px")
-                .set("background", "var(--lumo-contrast-5pct)")
-                .set("border", "1px solid var(--lumo-contrast-20pct)");
+        existingFileRow.addClassNames("file-row", "file-row--existing");
 
         Icon icon = LinkedFilesSupport.getFileIcon(fileType);
         icon.addClassName("file-row__icon");

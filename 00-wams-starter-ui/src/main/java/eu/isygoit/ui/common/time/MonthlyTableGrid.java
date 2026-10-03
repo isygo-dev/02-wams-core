@@ -142,7 +142,9 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         dot.addClassName("monthly-grid-event-dot-enhanced");
 
         String color = config.getColorExtractor().apply(evt);
-        dot.getStyle().set("background-color", color != null ? color : "#1976D2");
+        if (color != null) {
+            dot.getElement().setAttribute("data-event-color", color);
+        }
 
         // Tooltip with all fields
         String tooltip = buildTooltipText(evt);
@@ -169,7 +171,7 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
             if (config.getOnEventDelete() != null) {
                 MenuItem deleteItem = subMenu.addItem(I18n.t("calendar.grid.delete"),
                         e -> config.getOnEventDelete().accept(evt));
-                deleteItem.getStyle().set("color", "var(--lumo-error-text-color)");
+                deleteItem.addClassName("timetable-delete-menu-item");
             }
             dot.add(menuBar);
         }

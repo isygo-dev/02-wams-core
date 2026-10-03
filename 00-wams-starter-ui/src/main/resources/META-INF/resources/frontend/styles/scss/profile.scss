@@ -234,6 +234,18 @@
     transition: width 0.3s ease;
 }
 
+.password-strength-bar--weak {
+    --strength-color: var(--lumo-error-color);
+}
+
+.password-strength-bar--medium {
+    --strength-color: var(--lumo-warning-color, var(--wams-warning-color));
+}
+
+.password-strength-bar--strong {
+    --strength-color: var(--lumo-success-color);
+}
+
 .password-strength-label {
     font-size: var(--lumo-font-size-xs);
     color: var(--lumo-secondary-text-color);

@@ -102,8 +102,8 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
             rowTemplate.append(start.getMinute() == 0 ? "var(--tt-row-full) " : "var(--tt-row-half) ");
         }
         rowTemplate.append("var(--tt-row-end)");
-        gridContainer.getStyle().set("grid-template-columns", "64px repeat(" + days.size() + ", 1fr)");
-        gridContainer.getStyle().set("grid-template-rows", rowTemplate.toString().trim());
+        gridContainer.getElement().setAttribute("data-day-count", String.valueOf(days.size()));
+        gridContainer.getElement().setAttribute("data-grid-template-rows", rowTemplate.toString().trim());
 
         buildHeader(today);
 
@@ -208,8 +208,8 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         List<String[]> palette = config.getPalette();
         int idx = key != null ? Math.floorMod(key.hashCode(), palette.size()) : 0;
         String[] colors = palette.get(idx);
-        content.getStyle().set("--slot-bg", colors[0]);
-        content.getStyle().set("--slot-accent", colors[1]);
+        content.getElement().setAttribute("data-slot-bg", colors[0]);
+        content.getElement().setAttribute("data-slot-accent", colors[1]);
 
         config.getSlotContentPopulator().accept(content, slot);
 
@@ -246,7 +246,7 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         if (config.getOnEventDelete() != null) {
             MenuItem deleteItem = subMenu.addItem(I18n.t("calendar.grid.delete"),
                     e -> config.getOnEventDelete().accept(slot));
-            deleteItem.getStyle().set("color", "var(--lumo-error-text-color)");
+            deleteItem.addClassName("timetable-delete-menu-item");
         }
         return menuBar;
     }
@@ -307,10 +307,10 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
     }
 
     private void placeInGrid(Component component, int rowStart, int colStart, int rowSpan, int colSpan) {
-        component.getElement().getStyle().set("grid-row",
-                rowStart + (rowSpan > 1 ? " / span " + rowSpan : ""));
-        component.getElement().getStyle().set("grid-column",
-                colStart + (colSpan > 1 ? " / span " + colSpan : ""));
+        component.getElement().setAttribute("data-grid-row-start", String.valueOf(rowStart));
+        component.getElement().setAttribute("data-grid-row-span", String.valueOf(rowSpan));
+        component.getElement().setAttribute("data-grid-column-start", String.valueOf(colStart));
+        component.getElement().setAttribute("data-grid-column-span", String.valueOf(colSpan));
     }
 
     private String formatHour(LocalTime time) {
@@ -334,7 +334,7 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
                         "  const jsDay = now.getDay();" +
                         "  const colIndex = jsDay === 0 ? -1 : jsDay - 1;" +
                         "  if (totalMin < startMin || totalMin > endMin || colIndex < 0) {" +
-                        "    if (indicator) indicator.style.display = 'none';" +
+                        "    if (indicator) indicator.removeAttribute('data-visible');" +
                         "    return;" +
                         "  }" +
                         "  const firstCell = dayCells[0];" +
@@ -352,10 +352,10 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
                         "    indicator.innerHTML = '<span class=\"timetable-now-dot\"></span>';" +
                         "    el.appendChild(indicator);" +
                         "  }" +
-                        "  indicator.style.display = 'block';" +
-                        "  indicator.style.top = top + 'px';" +
-                        "  indicator.style.left = (gutter + colIndex * colWidth) + 'px';" +
-                        "  indicator.style.width = colWidth + 'px';" +
+                        "  indicator.setAttribute('data-visible', 'true');" +
+                        "  indicator.setAttribute('data-top', top + 'px');" +
+                        "  indicator.setAttribute('data-left', (gutter + colIndex * colWidth) + 'px');" +
+                        "  indicator.setAttribute('data-width', colWidth + 'px');" +
                         "};" +
                         "update();" +
                         "el._nowInterval = setInterval(update, 60000);"

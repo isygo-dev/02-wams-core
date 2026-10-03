@@ -9,11 +9,13 @@
 @import 'components/toolbar';
 @import 'components/filter';
 @import 'components/stats';
+@import 'components/progress';
 @import 'layout/_layout.scss';
 @import 'layout/_app-shell.scss';
 @import 'app-search.scss';
 @import 'auth.scss';
 @import 'fileupload.scss';
+@import 'components/hex-color-picker';
 @import 'dialog.scss';
 @import 'landing.scss';
 @import 'language-selector.scss';
