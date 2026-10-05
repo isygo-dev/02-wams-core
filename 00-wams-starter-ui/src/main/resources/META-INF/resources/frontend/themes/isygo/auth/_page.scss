@@ -1,0 +1,47 @@
+@use "./variables" as v;
+
+auth-layout {
+  --lumo-primary-color: #{v.$auth-color-primary};
+  --lumo-primary-text-color: #{v.$auth-color-primary};
+  --lumo-primary-color-50pct: rgba(0, 80, 179, 0.5);
+  --lumo-primary-color-10pct: rgba(0, 80, 179, 0.1);
+  --lumo-error-color: #{v.$auth-color-error};
+  --lumo-error-text-color: #{v.$auth-color-error};
+  --lumo-success-color: #{v.$auth-color-success};
+  --lumo-body-text-color: #{v.$auth-color-ink};
+  --lumo-header-text-color: #{v.$auth-color-ink};
+  --lumo-secondary-text-color: #{v.$auth-color-muted};
+
+  display: flex;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: clamp(0.75rem, 3vw, 2.5rem);
+  background:
+    radial-gradient(ellipse at top, rgba(0, 80, 179, 0.09), transparent 58%),
+    v.$auth-color-page;
+  color: v.$auth-color-ink;
+}
+
+html[theme~="dark"] auth-layout {
+  --lumo-base-color: #20252b;
+  --lumo-body-text-color: #f1f4f8;
+  --lumo-header-text-color: #f1f4f8;
+  --lumo-secondary-text-color: #c3cbd6;
+  --lumo-primary-text-color: #8dbbff;
+  --lumo-error-text-color: #ffb4ab;
+
+  background:
+    radial-gradient(ellipse at top, rgba(71, 130, 210, 0.2), transparent 58%),
+    #15191e;
+  color: #f1f4f8;
+}
+
+@media (max-width: 360px) {
+  auth-layout {
+    padding: 0.5rem;
+  }
+}

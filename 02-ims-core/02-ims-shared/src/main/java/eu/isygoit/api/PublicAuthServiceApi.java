@@ -6,7 +6,9 @@ import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.dto.request.AuthenticationContextRequest;
 import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.dto.request.RegisteredUserDto;
+import eu.isygoit.dto.request.QrLoginChallengeRequest;
 import eu.isygoit.dto.response.AuthResponseDto;
+import eu.isygoit.dto.response.QrLoginStatusDto;
 import eu.isygoit.dto.response.UserAccountDto;
 import eu.isygoit.dto.response.UserContext;
 import io.swagger.v3.oas.annotations.Operation;
@@ -78,6 +80,25 @@ public interface PublicAuthServiceApi {
     })
     @PostMapping(path = "/authType")
     ResponseEntity<UserContext> resolveAuthContext(@Valid @RequestBody AuthenticationContextRequest authenticationContextRequest);
+
+    @Operation(summary = "Approve QR sign-in",
+            description = "Approves a pending QR sign-in for the authenticated account. "
+                    + "The scanned JSON payload has type 'isygo-qr-login' and a challengeId.")
+    @PostMapping(path = "/qr/approve")
+    ResponseEntity<QrLoginStatusDto> approveQrLogin(
+            @Valid @RequestBody QrLoginChallengeRequest request);
+
+    @Operation(summary = "Get QR sign-in status",
+            description = "Returns the status of a short-lived QR sign-in challenge.")
+    @PostMapping(path = "/qr/status")
+    ResponseEntity<QrLoginStatusDto> getQrLoginStatus(
+            @Valid @RequestBody QrLoginChallengeRequest request);
+
+    @Operation(summary = "Complete approved QR sign-in",
+            description = "Consumes an approved QR challenge and completes authentication.")
+    @PostMapping(path = "/qr/complete")
+    ResponseEntity<AuthResponseDto> completeQrLogin(
+            @Valid @RequestBody QrLoginChallengeRequest request);
 
     @Operation(summary = "Get Available Email Accounts Api",
             description = "Get Available Email Accounts")

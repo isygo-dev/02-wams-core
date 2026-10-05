@@ -1,0 +1,57 @@
+@use "./mixins" as m;
+@use "./variables" as v;
+
+auth-brand {
+  display: block;
+  width: 100%;
+  margin-bottom: v.$auth-space-sm;
+  text-align: center;
+}
+
+auth-brand vaadin-avatar {
+  width: 3.5rem;
+  height: 3.5rem;
+  margin: 0 auto v.$auth-space-sm;
+  background-color: v.$auth-color-primary;
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+auth-brand vaadin-avatar::part(avatar) {
+  background-color: v.$auth-color-primary;
+  color: #ffffff;
+}
+
+auth-brand h1 {
+  margin: 0;
+  color: var(--lumo-header-text-color, v.$auth-color-ink);
+  font-size: clamp(1.4rem, 4vw, 1.8rem);
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+auth-brand h1:focus-visible {
+  @include m.focus-ring;
+}
+
+auth-brand p {
+  margin: v.$auth-space-xs 0 0;
+  color: var(--lumo-secondary-text-color, v.$auth-color-muted);
+  line-height: 1.5;
+}
+
+auth-footer {
+  display: block;
+  width: 100%;
+  margin-top: v.$auth-space-xs;
+  padding-top: v.$auth-space-md;
+  border-top: 1px solid rgba(68, 84, 111, 0.18);
+  color: var(--lumo-secondary-text-color, v.$auth-color-muted);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+auth-footer p {
+  margin: 0;
+}

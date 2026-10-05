@@ -1,0 +1,39 @@
+@use "./variables" as v;
+
+auth-confirmation-mark {
+  display: grid;
+  width: 5rem;
+  height: 5rem;
+  place-items: center;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: var(--lumo-success-color, v.$auth-color-success);
+  color: #ffffff;
+}
+
+auth-confirmation-mark vaadin-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  color: inherit;
+}
+
+auth-confirmation-content {
+  display: flex;
+  flex-direction: column;
+  gap: v.$auth-space-sm;
+  width: 100%;
+  text-align: center;
+}
+
+auth-confirmation-content h2 {
+  margin: 0;
+  color: var(--lumo-header-text-color, v.$auth-color-ink);
+  font-size: 1.4rem;
+}
+
+auth-confirmation-content p {
+  margin: 0;
+  color: var(--lumo-secondary-text-color, v.$auth-color-muted);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}

@@ -5,8 +5,10 @@ import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceOperations;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.*;
 import eu.isygoit.dto.request.AuthenticationContextRequest;
+import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.dto.response.UserAccountDto;
 import eu.isygoit.dto.response.UserContext;
+import eu.isygoit.enums.QrLoginStatus;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.enums.IEnumSharedStatType;
@@ -96,6 +98,14 @@ public interface IAccountService extends ICrudTenantServiceOperations<Long, Acco
      * @throws AccountNotFoundException the account not found exception
      */
     UserContext resolveAuthContext(AuthenticationContextRequest authenticationContextRequest) throws AccountNotFoundException;
+
+    String createQrLoginChallenge(String tenant, String userName);
+
+    QrLoginStatus getQrLoginChallengeStatus(String challengeId);
+
+    QrLoginStatus approveQrLoginChallenge(String challengeId, String scannerTenant, String scannerUser);
+
+    Optional<AuthenticationRequestDto> completeQrLoginChallenge(String challengeId);
 
     /**
      * Switch auth type boolean.

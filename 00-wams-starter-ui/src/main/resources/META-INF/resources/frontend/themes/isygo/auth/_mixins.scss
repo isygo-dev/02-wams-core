@@ -1,0 +1,25 @@
+@use "./variables" as v;
+
+@mixin focus-ring {
+  outline: 3px solid v.$auth-color-focus;
+  outline-offset: 3px;
+}
+
+@mixin field-base {
+  border-radius: v.$auth-radius-sm;
+}
+
+@mixin cta {
+  min-height: v.$auth-touch-target;
+  border-radius: v.$auth-radius-sm;
+  font-weight: 650;
+}
+
+@mixin banner {
+  box-sizing: border-box;
+  width: 100%;
+  padding: v.$auth-space-sm v.$auth-space-md;
+  border: 1px solid currentColor;
+  border-radius: v.$auth-radius-sm;
+  line-height: 1.5;
+}

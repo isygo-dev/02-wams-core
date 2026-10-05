@@ -5,15 +5,13 @@ import eu.isygoit.annotation.InjectCodeGenKms;
 import eu.isygoit.annotation.InjectRepository;
 import eu.isygoit.com.rest.service.tenancy.ImageTenantService;
 import eu.isygoit.config.AppProperties;
-import eu.isygoit.constants.AccountTypeConstants;
-import eu.isygoit.constants.AppParameterConstants;
-import eu.isygoit.constants.JwtConstants;
-import eu.isygoit.constants.TenantConstants;
+import eu.isygoit.constants.*;
 import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.common.TokenRequestDto;
 import eu.isygoit.dto.common.TokenResponseDto;
 import eu.isygoit.dto.data.*;
 import eu.isygoit.dto.request.AuthenticationContextRequest;
+import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.dto.request.GeneratePwdRequestDto;
 import eu.isygoit.dto.response.UserAccountDto;
 import eu.isygoit.dto.response.UserContext;
@@ -30,6 +28,7 @@ import eu.isygoit.remote.kms.KmsPublicPasswordService;
 import eu.isygoit.remote.kms.KmsTokenService;
 import eu.isygoit.remote.mms.MmsChatMessageService;
 import eu.isygoit.repository.AccountRepository;
+import eu.isygoit.repository.QrLoginChallengeRepository;
 import eu.isygoit.repository.RegisteredUserRepository;
 import eu.isygoit.service.IAccountService;
 import eu.isygoit.service.IAppParameterService;
@@ -43,6 +42,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -59,6 +59,8 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
         implements IAccountService {
 
     private final AppProperties appProperties;
+    private static final SecureRandom QR_CHALLENGE_RANDOM = new SecureRandom();
+    private static final long QR_CHALLENGE_TTL_MILLIS = 120_000L;
 
     @Autowired
     private KmsPasswordService kmsPasswordService;
@@ -80,6 +82,8 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
     private IRoleInfoService roleInfoService;
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    private QrLoginChallengeRepository qrLoginChallengeRepository;
 
     /**
      * Instantiates a new Account service.
@@ -240,37 +244,133 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
                 }
 
             } else if (IEnumAuth.Types.QRC == account.getAuthType()) {
-                try {
-                    ResponseEntity<TokenResponseDto> result = kmsTokenService.buildToken(account.getTenant(),
-                            Set.of(IEnumAuth.Types.QRC.meaning()),
-                            IEnumToken.Types.QRC,
-                            TokenRequestDto.builder()
-                                    .subject(account.getCode())
-                                    .claims(Map.of(JwtConstants.JWT_SENDER_TENANT, authenticationContextRequest.getTenant(),
-                                            JwtConstants.JWT_LOG_APP, IEnumAuth.Types.QRC.meaning(),
-                                            JwtConstants.JWT_SENDER_USER, account.getCode()))
-                                    .build());
-                    if (result.getStatusCode().is2xxSuccessful() && result.hasBody()) {
-                        return UserContext.builder().authTypeMode(IEnumAuth.Types.QRC)
-                                .qrCodeToken(result.getBody().getToken())   //NOSONAR
-                                .build();
-                    }
-                } catch (Exception e) {
-                    log.error("Remote feign call failed : ", e);
-                    throw new RemoteCallFailedException(e);
-                }
-
                 return UserContext.builder().authTypeMode(IEnumAuth.Types.QRC)
-                        .qrCodeToken(null)
+                        .qrChallengeId(createQrLoginChallenge(account.getTenant(), account.getCode()))
                         .build();
             } else {
                 return UserContext.builder().authTypeMode(IEnumAuth.Types.PWD)
                         .build();
             }
-
         } else {
             throw new AccountNotFoundException("with tenant: " + authenticationContextRequest.getTenant() + " and username with " + authenticationContextRequest.getUserName());
         }
+    }
+
+    @Override
+    public String createQrLoginChallenge(String tenant, String userName) {
+        Date createdAt = new Date();
+        qrLoginChallengeRepository.deleteByExpiresAtBefore(createdAt);
+
+        byte[] challengeBytes = new byte[32];
+        QR_CHALLENGE_RANDOM.nextBytes(challengeBytes);
+        String challengeId = Base64.getUrlEncoder().withoutPadding().encodeToString(challengeBytes);
+        QrLoginChallenge challenge = QrLoginChallenge.builder()
+                .challengeId(challengeId)
+                .tenant(tenant.trim().toLowerCase(Locale.ROOT))
+                .username(userName.trim().toLowerCase(Locale.ROOT))
+                .status(QrLoginStatus.PENDING)
+                .expiresAt(new Date(createdAt.getTime() + QR_CHALLENGE_TTL_MILLIS))
+                .build();
+        qrLoginChallengeRepository.save(challenge);
+        return challengeId;
+    }
+
+    @Override
+    public QrLoginStatus getQrLoginChallengeStatus(String challengeId) {
+        Optional<QrLoginChallenge> optional = qrLoginChallengeRepository.findByChallengeId(challengeId);
+        if (optional.isEmpty()) {
+            return QrLoginStatus.EXPIRED;
+        }
+
+        QrLoginChallenge challenge = optional.get();
+        if (hasExpired(challenge) && challenge.getStatus() != QrLoginStatus.COMPLETED) {
+            challenge.setStatus(QrLoginStatus.EXPIRED);
+            qrLoginChallengeRepository.save(challenge);
+        }
+        return challenge.getStatus();
+    }
+
+    @Override
+    public QrLoginStatus approveQrLoginChallenge(String challengeId, String scannerTenant, String scannerUser) {
+        Optional<QrLoginChallenge> optional = qrLoginChallengeRepository.lockByChallengeId(challengeId);
+        if (optional.isEmpty()) {
+            return QrLoginStatus.EXPIRED;
+        }
+
+        QrLoginChallenge challenge = optional.get();
+        if (hasExpired(challenge) && challenge.getStatus() != QrLoginStatus.COMPLETED) {
+            challenge.setStatus(QrLoginStatus.EXPIRED);
+            qrLoginChallengeRepository.save(challenge);
+            return QrLoginStatus.EXPIRED;
+        }
+        if (!challenge.getTenant().equalsIgnoreCase(scannerTenant)
+                || !challenge.getUsername().equalsIgnoreCase(scannerUser)) {
+            return QrLoginStatus.EXPIRED;
+        }
+        if (challenge.getStatus() == QrLoginStatus.PENDING) {
+            challenge.setStatus(QrLoginStatus.APPROVED);
+            challenge.setApprovedTenant(scannerTenant);
+            challenge.setApprovedBy(scannerUser);
+            qrLoginChallengeRepository.save(challenge);
+        }
+        return challenge.getStatus();
+    }
+
+    @Override
+    public Optional<AuthenticationRequestDto> completeQrLoginChallenge(String challengeId) {
+        Optional<QrLoginChallenge> optional = qrLoginChallengeRepository.lockByChallengeId(challengeId);
+        if (optional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        QrLoginChallenge challenge = optional.get();
+        if (challenge.getStatus() != QrLoginStatus.APPROVED || hasExpired(challenge)) {
+            if (hasExpired(challenge) && challenge.getStatus() != QrLoginStatus.COMPLETED) {
+                challenge.setStatus(QrLoginStatus.EXPIRED);
+                qrLoginChallengeRepository.save(challenge);
+            }
+            return Optional.empty();
+        }
+
+        Account account = findByTenantAndUserName(challenge.getTenant(), challenge.getUsername());
+        if (account == null) {
+            challenge.setStatus(QrLoginStatus.EXPIRED);
+            qrLoginChallengeRepository.save(challenge);
+            return Optional.empty();
+        }
+
+        ResponseEntity<TokenResponseDto> tokenResponse;
+        try {
+            tokenResponse = kmsTokenService.buildToken(account.getTenant(),
+                    Set.of(IEnumAuth.Types.QRC.meaning()),
+                    IEnumToken.Types.QRC,
+                    TokenRequestDto.builder()
+                            .subject(account.getCode())
+                            .claims(Map.of(JwtConstants.JWT_SENDER_TENANT, account.getTenant(),
+                                    JwtConstants.JWT_LOG_APP, IEnumAuth.Types.QRC.meaning(),
+                                    JwtConstants.JWT_SENDER_USER, account.getCode()))
+                            .build());
+        } catch (Exception exception) {
+            throw new RemoteCallFailedException(exception);
+        }
+        if (!tokenResponse.getStatusCode().is2xxSuccessful() || tokenResponse.getBody() == null
+                || tokenResponse.getBody().getToken() == null || tokenResponse.getBody().getToken().isBlank()) {
+            throw new AccountAuthenticationException("QR sign-in token could not be issued");
+        }
+
+        challenge.setStatus(QrLoginStatus.COMPLETED);
+        qrLoginChallengeRepository.save(challenge);
+        return Optional.of(AuthenticationRequestDto.builder()
+                .tenant(account.getTenant())
+                .application(AuthConstants.DEFAULT_APPLICATION)
+                .userName(account.getCode())
+                .password(tokenResponse.getBody().getToken())
+                .authType(IEnumAuth.Types.QRC)
+                .build());
+    }
+
+    private static boolean hasExpired(QrLoginChallenge challenge) {
+        return !challenge.getExpiresAt().after(new Date());
     }
 
     @Override

@@ -1,0 +1,27 @@
+@use "./variables" as v;
+
+auth-card img {
+  display: block;
+  box-sizing: border-box;
+  width: min(100%, 12.5rem);
+  height: auto;
+  margin-inline: auto;
+  padding: v.$auth-space-xs;
+  border: 1px solid rgba(68, 84, 111, 0.24);
+  border-radius: v.$auth-radius-sm;
+  background: var(--lumo-base-color, v.$auth-color-surface);
+}
+
+auth-card [data-qr-status] {
+  min-height: 3rem;
+  margin: 0;
+  text-align: center;
+}
+
+auth-card [data-qr-status="error"] {
+  color: var(--lumo-error-text-color, v.$auth-color-error);
+}
+
+auth-card [data-qr-status="info"] {
+  color: var(--lumo-secondary-text-color, v.$auth-color-muted);
+}

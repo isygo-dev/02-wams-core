@@ -27,4 +27,8 @@ public class UserContext {
      * The Qr code token.
      */
     String qrCodeToken;
+    /**
+     * The opaque QR login approval challenge identifier.
+     */
+    String qrChallengeId;
 }

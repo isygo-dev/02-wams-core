@@ -9,16 +9,20 @@ import eu.isygoit.config.AppProperties;
 import eu.isygoit.config.JwtProperties;
 import eu.isygoit.dto.common.SystemInfoResponseDto;
 import eu.isygoit.dto.common.UserContextRequestDto;
+import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.dto.data.ThemeDto;
 import eu.isygoit.dto.request.AuthenticationContextRequest;
 import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.dto.request.RegisteredUserDto;
+import eu.isygoit.dto.request.QrLoginChallengeRequest;
 import eu.isygoit.dto.request.RequestTrackingDto;
 import eu.isygoit.dto.response.AuthResponseDto;
 import eu.isygoit.dto.response.UserAccountDto;
 import eu.isygoit.dto.response.UserContext;
 import eu.isygoit.dto.response.UserDataResponseDto;
+import eu.isygoit.dto.response.QrLoginStatusDto;
+import eu.isygoit.enums.QrLoginStatus;
 import eu.isygoit.enums.IEnumWebToken;
 import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.mapper.RegisteredUserMapper;
@@ -34,7 +38,9 @@ import eu.isygoit.service.IThemeService;
 import jakarta.servlet.http.Cookie;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -196,6 +202,38 @@ public class PublicAuthController extends ControllerUtils implements PublicAuthS
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
         }
+    }
+
+    @Override
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<QrLoginStatusDto> approveQrLogin(QrLoginChallengeRequest request) {
+        RequestContextDto context = requestContextService().getCurrentContext();
+        if (context == null || context.getSenderTenant() == null || context.getSenderUser() == null
+                || context.getSenderTenant().isBlank() || context.getSenderUser().isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        QrLoginStatus status = accountService.approveQrLoginChallenge(
+                request.getChallengeId(), context.getSenderTenant(), context.getSenderUser());
+        return ResponseFactory.responseOk(QrLoginStatusDto.builder().status(status).build());
+    }
+
+    @Override
+    public ResponseEntity<QrLoginStatusDto> getQrLoginStatus(QrLoginChallengeRequest request) {
+        QrLoginStatus status = accountService.getQrLoginChallengeStatus(request.getChallengeId());
+        return ResponseFactory.responseOk(QrLoginStatusDto.builder().status(status).build());
+    }
+
+    @Override
+    public ResponseEntity<AuthResponseDto> completeQrLogin(QrLoginChallengeRequest request) {
+        Optional<AuthenticationRequestDto> authenticationRequest =
+                accountService.completeQrLoginChallenge(request.getChallengeId());
+        if (authenticationRequest.isPresent()) {
+            return authenticate(authenticationRequest.get());
+        }
+        QrLoginStatus status = accountService.getQrLoginChallengeStatus(request.getChallengeId());
+        return ResponseEntity.status(status == QrLoginStatus.EXPIRED
+                ? HttpStatus.GONE
+                : HttpStatus.CONFLICT).build();
     }
 
     @Override

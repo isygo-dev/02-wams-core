@@ -4,225 +4,184 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.VaadinServletRequest;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.UIScope;
 import eu.isygoit.dto.request.AuthenticationContextRequest;
 import eu.isygoit.dto.request.AuthenticationRequestDto;
-import eu.isygoit.dto.response.AuthResponseDto;
-import eu.isygoit.dto.response.UserContext;
+import eu.isygoit.constants.AuthConstants;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.remote.ims.PublicAuthService;
-import eu.isygoit.util.SecurityUtils;
+import eu.isygoit.ui.auth.AuthServiceFacade.Failure;
 import jakarta.annotation.security.PermitAll;
-import jakarta.servlet.http.HttpSession;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-@Slf4j
 @Component
 @UIScope
-@Route(value = "login/otp")
-@PageTitle("OTP Login")
+@Route(value = AuthRoutes.OTP_LOGIN)
 @PermitAll
 public class OtpLoginView extends BaseLoginView {
 
     private final TextField usernameField = new TextField(I18n.t("auth.otp.field.username.label"));
-    private final HorizontalLayout otpFieldsLayout = new HorizontalLayout();
-    private final Button requestOtpButton = new Button(I18n.t("auth.otp.button.requestOtp"), new Icon(VaadinIcon.ENVELOPE));
-    private final Button loginButton = new Button(I18n.t("auth.otp.button.signIn"), new Icon(VaadinIcon.SIGN_IN));
-    private final Div errorBanner = createErrorBanner();
-    private final List<TextField> digitFields = new ArrayList<>();
+    private final OtpInput otpInput = new OtpInput();
+    private final Button requestOtpButton = new Button(
+            I18n.t("auth.otp.button.requestOtp"), VaadinIcon.ENVELOPE.create());
+    private final Button loginButton = new Button(
+            I18n.t("auth.otp.button.signIn"), VaadinIcon.SIGN_IN.create());
+    private final AuthServiceFacade authService;
+    private final AuthSession authSession;
     private String tenant;
     private String username;
     private int otpLength = 6;
-    @Autowired
-    private PublicAuthService authService;
+    private boolean requestingOtp;
+    private boolean submitting;
+    private boolean otpConfigurationValid = true;
 
-    public OtpLoginView() {
-        configureAsAuthPage("otp-login-view");
+    public OtpLoginView(AuthServiceFacade authService, AuthSession authSession) {
+        super("auth.page.title.otpLogin");
+        this.authService = authService;
+        this.authSession = authSession;
 
-        usernameField.setWidthFull();
+        describeErrors(usernameField);
+        otpInput.setErrorDescriptionId(AuthErrorBanner.ID);
         usernameField.setReadOnly(true);
-
-        otpFieldsLayout.setSpacing(true);
-        otpFieldsLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-        otpFieldsLayout.setWidthFull();
-        otpFieldsLayout.addClassName("wams-otp-fields");
-
+        usernameField.getElement().setAttribute("autocomplete", "username");
         requestOtpButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        requestOtpButton.setWidthFull();
-        requestOtpButton.addClickListener(e -> requestOtp());
-
+        requestOtpButton.addClickListener(event -> requestOtp());
         loginButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        loginButton.addClassName("wams-auth-primary-btn");
         loginButton.setEnabled(false);
-        loginButton.addClickListener(e -> handleOtpLogin());
+        loginButton.addClickListener(event -> handleOtpLogin());
+        loginButton.addClickShortcut(com.vaadin.flow.component.Key.ENTER);
 
-        Anchor backToLogin = createLink("login", I18n.t("auth.common.link.backToSignIn"));
+        otpInput.setValueChangeListener(complete -> {
+            clearError();
+            updateLoginButtonState();
+        });
+        otpInput.setCompleteListener(ignored -> handleOtpLogin());
 
-        var card = createCard();
-        card.add(createBrand(I18n.t("auth.otp.title"), null),
-                usernameField, requestOtpButton, otpFieldsLayout, loginButton,
-                errorBanner, backToLogin, createFooter());
-
-        add(card);
-    }
-
-    private void buildOtpFields(int length) {
-        otpFieldsLayout.removeAll();
-        digitFields.clear();
-
-        for (int i = 0; i < length; i++) {
-            TextField field = new TextField();
-            field.setMaxLength(1);
-            field.setPattern("[0-9]");
-            field.setPlaceholder(I18n.t("auth.otp.field.digit.placeholder"));
-            field.setValueChangeMode(ValueChangeMode.EAGER);
-            final int index = i;
-            field.addValueChangeListener(e -> {
-                String val = e.getValue();
-                if (!val.isEmpty() && index < digitFields.size() - 1) {
-                    digitFields.get(index + 1).focus();
-                }
-                updateLoginButtonState();
-            });
-            field.addKeyDownListener(e -> {
-                if (e.getKey().equals(com.vaadin.flow.component.Key.BACKSPACE) &&
-                        field.getValue().isEmpty() && index > 0) {
-                    digitFields.get(index - 1).focus();
-                }
-            });
-            digitFields.add(field);
-            otpFieldsLayout.add(field);
-        }
-        digitFields.forEach(f -> f.setEnabled(true));
-        if (!digitFields.isEmpty()) {
-            digitFields.get(0).focus();
-        }
-        digitFields.forEach(TextField::clear);
-        loginButton.setEnabled(false);
-    }
-
-    private void updateLoginButtonState() {
-        boolean allFilled = digitFields.stream().allMatch(f -> !f.getValue().isEmpty());
-        loginButton.setEnabled(allFilled);
-    }
-
-    private String getOtpFromFields() {
-        return digitFields.stream().map(TextField::getValue).collect(Collectors.joining());
+        Anchor backToLogin = new Anchor(AuthRoutes.LOGIN, I18n.t("auth.common.link.backToSignIn"));
+        addToCard(new BrandHeader(I18n.t("auth.otp.title"), null),
+                usernameField, requestOtpButton, otpInput, loginButton, errorBanner,
+                backToLogin, new AuthFooter());
     }
 
     private void requestOtp() {
-        digitFields.forEach(f -> f.clear());
-        if (!digitFields.isEmpty()) {
-            digitFields.get(0).focus();
+        if (requestingOtp || submitting || !otpConfigurationValid) {
+            return;
         }
-        loginButton.setEnabled(false);
-        errorBanner.setVisible(false);
+        clearError();
+        otpInput.clear();
+        otpInput.focusFirst();
+        otpInput.setEnabled(false);
+        updateLoginButtonState();
+        setRequestLoading(true);
 
         AuthenticationContextRequest request = AuthenticationContextRequest.builder()
                 .tenant(tenant)
                 .userName(username)
                 .build();
-
-        try {
-            ResponseEntity<UserContext> response = authService.resolveAuthContext(request);
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                Notification.show(I18n.t("auth.otp.notification.otpSent"), 4000, Notification.Position.BOTTOM_END)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            } else {
-                showError(errorBanner, I18n.t("auth.otp.error.requestFailed"));
-            }
-        } catch (Exception ex) {
-            showError(errorBanner, I18n.t("auth.otp.error.requestFailed"));
-        }
+        UI ui = UI.getCurrent();
+        authService.resolveAuthContext(request).whenComplete((result, failure) ->
+                ui.access(() -> {
+                    setRequestLoading(false);
+                    otpInput.setEnabled(otpConfigurationValid);
+                    updateLoginButtonState();
+                    if (failure != null) {
+                        reportUnexpectedFailure(failure);
+                        showError(I18n.t("auth.otp.error.requestFailed"), Failure.OFFLINE);
+                    } else if (!result.succeeded()) {
+                        showError(failureMessage(result.failure(), "auth.otp.error.requestFailed",
+                                "auth.otp.error.requestFailed"), result.failure());
+                    } else {
+                        errorBanner.showSuccess(I18n.t("auth.otp.notification.otpSent"));
+                        otpInput.focusFirst();
+                    }
+                }));
     }
 
     private void handleOtpLogin() {
-        String otp = getOtpFromFields();
-        if (otp.length() != otpLength) {
-            showError(errorBanner, I18n.t("auth.otp.error.incomplete"));
+        if (submitting || !otpConfigurationValid) {
+            return;
+        }
+        if (!otpInput.isComplete()) {
+            showError(I18n.t("auth.otp.error.incomplete"), Failure.INVALID_CREDENTIALS,
+                    otpInput);
+            otpInput.focusFirstIncomplete();
             return;
         }
 
-        AuthenticationRequestDto authRequest = AuthenticationRequestDto.builder()
+        clearError();
+        setLoginLoading(true);
+        AuthenticationRequestDto request = AuthenticationRequestDto.builder()
                 .tenant(tenant)
-                .application("default")
+                .application(AuthConstants.DEFAULT_APPLICATION)
                 .userName(username)
-                .password(otp)
+                .password(otpInput.getValue())
                 .authType(IEnumAuth.Types.OTP)
                 .build();
+        UI ui = UI.getCurrent();
 
+        authService.authenticate(request).whenComplete((result, failure) ->
+                ui.access(() -> {
+                    setLoginLoading(false);
+                    if (failure != null) {
+                        reportUnexpectedFailure(failure);
+                        showError(I18n.t("auth.common.error.authenticationError"), Failure.OFFLINE);
+                    } else if (!result.succeeded()) {
+                        showError(failureMessage(result.failure(), "auth.otp.error.invalidOtp",
+                                "auth.common.error.authenticationError"), result.failure(),
+                                otpInput);
+                    } else {
+                        completeLogin(ui, result.value().getAccessToken());
+                    }
+                }));
+    }
+
+    private void completeLogin(UI ui, String accessToken) {
         try {
-            ResponseEntity<AuthResponseDto> response = authService.authenticate(authRequest);
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                AuthResponseDto authResponse = response.getBody();
-
-                VaadinSession vaadinSession = VaadinSession.getCurrent();
-                vaadinSession.setAttribute("user", username);
-                vaadinSession.setAttribute("accessToken", authResponse.getAccessToken());
-
-                // Also store in plain HTTP session as a fallback
-                HttpSession httpSession = VaadinServletRequest.getCurrent().getSession(true);
-                httpSession.setAttribute("user", username);
-                httpSession.setAttribute("accessToken", authResponse.getAccessToken());
-
-                log.info("User logged in: {} (session id: {})", username, vaadinSession.getSession().getId());
-
-                String target = (redirectTarget != null && SecurityUtils.isSafeInternalPath(redirectTarget))
-                        ? redirectTarget
-                        : "landing";
-
-                log.info("Redirecting after login to: {}", target);
-                UI.getCurrent().navigate(target);
-
-                Notification.show(I18n.t("auth.common.notification.welcome", username), 2000, Notification.Position.BOTTOM_END)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            } else {
-                showError(errorBanner, I18n.t("auth.otp.error.invalidOtp"));
-            }
-        } catch (Exception ex) {
-            showError(errorBanner, I18n.t("auth.common.error.authenticationError"));
+            authSession.write(username, accessToken);
+            authSession.redirect(ui, redirectTarget);
+            showWelcome(username);
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            reportUnexpectedFailure(exception);
+            showError(I18n.t("auth.common.error.authenticationError"), Failure.SERVICE_ERROR);
         }
     }
 
-    // ─── Override only onBeforeEnter – base beforeEnter will call this ────
+    private void updateLoginButtonState() {
+        loginButton.setEnabled(otpConfigurationValid && otpInput.isComplete() && !submitting);
+    }
+
+    private void setRequestLoading(boolean loading) {
+        requestingOtp = loading;
+        setButtonLoading(requestOtpButton, loading);
+        if (!loading && !otpConfigurationValid) {
+            requestOtpButton.setEnabled(false);
+        }
+    }
+
+    private void setLoginLoading(boolean loading) {
+        submitting = loading;
+        otpInput.setEnabled(!loading);
+        setButtonLoading(loginButton, loading);
+        updateLoginButtonState();
+    }
+
     @Override
     protected void onBeforeEnter(BeforeEnterEvent event) {
-        // Clear error container
-        errorBanner.setVisible(false);
-        errorBanner.setText("");
-
-        // DO NOT overwrite redirectTarget here — BaseLoginView already did it
-        // Only extract tenant/username/otpLength
-
+        clearError();
+        otpConfigurationValid = true;
+        otpLength = 6;
         Optional<String> tenantOpt = event.getLocation().getQueryParameters().getSingleParameter("tenant");
         Optional<String> usernameOpt = event.getLocation().getQueryParameters().getSingleParameter("username");
         Optional<String> otpLengthOpt = event.getLocation().getQueryParameters().getSingleParameter("otpLength");
 
         if (tenantOpt.isEmpty() || usernameOpt.isEmpty()) {
-            event.forwardTo("login");
+            event.forwardTo(AuthRoutes.LOGIN);
             return;
         }
 
@@ -230,11 +189,22 @@ public class OtpLoginView extends BaseLoginView {
         username = usernameOpt.get();
         try {
             otpLength = Integer.parseInt(otpLengthOpt.orElse("6"));
-        } catch (NumberFormatException e) {
-            otpLength = 6;
+        } catch (NumberFormatException exception) {
+            otpConfigurationValid = false;
         }
 
+        otpConfigurationValid = otpConfigurationValid && otpInput.setLength(otpLength);
         usernameField.setValue(username);
-        buildOtpFields(otpLength);
+        if (!otpConfigurationValid) {
+            requestOtpButton.setEnabled(false);
+            loginButton.setEnabled(false);
+            showError(I18n.t("auth.otp.error.invalidLength"), Failure.SERVICE_ERROR);
+            return;
+        }
+
+        requestOtpButton.setEnabled(true);
+        otpInput.clear();
+        otpInput.focusFirst();
+        updateLoginButtonState();
     }
 }

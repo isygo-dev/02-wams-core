@@ -166,4 +166,11 @@ public interface SchemaColumnConstantName extends ComSchemaColumnConstantName {
     String C_ORGANISATION = "ORGANISATION";
 
     String C_PROCESSED = "PROCESSED";
+    String C_QR_CHALLENGE_ID = "QR_CHALLENGE_ID";
+    String C_QR_CHALLENGE_TENANT = "QR_CHALLENGE_TENANT";
+    String C_QR_CHALLENGE_USER = "QR_CHALLENGE_USER";
+    String C_QR_STATUS = "QR_STATUS";
+    String C_QR_EXPIRES_AT = "QR_EXPIRES_AT";
+    String C_QR_APPROVED_BY = "QR_APPROVED_BY";
+    String C_QR_APPROVED_TENANT = "QR_APPROVED_TENANT";
 }

@@ -1,0 +1,101 @@
+@use "./mixins" as m;
+@use "./variables" as v;
+
+auth-card vaadin-text-field,
+auth-card vaadin-password-field,
+auth-card vaadin-email-field,
+auth-card auth-password-field,
+auth-card auth-form-grid {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+auth-card vaadin-text-field,
+auth-card vaadin-password-field,
+auth-card vaadin-email-field {
+  --vaadin-input-field-border-radius: #{v.$auth-radius-sm};
+}
+
+auth-password-field {
+  display: flex;
+  flex-direction: column;
+  gap: v.$auth-space-xs;
+}
+
+auth-password-field span[role="status"] {
+  color: #795900;
+  font-size: 0.875rem;
+}
+
+auth-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: v.$auth-space-sm v.$auth-space-md;
+  width: 100%;
+}
+
+auth-card vaadin-button {
+  @include m.cta;
+
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+}
+
+auth-card vaadin-button[theme~="primary"] {
+  background-color: v.$auth-color-primary;
+  color: #ffffff;
+}
+
+auth-card vaadin-button[theme~="primary"]:hover:not([disabled]) {
+  background-color: v.$auth-color-primary-hover;
+}
+
+auth-card a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: v.$auth-touch-target;
+  color: var(--lumo-primary-text-color, v.$auth-color-primary);
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  overflow-wrap: anywhere;
+}
+
+auth-card vaadin-text-field:focus-within::part(input-field),
+auth-card vaadin-password-field:focus-within::part(input-field),
+auth-card vaadin-email-field:focus-within::part(input-field) {
+  @include m.focus-ring;
+}
+
+auth-card vaadin-button:focus-visible::part(button),
+auth-card a:focus-visible {
+  @include m.focus-ring;
+}
+
+auth-card vaadin-password-field::part(reveal-button):focus-visible {
+  @include m.focus-ring;
+}
+
+auth-card vaadin-text-field::part(input-field),
+auth-card vaadin-password-field::part(input-field),
+auth-card vaadin-email-field::part(input-field) {
+  @include m.field-base;
+  min-height: v.$auth-touch-target;
+}
+
+auth-card vaadin-button::part(button) {
+  min-height: v.$auth-touch-target;
+}
+
+auth-form-grid vaadin-text-field,
+auth-form-grid vaadin-email-field {
+  min-width: 0;
+}
+
+@media (min-width: 640px) {
+  auth-layout[data-size="wide"] auth-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

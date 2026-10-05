@@ -1,0 +1,95 @@
+@use "./mixins" as m;
+@use "./variables" as v;
+
+auth-error-banner[hidden] {
+  display: none;
+}
+
+auth-error-banner {
+  @include m.banner;
+
+  display: block;
+}
+
+auth-error-banner.has-error {
+  border-color: v.$auth-color-error;
+  background: v.$auth-color-error-surface;
+  color: v.$auth-color-error;
+}
+
+auth-error-banner.is-success {
+  border-color: v.$auth-color-success;
+  background: v.$auth-color-success-surface;
+  color: v.$auth-color-success;
+}
+
+auth-error-banner[data-state="rate-limited"],
+auth-error-banner[data-state="locked"],
+auth-error-banner[data-state="expired"],
+auth-error-banner[data-state="form-error"],
+auth-error-banner[data-state="invalid-token"],
+auth-error-banner[data-state="server-error"] {
+  font-weight: 600;
+}
+
+auth-card vaadin-button.is-loading {
+  cursor: progress;
+  opacity: 0.86;
+}
+
+auth-card vaadin-button.is-loading::part(button)::after {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  margin-inline-start: 0.5rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  content: "";
+  vertical-align: middle;
+  animation: auth-spin 0.75s linear infinite;
+}
+
+auth-card vaadin-button[disabled] {
+  cursor: not-allowed;
+}
+
+auth-card vaadin-text-field[invalid]::part(input-field),
+auth-card vaadin-email-field[invalid]::part(input-field),
+auth-card vaadin-password-field[invalid]::part(input-field) {
+  border-color: v.$auth-color-error;
+}
+
+@keyframes auth-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  auth-card vaadin-button.is-loading::part(button)::after {
+    animation: none;
+  }
+}
+
+html[theme~="dark"] auth-error-banner.has-error {
+  background: #3b2324;
+  color: #ffb4ab;
+}
+
+html[theme~="dark"] auth-error-banner.is-success {
+  background: #19382a;
+  color: #90d5ac;
+}
+
+html[theme~="dark"] auth-error-banner.has-error {
+  border-color: #ffb4ab;
+}
+
+html[theme~="dark"] auth-error-banner.is-success {
+  border-color: #90d5ac;
+}
+
+html[theme~="dark"] auth-password-field span[role="status"] {
+  color: #f5d778;
+}

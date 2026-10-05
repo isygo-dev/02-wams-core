@@ -84,6 +84,7 @@ public interface SchemaTableConstantName extends ComSchemaTableConstantName {
      * The constant T_CONNECTION_TRACKING.
      */
     String T_CONNECTION_TRACKING = "T_CONNECTION_TRACKING";
+    String T_QR_LOGIN_CHALLENGE = "T_QR_LOGIN_CHALLENGE";
     /**
      * The constant T_THEME.
      */
