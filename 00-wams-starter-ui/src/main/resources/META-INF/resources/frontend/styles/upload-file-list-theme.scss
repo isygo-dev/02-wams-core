@@ -5,10 +5,10 @@
  */
 ::slotted([slot="file-list"]),
 [part="file-list"] {
-    display: none !important;
+  display: none !important;
 }
 
 :host([nodrop]) [part="file-list"],
 [part="drop-label-container"] + [part="file-list"] {
-    display: none !important;
+  display: none !important;
 }

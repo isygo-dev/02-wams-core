@@ -166,17 +166,22 @@ public class DailyTableGridConfig<E extends DayTimeSlot> {
         // Prevents NullPointerException in DailyTableGrid.buildTooltipText()
         // and any other place that calls getXxxExtractor().apply(...).
         if (descriptionExtractor == null) descriptionExtractor = e -> "";
-        if (locationExtractor == null)    locationExtractor    = e -> "";
-        if (colorExtractor == null)       colorExtractor       = e -> "#1976D2";
+        if (locationExtractor == null) locationExtractor = e -> "";
+        if (colorExtractor == null) colorExtractor = e -> "#1976D2";
         if (categoryKeyExtractor == null) categoryKeyExtractor = e -> null;
-        if (ownerExtractor == null)       ownerExtractor       = e -> "";
+        if (ownerExtractor == null) ownerExtractor = e -> "";
 
-        if (slotContentPopulator == null) slotContentPopulator = (content, e) -> {};
-        if (isEditable == null)           isEditable           = e -> true;
-        if (onEventClick == null)         onEventClick         = e -> {};
-        if (onEventDelete == null)        onEventDelete        = e -> {};
-        if (onEventEdit == null)          onEventEdit          = e -> {};
-        if (onEmptyCellClick == null)     onEmptyCellClick     = (s, e) -> {};
+        if (slotContentPopulator == null) slotContentPopulator = (content, e) -> {
+        };
+        if (isEditable == null) isEditable = e -> true;
+        if (onEventClick == null) onEventClick = e -> {
+        };
+        if (onEventDelete == null) onEventDelete = e -> {
+        };
+        if (onEventEdit == null) onEventEdit = e -> {
+        };
+        if (onEmptyCellClick == null) onEmptyCellClick = (s, e) -> {
+        };
 
         if (palette == null || palette.isEmpty()) {
             palette = List.of(
@@ -194,25 +199,79 @@ public class DailyTableGridConfig<E extends DayTimeSlot> {
     }
 
     // ---- Getters ----
-    public Function<E, LocalTime> getStartTimeExtractor()   { return startTimeExtractor; }
-    public Function<E, LocalTime> getEndTimeExtractor()     { return endTimeExtractor; }
-    public Function<E, String>    getTitleExtractor()       { return titleExtractor; }
-    public Function<E, String>    getDescriptionExtractor() { return descriptionExtractor; }
-    public Function<E, String>    getColorExtractor()       { return colorExtractor; }
-    public Function<E, String>    getLocationExtractor()    { return locationExtractor; }
-    public Function<E, Object>    getCategoryKeyExtractor() { return categoryKeyExtractor; }
-    public Function<E, String>    getOwnerExtractor()       { return ownerExtractor; }
+    public Function<E, LocalTime> getStartTimeExtractor() {
+        return startTimeExtractor;
+    }
 
-    public Consumer<E> getOnEventClick()  { return onEventClick; }
-    public Consumer<E> getOnEventDelete() { return onEventDelete; }
-    public Consumer<E> getOnEventEdit()   { return onEventEdit; }
-    public BiConsumer<VerticalLayout, E> getSlotContentPopulator() { return slotContentPopulator; }
-    public Predicate<E> getIsEditable()   { return isEditable; }
+    public Function<E, LocalTime> getEndTimeExtractor() {
+        return endTimeExtractor;
+    }
 
-    public int getStartHour()           { return startHour; }
-    public int getEndHour()             { return endHour; }
-    public int getStepMinutes()         { return stepMinutes; }
-    public List<String[]> getPalette()  { return palette; }
-    public boolean isShowNowIndicator() { return showNowIndicator; }
-    public BiConsumer<LocalTime, LocalTime> getOnEmptyCellClick() { return onEmptyCellClick; }
+    public Function<E, String> getTitleExtractor() {
+        return titleExtractor;
+    }
+
+    public Function<E, String> getDescriptionExtractor() {
+        return descriptionExtractor;
+    }
+
+    public Function<E, String> getColorExtractor() {
+        return colorExtractor;
+    }
+
+    public Function<E, String> getLocationExtractor() {
+        return locationExtractor;
+    }
+
+    public Function<E, Object> getCategoryKeyExtractor() {
+        return categoryKeyExtractor;
+    }
+
+    public Function<E, String> getOwnerExtractor() {
+        return ownerExtractor;
+    }
+
+    public Consumer<E> getOnEventClick() {
+        return onEventClick;
+    }
+
+    public Consumer<E> getOnEventDelete() {
+        return onEventDelete;
+    }
+
+    public Consumer<E> getOnEventEdit() {
+        return onEventEdit;
+    }
+
+    public BiConsumer<VerticalLayout, E> getSlotContentPopulator() {
+        return slotContentPopulator;
+    }
+
+    public Predicate<E> getIsEditable() {
+        return isEditable;
+    }
+
+    public int getStartHour() {
+        return startHour;
+    }
+
+    public int getEndHour() {
+        return endHour;
+    }
+
+    public int getStepMinutes() {
+        return stepMinutes;
+    }
+
+    public List<String[]> getPalette() {
+        return palette;
+    }
+
+    public boolean isShowNowIndicator() {
+        return showNowIndicator;
+    }
+
+    public BiConsumer<LocalTime, LocalTime> getOnEmptyCellClick() {
+        return onEmptyCellClick;
+    }
 }

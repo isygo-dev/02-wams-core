@@ -121,6 +121,7 @@ public class AdditionalFilesManager<F extends LinkedFileMinDto<Long>> extends Ve
     private int maxFileSize = 25 * 1024 * 1024;   // 25 MB
     private String[] acceptedMimeTypes;
     private Upload uploadComponent;
+
     private AdditionalFilesManager(List<F> initialFiles) {
         setSpacing(true);
         setPadding(false);

@@ -140,7 +140,7 @@ public class FilterBar extends Div {
     private static String formatDateRange(LocalDate from, LocalDate to) {
         if (from != null && to != null) return from + " → " + to;
         if (from != null) return "≥ " + from;
-        if (to != null)   return "≤ " + to;
+        if (to != null) return "≤ " + to;
         return "";
     }
 
@@ -240,13 +240,13 @@ public class FilterBar extends Div {
      * {@code "2025-01-01 → 2025-12-31"} (or {@code "≥ X"} / {@code "≤ Y"}
      * for open-ended ranges).
      *
-     * @param labelKey          i18n key shown on the chip (e.g. "Période")
+     * @param labelKey     i18n key shown on the chip (e.g. "Période")
      * @param fromLabelKey i18n key for the "from" picker placeholder
      * @param toLabelKey   i18n key for the "to" picker placeholder
-     * @param onChange          receives the pair whenever either bound
-     *                          changes; either argument may be {@code null}
+     * @param onChange     receives the pair whenever either bound
+     *                     changes; either argument may be {@code null}
      * @return a handle to the two pickers, for programmatic enable / read /
-     *         clear from the owning view
+     * clear from the owning view
      */
     public DateRangeFilter addDateRangeFilter(
             String labelKey,          // chip label
@@ -275,14 +275,19 @@ public class FilterBar extends Div {
         to.addValueChangeListener(e -> fire.run());
 
         registrations.add(new FilterRegistration() {
-            @Override public boolean isActive() {
+            @Override
+            public boolean isActive() {
                 return from.getValue() != null || to.getValue() != null;
             }
-            @Override public void clear() {
+
+            @Override
+            public void clear() {
                 from.clear();
                 to.clear();
             }
-            @Override public FilterChip toChip(Runnable onClearAll) {
+
+            @Override
+            public FilterChip toChip(Runnable onClearAll) {
                 String value = formatDateRange(from.getValue(), to.getValue());
                 return new FilterChip(I18n.t(labelKey), value, onClearAll);
             }
@@ -364,14 +369,20 @@ public class FilterBar extends Div {
     // Nested types
     // ==============================================================
 
-    /** Uniform contract for anything that can produce a chip and be cleared. */
+    /**
+     * Uniform contract for anything that can produce a chip and be cleared.
+     */
     private interface FilterRegistration {
         boolean isActive();
+
         void clear();
+
         FilterChip toChip(Runnable onClearAll);
     }
 
-    /** A {@link ComboBox}-backed filter. */
+    /**
+     * A {@link ComboBox}-backed filter.
+     */
     private static final class ComboFilterRegistration<T> implements FilterRegistration {
         final ComboBox<T> combo;
         final String label;
@@ -425,8 +436,13 @@ public class FilterBar extends Div {
             this.to = to;
         }
 
-        public LocalDate getFromValue() { return from.getValue(); }
-        public LocalDate getToValue()   { return to.getValue(); }
+        public LocalDate getFromValue() {
+            return from.getValue();
+        }
+
+        public LocalDate getToValue() {
+            return to.getValue();
+        }
 
         public void clear() {
             from.clear();

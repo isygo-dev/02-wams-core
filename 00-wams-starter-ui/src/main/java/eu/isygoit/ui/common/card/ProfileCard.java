@@ -29,7 +29,9 @@ import org.springframework.util.StringUtils;
  */
 public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusCard<V, S> {
 
-    /** The DTO being displayed. Subclasses can read it directly. */
+    /**
+     * The DTO being displayed. Subclasses can read it directly.
+     */
     protected final D profile;
 
     protected ProfileCard(V parentView, S objectService, D profile) {
@@ -41,26 +43,46 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
      * Contract — subclasses expose profile info
      * ══════════════════════════════════════════════════════════════ */
 
-    /** Path/URL to the profile picture. May be {@code null}/{@code blank} → user icon. */
+    /**
+     * Resolves a translation key; if missing, falls back to the enum constant
+     * name through the shared enum translation key.
+     */
+    protected static String translate(String key, Enum<?> enumValue) {
+        String value = I18n.t(key);
+        if (value == null || value.isBlank() || value.equals(key) || value.equals("!" + key + "!")) {
+            return I18n.enumLabel(enumValue);
+        }
+        return value;
+    }
+
+    /**
+     * Path/URL to the profile picture. May be {@code null}/{@code blank} → user icon.
+     */
     protected abstract String profileImagePath();
 
-    /** Full display name, e.g. {@code "Mme Yasmine Trabelsi"}. Never {@code null}. */
+    /**
+     * Full display name, e.g. {@code "Mme Yasmine Trabelsi"}. Never {@code null}.
+     */
     protected abstract String profileFullName();
 
-    /** Secondary line under the name, e.g. email. Return {@code null} to skip. */
+    /**
+     * Secondary line under the name, e.g. email. Return {@code null} to skip.
+     */
     protected abstract String profileSubtitle();
 
-    /** Status chip shown at the footer's left. Return {@code null} to skip. */
+    /**
+     * Status chip shown at the footer's left. Return {@code null} to skip.
+     */
     protected abstract Span profileStatusTag();
+
+    /* ══════════════════════════════════════════════════════════════
+     * Default header — avatar + (full name over subtitle)
+     * ══════════════════════════════════════════════════════════════ */
 
     @Override
     protected final Span buildStatusTag() {
         return profileStatusTag();
     }
-
-    /* ══════════════════════════════════════════════════════════════
-     * Default header — avatar + (full name over subtitle)
-     * ══════════════════════════════════════════════════════════════ */
 
     @Override
     protected Component buildTitle() {
@@ -71,14 +93,16 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
         hero.addClassName("wams-profile-card__hero");
 
         Component avatar = buildProfileAvatar();
-        Component info   = buildProfileNameBlock();
+        Component info = buildProfileNameBlock();
 
         hero.add(avatar, info);
         hero.expand(info);
         return hero;
     }
 
-    /** Round avatar. Uses {@link #profileImagePath()} when non-blank, else a user icon. */
+    /**
+     * Round avatar. Uses {@link #profileImagePath()} when non-blank, else a user icon.
+     */
     protected Component buildProfileAvatar() {
         Div wrap = new Div();
         wrap.addClassName("wams-profile-card__avatar-wrap");
@@ -98,7 +122,13 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
         return wrap;
     }
 
-    /** Full name on top, optional subtitle underneath — stacked as a single flex item. */
+    /* ══════════════════════════════════════════════════════════════
+     * Shared body helpers
+     * ══════════════════════════════════════════════════════════════ */
+
+    /**
+     * Full name on top, optional subtitle underneath — stacked as a single flex item.
+     */
     protected Component buildProfileNameBlock() {
         VerticalLayout info = new VerticalLayout();
         info.setPadding(false);
@@ -120,11 +150,9 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
         return info;
     }
 
-    /* ══════════════════════════════════════════════════════════════
-     * Shared body helpers
-     * ══════════════════════════════════════════════════════════════ */
-
-    /** Standard body row: {@code [icon] Label: value}. */
+    /**
+     * Standard body row: {@code [icon] Label: value}.
+     */
     protected HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
         HorizontalLayout row = new HorizontalLayout();
         row.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -197,17 +225,5 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
         chip.getElement().setAttribute("title",
                 tooltip != null && !tooltip.equals(tooltipKey) ? tooltip : label);
         return chip;
-    }
-
-    /**
-     * Resolves a translation key; if missing, falls back to the enum constant
-     * name through the shared enum translation key.
-     */
-    protected static String translate(String key, Enum<?> enumValue) {
-        String value = I18n.t(key);
-        if (value == null || value.isBlank() || value.equals(key) || value.equals("!" + key + "!")) {
-            return I18n.enumLabel(enumValue);
-        }
-        return value;
     }
 }

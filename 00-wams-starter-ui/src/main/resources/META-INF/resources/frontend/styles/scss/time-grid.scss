@@ -7,402 +7,402 @@
 /* ─── Monthly Grid ───────────────────────────────────────────── */
 
 .monthly-grid-wrapper {
-    width: 100%;
+  width: 100%;
 }
 
 .monthly-grid {
-    width: 100%;
+  width: 100%;
 }
 
 .monthly-grid-header {
-    display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 2px;
-    margin-bottom: 2px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
+  margin-bottom: 2px;
 }
 
 .monthly-grid-header-cell {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 28px;
-    padding: var(--lumo-space-xs);
-    font-weight: 600;
-    font-size: var(--lumo-font-size-s);
-    line-height: 1;
-    text-align: center;
-    white-space: nowrap;
-    color: var(--lumo-secondary-text-color);
-    background: var(--lumo-contrast-5pct);
-    border-radius: var(--lumo-border-radius-s);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: var(--lumo-space-xs);
+  font-weight: 600;
+  font-size: var(--lumo-font-size-s);
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--lumo-secondary-text-color);
+  background: var(--lumo-contrast-5pct);
+  border-radius: var(--lumo-border-radius-s);
 }
 
 .monthly-grid-inner {
-    display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 2px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
 }
 
 .monthly-grid-cell {
-    background: var(--lumo-base-color);
-    border-radius: var(--lumo-border-radius-s);
-    padding: var(--lumo-space-xs);
-    min-height: 80px;
-    position: relative;
-    cursor: pointer;
-    border: 1px solid var(--lumo-contrast-10pct);
-    transition: var(--wams-stats-transition);
+  background: var(--lumo-base-color);
+  border-radius: var(--lumo-border-radius-s);
+  padding: var(--lumo-space-xs);
+  min-height: 80px;
+  position: relative;
+  cursor: pointer;
+  border: 1px solid var(--lumo-contrast-10pct);
+  transition: var(--wams-stats-transition);
 }
 
 .monthly-grid-cell:hover {
-    background: var(--lumo-contrast-5pct);
-    border-color: var(--lumo-primary-color-50pct);
+  background: var(--lumo-contrast-5pct);
+  border-color: var(--lumo-primary-color-50pct);
 }
 
 .monthly-grid-cell--empty {
-    background: var(--lumo-contrast-5pct);
-    border-color: transparent;
-    cursor: default;
+  background: var(--lumo-contrast-5pct);
+  border-color: transparent;
+  cursor: default;
 }
 
 .monthly-grid-cell--today {
-    background: var(--lumo-primary-color-10pct);
-    border-color: var(--lumo-primary-color);
+  background: var(--lumo-primary-color-10pct);
+  border-color: var(--lumo-primary-color);
 }
 
 .monthly-grid-cell--weekend {
-    background: var(--lumo-contrast-5pct);
+  background: var(--lumo-contrast-5pct);
 }
 
 .monthly-grid-day-number {
-    font-size: var(--lumo-font-size-s);
-    font-weight: 600;
-    color: var(--lumo-primary-text-color);
+  font-size: var(--lumo-font-size-s);
+  font-weight: 600;
+  color: var(--lumo-primary-text-color);
 }
 
 .monthly-grid-events {
-    margin-top: var(--lumo-space-xs);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    align-items: center;
+  margin-top: var(--lumo-space-xs);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
 }
 
 /* ─── Enhanced Event Dot ──────────────────────────────────────── */
 
 .monthly-grid-event-dot-enhanced {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    border: 2px solid white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-    position: relative;
-    transition: transform 0.2s, box-shadow 0.2s;
-    flex-shrink: 0;
-    background-color: attr(data-event-color type(<color>), #1976D2);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+  flex-shrink: 0;
+  background-color: attr(data-event-color type(< color >), #1976D2);
 }
 
 .monthly-grid-event-dot-enhanced:hover {
-    transform: scale(1.3);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    z-index: 10;
+  transform: scale(1.3);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 10;
 }
 
 .monthly-grid-event-dot-enhanced .monthly-grid-event-menu {
-    position: absolute;
-    top: -12px;
-    right: -12px;
-    opacity: 0;
-    transition: opacity 0.2s;
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  opacity: 0;
+  transition: opacity 0.2s;
 }
 
 .monthly-grid-event-dot-enhanced:hover .monthly-grid-event-menu {
-    opacity: 1;
+  opacity: 1;
 }
 
 .monthly-grid-event-dot-enhanced[title] {
-    position: relative;
+  position: relative;
 }
 
 .monthly-grid-cell--today .monthly-grid-event-dot-enhanced {
-    border-color: var(--lumo-primary-color-10pct);
+  border-color: var(--lumo-primary-color-10pct);
 }
 
 .monthly-grid-cell--weekend .monthly-grid-event-dot-enhanced {
-    border-color: var(--lumo-base-color);
+  border-color: var(--lumo-base-color);
 }
 
 /* ─── Event More Indicator ────────────────────────────────────── */
 
 .monthly-grid-event-more {
-    font-size: var(--lumo-font-size-xs);
-    font-weight: 600;
-    color: var(--lumo-secondary-text-color);
-    background: var(--lumo-contrast-10pct);
-    padding: 0 6px;
-    border-radius: var(--lumo-border-radius-s);
-    cursor: pointer;
-    transition: background 0.2s;
+  font-size: var(--lumo-font-size-xs);
+  font-weight: 600;
+  color: var(--lumo-secondary-text-color);
+  background: var(--lumo-contrast-10pct);
+  padding: 0 6px;
+  border-radius: var(--lumo-border-radius-s);
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
 .monthly-grid-event-more:hover {
-    background: var(--lumo-contrast-20pct);
+  background: var(--lumo-contrast-20pct);
 }
 
 /* Weekly timetable grid */
 .timetable-grid-wrapper {
-    --tt-row-full: 56px;
-    --tt-row-half: 28px;
-    --tt-row-end: 20px;
+  --tt-row-full: 56px;
+  --tt-row-half: 28px;
+  --tt-row-end: 20px;
 
-    background: var(--lumo-base-color);
-    border-radius: var(--lumo-border-radius-l);
-    border: 1px solid var(--lumo-contrast-10pct);
-    padding: 0;
-    box-shadow: var(--lumo-box-shadow-xs);
-    overflow-x: auto;
+  background: var(--lumo-base-color);
+  border-radius: var(--lumo-border-radius-l);
+  border: 1px solid var(--lumo-contrast-10pct);
+  padding: 0;
+  box-shadow: var(--lumo-box-shadow-xs);
+  overflow-x: auto;
 }
 
 .timetable-grid {
-    position: relative;
-    display: grid;
-    min-width: 800px;
-    width: 100%;
-    margin: 8px 0;
+  position: relative;
+  display: grid;
+  min-width: 800px;
+  width: 100%;
+  margin: 8px 0;
 }
 
 .timetable-grid--daily {
-    grid-template-columns: 64px 1fr;
+  grid-template-columns: 64px 1fr;
 }
 
 .timetable-grid[data-day-count] {
-    grid-template-columns: 64px repeat(attr(data-day-count type(<integer>)), 1fr);
+  grid-template-columns: 64px repeat(attr(data-day-count type(< integer >)), 1fr);
 }
 
 .timetable-grid[data-grid-template-rows] {
-    grid-template-rows: attr(data-grid-template-rows type(*));
+  grid-template-rows: attr(data-grid-template-rows type(*));
 }
 
 [data-grid-row-start][data-grid-row-span][data-grid-column-start][data-grid-column-span] {
-    grid-row-start: attr(data-grid-row-start type(<integer>));
-    grid-row-end: span attr(data-grid-row-span type(<integer>));
-    grid-column-start: attr(data-grid-column-start type(<integer>));
-    grid-column-end: span attr(data-grid-column-span type(<integer>));
+  grid-row-start: attr(data-grid-row-start type(< integer >));
+  grid-row-end: span attr(data-grid-row-span type(< integer >));
+  grid-column-start: attr(data-grid-column-start type(< integer >));
+  grid-column-end: span attr(data-grid-column-span type(< integer >));
 }
 
 .timetable-delete-menu-item {
-    color: var(--lumo-error-text-color);
+  color: var(--lumo-error-text-color);
 }
 
 .timetable-grid-header {
-    position: sticky;
-    top: 0;
-    z-index: 5;
-    background: var(--lumo-base-color);
-    border-bottom: 1px solid var(--lumo-contrast-10pct);
-    padding: var(--lumo-space-s) var(--lumo-space-xs);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--lumo-base-color);
+  border-bottom: 1px solid var(--lumo-contrast-10pct);
+  padding: var(--lumo-space-s) var(--lumo-space-xs);
 }
 
 .timetable-grid-header-day {
-    color: var(--lumo-secondary-text-color);
-    border-bottom: 2px solid transparent;
+  color: var(--lumo-secondary-text-color);
+  border-bottom: 2px solid transparent;
 }
 
 .timetable-grid-header-day--today {
-    color: var(--lumo-primary-text-color);
-    border-bottom: 2px solid var(--lumo-primary-color);
+  color: var(--lumo-primary-text-color);
+  border-bottom: 2px solid var(--lumo-primary-color);
 }
 
 .timetable-time-label {
-    display: block;
-    align-self: start;
-    transform: translateY(calc(-0.6em + 8px));
-    white-space: nowrap;
-    padding-right: var(--lumo-space-xs);
-    text-align: right;
+  display: block;
+  align-self: start;
+  transform: translateY(calc(-0.6em + 8px));
+  white-space: nowrap;
+  padding-right: var(--lumo-space-xs);
+  text-align: right;
 }
 
 .timetable-time-label--end {
-    opacity: 0.7;
+  opacity: 0.7;
 }
 
 .timetable-bg-cell {
-    position: relative;
-    border-right: 1px solid var(--lumo-contrast-5pct);
-    background: var(--lumo-base-color);
-    transition: background 0.12s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: default;
-    overflow: hidden;
+  position: relative;
+  border-right: 1px solid var(--lumo-contrast-5pct);
+  background: var(--lumo-base-color);
+  transition: background 0.12s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  overflow: hidden;
 }
 
 .timetable-bg-cell.hour-full {
-    border-top: 1px solid var(--lumo-contrast-20pct);
+  border-top: 1px solid var(--lumo-contrast-20pct);
 }
 
 .timetable-bg-cell.hour-half {
-    border-top: 1px solid var(--lumo-contrast-10pct);
+  border-top: 1px solid var(--lumo-contrast-10pct);
 }
 
 .timetable-grid-col-today {
-    background: var(--lumo-primary-color-10pct);
+  background: var(--lumo-primary-color-10pct);
 }
 
 .timetable-grid-cell--empty.timetable-grid-col-today:hover {
-    background: var(--lumo-primary-color-10pct);
+  background: var(--lumo-primary-color-10pct);
 }
 
 .timetable-grid-cell--empty {
-    cursor: pointer;
-    border-radius: var(--lumo-border-radius-s);
+  cursor: pointer;
+  border-radius: var(--lumo-border-radius-s);
 }
 
 .timetable-grid-cell--empty:hover {
-    background: var(--lumo-contrast-5pct);
+  background: var(--lumo-contrast-5pct);
 }
 
 .timetable-empty-plus {
-    display: none;
-    color: var(--lumo-secondary-text-color);
-    font-size: 1.1rem;
-    font-weight: 300;
+  display: none;
+  color: var(--lumo-secondary-text-color);
+  font-size: 1.1rem;
+  font-weight: 300;
 }
 
 .timetable-grid-cell--empty:hover .timetable-empty-plus {
-    display: block;
+  display: block;
 }
 
 .timetable-slot-chip {
-    position: relative;
-    z-index: 2;
-    cursor: pointer;
-    margin: 1px;
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+  margin: 1px;
 }
 
 .timetable-slot-content {
-    width: calc(100% - 2px);
-    height: calc(100% - 2px);
-    padding: 3px 6px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
-    text-align: left;
-    --slot-accent: attr(data-slot-accent type(<color>), var(--lumo-primary-color));
-    background: attr(data-slot-bg type(<color>), var(--lumo-primary-color-10pct));
-    border-left: 3px solid var(--slot-accent);
-    border-radius: var(--lumo-border-radius-s);
-    box-shadow: none;
-    transition: box-shadow 0.12s ease;
-    overflow: hidden;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  padding: 3px 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-align: left;
+  --slot-accent: attr(data-slot-accent type(< color >), var(--lumo-primary-color));
+  background: attr(data-slot-bg type(< color >), var(--lumo-primary-color-10pct));
+  border-left: 3px solid var(--slot-accent);
+  border-radius: var(--lumo-border-radius-s);
+  box-shadow: none;
+  transition: box-shadow 0.12s ease;
+  overflow: hidden;
 }
 
 .timetable-slot-chip:hover .timetable-slot-content {
-    box-shadow: var(--lumo-box-shadow-s);
+  box-shadow: var(--lumo-box-shadow-s);
 }
 
 .timetable-slot-title {
-    font-size: var(--lumo-font-size-xs);
-    font-weight: 600;
-    color: var(--slot-accent, var(--lumo-primary-text-color));
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
+  font-size: var(--lumo-font-size-xs);
+  font-weight: 600;
+  color: var(--slot-accent, var(--lumo-primary-text-color));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 .timetable-slot-meta {
-    font-size: var(--lumo-font-size-xxs);
-    color: var(--lumo-secondary-text-color);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
+  font-size: var(--lumo-font-size-xxs);
+  color: var(--lumo-secondary-text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 .timetable-slot-time-range {
-    font-size: 0.6rem;
-    opacity: 0.75;
-    margin-top: 1px;
+  font-size: 0.6rem;
+  opacity: 0.75;
+  margin-top: 1px;
 }
 
 .timetable-slot-actions {
-    position: absolute;
-    top: 0;
-    right: 0;
-    opacity: 0;
-    background: rgba(255, 255, 255, 0.85);
-    border-radius: var(--lumo-border-radius-s);
-    transition: opacity 0.12s ease;
-    z-index: 3;
+  position: absolute;
+  top: 0;
+  right: 0;
+  opacity: 0;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: var(--lumo-border-radius-s);
+  transition: opacity 0.12s ease;
+  z-index: 3;
 }
 
 .timetable-slot-chip:hover .timetable-slot-actions,
 .timetable-slot-actions:focus-within {
-    opacity: 1;
+  opacity: 1;
 }
 
 .timetable-now-indicator {
-    position: absolute;
-    height: 2px;
-    background: var(--lumo-error-color, #D13438);
-    z-index: 20;
-    pointer-events: none;
+  position: absolute;
+  height: 2px;
+  background: var(--lumo-error-color, #D13438);
+  z-index: 20;
+  pointer-events: none;
 }
 
 .timetable-now-dot {
-    position: absolute;
-    left: -5px;
-    top: -4px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--lumo-error-color, #D13438);
+  position: absolute;
+  left: -5px;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--lumo-error-color, #D13438);
 }
 
 @media (max-width: 768px) {
-    .timetable-grid-wrapper {
-        --tt-row-full: 46px;
-        --tt-row-half: 23px;
-        --tt-row-end: 16px;
-    }
+  .timetable-grid-wrapper {
+    --tt-row-full: 46px;
+    --tt-row-half: 23px;
+    --tt-row-end: 16px;
+  }
 
-    .timetable-grid {
-        min-width: 600px;
-        font-size: var(--lumo-font-size-xxs);
-    }
+  .timetable-grid {
+    min-width: 600px;
+    font-size: var(--lumo-font-size-xxs);
+  }
 
-    .timetable-grid-header {
-        font-size: var(--lumo-font-size-xxs);
-        padding: var(--lumo-space-xs) 0;
-    }
+  .timetable-grid-header {
+    font-size: var(--lumo-font-size-xxs);
+    padding: var(--lumo-space-xs) 0;
+  }
 
-    .timetable-slot-content {
-        font-size: 0.55rem;
-    }
+  .timetable-slot-content {
+    font-size: 0.55rem;
+  }
 }
 
 @media (max-width: 480px) {
-    .timetable-grid-wrapper {
-        --tt-row-full: 38px;
-        --tt-row-half: 19px;
-        --tt-row-end: 14px;
-    }
+  .timetable-grid-wrapper {
+    --tt-row-full: 38px;
+    --tt-row-half: 19px;
+    --tt-row-end: 14px;
+  }
 
-    .timetable-grid {
-        min-width: 400px;
-    }
+  .timetable-grid {
+    min-width: 400px;
+  }
 
-    .timetable-grid-header {
-        padding: var(--lumo-space-xs) 0;
-        font-size: 0.5rem;
-    }
+  .timetable-grid-header {
+    padding: var(--lumo-space-xs) 0;
+    font-size: 0.5rem;
+  }
 
-    .timetable-slot-content {
-        font-size: 0.45rem;
-        padding: 2px;
-    }
+  .timetable-slot-content {
+    font-size: 0.45rem;
+    padding: 2px;
+  }
 }

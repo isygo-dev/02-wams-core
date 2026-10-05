@@ -6,23 +6,23 @@
 /* ── Header ───────────────────────────────────────────────────────────────── */
 
 .wams-main-header {
-    flex-wrap: wrap;
-    gap: var(--lumo-space-s);
-    height: var(--wams-header-height);
-    min-height: var(--wams-header-height);
-    box-sizing: border-box;
-    border-bottom: 1px solid var(--lumo-contrast-10pct);
-    border-top: 3px solid var(--wams-module-accent, transparent);
-    box-shadow: var(--lumo-box-shadow-xs);
-    background: var(--lumo-base-color);
+  flex-wrap: wrap;
+  gap: var(--lumo-space-s);
+  height: var(--wams-header-height);
+  min-height: var(--wams-header-height);
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--lumo-contrast-10pct);
+  border-top: 3px solid var(--wams-module-accent, transparent);
+  box-shadow: var(--lumo-box-shadow-xs);
+  background: var(--lumo-base-color);
 }
 
 .wams-main-header__left {
-    overflow: hidden;
+  overflow: hidden;
 }
 
 .wams-main-header__right {
-    margin-right: var(--lumo-space-m);
+  margin-right: var(--lumo-space-m);
 }
 
 /* Touch-target sizing: Lumo's LUMO_TERTIARY_INLINE button variant strips
@@ -34,133 +34,133 @@
    pointer/touch input a real box to hit. */
 
 .wams-header-icon-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 36px;
-    min-height: 36px;
-    border-radius: var(--lumo-border-radius-m);
-    color: var(--lumo-secondary-text-color);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: var(--lumo-border-radius-m);
+  color: var(--lumo-secondary-text-color);
 }
 
 vaadin-drawer-toggle {
-    min-width: 36px;
-    min-height: 36px;
+  min-width: 36px;
+  min-height: 36px;
 }
 
 /* ── Brand (click → landing) ──────────────────────────────────────────────── */
 
 .wams-brand {
-    cursor: pointer;
-    padding: var(--lumo-space-xs) var(--lumo-space-s);
-    border-radius: var(--lumo-border-radius-m);
-    transition: background-color 0.15s ease;
+  cursor: pointer;
+  padding: var(--lumo-space-xs) var(--lumo-space-s);
+  border-radius: var(--lumo-border-radius-m);
+  transition: background-color 0.15s ease;
 }
 
 .wams-brand:hover {
-    background-color: var(--lumo-contrast-5pct);
+  background-color: var(--lumo-contrast-5pct);
 }
 
 .wams-brand__icon {
-    box-sizing: border-box;
-    width: 28px;
-    height: 28px;
-    padding: 5px;
-    margin-right: var(--lumo-space-s);
-    border-radius: var(--lumo-border-radius-l);
-    color: var(--lumo-primary-contrast-color);
-    background: linear-gradient(135deg, var(--lumo-primary-color), var(--wams-module-accent, #0055CC));
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  padding: 5px;
+  margin-right: var(--lumo-space-s);
+  border-radius: var(--lumo-border-radius-l);
+  color: var(--lumo-primary-contrast-color);
+  background: linear-gradient(135deg, var(--lumo-primary-color), var(--wams-module-accent, #0055CC));
 }
 
 .wams-brand__name {
-    font-size: var(--lumo-font-size-l);
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    color: var(--lumo-header-text-color);
-    white-space: nowrap;
+  font-size: var(--lumo-font-size-l);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--lumo-header-text-color);
+  white-space: nowrap;
 }
 
 .wams-header-title {
-    white-space: nowrap;
-    font-size: var(--lumo-font-size-s);
-    font-weight: 600;
-    color: var(--wams-module-accent, var(--lumo-secondary-text-color));
-    padding: 2px var(--lumo-space-s);
-    border-radius: var(--lumo-border-radius-l);
-    background: var(--lumo-contrast-5pct);
+  white-space: nowrap;
+  font-size: var(--lumo-font-size-s);
+  font-weight: 600;
+  color: var(--wams-module-accent, var(--lumo-secondary-text-color));
+  padding: 2px var(--lumo-space-s);
+  border-radius: var(--lumo-border-radius-l);
+  background: var(--lumo-contrast-5pct);
 }
 
 /* ── Header icon buttons (notifications / settings): hover only, sizing is
    in the shared .wams-header-icon-btn rule above ─────────────────────────── */
 
 .wams-header-icon-btn:hover {
-    color: var(--lumo-primary-color);
-    background-color: var(--lumo-contrast-5pct);
+  color: var(--lumo-primary-color);
+  background-color: var(--lumo-contrast-5pct);
 }
 
 .wams-header-icon-btn:focus-visible,
 .wams-brand:focus-visible,
 vaadin-drawer-toggle:focus-visible {
-    outline: 2px solid var(--lumo-primary-color);
-    outline-offset: 1px;
+  outline: 2px solid var(--lumo-primary-color);
+  outline-offset: 1px;
 }
 
 .wams-header-popover {
-    padding: var(--lumo-space-s) var(--lumo-space-m);
+  padding: var(--lumo-space-s) var(--lumo-space-m);
 }
 
 .wams-avatar-bordered {
-    border: 2px solid transparent;
-    transition: border-color 0.15s ease;
+  border: 2px solid transparent;
+  transition: border-color 0.15s ease;
 }
 
 .wams-profile-menu:hover .wams-avatar-bordered {
-    border-color: var(--lumo-primary-color-50pct);
+  border-color: var(--lumo-primary-color-50pct);
 }
 
 /* ── Profile dropdown ─────────────────────────────────────────────────── */
 
 .wams-profile-menu__identity {
-    display: flex;
-    flex-direction: column;
-    max-width: 260px;
-    padding: var(--lumo-space-xs) var(--lumo-space-s);
+  display: flex;
+  flex-direction: column;
+  max-width: 260px;
+  padding: var(--lumo-space-xs) var(--lumo-space-s);
 }
 
 .wams-profile-menu__header {
-    opacity: 1;
-    cursor: default;
+  opacity: 1;
+  cursor: default;
 }
 
 .wams-profile-menu__name {
-    font-weight: 600;
-    color: var(--lumo-header-text-color);
-    overflow: hidden;
-    text-overflow: ellipsis;
+  font-weight: 600;
+  color: var(--lumo-header-text-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .wams-profile-menu__email {
-    font-size: var(--lumo-font-size-xs);
-    color: var(--lumo-secondary-text-color);
-    overflow: hidden;
-    text-overflow: ellipsis;
+  font-size: var(--lumo-font-size-xs);
+  color: var(--lumo-secondary-text-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .wams-menu-entry {
-    display: flex;
-    align-items: center;
-    gap: var(--lumo-space-s);
+  display: flex;
+  align-items: center;
+  gap: var(--lumo-space-s);
 }
 
 .wams-menu-entry__icon {
-    width: 16px;
-    height: 16px;
-    color: var(--lumo-secondary-text-color);
+  width: 16px;
+  height: 16px;
+  color: var(--lumo-secondary-text-color);
 }
 
 .wams-profile-menu__logout .wams-menu-entry,
 .wams-profile-menu__logout .wams-menu-entry__icon {
-    color: var(--lumo-error-text-color);
+  color: var(--lumo-error-text-color);
 }
 
 /*
@@ -171,7 +171,7 @@ vaadin-drawer-toggle:focus-visible {
  */
 
 .wams-header-icon-cluster {
-    flex: 0 0 auto;
+  flex: 0 0 auto;
 }
 
 /* ── Header responsive breakpoints ────────────────────────────────────────
@@ -193,9 +193,9 @@ vaadin-drawer-toggle:focus-visible {
    the redundant text. */
 
 @media (max-width: 1024px) {
-    .wams-header-title {
-        display: none;
-    }
+  .wams-header-title {
+    display: none;
+  }
 }
 
 /* Mobile: one compact row (toggle · brand … search-icon · icons). The right
@@ -204,74 +204,74 @@ vaadin-drawer-toggle:focus-visible {
    full-width row only while .wams-search-open is set on the layout. */
 
 .wams-header-search-toggle {
-    display: none;
+  display: none;
 }
 
 @media (max-width: 768px) {
-    .wams-main-header {
-        height: auto;
-        min-height: var(--wams-header-height);
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: center;
-        padding: 0 var(--lumo-space-s);
-    }
+  .wams-main-header {
+    height: auto;
+    min-height: var(--wams-header-height);
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 0 var(--lumo-space-s);
+  }
 
-    .wams-main-header__right,
-    .wams-header-right-content {
-        display: contents;
-    }
+  .wams-main-header__right,
+  .wams-header-right-content {
+    display: contents;
+  }
 
-    .wams-main-header__left {
-        order: 1;
-    }
+  .wams-main-header__left {
+    order: 1;
+  }
 
-    .wams-header-icon-cluster {
-        order: 2;
-    }
+  .wams-header-icon-cluster {
+    order: 2;
+  }
 
-    .wams-header-search-toggle {
-        display: inline-flex;
-    }
+  .wams-header-search-toggle {
+    display: inline-flex;
+  }
 
-    .wams-header-search-slot {
-        display: none;
-        order: 3;
-        flex: 1 0 100%;
-        padding: 0 0 var(--lumo-space-s);
-    }
+  .wams-header-search-slot {
+    display: none;
+    order: 3;
+    flex: 1 0 100%;
+    padding: 0 0 var(--lumo-space-s);
+  }
 
-    .wams-search-open .wams-header-search-slot {
-        display: block;
-    }
+  .wams-search-open .wams-header-search-slot {
+    display: block;
+  }
 
-    .wams-search-open .wams-header-search-toggle {
-        color: var(--lumo-primary-color);
-        background-color: var(--lumo-primary-color-10pct);
-    }
+  .wams-search-open .wams-header-search-toggle {
+    color: var(--lumo-primary-color);
+    background-color: var(--lumo-primary-color-10pct);
+  }
 
-    .wams-brand__name {
-        font-size: var(--lumo-font-size-m);
-    }
+  .wams-brand__name {
+    font-size: var(--lumo-font-size-m);
+  }
 }
 
 /* Overlay drawer (Vaadin switches below 800px): always full width, never the
    icon rail, and the rail toggle is meaningless there. */
 
 @media (max-width: 800px) {
-    .wams-sidebar-collapsed {
-        --vaadin-app-layout-drawer-width: var(--wams-sidebar-width-expanded);
-    }
+  .wams-sidebar-collapsed {
+    --vaadin-app-layout-drawer-width: var(--wams-sidebar-width-expanded);
+  }
 
-    .wams-sidebar-collapse-toggle {
-        display: none;
-    }
+  .wams-sidebar-collapse-toggle {
+    display: none;
+  }
 }
 
 @media (max-width: 480px) {
-    .wams-header-icon-cluster {
-        gap: var(--lumo-space-xs);
-    }
+  .wams-header-icon-cluster {
+    gap: var(--lumo-space-xs);
+  }
 }
 
 /* ── Sidebar / drawer ─────────────────────────────────────────────────────
@@ -280,51 +280,51 @@ vaadin-drawer-toggle:focus-visible {
    pinned at the bottom while the nav content above it scrolls independently. */
 
 vaadin-app-layout {
-    --vaadin-app-layout-drawer-width: var(--wams-sidebar-width-expanded);
+  --vaadin-app-layout-drawer-width: var(--wams-sidebar-width-expanded);
 }
 
 /* The drawer width transition isn't declared by Vaadin's own styles (only
    transform/visibility are, for the open/close slide animation), so add it
    here to make the expanded/collapsed width swap animate smoothly too. */
 vaadin-app-layout::part(drawer) {
-    transition: width 0.2s ease, transform var(--vaadin-app-layout-transition, 200ms), visibility var(--vaadin-app-layout-transition, 200ms);
-    background: var(--lumo-base-color);
-    border-right: 1px solid var(--lumo-contrast-10pct);
+  transition: width 0.2s ease, transform var(--vaadin-app-layout-transition, 200ms), visibility var(--vaadin-app-layout-transition, 200ms);
+  background: var(--lumo-base-color);
+  border-right: 1px solid var(--lumo-contrast-10pct);
 }
 
 .wams-sidebar-collapsed {
-    --vaadin-app-layout-drawer-width: var(--wams-sidebar-width-collapsed);
+  --vaadin-app-layout-drawer-width: var(--wams-sidebar-width-collapsed);
 }
 
 .wams-drawer-wrapper {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .wams-drawer-scroll-area {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-    padding-top: var(--lumo-space-xs);
-    scrollbar-width: thin;
-    scrollbar-color: var(--lumo-contrast-20pct) transparent;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-top: var(--lumo-space-xs);
+  scrollbar-width: thin;
+  scrollbar-color: var(--lumo-contrast-20pct) transparent;
 }
 
 /* Section label above a group of flat nav items (SideNav#setLabel/constructor) */
 
 .wams-drawer-scroll-area [slot='label'] {
-    font-size: var(--lumo-font-size-xxs);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    color: var(--lumo-tertiary-text-color);
-    padding: var(--lumo-space-m) var(--lumo-space-m) var(--lumo-space-xs);
-    display: block;
+  font-size: var(--lumo-font-size-xxs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--lumo-tertiary-text-color);
+  padding: var(--lumo-space-m) var(--lumo-space-m) var(--lumo-space-xs);
+  display: block;
 }
 
 vaadin-side-nav {
-    padding: 0 var(--lumo-space-xs);
+  padding: 0 var(--lumo-space-xs);
 }
 
 /* Active item: blue left bar + tinted background + primary-colored text/icon,
@@ -332,53 +332,53 @@ vaadin-side-nav {
    vaadin-side-nav-item — no custom Java route-matching needed. */
 
 vaadin-side-nav-item::part(link) {
-    border-radius: var(--lumo-border-radius-m);
-    font-size: 14px;
-    min-height: 36px;
-    transition: background-color 0.15s ease, color 0.15s ease;
+  border-radius: var(--lumo-border-radius-m);
+  font-size: 14px;
+  min-height: 36px;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 vaadin-side-nav-item::part(link):focus-visible {
-    outline: 2px solid var(--lumo-primary-color);
-    outline-offset: -2px;
+  outline: 2px solid var(--lumo-primary-color);
+  outline-offset: -2px;
 }
 
 vaadin-side-nav-item::part(link):hover {
-    background-color: var(--lumo-contrast-5pct);
+  background-color: var(--lumo-contrast-5pct);
 }
 
 vaadin-side-nav-item[current]::part(link) {
-    background-color: var(--lumo-primary-color-10pct);
-    color: var(--lumo-primary-text-color);
-    font-weight: 600;
-    box-shadow: inset 3px 0 0 0 var(--lumo-primary-color);
+  background-color: var(--lumo-primary-color-10pct);
+  color: var(--lumo-primary-text-color);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 0 var(--lumo-primary-color);
 }
 
 vaadin-side-nav-item[current]::part(link) vaadin-icon,
 vaadin-side-nav-item[current]::part(link) [slot='prefix'] {
-    color: var(--lumo-primary-color);
+  color: var(--lumo-primary-color);
 }
 
 /* Nested (child) items get extra start padding so hierarchy reads clearly. */
 
 vaadin-side-nav-item[slot='children'] {
-    padding-inline-start: var(--lumo-space-m);
+  padding-inline-start: var(--lumo-space-m);
 }
 
 /* ── Sidebar collapse toggle (pinned at the bottom, BaseMainLayout) ──────── */
 
 .wams-sidebar-collapse-toggle {
-    width: 100%;
-    justify-content: center;
-    border-top: 1px solid var(--lumo-contrast-10pct);
-    border-radius: 0;
-    color: var(--lumo-secondary-text-color);
-    flex-shrink: 0;
+  width: 100%;
+  justify-content: center;
+  border-top: 1px solid var(--lumo-contrast-10pct);
+  border-radius: 0;
+  color: var(--lumo-secondary-text-color);
+  flex-shrink: 0;
 }
 
 .wams-sidebar-collapse-toggle:hover {
-    background-color: var(--lumo-contrast-5pct);
-    color: var(--lumo-primary-color);
+  background-color: var(--lumo-contrast-5pct);
+  color: var(--lumo-primary-color);
 }
 
 /* ── Collapsed (icon-rail) mode: hide labels/section headers, show icons only.
@@ -397,34 +397,34 @@ vaadin-side-nav-item[slot='children'] {
    collapsed. ──────────────────────────────────────────────────────────────── */
 
 @media (min-width: 801px) {
-    .wams-sidebar-collapsed .wams-drawer-scroll-area [slot='label'] {
-        display: none;
-    }
+  .wams-sidebar-collapsed .wams-drawer-scroll-area [slot='label'] {
+    display: none;
+  }
 
-    .wams-sidebar-collapsed vaadin-side-nav-item::part(content) {
-        position: relative;
-        min-height: 40px;
-    }
+  .wams-sidebar-collapsed vaadin-side-nav-item::part(content) {
+    position: relative;
+    min-height: 40px;
+  }
 
-    .wams-sidebar-collapsed vaadin-side-nav-item::part(link) {
-        font-size: 0;
-        overflow: hidden;
-        white-space: nowrap;
-    }
+  .wams-sidebar-collapsed vaadin-side-nav-item::part(link) {
+    font-size: 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
 
-    .wams-sidebar-collapsed vaadin-side-nav-item [slot='prefix'] {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        margin: 0;
-        transform: translate(-50%, -50%);
-    }
+  .wams-sidebar-collapsed vaadin-side-nav-item [slot='prefix'] {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: 0;
+    transform: translate(-50%, -50%);
+  }
 
-    .wams-sidebar-collapsed vaadin-side-nav-item::part(toggle-button) {
-        display: none;
-    }
+  .wams-sidebar-collapsed vaadin-side-nav-item::part(toggle-button) {
+    display: none;
+  }
 
-    .wams-sidebar-collapsed vaadin-side-nav-item[slot='children'] {
-        padding-inline-start: 0;
-    }
+  .wams-sidebar-collapsed vaadin-side-nav-item[slot='children'] {
+    padding-inline-start: 0;
+  }
 }

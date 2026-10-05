@@ -1,15 +1,7 @@
 package eu.isygoit.ui.common.profile;
 
 import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.model.ChartType;
-import com.vaadin.flow.component.charts.model.Configuration;
-import com.vaadin.flow.component.charts.model.Crosshair;
-import com.vaadin.flow.component.charts.model.DataLabels;
-import com.vaadin.flow.component.charts.model.ListSeries;
-import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
-import com.vaadin.flow.component.charts.model.Tooltip;
-import com.vaadin.flow.component.charts.model.XAxis;
-import com.vaadin.flow.component.charts.model.YAxis;
+import com.vaadin.flow.component.charts.model.*;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
 import eu.isygoit.dto.data.ConnectionTrackingDto;
 import eu.isygoit.i18n.I18n;
@@ -38,7 +30,9 @@ class LoginActivityChart extends Chart {
     private static final DateTimeFormatter DAY_LABEL = DateTimeFormatter.ofPattern("dd/MM");
     private static final SolidColor BAR_COLOR = new SolidColor("#5B6EF5");
 
-    /** Number of days currently displayed (7 or 30 by convention). */
+    /**
+     * Number of days currently displayed (7 or 30 by convention).
+     */
     private int windowDays;
 
     LoginActivityChart(List<ConnectionTrackingDto> history, int days) {
@@ -81,6 +75,31 @@ class LoginActivityChart extends Chart {
     }
 
     /**
+     * Adapt this to the actual date accessor on {@link ConnectionTrackingDto}.
+     * The DTO is assumed to expose a login timestamp (e.g. {@code getLoginDate()}
+     * returning {@code java.util.Date} / {@code Instant} / {@code LocalDateTime}).
+     */
+    private static LocalDate toLocalDate(ConnectionTrackingDto dto) {
+        if (dto == null || dto.getLoginDate() == null) {
+            return null;
+        }
+        Object login = dto.getLoginDate();
+        if (login instanceof LocalDate ld) {
+            return ld;
+        }
+        if (login instanceof java.time.LocalDateTime ldt) {
+            return ldt.toLocalDate();
+        }
+        if (login instanceof java.time.Instant inst) {
+            return inst.atZone(ZoneId.systemDefault()).toLocalDate();
+        }
+        if (login instanceof java.util.Date date) {
+            return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        }
+        return null;
+    }
+
+    /**
      * Recompute the buckets for {@code days} and push them into the existing
      * series / axis without recreating the chart.
      */
@@ -118,30 +137,5 @@ class LoginActivityChart extends Chart {
 
     int getWindowDays() {
         return windowDays;
-    }
-
-    /**
-     * Adapt this to the actual date accessor on {@link ConnectionTrackingDto}.
-     * The DTO is assumed to expose a login timestamp (e.g. {@code getLoginDate()}
-     * returning {@code java.util.Date} / {@code Instant} / {@code LocalDateTime}).
-     */
-    private static LocalDate toLocalDate(ConnectionTrackingDto dto) {
-        if (dto == null || dto.getLoginDate() == null) {
-            return null;
-        }
-        Object login = dto.getLoginDate();
-        if (login instanceof LocalDate ld) {
-            return ld;
-        }
-        if (login instanceof java.time.LocalDateTime ldt) {
-            return ldt.toLocalDate();
-        }
-        if (login instanceof java.time.Instant inst) {
-            return inst.atZone(ZoneId.systemDefault()).toLocalDate();
-        }
-        if (login instanceof java.util.Date date) {
-            return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        }
-        return null;
     }
 }

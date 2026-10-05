@@ -44,6 +44,16 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         add(gridContainer);
     }
 
+    private static <T, R> R safeApply(Function<T, R> fn, T value, R fallback) {
+        if (fn == null) return fallback;
+        try {
+            R result = fn.apply(value);
+            return result != null ? result : fallback;
+        } catch (Exception ex) {
+            return fallback;
+        }
+    }
+
     public void setMonth(YearMonth yearMonth, List<E> events) {
         this.yearMonth = yearMonth;
         this.events = events != null ? events : List.of();
@@ -223,16 +233,6 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         }
 
         return sb.toString();
-    }
-
-    private static <T, R> R safeApply(Function<T, R> fn, T value, R fallback) {
-        if (fn == null) return fallback;
-        try {
-            R result = fn.apply(value);
-            return result != null ? result : fallback;
-        } catch (Exception ex) {
-            return fallback;
-        }
     }
 
     @Override

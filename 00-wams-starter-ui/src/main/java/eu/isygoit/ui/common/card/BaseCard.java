@@ -49,7 +49,9 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
     protected HorizontalLayout headerLeft;
     protected HorizontalLayout footerRow;
     protected HorizontalLayout buttonBar;
-    /** Row of enum tags, added at the bottom of the body (above the footer). */
+    /**
+     * Row of enum tags, added at the bottom of the body (above the footer).
+     */
     protected HorizontalLayout enumTagsRow;
 
     // ── Constructor ───────────────────────────────────────────────────────────
@@ -379,15 +381,17 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         public static final ChipColor INFO = new ChipColor("chip--info");
         public static final ChipColor CONTRAST = new ChipColor("chip--contrast");
 
-        /** Legacy mapping — kept for backwards compatibility. */
+        /**
+         * Legacy mapping — kept for backwards compatibility.
+         */
         public static ChipColor fromStatus(String status) {
             if (status == null) return NEUTRAL;
             return switch (status.toUpperCase()) {
                 case "ENABLED", "CONNECTED" -> SUCCESS;
-                case "DISABLED"             -> ERROR;
-                case "DISCONNECTED"         -> NEUTRAL;
-                case "PENDING_DELETION"     -> WARNING;
-                default                     -> NEUTRAL;
+                case "DISABLED" -> ERROR;
+                case "DISCONNECTED" -> NEUTRAL;
+                case "PENDING_DELETION" -> WARNING;
+                default -> NEUTRAL;
             };
         }
 
@@ -398,70 +402,76 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
             if (status == null) return NEUTRAL;
             return switch (status.toUpperCase()) {
                 // Active lifecycle
-                case "ACTIVE"                 -> SUCCESS;
-                case "PROBATIONARY"           -> WARNING;
-                case "PRE_ENROLLED"           -> INFO;
-                case "APPLICANT"              -> INFO;
+                case "ACTIVE" -> SUCCESS;
+                case "PROBATIONARY" -> WARNING;
+                case "PRE_ENROLLED" -> INFO;
+                case "APPLICANT" -> INFO;
                 // Temporary absences
                 case "ON_LEAVE",
                      "MEDICAL_LEAVE",
-                     "EXCHANGE"               -> WARNING;
+                     "EXCHANGE" -> WARNING;
                 // Restricted
-                case "SUSPENDED"              -> ERROR;
+                case "SUSPENDED" -> ERROR;
                 // End of cycle
-                case "GRADUATED"              -> SUCCESS;
+                case "GRADUATED" -> SUCCESS;
                 case "TRANSFERRED",
-                     "WITHDRAWN"              -> NEUTRAL;
+                     "WITHDRAWN" -> NEUTRAL;
                 case "DROPPED_OUT",
-                     "EXPELLED"               -> ERROR;
+                     "EXPELLED" -> ERROR;
                 // Fallback
-                default                       -> NEUTRAL;
+                default -> NEUTRAL;
             };
         }
 
-        /** Color mapping for staff status. */
+        /**
+         * Color mapping for staff status.
+         */
         public static ChipColor fromStaffStatus(String status) {
             if (status == null) return NEUTRAL;
             return switch (status.toUpperCase()) {
                 // Active lifecycle
-                case "ACTIVE"                 -> SUCCESS;
-                case "PROBATION"              -> WARNING;
+                case "ACTIVE" -> SUCCESS;
+                case "PROBATION" -> WARNING;
                 // Temporary absences
                 case "ON_LEAVE",
                      "UNPAID_LEAVE",
                      "SICK_LEAVE",
                      "MATERNITY_LEAVE",
-                     "PATERNITY_LEAVE"        -> INFO;
-                case "TRAINING"               -> INFO;
+                     "PATERNITY_LEAVE" -> INFO;
+                case "TRAINING" -> INFO;
                 // Restricted
-                case "SUSPENDED"              -> ERROR;
+                case "SUSPENDED" -> ERROR;
                 // End of cycle
                 case "RESIGNED",
-                     "TERMINATED"             -> ERROR;
-                case "RETIRED"                -> NEUTRAL;
+                     "TERMINATED" -> ERROR;
+                case "RETIRED" -> NEUTRAL;
                 // Fallback
-                default                       -> NEUTRAL;
+                default -> NEUTRAL;
             };
         }
 
-        /** Color mapping for enabled status. */
+        /**
+         * Color mapping for enabled status.
+         */
         public static ChipColor fromEnabledStatus(String status) {
             if (status == null) return NEUTRAL;
             return switch (status.toUpperCase()) {
-                case "ENABLED"  -> SUCCESS;
+                case "ENABLED" -> SUCCESS;
                 case "DISABLED" -> NEUTRAL;
-                default         -> NEUTRAL;
+                default -> NEUTRAL;
             };
         }
 
-        /** Color mapping for teacher status. */
+        /**
+         * Color mapping for teacher status.
+         */
         public static ChipColor fromTeacherStatus(String status) {
             if (status == null) return NEUTRAL;
             return switch (status.toUpperCase()) {
-                case "ACTIVE"    -> SUCCESS;
-                case "ON_LEAVE"  -> WARNING;
-                case "RESIGNED"  -> ERROR;
-                default          -> NEUTRAL;
+                case "ACTIVE" -> SUCCESS;
+                case "ON_LEAVE" -> WARNING;
+                case "RESIGNED" -> ERROR;
+                default -> NEUTRAL;
             };
         }
     }

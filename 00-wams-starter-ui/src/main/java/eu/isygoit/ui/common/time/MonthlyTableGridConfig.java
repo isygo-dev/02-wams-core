@@ -117,33 +117,75 @@ public class MonthlyTableGridConfig<E extends DayTimeSlot> {
 
         // Safe defaults for every optional extractor / handler.
         if (descriptionExtractor == null) descriptionExtractor = e -> "";
-        if (ownerExtractor == null)       ownerExtractor       = e -> "";
-        if (locationExtractor == null)    locationExtractor    = e -> "";
-        if (startTimeExtractor == null)   startTimeExtractor   = e -> null;
-        if (endTimeExtractor == null)     endTimeExtractor     = e -> null;
+        if (ownerExtractor == null) ownerExtractor = e -> "";
+        if (locationExtractor == null) locationExtractor = e -> "";
+        if (startTimeExtractor == null) startTimeExtractor = e -> null;
+        if (endTimeExtractor == null) endTimeExtractor = e -> null;
 
-        if (onDayClick == null)          onDayClick          = d -> {};
-        if (onEventClick == null)        onEventClick        = e -> {};
-        if (onEventDelete == null)       onEventDelete       = e -> {};
-        if (onEventEdit == null)         onEventEdit         = e -> {};
-        if (eventDotPopulator == null)   eventDotPopulator   = (comp, e) -> {};
+        if (onDayClick == null) onDayClick = d -> {
+        };
+        if (onEventClick == null) onEventClick = e -> {
+        };
+        if (onEventDelete == null) onEventDelete = e -> {
+        };
+        if (onEventEdit == null) onEventEdit = e -> {
+        };
+        if (eventDotPopulator == null) eventDotPopulator = (comp, e) -> {
+        };
 
         return this;
     }
 
     // ---- Getters ----
-    public Function<E, LocalDate> getDateExtractor()        { return dateExtractor; }
-    public Function<E, String>    getTitleExtractor()       { return titleExtractor; }
-    public Function<E, String>    getDescriptionExtractor() { return descriptionExtractor; }
-    public Function<E, String>    getColorExtractor()       { return colorExtractor; }
-    public Function<E, String>    getOwnerExtractor()       { return ownerExtractor; }
-    public Function<E, String>    getLocationExtractor()    { return locationExtractor; }
-    public Function<E, LocalTime> getStartTimeExtractor()   { return startTimeExtractor; }
-    public Function<E, LocalTime> getEndTimeExtractor()     { return endTimeExtractor; }
+    public Function<E, LocalDate> getDateExtractor() {
+        return dateExtractor;
+    }
 
-    public Consumer<LocalDate> getOnDayClick()    { return onDayClick; }
-    public Consumer<E> getOnEventClick()          { return onEventClick; }
-    public Consumer<E> getOnEventDelete()         { return onEventDelete; }
-    public Consumer<E> getOnEventEdit()           { return onEventEdit; }
-    public BiConsumer<Component, E> getEventDotPopulator() { return eventDotPopulator; }
+    public Function<E, String> getTitleExtractor() {
+        return titleExtractor;
+    }
+
+    public Function<E, String> getDescriptionExtractor() {
+        return descriptionExtractor;
+    }
+
+    public Function<E, String> getColorExtractor() {
+        return colorExtractor;
+    }
+
+    public Function<E, String> getOwnerExtractor() {
+        return ownerExtractor;
+    }
+
+    public Function<E, String> getLocationExtractor() {
+        return locationExtractor;
+    }
+
+    public Function<E, LocalTime> getStartTimeExtractor() {
+        return startTimeExtractor;
+    }
+
+    public Function<E, LocalTime> getEndTimeExtractor() {
+        return endTimeExtractor;
+    }
+
+    public Consumer<LocalDate> getOnDayClick() {
+        return onDayClick;
+    }
+
+    public Consumer<E> getOnEventClick() {
+        return onEventClick;
+    }
+
+    public Consumer<E> getOnEventDelete() {
+        return onEventDelete;
+    }
+
+    public Consumer<E> getOnEventEdit() {
+        return onEventEdit;
+    }
+
+    public BiConsumer<Component, E> getEventDotPopulator() {
+        return eventDotPopulator;
+    }
 }

@@ -4,75 +4,75 @@
  */
 
 html {
-    /* ── Brand / semantic accents (Atlassian Design System) ─────────────── */
-    --lumo-primary-color: #0C66E4;
-    --lumo-primary-color-50pct: rgba(12, 102, 228, 0.5);
-    --lumo-primary-color-10pct: rgba(12, 102, 228, 0.1);
-    --wams-primary-rgb: 12, 102, 228;
-    --lumo-primary-text-color: #0C66E4;
-    --lumo-primary-contrast-color: #FFFFFF;
+  /* ── Brand / semantic accents (Atlassian Design System) ─────────────── */
+  --lumo-primary-color: #0C66E4;
+  --lumo-primary-color-50pct: rgba(12, 102, 228, 0.5);
+  --lumo-primary-color-10pct: rgba(12, 102, 228, 0.1);
+  --wams-primary-rgb: 12, 102, 228;
+  --lumo-primary-text-color: #0C66E4;
+  --lumo-primary-contrast-color: #FFFFFF;
 
-    --lumo-error-color: #C9372C;
-    --lumo-error-color-50pct: rgba(201, 55, 44, 0.5);
-    --lumo-error-color-10pct: rgba(201, 55, 44, 0.1);
-    --wams-error-rgb: 201, 55, 44;
-    --lumo-error-text-color: #AE2E24;
-    --lumo-error-contrast-color: #FFFFFF;
+  --lumo-error-color: #C9372C;
+  --lumo-error-color-50pct: rgba(201, 55, 44, 0.5);
+  --lumo-error-color-10pct: rgba(201, 55, 44, 0.1);
+  --wams-error-rgb: 201, 55, 44;
+  --lumo-error-text-color: #AE2E24;
+  --lumo-error-contrast-color: #FFFFFF;
 
-    --lumo-success-color: #1F845A;
-    --lumo-success-color-50pct: rgba(31, 132, 90, 0.5);
-    --lumo-success-color-10pct: rgba(31, 132, 90, 0.1);
-    --wams-success-rgb: 31, 132, 90;
-    --lumo-success-text-color: #216E4E;
-    --lumo-success-contrast-color: #FFFFFF;
+  --lumo-success-color: #1F845A;
+  --lumo-success-color-50pct: rgba(31, 132, 90, 0.5);
+  --lumo-success-color-10pct: rgba(31, 132, 90, 0.1);
+  --wams-success-rgb: 31, 132, 90;
+  --lumo-success-text-color: #216E4E;
+  --lumo-success-contrast-color: #FFFFFF;
 
-    /* Lumo has no native "warning" palette; every module reuses these two. */
-    --wams-warning-color: #A54800;
-    --wams-warning-rgb: 165, 72, 0;
-    --wams-warning-bg: #FFF0B3;
-    --wams-warning-bg-subtle: #FFF7D6;
-    --wams-warning-border: #F5CD47;
-    --wams-info-bg: #E9F2FF;
-    --wams-info-fg: #0055CC;
-    --wams-info-rgb: 0, 85, 204;
-    --wams-discovery-color: #6E5DC6;
-    --wams-discovery-bg: #F3F0FD;
+  /* Lumo has no native "warning" palette; every module reuses these two. */
+  --wams-warning-color: #A54800;
+  --wams-warning-rgb: 165, 72, 0;
+  --wams-warning-bg: #FFF0B3;
+  --wams-warning-bg-subtle: #FFF7D6;
+  --wams-warning-border: #F5CD47;
+  --wams-info-bg: #E9F2FF;
+  --wams-info-fg: #0055CC;
+  --wams-info-rgb: 0, 85, 204;
+  --wams-discovery-color: #6E5DC6;
+  --wams-discovery-bg: #F3F0FD;
 
-    /* ── Text ─────────────────────────────────────────────────────────────── */
-    --lumo-header-text-color: #172B4D;
-    --lumo-body-text-color: #172B4D;
-    --lumo-secondary-text-color: #44546F;
-    --lumo-tertiary-text-color: #626F86;
-    --lumo-disabled-text-color: #8590A2;
-    --wams-secondary-text-rgb: 68, 84, 111;
+  /* ── Text ─────────────────────────────────────────────────────────────── */
+  --lumo-header-text-color: #172B4D;
+  --lumo-body-text-color: #172B4D;
+  --lumo-secondary-text-color: #44546F;
+  --lumo-tertiary-text-color: #626F86;
+  --lumo-disabled-text-color: #8590A2;
+  --wams-secondary-text-rgb: 68, 84, 111;
 
-    /* ── Shape: compact, mostly-square controls (not pill-shaped) ────────── */
-    --lumo-border-radius-s: 3px;
-    --lumo-border-radius-m: 3px;
-    --lumo-border-radius-l: 6px;
-    --lumo-border-radius-xl: 8px;
+  /* ── Shape: compact, mostly-square controls (not pill-shaped) ────────── */
+  --lumo-border-radius-s: 3px;
+  --lumo-border-radius-m: 3px;
+  --lumo-border-radius-l: 6px;
+  --lumo-border-radius-xl: 8px;
 
-    /* ── Shadows: subtle, flat elevation ── */
-    --lumo-box-shadow-xs: 0 1px 1px rgba(9, 30, 66, 0.13);
-    --lumo-box-shadow-s: 0 1px 2px rgba(9, 30, 66, 0.16), 0 0 1px rgba(9, 30, 66, 0.1);
-    --lumo-box-shadow-m: 0 4px 8px -2px rgba(9, 30, 66, 0.18), 0 0 1px rgba(9, 30, 66, 0.12);
-    --lumo-box-shadow-l: 0 8px 16px -4px rgba(9, 30, 66, 0.22), 0 0 1px rgba(9, 30, 66, 0.12);
-    --lumo-box-shadow-xl: 0 12px 24px -6px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.12);
+  /* ── Shadows: subtle, flat elevation ── */
+  --lumo-box-shadow-xs: 0 1px 1px rgba(9, 30, 66, 0.13);
+  --lumo-box-shadow-s: 0 1px 2px rgba(9, 30, 66, 0.16), 0 0 1px rgba(9, 30, 66, 0.1);
+  --lumo-box-shadow-m: 0 4px 8px -2px rgba(9, 30, 66, 0.18), 0 0 1px rgba(9, 30, 66, 0.12);
+  --lumo-box-shadow-l: 0 8px 16px -4px rgba(9, 30, 66, 0.22), 0 0 1px rgba(9, 30, 66, 0.12);
+  --lumo-box-shadow-xl: 0 12px 24px -6px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.12);
 
-    /* ── Type scale ── */
-    --lumo-font-size-xxs: 0.6875rem;
-    --lumo-font-size-xs: 0.75rem;
-    --lumo-font-size-s: 0.8125rem;
-    --lumo-font-size-m: 0.875rem;
-    --lumo-font-size-l: 1rem;
-    --lumo-font-size-xl: 1.25rem;
-    --lumo-font-size-xxl: 1.5rem;
-    --lumo-font-size-xxxl: 1.75rem;
+  /* ── Type scale ── */
+  --lumo-font-size-xxs: 0.6875rem;
+  --lumo-font-size-xs: 0.75rem;
+  --lumo-font-size-s: 0.8125rem;
+  --lumo-font-size-m: 0.875rem;
+  --lumo-font-size-l: 1rem;
+  --lumo-font-size-xl: 1.25rem;
+  --lumo-font-size-xxl: 1.5rem;
+  --lumo-font-size-xxxl: 1.75rem;
 
-    /* ── App shell ─────────────────────────────────────────────────────────── */
-    --wams-header-height: 52px;
-    --wams-sidebar-width-expanded: 220px;
-    --wams-sidebar-width-collapsed: 60px;
+  /* ── App shell ─────────────────────────────────────────────────────────── */
+  --wams-header-height: 52px;
+  --wams-sidebar-width-expanded: 220px;
+  --wams-sidebar-width-collapsed: 60px;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -80,33 +80,33 @@ html {
    ═══════════════════════════════════════════════════════════════════════ */
 
 .status-chip {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-    padding: 0.2rem 0.5rem;
-    border: 1px solid rgba(var(--wams-primary-rgb), 0.16);
-    border-radius: var(--lumo-border-radius-m);
-    background: var(--lumo-primary-color-10pct);
-    color: var(--lumo-primary-text-color);
-    font-size: var(--lumo-font-size-xxs);
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    line-height: 1.2;
-    text-transform: uppercase;
-    white-space: nowrap;
-    cursor: default;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid rgba(var(--wams-primary-rgb), 0.16);
+  border-radius: var(--lumo-border-radius-m);
+  background: var(--lumo-primary-color-10pct);
+  color: var(--lumo-primary-text-color);
+  font-size: var(--lumo-font-size-xxs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: default;
 }
 
 /* Petit point indicateur (couleur = currentColor) */
 .status-chip::before {
-    content: "";
-    width: 0.45rem;
-    height: 0.45rem;
-    border-radius: 50%;
-    background: currentColor;
-    opacity: 0.8;
-    flex-shrink: 0;
+  content: "";
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.8;
+  flex-shrink: 0;
 }
 
 /* --- Modificateurs sémantiques (regroupés par catégorie) --- */
@@ -120,9 +120,9 @@ html {
 .status-chip--open,
 .status-chip--incident-resolved,
 .status-chip--incident-closed {
-    background: var(--lumo-success-color-10pct);
-    border-color: rgba(var(--wams-success-rgb), 0.2);
-    color: var(--lumo-success-text-color);
+  background: var(--lumo-success-color-10pct);
+  border-color: rgba(var(--wams-success-rgb), 0.2);
+  color: var(--lumo-success-text-color);
 }
 
 /* Info / inscrit / en attente, etc. */
@@ -135,9 +135,9 @@ html {
 .status-chip--incident-open,
 .status-chip--risk-low,
 .status-chip--severity-low {
-    background: var(--wams-info-bg);
-    border-color: rgba(var(--wams-info-rgb), 0.2);
-    color: var(--wams-info-fg);
+  background: var(--wams-info-bg);
+  border-color: rgba(var(--wams-info-rgb), 0.2);
+  color: var(--wams-info-fg);
 }
 
 /* Warning / partiellement payé / congé, etc. */
@@ -154,9 +154,9 @@ html {
 .status-chip--sick,
 .status-chip--unpaid-leave,
 .status-chip--moderate {
-    background: var(--wams-warning-bg-subtle);
-    border-color: rgba(var(--wams-warning-rgb), 0.2);
-    color: var(--wams-warning-color);
+  background: var(--wams-warning-bg-subtle);
+  border-color: rgba(var(--wams-warning-rgb), 0.2);
+  color: var(--wams-warning-color);
 }
 
 /* Danger / inactif / archivé / annulé, etc. */
@@ -176,9 +176,9 @@ html {
 .status-chip--invalid,
 .status-chip--not-available,
 .status-chip--closed {
-    background: var(--lumo-error-color-10pct);
-    border-color: rgba(var(--wams-error-rgb), 0.2);
-    color: var(--lumo-error-text-color);
+  background: var(--lumo-error-color-10pct);
+  border-color: rgba(var(--wams-error-rgb), 0.2);
+  color: var(--lumo-error-text-color);
 }
 
 /* Neutre / diplômé / en attente, etc. */
@@ -188,9 +188,9 @@ html {
 .status-chip--pending,
 .status-chip--review,
 .status-chip--unknown {
-    background: var(--lumo-contrast-10pct);
-    border-color: rgba(var(--wams-secondary-text-rgb), 0.18);
-    color: var(--lumo-secondary-text-color);
+  background: var(--lumo-contrast-10pct);
+  border-color: rgba(var(--wams-secondary-text-rgb), 0.18);
+  color: var(--lumo-secondary-text-color);
 }
 
 /* Rôles (enseignant, étudiant, admin, etc.) */
@@ -205,9 +205,9 @@ html {
 .status-chip--service,
 .status-chip--management,
 .status-chip--other {
-    background: var(--lumo-primary-color-10pct);
-    border-color: rgba(var(--wams-primary-rgb), 0.18);
-    color: var(--lumo-primary-text-color);
+  background: var(--lumo-primary-color-10pct);
+  border-color: rgba(var(--wams-primary-rgb), 0.18);
+  color: var(--lumo-primary-text-color);
 }
 
 /* Sous‑catégories de rôles (management, direction, etc.) */
@@ -216,23 +216,23 @@ html {
 .status-chip--director,
 .status-chip--manager,
 .status-chip--support {
-    background: var(--wams-info-bg);
-    border-color: rgba(var(--wams-info-rgb), 0.18);
-    color: var(--wams-info-fg);
+  background: var(--wams-info-bg);
+  border-color: rgba(var(--wams-info-rgb), 0.18);
+  color: var(--wams-info-fg);
 }
 
 .status-chip--technical,
 .status-chip--student,
 .status-chip--service {
-    background: var(--wams-warning-bg-subtle);
-    border-color: rgba(var(--wams-warning-rgb), 0.2);
-    color: var(--wams-warning-color);
+  background: var(--wams-warning-bg-subtle);
+  border-color: rgba(var(--wams-warning-rgb), 0.2);
+  color: var(--wams-warning-color);
 }
 
 .status-chip--other {
-    background: var(--lumo-contrast-10pct);
-    border-color: rgba(var(--wams-secondary-text-rgb), 0.18);
-    color: var(--lumo-secondary-text-color);
+  background: var(--lumo-contrast-10pct);
+  border-color: rgba(var(--wams-secondary-text-rgb), 0.18);
+  color: var(--lumo-secondary-text-color);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -240,20 +240,20 @@ html {
    ═══════════════════════════════════════════════════════════════════════ */
 
 .wams-action-btn {
-    transition: background-color 0.15s ease, color 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .wams-action-btn--danger:hover {
-    background-color: var(--lumo-error-color-10pct);
-    color: var(--lumo-error-text-color);
+  background-color: var(--lumo-error-color-10pct);
+  color: var(--lumo-error-text-color);
 }
 
 @media (max-width: 480px) {
-    .wams-dialog-responsive {
-        width: 100vw !important;
-        height: 100vh !important;
-        max-width: 100vw !important;
-        max-height: 100vh !important;
-        border-radius: 0 !important;
-    }
+  .wams-dialog-responsive {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+  }
 }

@@ -53,6 +53,24 @@ class ProfileConnectionsPanel extends VerticalLayout {
                 buildRecentSessionsCard(history, onViewAllActivity));
     }
 
+    /**
+     * Applies LUMO theme variants + aria-pressed so the active window is obvious.
+     */
+    private static void applyToggleState(Button btn7, Button btn30, int activeDays) {
+        boolean seven = activeDays == 7;
+
+        btn7.removeThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_TERTIARY);
+        btn30.removeThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_TERTIARY);
+
+        btn7.addThemeVariants(ButtonVariant.LUMO_SMALL,
+                seven ? ButtonVariant.LUMO_PRIMARY : ButtonVariant.LUMO_TERTIARY);
+        btn30.addThemeVariants(ButtonVariant.LUMO_SMALL,
+                seven ? ButtonVariant.LUMO_TERTIARY : ButtonVariant.LUMO_PRIMARY);
+
+        btn7.getElement().setAttribute("aria-pressed", String.valueOf(seven));
+        btn30.getElement().setAttribute("aria-pressed", String.valueOf(!seven));
+    }
+
     private Div buildChartCard(List<ConnectionTrackingDto> history) {
         Div chartCard = new Div();
         chartCard.addClassName("profile-section-card");
@@ -95,22 +113,6 @@ class ProfileConnectionsPanel extends VerticalLayout {
 
         chartCard.add(chartHeader, chartHolder);
         return chartCard;
-    }
-
-    /** Applies LUMO theme variants + aria-pressed so the active window is obvious. */
-    private static void applyToggleState(Button btn7, Button btn30, int activeDays) {
-        boolean seven = activeDays == 7;
-
-        btn7.removeThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_TERTIARY);
-        btn30.removeThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_TERTIARY);
-
-        btn7.addThemeVariants(ButtonVariant.LUMO_SMALL,
-                seven ? ButtonVariant.LUMO_PRIMARY : ButtonVariant.LUMO_TERTIARY);
-        btn30.addThemeVariants(ButtonVariant.LUMO_SMALL,
-                seven ? ButtonVariant.LUMO_TERTIARY : ButtonVariant.LUMO_PRIMARY);
-
-        btn7.getElement().setAttribute("aria-pressed", String.valueOf(seven));
-        btn30.getElement().setAttribute("aria-pressed", String.valueOf(!seven));
     }
 
     private Div buildRecentSessionsCard(List<ConnectionTrackingDto> history,

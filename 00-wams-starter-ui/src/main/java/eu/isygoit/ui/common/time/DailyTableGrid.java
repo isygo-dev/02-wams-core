@@ -61,6 +61,19 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         add(gridContainer);
     }
 
+    /**
+     * Null-safe helper — invokes the extractor only if it is non-null.
+     */
+    private static <T, R> R safeApply(Function<T, R> fn, T value, R fallback) {
+        if (fn == null) return fallback;
+        try {
+            R result = fn.apply(value);
+            return result != null ? result : fallback;
+        } catch (Exception ex) {
+            return fallback;
+        }
+    }
+
     public void setDate(LocalDate date, List<E> events) {
         this.currentDate = date;
         this.events = (events != null) ? events : Collections.emptyList();
@@ -277,7 +290,7 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
 
         // Time range
         LocalTime start = safeApply(config.getStartTimeExtractor(), evt, LocalTime.MIDNIGHT);
-        LocalTime end   = safeApply(config.getEndTimeExtractor(), evt, LocalTime.MIDNIGHT);
+        LocalTime end = safeApply(config.getEndTimeExtractor(), evt, LocalTime.MIDNIGHT);
         sb.append("\n").append(start).append(" – ").append(end);
 
         // Owner
@@ -293,17 +306,6 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         }
 
         return sb.toString();
-    }
-
-    /** Null-safe helper — invokes the extractor only if it is non-null. */
-    private static <T, R> R safeApply(Function<T, R> fn, T value, R fallback) {
-        if (fn == null) return fallback;
-        try {
-            R result = fn.apply(value);
-            return result != null ? result : fallback;
-        } catch (Exception ex) {
-            return fallback;
-        }
     }
 
     private String formatHour(LocalTime time) {

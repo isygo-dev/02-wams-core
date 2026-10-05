@@ -56,6 +56,16 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         add(gridContainer);
     }
 
+    private static <T, R> R safeApply(Function<T, R> fn, T value, R fallback) {
+        if (fn == null) return fallback;
+        try {
+            R result = fn.apply(value);
+            return result != null ? result : fallback;
+        } catch (Exception ex) {
+            return fallback;
+        }
+    }
+
     public void setItems(List<E> slots, boolean editable) {
         this.slots = slots != null ? slots : Collections.emptyList();
         this.editable = editable;
@@ -278,7 +288,7 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
 
         // Time range
         LocalTime start = safeApply(config.getStartTimeExtractor(), evt, LocalTime.MIDNIGHT);
-        LocalTime end   = safeApply(config.getEndTimeExtractor(), evt, LocalTime.MIDNIGHT);
+        LocalTime end = safeApply(config.getEndTimeExtractor(), evt, LocalTime.MIDNIGHT);
         sb.append("\n").append(start).append(" – ").append(end);
 
         // Owner
@@ -294,16 +304,6 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         }
 
         return sb.toString();
-    }
-
-    private static <T, R> R safeApply(Function<T, R> fn, T value, R fallback) {
-        if (fn == null) return fallback;
-        try {
-            R result = fn.apply(value);
-            return result != null ? result : fallback;
-        } catch (Exception ex) {
-            return fallback;
-        }
     }
 
     private void placeInGrid(Component component, int rowStart, int colStart, int rowSpan, int colSpan) {

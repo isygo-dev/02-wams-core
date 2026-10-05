@@ -19,7 +19,6 @@ import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.popover.Popover;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.sidenav.SideNavItem;
@@ -110,6 +109,15 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         SideNavItem item = new SideNavItem(label, route, iconComponent);
         item.setTooltipText(label);
         return item;
+    }
+
+    private static Component menuEntry(VaadinIcon icon, String label) {
+        Icon ic = icon.create();
+        ic.addClassName("wams-menu-entry__icon");
+        Span text = new Span(label);
+        Div row = new Div(ic, text);
+        row.addClassName("wams-menu-entry");
+        return row;
     }
 
     protected abstract String getTitle();
@@ -324,15 +332,6 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         logout.addClassName("wams-profile-menu__logout");
 
         return menuBar;
-    }
-
-    private static Component menuEntry(VaadinIcon icon, String label) {
-        Icon ic = icon.create();
-        ic.addClassName("wams-menu-entry__icon");
-        Span text = new Span(label);
-        Div row = new Div(ic, text);
-        row.addClassName("wams-menu-entry");
-        return row;
     }
 
     private void createDrawer() {

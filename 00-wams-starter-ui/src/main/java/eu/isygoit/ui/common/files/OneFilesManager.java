@@ -39,11 +39,11 @@ public class OneFilesManager extends VerticalLayout {
     private final VerticalLayout container = new VerticalLayout();
     private final HorizontalLayout existingFileRow = new HorizontalLayout();
     private final HorizontalLayout stagedFileRow = new HorizontalLayout();
-    
+
     private String fileName;
     private String fileType;
     private Long fileId;
-    
+
     private PendingFile pendingFile;
     private boolean markedForDeletion = false;
 
@@ -276,7 +276,7 @@ public class OneFilesManager extends VerticalLayout {
             } catch (Exception ex) {
                 log.error("Upload failed", ex);
                 Notification.show(I18n.t("files.upload.error", ex.getMessage()),
-                        5000, Notification.Position.MIDDLE)
+                                5000, Notification.Position.MIDDLE)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
