@@ -182,7 +182,8 @@ public class CryptoOperationsView extends ManagementVerticalView {
                 updateTabBasedOnKey();
             }
         } catch (FeignException e) {
-            Notification.show(I18n.t("kms.crypto.view.load.keys.error", (e.status() == 500 ? e.contentUTF8() : e.getMessage())))
+            Notification.show(I18n.t("kms.crypto.view.load.keys.error", (e.status() == 500 ? e.contentUTF8() : e.getMessage())),
+                            5000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load keys: {}", e.getMessage());
         } catch (Exception e) {
@@ -202,10 +203,12 @@ public class CryptoOperationsView extends ManagementVerticalView {
                 return desc.getKeyMetadata().getKeyAlias();
             }
         } catch (FeignException e) {
-            Notification.show(I18n.t("kms.crypto.view.fetch.alias.failed", (e.status() == 500 ? e.contentUTF8() : e.getMessage())));
+            Notification.show(I18n.t("kms.crypto.view.fetch.alias.failed", (e.status() == 500 ? e.contentUTF8() : e.getMessage())),
+                    5000, Notification.Position.BOTTOM_END);
             log.error("Failed to fetch alias for keyId: {}", keyId, e);
         } catch (Exception e) {
-            Notification.show(I18n.t("kms.crypto.view.fetch.alias.failed", e.getMessage()));
+            Notification.show(I18n.t("kms.crypto.view.fetch.alias.failed", e.getMessage()),
+                    5000, Notification.Position.BOTTOM_END);
             log.error("Failed to fetch alias for keyId: {}", keyId, e);
         }
         return keyId;
@@ -223,7 +226,8 @@ public class CryptoOperationsView extends ManagementVerticalView {
                 updateTabBasedOnKey();
             }
         } catch (FeignException e) {
-            Notification.show(I18n.t("kms.crypto.view.load.metadata.failed") + ": " + (e.status() == 500 ? e.contentUTF8() : e.getMessage()))
+            Notification.show(I18n.t("kms.crypto.view.load.metadata.failed") + ": " + (e.status() == 500 ? e.contentUTF8() : e.getMessage()),
+                            5000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             log.error("Failed to load key metadata for keyId: {}", selectedKeyId, e);
         } catch (Exception e) {

@@ -1,0 +1,133 @@
+.wams-main-header {
+  min-height: var(--wams-header-height);
+  border-top: 3px solid var(--module-accent, var(--lumo-primary-color));
+  border-bottom: 1px solid var(--lumo-contrast-10pct);
+  background: var(--lumo-base-color);
+  box-shadow: var(--lumo-box-shadow-xs);
+}
+
+.wams-main-header__left,
+.wams-main-header__right,
+.wams-header-right-content,
+.wams-header-search-slot {
+  min-width: 0;
+}
+
+.wams-brand {
+  border-radius: var(--lumo-border-radius-m);
+}
+
+.wams-brand__icon {
+  border-radius: var(--lumo-border-radius-m);
+  background: var(--module-accent-strong, var(--lumo-primary-text-color));
+  color: var(--module-brand-foreground);
+}
+
+.wams-brand__name {
+  color: var(--lumo-header-text-color);
+  font-family: "Inter Tight", var(--lumo-font-family);
+  font-size: var(--lumo-font-size-l);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.wams-header-title {
+  border-radius: 999px;
+  background: var(--lumo-contrast-5pct);
+  color: var(--module-accent-strong, var(--lumo-primary-text-color));
+  font-weight: 600;
+}
+
+.wams-header-icon-btn,
+vaadin-drawer-toggle,
+.wams-sidebar-collapse-toggle {
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--lumo-border-radius-m);
+}
+
+.wams-header-icon-btn:hover,
+.wams-sidebar-collapse-toggle:hover {
+  background: var(--lumo-primary-color-10pct);
+  color: var(--lumo-primary-text-color);
+}
+
+.wams-sidebar-collapse-toggle {
+  width: 100%;
+  border-top: 1px solid var(--lumo-contrast-10pct);
+}
+
+vaadin-app-layout::part(drawer) {
+  border-inline-end: 1px solid var(--lumo-contrast-10pct);
+  background: var(--lumo-base-color);
+}
+
+vaadin-app-layout::part(content) {
+  min-width: 0;
+}
+
+vaadin-side-nav-item::part(link) {
+  min-height: 44px;
+  border-radius: var(--lumo-border-radius-m);
+  color: var(--lumo-secondary-text-color);
+  font-weight: 500;
+}
+
+vaadin-side-nav-item::part(link):hover {
+  background: var(--lumo-contrast-5pct);
+  color: var(--lumo-body-text-color);
+}
+
+vaadin-side-nav-item[current]::part(link) {
+  background: var(--lumo-primary-color-10pct);
+  box-shadow: inset 3px 0 0 var(--module-accent-strong, var(--lumo-primary-text-color));
+  color: var(--lumo-primary-text-color);
+  font-weight: 600;
+}
+
+vaadin-side-nav-item[current]::part(link) vaadin-icon,
+vaadin-side-nav-item[current]::part(link) [slot="prefix"] {
+  color: var(--module-accent-strong, var(--lumo-primary-text-color));
+}
+
+.wams-drawer-scroll-area [slot="label"] {
+  color: var(--lumo-secondary-text-color);
+  font-size: var(--lumo-font-size-xs);
+  letter-spacing: 0.08em;
+}
+
+.wams-header-popover,
+vaadin-popover-overlay::part(content) {
+  border: 1px solid var(--lumo-contrast-10pct);
+  border-radius: var(--lumo-border-radius-l);
+  box-shadow: var(--lumo-box-shadow-l);
+  background: var(--lumo-base-color);
+}
+
+.wams-profile-menu__identity {
+  max-width: min(260px, calc(100vw - 32px));
+}
+
+@media (max-width: 640px) {
+  .wams-main-header {
+    gap: var(--lumo-space-xs);
+  }
+
+  .wams-main-header__right {
+    margin-inline-end: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wams-brand,
+  .wams-header-icon-btn,
+  .wams-avatar-bordered,
+  .wams-sidebar-collapse-toggle,
+  vaadin-side-nav-item::part(link) {
+    transition: none;
+  }
+
+  vaadin-app-layout::part(drawer) {
+    transition: none;
+  }
+}

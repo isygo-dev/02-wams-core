@@ -1,0 +1,219 @@
+@import "./components/app-shell.css";
+@import "./components/surfaces.css";
+@import "./components/forms.css";
+@import "./components/data-grid.css";
+@import "./components/dashboard.css";
+
+@font-face {
+  font-family: "Inter";
+  src: url("./fonts/inter-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter Tight";
+  src: url("./fonts/inter-tight-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("./fonts/jetbrains-mono-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root,
+html {
+  color-scheme: light;
+  --lumo-primary-color: #6366f1;
+  --lumo-primary-color-50pct: #6366f180;
+  --lumo-primary-color-10pct: #6366f11a;
+  --lumo-primary-text-color: #4f46e5;
+  --lumo-primary-contrast-color: #ffffff;
+  --lumo-success-color: #10b981;
+  --lumo-success-color-50pct: #10b98180;
+  --lumo-success-color-10pct: #10b9811a;
+  --lumo-success-text-color: #047857;
+  --lumo-success-contrast-color: #ffffff;
+  --lumo-error-color: #ef4444;
+  --lumo-error-color-50pct: #ef444480;
+  --lumo-error-color-10pct: #ef44441a;
+  --lumo-error-text-color: #b91c1c;
+  --lumo-error-contrast-color: #ffffff;
+  --lumo-warning-color: #f59e0b;
+  --lumo-warning-color-10pct: #f59e0b1a;
+  --lumo-warning-text-color: #92400e;
+  --lumo-info-color: #0ea5e9;
+  --lumo-info-color-10pct: #0ea5e91a;
+  --lumo-info-text-color: #0369a1;
+  --lumo-base-color: #ffffff;
+  --lumo-body-text-color: #0f172a;
+  --lumo-header-text-color: #0f172a;
+  --lumo-secondary-text-color: #64748b;
+  --lumo-tertiary-text-color: #475569;
+  --lumo-disabled-text-color: #64748b;
+  --lumo-contrast-5pct: #f8fafc;
+  --lumo-contrast-10pct: #e2e8f0;
+  --lumo-contrast-20pct: #cbd5e1;
+  --lumo-contrast-30pct: #94a3b8;
+  --lumo-contrast-40pct: #64748b;
+  --lumo-border-radius-s: 6px;
+  --lumo-border-radius-m: 10px;
+  --lumo-border-radius-l: 16px;
+  --lumo-border-radius-xl: 20px;
+  --lumo-space-xs: 4px;
+  --lumo-space-s: 8px;
+  --lumo-space-m: 16px;
+  --lumo-space-l: 24px;
+  --lumo-space-xl: 32px;
+  --lumo-font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --lumo-font-size-xxs: 0.6875rem;
+  --lumo-font-size-xs: 0.8125rem;
+  --lumo-font-size-s: 0.875rem;
+  --lumo-font-size-m: 0.9375rem;
+  --lumo-font-size-l: 1.0625rem;
+  --lumo-font-size-xl: 1.25rem;
+  --lumo-font-size-xxl: 1.5rem;
+  --lumo-font-size-xxxl: 1.875rem;
+  --lumo-box-shadow-xs: 0 1px 2px rgb(15 23 42 / 5%);
+  --lumo-box-shadow-s: 0 1px 3px rgb(15 23 42 / 8%), 0 1px 2px rgb(15 23 42 / 5%);
+  --lumo-box-shadow-m: 0 8px 20px rgb(15 23 42 / 8%);
+  --lumo-box-shadow-l: 0 14px 32px rgb(15 23 42 / 10%);
+  --lumo-box-shadow-xl: 0 20px 44px rgb(15 23 42 / 12%);
+  --wams-primary-rgb: 99, 102, 241;
+  --wams-success-rgb: 16, 185, 129;
+  --wams-error-rgb: 239, 68, 68;
+  --wams-warning-color: #92400e;
+  --wams-warning-bg: #fef3c7;
+  --wams-warning-bg-subtle: #fffbeb;
+  --wams-warning-border: #f59e0b;
+  --wams-info-bg: #e0f2fe;
+  --wams-info-fg: #0369a1;
+  --wams-info-rgb: 14, 165, 233;
+  --wams-secondary-text-rgb: 100, 116, 139;
+  --wams-header-height: 64px;
+  --wams-sidebar-width-expanded: 264px;
+  --wams-sidebar-width-collapsed: 68px;
+  --module-accent: #6366f1;
+  --module-accent-strong: #4f46e5;
+  --module-brand-foreground: #ffffff;
+  --wams-module-accent: var(--module-accent);
+  --wams-module-accent-gradient: linear-gradient(135deg, #818cf8, #6366f1);
+}
+
+html[theme~="dark"] {
+  color-scheme: dark;
+  --lumo-primary-color: #818cf8;
+  --lumo-primary-color-50pct: #818cf880;
+  --lumo-primary-color-10pct: #818cf81a;
+  --lumo-primary-text-color: #a5b4fc;
+  --lumo-primary-contrast-color: #0b1120;
+  --lumo-success-color: #34d399;
+  --lumo-success-color-50pct: #34d39980;
+  --lumo-success-color-10pct: #34d3991a;
+  --lumo-success-text-color: #6ee7b7;
+  --lumo-error-color: #f87171;
+  --lumo-error-color-50pct: #f8717180;
+  --lumo-error-color-10pct: #f871711a;
+  --lumo-error-text-color: #fca5a5;
+  --lumo-warning-color: #fbbf24;
+  --lumo-warning-color-10pct: #fbbf241a;
+  --lumo-warning-text-color: #fcd34d;
+  --lumo-info-color: #38bdf8;
+  --lumo-info-color-10pct: #38bdf81a;
+  --lumo-info-text-color: #7dd3fc;
+  --lumo-success-contrast-color: #0b1120;
+  --lumo-error-contrast-color: #0b1120;
+  --lumo-base-color: #0b1120;
+  --lumo-body-text-color: #f1f5f9;
+  --lumo-header-text-color: #f1f5f9;
+  --lumo-secondary-text-color: #94a3b8;
+  --lumo-tertiary-text-color: #cbd5e1;
+  --lumo-disabled-text-color: #94a3b8;
+  --lumo-contrast-5pct: #111827;
+  --lumo-contrast-10pct: #1f2937;
+  --lumo-contrast-20pct: #334155;
+  --lumo-contrast-30pct: #475569;
+  --lumo-contrast-40pct: #64748b;
+  --wams-warning-color: #fcd34d;
+  --wams-warning-bg: #422006;
+  --wams-warning-bg-subtle: #29200e;
+  --wams-warning-border: #92400e;
+  --wams-info-bg: #082f49;
+  --wams-info-fg: #7dd3fc;
+  --wams-secondary-text-rgb: 148, 163, 184;
+  --module-accent-strong: #a5b4fc;
+  --module-brand-foreground: #0b1120;
+  --lumo-box-shadow-xs: 0 1px 2px rgb(0 0 0 / 20%);
+  --lumo-box-shadow-s: 0 1px 3px rgb(0 0 0 / 24%);
+  --lumo-box-shadow-m: 0 8px 20px rgb(0 0 0 / 28%);
+  --lumo-box-shadow-l: 0 14px 32px rgb(0 0 0 / 32%);
+  --lumo-box-shadow-xl: 0 20px 44px rgb(0 0 0 / 36%);
+}
+
+vaadin-app-layout.wams-module-kms {
+  --module-accent: #8b5cf6;
+  --module-accent-strong: #6d28d9;
+  --wams-module-accent: #8b5cf6;
+  --wams-module-accent-gradient: linear-gradient(135deg, #a78bfa, #8b5cf6);
+}
+
+vaadin-app-layout.wams-module-ims {
+  --module-accent: #10b981;
+  --module-accent-strong: #047857;
+  --wams-module-accent: #10b981;
+  --wams-module-accent-gradient: linear-gradient(135deg, #34d399, #10b981);
+}
+
+vaadin-app-layout.wams-module-edyra-pilot {
+  --module-accent: var(--wams-module-accent);
+  --module-accent-strong: var(--lumo-warning-text-color);
+}
+
+html[theme~="dark"] vaadin-app-layout.wams-module-kms {
+  --module-accent-strong: #c4b5fd;
+}
+
+html[theme~="dark"] vaadin-app-layout.wams-module-ims {
+  --module-accent-strong: #6ee7b7;
+}
+
+html,
+body {
+  min-height: 100%;
+  color: var(--lumo-body-text-color);
+  font-family: var(--lumo-font-family);
+}
+
+body {
+  background: var(--lumo-contrast-5pct);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--lumo-header-text-color);
+  font-family: "Inter Tight", var(--lumo-font-family);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+code,
+pre,
+kbd,
+samp {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+* {
+  scrollbar-color: var(--lumo-contrast-30pct) transparent;
+}

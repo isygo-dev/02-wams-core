@@ -1,0 +1,206 @@
+.kms-dashboard,
+.ims-dashboard,
+.management-view {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  color: var(--lumo-body-text-color);
+}
+
+.kms-dashboard > h2,
+.ims-dashboard > h2,
+.management-view > h2,
+.edyra-pilot-dashboard-title,
+.dashboard-title {
+  margin-block: 0 var(--lumo-space-s);
+  color: var(--lumo-header-text-color);
+  font-family: "Inter Tight", var(--lumo-font-family);
+  font-size: clamp(1.5rem, 2.2vw, 2rem);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.wams-dashboard-shortcuts {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: var(--lumo-space-s) var(--lumo-space-m);
+  flex-wrap: wrap;
+  gap: var(--lumo-space-s);
+  border: 1px solid var(--lumo-contrast-10pct);
+  border-radius: var(--lumo-border-radius-l);
+  background: var(--lumo-base-color);
+  box-shadow: var(--lumo-box-shadow-xs);
+}
+
+.wams-dashboard-shortcuts__title {
+  color: var(--lumo-secondary-text-color);
+  font-size: var(--lumo-font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.wams-dashboard-shortcuts__items {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.wams-dashboard-shortcut {
+  min-height: 44px;
+  border-radius: var(--lumo-border-radius-m);
+}
+
+.wams-stat-card,
+.wams-card,
+.wams-card-shell,
+.activity-panel,
+.kms-dashboard .kms-parta-usage-stat-card {
+  border: 1px solid var(--lumo-contrast-10pct);
+  border-radius: var(--lumo-border-radius-l);
+  background: var(--lumo-base-color);
+  box-shadow: var(--lumo-box-shadow-xs);
+}
+
+.wams-stat-card {
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.wams-stat-card:hover {
+  border-color: var(--lumo-contrast-20pct);
+  box-shadow: var(--lumo-box-shadow-m);
+}
+
+.wams-stat-card__value {
+  color: var(--lumo-header-text-color);
+  font-family: "Inter Tight", var(--lumo-font-family);
+  font-size: clamp(1.5rem, 2.2vw, 2rem);
+}
+
+.wams-stat-card__label {
+  color: var(--lumo-secondary-text-color);
+  font-size: var(--lumo-font-size-xs);
+  letter-spacing: 0.06em;
+}
+
+.panel__loading {
+  width: 100%;
+  height: 3px;
+  flex: 0 0 auto;
+}
+
+.panel__empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--lumo-space-s);
+  padding: var(--lumo-space-xl) var(--lumo-space-m);
+  border: 1px dashed var(--lumo-contrast-20pct);
+  border-radius: var(--lumo-border-radius-l);
+  background: var(--lumo-contrast-5pct);
+  text-align: center;
+}
+
+.panel__empty__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: var(--lumo-space-xs);
+  border-radius: 50%;
+  background: var(--lumo-primary-color-10pct);
+  color: var(--lumo-primary-text-color);
+}
+
+.panel__empty__icon vaadin-icon,
+.panel__empty__icon iron-icon,
+.panel__empty__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.panel__empty__title {
+  margin: 0;
+  color: var(--lumo-header-text-color);
+  font-size: var(--lumo-font-size-m);
+  font-weight: 600;
+}
+
+.panel__empty__description {
+  max-width: 42ch;
+  margin: 0;
+  color: var(--lumo-secondary-text-color);
+  font-size: var(--lumo-font-size-s);
+  line-height: 1.55;
+}
+
+.ims-dashboard .activity-panel {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: var(--lumo-space-l);
+}
+
+.ims-dashboard .activity-panel-content {
+  color: var(--lumo-secondary-text-color);
+}
+
+.edyra-dashboard-grid {
+  min-width: 0;
+  gap: var(--lumo-space-m);
+}
+
+.edyra-dashboard-grid > * {
+  min-width: 0;
+}
+
+vaadin-app-layout.wams-module-edyra-pilot .edyra-dashboard-surface,
+vaadin-app-layout.wams-module-edyra-pilot .edyra-dashboard-location-row {
+  border: 1px solid var(--lumo-contrast-10pct);
+  border-radius: var(--lumo-border-radius-l);
+  background: var(--lumo-base-color);
+  box-shadow: var(--lumo-box-shadow-xs);
+  color: var(--lumo-body-text-color);
+}
+
+vaadin-app-layout.wams-module-edyra-pilot .edyra-dashboard-surface h4,
+vaadin-app-layout.wams-module-edyra-pilot .edyra-dashboard-surface h5 {
+  color: var(--lumo-header-text-color);
+  font-family: "Inter Tight", var(--lumo-font-family);
+}
+
+vaadin-app-layout.wams-module-edyra-pilot .edyra-dashboard-location-row {
+  box-shadow: none;
+}
+
+vaadin-app-layout.wams-module-edyra-pilot .edyra-dashboard-welcome {
+  padding: clamp(1rem, 2.4vw, 1.75rem);
+}
+
+@media (max-width: 640px) {
+  .wams-dashboard-shortcuts {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .wams-dashboard-shortcuts__items {
+    width: 100%;
+  }
+
+  .ims-dashboard .activity-panel {
+    padding: var(--lumo-space-m);
+  }
+
+  .panel__empty {
+    padding: var(--lumo-space-l) var(--lumo-space-s);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wams-stat-card,
+  .edyra-dashboard-stat-loading-indicator {
+    transition: none;
+    animation: none;
+  }
+}

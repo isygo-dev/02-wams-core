@@ -151,7 +151,7 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
 
         String color = config.getColorExtractor().apply(evt);
         if (color != null) {
-            dot.getElement().setAttribute("data-event-color", color);
+            dot.getStyle().set("background-color", color);
         }
 
         // Tooltip with all fields

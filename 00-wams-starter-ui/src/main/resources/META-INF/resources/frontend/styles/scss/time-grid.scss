@@ -94,18 +94,18 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 2px solid var(--lumo-base-color);
+  box-shadow: var(--lumo-box-shadow-xs);
   cursor: pointer;
   position: relative;
   transition: transform 0.2s, box-shadow 0.2s;
   flex-shrink: 0;
-  background-color: attr(data-event-color type(< color >), #1976D2);
+  background-color: var(--lumo-primary-color);
 }
 
 .monthly-grid-event-dot-enhanced:hover {
   transform: scale(1.3);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--lumo-box-shadow-s);
   z-index: 10;
 }
 
@@ -170,25 +170,11 @@
   min-width: 800px;
   width: 100%;
   margin: 8px 0;
+  grid-template-columns: 64px repeat(7, minmax(0, 1fr));
 }
 
 .timetable-grid--daily {
-  grid-template-columns: 64px 1fr;
-}
-
-.timetable-grid[data-day-count] {
-  grid-template-columns: 64px repeat(attr(data-day-count type(< integer >)), 1fr);
-}
-
-.timetable-grid[data-grid-template-rows] {
-  grid-template-rows: attr(data-grid-template-rows type(*));
-}
-
-[data-grid-row-start][data-grid-row-span][data-grid-column-start][data-grid-column-span] {
-  grid-row-start: attr(data-grid-row-start type(< integer >));
-  grid-row-end: span attr(data-grid-row-span type(< integer >));
-  grid-column-start: attr(data-grid-column-start type(< integer >));
-  grid-column-end: span attr(data-grid-column-span type(< integer >));
+  grid-template-columns: 64px minmax(0, 1fr);
 }
 
 .timetable-delete-menu-item {
@@ -291,9 +277,8 @@
   justify-content: flex-start;
   align-items: flex-start;
   text-align: left;
-  --slot-accent: attr(data-slot-accent type(< color >), var(--lumo-primary-color));
-  background: attr(data-slot-bg type(< color >), var(--lumo-primary-color-10pct));
-  border-left: 3px solid var(--slot-accent);
+  background: var(--slot-bg, var(--lumo-primary-color-10pct));
+  border-left: 3px solid var(--slot-accent, var(--lumo-primary-color));
   border-radius: var(--lumo-border-radius-s);
   box-shadow: none;
   transition: box-shadow 0.12s ease;
@@ -334,7 +319,8 @@
   top: 0;
   right: 0;
   opacity: 0;
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--lumo-base-color);
+  box-shadow: var(--lumo-box-shadow-xs);
   border-radius: var(--lumo-border-radius-s);
   transition: opacity 0.12s ease;
   z-index: 3;
@@ -347,8 +333,9 @@
 
 .timetable-now-indicator {
   position: absolute;
+  display: none;
   height: 2px;
-  background: var(--lumo-error-color, #D13438);
+  background: var(--lumo-error-color);
   z-index: 20;
   pointer-events: none;
 }
@@ -360,7 +347,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--lumo-error-color, #D13438);
+  background: var(--lumo-error-color);
 }
 
 @media (max-width: 768px) {

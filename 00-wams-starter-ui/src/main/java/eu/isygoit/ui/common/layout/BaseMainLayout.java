@@ -60,6 +60,7 @@ import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @CssImport("./styles/scss/common.scss")
+@CssImport("./themes/isygo/styles.css")
 public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObserver {
 
     private static final String SIDEBAR_COLLAPSED_SESSION_KEY = "wams-sidebar-collapsed";

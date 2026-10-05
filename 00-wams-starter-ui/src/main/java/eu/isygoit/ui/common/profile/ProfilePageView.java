@@ -188,12 +188,12 @@ public class ProfilePageView extends ManagementVerticalView {
             if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
                 currentAccount = response.getBody();
                 loadProfileImage(header.getAvatar());
-                Notification.show(I18n.t("profile.avatar.updated"), 3000, Notification.Position.MIDDLE);
+                Notification.show(I18n.t("profile.avatar.updated"), 3000, Notification.Position.BOTTOM_END);
             } else {
-                Notification.show(I18n.t("profile.avatar.error"), 3000, Notification.Position.MIDDLE);
+                Notification.show(I18n.t("profile.avatar.error"), 3000, Notification.Position.BOTTOM_END);
             }
         } catch (Exception e) {
-            Notification.show(I18n.t("profile.avatar.error"), 3000, Notification.Position.MIDDLE);
+            Notification.show(I18n.t("profile.avatar.error"), 3000, Notification.Position.BOTTOM_END);
         }
     }
 

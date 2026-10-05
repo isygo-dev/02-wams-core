@@ -276,7 +276,7 @@ public class OneFilesManager extends VerticalLayout {
             } catch (Exception ex) {
                 log.error("Upload failed", ex);
                 Notification.show(I18n.t("files.upload.error", ex.getMessage()),
-                                5000, Notification.Position.MIDDLE)
+                                5000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });

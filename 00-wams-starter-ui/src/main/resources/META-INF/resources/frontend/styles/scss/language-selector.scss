@@ -1,79 +1,131 @@
 /*
  * Styling for eu.isygoit.ui.common.component.LanguageSelectorComponent.
- * Kept separate from the general app shell so locale switching remains a
- * self-contained, reusable component instead of a pile of layout CSS.
+ * Colors and geometry follow the shared Lumo design tokens.
  */
 
 .wams-language-selector {
-  padding: 2px var(--lumo-space-s);
-  background: var(--lumo-contrast-5pct);
-  border-radius: var(--lumo-border-radius-l);
-  border: 1px solid var(--lumo-contrast-20pct);
-  height: var(--lumo-size-m);
+  box-sizing: border-box;
+  --vaadin-horizontal-layout-gap: var(--lumo-space-s);
+  height: 40px;
+  padding: 0 var(--lumo-space-s);
+  border: 1px solid var(--lumo-contrast-10pct);
+  border-radius: 999px;
+  background: var(--lumo-base-color);
   box-shadow: var(--lumo-box-shadow-xs);
   cursor: pointer;
-  transition: all 0.25s ease-in-out;
+  transition: background-color 140ms ease-out, border-color 140ms ease-out,
+    box-shadow 140ms ease-out;
 }
 
 .wams-language-selector:hover {
-  background: var(--lumo-contrast-10pct);
+  border-color: var(--lumo-contrast-20pct);
+  background: var(--lumo-contrast-5pct);
   box-shadow: var(--lumo-box-shadow-s);
-  border-color: var(--lumo-primary-color);
+}
+
+.wams-language-selector:focus-within {
+  outline: 2px solid var(--module-accent, var(--lumo-primary-color));
+  outline-offset: 2px;
 }
 
 .wams-language-selector:active {
-  background: var(--lumo-contrast-20pct);
-  transform: scale(0.98);
+  background: var(--lumo-contrast-5pct);
 }
 
 .wams-language-selector__globe-icon {
-  color: var(--lumo-secondary-text-color);
-  margin-right: var(--lumo-space-xs);
+  flex: none;
+  color: var(--module-accent-strong, var(--lumo-primary-text-color));
 }
 
-.wams-language-selector__flag {
-  font-size: 1.2em;
-  margin-right: var(--lumo-space-xs);
-}
-
+.wams-language-selector__flag,
 .wams-language-selector__item-flag {
-  font-size: 1.2em;
+  flex: none;
+  width: 20px;
+  height: 14px;
+  margin: 0;
+  border-radius: var(--lumo-border-radius-s);
+  box-shadow: 0 0 0 1px var(--lumo-contrast-10pct);
+  font-size: 1rem;
+}
+
+.wams-language-selector__item {
+  width: 100%;
+  --vaadin-horizontal-layout-gap: var(--lumo-space-s);
 }
 
 .wams-language-selector__item-name {
+  overflow: hidden;
+  color: var(--lumo-body-text-color);
+  font-size: var(--lumo-font-size-s);
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .wams-language-selector__combo {
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  --lumo-combo-box-overlay-width: auto;
   min-width: 0;
-  padding: 0 var(--lumo-space-s);
+  padding: 0;
+  background: transparent;
+  --lumo-combo-box-overlay-width: max-content;
+}
+
+.wams-language-selector__combo::part(input-field) {
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.wams-language-selector__combo::part(toggle-button) {
+  width: 24px;
+  color: var(--lumo-secondary-text-color);
 }
 
 .wams-language-selector__mobile-trigger {
   display: none;
 }
 
+.wams-language-selector__popover-list {
+  min-width: 200px;
+  --vaadin-vertical-layout-gap: var(--lumo-space-xxs);
+  padding: var(--lumo-space-xs);
+}
+
 .wams-language-selector__popover-item {
-  padding: var(--lumo-space-xs) var(--lumo-space-s);
+  min-height: 44px;
+  padding: 0 var(--lumo-space-s);
   border-radius: var(--lumo-border-radius-m);
-  cursor: pointer;
+  text-align: start;
+  --lumo-button-background-color: transparent;
+  --lumo-button-text-color: var(--lumo-body-text-color);
 }
 
 .wams-language-selector__popover-item:hover {
-  background-color: var(--lumo-contrast-5pct);
+  --lumo-button-background-color: var(--lumo-contrast-5pct);
+}
+
+.wams-language-selector__popover-item:focus-visible {
+  outline: 2px solid var(--module-accent, var(--lumo-primary-color));
+  outline-offset: 1px;
+}
+
+.wams-language-selector__popover-item--selected {
+  --lumo-button-background-color: var(--lumo-primary-color-10pct);
+  --lumo-button-text-color: var(--lumo-primary-text-color);
+}
+
+.wams-language-selector__selected-icon {
+  flex: none;
+  color: var(--module-accent-strong, var(--lumo-primary-text-color));
 }
 
 @media (max-width: 768px) {
   .wams-language-selector {
-    padding: 0;
-    background: transparent;
-    border: none;
-    box-shadow: none;
     height: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
     cursor: default;
   }
 
@@ -84,5 +136,11 @@
 
   .wams-language-selector__mobile-trigger {
     display: inline-flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wams-language-selector {
+    transition: none;
   }
 }

@@ -6,7 +6,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.StyleSheet;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -35,7 +34,7 @@ public class LanguageSelectorComponent extends HorizontalLayout {
     private final Span flagPrefixSpan;
     // Icon-only trigger shown instead of languageCombo on mobile (see
     // .wams-language-selector__mobile-trigger in
-    // styles/scss/layout/_app-shell.scss) – a shrunk
+    // styles/scss/language-selector.scss) – a shrunk
     // ComboBox still carries its own input/dropdown-arrow chrome and doesn't
     // read as "just an icon", so mobile gets a real icon button + Popover
     // instead, matching the notifications/settings buttons' pattern.
@@ -65,10 +64,7 @@ public class LanguageSelectorComponent extends HorizontalLayout {
         languageCombo.setRenderer(new ComponentRenderer<>(this::buildLocaleItemContent));
 
         // Show selected value as flag + language name
-        languageCombo.setItemLabelGenerator(locale -> {
-            String flag = getFlagEmoji(locale); // fallback if needed
-            return getLanguageName(locale);
-        });
+        languageCombo.setItemLabelGenerator(this::getLanguageName);
 
         // Use flag prefix for the selected value
         languageCombo.setPrefixComponent(flagPrefixSpan);
@@ -82,6 +78,7 @@ public class LanguageSelectorComponent extends HorizontalLayout {
 
         // Set current locale
         languageCombo.setValue(I18n.getCurrentLocale());
+        languageCombo.setAriaLabel(I18n.t("common.layout.header.language.tooltip"));
 
         // Add change listener – update prefix flag and reload page
         languageCombo.addValueChangeListener(event -> {
@@ -111,9 +108,27 @@ public class LanguageSelectorComponent extends HorizontalLayout {
         VerticalLayout popoverContent = new VerticalLayout();
         popoverContent.setPadding(false);
         popoverContent.setSpacing(false);
+        popoverContent.addClassName("wams-language-selector__popover-list");
         for (Locale locale : I18n.getSupportedLocales()) {
-            Div item = new Div(buildLocaleItemContent(locale));
+            HorizontalLayout itemContent = buildLocaleItemContent(locale);
+            boolean selected = locale.equals(I18n.getCurrentLocale());
+            if (selected) {
+                Icon selectedIcon = VaadinIcon.CHECK.create();
+                selectedIcon.addClassName("wams-language-selector__selected-icon");
+                selectedIcon.getElement().setAttribute("aria-hidden", "true");
+                itemContent.add(selectedIcon);
+                itemContent.expand(itemContent.getComponentAt(1));
+            }
+
+            Button item = new Button(itemContent);
+            item.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
             item.addClassName("wams-language-selector__popover-item");
+            item.setWidthFull();
+            item.setAriaLabel(getLanguageName(locale));
+            if (selected) {
+                item.addClassName("wams-language-selector__popover-item--selected");
+                item.getElement().setAttribute("aria-current", "true");
+            }
             item.addClickListener(e -> applyLocaleChange(locale));
             popoverContent.add(item);
         }
@@ -131,6 +146,8 @@ public class LanguageSelectorComponent extends HorizontalLayout {
         itemLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         itemLayout.setSpacing(true);
         itemLayout.setPadding(false);
+        itemLayout.setWidthFull();
+        itemLayout.addClassName("wams-language-selector__item");
 
         Span flagSpan = new Span();
         flagSpan.addClassName("flag-icon");
@@ -186,35 +203,6 @@ public class LanguageSelectorComponent extends HorizontalLayout {
             };
         }
         return "flag-icon-" + countryCode.toLowerCase();
-    }
-
-    /**
-     * Returns the flag emoji as a fallback if the CSS class fails.
-     */
-    private String getFlagEmoji(Locale locale) {
-        String countryCode = locale.getCountry();
-        if (countryCode == null || countryCode.isEmpty()) {
-            countryCode = switch (locale.getLanguage()) {
-                case "en" -> "US";
-                case "fr" -> "FR";
-                case "de" -> "DE";
-                case "es" -> "ES";
-                case "it" -> "IT";
-                case "pt" -> "PT";
-                case "nl" -> "NL";
-                case "ru" -> "RU";
-                case "zh" -> "CN";
-                case "ja" -> "JP";
-                case "ko" -> "KR";
-                case "ar" -> "SA";
-                case "hi" -> "IN";
-                default -> "UN";
-            };
-        }
-        // Convert country code to flag emoji (regional indicator symbols)
-        int firstChar = Character.codePointAt(countryCode.toUpperCase(), 0) - 'A' + 0x1F1E6;
-        int secondChar = Character.codePointAt(countryCode.toUpperCase(), 1) - 'A' + 0x1F1E6;
-        return new String(Character.toChars(firstChar)) + new String(Character.toChars(secondChar));
     }
 
     /**

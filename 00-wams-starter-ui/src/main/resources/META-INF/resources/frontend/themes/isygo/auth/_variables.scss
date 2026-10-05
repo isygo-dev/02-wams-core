@@ -1,14 +1,14 @@
-$auth-color-ink: #172b4d;
-$auth-color-muted: #44546f;
-$auth-color-primary: #0050b3;
-$auth-color-primary-hover: #003f8f;
-$auth-color-success: #176b45;
-$auth-color-error: #a4262c;
-$auth-color-error-surface: #fff1f0;
-$auth-color-success-surface: #eaf6ef;
+$auth-color-ink: #0f172a;
+$auth-color-muted: #64748b;
+$auth-color-primary: #4f46e5;
+$auth-color-primary-hover: #4338ca;
+$auth-color-success: #047857;
+$auth-color-error: #b91c1c;
+$auth-color-error-surface: #fef2f2;
+$auth-color-success-surface: #ecfdf5;
 $auth-color-surface: #ffffff;
-$auth-color-page: #f6f8fb;
-$auth-color-focus: #005fcc;
+$auth-color-page: #f8fafc;
+$auth-color-focus: #4338ca;
 
 $auth-space-xs: 0.375rem;
 $auth-space-sm: 0.75rem;
@@ -16,9 +16,9 @@ $auth-space-md: 1rem;
 $auth-space-lg: 1.5rem;
 $auth-space-xl: 2rem;
 
-$auth-radius-sm: 0.5rem;
-$auth-radius-md: 0.875rem;
-$auth-radius-lg: 1.25rem;
+$auth-radius-sm: 0.375rem;
+$auth-radius-md: 0.625rem;
+$auth-radius-lg: 1rem;
 $auth-card-max-width: 30rem;
 $auth-touch-target: 2.75rem;
 $auth-shadow: 0 1.5rem 4rem rgba(23, 43, 77, 0.12);

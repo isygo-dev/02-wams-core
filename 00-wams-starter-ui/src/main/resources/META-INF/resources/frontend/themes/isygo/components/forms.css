@@ -1,0 +1,94 @@
+vaadin-button {
+  --lumo-button-border-radius: var(--lumo-border-radius-m);
+  font-family: var(--lumo-font-family);
+  font-weight: 600;
+}
+
+vaadin-button:not([theme~="tertiary-inline"])::part(button) {
+  min-height: 44px;
+  border-radius: var(--lumo-border-radius-m);
+}
+
+vaadin-button[theme~="primary"]::part(button) {
+  background: var(--lumo-primary-text-color);
+  color: var(--lumo-primary-contrast-color);
+}
+
+vaadin-button[theme~="primary"]:hover:not([disabled])::part(button) {
+  filter: brightness(0.94);
+}
+
+vaadin-text-field,
+vaadin-email-field,
+vaadin-password-field,
+vaadin-number-field,
+vaadin-combo-box,
+vaadin-date-picker,
+vaadin-time-picker,
+vaadin-select,
+vaadin-text-area {
+  --vaadin-input-field-border-radius: var(--lumo-border-radius-m);
+  color: var(--lumo-body-text-color);
+  font-family: var(--lumo-font-family);
+}
+
+vaadin-text-field::part(input-field),
+vaadin-email-field::part(input-field),
+vaadin-password-field::part(input-field),
+vaadin-number-field::part(input-field),
+vaadin-combo-box::part(input-field),
+vaadin-date-picker::part(input-field),
+vaadin-time-picker::part(input-field),
+vaadin-select::part(input-field),
+vaadin-text-area::part(input-field) {
+  min-height: 44px;
+  border: 1px solid var(--lumo-contrast-20pct);
+  border-radius: var(--lumo-border-radius-m);
+  background: var(--lumo-base-color);
+  box-shadow: none;
+}
+
+vaadin-text-field:focus-within::part(input-field),
+vaadin-email-field:focus-within::part(input-field),
+vaadin-password-field:focus-within::part(input-field),
+vaadin-number-field:focus-within::part(input-field),
+vaadin-combo-box:focus-within::part(input-field),
+vaadin-date-picker:focus-within::part(input-field),
+vaadin-time-picker:focus-within::part(input-field),
+vaadin-select:focus-within::part(input-field),
+vaadin-text-area:focus-within::part(input-field) {
+  border-color: var(--lumo-primary-color);
+  box-shadow: 0 0 0 3px var(--lumo-primary-color-10pct);
+}
+
+vaadin-button:focus-visible::part(button),
+vaadin-text-field:focus-visible::part(input-field),
+vaadin-email-field:focus-visible::part(input-field),
+vaadin-password-field:focus-visible::part(input-field),
+vaadin-combo-box:focus-visible::part(input-field),
+vaadin-date-picker:focus-visible::part(input-field),
+vaadin-select:focus-visible::part(input-field),
+vaadin-text-area:focus-visible::part(input-field) {
+  outline: 2px solid var(--lumo-primary-text-color);
+  outline-offset: 2px;
+}
+
+vaadin-dialog-overlay::part(overlay),
+vaadin-confirm-dialog-overlay::part(overlay) {
+  border: 1px solid var(--lumo-contrast-10pct);
+  border-radius: var(--lumo-border-radius-l);
+  background: var(--lumo-base-color);
+  box-shadow: var(--lumo-box-shadow-xl);
+}
+
+vaadin-dialog-overlay::part(header),
+vaadin-confirm-dialog-overlay::part(header) {
+  color: var(--lumo-header-text-color);
+  font-family: "Inter Tight", var(--lumo-font-family);
+}
+
+vaadin-notification-card {
+  border: 1px solid var(--lumo-contrast-10pct);
+  border-radius: var(--lumo-border-radius-m);
+  box-shadow: var(--lumo-box-shadow-l);
+}

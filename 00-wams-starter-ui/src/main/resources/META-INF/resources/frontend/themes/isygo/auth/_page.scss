@@ -1,16 +1,44 @@
 @use "./variables" as v;
 
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/inter-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter Tight";
+  src: url("../fonts/inter-tight-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../fonts/jetbrains-mono-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 auth-layout {
-  --lumo-primary-color: #{v.$auth-color-primary};
+  --lumo-primary-color: #6366f1;
   --lumo-primary-text-color: #{v.$auth-color-primary};
-  --lumo-primary-color-50pct: rgba(0, 80, 179, 0.5);
-  --lumo-primary-color-10pct: rgba(0, 80, 179, 0.1);
+  --lumo-primary-color-50pct: rgba(99, 102, 241, 0.5);
+  --lumo-primary-color-10pct: rgba(99, 102, 241, 0.1);
   --lumo-error-color: #{v.$auth-color-error};
   --lumo-error-text-color: #{v.$auth-color-error};
   --lumo-success-color: #{v.$auth-color-success};
   --lumo-body-text-color: #{v.$auth-color-ink};
   --lumo-header-text-color: #{v.$auth-color-ink};
   --lumo-secondary-text-color: #{v.$auth-color-muted};
+  --lumo-border-radius-s: 6px;
+  --lumo-border-radius-m: 10px;
+  --lumo-border-radius-l: 16px;
+  --lumo-font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
 
   display: flex;
   box-sizing: border-box;
@@ -21,23 +49,29 @@ auth-layout {
   min-height: 100dvh;
   padding: clamp(0.75rem, 3vw, 2.5rem);
   background:
-    radial-gradient(ellipse at top, rgba(0, 80, 179, 0.09), transparent 58%),
+    radial-gradient(ellipse at top, rgba(99, 102, 241, 0.08), transparent 58%),
     v.$auth-color-page;
   color: v.$auth-color-ink;
 }
 
+auth-layout h1,
+auth-layout h2,
+auth-layout h3 {
+  font-family: "Inter Tight", var(--lumo-font-family);
+}
+
 html[theme~="dark"] auth-layout {
-  --lumo-base-color: #20252b;
-  --lumo-body-text-color: #f1f4f8;
-  --lumo-header-text-color: #f1f4f8;
-  --lumo-secondary-text-color: #c3cbd6;
-  --lumo-primary-text-color: #8dbbff;
-  --lumo-error-text-color: #ffb4ab;
+  --lumo-base-color: #0b1120;
+  --lumo-body-text-color: #f1f5f9;
+  --lumo-header-text-color: #f1f5f9;
+  --lumo-secondary-text-color: #94a3b8;
+  --lumo-primary-text-color: #a5b4fc;
+  --lumo-error-text-color: #fca5a5;
 
   background:
-    radial-gradient(ellipse at top, rgba(71, 130, 210, 0.2), transparent 58%),
-    #15191e;
-  color: #f1f4f8;
+    radial-gradient(ellipse at top, rgba(129, 140, 248, 0.18), transparent 58%),
+    #0b1120;
+  color: #f1f5f9;
 }
 
 @media (max-width: 360px) {

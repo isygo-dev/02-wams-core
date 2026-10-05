@@ -102,15 +102,15 @@ class ProfileSettingsPanel extends VerticalLayout {
         String confirmPwd = confirmPasswordField.getValue();
 
         if (newPwd.isEmpty() || confirmPwd.isEmpty() || currentPwd.isEmpty()) {
-            Notification.show(I18n.t("profile.password.fields.required"), 3000, Notification.Position.MIDDLE);
+            Notification.show(I18n.t("profile.password.fields.required"), 3000, Notification.Position.BOTTOM_END);
             return;
         }
         if (!newPwd.equals(confirmPwd)) {
-            Notification.show(I18n.t("profile.password.mismatch"), 3000, Notification.Position.MIDDLE);
+            Notification.show(I18n.t("profile.password.mismatch"), 3000, Notification.Position.BOTTOM_END);
             return;
         }
         if (newPwd.length() < 8) {
-            Notification.show(I18n.t("profile.password.min.length"), 3000, Notification.Position.MIDDLE);
+            Notification.show(I18n.t("profile.password.min.length"), 3000, Notification.Position.BOTTOM_END);
             return;
         }
 
@@ -124,13 +124,13 @@ class ProfileSettingsPanel extends VerticalLayout {
             ResponseEntity<Void> response = profileService.changePassword(request);
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                Notification.show(I18n.t("profile.password.success"), 3000, Notification.Position.MIDDLE);
+                Notification.show(I18n.t("profile.password.success"), 3000, Notification.Position.BOTTOM_END);
                 currentPasswordField.clear();
                 newPasswordField.clear();
                 confirmPasswordField.clear();
             }
         } catch (Exception e) {
-            Notification.show(I18n.t("profile.password.error"), 3000, Notification.Position.MIDDLE);
+            Notification.show(I18n.t("profile.password.error"), 3000, Notification.Position.BOTTOM_END);
         }
     }
 

@@ -104,7 +104,7 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         }
         rowTemplate.append("var(--tt-row-end)");
         gridContainer.addClassName("timetable-grid--daily");
-        gridContainer.getElement().setAttribute("data-grid-template-rows", rowTemplate.toString().trim());
+        gridContainer.getStyle().set("grid-template-rows", rowTemplate.toString().trim());
 
         // ---- Header row ----
         Div corner = new Div();
@@ -217,8 +217,8 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         List<String[]> palette = config.getPalette();
         int idx = key != null ? Math.floorMod(key.hashCode(), palette.size()) : 0;
         String[] colors = palette.get(idx);
-        content.getElement().setAttribute("data-slot-bg", colors[0]);
-        content.getElement().setAttribute("data-slot-accent", colors[1]);
+        content.getStyle().set("--slot-bg", colors[0]);
+        content.getStyle().set("--slot-accent", colors[1]);
 
         if (config.getSlotContentPopulator() != null) {
             config.getSlotContentPopulator().accept(content, evt);
@@ -313,10 +313,8 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
     }
 
     private void placeInGrid(Component component, int rowStart, int colStart, int rowSpan, int colSpan) {
-        component.getElement().setAttribute("data-grid-row-start", String.valueOf(rowStart));
-        component.getElement().setAttribute("data-grid-row-span", String.valueOf(rowSpan));
-        component.getElement().setAttribute("data-grid-column-start", String.valueOf(colStart));
-        component.getElement().setAttribute("data-grid-column-span", String.valueOf(colSpan));
+        component.getStyle().set("grid-row", rowStart + " / span " + rowSpan);
+        component.getStyle().set("grid-column", colStart + " / span " + colSpan);
     }
 
     private void installNowIndicator() {
@@ -329,7 +327,7 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
                         "  if (!cells.length) return;" +
                         "  const now = new Date(); const totalMin = now.getHours()*60 + now.getMinutes();" +
                         "  if (totalMin < " + startMinutes + " || totalMin > " + endMinutes + ") {" +
-                        "    let ind = el.querySelector('.timetable-now-indicator'); if(ind) ind.removeAttribute('data-visible'); return;" +
+                        "    let ind = el.querySelector('.timetable-now-indicator'); if(ind) ind.style.display = 'none'; return;" +
                         "  }" +
                         "  const firstCell = cells[0];" +
                         "  let totalHeight = 0; cells.forEach(c => totalHeight += c.offsetHeight);" +
@@ -342,10 +340,10 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
                         "  let ind = el.querySelector('.timetable-now-indicator');" +
                         "  if (!ind) { ind = document.createElement('div'); ind.className = 'timetable-now-indicator';" +
                         "    ind.innerHTML = '<span class=\"timetable-now-dot\"></span>'; el.appendChild(ind); }" +
-                        "  ind.setAttribute('data-visible', 'true');" +
-                        "  ind.setAttribute('data-top', top + 'px');" +
-                        "  ind.setAttribute('data-left', gutter + 'px');" +
-                        "  ind.setAttribute('data-width', colWidth + 'px');" +
+                        "  ind.style.display = 'block';" +
+                        "  ind.style.top = top + 'px';" +
+                        "  ind.style.left = gutter + 'px';" +
+                        "  ind.style.width = colWidth + 'px';" +
                         "}; update(); el._nowInterval = setInterval(update, 60000);"
         );
     }

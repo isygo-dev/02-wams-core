@@ -475,28 +475,28 @@ public class AdditionalFilesManager<F extends LinkedFileMinDto<Long>> extends Ve
                     } else {
                         Notification.show(I18n.t("files.upload.error",
                                                 I18n.t("files.upload.emptyResponse")),
-                                        4000, Notification.Position.MIDDLE)
+                                        4000, Notification.Position.BOTTOM_END)
                                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
                     }
                 }
             } catch (Exception ex) {
                 log.error("Upload failed for {}", fileName, ex);
                 Notification.show(I18n.t("files.upload.error", ex.getMessage()),
-                                5000, Notification.Position.MIDDLE)
+                                5000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
 
         uploadComponent.addFileRejectedListener(event ->
                 Notification.show(I18n.t("files.upload.rejected", event.getErrorMessage()),
-                                4000, Notification.Position.MIDDLE)
+                                4000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING));
 
         uploadComponent.addFailedListener(event ->
                 Notification.show(I18n.t("files.upload.error",
                                         event.getReason() != null
                                                 ? event.getReason().getMessage() : ""),
-                                5000, Notification.Position.MIDDLE)
+                                5000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR));
 
         return uploadComponent;
@@ -533,17 +533,17 @@ public class AdditionalFilesManager<F extends LinkedFileMinDto<Long>> extends Ve
                 renderFiles();
                 notifyChanged();
                 Notification.show(I18n.t("files.delete.success"),
-                                3000, Notification.Position.MIDDLE)
+                                3000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } else {
                 Notification.show(I18n.t("files.delete.error"),
-                                4000, Notification.Position.MIDDLE)
+                                4000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         } catch (Exception ex) {
             log.error("Delete failed for file {}", file.getId(), ex);
             Notification.show(I18n.t("files.delete.error"),
-                            5000, Notification.Position.MIDDLE)
+                            5000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }
