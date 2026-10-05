@@ -471,6 +471,50 @@ vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .dashboard-location-li
   display: none;
 }
 
+.student-location-map-page {
+  box-sizing: border-box;
+  gap: var(--lumo-space-m);
+  min-height: 0;
+  overflow: hidden;
+  padding: var(--lumo-space-m);
+}
+
+.student-location-map-page__loading {
+  flex: 0 0 auto;
+}
+
+.student-location-map-page .dashboard-location-list {
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.student-geographic-map-content--dashboard .dashboard-location-list {
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.student-location-map-page__canvas {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  width: 100%;
+  min-height: 260px;
+  overflow: hidden;
+  border: 1px solid var(--dashboard-border);
+  border-radius: var(--lumo-border-radius-l);
+  background: var(--lumo-base-color);
+}
+
+.student-location-map-page__canvas > .leaflet-map {
+  width: 100%;
+  height: 100%;
+  min-height: 260px;
+}
+
+.student-location-map-page__canvas > .dashboard-empty {
+  flex: 1 1 auto;
+}
+
 @keyframes dashboard-spin {
   to { transform: rotate(360deg); }
 }
@@ -522,6 +566,15 @@ vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .dashboard-location-li
 @media (max-width: 767px) {
   .dashboard-root {
     --dashboard-chart-height: 260px;
+  }
+
+  .student-location-map-page {
+    gap: var(--lumo-space-s);
+    padding: var(--lumo-space-s);
+  }
+
+  .student-location-map-page .dashboard-location-list {
+    max-height: 150px;
   }
 
   .dashboard-root .dashboard-grid {
