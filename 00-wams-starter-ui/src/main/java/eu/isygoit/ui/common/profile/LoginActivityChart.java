@@ -1,8 +1,16 @@
 package eu.isygoit.ui.common.profile;
 
-import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.model.*;
-import com.vaadin.flow.component.charts.model.style.SolidColor;
+import com.storedobject.chart.Axis;
+import com.storedobject.chart.BarChart;
+import com.storedobject.chart.CategoryData;
+import com.storedobject.chart.Color;
+import com.storedobject.chart.Data;
+import com.storedobject.chart.DataType;
+import com.storedobject.chart.RectangularCoordinate;
+import com.storedobject.chart.SOChart;
+import com.storedobject.chart.Tooltip;
+import com.storedobject.chart.XAxis;
+import com.storedobject.chart.YAxis;
 import eu.isygoit.dto.data.ConnectionTrackingDto;
 import eu.isygoit.i18n.I18n;
 
@@ -25,10 +33,14 @@ import java.util.stream.Collectors;
  * {@link #update(List, int)} whenever the window (7/30 days) changes, instead
  * of tearing down and recreating the component.</p>
  */
-class LoginActivityChart extends Chart {
+class LoginActivityChart extends SOChart {
 
     private static final DateTimeFormatter DAY_LABEL = DateTimeFormatter.ofPattern("dd/MM");
-    private static final SolidColor BAR_COLOR = new SolidColor("#5B6EF5");
+    private static final Color BAR_COLOR = new Color("#5B6EF5");
+
+    private final CategoryData categories = new CategoryData();
+    private final Data values = new Data();
+    private final XAxis xAxis = new XAxis(categories);
 
     /**
      * Number of days currently displayed (7 or 30 by convention).
@@ -36,48 +48,32 @@ class LoginActivityChart extends Chart {
     private int windowDays;
 
     LoginActivityChart(List<ConnectionTrackingDto> history, int days) {
-        super(ChartType.COLUMN);
-
         addClassName("profile-login-activity-chart");
         setHeight("300px");
         setWidthFull();
+        disableDefaultLegend();
+        getDefaultTooltip().setType(Tooltip.Type.Axis);
 
-        Configuration cfg = getConfiguration();
-        cfg.getCredits().setEnabled(false);   // hide "Highcharts.com" link
-        cfg.getLegend().setEnabled(false);    // single series → no legend
-        cfg.getExporting().setEnabled(false); // hide the hamburger menu
+        xAxis.getPointer(true).setType(Axis.PointerType.CROSS_HAIR);
 
-        // Axes are configured once; update() only swaps their data.
-        XAxis xAxis = new XAxis();
-        xAxis.setCrosshair(new Crosshair());
-        cfg.addxAxis(xAxis);
-
-        YAxis yAxis = new YAxis();
-        yAxis.setTitle(I18n.t("profile.connections.chart.yAxis"));
+        YAxis yAxis = new YAxis(DataType.NUMBER);
+        yAxis.setName(I18n.t("profile.connections.chart.yAxis"));
         yAxis.setMin(0);
-        yAxis.setAllowDecimals(false);
-        cfg.addyAxis(yAxis);
+        yAxis.getLabel(true).setFormatterFunction("return Math.round(value);");
 
-        PlotOptionsColumn plot = new PlotOptionsColumn();
-        plot.setColor(BAR_COLOR);
-        plot.setBorderRadius(4);
-        plot.setDataLabels(new DataLabels(false));
+        RectangularCoordinate coordinate = new RectangularCoordinate(xAxis, yAxis);
+        BarChart series = new BarChart(categories, values);
+        series.setName(I18n.t("profile.connections.chart.series"));
+        series.setColors(BAR_COLOR);
+        series.getItemStyle(true).getBorder(true).setRadius(4);
+        series.plotOn(coordinate);
 
-        ListSeries series = new ListSeries(I18n.t("profile.connections.chart.series"), new ArrayList<Number>());
-        series.setPlotOptions(plot);
-        cfg.addSeries(series);
-
-        Tooltip tooltip = new Tooltip();
-        tooltip.setShared(true);
-        cfg.setTooltip(tooltip);
-
+        add(coordinate, series);
         update(history, days);
     }
 
     /**
-     * Adapt this to the actual date accessor on {@link ConnectionTrackingDto}.
-     * The DTO is assumed to expose a login timestamp (e.g. {@code getLoginDate()}
-     * returning {@code java.util.Date} / {@code Instant} / {@code LocalDateTime}).
+     * Convert supported login timestamp types to the user's local calendar date.
      */
     private static LocalDate toLocalDate(ConnectionTrackingDto dto) {
         if (dto == null || dto.getLoginDate() == null) {
@@ -100,8 +96,7 @@ class LoginActivityChart extends Chart {
     }
 
     /**
-     * Recompute the buckets for {@code days} and push them into the existing
-     * series / axis without recreating the chart.
+     * Recompute the buckets for {@code days} and update the existing chart.
      */
     void update(List<ConnectionTrackingDto> history, int days) {
         this.windowDays = days;
@@ -117,22 +112,26 @@ class LoginActivityChart extends Chart {
                         LinkedHashMap::new,
                         Collectors.counting()));
 
-        List<String> categories = new ArrayList<>(days);
-        List<Number> values = new ArrayList<>(days);
+        List<String> labels = new ArrayList<>(days);
+        List<Number> dailyValues = new ArrayList<>(days);
         for (LocalDate d = from; !d.isAfter(today); d = d.plusDays(1)) {
-            categories.add(d.format(DAY_LABEL));
-            values.add(counts.getOrDefault(d, 0L));
+            labels.add(d.format(DAY_LABEL));
+            dailyValues.add(counts.getOrDefault(d, 0L));
         }
 
-        Configuration cfg = getConfiguration();
-        XAxis xAxis = cfg.getxAxis();
-        xAxis.setCategories(categories.toArray(new String[0]));
-        xAxis.setTickInterval(days <= 7 ? 1 : (int) Math.ceil(days / 10.0));
+        categories.clear();
+        categories.addAll(labels);
+        values.clear();
+        values.addAll(dailyValues);
+        xAxis.getLabel(true).setInterval(days <= 7 ? 0 : (int) Math.ceil(days / 10.0) - 1);
 
-        ListSeries series = (ListSeries) cfg.getSeries().get(0);
-        series.setData(values);
-
-        drawChart();
+        if (isAttached()) {
+            try {
+                update(false);
+            } catch (Exception e) {
+                throw new IllegalStateException("Unable to update login activity chart", e);
+            }
+        }
     }
 
     int getWindowDays() {
