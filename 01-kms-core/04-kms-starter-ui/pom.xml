@@ -3,6 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
     <version>WC-1.0.260928-T1052</version>
 
+    <organization>
+        <name>isygo-it-services</name>
+        <url>https://isygo-it.eu/</url>
+    </organization>
+
     <groupId>eu.isygo-it.services</groupId>
     <artifactId>key-management-starter-ui</artifactId>
     <packaging>jar</packaging>
@@ -97,6 +102,13 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 
