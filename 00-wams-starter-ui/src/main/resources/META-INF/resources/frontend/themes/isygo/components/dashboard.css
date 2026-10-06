@@ -484,7 +484,7 @@ vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .dashboard-location-li
 }
 
 .student-location-map-page .dashboard-location-list {
-  max-height: 180px;
+  max-height: fit-content;
   overflow-y: auto;
 }
 
@@ -574,7 +574,7 @@ vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .dashboard-location-li
   }
 
   .student-location-map-page .dashboard-location-list {
-    max-height: 150px;
+    max-height: fit-content;
   }
 
   .dashboard-root .dashboard-grid {
