@@ -14,6 +14,9 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.auth.AuthServiceFacade.Failure;
 import eu.isygoit.util.SecurityUtils;
 
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+
 @CssImport("./themes/isygo/auth/auth.scss")
 public abstract class BaseLoginView extends Div implements BeforeEnterObserver, HasDynamicTitle {
 
@@ -126,7 +129,12 @@ public abstract class BaseLoginView extends Div implements BeforeEnterObserver, 
     }
 
     protected void reportUnexpectedFailure(Throwable failure) {
+        Throwable cause = failure;
+        while ((cause instanceof CompletionException || cause instanceof ExecutionException)
+                && cause.getCause() != null) {
+            cause = cause.getCause();
+        }
         LOG.warn("Authentication service request failed ({})",
-                failure.getClass().getSimpleName());
+                cause.getClass().getSimpleName(), cause);
     }
 }

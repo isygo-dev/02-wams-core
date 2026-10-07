@@ -1,5 +1,6 @@
 package eu.isygoit.ui.auth;
 
+import eu.isygoit.async.ContextAwareAsync;
 import eu.isygoit.dto.request.AuthenticationContextRequest;
 import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.dto.request.QrLoginChallengeRequest;
@@ -98,7 +99,7 @@ public class AuthServiceFacade {
             Supplier<ResponseEntity<T>> request,
             Function<ResponseEntity<T>, Result<T>> responseMapper) {
         try {
-            return CompletableFuture.supplyAsync(request, authExecutor).thenApply(responseMapper);
+            return ContextAwareAsync.supplyAsync(request, authExecutor).thenApply(responseMapper);
         } catch (RejectedExecutionException exception) {
             return CompletableFuture.failedFuture(exception);
         }

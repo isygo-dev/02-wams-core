@@ -23,7 +23,13 @@ public class BearerTokenRequestInterceptor implements RequestInterceptor {
             return;
         }
 
-        String token = (String) session.getAttribute("accessToken");
+        String token;
+        session.lock();
+        try {
+            token = (String) session.getAttribute("accessToken");
+        } finally {
+            session.unlock();
+        }
         if (token != null && !token.isEmpty()) {
             template.header(AUTHORIZATION_HEADER, BEARER_PREFIX + token);
         }
