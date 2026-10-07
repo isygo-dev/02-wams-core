@@ -21,7 +21,7 @@ public class ContextAwareAsyncConfig {
         return executor;
     }
 
-    @Bean(name = "contextAwareAsyncExecutor")
+    @Bean(name = {"VaadinTaskExecutor", "contextAwareAsyncExecutor"})
     public AsyncTaskExecutor contextAwareAsyncExecutor(
             @Qualifier("contextAwareAsyncPool") ThreadPoolTaskExecutor executor) {
         AsyncTaskExecutor contextAwareExecutor = new DelegatingSecurityContextAsyncTaskExecutor(executor);

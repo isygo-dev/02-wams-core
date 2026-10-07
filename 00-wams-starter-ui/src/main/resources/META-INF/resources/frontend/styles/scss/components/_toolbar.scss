@@ -27,8 +27,8 @@
 // (inline-start/end, margin-inline, …) rather than left/right.
 // ═══════════════════════════════════════════════════════════════════
 
-@import "../abstracts/variables";
-@import "../abstracts/mixins";
+@use "../abstracts/variables" as *;
+@use "../abstracts/mixins" as *;
 
 $toolbar-overlay-width: 260px; // filter combo-box dropdown width
 $toolbar-search-max: 420px; // a search box wider than this just looks empty

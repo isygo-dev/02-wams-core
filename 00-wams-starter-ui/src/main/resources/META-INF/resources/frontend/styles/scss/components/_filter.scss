@@ -41,7 +41,7 @@
 //     color         --lumo-secondary-text-color
 // ═══════════════════════════════════════════════════════════════════
 
-@import "../abstracts/variables";
+@use "../abstracts/variables" as *;
 
 // ══════════════════════════════════════════════════════════════════
 // Toolbar surface — search on the left, add button on the right

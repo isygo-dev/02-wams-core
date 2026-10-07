@@ -1,4 +1,4 @@
-@import "../abstracts/variables";
+@use "../abstracts/variables" as *;
 
 .app-container {
   min-height: 100vh;

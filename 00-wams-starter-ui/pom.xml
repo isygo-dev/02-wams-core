@@ -138,6 +138,18 @@
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct-processor</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.storedobject.chart</groupId>
+            <artifactId>so-charts</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>software.xdev.vaadin.maps-leaflet</groupId>
+            <artifactId>flow</artifactId>
+            <version>5.0.1</version>
+        </dependency>
     </dependencies>
 
     <build>

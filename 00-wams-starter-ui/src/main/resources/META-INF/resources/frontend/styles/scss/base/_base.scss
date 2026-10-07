@@ -1,4 +1,4 @@
-@import "../abstracts/variables";
+@use "../abstracts/variables" as *;
 
 body {
   font-family: var(--lumo-font-family);
