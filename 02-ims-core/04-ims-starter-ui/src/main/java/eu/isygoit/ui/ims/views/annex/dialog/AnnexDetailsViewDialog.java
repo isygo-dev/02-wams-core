@@ -23,6 +23,7 @@ public class AnnexDetailsViewDialog extends DetailsViewDialog {
                                   AnnexService annexService,
                                   Long annexId) {
         super(I18n.t("ims.annex.details.title"));
+        addClassName("ims-dialog");
         this.parentView = parentView;
         this.annexService = annexService;
         this.annexId = annexId;

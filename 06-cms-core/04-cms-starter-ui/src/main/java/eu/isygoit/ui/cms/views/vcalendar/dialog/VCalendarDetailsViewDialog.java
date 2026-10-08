@@ -24,6 +24,7 @@ public class VCalendarDetailsViewDialog extends TabbedDetailsViewDialog {
         super(I18n.t("cms.calendar.details.title"),
                 I18n.t("cms.calendar.details.section.identity"),
                 I18n.t("cms.calendar.details.section.identity"));
+        addClassName("cms-dialog");
         this.parentView = parentView;
         this.calendarService = calendarService;
         this.calendarId = calendarId;

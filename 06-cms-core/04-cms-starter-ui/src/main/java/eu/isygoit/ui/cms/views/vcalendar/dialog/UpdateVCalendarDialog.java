@@ -31,6 +31,7 @@ public class UpdateVCalendarDialog extends BaseActionDialog {
                                  VCalendarDto calendar,
                                  Runnable onSuccess) {
         super(I18n.t("cms.calendar.dialog.update.title"), onSuccess);
+        addClassName("cms-dialog");
         this.parentView = parentView;
         this.calendarService = calendarService;
         this.calendar = calendar;

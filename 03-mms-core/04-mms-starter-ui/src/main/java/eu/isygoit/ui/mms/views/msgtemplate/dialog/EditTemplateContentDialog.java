@@ -53,6 +53,7 @@ public class EditTemplateContentDialog extends BaseActionDialog {
                                      Runnable onSuccess) {
         super(I18n.t("mms.msgtemplate.dialog.edit.content.title",
                 template.getName() != null ? template.getName() : template.getId()), onSuccess);
+        addClassName("mms-dialog");
         this.parentView = parentView;
         this.templateFileService = templateFileService;
         this.template = template;

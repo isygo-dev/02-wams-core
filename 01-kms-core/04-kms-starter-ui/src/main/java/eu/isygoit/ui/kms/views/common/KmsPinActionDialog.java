@@ -10,9 +10,11 @@ public abstract class KmsPinActionDialog extends PinBaseActionDialog {
             Runnable onSuccess,
             boolean requirePin) {
         super(title, warningMessage, onSuccess, requirePin);
+        addClassName("kms-dialog");
     }
 
     protected KmsPinActionDialog(String title, String warningMessage, Runnable onSuccess) {
         super(title, warningMessage, onSuccess);
+        addClassName("kms-dialog");
     }
 }

@@ -20,6 +20,7 @@ public class DeleteVCalendarDialog extends PinBaseActionDialog {
         super(I18n.t("cms.calendar.dialog.delete.title"),
                 I18n.t("cms.calendar.dialog.delete.message"),
                 onSuccess);
+        addClassName("cms-dialog");
         this.parentView = parentView;
         this.calendarService = calendarService;
         this.calendarId = calendarId;

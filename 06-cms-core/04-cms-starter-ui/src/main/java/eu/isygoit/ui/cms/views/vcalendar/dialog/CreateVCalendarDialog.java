@@ -29,6 +29,7 @@ public class CreateVCalendarDialog extends BaseActionDialog {
                                  VCalendarService calendarService,
                                  Runnable onSuccess) {
         super(I18n.t("cms.calendar.dialog.create.title"), onSuccess);
+        addClassName("cms-dialog");
         this.parentView = parentView;
         this.calendarService = calendarService;
         this.onSuccess = onSuccess;

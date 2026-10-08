@@ -11,6 +11,7 @@ public abstract class KmsDetailsDialog extends DetailsViewDialog {
 
     protected KmsDetailsDialog(String title) {
         super(title);
+        addClassName("kms-dialog");
     }
 
     protected final void addTab(String label, Component content) {

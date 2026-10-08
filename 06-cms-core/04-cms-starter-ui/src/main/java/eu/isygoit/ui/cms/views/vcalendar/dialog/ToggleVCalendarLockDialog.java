@@ -36,6 +36,7 @@ public class ToggleVCalendarLockDialog extends PinBaseActionDialog {
                 onSuccess,
                 false
         );
+        addClassName("cms-dialog");
         this.parentView = parentView;
         this.calendarService = calendarService;
         this.calendar = calendar;

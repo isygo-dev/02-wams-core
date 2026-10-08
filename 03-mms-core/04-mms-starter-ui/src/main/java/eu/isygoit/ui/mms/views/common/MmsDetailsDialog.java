@@ -13,6 +13,7 @@ public abstract class MmsDetailsDialog extends DetailsViewDialog {
 
     protected MmsDetailsDialog(String title) {
         super(title);
+        addClassName("mms-dialog");
     }
 
     protected final void addTab(String label, Component content) {

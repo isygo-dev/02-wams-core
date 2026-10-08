@@ -24,6 +24,7 @@ public class DeleteSenderConfigDialog extends PinBaseActionDialog {
         super(I18n.t("mms.sender.dialog.delete.title"),
                 buildMessage(config),
                 onSuccess);
+        addClassName("mms-dialog");
         this.parentView = parentView;
         this.senderConfigService = senderConfigService;
         this.config = config;

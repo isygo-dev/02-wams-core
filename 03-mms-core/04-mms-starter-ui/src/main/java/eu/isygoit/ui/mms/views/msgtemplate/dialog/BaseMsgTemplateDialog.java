@@ -52,6 +52,7 @@ public abstract class BaseMsgTemplateDialog extends BaseActionDialog {
                                  SenderConfigService senderConfigService,
                                  Runnable onSuccess) {
         super(title, onSuccess);
+        addClassName("mms-dialog");
         this.parentView = parentView;
         this.templateService = templateService;
         this.templateFileService = templateFileService;

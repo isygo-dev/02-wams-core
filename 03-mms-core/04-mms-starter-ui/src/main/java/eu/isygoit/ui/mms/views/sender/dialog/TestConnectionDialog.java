@@ -29,6 +29,7 @@ public class TestConnectionDialog extends NoActionDialog {
                                 SenderConfigDto config,
                                 Runnable onComplete) {
         super(I18n.t("mms.sender.dialog.test.title", config.getHost()));
+        addClassName("mms-dialog");
         this.senderConfigService = senderConfigService;
         this.config = config;
         this.onComplete = onComplete;

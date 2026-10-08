@@ -23,6 +23,7 @@ public class ApplicationDetailsViewDialog extends DetailsViewDialog {
                                         ApplicationService applicationService,
                                         Long applicationId) {
         super(I18n.t("ims.app.details.title"));
+        addClassName("ims-dialog");
         this.parentView = parentView;
         this.applicationService = applicationService;
         this.applicationId = applicationId;

@@ -18,6 +18,7 @@ public class BucketDetailsDialog extends DetailsViewDialog {
     public BucketDetailsDialog(BucketManagementView parentView, ObjectStorageService objectStorageService,
                                String tenant, BucketDto bucket) {
         super(I18n.t("sms.buckets.details.title"));
+        addClassName("sms-dialog");
         this.parentView = parentView;
         this.objectStorageService = objectStorageService;
         this.tenant = tenant;

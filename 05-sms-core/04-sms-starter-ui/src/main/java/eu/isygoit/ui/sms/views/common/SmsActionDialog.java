@@ -6,9 +6,11 @@ public abstract class SmsActionDialog extends BaseActionDialog {
 
     protected SmsActionDialog(String title) {
         super(title);
+        addClassName("sms-dialog");
     }
 
     protected SmsActionDialog(String title, Runnable onSuccess) {
         super(title, onSuccess);
+        addClassName("sms-dialog");
     }
 }

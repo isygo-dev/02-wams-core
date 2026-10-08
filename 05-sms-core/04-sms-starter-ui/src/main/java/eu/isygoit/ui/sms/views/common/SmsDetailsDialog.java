@@ -11,6 +11,7 @@ public abstract class SmsDetailsDialog extends DetailsViewDialog {
 
     protected SmsDetailsDialog(String title) {
         super(title);
+        addClassName("sms-dialog");
     }
 
     protected final void addTab(String label, Component content) {

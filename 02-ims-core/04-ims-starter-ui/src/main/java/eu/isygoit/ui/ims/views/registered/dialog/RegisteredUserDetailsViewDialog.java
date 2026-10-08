@@ -23,6 +23,7 @@ public class RegisteredUserDetailsViewDialog extends DetailsViewDialog {
                                            RegisteredUserService registeredUserService,
                                            Long registeredUserId) {
         super(I18n.t("ims.registered.details.title"));
+        addClassName("ims-dialog");
         this.parentView = parentView;
         this.registeredUserService = registeredUserService;
         this.registeredUserId = registeredUserId;

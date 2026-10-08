@@ -23,6 +23,7 @@ public final class KmsConfirmationDialog extends Dialog {
         setCloseOnOutsideClick(false);
         setWidth("500px");
         setMaxWidth("90%");
+        addClassName("kms-dialog");
         addClassName("wams-dialog-responsive");
 
         VerticalLayout content = new VerticalLayout(new Span(message));

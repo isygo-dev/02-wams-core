@@ -18,7 +18,6 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
@@ -432,6 +431,7 @@ public class PoliciesView extends ManagementVerticalView {
 
         // Build refined dialog
         Dialog resultDialog = new Dialog();
+        resultDialog.addClassName("kms-dialog");
         resultDialog.setHeaderTitle(I18n.t("kms.policy.eval.title", action));
         resultDialog.setWidth("600px");
         resultDialog.setResizable(true);
@@ -527,15 +527,10 @@ public class PoliciesView extends ManagementVerticalView {
         helpSpan.addClassName("policy-eval-help-span");
         content.add(helpSpan);
 
-        TabSheet resultTabs = new TabSheet();
-        resultTabs.addClassName("wams-dialog-tabs");
-        resultTabs.addClassName("kms-dialog-tabs");
-        resultTabs.add(I18n.t("kms.policy.eval.tab.result"), content);
-
         Button closeBtn = new Button(I18n.t("kms.policy.eval.close"), e -> resultDialog.close());
         closeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         resultDialog.getFooter().add(closeBtn);
-        resultDialog.add(resultTabs);
+        resultDialog.add(content);
         resultDialog.open();
     }
 

@@ -6,9 +6,11 @@ public abstract class ImsPinActionDialog extends PinBaseActionDialog {
 
     protected ImsPinActionDialog(String title, String warningMessage, Runnable onSuccess, boolean requirePin) {
         super(title, warningMessage, onSuccess, requirePin);
+        addClassName("ims-dialog");
     }
 
     protected ImsPinActionDialog(String title, String warningMessage, Runnable onSuccess) {
         super(title, warningMessage, onSuccess);
+        addClassName("ims-dialog");
     }
 }

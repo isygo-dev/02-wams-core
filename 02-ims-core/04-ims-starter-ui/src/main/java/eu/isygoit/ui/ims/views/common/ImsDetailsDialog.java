@@ -11,6 +11,7 @@ public abstract class ImsDetailsDialog extends DetailsViewDialog {
 
     protected ImsDetailsDialog(String title) {
         super(title);
+        addClassName("ims-dialog");
     }
 
     protected final void addTab(String label, Component content) {

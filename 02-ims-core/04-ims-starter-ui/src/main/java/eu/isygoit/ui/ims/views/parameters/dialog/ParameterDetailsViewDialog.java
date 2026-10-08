@@ -22,6 +22,7 @@ public class ParameterDetailsViewDialog extends DetailsViewDialog {
                                       AppParameterService parameterService,
                                       Long parameterId) {
         super(I18n.t("ims.parameter.details.title"));
+        addClassName("ims-dialog");
         this.parentView = parentView;
         this.parameterService = parameterService;
         this.parameterId = parameterId;

@@ -9,6 +9,7 @@ import eu.isygoit.dto.KmsDtos.UpdateKeyRotationRequest;
 import eu.isygoit.dto.KmsDtos.UpdateKeyRotationResponse;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.kms.views.common.KmsPinActionDialog;
 import eu.isygoit.ui.kms.views.cryptography.key.KeyManagementView;
 import feign.FeignException;
@@ -19,7 +20,7 @@ import org.springframework.http.ResponseEntity;
  * When enabling rotation, a new key version will be created immediately.
  * When disabling rotation, future automatic rotations are stopped.
  */
-public class ToggleRotationDialog extends KmsPinActionDialog {
+public class ToggleRotationDialog extends PinBaseActionDialog {
 
     private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;

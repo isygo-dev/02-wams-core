@@ -25,6 +25,7 @@ public class DeleteMsgTemplateDialog extends PinBaseActionDialog {
         super(I18n.t("mms.msgtemplate.dialog.delete.title"),
                 buildMessage(template),
                 onSuccess);
+        addClassName("mms-dialog");
         this.parentView = parentView;
         this.templateService = templateService;
         this.template = template;

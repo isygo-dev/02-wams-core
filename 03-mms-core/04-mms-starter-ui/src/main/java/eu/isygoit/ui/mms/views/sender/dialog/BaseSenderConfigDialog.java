@@ -20,6 +20,7 @@ public abstract class BaseSenderConfigDialog extends BaseActionDialog {
                                   SenderConfigService senderConfigService,
                                   Runnable onSuccess) {
         super(title, onSuccess);
+        addClassName("mms-dialog");
         this.parentView = parentView;
         this.senderConfigService = senderConfigService;
 
