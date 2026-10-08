@@ -3,7 +3,10 @@ package eu.isygoit.ui.common.component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.shared.Registration;
 import software.xdev.vaadin.maps.leaflet.MapContainer;
+import software.xdev.vaadin.maps.leaflet.basictypes.LIcon;
+import software.xdev.vaadin.maps.leaflet.basictypes.LIconOptions;
 import software.xdev.vaadin.maps.leaflet.basictypes.LLatLng;
+import software.xdev.vaadin.maps.leaflet.basictypes.LPoint;
 import software.xdev.vaadin.maps.leaflet.layer.raster.LTileLayer;
 import software.xdev.vaadin.maps.leaflet.layer.ui.LMarker;
 import software.xdev.vaadin.maps.leaflet.map.LMap;
@@ -26,6 +29,9 @@ public class LeafletMap extends Div {
     private static final String OSM_ATTRIBUTION =
             "© <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" "
                     + "rel=\"noopener noreferrer\">OpenStreetMap contributors</a>";
+    private static final String MARKER_ICON_URL = "/images/leaflet/marker-icon.png";
+    private static final String MARKER_ICON_RETINA_URL = "/images/leaflet/marker-icon-2x.png";
+    private static final String MARKER_SHADOW_URL = "/images/leaflet/marker-shadow.png";
     private static final int MAX_ZOOM = 19;
 
     private final LComponentManagementRegistry registry;
@@ -85,6 +91,7 @@ public class LeafletMap extends Div {
         validateCoordinates(latitude, longitude);
         Objects.requireNonNull(popupHtml, "popupHtml must not be null");
         LMarker marker = new LMarker(registry, new LLatLng(registry, latitude, longitude));
+        marker.setIcon(createMarkerIcon());
         marker.bindPopup(popupHtml).addTo(map);
         markers.add(marker);
     }
@@ -95,6 +102,19 @@ public class LeafletMap extends Div {
     public void clearMarkers() {
         markers.forEach(map::removeLayer);
         markers.clear();
+    }
+
+    private LIcon createMarkerIcon() {
+        LIconOptions options = new LIconOptions()
+                .withIconUrl(MARKER_ICON_URL)
+                .withIconRetinaUrl(MARKER_ICON_RETINA_URL)
+                .withIconSize(new LPoint(registry, 25, 41))
+                .withIconAnchor(new LPoint(registry, 12, 41))
+                .withPopupAnchor(new LPoint(registry, 1, -34))
+                .withShadowUrl(MARKER_SHADOW_URL)
+                .withShadowSize(new LPoint(registry, 41, 41))
+                .withShadowAnchor(new LPoint(registry, 12, 41));
+        return new LIcon(registry, options);
     }
 
     private void validateCoordinates(double latitude, double longitude) {

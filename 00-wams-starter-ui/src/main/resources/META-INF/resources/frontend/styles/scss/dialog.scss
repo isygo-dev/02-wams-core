@@ -47,6 +47,27 @@
   color: var(--lumo-secondary-text-color);
 }
 
+/* ── Tabbed details dialog content ── */
+
+.wams-dialog-tabs {
+  width: 100%;
+  --vaadin-tabs-background-color: transparent;
+}
+
+.wams-dialog-tabs::part(content) {
+  padding-block-start: var(--lumo-space-m);
+}
+
+.wams-dialog-tab-content {
+  box-sizing: border-box;
+  min-width: 0;
+  padding-block: var(--lumo-space-m);
+}
+
+.wams-dialog-tab-content > * {
+  min-width: 0;
+}
+
 /* ── Image cropper (eu.isygoit.ui.common.{dialog.ImageCropperDialog, component.ImageCropper}) ── */
 
 .wams-image-cropper-dialog__content {
