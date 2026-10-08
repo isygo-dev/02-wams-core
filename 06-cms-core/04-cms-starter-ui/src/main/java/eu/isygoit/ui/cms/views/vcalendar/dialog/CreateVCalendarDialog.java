@@ -35,7 +35,7 @@ public class CreateVCalendarDialog extends BaseActionDialog {
         this.onSuccess = onSuccess;
 
         setOkButtonText(I18n.t("cms.calendar.dialog.create.button"));
-        setWidth("600px");
+        setWidth("var(--dialog-width-standard, 700px)");
         setMaxWidth("95%");
 
         buildForm();
@@ -44,6 +44,7 @@ public class CreateVCalendarDialog extends BaseActionDialog {
 
     private void buildForm() {
         tenantField = new TextField(I18n.t("cms.calendar.dialog.field.tenant"));
+        tenantField.setRequired(true);
         tenantField.setRequiredIndicatorVisible(true);
         tenantField.setPlaceholder(I18n.t("cms.calendar.dialog.field.tenant.placeholder"));
         tenantField.setWidthFull();
@@ -53,6 +54,7 @@ public class CreateVCalendarDialog extends BaseActionDialog {
         codeField.setWidthFull();
 
         nameField = new TextField(I18n.t("cms.calendar.dialog.field.name"));
+        nameField.setRequired(true);
         nameField.setRequiredIndicatorVisible(true);
         nameField.setPlaceholder(I18n.t("cms.calendar.dialog.field.name.placeholder"));
         nameField.setWidthFull();
@@ -67,6 +69,7 @@ public class CreateVCalendarDialog extends BaseActionDialog {
         descriptionArea = new TextArea(I18n.t("cms.calendar.dialog.field.description"));
         descriptionArea.setPlaceholder(I18n.t("cms.calendar.dialog.field.description.placeholder"));
         descriptionArea.setWidthFull();
+        descriptionArea.setMinHeight("80px");
         descriptionArea.addClassName("calendar-dialog-description");
     }
 
@@ -74,7 +77,7 @@ public class CreateVCalendarDialog extends BaseActionDialog {
         FormLayout form = new FormLayout();
         form.setResponsiveSteps(
                 new FormLayout.ResponsiveStep("0", 1),
-                new FormLayout.ResponsiveStep("500px", 2)
+                new FormLayout.ResponsiveStep("600px", 2)
         );
         form.add(tenantField, codeField, nameField, icsPathField);
         form.add(lockedCheckbox, 2);

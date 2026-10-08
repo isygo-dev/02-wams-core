@@ -51,9 +51,11 @@ public class CreateCategoryDialog extends DmsActionDialog {
     private FormLayout buildFormLayout() {
         FormLayout form = new FormLayout();
         form.setResponsiveSteps(
-                new FormLayout.ResponsiveStep("0", 1)
+                new FormLayout.ResponsiveStep("0", 1),
+                new FormLayout.ResponsiveStep("600px", 2)
         );
         form.add(nameField, descriptionArea);
+        form.setColspan(descriptionArea, 2);
         return form;
     }
 

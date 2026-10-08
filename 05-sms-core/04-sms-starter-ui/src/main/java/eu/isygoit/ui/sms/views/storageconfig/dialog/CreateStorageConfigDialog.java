@@ -35,7 +35,7 @@ public class CreateStorageConfigDialog extends SmsActionDialog {
         this.onSuccess = onSuccess;
 
         setOkButtonText(I18n.t("sms.storageconfig.dialog.create.button"));
-        setWidth("600px");
+        setWidth("var(--dialog-width-standard, 700px)");
         setMaxWidth("95%");
 
         buildForm();
@@ -44,6 +44,7 @@ public class CreateStorageConfigDialog extends SmsActionDialog {
 
     private void buildForm() {
         tenantField = new TextField(I18n.t("sms.storageconfig.dialog.field.tenant"));
+        tenantField.setRequired(true);
         tenantField.setRequiredIndicatorVisible(true);
         tenantField.setPlaceholder(I18n.t("sms.storageconfig.dialog.field.tenant.placeholder"));
         tenantField.setWidthFull();
@@ -51,21 +52,25 @@ public class CreateStorageConfigDialog extends SmsActionDialog {
         typeCombo = new ComboBox<>(I18n.t("sms.storageconfig.dialog.field.type"));
         typeCombo.setItems(IEnumStorage.Types.values());
         SmsEnumTag.useTagRenderer(typeCombo, "sms.enum.storage");
+        typeCombo.setRequired(true);
         typeCombo.setRequiredIndicatorVisible(true);
         typeCombo.setPlaceholder(I18n.t("sms.storageconfig.dialog.field.type.placeholder"));
         typeCombo.setWidthFull();
 
         userNameField = new TextField(I18n.t("sms.storageconfig.dialog.field.username"));
+        userNameField.setRequired(true);
         userNameField.setRequiredIndicatorVisible(true);
         userNameField.setPlaceholder(I18n.t("sms.storageconfig.dialog.field.username.placeholder"));
         userNameField.setWidthFull();
 
         passwordField = new PasswordField(I18n.t("sms.storageconfig.dialog.field.password"));
+        passwordField.setRequired(true);
         passwordField.setRequiredIndicatorVisible(true);
         passwordField.setPlaceholder(I18n.t("sms.storageconfig.dialog.field.password.placeholder"));
         passwordField.setWidthFull();
 
         urlField = new TextField(I18n.t("sms.storageconfig.dialog.field.url"));
+        urlField.setRequired(true);
         urlField.setRequiredIndicatorVisible(true);
         urlField.setPlaceholder(I18n.t("sms.storageconfig.dialog.field.url.placeholder"));
         urlField.setWidthFull();
@@ -75,9 +80,10 @@ public class CreateStorageConfigDialog extends SmsActionDialog {
         FormLayout form = new FormLayout();
         form.setResponsiveSteps(
                 new FormLayout.ResponsiveStep("0", 1),
-                new FormLayout.ResponsiveStep("500px", 2)
+                new FormLayout.ResponsiveStep("600px", 2)
         );
         form.add(tenantField, typeCombo, userNameField, passwordField, urlField);
+        form.setColspan(urlField, 2);
         form.setColspan(urlField, 2);
         return form;
     }
