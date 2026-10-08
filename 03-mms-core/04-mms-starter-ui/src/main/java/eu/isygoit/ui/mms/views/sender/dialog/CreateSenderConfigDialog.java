@@ -2,6 +2,7 @@ package eu.isygoit.ui.mms.views.sender.dialog;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -43,11 +44,9 @@ public class CreateSenderConfigDialog extends BaseSenderConfigDialog {
 
     @Override
     protected void buildContent() {
-        FormLayout form = new FormLayout();
-        form.setResponsiveSteps(
-                new FormLayout.ResponsiveStep("0", 1),
-                new FormLayout.ResponsiveStep("500px", 2)
-        );
+        FormLayout generalForm = createFormLayout();
+        FormLayout connectionForm = createFormLayout();
+        FormLayout credentialsForm = createFormLayout();
 
         tenantField = new TextField(I18n.t("mms.sender.dialog.create.field.tenant"));
         tenantField.setPlaceholder(I18n.t("mms.sender.dialog.create.field.tenant.placeholder"));
@@ -113,23 +112,37 @@ public class CreateSenderConfigDialog extends BaseSenderConfigDialog {
         defaultSenderField.setWidthFull();
         defaultSenderField.setHelperText(I18n.t("mms.sender.dialog.create.field.defaultSender.helper"));
 
-        form.add(tenantField, codeField, nameField, descriptionField,
-                hostField, portField, usernameField, passwordField,
-                transportProtocolField, smtpAuthField,
-                smtpStarttlsEnableCheckbox, smtpStarttlsRequiredCheckbox,
-                debugCheckbox, defaultSenderField);
+        generalForm.add(tenantField, codeField, nameField, descriptionField);
+        generalForm.setColspan(tenantField, 2);
+        generalForm.setColspan(codeField, 2);
+        generalForm.setColspan(nameField, 2);
+        generalForm.setColspan(descriptionField, 2);
 
-        // Set column spans
-        form.setColspan(tenantField, 2);
-        form.setColspan(codeField, 2);
-        form.setColspan(nameField, 2);
-        form.setColspan(descriptionField, 2);
-        form.setColspan(hostField, 2);
-        form.setColspan(usernameField, 2);
-        form.setColspan(passwordField, 2);
-        form.setColspan(defaultSenderField, 2);
+        connectionForm.add(hostField, portField, transportProtocolField, smtpAuthField,
+                smtpStarttlsEnableCheckbox, smtpStarttlsRequiredCheckbox, debugCheckbox, defaultSenderField);
+        connectionForm.setColspan(hostField, 2);
+        connectionForm.setColspan(defaultSenderField, 2);
 
-        addContent(form);
+        credentialsForm.add(usernameField, passwordField);
+        credentialsForm.setColspan(usernameField, 2);
+        credentialsForm.setColspan(passwordField, 2);
+
+        TabSheet tabs = new TabSheet();
+        tabs.addClassName("wams-dialog-tabs");
+        tabs.addClassName("mms-dialog-tabs");
+        tabs.add(I18n.t("mms.dialog.tab.general"), generalForm);
+        tabs.add(I18n.t("mms.dialog.tab.connection"), connectionForm);
+        tabs.add(I18n.t("mms.dialog.tab.credentials"), credentialsForm);
+        addContent(tabs);
+    }
+
+    private FormLayout createFormLayout() {
+        FormLayout form = new FormLayout();
+        form.setResponsiveSteps(
+                new FormLayout.ResponsiveStep("0", 1),
+                new FormLayout.ResponsiveStep("500px", 2)
+        );
+        return form;
     }
 
     private void prefillData() {

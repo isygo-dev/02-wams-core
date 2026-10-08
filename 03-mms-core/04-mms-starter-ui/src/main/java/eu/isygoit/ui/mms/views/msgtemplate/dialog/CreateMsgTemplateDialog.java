@@ -3,6 +3,7 @@ package eu.isygoit.ui.mms.views.msgtemplate.dialog;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -100,7 +101,12 @@ public class CreateMsgTemplateDialog extends BaseMsgTemplateDialog {
         uploadSection.addClassName("wams-dialog-upload-section");
         uploadSection.add(fileUpload, fileInfoArea);
 
-        addContent(form, uploadSection);
+        TabSheet tabs = new TabSheet();
+        tabs.addClassName("wams-dialog-tabs");
+        tabs.addClassName("mms-dialog-tabs");
+        tabs.add(I18n.t("mms.dialog.tab.general"), form);
+        tabs.add(I18n.t("mms.dialog.tab.file"), uploadSection);
+        addContent(tabs);
     }
 
     @Override

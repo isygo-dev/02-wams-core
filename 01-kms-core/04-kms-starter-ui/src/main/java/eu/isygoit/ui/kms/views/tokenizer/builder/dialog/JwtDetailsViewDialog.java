@@ -50,8 +50,7 @@ public class JwtDetailsViewDialog extends KmsDetailsDialog {
         try {
             String[] parts = jwtToken.split("\\.");
             if (parts.length != 3) {
-                addTab(I18n.t("kms.dialog.tab.details"),
-                        createErrorCard(I18n.t("kms.decode.jwt.invalid.format")));
+                add(createErrorCard(I18n.t("kms.decode.jwt.invalid.format")));
                 return;
             }
 
@@ -87,8 +86,7 @@ public class JwtDetailsViewDialog extends KmsDetailsDialog {
                 addTab(I18n.t("kms.decode.jwt.signature"), createSignatureRow(signature));
             }
         } catch (Exception e) {
-            addTab(I18n.t("kms.dialog.tab.details"),
-                    createErrorCard(I18n.t("kms.decode.jwt.decode.failed", e.getMessage())));
+            add(createErrorCard(I18n.t("kms.decode.jwt.decode.failed", e.getMessage())));
         }
 
     }

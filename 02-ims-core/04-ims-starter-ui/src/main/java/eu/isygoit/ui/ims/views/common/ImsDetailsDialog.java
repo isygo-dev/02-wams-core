@@ -3,13 +3,11 @@ package eu.isygoit.ui.ims.views.common;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.TabSheet;
-import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.dialog.DetailsViewDialog;
 
 public abstract class ImsDetailsDialog extends DetailsViewDialog {
 
     private TabSheet tabs;
-    private VerticalLayout fallbackPage;
 
     protected ImsDetailsDialog(String title) {
         super(title);
@@ -23,18 +21,6 @@ public abstract class ImsDetailsDialog extends DetailsViewDialog {
         page.setWidthFull();
         page.addClassName("wams-dialog-tab-content");
         tabSheet.add(label, page);
-    }
-
-    @Override
-    public void add(Component... components) {
-        if (fallbackPage == null) {
-            fallbackPage = new VerticalLayout();
-            fallbackPage.setPadding(false);
-            fallbackPage.setSpacing(false);
-            fallbackPage.setWidthFull();
-            getOrCreateTabs().add(I18n.t("ims.dialog.tab.details"), fallbackPage);
-        }
-        fallbackPage.add(components);
     }
 
     private TabSheet getOrCreateTabs() {

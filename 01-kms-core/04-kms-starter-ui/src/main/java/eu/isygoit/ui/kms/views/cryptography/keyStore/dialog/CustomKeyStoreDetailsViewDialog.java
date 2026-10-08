@@ -4,6 +4,7 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import eu.isygoit.dto.KmsDtos;
+import eu.isygoit.enums.IEnumCustomKeyStoreType;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.kms.views.common.KmsDetailsDialog;
@@ -31,6 +32,10 @@ public class CustomKeyStoreDetailsViewDialog extends KmsDetailsDialog {
     }
 
     private void buildContent(KmsDtos.DescribeCustomKeyStoreResponse.CustomKeyStore store) {
+        String type = store.getCustomKeyStoreType();
+        boolean isCloudHsm = IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM.name().equals(type);
+        boolean isExternalKeyStore = IEnumCustomKeyStoreType.Types.EXTERNAL_KEY_STORE.name().equals(type);
+
         // Identity
         Div identityGrid = createDetailGrid();
         addFieldToGrid(identityGrid, VaadinIcon.KEY, I18n.t("kms.keystore.details.field.id"),
@@ -55,8 +60,10 @@ public class CustomKeyStoreDetailsViewDialog extends KmsDetailsDialog {
                 store.getKeyStorePassword() != null ? I18n.t("kms.keystore.details.value.redacted") : null);
         // Trust anchor certificate is PEM material — always copyable.
         addFieldToGrid(cloudHsmGrid, VaadinIcon.FILE_TEXT, I18n.t("kms.keystore.details.field.trust.anchor"), store.getTrustAnchorCertificate(), true);
-        addTab(I18n.t("kms.keystore.details.section.cloudhsm"),
-                createSection(I18n.t("kms.keystore.details.section.cloudhsm"), cloudHsmGrid));
+        if (isCloudHsm || !isExternalKeyStore) {
+            addTab(I18n.t("kms.keystore.details.section.cloudhsm"),
+                    createSection(I18n.t("kms.keystore.details.section.cloudhsm"), cloudHsmGrid));
+        }
 
         // External key store (XKS)
         Div xksGrid = createDetailGrid();
@@ -69,8 +76,10 @@ public class CustomKeyStoreDetailsViewDialog extends KmsDetailsDialog {
                 I18n.t("kms.keystore.details.field.xks.connectivity"),
                 KmsEnumTag.ofValue(store.getXksProxyConnectivity(), "kms.enum")));
         addFieldToGrid(xksGrid, VaadinIcon.CODE, I18n.t("kms.keystore.details.field.type.specific.data"), store.getCustomKeyStoreTypeSpecificData());
-        addTab(I18n.t("kms.keystore.details.section.xks"),
-                createSection(I18n.t("kms.keystore.details.section.xks"), xksGrid));
+        if (isExternalKeyStore || !isCloudHsm) {
+            addTab(I18n.t("kms.keystore.details.section.xks"),
+                    createSection(I18n.t("kms.keystore.details.section.xks"), xksGrid));
+        }
 
         // Health & connectivity
         Div healthGrid = createDetailGrid();

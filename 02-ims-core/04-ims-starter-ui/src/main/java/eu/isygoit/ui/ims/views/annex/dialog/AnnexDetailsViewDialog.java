@@ -7,13 +7,13 @@ import eu.isygoit.dto.data.AnnexDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AnnexService;
+import eu.isygoit.ui.common.dialog.DetailsViewDialog;
 import eu.isygoit.ui.ims.views.annex.AnnexManagementView;
-import eu.isygoit.ui.ims.views.common.ImsDetailsDialog;
 import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class AnnexDetailsViewDialog extends ImsDetailsDialog {
+public class AnnexDetailsViewDialog extends DetailsViewDialog {
 
     private final AnnexManagementView parentView;
     private final AnnexService annexService;
@@ -65,7 +65,7 @@ public class AnnexDetailsViewDialog extends ImsDetailsDialog {
         addFieldToGrid(identityInfo, VaadinIcon.LINK, I18n.t("ims.annex.details.field.reference"), annex.getReference(), true);
         addFieldToGrid(identityInfo, VaadinIcon.SORT, I18n.t("ims.annex.details.field.order"), annex.getAnnexOrder() != null ? String.valueOf(annex.getAnnexOrder()) : null);
 
-        addTab(I18n.t("ims.annex.details.section.identity"), createSection(I18n.t("ims.annex.details.section.identity"), identityInfo));
+        add(createSection(I18n.t("ims.annex.details.section.identity"), identityInfo));
 
         // Classification & status — language
         Div classificationInfo = new Div();
@@ -73,7 +73,7 @@ public class AnnexDetailsViewDialog extends ImsDetailsDialog {
 
         ImsEnumTag.addDetailField(classificationInfo, VaadinIcon.LOCATION_ARROW_CIRCLE, I18n.t("ims.annex.details.field.language"), annex.getLanguage(), "ims.enum.language");
 
-        addTab(I18n.t("ims.annex.details.section.classification"), createSection(I18n.t("ims.annex.details.section.classification"), classificationInfo));
+        add(createSection(I18n.t("ims.annex.details.section.classification"), classificationInfo));
 
         // Contact / relations — tenant/description
         Div contactInfo = new Div();
@@ -82,7 +82,7 @@ public class AnnexDetailsViewDialog extends ImsDetailsDialog {
         addFieldToGrid(contactInfo, VaadinIcon.BUILDING, I18n.t("ims.annex.details.field.tenant"), annex.getTenant(), true);
         addFieldToGrid(contactInfo, VaadinIcon.FILE_TEXT, I18n.t("ims.annex.details.field.description"), annex.getDescription(), false);
 
-        addTab(I18n.t("ims.annex.details.section.contact"), createSection(I18n.t("ims.annex.details.section.contact"), contactInfo));
+        add(createSection(I18n.t("ims.annex.details.section.contact"), contactInfo));
 
         // Audit — created/updated by & date
         Div auditInfo = new Div();
@@ -93,7 +93,7 @@ public class AnnexDetailsViewDialog extends ImsDetailsDialog {
         addFieldToGrid(auditInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.annex.details.field.updated"), annex.getUpdateDate() != null ? DateHelper.formatToHumanReadable(annex.getUpdateDate()) : null);
         addFieldToGrid(auditInfo, VaadinIcon.EDIT, I18n.t("ims.annex.details.field.updated.by"), annex.getUpdatedBy());
 
-        addTab(I18n.t("ims.annex.details.section.audit"), createSection(I18n.t("ims.annex.details.section.audit"), auditInfo));
+        add(createSection(I18n.t("ims.annex.details.section.audit"), auditInfo));
 
     }
 

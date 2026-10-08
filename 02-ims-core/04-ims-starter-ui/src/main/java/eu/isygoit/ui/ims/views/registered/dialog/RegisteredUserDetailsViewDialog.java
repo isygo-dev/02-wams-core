@@ -7,13 +7,13 @@ import eu.isygoit.dto.request.RegisteredUserDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.RegisteredUserService;
-import eu.isygoit.ui.ims.views.common.ImsDetailsDialog;
+import eu.isygoit.ui.common.dialog.DetailsViewDialog;
 import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import eu.isygoit.ui.ims.views.registered.RegisteredManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class RegisteredUserDetailsViewDialog extends ImsDetailsDialog {
+public class RegisteredUserDetailsViewDialog extends DetailsViewDialog {
 
     private final RegisteredManagementView parentView;
     private final RegisteredUserService registeredUserService;
@@ -67,7 +67,7 @@ public class RegisteredUserDetailsViewDialog extends ImsDetailsDialog {
         addFieldToGrid(identityInfo, VaadinIcon.PHONE, I18n.t("ims.registered.details.field.phone"), registeredUser.getPhoneNumber());
         addFieldToGrid(identityInfo, VaadinIcon.BUILDING, I18n.t("ims.registered.details.field.organisation"), registeredUser.getOrganisation());
 
-        addTab(I18n.t("ims.registered.details.section.identity"), createSection(I18n.t("ims.registered.details.section.identity"), identityInfo));
+        add(createSection(I18n.t("ims.registered.details.section.identity"), identityInfo));
 
         // Classification & status — origin, function role, status
         Div classificationInfo = new Div();
@@ -82,7 +82,7 @@ public class RegisteredUserDetailsViewDialog extends ImsDetailsDialog {
         ImsEnumTag.addDetailField(classificationInfo, VaadinIcon.SHIELD, I18n.t("ims.registered.details.field.status"),
                 registeredUser.getStatus(), "ims.registered.card.status");
 
-        addTab(I18n.t("ims.registered.details.section.classification"), createSection(I18n.t("ims.registered.details.section.classification"), classificationInfo));
+        add(createSection(I18n.t("ims.registered.details.section.classification"), classificationInfo));
 
         // Contact / relations — tenant
         Div contactInfo = new Div();
@@ -90,7 +90,7 @@ public class RegisteredUserDetailsViewDialog extends ImsDetailsDialog {
 
         addFieldToGrid(contactInfo, VaadinIcon.BUILDING_O, I18n.t("ims.registered.details.field.tenant"), registeredUser.getTenant(), true);
 
-        addTab(I18n.t("ims.registered.details.section.contact"), createSection(I18n.t("ims.registered.details.section.contact"), contactInfo));
+        add(createSection(I18n.t("ims.registered.details.section.contact"), contactInfo));
 
         // Audit — created/updated by & date
         Div auditInfo = new Div();
@@ -101,7 +101,7 @@ public class RegisteredUserDetailsViewDialog extends ImsDetailsDialog {
         addFieldToGrid(auditInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.registered.details.field.updated"), registeredUser.getUpdateDate() != null ? DateHelper.formatToHumanReadable(registeredUser.getUpdateDate()) : null);
         addFieldToGrid(auditInfo, VaadinIcon.EDIT, I18n.t("ims.registered.details.field.updated.by"), registeredUser.getUpdatedBy());
 
-        addTab(I18n.t("ims.registered.details.section.audit"), createSection(I18n.t("ims.registered.details.section.audit"), auditInfo));
+        add(createSection(I18n.t("ims.registered.details.section.audit"), auditInfo));
 
     }
 

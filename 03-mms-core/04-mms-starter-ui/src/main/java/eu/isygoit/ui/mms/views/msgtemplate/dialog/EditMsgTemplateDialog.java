@@ -4,6 +4,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -112,7 +113,12 @@ public class EditMsgTemplateDialog extends BaseMsgTemplateDialog {
         uploadLabel.addClassName("wams-dialog-upload-label");
         uploadSection.add(uploadLabel, fileUpload, fileInfoArea);
 
-        addContent(form, uploadSection);
+        TabSheet tabs = new TabSheet();
+        tabs.addClassName("wams-dialog-tabs");
+        tabs.addClassName("mms-dialog-tabs");
+        tabs.add(I18n.t("mms.dialog.tab.general"), form);
+        tabs.add(I18n.t("mms.dialog.tab.file"), uploadSection);
+        addContent(tabs);
     }
 
     private void prefillData() {

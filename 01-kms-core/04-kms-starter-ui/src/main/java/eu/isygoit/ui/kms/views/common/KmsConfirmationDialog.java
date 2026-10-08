@@ -7,8 +7,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.tabs.TabSheet;
-import eu.isygoit.i18n.I18n;
 
 public final class KmsConfirmationDialog extends Dialog {
 
@@ -31,13 +29,7 @@ public final class KmsConfirmationDialog extends Dialog {
         content.setPadding(false);
         content.setSpacing(false);
         content.setWidthFull();
-        content.addClassName("wams-dialog-tab-content");
-
-        TabSheet tabs = new TabSheet();
-        tabs.addClassName("wams-dialog-tabs");
-        tabs.addClassName("kms-dialog-tabs");
-        tabs.add(I18n.t("kms.dialog.tab.general"), content);
-        add(tabs);
+        add(content);
 
         Button cancelButton = new Button(cancelText, event -> close());
         cancelButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);

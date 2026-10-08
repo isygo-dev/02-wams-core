@@ -39,17 +39,13 @@ public class AliasDetailsViewDialog extends KmsDetailsDialog {
         addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("kms.alias.details.field.alias.name"), entry.getAliasName(), true);
         addFieldToGrid(identityGrid, VaadinIcon.KEY, I18n.t("kms.alias.details.field.target.key"), entry.getTargetKeyId(), true);
         addFieldToGrid(identityGrid, VaadinIcon.HASH, I18n.t("kms.alias.details.field.wrn"), entry.getAliasWrn(), true);
-        addTab(I18n.t("kms.alias.details.section.identity"),
-                createSection(I18n.t("kms.alias.details.section.identity"), identityGrid));
-
-        // Classification & status — the primary-key boolean flag.
-        Div classificationGrid = createDetailGrid();
-        addFieldToGrid(classificationGrid, VaadinIcon.EXCLAMATION_CIRCLE, I18n.t("kms.alias.details.field.primary"),
+        addFieldToGrid(identityGrid, VaadinIcon.EXCLAMATION_CIRCLE, I18n.t("kms.alias.details.field.primary"),
                 Boolean.TRUE.equals(entry.getPrimaryKey()) ? I18n.t("kms.alias.details.yes") : I18n.t("kms.alias.details.no"));
-        VerticalLayout classification = new VerticalLayout(
-                createSection(I18n.t("kms.alias.details.section.classification"), classificationGrid));
-        classification.setPadding(false);
-        classification.setSpacing(true);
+
+        VerticalLayout identitySection = new VerticalLayout(
+                createSection(I18n.t("kms.alias.details.section.identity"), identityGrid));
+        identitySection.setPadding(false);
+        identitySection.setSpacing(true);
 
         // Dates — creation / last-updated timestamps.
         Div datesGrid = createDetailGrid();
@@ -69,9 +65,9 @@ public class AliasDetailsViewDialog extends KmsDetailsDialog {
             Icon warningIcon = VaadinIcon.WARNING.create();
             warningIcon.addClassName("kms-text-danger");
             warningRow.add(warningIcon, new Span(I18n.t("kms.alias.details.primary.note")));
-            classification.add(warningRow);
+            identitySection.add(warningRow);
         }
 
-        addTab(I18n.t("kms.alias.details.section.classification"), classification);
+        addTab(I18n.t("kms.alias.details.section.identity"), identitySection);
     }
 }

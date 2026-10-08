@@ -14,8 +14,8 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
 import eu.isygoit.remote.mms.MsgTemplateService;
 import eu.isygoit.remote.mms.SenderConfigService;
-import eu.isygoit.ui.mms.views.common.MmsActionDialog;
 import eu.isygoit.ui.mms.views.msgtemplate.MsgTemplateManagementView;
+import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public abstract class BaseMsgTemplateDialog extends MmsActionDialog {
+public abstract class BaseMsgTemplateDialog extends BaseActionDialog {
 
     protected final MsgTemplateManagementView parentView;
     protected final MsgTemplateService templateService;

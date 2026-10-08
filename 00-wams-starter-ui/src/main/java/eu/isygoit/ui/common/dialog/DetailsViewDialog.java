@@ -43,6 +43,7 @@ public abstract class DetailsViewDialog extends NoActionDialog {
         VerticalLayout section = new VerticalLayout();
         section.setPadding(false);
         section.setSpacing(false);
+        section.addClassName("wams-dialog-section");
         Span titleSpan = new Span(title);
         titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
         titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);

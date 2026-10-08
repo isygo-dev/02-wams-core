@@ -4,14 +4,14 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.SenderConfigService;
-import eu.isygoit.ui.mms.views.common.MmsPinActionDialog;
+import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.mms.views.sender.SenderConfigManagementView;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 
 @Slf4j
-public class DeleteSenderConfigDialog extends MmsPinActionDialog {
+public class DeleteSenderConfigDialog extends PinBaseActionDialog {
 
     private final SenderConfigManagementView parentView;
     private final SenderConfigService senderConfigService;

@@ -66,7 +66,8 @@ public abstract class PinBaseActionDialog extends BaseActionDialog {
     private void buildContentWithPin(String warningMessage) {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
-        layout.setPadding(true);
+        layout.setPadding(false);
+        layout.addClassName("wams-dialog-message");
 
         layout.add(createWarningMessage(warningMessage));
         layout.add(new Span(I18n.t("common.dialog.pin.confirm.instruction")));
@@ -83,7 +84,8 @@ public abstract class PinBaseActionDialog extends BaseActionDialog {
     private void buildContentSimple(String warningMessage) {
         VerticalLayout layout = new VerticalLayout();
         layout.setSpacing(true);
-        layout.setPadding(true);
+        layout.setPadding(false);
+        layout.addClassName("wams-dialog-message");
         layout.add(createWarningMessage(warningMessage));
         addContent(layout);
     }

@@ -37,9 +37,10 @@ public class NoActionDialog extends Dialog {
         addClassName("wams-dialog-responsive");
 
         contentWrapper = new VerticalLayout();
-        contentWrapper.setPadding(true);
+        contentWrapper.setPadding(false);
         contentWrapper.setSpacing(true);
         contentWrapper.setWidthFull();
+        contentWrapper.addClassName("wams-dialog-content");
 
         // Add the wrapper as the main content
         super.add(contentWrapper);
@@ -57,8 +58,9 @@ public class NoActionDialog extends Dialog {
         footerLayout.setWidthFull();
         footerLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
         footerLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        footerLayout.setPadding(true);
+        footerLayout.setPadding(false);
         footerLayout.setSpacing(true);
+        footerLayout.addClassName("wams-dialog-footer");
 
         getFooter().removeAll();
         getFooter().add(footerLayout);

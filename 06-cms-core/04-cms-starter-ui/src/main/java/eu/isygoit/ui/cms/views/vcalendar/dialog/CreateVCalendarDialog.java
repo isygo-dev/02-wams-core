@@ -2,7 +2,6 @@ package eu.isygoit.ui.cms.views.vcalendar.dialog;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.VCalendarDto;
@@ -39,7 +38,7 @@ public class CreateVCalendarDialog extends BaseActionDialog {
         setMaxWidth("95%");
 
         buildForm();
-        addContent(buildTabbedForm());
+        addContent(buildFormLayout());
     }
 
     private void buildForm() {
@@ -70,15 +69,7 @@ public class CreateVCalendarDialog extends BaseActionDialog {
         descriptionArea.addClassName("calendar-dialog-description");
     }
 
-    private TabSheet buildTabbedForm() {
-        TabSheet tabs = new TabSheet();
-        tabs.addClassName("wams-dialog-tabs");
-        tabs.add(I18n.t("cms.calendar.dialog.tab.general"), buildGeneralForm());
-        tabs.add(I18n.t("cms.calendar.dialog.tab.description"), buildDescriptionForm());
-        return tabs;
-    }
-
-    private FormLayout buildGeneralForm() {
+    private FormLayout buildFormLayout() {
         FormLayout form = new FormLayout();
         form.setResponsiveSteps(
                 new FormLayout.ResponsiveStep("0", 1),
@@ -86,13 +77,8 @@ public class CreateVCalendarDialog extends BaseActionDialog {
         );
         form.add(tenantField, codeField, nameField, icsPathField);
         form.add(lockedCheckbox, 2);
-        return form;
-    }
-
-    private FormLayout buildDescriptionForm() {
-        FormLayout form = new FormLayout();
-        form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
         form.add(descriptionArea);
+        form.setColspan(descriptionArea, 2);
         return form;
     }
 

@@ -146,6 +146,7 @@ public abstract class BaseActionDialog extends Dialog {
         footerLayout.setWidthFull();
         footerLayout.setSpacing(true);
         footerLayout.setPadding(false);
+        footerLayout.addClassName("wams-dialog-footer");
 
         errorSpan.setWidthFull();
         footerLayout.add(errorSpan);
@@ -165,9 +166,10 @@ public abstract class BaseActionDialog extends Dialog {
      */
     protected void addContent(com.vaadin.flow.component.Component... components) {
         VerticalLayout content = new VerticalLayout(components);
-        content.setPadding(true);
+        content.setPadding(false);
         content.setSpacing(true);
         content.setWidthFull();
+        content.addClassName("wams-dialog-content");
         add(content);
     }
 }

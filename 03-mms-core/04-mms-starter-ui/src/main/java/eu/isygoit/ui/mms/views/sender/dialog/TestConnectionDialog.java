@@ -12,11 +12,11 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.SenderConfigService;
-import eu.isygoit.ui.mms.views.common.MmsNoActionDialog;
+import eu.isygoit.ui.common.dialog.NoActionDialog;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class TestConnectionDialog extends MmsNoActionDialog {
+public class TestConnectionDialog extends NoActionDialog {
 
     private final SenderConfigService senderConfigService;
     private final SenderConfigDto config;

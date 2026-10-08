@@ -4,15 +4,15 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.dto.data.MsgTemplateDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateService;
+import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.mms.views.common.MmsEnumTag;
-import eu.isygoit.ui.mms.views.common.MmsPinActionDialog;
 import eu.isygoit.ui.mms.views.msgtemplate.MsgTemplateManagementView;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 
 @Slf4j
-public class DeleteMsgTemplateDialog extends MmsPinActionDialog {
+public class DeleteMsgTemplateDialog extends PinBaseActionDialog {
 
     private final MsgTemplateManagementView parentView;
     private final MsgTemplateService templateService;

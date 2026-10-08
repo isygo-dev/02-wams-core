@@ -1,8 +1,8 @@
 package eu.isygoit.ui.mms.views.sender.dialog;
 
 import eu.isygoit.remote.mms.SenderConfigService;
-import eu.isygoit.ui.mms.views.common.MmsActionDialog;
 import eu.isygoit.ui.mms.views.sender.SenderConfigManagementView;
+import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
  * Provides common structure with header, content, and footer sections.
  */
 @Slf4j
-public abstract class BaseSenderConfigDialog extends MmsActionDialog {
+public abstract class BaseSenderConfigDialog extends BaseActionDialog {
 
     protected final SenderConfigManagementView parentView;
     protected final SenderConfigService senderConfigService;

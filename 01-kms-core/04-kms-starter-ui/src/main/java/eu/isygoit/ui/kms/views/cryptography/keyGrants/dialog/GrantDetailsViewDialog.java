@@ -1,6 +1,7 @@
 package eu.isygoit.ui.kms.views.cryptography.keyGrants.dialog;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Pre;
@@ -48,8 +49,12 @@ public class GrantDetailsViewDialog extends KmsDetailsDialog {
                 KmsEnumTag.ofValue(grant.getStatus(), "kms.enum")));
         addFieldToGrid(identityGrid, VaadinIcon.COG, I18n.t("kms.grant.details.field.operations"),
                 grant.getOperations() != null ? String.join(", ", grant.getOperations()) : null);
-        addTab(I18n.t("kms.grant.details.section.identity"),
-                createSection(I18n.t("kms.grant.details.section.identity"), identityGrid));
+        Component identitySection = createSection(I18n.t("kms.grant.details.section.identity"), identityGrid);
+        if (grant.getConstraints() == null && grant.getCreateDate() == null) {
+            add(identitySection);
+        } else {
+            addTab(I18n.t("kms.grant.details.section.identity"), identitySection);
+        }
 
         // Constraints
         if (grant.getConstraints() != null) {
