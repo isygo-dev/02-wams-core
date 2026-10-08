@@ -2,11 +2,11 @@ package eu.isygoit.ui.ims.views.account.dialog;
 
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.account.AccountManagementView;
+import eu.isygoit.ui.ims.views.common.ImsPinActionDialog;
 import feign.FeignException;
 
-public class ResetPasswordDialog extends PinBaseActionDialog {
+public class ResetPasswordDialog extends ImsPinActionDialog {
 
     private final AccountManagementView parentView;
     private final AccountService accountService;

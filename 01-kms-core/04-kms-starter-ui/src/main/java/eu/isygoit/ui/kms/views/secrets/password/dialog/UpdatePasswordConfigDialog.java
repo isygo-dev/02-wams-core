@@ -9,11 +9,12 @@ import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.PasswordConfigService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class UpdatePasswordConfigDialog extends BaseActionDialog {
+public class UpdatePasswordConfigDialog extends KmsActionDialog {
 
     private final PasswordConfigService configService;
     private final PasswordConfigDto original;
@@ -45,6 +46,7 @@ public class UpdatePasswordConfigDialog extends BaseActionDialog {
 
         typeCombo = new ComboBox<>(I18n.t("kms.password.dialog.field.type"));
         typeCombo.setItems(IEnumAuth.Types.values());
+        KmsEnumTag.useTagRenderer(typeCombo, "kms.enum");
         typeCombo.setRequired(true);
         typeCombo.setWidthFull();
 
@@ -53,6 +55,7 @@ public class UpdatePasswordConfigDialog extends BaseActionDialog {
 
         charSetCombo = new ComboBox<>(I18n.t("kms.password.dialog.field.char.set"));
         charSetCombo.setItems(IEnumCharSet.Types.values());
+        KmsEnumTag.useTagRenderer(charSetCombo, "kms.enum");
         charSetCombo.setRequired(true);
         charSetCombo.setWidthFull();
 

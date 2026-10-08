@@ -4,6 +4,99 @@
  * CmsMainLayout so it is available to every view rendered inside it.
  */
 
+/* Pilot-aligned application palette for CMS surfaces and dialogs. */
+:root {
+    --cms-color-primary: #0c66e4;
+    --cms-color-primary-soft: rgba(12, 102, 228, 0.1);
+    --cms-color-success: #1f845a;
+    --cms-color-success-soft: rgba(31, 132, 90, 0.1);
+    --cms-color-warning: #a54800;
+    --cms-color-warning-soft: rgba(165, 72, 0, 0.12);
+    --cms-color-danger: #c9372c;
+    --cms-color-danger-soft: rgba(201, 55, 44, 0.1);
+    --cms-color-info: #0055cc;
+    --cms-color-text: #172b4d;
+    --cms-color-text-muted: #44546f;
+    --cms-color-text-soft: #626f86;
+    --cms-color-surface: #ffffff;
+    --cms-color-border: rgba(9, 30, 66, 0.14);
+    --cms-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --cms-font-size-xxs: 0.625rem;
+    --cms-font-size-xs: 0.75rem;
+    --cms-font-size-sm: 0.875rem;
+    --cms-font-size-md: 1rem;
+    --cms-font-size-lg: 1.125rem;
+    --cms-font-size-xl: 1.5rem;
+    --cms-font-weight-semibold: 600;
+    --cms-line-height-normal: 1.5;
+    --cms-space-1: 0.25rem;
+    --cms-space-2: 0.5rem;
+    --cms-space-2-5: 0.625rem;
+    --cms-space-3: 0.75rem;
+    --cms-space-4: 1rem;
+    --cms-space-6: 1.5rem;
+    --cms-space-8: 2rem;
+    --cms-radius-sm: 3px;
+    --cms-radius-md: 6px;
+    --cms-radius-lg: 9px;
+    --cms-radius-xl: 12px;
+    --cms-shadow-sm: 0 1px 2px rgba(9, 30, 66, 0.16), 0 0 1px rgba(9, 30, 66, 0.1);
+    --cms-shadow-md: 0 4px 8px -2px rgba(9, 30, 66, 0.18), 0 0 1px rgba(9, 30, 66, 0.12);
+
+    --lumo-primary-color: var(--cms-color-primary);
+    --lumo-primary-text-color: var(--cms-color-primary);
+    --lumo-primary-color-10pct: var(--cms-color-primary-soft);
+    --lumo-primary-color-50pct: rgba(12, 102, 228, 0.5);
+    --lumo-success-color: var(--cms-color-success);
+    --lumo-success-text-color: var(--cms-color-success);
+    --lumo-success-color-10pct: var(--cms-color-success-soft);
+    --lumo-success-color-50pct: rgba(31, 132, 90, 0.5);
+    --lumo-warning-color: var(--cms-color-warning);
+    --lumo-warning-text-color: var(--cms-color-warning);
+    --lumo-warning-color-10pct: var(--cms-color-warning-soft);
+    --lumo-warning-color-50pct: rgba(165, 72, 0, 0.5);
+    --lumo-error-color: var(--cms-color-danger);
+    --lumo-error-text-color: var(--cms-color-danger);
+    --lumo-error-color-10pct: var(--cms-color-danger-soft);
+    --lumo-error-color-50pct: rgba(201, 55, 44, 0.5);
+    --lumo-body-text-color: var(--cms-color-text);
+    --lumo-secondary-text-color: var(--cms-color-text-muted);
+    --lumo-tertiary-text-color: var(--cms-color-text-soft);
+    --lumo-base-color: var(--cms-color-surface);
+    --lumo-contrast-5pct: rgba(9, 30, 66, 0.04);
+    --lumo-contrast-10pct: rgba(9, 30, 66, 0.08);
+    --lumo-contrast-20pct: var(--cms-color-border);
+    --lumo-font-family: var(--cms-font-family);
+    --lumo-font-size-xxs: var(--cms-font-size-xxs);
+    --lumo-font-size-xs: var(--cms-font-size-xs);
+    --lumo-font-size-s: var(--cms-font-size-sm);
+    --lumo-font-size-m: var(--cms-font-size-md);
+    --lumo-font-size-l: var(--cms-font-size-lg);
+    --lumo-font-size-xl: var(--cms-font-size-xl);
+    --lumo-space-xs: var(--cms-space-1);
+    --lumo-space-s: var(--cms-space-2);
+    --lumo-space-m: var(--cms-space-4);
+    --lumo-space-l: var(--cms-space-6);
+    --lumo-space-xl: var(--cms-space-8);
+    --lumo-border-radius-s: var(--cms-radius-sm);
+    --lumo-border-radius-m: var(--cms-radius-md);
+    --lumo-border-radius: var(--cms-radius-lg);
+    --lumo-border-radius-l: var(--cms-radius-lg);
+    --lumo-box-shadow-xs: var(--cms-shadow-sm);
+    --lumo-box-shadow-s: var(--cms-shadow-sm);
+    --lumo-box-shadow-m: var(--cms-shadow-md);
+}
+
+.wams-dialog-tabs,
+.cms-dialog-tabs {
+    --vaadin-tabs-background-color: transparent;
+    --vaadin-tabs-border-color: var(--cms-color-border);
+}
+
+.calendar-dialog-description {
+    height: 100px;
+}
+
 /* ── Dashboard (CmsMainView) ──────────────────────────────────────────────── */
 
 .cms-dashboard .wams-dashboard-header {
@@ -51,6 +144,10 @@
 }
 
 .calendar-management-toolbar .wams-page-info-label {
+    margin: 0 0.5rem;
+}
+
+.calendar-management-toolbar .wams-total-count-label {
     margin: 0 0.5rem;
 }
 
@@ -112,7 +209,7 @@
 }
 
 @media (max-width: 480px) {
-    .calendar-management-toolbar > :nth-child(2) > :nth-child(4) {
+    .calendar-management-toolbar .wams-total-count-label {
         display: none;
     }
 
@@ -142,52 +239,7 @@
     flex-wrap: wrap;
 }
 
-.calendar-card .meta-row {
-    border-bottom: 1px solid var(--lumo-contrast-10pct);
-    padding-bottom: var(--lumo-space-xs);
-    margin-bottom: var(--lumo-space-xs);
-}
-
-.calendar-card .meta-row:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-}
-
-.calendar-card .wams-body-rows {
-    margin-top: var(--lumo-space-s);
-}
-
-.calendar-card .meta-row-icon {
-    color: var(--lumo-secondary-text-color);
-}
-
-.calendar-card .meta-row-label {
-    min-width: 80px;
-}
-
-.calendar-card .meta-row-value {
-    word-break: break-all;
-    flex: 1;
-}
-
-.calendar-card .meta-row-value--wrap {
-    word-break: break-word;
-    white-space: pre-wrap;
-}
-
-.calendar-card .meta-row-icon--align-start {
-    margin-top: 2px;
-}
-
 @media (max-width: 640px) {
-    .calendar-card .meta-row {
-        flex-wrap: wrap;
-    }
-
-    .calendar-card .meta-row > :not(:first-child) {
-        margin-left: 28px;
-    }
-
     .calendar-card .wams-card__button-bar {
         width: 100%;
         justify-content: flex-start;
@@ -195,7 +247,7 @@
 }
 
 /* ── Calendar details dialog ──────────────────────────────────────────────── */
-/* Sections (Identity / Status / Audit) reuse the shared wams-card__detail-grid
+/* Sections (Identity / Status / Description / Audit) reuse the shared wams-card__detail-grid
    class from card.css (overriding its column width for the wider dialog
    layout) and createSection()'s wams-section-title divider, matching the
    convention used by ims.css/dms.css/sms.css details dialogs. */

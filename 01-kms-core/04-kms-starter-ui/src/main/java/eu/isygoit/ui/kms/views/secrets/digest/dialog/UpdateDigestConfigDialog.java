@@ -12,7 +12,8 @@ import eu.isygoit.enums.IEnumSaltGenerator;
 import eu.isygoit.enums.IEnumStringOutputType;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.DigestConfigService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
@@ -21,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class UpdateDigestConfigDialog extends BaseActionDialog {
+public class UpdateDigestConfigDialog extends KmsActionDialog {
 
     private final DigestConfigService configService;
     private final DigestConfigDto original;
@@ -60,6 +61,7 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
 
         algorithmCombo = new ComboBox<>(I18n.t("kms.digest.dialog.field.algorithm"));
         algorithmCombo.setItems(IEnumAlgoDigestConfig.Types.values());
+        KmsEnumTag.useTagRenderer(algorithmCombo, "kms.enum");
         algorithmCombo.setRequired(true);
         algorithmCombo.setWidthFull();
 
@@ -74,6 +76,7 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
 
         saltGeneratorCombo = new ComboBox<>(I18n.t("kms.digest.dialog.field.salt.generator"));
         saltGeneratorCombo.setItems(IEnumSaltGenerator.Types.values());
+        KmsEnumTag.useTagRenderer(saltGeneratorCombo, "kms.enum");
         saltGeneratorCombo.setWidthFull();
 
         for (IEnumProviderClassName.Types type : IEnumProviderClassName.Types.values()) {
@@ -120,6 +123,7 @@ public class UpdateDigestConfigDialog extends BaseActionDialog {
 
         outputTypeCombo = new ComboBox<>(I18n.t("kms.digest.dialog.field.output.type"));
         outputTypeCombo.setItems(IEnumStringOutputType.Types.values());
+        KmsEnumTag.useTagRenderer(outputTypeCombo, "kms.enum");
         outputTypeCombo.setWidthFull();
 
         prefixField = new TextField(I18n.t("kms.digest.dialog.field.prefix"));

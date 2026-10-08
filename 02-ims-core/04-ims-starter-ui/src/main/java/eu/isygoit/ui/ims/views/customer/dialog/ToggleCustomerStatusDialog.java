@@ -4,12 +4,12 @@ import eu.isygoit.dto.data.CustomerDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.CustomerService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.ims.views.common.ImsPinActionDialog;
 import eu.isygoit.ui.ims.views.customer.CustomerManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class ToggleCustomerStatusDialog extends PinBaseActionDialog {
+public class ToggleCustomerStatusDialog extends ImsPinActionDialog {
 
     private final CustomerManagementView parentView;
     private final CustomerService customerService;

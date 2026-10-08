@@ -15,12 +15,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.MsgTemplateDto;
 import eu.isygoit.dto.data.SenderConfigDto;
-import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
 import eu.isygoit.remote.mms.MsgTemplateService;
 import eu.isygoit.remote.mms.SenderConfigService;
 import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.mms.views.common.MmsEnumTag;
 import eu.isygoit.ui.mms.views.msgtemplate.dialog.DeleteMsgTemplateDialog;
 import eu.isygoit.ui.mms.views.msgtemplate.dialog.EditMsgTemplateDialog;
 import eu.isygoit.ui.mms.views.msgtemplate.dialog.EditTemplateContentDialog;
@@ -52,9 +52,6 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
     // UI components (updated on refresh)
     private Span titleSpan;
     private Span languageChip;
-    private Span codeSpan;
-    private Span descriptionSpan;
-    private Span senderConfigSpan;
     private Button viewSenderConfigButton;
     private Button viewButton;
     private Button editButton;
@@ -138,16 +135,16 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
             if (config.getName() != null) {
                 tooltip.append(config.getName());
             }
-            if (config.getDescription() != null) {
+            if (config.getCode() != null && !config.getCode().equals(config.getName())) {
                 if (tooltip.length() > 0) {
-                    tooltip.append(" - ");
+                    tooltip.append(" (");
+                    tooltip.append(config.getCode());
+                    tooltip.append(")");
+                } else {
+                    tooltip.append(config.getCode());
                 }
-                tooltip.append(config.getDescription());
             }
-            if (tooltip.length() == 0 && config.getCode() != null) {
-                tooltip.append(config.getCode());
-            }
-            return tooltip.toString();
+            return tooltip.length() == 0 ? null : tooltip.toString();
         }
         return String.valueOf(id);
     }
@@ -195,37 +192,25 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
             titleSpan = buildTitleSpan("", "");
         }
         if (languageChip == null) {
-            languageChip = buildStatusChip("", "");
+            languageChip = MmsEnumTag.ofOrUnknown(template.getLanguage(), "mms.msgtemplate.view.language");
         }
-        if (codeSpan == null) {
-            codeSpan = new Span();
-        }
-        if (descriptionSpan == null) {
-            descriptionSpan = new Span();
-        }
-        if (senderConfigSpan == null) {
-            senderConfigSpan = new Span();
+        String displayName = getTemplateDisplayName();
+        if (template.getName() != null) {
+            MmsEnumTag.update(titleSpan, template.getName(), "mms.msgtemplate.enum.name");
+            titleSpan.addClassName("mms-enum-tag--title");
+        } else {
+            titleSpan.setText(displayName);
+            titleSpan.getElement().setAttribute("title", displayName);
+            titleSpan.removeClassName("mms-enum-tag");
+            titleSpan.removeClassName("mms-enum-tag--title");
+            for (String tone : List.of("success", "warning", "danger", "info", "neutral")) {
+                titleSpan.removeClassName("mms-enum-tag--" + tone);
+            }
         }
 
-        String displayName = template.getName() != null ? template.getName() : I18n.t("mms.msgtemplate.card.fallback.name", template.getId());
-        titleSpan.setText(displayName);
-        titleSpan.getElement().setAttribute("title", displayName);
-
-        // Language chip
-        String language = template.getLanguage() != null ? template.getLanguage().name() : I18n.t("mms.common.value.notAvailable");
-        languageChip.setText(language);
-        applyChipColor(languageChip, getLanguageColor(template.getLanguage()));
-
-        codeSpan.setText(template.getCode() != null ? template.getCode() : I18n.t("mms.common.value.notAvailable"));
-        descriptionSpan.setText(template.getDescription() != null ? template.getDescription() : I18n.t("mms.msgtemplate.card.no.description"));
-
-        // Sender Config with name and tooltip
-        String senderConfigDisplay = getSenderConfigDisplayName();
-        senderConfigSpan.setText(senderConfigDisplay);
-        String tooltip = getSenderConfigTooltip();
-        if (tooltip != null) {
-            senderConfigSpan.getElement().setAttribute("title", tooltip);
-        }
+        MmsEnumTag.update(languageChip, template.getLanguage(), "mms.msgtemplate.view.language");
+        languageChip.getElement().setAttribute("title",
+                I18n.t("mms.msgtemplate.card.language.tooltip", languageChip.getText()));
 
         // Update view sender config button
         boolean hasSenderConfig = template.getSenderConfigId() != null;
@@ -254,18 +239,10 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         buildBodyRows();
     }
 
-    private ChipColor getLanguageColor(IEnumLanguage.Types language) {
-        if (language == null) return ChipColor.NEUTRAL;
-        switch (language) {
-            case EN:
-                return ChipColor.INFO;
-            case FR:
-                return ChipColor.SUCCESS;
-            case AR:
-                return ChipColor.WARNING;
-            default:
-                return ChipColor.NEUTRAL;
-        }
+    private String getTemplateDisplayName() {
+        return template.getName() != null
+                ? MmsEnumTag.label(template.getName(), "mms.msgtemplate.enum.name")
+                : I18n.t("mms.msgtemplate.card.fallback.name", template.getId());
     }
 
     // ─── BaseCard Implementation ─────────────────────────────────────────────
@@ -294,14 +271,17 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         }
 
         // Title
-        String displayName = template.getName() != null ? template.getName() : I18n.t("mms.msgtemplate.card.fallback.name", template.getId());
+        String displayName = getTemplateDisplayName();
         titleSpan = buildTitleSpan(displayName, displayName);
+        if (template.getName() != null) {
+            MmsEnumTag.update(titleSpan, template.getName(), "mms.msgtemplate.enum.name");
+            titleSpan.addClassName("mms-enum-tag--title");
+        }
         left.add(titleSpan);
 
-        // Language chip
-        String language = template.getLanguage() != null ? template.getLanguage().name() : I18n.t("mms.common.value.notAvailable");
-        languageChip = buildStatusChip(language, I18n.t("mms.msgtemplate.card.language.tooltip", language));
-        applyChipColor(languageChip, getLanguageColor(template.getLanguage()));
+        languageChip = MmsEnumTag.ofOrUnknown(template.getLanguage(), "mms.msgtemplate.view.language");
+        languageChip.getElement().setAttribute("title",
+                I18n.t("mms.msgtemplate.card.language.tooltip", languageChip.getText()));
         left.add(languageChip);
 
         return left;
@@ -352,12 +332,6 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
                 I18n.t("mms.msgtemplate.card.code"),
                 template.getCode() != null ? template.getCode() : I18n.t("mms.common.value.notAvailable"),
                 template.getCode() != null ? template.getCode() : ""
-        ));
-
-        bodyContainer.add(createDetailRow(
-                VaadinIcon.FILE_TEXT,
-                I18n.t("mms.msgtemplate.card.description"),
-                template.getDescription() != null ? template.getDescription() : I18n.t("mms.msgtemplate.card.no.description")
         ));
 
         // Sender Config row with tooltip and view button

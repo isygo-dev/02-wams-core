@@ -9,13 +9,13 @@ import com.vaadin.flow.data.validator.StringLengthValidator;
 import eu.isygoit.dto.data.BucketDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.ObjectStorageService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import eu.isygoit.ui.sms.views.bucket.BucketManagementView;
+import eu.isygoit.ui.sms.views.common.SmsActionDialog;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class CreateBucketDialog extends BaseActionDialog {
+public class CreateBucketDialog extends SmsActionDialog {
 
     private final BucketManagementView parentView;
     private final ObjectStorageService objectStorageService;

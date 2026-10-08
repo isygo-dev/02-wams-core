@@ -5,7 +5,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
@@ -13,7 +12,8 @@ import eu.isygoit.dto.KmsDtos.GetKeyPolicyResponse;
 import eu.isygoit.dto.KmsDtos.ListResourceTagsResponse;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.common.dialog.DetailsViewDialog;
+import eu.isygoit.ui.kms.views.common.KmsDetailsDialog;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.kms.views.cryptography.key.KeyManagementView;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +36,7 @@ import java.util.Map;
  * </ul>
  */
 @Slf4j
-public class KeyDetailsViewDialog extends DetailsViewDialog {
+public class KeyDetailsViewDialog extends KmsDetailsDialog {
 
     private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;
@@ -67,15 +67,14 @@ public class KeyDetailsViewDialog extends DetailsViewDialog {
     }
 
     private void buildContent() {
-        VerticalLayout content = new VerticalLayout();
-        content.setPadding(true);
-        content.setSpacing(true);
-        content.setWidthFull();
-
-        content.add(createSection(I18n.t("kms.key.dialog.describe.section.identity"), buildIdentityGrid()));
-        content.add(createSection(I18n.t("kms.key.dialog.describe.section.classification"), buildClassificationGrid()));
-        content.add(createSection(I18n.t("kms.key.dialog.describe.section.crypto"), buildCryptoGrid()));
-        content.add(createSection(I18n.t("kms.key.dialog.describe.section.dates"), buildDatesGrid()));
+        addTab(I18n.t("kms.key.dialog.describe.section.identity"),
+                createSection(I18n.t("kms.key.dialog.describe.section.identity"), buildIdentityGrid()));
+        addTab(I18n.t("kms.key.dialog.describe.section.classification"),
+                createSection(I18n.t("kms.key.dialog.describe.section.classification"), buildClassificationGrid()));
+        addTab(I18n.t("kms.key.dialog.describe.section.crypto"),
+                createSection(I18n.t("kms.key.dialog.describe.section.crypto"), buildCryptoGrid()));
+        addTab(I18n.t("kms.key.dialog.describe.section.dates"),
+                createSection(I18n.t("kms.key.dialog.describe.section.dates"), buildDatesGrid()));
 
         // Tags (as chips)
         List<ListResourceTagsResponse.Tag> tags = fetchTags();
@@ -94,7 +93,8 @@ public class KeyDetailsViewDialog extends DetailsViewDialog {
                 chip.addClassName("tag-chip");
                 tagsContainer.add(chip);
             }
-            content.add(createSection(I18n.t("kms.key.dialog.describe.section.tags"), tagsContainer));
+            addTab(I18n.t("kms.key.dialog.describe.section.tags"),
+                    createSection(I18n.t("kms.key.dialog.describe.section.tags"), tagsContainer));
         }
 
         // Policy (pretty JSON)
@@ -116,14 +116,13 @@ public class KeyDetailsViewDialog extends DetailsViewDialog {
                     policyArea.setHeight("300px");
                     policyArea.setReadOnly(true);
                     policyArea.addClassName("policy-textarea");
-                    content.add(createSection(I18n.t("kms.key.dialog.describe.field.policy"), policyArea));
+                    addTab(I18n.t("kms.key.dialog.describe.field.policy"),
+                            createSection(I18n.t("kms.key.dialog.describe.field.policy"), policyArea));
                 }
             }
         } catch (Exception e) {
             log.warn("Could not fetch or format policy for key {}", keyId, e);
         }
-
-        add(content);
     }
 
     // ─── Section builders (strictly grouped by data type) ───────────────────
@@ -147,19 +146,19 @@ public class KeyDetailsViewDialog extends DetailsViewDialog {
      */
     private Component buildClassificationGrid() {
         Div grid = createDetailGrid();
-        addFieldToGrid(grid, VaadinIcon.FLAG, I18n.t("kms.key.dialog.describe.field.status"),
-                metadata.getKeyStatus() != null ? metadata.getKeyStatus().name() : I18n.t("kms.key.dialog.describe.placeholder"));
+        KmsEnumTag.addDetailField(grid, VaadinIcon.FLAG,
+                I18n.t("kms.key.dialog.describe.field.status"), metadata.getKeyStatus(), "kms.enum");
         addFieldToGrid(grid, VaadinIcon.CHECK_CIRCLE, I18n.t("kms.key.dialog.describe.field.enabled"),
                 metadata.getEnabled() != null ? metadata.getEnabled().toString() : I18n.t("kms.key.dialog.describe.placeholder"));
-        addFieldToGrid(grid, VaadinIcon.COG, I18n.t("kms.key.dialog.describe.field.key.spec"),
-                metadata.getKeySpec() != null ? metadata.getKeySpec().name() : I18n.t("kms.key.dialog.describe.placeholder"));
-        addFieldToGrid(grid, VaadinIcon.COGS, I18n.t("kms.key.dialog.describe.field.key.usage"),
-                metadata.getKeyUsage() != null ? metadata.getKeyUsage().name() : I18n.t("kms.key.dialog.describe.placeholder"));
+        KmsEnumTag.addDetailField(grid, VaadinIcon.COG,
+                I18n.t("kms.key.dialog.describe.field.key.spec"), metadata.getKeySpec(), "kms.enum");
+        KmsEnumTag.addDetailField(grid, VaadinIcon.COGS,
+                I18n.t("kms.key.dialog.describe.field.key.usage"), metadata.getKeyUsage(), "kms.enum");
         addFieldToGrid(grid, VaadinIcon.COG_O, I18n.t("kms.key.dialog.describe.field.customer.master.key.spec"), metadata.getCustomerMasterKeySpec());
-        addFieldToGrid(grid, VaadinIcon.CLOUD, I18n.t("kms.key.dialog.describe.field.origin"),
-                metadata.getOrigin() != null ? metadata.getOrigin().name() : I18n.t("kms.key.dialog.describe.placeholder"));
-        addFieldToGrid(grid, VaadinIcon.HOURGLASS, I18n.t("kms.key.dialog.describe.field.expiration.model"),
-                metadata.getExpirationModel() != null ? metadata.getExpirationModel().name() : I18n.t("kms.key.dialog.describe.placeholder"));
+        KmsEnumTag.addDetailField(grid, VaadinIcon.CLOUD,
+                I18n.t("kms.key.dialog.describe.field.origin"), metadata.getOrigin(), "kms.enum");
+        KmsEnumTag.addDetailField(grid, VaadinIcon.HOURGLASS,
+                I18n.t("kms.key.dialog.describe.field.expiration.model"), metadata.getExpirationModel(), "kms.enum");
         addFieldToGrid(grid, VaadinIcon.GLOBE, I18n.t("kms.key.dialog.describe.field.multi.region"),
                 metadata.getMultiRegion() != null ? metadata.getMultiRegion().toString() : Boolean.FALSE.toString());
         return grid;

@@ -4,8 +4,8 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.dto.data.VCalendarDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.cms.VCalendarService;
+import eu.isygoit.ui.cms.views.common.CmsPinActionDialog;
 import eu.isygoit.ui.cms.views.vcalendar.VCalendarManagementView;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
  * call with the {@code locked} field flipped — same simple-confirmation
  * (no PIN) shape as {@code ToggleTenantStatusDialog}.
  */
-public class ToggleVCalendarLockDialog extends PinBaseActionDialog {
+public class ToggleVCalendarLockDialog extends CmsPinActionDialog {
 
     private final VCalendarManagementView parentView;
     private final VCalendarService calendarService;
@@ -34,7 +34,7 @@ public class ToggleVCalendarLockDialog extends PinBaseActionDialog {
                         ? I18n.t("cms.calendar.dialog.toggle.message.unlock")
                         : I18n.t("cms.calendar.dialog.toggle.message.lock"),
                 onSuccess,
-                false // simple confirmation, no PIN
+                false
         );
         this.parentView = parentView;
         this.calendarService = calendarService;

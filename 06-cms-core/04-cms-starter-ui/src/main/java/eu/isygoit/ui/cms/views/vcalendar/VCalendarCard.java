@@ -1,14 +1,11 @@
 package eu.isygoit.ui.cms.views.vcalendar;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.VCalendarDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.cms.VCalendarService;
@@ -52,7 +49,7 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
         titleLayout.addClassName("wams-title-row");
 
         String displayName = calendar.getName() != null ? calendar.getName() : I18n.t("cms.calendar.card.default.name", calendar.getId());
-        Span titleSpan = buildTitleSpan(displayName, calendar.getDescription());
+        Span titleSpan = buildTitleSpan(displayName, displayName);
         titleLayout.add(titleSpan);
 
         // Short code badge — how users commonly search/identify calendars (see search field)
@@ -65,7 +62,7 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
         boolean locked = calendar.getLocked() != null && calendar.getLocked();
         lockStatusChip = buildStatusChip(
                 locked ? I18n.t("cms.calendar.card.status.locked") : I18n.t("cms.calendar.card.status.unlocked"),
-                locked ? "LOCKED" : "UNLOCKED"
+                locked ? ChipColor.WARNING : ChipColor.SUCCESS
         );
         titleLayout.add(lockStatusChip);
 
@@ -109,7 +106,7 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
             String text = locked ? I18n.t("cms.calendar.card.status.locked") : I18n.t("cms.calendar.card.status.unlocked");
             lockStatusChip.setText(text);
             lockStatusChip.getElement().setAttribute("title", text);
-            applyChipColor(lockStatusChip, ChipColor.fromStatus(locked ? "LOCKED" : "UNLOCKED"));
+            applyChipColor(lockStatusChip, locked ? ChipColor.WARNING : ChipColor.SUCCESS);
         }
         if (toggleLockBtn != null) {
             toggleLockBtn.setIcon(locked ? VaadinIcon.LOCK.create() : VaadinIcon.UNLOCK.create());
@@ -119,50 +116,10 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
 
     @Override
     protected void buildBodyRows() {
-        VerticalLayout body = new VerticalLayout();
-        body.setSpacing(false);
-        body.setPadding(false);
-        body.addClassName("wams-body-rows");
-
-        // Only the description is shown in the body — code/tenant/icsPath/createdBy
-        // are secondary details and live in the "Details" dialog instead, to keep
-        // the card focused on quick scanning.
-        if (calendar.getDescription() != null && !calendar.getDescription().isBlank()) {
-            body.add(createDescriptionRow(calendar.getDescription()));
+        String tenant = calendar.getTenant();
+        if (tenant != null && !tenant.isBlank()) {
+            addMetaRow(I18n.t("cms.calendar.card.tenant") + ": " + tenant);
         }
-
-        add(body);
     }
 
-    private HorizontalLayout createDescriptionRow(String description) {
-        HorizontalLayout row = new HorizontalLayout();
-        row.setAlignItems(FlexComponent.Alignment.START);
-        row.setSpacing(true);
-        row.setWidthFull();
-        row.addClassName("meta-row");
-
-        com.vaadin.flow.component.icon.Icon iconComponent = VaadinIcon.FILE_TEXT.create();
-        iconComponent.setSize("14px");
-        iconComponent.addClassName("meta-row-icon");
-        iconComponent.addClassName("meta-row-icon--align-start");
-
-        Span labelSpan = new Span(I18n.t("cms.calendar.card.description") + ":");
-        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        labelSpan.addClassName("meta-row-label");
-
-        Span valueSpan = new Span(description);
-        valueSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        valueSpan.addClassName("meta-row-value");
-        valueSpan.addClassName("meta-row-value--wrap");
-
-        row.add(iconComponent, labelSpan, valueSpan);
-        row.expand(valueSpan);
-        return row;
-    }
-
-    @Override
-    protected void onCardAttach(AttachEvent event) {
-        // nothing special
-    }
 }

@@ -19,7 +19,7 @@ import eu.isygoit.dto.data.CategoryDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.dms.CategoryService;
 import eu.isygoit.remote.dms.LinkedFileService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.dms.views.common.DmsActionDialog;
 import eu.isygoit.ui.dms.views.linkedFile.LinkedFileManagementView;
 import eu.isygoit.util.ByteArrayMultipartFile;
 import feign.FeignException;
@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class UploadLinkedFileDialog extends BaseActionDialog {
+public class UploadLinkedFileDialog extends DmsActionDialog {
 
     private final LinkedFileManagementView parentView;
     private final LinkedFileService linkedFileService;
@@ -87,7 +87,7 @@ public class UploadLinkedFileDialog extends BaseActionDialog {
                 "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 "text/plain", "application/zip");
         upload.addClassName("wams-upload-component");
-        upload.getStyle().set("width", "100%");
+        upload.addClassName("dms-upload-component");
 
         upload.addSucceededListener(event -> {
             uploadedFileName = event.getFileName();
@@ -100,24 +100,21 @@ public class UploadLinkedFileDialog extends BaseActionDialog {
             fileNameDisplay.setText(I18n.t("dms.linkedfile.dialog.upload.file.name", uploadedFileName));
             fileSizeDisplay.setText(I18n.t("dms.linkedfile.dialog.upload.file.size", formatFileSize(uploadedFile.getSize())));
             uploadStatus.setText(I18n.t("dms.linkedfile.dialog.upload.success"));
-            uploadStatus.getStyle().set("color", "var(--lumo-success-color)");
-            uploadIcon.getStyle().set("color", "var(--lumo-success-color)");
+            setUploadStatusStyle("dms-upload-status--success", "dms-upload-icon--success");
             enableOkButton(true);
             log.info("File uploaded: {}", uploadedFileName);
         });
 
         upload.addFailedListener(event -> {
             uploadStatus.setText(I18n.t("dms.linkedfile.dialog.upload.failed", event.getReason().getMessage()));
-            uploadStatus.getStyle().set("color", "var(--lumo-error-color)");
-            uploadIcon.getStyle().set("color", "var(--lumo-error-color)");
+            setUploadStatusStyle("dms-upload-status--error", "dms-upload-icon--error");
             enableOkButton(false);
             log.error("Upload failed: {}", event.getReason().getMessage());
         });
 
         upload.addFileRejectedListener(event -> {
             uploadStatus.setText(I18n.t("dms.linkedfile.dialog.upload.rejected", event.getErrorMessage()));
-            uploadStatus.getStyle().set("color", "var(--lumo-error-color)");
-            uploadIcon.getStyle().set("color", "var(--lumo-error-color)");
+            setUploadStatusStyle("dms-upload-status--error", "dms-upload-icon--error");
             enableOkButton(false);
             log.warn("File rejected: {}", event.getErrorMessage());
         });
@@ -182,19 +179,17 @@ public class UploadLinkedFileDialog extends BaseActionDialog {
 
         fileNameDisplay = new Span();
         fileNameDisplay.addClassName("wams-upload-file-name");
-        fileNameDisplay.getStyle().set("font-size", "var(--lumo-font-size-s)");
 
         fileSizeDisplay = new Span();
         fileSizeDisplay.addClassName("wams-upload-file-size");
-        fileSizeDisplay.getStyle().set("font-size", "var(--lumo-font-size-s)");
 
         uploadStatus = new Span();
         uploadStatus.addClassName("wams-upload-status");
-        uploadStatus.getStyle().set("font-size", "var(--lumo-font-size-s)");
+        uploadStatus.addClassName("dms-upload-status");
 
         uploadIcon = VaadinIcon.UPLOAD.create();
         uploadIcon.setSize("20px");
-        uploadIcon.getStyle().set("color", "var(--lumo-primary-color)");
+        uploadIcon.addClassName("dms-upload-icon");
     }
 
     private void loadCategories() {
@@ -224,7 +219,8 @@ public class UploadLinkedFileDialog extends BaseActionDialog {
 
         Span instruction = new Span(I18n.t("dms.linkedfile.dialog.upload.instruction"));
         instruction.addClassName(LumoUtility.FontSize.SMALL);
-        instruction.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        instruction.addClassName("dms-secondary-text");
+        instruction.addClassName("dms-upload-instruction");
         uploadLayout.add(instruction);
 
         uploadLayout.add(upload);
@@ -235,15 +231,8 @@ public class UploadLinkedFileDialog extends BaseActionDialog {
         fileInfoLayout.setSpacing(true);
         fileInfoLayout.addClassName("wams-upload-file-info");
 
-        uploadIcon = VaadinIcon.UPLOAD.create();
-        uploadIcon.setSize("20px");
-        uploadIcon.getStyle().set("color", "var(--lumo-primary-color)");
-
-        fileNameDisplay = new Span(I18n.t("dms.linkedfile.dialog.upload.no.file.selected"));
-        fileNameDisplay.getStyle().set("color", "var(--lumo-secondary-text-color)");
-
-        fileSizeDisplay = new Span("");
-
+        fileNameDisplay.setText(I18n.t("dms.linkedfile.dialog.upload.no.file.selected"));
+        fileNameDisplay.addClassName("dms-secondary-text");
         fileInfoLayout.add(uploadIcon, fileNameDisplay, fileSizeDisplay);
         uploadLayout.add(fileInfoLayout);
         uploadLayout.add(uploadStatus);
@@ -251,6 +240,13 @@ public class UploadLinkedFileDialog extends BaseActionDialog {
         form.add(uploadLayout);
         form.add(tagsField, pathField, categoryComboBox);
         return form;
+    }
+
+    private void setUploadStatusStyle(String statusClass, String iconClass) {
+        uploadStatus.removeClassNames("dms-upload-status--success", "dms-upload-status--error");
+        uploadIcon.removeClassNames("dms-upload-icon--success", "dms-upload-icon--error");
+        uploadStatus.addClassName(statusClass);
+        uploadIcon.addClassName(iconClass);
     }
 
     @Override

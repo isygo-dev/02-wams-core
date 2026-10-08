@@ -12,6 +12,7 @@ import eu.isygoit.dto.data.PasswordConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.PasswordConfigService;
 import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.kms.views.secrets.password.dialog.DeletePasswordConfigDialog;
 import eu.isygoit.ui.kms.views.secrets.password.dialog.PasswordConfigDetailsViewDialog;
 import eu.isygoit.ui.kms.views.secrets.password.dialog.UpdatePasswordConfigDialog;
@@ -71,12 +72,17 @@ public class PasswordConfigCard extends BaseCard<PasswordConfigView, PasswordCon
 
     @Override
     protected void buildBodyRows() {
-        add(createIconRow(VaadinIcon.USER, I18n.t("kms.password.card.type"), dto.getType() != null ? dto.getType().meaning() : "—"));
+        add(createIconRow(VaadinIcon.USER, I18n.t("kms.password.card.type"),
+                KmsEnumTag.ofOrUnknown(dto.getType(), "kms.enum")));
         add(createIconRow(VaadinIcon.ARROW_DOWN, I18n.t("kms.password.card.min.length"), String.valueOf(dto.getMinLength())));
         add(createIconRow(VaadinIcon.ARROW_UP, I18n.t("kms.password.card.max.length"), String.valueOf(dto.getMaxLength())));
     }
 
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
+        return createIconRow(icon, label, new Span(value));
+    }
+
+    private HorizontalLayout createIconRow(VaadinIcon icon, String label, Component value) {
         HorizontalLayout row = new HorizontalLayout();
         row.setAlignItems(FlexComponent.Alignment.CENTER);
         row.setSpacing(true);
@@ -92,12 +98,11 @@ public class PasswordConfigCard extends BaseCard<PasswordConfigView, PasswordCon
         labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
         labelSpan.addClassName("meta-row-label");
 
-        Span valueSpan = new Span(value);
-        valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        valueSpan.addClassName("meta-row-value");
+        value.addClassName(LumoUtility.FontSize.XSMALL);
+        value.addClassName("meta-row-value");
 
-        row.add(iconComponent, labelSpan, valueSpan);
-        row.expand(valueSpan);
+        row.add(iconComponent, labelSpan, value);
+        row.expand(value);
         return row;
     }
 

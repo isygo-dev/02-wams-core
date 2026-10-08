@@ -3,11 +3,11 @@ package eu.isygoit.ui.dms.views.category.dialog;
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.dms.CategoryService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.dms.views.category.CategoryManagementView;
+import eu.isygoit.ui.dms.views.common.DmsPinActionDialog;
 import feign.FeignException;
 
-public class DeleteCategoryDialog extends PinBaseActionDialog {
+public class DeleteCategoryDialog extends DmsPinActionDialog {
 
     private final CategoryManagementView parentView;
     private final CategoryService categoryService;

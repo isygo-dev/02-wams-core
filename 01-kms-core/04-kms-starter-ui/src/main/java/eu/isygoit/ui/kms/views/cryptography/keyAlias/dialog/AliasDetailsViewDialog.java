@@ -11,14 +11,14 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.ListAliasesResponse;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.ui.common.dialog.DetailsViewDialog;
+import eu.isygoit.ui.kms.views.common.KmsDetailsDialog;
 
 /**
  * Read-only dialog showing every field of a key alias, for use when the
  * compact {@code AliasCard} isn't enough (i.e. "Details" action).
  */
 @CssImport("./styles/kms.css")
-public class AliasDetailsViewDialog extends DetailsViewDialog {
+public class AliasDetailsViewDialog extends KmsDetailsDialog {
 
     public AliasDetailsViewDialog(ListAliasesResponse.AliasEntry entry) {
         super(I18n.t("kms.alias.details.title"));
@@ -34,28 +34,29 @@ public class AliasDetailsViewDialog extends DetailsViewDialog {
     }
 
     private void buildContent(ListAliasesResponse.AliasEntry entry) {
-        VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setPadding(false);
-        mainLayout.setSpacing(true);
-
         // Identity — free-text identifying fields only.
         Div identityGrid = createDetailGrid();
         addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("kms.alias.details.field.alias.name"), entry.getAliasName(), true);
         addFieldToGrid(identityGrid, VaadinIcon.KEY, I18n.t("kms.alias.details.field.target.key"), entry.getTargetKeyId(), true);
         addFieldToGrid(identityGrid, VaadinIcon.HASH, I18n.t("kms.alias.details.field.wrn"), entry.getAliasWrn(), true);
-        mainLayout.add(createSection(I18n.t("kms.alias.details.section.identity"), identityGrid));
+        addTab(I18n.t("kms.alias.details.section.identity"),
+                createSection(I18n.t("kms.alias.details.section.identity"), identityGrid));
 
         // Classification & status — the primary-key boolean flag.
         Div classificationGrid = createDetailGrid();
         addFieldToGrid(classificationGrid, VaadinIcon.EXCLAMATION_CIRCLE, I18n.t("kms.alias.details.field.primary"),
                 Boolean.TRUE.equals(entry.getPrimaryKey()) ? I18n.t("kms.alias.details.yes") : I18n.t("kms.alias.details.no"));
-        mainLayout.add(createSection(I18n.t("kms.alias.details.section.classification"), classificationGrid));
+        VerticalLayout classification = new VerticalLayout(
+                createSection(I18n.t("kms.alias.details.section.classification"), classificationGrid));
+        classification.setPadding(false);
+        classification.setSpacing(true);
 
         // Dates — creation / last-updated timestamps.
         Div datesGrid = createDetailGrid();
         addFieldToGrid(datesGrid, VaadinIcon.CALENDAR, I18n.t("kms.alias.details.field.created"), entry.getCreateDate());
         addFieldToGrid(datesGrid, VaadinIcon.CALENDAR_O, I18n.t("kms.alias.details.field.updated"), entry.getUpdateDate());
-        mainLayout.add(createSection(I18n.t("kms.alias.details.section.dates"), datesGrid));
+        addTab(I18n.t("kms.alias.details.section.dates"),
+                createSection(I18n.t("kms.alias.details.section.dates"), datesGrid));
 
         if (Boolean.TRUE.equals(entry.getPrimaryKey())) {
             HorizontalLayout warningRow = new HorizontalLayout();
@@ -66,11 +67,11 @@ public class AliasDetailsViewDialog extends DetailsViewDialog {
             warningRow.addClassName(LumoUtility.Padding.SMALL);
             warningRow.addClassName(LumoUtility.BorderRadius.MEDIUM);
             Icon warningIcon = VaadinIcon.WARNING.create();
-            warningIcon.setColor("var(--lumo-error-color)");
+            warningIcon.addClassName("kms-text-danger");
             warningRow.add(warningIcon, new Span(I18n.t("kms.alias.details.primary.note")));
-            mainLayout.add(warningRow);
+            classification.add(warningRow);
         }
 
-        add(mainLayout);
+        addTab(I18n.t("kms.alias.details.section.classification"), classification);
     }
 }

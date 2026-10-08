@@ -12,7 +12,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.component.ClipboardCopyButton;
-import eu.isygoit.ui.common.dialog.DetailsViewDialog;
+import eu.isygoit.ui.kms.views.common.KmsDetailsDialog;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -25,7 +25,7 @@ import java.util.Base64;
  * is multi-line JSON rendered in read-only {@link TextArea}s inside titled
  * section-cards, rather than label/value fields.
  */
-public class JwtDetailsViewDialog extends DetailsViewDialog {
+public class JwtDetailsViewDialog extends KmsDetailsDialog {
 
     private static final DateTimeFormatter DATE_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'UTC'").withZone(ZoneId.of("UTC"));
@@ -47,16 +47,11 @@ public class JwtDetailsViewDialog extends DetailsViewDialog {
     }
 
     private void buildUI() {
-        VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setSpacing(true);
-        mainLayout.setPadding(true);
-        mainLayout.setWidthFull();
-
         try {
             String[] parts = jwtToken.split("\\.");
             if (parts.length != 3) {
-                mainLayout.add(createErrorCard(I18n.t("kms.decode.jwt.invalid.format")));
-                add(mainLayout);
+                addTab(I18n.t("kms.dialog.tab.details"),
+                        createErrorCard(I18n.t("kms.decode.jwt.invalid.format")));
                 return;
             }
 
@@ -83,21 +78,19 @@ public class JwtDetailsViewDialog extends DetailsViewDialog {
                     I18n.t("kms.decode.jwt.payload.tooltip")
             );
 
-            mainLayout.add(headerCard, payloadCard);
+            addTab(I18n.t("kms.decode.jwt.header"), headerCard);
+            addTab(I18n.t("kms.decode.jwt.payload"), payloadCard);
 
             // Signature info
             if (parts[2] != null && !parts[2].isEmpty()) {
                 String signature = parts[2];
-                mainLayout.add(createSignatureRow(signature));
+                addTab(I18n.t("kms.decode.jwt.signature"), createSignatureRow(signature));
             }
         } catch (Exception e) {
-            mainLayout.add(createErrorCard(I18n.t("kms.decode.jwt.decode.failed", e.getMessage())));
+            addTab(I18n.t("kms.dialog.tab.details"),
+                    createErrorCard(I18n.t("kms.decode.jwt.decode.failed", e.getMessage())));
         }
 
-        // No ad-hoc button row here: NoActionDialog already supplies the standard
-        // footer (error slot + Close button), so every dialog in the app shares
-        // the same footer shape.
-        add(mainLayout);
     }
 
     private Card createSectionCard(String title, String content, String tooltip) {

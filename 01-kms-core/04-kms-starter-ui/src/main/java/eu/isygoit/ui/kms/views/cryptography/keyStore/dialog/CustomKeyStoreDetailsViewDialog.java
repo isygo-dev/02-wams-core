@@ -3,11 +3,11 @@ package eu.isygoit.ui.kms.views.cryptography.keyStore.dialog;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.ui.common.dialog.DetailsViewDialog;
+import eu.isygoit.ui.kms.views.common.KmsDetailsDialog;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 
 /**
  * Read-only dialog showing every field of a
@@ -15,7 +15,7 @@ import eu.isygoit.ui.common.dialog.DetailsViewDialog;
  * the compact {@code StoreCard} isn't enough (i.e. "Details" action).
  */
 @CssImport("./styles/kms.css")
-public class CustomKeyStoreDetailsViewDialog extends DetailsViewDialog {
+public class CustomKeyStoreDetailsViewDialog extends KmsDetailsDialog {
 
     public CustomKeyStoreDetailsViewDialog(KmsDtos.DescribeCustomKeyStoreResponse.CustomKeyStore store) {
         super(I18n.t("kms.keystore.details.title"));
@@ -31,22 +31,21 @@ public class CustomKeyStoreDetailsViewDialog extends DetailsViewDialog {
     }
 
     private void buildContent(KmsDtos.DescribeCustomKeyStoreResponse.CustomKeyStore store) {
-        VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setPadding(false);
-        mainLayout.setSpacing(true);
-
         // Identity
         Div identityGrid = createDetailGrid();
         addFieldToGrid(identityGrid, VaadinIcon.KEY, I18n.t("kms.keystore.details.field.id"),
                 store.getCustomKeyStoreId() != null ? String.valueOf(store.getCustomKeyStoreId()) : null);
         addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("kms.keystore.details.field.name"), store.getName());
-        addFieldToGrid(identityGrid, VaadinIcon.COG, I18n.t("kms.keystore.details.field.type"), store.getCustomKeyStoreType());
-        addFieldToGrid(identityGrid, VaadinIcon.FLAG, I18n.t("kms.keystore.details.field.status"),
-                store.getStatus() != null ? store.getStatus().meaning() : null);
-        addFieldToGrid(identityGrid, VaadinIcon.CONNECT, I18n.t("kms.keystore.details.field.connection.state"), store.getConnectionState());
+        identityGrid.add(KmsEnumTag.detailField(VaadinIcon.COG, I18n.t("kms.keystore.details.field.type"),
+                KmsEnumTag.ofValue(store.getCustomKeyStoreType(), "kms.enum")));
+        identityGrid.add(KmsEnumTag.detailField(VaadinIcon.FLAG, I18n.t("kms.keystore.details.field.status"),
+                KmsEnumTag.ofOrUnknown(store.getStatus(), "kms.enum")));
+        identityGrid.add(KmsEnumTag.detailField(VaadinIcon.CONNECT, I18n.t("kms.keystore.details.field.connection.state"),
+                KmsEnumTag.ofValue(store.getConnectionState(), "kms.enum")));
         // Connection id is a stable identifier worth copying even though it may be short.
         addFieldToGrid(identityGrid, VaadinIcon.HASH, I18n.t("kms.keystore.details.field.connection.id"), store.getConnectionId(), true);
-        mainLayout.add(createSection(I18n.t("kms.keystore.details.section.identity"), identityGrid));
+        addTab(I18n.t("kms.keystore.details.section.identity"),
+                createSection(I18n.t("kms.keystore.details.section.identity"), identityGrid));
 
         // CloudHSM
         Div cloudHsmGrid = createDetailGrid();
@@ -56,7 +55,8 @@ public class CustomKeyStoreDetailsViewDialog extends DetailsViewDialog {
                 store.getKeyStorePassword() != null ? I18n.t("kms.keystore.details.value.redacted") : null);
         // Trust anchor certificate is PEM material — always copyable.
         addFieldToGrid(cloudHsmGrid, VaadinIcon.FILE_TEXT, I18n.t("kms.keystore.details.field.trust.anchor"), store.getTrustAnchorCertificate(), true);
-        mainLayout.add(createSection(I18n.t("kms.keystore.details.section.cloudhsm"), cloudHsmGrid));
+        addTab(I18n.t("kms.keystore.details.section.cloudhsm"),
+                createSection(I18n.t("kms.keystore.details.section.cloudhsm"), cloudHsmGrid));
 
         // External key store (XKS)
         Div xksGrid = createDetailGrid();
@@ -65,9 +65,12 @@ public class CustomKeyStoreDetailsViewDialog extends DetailsViewDialog {
         addFieldToGrid(xksGrid, VaadinIcon.ROAD, I18n.t("kms.keystore.details.field.xks.path"), store.getXksProxyUriPath(), true);
         addFieldToGrid(xksGrid, VaadinIcon.LOCK, I18n.t("kms.keystore.details.field.xks.credential"),
                 store.getXksProxyAuthenticationCredential() != null ? I18n.t("kms.keystore.details.value.redacted") : null);
-        addFieldToGrid(xksGrid, VaadinIcon.CONNECT, I18n.t("kms.keystore.details.field.xks.connectivity"), store.getXksProxyConnectivity());
+        xksGrid.add(KmsEnumTag.detailField(VaadinIcon.CONNECT,
+                I18n.t("kms.keystore.details.field.xks.connectivity"),
+                KmsEnumTag.ofValue(store.getXksProxyConnectivity(), "kms.enum")));
         addFieldToGrid(xksGrid, VaadinIcon.CODE, I18n.t("kms.keystore.details.field.type.specific.data"), store.getCustomKeyStoreTypeSpecificData());
-        mainLayout.add(createSection(I18n.t("kms.keystore.details.section.xks"), xksGrid));
+        addTab(I18n.t("kms.keystore.details.section.xks"),
+                createSection(I18n.t("kms.keystore.details.section.xks"), xksGrid));
 
         // Health & connectivity
         Div healthGrid = createDetailGrid();
@@ -81,7 +84,8 @@ public class CustomKeyStoreDetailsViewDialog extends DetailsViewDialog {
                 store.getLastConnectionAttempt() != null ? DateHelper.formatToHumanReadable(store.getLastConnectionAttempt()) : null);
         addFieldToGrid(healthGrid, VaadinIcon.STOPWATCH, I18n.t("kms.keystore.details.field.last.health.check"),
                 store.getLastHealthCheck() != null ? DateHelper.formatToHumanReadable(store.getLastHealthCheck()) : null);
-        mainLayout.add(createSection(I18n.t("kms.keystore.details.section.health"), healthGrid));
+        addTab(I18n.t("kms.keystore.details.section.health"),
+                createSection(I18n.t("kms.keystore.details.section.health"), healthGrid));
 
         // Connection settings
         Div settingsGrid = createDetailGrid();
@@ -93,13 +97,15 @@ public class CustomKeyStoreDetailsViewDialog extends DetailsViewDialog {
                 store.getAutoReconnect() != null
                         ? (store.getAutoReconnect() ? I18n.t("kms.keystore.card.on") : I18n.t("kms.keystore.card.off"))
                         : null);
-        mainLayout.add(createSection(I18n.t("kms.keystore.details.section.settings"), settingsGrid));
+        addTab(I18n.t("kms.keystore.details.section.settings"),
+                createSection(I18n.t("kms.keystore.details.section.settings"), settingsGrid));
 
         // Metadata & tags
         Div metaGrid = createDetailGrid();
         addFieldToGrid(metaGrid, VaadinIcon.TAGS, I18n.t("kms.keystore.details.field.metadata"), store.getMetadata());
         addFieldToGrid(metaGrid, VaadinIcon.TAGS, I18n.t("kms.keystore.details.field.tags"), store.getTags());
-        mainLayout.add(createSection(I18n.t("kms.keystore.details.section.metadata"), metaGrid));
+        addTab(I18n.t("kms.keystore.details.section.metadata"),
+                createSection(I18n.t("kms.keystore.details.section.metadata"), metaGrid));
 
         // Audit
         Div auditGrid = createDetailGrid();
@@ -107,8 +113,7 @@ public class CustomKeyStoreDetailsViewDialog extends DetailsViewDialog {
                 store.getCreateDate() != null ? DateHelper.formatToHumanReadable(store.getCreateDate()) : null);
         addFieldToGrid(auditGrid, VaadinIcon.CALENDAR_O, I18n.t("kms.keystore.details.field.updated"),
                 store.getUpdateDate() != null ? DateHelper.formatToHumanReadable(store.getUpdateDate()) : null);
-        mainLayout.add(createSection(I18n.t("kms.keystore.details.section.audit"), auditGrid));
-
-        add(mainLayout);
+        addTab(I18n.t("kms.keystore.details.section.audit"),
+                createSection(I18n.t("kms.keystore.details.section.audit"), auditGrid));
     }
 }

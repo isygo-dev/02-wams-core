@@ -9,7 +9,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.LinkedFileResponseDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.dms.LinkedFileService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.dms.views.common.DmsActionDialog;
 import eu.isygoit.ui.dms.views.linkedFile.LinkedFileManagementView;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.function.Consumer;
 
 @Slf4j
-public class RenameLinkedFileDialog extends BaseActionDialog {
+public class RenameLinkedFileDialog extends DmsActionDialog {
 
     private final LinkedFileManagementView parentView;
     private final LinkedFileService linkedFileService;
@@ -65,7 +65,7 @@ public class RenameLinkedFileDialog extends BaseActionDialog {
 
         currentNameDisplay = new Span(file.getOriginalFileName() != null ? file.getOriginalFileName() : file.getCode());
         currentNameDisplay.addClassName(LumoUtility.FontSize.SMALL);
-        currentNameDisplay.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        currentNameDisplay.addClassName("dms-secondary-text");
 
         currentNameRow.add(fileIcon, currentLabel, currentNameDisplay);
 
@@ -85,7 +85,7 @@ public class RenameLinkedFileDialog extends BaseActionDialog {
         // Info text
         Span infoText = new Span(I18n.t("dms.linkedfile.dialog.rename.info"));
         infoText.addClassName(LumoUtility.FontSize.XXSMALL);
-        infoText.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        infoText.addClassName("dms-secondary-text");
 
         layout.add(currentNameRow, newNameField, infoText);
         addContent(layout);

@@ -9,12 +9,13 @@ import eu.isygoit.dto.data.AnnexDto;
 import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AnnexService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import eu.isygoit.ui.ims.views.annex.AnnexManagementView;
+import eu.isygoit.ui.ims.views.common.ImsActionDialog;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class CreateAnnexDialog extends BaseActionDialog {
+public class CreateAnnexDialog extends ImsActionDialog {
 
     private final AnnexManagementView parentView;
     private final AnnexService annexService;
@@ -51,6 +52,8 @@ public class CreateAnnexDialog extends BaseActionDialog {
 
         languageCombo = new ComboBox<>(I18n.t("ims.annex.dialog.field.language"));
         languageCombo.setItems(IEnumLanguage.Types.values());
+        languageCombo.setItemLabelGenerator(language -> ImsEnumTag.label(language, "ims.enum.language"));
+        languageCombo.setRenderer(ImsEnumTag.renderer("ims.enum.language"));
         languageCombo.setRequiredIndicatorVisible(true);
         languageCombo.setPlaceholder(I18n.t("ims.annex.dialog.field.language.placeholder"));
         languageCombo.setWidthFull();

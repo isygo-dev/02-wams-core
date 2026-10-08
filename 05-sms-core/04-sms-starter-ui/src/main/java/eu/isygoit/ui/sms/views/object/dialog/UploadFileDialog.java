@@ -14,7 +14,7 @@ import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.ObjectStorageService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.sms.views.common.SmsActionDialog;
 import eu.isygoit.ui.sms.views.object.ObjectStorageManagementView;
 import eu.isygoit.util.ByteArrayMultipartFile;
 import feign.FeignException;
@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class UploadFileDialog extends BaseActionDialog {
+public class UploadFileDialog extends SmsActionDialog {
 
     private final ObjectStorageManagementView parentView;
     private final ObjectStorageService objectStorageService;

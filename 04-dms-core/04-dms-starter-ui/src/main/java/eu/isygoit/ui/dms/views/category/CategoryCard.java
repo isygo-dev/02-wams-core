@@ -47,7 +47,7 @@ public class CategoryCard extends BaseCard<CategoryManagementView, CategoryServi
         titleLayout.setSpacing(true);
         titleLayout.addClassName("wams-title-row");
 
-        Span titleSpan = buildTitleSpan(category.getName(), category.getDescription());
+        Span titleSpan = buildTitleSpan(category.getName(), null);
 
         // Add ID chip
         Span idChip = buildStatusChip(

@@ -21,6 +21,7 @@ import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.kms.views.cryptography.key.KeyManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
@@ -63,10 +64,12 @@ public class CreateKeyDialog extends KeyDialogBase {
     private void buildCreateSpecificForm() {
         keyUsageCombo = new ComboBox<>(I18n.t("kms.key.dialog.create.field.key.usage"));
         keyUsageCombo.setItems(IEnumKeyUsage.Types.values());
+        KmsEnumTag.useTagRenderer(keyUsageCombo, "kms.enum");
         keyUsageCombo.setValue(IEnumKeyUsage.Types.ENCRYPT_DECRYPT);
         keyUsageCombo.setRequiredIndicatorVisible(true);
 
         keySpecCombo = new ComboBox<>(I18n.t("kms.key.dialog.create.field.key.spec"));
+        KmsEnumTag.useTagRenderer(keySpecCombo, "kms.enum");
         keySpecCombo.setRequiredIndicatorVisible(true);
         updateKeySpecOptions(IEnumKeyUsage.Types.ENCRYPT_DECRYPT);
         keyUsageCombo.addValueChangeListener(e -> {
@@ -77,6 +80,7 @@ public class CreateKeyDialog extends KeyDialogBase {
 
         originCombo = new ComboBox<>(I18n.t("kms.key.dialog.create.field.origin"));
         originCombo.setItems(IEnumKeyOrigin.Types.values());
+        KmsEnumTag.useTagRenderer(originCombo, "kms.enum");
         originCombo.setValue(IEnumKeyOrigin.Types.WAMS_KMS);
         originCombo.setRequiredIndicatorVisible(true);
 
@@ -102,6 +106,7 @@ public class CreateKeyDialog extends KeyDialogBase {
 
         expirationModelCombo = new ComboBox<>(I18n.t("kms.key.dialog.create.field.expiration.model"));
         expirationModelCombo.setItems(IEnumKeyExpirationModel.Types.values());
+        KmsEnumTag.useTagRenderer(expirationModelCombo, "kms.enum");
         expirationModelCombo.setValue(IEnumKeyExpirationModel.Types.KEY_MATERIAL_DOES_NOT_EXPIRE);
         expirationModelCombo.setHelperText(I18n.t("kms.key.dialog.create.field.expiration.model.helper"));
         expirationModelCombo.setVisible(false);

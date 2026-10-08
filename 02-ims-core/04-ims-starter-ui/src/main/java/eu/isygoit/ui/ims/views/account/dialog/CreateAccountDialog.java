@@ -23,9 +23,10 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountImageService;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.remote.ims.TenantService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
-import eu.isygoit.ui.common.dialog.ImageCropperDialog;
 import eu.isygoit.ui.ims.views.account.AccountManagementView;
+import eu.isygoit.ui.ims.views.common.ImsActionDialog;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
+import eu.isygoit.ui.ims.views.common.ImsImageCropperDialog;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CreateAccountDialog extends BaseActionDialog {
+public class CreateAccountDialog extends ImsActionDialog {
 
     private final AccountManagementView parentView;
     private final AccountService accountService;
@@ -126,6 +127,8 @@ public class CreateAccountDialog extends BaseActionDialog {
 
         languageCombo = new ComboBox<>(I18n.t("ims.account.dialog.field.language"));
         languageCombo.setItems(IEnumLanguage.Types.values());
+        languageCombo.setItemLabelGenerator(language -> ImsEnumTag.label(language, "ims.enum.language"));
+        languageCombo.setRenderer(ImsEnumTag.renderer("ims.enum.language"));
         languageCombo.setValue(IEnumLanguage.Types.EN);
         languageCombo.setWidthFull();
 
@@ -138,6 +141,8 @@ public class CreateAccountDialog extends BaseActionDialog {
 
         adminStatusCombo = new ComboBox<>(I18n.t("ims.account.dialog.field.admin.status"));
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
+        adminStatusCombo.setItemLabelGenerator(status -> ImsEnumTag.label(status, null));
+        adminStatusCombo.setRenderer(ImsEnumTag.renderer(null));
         adminStatusCombo.setValue(IEnumEnabledBinaryStatus.Types.ENABLED);
         adminStatusCombo.setWidthFull();
 
@@ -188,7 +193,7 @@ public class CreateAccountDialog extends BaseActionDialog {
     }
 
     private void openCropperDialog() {
-        ImageCropperDialog cropperDialog = new ImageCropperDialog(croppedImage -> {
+        ImsImageCropperDialog cropperDialog = new ImsImageCropperDialog(croppedImage -> {
             if (croppedImage != null) {
                 selectedImageFile = croppedImage;
                 updateImageThumbnail(croppedImage);

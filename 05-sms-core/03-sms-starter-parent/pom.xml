@@ -1,7 +1,7 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <version>WC-1.0.260928-T1052</version>
+    <version>WC-1.0.261007-T1703</version>
 
     <artifactId>storage-management-starter-parent</artifactId>
     <packaging>jar</packaging>
@@ -12,7 +12,7 @@
     <parent>
         <groupId>eu.isygo-it.services</groupId>
         <artifactId>service-stack-parent</artifactId>
-        <version>WS-1.0.260928-T1052</version>
+        <version>WS-1.0.261007-T1703</version>
     </parent>
 
     <dependencyManagement>
@@ -20,7 +20,7 @@
             <dependency>
                 <groupId>eu.isygo-it.services</groupId>
                 <artifactId>service-core</artifactId>
-                <version>WC-1.0.260928-T1052</version>
+                <version>WC-1.0.261007-T1703</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -73,12 +73,12 @@
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>storage-management-jpa</artifactId>
-            <version>WC-1.0.260928-T1052</version>
+            <version>WC-1.0.261007-T1703</version>
         </dependency>
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>storage-management-shared</artifactId>
-            <version>WC-1.0.260928-T1052</version>
+            <version>WC-1.0.261007-T1703</version>
         </dependency>
 
         <dependency>
@@ -89,7 +89,7 @@
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>messaging-management-shared</artifactId>
-            <version>WC-1.0.260928-T1052</version>
+            <version>WC-1.0.261007-T1703</version>
         </dependency>
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
@@ -99,12 +99,12 @@
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>key-management-shared</artifactId>
-            <version>WC-1.0.260928-T1052</version>
+            <version>WC-1.0.261007-T1703</version>
         </dependency>
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>identity-management-shared</artifactId>
-            <version>WC-1.0.260928-T1052</version>
+            <version>WC-1.0.261007-T1703</version>
         </dependency>
         <dependency>
             <groupId>io.minio</groupId>

@@ -19,14 +19,15 @@ import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.CustomerImageService;
 import eu.isygoit.remote.ims.CustomerService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
-import eu.isygoit.ui.common.dialog.ImageCropperDialog;
+import eu.isygoit.ui.ims.views.common.ImsActionDialog;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
+import eu.isygoit.ui.ims.views.common.ImsImageCropperDialog;
 import eu.isygoit.ui.ims.views.customer.CustomerManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
-public class CreateCustomerDialog extends BaseActionDialog {
+public class CreateCustomerDialog extends ImsActionDialog {
 
     private final CustomerManagementView parentView;
     private final CustomerService customerService;
@@ -92,6 +93,8 @@ public class CreateCustomerDialog extends BaseActionDialog {
 
         adminStatusCombo = new ComboBox<>(I18n.t("ims.customer.dialog.field.admin.status"));
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
+        adminStatusCombo.setItemLabelGenerator(status -> ImsEnumTag.label(status, null));
+        adminStatusCombo.setRenderer(ImsEnumTag.renderer(null));
         adminStatusCombo.setValue(IEnumEnabledBinaryStatus.Types.ENABLED);
         adminStatusCombo.setWidthFull();
 
@@ -132,7 +135,7 @@ public class CreateCustomerDialog extends BaseActionDialog {
     }
 
     private void openCropperDialog() {
-        ImageCropperDialog cropperDialog = new ImageCropperDialog(croppedImage -> {
+        ImsImageCropperDialog cropperDialog = new ImsImageCropperDialog(croppedImage -> {
             if (croppedImage != null) {
                 selectedImageFile = croppedImage;
                 updateImageThumbnail(croppedImage);

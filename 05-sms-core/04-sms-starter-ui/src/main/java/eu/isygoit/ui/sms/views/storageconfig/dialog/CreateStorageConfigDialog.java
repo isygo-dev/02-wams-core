@@ -8,12 +8,13 @@ import eu.isygoit.dto.data.StorageConfigDto;
 import eu.isygoit.enums.IEnumStorage;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.StorageConfigService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.sms.views.common.SmsActionDialog;
+import eu.isygoit.ui.sms.views.common.SmsEnumTag;
 import eu.isygoit.ui.sms.views.storageconfig.StorageConfigManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class CreateStorageConfigDialog extends BaseActionDialog {
+public class CreateStorageConfigDialog extends SmsActionDialog {
 
     private final StorageConfigManagementView parentView;
     private final StorageConfigService storageConfigService;
@@ -49,7 +50,7 @@ public class CreateStorageConfigDialog extends BaseActionDialog {
 
         typeCombo = new ComboBox<>(I18n.t("sms.storageconfig.dialog.field.type"));
         typeCombo.setItems(IEnumStorage.Types.values());
-        typeCombo.setItemLabelGenerator(type -> type.name());
+        SmsEnumTag.useTagRenderer(typeCombo, "sms.enum.storage");
         typeCombo.setRequiredIndicatorVisible(true);
         typeCombo.setPlaceholder(I18n.t("sms.storageconfig.dialog.field.type.placeholder"));
         typeCombo.setWidthFull();

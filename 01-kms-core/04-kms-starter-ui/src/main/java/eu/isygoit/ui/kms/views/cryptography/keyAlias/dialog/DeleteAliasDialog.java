@@ -4,7 +4,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.dto.KmsDtos.DeleteAliasResponse;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsPinActionDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyAlias.AliasesView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
  * If the alias is the primary key, a 9‑digit confirmation code is required.
  * Otherwise, it behaves like a simple confirmation dialog.
  */
-public class DeleteAliasDialog extends PinBaseActionDialog {
+public class DeleteAliasDialog extends KmsPinActionDialog {
 
     private final AliasesView parentView;
     private final KmsApiService kmsApiService;

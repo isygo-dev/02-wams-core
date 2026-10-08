@@ -24,6 +24,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.StorageConfigService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.sms.layout.SmsMainLayout;
+import eu.isygoit.ui.sms.views.common.SmsEnumTag;
 import eu.isygoit.ui.sms.views.storageconfig.dialog.CreateStorageConfigDialog;
 import eu.isygoit.ui.sms.views.storageconfig.dialog.UpdateStorageConfigDialog;
 import feign.FeignException;
@@ -113,7 +114,7 @@ public class StorageConfigManagementView extends ManagementVerticalView {
         });
 
         typeFilter.setItems(IEnumStorage.Types.values());
-        typeFilter.setItemLabelGenerator(type -> type.name());
+        SmsEnumTag.useTagRenderer(typeFilter, "sms.enum.storage");
         typeFilter.setPlaceholder(I18n.t("sms.storageconfig.view.type.placeholder"));
         typeFilter.addValueChangeListener(e -> {
             currentType = e.getValue();

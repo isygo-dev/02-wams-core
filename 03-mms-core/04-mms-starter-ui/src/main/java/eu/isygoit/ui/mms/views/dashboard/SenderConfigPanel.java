@@ -81,7 +81,7 @@ public class SenderConfigPanel extends VerticalLayout {
                 I18n.t("mms.dashboard.sender.sample.production.name"),
                 "smtp.prod.company.com",
                 true,
-                "#4F46E5",
+                "primary",
                 "mail@company.com",
                 "587"
         ));
@@ -90,7 +90,7 @@ public class SenderConfigPanel extends VerticalLayout {
                 I18n.t("mms.dashboard.sender.sample.staging.name"),
                 "smtp.staging.company.com",
                 false,
-                "#6B7280",
+                "neutral",
                 "staging@company.com",
                 "587"
         ));
@@ -99,7 +99,7 @@ public class SenderConfigPanel extends VerticalLayout {
                 I18n.t("mms.dashboard.sender.sample.sendgrid.name"),
                 "api.sendgrid.com",
                 true,
-                "#10B981",
+                "success",
                 "sendgrid@company.com",
                 "443"
         ));
@@ -107,7 +107,7 @@ public class SenderConfigPanel extends VerticalLayout {
         return container;
     }
 
-    private Div createSenderItem(String name, String host, boolean active, String color, String email, String port) {
+    private Div createSenderItem(String name, String host, boolean active, String tone, String email, String port) {
         Div item = new Div();
         item.addClassName("sender-item");
 
@@ -128,7 +128,7 @@ public class SenderConfigPanel extends VerticalLayout {
         // Icon
         Icon mailIcon = VaadinIcon.MAILBOX.create();
         mailIcon.setSize("16px");
-        mailIcon.setColor(color);
+        mailIcon.addClassName("mms-tone-icon--" + tone);
 
         // Info
         VerticalLayout info = new VerticalLayout();
@@ -195,14 +195,14 @@ public class SenderConfigPanel extends VerticalLayout {
         Div container = new Div();
         container.addClassName("wams-summary-grid");
 
-        container.add(createSummaryItem(I18n.t("mms.dashboard.sender.summary.total"), "3", VaadinIcon.MAILBOX, "#4F46E5"));
-        container.add(createSummaryItem(I18n.t("mms.dashboard.sender.status.active"), "2", VaadinIcon.CHECK, "#10B981"));
-        container.add(createSummaryItem(I18n.t("mms.dashboard.sender.status.inactive"), "1", VaadinIcon.CLOSE, "#EF4444"));
+        container.add(createSummaryItem(I18n.t("mms.dashboard.sender.summary.total"), "3", VaadinIcon.MAILBOX, "primary"));
+        container.add(createSummaryItem(I18n.t("mms.dashboard.sender.status.active"), "2", VaadinIcon.CHECK, "success"));
+        container.add(createSummaryItem(I18n.t("mms.dashboard.sender.status.inactive"), "1", VaadinIcon.CLOSE, "danger"));
 
         return container;
     }
 
-    private Div createSummaryItem(String label, String value, VaadinIcon icon, String color) {
+    private Div createSummaryItem(String label, String value, VaadinIcon icon, String tone) {
         Div item = new Div();
         item.addClassName("wams-summary-item");
 
@@ -213,7 +213,7 @@ public class SenderConfigPanel extends VerticalLayout {
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("14px");
-        iconComponent.setColor(color);
+        iconComponent.addClassName("mms-tone-icon--" + tone);
 
         Span valueSpan = new Span(value);
         valueSpan.addClassName("wams-summary-value");

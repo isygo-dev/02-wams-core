@@ -13,6 +13,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
 import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.kms.views.tokenizer.config.dialog.DeleteTokenConfigDialog;
 import eu.isygoit.ui.kms.views.tokenizer.config.dialog.TokenConfigDetailsViewDialog;
 import eu.isygoit.ui.kms.views.tokenizer.config.dialog.UpdateTokenConfigDialog;
@@ -62,10 +63,9 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
 
         titleSpan = buildTitleSpan(dto.getCode(), dto.getCode());
 
-        typeChip = buildStatusChip(
-                dto.getTokenType() != null ? dto.getTokenType().meaning() : I18n.t("kms.token.config.type.unknown"),
-                dto.getTokenType() != null ? dto.getTokenType().name() : I18n.t("kms.token.config.type.unknown")
-        );
+        typeChip = dto.getTokenType() != null
+                ? KmsEnumTag.of(dto.getTokenType(), "kms.enum")
+                : KmsEnumTag.ofLabel(I18n.t("kms.token.config.type.unknown"), "UNKNOWN");
 
         left.add(titleSpan, typeChip);
         return left;
@@ -129,7 +129,7 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
     private void refreshDisplay() {
         titleSpan.setText(dto.getCode());
         titleSpan.getElement().setAttribute("title", dto.getCode());
-        typeChip.setText(dto.getTokenType() != null ? dto.getTokenType().meaning() : I18n.t("kms.token.config.type.unknown"));
+        KmsEnumTag.update(typeChip, dto.getTokenType(), "kms.enum");
         getUI().ifPresent(ui -> ui.access(() -> {
             List<Component> children = new java.util.ArrayList<>(getChildren().toList());
             boolean headerRemoved = false;

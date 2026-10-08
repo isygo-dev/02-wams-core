@@ -13,13 +13,13 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.KmsDtos.KeyPolicy;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsActionDialog;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class PolicyBuilderDialog extends BaseActionDialog {
+public class PolicyBuilderDialog extends KmsActionDialog {
 
     private final ObjectMapper objectMapper;
     private final Consumer<KeyPolicy> onSave;

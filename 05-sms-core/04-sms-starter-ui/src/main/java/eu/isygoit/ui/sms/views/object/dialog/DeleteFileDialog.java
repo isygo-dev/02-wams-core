@@ -3,7 +3,7 @@ package eu.isygoit.ui.sms.views.object.dialog;
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.ObjectStorageService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.sms.views.common.SmsPinActionDialog;
 import eu.isygoit.ui.sms.views.object.ObjectStorageManagementView;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ import org.springframework.http.ResponseEntity;
  * plain confirm/cancel dialog.
  */
 @Slf4j
-public class DeleteFileDialog extends PinBaseActionDialog {
+public class DeleteFileDialog extends SmsPinActionDialog {
 
     private final ObjectStorageManagementView parentView;
     private final ObjectStorageService objectStorageService;

@@ -4,13 +4,13 @@ import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsActionDialog;
 import feign.FeignException;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
 
-public class AddTagDialog extends BaseActionDialog {
+public class AddTagDialog extends KmsActionDialog {
 
     private final KmsApiService kmsApiService;
     private final String keyId;

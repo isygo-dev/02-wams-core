@@ -3,7 +3,6 @@ package eu.isygoit.ui.kms.views.cryptography.keyStore;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -17,6 +16,8 @@ import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.kms.views.common.KmsConfirmationDialog;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.kms.views.cryptography.keyStore.dialog.CustomKeyStoreDetailsViewDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyStore.dialog.DeleteCustomKeyStoreDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyStore.dialog.UpdateCustomKeyStoreDialog;
@@ -72,9 +73,9 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
         left.addClassName("kms-partc-title-wrap");
 
         Span titleSpan = buildTitleSpan(storeName, storeName);
-        Span typeChip = buildStatusChip(storeType, ChipColor.INFO);
+        Span typeChip = KmsEnumTag.ofValue(storeType, "kms.enum");
         String statusDisplay = connectionState != null ? connectionState : storeStatus;
-        Span statusChip = buildStatusChip(statusDisplay, storeStatus);
+        Span statusChip = KmsEnumTag.ofValue(statusDisplay, "kms.enum");
 
         left.add(titleSpan, typeChip, statusChip);
         return left;
@@ -147,25 +148,23 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
     }
 
     private void confirmConnect() {
-        ConfirmDialog dlg = new ConfirmDialog();
-        dlg.setHeader(I18n.t("kms.keystore.connect.confirm.title"));
-        dlg.setText(I18n.t("kms.keystore.connect.confirm.message", storeName));
-        dlg.setCancelable(true);
-        dlg.setConfirmText(I18n.t("kms.keystore.connect.confirm.button"));
-        dlg.setConfirmButtonTheme(ButtonVariant.LUMO_SUCCESS.getVariantName());
-        dlg.addConfirmListener(e -> connectStore());
-        dlg.open();
+        new KmsConfirmationDialog(
+                I18n.t("kms.keystore.connect.confirm.title"),
+                I18n.t("kms.keystore.connect.confirm.message", storeName),
+                I18n.t("kms.keystore.connect.confirm.button"),
+                I18n.t("common.dialog.base.cancel"),
+                this::connectStore,
+                ButtonVariant.LUMO_SUCCESS).open();
     }
 
     private void confirmDisconnect() {
-        ConfirmDialog dlg = new ConfirmDialog();
-        dlg.setHeader(I18n.t("kms.keystore.disconnect.confirm.title"));
-        dlg.setText(I18n.t("kms.keystore.disconnect.confirm.message"));
-        dlg.setCancelable(true);
-        dlg.setConfirmText(I18n.t("kms.keystore.disconnect.confirm.button"));
-        dlg.setConfirmButtonTheme(ButtonVariant.LUMO_WARNING.getVariantName());
-        dlg.addConfirmListener(e -> disconnectStore());
-        dlg.open();
+        new KmsConfirmationDialog(
+                I18n.t("kms.keystore.disconnect.confirm.title"),
+                I18n.t("kms.keystore.disconnect.confirm.message"),
+                I18n.t("kms.keystore.disconnect.confirm.button"),
+                I18n.t("common.dialog.base.cancel"),
+                this::disconnectStore,
+                ButtonVariant.LUMO_WARNING).open();
     }
 
     private void connectStore() {

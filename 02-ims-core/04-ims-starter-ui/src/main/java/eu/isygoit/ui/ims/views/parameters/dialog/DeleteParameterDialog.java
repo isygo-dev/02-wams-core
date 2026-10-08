@@ -3,11 +3,11 @@ package eu.isygoit.ui.ims.views.parameters.dialog;
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AppParameterService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.ims.views.common.ImsPinActionDialog;
 import eu.isygoit.ui.ims.views.parameters.ParameterManagementView;
 import feign.FeignException;
 
-public class DeleteParameterDialog extends PinBaseActionDialog {
+public class DeleteParameterDialog extends ImsPinActionDialog {
 
     private final ParameterManagementView parentView;
     private final AppParameterService parameterService;

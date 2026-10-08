@@ -27,6 +27,7 @@ import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.ims.layout.ImsMainLayout;
 import eu.isygoit.ui.ims.views.application.dialog.CreateApplicationDialog;
 import eu.isygoit.ui.ims.views.application.dialog.UpdateApplicationDialog;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
@@ -117,7 +118,8 @@ public class ApplicationManagementView extends ManagementVerticalView {
         });
 
         statusFilter.setItems(IEnumEnabledBinaryStatus.Types.values());
-        statusFilter.setItemLabelGenerator(status -> status.name());
+        statusFilter.setItemLabelGenerator(status -> ImsEnumTag.label(status, null));
+        statusFilter.setRenderer(ImsEnumTag.renderer(null));
         statusFilter.setPlaceholder(I18n.t("ims.app.view.status.placeholder"));
         statusFilter.addValueChangeListener(e -> {
             currentAdminStatus = e.getValue();

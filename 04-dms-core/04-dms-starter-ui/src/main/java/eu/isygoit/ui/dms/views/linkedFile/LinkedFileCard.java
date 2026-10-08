@@ -145,7 +145,7 @@ public class LinkedFileCard extends BaseCard<LinkedFileManagementView, LinkedFil
 
             Anchor downloadAnchor = new Anchor(streamResource, "");
             downloadAnchor.getElement().setAttribute("download", true);
-            downloadAnchor.getStyle().set("display", "none");
+            downloadAnchor.addClassName("dms-download-trigger");
             add(downloadAnchor);
             downloadAnchor.getElement().executeJs("this.click(); this.remove();");
         } catch (FeignException ex) {
@@ -239,8 +239,7 @@ public class LinkedFileCard extends BaseCard<LinkedFileManagementView, LinkedFil
 
         HorizontalLayout tagsContainer = new HorizontalLayout();
         tagsContainer.setSpacing(true);
-        tagsContainer.getStyle().set("flex-wrap", "wrap");
-        tagsContainer.getStyle().set("gap", "4px");
+        tagsContainer.addClassName("dms-chip-container");
 
         for (String tag : tags) {
             Span tagChip = new Span(tag);
@@ -272,8 +271,7 @@ public class LinkedFileCard extends BaseCard<LinkedFileManagementView, LinkedFil
 
         HorizontalLayout categoriesContainer = new HorizontalLayout();
         categoriesContainer.setSpacing(true);
-        categoriesContainer.getStyle().set("flex-wrap", "wrap");
-        categoriesContainer.getStyle().set("gap", "4px");
+        categoriesContainer.addClassName("dms-chip-container");
 
         for (String category : categories) {
             Span categoryChip = new Span(category);

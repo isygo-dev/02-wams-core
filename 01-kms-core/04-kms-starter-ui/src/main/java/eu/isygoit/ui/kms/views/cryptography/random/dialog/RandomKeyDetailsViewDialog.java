@@ -15,7 +15,7 @@ import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.RandomKeyService;
 import eu.isygoit.ui.common.component.ClipboardCopyButton;
-import eu.isygoit.ui.common.dialog.DetailsViewDialog;
+import eu.isygoit.ui.kms.views.common.KmsDetailsDialog;
 import eu.isygoit.ui.kms.views.cryptography.random.RandomKeyView;
 
 /**
@@ -26,7 +26,7 @@ import eu.isygoit.ui.kms.views.cryptography.random.RandomKeyView;
  * creation, renewal and deletion by name). The dialog therefore renders the {@link RandomKeyDto}
  * already held by the card/view instead of re-fetching it from the service.</p>
  */
-public class RandomKeyDetailsViewDialog extends DetailsViewDialog {
+public class RandomKeyDetailsViewDialog extends KmsDetailsDialog {
 
     private final RandomKeyView parentView;
     private final RandomKeyService keyService;
@@ -53,18 +53,16 @@ public class RandomKeyDetailsViewDialog extends DetailsViewDialog {
     }
 
     private void buildContent() {
-        VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setPadding(false);
-        mainLayout.setSpacing(true);
-
         // Section 1: Identity — name/tenant only.
         Div identityGrid = createDetailGrid();
         addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("kms.random.key.dialog.details.field.name"), dto.getName(), true);
         addFieldToGrid(identityGrid, VaadinIcon.BUILDING, I18n.t("kms.random.key.dialog.details.field.tenant"), dto.getTenant());
-        mainLayout.add(createSection(I18n.t("kms.random.key.dialog.details.section.identity"), identityGrid));
+        addTab(I18n.t("kms.random.key.dialog.details.section.identity"),
+                createSection(I18n.t("kms.random.key.dialog.details.section.identity"), identityGrid));
 
         // Section 2: Key value — masked value + reveal/copy.
-        mainLayout.add(createSection(I18n.t("kms.random.key.dialog.details.section.value"), buildValueRow()));
+        addTab(I18n.t("kms.random.key.dialog.details.section.value"),
+                createSection(I18n.t("kms.random.key.dialog.details.section.value"), buildValueRow()));
 
         // Section 3: Audit — created/updated by/date.
         Div auditGrid = createDetailGrid();
@@ -74,9 +72,8 @@ public class RandomKeyDetailsViewDialog extends DetailsViewDialog {
         addFieldToGrid(auditGrid, VaadinIcon.EDIT, I18n.t("kms.random.key.dialog.details.field.updated.by"), dto.getUpdatedBy());
         addFieldToGrid(auditGrid, VaadinIcon.CALENDAR_O, I18n.t("kms.random.key.dialog.details.field.updated.date"),
                 dto.getUpdateDate() != null ? DateHelper.formatToHumanReadable(dto.getUpdateDate()) : null);
-        mainLayout.add(createSection(I18n.t("kms.random.key.dialog.details.section.audit"), auditGrid));
-
-        add(mainLayout);
+        addTab(I18n.t("kms.random.key.dialog.details.section.audit"),
+                createSection(I18n.t("kms.random.key.dialog.details.section.audit"), auditGrid));
     }
 
     /**

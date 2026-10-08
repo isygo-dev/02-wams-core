@@ -3,10 +3,10 @@ package eu.isygoit.ui.kms.views.secrets.peb.dialog;
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.PEBConfigService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsPinActionDialog;
 import feign.FeignException;
 
-public class DeletePEBConfigDialog extends PinBaseActionDialog {
+public class DeletePEBConfigDialog extends KmsPinActionDialog {
 
     private final PEBConfigService configService;
     private final Long configId;

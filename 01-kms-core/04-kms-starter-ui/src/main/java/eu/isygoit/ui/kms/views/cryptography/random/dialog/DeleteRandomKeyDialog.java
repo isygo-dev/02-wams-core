@@ -2,9 +2,9 @@ package eu.isygoit.ui.kms.views.cryptography.random.dialog;
 
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.RandomKeyService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsPinActionDialog;
 
-public class DeleteRandomKeyDialog extends PinBaseActionDialog {
+public class DeleteRandomKeyDialog extends KmsPinActionDialog {
 
     private final RandomKeyService keyService;
     private final String keyName;

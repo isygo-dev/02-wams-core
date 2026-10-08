@@ -5,12 +5,12 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import eu.isygoit.dto.KmsDtos.RotateKeyResponse;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsPinActionDialog;
 import eu.isygoit.ui.kms.views.cryptography.key.KeyManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class RotateKeyConfirmDialog extends PinBaseActionDialog {
+public class RotateKeyConfirmDialog extends KmsPinActionDialog {
 
     private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;

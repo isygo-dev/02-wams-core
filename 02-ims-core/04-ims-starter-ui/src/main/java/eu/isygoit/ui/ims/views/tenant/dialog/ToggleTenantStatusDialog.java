@@ -4,12 +4,12 @@ import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.TenantService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.ims.views.common.ImsPinActionDialog;
 import eu.isygoit.ui.ims.views.tenant.TenantManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class ToggleTenantStatusDialog extends PinBaseActionDialog {
+public class ToggleTenantStatusDialog extends ImsPinActionDialog {
 
     private final TenantManagementView parentView;
     private final TenantService tenantService;

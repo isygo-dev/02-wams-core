@@ -3,11 +3,11 @@ package eu.isygoit.ui.sms.views.storageconfig.dialog;
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.StorageConfigService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.sms.views.common.SmsPinActionDialog;
 import eu.isygoit.ui.sms.views.storageconfig.StorageConfigManagementView;
 import feign.FeignException;
 
-public class DeleteStorageConfigDialog extends PinBaseActionDialog {
+public class DeleteStorageConfigDialog extends SmsPinActionDialog {
 
     private final StorageConfigManagementView parentView;
     private final StorageConfigService storageConfigService;

@@ -2,10 +2,10 @@ package eu.isygoit.ui.kms.views.secrets.digest.dialog;
 
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.DigestConfigService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsPinActionDialog;
 import feign.FeignException;
 
-public class DeleteDigestConfigDialog extends PinBaseActionDialog {
+public class DeleteDigestConfigDialog extends KmsPinActionDialog {
 
     private final DigestConfigService configService;
     private final Long configId;

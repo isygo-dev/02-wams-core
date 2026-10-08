@@ -12,11 +12,11 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.SenderConfigService;
-import eu.isygoit.ui.common.dialog.NoActionDialog;
+import eu.isygoit.ui.mms.views.common.MmsNoActionDialog;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class TestConnectionDialog extends NoActionDialog {
+public class TestConnectionDialog extends MmsNoActionDialog {
 
     private final SenderConfigService senderConfigService;
     private final SenderConfigDto config;
@@ -59,7 +59,7 @@ public class TestConnectionDialog extends NoActionDialog {
         infoRow.setSpacing(true);
 
         Icon serverIcon = VaadinIcon.SERVER.create();
-        serverIcon.setColor("var(--lumo-primary-color)");
+        serverIcon.addClassName("mms-primary-icon");
         Span hostLabel = new Span(I18n.t("mms.sender.dialog.test.host") + ":");
         hostLabel.addClassName(LumoUtility.FontWeight.BOLD);
         Span hostValue = new Span(config.getHost() + ":" + config.getPort());
@@ -132,7 +132,7 @@ public class TestConnectionDialog extends NoActionDialog {
             resultContent.addClassName("wams-dialog-status-content");
 
             Icon successIcon = VaadinIcon.CHECK_CIRCLE.create();
-            successIcon.setColor("var(--lumo-success-color)");
+            successIcon.addClassName("mms-success-icon");
             successIcon.setSize("48px");
 
             resultContent.add(successIcon);
@@ -149,7 +149,7 @@ public class TestConnectionDialog extends NoActionDialog {
             resultContent.addClassName("wams-dialog-status-content");
 
             Icon errorIcon = VaadinIcon.EXCLAMATION_CIRCLE.create();
-            errorIcon.setColor("var(--lumo-error-color)");
+            errorIcon.addClassName("mms-danger-icon");
             errorIcon.setSize("48px");
 
             resultContent.add(errorIcon);

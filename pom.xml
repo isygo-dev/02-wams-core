@@ -2,7 +2,7 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <version>WC-1.0.260928-T1052</version>
+    <version>WC-1.0.261007-T1703</version>
 
     <organization>
         <name>Isygo-it</name>
@@ -26,7 +26,7 @@
         <maven.compiler.target>17</maven.compiler.target>
 
         <!-- Main service stack version -->
-        <isygoit.service.stack.version>WS-1.0.260928-T1052</isygoit.service.stack.version>
+        <isygoit.service.stack.version>WS-1.0.261007-T1703</isygoit.service.stack.version>
 
         <!-- Spring Boot and Cloud -->
         <spring-boot.version>3.0.7</spring-boot.version>

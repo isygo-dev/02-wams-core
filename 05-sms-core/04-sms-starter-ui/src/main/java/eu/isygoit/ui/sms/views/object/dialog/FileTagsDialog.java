@@ -9,14 +9,14 @@ import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.FileTagsDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.ObjectStorageService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.sms.views.common.SmsActionDialog;
 import eu.isygoit.ui.sms.views.object.ObjectStorageManagementView;
 import feign.FeignException;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileTagsDialog extends BaseActionDialog {
+public class FileTagsDialog extends SmsActionDialog {
 
     private final ObjectStorageManagementView parentView;
     private final ObjectStorageService objectStorageService;

@@ -12,6 +12,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -25,6 +26,7 @@ import eu.isygoit.remote.mms.MsgTemplateService;
 import eu.isygoit.remote.mms.SenderConfigService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.mms.layout.MmsMainLayout;
+import eu.isygoit.ui.mms.views.common.MmsEnumTag;
 import eu.isygoit.ui.mms.views.msgtemplate.dialog.CreateMsgTemplateDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
@@ -129,6 +131,9 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
                 new TemplateLanguageOption(I18n.t("mms.msgtemplate.view.language.ar"), IEnumLanguage.Types.AR)
         );
         languageFilter.setItemLabelGenerator(option -> option.label());
+        languageFilter.setRenderer(new ComponentRenderer<>(option -> option.value() == null
+                ? new Span(option.label())
+                : MmsEnumTag.of(option.value(), "mms.msgtemplate.view.language")));
         languageFilter.setValue(new TemplateLanguageOption(I18n.t("mms.msgtemplate.view.language.all"), null));
         languageFilter.setPlaceholder(I18n.t("mms.msgtemplate.view.language.placeholder"));
         languageFilter.setTooltipText(I18n.t("mms.msgtemplate.view.language.tooltip"));
@@ -142,6 +147,9 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
                 new TemplateNameOption(I18n.t("mms.msgtemplate.view.name.all"), null)
         );
         nameFilter.setItemLabelGenerator(option -> option.label());
+        nameFilter.setRenderer(new ComponentRenderer<>(option -> option.value() == null
+                ? new Span(option.label())
+                : MmsEnumTag.ofValue(option.value(), "mms.msgtemplate.enum.name")));
         nameFilter.setValue(new TemplateNameOption(I18n.t("mms.msgtemplate.view.name.all"), null));
         nameFilter.setPlaceholder(I18n.t("mms.msgtemplate.view.name.placeholder"));
         nameFilter.setTooltipText(I18n.t("mms.msgtemplate.view.name.tooltip"));
@@ -191,7 +199,8 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
                 List<TemplateNameOption> options = new ArrayList<>();
                 options.add(new TemplateNameOption(I18n.t("mms.msgtemplate.view.name.all"), null));
                 response.getBody().forEach(name ->
-                        options.add(new TemplateNameOption(name, name))
+                        options.add(new TemplateNameOption(
+                                MmsEnumTag.label(name, "mms.msgtemplate.enum.name"), name))
                 );
                 nameFilter.setItems(options);
                 nameFilter.setValue(options.get(0));

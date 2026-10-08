@@ -18,6 +18,7 @@ import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.remote.ims.CustomerImageService;
 import eu.isygoit.remote.ims.CustomerService;
 import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import eu.isygoit.ui.ims.views.customer.dialog.CustomerDetailsViewDialog;
 import eu.isygoit.ui.ims.views.customer.dialog.DeleteCustomerDialog;
 import eu.isygoit.ui.ims.views.customer.dialog.LinkCustomerAccountDialog;
@@ -94,10 +95,7 @@ public class CustomerCard extends BaseCard<CustomerManagementView, CustomerServi
         row2.addClassName("card-row--spaced");
 
         Span titleSpan = buildTitleSpan(customer.getName(), customer.getEmail());
-        adminStatusChip = buildStatusChip(
-                customer.getAdminStatus() != null ? customer.getAdminStatus().name() : I18n.t("ims.customer.card.status.unknown"),
-                customer.getAdminStatus() != null ? customer.getAdminStatus().name() : I18n.t("ims.customer.card.status.unknown")
-        );
+        adminStatusChip = ImsEnumTag.ofOrUnknown(customer.getAdminStatus(), null);
         row2.add(titleSpan, adminStatusChip);
 
         titleLayout.add(row1, row2);
@@ -199,10 +197,7 @@ public class CustomerCard extends BaseCard<CustomerManagementView, CustomerServi
 
     private void updateStatusChip() {
         if (adminStatusChip != null) {
-            String status = customer.getAdminStatus() != null ? customer.getAdminStatus().name() : I18n.t("ims.customer.card.status.unknown");
-            adminStatusChip.setText(status);
-            adminStatusChip.getElement().setAttribute("title", status);
-            applyChipColor(adminStatusChip, ChipColor.fromStatus(status));
+            ImsEnumTag.update(adminStatusChip, customer.getAdminStatus(), null);
         }
     }
 

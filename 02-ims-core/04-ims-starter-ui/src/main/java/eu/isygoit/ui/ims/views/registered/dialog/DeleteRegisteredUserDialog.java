@@ -3,11 +3,11 @@ package eu.isygoit.ui.ims.views.registered.dialog;
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.RegisteredUserService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.ims.views.common.ImsPinActionDialog;
 import eu.isygoit.ui.ims.views.registered.RegisteredManagementView;
 import feign.FeignException;
 
-public class DeleteRegisteredUserDialog extends PinBaseActionDialog {
+public class DeleteRegisteredUserDialog extends ImsPinActionDialog {
 
     private final RegisteredManagementView parentView;
     private final RegisteredUserService registeredUserService;

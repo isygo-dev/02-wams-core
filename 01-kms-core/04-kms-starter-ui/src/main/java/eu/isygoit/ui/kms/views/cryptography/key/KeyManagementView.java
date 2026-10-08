@@ -13,6 +13,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -25,6 +26,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.kms.views.cryptography.key.dialog.CreateKeyDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
@@ -114,11 +116,14 @@ public class KeyManagementView extends ManagementVerticalView {
 
         statusFilter.setItems(
                 new KeyStatusOption(I18n.t("kms.key.view.status.all"), null),
-                new KeyStatusOption(IEnumKeyStatus.Types.ENABLED.meaning(), IEnumKeyStatus.Types.ENABLED),
-                new KeyStatusOption(IEnumKeyStatus.Types.DISABLED.meaning(), IEnumKeyStatus.Types.DISABLED),
-                new KeyStatusOption(IEnumKeyStatus.Types.PENDING_DELETION.meaning(), IEnumKeyStatus.Types.PENDING_DELETION)
+                new KeyStatusOption(KmsEnumTag.label(IEnumKeyStatus.Types.ENABLED, null), IEnumKeyStatus.Types.ENABLED),
+                new KeyStatusOption(KmsEnumTag.label(IEnumKeyStatus.Types.DISABLED, null), IEnumKeyStatus.Types.DISABLED),
+                new KeyStatusOption(KmsEnumTag.label(IEnumKeyStatus.Types.PENDING_DELETION, null), IEnumKeyStatus.Types.PENDING_DELETION)
         );
         statusFilter.setItemLabelGenerator(option -> option.label());
+        statusFilter.setRenderer(new ComponentRenderer<>(option -> option.value() == null
+                ? new Span(option.label())
+                : KmsEnumTag.of(option.value(), null)));
         statusFilter.setValue(new KeyStatusOption(I18n.t("kms.key.view.status.all"), null));
         statusFilter.setPlaceholder(I18n.t("kms.key.view.status.placeholder"));
         statusFilter.setTooltipText(I18n.t("kms.key.view.status.tooltip"));

@@ -22,6 +22,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.kms.KmsMainView;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.kms.views.cryptography.key.dialog.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -105,9 +106,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
                     titleSpan.setText(aliasOrId);
                     titleSpan.getElement().setAttribute("title", aliasOrId);
 
-                    statusChip.setText(statusText);
-                    applyChipColor(statusChip, ChipColor.fromStatus(statusText));
-                    statusChip.getElement().setAttribute("title", statusText);
+                    KmsEnumTag.update(statusChip, metadata.getKeyStatus(), "kms.enum");
 
                     updateVersionDisplay();
                     updateRotationButton();
@@ -145,7 +144,9 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         left.addClassName("key-card__title-row");
 
         titleSpan = buildTitleSpan(aliasOrId, aliasOrId);
-        statusChip = buildStatusChip(statusText, statusText);
+        statusChip = metadata != null && metadata.getKeyStatus() != null
+                ? KmsEnumTag.of(metadata.getKeyStatus(), "kms.enum")
+                : KmsEnumTag.ofLabel(I18n.t("kms.key.card.status.unknown"), "UNKNOWN");
 
         versionSpan = new Span();
         updateVersionDisplay();
@@ -190,10 +191,6 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
     protected void buildBodyRows() {
         bodyContainer.removeAll();
 
-        // Description (with icon) — kept short for quick scanning
-        bodyContainer.add(createIconRow(VaadinIcon.FILE_TEXT, I18n.t("kms.key.card.description"),
-                metadata != null && metadata.getDescription() != null ? metadata.getDescription() : I18n.t("kms.key.card.no.description")));
-
         // Deletion warning — operationally important, stays visible on the card
         createDeletionWarningSpan();
         updateDeletionWarning();
@@ -221,7 +218,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         Span valueSpan = new Span(value);
         valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
         valueSpan.addClassName("key-card__row-value");
-        valueSpan.getStyle().set("color", "var(--lumo-primary-text-color)");
+        valueSpan.addClassName("key-card__row-value--primary");
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
@@ -257,11 +254,15 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
 
         if (rotationOn) {
             rotationBtn.setTooltipText(isActive ? I18n.t("kms.key.card.rotation.tooltip.disable.active") : I18n.t("kms.key.card.rotation.tooltip.disable.inactive"));
-            rotationBtn.getStyle().set("color", isActive ? "var(--lumo-success-color)" : "var(--lumo-tertiary-text-color)");
         } else {
             rotationBtn.setTooltipText(isActive ? I18n.t("kms.key.card.rotation.tooltip.enable.active") : I18n.t("kms.key.card.rotation.tooltip.enable.inactive"));
-            rotationBtn.getStyle().set("color", isActive ? "var(--lumo-primary-color)" : "var(--lumo-tertiary-text-color)");
         }
+        for (String tone : new String[]{"primary", "success", "muted"}) {
+            rotationBtn.removeClassName("key-card__rotation-button--" + tone);
+        }
+        rotationBtn.addClassName("key-card__rotation-button--" + (isActive
+                ? rotationOn ? "success" : "primary"
+                : "muted"));
 
         rotationBtn.setEnabled(isActive);
     }
@@ -283,7 +284,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
             String warningText = buildDeletionWarning();
             deletionWarningSpan.removeAll();
             Icon warningIcon = VaadinIcon.EXCLAMATION_CIRCLE.create();
-            warningIcon.setColor("var(--lumo-error-color)");
+            warningIcon.addClassName("kms-text-danger");
             deletionWarningSpan.add(warningIcon);
             deletionWarningSpan.add(new Span(warningText));
             deletionWarningSpan.setVisible(true);

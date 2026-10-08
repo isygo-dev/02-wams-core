@@ -10,7 +10,7 @@ import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.enums.IEnumCustomKeyStoreType;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsActionDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyStore.CustomKeyStoresView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +19,7 @@ import org.springframework.util.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UpdateCustomKeyStoreDialog extends BaseActionDialog {
+public class UpdateCustomKeyStoreDialog extends KmsActionDialog {
 
     private final CustomKeyStoresView parentView;
     private final KmsApiService kmsApiService;

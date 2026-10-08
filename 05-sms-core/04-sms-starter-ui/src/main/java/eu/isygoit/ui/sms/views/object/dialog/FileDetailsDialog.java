@@ -11,7 +11,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.ObjectStorageService;
 import eu.isygoit.s3.object.MetaData;
-import eu.isygoit.ui.common.dialog.DetailsViewDialog;
+import eu.isygoit.ui.sms.views.common.SmsDetailsDialog;
 import eu.isygoit.ui.sms.views.object.ObjectStorageManagementView;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class FileDetailsDialog extends DetailsViewDialog {
+public class FileDetailsDialog extends SmsDetailsDialog {
 
     private final ObjectStorageManagementView parentView;
     private final ObjectStorageService objectStorageService;
@@ -53,10 +53,6 @@ public class FileDetailsDialog extends DetailsViewDialog {
     }
 
     private void buildContent() {
-        VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setPadding(false);
-        mainLayout.setSpacing(true);
-
         Div identityGrid = createDetailGrid();
         addFieldToGrid(identityGrid, VaadinIcon.FILE, I18n.t("sms.objects.details.field.name"), file.getFileName(), true);
         addFieldToGrid(identityGrid, VaadinIcon.FOLDER_O, I18n.t("sms.objects.details.field.path"),
@@ -65,12 +61,11 @@ public class FileDetailsDialog extends DetailsViewDialog {
         addFieldToGrid(identityGrid, VaadinIcon.HARDDRIVE, I18n.t("sms.objects.details.field.size"), file.getSizeDisplay());
         addFieldToGrid(identityGrid, VaadinIcon.CALENDAR, I18n.t("sms.objects.details.field.modified"),
                 file.getModifiedDate() != null ? file.getModifiedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null);
-        mainLayout.add(createSection(I18n.t("sms.objects.details.section.identity"), identityGrid));
+        addTab(I18n.t("sms.objects.details.section.identity"), identityGrid);
 
         metadataLayout.setPadding(false);
         metadataLayout.setSpacing(true);
         metadataLayout.add(new Span(I18n.t("sms.objects.details.loading.metadata")));
-        mainLayout.add(createSection(I18n.t("sms.objects.details.section.metadata"), metadataLayout));
 
         // NoActionDialog already renders its own Close button in the real
         // dialog footer — this row only needs the metadata-refresh action.
@@ -84,9 +79,11 @@ public class FileDetailsDialog extends DetailsViewDialog {
         refreshMetaBtn.addClickListener(e -> loadMetadata());
 
         actionsRow.add(refreshMetaBtn);
-        mainLayout.add(actionsRow);
-
-        add(mainLayout);
+        VerticalLayout metadataTab = new VerticalLayout(metadataLayout, actionsRow);
+        metadataTab.setPadding(false);
+        metadataTab.setSpacing(true);
+        metadataTab.setWidthFull();
+        addTab(I18n.t("sms.objects.details.section.metadata"), metadataTab);
 
         addOpenedChangeListener(e -> {
             if (e.isOpened()) {

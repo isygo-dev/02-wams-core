@@ -7,7 +7,6 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -27,6 +26,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.kms.views.cryptography.keyGrants.dialog.CreateGrantDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyGrants.dialog.GrantDetailsViewDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyGrants.dialog.RetireGrantDialog;
@@ -205,30 +205,7 @@ public class GrantsView extends ManagementVerticalView {
                 .setHeader(I18n.t("kms.grants.view.grid.column.operations")).setSortable(true);
         grantsGrid.addColumn(new ComponentRenderer<>(grant -> {
             String status = grant.getStatus() != null ? grant.getStatus() : "ACTIVE";
-            Span chip = new Span(status);
-            chip.addClassNames(LumoUtility.FontSize.XSMALL, LumoUtility.Padding.Horizontal.SMALL,
-                    LumoUtility.Padding.Vertical.XSMALL, LumoUtility.BorderRadius.LARGE);
-            chip.addClassName("status-chip");
-            String statusDisplay;
-            switch (status.toUpperCase()) {
-                case "ACTIVE":
-                    chip.addClassName("status-chip--success");
-                    statusDisplay = I18n.t("kms.grants.view.status.active");
-                    break;
-                case "REVOKED":
-                    chip.addClassName("status-chip--error");
-                    statusDisplay = I18n.t("kms.grants.view.status.revoked");
-                    break;
-                case "RETIRED":
-                    chip.addClassName("status-chip--neutral");
-                    statusDisplay = I18n.t("kms.grants.view.status.retired");
-                    break;
-                default:
-                    chip.addClassName("status-chip--neutral");
-                    statusDisplay = status;
-            }
-            chip.setText(statusDisplay);
-            return chip;
+            return KmsEnumTag.ofValue(status, null);
         })).setHeader(I18n.t("kms.grants.view.grid.column.status")).setSortable(true);
 
         grantsGrid.setSelectionMode(Grid.SelectionMode.SINGLE);

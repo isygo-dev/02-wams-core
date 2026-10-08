@@ -5,6 +5,81 @@
  * Imported once via @CssImport on ImsMainLayout.
  */
 
+/* Pilot-aligned theme tokens for this stylesheet and Vaadin/Lumo components. */
+:root {
+    --ims-color-primary: #0c66e4;
+    --ims-color-primary-soft: rgba(12, 102, 228, 0.1);
+    --ims-color-success: #1f845a;
+    --ims-color-warning: #a54800;
+    --ims-color-danger: #c9372c;
+    --ims-color-info: #0055cc;
+    --ims-color-text: #172b4d;
+    --ims-color-text-muted: #44546f;
+    --ims-color-text-soft: #626f86;
+    --ims-color-surface: #ffffff;
+    --ims-color-surface-alt: #f7f8f9;
+    --ims-color-border: rgba(9, 30, 66, 0.14);
+    --ims-color-shadow: rgba(9, 30, 66, 0.13);
+    --ims-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --ims-font-size-xs: 0.75rem;
+    --ims-font-size-sm: 0.875rem;
+    --ims-font-size-md: 1rem;
+    --ims-font-size-lg: 1.125rem;
+    --ims-space-1: 0.25rem;
+    --ims-space-2: 0.5rem;
+    --ims-space-3: 0.75rem;
+    --ims-space-4: 1rem;
+    --ims-space-6: 1.5rem;
+    --ims-space-8: 2rem;
+    --ims-radius-sm: 3px;
+    --ims-radius-md: 6px;
+    --ims-radius-lg: 9px;
+    --ims-radius-xl: 12px;
+    --ims-shadow-sm: 0 1px 2px rgba(9, 30, 66, 0.16), 0 0 1px rgba(9, 30, 66, 0.1);
+    --ims-shadow-md: 0 4px 8px -2px rgba(9, 30, 66, 0.18), 0 0 1px rgba(9, 30, 66, 0.12);
+
+    --lumo-primary-color: var(--ims-color-primary);
+    --lumo-primary-text-color: var(--ims-color-primary);
+    --lumo-primary-color-10pct: var(--ims-color-primary-soft);
+    --lumo-primary-color-50pct: rgba(12, 102, 228, 0.5);
+    --lumo-success-color: var(--ims-color-success);
+    --lumo-success-text-color: var(--ims-color-success);
+    --lumo-success-color-10pct: rgba(31, 132, 90, 0.1);
+    --lumo-success-color-50pct: rgba(31, 132, 90, 0.5);
+    --lumo-warning-color: var(--ims-color-warning);
+    --lumo-warning-text-color: var(--ims-color-warning);
+    --lumo-warning-color-10pct: rgba(165, 72, 0, 0.12);
+    --lumo-warning-color-50pct: rgba(165, 72, 0, 0.5);
+    --lumo-error-color: var(--ims-color-danger);
+    --lumo-error-text-color: var(--ims-color-danger);
+    --lumo-error-color-10pct: rgba(201, 55, 44, 0.1);
+    --lumo-error-color-50pct: rgba(201, 55, 44, 0.5);
+    --lumo-body-text-color: var(--ims-color-text);
+    --lumo-secondary-text-color: var(--ims-color-text-muted);
+    --lumo-tertiary-text-color: var(--ims-color-text-soft);
+    --lumo-base-color: var(--ims-color-surface);
+    --lumo-contrast-5pct: rgba(9, 30, 66, 0.04);
+    --lumo-contrast-10pct: rgba(9, 30, 66, 0.08);
+    --lumo-contrast-20pct: var(--ims-color-border);
+    --lumo-font-family: var(--ims-font-family);
+    --lumo-font-size-xs: var(--ims-font-size-xs);
+    --lumo-font-size-s: var(--ims-font-size-sm);
+    --lumo-font-size-m: var(--ims-font-size-md);
+    --lumo-font-size-l: var(--ims-font-size-lg);
+    --lumo-space-xs: var(--ims-space-1);
+    --lumo-space-s: var(--ims-space-2);
+    --lumo-space-m: var(--ims-space-4);
+    --lumo-space-l: var(--ims-space-6);
+    --lumo-space-xl: var(--ims-space-8);
+    --lumo-border-radius-s: var(--ims-radius-sm);
+    --lumo-border-radius-m: var(--ims-radius-md);
+    --lumo-border-radius: var(--ims-radius-lg);
+    --lumo-border-radius-l: var(--ims-radius-lg);
+    --lumo-box-shadow-xs: var(--ims-shadow-sm);
+    --lumo-box-shadow-s: var(--ims-shadow-sm);
+    --lumo-box-shadow-m: var(--ims-shadow-md);
+}
+
 /* ══════════════════════════════════════════════════════════════════════════
    Cards — AccountCard / AnnexCard / ApplicationCard / CustomerCard /
    ParameterCard / RegisteredCard / RoleCard / TenantCard
@@ -659,6 +734,10 @@
     flex-shrink: 0;
 }
 
+.wams-user-info-name {
+    margin: 0;
+}
+
 /* Toggle section */
 .wams-toggle-section {
     padding: var(--lumo-space-s) var(--lumo-space-xs);
@@ -743,107 +822,54 @@
     }
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   Chips - Shared chip styles for all IMS cards
-   ══════════════════════════════════════════════════════════════════════════ */
-
-.status-chip {
+/* Enum tags mirror Pilot's single reusable tag component. */
+.ims-enum-tag {
     display: inline-flex;
     align-items: center;
-    padding: 0.125rem 0.625rem;
-    border-radius: var(--lumo-border-radius-s);
-    font-size: var(--lumo-font-size-xxs);
+    max-width: 100%;
+    padding: 0.12rem 0.55rem;
+    border: 1px solid transparent;
+    border-radius: var(--ims-radius-md);
+    font-size: var(--ims-font-size-xs);
     font-weight: 600;
-    line-height: 1.6;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
+    line-height: 1.5;
     white-space: nowrap;
+    vertical-align: middle;
 }
 
-/* Success chip - Green */
-.status-chip--success {
-    background: var(--lumo-success-color-10pct);
-    color: var(--lumo-success-text-color);
-    border: 1px solid var(--lumo-success-color-50pct);
+.ims-enum-tag--success {
+    color: var(--ims-color-success);
+    background: rgba(31, 132, 90, 0.1);
 }
 
-/* Warning chip - Orange/Amber */
-.status-chip--warning {
-    background: var(--lumo-warning-color-10pct);
-    color: var(--lumo-warning-text-color);
-    border: 1px solid var(--lumo-warning-color-50pct);
+.ims-enum-tag--warning {
+    color: var(--ims-color-warning);
+    background: rgba(165, 72, 0, 0.12);
 }
 
-/* Error chip - Red */
-.status-chip--error {
-    background: var(--lumo-error-color-10pct);
-    color: var(--lumo-error-text-color);
-    border: 1px solid var(--lumo-error-color-50pct);
+.ims-enum-tag--danger {
+    color: var(--ims-color-danger);
+    background: rgba(201, 55, 44, 0.1);
 }
 
-/* Primary chip - Blue */
-.status-chip--primary {
-    background: var(--lumo-primary-color-10pct);
-    color: var(--lumo-primary-text-color);
-    border: 1px solid var(--lumo-primary-color-50pct);
+.ims-enum-tag--info {
+    color: var(--ims-color-info);
+    background: var(--ims-color-primary-soft);
 }
 
-/* Neutral chip - Gray */
-.status-chip--neutral {
-    background: var(--lumo-contrast-10pct);
-    color: var(--lumo-secondary-text-color);
-    border: 1px solid var(--lumo-contrast-20pct);
+.ims-enum-tag--neutral {
+    color: var(--ims-color-text-muted);
+    background: var(--ims-color-surface-alt);
 }
 
-/* Chip with icon */
-.status-chip--with-icon {
-    gap: var(--lumo-space-xs);
+.ims-dialog-tabs,
+.wams-dialog-tabs {
+    width: 100%;
+    --vaadin-tabs-background-color: transparent;
+    --vaadin-tabs-border-color: var(--ims-color-border);
 }
 
-.status-chip--with-icon .status-chip-icon {
-    font-size: var(--lumo-font-size-xs);
-}
-
-/* Chip sizes */
-.status-chip--sm {
-    font-size: var(--lumo-font-size-xxs);
-    padding: 0.0625rem 0.5rem;
-}
-
-.status-chip--md {
-    font-size: var(--lumo-font-size-xs);
-    padding: 0.125rem 0.75rem;
-}
-
-.status-chip--lg {
-    font-size: var(--lumo-font-size-s);
-    padding: 0.25rem 1rem;
-}
-
-/* Clickable chips */
-.status-chip--clickable {
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.status-chip--clickable:hover {
-    transform: scale(1.05);
-    box-shadow: var(--lumo-box-shadow-xs);
-}
-
-/* Chip animation */
-@keyframes status-chip-pulse {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
-    }
-    100% {
-        transform: scale(1);
-    }
-}
-
-.status-chip--pulse {
-    animation: status-chip-pulse 2s ease-in-out infinite;
+.ims-dialog-tabs::part(content),
+.wams-dialog-tabs::part(content) {
+    padding-block-start: var(--ims-space-4);
 }

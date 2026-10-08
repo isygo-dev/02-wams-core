@@ -11,7 +11,8 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.ui.common.dialog.DetailsViewDialog;
+import eu.isygoit.ui.kms.views.common.KmsDetailsDialog;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 
 /**
  * Read-only dialog showing every field of a {@link KmsDtos.ListGrantsResponse.Grant},
@@ -21,7 +22,7 @@ import eu.isygoit.ui.common.dialog.DetailsViewDialog;
  * Identity, Constraints, Audit — with a {@code wams-card__detail-grid} field grid per section.
  */
 @CssImport("./styles/kms.css")
-public class GrantDetailsViewDialog extends DetailsViewDialog {
+public class GrantDetailsViewDialog extends KmsDetailsDialog {
 
     public GrantDetailsViewDialog(KmsDtos.ListGrantsResponse.Grant grant, ObjectMapper objectMapper) {
         super(I18n.t("kms.grant.details.title"));
@@ -36,20 +37,19 @@ public class GrantDetailsViewDialog extends DetailsViewDialog {
     }
 
     private void buildContent(KmsDtos.ListGrantsResponse.Grant grant, ObjectMapper objectMapper) {
-        VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setPadding(false);
-        mainLayout.setSpacing(true);
-
         // Identity
         Div identityGrid = createDetailGrid();
         addFieldToGrid(identityGrid, VaadinIcon.KEY, I18n.t("kms.grant.details.field.grant.id"), grant.getGrantId(), true);
         addFieldToGrid(identityGrid, VaadinIcon.USER, I18n.t("kms.grant.details.field.grantee"), grant.getGranteePrincipal(), true);
         addFieldToGrid(identityGrid, VaadinIcon.USER_STAR, I18n.t("kms.grant.details.field.retiring"), grant.getRetiringPrincipal(), true);
         addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("kms.grant.details.field.name"), grant.getName());
-        addFieldToGrid(identityGrid, VaadinIcon.FLAG, I18n.t("kms.grant.details.field.status"), grant.getStatus());
+        identityGrid.add(KmsEnumTag.detailField(VaadinIcon.FLAG,
+                I18n.t("kms.grant.details.field.status"),
+                KmsEnumTag.ofValue(grant.getStatus(), "kms.enum")));
         addFieldToGrid(identityGrid, VaadinIcon.COG, I18n.t("kms.grant.details.field.operations"),
                 grant.getOperations() != null ? String.join(", ", grant.getOperations()) : null);
-        mainLayout.add(createSection(I18n.t("kms.grant.details.section.identity"), identityGrid));
+        addTab(I18n.t("kms.grant.details.section.identity"),
+                createSection(I18n.t("kms.grant.details.section.identity"), identityGrid));
 
         // Constraints
         if (grant.getConstraints() != null) {
@@ -73,7 +73,7 @@ public class GrantDetailsViewDialog extends DetailsViewDialog {
                 pre.addClassName("grant-detail-constraints-pre");
                 constraintsSection.add(pre);
             }
-            mainLayout.add(constraintsSection);
+            addTab(I18n.t("kms.grant.details.section.constraints"), constraintsSection);
         }
 
         // Audit
@@ -81,9 +81,8 @@ public class GrantDetailsViewDialog extends DetailsViewDialog {
             Div auditGrid = createDetailGrid();
             addFieldToGrid(auditGrid, VaadinIcon.CALENDAR, I18n.t("kms.grant.details.field.creation.date"),
                     DateHelper.formatToHumanReadable(grant.getCreateDate()));
-            mainLayout.add(createSection(I18n.t("kms.grant.details.section.audit"), auditGrid));
+            addTab(I18n.t("kms.grant.details.section.audit"),
+                    createSection(I18n.t("kms.grant.details.section.audit"), auditGrid));
         }
-
-        add(mainLayout);
     }
 }

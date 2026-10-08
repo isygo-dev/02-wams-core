@@ -4,6 +4,108 @@
  * DmsMainLayout so it is available to every view rendered inside it.
  */
 
+/* Pilot/IMS/SMS-aligned design tokens and Vaadin theme values. */
+:root {
+    --dms-color-primary: #0c66e4;
+    --dms-color-primary-soft: rgba(12, 102, 228, 0.1);
+    --dms-color-success: #1f845a;
+    --dms-color-success-soft: rgba(31, 132, 90, 0.1);
+    --dms-color-warning: #a54800;
+    --dms-color-warning-soft: rgba(165, 72, 0, 0.12);
+    --dms-color-danger: #c9372c;
+    --dms-color-danger-soft: rgba(201, 55, 44, 0.1);
+    --dms-color-info: #0055cc;
+    --dms-color-text: #172b4d;
+    --dms-color-text-muted: #44546f;
+    --dms-color-text-soft: #626f86;
+    --dms-color-surface: #ffffff;
+    --dms-color-surface-alt: #f7f8f9;
+    --dms-color-border: rgba(9, 30, 66, 0.14);
+    --dms-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --dms-font-size-xxs: 0.625rem;
+    --dms-font-size-xs: 0.75rem;
+    --dms-font-size-sm: 0.875rem;
+    --dms-font-size-md: 1rem;
+    --dms-font-size-lg: 1.125rem;
+    --dms-font-size-xl: 1.5rem;
+    --dms-font-weight-semibold: 600;
+    --dms-font-weight-medium: 500;
+    --dms-line-height-normal: 1.5;
+    --dms-space-1: 0.25rem;
+    --dms-space-2: 0.5rem;
+    --dms-space-2-5: 0.625rem;
+    --dms-space-3: 0.75rem;
+    --dms-space-4: 1rem;
+    --dms-space-6: 1.5rem;
+    --dms-space-8: 2rem;
+    --dms-space-meta-indent: 1.75rem;
+    --dms-space-icon-offset: 0.125rem;
+    --dms-space-tag-x: 0.55rem;
+    --dms-space-tag-y: 0.12rem;
+    --dms-detail-label-width: 5rem;
+    --dms-radius-sm: 3px;
+    --dms-radius-md: 6px;
+    --dms-radius-lg: 9px;
+    --dms-radius-xl: 12px;
+    --dms-shadow-sm: 0 1px 2px rgba(9, 30, 66, 0.16), 0 0 1px rgba(9, 30, 66, 0.1);
+    --dms-shadow-md: 0 4px 8px -2px rgba(9, 30, 66, 0.18), 0 0 1px rgba(9, 30, 66, 0.12);
+
+    --lumo-primary-color: var(--dms-color-primary);
+    --lumo-primary-text-color: var(--dms-color-primary);
+    --lumo-primary-color-10pct: var(--dms-color-primary-soft);
+    --lumo-primary-color-50pct: rgba(12, 102, 228, 0.5);
+    --lumo-success-color: var(--dms-color-success);
+    --lumo-success-text-color: var(--dms-color-success);
+    --lumo-success-color-10pct: var(--dms-color-success-soft);
+    --lumo-success-color-50pct: rgba(31, 132, 90, 0.5);
+    --lumo-warning-color: var(--dms-color-warning);
+    --lumo-warning-text-color: var(--dms-color-warning);
+    --lumo-warning-color-10pct: var(--dms-color-warning-soft);
+    --lumo-warning-color-50pct: rgba(165, 72, 0, 0.5);
+    --lumo-error-color: var(--dms-color-danger);
+    --lumo-error-text-color: var(--dms-color-danger);
+    --lumo-error-color-10pct: var(--dms-color-danger-soft);
+    --lumo-error-color-50pct: rgba(201, 55, 44, 0.5);
+    --lumo-body-text-color: var(--dms-color-text);
+    --lumo-secondary-text-color: var(--dms-color-text-muted);
+    --lumo-tertiary-text-color: var(--dms-color-text-soft);
+    --lumo-base-color: var(--dms-color-surface);
+    --lumo-contrast-5pct: rgba(9, 30, 66, 0.04);
+    --lumo-contrast-10pct: rgba(9, 30, 66, 0.08);
+    --lumo-contrast-20pct: var(--dms-color-border);
+    --lumo-font-family: var(--dms-font-family);
+    --lumo-font-size-xxs: var(--dms-font-size-xxs);
+    --lumo-font-size-xs: var(--dms-font-size-xs);
+    --lumo-font-size-s: var(--dms-font-size-sm);
+    --lumo-font-size-m: var(--dms-font-size-md);
+    --lumo-font-size-l: var(--dms-font-size-lg);
+    --lumo-font-size-xl: var(--dms-font-size-xl);
+    --lumo-space-xs: var(--dms-space-1);
+    --lumo-space-s: var(--dms-space-2);
+    --lumo-space-m: var(--dms-space-4);
+    --lumo-space-l: var(--dms-space-6);
+    --lumo-space-xl: var(--dms-space-8);
+    --lumo-border-radius-s: var(--dms-radius-sm);
+    --lumo-border-radius-m: var(--dms-radius-md);
+    --lumo-border-radius: var(--dms-radius-lg);
+    --lumo-border-radius-l: var(--dms-radius-lg);
+    --lumo-box-shadow-xs: var(--dms-shadow-sm);
+    --lumo-box-shadow-s: var(--dms-shadow-sm);
+    --lumo-box-shadow-m: var(--dms-shadow-md);
+}
+
+.dms-dialog-tabs,
+.wams-dialog-tabs {
+    width: 100%;
+    --vaadin-tabs-background-color: transparent;
+    --vaadin-tabs-border-color: var(--dms-color-border);
+}
+
+.dms-dialog-tabs::part(content),
+.wams-dialog-tabs::part(content) {
+    padding-block-start: var(--dms-space-4);
+}
+
 /* ── Dashboard (DmsMainView) ──────────────────────────────────────────────── */
 
 .dms-dashboard .wams-dashboard-header {
@@ -51,7 +153,7 @@
 }
 
 .category-management-toolbar .wams-page-info-label {
-    margin: 0 0.5rem;
+    margin: 0 var(--dms-space-2);
 }
 
 .category-cards-grid {
@@ -94,7 +196,7 @@
     .category-management-toolbar > :nth-child(2),
     .category-management-toolbar > :nth-child(3) {
         flex-wrap: wrap;
-        row-gap: var(--lumo-space-xs);
+        row-gap: var(--dms-space-1);
     }
 
     .category-management-toolbar > :nth-child(1) vaadin-text-field,
@@ -165,7 +267,7 @@
 }
 
 .category-card .meta-row-label {
-    min-width: 80px;
+    min-width: var(--dms-detail-label-width);
 }
 
 .category-card .meta-row-value {
@@ -179,7 +281,7 @@
 }
 
 .category-card .meta-row-icon--align-start {
-    margin-top: 2px;
+    margin-top: var(--dms-space-icon-offset);
 }
 
 @media (max-width: 640px) {
@@ -188,7 +290,7 @@
     }
 
     .category-card .meta-row > :not(:first-child) {
-        margin-left: 28px;
+        margin-left: var(--dms-space-meta-indent);
     }
 
     .category-card .wams-card__button-bar {
@@ -209,6 +311,14 @@
     flex: 1;
 }
 
+.dms-category-description {
+    display: block;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow: visible;
+    text-overflow: unset;
+}
+
 /* .wams-section-title's underline is now a single shared rule in card.css. */
 
 /* ── Linked file management view ──────────────────────────────────────────── */
@@ -227,7 +337,7 @@
 }
 
 .linked-file-management-toolbar .wams-page-info-label {
-    margin: 0 0.5rem;
+    margin: 0 var(--dms-space-2);
 }
 
 .linked-file-cards-grid {
@@ -269,7 +379,7 @@
     .linked-file-management-toolbar > :nth-child(2),
     .linked-file-management-toolbar > :nth-child(3) {
         flex-wrap: wrap;
-        row-gap: var(--lumo-space-xs);
+        row-gap: var(--dms-space-1);
     }
 
     .linked-file-management-toolbar > :nth-child(1) vaadin-text-field,
@@ -341,7 +451,7 @@
 }
 
 .linked-file-card .meta-row-label {
-    min-width: 80px;
+    min-width: var(--dms-detail-label-width);
 }
 
 .linked-file-card .meta-row-value {
@@ -355,7 +465,7 @@
     }
 
     .linked-file-card .meta-row > :not(:first-child) {
-        margin-left: 28px;
+        margin-left: var(--dms-space-meta-indent);
     }
 }
 
@@ -365,7 +475,7 @@
 .wams-category-chip {
     background: var(--lumo-contrast-10pct);
     border-radius: var(--lumo-border-radius-s);
-    padding: 2px var(--lumo-space-s);
+    padding: var(--dms-space-tag-y) var(--dms-space-tag-x);
     color: var(--lumo-secondary-text-color);
 }
 
@@ -384,9 +494,34 @@
     flex: 1;
 }
 
+.dms-chip-container {
+    flex-wrap: wrap;
+    gap: var(--dms-space-1);
+}
+
+.dms-download-trigger {
+    display: none;
+}
+
+.dms-secondary-text {
+    color: var(--lumo-secondary-text-color);
+}
+
+.dms-delete-warning-icon,
+.dms-upload-icon--error {
+    color: var(--dms-color-danger);
+}
+
+.dms-delete-warning-text {
+    color: var(--dms-color-danger);
+    font-weight: var(--dms-font-weight-medium);
+    font-size: var(--dms-font-size-sm);
+}
+
 /* ── Upload dialog ────────────────────────────────────────────────────────── */
 
-.wams-upload-component {
+.wams-upload-component,
+.dms-upload-component {
     width: 100%;
 }
 
@@ -405,3 +540,24 @@
     font-weight: 500;
 }
 
+.dms-upload-status {
+    font-size: var(--dms-font-size-sm);
+    font-weight: 500;
+}
+
+.dms-upload-status--success,
+.dms-upload-icon--success {
+    color: var(--dms-color-success);
+}
+
+.dms-upload-status--error {
+    color: var(--dms-color-danger);
+}
+
+.dms-upload-icon {
+    color: var(--dms-color-primary);
+}
+
+.dms-upload-instruction {
+    color: var(--dms-color-text-muted);
+}

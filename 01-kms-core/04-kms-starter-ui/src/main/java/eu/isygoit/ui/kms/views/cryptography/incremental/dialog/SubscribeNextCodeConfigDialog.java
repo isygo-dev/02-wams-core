@@ -7,10 +7,10 @@ import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.common.NextCodeDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsAppNextCodeService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsActionDialog;
 import org.springframework.http.ResponseEntity;
 
-public class SubscribeNextCodeConfigDialog extends BaseActionDialog {
+public class SubscribeNextCodeConfigDialog extends KmsActionDialog {
 
     private final KmsAppNextCodeService nextCodeService;
 

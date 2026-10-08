@@ -13,6 +13,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
 import eu.isygoit.remote.mms.MsgTemplateService;
 import eu.isygoit.remote.mms.SenderConfigService;
+import eu.isygoit.ui.mms.views.common.MmsEnumTag;
 import eu.isygoit.ui.mms.views.msgtemplate.MsgTemplateManagementView;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +59,7 @@ public class CreateMsgTemplateDialog extends BaseMsgTemplateDialog {
 
         nameCombo = new ComboBox<>(I18n.t("mms.msgtemplate.dialog.create.field.name"));
         nameCombo.setItems(IEnumEmailTemplate.Types.values());
+        MmsEnumTag.useTagRenderer(nameCombo, "mms.msgtemplate.enum.name");
         nameCombo.setRequiredIndicatorVisible(true);
         nameCombo.setWidthFull();
 
@@ -68,6 +70,7 @@ public class CreateMsgTemplateDialog extends BaseMsgTemplateDialog {
 
         languageCombo = new ComboBox<>(I18n.t("mms.msgtemplate.dialog.create.field.language"));
         languageCombo.setItems(IEnumLanguage.Types.values());
+        MmsEnumTag.useTagRenderer(languageCombo, "mms.msgtemplate.view.language");
         languageCombo.setValue(IEnumLanguage.Types.EN);
         languageCombo.setWidthFull();
 

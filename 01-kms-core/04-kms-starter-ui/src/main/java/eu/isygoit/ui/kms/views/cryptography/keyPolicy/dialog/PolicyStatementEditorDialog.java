@@ -10,15 +10,17 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import eu.isygoit.dto.KmsDtos.KeyPolicy;
 import eu.isygoit.enums.IKmsActionType;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 
 import java.util.*;
 import java.util.function.Consumer;
 
-public class PolicyStatementEditorDialog extends BaseActionDialog {
+public class PolicyStatementEditorDialog extends KmsActionDialog {
 
     private final ObjectMapper objectMapper;
     private final Consumer<KeyPolicy.Statement> onDone;
@@ -92,6 +94,7 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
         sidField.setHelperText(I18n.t("kms.policy.statement.field.sid.helper"));
 
         effectCombo.setItems("Allow", "Deny");
+        effectCombo.setRenderer(new ComponentRenderer<>(effect -> KmsEnumTag.ofValue(effect, "kms.enum")));
         effectCombo.setWidthFull();
 
         principalField.setWidthFull();
@@ -120,7 +123,7 @@ public class PolicyStatementEditorDialog extends BaseActionDialog {
         actionShortcuts.addClassName("policy-statement-shortcuts");
         for (IKmsActionType.Types action : importantActions) {
             String actionMeaning = action.meaning();
-            Button btn = new Button(actionMeaning);
+            Button btn = new Button(KmsEnumTag.label(action, "kms.enum"));
             btn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
             btn.addClickListener(e -> addToActionsArea("kms:" + actionMeaning));
             actionShortcuts.add(btn);

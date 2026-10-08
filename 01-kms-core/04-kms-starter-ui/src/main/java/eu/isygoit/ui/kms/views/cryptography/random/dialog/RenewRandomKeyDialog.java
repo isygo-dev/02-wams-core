@@ -6,10 +6,11 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.RandomKeyService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
+import eu.isygoit.ui.kms.views.common.KmsPinActionDialog;
 import org.springframework.http.ResponseEntity;
 
-public class RenewRandomKeyDialog extends PinBaseActionDialog {
+public class RenewRandomKeyDialog extends KmsPinActionDialog {
 
     private final RandomKeyService keyService;
     private final String keyName;
@@ -43,6 +44,7 @@ public class RenewRandomKeyDialog extends PinBaseActionDialog {
 
         charSetCombo = new ComboBox<>(I18n.t("kms.random.key.dialog.field.char.set"));
         charSetCombo.setItems(IEnumCharSet.Types.values());
+        KmsEnumTag.useTagRenderer(charSetCombo, "kms.enum");
         charSetCombo.setValue(charSet);
         charSetCombo.setWidthFull();
         charSetCombo.addValueChangeListener(e -> charSet = e.getValue());

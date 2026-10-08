@@ -3,9 +3,9 @@ package eu.isygoit.ui.kms.views.tokenizer.config.dialog;
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsPinActionDialog;
 
-public class DeleteTokenConfigDialog extends PinBaseActionDialog {
+public class DeleteTokenConfigDialog extends KmsPinActionDialog {
 
     private final KmsTokenConfigService tokenConfigService;
     private final Long configId;

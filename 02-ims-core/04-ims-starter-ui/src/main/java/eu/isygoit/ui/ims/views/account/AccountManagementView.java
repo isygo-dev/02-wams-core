@@ -30,6 +30,7 @@ import eu.isygoit.ui.ims.layout.ImsMainLayout;
 import eu.isygoit.ui.ims.views.account.dialog.CreateAccountDialog;
 import eu.isygoit.ui.ims.views.account.dialog.ResetPasswordDialog;
 import eu.isygoit.ui.ims.views.account.dialog.UpdateAccountDialog;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
@@ -124,15 +125,24 @@ public class AccountManagementView extends ManagementVerticalView {
 
         statusFilter.setItems(
                 new StatusFilterOption(I18n.t("ims.account.view.status.all"), null, null),
-                new StatusFilterOption(I18n.t("ims.account.view.status.admin.enabled"), IEnumEnabledBinaryStatus.Types.ENABLED, null),
-                new StatusFilterOption(I18n.t("ims.account.view.status.admin.disabled"), IEnumEnabledBinaryStatus.Types.DISABLED, null),
-                new StatusFilterOption(I18n.t("ims.account.view.status.system.expired"), null, IEnumAccountSystemStatus.Types.EXPIRED),
-                new StatusFilterOption(I18n.t("ims.account.view.status.system.registered"), null, IEnumAccountSystemStatus.Types.REGISTRED),
-                new StatusFilterOption(I18n.t("ims.account.view.status.system.temp.locked"), null, IEnumAccountSystemStatus.Types.TEM_LOCKED),
-                new StatusFilterOption(I18n.t("ims.account.view.status.system.idle"), null, IEnumAccountSystemStatus.Types.IDLE),
-                new StatusFilterOption(I18n.t("ims.account.view.status.system.locked"), null, IEnumAccountSystemStatus.Types.LOCKED)
+                new StatusFilterOption(ImsEnumTag.label(IEnumEnabledBinaryStatus.Types.ENABLED, null), IEnumEnabledBinaryStatus.Types.ENABLED, null),
+                new StatusFilterOption(ImsEnumTag.label(IEnumEnabledBinaryStatus.Types.DISABLED, null), IEnumEnabledBinaryStatus.Types.DISABLED, null),
+                new StatusFilterOption(ImsEnumTag.label(IEnumAccountSystemStatus.Types.EXPIRED, null), null, IEnumAccountSystemStatus.Types.EXPIRED),
+                new StatusFilterOption(ImsEnumTag.label(IEnumAccountSystemStatus.Types.REGISTRED, null), null, IEnumAccountSystemStatus.Types.REGISTRED),
+                new StatusFilterOption(ImsEnumTag.label(IEnumAccountSystemStatus.Types.TEM_LOCKED, null), null, IEnumAccountSystemStatus.Types.TEM_LOCKED),
+                new StatusFilterOption(ImsEnumTag.label(IEnumAccountSystemStatus.Types.IDLE, null), null, IEnumAccountSystemStatus.Types.IDLE),
+                new StatusFilterOption(ImsEnumTag.label(IEnumAccountSystemStatus.Types.LOCKED, null), null, IEnumAccountSystemStatus.Types.LOCKED)
         );
         statusFilter.setItemLabelGenerator(StatusFilterOption::label);
+        statusFilter.setRenderer(new com.vaadin.flow.data.renderer.ComponentRenderer<>(option -> {
+            if (option.adminStatus() != null) {
+                return ImsEnumTag.of(option.adminStatus());
+            }
+            if (option.systemStatus() != null) {
+                return ImsEnumTag.of(option.systemStatus());
+            }
+            return new Span(option.label());
+        }));
         statusFilter.setValue(new StatusFilterOption(I18n.t("ims.account.view.status.all"), null, null));
         statusFilter.addValueChangeListener(e -> {
             if (e.getValue() != null) {

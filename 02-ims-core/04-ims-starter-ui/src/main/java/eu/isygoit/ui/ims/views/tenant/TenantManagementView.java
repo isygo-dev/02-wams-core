@@ -25,6 +25,7 @@ import eu.isygoit.remote.ims.TenantImageService;
 import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.ims.layout.ImsMainLayout;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import eu.isygoit.ui.ims.views.tenant.dialog.CreateTenantDialog;
 import eu.isygoit.ui.ims.views.tenant.dialog.UpdateTenantDialog;
 import feign.FeignException;
@@ -116,7 +117,8 @@ public class TenantManagementView extends ManagementVerticalView {
         });
 
         statusFilter.setItems(IEnumEnabledBinaryStatus.Types.values());
-        statusFilter.setItemLabelGenerator(status -> status.name());
+        statusFilter.setItemLabelGenerator(status -> ImsEnumTag.label(status, null));
+        statusFilter.setRenderer(ImsEnumTag.renderer(null));
         statusFilter.setPlaceholder(I18n.t("ims.tenant.view.status.placeholder"));
         statusFilter.addValueChangeListener(e -> {
             currentAdminStatus = e.getValue();

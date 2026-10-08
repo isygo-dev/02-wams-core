@@ -14,7 +14,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
 import eu.isygoit.remote.mms.MsgTemplateService;
 import eu.isygoit.remote.mms.SenderConfigService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.mms.views.common.MmsActionDialog;
 import eu.isygoit.ui.mms.views.msgtemplate.MsgTemplateManagementView;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public abstract class BaseMsgTemplateDialog extends BaseActionDialog {
+public abstract class BaseMsgTemplateDialog extends MmsActionDialog {
 
     protected final MsgTemplateManagementView parentView;
     protected final MsgTemplateService templateService;
@@ -127,9 +127,9 @@ public abstract class BaseMsgTemplateDialog extends BaseActionDialog {
 
     private Renderer<SenderConfigOption> createSenderConfigRenderer() {
         return LitRenderer.<SenderConfigOption>of(
-                        "<div style='display: flex; flex-direction: column;'>" +
-                                "  <span style='font-weight: bold;'>${item.name}</span>" +
-                                "  <span style='font-size: var(--lumo-font-size-xs); color: var(--lumo-secondary-text-color);'>${item.code} - ${item.host}:${item.port}</span>" +
+                        "<div class='mms-sender-config-option'>" +
+                                "  <span class='mms-sender-config-option__name'>${item.name}</span>" +
+                                "  <span class='mms-sender-config-option__details'>${item.code} - ${item.host}:${item.port}</span>" +
                                 "</div>"
                 ).withProperty("name", option -> option.getName() != null ? option.getName() : option.getCode())
                 .withProperty("code", option -> option.getCode() != null ? option.getCode() : "")

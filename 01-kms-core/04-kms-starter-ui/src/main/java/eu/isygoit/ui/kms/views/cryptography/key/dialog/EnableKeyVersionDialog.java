@@ -5,11 +5,11 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsPinActionDialog;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class EnableKeyVersionDialog extends PinBaseActionDialog {
+public class EnableKeyVersionDialog extends KmsPinActionDialog {
 
     private final KmsApiService kmsApiService;
     private final String keyId;

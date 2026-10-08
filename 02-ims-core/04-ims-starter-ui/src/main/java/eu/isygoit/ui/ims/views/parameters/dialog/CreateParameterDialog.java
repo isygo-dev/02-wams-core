@@ -6,12 +6,12 @@ import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.AppParameterDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AppParameterService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.ims.views.common.ImsActionDialog;
 import eu.isygoit.ui.ims.views.parameters.ParameterManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class CreateParameterDialog extends BaseActionDialog {
+public class CreateParameterDialog extends ImsActionDialog {
 
     private final ParameterManagementView parentView;
     private final AppParameterService parameterService;

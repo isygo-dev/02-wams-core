@@ -3,17 +3,17 @@ package eu.isygoit.ui.ims.views.application.dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.data.ApplicationDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.ApplicationService;
-import eu.isygoit.ui.common.dialog.DetailsViewDialog;
 import eu.isygoit.ui.ims.views.application.ApplicationManagementView;
+import eu.isygoit.ui.ims.views.common.ImsDetailsDialog;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class ApplicationDetailsViewDialog extends DetailsViewDialog {
+public class ApplicationDetailsViewDialog extends ImsDetailsDialog {
 
     private final ApplicationManagementView parentView;
     private final ApplicationService applicationService;
@@ -56,10 +56,6 @@ public class ApplicationDetailsViewDialog extends DetailsViewDialog {
     }
 
     private void buildContent(ApplicationDto app) {
-        VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setPadding(false);
-        mainLayout.setSpacing(true);
-
         // Identity — name/title/code (text identifiers)
         Div identityInfo = new Div();
         identityInfo.addClassName("wams-card__detail-grid");
@@ -68,7 +64,7 @@ public class ApplicationDetailsViewDialog extends DetailsViewDialog {
         addFieldToGrid(identityInfo, VaadinIcon.FUNCTION, I18n.t("ims.app.details.field.title"), app.getTitle());
         addFieldToGrid(identityInfo, VaadinIcon.CODE, I18n.t("ims.app.details.field.code"), app.getCode(), true);
 
-        mainLayout.add(createSection(I18n.t("ims.app.details.section.identity"), identityInfo));
+        addTab(I18n.t("ims.app.details.section.identity"), createSection(I18n.t("ims.app.details.section.identity"), identityInfo));
 
         // Classification & status — category/order/admin status
         Div classificationInfo = new Div();
@@ -76,9 +72,9 @@ public class ApplicationDetailsViewDialog extends DetailsViewDialog {
 
         addFieldToGrid(classificationInfo, VaadinIcon.DESKTOP, I18n.t("ims.app.details.field.category"), app.getCategory());
         addFieldToGrid(classificationInfo, VaadinIcon.SORT, I18n.t("ims.app.details.field.order"), app.getOrder() != null ? String.valueOf(app.getOrder()) : null);
-        addFieldToGrid(classificationInfo, VaadinIcon.SHIELD, I18n.t("ims.app.details.field.admin.status"), app.getAdminStatus() != null ? app.getAdminStatus().name() : null);
+        ImsEnumTag.addDetailField(classificationInfo, VaadinIcon.SHIELD, I18n.t("ims.app.details.field.admin.status"), app.getAdminStatus(), null);
 
-        mainLayout.add(createSection(I18n.t("ims.app.details.section.classification"), classificationInfo));
+        addTab(I18n.t("ims.app.details.section.classification"), createSection(I18n.t("ims.app.details.section.classification"), classificationInfo));
 
         // Contact / relations — tenant/url/description
         Div contactInfo = new Div();
@@ -87,13 +83,13 @@ public class ApplicationDetailsViewDialog extends DetailsViewDialog {
         addFieldToGrid(contactInfo, VaadinIcon.BUILDING, I18n.t("ims.app.details.field.tenant"), app.getTenant(), true);
         addFieldToGrid(contactInfo, VaadinIcon.GLOBE, I18n.t("ims.app.details.field.url"), app.getUrl(), true);
 
-        mainLayout.add(createSection(I18n.t("ims.app.details.section.contact"), contactInfo));
+        addTab(I18n.t("ims.app.details.section.contact"), createSection(I18n.t("ims.app.details.section.contact"), contactInfo));
 
         if (app.getDescription() != null && !app.getDescription().isBlank()) {
             Div descGrid = new Div();
             descGrid.addClassName("wams-card__detail-grid");
             addFieldToGrid(descGrid, VaadinIcon.FILE_TEXT, I18n.t("ims.app.details.field.description"), app.getDescription(), false);
-            mainLayout.add(descGrid);
+            addTab(I18n.t("ims.dialog.tab.description"), descGrid);
         }
 
         // Audit — created/updated by & date
@@ -105,9 +101,8 @@ public class ApplicationDetailsViewDialog extends DetailsViewDialog {
         addFieldToGrid(auditInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.app.details.field.updated"), app.getUpdateDate() != null ? DateHelper.formatToHumanReadable(app.getUpdateDate()) : null);
         addFieldToGrid(auditInfo, VaadinIcon.EDIT, I18n.t("ims.app.details.field.updated.by"), app.getUpdatedBy());
 
-        mainLayout.add(createSection(I18n.t("ims.app.details.section.audit"), auditInfo));
+        addTab(I18n.t("ims.app.details.section.audit"), createSection(I18n.t("ims.app.details.section.audit"), auditInfo));
 
-        add(mainLayout);
     }
 
     private String extractErrorMessage(FeignException ex) {

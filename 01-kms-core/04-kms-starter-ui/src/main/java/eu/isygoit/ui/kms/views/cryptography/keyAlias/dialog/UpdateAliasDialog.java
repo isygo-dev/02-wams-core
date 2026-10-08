@@ -7,7 +7,7 @@ import eu.isygoit.dto.KmsDtos.UpdateAliasRequest;
 import eu.isygoit.dto.KmsDtos.UpdateAliasResponse;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsActionDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyAlias.AliasesView;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ import org.springframework.http.ResponseEntity;
  * Dialog for reassigning an alias to a different KMS key.
  */
 @Slf4j
-public class UpdateAliasDialog extends BaseActionDialog {
+public class UpdateAliasDialog extends KmsActionDialog {
 
     private final AliasesView parentView;
     private final KmsApiService kmsApiService;

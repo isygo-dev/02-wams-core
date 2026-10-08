@@ -3,11 +3,11 @@ package eu.isygoit.ui.ims.views.tenant.dialog;
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.TenantService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.ims.views.common.ImsPinActionDialog;
 import eu.isygoit.ui.ims.views.tenant.TenantManagementView;
 import feign.FeignException;
 
-public class DeleteTenantDialog extends PinBaseActionDialog {
+public class DeleteTenantDialog extends ImsPinActionDialog {
 
     private final TenantManagementView parentView;
     private final TenantService tenantService;

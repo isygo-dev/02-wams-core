@@ -7,21 +7,19 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.dms.LinkedFileService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.dms.views.common.DmsPinActionDialog;
 import eu.isygoit.ui.dms.views.linkedFile.LinkedFileManagementView;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 
 @Slf4j
-public class DeleteLinkedFileDialog extends PinBaseActionDialog {
+public class DeleteLinkedFileDialog extends DmsPinActionDialog {
 
     private final LinkedFileManagementView parentView;
     private final LinkedFileService linkedFileService;
     private final String fileCode;
     private final String fileName;
-    private Span warningIcon;
-
     public DeleteLinkedFileDialog(LinkedFileManagementView parentView,
                                   LinkedFileService linkedFileService,
                                   String fileCode,
@@ -55,14 +53,11 @@ public class DeleteLinkedFileDialog extends PinBaseActionDialog {
         warningRow.setSpacing(true);
 
         com.vaadin.flow.component.icon.Icon warningIcon = VaadinIcon.EXCLAMATION_CIRCLE.create();
-        warningIcon.setColor("var(--lumo-error-color)");
         warningIcon.setSize("20px");
+        warningIcon.addClassName("dms-delete-warning-icon");
 
         Span warningText = new Span(I18n.t("dms.linkedfile.dialog.delete.warning"));
-        warningText.getStyle()
-                .set("color", "var(--lumo-error-color)")
-                .set("font-weight", "500")
-                .set("font-size", "var(--lumo-font-size-s)");
+        warningText.addClassName("dms-delete-warning-text");
 
         warningRow.add(warningIcon, warningText);
         warningLayout.add(warningRow);

@@ -11,12 +11,13 @@ import eu.isygoit.enums.IEnumSaltGenerator;
 import eu.isygoit.enums.IEnumStringOutputType;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.PEBConfigService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
-public class CreatePEBConfigDialog extends BaseActionDialog {
+public class CreatePEBConfigDialog extends KmsActionDialog {
 
     private final PEBConfigService configService;
 
@@ -48,6 +49,7 @@ public class CreatePEBConfigDialog extends BaseActionDialog {
 
         algorithmCombo = new ComboBox<>(I18n.t("kms.peb.dialog.field.algorithm"));
         algorithmCombo.setItems(IEnumAlgoPEBConfig.Types.values());
+        KmsEnumTag.useTagRenderer(algorithmCombo, "kms.enum");
         algorithmCombo.setRequired(true);
         algorithmCombo.setRequiredIndicatorVisible(true);
         algorithmCombo.setWidthFull();
@@ -60,11 +62,13 @@ public class CreatePEBConfigDialog extends BaseActionDialog {
 
         saltGeneratorCombo = new ComboBox<>(I18n.t("kms.peb.dialog.field.salt.generator"));
         saltGeneratorCombo.setItems(IEnumSaltGenerator.Types.values());
+        KmsEnumTag.useTagRenderer(saltGeneratorCombo, "kms.enum");
         saltGeneratorCombo.setRequired(true);
         saltGeneratorCombo.setWidthFull();
 
         ivGeneratorCombo = new ComboBox<>(I18n.t("kms.peb.dialog.field.iv.generator"));
         ivGeneratorCombo.setItems(IEnumIvGenerator.Types.values());
+        KmsEnumTag.useTagRenderer(ivGeneratorCombo, "kms.enum");
         ivGeneratorCombo.setRequired(true);
         ivGeneratorCombo.setWidthFull();
 
@@ -83,6 +87,7 @@ public class CreatePEBConfigDialog extends BaseActionDialog {
 
         outputTypeCombo = new ComboBox<>(I18n.t("kms.peb.dialog.field.output.type"));
         outputTypeCombo.setItems(IEnumStringOutputType.Types.values());
+        KmsEnumTag.useTagRenderer(outputTypeCombo, "kms.enum");
         outputTypeCombo.setValue(IEnumStringOutputType.Types.Base64);
         outputTypeCombo.setWidthFull();
     }

@@ -13,13 +13,14 @@ import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ShowKeyVersionsDialog extends BaseActionDialog {
+public class ShowKeyVersionsDialog extends KmsActionDialog {
 
     private final KmsApiService kmsApiService;
     private final String keyId;
@@ -71,32 +72,9 @@ public class ShowKeyVersionsDialog extends BaseActionDialog {
         grid.addColumn(KmsDtos.ListKeyVersionsResponse.KeyVersion::getVersionId)
                 .setHeader(I18n.t("kms.key.dialog.versions.column.version.id")).setSortable(true).setResizable(true);
 
-        // Status column with colored chip
-        grid.addColumn(new ComponentRenderer<>(version -> {
-            String status = version.getStatus() != null ? version.getStatus().name() : "UNKNOWN";
-            String displayStatus;
-            Span chip = new Span();
-            chip.addClassName("status-chip");
-            switch (status) {
-                case "ENABLED":
-                    chip.addClassName("status-chip--success");
-                    displayStatus = I18n.t("kms.key.dialog.versions.status.enabled");
-                    break;
-                case "DISABLED":
-                    chip.addClassName("status-chip--error");
-                    displayStatus = I18n.t("kms.key.dialog.versions.status.disabled");
-                    break;
-                case "PENDING_DELETION":
-                    chip.addClassName("status-chip--warning");
-                    displayStatus = I18n.t("kms.key.dialog.versions.status.pending.deletion");
-                    break;
-                default:
-                    chip.addClassName("status-chip--neutral");
-                    displayStatus = I18n.t("kms.key.dialog.versions.status.unknown");
-            }
-            chip.setText(displayStatus);
-            return chip;
-        })).setHeader(I18n.t("kms.key.dialog.versions.column.status")).setSortable(true).setResizable(true);
+        grid.addColumn(new ComponentRenderer<>(
+                        version -> KmsEnumTag.ofOrUnknown(version.getStatus(), null)))
+                .setHeader(I18n.t("kms.key.dialog.versions.column.status")).setSortable(true).setResizable(true);
 
         // Creation date column – simple string formatting, sortable
         grid.addColumn(version -> version.getCreateDate() != null ?
@@ -109,8 +87,9 @@ public class ShowKeyVersionsDialog extends BaseActionDialog {
         grid.addColumn(KmsDtos.ListKeyVersionsResponse.KeyVersion::getSigningAlgorithm)
                 .setHeader(I18n.t("kms.key.dialog.versions.column.signing.algorithm")).setResizable(true);
 
-        // Origin column
-        grid.addColumn(version -> version.getOrigin() != null ? version.getOrigin().name() : "-")
+        grid.addColumn(new ComponentRenderer<>(version -> version.getOrigin() != null
+                        ? KmsEnumTag.of(version.getOrigin(), null)
+                        : new Span("-")))
                 .setHeader(I18n.t("kms.key.dialog.versions.column.origin")).setSortable(true).setResizable(true);
 
         // Deactivation date column

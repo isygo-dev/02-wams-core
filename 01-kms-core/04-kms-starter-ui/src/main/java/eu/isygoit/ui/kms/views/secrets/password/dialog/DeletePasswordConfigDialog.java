@@ -3,9 +3,9 @@ package eu.isygoit.ui.kms.views.secrets.password.dialog;
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.PasswordConfigService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsPinActionDialog;
 
-public class DeletePasswordConfigDialog extends PinBaseActionDialog {
+public class DeletePasswordConfigDialog extends KmsPinActionDialog {
 
     private final PasswordConfigService configService;
     private final Long configId;

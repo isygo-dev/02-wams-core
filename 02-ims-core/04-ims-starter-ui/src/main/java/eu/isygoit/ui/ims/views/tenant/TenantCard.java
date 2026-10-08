@@ -17,6 +17,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.TenantImageService;
 import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import eu.isygoit.ui.ims.views.tenant.dialog.DeleteTenantDialog;
 import eu.isygoit.ui.ims.views.tenant.dialog.TenantDetailsViewDialog;
 import eu.isygoit.ui.ims.views.tenant.dialog.ToggleTenantStatusDialog;
@@ -89,10 +90,7 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
         row2.addClassName("card-row--spaced");
 
         Span titleSpan = buildTitleSpan(tenant.getName(), tenant.getEmail());
-        adminStatusChip = buildStatusChip(
-                tenant.getAdminStatus() != null ? tenant.getAdminStatus().name() : I18n.t("ims.tenant.card.status.unknown"),
-                tenant.getAdminStatus() != null ? tenant.getAdminStatus().name() : I18n.t("ims.tenant.card.status.unknown")
-        );
+        adminStatusChip = ImsEnumTag.ofOrUnknown(tenant.getAdminStatus(), null);
         row2.add(titleSpan, adminStatusChip);
 
         titleLayout.add(row1, row2);
@@ -182,10 +180,7 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
 
     private void updateStatusChip() {
         if (adminStatusChip != null) {
-            String status = tenant.getAdminStatus() != null ? tenant.getAdminStatus().name() : I18n.t("ims.tenant.card.status.unknown");
-            adminStatusChip.setText(status);
-            adminStatusChip.getElement().setAttribute("title", status);
-            applyChipColor(adminStatusChip, ChipColor.fromStatus(status));
+            ImsEnumTag.update(adminStatusChip, tenant.getAdminStatus(), null);
         }
     }
 

@@ -3,17 +3,17 @@ package eu.isygoit.ui.ims.views.annex.dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.data.AnnexDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AnnexService;
-import eu.isygoit.ui.common.dialog.DetailsViewDialog;
 import eu.isygoit.ui.ims.views.annex.AnnexManagementView;
+import eu.isygoit.ui.ims.views.common.ImsDetailsDialog;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class AnnexDetailsViewDialog extends DetailsViewDialog {
+public class AnnexDetailsViewDialog extends ImsDetailsDialog {
 
     private final AnnexManagementView parentView;
     private final AnnexService annexService;
@@ -56,10 +56,6 @@ public class AnnexDetailsViewDialog extends DetailsViewDialog {
     }
 
     private void buildContent(AnnexDto annex) {
-        VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setPadding(false);
-        mainLayout.setSpacing(true);
-
         // Identity — table code/value/reference/order (text identifiers)
         Div identityInfo = new Div();
         identityInfo.addClassName("wams-card__detail-grid");
@@ -69,15 +65,15 @@ public class AnnexDetailsViewDialog extends DetailsViewDialog {
         addFieldToGrid(identityInfo, VaadinIcon.LINK, I18n.t("ims.annex.details.field.reference"), annex.getReference(), true);
         addFieldToGrid(identityInfo, VaadinIcon.SORT, I18n.t("ims.annex.details.field.order"), annex.getAnnexOrder() != null ? String.valueOf(annex.getAnnexOrder()) : null);
 
-        mainLayout.add(createSection(I18n.t("ims.annex.details.section.identity"), identityInfo));
+        addTab(I18n.t("ims.annex.details.section.identity"), createSection(I18n.t("ims.annex.details.section.identity"), identityInfo));
 
         // Classification & status — language
         Div classificationInfo = new Div();
         classificationInfo.addClassName("wams-card__detail-grid");
 
-        addFieldToGrid(classificationInfo, VaadinIcon.LOCATION_ARROW_CIRCLE, I18n.t("ims.annex.details.field.language"), annex.getLanguage() != null ? annex.getLanguage().name() : null);
+        ImsEnumTag.addDetailField(classificationInfo, VaadinIcon.LOCATION_ARROW_CIRCLE, I18n.t("ims.annex.details.field.language"), annex.getLanguage(), "ims.enum.language");
 
-        mainLayout.add(createSection(I18n.t("ims.annex.details.section.classification"), classificationInfo));
+        addTab(I18n.t("ims.annex.details.section.classification"), createSection(I18n.t("ims.annex.details.section.classification"), classificationInfo));
 
         // Contact / relations — tenant/description
         Div contactInfo = new Div();
@@ -86,7 +82,7 @@ public class AnnexDetailsViewDialog extends DetailsViewDialog {
         addFieldToGrid(contactInfo, VaadinIcon.BUILDING, I18n.t("ims.annex.details.field.tenant"), annex.getTenant(), true);
         addFieldToGrid(contactInfo, VaadinIcon.FILE_TEXT, I18n.t("ims.annex.details.field.description"), annex.getDescription(), false);
 
-        mainLayout.add(createSection(I18n.t("ims.annex.details.section.contact"), contactInfo));
+        addTab(I18n.t("ims.annex.details.section.contact"), createSection(I18n.t("ims.annex.details.section.contact"), contactInfo));
 
         // Audit — created/updated by & date
         Div auditInfo = new Div();
@@ -97,9 +93,8 @@ public class AnnexDetailsViewDialog extends DetailsViewDialog {
         addFieldToGrid(auditInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.annex.details.field.updated"), annex.getUpdateDate() != null ? DateHelper.formatToHumanReadable(annex.getUpdateDate()) : null);
         addFieldToGrid(auditInfo, VaadinIcon.EDIT, I18n.t("ims.annex.details.field.updated.by"), annex.getUpdatedBy());
 
-        mainLayout.add(createSection(I18n.t("ims.annex.details.section.audit"), auditInfo));
+        addTab(I18n.t("ims.annex.details.section.audit"), createSection(I18n.t("ims.annex.details.section.audit"), auditInfo));
 
-        add(mainLayout);
     }
 
     private String extractErrorMessage(FeignException ex) {

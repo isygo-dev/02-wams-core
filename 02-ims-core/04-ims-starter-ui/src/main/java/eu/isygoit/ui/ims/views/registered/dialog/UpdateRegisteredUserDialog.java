@@ -8,12 +8,13 @@ import eu.isygoit.dto.request.RegisteredUserDto;
 import eu.isygoit.enums.IEnumAccountOrigin;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.RegisteredUserService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.ims.views.common.ImsActionDialog;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import eu.isygoit.ui.ims.views.registered.RegisteredManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class UpdateRegisteredUserDialog extends BaseActionDialog {
+public class UpdateRegisteredUserDialog extends ImsActionDialog {
 
     private final RegisteredManagementView parentView;
     private final RegisteredUserService registeredUserService;
@@ -65,6 +66,8 @@ public class UpdateRegisteredUserDialog extends BaseActionDialog {
 
         originCombo = new ComboBox<>(I18n.t("ims.registered.dialog.update.field.origin"));
         originCombo.setItems(IEnumAccountOrigin.Types.values());
+        originCombo.setItemLabelGenerator(origin -> ImsEnumTag.label(origin, "ims.enum.origin"));
+        originCombo.setRenderer(ImsEnumTag.renderer("ims.enum.origin"));
         originCombo.setWidthFull();
 
         functionRoleField = new TextField(I18n.t("ims.registered.dialog.update.field.function.role"));

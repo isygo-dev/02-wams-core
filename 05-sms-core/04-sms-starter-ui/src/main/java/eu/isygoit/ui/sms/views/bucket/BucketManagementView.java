@@ -28,6 +28,7 @@ import eu.isygoit.ui.common.component.StatCardGrid;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.sms.layout.SmsMainLayout;
 import eu.isygoit.ui.sms.views.bucket.dialog.CreateBucketDialog;
+import eu.isygoit.ui.sms.views.common.SmsEnumTag;
 import eu.isygoit.ui.sms.views.object.ObjectStorageManagementView;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
@@ -162,7 +163,12 @@ public class BucketManagementView extends ManagementVerticalView {
             if (response.getBody() != null && !response.getBody().isEmpty()) {
                 List<StorageConfigDto> configs = response.getBody();
                 tenantSelector.setItems(configs);
-                tenantSelector.setItemLabelGenerator(c -> c.getTenant() + " (" + (c.getType() != null ? c.getType().name() : "unknown") + ")");
+                tenantSelector.setItemLabelGenerator(c ->
+                        c.getTenant() + " (" + SmsEnumTag.label(c.getType(), "sms.enum.storage") + ")");
+                tenantSelector.setRenderer(SmsEnumTag.compositeRenderer(
+                        StorageConfigDto::getTenant,
+                        StorageConfigDto::getType,
+                        "sms.enum.storage"));
                 tenantSelector.setValue(configs.get(0));
             } else {
                 showWarning(I18n.t("sms.buckets.view.no.configs"));

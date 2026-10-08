@@ -15,7 +15,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsActionDialog;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ import java.util.Map;
  * error-span footer contract as every other action dialog in the app instead
  * of building its own ad-hoc button bar in the content area.
  */
-public class ClaimsBuilderDialog extends BaseActionDialog {
+public class ClaimsBuilderDialog extends KmsActionDialog {
 
     private final ObjectMapper objectMapper;
     private final String existingClaimsJson;

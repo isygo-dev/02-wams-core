@@ -26,12 +26,13 @@ import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.RegisteredUserService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.ims.views.common.ImsActionDialog;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import eu.isygoit.ui.ims.views.registered.RegisteredManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class CreateAccountFromRegisteredDialog extends BaseActionDialog {
+public class CreateAccountFromRegisteredDialog extends ImsActionDialog {
 
     private final RegisteredManagementView parentView;
     private final RegisteredUserService registeredUserService;
@@ -119,6 +120,8 @@ public class CreateAccountFromRegisteredDialog extends BaseActionDialog {
 
         languageCombo = new ComboBox<>(I18n.t("ims.account.dialog.field.language"));
         languageCombo.setItems(IEnumLanguage.Types.values());
+        languageCombo.setItemLabelGenerator(language -> ImsEnumTag.label(language, "ims.enum.language"));
+        languageCombo.setRenderer(ImsEnumTag.renderer("ims.enum.language"));
         languageCombo.setValue(IEnumLanguage.Types.EN);
         languageCombo.setWidthFull();
 
@@ -133,6 +136,8 @@ public class CreateAccountFromRegisteredDialog extends BaseActionDialog {
 
         adminStatusCombo = new ComboBox<>(I18n.t("ims.account.dialog.field.admin.status"));
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
+        adminStatusCombo.setItemLabelGenerator(status -> ImsEnumTag.label(status, null));
+        adminStatusCombo.setRenderer(ImsEnumTag.renderer(null));
         adminStatusCombo.setValue(IEnumEnabledBinaryStatus.Types.ENABLED);
         adminStatusCombo.setWidthFull();
     }
@@ -156,7 +161,7 @@ public class CreateAccountFromRegisteredDialog extends BaseActionDialog {
         String fullName = (registeredUser.getFirstName() != null ? registeredUser.getFirstName() : "") +
                 " " + (registeredUser.getLastName() != null ? registeredUser.getLastName() : "");
         H4 nameLabel = new H4(fullName.trim());
-        nameLabel.getStyle().set("margin", "0");
+        nameLabel.addClassName("wams-user-info-name");
         nameLabel.addClassName(LumoUtility.FontSize.MEDIUM);
 
         Span emailLabel = new Span(registeredUser.getEmail());

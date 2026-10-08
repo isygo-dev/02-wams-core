@@ -26,6 +26,7 @@ import eu.isygoit.remote.ims.RegisteredUserService;
 import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.ims.layout.ImsMainLayout;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import eu.isygoit.ui.ims.views.registered.dialog.CreateAccountFromRegisteredDialog;
 import eu.isygoit.ui.ims.views.registered.dialog.CreateRegisteredUserDialog;
 import eu.isygoit.ui.ims.views.registered.dialog.UpdateRegisteredUserDialog;
@@ -122,7 +123,8 @@ public class RegisteredManagementView extends ManagementVerticalView {
         });
 
         originFilter.setItems(IEnumAccountOrigin.Types.values());
-        originFilter.setItemLabelGenerator(Enum::name);
+        originFilter.setItemLabelGenerator(origin -> ImsEnumTag.label(origin, "ims.enum.origin"));
+        originFilter.setRenderer(ImsEnumTag.renderer("ims.enum.origin"));
         originFilter.setPlaceholder(I18n.t("ims.registered.view.origin.placeholder"));
         originFilter.addValueChangeListener(e -> {
             currentOrigin = e.getValue();

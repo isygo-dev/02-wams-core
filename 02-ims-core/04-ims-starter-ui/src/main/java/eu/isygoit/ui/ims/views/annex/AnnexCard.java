@@ -15,6 +15,7 @@ import eu.isygoit.remote.ims.AnnexService;
 import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.ims.views.annex.dialog.AnnexDetailsViewDialog;
 import eu.isygoit.ui.ims.views.annex.dialog.DeleteAnnexDialog;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -48,10 +49,7 @@ public class AnnexCard extends BaseCard<AnnexManagementView, AnnexService> {
         titleLayout.addClassName("card-title-group");
 
         Span titleSpan = buildTitleSpan(annex.getTableCode(), annex.getValue());
-        Span langChip = buildStatusChip(
-                annex.getLanguage() != null ? annex.getLanguage().name() : I18n.t("ims.annex.card.status.unknown"),
-                annex.getLanguage() != null ? annex.getLanguage().name() : I18n.t("ims.annex.card.status.unknown")
-        );
+        Span langChip = ImsEnumTag.ofOrUnknown(annex.getLanguage(), "ims.enum.language");
 
         titleLayout.add(titleSpan, langChip);
         return titleLayout;

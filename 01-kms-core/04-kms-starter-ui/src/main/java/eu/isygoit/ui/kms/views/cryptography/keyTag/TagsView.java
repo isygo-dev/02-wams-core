@@ -3,7 +3,6 @@ package eu.isygoit.ui.kms.views.cryptography.keyTag;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
@@ -26,6 +25,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
+import eu.isygoit.ui.kms.views.common.KmsConfirmationDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyTag.dialog.AddTagDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
@@ -312,14 +312,13 @@ public class TagsView extends ManagementVerticalView {
     }
 
     private void confirmDeleteTag(KmsDtos.ListResourceTagsResponse.Tag tag) {
-        ConfirmDialog confirmDialog = new ConfirmDialog();
-        confirmDialog.setHeader(I18n.t("kms.tag.delete.confirm.title"));
-        confirmDialog.setText(I18n.t("kms.tag.delete.confirm.message", tag.getTagKey()));
-        confirmDialog.setCancelable(true);
-        confirmDialog.setConfirmText(I18n.t("kms.tag.delete.confirm.button"));
-        confirmDialog.setConfirmButtonTheme(ButtonVariant.LUMO_ERROR.getVariantName());
-        confirmDialog.addConfirmListener(event -> deleteTag(tag.getTagKey()));
-        confirmDialog.open();
+        new KmsConfirmationDialog(
+                I18n.t("kms.tag.delete.confirm.title"),
+                I18n.t("kms.tag.delete.confirm.message", tag.getTagKey()),
+                I18n.t("kms.tag.delete.confirm.button"),
+                I18n.t("common.dialog.base.cancel"),
+                () -> deleteTag(tag.getTagKey()),
+                ButtonVariant.LUMO_ERROR).open();
     }
 
     private void deleteTag(String tagKey) {

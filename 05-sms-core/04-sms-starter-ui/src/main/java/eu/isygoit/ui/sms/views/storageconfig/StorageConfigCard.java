@@ -11,6 +11,7 @@ import eu.isygoit.dto.data.StorageConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.StorageConfigService;
 import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.sms.views.common.SmsEnumTag;
 import eu.isygoit.ui.sms.views.storageconfig.dialog.DeleteStorageConfigDialog;
 import eu.isygoit.ui.sms.views.storageconfig.dialog.StorageConfigDetailsViewDialog;
 import lombok.extern.slf4j.Slf4j;
@@ -48,8 +49,7 @@ public class StorageConfigCard extends BaseCard<StorageConfigManagementView, Sto
         String displayName = config.getUserName() != null ? config.getUserName() : I18n.t("sms.storageconfig.card.default.name", config.getId());
         Span titleSpan = buildTitleSpan(displayName, config.getUrl());
 
-        String typeLabel = config.getType() != null ? config.getType().name() : I18n.t("sms.storageconfig.card.type.unknown");
-        Span typeChip = buildStatusChip(typeLabel, BaseCard.ChipColor.INFO);
+        Span typeChip = SmsEnumTag.ofOrUnknown(config.getType(), "sms.enum.storage");
 
         titleLayout.add(titleSpan, typeChip);
         return titleLayout;

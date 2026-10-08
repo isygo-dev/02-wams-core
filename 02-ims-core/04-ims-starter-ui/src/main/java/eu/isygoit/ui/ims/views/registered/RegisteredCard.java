@@ -17,6 +17,7 @@ import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.remote.ims.RegisteredUserService;
 import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import eu.isygoit.ui.ims.views.registered.dialog.CreateAccountConfirmationDialog;
 import eu.isygoit.ui.ims.views.registered.dialog.DeleteRegisteredUserDialog;
 import eu.isygoit.ui.ims.views.registered.dialog.RegisteredUserDetailsViewDialog;
@@ -63,14 +64,7 @@ public class RegisteredCard extends BaseCard<RegisteredManagementView, Registere
         Span titleSpan = buildTitleSpan(fullName.trim(), registeredUser.getEmail());
 
         // Origin chip
-        Span originChip = buildStatusChip(
-                registeredUser.getOrigin() != null
-                        ? registeredUser.getOrigin().name()
-                        : I18n.t("ims.registered.card.status.unknown"),
-                registeredUser.getOrigin() != null
-                        ? registeredUser.getOrigin().name()
-                        : I18n.t("ims.registered.card.status.unknown")
-        );
+        Span originChip = ImsEnumTag.ofOrUnknown(registeredUser.getOrigin(), "ims.enum.origin");
 
         // Status chip
         Span statusChip = buildStatusChip();
@@ -82,40 +76,7 @@ public class RegisteredCard extends BaseCard<RegisteredManagementView, Registere
     private Span buildStatusChip() {
         IEnumRegistrationStatus.Types status = registeredUser.getStatus();
 
-        Span chip = new Span();
-        chip.addClassName("status-chip");
-
-        if (status == null) {
-            chip.setText(I18n.t("ims.registered.card.status.unknown"));
-            chip.addClassName("status-chip--neutral");
-            return chip;
-        }
-
-        switch (status) {
-            case PROCESSED:
-                chip.setText(I18n.t("ims.registered.card.status.processed"));
-                chip.addClassName("status-chip--success");
-                chip.getElement().setAttribute("title", I18n.t("ims.registered.card.status.processed.tooltip"));
-                break;
-            case CONFIRMED:
-                chip.setText(I18n.t("ims.registered.card.status.confirmed"));
-                chip.addClassName("status-chip--primary");
-                chip.getElement().setAttribute("title", I18n.t("ims.registered.card.status.confirmed.tooltip"));
-                break;
-            case REJECTED:
-                chip.setText(I18n.t("ims.registered.card.status.rejected"));
-                chip.addClassName("status-chip--error");
-                chip.getElement().setAttribute("title", I18n.t("ims.registered.card.status.rejected.tooltip"));
-                break;
-            case NEW:
-            default:
-                chip.setText(I18n.t("ims.registered.card.status.new"));
-                chip.addClassName("status-chip--warning");
-                chip.getElement().setAttribute("title", I18n.t("ims.registered.card.status.new.tooltip"));
-                break;
-        }
-
-        return chip;
+        return ImsEnumTag.ofOrUnknown(status, "ims.registered.card.status");
     }
 
     @Override

@@ -16,14 +16,15 @@ import eu.isygoit.dto.data.RoleInfoDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountService;
-import eu.isygoit.ui.common.dialog.DetailsViewDialog;
 import eu.isygoit.ui.ims.views.account.AccountManagementView;
+import eu.isygoit.ui.ims.views.common.ImsDetailsDialog;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
 import java.util.stream.Collectors;
 
-public class AccountDetailsViewDialog extends DetailsViewDialog {
+public class AccountDetailsViewDialog extends ImsDetailsDialog {
 
     private final AccountManagementView parentView;
     private final AccountService accountService;
@@ -64,10 +65,6 @@ public class AccountDetailsViewDialog extends DetailsViewDialog {
     }
 
     private void buildContent(AccountDto account) {
-        VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setPadding(false);
-        mainLayout.setSpacing(true);
-
         // Identity — name/email/code (text identifiers)
         Div identityInfo = new Div();
         identityInfo.addClassName("wams-card__detail-grid");
@@ -76,7 +73,7 @@ public class AccountDetailsViewDialog extends DetailsViewDialog {
         addFieldToGrid(identityInfo, VaadinIcon.ENVELOPE, I18n.t("ims.account.details.field.email"), account.getEmail(), true);
         addFieldToGrid(identityInfo, VaadinIcon.HASH, I18n.t("ims.account.details.field.code"), account.getCode(), true);
 
-        mainLayout.add(createSection(I18n.t("ims.account.details.section.identity"), identityInfo));
+        addTab(I18n.t("ims.account.details.section.identity"), createSection(I18n.t("ims.account.details.section.identity"), identityInfo));
 
         // Classification & status — type/role/status/flags/language
         Div classificationInfo = new Div();
@@ -84,14 +81,14 @@ public class AccountDetailsViewDialog extends DetailsViewDialog {
 
         addFieldToGrid(classificationInfo, VaadinIcon.COG, I18n.t("ims.account.details.field.function.role"), account.getFunctionRole());
         addFieldToGrid(classificationInfo, VaadinIcon.TAGS, I18n.t("ims.account.details.field.account.type"), account.getAccountType());
-        addFieldToGrid(classificationInfo, VaadinIcon.SIGN_IN, I18n.t("ims.account.details.field.auth.type"), account.getAuthType() != null ? account.getAuthType().name() : null);
-        addFieldToGrid(classificationInfo, VaadinIcon.COMMENT, I18n.t("ims.account.details.field.chat.status"), account.getChatStatus() != null ? account.getChatStatus().name() : null);
-        addFieldToGrid(classificationInfo, VaadinIcon.LOCATION_ARROW_CIRCLE, I18n.t("ims.account.details.field.language"), account.getLanguage() != null ? account.getLanguage().name() : null);
+        ImsEnumTag.addDetailField(classificationInfo, VaadinIcon.SIGN_IN, I18n.t("ims.account.details.field.auth.type"), account.getAuthType(), null);
+        ImsEnumTag.addDetailField(classificationInfo, VaadinIcon.COMMENT, I18n.t("ims.account.details.field.chat.status"), account.getChatStatus(), null);
+        ImsEnumTag.addDetailField(classificationInfo, VaadinIcon.LOCATION_ARROW_CIRCLE, I18n.t("ims.account.details.field.language"), account.getLanguage(), "ims.enum.language");
         addFieldToGrid(classificationInfo, VaadinIcon.SHIELD, I18n.t("ims.account.details.field.admin"), Boolean.TRUE.equals(account.getIsAdmin()) ? I18n.t("ims.account.details.yes") : I18n.t("ims.account.details.no"));
-        addFieldToGrid(classificationInfo, VaadinIcon.LOCK, I18n.t("ims.account.details.field.admin.status"), account.getAdminStatus() != null ? account.getAdminStatus().name() : null);
-        addFieldToGrid(classificationInfo, VaadinIcon.STETHOSCOPE, I18n.t("ims.account.details.field.system.status"), account.getSystemStatus() != null ? account.getSystemStatus().name() : null);
+        ImsEnumTag.addDetailField(classificationInfo, VaadinIcon.LOCK, I18n.t("ims.account.details.field.admin.status"), account.getAdminStatus(), null);
+        ImsEnumTag.addDetailField(classificationInfo, VaadinIcon.STETHOSCOPE, I18n.t("ims.account.details.field.system.status"), account.getSystemStatus(), null);
 
-        mainLayout.add(createSection(I18n.t("ims.account.details.section.classification"), classificationInfo));
+        addTab(I18n.t("ims.account.details.section.classification"), createSection(I18n.t("ims.account.details.section.classification"), classificationInfo));
 
         // Contact / relations — phone/tenant/origin/country/address/contacts/last login
         Div contactInfo = new Div();
@@ -99,13 +96,16 @@ public class AccountDetailsViewDialog extends DetailsViewDialog {
 
         addFieldToGrid(contactInfo, VaadinIcon.PHONE, I18n.t("ims.account.details.field.phone"), account.getPhoneNumber(), true);
         addFieldToGrid(contactInfo, VaadinIcon.BUILDING, I18n.t("ims.account.details.field.tenant"), account.getTenant(), true);
-        addFieldToGrid(contactInfo, VaadinIcon.CLOUD, I18n.t("ims.account.details.field.origin"), account.getOrigin());
+        if (account.getOrigin() != null && !account.getOrigin().isBlank()) {
+            contactInfo.add(ImsEnumTag.detailField(VaadinIcon.CLOUD, I18n.t("ims.account.details.field.origin"),
+                    ImsEnumTag.ofValue(account.getOrigin(), "ims.enum.origin")));
+        }
         addFieldToGrid(contactInfo, VaadinIcon.CLOCK, I18n.t("ims.account.details.field.last.login"), account.getLastConnectionDate() != null ? DateHelper.formatToHumanReadable(account.getLastConnectionDate()) : null);
         if (account.getAccountDetails() != null) {
             addFieldToGrid(contactInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.account.details.field.country"), account.getAccountDetails().getCountry());
         }
 
-        mainLayout.add(createSection(I18n.t("ims.account.details.section.contact"), contactInfo));
+        addTab(I18n.t("ims.account.details.section.contact"), createSection(I18n.t("ims.account.details.section.contact"), contactInfo));
 
         // Address (if present)
         if (account.getAccountDetails() != null && account.getAccountDetails().getAddress() != null) {
@@ -117,17 +117,27 @@ public class AccountDetailsViewDialog extends DetailsViewDialog {
                 Div addressGrid = new Div();
                 addressGrid.addClassName("wams-card__detail-grid");
                 addFieldToGrid(addressGrid, VaadinIcon.MAP_MARKER, I18n.t("ims.account.details.field.address"), address);
-                mainLayout.add(addressGrid);
+                addTab(I18n.t("ims.dialog.tab.address"), addressGrid);
             }
         }
 
         // Contacts (compact list, if present)
         if (account.getAccountDetails() != null && account.getAccountDetails().getContacts() != null
                 && !account.getAccountDetails().getContacts().isEmpty()) {
-            String contactsText = account.getAccountDetails().getContacts().stream()
-                    .map(c -> (c.getType() != null ? c.getType().name() + ": " : "") + (c.getValue() != null ? c.getValue() : ""))
-                    .collect(Collectors.joining(" • "));
-            mainLayout.add(createCompactList(VaadinIcon.PAPERPLANE, I18n.t("ims.account.details.field.contacts"), contactsText));
+            VerticalLayout contactsLayout = new VerticalLayout();
+            contactsLayout.setPadding(false);
+            contactsLayout.setSpacing(true);
+            account.getAccountDetails().getContacts().forEach(contact -> {
+                HorizontalLayout row = new HorizontalLayout();
+                row.setAlignItems(FlexComponent.Alignment.CENTER);
+                row.setSpacing(true);
+                if (contact.getType() != null) {
+                    row.add(ImsEnumTag.of(contact.getType(), "ims.enum.contact"));
+                }
+                row.add(new Span(contact.getValue() == null ? "" : contact.getValue()));
+                contactsLayout.add(row);
+            });
+            addTab(I18n.t("ims.dialog.tab.contacts"), contactsLayout);
         }
 
         // Audit — created/updated by & date
@@ -139,7 +149,7 @@ public class AccountDetailsViewDialog extends DetailsViewDialog {
         addFieldToGrid(auditInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.account.details.field.updated"), account.getUpdateDate() != null ? DateHelper.formatToHumanReadable(account.getUpdateDate()) : null);
         addFieldToGrid(auditInfo, VaadinIcon.EDIT, I18n.t("ims.account.details.field.updated.by"), account.getUpdatedBy());
 
-        mainLayout.add(createSection(I18n.t("ims.account.details.section.audit"), auditInfo));
+        addTab(I18n.t("ims.account.details.section.audit"), createSection(I18n.t("ims.account.details.section.audit"), auditInfo));
 
         // Roles (expandable)
         if (account.getRoleInfo() != null && !account.getRoleInfo().isEmpty()) {
@@ -147,7 +157,7 @@ public class AccountDetailsViewDialog extends DetailsViewDialog {
                     .map(RoleInfoDto::getName)
                     .collect(Collectors.joining(" • "));
             Component rolesComponent = createCompactList(VaadinIcon.TAG, I18n.t("ims.account.details.section.roles"), rolesText);
-            mainLayout.add(new Details(I18n.t("ims.account.details.section.roles"), rolesComponent));
+            addTab(I18n.t("ims.account.details.section.roles"), new Details(I18n.t("ims.account.details.section.roles"), rolesComponent));
         }
 
         // Connection tracking (expandable)
@@ -161,10 +171,9 @@ public class AccountDetailsViewDialog extends DetailsViewDialog {
                         ct.getDevice() != null ? ct.getDevice() : I18n.t("ims.account.details.unknown.device"));
                 connectionsLayout.add(row);
             }
-            mainLayout.add(new Details(I18n.t("ims.account.details.section.connections"), connectionsLayout));
+            addTab(I18n.t("ims.account.details.section.connections"), new Details(I18n.t("ims.account.details.section.connections"), connectionsLayout));
         }
 
-        add(mainLayout);
     }
 
     private Component createCompactList(VaadinIcon icon, String title, String items) {

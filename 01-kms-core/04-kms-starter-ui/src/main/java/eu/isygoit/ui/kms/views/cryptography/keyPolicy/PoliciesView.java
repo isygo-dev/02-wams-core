@@ -5,7 +5,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Hr;
@@ -19,6 +18,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
@@ -30,6 +30,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
+import eu.isygoit.ui.kms.views.common.KmsConfirmationDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyPolicy.dialog.PolicyBuilderDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
@@ -284,17 +285,17 @@ public class PoliciesView extends ManagementVerticalView {
         String policyText = policyEditor.getValue();
 
         if (!StringUtils.hasText(policyText)) {
-            ConfirmDialog confirmDialog = new ConfirmDialog();
-            confirmDialog.setHeader(I18n.t("kms.policy.view.erase.confirm.header"));
-            confirmDialog.setText(I18n.t("kms.policy.view.erase.confirm.message"));
-            confirmDialog.setConfirmText(I18n.t("kms.policy.view.erase.confirm.button"));
-            confirmDialog.setCancelText(I18n.t("kms.policy.view.erase.cancel.button"));
-            confirmDialog.setConfirmButtonTheme("error primary");
-            confirmDialog.addConfirmListener(event -> {
-                Map<String, Object> emptyPolicy = new HashMap<>();
-                performSave(emptyPolicy, true);
-            });
-            confirmDialog.open();
+            new KmsConfirmationDialog(
+                    I18n.t("kms.policy.view.erase.confirm.header"),
+                    I18n.t("kms.policy.view.erase.confirm.message"),
+                    I18n.t("kms.policy.view.erase.confirm.button"),
+                    I18n.t("kms.policy.view.erase.cancel.button"),
+                    () -> {
+                        Map<String, Object> emptyPolicy = new HashMap<>();
+                        performSave(emptyPolicy, true);
+                    },
+                    ButtonVariant.LUMO_ERROR,
+                    ButtonVariant.LUMO_PRIMARY).open();
             return;
         }
 
@@ -353,33 +354,16 @@ public class PoliciesView extends ManagementVerticalView {
             return;
         }
         UI.getCurrent().getPage().executeJs(
-                "navigator.clipboard.writeText($0).then(() => { " +
+                "const showToast = (message, tone, duration) => {" +
                         "  const notification = document.createElement('div'); " +
-                        "  notification.textContent = $1; " +
-                        "  notification.style.position = 'fixed'; " +
-                        "  notification.style.bottom = '20px'; " +
-                        "  notification.style.right = '20px'; " +
-                        "  notification.style.backgroundColor = '#4caf50'; " +
-                        "  notification.style.color = 'white'; " +
-                        "  notification.style.padding = '10px 20px'; " +
-                        "  notification.style.borderRadius = '4px'; " +
-                        "  notification.style.zIndex = '1000'; " +
+                        "  notification.className = 'kms-copy-toast kms-copy-toast--' + tone; " +
+                        "  notification.textContent = message; " +
                         "  document.body.appendChild(notification); " +
-                        "  setTimeout(() => notification.remove(), 2000); " +
-                        "}).catch(() => { " +
-                        "  const notification = document.createElement('div'); " +
-                        "  notification.textContent = $2; " +
-                        "  notification.style.position = 'fixed'; " +
-                        "  notification.style.bottom = '20px'; " +
-                        "  notification.style.right = '20px'; " +
-                        "  notification.style.backgroundColor = '#f44336'; " +
-                        "  notification.style.color = 'white'; " +
-                        "  notification.style.padding = '10px 20px'; " +
-                        "  notification.style.borderRadius = '4px'; " +
-                        "  notification.style.zIndex = '1000'; " +
-                        "  document.body.appendChild(notification); " +
-                        "  setTimeout(() => notification.remove(), 3000); " +
-                        "});",
+                        "  setTimeout(() => notification.remove(), duration); " +
+                        "}; " +
+                        "navigator.clipboard.writeText($0) " +
+                        "  .then(() => showToast($1, 'success', 2000)) " +
+                        "  .catch(() => showToast($2, 'error', 3000));",
                 content, I18n.t("kms.policy.view.policy.copied"), I18n.t("kms.policy.view.copy.failed")
         );
     }
@@ -543,10 +527,15 @@ public class PoliciesView extends ManagementVerticalView {
         helpSpan.addClassName("policy-eval-help-span");
         content.add(helpSpan);
 
+        TabSheet resultTabs = new TabSheet();
+        resultTabs.addClassName("wams-dialog-tabs");
+        resultTabs.addClassName("kms-dialog-tabs");
+        resultTabs.add(I18n.t("kms.policy.eval.tab.result"), content);
+
         Button closeBtn = new Button(I18n.t("kms.policy.eval.close"), e -> resultDialog.close());
         closeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         resultDialog.getFooter().add(closeBtn);
-        resultDialog.add(content);
+        resultDialog.add(resultTabs);
         resultDialog.open();
     }
 

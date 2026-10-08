@@ -3,17 +3,17 @@ package eu.isygoit.ui.ims.views.tenant.dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.TenantService;
-import eu.isygoit.ui.common.dialog.DetailsViewDialog;
+import eu.isygoit.ui.ims.views.common.ImsDetailsDialog;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import eu.isygoit.ui.ims.views.tenant.TenantManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class TenantDetailsViewDialog extends DetailsViewDialog {
+public class TenantDetailsViewDialog extends ImsDetailsDialog {
 
     private final TenantManagementView parentView;
     private final TenantService tenantService;
@@ -56,10 +56,6 @@ public class TenantDetailsViewDialog extends DetailsViewDialog {
     }
 
     private void buildContent(TenantDto tenant) {
-        VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setPadding(false);
-        mainLayout.setSpacing(true);
-
         // Identity — name/code (text identifiers)
         Div identityInfo = new Div();
         identityInfo.addClassName("wams-card__detail-grid");
@@ -67,16 +63,16 @@ public class TenantDetailsViewDialog extends DetailsViewDialog {
         addFieldToGrid(identityInfo, VaadinIcon.BUILDING, I18n.t("ims.tenant.details.field.name"), tenant.getName());
         addFieldToGrid(identityInfo, VaadinIcon.CODE, I18n.t("ims.tenant.details.field.code"), tenant.getCode(), true);
 
-        mainLayout.add(createSection(I18n.t("ims.tenant.details.section.identity"), identityInfo));
+        addTab(I18n.t("ims.tenant.details.section.identity"), createSection(I18n.t("ims.tenant.details.section.identity"), identityInfo));
 
         // Classification & status — admin status/industry
         Div classificationInfo = new Div();
         classificationInfo.addClassName("wams-card__detail-grid");
 
-        addFieldToGrid(classificationInfo, VaadinIcon.SHIELD, I18n.t("ims.tenant.details.field.admin.status"), tenant.getAdminStatus() != null ? tenant.getAdminStatus().name() : null);
+        ImsEnumTag.addDetailField(classificationInfo, VaadinIcon.SHIELD, I18n.t("ims.tenant.details.field.admin.status"), tenant.getAdminStatus(), null);
         addFieldToGrid(classificationInfo, VaadinIcon.INSTITUTION, I18n.t("ims.tenant.details.field.industry"), tenant.getIndustry());
 
-        mainLayout.add(createSection(I18n.t("ims.tenant.details.section.classification"), classificationInfo));
+        addTab(I18n.t("ims.tenant.details.section.classification"), createSection(I18n.t("ims.tenant.details.section.classification"), classificationInfo));
 
         // Contact / relations — email/phone/website
         Div contactInfo = new Div();
@@ -86,14 +82,14 @@ public class TenantDetailsViewDialog extends DetailsViewDialog {
         addFieldToGrid(contactInfo, VaadinIcon.PHONE, I18n.t("ims.tenant.details.field.phone"), tenant.getPhone(), true);
         addFieldToGrid(contactInfo, VaadinIcon.GLOBE, I18n.t("ims.tenant.details.field.website"), tenant.getUrl(), true);
 
-        mainLayout.add(createSection(I18n.t("ims.tenant.details.section.contact"), contactInfo));
+        addTab(I18n.t("ims.tenant.details.section.contact"), createSection(I18n.t("ims.tenant.details.section.contact"), contactInfo));
 
         // Description (full width)
         if (tenant.getDescription() != null && !tenant.getDescription().isBlank()) {
             Div descGrid = new Div();
             descGrid.addClassName("wams-card__detail-grid");
             addFieldToGrid(descGrid, VaadinIcon.FILE_TEXT, I18n.t("ims.tenant.details.field.description"), tenant.getDescription(), false);
-            mainLayout.add(descGrid);
+            addTab(I18n.t("ims.dialog.tab.description"), descGrid);
         }
 
         // Social links (part of contact / relations, if present)
@@ -105,7 +101,7 @@ public class TenantDetailsViewDialog extends DetailsViewDialog {
             addFieldToGrid(socialInfo, VaadinIcon.LINK, I18n.t("ims.tenant.details.field.linkedin"), tenant.getLnk_linkedin(), true);
             addFieldToGrid(socialInfo, VaadinIcon.LINK, I18n.t("ims.tenant.details.field.xing"), tenant.getLnk_xing(), true);
 
-            mainLayout.add(createSection(I18n.t("ims.tenant.details.section.social"), socialInfo));
+            addTab(I18n.t("ims.tenant.details.section.social"), createSection(I18n.t("ims.tenant.details.section.social"), socialInfo));
         }
 
         // Address (part of contact / relations, if present)
@@ -120,7 +116,7 @@ public class TenantDetailsViewDialog extends DetailsViewDialog {
             addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.tenant.details.field.zip.code"), tenant.getAddress().getZipCode(), true);
             addFieldToGrid(addressInfo, VaadinIcon.MAP_MARKER, I18n.t("ims.tenant.details.field.additional.info"), tenant.getAddress().getAdditionalInfo());
 
-            mainLayout.add(createSection(I18n.t("ims.tenant.details.section.address"), addressInfo));
+            addTab(I18n.t("ims.tenant.details.section.address"), createSection(I18n.t("ims.tenant.details.section.address"), addressInfo));
         }
 
         // Audit — created/updated by & date
@@ -132,9 +128,8 @@ public class TenantDetailsViewDialog extends DetailsViewDialog {
         addFieldToGrid(auditInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.tenant.details.field.updated"), tenant.getUpdateDate() != null ? DateHelper.formatToHumanReadable(tenant.getUpdateDate()) : null);
         addFieldToGrid(auditInfo, VaadinIcon.EDIT, I18n.t("ims.tenant.details.field.updated.by"), tenant.getUpdatedBy());
 
-        mainLayout.add(createSection(I18n.t("ims.tenant.details.section.audit"), auditInfo));
+        addTab(I18n.t("ims.tenant.details.section.audit"), createSection(I18n.t("ims.tenant.details.section.audit"), auditInfo));
 
-        add(mainLayout);
     }
 
     private boolean hasAnySocialLink(TenantDto tenant) {

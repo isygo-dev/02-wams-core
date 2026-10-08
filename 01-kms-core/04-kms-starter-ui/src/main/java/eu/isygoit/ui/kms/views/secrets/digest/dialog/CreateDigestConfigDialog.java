@@ -12,7 +12,8 @@ import eu.isygoit.enums.IEnumSaltGenerator;
 import eu.isygoit.enums.IEnumStringOutputType;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.DigestConfigService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -22,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class CreateDigestConfigDialog extends BaseActionDialog {
+public class CreateDigestConfigDialog extends KmsActionDialog {
 
     private final DigestConfigService configService;
     private final Map<String, String> classToProviderNameMap = new HashMap<>();
@@ -60,6 +61,7 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
 
         algorithmCombo = new ComboBox<>(I18n.t("kms.digest.dialog.field.algorithm"));
         algorithmCombo.setItems(IEnumAlgoDigestConfig.Types.values());
+        KmsEnumTag.useTagRenderer(algorithmCombo, "kms.enum");
         algorithmCombo.setRequired(true);
         algorithmCombo.setWidthFull();
 
@@ -77,6 +79,7 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
 
         saltGeneratorCombo = new ComboBox<>(I18n.t("kms.digest.dialog.field.salt.generator"));
         saltGeneratorCombo.setItems(IEnumSaltGenerator.Types.values());
+        KmsEnumTag.useTagRenderer(saltGeneratorCombo, "kms.enum");
         saltGeneratorCombo.setValue(IEnumSaltGenerator.Types.RandomSaltGenerator);
         saltGeneratorCombo.setWidthFull();
 
@@ -125,6 +128,7 @@ public class CreateDigestConfigDialog extends BaseActionDialog {
 
         outputTypeCombo = new ComboBox<>(I18n.t("kms.digest.dialog.field.output.type"));
         outputTypeCombo.setItems(IEnumStringOutputType.Types.values());
+        KmsEnumTag.useTagRenderer(outputTypeCombo, "kms.enum");
         outputTypeCombo.setValue(IEnumStringOutputType.Types.Base64);
         outputTypeCombo.setWidthFull();
 

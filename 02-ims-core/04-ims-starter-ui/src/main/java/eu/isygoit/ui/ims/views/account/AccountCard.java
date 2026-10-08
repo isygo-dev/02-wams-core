@@ -22,6 +22,7 @@ import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.ims.views.account.dialog.AccountDetailsViewDialog;
 import eu.isygoit.ui.ims.views.account.dialog.DeleteAccountDialog;
 import eu.isygoit.ui.ims.views.account.dialog.EnableDisableAccountDialog;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -95,14 +96,8 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
 
         String displayName = minAccount.getFullName() != null ? minAccount.getFullName() : minAccount.getEmail();
         Span titleSpan = buildTitleSpan(displayName, minAccount.getEmail());
-        adminStatusChip = buildStatusChip(
-                minAccount.getAdminStatus() != null ? minAccount.getAdminStatus().name() : I18n.t("ims.account.card.status.unknown"),
-                minAccount.getAdminStatus() != null ? minAccount.getAdminStatus().name() : I18n.t("ims.account.card.status.unknown")
-        );
-        systemStatusChip = buildStatusChip(
-                minAccount.getSystemStatus() != null ? minAccount.getSystemStatus().name() : I18n.t("ims.account.card.status.unknown"),
-                minAccount.getSystemStatus() != null ? minAccount.getSystemStatus().name() : I18n.t("ims.account.card.status.unknown")
-        );
+        adminStatusChip = ImsEnumTag.ofOrUnknown(minAccount.getAdminStatus(), null);
+        systemStatusChip = ImsEnumTag.ofOrUnknown(minAccount.getSystemStatus(), null);
         row2.add(titleSpan, adminStatusChip, systemStatusChip);
 
         titleLayout.add(row1, row2);
@@ -160,16 +155,10 @@ public class AccountCard extends BaseCard<AccountManagementView, AccountService>
 
     private void updateStatusChips() {
         if (adminStatusChip != null) {
-            String status = minAccount.getAdminStatus() != null ? minAccount.getAdminStatus().name() : I18n.t("ims.account.card.status.unknown");
-            adminStatusChip.setText(status);
-            adminStatusChip.getElement().setAttribute("title", status);
-            applyChipColor(adminStatusChip, ChipColor.fromStatus(status));
+            ImsEnumTag.update(adminStatusChip, minAccount.getAdminStatus(), null);
         }
         if (systemStatusChip != null) {
-            String status = minAccount.getSystemStatus() != null ? minAccount.getSystemStatus().name() : I18n.t("ims.account.card.status.unknown");
-            systemStatusChip.setText(status);
-            systemStatusChip.getElement().setAttribute("title", status);
-            applyChipColor(systemStatusChip, ChipColor.fromStatus(status));
+            ImsEnumTag.update(systemStatusChip, minAccount.getSystemStatus(), null);
         }
     }
 

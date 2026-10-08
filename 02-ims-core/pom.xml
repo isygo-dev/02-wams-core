@@ -2,7 +2,7 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <version>WC-1.0.260928-T1052</version>
+    <version>WC-1.0.261007-T1703</version>
 
     <artifactId>ims-core</artifactId>
     <packaging>pom</packaging>
@@ -13,7 +13,7 @@
     <parent>
         <groupId>eu.isygo-it.services</groupId>
         <artifactId>service-core</artifactId>
-        <version>WC-1.0.260928-T1052</version>
+        <version>WC-1.0.261007-T1703</version>
     </parent>
 
     <properties>

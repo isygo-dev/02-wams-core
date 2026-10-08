@@ -4,10 +4,10 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsPinActionDialog;
 import feign.FeignException;
 
-public class RetireGrantDialog extends PinBaseActionDialog {
+public class RetireGrantDialog extends KmsPinActionDialog {
 
     private final String keyId;
     private final KmsApiService kmsApiService;

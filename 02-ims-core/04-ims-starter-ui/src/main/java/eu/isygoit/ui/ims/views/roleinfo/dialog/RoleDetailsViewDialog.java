@@ -4,19 +4,18 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.data.ApplicationDto;
 import eu.isygoit.dto.data.RoleInfoDto;
 import eu.isygoit.dto.data.RolePermissionDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.RoleInfoService;
-import eu.isygoit.ui.common.dialog.DetailsViewDialog;
+import eu.isygoit.ui.ims.views.common.ImsDetailsDialog;
 import eu.isygoit.ui.ims.views.roleinfo.RoleManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class RoleDetailsViewDialog extends DetailsViewDialog {
+public class RoleDetailsViewDialog extends ImsDetailsDialog {
 
     private final RoleManagementView parentView;
     private final RoleInfoService roleService;
@@ -59,10 +58,6 @@ public class RoleDetailsViewDialog extends DetailsViewDialog {
     }
 
     private void buildContent(RoleInfoDto role) {
-        VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setPadding(false);
-        mainLayout.setSpacing(true);
-
         // Identity — name/code/template code (text identifiers)
         Div identityInfo = new Div();
         identityInfo.addClassName("wams-card__detail-grid");
@@ -71,7 +66,7 @@ public class RoleDetailsViewDialog extends DetailsViewDialog {
         addFieldToGrid(identityInfo, VaadinIcon.CODE, I18n.t("ims.role.details.field.code"), role.getCode(), true);
         addFieldToGrid(identityInfo, VaadinIcon.CLIPBOARD_TEXT, I18n.t("ims.role.details.field.template.code"), role.getTemplateCode(), true);
 
-        mainLayout.add(createSection(I18n.t("ims.role.details.section.identity"), identityInfo));
+        addTab(I18n.t("ims.role.details.section.identity"), createSection(I18n.t("ims.role.details.section.identity"), identityInfo));
 
         // Classification & status — level/number of users
         Div classificationInfo = new Div();
@@ -80,7 +75,7 @@ public class RoleDetailsViewDialog extends DetailsViewDialog {
         addFieldToGrid(classificationInfo, VaadinIcon.SORT, I18n.t("ims.role.details.field.level"), String.valueOf(role.getLevel()));
         addFieldToGrid(classificationInfo, VaadinIcon.USERS, I18n.t("ims.role.details.field.users"), String.valueOf(role.getNumberOfUsers()));
 
-        mainLayout.add(createSection(I18n.t("ims.role.details.section.classification"), classificationInfo));
+        addTab(I18n.t("ims.role.details.section.classification"), createSection(I18n.t("ims.role.details.section.classification"), classificationInfo));
 
         // Contact / relations — tenant/description
         Div contactInfo = new Div();
@@ -88,13 +83,13 @@ public class RoleDetailsViewDialog extends DetailsViewDialog {
 
         addFieldToGrid(contactInfo, VaadinIcon.BUILDING, I18n.t("ims.role.details.field.tenant"), role.getTenant(), true);
 
-        mainLayout.add(createSection(I18n.t("ims.role.details.section.contact"), contactInfo));
+        addTab(I18n.t("ims.role.details.section.contact"), createSection(I18n.t("ims.role.details.section.contact"), contactInfo));
 
         if (role.getDescription() != null && !role.getDescription().isBlank()) {
             Div descGrid = new Div();
             descGrid.addClassName("wams-card__detail-grid");
             addFieldToGrid(descGrid, VaadinIcon.FILE_TEXT, I18n.t("ims.role.details.field.description"), role.getDescription(), false);
-            mainLayout.add(descGrid);
+            addTab(I18n.t("ims.dialog.tab.description"), descGrid);
         }
 
         // Audit — created/updated by & date
@@ -106,7 +101,7 @@ public class RoleDetailsViewDialog extends DetailsViewDialog {
         addFieldToGrid(auditInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.role.details.field.updated"), role.getUpdateDate() != null ? DateHelper.formatToHumanReadable(role.getUpdateDate()) : null);
         addFieldToGrid(auditInfo, VaadinIcon.EDIT, I18n.t("ims.role.details.field.updated.by"), role.getUpdatedBy());
 
-        mainLayout.add(createSection(I18n.t("ims.role.details.section.audit"), auditInfo));
+        addTab(I18n.t("ims.role.details.section.audit"), createSection(I18n.t("ims.role.details.section.audit"), auditInfo));
 
         // Allowed Applications
         if (role.getAllowedTools() != null && !role.getAllowedTools().isEmpty()) {
@@ -116,7 +111,7 @@ public class RoleDetailsViewDialog extends DetailsViewDialog {
             appsGrid.addColumn(ApplicationDto::getCategory).setHeader(I18n.t("ims.role.details.apps.column.category"));
             appsGrid.setItems(role.getAllowedTools());
             appsGrid.setHeight("200px");
-            mainLayout.add(createSection(I18n.t("ims.role.details.section.apps"), appsGrid));
+            addTab(I18n.t("ims.role.details.section.apps"), createSection(I18n.t("ims.role.details.section.apps"), appsGrid));
         }
 
         // Permissions
@@ -129,10 +124,9 @@ public class RoleDetailsViewDialog extends DetailsViewDialog {
             permsGrid.addComponentColumn(perm -> new Span(perm.getDelete() ? I18n.t("ims.role.details.yes") : I18n.t("ims.role.details.no"))).setHeader(I18n.t("ims.role.details.field.delete"));
             permsGrid.setItems(role.getRolePermission());
             permsGrid.setHeight("300px");
-            mainLayout.add(createSection(I18n.t("ims.role.details.section.perms"), permsGrid));
+            addTab(I18n.t("ims.role.details.section.perms"), createSection(I18n.t("ims.role.details.section.perms"), permsGrid));
         }
 
-        add(mainLayout);
     }
 
     private String extractErrorMessage(FeignException ex) {

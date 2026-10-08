@@ -28,7 +28,7 @@ import eu.isygoit.dto.data.RolePermissionDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.ApplicationService;
 import eu.isygoit.remote.ims.RoleInfoService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.ims.views.common.ImsActionDialog;
 import eu.isygoit.ui.ims.views.roleinfo.RoleManagementView;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class CreateRoleDialog extends BaseActionDialog {
+public class CreateRoleDialog extends ImsActionDialog {
 
     private final RoleManagementView parentView;
     private final RoleInfoService roleInfoService;

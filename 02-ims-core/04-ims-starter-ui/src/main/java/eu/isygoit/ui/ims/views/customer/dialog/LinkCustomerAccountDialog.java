@@ -9,7 +9,7 @@ import eu.isygoit.dto.data.MinAccountDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.remote.ims.CustomerService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.ims.views.common.ImsActionDialog;
 import eu.isygoit.ui.ims.views.customer.CustomerManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LinkCustomerAccountDialog extends BaseActionDialog {
+public class LinkCustomerAccountDialog extends ImsActionDialog {
 
     private final CustomerManagementView parentView;
     private final CustomerService customerService;

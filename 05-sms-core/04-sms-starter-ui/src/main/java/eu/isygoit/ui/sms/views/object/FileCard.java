@@ -116,7 +116,7 @@ public class FileCard extends BaseCard<ObjectStorageManagementView, ObjectStorag
 
             Anchor anchor = new Anchor(streamResource, "");
             anchor.getElement().setAttribute("download", true);
-            anchor.getStyle().set("display", "none");
+            anchor.addClassName("sms-download-trigger");
             add(anchor);
             anchor.getElement().executeJs("this.click(); this.remove();");
 

@@ -17,7 +17,8 @@ import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
 import eu.isygoit.remote.mms.SenderConfigService;
-import eu.isygoit.ui.common.dialog.DetailsViewDialog;
+import eu.isygoit.ui.mms.views.common.MmsDetailsDialog;
+import eu.isygoit.ui.mms.views.common.MmsEnumTag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +32,7 @@ import org.springframework.http.ResponseEntity;
  * and the other {@code *DetailsViewDialog} classes across the app.
  */
 @Slf4j
-public class MsgTemplateDetailsViewDialog extends DetailsViewDialog {
+public class MsgTemplateDetailsViewDialog extends MmsDetailsDialog {
 
     private final MsgTemplateFileService templateFileService;
     private final SenderConfigService senderConfigService;
@@ -43,7 +44,9 @@ public class MsgTemplateDetailsViewDialog extends DetailsViewDialog {
                                         SenderConfigService senderConfigService,
                                         MsgTemplateDto template) {
         super(I18n.t("mms.msgtemplate.dialog.view.title",
-                template.getName() != null ? template.getName() : template.getId()));
+                template.getName() != null
+                        ? MmsEnumTag.label(template.getName(), "mms.msgtemplate.enum.name")
+                        : template.getId()));
         this.templateFileService = templateFileService;
         this.senderConfigService = senderConfigService;
         this.template = template;
@@ -90,17 +93,20 @@ public class MsgTemplateDetailsViewDialog extends DetailsViewDialog {
                 template.getCode(), true);
         addFieldToGrid(identityGrid, VaadinIcon.BUILDING, I18n.t("mms.msgtemplate.dialog.view.tenant"),
                 template.getTenant());
-        addFieldToGrid(identityGrid, VaadinIcon.FILE_TEXT, I18n.t("mms.msgtemplate.dialog.view.name"),
-                template.getName());
-        add(createSection(I18n.t("mms.msgtemplate.dialog.view.section.identity"), identityGrid));
+        identityGrid.add(MmsEnumTag.detailField(VaadinIcon.FILE_TEXT,
+                I18n.t("mms.msgtemplate.dialog.view.name"),
+                MmsEnumTag.ofValue(template.getName(), "mms.msgtemplate.enum.name")));
+        addTab(I18n.t("mms.msgtemplate.dialog.view.section.identity"),
+                createSection(I18n.t("mms.msgtemplate.dialog.view.section.identity"), identityGrid));
 
         // ── Configuration — language/default sender ──────────────────────────
         Div configGrid = createDetailGrid();
-        addFieldToGrid(configGrid, VaadinIcon.FLAG, I18n.t("mms.msgtemplate.dialog.view.language"),
-                template.getLanguage() != null ? template.getLanguage().name() : null);
+        configGrid.add(MmsEnumTag.detailField(VaadinIcon.FLAG, I18n.t("mms.msgtemplate.dialog.view.language"),
+                MmsEnumTag.ofOrUnknown(template.getLanguage(), "mms.msgtemplate.view.language")));
         addFieldToGrid(configGrid, VaadinIcon.ENVELOPE_O, I18n.t("mms.msgtemplate.dialog.view.defaultSender"),
                 template.getDefaultSender());
-        add(createSection(I18n.t("mms.msgtemplate.dialog.view.section.configuration"), configGrid));
+        addTab(I18n.t("mms.msgtemplate.dialog.view.section.configuration"),
+                createSection(I18n.t("mms.msgtemplate.dialog.view.section.configuration"), configGrid));
 
         // ── Relations — sender config reference ──────────────────────────────
         Div relationsGrid = createDetailGrid();
@@ -109,14 +115,16 @@ public class MsgTemplateDetailsViewDialog extends DetailsViewDialog {
                 : senderConfigDisplayName;
         addFieldToGrid(relationsGrid, VaadinIcon.ENVELOPE, I18n.t("mms.msgtemplate.dialog.view.senderConfig"),
                 senderConfigValue, true);
-        add(createSection(I18n.t("mms.msgtemplate.dialog.view.section.relations"), relationsGrid));
+        addTab(I18n.t("mms.msgtemplate.dialog.view.section.relations"),
+                createSection(I18n.t("mms.msgtemplate.dialog.view.section.relations"), relationsGrid));
 
         // ── Description — free text, a full-width block rather than a grid
         //    field, since it doesn't fit the short label/value pattern well ──
         if (template.getDescription() != null && !template.getDescription().isBlank()) {
             Paragraph descParagraph = new Paragraph(template.getDescription());
             descParagraph.addClassName("wams-card__detail-field-value");
-            add(createSection(I18n.t("mms.msgtemplate.dialog.view.description"), descParagraph));
+            addTab(I18n.t("mms.msgtemplate.dialog.view.description"),
+                    createSection(I18n.t("mms.msgtemplate.dialog.view.description"), descParagraph));
         }
 
         // ── File ───────────────────────────────────────────────────────────
@@ -141,7 +149,8 @@ public class MsgTemplateDetailsViewDialog extends DetailsViewDialog {
         VerticalLayout fileSection = new VerticalLayout(fileGrid, downloadRow);
         fileSection.setPadding(false);
         fileSection.setSpacing(true);
-        add(createSection(I18n.t("mms.msgtemplate.dialog.view.section.file"), fileSection));
+        addTab(I18n.t("mms.msgtemplate.dialog.view.section.file"),
+                createSection(I18n.t("mms.msgtemplate.dialog.view.section.file"), fileSection));
 
         // ── Audit — created/updated by & date ─────────────────────────────
         Div auditGrid = createDetailGrid();
@@ -153,7 +162,8 @@ public class MsgTemplateDetailsViewDialog extends DetailsViewDialog {
                 template.getUpdateDate() != null ? DateHelper.formatToHumanReadable(template.getUpdateDate()) : null);
         addFieldToGrid(auditGrid, VaadinIcon.EDIT, I18n.t("mms.msgtemplate.dialog.view.field.updated.by"),
                 template.getUpdatedBy());
-        add(createSection(I18n.t("mms.msgtemplate.dialog.view.section.audit"), auditGrid));
+        addTab(I18n.t("mms.msgtemplate.dialog.view.section.audit"),
+                createSection(I18n.t("mms.msgtemplate.dialog.view.section.audit"), auditGrid));
     }
 
     private void downloadTemplate() {

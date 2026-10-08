@@ -3,11 +3,11 @@ package eu.isygoit.ui.ims.views.application.dialog;
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.ApplicationService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.application.ApplicationManagementView;
+import eu.isygoit.ui.ims.views.common.ImsPinActionDialog;
 import feign.FeignException;
 
-public class DeleteApplicationDialog extends PinBaseActionDialog {
+public class DeleteApplicationDialog extends ImsPinActionDialog {
 
     private final ApplicationManagementView parentView;
     private final ApplicationService applicationService;

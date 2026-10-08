@@ -16,14 +16,14 @@ import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.KmsDtos.CreateKeyRequest;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsActionDialog;
 import eu.isygoit.ui.kms.views.cryptography.key.KeyManagementView;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public abstract class KeyDialogBase extends BaseActionDialog {
+public abstract class KeyDialogBase extends KmsActionDialog {
 
     protected final KeyManagementView parentView;
     protected final KmsApiService kmsApiService;

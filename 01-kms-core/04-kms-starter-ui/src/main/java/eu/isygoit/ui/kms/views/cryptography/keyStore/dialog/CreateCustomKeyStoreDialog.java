@@ -12,7 +12,8 @@ import eu.isygoit.dto.KmsDtos.CreateCustomKeyStoreResponse;
 import eu.isygoit.enums.IEnumCustomKeyStoreType;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.kms.views.cryptography.keyStore.CustomKeyStoresView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ import org.springframework.util.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CreateCustomKeyStoreDialog extends BaseActionDialog {
+public class CreateCustomKeyStoreDialog extends KmsActionDialog {
 
     private final CustomKeyStoresView parentView;
     private final KmsApiService kmsApiService;
@@ -157,6 +158,7 @@ public class CreateCustomKeyStoreDialog extends BaseActionDialog {
 
         typeCombo = new ComboBox<>(I18n.t("kms.keystore.dialog.field.type"));
         typeCombo.setItems(IEnumCustomKeyStoreType.Types.values());
+        KmsEnumTag.useTagRenderer(typeCombo, "kms.enum");
         typeCombo.setRequiredIndicatorVisible(true);
         typeCombo.setValue(IEnumCustomKeyStoreType.Types.WAMS_CLOUDHSM);
         typeCombo.setHelperText(I18n.t("kms.keystore.dialog.field.type.helper"));

@@ -3,11 +3,11 @@ package eu.isygoit.ui.cms.views.vcalendar.dialog;
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.cms.VCalendarService;
+import eu.isygoit.ui.cms.views.common.CmsPinActionDialog;
 import eu.isygoit.ui.cms.views.vcalendar.VCalendarManagementView;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import feign.FeignException;
 
-public class DeleteVCalendarDialog extends PinBaseActionDialog {
+public class DeleteVCalendarDialog extends CmsPinActionDialog {
 
     private final VCalendarManagementView parentView;
     private final VCalendarService calendarService;

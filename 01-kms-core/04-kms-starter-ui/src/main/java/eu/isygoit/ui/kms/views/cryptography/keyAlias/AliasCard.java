@@ -69,7 +69,7 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
 
         if (Boolean.TRUE.equals(primaryKey)) {
             Icon warningIcon = VaadinIcon.WARNING.create();
-            warningIcon.setColor("var(--lumo-error-color)");
+            warningIcon.addClassName("kms-text-danger");
             warningIcon.setSize("18px");
             warningIcon.setTooltipText(I18n.t("kms.alias.card.primary.tooltip"));
             left.add(warningIcon);

@@ -3,11 +3,11 @@ package eu.isygoit.ui.ims.views.roleinfo.dialog;
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.RoleInfoService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.ims.views.common.ImsPinActionDialog;
 import eu.isygoit.ui.ims.views.roleinfo.RoleManagementView;
 import feign.FeignException;
 
-public class DeleteRoleDialog extends PinBaseActionDialog {
+public class DeleteRoleDialog extends ImsPinActionDialog {
 
     private final RoleManagementView parentView;
     private final RoleInfoService roleService;

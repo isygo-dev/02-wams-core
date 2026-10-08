@@ -3,11 +3,11 @@ package eu.isygoit.ui.ims.views.annex.dialog;
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AnnexService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.annex.AnnexManagementView;
+import eu.isygoit.ui.ims.views.common.ImsPinActionDialog;
 import feign.FeignException;
 
-public class DeleteAnnexDialog extends PinBaseActionDialog {
+public class DeleteAnnexDialog extends ImsPinActionDialog {
 
     private final AnnexManagementView parentView;
     private final AnnexService annexService;

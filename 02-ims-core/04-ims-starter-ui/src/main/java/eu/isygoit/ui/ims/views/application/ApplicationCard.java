@@ -20,6 +20,7 @@ import eu.isygoit.ui.common.card.BaseCard;
 import eu.isygoit.ui.ims.views.application.dialog.ApplicationDetailsViewDialog;
 import eu.isygoit.ui.ims.views.application.dialog.DeleteApplicationDialog;
 import eu.isygoit.ui.ims.views.application.dialog.ToggleApplicationStatusDialog;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -89,10 +90,7 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
         row2.addClassName("card-row--spaced");
 
         Span titleSpan = buildTitleSpan(application.getName(), application.getTitle());
-        adminStatusChip = buildStatusChip(
-                application.getAdminStatus() != null ? application.getAdminStatus().name() : I18n.t("ims.app.card.status.unknown"),
-                application.getAdminStatus() != null ? application.getAdminStatus().name() : I18n.t("ims.app.card.status.unknown")
-        );
+        adminStatusChip = ImsEnumTag.ofOrUnknown(application.getAdminStatus(), null);
         row2.add(titleSpan, adminStatusChip);
 
         titleLayout.add(row1, row2);
@@ -182,10 +180,7 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
 
     private void updateStatusChip() {
         if (adminStatusChip != null) {
-            String status = application.getAdminStatus() != null ? application.getAdminStatus().name() : I18n.t("ims.app.card.status.unknown");
-            adminStatusChip.setText(status);
-            adminStatusChip.getElement().setAttribute("title", status);
-            applyChipColor(adminStatusChip, ChipColor.fromStatus(status));
+            ImsEnumTag.update(adminStatusChip, application.getAdminStatus(), null);
         }
     }
 

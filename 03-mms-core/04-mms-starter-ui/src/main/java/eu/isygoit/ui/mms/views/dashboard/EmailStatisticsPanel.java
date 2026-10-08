@@ -76,15 +76,15 @@ public class EmailStatisticsPanel extends VerticalLayout {
         Div grid = new Div();
         grid.addClassName("wams-mini-stats-grid");
 
-        grid.add(createMiniStatCard(I18n.t("mms.dashboard.email.stats.sent"), "2.8K", VaadinIcon.ENVELOPE_O, "#4F46E5", "+12%"));
-        grid.add(createMiniStatCard(I18n.t("mms.dashboard.email.stats.opened"), "1.9K", VaadinIcon.EYE, "#10B981", "+8%"));
-        grid.add(createMiniStatCard(I18n.t("mms.dashboard.email.stats.bounced"), "124", VaadinIcon.EXCLAMATION_CIRCLE_O, "#EF4444", "-3%"));
-        grid.add(createMiniStatCard(I18n.t("mms.dashboard.email.stats.rate"), "67.6%", VaadinIcon.TRENDING_UP, "#F59E0B", "+5%"));
+        grid.add(createMiniStatCard(I18n.t("mms.dashboard.email.stats.sent"), "2.8K", VaadinIcon.ENVELOPE_O, "primary", "+12%"));
+        grid.add(createMiniStatCard(I18n.t("mms.dashboard.email.stats.opened"), "1.9K", VaadinIcon.EYE, "success", "+8%"));
+        grid.add(createMiniStatCard(I18n.t("mms.dashboard.email.stats.bounced"), "124", VaadinIcon.EXCLAMATION_CIRCLE_O, "danger", "-3%"));
+        grid.add(createMiniStatCard(I18n.t("mms.dashboard.email.stats.rate"), "67.6%", VaadinIcon.TRENDING_UP, "warning", "+5%"));
 
         return grid;
     }
 
-    private Div createMiniStatCard(String label, String value, VaadinIcon icon, String color, String change) {
+    private Div createMiniStatCard(String label, String value, VaadinIcon icon, String tone, String change) {
         Div card = new Div();
         card.addClassName("wams-mini-stat-card");
         card.addClassName("stat-card");
@@ -97,11 +97,11 @@ public class EmailStatisticsPanel extends VerticalLayout {
         // Icon with circle background
         Div iconWrapper = new Div();
         iconWrapper.addClassName("wams-mini-stat-icon-wrapper");
-        iconWrapper.getStyle().set("--wams-mini-stat-color", color + "20");
+        iconWrapper.addClassName("mms-tone--" + tone);
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("16px");
-        iconComponent.setColor(color);
+        iconComponent.addClassName("mms-tone-icon--" + tone);
         iconWrapper.add(iconComponent);
 
         // Value and label

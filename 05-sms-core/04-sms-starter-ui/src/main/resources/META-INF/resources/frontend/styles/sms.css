@@ -4,10 +4,153 @@
  * once via SmsMainLayout so it is available to every view rendered inside it.
  */
 
+/* Pilot/IMS-aligned design tokens and Vaadin theme values. */
+:root {
+    --sms-color-primary: #0c66e4;
+    --sms-color-primary-soft: rgba(12, 102, 228, 0.1);
+    --sms-color-success: #1f845a;
+    --sms-color-success-soft: rgba(31, 132, 90, 0.1);
+    --sms-color-warning: #a54800;
+    --sms-color-warning-soft: rgba(165, 72, 0, 0.12);
+    --sms-color-danger: #c9372c;
+    --sms-color-danger-soft: rgba(201, 55, 44, 0.1);
+    --sms-color-info: #0055cc;
+    --sms-color-text: #172b4d;
+    --sms-color-text-muted: #44546f;
+    --sms-color-text-soft: #626f86;
+    --sms-color-surface: #ffffff;
+    --sms-color-surface-alt: #f7f8f9;
+    --sms-color-border: rgba(9, 30, 66, 0.14);
+    --sms-color-shadow: rgba(9, 30, 66, 0.13);
+    --sms-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --sms-font-size-xxs: 0.625rem;
+    --sms-font-size-xs: 0.75rem;
+    --sms-font-size-sm: 0.875rem;
+    --sms-font-size-md: 1rem;
+    --sms-font-size-lg: 1.125rem;
+    --sms-font-size-xl: 1.5rem;
+    --sms-font-weight-semibold: 600;
+    --sms-line-height-normal: 1.5;
+    --sms-space-1: 0.25rem;
+    --sms-space-2: 0.5rem;
+    --sms-space-2-5: 0.625rem;
+    --sms-space-3: 0.75rem;
+    --sms-space-4: 1rem;
+    --sms-space-6: 1.5rem;
+    --sms-space-8: 2rem;
+    --sms-space-meta-indent: 1.75rem;
+    --sms-space-tag-x: 0.55rem;
+    --sms-space-tag-y: 0.12rem;
+    --sms-radius-sm: 3px;
+    --sms-radius-md: 6px;
+    --sms-radius-lg: 9px;
+    --sms-radius-xl: 12px;
+    --sms-shadow-sm: 0 1px 2px rgba(9, 30, 66, 0.16), 0 0 1px rgba(9, 30, 66, 0.1);
+    --sms-shadow-md: 0 4px 8px -2px rgba(9, 30, 66, 0.18), 0 0 1px rgba(9, 30, 66, 0.12);
+
+    --lumo-primary-color: var(--sms-color-primary);
+    --lumo-primary-text-color: var(--sms-color-primary);
+    --lumo-primary-color-10pct: var(--sms-color-primary-soft);
+    --lumo-primary-color-50pct: rgba(12, 102, 228, 0.5);
+    --lumo-success-color: var(--sms-color-success);
+    --lumo-success-text-color: var(--sms-color-success);
+    --lumo-success-color-10pct: var(--sms-color-success-soft);
+    --lumo-success-color-50pct: rgba(31, 132, 90, 0.5);
+    --lumo-warning-color: var(--sms-color-warning);
+    --lumo-warning-text-color: var(--sms-color-warning);
+    --lumo-warning-color-10pct: var(--sms-color-warning-soft);
+    --lumo-warning-color-50pct: rgba(165, 72, 0, 0.5);
+    --lumo-error-color: var(--sms-color-danger);
+    --lumo-error-text-color: var(--sms-color-danger);
+    --lumo-error-color-10pct: var(--sms-color-danger-soft);
+    --lumo-error-color-50pct: rgba(201, 55, 44, 0.5);
+    --lumo-body-text-color: var(--sms-color-text);
+    --lumo-secondary-text-color: var(--sms-color-text-muted);
+    --lumo-tertiary-text-color: var(--sms-color-text-soft);
+    --lumo-base-color: var(--sms-color-surface);
+    --lumo-contrast-5pct: rgba(9, 30, 66, 0.04);
+    --lumo-contrast-10pct: rgba(9, 30, 66, 0.08);
+    --lumo-contrast-20pct: var(--sms-color-border);
+    --lumo-font-family: var(--sms-font-family);
+    --lumo-font-size-xxs: var(--sms-font-size-xxs);
+    --lumo-font-size-xs: var(--sms-font-size-xs);
+    --lumo-font-size-s: var(--sms-font-size-sm);
+    --lumo-font-size-m: var(--sms-font-size-md);
+    --lumo-font-size-l: var(--sms-font-size-lg);
+    --lumo-font-size-xl: var(--sms-font-size-xl);
+    --lumo-space-xs: var(--sms-space-1);
+    --lumo-space-s: var(--sms-space-2);
+    --lumo-space-m: var(--sms-space-4);
+    --lumo-space-l: var(--sms-space-6);
+    --lumo-space-xl: var(--sms-space-8);
+    --lumo-border-radius-s: var(--sms-radius-sm);
+    --lumo-border-radius-m: var(--sms-radius-md);
+    --lumo-border-radius: var(--sms-radius-lg);
+    --lumo-border-radius-l: var(--sms-radius-lg);
+    --lumo-box-shadow-xs: var(--sms-shadow-sm);
+    --lumo-box-shadow-s: var(--sms-shadow-sm);
+    --lumo-box-shadow-m: var(--sms-shadow-md);
+}
+
+.sms-enum-tag {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    padding: var(--sms-space-tag-y) var(--sms-space-tag-x);
+    border: 1px solid transparent;
+    border-radius: var(--sms-radius-md);
+    font-size: var(--sms-font-size-xs);
+    font-weight: var(--sms-font-weight-semibold);
+    line-height: var(--sms-line-height-normal);
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.sms-enum-tag--success {
+    color: var(--sms-color-success);
+    background: var(--sms-color-success-soft);
+}
+
+.sms-enum-tag--warning {
+    color: var(--sms-color-warning);
+    background: var(--sms-color-warning-soft);
+}
+
+.sms-enum-tag--danger {
+    color: var(--sms-color-danger);
+    background: var(--sms-color-danger-soft);
+}
+
+.sms-enum-tag--info {
+    color: var(--sms-color-info);
+    background: var(--sms-color-primary-soft);
+}
+
+.sms-enum-tag--neutral {
+    color: var(--sms-color-text-muted);
+    background: var(--sms-color-surface-alt);
+}
+
+.sms-dialog-tabs,
+.wams-dialog-tabs {
+    width: 100%;
+    --vaadin-tabs-background-color: transparent;
+    --vaadin-tabs-border-color: var(--sms-color-border);
+}
+
+.sms-dialog-tabs::part(content),
+.wams-dialog-tabs::part(content) {
+    padding-block-start: var(--sms-space-4);
+}
+
+.sms-download-trigger {
+    display: none;
+}
+
 /* ── Dashboard (SmsMainView) ──────────────────────────────────────────────── */
 
 .sms-dashboard .wams-dashboard-header {
-    margin-bottom: 10px;
+    margin-bottom: var(--sms-space-2-5);
 }
 
 /* Stat cards now use the shared eu.isygoit.ui.common.component.StatCard /
@@ -15,7 +158,7 @@
    this module's own .stat-card/.stats-row/.sms-mini-stats-grid overrides. */
 
 .sms-dashboard .wams-recent-activity-panel {
-    margin-top: 24px;
+    margin-top: var(--sms-space-6);
 }
 
 .sms-dashboard .wams-recent-activity-content {
@@ -35,7 +178,7 @@
 @keyframes sms-fade-in {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(var(--sms-space-4));
     }
     to {
         opacity: 1;
@@ -65,7 +208,7 @@
    storageconfig/buckets/objects instead of being redeclared per toolbar. */
 .wams-page-info-label,
 .wams-total-count-label {
-    margin: 0 0.5rem;
+    margin: 0 var(--sms-space-2);
 }
 
 @media (max-width: 768px) {
@@ -171,7 +314,7 @@
     }
 
     .storageconfig-card .meta-row > :not(:first-child) {
-        margin-left: 28px;
+        margin-left: var(--sms-space-meta-indent);
     }
 }
 
@@ -351,6 +494,6 @@
 
     .bucket-card .meta-row > :not(:first-child),
     .file-card .meta-row > :not(:first-child) {
-        margin-left: 28px;
+        margin-left: var(--sms-space-meta-indent);
     }
 }

@@ -5,7 +5,8 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.ui.common.dialog.DetailsViewDialog;
+import eu.isygoit.ui.mms.views.common.MmsDetailsDialog;
+import eu.isygoit.ui.mms.views.common.MmsEnumTag;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -17,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
  * and the other {@code *DetailsViewDialog} classes across the app.
  */
 @Slf4j
-public class SenderConfigDetailsViewDialog extends DetailsViewDialog {
+public class SenderConfigDetailsViewDialog extends MmsDetailsDialog {
 
     private final SenderConfigDto config;
 
@@ -49,7 +50,8 @@ public class SenderConfigDetailsViewDialog extends DetailsViewDialog {
                 config.getName());
         addFieldToGrid(identityGrid, VaadinIcon.INFO_CIRCLE, I18n.t("mms.sender.dialog.view.description"),
                 config.getDescription());
-        add(createSection(I18n.t("mms.sender.dialog.view.section.identity"), identityGrid));
+        addTab(I18n.t("mms.sender.dialog.view.section.identity"),
+                createSection(I18n.t("mms.sender.dialog.view.section.identity"), identityGrid));
 
         // ── Connection — SMTP host/port/protocol/TLS/debug ────────────────
         Div connectionGrid = createDetailGrid();
@@ -76,7 +78,8 @@ public class SenderConfigDetailsViewDialog extends DetailsViewDialog {
 
         addFieldToGrid(connectionGrid, VaadinIcon.ENVELOPE_O, I18n.t("mms.sender.dialog.view.defaultSender"),
                 config.getDefaultSender());
-        add(createSection(I18n.t("mms.sender.dialog.view.section.connection"), connectionGrid));
+        addTab(I18n.t("mms.sender.dialog.view.section.connection"),
+                createSection(I18n.t("mms.sender.dialog.view.section.connection"), connectionGrid));
 
         // ── Credentials — username only; the raw password is never
         //    rendered, only whether one is configured ───────────────────
@@ -87,14 +90,17 @@ public class SenderConfigDetailsViewDialog extends DetailsViewDialog {
         boolean hasPassword = config.getPassword() != null && !config.getPassword().isEmpty();
         addFieldToGrid(credentialsGrid, VaadinIcon.KEY, I18n.t("mms.sender.dialog.view.password"),
                 hasPassword ? I18n.t("mms.sender.dialog.view.password.set") : I18n.t("mms.sender.dialog.view.password.notSet"));
-        add(createSection(I18n.t("mms.sender.dialog.view.section.credentials"), credentialsGrid));
+        addTab(I18n.t("mms.sender.dialog.view.section.credentials"),
+                createSection(I18n.t("mms.sender.dialog.view.section.credentials"), credentialsGrid));
 
         // ── Status ─────────────────────────────────────────────────────────
         Div statusGrid = createDetailGrid();
         boolean isActive = Boolean.TRUE.equals(config.getSmtpStarttlsEnable());
         String statusText = isActive ? I18n.t("mms.sender.dialog.view.status.active") : I18n.t("mms.sender.dialog.view.status.inactive");
-        addFieldToGrid(statusGrid, VaadinIcon.CIRCLE, I18n.t("mms.sender.dialog.view.status"), statusText);
-        add(createSection(I18n.t("mms.sender.dialog.view.section.status"), statusGrid));
+        statusGrid.add(MmsEnumTag.detailField(VaadinIcon.CIRCLE, I18n.t("mms.sender.dialog.view.status"),
+                MmsEnumTag.ofLabel(statusText, isActive ? "ACTIVE" : "INACTIVE")));
+        addTab(I18n.t("mms.sender.dialog.view.section.status"),
+                createSection(I18n.t("mms.sender.dialog.view.section.status"), statusGrid));
 
         // ── Audit — created/updated by & date ─────────────────────────────
         Div auditGrid = createDetailGrid();
@@ -106,6 +112,7 @@ public class SenderConfigDetailsViewDialog extends DetailsViewDialog {
                 config.getUpdateDate() != null ? DateHelper.formatToHumanReadable(config.getUpdateDate()) : null);
         addFieldToGrid(auditGrid, VaadinIcon.EDIT, I18n.t("mms.sender.dialog.view.field.updated.by"),
                 config.getUpdatedBy());
-        add(createSection(I18n.t("mms.sender.dialog.view.section.audit"), auditGrid));
+        addTab(I18n.t("mms.sender.dialog.view.section.audit"),
+                createSection(I18n.t("mms.sender.dialog.view.section.audit"), auditGrid));
     }
 }

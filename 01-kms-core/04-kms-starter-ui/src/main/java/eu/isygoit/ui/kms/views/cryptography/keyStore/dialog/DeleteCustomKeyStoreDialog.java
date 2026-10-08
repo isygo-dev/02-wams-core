@@ -3,12 +3,12 @@ package eu.isygoit.ui.kms.views.cryptography.keyStore.dialog;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsPinActionDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyStore.CustomKeyStoresView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class DeleteCustomKeyStoreDialog extends PinBaseActionDialog {
+public class DeleteCustomKeyStoreDialog extends KmsPinActionDialog {
 
     private final CustomKeyStoresView parentView;
     private final KmsApiService kmsApiService;

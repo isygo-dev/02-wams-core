@@ -26,6 +26,7 @@ import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.ims.layout.ImsMainLayout;
 import eu.isygoit.ui.ims.views.annex.dialog.CreateAnnexDialog;
 import eu.isygoit.ui.ims.views.annex.dialog.UpdateAnnexDialog;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
@@ -122,7 +123,8 @@ public class AnnexManagementView extends ManagementVerticalView {
         });
 
         languageFilter.setItems(IEnumLanguage.Types.values());
-        languageFilter.setItemLabelGenerator(lang -> lang.name());
+        languageFilter.setItemLabelGenerator(lang -> ImsEnumTag.label(lang, "ims.enum.language"));
+        languageFilter.setRenderer(ImsEnumTag.renderer("ims.enum.language"));
         languageFilter.setPlaceholder(I18n.t("ims.annex.view.language.placeholder"));
         languageFilter.addValueChangeListener(e -> {
             currentLanguage = e.getValue();

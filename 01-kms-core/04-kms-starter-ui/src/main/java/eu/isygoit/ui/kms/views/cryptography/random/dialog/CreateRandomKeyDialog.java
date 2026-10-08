@@ -7,10 +7,11 @@ import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.RandomKeyService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import org.springframework.http.ResponseEntity;
 
-public class CreateRandomKeyDialog extends BaseActionDialog {
+public class CreateRandomKeyDialog extends KmsActionDialog {
 
     private final RandomKeyService keyService;
     private final Runnable onSuccess;
@@ -46,6 +47,7 @@ public class CreateRandomKeyDialog extends BaseActionDialog {
 
         charSetCombo = new ComboBox<>(I18n.t("kms.random.key.dialog.field.char.set"));
         charSetCombo.setItems(IEnumCharSet.Types.values());
+        KmsEnumTag.useTagRenderer(charSetCombo, "kms.enum");
         charSetCombo.setValue(IEnumCharSet.Types.ALL);
         charSetCombo.setRequired(true);
         charSetCombo.setHelperText(I18n.t("kms.random.key.dialog.field.char.set.helper"));

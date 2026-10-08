@@ -3,11 +3,11 @@ package eu.isygoit.ui.sms.views.bucket.dialog;
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.ObjectStorageService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.sms.views.bucket.BucketManagementView;
+import eu.isygoit.ui.sms.views.common.SmsPinActionDialog;
 import feign.FeignException;
 
-public class DeleteBucketDialog extends PinBaseActionDialog {
+public class DeleteBucketDialog extends SmsPinActionDialog {
 
     private final BucketManagementView parentView;
     private final ObjectStorageService objectStorageService;

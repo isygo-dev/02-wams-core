@@ -32,6 +32,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsTokenService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.kms.views.tokenizer.builder.dialog.ClaimsBuilderDialog;
 import eu.isygoit.ui.kms.views.tokenizer.builder.dialog.JwtDetailsViewDialog;
 import feign.FeignException;
@@ -123,6 +124,7 @@ public class TokenBuilderView extends ManagementVerticalView {
 
         tokenTypeCombo.setLabel(I18n.t("kms.token.builder.token.type"));
         tokenTypeCombo.setItems(IEnumToken.Types.values());
+        KmsEnumTag.useTagRenderer(tokenTypeCombo, "kms.enum");
         tokenTypeCombo.setValue(IEnumToken.Types.ACCESS);
         tokenTypeCombo.setRequired(true);
 
@@ -176,6 +178,7 @@ public class TokenBuilderView extends ManagementVerticalView {
 
         validateTokenTypeCombo.setLabel(I18n.t("kms.token.builder.token.type"));
         validateTokenTypeCombo.setItems(IEnumToken.Types.values());
+        KmsEnumTag.useTagRenderer(validateTokenTypeCombo, "kms.enum");
         validateTokenTypeCombo.setValue(IEnumToken.Types.ACCESS);
         validateTokenTypeCombo.setRequired(true);
 
@@ -371,33 +374,16 @@ public class TokenBuilderView extends ManagementVerticalView {
     private void copyToClipboard(String text) {
         if (!StringUtils.hasText(text)) return;
         UI.getCurrent().getPage().executeJs(
-                "navigator.clipboard.writeText($0).then(() => {" +
+                "const showToast = (message, tone) => {" +
                         "  const notification = document.createElement('div');" +
-                        "  notification.textContent = $1;" +
-                        "  notification.style.position = 'fixed';" +
-                        "  notification.style.bottom = '20px';" +
-                        "  notification.style.right = '20px';" +
-                        "  notification.style.backgroundColor = '#4caf50';" +
-                        "  notification.style.color = 'white';" +
-                        "  notification.style.padding = '8px 16px';" +
-                        "  notification.style.borderRadius = '4px';" +
-                        "  notification.style.zIndex = '1000';" +
+                        "  notification.className = 'kms-copy-toast kms-copy-toast--' + tone;" +
+                        "  notification.textContent = message;" +
                         "  document.body.appendChild(notification);" +
                         "  setTimeout(() => notification.remove(), 2000);" +
-                        "}).catch(() => {" +
-                        "  const notification = document.createElement('div');" +
-                        "  notification.textContent = $2;" +
-                        "  notification.style.backgroundColor = '#f44336';" +
-                        "  notification.style.color = 'white';" +
-                        "  notification.style.padding = '8px 16px';" +
-                        "  notification.style.borderRadius = '4px';" +
-                        "  notification.style.position = 'fixed';" +
-                        "  notification.style.bottom = '20px';" +
-                        "  notification.style.right = '20px';" +
-                        "  notification.style.zIndex = '1000';" +
-                        "  document.body.appendChild(notification);" +
-                        "  setTimeout(() => notification.remove(), 2000);" +
-                        "});",
+                        "};" +
+                        "navigator.clipboard.writeText($0)" +
+                        "  .then(() => showToast($1, 'success'))" +
+                        "  .catch(() => showToast($2, 'error'));",
                 text, I18n.t("kms.token.builder.copy.success"), I18n.t("kms.token.builder.copy.failed"));
     }
 

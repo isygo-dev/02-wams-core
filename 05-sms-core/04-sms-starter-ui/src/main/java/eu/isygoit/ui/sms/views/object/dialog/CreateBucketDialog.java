@@ -3,7 +3,7 @@ package eu.isygoit.ui.sms.views.object.dialog;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.ObjectStorageService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.sms.views.common.SmsActionDialog;
 import eu.isygoit.ui.sms.views.object.ObjectStorageManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
  * the bucket selector could only ever pick among buckets that already
  * existed.
  */
-public class CreateBucketDialog extends BaseActionDialog {
+public class CreateBucketDialog extends SmsActionDialog {
 
     private final ObjectStorageManagementView parentView;
     private final ObjectStorageService objectStorageService;

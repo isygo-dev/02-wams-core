@@ -65,22 +65,22 @@ public class TemplateStatisticsPanel extends VerticalLayout {
         Div grid = new Div();
         grid.addClassName("wams-mini-stats-grid");
 
-        grid.add(createMiniStatCard(I18n.t("mms.dashboard.template.stats.total"), "120", VaadinIcon.FILE_TEXT, "#4F46E5"));
-        grid.add(createMiniStatCard(I18n.t("mms.dashboard.template.stats.active"), "85", VaadinIcon.CHECK_CIRCLE, "#10B981"));
-        grid.add(createMiniStatCard(I18n.t("mms.dashboard.template.stats.draft"), "25", VaadinIcon.PENCIL, "#F59E0B"));
-        grid.add(createMiniStatCard(I18n.t("mms.dashboard.template.stats.archived"), "10", VaadinIcon.ARCHIVE, "#6B7280"));
+        grid.add(createMiniStatCard(I18n.t("mms.dashboard.template.stats.total"), "120", VaadinIcon.FILE_TEXT, "primary"));
+        grid.add(createMiniStatCard(I18n.t("mms.dashboard.template.stats.active"), "85", VaadinIcon.CHECK_CIRCLE, "success"));
+        grid.add(createMiniStatCard(I18n.t("mms.dashboard.template.stats.draft"), "25", VaadinIcon.PENCIL, "warning"));
+        grid.add(createMiniStatCard(I18n.t("mms.dashboard.template.stats.archived"), "10", VaadinIcon.ARCHIVE, "neutral"));
 
         return grid;
     }
 
-    private Div createMiniStatCard(String label, String value, VaadinIcon icon, String color) {
+    private Div createMiniStatCard(String label, String value, VaadinIcon icon, String tone) {
         Div card = new Div();
         card.addClassName("wams-mini-stat-card");
         card.addClassName("template-stat-card");
 
         Icon iconComponent = icon.create();
         iconComponent.setSize("18px");
-        iconComponent.setColor(color);
+        iconComponent.addClassName("mms-tone-icon--" + tone);
         iconComponent.addClassName("template-stat-icon");
 
         Span valueSpan = new Span(value);
@@ -118,15 +118,15 @@ public class TemplateStatisticsPanel extends VerticalLayout {
         container.add(header);
 
         // Usage items with mini progress bars
-        container.add(createUsageItem(I18n.t("mms.dashboard.template.stats.sample.welcome"), 45, "#4F46E5"));
-        container.add(createUsageItem(I18n.t("mms.dashboard.template.stats.sample.password.reset"), 30, "#10B981"));
-        container.add(createUsageItem(I18n.t("mms.dashboard.template.stats.sample.newsletter"), 15, "#F59E0B"));
-        container.add(createUsageItem(I18n.t("mms.dashboard.template.stats.sample.invoice"), 8, "#EF4444"));
+        container.add(createUsageItem(I18n.t("mms.dashboard.template.stats.sample.welcome"), 45, "primary"));
+        container.add(createUsageItem(I18n.t("mms.dashboard.template.stats.sample.password.reset"), 30, "success"));
+        container.add(createUsageItem(I18n.t("mms.dashboard.template.stats.sample.newsletter"), 15, "warning"));
+        container.add(createUsageItem(I18n.t("mms.dashboard.template.stats.sample.invoice"), 8, "danger"));
 
         return container;
     }
 
-    private HorizontalLayout createUsageItem(String name, int usage, String color) {
+    private HorizontalLayout createUsageItem(String name, int usage, String tone) {
         HorizontalLayout row = new HorizontalLayout();
         row.setWidthFull();
         row.setPadding(false);
@@ -142,7 +142,7 @@ public class TemplateStatisticsPanel extends VerticalLayout {
 
         Icon fileIcon = VaadinIcon.FILE_O.create();
         fileIcon.setSize("14px");
-        fileIcon.setColor(color);
+        fileIcon.addClassName("mms-tone-icon--" + tone);
 
         Span nameSpan = new Span(name);
         nameSpan.addClassName(LumoUtility.FontSize.SMALL);
@@ -159,9 +159,8 @@ public class TemplateStatisticsPanel extends VerticalLayout {
 
         Div fill = new Div();
         fill.addClassName("wams-usage-bar-fill");
-        fill.getStyle()
-                .set("width", usage + "%")
-                .set("--wams-usage-color", color);
+        fill.addClassName("mms-tone--" + tone);
+        fill.getStyle().set("width", usage + "%");
         bar.add(fill);
         barContainer.add(bar);
 
@@ -169,7 +168,7 @@ public class TemplateStatisticsPanel extends VerticalLayout {
         Span percentSpan = new Span(usage + "%");
         percentSpan.addClassName(LumoUtility.FontSize.XSMALL);
         percentSpan.addClassName("wams-usage-percent");
-        percentSpan.getStyle().set("--wams-usage-color", color);
+        percentSpan.addClassName("mms-tone-icon--" + tone);
 
         row.add(nameLayout, barContainer, percentSpan);
         row.expand(nameLayout);

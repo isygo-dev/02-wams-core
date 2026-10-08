@@ -12,7 +12,7 @@ import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsActionDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyAlias.AliasesView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 /**
  * Dialog for creating a new alias.
  */
-public class CreateAliasDialog extends BaseActionDialog {
+public class CreateAliasDialog extends KmsActionDialog {
 
     private final AliasesView parentView;
     private final KmsApiService kmsApiService;

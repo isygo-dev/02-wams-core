@@ -4,12 +4,12 @@ import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.account.AccountManagementView;
+import eu.isygoit.ui.ims.views.common.ImsPinActionDialog;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class EnableDisableAccountDialog extends PinBaseActionDialog {
+public class EnableDisableAccountDialog extends ImsPinActionDialog {
 
     private final AccountManagementView parentView;
     private final AccountService accountService;

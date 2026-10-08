@@ -17,7 +17,7 @@ import eu.isygoit.exception.TransferNotSupportedException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
 import eu.isygoit.remote.mms.MsgTemplateService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.mms.views.common.MmsActionDialog;
 import eu.isygoit.ui.mms.views.msgtemplate.MsgTemplateManagementView;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -31,13 +31,13 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * Has a real commit action (save the edited content), so it extends
- * {@link BaseActionDialog} — the error/success span and Save/Cancel buttons
+ * {@link MmsActionDialog} — the error/success span and Save/Cancel buttons
  * come from the shared footer contract. Download stays a content-level
  * action (it doesn't commit or discard anything) and lives next to the file
  * info bar rather than in the footer.
  */
 @Slf4j
-public class EditTemplateContentDialog extends BaseActionDialog {
+public class EditTemplateContentDialog extends MmsActionDialog {
 
     private final MsgTemplateManagementView parentView;
     private final MsgTemplateFileService templateFileService;
@@ -80,7 +80,7 @@ public class EditTemplateContentDialog extends BaseActionDialog {
         infoBar.addClassName("wams-dialog-info-bar");
 
         Icon fileIcon = VaadinIcon.FILE.create();
-        fileIcon.setColor("var(--lumo-primary-color)");
+        fileIcon.addClassName("mms-primary-icon");
 
         Span fileName = new Span(template.getOriginalFileName() != null ?
                 template.getOriginalFileName() : template.getFileName());

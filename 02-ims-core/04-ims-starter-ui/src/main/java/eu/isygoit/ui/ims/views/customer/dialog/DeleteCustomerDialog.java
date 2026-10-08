@@ -3,11 +3,11 @@ package eu.isygoit.ui.ims.views.customer.dialog;
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.CustomerService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.ims.views.common.ImsPinActionDialog;
 import eu.isygoit.ui.ims.views.customer.CustomerManagementView;
 import feign.FeignException;
 
-public class DeleteCustomerDialog extends PinBaseActionDialog {
+public class DeleteCustomerDialog extends ImsPinActionDialog {
 
     private final CustomerManagementView parentView;
     private final CustomerService customerService;

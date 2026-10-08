@@ -3,17 +3,17 @@ package eu.isygoit.ui.sms.views.storageconfig.dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.data.StorageConfigDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.StorageConfigService;
-import eu.isygoit.ui.common.dialog.DetailsViewDialog;
+import eu.isygoit.ui.sms.views.common.SmsDetailsDialog;
+import eu.isygoit.ui.sms.views.common.SmsEnumTag;
 import eu.isygoit.ui.sms.views.storageconfig.StorageConfigManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class StorageConfigDetailsViewDialog extends DetailsViewDialog {
+public class StorageConfigDetailsViewDialog extends SmsDetailsDialog {
 
     private final StorageConfigManagementView parentView;
     private final StorageConfigService storageConfigService;
@@ -56,22 +56,21 @@ public class StorageConfigDetailsViewDialog extends DetailsViewDialog {
     }
 
     private void buildContent(StorageConfigDto config) {
-        VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setPadding(false);
-        mainLayout.setSpacing(true);
-
         Div identityGrid = createDetailGrid();
         // ID is a copyable identifier, force the copy button on even though it's short.
         addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("sms.storageconfig.details.field.id"), String.valueOf(config.getId()), true);
         addFieldToGrid(identityGrid, VaadinIcon.BUILDING, I18n.t("sms.storageconfig.details.field.tenant"), config.getTenant());
-        addFieldToGrid(identityGrid, VaadinIcon.COG, I18n.t("sms.storageconfig.details.field.type"), config.getType() != null ? config.getType().name() : null);
+        identityGrid.add(SmsEnumTag.detailField(
+                VaadinIcon.COG,
+                I18n.t("sms.storageconfig.details.field.type"),
+                SmsEnumTag.ofOrUnknown(config.getType(), "sms.enum.storage")));
         addFieldToGrid(identityGrid, VaadinIcon.USER, I18n.t("sms.storageconfig.details.field.username"), config.getUserName());
-        mainLayout.add(createSection(I18n.t("sms.storageconfig.details.section.identity"), identityGrid));
+        addTab(I18n.t("sms.storageconfig.details.section.identity"), identityGrid);
 
         Div connectionGrid = createDetailGrid();
         // URL is a connection endpoint users would copy/paste elsewhere — force copyable.
         addFieldToGrid(connectionGrid, VaadinIcon.LINK, I18n.t("sms.storageconfig.details.field.url"), config.getUrl(), true);
-        mainLayout.add(createSection(I18n.t("sms.storageconfig.details.section.connection"), connectionGrid));
+        addTab(I18n.t("sms.storageconfig.details.section.connection"), connectionGrid);
 
         Div auditGrid = createDetailGrid();
         addFieldToGrid(auditGrid, VaadinIcon.USER_CHECK, I18n.t("sms.storageconfig.details.field.created.by"), config.getCreatedBy());
@@ -80,9 +79,7 @@ public class StorageConfigDetailsViewDialog extends DetailsViewDialog {
         addFieldToGrid(auditGrid, VaadinIcon.EDIT, I18n.t("sms.storageconfig.details.field.updated.by"), config.getUpdatedBy());
         addFieldToGrid(auditGrid, VaadinIcon.CALENDAR_O, I18n.t("sms.storageconfig.details.field.updated.date"),
                 config.getUpdateDate() != null ? DateHelper.formatToHumanReadable(config.getUpdateDate()) : null);
-        mainLayout.add(createSection(I18n.t("sms.storageconfig.details.section.audit"), auditGrid));
-
-        add(mainLayout);
+        addTab(I18n.t("sms.storageconfig.details.section.audit"), auditGrid);
     }
 
     private String extractErrorMessage(FeignException ex) {

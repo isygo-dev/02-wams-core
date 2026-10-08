@@ -26,7 +26,8 @@ import eu.isygoit.exception.InvalidUnitException;
 import eu.isygoit.exception.UnsupportedAsymmetricAlgorithmException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +43,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-public abstract class TokenConfigDialogBase extends BaseActionDialog {
+public abstract class TokenConfigDialogBase extends KmsActionDialog {
 
     // Algorithm groups
     protected static final List<String> HMAC_ALGORITHMS = List.of("HS256", "HS384", "HS512");
@@ -124,6 +125,7 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
         // Token type
         tokenTypeCombo = new ComboBox<>(I18n.t("kms.dialog.token.token.type"));
         tokenTypeCombo.setItems(IEnumToken.Types.values());
+        KmsEnumTag.useTagRenderer(tokenTypeCombo, "kms.enum");
         tokenTypeCombo.setRequired(true);
         tokenTypeCombo.setRequiredIndicatorVisible(true);
         tokenTypeCombo.setValue(IEnumToken.Types.ACCESS);
@@ -478,22 +480,17 @@ public abstract class TokenConfigDialogBase extends BaseActionDialog {
             return;
         }
         UI.getCurrent().getPage().executeJs(
-                "navigator.clipboard.writeText($0).then(() => {" +
+                "const showToast = (message, tone) => {" +
                         "  const notification = document.createElement('div');" +
-                        "  notification.textContent = $1;" +
-                        "  notification.style.position = 'fixed';" +
-                        "  notification.style.bottom = '20px';" +
-                        "  notification.style.left = '50%';" +
-                        "  notification.style.transform = 'translateX(-50%)';" +
-                        "  notification.style.backgroundColor = '#4caf50';" +
-                        "  notification.style.color = 'white';" +
-                        "  notification.style.padding = '8px 16px';" +
-                        "  notification.style.borderRadius = '4px';" +
-                        "  notification.style.zIndex = '10000';" +
+                        "  notification.className = 'kms-copy-toast kms-copy-toast--' + tone;" +
+                        "  notification.textContent = message;" +
                         "  document.body.appendChild(notification);" +
                         "  setTimeout(() => notification.remove(), 2000);" +
-                        "});",
-                text, I18n.t("kms.dialog.token.copied"));
+                        "};" +
+                        "navigator.clipboard.writeText($0)" +
+                        "  .then(() => showToast($1, 'success'))" +
+                        "  .catch(() => showToast($2, 'error'));",
+                text, I18n.t("kms.dialog.token.copied"), I18n.t("kms.token.builder.copy.failed"));
     }
 
     protected boolean validateHmacKey(String algorithm, String secretKey) {

@@ -2,9 +2,9 @@ package eu.isygoit.ui.kms.views.cryptography.incremental.dialog;
 
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsAppNextCodeService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsPinActionDialog;
 
-public class DeleteNextCodeConfigDialog extends PinBaseActionDialog {
+public class DeleteNextCodeConfigDialog extends KmsPinActionDialog {
 
     private final KmsAppNextCodeService nextCodeService;
     private final Long configId;

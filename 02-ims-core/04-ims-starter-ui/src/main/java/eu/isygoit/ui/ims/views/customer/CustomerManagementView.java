@@ -26,6 +26,7 @@ import eu.isygoit.remote.ims.CustomerImageService;
 import eu.isygoit.remote.ims.CustomerService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.ims.layout.ImsMainLayout;
+import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import eu.isygoit.ui.ims.views.customer.dialog.CreateCustomerDialog;
 import eu.isygoit.ui.ims.views.customer.dialog.UpdateCustomerDialog;
 import feign.FeignException;
@@ -119,7 +120,8 @@ public class CustomerManagementView extends ManagementVerticalView {
         });
 
         statusFilter.setItems(IEnumEnabledBinaryStatus.Types.values());
-        statusFilter.setItemLabelGenerator(status -> status.name());
+        statusFilter.setItemLabelGenerator(status -> ImsEnumTag.label(status, null));
+        statusFilter.setRenderer(ImsEnumTag.renderer(null));
         statusFilter.setPlaceholder(I18n.t("ims.customer.view.status.placeholder"));
         statusFilter.addValueChangeListener(e -> {
             currentAdminStatus = e.getValue();

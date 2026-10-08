@@ -12,6 +12,7 @@ import eu.isygoit.dto.data.DigestConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.DigestConfigService;
 import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.kms.views.secrets.digest.dialog.DeleteDigestConfigDialog;
 import eu.isygoit.ui.kms.views.secrets.digest.dialog.DigestConfigDetailsViewDialog;
 import eu.isygoit.ui.kms.views.secrets.digest.dialog.UpdateDigestConfigDialog;
@@ -71,11 +72,16 @@ public class DigestConfigCard extends BaseCard<DigestConfigView, DigestConfigSer
 
     @Override
     protected void buildBodyRows() {
-        add(createIconRow(VaadinIcon.COG, I18n.t("kms.digest.card.algorithm"), dto.getAlgorithm() != null ? dto.getAlgorithm().meaning() : "—"));
+        add(createIconRow(VaadinIcon.COG, I18n.t("kms.digest.card.algorithm"),
+                KmsEnumTag.ofOrUnknown(dto.getAlgorithm(), "kms.enum")));
         add(createIconRow(VaadinIcon.ROTATE_RIGHT, I18n.t("kms.digest.card.iterations"), String.valueOf(dto.getIterations())));
     }
 
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
+        return createIconRow(icon, label, new Span(value));
+    }
+
+    private HorizontalLayout createIconRow(VaadinIcon icon, String label, Component value) {
         HorizontalLayout row = new HorizontalLayout();
         row.setAlignItems(FlexComponent.Alignment.CENTER);
         row.setSpacing(true);
@@ -91,12 +97,11 @@ public class DigestConfigCard extends BaseCard<DigestConfigView, DigestConfigSer
         labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
         labelSpan.addClassName("meta-row-label");
 
-        Span valueSpan = new Span(value);
-        valueSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        valueSpan.addClassName("meta-row-value");
+        value.addClassName(LumoUtility.FontSize.XSMALL);
+        value.addClassName("meta-row-value");
 
-        row.add(iconComponent, labelSpan, valueSpan);
-        row.expand(valueSpan);
+        row.add(iconComponent, labelSpan, value);
+        row.expand(value);
         return row;
     }
 

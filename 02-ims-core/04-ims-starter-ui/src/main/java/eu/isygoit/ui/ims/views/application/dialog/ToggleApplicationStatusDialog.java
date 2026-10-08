@@ -4,12 +4,12 @@ import eu.isygoit.dto.data.ApplicationDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.ApplicationService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.ims.views.application.ApplicationManagementView;
+import eu.isygoit.ui.ims.views.common.ImsPinActionDialog;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class ToggleApplicationStatusDialog extends PinBaseActionDialog {
+public class ToggleApplicationStatusDialog extends ImsPinActionDialog {
 
     private final ApplicationManagementView parentView;
     private final ApplicationService applicationService;

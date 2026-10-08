@@ -3,18 +3,18 @@ package eu.isygoit.ui.kms.views.tokenizer.config.dialog;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.data.TokenConfigDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.ui.common.dialog.DetailsViewDialog;
+import eu.isygoit.ui.kms.views.common.KmsDetailsDialog;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 
 /**
  * Read-only dialog showing every field of a {@link TokenConfigDto}, for use
  * when the compact {@code TokenConfigCard} isn't enough (i.e. "Details" action).
  */
 @CssImport("./styles/kms.css")
-public class TokenConfigDetailsViewDialog extends DetailsViewDialog {
+public class TokenConfigDetailsViewDialog extends KmsDetailsDialog {
 
     public TokenConfigDetailsViewDialog(TokenConfigDto dto) {
         super(I18n.t("kms.token.details.title"));
@@ -30,32 +30,32 @@ public class TokenConfigDetailsViewDialog extends DetailsViewDialog {
     }
 
     private void buildContent(TokenConfigDto dto) {
-        VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setPadding(false);
-        mainLayout.setSpacing(true);
-
         Div identityGrid = createDetailGrid();
         // Config code is the identifier used to reference this config elsewhere — worth copying.
         addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("kms.token.details.field.code"), dto.getCode(), true);
         addFieldToGrid(identityGrid, VaadinIcon.BUILDING, I18n.t("kms.token.details.field.tenant"), dto.getTenant());
-        mainLayout.add(createSection(I18n.t("kms.token.details.section.identity"), identityGrid));
+        addTab(I18n.t("kms.token.details.section.identity"),
+                createSection(I18n.t("kms.token.details.section.identity"), identityGrid));
 
         // Algorithm / cryptographic + token parameters — how the token is shaped and signed.
         Div algorithmGrid = createDetailGrid();
-        addFieldToGrid(algorithmGrid, VaadinIcon.KEY, I18n.t("kms.token.details.field.type"),
-                dto.getTokenType() != null ? dto.getTokenType().meaning() : null);
+        algorithmGrid.add(KmsEnumTag.detailField(
+                VaadinIcon.KEY, I18n.t("kms.token.details.field.type"),
+                KmsEnumTag.ofOrUnknown(dto.getTokenType(), "kms.enum")));
         addFieldToGrid(algorithmGrid, VaadinIcon.CLOCK, I18n.t("kms.token.config.lifetime"),
                 dto.getLifeTimeInMs() != null ? formatLifetime(dto.getLifeTimeInMs()) : null);
         // Signature algorithm identifier — copyable for precise reuse in configs even if short.
         addFieldToGrid(algorithmGrid, VaadinIcon.CODE, I18n.t("kms.token.config.algorithm"), dto.getSignatureAlgorithm(), true);
-        mainLayout.add(createSection(I18n.t("kms.token.details.section.algorithm"), algorithmGrid));
+        addTab(I18n.t("kms.token.details.section.algorithm"),
+                createSection(I18n.t("kms.token.details.section.algorithm"), algorithmGrid));
 
         // Claims — issuer/audience values embedded into the JWT payload.
         Div claimsGrid = createDetailGrid();
         addFieldToGrid(claimsGrid, VaadinIcon.BUILDING, I18n.t("kms.token.config.issuer"), dto.getIssuer());
         addFieldToGrid(claimsGrid, VaadinIcon.GROUP, I18n.t("kms.token.config.audience"),
                 dto.getAudience() != null && !dto.getAudience().isEmpty() ? String.join(", ", dto.getAudience()) : null);
-        mainLayout.add(createSection(I18n.t("kms.token.details.section.claims"), claimsGrid));
+        addTab(I18n.t("kms.token.details.section.claims"),
+                createSection(I18n.t("kms.token.details.section.claims"), claimsGrid));
 
         Div keyGrid = createDetailGrid();
         // KMS key id is a reference identifier — copyable even if short.
@@ -64,16 +64,16 @@ public class TokenConfigDetailsViewDialog extends DetailsViewDialog {
         addFieldToGrid(keyGrid, VaadinIcon.LOCK, I18n.t("kms.token.details.field.secret.key"), maskSecret(dto.getSecretKey()), false);
         // Public key is meant to be shared/copied for verification elsewhere.
         addFieldToGrid(keyGrid, VaadinIcon.UNLOCK, I18n.t("kms.token.details.field.public.key"), dto.getPublicKey(), true);
-        mainLayout.add(createSection(I18n.t("kms.token.details.section.key"), keyGrid));
+        addTab(I18n.t("kms.token.details.section.key"),
+                createSection(I18n.t("kms.token.details.section.key"), keyGrid));
 
         Div auditGrid = createDetailGrid();
         addFieldToGrid(auditGrid, VaadinIcon.CALENDAR, I18n.t("kms.token.details.field.created"), dto.getCreateDate() != null ? DateHelper.formatToHumanReadable(dto.getCreateDate()) : null);
         addFieldToGrid(auditGrid, VaadinIcon.USER_CHECK, I18n.t("kms.token.details.field.created.by"), dto.getCreatedBy());
         addFieldToGrid(auditGrid, VaadinIcon.CALENDAR_O, I18n.t("kms.token.details.field.updated"), dto.getUpdateDate() != null ? DateHelper.formatToHumanReadable(dto.getUpdateDate()) : null);
         addFieldToGrid(auditGrid, VaadinIcon.EDIT, I18n.t("kms.token.details.field.updated.by"), dto.getUpdatedBy());
-        mainLayout.add(createSection(I18n.t("kms.token.details.section.audit"), auditGrid));
-
-        add(mainLayout);
+        addTab(I18n.t("kms.token.details.section.audit"),
+                createSection(I18n.t("kms.token.details.section.audit"), auditGrid));
     }
 
     private String maskSecret(String secret) {

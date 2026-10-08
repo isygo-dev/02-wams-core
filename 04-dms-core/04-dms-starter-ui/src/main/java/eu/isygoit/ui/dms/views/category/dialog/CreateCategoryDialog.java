@@ -6,12 +6,12 @@ import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.CategoryDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.dms.CategoryService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import eu.isygoit.ui.dms.views.category.CategoryManagementView;
+import eu.isygoit.ui.dms.views.common.DmsActionDialog;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class CreateCategoryDialog extends BaseActionDialog {
+public class CreateCategoryDialog extends DmsActionDialog {
 
     private final CategoryManagementView parentView;
     private final CategoryService categoryService;

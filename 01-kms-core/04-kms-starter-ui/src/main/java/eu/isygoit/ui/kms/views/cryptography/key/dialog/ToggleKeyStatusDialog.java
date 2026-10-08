@@ -6,12 +6,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsActionDialog;
 import eu.isygoit.ui.kms.views.cryptography.key.KeyManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class ToggleKeyStatusDialog extends BaseActionDialog {
+public class ToggleKeyStatusDialog extends KmsActionDialog {
 
     private final KeyManagementView parentView;
     private final KmsApiService kmsApiService;
